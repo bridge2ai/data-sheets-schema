@@ -1,0 +1,1373 @@
+bundle_md5: dcd717170da6762569c0b4eeafc1c3d2
+slots:
+  acquisition_methods[0].acquisition_details:
+    receipts:
+    - chunk: c007
+      snippet: Data is collected in the clinic with the assistance of a trained research
+        assistant. Future data collection will also occur remotely; however, remote
+        data collection did not occur for the initial dataset release
+    - chunk: c009
+      snippet: The data was directly observable and reported by subjects. Clinical
+        diagnoses were verified by clinicians reviewing audio and/or imaging data
+    - chunk: c015
+      snippet: Data collection was conducted using a custom application on a tablet
+        with a headset used for data collection when possible
+    core_path: acquisition_methods[0].acquisition_details
+  acquisition_methods[0].was_directly_observed:
+    receipts:
+    - chunk: c018
+      snippet: Patients presenting at specialty clinics and institutions were considered
+        for enrollment. Patients were selected based on membership to five predetermined
+        groups
+    core_path: acquisition_methods[0].was_directly_observed
+  acquisition_methods[1].acquisition_details:
+    receipts:
+    - chunk: c011
+      snippet: This is a prospective cohort study over 4 years involving 11 different
+        academic sites across the US
+    - chunk: c012
+      snippet: Study Design Prospective Cohort Study
+    - chunk: c012
+      snippet: Data collection for up to 180 participants (30 participants from each
+        disease category and controls, at main sites only
+    core_path: acquisition_methods[1].acquisition_details
+  addressing_gaps[0].response:
+    receipts:
+    - chunk: c002
+      snippet: there is a crucial need for large datasets that capture diverse populations
+        and disease statuses along with other established physiologic biomarkers
+    - chunk: c008
+      snippet: created to address a gap in the availability of large-scale, diverse,
+        and well-documented voice data for use in clinical machine-learning applications
+    core_path: addressing_gaps[0].response
+  addressing_gaps[1].response:
+    receipts:
+    - chunk: c002
+      snippet: comparing studies and pooling data is challenging due to a lack of
+        existing standards in how voice and other acoustics are measured and collected
+    - chunk: c005
+      snippet: creating new bioinformatics standards for voice data
+    core_path: addressing_gaps[1].response
+  addressing_gaps[2].response:
+    receipts:
+    - chunk: c005
+      snippet: ensuring quality and accuracy of acoustic data
+    core_path: addressing_gaps[2].response
+  addressing_gaps[3].response:
+    receipts:
+    - chunk: c005
+      snippet: benchmarks of diversity metrics and minimizing risk of algorithmic
+    core_path: addressing_gaps[3].response
+  addressing_gaps[4].response:
+    receipts:
+    - chunk: c005
+      snippet: the limited size, quality, and diversity of existing open-
+    core_path: addressing_gaps[4].response
+  anomalies[0].anomaly_details:
+    receipts:
+    - chunk: c008
+      snippet: Yes, different sites have different collection configurations. The
+        collection protocol changed over the course of the study
+    core_path: anomalies[0].anomaly_details
+  anomalies[1].anomaly_details:
+    receipts:
+    - chunk: c009
+      snippet: Noise artifacts, variations in diagnostic practices, inaccurate questionnaire
+        responses, underreporting
+    core_path: anomalies[1].anomaly_details
+  anomalies[2].anomaly_details:
+    receipts:
+    - chunk: c017
+      snippet: some files, whether due to length or other issues, could not generate
+        certain features and so are not included in the bundled data
+    core_path: anomalies[2].anomaly_details
+  at_risk_populations.assent_procedures:
+    receipts:
+    - chunk: c012
+      snippet: parents or guardians will provide consent, and children will provide
+        verbal assent where appropriate
+    core_path: at_risk_populations.assent_procedures
+  at_risk_populations.guardian_consent:
+    receipts:
+    - chunk: c012
+      snippet: Parental permission will be obtained from one or both parents; this
+        research is minimal risk and does not require permission from both parents
+        or legal guardians
+    core_path: at_risk_populations.guardian_consent
+  at_risk_populations.special_protections:
+    receipts:
+    - chunk: c011
+      snippet: Pediatric patients will be enrolled ONLY through the pediatric sites
+        and not at USF. Checklist HRP-416 for children under 21 has been completed
+    core_path: at_risk_populations.special_protections
+  citation:
+    receipts:
+    - chunk: c018
+      snippet: diverse voice dataset linked to health information (version 3.1.0)
+    core_path: citation
+  cleaning_strategies[0].cleaning_details:
+    receipts:
+    - chunk: c009
+      snippet: Audit protocol Generate missingness tables Check distributions and
+        outliers For categorical responses, check against schema
+    - chunk: c019
+      snippet: One feature per audio recording derived from the raw audio related
+        to quality control metrics
+    core_path: cleaning_strategies[0].cleaning_details
+  cleaning_strategies[1].cleaning_details:
+    receipts:
+    - chunk: c011
+      snippet: Each subsequent year of the study (2-4) 10% of the data will be selected
+        at random every month for quality control and ML readiness
+    core_path: cleaning_strategies[1].cleaning_details
+  collection_consents[0].consent_details:
+    receipts:
+    - chunk: c008
+      snippet: Research data that does not contain your direct identifiers will be
+        shared with external researchers for future research through a secure database
+    core_path: collection_consents[0].consent_details
+  collection_mechanisms[0].mechanism_details:
+    receipts:
+    - chunk: c002
+      snippet: A novel smartphone application, the Bridge2AI-Voice app, was created
+        to collect standardized recordings of acoustic tasks, validated patient questionnaires,
+        and validated patient reported outcomes
+    - chunk: c007
+      snippet: A total of 22 acoustic tasks are recorded through the app
+    core_path: collection_mechanisms[0].mechanism_details
+  collection_mechanisms[1].mechanism_details:
+    receipts:
+    - chunk: c011
+      snippet: HVEC and remote data collection occur through two platforms, the Bridge2AI
+        Voice Web app and the Bridge2AI Voice iOS app
+    - chunk: c011
+      snippet: No software is downloaded or installed. The app is itself HIPAA-compliant,
+        and only stores data during the collection phase
+    core_path: collection_mechanisms[1].mechanism_details
+  collection_mechanisms[2].mechanism_details:
+    receipts:
+    - chunk: c008
+      snippet: Data is collected on iPads (9th or 10th generation), iPad Air (5th
+        generation) using an Avid AE-36 microphone and an Apple dongle to connect
+        it to the iPad
+    core_path: collection_mechanisms[2].mechanism_details
+  collection_mechanisms[3].mechanism_details:
+    receipts:
+    - chunk: c002
+      snippet: Full data acquisition protocols will be available in the REDCap instrument
+        Shared Library
+    core_path: collection_mechanisms[3].mechanism_details
+  collection_mechanisms[4].mechanism_details:
+    receipts:
+    - chunk: c009
+      snippet: There are five recording sites included in the dataset
+    core_path: collection_mechanisms[4].mechanism_details
+  collection_notifications[0].notification_details:
+    receipts:
+    - chunk: c009
+      snippet: Yes, participants went through an IRB-approved consent process
+    core_path: collection_notifications[0].notification_details
+  collection_timeframes[0]:
+    receipts:
+    - chunk: c006
+      snippet: 'Project start: 2022-09-01T00:00:00'
+    core_path: collection_timeframes[0]
+  collection_timeframes[1].timeframe_details:
+    receipts:
+    - chunk: c009
+      snippet: The data was collected over a period of 12 months
+    - chunk: c011
+      snippet: This data collection will be asked at intervals of 1-6 months depending
+        on disease cohorts
+    core_path: collection_timeframes[1].timeframe_details
+  confidential_elements[0].confidentiality_details:
+    receipts:
+    - chunk: c007
+      snippet: Access to the original raw audio is restricted to controlled access
+        due to privacy concerns
+    - chunk: c018
+      snippet: The published Bridge2AI-Voice Adult Dataset contains derived features
+        from the audio waveforms. This PhysioNet project does not contain raw audios
+    core_path: confidential_elements[0].confidentiality_details
+  confidential_elements[1].confidentiality_details:
+    receipts:
+    - chunk: c013
+      snippet: the Data is covered under a Certificate of Confidentiality, which must
+        be asserted against compulsory legal demands, such as court orders and subpoenas
+    core_path: confidential_elements[1].confidentiality_details
+  conforms_to:
+    receipts:
+    - chunk: c009
+      snippet: converted to be compliant with the Brain Imaging Data Structure v1.9.0
+    core_path: conforms_to
+  consent_revocations[0].revocation_details:
+    receipts:
+    - chunk: c009
+      snippet: Participants are informed that research data (including voice recordings)
+        cannot be removed from the database once the voice data collection process
+        is completed
+    - chunk: c011
+      snippet: If participants withdraw during or before the voice data collection
+        is completed their data will not be included in the database
+    core_path: consent_revocations[0].revocation_details
+  content_warnings[0].warnings:
+    receipts:
+    - chunk: c008
+      snippet: This dataset includes the transcription of free speech tasks. While
+        the inclusion of information of that type is unlikely, it cannot be completely
+        avoided
+    core_path: content_warnings[0].warnings
+  creators[0].affiliations:
+    receipts:
+    - chunk: c003
+      snippet: 'University of South Florida, Tampa, FL, US: Yael Bensoussan. Weill
+        Cornell Medicine, New York, NY, USA: Olivier Elemento'
+    core_path: creators[0].affiliations
+  creators[0].description:
+    receipts:
+    - chunk: c005
+      snippet: experts from 12 North American institutions to generate
+    - chunk: c008
+      snippet: 'The team includes: Clinicians and Healthcare Professionals'
+    core_path: creators[0].description
+  creators[0].name:
+    receipts:
+    - chunk: c002
+      snippet: Bridge2AI-Voice Consortium
+    core_path: creators[0].name
+  creators[10].affiliations:
+    receipts:
+    - chunk: c012
+      snippet: Hospital for Sick Children (HSC) Alistair Johnson, DPhil
+    core_path: creators[10].affiliations
+  creators[10].name:
+    receipts:
+    - chunk: c015
+      snippet: Alistair Johnson
+    core_path: creators[10].name
+  creators[17].name:
+    receipts:
+    - chunk: c020
+      snippet: Jennifer Siu
+    core_path: creators[17].name
+  creators[1].description:
+    receipts:
+    - chunk: c008
+      snippet: Voice as a Biomarker of Health is being co-led by Dr. Yaël Bensoussan,
+        MD, MSc, from USF Health Morsani College of Medicine and Olivier Elemento,
+        PhD, from Weill Cornell Medicine, who are co-principal investigators
+    core_path: creators[1].description
+  creators[1].name:
+    receipts:
+    - chunk: c003
+      snippet: 'Bridge2AI-Voice Consortium: Yael Bensoussan'
+    - chunk: c011
+      snippet: 'PRINCIPAL INVESTIGATOR: Yael Bensoussan, MD MSc, FRCSC'
+    - chunk: c016
+      snippet: Yael Bensoussan
+    - chunk: c018
+      snippet: Yael Bensoussan
+    core_path: creators[1].name
+  creators[3].description:
+    receipts:
+    - chunk: c012
+      snippet: WCM Anais Rameau, MD, MPhil Co-Lead of Data Acquisition
+    core_path: creators[3].description
+  creators[5].description:
+    receipts:
+    - chunk: c012
+      snippet: MIT Satrajit Ghosh, PhD Lead Mood Disorders
+    core_path: creators[5].description
+  creators[8].description:
+    receipts:
+    - chunk: c012
+      snippet: UofT Frank Rudzicz, PhD Lead Neuro Disorders
+    core_path: creators[8].description
+  data_collectors[2].collector_details:
+    receipts:
+    - chunk: c008
+      snippet: Collaborators University of South Florida Weill Cornell Medicine Oregon
+        Health & Science University Massachusetts Institute of Technology
+    - chunk: c012
+      snippet: Participating institutions University of South Florida, Tampa, Florida,
+        US (USF) Weill Cornell Medicine, New York, New York, US (WCM) Vanderbilt University
+        Medical Center, Nashville, Tennessee, US (VUMC)
+    core_path: data_collectors[2].collector_details
+  data_governance.access_review_process:
+    receipts:
+    - chunk: c007
+      snippet: Users interested in access the audio data from any Bridge2AI-Voice
+        dataset can request access by emailing
+    - chunk: c008
+      snippet: 'Controlled Access (raw audio data): Complete the Data Access Request
+        Form (DARF) Complete the Data Use Agreement (DUA) Submit your application
+        to the Data Access Compliance Office for review'
+    - chunk: c014
+      snippet: including the completion of any IRB review or approval that may be
+        required prior to Recipient's use of the Data
+    - chunk: c015
+      snippet: Accessing raw audio is a more involved process and requires institutional
+        sign off. Please reach out to the access committee if you are interested in
+        access
+    core_path: data_governance.access_review_process
+  data_governance.accountable_organization:
+    receipts:
+    - chunk: c013
+      snippet: 'Provider Institution: University of South Florida Board of Trustees'
+    core_path: data_governance.accountable_organization
+  data_governance.committee_name:
+    receipts:
+    - chunk: c013
+      snippet: This Agreement shall only be effective upon the review and subject
+        ot the approval of the Data Access Compliance Office ("DACO") requiring a
+        distinct application
+    core_path: data_governance.committee_name
+  description:
+    receipts:
+    - chunk: c007
+      snippet: dataset is a large, ethically sourced, and demographically diverse
+        voice dataset linked to health information, released by the NIH's Bridge2AI
+        initiative
+    - chunk: c013
+      snippet: The Bridge2AI-Voice dataset contains samples from conventional acoustic
+        tasks including respiratory sounds, cough sounds, and free speech prompts,
+        capturing voice, speech and language data relating to health
+    - chunk: c016
+      snippet: The Bridge2AI-Voice project seeks to create an ethically sourced flagship
+        dataset to enable future research in artificial intelligence and support critical
+        insights into the use of voice as a biomarker of health
+    core_path: description
+  direct_collection[0].collection_details:
+    receipts:
+    - chunk: c009
+      snippet: Did you collect the data from the individuals in question directly,
+        or obtain it via third parties or other sources (e.g., hospitals, app company)?
+        Directly
+    core_path: direct_collection[0].collection_details
+  discouraged_uses[0].discouragement_details:
+    receipts:
+    - chunk: c008
+      snippet: the dataset should not be used for non-research applications, such
+        as hiring decisions, insurance premium adjustments, or any form of surveillance
+        that could lead to discrimination or harm
+    core_path: discouraged_uses[0].discouragement_details
+  distribution_dates[0].description:
+    receipts:
+    - chunk: c009
+      snippet: The dataset will be distributed through a data publishing platform
+        accessible at https://healthdatanexus.ai/
+    core_path: distribution_dates[0].description
+  distribution_formats[0].description:
+    receipts:
+    - chunk: c017
+      snippet: Binary files are made available as Parquet, an open-source column-oriented
+        data file format
+    core_path: distribution_formats[0].description
+  distribution_formats[0].format:
+    receipts:
+    - chunk: c019
+      snippet: Binary files are made available as Parquet
+    core_path: distribution_formats[0].format
+  distribution_formats[2].access_urls:
+    receipts:
+    - chunk: c018
+      snippet: 'Data will be made available via Synapse: https://www.synapse.org/Synapse:syn72370534/'
+    core_path: distribution_formats[2].access_urls
+  doi:
+    receipts:
+    - chunk: c018
+      snippet: doi = {10.13026/8xbn-nq66}
+    core_path: doi
+  errata[0].erratum_details:
+    receipts:
+    - chunk: c017
+      snippet: 'b2ai-voice v2.0: This release provides data for an additional 136
+        new participants. Spectrograms were reprocessed to fix some minor issues identified
+        in the previous release'
+    core_path: errata[0].erratum_details
+  errata[1].erratum_details:
+    receipts:
+    - chunk: c017
+      snippet: 'b2ai-voice v2.0.1: Corrections in the authorship list'
+    core_path: errata[1].erratum_details
+  errata[2].erratum_details:
+    receipts:
+    - chunk: c019
+      snippet: 'b2ai-voice v3.1.0: Minor update with no new participants, but some
+        additional data released for certain participants. Fixed broken parquet files
+        from previous release'
+    core_path: errata[2].erratum_details
+  errata[2].source_caveats:
+    receipts:
+    - chunk: c009
+      snippet: There is no erratum. A changelog for each dataset version is published
+        online with the dataset metadata
+    core_path: errata[2].source_caveats
+  ethical_reviews[0].review_details:
+    receipts:
+    - chunk: c008
+      snippet: Submitted and approved by the USF Single IRB and subsite IRBs through
+        the Single IRB process
+    - chunk: c011
+      snippet: 'PROTOCOL TITLE: Bridge2AI Voice Data Acquisition'
+    - chunk: c011
+      snippet: 'VERSION NUMBER/DATE: V1. January 17th, 2023'
+    - chunk: c011
+      snippet: Answering some of these questions can lead to possible discomfort and
+        could trigger negative emotions for the participants
+    - chunk: c012
+      snippet: All US-based institutions will abide to the SINGLE IRB Process. Once
+        this protocol is approved at USF, each of the participating institution will
+        submit review based on the SINGLE IRB at USF
+    core_path: ethical_reviews[0].review_details
+  ethical_reviews[0].reviewing_organization:
+    receipts:
+    - chunk: c015
+      snippet: Data collection and sharing was approved by the University of South
+        Florida Institutional Review Board
+    core_path: ethical_reviews[0].reviewing_organization
+  ethical_reviews[1].review_details:
+    receipts:
+    - chunk: c012
+      snippet: Canadian Institutions (MSH, SickKids and UofT) do not abide to the
+        SINGLE IRB process and will apply for a separate REB (research ethics board
+        application)
+    core_path: ethical_reviews[1].review_details
+  existing_uses[0].examples:
+    receipts:
+    - chunk: c009
+      snippet: A restricted version of the dataset containing raw audio has been used
+        in the Bridge2AI Summer School and hackathon
+    core_path: existing_uses[0].examples
+  extension_mechanism.extension_details:
+    receipts:
+    - chunk: c009
+      snippet: it is possible for others to publish a derivative dataset on the Health
+        Data Nexus which references the original source
+    core_path: extension_mechanism.extension_details
+  external_resources[0].external_resources:
+    receipts:
+    - chunk: c002
+      snippet: https://github.com/eipm/bridge2ai-redcap
+    - chunk: c007
+      snippet: https://zenodo.org/doi/10.5281/zenodo.12760724
+    core_path: external_resources[0].external_resources
+  external_resources[0].restrictions:
+    receipts:
+    - chunk: c010
+      snippet: Bridge2AI REDCap Data Dictionary and Metadata
+    core_path: external_resources[0].restrictions
+  external_resources[1].restrictions:
+    receipts:
+    - chunk: c010
+      snippet: The code used to preprocess the raw audio waveforms into the parquet
+        file and to merge the source data into the phenotype files
+    core_path: external_resources[1].restrictions
+  external_resources[2].external_resources:
+    receipts:
+    - chunk: c009
+      snippet: https://github.com/sensein/senselab
+    core_path: external_resources[2].external_resources
+  external_resources[3].description:
+    receipts:
+    - chunk: c022
+      snippet: Docs for the Bridge2AI Voice Project
+    core_path: external_resources[3].description
+  external_resources[3].external_resources:
+    receipts:
+    - chunk: c010
+      snippet: Source code for the Docs and Dashboard for the Bridge2AI Voice Project
+    - chunk: c022
+      snippet: https://zenodo.org/doi/10.5281/zenodo.13834653
+    core_path: external_resources[3].external_resources
+  external_resources[3].restrictions:
+    receipts:
+    - chunk: c022
+      snippet: 'License: MIT'
+    core_path: external_resources[3].restrictions
+  external_resources[4].external_resources:
+    receipts:
+    - chunk: c003
+      snippet: https://bridge2ai.org/voice/
+    - chunk: c007
+      snippet: https://www.b2aivoicescholars.org/
+    core_path: external_resources[4].external_resources
+  external_resources[5].description:
+    receipts:
+    - chunk: c008
+      snippet: It is self-contained.
+    core_path: external_resources[5].description
+  external_resources[5].future_guarantees:
+    receipts:
+    - chunk: c008
+      snippet: Are there guarantees that they will exist, and remain constant, over
+        time?
+    core_path: external_resources[5].future_guarantees
+  file_collections[0].description:
+    receipts:
+    - chunk: c017
+      snippet: Each element of the parquet formatted dataset contains a unique identifier
+        for the participant (participant_id), a unique identifier for the recording
+        session (session_id), the task performed (task_name)
+    core_path: distributions[0].description
+  file_collections[0].resources:
+    receipts:
+    - chunk: c017
+      snippet: 'The following dense binary files are available in the features subfolder:
+        ppgs.parquet sparc_ema.parquet sparc_loudness.parquet sparc_periodicity.parquet
+        sparc_pitch.parquet torchaudio_spectrogram.parquet'
+    core_path: distributions[0].resources
+  file_collections[0].resources[0].description:
+    receipts:
+    - chunk: c019
+      snippet: torchaudio_spectrograms.parquet (n=29278) contains spectrograms of
+        dimension 201xT generated using the short-time Fast Fourier Transform (FFT)
+        with a 25ms window size, 10ms hop length, and a 400-point FFT
+    core_path: distributions[1].description
+  file_collections[0].resources[10].description:
+    receipts:
+    - chunk: c019
+      snippet: audio_quality_metrics.tsv - One feature per audio recording derived
+        from the raw audio related to quality control metrics
+    core_path: distributions[11].description
+  file_collections[0].resources[1].description:
+    receipts:
+    - chunk: c019
+      snippet: torchaudio_mel_spectrograms.parquet (n=29278) contains Mel spectrograms
+        of dimension 60xT
+    core_path: distributions[2].description
+  file_collections[0].resources[2].description:
+    receipts:
+    - chunk: c019
+      snippet: torchaudio_mfcc.parquet (n=29278) contains Mel-frequency cepstrum coefficients
+        of dimension 60xT
+    core_path: distributions[3].description
+  file_collections[0].resources[3].description:
+    receipts:
+    - chunk: c019
+      snippet: torchaudio_pitch.parquet (n=32522) contains the detected pitch (fundamental
+        frequency) over time and is of dimension T with a min and max pitch of 80
+        and 500 respectively
+    core_path: distributions[4].description
+  file_collections[0].resources[4].description:
+    receipts:
+    - chunk: c019
+      snippet: sparc_ema.parquet (n=28640) contains the estimated electromagnetic
+        articulography (EMA) using a deep learning model with dimensions Tx12
+    core_path: distributions[5].description
+  file_collections[0].resources[5].description:
+    receipts:
+    - chunk: c019
+      snippet: sparc_loudness.parquet (n=31855) contains the estimated loudness based
+        on the average absolute amplitude of the audio waveform of size T, using 20ms
+        windows
+    core_path: distributions[6].description
+  file_collections[0].resources[6].description:
+    receipts:
+    - chunk: c019
+      snippet: sparc_periodicity.parquet (n=31872) contains the estimated periodicity
+        (confidence of pitch presence)
+    core_path: distributions[7].description
+  file_collections[0].resources[7].description:
+    receipts:
+    - chunk: c019
+      snippet: sparc_pitch.parquet (n=31872) contains the estimated fundamental frequency
+        (F0) of the audio signal using a different algorithm than before with a range
+        of 50-550Hz
+    core_path: distributions[8].description
+  file_collections[0].resources[8].description:
+    receipts:
+    - chunk: c019
+      snippet: ppgs.parquet (n=29289) contains the phonetic posteriorgram probabilities
+        across 40 phoneme categories giving a dimension of 40xT with a frame rate
+        of 100Hz
+    core_path: distributions[9].description
+  file_collections[0].resources[9].description:
+    receipts:
+    - chunk: c019
+      snippet: static_features.tsv - Features derived from the raw audio, with one
+        feature per audio recording
+    core_path: distributions[10].description
+  file_collections[1].description:
+    receipts:
+    - chunk: c015
+      snippet: phenotype.tsv - Information collected during the visit including demographics,
+        acoustic confounders, and responses to validated questionnaires
+    - chunk: c017
+      snippet: The phenotype subfolder contains organized information collected from
+        the participant or other individual during their encounter
+    - chunk: c017
+      snippet: dictionary files have keys with the same name as the column names in
+        the associated data file
+    - chunk: c019
+      snippet: The values for each element provide detail of the column, including
+        a description field which provides a one sentence summary of the respective
+        column, the question (if any) that was asked the participant
+    core_path: distributions[12].description
+  file_collections[2].description:
+    receipts:
+    - chunk: c019
+      snippet: The metadata folder contains a binary file made available as Parquet
+        and its corresponding data dictionary. This includes specific information
+        about the recording, including task instructions and prompts, as well as information
+        about the microphone used and its gain
+    core_path: distributions[13].description
+  funders[0]:
+    receipts:
+    - chunk: c003
+      snippet: This work was supported by the National Institute for Health Grant
+    core_path: funders[0]
+  funders[0].description:
+    receipts:
+    - chunk: c006
+      snippet: 'Award amount: 4660942'
+    core_path: funders[0].description
+  funders[0].grants[0].grant_number:
+    receipts:
+    - chunk: c005
+      snippet: All authors are funded by Bridge2AI award OT2 OD032720 from the National
+        Institutes of Health Common Fund
+    - chunk: c006
+      snippet: 'Core project number: OT2OD032720'
+    core_path: funders[0].grants[0].grant_number
+  funders[0].grants[1].grant_number:
+    receipts:
+    - chunk: c015
+      snippet: This project was funded by NIH project number 3OT2OD032720-01S1
+    - chunk: c021
+      snippet: This project was funded by NIH project number 3OT2OD032720-01S1
+    core_path: funders[0].grants[1].grant_number
+  funders[0].grants[2].grant_number:
+    receipts:
+    - chunk: c006
+      snippet: 'Project number: 3OT2OD032720-01S3'
+    core_path: funders[0].grants[2].grant_number
+  funders[0].source_caveats:
+    receipts:
+    - chunk: c010
+      snippet: Bridge2AI-Voice is part of the Bridge2AI Program, funded by the NIH
+        Common Fund. Award
+    core_path: funders[0].source_caveats
+  future_use_impacts[0].impact_details:
+    receipts:
+    - chunk: c009
+      snippet: this dataset has skews based on disorder category, site, and other
+        demographic factors. Users should consider the multivariate distribution when
+        assessing utility for different questions
+    core_path: future_use_impacts[0].impact_details
+  id:
+    receipts:
+    - chunk: c015
+      snippet: 'DOI (latest version): https://doi.org/10.13026/37yb-1t42'
+    core_path: id
+  informed_consent[0].consent_documentation:
+    receipts:
+    - chunk: c011
+      snippet: Consent may take place electronically, within the app, or on paper.
+        Electronic consent is housed in REDCap and is HIPAA compliant
+    core_path: informed_consent[0].consent_documentation
+  informed_consent[0].consent_type:
+    receipts:
+    - chunk: c012
+      snippet: The audio recording from the consent will be used to verify that the
+        acoustic data submitted by the participant belongs to the consented individual
+    core_path: informed_consent[0].consent_type
+  instances[0].counts:
+    receipts:
+    - chunk: c007
+      snippet: with version 3.0 containing ~61,937 voice-derived recordings from 833
+        adult participants
+    - chunk: c008
+      snippet: There are currently around 833 instances
+    - chunk: c016
+      snippet: Bridge2AI-Voice v3.0 contains data for 833 participants across five
+        sites in North America
+    - chunk: c018
+      snippet: Bridge2AI-Voice v3.1 contains data for 833 participants across five
+        sites in North America
+    core_path: instances[0].counts
+  instances[0].instance_type:
+    receipts:
+    - chunk: c008
+      snippet: Each instance represents a person
+    core_path: instances[0].instance_type
+  instances[0].label_description:
+    receipts:
+    - chunk: c016
+      snippet: Participants were selected based on known conditions which manifest
+        within the voice waveform including voice disorders, neurological disorders,
+        mood disorders, and respiratory disorders
+    - chunk: c018
+      snippet: Participants were selected based on known conditions which manifest
+        within the voice waveform including voice disorders, neurological disorders,
+        mood disorders, and respiratory disorders
+    core_path: instances[0].label_description
+  intended_uses[0].usage_notes:
+    receipts:
+    - chunk: c008
+      snippet: aims to enable the development, benchmarking, or validation of clinically
+        applicable machine-learning models for diagnosing a wide range of health conditions
+        using voice data
+    - chunk: c011
+      snippet: This database could provide very valuable datasets to train AI models
+        to screen or diagnose diseases in early staged based on voice
+    core_path: intended_uses[0].usage_notes
+  ip_restrictions.description:
+    receipts:
+    - chunk: c013
+      snippet: The Data Provider provides no guarantees that the Data is free of third-party
+        intellectual property rights, database rights, and other related rights
+    core_path: ip_restrictions.description
+  ip_restrictions.restrictions:
+    receipts:
+    - chunk: c009
+      snippet: Sale of all or part of the Data on any media is not permitted. You
+        recognize that nothing in this Agreement shall operate to transfer to You
+        any intellectual property rights in or relating to the Data
+    - chunk: c013
+      snippet: Nothing in this Agreement shall operate to transfer to the Recipient
+        any intellectual property rights in or relating to the Data
+    core_path: ip_restrictions.restrictions
+  is_deidentified.deidentification_details:
+    receipts:
+    - chunk: c008
+      snippet: Does this dataset achieve K-anonymization (k>=2)? No
+    - chunk: c009
+      snippet: Raw audio transcripts were reviewed, and any audio recordings that
+        contained potentially identifying information and external voices were removed
+        from the release
+    - chunk: c015
+      snippet: Transcripts of free speech audio were removed
+    - chunk: c017
+      snippet: Spectrograms, Mel Spectrograms, MFC coefficients, PPGs, and EMAs for
+        sensitive records and audio checks have been removed
+    - chunk: c019
+      snippet: Spectrograms and similar features were excluded if the audio contained
+        free speech
+    core_path: is_deidentified.deidentification_details
+  is_deidentified.identifiers_removed:
+    receipts:
+    - chunk: c008
+      snippet: All direct identifiers were removed, as these would reveal the identity
+        of the research participant. These include name, civic address, and social
+        security numbers
+    - chunk: c015
+      snippet: State and province were removed. Country of data collection was retained
+    core_path: is_deidentified.identifiers_removed
+  issued:
+    receipts:
+    - chunk: c018
+      snippet: 'Published: May 1, 2026'
+    core_path: issued
+  keywords:
+    receipts:
+    - chunk: c015
+      snippet: 'Topics: bridge2ai voice'
+    - chunk: c019
+      snippet: 'Topics: health biomarkers bridge2ai voice'
+    core_path: keywords
+  known_biases[0].bias_description:
+    receipts:
+    - chunk: c007
+      snippet: The public data releases do not contain an equal distribution of these
+        categories of diseases. Further releases will contain additional data
+    core_path: known_biases[0].bias_description
+  known_biases[1].bias_description:
+    receipts:
+    - chunk: c009
+      snippet: Groups that have less trust in the medical system, AI, or are less
+        proximal to the collection sites would have been less likely to be recruited
+    core_path: known_biases[1].bias_description
+  known_biases[2].bias_description:
+    receipts:
+    - chunk: c009
+      snippet: Participants were screened for different disorders based on site, so
+        they also had their data collected with different devices
+    core_path: known_biases[2].bias_description
+  known_limitations[0].limitation_description:
+    receipts:
+    - chunk: c011
+      snippet: Not speaking the English or Spanish Language
+    core_path: known_limitations[0].limitation_description
+  known_limitations[0].recommended_mitigation:
+    receipts:
+    - chunk: c009
+      snippet: The only language option for v2.0.0 is English. Spanish versions of
+        the protocol are under development
+    - chunk: c012
+      snippet: Updated to include data collection from Spanish language speakers
+    core_path: known_limitations[0].recommended_mitigation
+  known_limitations[2].limitation_description:
+    receipts:
+    - chunk: c007
+      snippet: The dataset includes many derived voice recordings (such as spectrograms
+        and other acoustic features) rather than raw audio in the public release
+    core_path: known_limitations[2].limitation_description
+  known_limitations[3].limitation_description:
+    receipts:
+    - chunk: c007
+      snippet: Please note that no external data is released in this v3.0.0 release
+    core_path: known_limitations[3].limitation_description
+  known_limitations[4].limitation_description:
+    receipts:
+    - chunk: c009
+      snippet: Changes in diagnostic criteria or practices could be a source of distribution
+        shift
+    core_path: known_limitations[4].limitation_description
+  labeling_strategies[0].annotations_per_item:
+    receipts:
+    - chunk: c009
+      snippet: How many labelers provide a label per instance? 1
+    core_path: labeling_strategies[0].annotations_per_item
+  labeling_strategies[0].data_annotation_protocol:
+    receipts:
+    - chunk: c007
+      snippet: Clinical validation is performed by a qualified physician or practitioner
+        based on established gold standards for diagnosis
+    - chunk: c007
+      snippet: Table 1 – Disease cohort inclusion/exclusion criteria and validation
+        methods
+    - chunk: c009
+      snippet: At each site, a local clinician provided the diagnosis based on a clinical
+        interview and appropriate work-up
+    core_path: labeling_strategies[0].data_annotation_protocol
+  labeling_strategies[0].labeling_details:
+    receipts:
+    - chunk: c009
+      snippet: What guidelines did they follow? Per Bridge2AI Protocols and ICD-10
+        codes
+    core_path: labeling_strategies[0].labeling_details
+  language:
+    receipts:
+    - chunk: c009
+      snippet: English language was used for communication with study participants
+    core_path: language
+  license:
+    receipts:
+    - chunk: c015
+      snippet: 'License (for files): Bridge2AI Voice Registered Access License'
+    core_path: license
+  license_and_use_terms.description:
+    receipts:
+    - chunk: c013
+      snippet: The Data will be used solely to conduct the Project and solely by Recipient
+        Scientist and Recipient's faculty, employees, fellows, students, and agents
+    core_path: license_and_use_terms.description
+  license_and_use_terms.license_terms:
+    receipts:
+    - chunk: c007
+      snippet: The adult and pediatric datasets are available through separate PhysioNet
+        links under registered access. Credentialed users must be approved and sign
+        DUA
+    - chunk: c008
+      snippet: Sign the Bridge2AI-Voice Registered Access Agreement, which outlines
+        the terms and conditions for data use
+    - chunk: c013
+      snippet: Either party may terminate this Agreement with thirty (30) days written
+        notice to the other party's Authorized Official
+    - chunk: c013
+      snippet: Recipient is encouraged to make publicly available the results of the
+        Project, in open-access journals or pre-print servers where possible
+    - chunk: c015
+      snippet: 'Access Policy: Only registered users who sign the specified data use
+        agreement can access the files'
+    - chunk: c016
+      snippet: Database Credentialed Access
+    - chunk: c017
+      snippet: 'Access Policy: Only credentialed users who sign the DUA can access
+        the files'
+    - chunk: c019
+      snippet: 'Required training: No training required'
+    core_path: license_and_use_terms.license_terms
+  machine_annotation_tools[0].tool_accuracy:
+    receipts:
+    - chunk: c008
+      snippet: Certain aspects of the data (e.g., transcription) were generated using
+        off-the-shelf models that have not been audited for correctness
+    core_path: machine_annotation_tools[0].tool_accuracy
+  machine_annotation_tools[0].tools:
+    receipts:
+    - chunk: c015
+      snippet: Transcriptions were generated using OpenAI's Whisper Large model
+    core_path: machine_annotation_tools[0].tools
+  maintainers[0].maintainer_details:
+    receipts:
+    - chunk: c014
+      snippet: Recipient futher agrees to adhere to the specific requirements of PhysioNet.Org
+        managed by the MIT Laboratory for Computational Physiology
+    - chunk: c015
+      snippet: Maintained by the MIT Laboratory for Computational Physiology
+    core_path: maintainers[0].maintainer_details
+  maintainers[1].maintainer_details:
+    receipts:
+    - chunk: c008
+      snippet: Bridge2AI-Voice is supported by NIH grant OT2OD032720 through the NIH
+        Bridge2AI Common Fund program
+    core_path: maintainers[1].maintainer_details
+  maintainers[2].maintainer_details:
+    receipts:
+    - chunk: c009
+      snippet: a data publishing platform maintained by the Temerty Center for Artificial
+        Intelligence Research and Education in Medicine (T-CAIREM) based at the University
+        of Toronto
+    core_path: maintainers[2].maintainer_details
+  missing_data_documentation[0].handling_strategy:
+    receipts:
+    - chunk: c008
+      snippet: The dataset has been audited internally for missingness and consistency
+        by the data release team. A missingness table is included with the dataset
+    core_path: missing_data_documentation[0].handling_strategy
+  missing_data_documentation[0].missing_data_causes:
+    receipts:
+    - chunk: c008
+      snippet: Yes, some questions are optional. There may be data collection irregularities
+        that caused some information to be missing from individual instances
+    core_path: missing_data_documentation[0].missing_data_causes
+  missing_data_documentation[0].missing_data_patterns:
+    receipts:
+    - chunk: c017
+      snippet: Phenotype data files only contain rows for a participant if at least
+        one column is not missing
+    core_path: missing_data_documentation[0].missing_data_patterns
+  notes:
+    receipts:
+    - chunk: c008
+      snippet: it is structured to be Findable, Accessible, Interoperable, and Reusable
+        (FAIR)
+    - chunk: c010
+      snippet: Domain-appropriate (5.b)
+    core_path: notes
+  page:
+    receipts:
+    - chunk: c015
+      snippet: 'Project Website: https://docs.b2ai-voice.org'
+    - chunk: c017
+      snippet: 'Project Website: https://b2ai-voice.org/'
+    core_path: page
+  participant_compensation[0].compensation_amount:
+    receipts:
+    - chunk: c009
+      snippet: Participants currently receive $40 for a data collection session that
+        takes less than 90 minutes, and $80 for a session that takes over 90 minutes,
+        for no more than a total of 3 sessions and maximum compensation of $120
+    core_path: participant_compensation[0].compensation_amount
+  participant_compensation[0].compensation_type:
+    receipts:
+    - chunk: c012
+      snippet: Participants will be given a $40 gift card for sessions lasting under
+        90 minutes, and an $80 gift card for sessions lasting over 90 minutes, for
+        a maximum of three sessions and $120
+    core_path: participant_compensation[0].compensation_type
+  participant_privacy[0].privacy_techniques:
+    receipts:
+    - chunk: c011
+      snippet: All clinical data will be hosted on cloud/servers through NIH STRIDE
+        partners. NIH Stride partners have pre-determined agreements with the NIH
+        to ensure HIPAA protection and participant safety
+    core_path: participant_privacy[0].privacy_techniques
+  participant_privacy[0].reidentification_risk:
+    receipts:
+    - chunk: c012
+      snippet: each person's voice is unique to them and their health at that time
+        in their life and it is always possible even if unlikely that at some point
+        someone could recognize the participant's voice
+    core_path: participant_privacy[0].reidentification_risk
+  participant_privacy[1].privacy_techniques:
+    receipts:
+    - chunk: c013
+      snippet: Recipient agrees to store Data with security controls adequate to protect
+        Personally Identifiable Information, to ensure that only Authorized Persons
+        have access to the Data
+    core_path: participant_privacy[1].privacy_techniques
+  preprocessing_strategies[0].preprocessing_details:
+    receipts:
+    - chunk: c009
+      snippet: the data were extracted from the raw audio to limit re-identification
+        and only the extracted features are being released with the dataset
+    - chunk: c015
+      snippet: Raw audio was preprocessed by converting to monaural and resampling
+        to 16 kHz with a Butterworth anti-aliasing filter applied
+    core_path: preprocessing_strategies[0].preprocessing_details
+  preprocessing_strategies[0].used_software:
+    receipts:
+    - chunk: c009
+      snippet: https://github.com/sensein/b2aiprep
+    - chunk: c017
+      snippet: This release was generated with b2aiprep v3.0.0
+    core_path: preprocessing_strategies[0].used_software
+  preprocessing_strategies[1].preprocessing_details:
+    receipts:
+    - chunk: c015
+      snippet: Time-frequency representations were computed using the short-time Fast
+        Fourier Transform (FFT) with a 25ms window size, 10ms hop length
+    core_path: preprocessing_strategies[1].preprocessing_details
+  preprocessing_strategies[2].preprocessing_details:
+    receipts:
+    - chunk: c016
+      snippet: Mel Spectrogram - a combination of the above two computed with the
+        same parameters (25ms window size, 10ms hop length, a 400-point FFT, and 60
+        Mels)
+    core_path: preprocessing_strategies[2].preprocessing_details
+  preprocessing_strategies[4].preprocessing_details:
+    receipts:
+    - chunk: c016
+      snippet: Articulatory features - using the Speech Articulatory Coding (sparc)
+        package, we generate the kinematic traces of vocal tract articulators and
+        source features as well as measures of loudness, periodicity, and pitch. All
+        features were gathered at 50Hz
+    core_path: preprocessing_strategies[4].preprocessing_details
+  preprocessing_strategies[5].preprocessing_details:
+    receipts:
+    - chunk: c009
+      snippet: OpenSmile eGeMaps features per audio file
+    core_path: preprocessing_strategies[5].preprocessing_details
+  preprocessing_strategies[7].preprocessing_details:
+    receipts:
+    - chunk: c017
+      snippet: Phonetic Posteriorgrams (ppgs) - time-varying categorical distribution
+        over acoustic units of speech (e.g., phonemes) at 100Hz
+    core_path: preprocessing_strategies[7].preprocessing_details
+  preprocessing_strategies[8].preprocessing_details:
+    receipts:
+    - chunk: c009
+      snippet: b2ai-voice-audio ├── CHANGES.md ├── README.md ├── dataset_description.json
+        ├── phenotype
+    core_path: preprocessing_strategies[8].preprocessing_details
+  prohibited_uses[0].prohibition_reason:
+    receipts:
+    - chunk: c008
+      snippet: the dataset is not to be used a) to attempt to re-identify research
+        participants, nor any actions that could reasonably lead to re-identification
+    core_path: prohibited_uses[0].prohibition_reason
+  prohibited_uses[2].prohibition_reason:
+    receipts:
+    - chunk: c013
+      snippet: Recipient will not use the Data, either alone or in concert with any
+        other information, to make any effort to contact individuals who are the subjects
+        of the Data without appropriate Institutional Review Board (IRB) approval
+    core_path: prohibited_uses[2].prohibition_reason
+  purposes[0].response:
+    receipts:
+    - chunk: c002
+      snippet: aims to generate a large-scale, ethically sourced voice, speech, and
+        cough database linked to health metadata in order to support AI-driven research
+    - chunk: c002
+      snippet: establishing an ethically sourced, diverse, and publicly available
+        voice database linked to multimodal health biomarkers
+    - chunk: c012
+      snippet: To build a large multi-institutional database of human voices, speech
+        and respiratory sounds that is ethically sourced, diverse, and linked to multimodal
+        health biomarkers to fuel voice AI research
+    core_path: purposes[0].response
+  purposes[1].response:
+    receipts:
+    - chunk: c007
+      snippet: seeks to create a flagship, standardized, and ethically sourced dataset
+        of 10,000 voices linked to health information to fuel research and discovery
+        in voice biomarkers
+    core_path: purposes[1].response
+  purposes[2].response:
+    receipts:
+    - chunk: c006
+      snippet: Our group aims to integrate the use of voice as biomarker of health
+        in clinical care by generating a substantial multi-institutional, ethically
+        sourced, and diverse voice database linked to multimodal health biomarkers
+    core_path: purposes[2].response
+  purposes[3].response:
+    receipts:
+    - chunk: c006
+      snippet: Data collection will be made possible by software through a smartphone
+        application linked to electronic health records (EHR) and other health biomarkers
+        such as radiomics, and genomics, and supported by federated learning technology
+        to protect data privacy
+    core_path: purposes[3].response
+  purposes[4].response:
+    receipts:
+    - chunk: c006
+      snippet: To introduce the field of acoustic biomarkers by developing new standards
+        of acoustic and voice data collection and analysis for voice AI research
+    core_path: purposes[4].response
+  raw_data_sources[1].source_description:
+    receipts:
+    - chunk: c011
+      snippet: Existing clinical data within the EHR will be reviewed and the following
+        information will be collected
+    - chunk: c012
+      snippet: Neurological Disorders Voice and Speech Brain CT Scan Brain MRI Whole
+        Genome Sequencing
+    core_path: raw_data_sources[1].source_description
+  raw_sources[0].access_url:
+    receipts:
+    - chunk: c015
+      snippet: 'Data will be made available via Synapse: https://www.synapse.org/Synapse:syn72370534/'
+    core_path: raw_sources[0].access_url
+  raw_sources[0].raw_data_details:
+    receipts:
+    - chunk: c009
+      snippet: Yes, it is saved and is not accessible publicly
+    core_path: raw_sources[0].raw_data_details
+  regulatory_restrictions.other_compliance:
+    receipts:
+    - chunk: c008
+      snippet: Does this dataset apply the HIPAA de-identification rules? Yes
+    core_path: regulatory_restrictions.other_compliance
+  regulatory_restrictions.regulatory_restrictions:
+    receipts:
+    - chunk: c009
+      snippet: No export controls apply to the dataset
+    core_path: regulatory_restrictions.regulatory_restrictions
+  related_datasets[0].description:
+    receipts:
+    - chunk: c007
+      snippet: The pediatric dataset v1.0 is now available containing data from 300
+        participants
+    - chunk: c020
+      snippet: doi = {10.13026/h995-bt35}
+    - chunk: c020
+      snippet: Bridge2AI-Voice Pediatric Dataset v1.1.0 contains derived audio features
+        for 23,533 recordings collected from 300 participants aged 2-18
+    - chunk: c020
+      snippet: Patients/healthy volunteers at the Hospital for Sick Children were
+        considered for enrollment in the study. Patients were considered eligible
+        for the study if they fulfilled the inclusion criteria of 2 to 18 years of
+        age, and English proficiency
+    - chunk: c021
+      snippet: Data collection and sharing was approved by the Research Ethics Board
+        at the Hospital for Sick Children
+    core_path: related_datasets[0].description
+  related_datasets[0].name:
+    receipts:
+    - chunk: c020
+      snippet: title = {{Bridge2AI-Voice Pediatric Dataset}}
+    core_path: related_datasets[0].name
+  related_datasets[0].target_dataset:
+    receipts:
+    - chunk: c015
+      snippet: 'Note that the Bridge2AI-Voice Pediatric Dataset is also available
+        on PhysioNet: https://physionet.org/content/b2ai-voice-pediatric/'
+    - chunk: c018
+      snippet: 'Note that the Bridge2AI-Voice Pediatric Dataset is also available
+        on PhysioNet: https://physionet.org/content/b2ai-voice-pediatric/'
+    - chunk: c021
+      snippet: 'DOI (latest version): https://doi.org/10.13026/mf9s-5r03'
+    core_path: related_datasets[0].target_dataset
+  relationships[0].relationship_details:
+    receipts:
+    - chunk: c008
+      snippet: Are relationships between individual instances made explicit?...No,
+        they are unrelated
+    core_path: relationships[0].relationship_details
+  relationships[1].relationship_details:
+    receipts:
+    - chunk: c017
+      snippet: as participants may have repeated visits in order to collect data,
+        there may be more than one row per participant in the data files
+    core_path: relationships[1].relationship_details
+  retention_limit.retention_details:
+    receipts:
+    - chunk: c011
+      snippet: The USF IRB requires de-identified study data and original consent
+        forms be stored for a minimum of 5 years after the completion of the study
+    - chunk: c012
+      snippet: Identifiable data and datasheets linking participant numbers to participant
+        information will be kept in each institution on local cloud storage for a
+        maximum of 10 years after study completion
+    - chunk: c013
+      snippet: 'End Date: Two years after the Start Date, upon completion of the project,
+        upon expiration of the applicable ethics approval, or termination by Provider
+        Institution, whichever occurs first'
+    - chunk: c013
+      snippet: Recipient shall submit to Provider a written certification of such
+        data destruction within thirty (30) days after termination or expiration
+    core_path: retention_limit.retention_details
+  retention_limit.retention_period:
+    receipts:
+    - chunk: c009
+      snippet: Once data is contributed, the data will be retained as long as it is
+        useful for research purposes, possibly indefinitely
+    core_path: retention_limit.retention_period
+  sampling_strategies[0].representative_verification:
+    receipts:
+    - chunk: c011
+      snippet: There is a specific plan in place to enroll participants from socially/
+        economically disadvantaged and underserved population so that the database
+        is diverse and FAIR
+    core_path: sampling_strategies[0].representative_verification
+  sampling_strategies[0].source_data:
+    receipts:
+    - chunk: c011
+      snippet: We define High Volume Expert Clinics (HVEC) as clinics/programs within
+        academic institutions that have multidisciplinary programs targeted to the
+        specific diseases listed in the disease cohorts table and have a volume of
+        over 1000 patients per year
+    core_path: sampling_strategies[0].source_data
+  sampling_strategies[0].strategies:
+    receipts:
+    - chunk: c007
+      snippet: Participants are recruited across different academic institutions from
+        "high volume expert clinics" based on diagnosis and inclusion/exclusion criteria
+    - chunk: c008
+      snippet: Sampling Method Non-Probability Sample
+    - chunk: c011
+      snippet: recruitment flyers will link through a QR code to a secure REDCap survey,
+        which will be used to screen participants and facilitate enrollment
+    core_path: sampling_strategies[0].strategies
+  sampling_strategies[0].why_not_representative:
+    receipts:
+    - chunk: c008
+      snippet: The data is not representative because it was collected at a limited
+        number of geographic locations
+    core_path: sampling_strategies[0].why_not_representative
+  sampling_strategies[1].strategies:
+    receipts:
+    - chunk: c011
+      snippet: complete data acquisition including multi-modal data will be performed
+        for up to 5000 participants per category (disease category and controls)
+    core_path: sampling_strategies[1].strategies
+  sensitive_elements[0].sensitivity_details:
+    receipts:
+    - chunk: c005
+      snippet: of patients by their voice, voice hacking, and data ownership
+    core_path: sensitive_elements[0].sensitivity_details
+  sensitive_elements[1].sensitivity_details:
+    receipts:
+    - chunk: c008
+      snippet: 'racial or ethnic origins: The dataset includes race information. sexual
+        orientations: The dataset includes sexual orientation information'
+    core_path: sensitive_elements[1].sensitivity_details
+  sensitive_elements[2].sensitivity_details:
+    receipts:
+    - chunk: c013
+      snippet: The Data is Personally Identifiable Information, as that is defined
+        in OMB Memorandum M-07-16
+    core_path: sensitive_elements[2].sensitivity_details
+  splits[0].split_details:
+    receipts:
+    - chunk: c008
+      snippet: there are no predefined recommended data splits for training, validation,
+        or testing. Researchers are encouraged to create their own data splits
+    core_path: splits[0].split_details
+  status:
+    receipts:
+    - chunk: c018
+      snippet: 'Published: May 1, 2026. Version'
+    core_path: status
+  subpopulations[0].identification:
+    receipts:
+    - chunk: c002
+      snippet: four different categories of diseases in the adult population...vocal
+        pathologies, neurological and neurodegenerative disorders, mood and psychiatric
+        disorders, and respiratory disorders
+    - chunk: c006
+      snippet: our group has identified 5 disease categories for which voice changes
+        have been associated to specific diseases
+    - chunk: c007
+      snippet: Voice Disorders Neurological and Neurodegenerative Disorders Mood and
+        Psychiatric Disorders Respiratory disorders Pediatric Voice and Speech Disorders
+    core_path: subpopulations[0].identification
+  subpopulations[1].identification:
+    receipts:
+    - chunk: c009
+      snippet: Age, Gender, Sex, Ethnicity, Socioeconomic status
+    core_path: subpopulations[1].identification
+  subpopulations[2].distribution:
+    receipts:
+    - chunk: c005
+      snippet: to build a publicly available database of 30 000 human voices
+    - chunk: c008
+      snippet: 'Enrollment Count (Anticipated by 2027): 10,000'
+    - chunk: c011
+      snippet: we aim to enroll 5000 participants over the study period. The total
+        number of 30 000 participants will be reached by collaboration with other
+        participating institutions and existing cohorts
+    - chunk: c012
+      snippet: Sample Size 30 000 participants
+    core_path: subpopulations[2].distribution
+  tasks[0].response:
+    receipts:
+    - chunk: c006
+      snippet: To build a multi-modal, multi-institutional, large scale, diverse and
+        ethically sourced human voice database linked to other biomarkers of health
+        that is AI/ML friendly to fuel voice AI research
+    core_path: tasks[0].response
+  third_party_sharing[0].description:
+    receipts:
+    - chunk: c009
+      snippet: The dataset will be distributed broadly to individuals outside of the
+        entity who created the dataset
+    - chunk: c013
+      snippet: Collaborators at other research organizations, and other research teams
+        at the same organization, must apply independently for access to the Data
+        and sign a Data Transfer and Use Agreement (DTUA) with the Provider, before
+        accessing the data
+    core_path: third_party_sharing[0].description
+  title:
+    receipts:
+    - chunk: c015
+      snippet: 'Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked
+        to health information'
+    core_path: title
+  updates.frequency:
+    receipts:
+    - chunk: c009
+      snippet: further versions of the dataset will be released on a semi-annual (twice
+        a year) basis
+    core_path: updates.frequency
+  updates.update_details:
+    receipts:
+    - chunk: c008
+      snippet: Does the dataset get released as static versions or is it dynamically
+        updated? Static
+    core_path: updates.update_details
+  variables[0].variable_name:
+    receipts:
+    - chunk: c017
+      snippet: participant_id
+    core_path: variables[0].variable_name
+  variables[1].variable_name:
+    receipts:
+    - chunk: c017
+      snippet: session_id
+    core_path: variables[1].variable_name
+  variables[2].variable_name:
+    receipts:
+    - chunk: c017
+      snippet: task_name
+    core_path: variables[2].variable_name
+  variables[3].variable_name:
+    receipts:
+    - chunk: c017
+      snippet: n_frames
+    core_path: variables[3].variable_name
+  version:
+    receipts:
+    - chunk: c018
+      snippet: 'Published: May 1, 2026. Version: 3.1.0'
+    core_path: version
+  version_access.version_details:
+    receipts:
+    - chunk: c009
+      snippet: By default, older versions of the dataset will continue to be supported,
+        hosted, and made available to researchers. Each version of the dataset has
+        a unique DOI
+    - chunk: c015
+      snippet: Bridge2AI-Voice v1.0, the initial release, provides 12,523 recordings
+        for 306 participants collected across five sites in North America
+    - chunk: c015
+      snippet: diverse voice dataset linked to health information (version 1.0). Health
+        Data Nexus
+    - chunk: c017
+      snippet: 'b2ai-voice v3.0.0: A major update with new data for an additional
+        391 participants. The single phenotype data file has been separated into more
+        user-friendly and intuitive individual files'
+    core_path: version_access.version_details
+  version_access.versions_available:
+    receipts:
+    - chunk: c015
+      snippet: Versions 1.1 Jan. 17, 2025 2.0.0 April 16, 2025 2.0.1 Aug. 18, 2025
+        3.0.0 Dec. 16, 2025 3.1.0 May 1, 2026
+    - chunk: c016
+      snippet: doi = {10.13026/k81f-qr68}
+    - chunk: c016
+      snippet: 'Published: Dec. 16, 2025. Version: 3.0.0'
+    core_path: version_access.versions_available

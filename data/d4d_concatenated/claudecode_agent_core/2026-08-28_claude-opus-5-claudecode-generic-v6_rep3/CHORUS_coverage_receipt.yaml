@@ -1,0 +1,308 @@
+bundle_md5: 9b2ef4b65d67957f79362266cab0bc7a
+chunks:
+- id: c001
+  status: nothing_relevant
+  reason: Bundle preamble and table of contents describing the concatenation itself (input
+    directory, file count, source manifest path, list of the four constituent document filenames).
+    It states no fact about the dataset.
+- id: c002
+  status: extracted
+  extracted:
+  - slot: title
+    snippet: 'Bridge2AI: Patient-Focused Collaborative Hospital Repository Uniting Standards
+      (CHoRUS) for Equitable AI'
+  - slot: creators[0].description
+    snippet: 'Principal investigator: ROSENTHAL, ERIC S.'
+  - slot: creators[0].affiliations[0].name
+    snippet: 'Organization: MASSACHUSETTS GENERAL HOSPITAL'
+  - slot: funders[0].grants[0].description
+    snippet: 'Project number: 1OT2OD032701-01'
+  - slot: funders[0].grants[0].grant_number
+    snippet: 'Core project number: OT2OD032701'
+  - slot: funders[0].grantor
+    snippet: As part of the NIH Common Fund
+  - slot: purposes[2].response
+    snippet: generating data for ML/AI applications aimed at characterizing acute and critical
+      care illness, predicting complications, and measuring treatment response among patients
+      with acute or critical illness
+  - slot: addressing_gaps[0].response
+    snippet: There is an urgent need for infrastructure to support artificial intelligence
+      and machine learning (AI/ML) in critical care
+  - slot: addressing_gaps[1].response
+    snippet: Developing high-resolution multi-center data sets is a critical first step towards
+      actionable and trustworthy AI
+  - slot: updates.update_details
+    snippet: an AI-ready data set from more than 100,000 critically ill patients
+  - slot: instances[0].description
+    snippet: structured electronic health record data, tokenized unstructured electronic health
+      record data, telemetry and EEG waveforms, imaging, and social determinants of health
+  - slot: conforms_to
+    snippet: standardize data to the OMOP Common Data Model
+  - slot: splits[0].split_details
+    snippet: The dataset will also provision a holdout test set, accessible for model external
+      validation
+  - slot: is_deidentified.deidentification_details
+    snippet: transform data using approaches that limit re-identification
+  - slot: ethical_reviews[0].review_details
+    snippet: perform community-facing ethics focus groups to determine what data is appropriate
+      for public sharing
+  - slot: sampling_strategies[0].strategies
+    snippet: sampling to ensure comprehensive sets of patient conditions and clinical treatment
+      strategies
+  - slot: tasks[1].response
+    snippet: build machine-learning (ML) and artificial intelligence (AI)-derived models to
+      improve the care and outcomes of patients requiring critical care
+  - slot: description
+    snippet: develop a publicly available, AI-ready critical care dataset, while ensuring
+      the methods promote privacy, accountability, and clinical benefit
+  - slot: keywords
+    snippet: Critical Care;Critical Illness
+  - slot: future_use_impacts[0].impact_details
+    snippet: aid marketplace adoption of AI-developed models for implementation in acute and
+      critical care
+  - slot: variables[0].variable_name
+    snippet: ensure that data elements feature appropriate contextual factors such as geographic
+      distance to the nearest hospital
+- id: c003
+  status: extracted
+  extracted:
+  - slot: creators[0]
+    snippet: Eric Rosenthal ... Massachusetts General
+  - slot: creators[1]
+    snippet: Azra Bihorac ... University of Florida
+  - slot: creators[2]
+    snippet: Xiaoqian Jiang ... UTHealth Houston
+  - slot: creators[3]
+    snippet: Yulia Strekalova ... University of Florida
+  - slot: creators[4]
+    snippet: Parisa Rashidi ... University of Florida
+  - slot: creators[5]
+    snippet: Manlik Kwong ... Tufts University
+  - slot: creators[0].description
+    snippet: Bridge2AI CHoRUS Leadership Team
+  - slot: acquisition_methods[0].acquisition_details
+    snippet: Retrospective data collection
+  - slot: instances[0].source_caveats
+    snippet: As of August 2025, covers 14 different ... hospitals with over 45K unique admissions
+  - slot: distribution_formats[0]
+    snippet: Demographics OMOP
+  - slot: distribution_formats[1]
+    snippet: Medication administration ... (dosing time-stamped upon ... each infusion change
+      or ... dose administration)
+  - slot: distribution_formats[2]
+    snippet: Procedures (documentation ... by providers)
+  - slot: distribution_formats[3]
+    snippet: Nursing flowsheets ... (high-frequency ... documentation)
+  - slot: distribution_formats[4]
+    snippet: Diagnoses (documentation ... by providers)
+  - slot: distribution_formats[5]
+    snippet: Clinical notes (extracted ... and tokenized using OHNLP ... toolkit)
+  - slot: distribution_formats[6]
+    snippet: Imaging (from PACS) ... DICOM
+  - slot: distribution_formats[7]
+    snippet: Waveform telemetry ... (bedside monitors, ... gateway/middleware) ... WFDB
+  - slot: distribution_formats[8]
+    snippet: Waveform EEG (hospital ... database) ... EDF+ and ... Persyst
+  - slot: conforms_to_standard
+    snippet: Yes (DICOM schema)
+  - slot: license_and_use_terms.license_terms
+    snippet: All participants must sign a licensing agreement included in the registration
+      form before gaining
+  - slot: data_governance.access_review_process
+    snippet: Participants will ... out a registration form with name, email, and institution
+  - slot: distribution_formats[9].description
+    snippet: 'OMOP and telemetry in enclave except:'
+  - slot: known_limitations[0].limitation_description
+    snippet: Clinical notes - stored locally except tokens
+  - slot: known_limitations[1].limitation_description
+    snippet: Imaging - currently 1000 images available ... with de-id in process for larger
+      cohort
+  - slot: known_limitations[2].limitation_description
+    snippet: EEG - extraction in process at this point
+  - slot: existing_uses[0].examples
+    snippet: Datasets are being used for training ... activities and publications
+  - slot: description
+    snippet: Multimodal & ... High-Resolution
+  - slot: intended_uses[0].examples
+    snippet: expands access to Bridge2AI CHoRUS data through engagement, AI ... training,
+      and mentorship
+  - slot: name
+    snippet: CHoRUS Dataset
+- id: c004
+  status: extracted
+  extracted:
+  - slot: license_and_use_terms.license_terms
+    snippet: access to the dataset
+  - slot: data_governance.access_review_process
+    snippet: Program administrators will assist with this access if ... needed.
+  - slot: distribution_formats[9].name
+    snippet: Bridge2AI AI/ML for Clinical ... Care Collaborative Cloud
+  - slot: intended_uses[0].usage_notes
+    snippet: leverage the data and tools to create practical use cases, putting their new
+      skills ... to work in real-life situations and innovative data-driven research
+  - slot: conforms_to
+    snippet: The OHDSI/OMOP common data model.
+  notes: The remainder of this chunk describes the AIM-AHEAD Bridge2AI for Clinical Care Training
+    Program - curriculum, learning sessions, trainee objectives and expectations, mentorship
+    matching, applicant citizenship and education eligibility, and the $8,000 trainee stipend.
+    Those are facts about a training program, not about the CHoRUS dataset that is this record's
+    referent, so they are not extracted.
+- id: c005
+  status: extracted
+  extracted:
+  - slot: data_governance.access_review_process
+    snippet: In order to gain access to ... the dataset, you will need ... to have a
+  notes: The remainder of this chunk covers the AIM-AHEAD training program's eligible organizations,
+    application requirements and portal, submission deadlines, selection count and key program
+    dates. Those describe the training program, not the CHoRUS dataset, and are not extracted.
+    The one dataset fact is the email-domain condition on gaining access to the data.
+- id: c006
+  status: extracted
+  extracted:
+  - slot: id
+    snippet: 'Source URL: https://chorus4ai.org/'
+  - slot: title
+    snippet: Creating a patient-focused collaborative hospital repository uniting standards
+      for clinical care AI
+  - slot: description
+    snippet: The CHoRUS project is one data generation project of four in the National Institute
+      of Health (NIH) funded Bridge2AI consortium
+  - slot: purposes[0].response
+    snippet: The goal is to work with projects to create ethically sourced datasets and tools
+      around Artificial Intelligence and to create best practices for AI in health
+  - slot: updates.update_details
+    snippet: Anticipated Final Dataset ... 100,000 ... Patient admissions
+  - slot: updates.update_details
+    snippet: Different data modalities
+  - slot: instances[0].counts
+    snippet: Current Released Dataset ... 50,000 ... Patient admissions from ICU, PICU, and
+      NICU
+  - slot: instances[0].description
+    snippet: 1.6 Billion ... Rows of EHR OMOP data
+  - slot: instances[0].description
+    snippet: 7,642 ... Admissions with Radiology Data
+  - slot: instances[0].description
+    snippet: 23 Tb ... Waveform data
+  - slot: creators[6].description
+    snippet: CHoRUS consortium members across 20 different institutions
+  - slot: collection_mechanisms[0].mechanism_details
+    snippet: The CHoRUS project is the collection of multi-modal data across 14 different
+      hospitals. The data utilizes ongoing and new standardization practices. The team creates
+      tools to support the cloud enclave.
+  - slot: ethical_reviews[0].review_details
+    snippet: The CHoRUS consortium evaluates community perspectives on clinical care AI to
+      find ways to increase trustworthiness of provenance and privacy in AI
+  - slot: funders[0].grants[0].grant_number
+    snippet: This project is funded by the NIH under award number OT2OD032701
+  - slot: maintainers[1].name
+    snippet: Ciera McCrary, MGH, Program Manager
+  - slot: maintainers[1].maintainer_details
+    snippet: cmccrary@mgh.havard.edu
+  - slot: source_caveats
+    snippet: This repoitory is under review for potential modification in compliance with
+      Administration directives.
+  - slot: intended_uses[0].examples
+    snippet: gain hands-on training using the CHoRUS dataset to support the development of
+      transnational AI in clinical care
+  - slot: status
+    snippet: Current Released Dataset
+- id: c007
+  status: extracted
+  extracted:
+  - slot: title
+    snippet: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS)
+      for ... Equitable AI
+  - slot: purposes[1].response
+    snippet: The goal of the CHoRUS Network is to develop the most diverse, high-resolution,
+      ethically ... sourced, AI-ready data set to answer the grand challenge of improving
+      recovery from acute
+  - slot: creators[6].description
+    snippet: This collaboration spans 20 academic centers, of which 14 will contribute as
+      Data ... Acquisition centers.
+  - slot: ethical_reviews[0].review_details
+    snippet: Patient-focused efforts will determine the ethical and legal approaches to manage
+      privacy ... and bias, while accounting for Social Determinants of Health.
+  - slot: preprocessing_strategies[0].preprocessing_details
+    snippet: Unified standards will harmonize multi-modal EHR, waveform, imaging, and text
+      data.
+  - slot: labeling_strategies[0].labeling_details
+    snippet: A visualization and annotation environment will label data with targets important
+      for ... prediction.
+  - slot: sampling_strategies[0].strategies
+    snippet: Federated access will enable sampling methods to ensure a balanced and diverse
+      cohort.
+  - slot: description
+    snippet: Collaborating with Bridge2AI and 3 other data generation projects, the CHoRUS
+      Network will
+  - slot: external_resources[0].external_resources
+    snippet: https://github.com/chorus-ai#table-of-contents
+  - slot: external_resources[0].description
+    snippet: 'The CHoRUS GitHub organization houses active repositories that provide: ...
+      1. Software and tooling to interact with and extract insight from clinical data in diverse
+      ... formats'
+  - slot: preprocessing_strategies[1].preprocessing_details
+    snippet: 2. Validated semantic mappings for connecting clinical data in various source
+      formats to ... international standards
+  - slot: collection_mechanisms[0].mechanism_details
+    snippet: 3. Standard operating protocols (SOPs) to instruct data contributing sites about
+      best ... practices for curating and delivering interoperable datasets
+  - slot: external_resources[0].description
+    snippet: chorus-container-apps
+  - slot: external_resources[0].description
+    snippet: Set of dockerized container applications and associated configurations to be
+      deployed to support CHoRUS ... services on Azure
+  - slot: external_resources[0].description
+    snippet: privacy_scan_tool ... A Privacy Scan tools for medical records
+  - slot: external_resources[0].description
+    snippet: chorus_waveform ... CHoRUS waveform documentation and various waveform conversion
+      scripts
+  - slot: external_resources[0].description
+    snippet: Chorus_SOP ... ChoRUS centralized SOP documentation site
+  - slot: external_resources[0].description
+    snippet: data_acq_SOP ... An online documentation SOP for Data Acquisition Module
+  - slot: external_resources[0].description
+    snippet: Apache-2.0
+  - slot: external_resources[0].description
+    snippet: This project is licensed under the MIT License. See the LICENSE file for more
+      details.
+  - slot: data_governance.access_review_process
+    snippet: 'Request access: dbold@emory.edu or jared.houghtaling@tuftsmedicine.org'
+  - slot: external_resources[1].external_resources
+    snippet: 'Website: www.bridge2ai.org/chorus'
+  - slot: extension_mechanism.extension_details
+    snippet: We have created a web guide for both contributors and users of the CHoRUS ...
+      software packages that compiles documentation in the chorus-developer repository.
+  - slot: extension_mechanism.extension_details
+    snippet: We have asked data contributing sites to provide regular status updates with
+      regard to their ... progress in creating and curating a CHoRUS-specific clinical data
+      extract.
+  - slot: page
+    snippet: https://chorus4ai.org/
+- id: c008
+  status: extracted
+  extracted:
+  - slot: external_resources[0].description
+    snippet: chorus-extract-upload Public ... Repository with tools to create and upload a
+      CHoRUS Data Extract
+  - slot: external_resources[0].description
+    snippet: chorus-extract-upload Public ... Python ... MIT
+  - slot: external_resources[0].description
+    snippet: UF-Geocoding Public ... Forked from bihorac-LAB/Exposome ... Open source code
+      to geocode OMOP Location entities via DeGauss
+  - slot: external_resources[0].description
+    snippet: chorus_waveform_resources ... Resources which support the preparation and release
+      of waveforms
+  - slot: external_resources[0].description
+    snippet: CHoRUSReports ... This repo is dedicated to producing characterization reports
+      to return to sites following their ... data submissions
+  - slot: cleaning_strategies[0].cleaning_details
+    snippet: producing characterization reports to return to sites following their ... data
+      submissions
+  - slot: is_deidentified.deidentification_details
+    snippet: CTP-deid Public
+  - slot: variables[0].derivation
+    snippet: UF-Geocoding Public ... Forked from bihorac-LAB/Exposome ... Open source code
+      to geocode OMOP Location entities via DeGauss
+  notes: The remainder of this chunk is GitHub repository listing furniture - star and fork
+    counts, "Updated on" timestamps, the top-languages panel and page footers - which carry
+    no dataset fact.

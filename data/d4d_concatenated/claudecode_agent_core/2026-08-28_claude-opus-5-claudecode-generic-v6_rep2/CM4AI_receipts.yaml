@@ -1,0 +1,1622 @@
+bundle_md5: 1dfd34e5610fed7c22bea1f09c0bc60c
+slots:
+  acquisition_methods[0].acquisition_details:
+    receipts:
+    - chunk: c010
+      snippet: MDA-MB-468 (RRID:CVCL_0419) is a triple negative breast cancer cell
+        line established...from a metastatic site pleural effusion of a 51-year-old
+        black female
+    core_path: acquisition_methods[0].acquisition_details
+  acquisition_methods[1].acquisition_details:
+    receipts:
+    - chunk: c010
+      snippet: The KOLF2.1J (RRID:CVCL_B5P3) iPSCs cell line was derived from a healthy
+        male...Northern European donor
+    core_path: acquisition_methods[1].acquisition_details
+  addressing_gaps[0].response:
+    receipts:
+    - chunk: c014
+      snippet: genomics and precision medicine, machine learning models are often
+        "black boxes,"...predicting phenotypes from genotypes without understanding
+        the mechanisms by...which such translation occurs
+    - chunk: c014
+      snippet: this Bridge2AI data generation...project will generate a resource of
+        matched data and tools to enable the creation of..."visible" ML systems
+    core_path: addressing_gaps[0].response
+  citation:
+    receipts:
+    - chunk: c026
+      snippet: Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn
+        B; Churas CP
+    - chunk: c026
+      snippet: ', University of Virginia Dataverse, V2'
+    core_path: citation
+  collection_mechanisms[0].mechanism_details:
+    receipts:
+    - chunk: c010
+      snippet: CM4AI input data streams are generated using immunofluorescence (IF)
+        subcellular...microscopy for spatial proteomics data; affinity purification
+        mass spectroscopy (AP-MS)
+    - chunk: c014
+      snippet: three complementary mapping approaches - proteomic...mass spectrometry,
+        cellular imaging, and genetic perturbation via CRISPR/Cas9
+    core_path: collection_mechanisms[0].mechanism_details
+  collection_mechanisms[1].mechanism_details:
+    receipts:
+    - chunk: c010
+      snippet: we employed AP-MS on endogenously tagged cell lines...and size-exclusion
+        chromatography coupled to mass spectrometry (SEC-MS) for...proteome-wide complex/interaction
+        mapping
+    core_path: collection_mechanisms[1].mechanism_details
+  collection_mechanisms[2].mechanism_details:
+    receipts:
+    - chunk: c010
+      snippet: completed spatial proteomics mapping of 100 chromatin regulators in
+        the MDA-MB-...468 cells
+    core_path: collection_mechanisms[2].mechanism_details
+  collection_mechanisms[3].mechanism_details:
+    receipts:
+    - chunk: c010
+      snippet: we performed single-cell CRISPR screens perturbing 100 chromatin...regulators
+        in the MDA-MB-468 cells under 3 conditions
+    core_path: collection_mechanisms[3].mechanism_details
+  collection_timeframes[0].end_date:
+    receipts:
+    - chunk: c014
+      snippet: 'Project end: 2026-08-31T00:00:00'
+    core_path: collection_timeframes[0].end_date
+  collection_timeframes[0].source_caveats:
+    receipts:
+    - chunk: c020
+      snippet: through the end of the project in November 2026
+    core_path: collection_timeframes[0].source_caveats
+  collection_timeframes[0].start_date:
+    receipts:
+    - chunk: c014
+      snippet: 'Project start: 2022-09-01T00:00:00'
+    core_path: collection_timeframes[0].start_date
+  collection_timeframes[0].timeframe_details:
+    receipts:
+    - chunk: c014
+      snippet: 'Project start: 2022-09-01T00:00:00...Project end: 2026-08-31T00:00:00'
+    core_path: collection_timeframes[0].timeframe_details
+  confidential_elements[0].confidentiality_details:
+    receipts:
+    - chunk: c020
+      snippet: These data are not yet in completed final form:...Some datasets are
+        under temporary pre-publication embargo
+    - chunk: c023
+      snippet: Perturb-seq data in KOLF2.1J iPSCs (undifferentiated):...Embargoed...Perturb-seq
+        data in MDA-MB-468 breast cancer cells (+/- treatment):...Embargoed
+    core_path: confidential_elements[0].confidentiality_details
+  conforms_to:
+    receipts:
+    - chunk: c010
+      snippet: datasets in RO-Crate format
+    core_path: conforms_to
+  conforms_to_standard[0]:
+    receipts:
+    - chunk: c010
+      snippet: output cell maps are packaged with provenance graphs and rich metadata
+        as AI-Ready...datasets in RO-Crate format
+    core_path: conforms_to_standard[0]
+  creators[0].affiliations[0].name:
+    receipts:
+    - chunk: c007
+      snippet: Department of Medicine, University of California San Diego, La Jolla,
+        CA, USA
+    core_path: creators[0].affiliations[0].name
+  creators[0].affiliations[3].id:
+    receipts:
+    - chunk: c026
+      snippet: Al Manir S...https://ror.org/0153tk833
+    - chunk: c027
+      snippet: Ratcliffe S...https://ror.org/0153tk833
+    core_path: creators[0].affiliations[3].id
+  creators[0].affiliations[8].name:
+    receipts:
+    - chunk: c016
+      snippet: CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UT Austin,
+        UA Birmingham, Simon Fraser University, and the Hastings Center
+    core_path: creators[0].affiliations[8].name
+  creators[0].description:
+    receipts:
+    - chunk: c018
+      snippet: Production Location...University of California San Diego; University
+        of California San Francisco; University of California San Francisco; Stanford
+        University; University of Virginia
+    - chunk: c021
+      snippet: Production Location...University of California San Diego; University
+        of California San Francisco; Stanford University; University of Virginia
+    core_path: creators[0].description
+  creators[0].notes:
+    receipts:
+    - chunk: c014
+      snippet: 'Principal investigator: IDEKER, TREY...Organization: UNIVERSITY OF
+        CALIFORNIA, SAN DIEGO'
+    - chunk: c018
+      snippet: Ideker T (University of California San Diego) - ORCID:...https://orcid.org/0000-0002-1708-8454
+    core_path: creators[0].notes
+  creators[0].principal_investigator:
+    receipts:
+    - chunk: c002
+      snippet: Trey Ideker
+    core_path: creators[0].principal_investigator
+  creators[0].source_caveats:
+    receipts:
+    - chunk: c016
+      snippet: CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UT Austin,
+        UA Birmingham, Simon Fraser University, and the Hastings Center
+    core_path: creators[0].source_caveats
+  creators[1].affiliations[0].name:
+    receipts:
+    - chunk: c007
+      snippet: Department of Bioengineering, Stanford University, Palo Alto, CA, USA
+    core_path: creators[1].affiliations[0].name
+  creators[1].description:
+    receipts:
+    - chunk: c011
+      snippet: IF images for the cell line and conditions are downloaded from the
+        Lundberg...Laboratory's deposition archive
+    - chunk: c018
+      snippet: as imaged by immunofluorescence-based staining (ICC-IF) and confocal
+        microscopy in the Lundberg Lab at Stanford University
+    core_path: creators[1].description
+  creators[1].notes:
+    receipts:
+    - chunk: c018
+      snippet: Lundberg E (Stanford University) - ORCID:...https://orcid.org/0000-0001-7034-0850
+    core_path: creators[1].notes
+  creators[2].description:
+    receipts:
+    - chunk: c011
+      snippet: PPI networks for the cell line and conditions are downloaded from the
+        Krogan...Laboratory's deposition archive
+    - chunk: c018
+      snippet: This dataset was generated by size exclusion chromatography-mass spectroscopy
+        (SEC-MS) on undifferentiated KOLF2.1J human induced pluripotent stem cells
+        (hiPSCs), in the Nevan Krogan laboratory at the University of California San
+        Francisco
+    core_path: creators[2].description
+  creators[2].notes:
+    receipts:
+    - chunk: c018
+      snippet: Krogan N (University of California San Francisco) - ORCID:...https://orcid.org/0000-0003-4902-337X
+    - chunk: c024
+      snippet: Krogan, N...University of California San Francisco...ORCID...https://orcid.org/0000-0003-4902-337X
+    core_path: creators[2].notes
+  creators[3].description:
+    receipts:
+    - chunk: c010
+      snippet: We have designed a CRISPR...lentiviral library targeting 100 chromatin
+        factors with 6 guide RNAs per gene
+    core_path: creators[3].description
+  creators[4].description:
+    receipts:
+    - chunk: c011
+      snippet: The Standards Module of CM4AI is responsible for AI-Readiness packaging
+        of data,...software, metadata and provenance graphs
+    - chunk: c011
+      snippet: FAIRSCAPE consists of a client-side Python3 application, called either
+        from the...command line
+    core_path: creators[4].description
+  creators[4].notes:
+    receipts:
+    - chunk: c018
+      snippet: Clark T (University of Virginia) - ORCID:...https://orcid.org/0000-0003-4060-7360
+    - chunk: c026
+      snippet: Clark T...https://ror.org/0153tk833
+    core_path: creators[4].notes
+  creators[5].description:
+    receipts:
+    - chunk: c010
+      snippet: The Tools Module of CM4AI is responsible for producing and maintaining
+        a dataset...integration and map production system, the Multi-Scale Integrated
+        Cell (MuSIC)...pipeline
+    core_path: creators[5].description
+  data_governance.access_review_process:
+    receipts:
+    - chunk: c011
+      snippet: The Ethics team worked closely with Data Acquisition, Tools, and Standards
+        Modules to...develop a plan for ethical preparation, licensing, dissemination,
+        and Data Access...supervision of CM4AI datasets
+    - chunk: c012
+      snippet: The Code...of Conduct outlines basic requirements for participants
+        in the Bridge2AI Open House to...access B2AI data (including CM4AI datasets),
+        to attest and commit to it prior to...accessing the data
+    core_path: data_governance.access_review_process
+  data_governance.accountable_organization.description:
+    receipts:
+    - chunk: c027
+      snippet: Long term preservation in the University of Virginia Dataverse, supported
+        by committed institutional funds
+    core_path: data_governance.accountable_organization.description
+  data_governance.accountable_organization.id:
+    receipts:
+    - chunk: c026
+      snippet: Levinson MA...https://ror.org/0153tk833
+    core_path: data_governance.accountable_organization.id
+  data_governance.accountable_organization.name:
+    receipts:
+    - chunk: c027
+      snippet: Long term preservation in the University of Virginia Dataverse
+    core_path: data_governance.accountable_organization.name
+  data_governance.committee_contact:
+    receipts:
+    - chunk: c020
+      snippet: Data Governance Committee:...Jillian Parker
+    core_path: data_governance.committee_contact
+  data_governance.committee_members[0].affiliation[0].name:
+    receipts:
+    - chunk: c018
+      snippet: Parker J (University of California, San Diego)
+    core_path: data_governance.committee_members[0].affiliation[0].name
+  data_governance.committee_members[0].email:
+    receipts:
+    - chunk: c020
+      snippet: Jillian Parker (jillianparker@health.ucsd.edu)
+    core_path: data_governance.committee_members[0].email
+  data_governance.committee_members[0].name:
+    receipts:
+    - chunk: c020
+      snippet: Data Governance Committee:...Jillian Parker (jillianparker@health.ucsd.edu)
+    core_path: data_governance.committee_members[0].name
+  data_governance.committee_members[0].orcid:
+    receipts:
+    - chunk: c018
+      snippet: Parker J (University of California, San Diego) - ORCID:...https://orcid.org/0000-0003-4535-3486
+    core_path: data_governance.committee_members[0].orcid
+  data_governance.committee_name:
+    receipts:
+    - chunk: c012
+      snippet: A Data Access Committee will supervise ethical matters related to dataset...distribution
+        and potential dual licensing for commercial use
+    core_path: data_governance.committee_name
+  data_governance.stewardship_roles[0]:
+    receipts:
+    - chunk: c011
+      snippet: the Ethics team is instrumental in formulating the CM4AI Life...Cycle,
+        a framework designed to elucidate governance milestones
+    core_path: data_governance.stewardship_roles[0]
+  data_governance.stewardship_roles[1]:
+    receipts:
+    - chunk: c020
+      snippet: Long term preservation in the University of Virginia Dataverse, supported
+        by committed institutional funds
+    core_path: data_governance.stewardship_roles[1]
+  description:
+    receipts:
+    - chunk: c010
+      snippet: CM4AI is the Functional Genomics Data Generation Project in the U.S....National
+        Institute of Health's (NIH) Bridge2AI program
+    - chunk: c010
+      snippet: treated (with paclitaxel and vorinostat) versus untreated MDA-MB-468...breast
+        cancer cell lines
+    - chunk: c010
+      snippet: undifferentiated vs.  neurons and cardiomyocytes...generated from NIH-iPCS-1
+        KOLF2.1J induced pluripotent stem cells (IPSCs)
+    - chunk: c015
+      snippet: Data volume...21.4 TB
+    - chunk: c016
+      snippet: Cell Maps for Artificial Intelligence (CM4AI) will deliver machine-readable
+        hierarchical maps of cell architecture as AI-ready data, together with quarterly
+        data releases of map-input data streams
+    core_path: description
+  distribution_dates[0].source_caveats:
+    receipts:
+    - chunk: c016
+      snippet: Released on:...June 17, 2025
+    core_path: distribution_dates[0].source_caveats
+  distribution_formats[0].access_urls[0]:
+    receipts:
+    - chunk: c026
+      snippet: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
+    core_path: distribution_formats[0].access_urls[0]
+  distribution_formats[0].access_urls[1]:
+    receipts:
+    - chunk: c023
+      snippet: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/K7TGEM
+    core_path: distribution_formats[0].access_urls[1]
+  distribution_formats[0].access_urls[3]:
+    receipts:
+    - chunk: c018
+      snippet: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX
+    core_path: distribution_formats[0].access_urls[3]
+  distribution_formats[0].description:
+    receipts:
+    - chunk: c012
+      snippet: LibraData is the University of Virginia's instance of Dataverse, an
+        NIH-approved...generalist repository
+    - chunk: c018
+      snippet: The dataset is too large to download. Please select the files you need
+        from the files table
+    - chunk: c026
+      snippet: The dataset is too large to download. Please select the files you need
+        from the files table
+    core_path: distribution_formats[0].description
+  distribution_formats[1].access_urls[0]:
+    receipts:
+    - chunk: c019
+      snippet: Download URL...https://dataverse.lib.virginia.edu/api/access/datafile/
+    core_path: distribution_formats[1].access_urls[0]
+  distribution_formats[1].description:
+    receipts:
+    - chunk: c019
+      snippet: You can select individual files that are below the 953.7 MB download
+        limit from the files table, or use the...Data Access API...for programmatic
+        access to the files
+    - chunk: c024
+      snippet: You can select individual files that are below the 1.9 GB download
+        limit from the files table
+    core_path: distribution_formats[1].description
+  distribution_formats[2].description:
+    receipts:
+    - chunk: c023
+      snippet: Export Metadata...OAI_ORE...DataCite
+    core_path: distribution_formats[2].description
+  distribution_formats[2].format:
+    receipts:
+    - chunk: c023
+      snippet: Export Metadata...OAI_ORE...DataCite...OpenAIRE...Schema.org JSON-LD...DDI
+        Codebook v2...Dublin Core...Croissant
+    core_path: distribution_formats[2].format
+  errata[0].erratum_details:
+    receipts:
+    - chunk: c020
+      snippet: This dataset is a revision of the June 2025 Data Release...This revision
+        includes adding RGB immunofluorescent images, corrections to ro-crate metadata,
+        and changes to naming conventions
+    core_path: errata[0].erratum_details
+  ethical_reviews[0].contact_person:
+    receipts:
+    - chunk: c020
+      snippet: Ethical Review:...Vardit Ravitsky (ravitskyv@thehastingscenter.org)
+    core_path: ethical_reviews[0].contact_person
+  ethical_reviews[0].review_details:
+    receipts:
+    - chunk: c020
+      snippet: Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe
+        Belisle-Pipon
+    - chunk: c021
+      snippet: Ravitsky V (University of Montreal) - ORCID:...https://orcid.org/0000-0002-7080-8801
+    core_path: ethical_reviews[0].review_details
+  ethical_reviews[0].source_caveats:
+    receipts:
+    - chunk: c021
+      snippet: Ravitsky V (University of Montreal)
+    core_path: ethical_reviews[0].source_caveats
+  ethical_reviews[1].contact_person:
+    receipts:
+    - chunk: c020
+      snippet: Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
+    core_path: ethical_reviews[1].contact_person
+  ethical_reviews[1].review_details:
+    receipts:
+    - chunk: c021
+      snippet: Simon Fraser University) - ORCID:...https://orcid.org/0000-0002-8965-8153
+    core_path: ethical_reviews[1].review_details
+  ethical_reviews[2].review_details:
+    receipts:
+    - chunk: c011
+      snippet: The Ethics team employs a...methodology inspired by Value-Sensitive
+        Design (VSD)
+    core_path: ethical_reviews[2].review_details
+  existing_uses[0].examples[0]:
+    receipts:
+    - chunk: c012
+      snippet: Initial Datasets, Tools and Standards associated with all three parallel
+        mapping...platforms have been released and are publicly available at our CM4AI
+        web portal
+    core_path: existing_uses[0].examples[0]
+  existing_uses[0].examples[1]:
+    receipts:
+    - chunk: c012
+      snippet: These data were also made available at our CodeFest in March 2024,
+        accompanied by...detailed tutorials explaining how the data were derived and
+        integrated
+    core_path: existing_uses[0].examples[1]
+  external_resources[0].description:
+    receipts:
+    - chunk: c011
+      snippet: Teaming supports open dissemination of CM4AI-generated data, maps,
+        and tools via...the CM4AI web portal (http://www.cm4ai.org), using the U-BRITE
+        platform
+    core_path: external_resources[0].description
+  external_resources[0].external_resources[0]:
+    receipts:
+    - chunk: c011
+      snippet: the CM4AI web portal (http://www.cm4ai.org)
+    core_path: external_resources[0].external_resources[0]
+  external_resources[1].description:
+    receipts:
+    - chunk: c020
+      snippet: 'External Data Links...Access external data resources related to this
+        dataset:'
+    - chunk: c026
+      snippet: AP-MS data in MDA-MB-468 breast cancer cells (treated with paclitaxel):...MassIVE
+        Repository
+    core_path: external_resources[1].description
+  external_resources[1].external_resources[0]:
+    receipts:
+    - chunk: c020
+      snippet: Mass Spectrometry Data (Human iPSCs):...MassIVE Repository
+    - chunk: c021
+      snippet: Mass Spectrometry Data (Human Cancer Cells):...MassIVE Repository
+    - chunk: c023
+      snippet: SEC-MS data in KOLF2.1J iPSCs (undifferentiated, NPC, neuron, and cardiomyocyte):...MassIVE
+        Repository
+    core_path: external_resources[1].external_resources[0]
+  external_resources[1].external_resources[1]:
+    receipts:
+    - chunk: c026
+      snippet: CRISPRi Perturbation Atlas of iPSCs:...Figshare
+    core_path: external_resources[1].external_resources[1]
+  external_resources[1].external_resources[2]:
+    receipts:
+    - chunk: c020
+      snippet: Sequence Read Archive (SRA) Data:...NCBI BioProject
+    core_path: external_resources[1].external_resources[2]
+  external_resources[1].restrictions[0]:
+    receipts:
+    - chunk: c023
+      snippet: Perturb-seq data in KOLF2.1J iPSCs (undifferentiated):...Embargoed
+    core_path: external_resources[1].restrictions[0]
+  external_resources[2].external_resources[0]:
+    receipts:
+    - chunk: c012
+      snippet: The FAIRSCAPE AI-readiness framework is described with a tutorial and
+        instructions...for installation at https://fairscape.github.io
+    core_path: external_resources[2].external_resources[0]
+  external_resources[2].restrictions[0]:
+    receipts:
+    - chunk: c012
+      snippet: to this software is held by...the Rector and Board of Visitors of the
+        University of Virginia. It is available under open...source MIT License
+    core_path: external_resources[2].restrictions[0]
+  external_resources[3].description:
+    receipts:
+    - chunk: c003
+      snippet: we also developed the Cell Mapping Toolkit
+    core_path: external_resources[3].description
+  external_resources[3].external_resources[0]:
+    receipts:
+    - chunk: c003
+      snippet: https://github.com/idekerlab/cellmaps_pipeline
+    core_path: external_resources[3].external_resources[0]
+  external_resources[4].external_resources[0]:
+    receipts:
+    - chunk: c011
+      snippet: open-source Integrative Modeling Platform (IMP) package version 2.18...(https://integrativemodeling.org)
+    core_path: external_resources[4].external_resources[0]
+  external_resources[5].description:
+    receipts:
+    - chunk: c002
+      snippet: Multimodal cell maps as a foundation for structural and functional
+        genomics
+    - chunk: c002
+      snippet: over 5,100 proteins in U2OS osteosarcoma cells
+    - chunk: c003
+      snippet: companion Multiscale Integrated Cell visualization portal
+    - chunk: c005
+      snippet: The entire image dataset is included in the Human Protein Atlas v23
+        release
+    - chunk: c005
+      snippet: Protein assemblies in the cell map are also available at the European
+        Bioinformatics Institute (EBI) Protein Complex Portal
+    - chunk: c008
+      snippet: Schaffer, L.V., Hu, M., Qian, G....et al....Multimodal cell maps as
+        a foundation for structural and functional genomics
+    - chunk: c008
+      snippet: Nature...642...222-231 (2025)
+    core_path: external_resources[5].description
+  external_resources[5].external_resources[0]:
+    receipts:
+    - chunk: c008
+      snippet: https://doi.org/10.1038/s41586-025-08878-3
+    core_path: external_resources[5].external_resources[0]
+  external_resources[5].external_resources[1]:
+    receipts:
+    - chunk: c005
+      snippet: The U2OS cell map is available at...https://ndexbio.org...under uuid
+        f693137a-d2d7-11ef-8e41-005056ae3c32
+    core_path: external_resources[5].external_resources[1]
+  external_resources[5].external_resources[2]:
+    receipts:
+    - chunk: c005
+      snippet: AP-MS raw MS files are available at MassIVE under the identifier...MSV000097168
+    core_path: external_resources[5].external_resources[2]
+  external_resources[5].external_resources[3]:
+    receipts:
+    - chunk: c005
+      snippet: SEC-MS raw MS files and search results are available at the Proteome
+        Xchange under the identifier...PXD052362
+    core_path: external_resources[5].external_resources[3]
+  external_resources[5].external_resources[4]:
+    receipts:
+    - chunk: c005
+      snippet: All structural models are available at the ModelArchive Database
+    core_path: external_resources[5].external_resources[4]
+  external_resources[5].external_resources[5]:
+    receipts:
+    - chunk: c003
+      snippet: http://musicmaps.ai/u2os-cellmap/
+    core_path: external_resources[5].external_resources[5]
+  external_resources[5].notes:
+    receipts:
+    - chunk: c005
+      snippet: A Correction to this paper has been published:...https://doi.org/10.1038/s41586-025-09648-x
+    - chunk: c005
+      snippet: was missing from the Acknowledgments section and has now been added
+    core_path: external_resources[5].notes
+  external_resources[5].restrictions[0]:
+    receipts:
+    - chunk: c008
+      snippet: This article is licensed under a Creative Commons Attribution 4.0 International
+        License
+    core_path: external_resources[5].restrictions[0]
+  file_collections[0].compression:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_apms_MDA-MB-468_paclitaxel.zip...ZIP Archive
+    core_path: distributions[0].compression
+  file_collections[0].file_count:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_apms_MDA-MB-468_paclitaxel.zip...cm4ai_apms_MDA-MB-468_vorinostat.zip
+    core_path: distributions[0].file_count
+  file_collections[0].name:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_apms_MDA-MB-468_paclitaxel.zip
+    core_path: distributions[0].name
+  file_collections[0].resources[0].description:
+    receipts:
+    - chunk: c026
+      snippet: 113.3 KB...Published Jun 17, 2026...22 Downloads
+    core_path: distributions[1].description
+  file_collections[0].resources[0].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: 8642317c321126213240af4837030a53'
+    core_path: distributions[1].md5
+  file_collections[0].resources[0].path:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_apms_MDA-MB-468_paclitaxel.zip
+    core_path: distributions[1].path
+  file_collections[0].resources[1].description:
+    receipts:
+    - chunk: c026
+      snippet: 135.8 KB...Published Jun 17, 2026...12 Downloads
+    core_path: distributions[2].description
+  file_collections[0].resources[1].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: b941f28d6f19c563d1222f7aff0c57b6'
+    core_path: distributions[2].md5
+  file_collections[0].resources[1].path:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_apms_MDA-MB-468_vorinostat.zip
+    core_path: distributions[2].path
+  file_collections[1].description:
+    receipts:
+    - chunk: c023
+      snippet: This data set displays the spatial localization of 464 proteins of
+        interest in cells of the breast cancer cell line MDA-MB-468 treated with paclitaxel
+        as imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy
+        in the Lundberg Lab at Stanford University
+    core_path: distributions[3].description
+  file_collections[1].resources[0].description:
+    receipts:
+    - chunk: c026
+      snippet: 3.8 GB...Published Jul 15, 2026
+    core_path: distributions[4].description
+  file_collections[1].resources[0].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: 6c1a86520eec2696ec19444eb8a8b428'
+    core_path: distributions[4].md5
+  file_collections[1].resources[0].path:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_ifimages_MDA-MB-468_paclitaxel.zip
+    core_path: distributions[4].path
+  file_collections[1].resources[1].description:
+    receipts:
+    - chunk: c026
+      snippet: 4.6 GB...Published Jul 15, 2026
+    core_path: distributions[5].description
+  file_collections[1].resources[1].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: 6d066e6b9d762284c6aa5d0b44565568'
+    core_path: distributions[5].md5
+  file_collections[1].resources[1].path:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_ifimages_MDA-MB-468_untreated.zip
+    core_path: distributions[5].path
+  file_collections[1].resources[2].description:
+    receipts:
+    - chunk: c026
+      snippet: 4.2 GB...Published Jul 15, 2026
+    core_path: distributions[6].description
+  file_collections[1].resources[2].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: df79632753989ef23b0a3df6604d4af1'
+    core_path: distributions[6].md5
+  file_collections[1].resources[2].path:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_ifimages_MDA-MB-468_vorinostat.zip
+    core_path: distributions[6].path
+  file_collections[2].description:
+    receipts:
+    - chunk: c023
+      snippet: This dataset was generated by size exclusion chromatography-mass spectroscopy
+        (SEC-MS) following the treatment of vorinostat or paclitaxel on MDA-MB468
+        human breast cancer cells, in the Nevan Krogan laboratory at the University
+        of California San Francisco
+    - chunk: c023
+      snippet: This dataset was generated by size exclusion chromatography-mass spectroscopy
+        (SEC-MS) on undifferentiated KOLF2.1J human induced pluripotent stem cells
+        (hiPSCs)
+    core_path: distributions[7].description
+  file_collections[2].resources[0].description:
+    receipts:
+    - chunk: c026
+      snippet: 171.8 KB...Published Jun 17, 2026
+    core_path: distributions[8].description
+  file_collections[2].resources[0].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: f250bf0b04f516f7462d30432441fc0e'
+    core_path: distributions[8].md5
+  file_collections[2].resources[0].path:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_mass-spec_KOLF2.zip
+    core_path: distributions[8].path
+  file_collections[2].resources[1].description:
+    receipts:
+    - chunk: c026
+      snippet: 93.9 KB...Published Jun 17, 2026
+    core_path: distributions[9].description
+  file_collections[2].resources[1].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: 9aed30b6e8a91b151155316aae657ea5'
+    core_path: distributions[9].md5
+  file_collections[2].resources[1].path:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_mass-spec_MDA-MB-468.zip
+    core_path: distributions[9].path
+  file_collections[3].description:
+    receipts:
+    - chunk: c023
+      snippet: This dataset represents an expressed genome-scale CRISPRi Perturbation
+        Cell Atlas in KOLF2.1J human induced pluripotent stem cells (hiPSCs) mapping
+        transcriptional and fitness phenotypes associated with 11,739 targeted genes
+    - chunk: c023
+      snippet: This dataset represents raw sequence data from an expressed genome-scale
+        CRISPRi Perturbation Cell Atlas
+    core_path: distributions[10].description
+  file_collections[3].resources[0].description:
+    receipts:
+    - chunk: c026
+      snippet: 30.2 KB...Published Jun 17, 2026
+    core_path: distributions[11].description
+  file_collections[3].resources[0].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: 291a362842a176a4fcccaf2cdc1dedde'
+    core_path: distributions[11].md5
+  file_collections[3].resources[0].path:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_perturb-seq_KOLF2_cell_atlas.zip
+    core_path: distributions[11].path
+  file_collections[3].resources[1].description:
+    receipts:
+    - chunk: c026
+      snippet: 73.3 KB...Published Jun 17, 2026
+    core_path: distributions[12].description
+  file_collections[3].resources[1].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: 8bb3f365f01fb8bbbd2ac6a535059305'
+    core_path: distributions[12].md5
+  file_collections[3].resources[1].path:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_perturb-seq_KOLF2_raw_sra.zip
+    core_path: distributions[12].path
+  file_collections[4].description:
+    receipts:
+    - chunk: c020
+      snippet: Release RO-Crate with pointers to sub ro-crates
+    - chunk: c020
+      snippet: The .html provenance graph files require download to view properly.
+        They will not display in the Dataverse preview
+    core_path: distributions[13].description
+  file_collections[4].resources[0].description:
+    receipts:
+    - chunk: c026
+      snippet: 1.1 MB...Published Jun 17, 2026...22 Downloads
+    core_path: distributions[14].description
+  file_collections[4].resources[0].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: 318deb7c5edab0d2fa55e26fcb67b440'
+    core_path: distributions[14].md5
+  file_collections[4].resources[0].path:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_release_metadata.zip
+    core_path: distributions[14].path
+  funders[0].description:
+    receipts:
+    - chunk: c007
+      snippet: the Bridge2AI Program (NIH Common Fund; OT2 OD032742
+    - chunk: c015
+      snippet: 'NIH funding award number: 1OT2OD032742-01'
+    core_path: funders[0].description
+  funders[0].grantor:
+    receipts:
+    - chunk: c018
+      snippet: 'Funding Information...National Institutes of Health: 1OT2OD032742-01'
+    core_path: funders[0].grantor
+  funders[0].grants[0].description:
+    receipts:
+    - chunk: c014
+      snippet: 'Project number: 3OT2OD032742-01S2...Core project number: OT2OD032742'
+    - chunk: c014
+      snippet: 'Fiscal year: 2025...Award amount: 5289382'
+    core_path: funders[0].grants[0].description
+  funders[0].grants[0].grant_number:
+    receipts:
+    - chunk: c012
+      snippet: 1OT2OD032742-01 (Bridge2AI Functional Genomics)
+    core_path: funders[0].grants[0].grant_number
+  funders[0].grants[0].name:
+    receipts:
+    - chunk: c014
+      snippet: 'Title: Bridge2AI: Cell Maps for AI (CM4AI) Data Generation Project'
+    core_path: funders[0].grants[0].name
+  funders[0].source_caveats:
+    receipts:
+    - chunk: c007
+      snippet: the Bridge2AI Program (NIH Common Fund; OT2 OD032742
+    - chunk: c014
+      snippet: 'Project number: 3OT2OD032742-01S2'
+    core_path: funders[0].source_caveats
+  funders[1].grants[0].grant_number:
+    receipts:
+    - chunk: c012
+      snippet: 5U54HG012513-02...(Bridge2AI Bridge Center)
+    core_path: funders[1].grants[0].grant_number
+  funders[2].description:
+    receipts:
+    - chunk: c012
+      snippet: by the Frederick Thomas Fund of the University of...Virginia
+    core_path: funders[2].description
+  human_subject_research.description:
+    receipts:
+    - chunk: c010
+      snippet: they are non-clinical (from tissue...cultures) and are considered to
+        be de-identified
+    core_path: human_subject_research.description
+  human_subject_research.involves_human_subjects:
+    receipts:
+    - chunk: c020
+      snippet: Data Governance & Ethics...Human Subjects
+    core_path: human_subject_research.involves_human_subjects
+  id:
+    receipts:
+    - chunk: c015
+      snippet: 'Source URL: https://cm4ai.org/'
+    core_path: id
+  instances[0].counts:
+    receipts:
+    - chunk: c015
+      snippet: Total Proteins Investigated...7,023
+    core_path: instances[0].counts
+  instances[0].instance_type:
+    receipts:
+    - chunk: c015
+      snippet: Proteomic Mass Spectrometry...Cellular Imaging...Genetic Perturbation
+        via CRISPR/Cas9
+    core_path: instances[0].instance_type
+  instances[1].counts:
+    receipts:
+    - chunk: c015
+      snippet: genes targeted...11,739
+    core_path: instances[1].counts
+  instances[1].description:
+    receipts:
+    - chunk: c018
+      snippet: mapping transcriptional and fitness phenotypes associated with 11,739
+        targeted genes
+    core_path: instances[1].description
+  instances[2].counts:
+    receipts:
+    - chunk: c015
+      snippet: Immunofluorescent Images...53,788
+    core_path: instances[2].counts
+  instances[2].data_topic:
+    receipts:
+    - chunk: c018
+      snippet: protein localization...http://purl.obolibrary.org/obo/GO_0008104
+    core_path: instances[2].data_topic
+  instances[2].label_description:
+    receipts:
+    - chunk: c018
+      snippet: Nuclei were stained with DAPI (blue channel); endoplasmic reticulum
+        with a calreticulin antibody (yellow channel); microtubules with tubulin antibody
+        (red channel); and antibody against protein of interest (green channel)
+    core_path: instances[2].label_description
+  instances[3].counts:
+    receipts:
+    - chunk: c015
+      snippet: Protein Interactions...1,374
+    core_path: instances[3].counts
+  instances[3].data_topic:
+    receipts:
+    - chunk: c018
+      snippet: protein-protein interaction...http://purl.obolibrary.org/obo/NCIT_C18469
+    core_path: instances[3].data_topic
+  instances[4].counts:
+    receipts:
+    - chunk: c020
+      snippet: the spatial localization of 464 proteins of interest
+    - chunk: c023
+      snippet: the spatial localization of 464 proteins of interest
+    core_path: instances[4].counts
+  instances[4].source_caveats:
+    receipts:
+    - chunk: c016
+      snippet: IF images for...523 proteins
+    - chunk: c018
+      snippet: the spatial localization of 563 proteins of interest
+    core_path: instances[4].source_caveats
+  intended_uses[0].examples[0]:
+    receipts:
+    - chunk: c020
+      snippet: AI-ready datasets to support research in functional genomics
+    core_path: intended_uses[0].examples[0]
+  intended_uses[0].examples[1]:
+    receipts:
+    - chunk: c020
+      snippet: AI model training
+    core_path: intended_uses[0].examples[1]
+  intended_uses[0].examples[2]:
+    receipts:
+    - chunk: c020
+      snippet: Cellular process analysis
+    core_path: intended_uses[0].examples[2]
+  intended_uses[0].examples[3]:
+    receipts:
+    - chunk: c020
+      snippet: Cell architectural changes and interactions in presence of specific
+        disease processes, treatment conditions, or genetic perturbations
+    core_path: intended_uses[0].examples[3]
+  intended_uses[0].usage_notes:
+    receipts:
+    - chunk: c016
+      snippet: These datasets focus on chromatin modifiers, metabolic enzymes, and
+        other proteins linked to cancer, neuropsychiatric, and cardiac disorders
+    core_path: intended_uses[0].usage_notes
+  ip_restrictions.restrictions[0]:
+    receipts:
+    - chunk: c012
+      snippet: to these datasets is held by the Regents of the University of...California,
+        except where otherwise indicated
+    - chunk: c012
+      snippet: Raw image data for spatial proteomics is...copyright
+    - chunk: c018
+      snippet: This data is Copyright (c) 2025 The Regents of the University of California
+        except where otherwise noted. Spatial proteomics raw image data is copyright
+        (c) 2025 The Board of Trustees of the Leland Stanford Junior University
+    core_path: ip_restrictions.restrictions[0]
+  ip_restrictions.restrictions[1]:
+    receipts:
+    - chunk: c012
+      snippet: Commercial use requires a separate license negotiation with the copyright...holder
+        (UCSD, Stanford, and/or UCSF depending upon the specific data package in...question)
+    core_path: ip_restrictions.restrictions[1]
+  ip_restrictions.restrictions[2]:
+    receipts:
+    - chunk: c011
+      snippet: This plan balances the openness of the data produced,...with protection
+        of the intellectual property, and supervision and monitoring of potential...efforts
+        at commercialization
+    core_path: ip_restrictions.restrictions[2]
+  is_deidentified.deidentification_details:
+    receipts:
+    - chunk: c010
+      snippet: CM4AI data are distinctive within Bridge2AI in that they are non-clinical
+        (from tissue...cultures) and are considered to be de-identified as they cannot
+        be matched, with current...knowledge, to a human subject
+    core_path: is_deidentified.deidentification_details
+  is_deidentified.identifiable_elements_present:
+    receipts:
+    - chunk: c020
+      snippet: De-identified Samples:...Yes
+    core_path: is_deidentified.identifiable_elements_present
+  keywords[0]:
+    receipts:
+    - chunk: c018
+      snippet: AI, affinity purification, AP-MS, artificial intelligence, breast cancer,
+        Bridge2AI, cardiomyocyte, CM4AI, CRISPR/Cas9
+    core_path: keywords[0]
+  keywords[20]:
+    receipts:
+    - chunk: c018
+      snippet: perturb-seq, perturbation sequencing, protein-protein interaction,
+        protein localization, single-cell RNA sequencing, scRNAseq, SEC-MS, size exclusion
+        chromatography, subcellular imaging, vorinostat
+    core_path: keywords[20]
+  keywords[9]:
+    receipts:
+    - chunk: c018
+      snippet: induced pluripotent stem cell, iPSC, KOLF2.1J, machine learning, mass
+        spectroscopy, MDA-MB-468, neural progenitor cell, NPC, neuron, paclitaxel
+    core_path: keywords[9]
+  known_biases[0].affected_subsets[0]:
+    receipts:
+    - chunk: c020
+      snippet: Data in this release was derived from commercially available de-identified
+        human cell lines
+    core_path: known_biases[0].affected_subsets[0]
+  known_biases[0].bias_description:
+    receipts:
+    - chunk: c020
+      snippet: Data in this release was derived from commercially available de-identified
+        human cell lines...Does not represent all biological variants which may be
+        seen in the population at large
+    core_path: known_biases[0].bias_description
+  known_limitations[0].limitation_description:
+    receipts:
+    - chunk: c020
+      snippet: This is an interim release
+    core_path: known_limitations[0].limitation_description
+  known_limitations[0].scope_impact:
+    receipts:
+    - chunk: c020
+      snippet: The current release is most suitable for bioinformatics analysis of
+        the individual datasets
+    core_path: known_limitations[0].scope_impact
+  known_limitations[1].limitation_description:
+    receipts:
+    - chunk: c020
+      snippet: Computed cell maps not included in this release
+    - chunk: c020
+      snippet: Does not contain predicted cell maps, which will be added in future
+        releases
+    core_path: known_limitations[1].limitation_description
+  known_limitations[2].limitation_description:
+    receipts:
+    - chunk: c020
+      snippet: Protein-protein interaction (SEC-MS), protein localization (IF imaging),
+        and CRISPRi perturbSeq data interrogate sets of proteins which incompletely
+        overlap
+    core_path: known_limitations[2].limitation_description
+  known_limitations[3].limitation_description:
+    receipts:
+    - chunk: c020
+      snippet: Requires domain expertise for meaningful analysis
+    core_path: known_limitations[3].limitation_description
+  known_limitations[4].limitation_description:
+    receipts:
+    - chunk: c015
+      snippet: This repository is under review for potential modification in compliance
+        with Administration directives
+    core_path: known_limitations[4].limitation_description
+  labeling_strategies[0].data_annotation_protocol:
+    receipts:
+    - chunk: c011
+      snippet: cell maps are aligned to...known protein function and pathway resources,
+        including the Gene Ontology (GO)...and...Reactome
+    - chunk: c011
+      snippet: assemblies in the cell maps are annotated using a large...language
+        model (LLM) approach that we developed to name sets of proteins and assign...a
+        name confidence score
+    core_path: labeling_strategies[0].data_annotation_protocol
+  last_updated_on:
+    receipts:
+    - chunk: c026
+      snippet: Published Jul 15, 2026
+    core_path: last_updated_on
+  license:
+    receipts:
+    - chunk: c017
+      snippet: Attribution-NonCommercial-ShareAlike 4.0 International...CC BY-NC-SA
+        4.0
+    core_path: license
+  license_and_use_terms.data_use_permission:
+    receipts:
+    - chunk: c018
+      snippet: License/Data Use Agreement...CC BY-NC-SA 4.0
+    core_path: license_and_use_terms.data_use_permission
+  license_and_use_terms.description:
+    receipts:
+    - chunk: c012
+      snippet: Software comprising the Tools data integration pipeline is available
+        under BSD-3 open...source license in GitHub (for alpha level tools) or in
+        the Zenodo long-term archive
+    core_path: license_and_use_terms.description
+  license_and_use_terms.license_terms:
+    receipts:
+    - chunk: c012
+      snippet: Data packages are licensed under Creative...Commons CC-BY-NC-SA 4.0
+        license terms...which include a requirement for...attribution to the dataset
+        authors and the copyright holding institutions, and citation of...this article
+    - chunk: c017
+      snippet: You must give...appropriate credit...provide a link to the license,
+        and...indicate if changes were made
+    - chunk: c017
+      snippet: copy and redistribute the material in any...medium or format
+    - chunk: c019
+      snippet: Community Norms...as well as good scientific practices expect that
+        proper credit is given via citation. Please use the data citation shown on
+        the dataset page
+    core_path: license_and_use_terms.license_terms
+  license_and_use_terms.source_caveats:
+    receipts:
+    - chunk: c017
+      snippet: This deed highlights only some of the key features and terms of the...actual
+        license. It is not a license and has no legal value
+    core_path: license_and_use_terms.source_caveats
+  maintainers[0].maintainer_details:
+    receipts:
+    - chunk: c010
+      snippet: corresponding author - tideker@health.ucsd.edu
+    - chunk: c018
+      snippet: Point of Contact...Use email button above to contact....Ideker Trey
+        (University of California San Diego)
+    - chunk: c021
+      snippet: Point of Contact...Use email button above to contact....Ideker Trey
+        (University of California San Diego)
+    - chunk: c024
+      snippet: Ideker, Trey (University of California San Diego)
+    - chunk: c027
+      snippet: Point of Contact...Use email button above to contact....Ideker Trey
+        (University of California San Diego)
+    core_path: maintainers[0].maintainer_details
+  maintainers[1].maintainer_details:
+    receipts:
+    - chunk: c015
+      snippet: Project-Related Inquiries:...Swathi Thaker, PhD, UAB, Program Manager...snthaker@uab.edu
+    core_path: maintainers[1].maintainer_details
+  maintainers[2].maintainer_details:
+    receipts:
+    - chunk: c015
+      snippet: Website Support & Updates:...Zhandos Sembay, UAB...zsembay8@uab.edu
+    core_path: maintainers[2].maintainer_details
+  maintainers[3].maintainer_details:
+    receipts:
+    - chunk: c019
+      snippet: Contact University of Virginia Dataverse Support
+    core_path: maintainers[3].maintainer_details
+  name:
+    receipts:
+    - chunk: c015
+      snippet: Cell Maps For AI (CM4AI) - Cell Maps For AI
+    core_path: name
+  notes:
+    receipts:
+    - chunk: c016
+      snippet: 'Curated dataset for undifferentiated (parental) iPSCs and iPSC-derived
+        neural progenitor cells (NPCs), neurons, and cardiomyocytes include:'
+    - chunk: c016
+      snippet: Perturb-seq of...>11,000 genes (whole-genome)
+    - chunk: c016
+      snippet: IF images for...523 proteins
+    - chunk: c016
+      snippet: Perturb-seq of...200 genes
+    core_path: notes
+  page:
+    receipts:
+    - chunk: c015
+      snippet: 'Source URL: https://cm4ai.org/'
+    core_path: page
+  preprocessing_strategies[0].preprocessing_details:
+    receipts:
+    - chunk: c010
+      snippet: Input data streams are integrated via the multi-scale integrated cell
+        (MuSIC) software...pipeline employing deep learning models and community detection
+        algorithms
+    core_path: preprocessing_strategies[0].preprocessing_details
+  preprocessing_strategies[1].preprocessing_details:
+    receipts:
+    - chunk: c011
+      snippet: Downloaded PPI networks are processed using the node2vec deep learning
+        model...to reduce dimensionality, producing a PPI embedding that contains
+        information about...the protein's interactions
+    core_path: preprocessing_strategies[1].preprocessing_details
+  preprocessing_strategies[1].used_software[0].description:
+    receipts:
+    - chunk: c004
+      snippet: used to represent each protein...based on its protein-protein interaction
+    core_path: preprocessing_strategies[1].used_software[0].description
+  preprocessing_strategies[1].used_software[0].name:
+    receipts:
+    - chunk: c004
+      snippet: the node2vec
+    core_path: preprocessing_strategies[1].used_software[0].name
+  preprocessing_strategies[1].used_software[0].url:
+    receipts:
+    - chunk: c004
+      snippet: https://github.com/eliorc/node2vec
+    core_path: preprocessing_strategies[1].used_software[0].url
+  preprocessing_strategies[2].preprocessing_details:
+    receipts:
+    - chunk: c011
+      snippet: The PPI and image embeddings are integrated to obtain a co-embedding
+        for each...protein using contrastive deep learning
+    core_path: preprocessing_strategies[2].preprocessing_details
+  preprocessing_strategies[3].preprocessing_details:
+    receipts:
+    - chunk: c011
+      snippet: The RO-Crates are then sent to the FAIRSCAPE server where they are
+        registered and...assigned persistent, resolvable, globally unique persistent
+        identifiers (PIDs)
+    core_path: preprocessing_strategies[3].preprocessing_details
+  preprocessing_strategies[3].used_software[0].license:
+    receipts:
+    - chunk: c012
+      snippet: It is available under open...source MIT License
+    core_path: preprocessing_strategies[3].used_software[0].license
+  prohibited_uses[0].description:
+    receipts:
+    - chunk: c020
+      snippet: These laboratory data are not to be used in clinical decision-making
+        or in any context involving patient care without appropriate regulatory oversight
+        and approval
+    core_path: prohibited_uses[0].description
+  prohibited_uses[0].prohibition_reason:
+    receipts:
+    - chunk: c020
+      snippet: Prohibited Uses...These laboratory data are not to be used in clinical
+        decision-making
+    core_path: prohibited_uses[0].prohibition_reason
+  prohibited_uses[1].description:
+    receipts:
+    - chunk: c017
+      snippet: You may not use the material for...commercial purposes
+    core_path: prohibited_uses[1].description
+  prohibited_uses[1].prohibition_reason:
+    receipts:
+    - chunk: c012
+      snippet: Commercial use requires a separate license negotiation with the copyright...holder
+    core_path: prohibited_uses[1].prohibition_reason
+  prohibited_uses[2].description:
+    receipts:
+    - chunk: c017
+      snippet: If you remix, transform, or build...upon the material, you must distribute
+        your contributions under...the...same license...as the original
+    - chunk: c017
+      snippet: You may not apply...legal terms or...technological measures...that
+        legally restrict others from doing anything the license...permits
+    core_path: prohibited_uses[2].description
+  publisher:
+    receipts:
+    - chunk: c026
+      snippet: Clark T...https://ror.org/0153tk833
+    core_path: publisher
+  purposes[0].response:
+    receipts:
+    - chunk: c010
+      snippet: Its overarching mission is to...produce ethical, AI-ready datasets
+        of cell architecture, inferred from multimodal data...collected for human
+        cell lines, to enable transformative biomedical AI research
+    core_path: purposes[0].response
+  purposes[1].response:
+    receipts:
+    - chunk: c010
+      snippet: CM4AI's objective is to deliver machine-readable hierarchical maps
+        of cell architecture...as AI-Ready data produced from multimodal interrogation
+        of 100 chromatin modifiers...and 100 metabolic enzymes involved in cancer,
+        neuropsychiatric, and cardiac disorders
+    core_path: purposes[1].response
+  purposes[2].response:
+    receipts:
+    - chunk: c014
+      snippet: the CM4AI data generation...project seeks to map the spatiotemporal
+        architecture of human cells and use these...maps toward the grand challenge
+        of interpretable genotype-phenotype learning
+    core_path: purposes[2].response
+  raw_data_sources[0].source_description:
+    receipts:
+    - chunk: c011
+      snippet: PPI networks for the cell line and conditions are downloaded from the
+        Krogan...Laboratory's deposition archive
+    core_path: raw_data_sources[0].source_description
+  raw_data_sources[1].source_description:
+    receipts:
+    - chunk: c011
+      snippet: IF images for the cell line and conditions are downloaded from the
+        Lundberg...Laboratory's deposition archive
+    core_path: raw_data_sources[1].source_description
+  raw_data_sources[2].access_details:
+    receipts:
+    - chunk: c018
+      snippet: The data will be uploaded to Pride when available
+    core_path: raw_data_sources[2].access_details
+  regulatory_restrictions.description:
+    receipts:
+    - chunk: c018
+      snippet: File Access...Public
+    - chunk: c020
+      snippet: De-identified Samples:...FDA Regulated
+    core_path: regulatory_restrictions.description
+  related_datasets[0].description:
+    receipts:
+    - chunk: c018
+      snippet: Clark T, Parker J, Schaffer L, Obernier K, Al Manir S, Churas CP
+    core_path: related_datasets[0].description
+  related_datasets[0].target_dataset:
+    receipts:
+    - chunk: c018
+      snippet: 'Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell
+        Architecture from Disease-Relevant Cell Lines. 2024.doi: http://doi.org/10.1101/2024.05.21.589311'
+    core_path: related_datasets[0].target_dataset
+  related_datasets[1].description:
+    receipts:
+    - chunk: c018
+      snippet: Nourreddine S, Doctor Y, Dailamy A, Forget A, Lee YH, Chinn B, Khaliq
+        H, Polacco B
+    core_path: related_datasets[1].description
+  related_datasets[1].target_dataset:
+    receipts:
+    - chunk: c018
+      snippet: 'A PERTURBATION CELL ATLAS OF HUMAN INDUCED PLURIPOTENT STEM CELLS.
+        bioRxiv. 2024 Nov 4;2024.11.03.621734. PMCID: PMC11580897'
+    core_path: related_datasets[1].target_dataset
+  related_datasets[2].description:
+    receipts:
+    - chunk: c012
+      snippet: Clark T, Mohan J, Schaffer L, Obernier K, et al. Cell Maps for Artificial...Intelligence
+        - Data Release", https://doi.org/10.18130/V3/DXWOS5, University of...Virginia
+        Dataverse, V1
+    - chunk: c016
+      snippet: Archive...May 2024 Data Release
+    core_path: related_datasets[2].description
+  resources[0].created_by:
+    receipts:
+    - chunk: c027
+      snippet: Depositor...Niestroy, Justin
+    core_path: resources[0].created_by
+  resources[0].created_on:
+    receipts:
+    - chunk: c027
+      snippet: Data Creation Date...2025-02-27
+    core_path: resources[0].created_on
+  resources[0].description:
+    receipts:
+    - chunk: c026
+      snippet: AP-MS data for MDA-MB-468 breast cancer cells + treatment
+    - chunk: c026
+      snippet: 181 Downloads
+    core_path: resources[0].description
+  resources[0].doi:
+    receipts:
+    - chunk: c026
+      snippet: Persistent Identifier...doi:10.18130/V3/HIGT4C
+    core_path: resources[0].doi
+  resources[0].issued:
+    receipts:
+    - chunk: c026
+      snippet: Publication Date...2026-06-17
+    core_path: resources[0].issued
+  resources[0].license:
+    receipts:
+    - chunk: c026
+      snippet: License/Data Use Agreement...CC BY-NC-SA 4.0
+    core_path: resources[0].license
+  resources[0].name:
+    receipts:
+    - chunk: c016
+      snippet: June 2026 Data Release (Beta)
+    - chunk: c026
+      snippet: Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta)
+    core_path: resources[0].name
+  resources[0].page:
+    receipts:
+    - chunk: c026
+      snippet: 'Source URL: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C'
+    core_path: resources[0].page
+  resources[0].source_caveats:
+    receipts:
+    - chunk: c016
+      snippet: Released on:...June 17, 2025
+    core_path: resources[0].source_caveats
+  resources[0].status:
+    receipts:
+    - chunk: c026
+      snippet: June 2026 Data Release (Beta)
+    core_path: resources[0].status
+  resources[0].title:
+    receipts:
+    - chunk: c026
+      snippet: Title...Cell Maps for Artificial Intelligence - June 2026 Data Release
+        (Beta)
+    core_path: resources[0].title
+  resources[0].total_file_count:
+    receipts:
+    - chunk: c026
+      snippet: 1 to 10 of 10 Files
+    core_path: resources[0].total_file_count
+  resources[0].version:
+    receipts:
+    - chunk: c026
+      snippet: Version 2.0
+    core_path: resources[0].version
+  resources[1].created_by:
+    receipts:
+    - chunk: c024
+      snippet: Depositor...Niestroy, Justin
+    core_path: resources[1].created_by
+  resources[1].created_on:
+    receipts:
+    - chunk: c024
+      snippet: Data Creation Date...2025-02-27
+    core_path: resources[1].created_on
+  resources[1].description:
+    receipts:
+    - chunk: c023
+      snippet: CM4AI is generating multi-modal data including protein-protein interaction
+        (PPI), spatial localization, and genetic perturbation data in MDA-MB-468 breast
+        cancer cells (+/- paclitaxel or vorinostat) and iPSCs (+/- differentiation)
+    - chunk: c023
+      snippet: 405 Downloads
+    - chunk: c023
+      snippet: cm4ai_mass-spec_KOLF2.zip...cm4ai_mass-spec_MDA-MB-468.zip...cm4ai_perturb-seq_KOLF2_cell_atlas.zip
+    core_path: resources[1].description
+  resources[1].doi:
+    receipts:
+    - chunk: c023
+      snippet: Persistent Identifier...doi:10.18130/V3/K7TGEM
+    core_path: resources[1].doi
+  resources[1].issued:
+    receipts:
+    - chunk: c023
+      snippet: Publication Date...2025-10-31
+    core_path: resources[1].issued
+  resources[1].license:
+    receipts:
+    - chunk: c023
+      snippet: License/Data Use Agreement...CC BY-NC-SA 4.0
+    core_path: resources[1].license
+  resources[1].name:
+    receipts:
+    - chunk: c023
+      snippet: Cell Maps for Artificial Intelligence - October 2025 Data Release (Beta)
+    core_path: resources[1].name
+  resources[1].page:
+    receipts:
+    - chunk: c023
+      snippet: 'Source URL: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/K7TGEM'
+    core_path: resources[1].page
+  resources[1].total_file_count:
+    receipts:
+    - chunk: c023
+      snippet: 1 to 8 of 8 Files
+    core_path: resources[1].total_file_count
+  resources[1].version:
+    receipts:
+    - chunk: c023
+      snippet: Version 2.1
+    core_path: resources[1].version
+  resources[2].created_by:
+    receipts:
+    - chunk: c021
+      snippet: Depositor...Niestroy, Justin
+    core_path: resources[2].created_by
+  resources[2].created_on:
+    receipts:
+    - chunk: c021
+      snippet: Data Creation Date...2025-02-27
+    core_path: resources[2].created_on
+  resources[2].description:
+    receipts:
+    - chunk: c020
+      snippet: This revision includes adding RGB immunofluorescent images, corrections
+        to ro-crate metadata, and changes to naming conventions
+    - chunk: c020
+      snippet: 256 Downloads
+    - chunk: c020
+      snippet: HTML datasheet summarizing key release information
+    core_path: resources[2].description
+  resources[2].doi:
+    receipts:
+    - chunk: c020
+      snippet: https://doi.org/10.18130/V3/F3TD5R
+    core_path: resources[2].doi
+  resources[2].issued:
+    receipts:
+    - chunk: c020
+      snippet: Publication Date...2025-07-01
+    core_path: resources[2].issued
+  resources[2].license:
+    receipts:
+    - chunk: c020
+      snippet: License/Data Use Agreement...CC BY-NC-SA 4.0
+    core_path: resources[2].license
+  resources[2].name:
+    receipts:
+    - chunk: c020
+      snippet: Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)
+    core_path: resources[2].name
+  resources[2].page:
+    receipts:
+    - chunk: c020
+      snippet: 'Source URL: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/F3TD5R'
+    core_path: resources[2].page
+  resources[2].total_file_count:
+    receipts:
+    - chunk: c020
+      snippet: 1 to 10 of 21 Files
+    core_path: resources[2].total_file_count
+  resources[2].version:
+    receipts:
+    - chunk: c020
+      snippet: Version 2.1
+    core_path: resources[2].version
+  resources[3].created_by:
+    receipts:
+    - chunk: c018
+      snippet: Depositor...Niestroy, Justin
+    core_path: resources[3].created_by
+  resources[3].created_on:
+    receipts:
+    - chunk: c018
+      snippet: Data Creation Date...2025-02-27
+    core_path: resources[3].created_on
+  resources[3].description:
+    receipts:
+    - chunk: c018
+      snippet: This Beta release includes perturb-seq data in undifferentiated KOLF2.1J
+        iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs,
+        neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells
+        in the presence and absence of chemotherapy (vorinostat and paclitaxel)
+    - chunk: c018
+      snippet: 302 Downloads
+    - chunk: c018
+      snippet: This dataset represents raw sequence data from an expressed genome-scale
+        CRISPRi Perturbation Cell Atlas
+    core_path: resources[3].description
+  resources[3].doi:
+    receipts:
+    - chunk: c018
+      snippet: Persistent Identifier...doi:10.18130/V3/B35XWX
+    core_path: resources[3].doi
+  resources[3].issued:
+    receipts:
+    - chunk: c018
+      snippet: Publication Date...2025-03-03
+    core_path: resources[3].issued
+  resources[3].license:
+    receipts:
+    - chunk: c018
+      snippet: License/Data Use Agreement...CC BY-NC-SA 4.0
+    core_path: resources[3].license
+  resources[3].name:
+    receipts:
+    - chunk: c018
+      snippet: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+    core_path: resources[3].name
+  resources[3].page:
+    receipts:
+    - chunk: c018
+      snippet: 'Source URL: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX'
+    core_path: resources[3].page
+  resources[3].source_caveats:
+    receipts:
+    - chunk: c018
+      snippet: University of Virginia Dataverse, V1
+    core_path: resources[3].source_caveats
+  resources[3].title:
+    receipts:
+    - chunk: c018
+      snippet: Title...Cell Maps for Artificial Intelligence - March 2025 Data Release
+        (Beta)
+    core_path: resources[3].title
+  resources[3].total_file_count:
+    receipts:
+    - chunk: c018
+      snippet: 1 to 6 of 6 Files
+    core_path: resources[3].total_file_count
+  resources[3].version:
+    receipts:
+    - chunk: c018
+      snippet: Version 1.4
+    core_path: resources[3].version
+  retention_limit.retention_details:
+    receipts:
+    - chunk: c020
+      snippet: Long term preservation in the University of Virginia Dataverse, supported
+        by committed institutional funds
+    core_path: retention_limit.retention_details
+  status:
+    receipts:
+    - chunk: c026
+      snippet: Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta)
+    core_path: status
+  tasks[0].response:
+    receipts:
+    - chunk: c014
+      snippet: These data will broadly stimulate research and...development in "visible"
+        machine learning systems informed by multi-scale cell and...tissue architecture
+    core_path: tasks[0].response
+  tasks[1].response:
+    receipts:
+    - chunk: c010
+      snippet: Cell maps provide a foundation for...downstream applications in human
+        genomics, including interpretation of genetic variants...and mutations
+    core_path: tasks[1].response
+  third_party_sharing[0].description:
+    receipts:
+    - chunk: c010
+      snippet: Its datasets and software are available to the research community under...minimally
+        restrictive terms consistent with ethical guidelines, researcher attribution,
+        and...research integrity
+    - chunk: c027
+      snippet: SEC-MS data in MDA-MB-468 breast cancer cells (+/- treatment):...MassIVE
+        Repository
+    core_path: third_party_sharing[0].description
+  third_party_sharing[0].is_shared:
+    receipts:
+    - chunk: c027
+      snippet: 'Access external data resources related to this dataset:'
+    core_path: third_party_sharing[0].is_shared
+  title:
+    receipts:
+    - chunk: c010
+      snippet: 'Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell
+        Architecture'
+    core_path: title
+  total_file_count:
+    receipts:
+    - chunk: c026
+      snippet: 1 to 10 of 10 Files
+    core_path: total_file_count
+  updates.frequency:
+    receipts:
+    - chunk: c016
+      snippet: CM4AI releases data quarterly, ensuring continuous updates to the cell
+        maps and input data streams
+    core_path: updates.frequency
+  updates.update_details:
+    receipts:
+    - chunk: c012
+      snippet: Software packages will be versioned as the project progresses, and
+        the version used to...produce each dataset will be referenced in the dataset's
+        metadata
+    - chunk: c020
+      snippet: Dataset will be regularly updated and augmented through the end of
+        the project in November 2026...Updates on a quarterly basis
+    core_path: updates.update_details
+  version_access.latest_version_doi:
+    receipts:
+    - chunk: c026
+      snippet: https://doi.org/10.18130/V3/HIGT4C
+    core_path: version_access.latest_version_doi
+  version_access.version_details:
+    receipts:
+    - chunk: c011
+      snippet: all RO-Crates for the current release are...available in the University
+        of...Virginia's LibraData data archive, an instance of Harvard's Dataverse
+    - chunk: c021
+      snippet: Version Differences Details...Please select two versions to view the
+        differences
+    core_path: version_access.version_details
+  version_access.versions_available[0]:
+    receipts:
+    - chunk: c016
+      snippet: Archive...May 2024 Data Release...March 2025 Data Release...June 2025
+        Data Release...October 2025 Data Release
+    core_path: version_access.versions_available[0]

@@ -1,0 +1,898 @@
+bundle: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+bundle_md5: 1dfd34e5610fed7c22bea1f09c0bc60c
+manifest: data/preprocessed/chunks/CM4AI_chunks.yaml
+label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+project: CM4AI
+chunks:
+- id: c001
+  source: <preamble>
+  lines:
+  - 1
+  - 24
+  status: nothing_relevant
+  reason: Concatenation preamble and table of contents. Lists the ten source filenames and the selection
+    manifest path; states no fact about the dataset itself.
+- id: c002
+  source: www_nature_com_articles-s41586-025-08878-3_row2.txt
+  lines:
+  - 25
+  - 424
+  status: extracted
+  extracted:
+  - slot: external_resources[1].description
+    snippet: we construct a global map of human subcellular architecture through joint measurement of
+      biophysical interactions and immunofluorescence images for over 5,100 proteins in U2OS osteosarcoma
+      cells
+  - slot: external_resources[1].name
+    snippet: Multimodal cell maps as a foundation for structural and functional genomics
+  - slot: external_resources[1].description
+    snippet: a total of 5,147 proteins was well represented in both modalities
+  - slot: external_resources[1].description
+    snippet: A total of 2,174 proteins were successfully tagged and isolated from U2OS whole-proteome
+      extracts using affinity purification
+  - slot: external_resources[1].description
+    snippet: we amassed a large collection of confocal images of U2OS cells stained with IF antibodies
+      against each of 10,348 proteins (20,660 images total
+  - slot: external_resources[1].description
+    snippet: we adopted a self-supervised embedding approach
+  - slot: external_resources[3].description
+    snippet: The associated Cell Visualization Portal and Mapping Toolkit provide a reference platform
+      for structural and functional cell biology.
+  - slot: external_resources[1].description
+    snippet: identified a hierarchy of 275 discrete protein assemblies
+  - slot: external_resources[1].description
+    snippet: to yield a total of 36,842 interactions among 7,543 proteins
+- id: c003
+  source: www_nature_com_articles-s41586-025-08878-3_row2.txt
+  lines:
+  - 425
+  - 824
+  status: extracted
+  extracted:
+  - slot: external_resources[3].external_resources
+    snippet: http://musicmaps.ai/u2os-cellmap/
+  - slot: external_resources[4].external_resources
+    snippet: https://github.com/idekerlab/cellmaps_pipeline
+  - slot: external_resources[1].description
+    snippet: we subjected triplicate cultures of U2OS cells to SEC–MS of 40 separate chromatography fractions
+  - slot: machine_annotation_tools[0].tool_descriptions
+    snippet: This process was greatly informed by suggestions from OpenAI’s pre-trained transformer (GPT-4)
+  - slot: external_resources[4].description
+    snippet: we also developed the Cell Mapping Toolkit
+  - slot: preprocessing_strategies[0].used_software[0]
+    snippet: https://github.com/idekerlab/cellmaps_pipeline
+  - slot: external_resources[3].name
+    snippet: the companion Multiscale Integrated Cell visualization portal
+  - slot: external_resources[4].name
+    snippet: we also developed the Cell Mapping Toolkit
+- id: c004
+  source: www_nature_com_articles-s41586-025-08878-3_row2.txt
+  lines:
+  - 825
+  - 1224
+  status: extracted
+  extracted:
+  - slot: external_resources[1].description
+    snippet: C-terminal HA-Flag-tagged DNA constructs targeting each of 2,174 bait proteins were constructed
+      using clones from the human ORFeome library
+  - slot: external_resources[1].description
+    snippet: The samples were then separated into 40 fractions at 15 s per fraction using the 1290 Series
+      semi-preparative HPLC (Agilent Technologies) system
+  - slot: preprocessing_strategies[0].preprocessing_details
+    snippet: we applied DenseNet-121, a convolutional neural network pre-trained for object recognition
+      in protein IF confocal images
+  - slot: machine_annotation_tools[0].tools
+    snippet: to guide the GPT-4 model
+  - slot: preprocessing_strategies[0].used_software[1]
+    snippet: https://github.com/eliorc/node2vec
+- id: c005
+  source: www_nature_com_articles-s41586-025-08878-3_row2.txt
+  lines:
+  - 1225
+  - 1624
+  status: extracted
+  extracted:
+  - slot: external_resources[1].external_resources
+    snippet: https://doi.org/10.1038/s41586-025-09648-x
+  - slot: external_resources[1].description
+    snippet: was missing from the Acknowledgments section and has now been added to the HTML and PDF versions
+      of the article.
+  - slot: related_datasets[0].description
+    snippet: The U2OS cell map is available at
+  - slot: related_datasets[0].description
+    snippet: under uuid f693137a-d2d7-11ef-8e41-005056ae3c32
+  - slot: external_resources[1].description
+    snippet: AP–MS raw MS files are available at MassIVE under the identifier
+  - slot: external_resources[1].description
+    snippet: MSV000097168
+  - slot: external_resources[1].description
+    snippet: SEC–MS raw MS files and search results are available at the Proteome Xchange under the identifier
+  - slot: external_resources[1].description
+    snippet: PXD052362
+  - slot: external_resources[1].description
+    snippet: The entire image dataset is included in the Human Protein Atlas v23 release.
+  - slot: external_resources[1].description
+    snippet: All structural models are available at the ModelArchive Database
+  - slot: external_resources[4].description
+    snippet: implements a series of Python packages to execute the end-to-end pipeline described herein
+  - slot: related_datasets[0]
+    snippet: The U2OS cell map is available at
+  - slot: related_datasets[0].target_dataset
+    snippet: https://ndexbio.org
+- id: c006
+  source: www_nature_com_articles-s41586-025-08878-3_row2.txt
+  lines:
+  - 1625
+  - 2024
+  status: nothing_relevant
+  reason: Bibliography of the Nature article (references 14 through 89). Citations to third-party literature
+    only; states no fact about the CM4AI dataset, its composition, distribution, licensing, governance
+    or provenance.
+- id: c007
+  source: www_nature_com_articles-s41586-025-08878-3_row2.txt
+  lines:
+  - 2025
+  - 2424
+  status: extracted
+  extracted:
+  - slot: funders[0].description
+    snippet: the Bridge2AI Program (NIH Common Fund; OT2 OD032742; T.I., E.L., A.S.)
+  - slot: external_resources[1].description
+    snippet: OT2 OD032742
+  - slot: external_resources[1].description
+    snippet: the Cancer Cell Map Initiative (NCI Center for Cancer Systems Biology; U54 CA274502; T.I.,
+      E.L., A.S.)
+  - slot: external_resources[1].description
+    snippet: We acknowledge funding from Schmidt Futures (T.I., E.L.)
+- id: c008
+  source: www_nature_com_articles-s41586-025-08878-3_row2.txt
+  lines:
+  - 2425
+  - 2824
+  status: extracted
+  extracted:
+  - slot: external_resources[1].description
+    snippet: L.V.S., M.H., E.L. and T.I. designed the study.
+  - slot: external_resources[1].description
+    snippet: E.L.H., L.P.V., J.W.H. and S.P.G. generated and analysed the AP–MS data.
+  - slot: external_resources[1].description
+    snippet: K.-M.M. and L.J.F. generated and analysed the SEC–MS data.
+  - slot: external_resources[1].external_resources
+    snippet: https://doi.org/10.1038/s41586-025-08878-3
+  - slot: external_resources[1].name
+    snippet: Multimodal cell maps as a foundation for structural and functional genomics.
+  - slot: external_resources[1].description
+    snippet: Supplementary Tables 1–10.
+  - slot: external_resources[1].description
+    snippet: 18 assemblies that did not have sufficient data in both cell lines were removed.
+  - slot: external_resources[1].restrictions
+    snippet: The images or other third party material in this article are included in the article’s Creative
+      Commons licence, unless indicated otherwise in a credit line to the material.
+- id: c009
+  source: www_nature_com_articles-s41586-025-08878-3_row2.txt
+  lines:
+  - 2825
+  - 2893
+  status: nothing_relevant
+  reason: nature.com site footer boilerplate (journal navigation, advertising, cookie and privacy links,
+    Springer Nature copyright line). No fact about the CM4AI dataset.
+- id: c010
+  source: biorxiv_2024.05.21.589311v1_row4.txt
+  lines:
+  - 2894
+  - 3293
+  status: extracted
+  extracted:
+  - slot: external_resources[0].name
+    snippet: 'Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture'
+  - slot: description
+    snippet: CM4AI is the Functional Genomics Data Generation Project in the U.S.
+  - slot: purposes[0].response
+    snippet: produce ethical, AI-ready datasets of cell architecture, inferred from multimodal data
+  - slot: creators[0].principal_investigator
+    snippet: corresponding author – tideker@health.ucsd.edu; † co-corresponding authors
+  - slot: funders[0].description
+    snippet: Cell Maps for Artificial Intelligence (CM4AI) is an NIH-funded Bridge to Artificial
+  - slot: subsets[0]
+    snippet: CM4AI are treated (with paclitaxel and vorinostat) versus untreated MDA-MB-468
+  - slot: subsets[0].description
+    snippet: MDA-MB-468 (RRID:CVCL_0419) is a triple negative breast cancer cell line established
+  - slot: subsets[1].description
+    snippet: The KOLF2.1J (RRID:CVCL_B5P3) iPSCs cell line was derived from a healthy male
+  - slot: is_deidentified.deidentification_details
+    snippet: cultures) and are considered to be de-identified as they cannot be matched, with current
+  - slot: conforms_to
+    snippet: datasets in RO-Crate format3,4 using an extended, client-server version of the
+  - slot: collection_mechanisms[4].mechanism_details
+    snippet: we performed single-cell CRISPR screens perturbing 100 chromatin
+  - slot: preprocessing_strategies[0].preprocessing_details
+    snippet: Input data streams are integrated via the multi-scale integrated cell (MuSIC) software
+  - slot: tasks[0].response
+    snippet: deliver machine-readable hierarchical maps of cell architecture
+  - slot: license_and_use_terms.license_terms
+    snippet: Its datasets and software are available to the research community under
+  - slot: subpopulations[0]
+    snippet: from a metastatic site pleural effusion of a 51-year-old black female with a metastatic
+  - slot: subpopulations[0].distribution
+    snippet: The KOLF2.1J (RRID:CVCL_B5P3) iPSCs cell line was derived from a healthy male
+  - slot: sensitive_elements[0]
+    snippet: are considered to be de-identified as they cannot be matched, with current
+  - slot: acquisition_methods[0]
+    snippet: both of which have been ethically sourced
+  - slot: purposes[2].response
+    snippet: establishing FAIRness including rich
+  - slot: collection_mechanisms[1].mechanism_details
+    snippet: We have endogenously tagged 17 genes in MDA-MB-468 and
+  - slot: collection_mechanisms[2].mechanism_details
+    snippet: 72/100 chromatin modifiers, with 52 of them being integral components of protein
+  - slot: third_party_sharing[0]
+    snippet: Its datasets and software are available to the research community under
+  - slot: external_resources[0].description
+    snippet: this version posted May 24, 2024.
+  - slot: external_resources[0].external_resources
+    snippet: https://doi.org/10.1101/2024.05.21.589311
+  - slot: sampling_strategies[0]
+    snippet: multimodal interrogation of 100 chromatin modifiers
+  - slot: sampling_strategies[0].strategies
+    snippet: we proposed to map the spatial subcellular organization of key chromatin
+- id: c011
+  source: biorxiv_2024.05.21.589311v1_row4.txt
+  lines:
+  - 3294
+  - 3693
+  status: extracted
+  extracted:
+  - slot: preprocessing_strategies[0].preprocessing_details
+    snippet: Community detection is performed based on the all-by-all similarities of pairs of
+  - slot: preprocessing_strategies[0].preprocessing_details
+    snippet: IF images are processed using a Human Protein Atlas deep learning model32 to
+  - slot: conforms_to_standard
+    snippet: an RO-Crate package with the datasets, metadata, and software
+  - slot: distribution_formats[0].description
+    snippet: Virginia’s LibraData data archive, an instance of Harvard’s Dataverse.
+  - slot: data_governance.access_review_process
+    snippet: develop a plan for ethical preparation, licensing, dissemination, and Data Access
+  - slot: distribution_formats[2].access_urls
+    snippet: the CM4AI web portal (http://www.cm4ai.org)
+  - slot: version_access.version_details
+    snippet: The PID system currently in use is the ARK scheme42
+  - slot: external_resources[5].description
+    snippet: Both the client-side and sever-side FAIRSCAPE packages are PIP-installable and are
+  - slot: acquisition_methods[0].acquisition_details
+    snippet: 'All of these data were generated in ethically sourced breast cancer cells (Pillar:'
+  - slot: labeling_strategies[0].data_annotation_protocol
+    snippet: assemblies in the cell maps are annotated using a large
+  - slot: data_collectors[2]
+    snippet: The Data Module completed parallel maps of protein-protein interactions, protein
+  - slot: preprocessing_strategies[1].preprocessing_details
+    snippet: The RO-Crates are then sent to the FAIRSCAPE server where they are registered and
+  - slot: distribution_formats[2].description
+    snippet: Teaming supports open dissemination of CM4AI-generated data, maps, and tools via
+  - slot: ip_restrictions.description
+    snippet: This plan balances the openness of the data produced,
+  - slot: data_governance.stewardship_roles
+    snippet: The Standards Module of CM4AI is responsible for AI-Readiness packaging of data,
+- id: c012
+  source: biorxiv_2024.05.21.589311v1_row4.txt
+  lines:
+  - 3694
+  - 4093
+  status: extracted
+  extracted:
+  - slot: license
+    snippet: Commons CC-BY-NC-SA 4.0 license terms31, which include a requirement for
+  - slot: license_and_use_terms.description
+    snippet: Commercial use requires a separate license negotiation with the copyright
+  - slot: license_and_use_terms.description
+    snippet: holder (UCSD, Stanford, and/or UCSF depending upon the specific data package in
+  - slot: data_governance.committee_name
+    snippet: A Data Access Committee will supervise ethical matters related to dataset
+  - slot: resources[0].doi
+    snippet: Intelligence - Data Release", https://doi.org/10.18130/V3/DXWOS5, University of
+  - slot: distribution_formats[0].description
+    snippet: LibraData is the University of Virginia’s instance of Dataverse, an NIH-approved
+  - slot: ip_restrictions.restrictions
+    snippet: Copyright © 2024 to these datasets is held by the Regents of the University of
+  - slot: ip_restrictions.restrictions
+    snippet: copyright © 2024 by The Board of Trustees of the Leland Stanford Junior University.
+  - slot: funders[0].grants[1].grant_number
+    snippet: 1OT2OD032742-01 (Bridge2AI Functional Genomics) and 5U54HG012513-02
+  - slot: funders[1]
+    snippet: the Frederick Thomas Fund of the University of
+  - slot: external_resources[4].description
+    snippet: Software comprising the Tools data integration pipeline is available under BSD-3 open
+  - slot: intended_uses[0].usage_notes
+    snippet: attribution to the dataset authors and the copyright holding institutions, and citation of
+  - slot: preprocessing_strategies[1].used_software[0]
+    snippet: The FAIRSCAPE AI-readiness framework is described with a tutorial and instructions
+  - slot: existing_uses[0].examples
+    snippet: These data were also made available at our CodeFest in March 2024, accompanied by
+  - slot: data_governance.description
+    snippet: A Data Access Committee will supervise ethical matters related to dataset
+  - slot: maintainers[2].maintainer_details
+    snippet: LibraData is the University of Virginia’s instance of Dataverse, an NIH-approved
+  - slot: external_resources[5].name
+    snippet: The FAIRSCAPE AI-readiness framework is described with a tutorial and instructions
+  - slot: external_resources[5].external_resources
+    snippet: https://fairscape.github.io
+  - slot: external_resources[6]
+    snippet: The open source Integrative Modeling Platform (IMP) package is available at
+  - slot: external_resources[6].external_resources
+    snippet: http://integrativemodeling.org
+  - slot: resources[0]
+    snippet: Intelligence - Data Release", https://doi.org/10.18130/V3/DXWOS5, University of
+  - slot: resources[0].version
+    snippet: Virginia Dataverse, V1
+  - slot: resources[0].license
+    snippet: the Creative Commons Attribution Non-Commercial Share-Alike International 4.0
+  - slot: resources[0].description
+    snippet: Clark T, Mohan J, Schaffer L, Obernier K, et al. Cell Maps for Artificial
+  - slot: resources[0].publisher
+    snippet: LibraData is the University of Virginia’s instance of Dataverse, an NIH-approved
+- id: c013
+  source: biorxiv_2024.05.21.589311v1_row4.txt
+  lines:
+  - 4094
+  - 4182
+  status: nothing_relevant
+  reason: Tail of the preprint bibliography (references 33-45) plus repeated bioRxiv page-footer stamps.
+    Third-party citations only; no fact about the CM4AI dataset beyond what c010-c012 already receipt.
+- id: c014
+  source: reporter_nih_gov_project-details-11211616_row7.txt
+  lines:
+  - 4183
+  - 4238
+  status: extracted
+  extracted:
+  - slot: funders[0].description
+    snippet: 'Core project number: OT2OD032742'
+  - slot: funders[0].grants[0].description
+    snippet: 'Project number: 3OT2OD032742-01S2'
+  - slot: creators[0].principal_investigator
+    snippet: 'Principal investigator: IDEKER, TREY'
+  - slot: funders[0].description
+    snippet: 'Organization: UNIVERSITY OF CALIFORNIA, SAN DIEGO'
+  - slot: collection_timeframes[0].start_date
+    snippet: 'Project start: 2022-09-01T00:00:00'
+  - slot: collection_timeframes[0].end_date
+    snippet: 'Project end: 2026-08-31T00:00:00'
+  - slot: purposes[1].response
+    snippet: project seeks to map the spatiotemporal architecture of human cells and use these
+  - slot: addressing_gaps[0].response
+    snippet: predicting phenotypes from genotypes without understanding the mechanisms by
+  - slot: tasks[1].response
+    snippet: development in "visible" machine learning systems informed by multi-scale cell and
+  - slot: keywords
+    snippet: Bridge to Artificial Intelligence;CRISPR/Cas technology;Cells;Cellular Structures
+  - slot: funders[0].description
+    snippet: 'Award amount: 5289382'
+  - slot: collection_timeframes[0]
+    snippet: 'Project start: 2022-09-01T00:00:00'
+  - slot: future_use_impacts[0]
+    snippet: These data will broadly stimulate research and
+- id: c015
+  source: cm4ai_org_row10.txt
+  lines:
+  - 4239
+  - 4359
+  status: extracted
+  extracted:
+  - slot: name
+    snippet: Cell Maps For AI (CM4AI)
+  - slot: instances[1]
+    snippet: Protein Interactions...1,374
+  - slot: instances[0]
+    snippet: Immunofluorescent Images...53,788
+  - slot: instances[3]
+    snippet: Total Proteins Investigated...7,023
+  - slot: instances[2]
+    snippet: genes targeted...11,739
+  - slot: description
+    snippet: Data volume...21.4 TB
+  - slot: maintainers[0]
+    snippet: Swathi Thaker, PhD, UAB, Program Manager
+  - slot: maintainers[0].maintainer_details
+    snippet: 'Project-Related Inquiries:'
+  - slot: maintainers[1]
+    snippet: Website Support & Updates:...Zhandos Sembay, UAB
+  - slot: funders[0].grants[0].grant_number
+    snippet: 'NIH funding award number: 1OT2OD032742-01'
+  - slot: source_caveats
+    snippet: This repository is under review for potential modification in compliance with Administration
+      directives.
+  - slot: collection_mechanisms[0].mechanism_details
+    snippet: CM4AI project is a coordinated effort involving three complementary mapping approaches –
+      proteomic mass spectrometry, cellular imaging, and genetic perturbation via CRISPR/Cas9
+  - slot: id
+    snippet: 'Source URL: https://cm4ai.org/'
+- id: c016
+  source: cm4ai_org_data-releases_row11.txt
+  lines:
+  - 4360
+  - 4484
+  status: extracted
+  extracted:
+  - slot: description
+    snippet: Cell Maps for Artificial Intelligence (CM4AI) will deliver machine-readable hierarchical
+      maps of cell architecture as AI-ready data, together with quarterly data releases of map-input data
+      streams.
+  - slot: creators[0].affiliations
+    snippet: CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UT Austin, UA Birmingham, Simon
+      Fraser University, and the Hastings Center
+  - slot: updates.frequency
+    snippet: CM4AI releases data quarterly, ensuring continuous updates to the cell maps and input data
+      streams.
+  - slot: resources[4]
+    snippet: June 2026 Data Release (Beta)
+  - slot: resources[4].doi
+    snippet: doi.org/10.18130/V3/HIGT4C
+  - slot: resources[4].description
+    snippet: This dataset is the June 2026 Data Release of CM4AI, the Functional Genomics Grand Challenge
+      in the NIH Bridge2AI program.
+  - slot: distribution_dates[0].description
+    snippet: Released on:...June 17, 2025
+  - slot: version_access.versions_available
+    snippet: October 2025 Data Release
+  - slot: version_access.versions_available
+    snippet: June 2025 Data Release
+  - slot: version_access.versions_available
+    snippet: March 2025 Data Release
+  - slot: version_access.versions_available
+    snippet: May 2024 Data Release
+  - slot: subsets[1]
+    snippet: 'Curated dataset for undifferentiated (parental) iPSCs and iPSC-derived neural progenitor
+      cells (NPCs), neurons, and cardiomyocytes include:'
+  - slot: subsets[0].description
+    snippet: 'Curated datasets for TNBC cells under untreated (DMSO control), vorinostat, and paclitaxel
+      conditions include:'
+  - slot: subsets[0].description
+    snippet: IF images for...523 proteins
+  - slot: subsets[1].description
+    snippet: Perturb-seq of...>11,000 genes (whole-genome)
+  - slot: page
+    snippet: 'Source URL: https://cm4ai.org/data-releases/'
+  - slot: sampling_strategies[0].strategies
+    snippet: We are generating deep multi-modal data for a shared list of proteins across all cell types
+      and treatment conditions
+- id: c017
+  source: creativecommons_org_licenses-by-nc-sa_row15.txt
+  lines:
+  - 4485
+  - 4740
+  status: extracted
+  extracted:
+  - slot: license_and_use_terms.license_terms
+    snippet: Attribution-NonCommercial-ShareAlike 4.0 International
+  - slot: license_and_use_terms.name
+    snippet: CC BY-NC-SA 4.0
+  - slot: license_and_use_terms.license_terms
+    snippet: Canonical URL...https://creativecommons.org/licenses/by-nc-sa/4.0/
+  - slot: prohibited_uses[1].prohibition_reason
+    snippet: You may not use the material for...commercial purposes
+  - slot: intended_uses[0].usage_notes
+    snippet: You must give...appropriate credit...provide a link to the license, and
+  - slot: license_and_use_terms.license_terms
+    snippet: upon the material, you must distribute your contributions under
+  - slot: ip_restrictions.restrictions
+    snippet: You may not apply...legal terms or...technological measures
+- id: c018
+  source: dataverse_10.18130_V3_B35XWX_row16.txt
+  lines:
+  - 4741
+  - 5140
+  status: extracted
+  extracted:
+  - slot: resources[1]
+    snippet: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+  - slot: resources[1].doi
+    snippet: Persistent Identifier...doi:10.18130/V3/B35XWX
+  - slot: resources[1].version
+    snippet: Version 1.4
+  - slot: resources[1].issued
+    snippet: Publication Date...2025-03-03
+  - slot: resources[1].created_on
+    snippet: Data Creation Date...2025-02-27
+  - slot: resources[1].description
+    snippet: This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data
+      in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images
+      in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel).
+  - slot: resources[1].license
+    snippet: License/Data Use Agreement...CC BY-NC-SA 4.0
+  - slot: resources[1].publisher
+    snippet: University of Virginia Dataverse
+  - slot: resources[1].created_by
+    snippet: Depositor...Niestroy, Justin
+  - slot: resources[1].file_collections[0]
+    snippet: CRISPR Perturbation Cell Atlas/
+  - slot: resources[1].file_collections[0].resources[0].md5
+    snippet: 'MD5: cbdb263b1c099396d75e16f00a79a818'
+  - slot: resources[1].file_collections[1]
+    snippet: CRISPR Perturbation RNA Sequences - Raw Sequences/
+  - slot: resources[1].file_collections[1].resources[0].md5
+    snippet: 'MD5: 1cafefa32a897998e3e2ba0a29a3ef5c'
+  - slot: resources[1].file_collections[2]
+    snippet: Protein Localization Subcellular Images/
+  - slot: resources[1].file_collections[2].resources[0]
+    snippet: cm4ai-v0.6-beta-if-images-paclitaxel.zip
+  - slot: resources[1].file_collections[2].resources[0].md5
+    snippet: 'MD5: 9422486c80bc9e1d35b2fbbc72a5f043'
+  - slot: resources[1].file_collections[2].resources[1]
+    snippet: cm4ai-v0.6-beta-if-images-untreated.zip
+  - slot: resources[1].file_collections[2].resources[1].md5
+    snippet: 'MD5: 0b4d129f5fbc3bb7f7ea564cd032cef7'
+  - slot: resources[1].file_collections[2].resources[2]
+    snippet: cm4ai-v0.6-beta-if-images-vorinostat.zip
+  - slot: resources[1].file_collections[2].resources[2].md5
+    snippet: 'MD5: ac577109a41a9806978461157b777d52'
+  - slot: resources[1].file_collections[3]
+    snippet: Protein-protein Interaction SEC-MS/
+  - slot: resources[1].file_collections[3].resources[0].md5
+    snippet: 'MD5: cb67e7749b15ce87b9042a9feba9d032'
+  - slot: keywords
+    snippet: AI, affinity purification, AP-MS, artificial intelligence, breast cancer, Bridge2AI, cardiomyocyte,
+      CM4AI, CRISPR/Cas9, induced pluripotent stem cell, iPSC, KOLF2.1J, machine learning, mass spectroscopy,
+      MDA-MB-468
+  - slot: creators[0].description
+    snippet: Clark T (University of Virginia) - ORCID:...https://orcid.org/0000-0003-4060-7360
+  - slot: creators[0].description
+    snippet: Ideker T (University of California San Diego) - ORCID:...https://orcid.org/0000-0002-1708-8454
+  - slot: license_and_use_terms.contact_person
+    snippet: Point of Contact...Ideker Trey (University of California San Diego)
+  - slot: funders[0].grants[0].description
+    snippet: 'National Institutes of Health: 1OT2OD032742-01'
+  - slot: acquisition_methods[1].acquisition_details
+    snippet: Production Location...University of California San Diego; University of California San Francisco
+  - slot: external_resources[2]
+    snippet: A PERTURBATION CELL ATLAS OF HUMAN INDUCED PLURIPOTENT STEM CELLS. bioRxiv. 2024 Nov 4;2024.11.03.621734.
+  - slot: collection_mechanisms[3].mechanism_details
+    snippet: as imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg
+      Lab at Stanford University
+  - slot: subsets[0].instances[0].description
+    snippet: the spatial localization of 563 proteins of interest in cells of the breast cancer cell line
+      MDA-MB-468
+  - slot: subsets[1].instances[0].counts
+    snippet: mapping transcriptional and fitness phenotypes associated with 11,739 targeted genes
+  - slot: license_and_use_terms.data_use_permission
+    snippet: Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+      International license
+  - slot: acquisition_methods[1]
+    snippet: Production Location
+  - slot: data_collectors[0]
+    snippet: in the Lundberg Lab at Stanford University
+  - slot: title
+    snippet: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+  - slot: creators[1]
+    snippet: in the Lundberg Lab at Stanford University
+  - slot: funders[0].grantor
+    snippet: National Institutes of Health
+  - slot: distribution_dates[0].release_dates
+    snippet: Publication Date...2025-03-03
+- id: c019
+  source: dataverse_10.18130_V3_B35XWX_row16.txt
+  lines:
+  - 5141
+  - 5361
+  status: extracted
+  extracted:
+  - slot: distribution_formats[0].description
+    snippet: You can select individual files that are below the 953.7 MB download limit from the files
+      table, or use the
+  - slot: distribution_formats[1].description
+    snippet: Data Access API...for programmatic access to the files.
+  - slot: distribution_formats[1].access_urls
+    snippet: https://dataverse.lib.virginia.edu/api/access/datafile/
+  - slot: license_and_use_terms.description
+    snippet: as well as good scientific practices expect that proper credit is given via citation. Please
+      use the data citation shown on the dataset page.
+- id: c020
+  source: dataverse_10.18130_V3_F3TD5R_row19.txt
+  lines:
+  - 5362
+  - 5761
+  status: extracted
+  extracted:
+  - slot: resources[2]
+    snippet: Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)
+  - slot: resources[2].version
+    snippet: Version 2.1
+  - slot: resources[2].doi
+    snippet: Persistent Identifier...doi:10.18130/V3/F3TD5R
+  - slot: resources[2].issued
+    snippet: Publication Date...2025-07-01
+  - slot: resources[2].description
+    snippet: This revision includes adding RGB immunofluorescent images, corrections to ro-crate metadata,
+      and changes to naming conventions.
+  - slot: human_subject_research
+    snippet: 'Human Subjects:'
+  - slot: is_deidentified.identifiable_elements_present
+    snippet: De-identified Samples:...Yes
+  - slot: regulatory_restrictions.description
+    snippet: 'FDA Regulated:'
+  - slot: data_governance.committee_contact
+    snippet: Data Governance Committee:...Jillian Parker (jillianparker@health.ucsd.edu)
+  - slot: ethical_reviews[0].contact_person
+    snippet: Ethical Review:...Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Belisle-Pipon
+  - slot: known_limitations[1]
+    snippet: Some datasets are under temporary pre-publication embargo
+  - slot: known_limitations[2]
+    snippet: Protein-protein interaction (SEC-MS), protein localization (IF imaging), and CRISPRi perturbSeq
+      data interrogate sets of proteins which incompletely overlap
+  - slot: known_limitations[3]
+    snippet: Computed cell maps not included in this release
+  - slot: known_limitations[4]
+    snippet: Requires domain expertise for meaningful analysis
+  - slot: updates.update_details
+    snippet: Dataset will be regularly updated and augmented through the end of the project in November
+      2026
+  - slot: retention_limit.retention_details
+    snippet: Long term preservation in the University of Virginia Dataverse, supported by committed institutional
+      funds
+  - slot: intended_uses[0].examples
+    snippet: AI-ready datasets to support research in functional genomics
+  - slot: intended_uses[0].examples
+    snippet: Cell architectural changes and interactions in presence of specific disease processes, treatment
+      conditions, or genetic perturbations
+  - slot: prohibited_uses[0]
+    snippet: These laboratory data are not to be used in clinical decision-making or in any context involving
+      patient care without appropriate regulatory oversight and approval
+  - slot: known_biases[0]
+    snippet: Data in this release was derived from commercially available de-identified human cell lines
+  - slot: known_biases[0].bias_description
+    snippet: Does not represent all biological variants which may be seen in the population at large
+  - slot: raw_data_sources[5]
+    snippet: Sequence Read Archive (SRA) Data:...NCBI BioProject
+  - slot: raw_data_sources[0]
+    snippet: Mass Spectrometry Data (Human iPSCs):...MassIVE Repository
+  - slot: resources[2].file_collections[0].resources[0]
+    snippet: release-ro-crate-datasheet.html
+  - slot: resources[2].file_collections[0].resources[0].md5
+    snippet: 'MD5: 599c9ece9b88b3ce797b82463b4a1eb4'
+  - slot: resources[2].file_collections[0].resources[1].md5
+    snippet: 'release-ro-crate-metadata.json...MD5: 99f9e00053bff3020fd9832a3a518bbb'
+  - slot: resources[2].file_collections[1].resources[0]
+    snippet: cm4ai_ifimages_MDA-MB-468_paclitaxel.zip
+  - slot: resources[2].file_collections[1].resources[0].md5
+    snippet: 'MD5: 0d972b80744344ddeede516a0cf6e3d7'
+  - slot: resources[2].file_collections[1].resources[1].md5
+    snippet: 'cm4ai_ifimages_MDA-MB-468_untreated.zip...MD5: a98affcc05429650c6bb3906cd836d55'
+  - slot: resources[2].file_collections[1].resources[2].md5
+    snippet: 'cm4ai_ifimages_MDA-MB-468_vorinostat.zip...MD5: ad4e68ccc14b0f3349dad3321e7b81b2'
+  - slot: resources[2].total_file_count
+    snippet: 1 to 10 of 21 Files
+  - slot: subsets[0].instances[0].description
+    snippet: the spatial localization of 464 proteins of interest in cells of the breast cancer cell line
+      MDA-MB-468 treated with paclitaxel
+  - slot: conforms_to_standard
+    snippet: Release RO-Crate with pointers to sub ro-crates.
+  - slot: status
+    snippet: This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs
+  - slot: direct_collection[0]
+    snippet: Data in this release was derived from commercially available de-identified human cell lines
+  - slot: ethical_reviews[0]
+    snippet: Vardit Ravitsky (ravitskyv@thehastingscenter.org)
+  - slot: ethical_reviews[1]
+    snippet: Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
+  - slot: human_subject_research.description
+    snippet: 'Human Subjects:'
+  - slot: known_limitations[0]
+    snippet: This is an interim release
+  - slot: intended_uses[0].use_category
+    snippet: AI-ready datasets to support research in functional genomics
+  - slot: distribution_dates[0].release_dates
+    snippet: Publication Date...2025-07-01
+  - slot: regulatory_restrictions.description
+    snippet: Data Governance & Ethics
+  - slot: data_governance.accountable_organization.description
+    snippet: Long term preservation in the University of Virginia Dataverse, supported by committed institutional
+      funds
+  - slot: maintainers[2]
+    snippet: Long term preservation in the University of Virginia Dataverse, supported by committed
+  - slot: errata[0]
+    snippet: This revision includes adding RGB immunofluorescent images, corrections to ro-crate metadata,
+      and changes to naming conventions.
+  - slot: errata[0].erratum_url
+    snippet: https://doi.org/10.18130/V3/F3TD5R
+- id: c021
+  source: dataverse_10.18130_V3_F3TD5R_row19.txt
+  lines:
+  - 5762
+  - 6161
+  status: redundant_with
+  chunks:
+  - c018
+  - c020
+  reason: The remainder of the June 2025 Dataverse page. Its Citation Metadata block repeats verbatim
+    the release description, external data links, governance and ethics contacts, completeness, maintenance
+    plan, intended use, limitations, prohibited uses and bias statements already receipted from c020,
+    and the author/ORCID roster, data creation date, production location, funding and depositor fields
+    already receipted from c018; the rest is Dataverse modal-dialog boilerplate.
+- id: c022
+  source: dataverse_10.18130_V3_F3TD5R_row19.txt
+  lines:
+  - 6162
+  - 6166
+  status: nothing_relevant
+  reason: Five-line tail of the June 2025 Dataverse capture - a trailing "Cancel" button label and the
+    document separator rule. No content.
+- id: c023
+  source: dataverse_10.18130_V3_K7TGEM_row16.txt
+  lines:
+  - 6167
+  - 6566
+  status: extracted
+  extracted:
+  - slot: resources[3]
+    snippet: Cell Maps for Artificial Intelligence - October 2025 Data Release (Beta)
+  - slot: resources[3].version
+    snippet: Version 2.1
+  - slot: resources[3].doi
+    snippet: Persistent Identifier...doi:10.18130/V3/K7TGEM
+  - slot: resources[3].issued
+    snippet: Publication Date...2025-10-31
+  - slot: resources[3].description
+    snippet: CM4AI is generating multi-modal data including protein-protein interaction (PPI), spatial
+      localization, and genetic perturbation data in MDA-MB-468 breast cancer cells (+/- paclitaxel or
+      vorinostat) and iPSCs (+/- differentiation).
+  - slot: resources[3].total_file_count
+    snippet: 1 to 8 of 8 Files
+  - slot: resources[3].file_collections[0].resources[0]
+    snippet: cm4ai_mass-spec_KOLF2.zip
+  - slot: resources[3].file_collections[0].resources[0].md5
+    snippet: 'MD5: fb04933a21e4395cce56930a014c6b4e'
+  - slot: resources[3].file_collections[0].resources[1].md5
+    snippet: 'cm4ai_mass-spec_MDA-MB-468.zip...MD5: 662d62ced9d379f7024e5c6d55859fbb'
+  - slot: resources[3].file_collections[1].resources[0].md5
+    snippet: 'cm4ai_perturb-seq_KOLF2_cell_atlas.zip...MD5: 15dc59312466dbfac85f59b57d27eee6'
+  - slot: resources[3].file_collections[1].resources[1].md5
+    snippet: 'cm4ai_perturb-seq_KOLF2_raw_sra.zip...MD5: 1cfc4e8e2ead7513a035cc7730046ebb'
+  - slot: resources[3].file_collections[2].resources[0].md5
+    snippet: 'cm4ai_release_metadata.zip...MD5: c14cc7aaaa0e7231a0d3ec296ff58518'
+  - slot: resources[3].file_collections[3].resources[0].md5
+    snippet: 'cm4ai_ifimages_MDA-MB-468_paclitaxel.zip...MD5: 0d972b80744344ddeede516a0cf6e3d7'
+  - slot: confidential_elements[0]
+    snippet: Perturb-seq data in KOLF2.1J iPSCs (undifferentiated):...Embargoed
+  - slot: raw_data_sources[1]
+    snippet: SEC-MS data in MDA-MB-468 breast cancer cells (+/- treatment):...MassIVE Repository
+  - slot: data_collectors[1].collector_details
+    snippet: in the Nevan Krogan laboratory at the University of California San Francisco.
+  - slot: creators[0].affiliations[9]
+    snippet: Axelsson, U...KTH Royal Institute of Technology,
+  - slot: data_collectors[1]
+    snippet: in the Nevan Krogan laboratory at the University of California San Francisco
+  - slot: creators[2]
+    snippet: in the Nevan Krogan laboratory at the University of California San Francisco
+  - slot: distribution_dates[0].release_dates
+    snippet: Publication Date...2025-10-31
+  - slot: sampling_strategies[0].source_data
+    snippet: mapping transcriptional and fitness phenotypes associated with 11,739 targeted genes.
+- id: c024
+  source: dataverse_10.18130_V3_K7TGEM_row16.txt
+  lines:
+  - 6567
+  - 6966
+  status: extracted
+  extracted:
+  - slot: creators[0].affiliations[7]
+    snippet: Bélisle-Pipon, JC...Simon Fraser University
+  - slot: creators[0].affiliations[4]
+    snippet: Brandt, C...Yale University
+  - slot: creators[0].affiliations[5]
+    snippet: Ding, Y...University of Texas at Austin
+  - slot: creators[0].affiliations[6]
+    snippet: Thaker, S...University of Alabama at Birmingham
+  - slot: creators[0].affiliations[10]
+    snippet: Ravitsky, V...University of Montreal
+  - slot: license_and_use_terms.contact_person
+    snippet: Point of Contact...Ideker, Trey (University of California San Diego)
+  - slot: distribution_formats[0].description
+    snippet: You can select individual files that are below the 1.9 GB download limit from the files table,
+      or use the
+  - slot: resources[3].created_on
+    snippet: Data Creation Date...2025-02-27
+  - slot: resources[3].created_by
+    snippet: Depositor...Niestroy, Justin
+- id: c025
+  source: dataverse_10.18130_V3_K7TGEM_row16.txt
+  lines:
+  - 6967
+  - 7001
+  status: nothing_relevant
+  reason: Tail of the October 2025 Dataverse capture - publish/return-to-author modal text, an empty curation
+    status table, the UVA Dataverse copyright footer, software build string and a contact-form captcha.
+    No fact about the CM4AI dataset.
+- id: c026
+  source: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
+  lines:
+  - 7002
+  - 7401
+  status: extracted
+  extracted:
+  - slot: resources[4]
+    snippet: Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta)
+  - slot: resources[4].version
+    snippet: Version 2.0
+  - slot: resources[4].doi
+    snippet: Persistent Identifier...doi:10.18130/V3/HIGT4C
+  - slot: resources[4].issued
+    snippet: Publication Date...2026-06-17
+  - slot: resources[4].description
+    snippet: AP-MS data for MDA-MB-468 breast cancer cells + treatment
+  - slot: resources[4].total_file_count
+    snippet: 1 to 10 of 10 Files
+  - slot: resources[4].publisher
+    snippet: University of Virginia Dataverse
+  - slot: resources[4].file_collections[0].resources[0]
+    snippet: cm4ai_apms_MDA-MB-468_paclitaxel.zip
+  - slot: resources[4].file_collections[0].resources[0].md5
+    snippet: 'MD5: 8642317c321126213240af4837030a53'
+  - slot: resources[4].file_collections[0].resources[1].md5
+    snippet: 'cm4ai_apms_MDA-MB-468_vorinostat.zip...MD5: b941f28d6f19c563d1222f7aff0c57b6'
+  - slot: resources[4].file_collections[1].resources[0].md5
+    snippet: 'cm4ai_ifimages_MDA-MB-468_paclitaxel.zip...MD5: 6c1a86520eec2696ec19444eb8a8b428'
+  - slot: resources[4].file_collections[1].resources[1].md5
+    snippet: 'cm4ai_ifimages_MDA-MB-468_untreated.zip...MD5: 6d066e6b9d762284c6aa5d0b44565568'
+  - slot: resources[4].file_collections[1].resources[2].md5
+    snippet: 'cm4ai_ifimages_MDA-MB-468_vorinostat.zip...MD5: df79632753989ef23b0a3df6604d4af1'
+  - slot: resources[4].file_collections[2].resources[0].md5
+    snippet: 'cm4ai_mass-spec_KOLF2.zip...MD5: f250bf0b04f516f7462d30432441fc0e'
+  - slot: resources[4].file_collections[2].resources[1].md5
+    snippet: 'cm4ai_mass-spec_MDA-MB-468.zip...MD5: 9aed30b6e8a91b151155316aae657ea5'
+  - slot: resources[4].file_collections[3].resources[0].md5
+    snippet: 'cm4ai_perturb-seq_KOLF2_cell_atlas.zip...MD5: 291a362842a176a4fcccaf2cdc1dedde'
+  - slot: resources[4].file_collections[3].resources[1].md5
+    snippet: 'cm4ai_perturb-seq_KOLF2_raw_sra.zip...MD5: 8bb3f365f01fb8bbbd2ac6a535059305'
+  - slot: resources[4].file_collections[4].resources[0].md5
+    snippet: 'cm4ai_release_metadata.zip...MD5: 318deb7c5edab0d2fa55e26fcb67b440'
+  - slot: raw_data_sources[2]
+    snippet: AP-MS data in MDA-MB-468 breast cancer cells (treated with paclitaxel):...MassIVE Repository
+  - slot: raw_data_sources[4]
+    snippet: CRISPRi Perturbation Atlas of iPSCs:...Figshare
+  - slot: creators[0].affiliations[0].id
+    snippet: Clark T...https://ror.org/0153tk833
+  - slot: resources[4].version
+    snippet: Version 2.0
+  - slot: publisher
+    snippet: https://ror.org/0153tk833
+  - slot: citation
+    snippet: University of Virginia Dataverse, V2
+  - slot: raw_data_sources[3]
+    snippet: AP-MS data in MDA-MB-468 breast cancer cells (treated with vorinostat):...MassIVE Repository
+  - slot: distribution_formats[0].format
+    snippet: ZIP Archive
+  - slot: distribution_formats[0].access_urls
+    snippet: https://doi.org/10.18130/V3/HIGT4C
+  - slot: distribution_dates[0].release_dates
+    snippet: Publication Date...2026-06-17
+  - slot: regulatory_restrictions.confidentiality_level
+    snippet: Public (10)
+  - slot: data_governance.accountable_organization
+    snippet: https://ror.org/0153tk833
+  - slot: version_access.latest_version_doi
+    snippet: doi:10.18130/V3/HIGT4C
+- id: c027
+  source: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
+  lines:
+  - 7402
+  - 7801
+  status: redundant_with
+  chunks:
+  - c018
+  - c020
+  - c023
+  - c024
+  - c026
+  reason: The remainder of the June 2026 Dataverse page. The author roster with ORCIDs, affiliations and
+    the University of Virginia ROR repeats what c018, c024 and c026 already receipt; the Citation Metadata
+    block repeats the release description, external data links, governance and ethics contacts, completeness,
+    maintenance plan, intended use, limitations, prohibited uses, bias statements, keywords, related publications,
+    data creation date, production location, funding, depositor and license already receipted from c020,
+    c023 and c026; the rest is Dataverse modal-dialog boilerplate.
+- id: c028
+  source: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
+  lines:
+  - 7802
+  - 7866
+  status: nothing_relevant
+  reason: Tail of the June 2026 Dataverse capture - package-download, compute batch, publish, return-to-author
+    and curation-status modal text, the UVA Dataverse copyright footer, software build string and a contact-form
+    captcha. No fact about the CM4AI dataset.

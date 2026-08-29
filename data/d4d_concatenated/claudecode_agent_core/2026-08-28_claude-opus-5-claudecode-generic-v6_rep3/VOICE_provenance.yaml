@@ -1,0 +1,394 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-08-29T06:31:21+00:00'
+run:
+  label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+  project: VOICE
+  method: claudecode_agent
+  arm: baseline
+  replicate: 3
+model:
+  generation_method: schema-grounded agentic, phase 1
+  agent_runtime: Claude Code
+  provider: Anthropic
+  model: claude-opus-5
+  mode: four-phase project agent, generic-v6 prompt
+  temperature: '0.0'
+  temperature_basis: asserted by the generating agent, not observed
+  shared_config:
+    path: .github/workflows/d4d_assistant_deterministic.config
+    name: claude-opus-5
+    temperature: 0.0
+    max_tokens: 16000
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: src/download/prompts/d4d_generic_arm_prompt_v6.md
+    sha256: 57ac203090ee6bab7ad89f4e1cecfe78dcf3fe6d29c44687d843c5e0215e9160
+    bytes: 13827
+    exists: true
+  request:
+    sha256: 68050e155a16d3311d8de89202c84df6865879923dbd7851f2fe90a21be7aa11
+    bytes: 11183
+    note: the instruction as sent, after substitution; the files above are what it
+      was built from
+    spec:
+      condition: generic_v6
+      arm: BASELINE (input documents only)
+      manifest_line: '# Source manifest: data/preprocessed/source_manifest.yaml'
+      run_date: '2026-08-29'
+      runtime: Claude Code
+      provider: Anthropic
+      bundle: data/preprocessed/concatenated/VOICE_preprocessed.txt
+playbooks:
+  hash_algorithm: sha256
+  files:
+  - path: .claude/commands/d4d-full-core.md
+    sha256: 9552cd7e5fca3576d647e467820849aa3b35f73664e2e065c2970db43f9d8313
+    bytes: 46172
+    exists: true
+  - path: .claude/commands/d4d-agent.md
+    sha256: a9a56cd791a6a4876e4dd756011460d6c7a24f634c928af8b0e2fc3057d6bc0d
+    bytes: 12138
+    exists: true
+  - path: .claude/agents/d4d-provenance-guard.md
+    sha256: 2b8889f4f698847294eb1c017f4bf095da3f0d919dc5903b984270df8f1c8278
+    bytes: 6910
+    exists: true
+  - path: .claude/commands/d4d-uniform-rules.md
+    sha256: 34b47643a3de8b41a2cf4074219f04cdb8b817b4c80fac7932bcfb163570aec7
+    bytes: 8330
+    exists: true
+  consumed: true
+  consumed_basis: the runtime opens these files itself, as the launch instruction
+    directs
+phase_log:
+  phases:
+  - phase: generate_full
+    ordinal: 1
+    completed: true
+    artifacts:
+    - VOICE_d4d.yaml
+    - VOICE_coverage_receipt.yaml
+  - phase: derive_core
+    ordinal: 2
+    completed: true
+    artifacts:
+    - VOICE_d4d_core.yaml
+  - phase: source_audit
+    ordinal: 3
+    completed: true
+  - phase: reconcile
+    ordinal: 4
+    completed: true
+    iterations: 2
+  - phase: report
+    ordinal: 5
+    completed: true
+    artifacts:
+    - VOICE_reconciliation.md
+  - phase: repair
+    ordinal: 6
+    completed: true
+    iterations: 1
+  - phase: report_after_repair
+    ordinal: 7
+    completed: true
+    artifacts:
+    - VOICE_reconciliation.md
+  recorded_by: the run itself, as the playbook directs
+  unavailable:
+  - seconds
+  - input_tokens
+  - output_tokens
+  - stop_reason
+  unavailable_basis: this runtime has no access to its own token accounting or per-call
+    timing (#400); these are named rather than omitted so the gap reads as a limit
+    and not an oversight
+  run_observed:
+    total_tokens: 37033795
+    tool_uses: 129
+    duration_ms: 2445031
+    bundle_lines_read: 5746
+    bundle_lines_total: 5746
+    receipt_chunks_total: 22
+    receipt_chunks_unopened: 0
+  run_observed_basis: 'aggregate totals for the whole run, observed by the orchestrator
+    from the subagent runner''s transcript. One number per run, not per phase: four-phase
+    project-agent mode runs every phase in one context, so the run is the only observable
+    boundary. Not the runtime''s own accounting, no input/output split, not billing-grade;
+    deliberately not shaped like api_usage (#681/#682). total_tokens counts each API
+    message once (a response spans several transcript lines); duration_ms sums each
+    invocation''s own span, so a resumed run excludes the gap. bundle_lines_read is
+    the union of the run''s successful file-reading windows over the declared bundle
+    (#700): lines the run never opened, or opened only in a read that errored, may
+    have been reached by search, but nothing attests that.'
+schema:
+  declared_version: 2.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+  merged_schema_carries_version: true
+  digest_md5: 580992ed7037762157c110fc9e671c81
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: 7a424690b7c33c107876d2aa27a199644bd6dd21
+  commit_short: 7a424690
+  branch: main
+  dirty: true
+  dirty_file_count: 15
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/VOICE_preprocessed.txt
+  chunks:
+    path: data/preprocessed/chunks/VOICE_chunks.yaml
+    sha256: f748d123c5f40b18d70a657088392eebfeb9fc3d5ae051f4aae760084ec182b9
+    rule:
+      version: 2
+      unit: source-document
+      boundary: 'FILE: line followed by PATH: or ROLE:'
+      preamble: own-chunk
+      split: line-window
+      max_lines: 400
+      max_bytes: 48000
+    chunk_count: 22
+  receipt_expected: true
+  bundle_md5: dcd717170da6762569c0b4eeafc1c3d2
+  bundle_bytes: 376295
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: 6c71e8d26497a5808e09e2edd19c1ba4
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_d4d.yaml
+    bytes: 86583
+    slots: 79
+  core:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_d4d_core.yaml
+    bytes: 76504
+    slots: 68
+  report:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_reconciliation.md
+    bytes: 20375
+    slots: null
+companions:
+  reasoning_log:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_reasoning.jsonl
+    present: false
+    md5: null
+    note: one JSON line per phase; absent for a runtime that cannot report its own
+      token accounting (#400)
+  telemetry_report:
+    path: data/run_telemetry/2026-08-28_claude-opus-5-claudecode-generic-v6.yaml
+    present: false
+    note: derived from records like this one, per label rather than per run; `d4d
+      runs telemetry` writes it
+  prompt_registry:
+    path: src/download/prompts/canonical_hashes.yaml
+    present: true
+    md5: dd0cd5fd0dee6e95a2d2104cad22ac0d
+    note: the pins the recorded prompt hashes were judged against
+  digest_inventory:
+    path: src/data_sheets_schema/schema/digest_inventory.yaml
+    present: true
+    md5: 25da69bd7533b1f1b950d15a9589b7e3
+    note: digest to slot inventory, which decides whether a slot predates a pair
+unrecoverable: null
+unverified:
+- field: model.temperature
+  value: '0.0'
+  reason: the Claude Code runtime does not expose a temperature setting to the agent
+    or to this recorder; the header value restates the prompt template rather than
+    a measured parameter. A direct API run can observe it.
+- field: model.reasoning_effort
+  value: null
+  reason: 'no effort is recorded: the header carries none and the route ''claude-opus-5''
+    exposes no effort ladder, so the provider default applied. That is not a value
+    this run chose, and it is not comparable with a run that named one.'
+notes: null
+pair_consistency:
+  ran: true
+  consistent: true
+  errors: 0
+  warnings: 1
+  identity_slots: 79
+  schema_moved: false
+  findings: []
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_d4d.yaml
+      md5: b9695b21530c399f9687ecf18023f2bf
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_d4d_core.yaml
+      md5: 17ccc09913c56a4f9bc5838718c421da
+  schema:
+    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
+    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+  recorded_by: d4d provenance record
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 3
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_reconciliation.md
+      md5: 994ea382122ae0d25ccd6b02d7f2beb6
+  recorded_by: d4d provenance record
+grounding:
+  checked: true
+  counts:
+    grounded: 4
+    minted_fragment: 28
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 1
+    minted_fragment: 14
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/VOICE_preprocessed.txt
+      md5: dcd717170da6762569c0b4eeafc1c3d2
+  recorded_by: d4d provenance record
+form:
+  checked: true
+  records:
+  - data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_d4d.yaml
+  - data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_d4d_core.yaml
+  undeclared_prefixes: {}
+  undeclared_prefix_occurrences: 0
+  british_spellings: 0
+  organisational_fragments: 0
+  gc_label_variants:
+    Bridge2AI-Voice: 11
+    Bridge2AI Voice: 17
+  gc_label_variant_occurrences: 28
+  recorded_by: d4d provenance record
+receipts:
+  expected: true
+  non_checks:
+  - that a chunk marked nothing_relevant truly held nothing for the record — a judgement;
+    sample by chunk id in review
+  - that a verified snippet supports the value it is attached to — a snippet can be
+    real and irrelevant; sample by slot path in review
+  checked: true
+  chunks:
+    total: 22
+    reviewed: 22
+    unreviewed: []
+    by_status:
+      extracted: 20
+      redundant_with: 0
+      nothing_relevant: 2
+      duplicate_of: 0
+  snippets:
+    total: 276
+    verified: 276
+    adjacent: 0
+    elsewhere: 0
+    mismatched: 0
+    unchecked: 0
+  slots:
+    populated: 560
+    exempt: 29
+    receiptable: 531
+    with_receipt: 194
+    without_receipt:
+    - name
+    - conforms_to_standard
+    - external_resources[0].name
+    - external_resources[0].description
+    - external_resources[1].name
+    - external_resources[1].description
+    - external_resources[1].external_resources
+    - external_resources[2].name
+    - external_resources[2].description
+    - external_resources[3].name
+    - external_resources[4].name
+    - external_resources[4].description
+    - external_resources[5].name
+    - purposes[0].name
+    - purposes[1].name
+    - purposes[2].name
+    - purposes[3].name
+    - purposes[4].name
+    - tasks[0].name
+    - tasks[1].name
+    - tasks[1].response
+    - addressing_gaps[0].name
+    - addressing_gaps[1].name
+    - addressing_gaps[2].name
+    - addressing_gaps[3].name
+    - addressing_gaps[4].name
+    - creators[0].affiliations[0].name
+    - creators[0].affiliations[1].name
+    - creators[0].affiliations[2].name
+    - creators[0].affiliations[3].name
+    - creators[0].affiliations[4].name
+    - creators[0].affiliations[5].name
+    - creators[0].affiliations[6].name
+    - creators[0].affiliations[7].name
+    - creators[0].affiliations[8].name
+    - creators[0].affiliations[9].name
+    - creators[0].affiliations[10].name
+    - creators[0].affiliations[11].name
+    - creators[0].affiliations[12].name
+    - creators[0].affiliations[13].name
+    - creators[1].affiliations[0].name
+    - creators[2].name
+    - creators[2].description
+    - creators[2].affiliations[0].name
+    - creators[3].name
+    - creators[3].affiliations[0].name
+    - creators[4].name
+    - creators[4].description
+    - creators[4].affiliations[0].name
+    - creators[5].name
+    without_receipt_truncated: 287
+    receipt_paths: 190
+    unresolved: []
+    reshaped_by_reconcile: []
+  findings: []
+  findings_truncated: null
+  summary: chunks 22/22 reviewed · snippets 276/276 verified · slots 194/531 with
+    a receipt (29 exempt)
+  artifacts:
+    receipt:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_coverage_receipt.yaml
+      sha256: 24e599f4bacb3922b355badb4d178f73c60d956faaded67db03093ff46e4449d
+    manifest:
+      path: data/preprocessed/chunks/VOICE_chunks.yaml
+      sha256: f748d123c5f40b18d70a657088392eebfeb9fc3d5ae051f4aae760084ec182b9
+  recorded_by: d4d receipts check
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_d4d.yaml
+      md5: b9695b21530c399f9687ecf18023f2bf
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_d4d_core.yaml
+      md5: 17ccc09913c56a4f9bc5838718c421da
+  schema:
+    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
+    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+  recorded_by: d4d runs validate
