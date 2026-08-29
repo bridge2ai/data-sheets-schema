@@ -2182,11 +2182,22 @@ class TestReceiptCondition(unittest.TestCase):
     def test_the_full_phase_budget_is_raised_only_under_a_receipt_condition(self):
         """#768: record plus receipt was 95,342 tokens on AI_READI against a
         96,000 cap. The receipt phase gets the route's ceiling; nothing else moves."""
+        import os
         from data_sheets_schema.api_runner import PHASE_MAX_TOKENS, phase_max_tokens
+        saved = os.environ.pop("D4D_RECEIPT_FULL_MAX_TOKENS", None)
+        self.addCleanup(lambda: os.environ.update({"D4D_RECEIPT_FULL_MAX_TOKENS": saved}) if saved is not None else None)
         self.assertEqual(phase_max_tokens(self._spec("generic_v7"), "full", 1), 128000)
         self.assertEqual(phase_max_tokens(self._spec("generic_v6"), "full", 1), PHASE_MAX_TOKENS["full"])
         self.assertEqual(phase_max_tokens(self._spec("generic_v7"), "reconcile_full", 1), PHASE_MAX_TOKENS["reconcile_full"])
         self.assertEqual(phase_max_tokens(self._spec("generic_v7"), "nope", 7), 7)
+        # #777: the receipt-condition full budget is env-overridable, malformed-safe
+        for raw, want in (("96000", 96000), ("junk", 128000), ("0", 128000), ("999999", 128000)):   # clamped (#779)
+            os.environ["D4D_RECEIPT_FULL_MAX_TOKENS"] = raw
+            try:
+                self.assertEqual(phase_max_tokens(self._spec("generic_v7"), "full", 1), want, raw)
+                self.assertEqual(phase_max_tokens(self._spec("generic_v6"), "full", 1), PHASE_MAX_TOKENS["full"])
+            finally:
+                os.environ.pop("D4D_RECEIPT_FULL_MAX_TOKENS", None)
         # the record's per-phase map says the same number api_usage does (#770)
         from data_sheets_schema.api_runner import _model_settings
         import data_sheets_schema.api_runner as api
