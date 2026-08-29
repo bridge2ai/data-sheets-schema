@@ -221,6 +221,8 @@ DERIVED_PHASES = frozenset({"core", "reconcile_core"})
 #: phase and condition keeps the budget below. Clamped by `output_limit()`
 #: like the rest. Within v7 this is a silent instrument change — earlier
 #: records carry 96000 on the full phase — and no check flags it (#771).
+#: D4D_RECEIPT_FULL_MAX_TOKENS overrides the full budget per launch (#777);
+#: the record carries whatever value a run used, clamped to the route.
 RECEIPT_PHASE_MAX_TOKENS = {"full": 128000}
 
 
@@ -231,12 +233,16 @@ def phase_max_tokens(spec: "RunSpec", ph: str, default: int) -> int:
         # 96k had completed; the value a run used is in its api_usage either
         # way, so the override changes nothing about what the record attests.
         raw = os.environ.get("D4D_RECEIPT_FULL_MAX_TOKENS", "")
+        value = RECEIPT_PHASE_MAX_TOKENS[ph]
         try:
             if ph == "full" and int(raw) > 0:
-                return int(raw)
+                value = int(raw)
         except ValueError:
             pass
-        return RECEIPT_PHASE_MAX_TOKENS[ph]
+        # Clamped here, where the record reads it, so api_usage and
+        # max_tokens_by_phase say what was sent rather than what was asked
+        # for (#779).
+        return min(value, output_limit(_model_settings()["name"]))
     return PHASE_MAX_TOKENS.get(ph, default)
 
 
@@ -2256,9 +2262,11 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             if not transient and _transient_error_type(exc):
                 transient = True
             # A watchdog abandonment is transient by definition: the point of
-            # leaving a stalled call is to try again.
+            # leaving a stalled call is to try again — and it is said, because
+            # a silent retry made a stalled phase look like a slow one (#779).
             if not transient and "wall clock" in str(exc) and "#664" in str(exc):
                 transient = True
+                print(f"   attempt {attempt} abandoned by the watchdog after the wall clock; retrying")
             if not transient or attempt == MAX_ATTEMPTS:
                 raise
             last = exc
