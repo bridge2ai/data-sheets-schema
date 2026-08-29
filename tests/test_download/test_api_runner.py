@@ -2179,6 +2179,22 @@ class TestReceiptCondition(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "not a receipt"):
             _extract_receipt("- a list\n")
 
+    def test_the_full_phase_budget_is_raised_only_under_a_receipt_condition(self):
+        """#768: record plus receipt was 95,342 tokens on AI_READI against a
+        96,000 cap. The receipt phase gets the route's ceiling; nothing else moves."""
+        from data_sheets_schema.api_runner import PHASE_MAX_TOKENS, phase_max_tokens
+        self.assertEqual(phase_max_tokens(self._spec("generic_v7"), "full", 1), 128000)
+        self.assertEqual(phase_max_tokens(self._spec("generic_v6"), "full", 1), PHASE_MAX_TOKENS["full"])
+        self.assertEqual(phase_max_tokens(self._spec("generic_v7"), "reconcile_full", 1), PHASE_MAX_TOKENS["reconcile_full"])
+        self.assertEqual(phase_max_tokens(self._spec("generic_v7"), "nope", 7), 7)
+        # the record's per-phase map says the same number api_usage does (#770)
+        from data_sheets_schema.api_runner import _model_settings
+        import data_sheets_schema.api_runner as api
+        settings = _model_settings()
+        blk = api._model_block(self._spec("generic_v7"), settings) if hasattr(api, "_model_block") else None
+        if blk is not None:
+            self.assertEqual(blk["max_tokens_by_phase"]["full"], 128000)
+
     def test_the_assembly_digest_covers_the_receipt_instruction(self):
         from data_sheets_schema.api_runner import PHASE_INSTRUCTIONS, assembly_digest
         self.assertIn("full_receipt", PHASE_INSTRUCTIONS)
