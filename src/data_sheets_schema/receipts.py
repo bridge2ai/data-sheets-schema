@@ -284,8 +284,18 @@ def claim_receipts(receipt: dict[str, Any], full: dict[str, Any] | None = None) 
 
 
 def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[str, str],
-          full: dict[str, Any], record_bundle_md5: str | None) -> dict[str, Any]:
-    """The validator. Pure: receipt + manifest + chunk texts + record → block."""
+          full: dict[str, Any], record_bundle_md5: str | None,
+          original: dict[str, Any] | None = None) -> dict[str, Any]:
+    """The validator. Pure: receipt + manifest + chunk texts + record → block.
+
+    `original` is the record as it stood when the receipt was written (the
+    API path's phase-1 snapshot). A receipt path that resolved there but not
+    in the final record was reshaped by a later phase — reconcile flattened
+    `principal_investigator: {name: …}` to a string on the v7 canary — and is
+    reported as `reshaped_by_reconcile`, not as a path that never existed
+    (#758). The API path has no re-receipt route after reconcile (#742), so
+    this is a measured limitation, kept out of the findings and the gate.
+    """
     findings: list[dict[str, Any]] = []
     manifest_ids = [c["id"] for c in manifest.get("chunks") or [] if isinstance(c, dict) and "id" in c]
 
@@ -383,6 +393,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     receipt_paths = sorted({str(p.get("slot") or "") for e in entries if e.get("status") == "extracted"
                             for p in (e.get("extracted") or [])})
     unresolved = [p for p in receipt_paths if not resolve(full, p)]
+    reshaped = [p for p in unresolved if p and original is not None and resolve(original, p)]
+    unresolved = [p for p in unresolved if p not in reshaped]
     for p in unresolved:
         findings.append({"kind": "slot_not_in_record" if p else "slot_empty", "slot": p})
     leaves = populated_leaves(full)
@@ -393,7 +405,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
              "receiptable": len(receiptable), "with_receipt": len(receiptable) - len(without),
              "without_receipt": without[:50],
              "without_receipt_truncated": max(0, len(without) - 50) or None,
-             "receipt_paths": len(receipt_paths), "unresolved": unresolved}
+             "receipt_paths": len(receipt_paths), "unresolved": unresolved,
+             "reshaped_by_reconcile": reshaped}
 
     chunks = {"total": len(manifest_ids), "reviewed": reviewed, "unreviewed": missing[:50],
               "by_status": by_status}
@@ -404,7 +417,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                         f"{snippets['verified']}/{snippets['total']} verified"
                         + (f" ({snippets['unchecked']} unchecked)" if snippets["unchecked"] else "")
                         + f" · slots {slots['with_receipt']}/{slots['receiptable']} with a receipt"
-                        + (f" ({slots['exempt']} exempt)" if slots["exempt"] else "")),
+                        + (f" ({slots['exempt']} exempt)" if slots["exempt"] else "")
+                        + (f" · {len(reshaped)} receipt path(s) reshaped by reconcile" if reshaped else "")),
             "non_checks": list(NON_CHECKS)}
 
 
@@ -460,7 +474,27 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
                 "reason": "bundle drifted since the run; the receipt's chunks are not today's bytes"}
     texts = dict(zip([c["id"] for c in m["chunks"]], _texts(raw.decode("utf-8"), m["chunks"])))
     full = (yaml.safe_load(full_path.read_text(encoding="utf-8")) or {}) if full_path.exists() else {}
-    block = check(rec, m, texts, full, record_bundle_md5)
+    # The record as the `full` phase wrote it: the API runner's phase-1
+    # snapshot beside the receipt under intermediate/ (#758) — written after
+    # the runner's value normalisation, so shapes match the record at the
+    # path level while the receipt itself came from the raw text. A same-
+    # label re-run appends _2, _3 to the snapshot names while the top-level
+    # receipt is overwritten, so the contemporary snapshot is the highest-
+    # numbered one (#761). Absent on the agentic path, whose Phase 3
+    # re-receipts what it changes. A reshaped path is kept out of the
+    # findings and is *not* credited for coverage: its leaves show under
+    # `without_receipt` until something re-receipts them.
+    original = None
+    stem = receipt.name.replace("_coverage_receipt.yaml", "_full")
+    snaps = sorted((receipt.parent / "intermediate").glob(f"{stem}.yaml")) + sorted(
+        (receipt.parent / "intermediate").glob(f"{stem}_[0-9]*.yaml"),
+        key=lambda p: int(p.stem.rsplit("_", 1)[1]))
+    if snaps:
+        try:
+            original = yaml.safe_load(snaps[-1].read_text(encoding="utf-8")) or None
+        except yaml.YAMLError:
+            original = None
+    block = check(rec, m, texts, full, record_bundle_md5, original)
     block["artifacts"] = {
         "receipt": {"path": str(receipt), "sha256": hashlib.sha256(receipt.read_bytes()).hexdigest()},
         "manifest": {"path": str(mpath), "sha256": hashlib.sha256(mpath.read_bytes()).hexdigest()},

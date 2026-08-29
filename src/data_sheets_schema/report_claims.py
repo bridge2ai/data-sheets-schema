@@ -70,8 +70,15 @@ _NEGATED = re.compile(r"\b(?:neither|nor|not|never|no)\b[^.]{0,40}"
 
 #: A claim that something is not in the schema. Decidable, and in every v4
 #: instance false.
+# "does not exist/appear" counts only with a schema-shaped object: "does not
+# appear in the reconciled description" is a sentence about a value, and read
+# without that guard it made the v7 API canary's only report finding (#757).
 _ABSENT_FROM_SCHEMA = re.compile(
-    r"\bnot declared\b|\bno such slot\b|\bdoes not (?:exist|appear)\b|"
+    r"\bnot declared\b|\bno such slot\b|"
+    # up to a short adjective run before the noun: "in the supplied schema
+    # digest", "in the declared `Dataset` slot inventory" (#760)
+    r"\bdoes not (?:exist|appear) (?:in|on) (?:[\w`\-]+ ){0,6}?"
+    r"(?:schema|class|inventory|digest)\b|"
     r"\bnot a (?:declared|valid|recognised|recognized) slot\b|"
     r"\bnot in the (?:inventory|schema)\b|\bnot attested (?:keys?|slots?)\b|"
     r"\bappears? to have been invented\b", re.I)
@@ -361,8 +368,12 @@ def check_report(report: Path, full: dict, core: dict,
                               if n not in classes]
                     # Nothing before it means the subject is a demonstrative —
                     # "This slot is not declared" — naming the slot introduced
-                    # in the sentence above.
-                    sentence_subjects.append((before or prev[:1], sent))
+                    # in the sentence above. Only then: a sentence with no
+                    # backticked subject and no demonstrative is about
+                    # something else, and borrowing the previous sentence's
+                    # slot made a prose remark a schema claim (#757).
+                    demonstrative = re.match(r"\s*(?:this|that|these|those|the|it|no such|such)\b", sent, re.I)
+                    sentence_subjects.append((before or (prev[:1] if demonstrative else []), sent))
                 if here:
                     prev = here
 

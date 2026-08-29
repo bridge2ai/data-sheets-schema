@@ -205,6 +205,28 @@ class SchemaClaimTest(Harness):
                          [("false_schema_claim", "md5"),
                           ("false_schema_claim", "path")])
 
+    def test_prose_about_a_value_not_appearing_is_not_a_schema_claim(self):
+        """#757: the v7 API canary's only report finding. The sentence is
+        about a value, and the previous sentence's slot must not be borrowed
+        as its subject when it has no demonstrative."""
+        md = ("- **The leadership roster was removed from `description`** in both "
+              "records. The final sentence of the original description (\"The team "
+              "comprises A. B (X).\") does not appear in the reconciled description.\n")
+        self.assertEqual(self.kinds(md), [])
+        md2 = ("The core record carried a `distributions` block. This slot does not "
+               "appear in the `CoreDataset` inventory.\n")
+        self.assertEqual(self.kinds(md2), [("false_schema_claim", "distributions")])
+        # the guard itself: the phrase matches, the sentence has no backticked
+        # subject and no demonstrative, so the previous slot is not borrowed
+        md3 = ("The core record carried a `distributions` block. Nothing of that kind "
+               "does not appear in the supplied schema digest, of course.\n")
+        self.assertEqual(self.kinds(md3), [])
+        # #760: the corpus's true positives carry an adjective run before the noun
+        for md in ("`distributions` does not appear in the supplied schema digest.\n",
+                   "It carried a `distributions` block that does not appear in the supplied slot inventory.\n",
+                   "`distributions` does not appear in the supplied 98-slot inventory.\n"):
+            self.assertEqual(self.kinds(md), [("false_schema_claim", "distributions")], md)
+
     def test_a_true_absence_claim_is_not_reported(self):
         md = "**Finding:** `invented_slot` is not declared on `CoreDataset`.\n"
         self.assertEqual(self.kinds(md), [])
