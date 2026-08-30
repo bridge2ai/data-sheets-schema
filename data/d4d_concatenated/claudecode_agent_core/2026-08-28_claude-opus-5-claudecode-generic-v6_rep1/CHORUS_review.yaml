@@ -1,0 +1,245 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: '2026-08-29T17:40:00Z'
+pack_sha256: b9b9de9707a4b00a17b94bd6cbbcccb146578db40a1ad9b12e5fac61ab1dc7e4
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-18 are the concatenation banner, input directory, file count and the four-entry table of contents; no dataset fact appears, and the four filenames are represented elsewhere only as the bundle's sources"
+- id: slot-002
+  verdict: misread
+  evidence: "lines 1413-1415 are a repository listing ('privacy_scan_tool / A Privacy Scan tools for medical records') in the GitHub organization; the value's clause 'the organization publishes a privacy scan tool for medical records' reads the existence of a repository as a privacy-preserving technique applied to the dataset (the slot asks what techniques were applied); the value's other three clauses are supported by lines 308-310, 251-252 and 45"
+- id: slot-003
+  verdict: supported
+  evidence: "line 45 'transform data using approaches that limit re-identification' says what the value's third clause says; the OHNLP clause is at lines 308-310 and the imaging clause at lines 251-252. Note the passage is a stated plan ('the project will ... E) ...'), and the value's final sentence ('publishes de-identification tooling in its CTP-deid repository') rests on line 1522, which gives only the name 'CTP-deid Public' with no description — see rule-01"
+- id: slot-004
+  verdict: supported
+  evidence: "line 1122 'Source URL: https://github.com/chorus-ai#table-of-contents' and lines 1185, 1264, 1336 give the organization URL; the slot is uriorcurie and no declared prefix covers github.com, so the URL form is correct"
+- id: slot-005
+  verdict: supported
+  evidence: "line 45 'The dataset will also provision a holdout test set, accessible for model external validation ...' is quoted verbatim, and line 47 'sequestering holdout datasets for external validation' supports the second sentence; the value keeps the source's prospective tense"
+- id: slot-006
+  verdict: supported
+  evidence: "lines 1072-1073 '60+ / CHoRUS consortium members across 20 different institutions' under 'Snapshot of the dataset'"
+- id: slot-007
+  verdict: supported
+  evidence: "line 1059 is the tagline expanding the acronym; the name 'CHoRUS' itself appears directly at line 236 ('CHoRUS Dataset'), line 1046 and line 1085 ('The CHoRUS project'), so the value is the name the sources use, though the cited snippet supports it only through the expansion"
+- id: slot-008
+  verdict: supported
+  evidence: "line 45 'As part of the NIH Common Fund's Bridge2AI program' and line 1094 'This project is funded by the NIH under award number OT2OD032701' together give the grantor as the value states it"
+- id: slot-009
+  verdict: supported
+  evidence: "lines 242-244 'As of August 2025, covers 14 different hospitals with over 45K unique admissions' is quoted accurately, and the caveat correctly names the tier-2 figure at lines 1074-1076 as the one recorded"
+- id: slot-010
+  verdict: supported
+  evidence: "lines 183-184 'Yulia Strekalova / University of Florida' under the heading 'Bridge2AI CHoRUS Leadership Team' at line 171, which also supports the description"
+- id: slot-011
+  verdict: supported
+  evidence: "line 1375 'This project is licensed under the MIT License. See the LICENSE file for more details.' is in the GitHub organization README; the caveat correctly scopes it to the software and cites the per-repository marks at lines 1512 (Apache-2.0), 1544, 1618 and 1652 (MIT)"
+- id: slot-012
+  verdict: supported
+  evidence: "lines 1238-1240 'Standard operating protocols (SOPs) to instruct data contributing sites about best practices for curating and delivering interoperable datasets'"
+- id: slot-013
+  verdict: supported
+  evidence: "lines 186-187 'Parisa Rashidi / University of Florida' under the Leadership Team heading at line 171"
+- id: slot-014
+  verdict: misread
+  evidence: "line 254 'EEG - extraction in process at this point' supports the first sentence (with lines 245-252 for notes and imaging); but the value's second sentence, 'Published metadata schemas were marked as planned rather than delivered for clinical notes, telemetry and EEG', reads the 'Planned' cells at lines 324, 360 and 372 as the published-schema column, while the published-schema cells for those modalities say 'Yes (OHNLP open source schema)' (338-339), 'Yes (PhysioNet schema extended)' (343-344) and 'Yes (open source EDF+ and Persyst schema)' (374-375). The record's own instances[7], [9] and [10] cite those schemas, and the record-level source_caveats says per-modality metadata status is asserted only where unambiguous"
+- id: slot-015
+  verdict: supported
+  evidence: "line 45 opening two sentences are quoted verbatim"
+- id: slot-016
+  verdict: supported
+  evidence: "line 341 'Yes (DICOM schema)', line 346 'Imaging (from PACS)', line 348 'DICOM'; the 7,642 figure is at lines 1079-1080 and is correctly stated as admissions with radiology data; controlled access at line 240"
+- id: slot-017
+  verdict: supported
+  evidence: "lines 177-178 'Azra Bihorac / University of Florida' under the Leadership Team heading at line 171; record index creators[2] is Azra Bihorac"
+- id: slot-018
+  verdict: supported
+  evidence: "line 305 'Diagnoses (documentation / by providers)'"
+- id: slot-019
+  verdict: supported
+  evidence: "lines 39-40 'Fiscal year: 2022 / Award amount: 5880300' and line 1094 for the award number; the value transcribes the amount as the source gives it"
+- id: slot-020
+  verdict: supported
+  evidence: "lines 1323-1334 say what the value's second half says (site status updates via GitHub or a Google Form, ending up in the Standards or Data Acquisition project); the first half rests on lines 1065-1069, 251-252 and 254. Note that the passage describes contributing sites reporting to the consortium, which is a stretch for a slot asking how updates are communicated to users — see rule-07"
+- id: slot-021
+  verdict: supported
+  evidence: "line 47 is quoted verbatim as the consortium's stated aim; the other figures in the description are at lines 1065-1082 (current/anticipated snapshot) and 238 (retrospective)"
+- id: slot-022
+  verdict: supported
+  evidence: "line 1220 'Federated access will enable sampling methods to ensure a balanced and diverse cohort.' and line 45 'sampling to ensure comprehensive sets of patient conditions and clinical treatment strategies' say what the value says; neither names a sampling strategy, and the value keeps the source's future tense — see rule-06"
+- id: slot-023
+  verdict: supported
+  evidence: "lines 465-467 'Trainees will receive hands-on training on the Bridge2AI AI/ML for Clinical Care Network and leverage the data and tools to create practical use cases'; the value generalizes 'Trainees' to 'Users'. The container-apps clause is at lines 1395-1396. The value's identification of the Collaborative Cloud (lines 493, 768) with the 'cloud enclave' (lines 245, 1085) is a join the bundle does not itself make"
+- id: slot-024
+  verdict: supported
+  evidence: "lines 1106-1108 'Contact Us / Ciera McCrary, MGH, Program Manager / cmccrary@mgh.havard.edu'; the value transcribes the address as given and flags the domain spelling in source_caveats"
+- id: slot-025
+  verdict: supported
+  evidence: "line 45 'acquire data, standardize data to the OMOP Common Data Model'"
+- id: slot-026
+  verdict: supported
+  evidence: "lines 251-252 'Imaging - currently 1000 images available / with de-id in process for larger cohort', dated by line 242 'As of August 2025'"
+- id: slot-027
+  verdict: bundle_supports
+  evidence: "line 45 'aimed at characterizing acute and critical care illness, predicting complications, and measuring treatment response'; the name is the first of the three"
+- id: slot-028
+  verdict: bundle_supports
+  evidence: "lines 308-310 'Clinical notes (extracted and tokenized using OHNLP toolkit)', 338-339 'Yes (OHNLP open source schema)', 247 'Clinical notes - stored locally except tokens', 240 'Controlled access'"
+- id: slot-029
+  verdict: bundle_supports
+  evidence: "each clause has a line: controlled access 240, notes stored locally except tokens 247, imaging de-id in process 251-252, approaches that limit re-identification 45; 'clinical records of critically ill patients' from line 45 'more than 100,000 critically ill patients'"
+- id: slot-030
+  verdict: not_in_bundle
+  evidence: "lines 245-254 state which modalities are in the enclave and which are in process; no passage states that analyses depending on imaging, EEG or note text are constrained relative to OMOP and telemetry. The value is the record's own consequence drawn from those lines, not a statement the bundle makes"
+- id: slot-031
+  verdict: bundle_supports
+  evidence: "line 1093 'CHoRUS Consortium' and line 1087 'The CHoRUS consortium evaluates ...'"
+- id: slot-032
+  verdict: bundle_supports
+  evidence: "line 42 'Project end: 2026-11-30T00:00:00', normalized to a date; the receipt cites this line under start_date. Whether the award period is the data collection period is a separate question — see rule-07"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "lines 1238-1240 'Standard operating protocols (SOPs) to instruct data contributing sites'; the name paraphrases that item"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "lines 1196-1200 'to answer the grand challenge of improving recovery from acute illness'"
+- id: slot-035
+  verdict: bundle_supports
+  evidence: "line 298 'Procedures (documentation by providers)'; the five 'OMOP' cells at lines 265, 267, 285, 289 and 312 match the five structured domains (demographics, medication, procedures, nursing flowsheets, diagnoses) with OHNLP at line 320 for notes, and line 45 'standardize data to the OMOP Common Data Model'"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "line 305 'Diagnoses (documentation by providers)'; OMOP pairing as for slot-035 (lines 265-312, 45)"
+- id: slot-037
+  verdict: bundle_supports
+  evidence: "lines 350-354 'Waveform telemetry (bedside monitors, gateway/middleware) / WFDB'"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "line 238 'Retrospective data collection' and the acquisition sources at lines 293-365 (provider documentation, PACS, bedside monitors, hospital database) — the data is drawn from clinical systems, not collected from individuals; the boolean is the direct reading of that"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "line 1062 'to create ethically sourced datasets and tools around Artificial Intelligence and to create best practices for AI in health'"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "line 1085 'The CHoRUS project is the collection of multi-modal data across 14 different hospitals. The data utilizes ongoing and new standardization practices.' and line 45 'develop capabilities across a multi-center network to acquire, standardize ...'; the name labels that passage"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "lines 298-299 'Procedures (documentation by providers)', OMOP cells 265-312, controlled access 240"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "lines 293-296 'Medication administration (dosing time-stamped upon each infusion change or dose administration)', OMOP cells 265-312, controlled access 240"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "line 265 'Demographics OMOP', controlled access at lines 240 and 269-271"
+- id: slot-044
+  verdict: cannot_tell
+  evidence: "the bundle states how the data arose (line 238 retrospective collection; lines 293-365 provider documentation, PACS, bedside monitors, hospital EEG database) but never says whether it counts as 'directly observed by a researcher or instrument'; the true/false answer turns on the slot's intended sense of 'instrument' for routinely recorded clinical data, not on anything the bundle states"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "lines 41-42 'Project start: 2022-09-01T00:00:00 / Project end: 2026-11-30T00:00:00' for the period named and line 238 for 'retrospective'; the value says it is the award period and the caveat says the bundle has no collection dates — see rule-07"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "line 240 'Controlled access', lines 251-252 'de-id in process', line 45 'critically ill patients' and 'approaches that limit re-identification' — clinical patient data that requires de-identification; the boolean follows from those lines"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "line 1076 'Patient admissions from ICU, PICU, and NICU' explicitly names subpopulations"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "lines 364-368 'Waveform EEG (hospital database) / EDF+ and Persyst', 374-375 'Yes (open source EDF+ and Persyst schema)', 254 'EEG - extraction in process at this point', 240 controlled access"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "line 45 'There is an urgent need for infrastructure to support artificial intelligence and machine learning (AI/ML) in critical care.'; the name labels that gap"
+- id: slot-050
+  verdict: exempt_by_nature
+  evidence: "an enum value (LimitationTypeEnum) classifying the limitation the record describes from lines 245-254; the category has no passage by its kind, and 'coverage' is the category the described modality gaps fall under"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "lines 1077-1078 '1.6 Billion / Rows of EHR OMOP data'; the name labels that unit"
+- id: rule-01
+  verdict: violated
+  evidence: "is_deidentified.method's final sentence, 'The organization publishes de-identification tooling in its CTP-deid repository', rests on line 1522 'CTP-deid Public' alone — a repository name with no description; that it is de-identification tooling is recognized from the name, not stated. known_limitations[0].scope_impact is an inferred consequence (slot-030). Otherwise the rule is followed conspicuously: license, doi, publisher, version, citation, data_use_permission, file_collections and known_biases are all omitted with reasons in the report's 'Deliberate omissions'"
+- id: rule-02
+  verdict: followed
+  evidence: "instances[0].counts carries 50,000 (line 1075) with instances[0].source_caveats and the record-level source_caveats stating the webinar's 45K (lines 242-244); instances[8] leaves counts unset and states both the 7,642-admissions (1079-1080) and 1000-images (251) figures with the unit mismatch; the training program and the GitHub organization are kept as external_resources/existing_uses rather than merged into the referent"
+- id: rule-03
+  verdict: followed
+  evidence: "full record id https://chorus4ai.org/ (line 1041 'Source URL: https://chorus4ai.org/', line 1153) and core record id identical (core line 437); the reconciliation report's 'Referent' section states the choice and names the two entities deliberately not merged"
+- id: rule-04
+  verdict: followed
+  evidence: "the report's 'Deliberate omissions' section names eight omitted slots with reasons and its final table labels the top-level slot counts (47/45) as 'informational metadata, not a quality measure'; no value in the record is padded from a source-less slot"
+- id: rule-05
+  verdict: followed
+  evidence: "creators holds seven entries, one per person at lines 173-190 plus the consortium at 1072-1073; tasks holds three entries split from the three aims in line 45; intended_uses three, existing_uses two, instances eleven (one per modality row at lines 265-375); raw_data_sources four"
+- id: rule-06
+  verdict: violated
+  evidence: "sampling_strategies[0].strategies states that 'Federated access will enable sampling methods' (line 1220) and that the project 'samples to ensure comprehensive sets' (line 45) — a statement that sampling is planned, naming no strategy, in a slot that asks which strategies were used; is_deidentified.method's last sentence points at where tooling lives ('in its CTP-deid repository', line 1522) rather than stating a method"
+- id: rule-07
+  verdict: violated
+  evidence: "collection_timeframes[0].start_date/end_date are the NIH award period (lines 41-42 'Project start ... Project end'), and the entry's own source_caveats says the bundle gives 'no start and end dates for the clinical encounters themselves' — a neighbouring fact (the funding period) placed in the data-collection slot and then disclaimed; the rule asks that it be put in the field it answers or omitted. Secondary: updates.update_details' second half (lines 1323-1334) describes sites reporting extract status to the consortium, not update communication to users"
+- id: rule-08
+  verdict: followed
+  evidence: "creators[1..6] carry name and affiliations[].name (lines 173-190) rather than prose; funders[0] carries grantor plus grants[].name/grant_number (lines 34-35); maintainers[0] carries name with contact in maintainer_details (1107-1108); external_resources[1] carries id and name; instances carry name/instance_type/counts where the source gives them"
+- id: rule-09
+  verdict: followed
+  evidence: "the only uriorcurie values are id https://chorus4ai.org/ and external_resources[1].id https://github.com/chorus-ai; no declared prefix (ROR, ORCID, doi, B2AI_*, ...) covers either, so the URL form is the correct fallback; no ROR/ORCID/DOI appears in the record; page is a string slot"
+- id: rule-10
+  verdict: followed
+  evidence: "both identifiers in the record are in the bundle (line 1041/1153 for chorus4ai.org, 1122/1185 for github.com/chorus-ai); no ROR, ORCID or DOI is asserted although the organizations at lines 38, 174-190 are recognizable; the report's grounding check reports 0 absent"
+- id: rule-11
+  verdict: not_applicable
+  evidence: "no fragment identifier is minted anywhere in the record; the report records that Person objects were deliberately not emitted because Person.id would have required minting for people with an external referent (creators[*] use Creator with name/affiliations and no id)"
+- id: rule-12
+  verdict: followed
+  evidence: "prose uses 'standardized' (instances[1].instance_type), 'organization' (external_resources[1].name), 'characterizing' (tasks[0]), 'harmonize', 'analyzed' (ethical_reviews), 'de-identification'; a grep for -ise/-isation/-our/-yse spellings finds none; 'centers' at data_collectors[0]"
+- id: rule-13
+  verdict: followed
+  evidence: "record-level source_caveats names both sources with their manifest source ids and tiers (project_documentation tier 2 vs cohort_2_webinar tier 4), quotes both values (50,000 at line 1075; 'over 45K' at line 244), and states which was preferred; instances[0].source_caveats repeats it at the entry"
+- id: rule-14
+  verdict: followed
+  evidence: "no fragment is minted; the one part that is named, splits[0] 'Holdout test set' (line 45), carries no id, and the only other value that mentions it (intended_uses[1].examples[0]) does so in prose rather than by reference — a part only described, left unlabeled, as the rule asks"
+- id: rule-15
+  verdict: followed
+  evidence: "no object sits in a scalar slot: grantor, instance_type, strategies, stewardship_roles[] and special_populations[] are strings; creators[*].principal_investigator (a scalar reference) is left unset rather than filled with an inlined object, per the report's 'Deliberate omissions'; both records pass linkml-validate per the report"
+notes: >-
+  Adverse findings are slot-002 (repository listing read as an applied privacy
+  technique), slot-014 (the 'Planned' cells of the degraded webinar table read as
+  the published-metadata-schema column, contradicting lines 338-339, 343-344 and
+  374-375 and the record's own instances[7], [9], [10]), slot-030 (scope_impact is an
+  inferred consequence with no passage), and rules 01, 06 and 07 (the CTP-deid clause
+  inferred from a bare repository name at line 1522; sampling_strategies naming no
+  strategy; the NIH award period standing in for the collection timeframe). The
+  record is otherwise carefully grounded and its deliberate omissions are well argued.
+  Instrument findings for the receipt validator: (a) the receipt entries
+  'is_deidentified.method: CTP-deid Public' (c008) and 'participant_privacy[0].privacy_techniques:
+  privacy_scan_tool ...' (c007) verify as verbatim snippets while the passage is a
+  bare repository name — a verbatim match cannot see that the snippet carries no
+  predicate; (b) c002's receipt for collection_timeframes[0].start_date quotes both
+  the start and end lines, yet the pack lists end_date as receiptless, so the
+  pack's receipted/receiptless split is by exact slot path and a receipt covering
+  two sibling slots under one path leaves the sibling looking unreceipted.
+  Procedure notes from this first use: (1) the agent definition says to 'read the
+  instruction in full first', but the pack gives the instruction only as a basis
+  line, hash and char count — no path and no text; I read
+  src/download/prompts/d4d_generic_arm_prompt_v6.md (the file the record's spec
+  names, sha256 57ac2030...) as the nearest stand-in, which is the template rather
+  than the substituted instruction. The pack should write the re-rendered text to a
+  file or include it. (2) The agent definition says the pack includes a 'schema
+  digest' with slot descriptions; the pack has none, so descriptions were read from
+  data_sheets_schema_all.yaml via SchemaView as the lead directed. (3) The pack's
+  chunk line spans stop at c007 (1113-1512) although the manifest has 8 chunks
+  (c008 = 1513-1698); the c008 span appears nowhere in the pack because no sampled
+  item cites it, so a reviewer cannot tell the bundle's length from the pack alone.
+  (4) Verdict vocabulary gaps: the slot_receiptless kind has no verdict for a value
+  that is a reasonable inference from stated lines rather than a stated fact
+  (slot-030 was marked not_in_bundle, slot-044 cannot_tell, slot-050 exempt_by_nature
+  — three different verdicts for the same underlying situation, an interpretive slot
+  with no passage); and slot_receipted has no verdict for 'passage supports the text
+  but the slot's question is not answered' (slot-022), which I marked supported and
+  carried to rule-06. (5) The pack item slot-007 cites a snippet (line 1059 tagline)
+  that does not contain the value 'CHoRUS'; the sampled receipt is weak rather than
+  wrong, and there is no verdict between supported and unsupported for that. (6)
+  The pack does not carry the record's values, so every item required opening the
+  full record; including the value under each slot item would remove one read per
+  item. (7) The reconciliation report's line count for the bundle (1698) and chunk
+  count (8) were the only place the bundle's extent was stated.

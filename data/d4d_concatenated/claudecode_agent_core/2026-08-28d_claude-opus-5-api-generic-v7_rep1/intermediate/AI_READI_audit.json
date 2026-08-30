@@ -1,0 +1,155 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "conforms_to_standard",
+      "issue": "Value contains `CDS`, which is a permitted value of the DataStandardEnum, but the list also mixes standards attested for sub-collections rather than the dataset as a whole; more seriously, the top-level `conforms_to_standard` omits nothing but must be checked against the enum: `CDS`, `WFDB`, `OMOP_CDM`, `ESDS`, `DICOM`, `OPEN_MHEALTH`, `RO_CRATE` are all declared, so the shape is valid. No defect on enum membership. However the list omits `FHIR`/`BIDS` correctly. Downgrade note: this entry is retained only to record that enum conformance was verified; no repair required."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "instances[0].data_topic",
+      "issue": "`B2AI_TOPIC:43` is Diabetes, a topic term, and the slot range accepts it; but the companion slot `data_substrate` is omitted while the bundle clearly supports it (the healthsheet states instances encompass tabular data, imaging data and physiological signal/waveform data). More importantly, `data_topic` is single-valued and the record has selected one topic for a multimodal dataset without recording that choice in `source_caveats`; the selection is defensible but undocumented."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "Range is `uriorcurie`. The value `https://fairhub.io/` is a bare website URL, not an identifier for the publishing organization, and no declared prefix covers FAIRhub. The FAIRhub structured metadata states only `\"publisherName\": \"FAIRhub\"`. A resolver-style homepage URL in a `uriorcurie` slot names a web page rather than the entity; either omit or use an attested organization identifier. The bundle supplies ROR identifiers for other organizations but none for FAIRhub."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators",
+      "issue": "Omitted entirely, though the bundle clearly supports it. The FAIRhub structured metadata declares `creator: [{creatorName: \"AI-READI Consortium\", nameType: \"Organizational\"}]`, and the RO-Crate declares `author: [\"AI-READI Consortium\"]` and `principalInvestigator: \"Aaron Lee, Department of Ophthalmology, University of Washington\"`. The record instead places creator information only in the scalar `created_by` and buries the principal investigator inside `data_governance.stewardship_roles` prose. Creator is a declared multivalued slot with `affiliations` and `principal_investigator` fields designed for exactly this content."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "funders[0].grants",
+      "issue": "`FundingMechanism` declares a `grants` field of range `Grant[]`, and the bundle supplies award number OT2OD032644 with award title \"Bridge2AI: Salutogenesis Data Generation Project\" and award URI. The record instead compresses the entire award record — number, title, application ID, PI, organization, amount, dates, URL — into the free-text `notes` field while the declared structured field stays empty. Same defect in funders[1] and funders[2] (P30 DK035816, UL1TR003096)."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "ethical_reviews[1].reviewing_organization",
+      "issue": "The value \"AI-READI ethics team\" is not attested anywhere in the bundle. The RO-Crate states `\"ethicalReview\": \"Camille Nebeker, Debra Mathews, Kadija Ferryman, Nicholas Evans\"` — a list of named persons, not an organization by that name. Inventing an organizational label for a set of individuals is an unsupported claim in an identifier-like position."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "data_governance.committee_contact",
+      "issue": "Omission the bundle supports. `DataGovernance` declares `committee_contact` of range `Person`, and the bundle supplies a central contact: Aaron Lee, MD, ORCID 0000-0002-7452-1648, email contact@aireadi.org. The record instead embeds this in `maintainers[0].maintainer_details` prose and in `stewardship_roles`, leaving the declared structured field empty."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "license_and_use_terms.contact_person",
+      "issue": "Omitted though `LicenseAndUseTerms` declares `contact_person` of range `Person`; the license and the documentation both direct licensees to the AI-READI contact, and the bundle names Aaron Lee with ORCID and email as central contact."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "human_subject_research.ethics_review_board",
+      "issue": "The value embeds source commentary and a full postal address inside what should be an identifying value: 'The RO-Crate metadata names the reviewing body \"Washington University IRB\" with the contact point...'. Naming the source inside the field value is source commentary; the schema provides `source_caveats` on this object for exactly that, and `EthicalReview.contact_person` (range Person) for the contact. The address and email belong in a Person/Organization structure or in notes, not inside the board-name string."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "sensitive_elements",
+      "issue": "Internal inconsistency left unreconciled across sibling entries. Entry [0] asserts `sensitive_elements_present: false` for the public dataset; entry [2] asserts `sensitive_elements_present: true` citing the RO-Crate `rai:personalSensitiveInformation` list. Entry [2] carries a caveat, but entry [0] does not cross-reference it, so a consumer reading the boolean alone gets contradictory answers from the same slot without signal on either side. Both are equally ranked sources (fairhub_dataset_v3_api and ro_crate_metadata, both tier 1), so representing both is correct, but each entry should flag the conflict."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "external_resources",
+      "issue": "Every entry populates only the free-text `external_resources` field; the declared `archival` (boolean) and `future_guarantees` fields are populated on only the first entry, and `restrictions` on only the first. The bundle supports `archival` determinations for the Zenodo community and the DOI-bearing publications, and the healthsheet explicitly answers the guarantee/archival/restriction sub-questions for external resources."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "labeling_strategies",
+      "issue": "Omitted. The bundle answers the labeling questions explicitly and repeatedly: 'N/A - no labels are provided. No specific labeling was performed in the dataset, as the dataset is a hypothesis-agnostic dataset aimed at facilitating multiple potential downstream AI/ML applications', and the RO-Crate `rai:dataAnnotationProtocol` states 'N/A - no labels are provided'. This is a substantive documented fact about the dataset, currently recorded only obliquely inside `instances[0].label_description`."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "existing_uses",
+      "issue": "Omitted though the bundle answers directly: healthsheet uses question 1, 'Has the dataset been used for any tasks already?' — response 'No'. An attested negative is supportable content for this slot; the record is silent instead."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "use_repository",
+      "issue": "Omitted though the bundle answers directly: healthsheet uses question 3, 'Is there a repository that links to any or all papers or systems that use the dataset?' — response 'No'. The FAIRhub landing page additionally shows a 'Cited by' / usage statistics panel and the API reports `cited: 0`."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "errata",
+      "issue": "Omitted. The healthsheet maintenance question 3 asks 'Is there an erratum?' and the response field is empty in the source. An empty source response is not the same as an absent question; the record gives no signal that the question was asked and left unanswered, which `source_caveats` on an Erratum object or a note could carry."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "discouraged_uses",
+      "issue": "Omitted, although the healthsheet motivation question 3 ('Are there any types of usage or applications that are discouraged from using this dataset?') is answered with a pointer to the license restrictions, and uses question 5 ('Are there tasks for which the dataset should not be used?') refers back to it. The record routes all of this into `prohibited_uses`, which is defensible for the hard license prohibitions, but the discouraged/prohibited distinction the schema draws is collapsed without comment."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "created_on",
+      "issue": "Omitted although the bundle supplies `created_at: 1763366400` in the FAIRhub API record for dataset 3 (corresponding to 2025-11-17T00:00:00Z), the same instant given in `issued`. Not a defect of correctness, but a supported omission."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "was_derived_from",
+      "issue": "Omitted. The bundle establishes that v3.0.0 supersedes and incorporates v1.0.0 and v2.0.0 content ('This version has more subjects/patients represented in the data'), which the record captures in `related_datasets` but not in this scalar provenance slot."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "is_tabular",
+      "issue": "Set to `false`. Defensible for a 3.82 TB multimodal collection dominated by DICOM, but the bundle states the collection 'encompass[es] tabular data, imaging data, and physiological signal/waveform data' and the clinical_data directory is entirely CSV mapped one-to-one to OMOP tables. A single boolean cannot represent a mixed collection; the choice is unrecorded in `source_caveats`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "license",
+      "issue": "Range is `string` and the value 'AI-READI custom license v2.0' matches the `rightsName` in the structured metadata, so the shape conforms. However the FAIRhub landing pages label the license 'Health Data License', an equally-ranked tier-1 source disagreement that is not recorded in `source_caveats`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subsets",
+      "issue": "Three split subsets are minted with fragment identifiers, but no other value in the record points at any of them — `splits[0].split_details` describes the partition in prose without referencing the fragments. Under the minting rule, a fragment identifier that nothing in the record points at is not a label but noise that reads as structure; either have `splits` or a task reference them, or describe the partitions in prose only."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "annotation_analyses",
+      "issue": "Omitted, which is correct given no labels were produced, but the bundle explicitly answers the inter-annotator agreement questions ('N/A - no labels are provided'), so an entry carrying that attested negative would be supported."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "collection_timeframes[0].source_caveats",
+      "issue": "The caveat correctly records the 2023-07-19 vs 18 July 2023 discrepancy and the preference. Minor: the two dates differ by one day and the caveat does not note that the protocol publication is tier 3 against the structured metadata's tier 1, which is the ranking that settles it."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "notes",
+      "issue": "Contains biospecimen and device-loan content that has fitting structured homes: the device loans and discounts are acknowledgements better placed in `source_caveats` or omitted, and the biorepository description overlaps `raw_data_sources`. The residual-content rule directs `notes` to hold only what no structured slot and no description can carry; the 'under review for potential modification' banner qualifies, the rest is arguable."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "variables",
+      "issue": "22 VariableMetadata entries are supplied but the clinical laboratory panel in the bundle enumerates roughly 40 named analytes with units and reference ranges (NT-proBNP pg/mL, Troponin-T ng/L, HbA1c %, sodium mEq/L, and so on) that would populate `unit`, `minimum_value` and `maximum_value` directly. The selection is not wrong, but the omission of the tabulated reference ranges leaves declared numeric fields empty where the bundle supplies exact values."
+    }
+  ],
+  "summary": "Audited the full record against the declared bundle. No fabricated dataset facts were found: figures (2280 participants, 356343 files, 3815969779678 bytes, per-directory counts and sizes), dates, DOIs, device names, standards and license terms all trace to the bundle, and the extensive source_caveats block correctly documents the acronym, publisher, lead-organization, enrollment-target and de-identification conflicts with the ranking applied. The defects are concentrated in three areas. First, structured fields left empty while their content sits in prose: `creators` is omitted entirely despite explicit creator and principalInvestigator declarations in two tier-1 sources; `funders[].grants` is unpopulated while award numbers, titles and URIs are compressed into notes; `data_governance.committee_contact` and `license_and_use_terms.contact_person` are omitted though the bundle names Aaron Lee with ORCID and email. Second, one unsupported value and one shape problem: `ethical_reviews[1].reviewing_organization` invents 'AI-READI ethics team' for what the RO-Crate records as four named individuals, and `human_subject_research.ethics_review_board` embeds source attribution and a postal address inside the board-name string. `publisher` holds a homepage URL in a uriorcurie slot. Third, supported omissions of attested negatives — `labeling_strategies`, `existing_uses`, `use_repository` — where the healthsheet answers the question directly and the record is silent. Minor issues: the three minted split fragments are pointed at by nothing; `sensitive_elements` carries an unflagged contradiction between siblings; the license-name disagreement between the FAIRhub landing page and the structured metadata is unrecorded. Counts: 6 high, 9 medium, 8 low."
+}
