@@ -74,6 +74,13 @@ class Normalisation(unittest.TestCase):
         # #784: version strings and figure labels pin nothing
         for weak in ("3.0.0", "v3.0.0", "Table 1", "Fig. 1", "1,000"):   # "10 days" (7 chars, 2 digits) pins, as the review measured
             self.assertFalse(rc.snippet_in(weak, f"see {weak} here")[0], weak)
+        # #789: a word the extraction wrapped mid-line is the word a reader quotes
+        ok, why = rc.snippet_in("Participants are volunteers; therefore, there is selection bias",
+                                "Partic-\nipants  are  volunteers;  therefore,  there  is  selection  bias\n")
+        self.assertTrue(ok); self.assertEqual(why, "linewrap-joined")
+        self.assertFalse(rc.snippet_in("Participants are volunteers", "Partic\nipants left; volunteers came")[0])
+        self.assertTrue(rc.snippet_in("selection bias known as volunteer bias",
+                                      "there  is  selection  bias\nknown  as  volunteer  bias  which")[0])
         # #786: a JSON-escaped newline in the bundle is whitespace
         self.assertTrue(rc.snippet_in("from the\nAI-READI Project (3.0.0) [Data set].",
                                       '"citation": "Diabetes from the\\nAI-READI Project (3.0.0) [Data set]. FAIRhub."')[0])
