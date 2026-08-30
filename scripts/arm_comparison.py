@@ -133,7 +133,7 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                    "receipts (#708): mismatched + unchecked snippets; same caveat"),
     "wrongchunk": ("snippets not in the chunk cited", "record", True,
                    "receipts (#763): verbatim in the bundle but not in the chunk cited — "
-                   "attribution precision, reported not gated; ~2% on the v7 API canaries"),
+                   "attribution precision, reported not gated; 3.8% on the five v7 API canaries (33/859)"),
     "leaves": ("populated leaves (full record)", "record", False,
                "count of populated leaf values in the full record (receipts.populated_leaves); "
                "informational — the v6 plan's prediction 5 is that it does not fall"),

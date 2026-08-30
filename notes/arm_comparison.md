@@ -81,7 +81,7 @@ Cells are mean ± sample SD over the *measured* replicates, with every replicate
 - **minted fragments (reported)** — record block. reported-only; every fragment hangs off an attested base wherever ungrounded is 0. Appetite varies 3→130 within one project (#685).
 - **chunks unreviewed** — record block. receipts (#708): manifest chunks with no receipt entry. Only arms whose procedure wrote a coverage receipt carry a value; earlier arms are –, not 0.
 - **snippets unverified** — record block. receipts (#708): mismatched + unchecked snippets; same caveat.
-- **snippets not in the chunk cited** — record block. receipts (#763): verbatim in the bundle but not in the chunk cited — attribution precision, reported not gated; ~2% on the v7 API canaries.
+- **snippets not in the chunk cited** — record block. receipts (#763): verbatim in the bundle but not in the chunk cited — attribution precision, reported not gated; 3.8% on the five v7 API canaries (33/859).
 - **populated leaves (full record)** — record block. count of populated leaf values in the full record (receipts.populated_leaves); informational — the v6 plan's prediction 5 is that it does not fall.
 - **slots without a receipt** — record block. receipts (#708): receiptable populated leaves with no receipt; exempt slots (runner-set, minted, commentary) are outside the denominator.
 - **GC label variants (reported)** — live recompute, current instrument. reported-only; counted against the manifest naming declaration decided 2026-08-22, so anachronistic for the v4 arm and same-day for 22c. For VOICE the count is the dataset's own PhysioNet title, lawful under the proper-noun carve-out (#674).
@@ -99,9 +99,9 @@ Cells are mean ± sample SD over the *measured* replicates, with every replicate
 
 | project | v4 API (2026-08-13) | v5 API (2026-08-22c) | v5 agentic (2026-08-24) | v6 agentic (2026-08-28) | v7 API canaries (2026-08-28…d, partial) |
 |---|---|---|---|---|---|
-| AI_READI | – | 81/88 (92.0%, 22c/rep2) | 79/88 (89.8%, rep2) | – | – |
-| CHORUS | – | 60/88 (68.2%, 22c/rep3) | 59/88 (67.0%, rep1) | – | – |
-| CM4AI | – | 70/78 (89.7%, 22c/rep1) | 66/78 (84.6%, rep2) | – | – |
-| VOICE | – | 81/88 (92.0%, 22c/rep2) | 78/88 (88.6%, rep1) | – | – |
+| AI_READI | – | 81/88 (92.0%, 22c/rep2) | 79/88 (89.8%, rep2) | 79/88 (89.8%, rep1); 78/88 (88.6%, rep2); 80/88 (90.9%, rep3) | 79/88 (89.8%, 28b/rep1); 80/88 (90.9%, 28c/rep1); 84/88 (95.5%, 28d/rep1) |
+| CHORUS | – | 60/88 (68.2%, 22c/rep3) | 59/88 (67.0%, rep1) | 59/88 (67.0%, rep1); 58/88 (65.9%, rep2); 57/83 (68.7%, rep3) | 62/88 (70.5%, rep1); 60/88 (68.2%, 28b/rep1) |
+| CM4AI | – | 70/78 (89.7%, 22c/rep1) | 66/78 (84.6%, rep2) | 73/88 (83.0%, rep1); 68/78 (87.2%, rep2); 68/78 (87.2%, rep3) | – |
+| VOICE | – | 81/88 (92.0%, 22c/rep2) | 78/88 (88.6%, rep1) | 80/88 (90.9%, rep1); 78/88 (88.6%, rep2); 80/88 (90.9%, rep3) | – |
 
 Evaluator model(s) recorded: claude-fable-5. Scores are shown as points / adjusted maximum after N/A exclusions; raw points are comparable within a rubric, percentages are denominator-sensitive. No gold standard exists (#177); the rubrics are not domain-neutral (#627); rubric20's N/A convention is #155's.
