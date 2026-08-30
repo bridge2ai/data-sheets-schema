@@ -37,6 +37,15 @@ class Rules(unittest.TestCase):
         self.assertEqual(rp.rules_from("no rules here\n- not a rule\n"), [])
 
 
+class ValueAt(unittest.TestCase):
+    def test_an_index_into_a_collapsed_string_does_not_resolve_to_a_character(self):
+        rec = {"a": [{"b": "collapsed into one string"}], "c": "xyz"}
+        self.assertEqual(rp._value_at(rec, "a[0].b"), "collapsed into one string")
+        self.assertIsNone(rp._value_at(rec, "a[0].b[3]"))      # not "l"
+        self.assertIsNone(rp._value_at(rec, "c[0]"))           # not "x"
+        self.assertIsNone(rp._value_at(rec, "a[5].b"))
+
+
 class Pack(unittest.TestCase):
     def _run(self, tmp):
         """A minimal run: bundle, manifest, receipt, records, provenance."""

@@ -382,3 +382,39 @@ receipts:
       path: data/preprocessed/chunks/VOICE_chunks.yaml
       sha256: f748d123c5f40b18d70a657088392eebfeb9fc3d5ae051f4aae760084ec182b9
   recorded_by: d4d receipts check
+review:
+  checked: true
+  items_total: 67
+  items_answered: 67
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 2
+    slot_receipted:
+      supported: 21
+      weak: 3
+      unsupported: 1
+    slot_receiptless:
+      bundle_supports: 15
+      exempt_by_nature: 8
+      inferred: 2
+    rule:
+      violated: 3
+      followed: 12
+  adverse: 9
+  cannot_tell: 0
+  findings: []
+  summary: items 67/67 answered · 9 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5
+    reviewed_at: '2026-08-30T08:13:14Z'
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/VOICE_review_pack.yaml
+      sha256: 6870616aeb038c986f1ae0522e88550406a27ce0a0db70e5bb7ad624fa69ab77
+    review:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/VOICE_review.yaml
+      sha256: 1f98c894533e79518ce42dfbdaa3e82655c01c2eb4e15ba375339fe029a7ffb9
+  recorded_by: d4d review check

@@ -1,0 +1,216 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: "2026-08-30T08:12:41Z"
+pack_sha256: cbfc4018e913e1da699992afa264e62ed93b743401eeb6b570671e7791fb00ee
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1–18 are the concatenation banner (input directory, file count, extensions, manifest path) and the four-entry table of contents; no dataset fact appears"
+- id: slot-002
+  verdict: supported
+  evidence: "line 265 'Demographics OMOP' is the first row of the data-type table; the nine 'Controlled' cells (lines 269, 271, 287, 291, 314, 322, 356, 358, 370) match the nine rows, so 'Access control is Controlled' holds for every row"
+- id: slot-003
+  verdict: supported
+  evidence: "line 254 'EEG – extraction in process at this point' sits in the bullet list opened by line 242 'As of August 2025'; the value dates it the same way"
+- id: slot-004
+  verdict: supported
+  evidence: "lines 33–42 give application ID 10472824, project number 1OT2OD032701-01, core number OT2OD032701, fiscal year 2022, award amount 5880300, start 2022-09-01, end 2026-11-30; line 1094 'funded by the NIH under award number OT2OD032701' — every figure in the value is there"
+- id: slot-005
+  verdict: supported
+  evidence: "line 1210 'Unified standards will harmonize multi-modal EHR, waveform, imaging, and text data'; OMOP standardization at line 45 ('standardize data to the OMOP Common Data Model') and line 1078 '1.6 Billion Rows of EHR OMOP data'; line 1085 'utilizes ongoing and new standardization practices'. The record drops the source's 'will', but the released OMOP data (line 1078) makes the present tense defensible"
+- id: slot-006
+  verdict: weak
+  evidence: "lines 1574–1575 'This repo is dedicated to producing characterization reports to return to sites following their data submissions' names a feedback repository; nothing there describes cleaning criteria, removal or correction of instances — cleaning_details asks for 'data cleaning procedures applied, including criteria for removing or correcting instances', which the passage does not give (the record's own source_caveats concedes this)"
+- id: slot-007
+  verdict: supported
+  evidence: "line 50 'Preferred terms' lists Critical Care; Critical Illness; Electronic Health Record; Electroencephalography; Artificial Intelligence; Machine Learning; data standards; social health determinants — all eight keywords verbatim"
+- id: slot-008
+  verdict: supported
+  evidence: "lines 189–190 'Manlik Kwong / Tufts University' under the heading line 171 'Bridge2AI CHoRUS Leadership Team'; name, affiliation and description all follow"
+- id: slot-009
+  verdict: supported
+  evidence: "lines 251–252 'Imaging – currently 1000 images available with de-id in process for larger cohort', in the 'As of August 2025' list opened at line 242"
+- id: slot-010
+  verdict: supported
+  evidence: "line 45 'The dataset will also provision a holdout test set, accessible for model external validation to aid marketplace adoption of AI-developed models for implementation in acute and critical care'; the value keeps it as planned and states that no proportions are given, which is true of the bundle"
+- id: slot-011
+  verdict: supported
+  evidence: "line 1122 'Source URL: https://github.com/chorus-ai#table-of-contents' and the same URL as the page footer at lines 1185, 1264, 1336"
+- id: slot-012
+  verdict: supported
+  evidence: "lines 298–299 'Procedures (documentation by providers)'; the five 'OMOP' cells before the first 'OHNLP' (lines 265, 267, 285, 289, 312) match the five OMOP rows Demographics–Diagnoses, so OMOP for Procedures is the sound alignment; Controlled per every row"
+- id: slot-013
+  verdict: weak
+  evidence: "lines 1534–1538 'UF-Geocoding Public / Forked from bihorac-LAB/Exposome / Open source code to geocode OMOP Location entities via DeGauss' describe a repository; nothing in the bundle says the variable 'geographic distance to the nearest hospital' (line 45) is derived with it — derivation asks how this variable was derived, and the record's own source_caveats admits the sources 'do not state that the two are connected'"
+- id: slot-014
+  verdict: supported
+  evidence: "line 1107 'Ciera McCrary, MGH, Program Manager' under 'Contact Us' (line 1106)"
+- id: slot-015
+  verdict: weak
+  evidence: "line 45 'transform data using approaches that limit re-identification' is a stated aim (the sentence is 'this project will ... E) ... transform data ...'), not a procedure; line 1522 'CTP-deid Public' is a bare repository name with no description. deidentification_details asks for 'de-identification procedures and residual risks'; neither passage supplies a procedure, and the value's present-tense 'The project transforms data' reads the plan as done"
+- id: slot-016
+  verdict: supported
+  evidence: "lines 293–296 'Medication administration (dosing time-stamped upon each infusion change or dose administration)'; OMOP by the row alignment noted for slot-012; Controlled per every row"
+- id: slot-017
+  verdict: weak
+  evidence: "lines 454–455 'All participants must sign a licensing agreement included in the registration form before gaining access to the dataset' — the passage says exactly what the value says, but license_terms asks for 'the dataset's license and terms of use'; the passage records that an agreement exists and gives none of its terms, which the record's source_caveats concedes"
+- id: slot-018
+  verdict: weak
+  evidence: "line 45 'perform community-facing ethics focus groups to determine what data is appropriate for public sharing' and 'establish a legal framework' are items in 'this project will A) ... F)'; lines 1206–1208 'Patient-focused efforts will determine the ethical and legal approaches'; line 1087 is present tense. The value renders the two future-tense aims as current ('performs', 'determine'), and review_details asks for 'the ethical review process, board decisions, outcomes' — the passages describe an ethics program, not a review"
+- id: slot-019
+  verdict: supported
+  evidence: "lines 242–244 'As of August 2025, covers 14 different hospitals with over 45K unique admissions'; the caveat quotes it and sets it against line 1075–1076 '50,000 Patient admissions from ICU, PICU, and NICU' and line 45 'more than 100,000 critically ill patients' correctly"
+- id: slot-020
+  verdict: supported
+  evidence: "lines 186–187 'Parisa Rashidi / University of Florida' under line 171 'Bridge2AI CHoRUS Leadership Team'"
+- id: slot-021
+  verdict: supported
+  evidence: "line 38 'Organization: MASSACHUSETTS GENERAL HOSPITAL' beside line 37 'Principal investigator: ROSENTHAL, ERIC S.'; lines 173–175 give the mixed-case form the record uses"
+- id: slot-022
+  verdict: supported
+  evidence: "lines 1072–1073 '60+ CHoRUS consortium members across 20 different institutions'; lines 1202–1204 'This collaboration spans 20 academic centers, of which 14 will contribute as Data Acquisition centers'; the present-tense '14 contribute' is carried by line 1070–1071 '14 Data contributing hospitals'"
+- id: slot-023
+  verdict: supported
+  evidence: "lines 346–348 'Imaging (from PACS) / DICOM'; Controlled per every row"
+- id: slot-024
+  verdict: supported
+  evidence: "line 37 'Principal investigator: ROSENTHAL, ERIC S.' on the page for core project OT2OD032701 (line 35); lines 171–175 list Eric Rosenthal first under 'Bridge2AI CHoRUS Leadership Team'"
+- id: slot-025
+  verdict: supported
+  evidence: "lines 350–354 'Waveform telemetry (bedside monitors, gateway/middleware) / WFDB'; Controlled per every row"
+- id: slot-026
+  verdict: weak
+  evidence: "line 45 'ensure that data elements feature appropriate contextual factors such as geographic distance to the nearest hospital' is an example in a list of aims; variable_name asks for 'the name or identifier of the variable as it appears in the data files', and no source shows a data file or a variable of that name"
+- id: slot-027
+  verdict: bundle_supports
+  evidence: "line 1093 'CHoRUS Consortium' (site footer heading); line 1073 'CHoRUS consortium members across 20 different institutions'"
+- id: slot-028
+  verdict: bundle_supports
+  evidence: "line 254 'EEG – extraction in process at this point'; the name is a paraphrase of that line"
+- id: slot-029
+  verdict: bundle_supports
+  evidence: "lines 308–310 'Clinical notes (extracted and tokenized using OHNLP toolkit)'"
+- id: slot-030
+  verdict: exempt_by_nature
+  evidence: "a boolean the record infers from structure: line 238 'Retrospective data collection' and the hospital-system sources at lines 346, 350–351, 364–365; no passage states 'not direct'"
+- id: slot-031
+  verdict: bundle_supports
+  evidence: "lines 1254–1258 'data managers at data contributing sites ... extracting and contributing clinical data to CHoRUS'; lines 1202–1204 '20 academic centers, of which 14 will contribute as Data Acquisition centers'"
+- id: slot-032
+  verdict: bundle_supports
+  evidence: "lines 215–217 'The AIM-AHEAD Bridge2AI for Clinical Care Training Program expands access to Bridge2AI CHoRUS data through engagement, AI training, and mentorship'; line 50 'Workforce Development'"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "line 440 'Accessing the Data' heads the registration/licensing slide (lines 442–458) the value describes"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "line 1258 'contributing clinical data to CHoRUS'; line 1294 'for contributing to mapping efforts'"
+- id: slot-035
+  verdict: exempt_by_nature
+  evidence: "a boolean inferred from structure: line 1076 'Patient admissions from ICU, PICU, and NICU' names the settings the entry records"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "line 45 'to aid marketplace adoption of AI-developed models for implementation in acute and critical care'"
+- id: slot-037
+  verdict: bundle_supports
+  evidence: "line 1093 'CHoRUS Consortium'; line 1085 'The CHoRUS project is the collection of multi-modal data across 14 different hospitals'"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "lines 452–455 'Licensing Agreement / All participants must sign a licensing agreement ... before gaining access to the dataset'"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "lines 308–310 'Clinical notes (extracted and tokenized using OHNLP toolkit)'; line 247 'Clinical notes – stored locally except tokens'"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "lines 1238–1240 'to instruct data contributing sites'; line 1254 'data managers at data contributing sites'"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "lines 251–252 'Imaging – currently 1000 images available with de-id in process for larger cohort'"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "lines 1196–1200 'to develop the most diverse, high-resolution, ethically sourced, AI-ready data set to answer the grand challenge of improving recovery from acute illness'"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "lines 1212–1214 'A visualization and annotation environment will label data with targets important for prediction'"
+- id: slot-044
+  verdict: exempt_by_nature
+  evidence: "a heading label the record composes for the grouping named at line 1076 'ICU, PICU, and NICU'; the phrase 'care setting' occurs nowhere in the bundle, and the entry's identification text is what carries the claim"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "lines 1234–1236 'Validated semantic mappings for connecting clinical data in various source formats to international standards'"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "line 1059 'collaborative hospital repository uniting standards for clinical care AI'; lines 217–221 'apply AI/ML methods to big data analysis and conduct innovative research'"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "the four role headings at lines 1171–1177 (Data Site Managers, Clinical Collaborators, Project Managers, Software Developers) with their descriptions at lines 1254–1258, 1290–1294, 1306–1308 and 1349–1352; the passages describe GitHub user groups rather than data stewardship as such, but every phrase in the value is stated"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "lines 308–310 'Clinical notes (extracted and tokenized using OHNLP toolkit)'"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "lines 217–221 'apply AI/ML methods to big data analysis and conduct innovative research at the intersection of healthcare challenges and AI/ML using multi-modal datasets from a broad range of cohort participants'; line 698 'collaborative research on the Bridge2AI Clinical Care Cloud platform'"
+- id: slot-050
+  verdict: exempt_by_nature
+  evidence: "a heading label for a singleton object; the bundle speaks of 'patients' (line 45) and 'Patient admissions' (line 1076) and never uses the phrase 'human subjects data'"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "line 45 'approaches that limit re-identification'; line 252 'de-id in process'"
+- id: rule-01
+  verdict: violated
+  evidence: "variables[0].derivation asserts the UF-Geocoding repository (lines 1534–1538) as the derivation of 'geographic distance to the nearest hospital' (line 45) while the entry's own source_caveats says the sources 'do not state that the two are connected' — an inference placed in a slot the rule says to leave empty; maintainers[0].role 'academic_institution' is likewise chosen with no passage naming the consortium's kind"
+- id: rule-02
+  verdict: followed
+  evidence: "instances[0].source_caveats states both admission figures (lines 1075–1076 and 242–244) and the 100,000 figure (line 45) separately; creators carries six people and the consortium as distinct entries"
+- id: rule-03
+  verdict: followed
+  evidence: "id: https://chorus4ai.org/ in both full (line 16) and core (line 448) records; the reconciliation report's 'Referent' section states the choice and why the training program and GitHub organization are not the referent"
+- id: rule-04
+  verdict: followed
+  evidence: "license, total_size_bytes, total_file_count, is_tabular and every person id are left unset with reasons in source_caveats; nothing in the record or report cites another arm or a target count"
+- id: rule-05
+  verdict: followed
+  evidence: "creators has seven entries (one per leadership member at lines 173–190 plus the consortium); purposes three, tasks three, intended_uses two, distribution_formats one per data-type row of lines 260–375"
+- id: rule-06
+  verdict: violated
+  evidence: "raw_data_sources[0].raw_data_format reads 'Site source formats vary and are mapped to international standards ...; the sources do not enumerate the source formats' — a statement that the information is absent, in the value rather than in source_caveats; data_collectors[0].collector_details likewise ends 'The sources do not describe training or compensation arrangements for those staff'"
+- id: rule-07
+  verdict: violated
+  evidence: "distribution_formats[9] 'Bridge2AI AI/ML for Clinical Care Collaborative Cloud' has no format and describes the enclave in which the data are accessed (lines 245–247, 491–493) — the access route placed in the distribution-formats slot, the rule's own example; cleaning_strategies[0] places a site-feedback report (lines 1574–1575) under cleaning"
+- id: rule-08
+  verdict: followed
+  evidence: "creators[0..5] populate name and affiliations[].name rather than prose; funders[0].grants[0] populates name and grant_number (lines 34–36); maintainers[1] gives name with the rest in maintainer_details"
+- id: rule-09
+  verdict: followed
+  evidence: "the only uriorcurie value is the dataset id https://chorus4ai.org/, for which the schema declares no prefix; no ROR, ORCID or DOI resolver URL appears anywhere in the record"
+- id: rule-10
+  verdict: followed
+  evidence: "no ROR, ORCID or other registry identifier is written for any person or organization; creators[0].source_caveats states 'The sources supply no personal identifier for any named individual', which the bundle confirms"
+- id: rule-11
+  verdict: not_applicable
+  evidence: "no fragment identifier is minted anywhere in the record; the report's grounding line reads '0 minted_fragment'"
+- id: rule-12
+  verdict: followed
+  evidence: "the record's prose uses standardized, organization, characterizing, analyzed, tokenized, license; a grep for -ise/-isation/-our/centre/programme forms finds none, and the source misspellings 'repoitory' and 'havard' are kept only inside quotations"
+- id: rule-13
+  verdict: followed
+  evidence: "instances[0].source_caveats names the project site as 'the higher-ranked source', states both values (50,000 at line 1075; 'over 45K' at line 244) and says the site's figure was preferred on the manifest's ranking"
+- id: rule-14
+  verdict: not_applicable
+  evidence: "no fragment identifier is minted and no value in the record points at a part of the dataset"
+- id: rule-15
+  verdict: followed
+  evidence: "created_by is the string 'CHoRUS Consortium'; conforms_to and page are strings; no object is placed in a scalar-ranged slot, and linkml-validate passed per the report"
+notes: >-
+  Adverse pattern in the receipted sample: five of 25 receipted values are 'weak'
+  because the passage describes a plan or a repository rather than the procedure
+  the slot asks for (cleaning_details, deidentification_details, review_details,
+  license_terms, and the variable derivation/name pair). Three of these also
+  render the sources' future tense ('will transform', 'will perform', 'will
+  determine') as present tense; the released-data evidence at lines 1074–1082
+  makes that defensible for OMOP standardization but not for the ethics and
+  de-identification procedures. Entry `name` labels among the receiptless sample
+  were judged bundle_supports where the wording paraphrases a bundle line and
+  exempt_by_nature where the label is a composed heading (slot-044, slot-050).
+  No instrument finding: every snippet in the sample is verbatim in the cited
+  chunk, so nothing here is something the receipt validator should have caught.

@@ -1,0 +1,227 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: '2026-08-30T08:30:00Z'
+pack_sha256: 1c7264fb749f871f11736e57b679a28f697e89f640bb7371f7c2651953e25f56
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-25 are the concatenation header and an eleven-file table of contents; no dataset fact"
+- id: chunk-c025
+  verdict: confirmed
+  evidence: "lines 6338-6647 are the blank UW HSD IRB protocol form, sections 1-5.11 (numbered questions, guidance, unticked boxes); the only study-specific line is the SOURCE METADATA block (6343-6348) naming the source id; nothing answers a datasheet slot"
+- id: chunk-c026
+  verdict: confirmed
+  evidence: "lines 6648-6943 continue the blank form (5.11.g through 10.10); every answer field is empty; the filled-in protocol text begins in c027 and is receipted from there"
+- id: slot-004
+  verdict: weak
+  evidence: "the value's first two sentences (login through a verified identity system, T2D-only use, access type public download with self-attestation) are stated at lines 2983-2985 in c015, not in any of the four receipted snippets; the c012 snippet (line 2486, permitted data storage) is on topic but its content does not appear in the value, while the 'authorized users' sentence rests on line 2431, a different passage; the c022 copyright snippet (5412) supports the last sentence; the c022 '\"project_name\": \"AI READI\"' snippet (5463) bears on nothing in the value"
+- id: slot-005
+  verdict: supported
+  evidence: "line 1564 'Sally L Baxter http://orcid.org/0000-0002-5271-7690' (BMJ author list) and line 4976 overallOfficialIdentifierValue for Sally L. Baxter, role Study Principal Investigator; CURIE form is the rule-09 normalisation"
+- id: slot-006
+  verdict: supported
+  evidence: "line 4334 healthsheet response: 'Factors influencing the generalization of derived models include the predominantly urban and hospital-based recruitment, which may not fully capture diverse cultural and socioeconomic backgrounds'; value paraphrases it as a representation bias"
+- id: slot-007
+  verdict: supported
+  evidence: "line 5018 overallOfficialIdentifierValue https://orcid.org/0000-0002-7899-3060 sits in the Jorge Contreras overallOfficial block (affiliation University of Utah, 5024)"
+- id: slot-008
+  verdict: supported
+  evidence: "line 3953 directoryDescription for wearable_blood_glucose, line 4014 dexcom_g6 device directory, line 6053-6054 CGM subcrate description (filament under the skin, readings every five minutes, sensor lasts a maximum of ten days); value restates these"
+- id: slot-009
+  verdict: supported
+  evidence: "line 2862 '\"creatorName\": \"AI-READI Consortium\", nameType Organizational' and line 2674-2682 FAIRhub page listing AI-READI Consortium as creator"
+- id: slot-010
+  verdict: supported
+  evidence: "license line 2519 and surrounding clause: reproduction forbidden except small representative samples in up to five images or figures per Paper; value matches the clause including the supplemental-files exception"
+- id: slot-011
+  verdict: supported
+  evidence: "line 7212-7214 'Sally Baxter (Co-PI) / Assistant Professor of Ophthalmology and Biomedical Informatics / UC San Diego / s1baxter@health.ucsd.edu' carries the description's substance; the c007 'Writing Committee / Sally L. Baxter' snippet (2054-2056) attests only the name"
+- id: slot-012
+  verdict: supported
+  evidence: "line 2874 '\"dateValue\": \"2023-07-19/2025-05-01\", dateType Collected'; start_date is the first half of the range"
+- id: slot-013
+  verdict: supported
+  evidence: "lines 4345-4346 healthsheet question 'Does the dataset identify any demographic sub-populations' with response 'No'; boolean false is the direct reading"
+- id: slot-014
+  verdict: supported
+  evidence: "line 4420 (70%/15%/15% splits balanced for sex, race/ethnicity, diabetes status because those fields are withheld from the public version) and line 4211 (new recommended split for the 2280 participants); value restates both"
+- id: slot-015
+  verdict: weak
+  evidence: "line 7366 is the IRB protocol's staff-role list ('Software engineer: Responsible for designing, implementing, and testing the different data curation pipelines'); it names who builds pipelines, not any preprocessing step, tool, parameter or order of operations that preprocessing_details asks for"
+- id: slot-016
+  verdict: supported
+  evidence: "line 4300 'The dataset is self-contained but does rely on the dataset documentation for users requiring additional information about the provenance of the dataset' and line 2260 (Healthsheet template, per-domain overview, acquisition, variables, processing details); value restates them"
+- id: slot-017
+  verdict: supported
+  evidence: "banner text at lines 2285 and 2371 (docs.aireadi.org pages) and 2736, 2809 (FAIRhub dataset pages); the value's 'both' claim matches"
+- id: slot-018
+  verdict: supported
+  evidence: "line 2247 'As enrollment is ongoing, the pilot data release and periodic updates to data releases may not have achieved balanced distribution across groups' and line 4334 'the pilot study is not balanced across these parameters'"
+- id: slot-019
+  verdict: supported
+  evidence: "license lines 2493-2499: no sharing with third party model vendors for training even under a BAA, training includes model weight modification, analysis permitted where interaction is short-term prompting or querying; value restates the clause"
+- id: slot-020
+  verdict: supported
+  evidence: "line 3026 '\"directoryName\": \"cardiac_ecg\"' at directoryType dataType"
+- id: slot-021
+  verdict: supported
+  evidence: "lines 443-446: '12- lead ECG is performed (Philips Pagewriter TC30 Cardiograph, Amsterdam, The Netherlands) while the participant sits in a reclining chair or lies supine; the position is recorded (0°, 30°, 60° or 90°) relative to the supine position'"
+- id: slot-022
+  verdict: supported
+  evidence: "line 4645 responsiblePartyInvestigatorIdentifierValue https://orcid.org/0000-0002-7452-1648 and line 4913 the same ORCID in the Aaron Lee overallOfficial block"
+- id: slot-023
+  verdict: supported
+  evidence: "line 5446 '\"rai:dataCollectionType\": [\"Manual Human Curation\"]' in the RO-Crate; value reports exactly that attribution"
+- id: slot-024
+  verdict: supported
+  evidence: "line 1880 (c007) 'stripped of Protected Health Information ... via the Safe Harbor method' supports the value's last sentence as a de-identification method; the first sentence rests on line 2884 deIdentType NoDeIdentification, receipted under the caveat rather than here"
+- id: slot-025
+  verdict: supported
+  evidence: "lines 944-946 'All participant images are exported from imaging devices in their raw format and some images required conversion to a DICOM standard format prior to upload' and the device table entries 'Exported in .fda file format; converted to DICOM for the data set' in c005"
+- id: slot-026
+  verdict: weak
+  evidence: "the three snippets attest OMOP_CDM and DICOM (c004) and RO_CRATE (line 5339 conformsTo ro/crate/1.2-DRAFT); the ark @id snippet (5342) bears on no standard; WFDB, OPEN_MHEALTH, ESDS and CDS are stated elsewhere in the bundle (e.g. line 1911 CDS, the relatedStandard blocks in c015-c017) but no receipt for this slot cites them"
+- id: slot-027
+  verdict: supported
+  evidence: "line 2242, 2328 ('the AI-READI dataset called Flagship Dataset of Type 2 Diabetes from the AI-READI Project') and 2674/2682 FAIRhub page title"
+- id: slot-028
+  verdict: supported
+  evidence: "line 285 'The study base is all patients aged >=40 years of age who had a medical encounter within each health system site (UAB, UCSD, UW) between 2020 and 2025' and the eligibility list at 4499 (consent, >=40, with or without T2D, English; exclusions pregnancy, gestational and type 1 diabetes); the c020 1,000-per-group snippet (4879) is on topic though its content is carried by strategies rather than source_data"
+- id: slot-029
+  verdict: bundle_supports
+  evidence: "line 4320 'the controlled access dataset will contain data regarding racial and ethnic origins, location (5-digit zip code), ...' and line 5454 rai:personalSensitiveInformation list; sensitivity_details states the public/controlled split"
+- id: slot-030
+  verdict: bundle_supports
+  evidence: "lines 5199-5213: overallOfficial block for Sara J. Singer (ORCID 0000-0002-3374-1177) with overallOfficialAffiliationName 'Stanford University'"
+- id: slot-031
+  verdict: inferred
+  evidence: "no passage types the wearable_blood_glucose directory as processed; the record derives it from lines 3953/4014 (CGM data organised under Open mHealth) and line 4327/1062-region statements that raw device exports are converted before release; a categorisation, not a stated fact"
+- id: slot-032
+  verdict: bundle_supports
+  evidence: "line 5236 overallOfficialAffiliationIdentifierValue https://ror.org/0168r3w48 in the Linda M. Zangwill block (ORCID 0000-0002-1143-5224, affiliation University of California, San Diego at 5232); CURIE form is the rule-09 normalisation"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "lines 4612-4614 '\"secondaryId\": \"NCT06002048\"' with secondaryIdLink https://classic.clinicaltrials.gov/ct2/show/NCT06002048 in the FAIRhub study description"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "line 3026 directoryName cardiac_ecg (root-level dataType directory) and line 5560 'cardiac_ecg/ro-crate-metadata.json'"
+- id: slot-035
+  verdict: bundle_supports
+  evidence: "line 307 'by screening electronic health records at each site' and line 1773 'demographic data from the electronic health records of study sites'; the EHR extraction of medical history is in c003"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "line 332 'The protocol is performed as a single visit' and line 1008 'At the end of their in-person visit'; the name labels that passage"
+- id: slot-037
+  verdict: bundle_supports
+  evidence: "line 5024 overallOfficialAffiliationName 'University of Utah' in the Jorge Contreras block (ORCID at 5018)"
+- id: slot-038
+  verdict: not_in_bundle
+  evidence: "the bundle names 'Particulate matter (PM1.0, PM2.5, PM4, PM10)' at lines 1382-1383 and 1854 but states no data type; 'counts' would as readily be integer, so float is a guess rather than a reading"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "lines 1868-1870 'nature metabolism ... 2210-2212' and line 1721 https://doi.org/10.1038/s42255-024-01165-x; line 5406 cites the same article (with a differing subtitle) as a related publication"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "line 1911-1913 'the Clinical Dataset Structure (CDS) ... (https://cds-specification.readthedocs.io)' and line 3069 relatedIdentifierValue https://cds-specification.readthedocs.io/en/v0.1.1/"
+- id: slot-041
+  verdict: inferred
+  evidence: "no passage types the environment directory as processed; derived from line 3288-region (files follow ESDS ASCII guidelines) and the general statement that raw exports are converted before release"
+- id: slot-042
+  verdict: inferred
+  evidence: "line 4201 states only logMAR visual acuity measurements remain; a logMAR value is a continuous number, so float follows, but no passage states the type"
+- id: slot-043
+  verdict: inferred
+  evidence: "line 440-441 heart rate measured with the automatic oscillometric device and lines 1372-1373 heart rate under the Garmin table support the second and third clauses; nothing states that heart rate is read from the electrocardiogram"
+- id: slot-044
+  verdict: bundle_supports
+  evidence: "line 1520 'Samantha Hurst' (BMJ author list), line 2077 (Nature Metabolism author list) and line 5056 overallOfficialLastName 'Hurst'"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "lines 1448-1451 'A meta-epidemiological review of T2DM studies published from 2000 to 2020 indicated that samples lacked racial and ethnic diversity'; the name labels that gap"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "line 576 'Glucose' in the BMJ laboratory-test table whose unit column (lines 633-645) reads mg/dL, and line 1351 'Blood glucose measurements (mg/dL)'"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "retinal_flio relatedStandard block (c016, around lines 3318-3330): standardName 'Digital Imaging and Communications in Medicine (DICOM)', standardUse 'All the data files within this directory follow the format specified in this standard'"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "lines 2727-2728 and 2806-2807 list Version 1.0.0 with DOI 10.60775/fairhub.1 as an earlier version of the same FAIRhub dataset, and line 5309 the same DOI in the RO-Crate version list; the enum encodes that stated version lineage"
+- id: slot-049
+  verdict: inferred
+  evidence: "line 1372 'Number of steps' under the Garmin device; a count is integer by nature but no passage states the type"
+- id: slot-050
+  verdict: bundle_supports
+  evidence: "lines 1916-1918 'ethical, legal and social implications are considered at every stage of the project cycle' and line 5414 '\"ethicalReview\": \"Camille Nebeker, Debra Mathews, Kadija Ferryman, Nicholas Evans\"'; the name labels that review"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "line 1534 'OT2OD032644, P30DK035816, and UL1TR003096 and Research to Prevent' (BMJ funding statement)"
+- id: slot-052
+  verdict: bundle_supports
+  evidence: "line 443 'A 12- lead ECG is performed' and line 3028 'electrocardiogram data collected by a 12 lead protocol'"
+- id: slot-053
+  verdict: bundle_supports
+  evidence: "line 3210 '\"numberOfFiles\": 7' closing the clinical_data directory block (dqd_omop.json metadata at 3197)"
+- id: rule-01
+  verdict: violated
+  evidence: "variables[12].data_type 'float' for particulate matter counts has no passage (lines 1382-1383 name the variable only); variables[7].measurement_technique 'Read from the electrocardiogram' is not stated anywhere; file_collections[*].collection_type 'processed_data' is a categorisation the bundle never states. Elsewhere the rule is followed: funders[1] carries no id because none is in the bundle, and every ROR, ORCID, DOI and the MeSH IRI in the record is in the bundle"
+- id: rule-02
+  verdict: followed
+  evidence: "source_caveats (record lines 76-108) sets out six disagreements without merging; ethical_reviews[0].source_caveats keeps 'Washington University IRB' and 'University of Washington IRB' as two accounts; creators[1].description records the alternative affiliation rather than collapsing it"
+- id: rule-03
+  verdict: followed
+  evidence: "reconciliation report 'Referent' section (lines 11-19) names AI-READI dataset version 3.0.0 and says the choice is held across both records; full record id doi:10.60775/fairhub.3, version 3.0.0, counts 2280, and related_datasets[0..1] place versions 2.0.0 and 1.0.0 as prior versions rather than the referent"
+- id: rule-04
+  verdict: followed
+  evidence: "the record omits slots the bundle does not answer (no imputation_protocols, no existing_uses, no errata) and populates 17 creators because the study description lists 17 overallOfficials; no sign of padding to a count"
+- id: rule-05
+  verdict: followed
+  evidence: "creators[0..16] one object per person or organisation; intended_uses split into research and commercial; prohibited_uses[0..4] one per license clause; file_collections one per root directory"
+- id: rule-06
+  verdict: followed
+  evidence: "no slot is filled with a bare pointer; the closest are data_protection_impacts[0] ('No data protection impact analysis has been conducted') and extension_mechanism, which answer the datasheet question with the healthsheet's stated 'no' rather than deferring it; preprocessing_strategies[0] ends with a pointer sentence but carries the OMOP/DICOM mapping content before it"
+- id: rule-07
+  verdict: violated
+  evidence: "collection_notifications[1] 'Return of individual results to participants' (record lines 778-795) describes how results are returned after the visit; notification_details asks how individuals were notified about data collection, and the content belongs to a benefits/return-of-results field, not this one"
+- id: rule-08
+  verdict: followed
+  evidence: "creators carry name, principal_investigator, affiliations{id,name}, credit_roles; funders[0] carries id, grantor, grants{name,grant_number}; data_collectors carry id, name, role; data_governance.accountable_organization carries id and name rather than prose alone"
+- id: rule-09
+  verdict: followed
+  evidence: "creators[*].affiliations[*].id and data_collectors[*].id are ROR: CURIEs, principal_investigator values are ORCID: CURIEs, id and latest_version_doi are doi: CURIEs, doi is the bare string; instances[0].data_topic is a MeSH IRI, and the schema declares no MeSH prefix, so the uri fallback applies; access_urls and external_resources are URLs as their range asks"
+- id: rule-10
+  verdict: followed
+  evidence: "every ROR in the record (01yc7t268, 00f54p054, 0168r3w48, 00za53h95, 03r0ha626, 03hamhx47, 009avj582, 008s83205, 0156zyn36, 00cvxb145, 01cwqze88) occurs in the bundle as a ror.org URL; all 17 ORCIDs occur; MeSH D003924 at line 4733-4736; DOIs 10.1136/bmjopen-2024-097449 (line 191) and 10.1038/s42255-024-01165-x (line 1721); NCT06002048 at 4612; funders[1] Research to Prevent Blindness has no id because none is in the bundle"
+- id: rule-11
+  verdict: followed
+  evidence: "the only minted identifiers are file_collections[*].id fragments on doi:10.60775/fairhub.3 (record lines 1466-1605), an identifier the bundle supplies (line 2990-region, FAIRhub DOI); no invented prefix and no fragment on an organisation or person identifier"
+- id: rule-12
+  verdict: violated
+  evidence: "record prose uses British spellings: 'tumour and optic disc oedema' (collection_notifications[1], line 793), 'at 4 metres' (collection_mechanisms[5], line 625; variables[3].measurement_technique, line 1394), 'travelling' (at_risk_populations.special_protections[2], line 959); none is inside a quotation or a title"
+- id: rule-13
+  verdict: followed
+  evidence: "source_caveats states the tier of each disagreeing source and which was preferred (acronym expansion, target enrollment 4,000 vs 4,600, collection start 2023-07-19 vs 18 July 2023) and, where both sides are tier 1 (Washington University vs University of Washington IRB), records both instead of choosing; collection_timeframes[0].source_caveats repeats the start-date choice locally"
+- id: rule-14
+  verdict: violated
+  evidence: "nine fragments are minted at file_collections[*].id (doi:10.60775/fairhub.3#cardiac_ecg ... #wearable_blood_glucose, record lines 1466-1605) and no other value in the record points at any of them (grep for '#' finds only those nine id lines); the v6 rule asks for minting only where another value must reference the part"
+- id: rule-15
+  verdict: followed
+  evidence: "no object sits in a scalar slot: related_datasets[*].target_dataset (string) holds the DOI or NCT identifier, funders[0].grantor (string) holds the name, and creators[*].principal_investigator, whose range is the Person class with id as identifier, holds an ORCID CURIE reference rather than an inlined object"
+notes: >-
+  Pack lists no gaps. The receipted sample has three weak receipts (slot-004, slot-015, slot-026)
+  and no misread or unsupported one; in each weak case the bundle does support the value at a
+  passage the receipt did not cite (lines 2983-2985 for slot-004; the per-directory relatedStandard
+  blocks for slot-026), so these are attribution defects rather than fabrications. The receiptless
+  sample has one not_in_bundle value (particulate-matter data_type float) and five inferred values,
+  four of which are data_type/collection_type enums; the record's variables[*].data_type and
+  file_collections[*].collection_type populations are systematically unattested and probably
+  account for much of the 331-slot receiptless count. Rule violations are all rule-level rather
+  than fact-level: an unused fragment set (rule-14), a return-of-results entry filed under
+  collection_notifications (rule-07), and four British spellings (rule-12). Instrument note: the
+  receipt validator accepted '"project_name": "AI READI"' as a receipt for
+  license_and_use_terms.description (slot-004) - it is verbatim in c022 and passes the 8-character
+  floor, but bears on nothing in the value; that is the laundering pattern the deterministic check
+  cannot see, and it is the reason the weak verdict exists. Creator.principal_investigator is
+  declared with range Person whose description asks for a name; the record's ORCID CURIE references
+  validate as identifier references but read against the slot description - worth a schema issue,
+  not a record defect.

@@ -381,3 +381,59 @@ receipts:
       path: data/preprocessed/chunks/CHORUS_chunks.yaml
       sha256: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
   recorded_by: d4d receipts check
+review:
+  checked: true
+  items_total: 66
+  items_answered: 66
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 1
+    slot_receipted:
+      supported: 19
+      weak: 6
+    slot_receiptless:
+      bundle_supports: 21
+      exempt_by_nature: 4
+    rule:
+      violated: 3
+      followed: 10
+      not_applicable: 2
+  adverse: 9
+  cannot_tell: 0
+  findings: []
+  summary: items 66/66 answered · 9 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5
+    reviewed_at: '2026-08-30T08:12:41Z'
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CHORUS_review_pack.yaml
+      sha256: cbfc4018e913e1da699992afa264e62ed93b743401eeb6b570671e7791fb00ee
+    review:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CHORUS_review.yaml
+      sha256: ff96d4a6f513e1d04c942647e1212ef9707957f8ccfd2472a05ae48142ad1d2e
+  recorded_by: d4d review check
+canonical:
+  criterion: full and core both validate against the current schema, then most slots,
+    then lowest label
+  selected_from:
+  - label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1
+    slots: 47
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep2
+    slots: 43
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+    slots: 50
+    validation: valid
+    validation_recorded_at_run_time: valid
+  margin_over_runner_up: 3
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep3
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep3

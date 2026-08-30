@@ -1,0 +1,228 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: '2026-08-30T08:17:34Z'
+pack_sha256: 2a29a098bb7f2b9f5cae913b38bf25ed6a66bcaf2bd862367d791d7ddc2ce043
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1–25 are the concatenation banner and the 11-file table of contents; no dataset fact"
+- id: chunk-c006
+  verdict: confirmed
+  evidence: "lines 1626–1704 are BMJ Open references 14–30 and the page footer; the one self-citation (ref 16, line 1633, dataset 1.0.0 at docs.aireadi.org) is already carried in version_access.versions_available"
+- id: chunk-c008
+  verdict: missed_content
+  evidence: "lines 2144–2148 list the consortium affiliations (UCSD, JHU, Stanford, UW, CMII, NCCIH/NIH, UAB, OHSU, Portland State, Meharry, NIDDK) and line 2150 gives the PI e-mail leeay@uw.edu; creators[0].description names seven of these institutions (so the chunk did supply content while marked nothing_relevant) and omits Portland State, Meharry and the NIH institutes; the PI e-mail is absent from creators[0] and every contact slot"
+- id: chunk-c025
+  verdict: confirmed
+  evidence: "lines 6338–6647 are the unfilled UW IRB application template (INSTRUCTIONS, INDEX, question prompts 1.1–5.11.f with empty answer boxes); every AI-READI-specific answer is in later chunks"
+- id: slot-005
+  verdict: supported
+  evidence: "lines 1372–1375 list 'Number of steps / Heart rate / Sleep duration (circadian and diurnal rhythm) / Oxygen saturation' under the Garmin column of Table 3; the 'sleep phases' phrase comes from line 1850 (c007), not receipted but in the bundle"
+- id: slot-006
+  verdict: supported
+  evidence: "lines 2722–2730 (and 2801–2808): 'Version 3.0.0 … Nov 17, 2025 / Version 2.0.0 … Nov 8, 2024 / Version 1.0.0 … May 3, 2024'; line 4543 gives the same sequence in prose"
+- id: slot-007
+  verdict: supported
+  evidence: "line 1179 'FAIRhub (https://fairhub.io/), a Microsoft Azure cloud-based platform'; line 4565 'The AI-READI team will be supporting and maintaining the dataset'; line 4903 contact@aireadi.org; line 5466 the docs contact URL; line 4570 'We refer to the README file included with the dataset for contact information'"
+- id: slot-008
+  verdict: supported
+  evidence: "line 2725 '10.60775/fairhub.2' under 'Version 2.0.0' in the version list; line 5303 '\"doi\": \"10.60775/fairhub.2\"' for version id 2 — the prior version, so is_new_version_of holds"
+- id: slot-009
+  verdict: supported
+  evidence: "lines 459–469: photopic/mesopic conditions, eyes tested separately, EVA tester (M&S Technology), 2.0 ND filter, logMAR; line 4327: 'M&S Technologies EVA device … at a distance of 4 meters from a touch-screen monitor'"
+- id: slot-010
+  verdict: supported
+  evidence: "lines 285–291: 'all patients aged ≥40 years … medical encounter within each health system site … identified by screening electronic health records for ICD-10 diagnosis codes R73.09 and E11.X'; line 4457 EHR screening"
+- id: slot-011
+  verdict: supported
+  evidence: "line 3076 '\"standardName\": \"WaveForm DataBase (WFDB)\"' inside the cardiac_ecg directory block, whose related identifier at line 3069 is the CDS v0.1.1 spec"
+- id: slot-012
+  verdict: supported
+  evidence: "lines 390–402 are the self-report instrument table (screening questionnaire, demographics, CES-D 'Screens for depressive symptoms', PAID-5, diabetes score); the REDCap and clinical-data parts of the value are attested elsewhere (line 1175ff). The snippet is thin for a long value but the passage is the instrument list"
+- id: slot-013
+  verdict: supported
+  evidence: "line 4400: 'N/A - no labels are provided. No specific labeling was performed in the dataset, as the dataset is a hypothesis-agnostic dataset aimed at facilitating multiple potential downstream AI/ML applications.'"
+- id: slot-014
+  verdict: supported
+  evidence: "line 2907 '\"language\": \"en\"' in the FAIRhub dataset_description block"
+- id: slot-015
+  verdict: weak
+  evidence: "line 4467 supports 'required before participation in any part of the protocol (including questionnaires)'; but line 4725 'Data will be placed in an open-source repository' is the ClinicalTrials.gov briefSummary of the study design, not a statement of what participants consented to, and no passage states that consent covers repository placement or biospecimen storage for future research (line 4813 only says participants who consent provide blood and urine)"
+- id: slot-016
+  verdict: supported
+  evidence: "line 5670 FLIO subcrate description: 'FLIO stands for Fluorescence Lifetime Imaging Ophthalmoscopy, a technology used to capture and analyze fluorescence behavior in the eye over time'; line 3288 'in vivo measurement of lifetimes of endogenous retinal fluorophores'"
+- id: slot-017
+  verdict: supported
+  evidence: "line 4159: 'The dataset has not undergone any formal external audits. However, the dataset has been reviewed internally by AI-READI team members for quality checks and to ensure that no personally identifiable information was accidentally included.'"
+- id: slot-018
+  verdict: supported
+  evidence: "lines 3283–3284 '\"size\": 55625676514, \"numberOfFiles\": 2232' close the environment directory block (next block at 3287 is retinal_flio); file_collections[2] is environment"
+- id: slot-019
+  verdict: weak
+  evidence: "neither snippet states the value: line 2175 'Application ID: 10471118' and line 3009 'awardNumberValue' are funding facts, but the ROR the value asserts is at line 3004 '\"funderIdentifierValue\": \"https://ror.org/01cwqze88\"' (same chunk, not cited) and the 'does not create or manage the dataset' claim is receipted nowhere in this item"
+- id: slot-020
+  verdict: supported
+  evidence: "lines 242–243: 'Written informed consent is provided by all participants.' (line-wrapped in the bundle)"
+- id: slot-021
+  verdict: supported
+  evidence: "lines 3805–3806 '\"size\": 174381046406, \"numberOfFiles\": 93921' close the retinal_photography block (next block 3809 is wearable_activity_monitor); file_collections[6] is retinal_photography with file_count 93921"
+- id: slot-022
+  verdict: supported
+  evidence: "line 4327: 'It is done using a standard 10g monofilament applying pressure to different points on the plantar surface of the feet … the insensate area is retested for confirmation. This sequence is further repeated randomly at each of the testing sites on each foot'"
+- id: slot-023
+  verdict: supported
+  evidence: "lines 2517–2523, license §F Publications: 'Data may not be reproduced in papers … except that small representative samples of Data may be reproduced in up to five images or figures per Paper … larger amounts of data shall not be published, posted or otherwise made available via supplemental files, zip archives, code packages'"
+- id: slot-024
+  verdict: supported
+  evidence: "line 4305, healthsheet Q11: 'No, the dataset does not contain data that might be considered confidential. No personally identifiable information is included in the dataset.'"
+- id: slot-025
+  verdict: supported
+  evidence: "line 3177 OMOP CDM standardName inside the clinical_data directory block; CDS v0.1.1 related identifier at line 3170"
+- id: slot-026
+  verdict: weak
+  evidence: "line 4816 '\"enrollmentCount\": \"4000\"' is the anticipated enrollment, not a sampling strategy; the value's balanced-distribution and wave-recruitment content is stated at lines 2246/2332 ('recruitment sampling procedures aimed at achieving approximately equal distribution') and in the BMJ Open protocol, none of which this receipt cites"
+- id: slot-027
+  verdict: supported
+  evidence: "line 2852 '\"titleValue\": \"Flagship Dataset of Type 2 Diabetes from the AI-READI Project\"'"
+- id: slot-028
+  verdict: supported
+  evidence: "lines 1878–1882: 'The public set is stripped of Protected Health Information (PHI), as defined by the HIPAA … Privacy Rule via the \"Safe Harbor\" method, as well as information related to the sex and race/ethnicity of the participants to prevent stigmatization of findings'"
+- id: slot-029
+  verdict: supported
+  evidence: "lines 3947–3948 '\"size\": 38313536220, \"numberOfFiles\": 15245' close the wearable_activity_monitor block; file_collections[7] is wearable_activity_monitor with file_count 15245"
+- id: slot-030
+  verdict: bundle_supports
+  evidence: "line 688 '6.0–8.2' in the Table 2 reference-range column, in row order with ' Protein, total' at line 594"
+- id: slot-031
+  verdict: bundle_supports
+  evidence: "lines 711–717 'Marker of metabolic health' repeated for the electrolyte rows (Sodium, Potassium, Chloride, CO2, Calcium; Chloride at line 588); line 517 column header 'Reference range*'"
+- id: slot-032
+  verdict: bundle_supports
+  evidence: "lines 4010–4014 directoryName 'continuous_glucose_monitoring' (modality) containing 'dexcom_g6' (device) inside the wearable_blood_glucose block; line 1348 'Dexcom G6 Continuous Glucose Monitor'"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "line 775 '3.4–10.8' in the whole-blood reference-range column, row order matching ' White blood cell' at line 614"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "Table 2 units column lines 733–739 give mg/dL for the lipid rows; ' Low- density lipoprotein cholesterol' at line 573"
+- id: slot-035
+  verdict: inferred
+  evidence: "no passage recommends checking manifest.tsv/participants.tsv; the value is built from the existence of manifest.tsv per datatype (lines 3122, 3271, 3350 …) and participants.tsv (line 4112) plus the missing-modality statement at line 4457ff"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "line 2899 'The public version of the dataset can only be used for type 2 diabetes related research'; line 2985 'Agreeing to use the data only for type 2 diabetes related research' — mapped to the enum value disease_specific_research"
+- id: slot-037
+  verdict: bundle_supports
+  evidence: "line 665 '<150' in the reference-range column, row order matching ' Triglycerides' at line 569; 'Cardiovascular disease risk factor' at lines 705–708"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "line 741 'g/dL' in the whole-blood units column, row order matching ' Haemoglobin' at line 618"
+- id: slot-039
+  verdict: exempt_by_nature
+  evidence: "data_type 'float' for a numeric lab analyte (CRP, mg/L, range 0.0–10.0 at line 561–563) is a type inferred from the value's form; no passage states a data type"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "line 1378 'Nitrogen oxides (NO and NO2)' in the environmental-sensor column of Table 3"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "' Calcium' at line 592 with 'Marker of metabolic health' at lines 711–717 and range '8.9–10.2' at line 686"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "line 680 '3.6–5.2' in the reference-range column, row order matching ' Potassium' at line 586"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "' Glucose' at line 576 falls under the 'Serum tests' heading at line 543; line 4813 'stored at the collection site for batch shipment to the University of Washington Nutrition and Obesity Research Center for specialized lab tests'"
+- id: slot-044
+  verdict: bundle_supports
+  evidence: "lines 1379–1380 'Particulate matter (PM1.0, PM2.5, PM4, PM10)' in the environmental-sensor column of Table 3"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "' Bilirubin, total' at line 602 under the 'Serum tests' heading (line 543); NORC at line 4813"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "line 3019 '\"application/json\"' in the FAIRhub format list (lines 3015–3020)"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "' Urine creatinine' at line 861 in Table 2 continued; mg/dL is the unit given for the urine rows in the units column (line 733ff block following 'Urine tests' at line 631)"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "line 4211 'a new recommended data split for the 2280 participants balancing training, validation, and testing sets'; the README (line 4599) gives the 70/15/15 split in participants.tsv"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "line 586 ' Potassium' in Table 2"
+- id: slot-050
+  verdict: bundle_supports
+  evidence: "lines 4719–4720 '\"isFDARegulatedDrug\": \"No\", \"isFDARegulatedDevice\": \"No\"'; lines 2486–2490 license §B Permitted Data Storage: servers within Licensee's Institution/Employer or cloud services with a HIPAA-approved BAA"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "' Hign- density lipoprotein cholesterol' at line 571 (source typo) with mg/dL in the lipid units block (lines 733–739) and '>39' at line 666"
+- id: slot-052
+  verdict: bundle_supports
+  evidence: "line 4457 'The data was collected directly from participants across the three recruiting sites'; the in-visit measurements are described at lines 455–470 and 4327"
+- id: slot-053
+  verdict: bundle_supports
+  evidence: "' Total cholesterol' at line 567; mg/dL in the lipid units block (lines 733–739); '<200' at line 664"
+- id: slot-054
+  verdict: bundle_supports
+  evidence: "lines 4052–4053 and 4112–4113: dataset_description.json and participants.tsv are each 'a metadata file based on the Clinical Dataset Structure (CDS)' with the CDS v0.1.1 related identifier"
+- id: slot-055
+  verdict: still_supported
+  evidence: "publisher was removed from both records in phase 4 (report §2.1 finding 3); the receipted passage (c015 '\"publisherName\": \"FAIRhub\"') now survives only as prose in top-level source_caveats item (2): 'the FAIRhub structured metadata gives the publisher as FAIRhub while the RO-Crate metadata gives it as the AI-READI Consortium' — the same statement, no longer in a slot"
+- id: rule-01
+  verdict: violated
+  evidence: "creators[0].id = ROR:01yc7t268 is attached to 'AI-READI Consortium', but the bundle attaches that ROR only to Washington University in St. Louis (lines 2978, 4633, 4653); the entry's own source_caveats admits the bundle 'supplies no separate identifier for the AI-READI Consortium itself'. Also known_limitations[1].recommended_mitigation (slot-035) is an inference no passage states"
+- id: rule-02
+  verdict: followed
+  evidence: "sensitive_elements[0] and [2] carry both tier-1 statements with cross-referencing caveats; top-level source_caveats items (1)–(9) record acronym, publisher, lead-organization, enrollment-target and license-name disagreements; creators[0].source_caveats records the PI-affiliation split"
+- id: rule-03
+  verdict: violated
+  evidence: "the referent is held consistently — full id doi:10.60775/fairhub.3 (line 16) and core id doi:10.60775/fairhub.3 (core line 1045) — but the reconciliation report never states the choice: it contains no mention of 3.0.0, fairhub.3 or a referent decision, only the project name in its header"
+- id: rule-04
+  verdict: followed
+  evidence: "instances[0].data_substrate and publisher are omitted with the reason recorded (instances[0].source_caveats; source_caveats item 2); no density target is evident"
+- id: rule-05
+  verdict: followed
+  evidence: "funders is five entries (NIH ×3 by award, Research to Prevent Blindness, Microsoft AI for Good Lab); sensitive_elements is three entries by source; data_governance.stewardship_roles is four entries; participant_compensation is two entries"
+- id: rule-06
+  verdict: violated
+  evidence: "errata[0].erratum_details records that the healthsheet response field is blank ('the question was posed and left unanswered') — a statement that the answer is absent; discouraged_uses[0].discouragement_details answers by pointer ('refer users to the license files available at https://doi.org/10.5281/zenodo.17555036'); maintainers[0].maintainer_details says contact information 'is provided in the README file'"
+- id: rule-07
+  verdict: violated
+  evidence: "distribution_formats[0].format holds the access route and hosting ('distributed through the FAIRhub platform, which is hosted on Microsoft Azure; Azure Storage access is described in the version 3.0.0 documentation') — the rule's own example of the access route placed in the distribution-formats field"
+- id: rule-08
+  verdict: violated
+  evidence: "data_governance.committee_contact, license_and_use_terms.contact_person, regulatory_restrictions.governance_committee_contact and creators[0].principal_investigator are the bare string 'Aaron Lee' in Person-ranged slots, while the attested ORCID (line 4645 https://orcid.org/0000-0002-7452-1648) and e-mail (line 4903) are restated in the sibling notes prose instead of the Person's declared fields"
+- id: rule-09
+  verdict: followed
+  evidence: "creators[0].id ROR:01yc7t268, was_derived_from doi:10.60775/fairhub.2, version_access.latest_version_doi doi:10.60775/fairhub.3, related_datasets[*].target_dataset doi: CURIEs, doi slot bare '10.60775/fairhub.3'; funders[0].grants[0].id is a reporter.nih.gov URL, which no declared prefix covers, so the uri fallback applies"
+- id: rule-10
+  verdict: violated
+  evidence: "creators[0].id ROR:01yc7t268 names Washington University in St. Louis (lines 2978, 4633) and is applied to the AI-READI Consortium, an entity the bundle gives no identifier for — an identifier for something outside the dataset that the evidence does not state for that entity"
+- id: rule-11
+  verdict: violated
+  evidence: "funders[1].grants[0].id 'https://reporter.nih.gov/project-details/10471118#P30DK035816' and funders[2].grants[0].id '…#UL1TR003096' mint fragments for awards that exist outside this record (lines 1162–1164 name them as supporting grants) on the RePORTER record of a different award — the test 'has a referent outside this record' fails, so the identifier had to come from evidence or be omitted, and the fragment makes a false claim about record 10471118"
+- id: rule-12
+  verdict: violated
+  evidence: "record prose uses British spellings at 24 places: programme (lines 143, 834, 1588), minimise (186, 1520), licence (254, 708), metres (334, 1067), enrolment (347, 348, 837), favour (356, 700), summarised (502), personalised (527, 832), centimetre (618), tumour and oedema (762), stabilised (983), prioritising (995, 1604), colour (1420); 'Haemoglobin'/'Haematocrit' variable names keep the source spelling (line 618) and are exempt"
+- id: rule-13
+  verdict: followed
+  evidence: "collection_timeframes[0].source_caveats (tier 1 vs tier 3, one-day discrepancy, 2023-07-19 preferred); is_deidentified.source_caveats (structured metadata over Nature Metabolism); license_and_use_terms.source_caveats (equal rank, both recorded); human_subject_research.source_caveats"
+- id: rule-14
+  verdict: violated
+  evidence: "no value points at file_collections[0..9].id (doi:10.60775/fairhub.3#cardiac_ecg … #root_metadata) or at funders[1].grants[0].id / funders[2].grants[0].id; the three split fragments are the only minted ids another value uses (splits[0].split_details names all three)"
+- id: rule-15
+  verdict: followed
+  evidence: "AI_READI_coverage_receipt.yaml exists beside the core record with 28 chunk entries in manifest order; provenance receipts block reports chunks 28/28 reviewed and receipts.expected true"
+- id: rule-16
+  verdict: followed
+  evidence: "related_datasets[*].target_dataset (string) hold doi: CURIEs, not objects; version_access.latest_version_doi holds a CURIE; data_governance.accountable_organization is an Organization object in an Organization-ranged slot"
+notes: >-
+  Instrument findings for the validator: (a) c008 is marked nothing_relevant yet creators[0].description
+  carries the institution list that only lines 2144–2148 state — a chunk-status/claim mismatch the
+  receipt validator cannot see because the value has no receipt; (b) slot-055's reshaped path is not named
+  in the pack — publisher was deleted in phase 4 and the receipted statement now lives only in top-level
+  source_caveats, so the 'reshaped' item has no slot to read; (c) the Table 2 lab reference ranges are
+  column-scrambled in the preprocessed BMJ Open text (names at lines 561–620, ranges at 662–690 and 775,
+  units at 733–745), so every variables[*] bound/unit is read by row order across three blocks —
+  supported, but a reader should know the alignment is positional. Two receipts (slot-019, slot-026) cite
+  real but non-attesting snippets from the right chunk while the attesting line sits uncited elsewhere.

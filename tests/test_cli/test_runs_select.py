@@ -206,6 +206,15 @@ class TestSelect(unittest.TestCase):
         rep2 = yaml.safe_load((core / "cfg_rep2" / "P_provenance.yaml").read_text())
         self.assertEqual(rep2["canonical_superseded_by"]["label"], "cfg_rep3")   # its own displacer, unchanged
 
+    def test_the_demotion_pointer_is_written_as_a_value_not_an_alias(self):
+        """The displaced record names its displacer twice — at the top and inside
+        its history entry. Written as one shared object, PyYAML emits the second
+        as `*id001`, a reference a reader of the file has to chase."""
+        self._run("--execute")
+        self._run("--execute", valid={"cfg_rep2": False})
+        text = (self.root / "claudecode_agent_core" / "cfg_rep2" / "P_provenance.yaml").read_text()
+        self.assertNotIn("&id", text); self.assertNotIn("*id", text)
+
     def test_a_same_winner_rerun_keeps_the_chain_and_re_promotion_is_clean(self):
         """#748: re-selecting the current canonical must not drop its chain;
         a record promoted again after a displacement must not name itself

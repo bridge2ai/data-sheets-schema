@@ -883,6 +883,18 @@ def record_conformance(data: dict[str, Any]) -> list[str]:
     return check_record(data)[0]
 
 
+class _NoAliasDumper(yaml.SafeDumper):
+    """A record names the same thing twice as two values, never as `*id001`:
+    an alias is a reference a reader has to chase, and `grep` never resolves."""
+
+    def ignore_aliases(self, data):                          # noqa: D401
+        return True
+
+
+def dump_yaml(data: Any) -> str:
+    return yaml.dump(data, Dumper=_NoAliasDumper, sort_keys=False, allow_unicode=True)
+
+
 @dataclass
 class ProvenanceRecord:
     data: dict[str, Any] = field(default_factory=dict)
@@ -923,7 +935,7 @@ class ProvenanceRecord:
         path.write_text(
             "# D4D generation provenance record\n"
             f"# record_version {RECORD_VERSION} — see src/data_sheets_schema/provenance.py\n"
-            + yaml.safe_dump(data, sort_keys=False, allow_unicode=True),
+            + dump_yaml(data),
             encoding="utf-8")
         # Checked here, on the write path, not only by a command someone
         # remembers to run (#605). Reported rather than raised: the record is

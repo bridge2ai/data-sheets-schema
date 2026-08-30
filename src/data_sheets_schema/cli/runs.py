@@ -1335,8 +1335,10 @@ def select_cmd(method, project, config, allow_unverified, execute):
         # pointer that says what replaced it.
         displaced = prior.pop("canonical", None) or {}
         pointer = {"label": winner[0], "at": stamp, "by": "d4d runs select"}
-        prior["canonical_superseded_by"] = pointer
-        prior.setdefault("canonical_history", []).insert(0, {**displaced, "superseded_by": pointer})
+        # two copies, not one object twice: PyYAML would otherwise emit the
+        # second as an `*id001` alias, which reads as a reference, not a value
+        prior["canonical_superseded_by"] = dict(pointer)
+        prior.setdefault("canonical_history", []).insert(0, {**displaced, "superseded_by": dict(pointer)})
         ProvenanceRecord(data=prior).write(other)
         click.echo(f"   demoted the prior mark on {label} to canonical_history")
 

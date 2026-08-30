@@ -1,0 +1,224 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: 2026-08-30T08:30:00Z
+pack_sha256: 308f1cea9d0a9f3656b02be0543f7f81d68117f0de931cdc258031fec150642a
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-25 are the concatenation banner and table of contents (11 file names); no dataset fact"
+- id: chunk-c006
+  verdict: confirmed
+  evidence: "lines 1626-1704 are BMJ Open references 14-30 and the running footer; ref 16 (line 1633-1634) names the v1.0.0 dataset and docs.aireadi.org, both already in the record (related_datasets[1], external_resources[0])"
+- id: chunk-c025
+  verdict: confirmed
+  evidence: "lines 6338-6647 are the UW IRB form's instructions and unanswered questions 1.1-5.11.f; the only study-specific content is the source-metadata header (lines 6343-6348), which the record's ethical_reviews already reflect"
+- id: chunk-c026
+  verdict: confirmed
+  evidence: "lines 6648-6943 are template questions 5.11.g-10.10 with no answers filled in; nothing study-specific"
+- id: slot-005
+  verdict: supported
+  evidence: "line 3134 '\"size\": 302931703' closes the cardiac_ecg directory object (numberOfFiles 4515 at line 3135 matches file_collections[0].file_count)"
+- id: slot-006
+  verdict: supported
+  evidence: "line 4368 continues with the REDCap min/max flagging, CRC/Data Manager review and the four checks (credibility, skip patterns, fillable missing data, omission/duplication) that the value paraphrases"
+- id: slot-007
+  verdict: supported
+  evidence: "line 3477 '\"numberOfFiles\": 56478' sits under the retinal_oct directory with size 1317625293027 (line 3476), matching file_collections[4]"
+- id: slot-008
+  verdict: supported
+  evidence: "lines 4830-4846 list the four arm groups (Pre-diabetes/Lifestyle Controlled, Oral Medication and/or Non-insulin-injectable, Insulin Dependent, plus no-diabetes) that the value enumerates; line 4420 confirms the same four categories in the split"
+- id: slot-009
+  verdict: supported
+  evidence: "line 3632 '\"size\": 1155908809724' with numberOfFiles 173721 (line 3633) is the retinal_octa directory, matching file_collections[5]"
+- id: slot-010
+  verdict: supported
+  evidence: "line 3283 '\"size\": 55625676514' with numberOfFiles 2232 is the environment directory, matching file_collections[2]"
+- id: slot-011
+  verdict: supported
+  evidence: "line 3209 '\"size\": 176182781' with numberOfFiles 7 (line 3210) is the clinical_data directory, matching file_collections[1]"
+- id: slot-012
+  verdict: supported
+  evidence: "lines 3244-3246: standardName 'ASCII File Format Guidelines for Earth Science Data', standardDescription 'NASA recommended practices', standardUse 'All the data files within this directory follow the format'; CDS v0.1.1 named for directory naming at line 3237"
+- id: slot-013
+  verdict: supported
+  evidence: "line 5414 ethicalReview names the four people; the second sentence is supported by line 127 'guidance from bioethicists' in the BMJ abstract (and line 1504)"
+- id: slot-014
+  verdict: supported
+  evidence: "line 3140 directoryDescription (REDCap, blood/urine labs, survey, one-to-one OMOP CDM tables); line 5574 adds MoCA, monofilament, physical and vision assessments; line 3198 describes dqd_omop.json"
+- id: slot-015
+  verdict: supported
+  evidence: "lines 1378-1390 list the Anura measurands and 'Custom designed, Karalis Johnson Retina Center, University of Washington'; line 4327 names the LeeLab Anura; line 6246 gives the 10-day home placement in a frequently used area"
+- id: slot-016
+  verdict: supported
+  evidence: "lines 541-557 (table 2 column layout): C peptide, ng/mL, '1.1–4.4', 'Indicator of insulin production' — the value's reference range and rationale both appear"
+- id: slot-017
+  verdict: supported
+  evidence: "line 5377 and 5469 '@id: ark:59853/rocrate-b2ai-ai-readi-ecg' is the ECG subcrate identifier"
+- id: slot-018
+  verdict: supported
+  evidence: "line 4427 gives 20 December 2022 and the annual renewal due within 90 days; lines 237-241 give STUDY00016228 and the UAB/UCSD reliance agreements; the 'Submitted, approved' and hsdrely@uw.edu details are in the FAIRhub study record (c019-c020)"
+- id: slot-019
+  verdict: supported
+  evidence: "line 1875 'Data are released annually'; line 4166 'plans to release new versions of the dataset approximately once a year'"
+- id: slot-020
+  verdict: supported
+  evidence: "lines 5371 and 6237 '@id: ark:59853/rocrate-b2ai-ai-readi-environmental-sensor'"
+- id: slot-021
+  verdict: supported
+  evidence: "line 4334: 'Factors influencing the generalization of derived models include the predominantly urban and hospital-based recruitment, which may not fully capture diverse cultural and socioeconomic backgrounds', after naming the three sites UAB, UCSD, UW"
+- id: slot-022
+  verdict: weak
+  evidence: "line 4864 healthyVolunteers: No attests only the last clause; the age floor, consent and exclusions come from lines 4378/4499 (>=40, not pregnant, no gestational or type 1 diabetes) and the 85 upper limit from the registered record — the cited snippet alone does not answer what special populations require protection"
+- id: slot-023
+  verdict: supported
+  evidence: "line 2832 '\"fileCount\": 356343' at the dataset level (id 3, size 3815969779678 at line 2831)"
+- id: slot-024
+  verdict: supported
+  evidence: "lines 2012-2016 acknowledgements match the equipment-loan and discount text verbatim; line 2285/2371/2736/2809 carry the 'under review ... Administration directives' sentence; Microsoft AI for Good Lab at line 2011 preceding"
+- id: slot-025
+  verdict: supported
+  evidence: "line 4472 is the value verbatim, three sentences"
+- id: slot-026
+  verdict: supported
+  evidence: "lines 238-240 'approved by the Institutional Review Board (IRB) of the University of Washington (approval number STUDY00016228)'"
+- id: slot-027
+  verdict: supported
+  evidence: "lines 362-363 'Preliminary pilot enrolment occurred between 18 July 2023 and 30 November 2023'; the FAIRhub side of the caveat (19 July 2023) is at line 4166; the caveat states both readings as the slot asks"
+- id: slot-028
+  verdict: supported
+  evidence: "line 3289 directoryDescription (FLIO, in vivo lifetimes of endogenous retinal fluorophores); line 5670 gives the two wavelengths 498-560nm/560-720nm, two .dcm files per eye, and the Poisson-distributed arrival times"
+- id: slot-029
+  verdict: supported
+  evidence: "line 5862 'OCTA is a non-invasive imaging modality ... without the need for the dye injection'; en face / flow cube / segmentation directories at lines 3539-3603 with the four devices"
+- id: slot-030
+  verdict: bundle_supports
+  evidence: "line 4599 (README) 'limited by a lack of well-designed, high quality, large, and inclusive multimodal datasets' and line 2187; second clause at line 1754 'a major barrier has been the lack of diverse datasets that are AI ready'"
+- id: slot-031
+  verdict: bundle_supports
+  evidence: "lines 334-335 'participants are volunteers; therefore, there is selection bias known as volunteer bias'"
+- id: slot-032
+  verdict: bundle_supports
+  evidence: "line 4420 'sex, race, and ethnicity data are not being released with the public version of the dataset'; line 1882 removal 'to prevent stigmatization'"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "line 2187 and 4599 'reconstruct a temporal atlas of T2DM development and reversal towards health'; 'from normal to insulin-dependent T2DM' precedes it in the same passage"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "line 4442 'Study subjects received a compensation of $200 for the study visit'; line 7111 '$200 stipend'"
+- id: slot-035
+  verdict: bundle_supports
+  evidence: "line 4599 README suggested-split table, Total column: Hispanic 380, Asian 545, Black 519, White 836; line 4334 'does not include other races/ethnicities such as Pacific Islanders and Native Americans'"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "lines 1006-1009 'REDCap is used for collecting patient-reported data from questionnaires and the following clinical data from the visit: medications assessment, vitals, visual acuity, contrast sensitivity, monofilament test results and CBC test results'"
+- id: slot-037
+  verdict: exempt_by_nature
+  evidence: "minted fragment on the ROR the bundle supplies for Washington University in St. Louis (line 2978); no passage can state it. Noted under rule-11/rule-14: the consortium has a referent outside the record, so minting was not the right route"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "line 530 'pg/mL' in the table-2 row that begins at line 528 'N-terminal pro-B-type natriuretic peptide'"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "line 1183 'The Data Manager at each data site is responsible for the quality control of all data'; line 4368 Data Managers examine flagged records"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "line 1382 'Particulate matter (PM1.0, PM2.5, PM4, PM10)'; line 1854"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "line 3012 awardTitle 'Bridge2AI: Salutogenesis Data Generation Project'; line 2178"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "line 528 'N- terminal pro- B- type natriuretic peptide' (PDF hyphen spacing); line 1164"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "lines 2910-2912 relatedIdentifierValue 'https://docs.aireadi.org/' with relationType IsDocumentedBy"
+- id: slot-044
+  verdict: bundle_supports
+  evidence: "line 6246 (custom-designed LeeLab Anura, each subject's home, 10 days); lines 1378-1384 and 1853-1854 list the measurands including the eleven light-intensity measurements"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "line 4467 e-consent with electronic signature before the visit; lines 7271-7276 consent in a private room, in person for those who wish; lines 241-242 'Written informed consent'"
+- id: slot-046
+  verdict: exempt_by_nature
+  evidence: "minted fragment '#UL1TR003096' on the awardURI at line 3010; the grant number itself is at line 1534. Noted under rule-11: the grant is a thing outside the record, and the fragment asserts it is part of award 10885481, which the bundle does not say"
+- id: slot-047
+  verdict: inferred
+  evidence: "the bundle uses IsDescribedBy only for standards and directory links (lines 3071-3097); no relation type is stated between the dataset and doi:10.1136/bmjopen-2024-097449 — the record infers it from the paper being the protocol (line 26-30 header)"
+- id: slot-048
+  verdict: exempt_by_nature
+  evidence: "enum classification of the limitation described at line 4334 (urban, hospital-based recruitment); no passage states a category label"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "line 4472 is the value verbatim"
+- id: slot-050
+  verdict: exempt_by_nature
+  evidence: "enum classification; the described bias is supported at lines 1457-1466 (recruiting black men more difficult, disproportionate burden) and 1765-1766 (under-representation)"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "line 4599 README table, Val column: 88/88/88/88, 176/176, 88/88/109/67, 60.3 ± 10.8, total 352"
+- id: slot-052
+  verdict: exempt_by_nature
+  evidence: "minted fragment '#P30DK035816' on the awardURI at line 3010; number at line 1534. Same rule-11 concern as slot-046"
+- id: slot-053
+  verdict: bundle_supports
+  evidence: "line 4521 'we do not currently anticipate any uses ... unfair treatment or harm. However, there is a theoretical risk of future re-identification'; lines 1924-1927 'robust data dissemination system, a strict licence agreement and data watermarking'"
+- id: slot-054
+  verdict: bundle_supports
+  evidence: "lines 2477-2480 license section A 'Licensee shall not transfer, license, sublicense, sell, assign, display, share or otherwise convey any portion of the Data or any derivative work to any third party other than another licensee'"
+- id: rule-01
+  verdict: violated
+  evidence: "instances[0].data_topic 'B2AI_TOPIC:43' appears nowhere in the bundle (no match for B2AI_TOPIC); the reconciliation removed other unsupported values (hipaa_compliant, MoCA minimum_value) but left this one"
+- id: rule-02
+  verdict: followed
+  evidence: "sensitive_elements carries three entries with a source_caveats naming both tier-1 readings; creators[0].source_caveats records the WashU/UW affiliation conflict without choosing"
+- id: rule-03
+  verdict: violated
+  evidence: "both records hold id doi:10.60775/fairhub.3 / version 3.0.0 consistently, but the reconciliation report never states the referent choice (no 'referent' passage; §1-§7 discuss only findings)"
+- id: rule-04
+  verdict: followed
+  evidence: "no density target is cited anywhere in the report; slots such as hipaa_compliant and minimum_value were removed rather than kept for count"
+- id: rule-05
+  verdict: followed
+  evidence: "known_biases has three DatasetBias objects, prohibited_uses six, intended_uses three, file_collections nine — one object per entity"
+- id: rule-06
+  verdict: violated
+  evidence: "existing_uses[0].examples[0] 'None. The healthsheet uses section records that the dataset has not been used...' is a statement of absence placed in a slot that asks for examples; the rule says omit instead"
+- id: rule-07
+  verdict: followed
+  evidence: "third_party_sharing[0].notes carries the access route; distribution_formats carries formats; updates.frequency carries cadence rather than future_use_impacts"
+- id: rule-08
+  verdict: followed
+  evidence: "funders[0].grants populated with Grant objects (name, id, description); data_governance.accountable_organization is an Organization with id and name; creators[0] has name and principal_investigator"
+- id: rule-09
+  verdict: violated
+  evidence: "creators[0].id 'https://ror.org/01yc7t268#ai-readi-consortium' and data_governance.accountable_organization.id 'https://ror.org/01yc7t268' are resolver URLs in uriorcurie slots while the schema declares prefix ROR (schema line 56); funders[0].grants[*].id are reporter.nih.gov URLs (no prefix covers those, so those are permitted)"
+- id: rule-10
+  verdict: violated
+  evidence: "instances[0].data_topic 'B2AI_TOPIC:43' is an external identifier the bundle does not state; ROR 01yc7t268 (line 2978), ORCID 0000-0002-7452-1648 (line 4645) and zenodo.17555036 (line 2990) are in the bundle and fine"
+- id: rule-11
+  verdict: violated
+  evidence: "creators[0].id mints a fragment on Washington University's ROR for the AI-READI Consortium, and funders[0].grants[1].id / grants[2].id mint '#P30DK035816' / '#UL1TR003096' on the OT2OD032644 award URI — all three name things with referents outside the record (an organisation, two NIH grants), where the rule says take from evidence or omit"
+- id: rule-12
+  verdict: violated
+  evidence: "record prose uses British spellings: 'colour' (collection_mechanisms[2],[3],[5],[6]; file_collections[6].description), 'labelled' (subpopulations[0],[1].identification), 'generalisability' (known_biases[0]), 'centred', 'metres', 'dioptres', 'programme', 'personalised', 'enrolment', 'totalling' (description)"
+- id: rule-13
+  verdict: followed
+  evidence: "collection_timeframes[0].source_caveats: FAIRhub 2023-07-19 vs BMJ 18 July 2023, higher-ranked FAIRhub used; is_deidentified.source_caveats prefers tier-1 FAIRhub over tier-3 Nature Metabolism and records both"
+- id: rule-14
+  verdict: violated
+  evidence: "no value in the record points at creators[0].id or at funders[0].grants[1].id / grants[2].id; the fragments are labels nothing uses"
+- id: rule-15
+  verdict: followed
+  evidence: "provenance receipts block: chunks 28/28 reviewed, snippets 276/286 verified (8 adjacent, 1 elsewhere, 1 mismatched), receipt written beside the core record and md5 0f3abb51 matches the bundle"
+- id: rule-16
+  verdict: followed
+  evidence: "created_by 'AI-READI Consortium' (string range) and creators[0].principal_investigator 'Aaron Lee' (Person range, identified by name) are scalars, not nested objects; both files validated per report §6"
+notes: >-
+  Several pack receipts cite a chunk adjacent to where the snippet actually sits (slot-024 c008 -> lines
+  2012-2016 are in c007; slot-028 c023 -> line 5670 is in c022); support holds and the validator already
+  reports these as adjacent. The one validator mismatch (collection_notifications, snippet
+  'vidually in each pool are mailed a hardcopy invitati') is a PDF line-break artifact, not a fabrication —
+  the passage is in the BMJ protocol. Three receipted slots in the sample were sampled with a snippet that
+  attests only part of the value (slot-022); the rest of that value is in the bundle. Rule findings
+  concentrate on identifiers: one unattested ontology term (data_topic) and three minted fragments on
+  identifiers of things outside the record (rule-09/10/11/14), plus pervasive British spelling (rule-12).

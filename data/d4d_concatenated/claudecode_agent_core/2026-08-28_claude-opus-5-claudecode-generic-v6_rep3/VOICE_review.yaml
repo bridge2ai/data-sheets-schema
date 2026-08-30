@@ -1,0 +1,216 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: 2026-08-30T08:30:00Z
+pack_sha256: 0c99365a43e7856e333e51eea0581fa892ae02ed35b6d8d2e11cfc3b0ba74a91
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1–25 are the concatenation banner and the 11-entry table of contents; no dataset fact appears"
+- id: chunk-c004
+  verdict: confirmed
+  evidence: "lines 826–895 are PMC reference-link markers and NCBI/NLM site furniture; the only statement (line 834, 'raw data supporting the conclusions of this article will be made available by the authors') is the feasibility article's own data availability, not the Voice dataset's"
+- id: slot-003
+  verdict: supported
+  evidence: "lines 3821–3831 list the five versions with those dates; DOIs at line 3629 (1.1, 249v-w155), 4162 (3.0.0, k81f-qr68) and 4831 (3.1.0, 8xbn-nq66); value reads them correctly"
+- id: slot-004
+  verdict: supported
+  evidence: "line 2016–2017 'static versions or dynamically updated? Static'; the remainder of the value (new versions on the platform, news items, standard channels, changelog) is at lines 2219–2221; the value generalises 'Health Data Nexus platform' to 'the hosting platform', which the record's source_caveats explains"
+- id: slot-005
+  verdict: supported
+  evidence: "line 1273 states Specific Aim #2 verbatim; the second clause ('new bioinformatics standards for voice data so that datasets are interoperable') is at lines 1116–1117 of the white paper, uncited but in the bundle"
+- id: slot-006
+  verdict: supported
+  evidence: "line 2219 'There is no erratum. A changelog for each dataset version is published online with the dataset metadata.' — the caveat restates it accurately"
+- id: slot-007
+  verdict: supported
+  evidence: "line 4813 (and 3611, 4144) 'Data will be made available via Synapse: https://www.synapse.org/Synapse:syn72370534/' under the raw-audio access paragraph; access_urls is declared uri and the value is that URL"
+- id: slot-008
+  verdict: supported
+  evidence: "line 3714 (repeated 4248, 4917) states the monaural/16 kHz/Butterworth preprocessing and 'From this standardized audio, we extracted five types of derived data'; line 2113 confirms only extracted features are released"
+- id: slot-009
+  verdict: supported
+  evidence: "lines 4820–4822 carry the APA citation for version 3.1.0 verbatim, including 'PhysioNet. RRID:SCR_007345.' and the DOI resolver"
+- id: slot-010
+  verdict: supported
+  evidence: "line 1952 states the three-tier sharing sentence verbatim under 'Consent Details'; the 'no restriction to non-commercial use…' clauses answer the healthsheet yes/no items at lines 1941–1950"
+- id: slot-011
+  verdict: supported
+  evidence: "line 2212 names T-CAIREM at the University of Toronto as maintainer of the Health Data Nexus and says it 'maintains the technical infrastructure hosting dataset and provides continued access'; the record's framing of HDN as host of the earlier feature-only version is consistent with its source_caveats"
+- id: slot-012
+  verdict: supported
+  evidence: "line 200 (app created to collect standardized recordings, questionnaires, PROs) and line 1423 ('A total of 22 acoustic tasks are recorded through the app'); task groupings match Table 2 at lines 1427–1460 and the task list at lines 2425–2440"
+- id: slot-013
+  verdict: supported
+  evidence: "line 3764 (repeated 4424, 5094) 'Data collection and sharing was approved by the University of South Florida Institutional Review Board'"
+- id: slot-014
+  verdict: supported
+  evidence: "lines 2062–2063: the healthsheet question on explicit relationships is answered 'No, they are unrelated.'"
+- id: slot-015
+  verdict: supported
+  evidence: "lines 2229–2231: raw audio and questionnaire data 'were converted to be compliant with the Brain Imaging Data Structure v1.9.0'; conforms_to asks for a standard the dataset's own content follows"
+- id: slot-016
+  verdict: supported
+  evidence: "line 2201 reproduces the registered-access IP clause (copyright, duplication permitted, no sale, no transfer of IP, no IP claims); the DTUA in c013 (lines ~3130–3150) repeats the no-transfer clause; each restrictions[] entry maps to a sentence"
+- id: slot-017
+  verdict: supported
+  evidence: "line 4958 'sparc_pitch.parquet (n=31872) … using a different algorithm than before with a range of 50-550Hz and dimension T'; 'than before' refers to the torchaudio_pitch entry three lines earlier (line 4954), which the value names explicitly"
+- id: slot-018
+  verdict: supported
+  evidence: "line 4831 'doi = {10.13026/8xbn-nq66}' in the 3.1.0 BibTeX; doi is a string slot and the value is the bare DOI"
+- id: slot-019
+  verdict: supported
+  evidence: "line 4921 states the sparc sentence verbatim; the Tx12 / six-articulator detail is at line 4955"
+- id: slot-020
+  verdict: misread
+  evidence: "line 1993 'Collaborators' heads a list of consortium collaborators (lines 1994–2005), and line 2970 'Participating institutions' lists nine sites (2971–2979) that do not include Oregon Health & Science University, Washington University in St. Louis or the University of Florida; the value asserts 'Data were collected at … Oregon Health & Science University, Washington University in St. Louis and the University of Florida', reading a collaborator list as collection sites; the release itself says five recording sites (line 3720ff)"
+- id: slot-021
+  verdict: supported
+  evidence: "line 2076 states the free-speech transcription warning verbatim, including 'research participants are responsible for their choice of language'"
+- id: slot-022
+  verdict: supported
+  evidence: "line 2443 'OpenSmile eGeMaps features per audio file'; the toolkit expansion and 'one row per unique recording' are at lines 4922 and 4961"
+- id: slot-023
+  verdict: supported
+  evidence: "line 4280 (c017) and 4950 (c019): 'a unique identifier for the recording session (session_id)'"
+- id: slot-024
+  verdict: supported
+  evidence: "lines 2454–2457 (indirect identifiers, household composition, cultural identity, sensitive fields), 2455 (transcripts reviewed), 3724, 4930, 4960 and 1935–1936 (K-anonymization: No) together state every clause of the value"
+- id: slot-025
+  verdict: supported
+  evidence: "line 1417 (clinical validation by qualified physician against gold standards) and Table 1 at lines 1460–1530 listing laryngoscopy/stroboscopy, spirometry/flow volume loops/CT (lines 1498–1511), brain CT/MRI, and EHR/psychiatrist diagnosis per cohort; line 2125 adds the local-clinician statement"
+- id: slot-026
+  verdict: supported
+  evidence: "line 4959 'ppgs.parquet (n=29289) contains the phonetic posteriorgram probabilities across 40 phoneme categories giving a dimension of 40xT with a frame rate of 100Hz'"
+- id: slot-027
+  verdict: supported
+  evidence: "line 2101 (confounders) and line 2095 (head-mounted headset at different distances; diagnosis by one clinician or from EHR/prescription) state both sentences of the value"
+- id: slot-028
+  verdict: exempt_by_nature
+  evidence: "file_type is an enum the record assigns to a .parquet feature file; the bundle names the file (line 4959) but no passage states an enum category"
+- id: slot-029
+  verdict: bundle_supports
+  evidence: "line 2127 'Gold standard label available in the data (diagnosed by a clinician)' and line 1417 — the name is a label composed from those lines"
+- id: slot-030
+  verdict: bundle_supports
+  evidence: "line 3066 'USF Stephanie Watts, PhD, CCC-SLP Lead Respiratory Disorders'; also lines 2619, 3917"
+- id: slot-031
+  verdict: bundle_supports
+  evidence: "lines 3739–3740 'The code used to preprocess the raw audio waveforms into the parquet file and to merge the source data into the phenotype files has been made open source in the b2aiprep library'; line 2141 gives the GitHub URL as the preprocessing software"
+- id: slot-032
+  verdict: bundle_supports
+  evidence: "line 2926 'Vanderbilt University Medical Center (VUMC) Maria Powell, PhD' and line 3073 'VUMC Maria Powell, PhD Investigator – Voice Disorders'"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "line 2212 'maintained by the Temerty Center for Artificial Intelligence Research and Education in Medicine (T-CAIREM) based at the University of Toronto'"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "line 1999 'Mount Sinai Hospital' in the healthsheet's Collaborators list under the consortium; also line 2975"
+- id: slot-035
+  verdict: bundle_supports
+  evidence: "line 1168 'Satrajit S. Ghosh, PhD, McGovern Institute,' (white paper author list) with the MIT affiliation at lines 129/176"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "line 2076 answers the healthsheet's 'might be offensive… or pose any safety risk?' question affirmatively for free-speech transcriptions; the boolean records that answer"
+- id: slot-037
+  verdict: bundle_supports
+  evidence: "line 3066 'USF Stephanie Watts, PhD, CCC-SLP Lead Respiratory Disorders'"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "line 4925 'Transcriptions were generated using OpenAI's Whisper Large model', line 2455 (transcripts reviewed, identifying/external-voice recordings removed), line 3724 'Transcripts of free speech audio were removed'"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "line 3078 'HSC Alistair Johnson Lead – data integration'"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "line 2023 'It aims to support clinical research in disease screening, diagnosis, and monitoring through voice biomarkers. The dataset can be used for AI model pretraining, fine-tuning, benchmarking, or validation.'"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "line 629 consortium member list gives 'University of Florida … Donald Bolser' (feasibility paper affiliations); line 2004 lists University of Florida among collaborators"
+- id: slot-042
+  verdict: inferred
+  evidence: "line 2411 shows the BIDS layout filename 'sub<participant_id>_ses<participant_id>_task-<task_name>.wav'; no passage states the raw recordings' format as WAV — the format is inferred from the extension in a directory template"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "line 2723 'complete data acquisition including multi-modal data will be performed for up to 5000 participants per category (disease category and controls)' — the name labels that passage"
+- id: slot-044
+  verdict: bundle_supports
+  evidence: "line 1982 'Non-Probability Sample' (healthsheet sampling item) and the 'limited number of geographic locations' non-representativeness answer nearby; the enum classifies that stated method"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "line 2150 'The data was directly observable and reported by subjects.'"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "line 4956 'sparc_loudness.parquet (n=31855) …' on the 3.1.0 page"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "lines 3739–3740 (preprocess raw audio into parquet, merge source data into phenotype files, open source in b2aiprep) and line 5063 'This release was generated with b2aiprep v3.0.0'"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "line 4946 'the features folder contains the following plain-text files' on the 3.1.0 page; line 5572 '(under features)' on the pediatric page"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "line 2788 'Pediatric patients will be enrolled ONLY through the pediatric sites and not at USF. Checklist HRP-416 for children under 21 has been completed and is appended to this protocol.'"
+- id: slot-050
+  verdict: bundle_supports
+  evidence: "line 1995 'Weill Cornell Medicine' in the Collaborators list; line 2972 among participating institutions"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "line 1443 gives https://github.com/eipm/bridge2ai-redcap in the documentation's data-acquisition section beside the REDCap data dictionary, metadata and instrument PDFs (lines 1440–1446)"
+- id: slot-052
+  verdict: bundle_supports
+  evidence: "line 1994 'University of South Florida' first in the Collaborators list; line 2971 among participating institutions"
+- id: rule-01
+  verdict: violated
+  evidence: "data_collectors[2].collector_details asserts data were collected at Oregon Health & Science University, Washington University in St. Louis and the University of Florida, which the bundle lists only as collaborators (lines 1996, 2003–2004), never as collection sites (lines 2971–2979 list nine; line 3720 says five recording sites); raw_data_sources[0].raw_data_format 'WAV audio' is inferred from a filename template (line 2411). Most other slots are grounded (e.g. instances[0].counts 833, doi, version_access)"
+- id: rule-02
+  verdict: followed
+  evidence: "source_caveats (root) records the 10,000 vs 30,000 target disagreement; creators[8].source_caveats and creators[14].source_caveats record the Rudzicz and Ravitsky affiliation disagreements; funders[0].source_caveats lists five spellings of the award and keeps supplements as separate grants; instances[1].source_caveats declines to assert a single recording count"
+- id: rule-03
+  verdict: followed
+  evidence: "reconciliation report 'Referent' section (lines 13–18) chooses the adult Bridge2AI-Voice PhysioNet dataset, id doi:10.13026/37yb-1t42 with version 3.1.0; the record's id, version, doi and related_datasets[0] (pediatric dataset held as a relation, not absorbed) are consistent with it"
+- id: rule-04
+  verdict: followed
+  evidence: "the record omits slots the bundle does not answer (no creator identifiers, no ROR/ORCID, no funder ids) and does not pad; density follows the evidence"
+- id: rule-05
+  verdict: followed
+  evidence: "creators is 18 separate objects (creators[1]..[17]) rather than one consortium blob; intended_uses has three entries; purposes has five; prohibited_uses four; grants three"
+- id: rule-06
+  verdict: violated
+  evidence: "external_resources[5] ('Guarantees and archival status of linked resources') is an entry whose future_guarantees value is 'The healthsheet records \"NA\" both for guarantees … and for official archival versions' — a statement that the information is absent, in a slot that asks for the guarantee itself; the rule says to omit instead. labeling_strategies[0].inter_annotator_agreement 'Not computed…' is borderline but states a fact about single labelers"
+- id: rule-07
+  verdict: followed
+  evidence: "distribution_formats[] carries formats (Parquet, TSV) with the access route in access_urls; updates.frequency carries the cadence and future_use_impacts carries impacts; raw_sources vs raw_data_sources are separately populated"
+- id: rule-08
+  verdict: followed
+  evidence: "funders[0] populates grantor, grants[].grant_number and name; creators[] populate name, description, affiliations[].name; collection_timeframes[0] populates start_date/end_date; used_software[0] populates id, name, version, license, url"
+- id: rule-09
+  verdict: followed
+  evidence: "id, version_access.latest_version_doi, related_datasets[0].target_dataset and the minted fragments use doi: CURIEs; doi (string) holds the bare DOI; access_urls, access_url and contribution_url (uri) hold URLs; used_software[].id is a GitHub URL with no declared prefix covering it"
+- id: rule-10
+  verdict: followed
+  evidence: "no ROR/ORCID/RRID is supplied outside the bundle; RRID:SCR_007345 appears only inside the citation text, which is verbatim from line 4822; the pediatric DOIs (mf9s-5r03, h995-bt35) are at lines 5138–5140 region of the pediatric page; grant numbers are at lines 1991, 3766, and the RePORTER page"
+- id: rule-11
+  verdict: followed
+  evidence: "the 14 fragments in file_collections are minted on doi:10.13026/37yb-1t42, the record's own id taken from line 3806/4470; no prefix is invented and no fragment is appended to an organisation identifier"
+- id: rule-12
+  verdict: followed
+  evidence: "grep of the record for British spellings (organisation, standardis-, analyse, behaviour, licence, recognis-, characteris-, programme, enrolment, centre) finds none; 'standardized', 'organized', 'analyzed', 'license' are used"
+- id: rule-13
+  verdict: followed
+  evidence: "creators[8].source_caveats and creators[14].source_caveats prefer the documentation (tier 2) over the publication (tier 3) and say so; creators[17].source_caveats prefers the PhysioNet data resource (tier 1) over documentation for the 'Siu'/'Sui' spelling; subpopulations[2].source_caveats declines to prefer between two same-tier sources; these match source_priority in the manifest (data resource 1, documentation/IRB 2, publication 3)"
+- id: rule-14
+  verdict: violated
+  evidence: "file_collections[0].id, file_collections[1].id, file_collections[2].id and the eleven file_collections[0].resources[].id fragments (doi:10.13026/37yb-1t42#features, #phenotype, #metadata, #features/torchaudio_spectrogram.parquet …) are referenced by no other value in the record — grep finds each fragment exactly once, at its own id line; the rule says a part nothing points at is described in prose, not labeled"
+- id: rule-15
+  verdict: followed
+  evidence: "scalar slots hold scalars: conforms_to is a string, license is a string, page/contribution_url/access_url are URLs, ethics_review_board is a string; no object was placed in a string-ranged slot and both files validated (reconciliation report)"
+notes: >-
+  One receipted value is a scope misread (slot-020, collaborators read as collection
+  sites) and it recurs as an unreceipted claim in creators[0].affiliations, which lists
+  the same collaborators as affiliations of the consortium — that use is defensible
+  since the list is headed 'Collaborators'. slot-004's receipt cites only the 'Static'
+  answer while most of the value comes from lines 2219–2221 in c009; attribution is
+  thin but the support is real. The 1.1 page (line 3715) gives a 512-point FFT where
+  the 3.0.0/3.1.0 pages give 400-point; the record states 400 without a caveat, which
+  is the current release's value and not among the sampled items. No instrument
+  defect observed: every sampled snippet was found verbatim in its cited chunk.

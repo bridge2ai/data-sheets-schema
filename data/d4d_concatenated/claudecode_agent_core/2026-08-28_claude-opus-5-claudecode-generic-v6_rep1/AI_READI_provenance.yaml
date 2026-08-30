@@ -390,3 +390,58 @@ receipts:
       path: data/preprocessed/chunks/AI_READI_chunks.yaml
       sha256: 631788768d84a9ae689f722a37f2244be4f67393de390c2055585b81f27f33cf
   recorded_by: d4d receipts check
+review:
+  checked: true
+  items_total: 68
+  items_answered: 68
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 3
+    slot_receipted:
+      weak: 2
+      supported: 23
+    slot_receiptless:
+      bundle_supports: 24
+      exempt_by_nature: 1
+    rule:
+      followed: 13
+      violated: 2
+  adverse: 4
+  cannot_tell: 0
+  findings: []
+  summary: items 68/68 answered · 4 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5
+    reviewed_at: '2026-08-30T08:12:15Z'
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_review_pack.yaml
+      sha256: 2c50bdd41ebb5b450a6d2b62f886cb6e9f42c0030242730c8336c719810be6a4
+    review:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_review.yaml
+      sha256: a3bd94c00a11f3ef96c163b9d857a7eb981f4ad19376ade05dafb684507f29d5
+  recorded_by: d4d review check
+canonical:
+  criterion: full and core both validate against the current schema, then most slots,
+    then lowest label
+  selected_from:
+  - label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1
+    slots: 82
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep2
+    slots: 79
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+    slots: 80
+    validation: valid
+    validation_recorded_at_run_time: valid
+  margin_over_runner_up: 2
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep2
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep1

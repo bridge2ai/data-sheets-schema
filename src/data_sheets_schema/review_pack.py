@@ -144,7 +144,15 @@ def _value_at(record: Any, path: str, limit: int = 300) -> Any:
     cur = record
     for part in re.findall(r"[\w]+|\[\d+\]", path):
         try:
-            cur = cur[int(part[1:-1])] if part.startswith("[") else cur[part]
+            if part.startswith("["):
+                # a list index against a string would return a character —
+                # a receipt path into a value reconcile collapsed to one string
+                # does not resolve, it is not a one-letter value
+                if not isinstance(cur, list):
+                    return None
+                cur = cur[int(part[1:-1])]
+            else:
+                cur = cur[part]
         except (KeyError, IndexError, TypeError):
             return None
     s = cur if isinstance(cur, (int, float, bool)) or cur is None else str(cur)
@@ -271,7 +279,11 @@ def write_pack(provenance: Path, instruction_file: Path | None = None,
                sample: dict[str, int] | None = None) -> tuple[Path, dict[str, Any]]:
     pack = build_pack(provenance, instruction_file, sample)
     out = record_paths(provenance)["pack"]
-    out.write_text(yaml.safe_dump(pack, sort_keys=False, allow_unicode=True, width=10_000), encoding="utf-8")
+    from data_sheets_schema.provenance import _NoAliasDumper
+    # chunk line spans are shared between `bundle.chunks` and the items; an
+    # alias dumper would write the second as `*id001`
+    out.write_text(yaml.dump(pack, Dumper=_NoAliasDumper, sort_keys=False, allow_unicode=True, width=10_000),
+                   encoding="utf-8")
     return out, pack
 
 

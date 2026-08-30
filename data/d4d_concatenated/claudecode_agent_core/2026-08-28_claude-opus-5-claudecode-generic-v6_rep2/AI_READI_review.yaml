@@ -1,0 +1,217 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: '2026-08-30T08:17:03Z'
+pack_sha256: 28a7915e4f9df7703613d17be1a65db6a88ded0db4ae6f2c2dcaf76a12c57b69
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-25 are the concatenation banner and the 11-entry table of contents; no dataset fact"
+- id: chunk-c025
+  verdict: confirmed
+  evidence: "lines 6338-6647 are the UW HSD form's instructions and question text, sections 1-5.11.f, with 'Study Title:' (line 6373) blank and every checkbox/answer empty; the only figures are form examples (e.g. 'payment of $ 50', line 6489-6490)"
+- id: chunk-c026
+  verdict: confirmed
+  evidence: "lines 6648-6943 continue the unfilled form (5.11.g-10.10): definitions, MRI/gadolinium facility checklists (6542-6553, 6909-6919), assent and consent guidance; nothing answered for this study"
+- id: slot-004
+  verdict: supported
+  evidence: "line 6328 'environment/ro-crate-metadata.json' sits in the environmental-sensor sub-crate entry (6246-6330); the FAIRhub structure description also names the directory 'environment' at line 3213"
+- id: slot-005
+  verdict: supported
+  evidence: "line 5412 '\"copyrightNotice\": \"Copyright © 2026 AI-READI\"' in the release crate; the value renders © as (c), same notice"
+- id: slot-006
+  verdict: supported
+  evidence: "lines 7219-7222 (IRB protocol collaborator roster, under 'Stanford:') give the chair, university and email; the 'Study Principal Investigator' clause is attested at line 5178 (overallOfficialRole) though that passage is not cited"
+- id: slot-007
+  verdict: supported
+  evidence: "line 2247 lists the controlled-access elements, which is what the value's second sentence says; the first sentence is the healthsheet answer at line 4305 ('No, the dataset does not contain data that might be considered confidential...'), not cited on this slot"
+- id: slot-008
+  verdict: supported
+  evidence: "line 7282 supports the 'email with a unique code ... UW REDCap' sentence; the value's opening sentences are the healthsheet answer at line 4467 ('Informed consent to participate was required before participation in any part of the protocol...'), which is not cited on this slot"
+- id: slot-009
+  verdict: supported
+  evidence: "lines 7180-7183 (roster under 'UAB:') give the chair, university and email; guarantor at line 1524 'CO is the guarantor', corresponding author at line 94 'Correspondence to', PI role at line 5136 — all in the bundle, none cited here"
+- id: slot-010
+  verdict: supported
+  evidence: "line 2831 '\"size\": 3815969779678' in the FAIRhub v3 API record's top-level data block, beside fileCount 356343"
+- id: slot-011
+  verdict: supported
+  evidence: "line 4721 'humanSubjectReviewStatus: Submitted, approved' in the oversightModule; an approved human-subject review entails human subjects, and line 6303 'humanSubjectResearch: Yes' states it outright"
+- id: slot-012
+  verdict: supported
+  evidence: "line 4166 (static versions, third version, roughly once a year) and line 4580 (not updated; new versions with additional instances) say what the value says"
+- id: slot-013
+  verdict: supported
+  evidence: "lines 494-497 (derivatives sent to UAB CCTS biorepository, available for ancillary studies) and 1418-1424 (plasma/serum/buffy coats batch-shipped to UAB CCTS, DNA extraction, PBMC processing); line 4813 lists the derivatives and storage temperatures"
+- id: slot-014
+  verdict: supported
+  evidence: "line 3209 '\"size\": 176182781' closes the clinical_data directory entry that opens at line 3138"
+- id: slot-015
+  verdict: supported
+  evidence: "line 3368 directoryDescription for retinal_oct (opened at 3366); structural_oct at 3436 with heidelberg_spectralis/topcon_maestro2/topcon_triton/zeiss_cirrus at 3440-3455"
+- id: slot-016
+  verdict: supported
+  evidence: "line 4327 (LeeLab Anura, 10 continuous days), 1389-1390 (Karalis Johnson Retina Center, UW), 6246 (particulate matter, temperature, humidity, VOCs, NOx, 11 light measurements; 'place the device in an area frequently used'), 966 (participants report where the sensor was placed)"
+- id: slot-017
+  verdict: supported
+  evidence: "line 5848 'retinal_oct/ro-crate-metadata.json' in the OCT sub-crate; directory named retinal_oct at line 3366"
+- id: slot-018
+  verdict: supported
+  evidence: "line 4533 'The dataset will be distributed and be available for public use.' answers the third-party distribution question the boolean asks"
+- id: slot-019
+  verdict: supported
+  evidence: "line 3244 standardName 'ASCII File Format Guidelines for Earth Science Data' is inside the environment directory entry that opens at line 3213"
+- id: slot-020
+  verdict: supported
+  evidence: "lines 2708-2715 list exactly the seven keywords in the record's order"
+- id: slot-021
+  verdict: supported
+  evidence: "line 2570 (statically watermarked to identify Licensee), line 2985 (login through a verified ID system), line 2552 (license forbids attempts to identify or contact any Data Subject)"
+- id: slot-022
+  verdict: supported
+  evidence: "lines 1189-1191 name the data set documentation at https://docs.aireadi.org/"
+- id: slot-023
+  verdict: supported
+  evidence: "line 5670: 'the device is very sensitive, and several factors can induce noise ... can not handle more than 1 centimeter of movement ... exposes patients to uncomfortable levels of light, it is kept to be performed as the last modality'"
+- id: slot-024
+  verdict: supported
+  evidence: "line 2179 'Principal investigator: LEE, AARON' on the RePORTER page for OT2OD032644; line 4642 responsiblePartyInvestigatorTitle 'Associate Professor'; line 4885 centralContact Aaron Lee; line 4926 role Study Principal Investigator"
+- id: slot-025
+  verdict: weak
+  evidence: "line 7371 'Phlebotomist: Responsible for blood collection' is on topic but says nothing about CLIA-certified local labs, CBC on fresh blood, UW NORC or stored frozen samples; that content is at lines 486-492 (BMJ Open, c003), not cited on this slot"
+- id: slot-026
+  verdict: supported
+  evidence: "lines 2975-2979 managingOrganization 'Washington University in St. Louis' with ROR https://ror.org/01yc7t268; the managing organization is the accountable organization in the slot's sense"
+- id: slot-027
+  verdict: supported
+  evidence: "lines 2246-2247 (individuals with and without T2DM, 3 sites), 2684 (flagship ethically-sourced dataset), 2903 (2280 participants, July 19 2023 to May 01 2025); 356,343 files / 3.82 TB at lines 2831-2832"
+- id: slot-028
+  verdict: supported
+  evidence: "line 2884 deIdentType 'NoDeIdentification' and line 2890 'No identifiers were collected so no active de-identification was necessary but we checked that no identifiable data per US HIPAA were present in the data.'"
+- id: slot-029
+  verdict: bundle_supports
+  evidence: "lines 2502-2504 (license §D): 'models, algorithms and programs that are developed, trained or adapted using the Data, but which do not themselves contain the Data'"
+- id: slot-030
+  verdict: exempt_by_nature
+  evidence: "a composed object name; the thing it labels is stated at lines 486-488 (blood and urine collected from participants during the visit) and 7111-region IRB answers"
+- id: slot-031
+  verdict: exempt_by_nature
+  evidence: "a composed object name; the collection it labels is stated at line 4457 'The data was collected directly from participants across the three recruiting sites'"
+- id: slot-032
+  verdict: exempt_by_nature
+  evidence: "an enum classification of the limitation stated at line 2247 / 5440 ('may not have achieved balanced distribution across groups'); the bundle states the limitation, not the category"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "line 6150 (wearable_activity_monitor crate description): 'There are gaps in data collection as the battery had to be charged every 2-3 days'"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "line 4951 overallOfficialLastName 'Bahmani' with first name Amir; also lines 1517 and 2071"
+- id: slot-035
+  verdict: bundle_supports
+  evidence: "line 5010 overallOfficialRole 'Study Principal Investigator' in the Chute official entry (4993)"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "line 3951 '\"directoryName\": \"wearable_blood_glucose\"'"
+- id: slot-037
+  verdict: bundle_supports
+  evidence: "lines 1887-1891: 'share our blueprint for collecting and sharing AI-ready datasets so that future DGPs can follow them ... including guidelines for project management, as well as data collection, management and sharing'"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "line 4432 'some data were directly observable (such as labs, vitals, and retinal imaging)'"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "line 5005 overallOfficialAffiliationIdentifierValue https://ror.org/00za53h95 for Chute, Johns Hopkins University"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "line 3809 '\"directoryName\": \"wearable_activity_monitor\"'"
+- id: slot-041
+  verdict: exempt_by_nature
+  evidence: "a composed object name; the limitation it labels is at line 6054 'The G6 transmitter will only save data for thirty days, therefore the data must be downloaded within thirty days from activation or all data will be lost'"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "lines 7295-7297: consent form translated into Spanish by UCSD translation services if recruitment goals for Hispanic participants are not met; native Spanish-speaking research staff provide interpretation"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "line 1887 heading 'Blueprint for future data-generating projects'"
+- id: slot-044
+  verdict: exempt_by_nature
+  evidence: "a role classification the record assigns; the collectors it classifies are stated at lines 486-492 (CLIA-certified local laboratories; UW NORC testing facility)"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "line 448 'monofilament test assessing touch perception' and line 1812 'Monofilament test'; peripheral neuropathy is the stated purpose in the BMJ Open procedures around line 448"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "line 5031 overallOfficialRole 'Study Principal Investigator' for Contreras (5014); line 1989 'Contreras, J. et al. License terms for reusing the AI-READI dataset. Zenodo'"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "line 3123 'This is a metadata file based on the Clinical Dataset Structure (CDS) v0.1.1' (the standardName entries at 3064/3232 spell it 'Clinical Data Structure')"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "lines 166 and 1475 ('a finite number of samples to share with scientists'); line 7233 'we will create an infrastructure to decide who is allowed to request and receive the specimen for future research'"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "line 7111 'There will be a $200 stipend for participation'"
+- id: slot-050
+  verdict: bundle_supports
+  evidence: "line 4725 'algorithms aimed at defining disease trajectories and underlying genetic links in different racial/ethnic cohorts'"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "line 4457 'collected directly from participants' and line 4462 'active data collection directly from participants'"
+- id: slot-052
+  verdict: bundle_supports
+  evidence: "line 3633 '\"numberOfFiles\": 173721' closes the retinal_octa directory entry that opens at line 3480"
+- id: slot-053
+  verdict: bundle_supports
+  evidence: "line 4993 overallOfficialLastName 'Chute', first name 'Christopher G.' (4990-region); also line 2075"
+- id: rule-01
+  verdict: followed
+  evidence: "of the 25 receiptless values sampled, 20 are stated in the bundle and 5 are labels or classifications; the report removed two inferred booleans (at_risk_groups_included, archival) and left publisher and confidentiality_level unset"
+- id: rule-02
+  verdict: followed
+  evidence: "publisher left unset with both tier-1 values in source_caveats; creators[3].affiliations carries both Washington University in St. Louis and University of Washington rather than one"
+- id: rule-03
+  verdict: followed
+  evidence: "report §Referent names version 3.0.0, doi 10.60775/fairhub.3; id, doi and version_access.latest_version_doi agree, and 1.0.0/2.0.0 appear only as related_datasets is_new_version_of"
+- id: rule-04
+  verdict: followed
+  evidence: "no density target is applied; the report's final table states counts are informational and variables/existing_uses/use_repository are omitted with reasons"
+- id: rule-05
+  verdict: violated
+  evidence: "funders[1] collapses Microsoft AI for Good Lab, Topcon, Optomed, iCare, Carl Zeiss, Heidelberg Engineering, Dexcom and Garmin into one FundingMechanism with grantor 'Microsoft AI for Good Lab and study device manufacturers'; funders[0].grants[1] collapses P30DK035816, UL1TR003096 and Research to Prevent Blindness into one Grant with no grant_number"
+- id: rule-06
+  verdict: followed
+  evidence: "existing_uses, use_repository, other_tasks and discouraged_uses are omitted rather than filled with 'No'/'see license' (report §Omissions); maintainers[0] gives the contact addresses themselves alongside the pointer"
+- id: rule-07
+  verdict: violated
+  evidence: "participant_compensation[0].compensation_rationale holds payment timing and proration ('provided once the final data are received ... not prorated'), not the rationale for the amount the slot asks for; participant_privacy[2].anonymization_method holds storage and access controls (encrypted servers, locked cabinets, Level 3), not an anonymization method"
+- id: rule-08
+  verdict: followed
+  evidence: "creators[0..16] populate name, principal_investigator (ORCID) and affiliations[].id/name; ethical_reviews[0] fills reviewing_organization; collection_timeframes[0] fills start_date/end_date"
+- id: rule-09
+  verdict: followed
+  evidence: "id and version_access.latest_version_doi are doi: CURIEs, every affiliation id is ROR:, every principal_investigator is ORCID:; instances[0].data_topic is a MeSH URL in a uriorcurie slot with no MESH prefix declared (uri fallback); doi slot bare; access_urls are URLs"
+- id: rule-10
+  verdict: followed
+  evidence: "all 16 ORCIDs and 9 RORs in the record occur in the bundle (grep count >= 1 each); D003924 at 2 lines, NIH ROR 01cwqze88 at 2 lines, NCT06002048 at 2 lines"
+- id: rule-11
+  verdict: followed
+  evidence: "13 fragments minted on doi:10.60775/fairhub.3 (file_collections[0..9].id, subsets[0..2].id); no prefix invented; no person identified by a fragment on an organization"
+- id: rule-12
+  verdict: followed
+  evidence: "prose uses 'organization', 'standardized', 'license', 'analyze'; 'categorised' at collection_consents[1] is a quotation of the FAIRhub consentType at line 2893 'ConsentSpecifiedNotElsewhereCategorised'"
+- id: rule-13
+  verdict: followed
+  evidence: "source_caveats records five ranked disagreements (acronym, target enrollment, blood volume, start date, governance committee) with each source's value and the preferred one; the tiers match d4d download priority (fairhub/ro-crate 1, docs/license/IRB 2, publications 3, RePORTER 4)"
+- id: rule-14
+  verdict: violated
+  evidence: "subsets[0].id #public, subsets[1].id #controlled and subsets[2].id #mini are pointed at by no value in either record; the file_collections fragments are used by the core's distributions, the subset fragments by nothing (DataSubset.id is schema-required, so recording the subsets at all forced the mint)"
+- id: rule-15
+  verdict: followed
+  evidence: "creators[].principal_investigator (range Person, not inlined) holds ORCID CURIEs; data_governance.accountable_organization is an inlined Organization with id/name; both records pass linkml-validate"
+notes: >-
+  Receipt attribution is thinner than support: for slot-006, slot-007, slot-008, slot-009 and
+  slot-025 the cited passage covers only part of the value while the rest is attested elsewhere in
+  the bundle without a receipt on that slot (lines 4305, 4467, 486-492, 1524, 5136, 5178). Only
+  slot-025 is weak enough to mark. The rule-14 finding is a schema/instruction tension rather than
+  carelessness: DataSubset requires an id, so the alternative under the rule was to describe the
+  public/controlled split only in prose (which sensitive_elements[0] and third_party_sharing[0]
+  already do). No instrument defect found; the pack listed no gaps.

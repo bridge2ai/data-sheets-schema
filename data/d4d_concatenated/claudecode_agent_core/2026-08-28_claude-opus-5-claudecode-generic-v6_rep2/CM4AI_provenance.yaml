@@ -381,3 +381,38 @@ receipts:
       path: data/preprocessed/chunks/CM4AI_chunks.yaml
       sha256: d891dbf1aad662eb402acb392d8c8fdb86fbc70bba4427a7cc783d8c9bb8d27b
   recorded_by: d4d receipts check
+review:
+  checked: true
+  items_total: 71
+  items_answered: 71
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 6
+    slot_receipted:
+      supported: 24
+      weak: 1
+    slot_receiptless:
+      exempt_by_nature: 8
+      bundle_supports: 14
+      inferred: 3
+    rule:
+      violated: 5
+      followed: 10
+  adverse: 9
+  cannot_tell: 0
+  findings: []
+  summary: items 71/71 answered · 9 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5
+    reviewed_at: '2026-08-30T00:00:00Z'
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CM4AI_review_pack.yaml
+      sha256: 0ca2862e9a78228d823c47f7b5260fb2ab57091b38f9b5b7ef77f0609005f806
+    review:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CM4AI_review.yaml
+      sha256: 6890c7c5bb39485a64c83a01e0084286c41442710fb0d629e340e43be0e73911
+  recorded_by: d4d review check

@@ -1,0 +1,226 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: '2026-08-30T00:00:00Z'
+pack_sha256: 0ca2862e9a78228d823c47f7b5260fb2ab57091b38f9b5b7ef77f0609005f806
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-24 are the concatenation banner and a ten-entry table of contents naming the input files; no dataset fact"
+- id: chunk-c006
+  verdict: confirmed
+  evidence: "lines 1625-2024 are the Nature article's reference list (Huttlin 2015 through Skinnider 2021, with CAS/PubMed/Google Scholar link labels); the only dataset-adjacent item, the GPT-4 report at 1729-1731, is a citation the record already handles in labeling_strategies[0].source_caveats"
+- id: chunk-c009
+  verdict: confirmed
+  evidence: "lines 2825-2893 are nature.com footer navigation, cookie and Nature Briefing sign-up banners; nothing belongs in a slot"
+- id: chunk-c013
+  verdict: confirmed
+  evidence: "lines 4095-4176 are preprint references 33-45; lines 4131-4148 repeat the bioRxiv banner (CC-BY-NC-ND 4.0), which is a fact about the preprint, not the dataset, and the preprint is already carried as related_datasets[0]"
+- id: chunk-c022
+  verdict: confirmed
+  evidence: "lines 6162-6166 hold 'Cancel', two blank lines and the document separator"
+- id: chunk-c025
+  verdict: confirmed
+  evidence: "lines 6967-7001 are Dataverse curation dialog labels, an empty Curation Status History table, the UVA copyright footer, the build string and the support-contact form; the truncated fragment 'and School of Medicine are published.' at 6967-6969 states nothing usable"
+- id: slot-007
+  verdict: supported
+  evidence: "line 3771-3773: 'Commercial use requires a separate license negotiation with the copyright holder (UCSD, Stanford, and/or UCSF depending upon the specific data package in question)'; the restriction is restated faithfully"
+- id: slot-008
+  verdict: supported
+  evidence: "line 5456, under 'Researchers should be aware of inherent limitations' (5453): 'The current release is most suitable for bioinformatics analysis of the individual datasets' — a scope statement, which is what scope_impact asks"
+- id: slot-009
+  verdict: supported
+  evidence: "lines 4348-4350: 'Website Support & Updates: / Zhandos Sembay, UAB / zsembay8@uab.edu' on the CM4AI site footer"
+- id: slot-010
+  verdict: supported
+  evidence: "line 4211-4213 (RePORTER abstract) states the black-box deficiency; line 4229-4231 states the project 'will generate a resource of matched data and tools to enable the creation of \"visible\" ML systems'; the value paraphrases both without changing scope"
+- id: slot-011
+  verdict: supported
+  evidence: "line 7248 'cm4ai_mass-spec_MDA-MB-468.zip' in the June 2026 file table (chunk c026), followed by 'ZIP Archive - 93.9 KB'"
+- id: slot-012
+  verdict: supported
+  evidence: "line 6199 'Version 2.1' is the page heading of the October 2025 release; the citation on 6202 says V2, and resources[1].description records that separately"
+- id: slot-013
+  verdict: supported
+  evidence: "the Nourreddine et al. Related Publication line appears on all four captures: 5123 (B35XWX), 5944 (F3TD5R), 6775 (K7TGEM), 7645 (HIGT4C), each with 'bioRxiv. 2024 Nov 4 ... PMCID: PMC11580897'"
+- id: slot-014
+  verdict: supported
+  evidence: "line 7270 'MD5: 291a362842a176a4fcccaf2cdc1dedde' directly under cm4ai_perturb-seq_KOLF2_cell_atlas.zip (7265)"
+- id: slot-015
+  verdict: supported
+  evidence: "line 5433-5434 'Data Governance Committee: / Jillian Parker (jillianparker@health.ucsd.edu)'"
+- id: slot-016
+  verdict: supported
+  evidence: "line 6176 'Source URL: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/K7TGEM'; access_urls is declared uri, so the URL form is right"
+- id: slot-017
+  verdict: supported
+  evidence: "line 4205 'Project start: 2022-09-01T00:00:00' on the RePORTER page; the value is that date normalised"
+- id: slot-018
+  verdict: supported
+  evidence: "lines 7265-7268: 'cm4ai_perturb-seq_KOLF2_cell_atlas.zip / ZIP Archive / - 30.2 KB / Published Jun 17, 2026'; the 'CRISPRi Perturbation Cell Atlas' phrase comes from the October 2025 file description the collection description cites"
+- id: slot-019
+  verdict: supported
+  evidence: "line 7011 'Source URL: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C' — the release's landing page"
+- id: slot-020
+  verdict: supported
+  evidence: "lines 5022-5023 'Lundberg E (Stanford University) - ORCID: / https://orcid.org/0000-0001-7034-0850' in the March 2025 author list"
+- id: slot-021
+  verdict: supported
+  evidence: "line 3010-3012 'Its datasets and software are available to the research community under minimally restrictive terms consistent with ethical guidelines, researcher attribution, and research integrity'; lines 7518-7525 list the MassIVE/Figshare external deposits; 'Public' file access is on every file entry (e.g. 7257)"
+- id: slot-022
+  verdict: supported
+  evidence: "line 4405 '... CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UT Austin, UA Birmingham, Simon Fraser University, and the Hastings Center'"
+- id: slot-023
+  verdict: supported
+  evidence: "line 5443 'Dataset will be regularly updated and augmented through the end of the project in November 2026' versus line 4206 'Project end: 2026-08-31T00:00:00'; the caveat states exactly this disagreement"
+- id: slot-024
+  verdict: supported
+  evidence: "line 2720 'This article is licensed under a Creative Commons Attribution 4.0 International License' in the Nature article's Rights and permissions; the data releases carry CC BY-NC-SA (3768-3769), so the contrast is grounded"
+- id: slot-025
+  verdict: supported
+  evidence: "line 4796 Keyword field begins 'AI, affinity purification, AP-MS, ...'"
+- id: slot-026
+  verdict: supported
+  evidence: "line 914 'https://github.com/eliorc/node2vec' inside 'Python3 implementation (...) was used to represent each protein' (913-915); in the Nature methods, but the CM4AI preprint independently names node2vec (record cites both)"
+- id: slot-027
+  verdict: supported
+  evidence: "line 6313 (KOLF2 archive) and line 6331 (MDA-MB468 archive) state SEC-MS in the Nevan Krogan laboratory at UCSF; the description attributes them to the October 2025 release, which chunk c023 is"
+- id: slot-028
+  verdict: supported
+  evidence: "line 4773 'Version 1.4' under the March 2025 release heading; the citation on 4776 says V1 and resources[3].source_caveats records that"
+- id: slot-029
+  verdict: weak
+  evidence: "line 7394 (and 7335, 7343, 7411, 7480) give https://ror.org/0153tk833 in the affiliation position of UVA-affiliated authors on the June 2026 page; the bundle never states that this ROR is the University of Virginia's, nor that UVA is the accountable organization — both are read across from the preprint affiliations (2936) and the 'Long term preservation in the University of Virginia Dataverse' line (5445)"
+- id: slot-030
+  verdict: supported
+  evidence: "lines 4618-4622 (ShareAlike) and 4624-4628 (No additional restrictions) on the CC BY-NC-SA deed"
+- id: slot-031
+  verdict: supported
+  evidence: "line 1479-1480 'AP-MS raw MS files are available at MassIVE under the identifier MSV000097168' in the Nature data availability statement; the slot is inside the entry for that publication's deposits"
+- id: slot-032
+  verdict: exempt_by_nature
+  evidence: "fragment minted on doi:10.18130/V3/HIGT4C (line 7328) for the file named at line 7231; File.id is required=True"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "Publication Date lines 4953 (2025-03-03), 5725 (2025-07-01), 6467 (2025-10-31), 7330 (2026-06-17)"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "line 7282-7283 'cm4ai_perturb-seq_KOLF2_raw_sra.zip / ZIP Archive'"
+- id: slot-035
+  verdict: inferred
+  evidence: "the June 2026 entry for cm4ai_release_metadata.zip (7299-7304) says only ZIP Archive, 1.1 MB, MD5; RO-Crate content is carried over from the June 2025 itemised files (5523-5529 'release-ro-crate-metadata.json ... RO-Crate metadata'), as file_collections[4].description itself admits"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "line 7146-7147 'cm4ai_apms_MDA-MB-468_paclitaxel.zip / ZIP Archive'"
+- id: slot-037
+  verdict: bundle_supports
+  evidence: "lines 3729-3733 'Initial Datasets, Tools and Standards ... have been released and are publicly available at our CM4AI web portal. These data were also made available at our CodeFest in March 2024, accompanied by detailed tutorials ...'"
+- id: slot-038
+  verdict: exempt_by_nature
+  evidence: "fragment on doi:10.18130/V3/HIGT4C for the file at line 7299; File.id required"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "line 3422-3424 'The Standards Module of CM4AI is responsible for AI-Readiness packaging ... performed by the FAIRSCAPE framework'; the composite name is the record's phrasing for an entity the bundle names"
+- id: slot-040
+  verdict: exempt_by_nature
+  evidence: "MIME normalisation of 'ZIP Archive' at line 7147; the bundle states no media type"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "line 7088 'Some datasets are under temporary pre-publication embargo' and lines 7512-7515 marking the two perturb-seq links 'Embargoed'"
+- id: slot-042
+  verdict: exempt_by_nature
+  evidence: "entry label for the RePORTER project start/end at lines 4205-4206; no passage names a period"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "line 4951 'doi:10.18130/V3/B35XWX' (Persistent Identifier) and 4750 Source URL"
+- id: slot-044
+  verdict: bundle_supports
+  evidence: "lines 3768-3770 'Data packages are licensed under Creative Commons CC-BY-NC-SA 4.0 license terms, which include a requirement for attribution ... and citation of this article'"
+- id: slot-045
+  verdict: exempt_by_nature
+  evidence: "boolean inferred from 'Human Subjects: No' (5427-5428) and the cell-line derivation line (5439 region); no passage states directness"
+- id: slot-046
+  verdict: inferred
+  evidence: "line 5435 names Belisle-Pipon as an Ethical Review contact at sfu.ca and line 5010 gives his affiliation as Simon Fraser University; no passage says Simon Fraser University conducted an ethical review, which is what reviewing_organization asks"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "lines 3865-3867 'funded by the National Institutes of Health under awards 1OT2OD032742-01 (Bridge2AI Functional Genomics) and 5U54HG012513-02 (Bridge2AI Bridge Center)'"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "line 5395 'Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)'"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "lines 3304-3305 'downloaded from the Krogan Laboratory's deposition archive'"
+- id: slot-050
+  verdict: bundle_supports
+  evidence: "line 5448 'AI-ready datasets to support research in functional genomics' under Intended Use"
+- id: slot-051
+  verdict: inferred
+  evidence: "no passage names 'Contributing laboratories'; the entity is composed from the Krogan and Lundberg lab lines (3304-3308, 6313, 6331) and the Production Location line (5127)"
+- id: slot-052
+  verdict: bundle_supports
+  evidence: "line 7180-7181 'cm4ai_ifimages_MDA-MB-468_paclitaxel.zip / ZIP Archive'"
+- id: slot-053
+  verdict: exempt_by_nature
+  evidence: "fragment on doi:10.18130/V3/HIGT4C; FileCollection.id required=True"
+- id: slot-054
+  verdict: exempt_by_nature
+  evidence: "fragment on doi:10.18130/V3/HIGT4C; FileCollection.id required=True"
+- id: slot-055
+  verdict: exempt_by_nature
+  evidence: "entry label over the release archive list on the data-releases page (chunk c016, 4360-4484)"
+- id: slot-056
+  verdict: bundle_supports
+  evidence: "line 5444 'Updates on a quarterly basis'"
+- id: rule-01
+  verdict: violated
+  evidence: "file_collections[4].conforms_to_standard [RO_CRATE] is inferred from a different release's itemised files (slot-035); ethical_reviews[1].reviewing_organization and [0] infer a reviewing organisation from a contact's affiliation (slot-046); data_governance.committee_members[0].id ORCID is attached by within-page surname matching, as its own caveat says"
+- id: rule-02
+  verdict: followed
+  evidence: "funders[0].source_caveats (three award-number forms), instances[4].source_caveats (464/563/523), distribution_dates[0].source_caveats (June 17, 2025 vs 2026-06-17) each state both sides"
+- id: rule-03
+  verdict: followed
+  evidence: "reconciliation report 'Referent' section chooses the Dataverse release series, id https://cm4ai.org/; top-level source_caveats records the U2OS/Nature exclusion; core record carries the same id"
+- id: rule-04
+  verdict: followed
+  evidence: "Nature article counts (5,147 proteins etc.) and funders were kept out of composition/funding slots per the report; density follows the bundle"
+- id: rule-05
+  verdict: violated
+  evidence: "data_collectors[0] 'Contributing laboratories' collapses the Lundberg Lab, the Krogan laboratory and the depositor into one DataCollector, while the same labs are split into creators[1] and creators[2]"
+- id: rule-06
+  verdict: violated
+  evidence: "raw_data_sources[2].access_details 'the data will be uploaded to Pride when available' records a pending statement rather than an access route"
+- id: rule-07
+  verdict: followed
+  evidence: "the access route is in distribution_formats[1].access_urls, cadence in updates.frequency, prior versions in version_access; embargo in confidential_elements not in prohibited_uses"
+- id: rule-08
+  verdict: followed
+  evidence: "data_governance.committee_members[0] fills id/name/orcid/email/affiliation; funders[0].grants[0] fills grant_number; resources[] fill doi/version/issued/created_by"
+- id: rule-09
+  verdict: followed
+  evidence: "publisher ROR:0153tk833, committee_members[0].id ORCID:0000-0003-4535-3486, resources[].id doi:10.18130/V3/..., latest_version_doi doi:10.18130/V3/HIGT4C; data_topic IRIs use GO/NCIT, for which the schema declares no prefix"
+- id: rule-10
+  verdict: followed
+  evidence: "every external identifier in the record is in the bundle: ORCIDs 0000-0002-1708-8454/4902-337X/4060-7360/7080-8801 (4-5 hits each), RRID CVCL_0419 and CVCL_B5P3, GO_0008104, NCIT_C18469, DOI DXWOS5, MSV000097168, PXD052362, ModelArchive and NDEx ids, CLO:0009454"
+- id: rule-11
+  verdict: followed
+  evidence: "all minted ids are fragments on doi:10.18130/V3/HIGT4C (attested at 7328); no invented prefix; no person given a fragment"
+- id: rule-12
+  verdict: violated
+  evidence: "known_limitations[0].limitation_description 'each is labelled a Beta release'; preprocessing_strategies[1].used_software[0].description 'interaction neighbourhood' — record prose, not quotation"
+- id: rule-13
+  verdict: violated
+  evidence: "collection_timeframes[0].end_date is 2026-08-31 from RePORTER although the caveat itself states the manifest ranks the Dataverse release (November 2026, line 5443) higher; the disagreement is recorded but the higher-ranked value is not the one stated"
+- id: rule-14
+  verdict: followed
+  evidence: "fragments exist only on required id slots (FileCollection.id, File.id required=True), one per part with a stable name; the two flagship groupings are described in prose in `notes` without an id"
+- id: rule-15
+  verdict: followed
+  evidence: "principal_investigator, committee_contact, contact_person, target_dataset hold strings; used_software and affiliations hold objects only where the range is a class"
+notes: >-
+  Pack lists no gaps. slot-029 is borderline: the ROR string is in the bundle (rule-10
+  holds), but its identification as the University of Virginia and as the accountable
+  organization is cross-page inference the record does not caveat. rule-13 and rule-01
+  findings are judgement calls the record itself documents in caveats; they are adverse
+  because the rules ask for the higher-ranked value and for omission over inference, not
+  for a well-explained inference. No defect the receipt validator should have caught was
+  found: every sampled snippet was in its cited chunk.
