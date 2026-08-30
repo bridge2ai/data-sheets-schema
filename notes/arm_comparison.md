@@ -86,22 +86,22 @@ Cells are mean ± sample SD over the *measured* replicates, with every replicate
 - **slots without a receipt** — record block. receipts (#708): receiptable populated leaves with no receipt; exempt slots (runner-set, minted, commentary) are outside the denominator.
 - **GC label variants (reported)** — live recompute, current instrument. reported-only; counted against the manifest naming declaration decided 2026-08-22, so anachronistic for the v4 arm and same-day for 22c. For VOICE the count is the dataset's own PhysioNet title, lawful under the proper-noun carve-out (#674).
 
-## Rubric10-semantic scores (canonical / would-be canonical records only; n = 1 per arm and project, so no SD)
+## Rubric10-semantic scores (every evaluated replicate; earlier arms have their canonical only)
 
 | project | v4 API (2026-08-13) | v5 API (2026-08-22c) | v5 agentic (2026-08-24) | v6 agentic (2026-08-28) | v7 API canaries (2026-08-28…d, partial) |
 |---|---|---|---|---|---|
-| AI_READI | – | 49/50 (98.0%, rep2) | 48/50 (96.0%, rep2) | – | – |
-| CHORUS | – | 36/49 (73.5%, rep3) | 32/49 (65.3%, rep1) | – | – |
-| CM4AI | – | 47/50 (94.0%, rep1) | 47/50 (94.0%, rep2) | – | – |
-| VOICE | – | 50/50 (100.0%, rep2) | 49/50 (98.0%, rep1) | – | – |
+| AI_READI | – | 49/50 (98.0%, 22c/rep2) | 48/50 (96.0%, rep2) | 50/50 (100.0%, rep1); 48/50 (96.0%, rep2); 49/50 (98.0%, rep3) | 49/50 (98.0%, 28b/rep1); 49/50 (98.0%, 28c/rep1); 49/50 (98.0%, 28d/rep1) |
+| CHORUS | – | 36/49 (73.5%, 22c/rep3) | 32/49 (65.3%, rep1) | 30/49 (61.2%, rep1); 26/49 (53.1%, rep2); 30/49 (61.2%, rep3) | 32/49 (65.3%, rep1); 31/49 (63.3%, 28b/rep1) |
+| CM4AI | – | 47/50 (94.0%, 22c/rep1) | 47/50 (94.0%, rep2) | 39/45 (86.7%, rep1); 40/45 (88.9%, rep2); 42/45 (93.3%, rep3) | – |
+| VOICE | – | 50/50 (100.0%, 22c/rep2) | 49/50 (98.0%, rep1) | 49/50 (98.0%, rep1); 47/50 (94.0%, rep2); 49/50 (98.0%, rep3) | – |
 
-## Rubric20-semantic scores (canonical / would-be canonical records only; n = 1 per arm and project, so no SD)
+## Rubric20-semantic scores (every evaluated replicate; earlier arms have their canonical only)
 
 | project | v4 API (2026-08-13) | v5 API (2026-08-22c) | v5 agentic (2026-08-24) | v6 agentic (2026-08-28) | v7 API canaries (2026-08-28…d, partial) |
 |---|---|---|---|---|---|
-| AI_READI | – | 81/88 (92.0%, rep2) | 79/88 (89.8%, rep2) | – | – |
-| CHORUS | – | 60/88 (68.2%, rep3) | 59/88 (67.0%, rep1) | – | – |
-| CM4AI | – | 70/78 (89.7%, rep1) | 66/78 (84.6%, rep2) | – | – |
-| VOICE | – | 81/88 (92.0%, rep2) | 78/88 (88.6%, rep1) | – | – |
+| AI_READI | – | 81/88 (92.0%, 22c/rep2) | 79/88 (89.8%, rep2) | – | – |
+| CHORUS | – | 60/88 (68.2%, 22c/rep3) | 59/88 (67.0%, rep1) | – | – |
+| CM4AI | – | 70/78 (89.7%, 22c/rep1) | 66/78 (84.6%, rep2) | – | – |
+| VOICE | – | 81/88 (92.0%, 22c/rep2) | 78/88 (88.6%, rep1) | – | – |
 
 Evaluator model(s) recorded: claude-fable-5. Scores are shown as points / adjusted maximum after N/A exclusions; raw points are comparable within a rubric, percentages are denominator-sensitive. No gold standard exists (#177); the rubrics are not domain-neutral (#627); rubric20's N/A convention is #155's.

@@ -112,12 +112,48 @@ subscription tokens for 12 runs against ~$8 × 12 ≈ $96 of metered API
 spend — different quantities, not a cost comparison, #400). Report-claims
 findings are 0ᵘ on nearly every run of every arm (#684): still unmeasured.
 
-## 5. What is not here
+## 5. Rubric10-semantic (same evaluator, claude-fable-5; every replicate)
 
-- **Rubric10/rubric20-semantic scores** for the new arms: the evaluator
-  subagents hit the account's weekly limit on 2026-08-30 (resets 2026-09-01);
-  `notes/arm_comparison.md` shows the rubric rows for v4/v5 only. To be run
-  with the fan-out.
+| project | v5 API (22c, canonical) | v5 agentic (24, canonical) | **v6 agentic** (3 reps) | **v7 API** canaries |
+|---|---|---|---|---|
+| AI_READI | 49/50 | 48/50 | **50, 48, 49** /50 | 49, 49, 49 /50 |
+| CHORUS | 36/49 | 32/49 | **30, 26, 30** /49 | 32, 31 /49 |
+| CM4AI | 47/50 | 47/50 | **39, 40, 42** /45 (Element 4 N/A: cell lines, no human subjects) | – |
+| VOICE | 50/50 | 49/50 | **49, 47, 49** /50 | – |
+
+Reading, with the caveat that the earlier arms show one selected record
+each and the new arms all three:
+
+- **AI_READI and VOICE are at the ceiling on every arm** (47–50/50); the
+  points lost are the same two everywhere — `variables` absent, and no
+  `software_and_tools` entry despite a linked GitHub organisation. Neither
+  the receipt protocol nor the minting norm moved these.
+- **CHORUS is where the arms differ, and the direction is down for v6
+  agentic**: 30/26/30 against 32 (v5 agentic) and 36 (v5 API); the v7 API
+  canaries sit at 32/31. Every evaluator names the same gaps — no persistent
+  identifier, no IRB/consent basis for PICU/NICU patient data, no
+  version/publisher/download URL — and every one of them is a gap *in the
+  bundle*: CHORUS's sources do not state them. The v6 records lost points
+  for declining to assert what the sources do not say; the v5 API record
+  scored higher partly by asserting more (the review of v6 rep1 found its
+  remaining adverse items to be exactly such assertions). On CHORUS the
+  rubric rewards coverage the evidence cannot support, and the leaner v6
+  record is the more faithful one.
+- **CM4AI**: the v6 evaluations excluded Element 4 (human subjects) as
+  not applicable — the record describes cell lines — where the v5
+  evaluations scored it; 39–42/45 is 87–93%, against 94% for v5. The
+  denominator moved, so the raw points are not comparable; the lost
+  points are `variables`, `anomalies` and a related-dataset link.
+- Rubric10 does not see the receipt at all: a 100% score (AI_READI v6
+  rep1) and the CHORUS records with six adverse review items are scored
+  by the same instrument on the same terms. Presence-and-quality and
+  evidence-and-support are different axes, and the arm comparison now has
+  both.
+
+## 6. What is not here
+
+- **Rubric20-semantic** for the new arms — running at the time of writing;
+  `notes/arm_comparison.md` regenerates with it.
 - **The arm-wide review pass** (`d4d-review-record` on all 12 v6 runs and the
   v7 canaries) — one record reviewed so far.
 - **Canonical selection** for v6 (safe since #677) — after the review pass.

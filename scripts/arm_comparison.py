@@ -91,6 +91,14 @@ ARMS = (
 )
 
 
+def _rep_tag(label: str) -> str:
+    """`rep2`, or for an arm spanning several label prefixes the date suffix
+    too — `28c/rep1` — so three "rep1" cells are distinguishable."""
+    head, rep = label.rsplit("_rep", 1)
+    date = head.split("_", 1)[0]
+    return f"rep{rep}" if date.count("-") == 2 and len(date) == 10 else f"{date[-3:]}/rep{rep}"
+
+
 def arm_labels(prefix) -> list[str]:
     """The run labels an arm spans: `{prefix}_rep{1..3}`, or an explicit list."""
     return list(prefix) if isinstance(prefix, (list, tuple)) else [f"{prefix}_rep{r}" for r in (1, 2, 3)]
@@ -339,7 +347,7 @@ def write_markdown(data, scores) -> None:
     lines.append("")
 
     for rubric, rscores in scores.items():
-        lines += [f"## {rubric.capitalize()}-semantic scores (canonical / would-be canonical records only; n = 1 per arm and project, so no SD)", "",
+        lines += [f"## {rubric.capitalize()}-semantic scores (every evaluated replicate; earlier arms have their canonical only)", "",
                   "| project | " + " | ".join(d for _k, d, *_ in ARMS) + " |",
                   "|---|" + "|".join("---" for _ in ARMS) + "|"]
         for p in PROJECTS:
@@ -347,7 +355,7 @@ def write_markdown(data, scores) -> None:
             for key, _d, pfx, _rt, _role in ARMS:
                 ss = rscores[key][p]
                 cells.append("; ".join(
-                    f"{s['total']}/{s['adjusted_max'] or s['max']} ({s['pct']}%, {s['label'].rsplit('_', 1)[-1]})"
+                    f"{s['total']}/{s['adjusted_max'] or s['max']} ({s['pct']}%, {_rep_tag(s['label'])})"
                     for s in ss) or "–")
             lines.append(f"| {p} | " + " | ".join(cells) + " |")
         lines.append("")
