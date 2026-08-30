@@ -371,7 +371,10 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
         if branch_guard:
             late = run_guard.runs_on_other_refs([(s.label, s.method)], run_guard.tracked_core_dirs())
             if late:
-                raise click.ClickException(run_guard.message(late))
+                # Stop the loop and raise after the lock is released, as the
+                # canary stop does: the release below is not in a finally.
+                canary_stop = run_guard.message(late)
+                break
         try:
             res = execute(s)
             spent_in += sum(u["input_tokens"] or 0 for u in res["usage"])
