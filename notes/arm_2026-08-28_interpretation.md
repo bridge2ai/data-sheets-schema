@@ -154,10 +154,36 @@ each and the new arms all three:
   evidence-and-support are different axes, and the arm comparison now has
   both.
 
-## 6. What is not here
+## 6. Rubric20-semantic (same evaluator; every replicate)
 
-- **Rubric20-semantic** for the new arms — running at the time of writing;
-  `notes/arm_comparison.md` regenerates with it.
+| project | v5 API (22c) | v5 agentic (24) | **v6 agentic** | **v7 API** canaries |
+|---|---|---|---|---|
+| AI_READI | 81/88 | 79/88 | 79, 78, 80 /88 | 79, 80, **84** /88 |
+| CHORUS | 60/88 | 59/88 | 59, 58, 57 (/88, /88, /83) | 62, 60 /88 |
+| CM4AI | 70/78 | 66/78 | 73/88, 68/78, 68/78 | – |
+| VOICE | 81/88 | 78/88 | 80, 78, 80 /88 | – |
+
+Rubric20 agrees with rubric10 on the shape and disagrees on CHORUS's
+direction: on the 20-question FAIR rubric the v6 agentic CHORUS records
+(57–59) sit level with v5 agentic (59) and just under v5 API (60), and the
+v7 API canaries (60, 62) are the best CHORUS has scored. The points every
+evaluator withholds are the same on every arm — no persistent identifier,
+no IRB/consent for PICU/NICU data, no version/publisher/license — bundle
+gaps, not generation gaps. AI_READI's 28d record (84/88, 95.5%) is the
+highest rubric20 score in the corpus. Two evaluator inconsistencies to
+carry: CM4AI v6 rep1 was scored with Q8/Q15 applicable (73/88) where rep2,
+rep3 and both v5 arms excluded them (/78), and CHORUS v6 rep3 excluded Q14
+(/83) where its siblings did not — the #155 convention is applied by
+judgement, and the denominators say so.
+
+Taken together, the two rubrics put the v6 agentic arm level with v5 on
+three projects and 2–6 points lower on CHORUS (rubric10) — with a receipt
+that verifies every quote and a review that names what the rubric cannot.
+The rubric measures presence and quality of what is said; the receipt
+measures whether what is said is in the bundle; neither substitutes for
+the other, and the CHORUS case is where they pull apart.
+
+## 7. What is not here
 - **The arm-wide review pass** (`d4d-review-record` on all 12 v6 runs and the
   v7 canaries) — one record reviewed so far.
 - **Canonical selection** for v6 (safe since #677) — after the review pass.
