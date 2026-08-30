@@ -139,8 +139,15 @@ def rules_from(instruction: str) -> list[dict[str, str]]:
     return out
 
 
+#: What the pack shows for a receipt path the final record no longer has —
+#: a leaf phase 4 deleted, an index into a list it collapsed. Distinct from
+#: a genuine null leaf, which the pack shows as `null` (#808).
+UNRESOLVED = "<path does not resolve in the record>"
+
+
 def _value_at(record: Any, path: str, limit: int = 300) -> Any:
-    """The record's value at a slot path, truncated for the pack (#791)."""
+    """The record's value at a slot path, truncated for the pack (#791);
+    :data:`UNRESOLVED` when the path does not reach a value."""
     cur = record
     for part in re.findall(r"[\w]+|\[\d+\]", path):
         try:
@@ -149,12 +156,14 @@ def _value_at(record: Any, path: str, limit: int = 300) -> Any:
                 # a receipt path into a value reconcile collapsed to one string
                 # does not resolve, it is not a one-letter value
                 if not isinstance(cur, list):
-                    return None
+                    return UNRESOLVED
                 cur = cur[int(part[1:-1])]
             else:
+                if not isinstance(cur, dict) or part not in cur:
+                    return UNRESOLVED
                 cur = cur[part]
         except (KeyError, IndexError, TypeError):
-            return None
+            return UNRESOLVED
     s = cur if isinstance(cur, (int, float, bool)) or cur is None else str(cur)
     return s[:limit] + "…" if isinstance(s, str) and len(s) > limit else s
 
@@ -237,7 +246,9 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                           "receipts": [{"chunk": r["chunk"], "lines": span.get(r["chunk"], {}).get("lines"),
                                         "snippet": r["snippet"]} for r in rs],
                           "question": "Read the passage each snippet sits in. Does it support the record's value at "
-                                      "this slot, as the slot's description asks, and is the value the right reading?"})
+                                      "this slot, as the slot's description asks, and is the value the right reading? "
+                                      f"A value of {UNRESOLVED!r} means the final record has no value at this path: "
+                                      "answer cannot_tell unless the receipt's statement survives elsewhere."})
         # The receiptless set from the receipt and the record themselves,
         # not the record's 50-entry walk-order prefix (#790): every populated,
         # non-exempt leaf no receipt path covers, sorted, then sampled.
