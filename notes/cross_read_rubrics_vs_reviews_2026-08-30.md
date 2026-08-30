@@ -14,9 +14,15 @@ the numbers?
 
 `r10`/`r20` are the rubric normalized percentages. `leaves` is
 `populated_leaves` of the full record. `slot adverse` counts non-affirmative
-verdicts on the ~50 sampled slots (weak + misread + unsupported + inferred +
-not_in_bundle); `rate` divides by the slots actually sampled. `rules
-violated` is out of 15 (v6) or 16 (v7).
+verdicts on the 50 sampled receipted + receiptless slots (weak + misread +
+unsupported + inferred + not_in_bundle); `rate` divides by those 50 — the
+`slot_reshaped` items some v7 packs also carry (including CHORUS 28b's two
+`cannot_tell`) are excluded from both numerator and denominator. This is a
+narrower count than the `adverse` column of the review-pass note, which adds
+rule and chunk items; per record, slot adverse + rules violated (+1
+`missed_content` chunk for 28d) equals that note's `adverse` exactly.
+`rules violated` is out of 15 (v6) or 16 (v7), of which 1–2 are
+`not_applicable` for some CHORUS records.
 
 | arm | project | rep | r10 | r20 | leaves | slot adverse | rate | rules violated |
 |---|---|---|---|---|---|---|---|---|
@@ -42,8 +48,7 @@ violated` is out of 15 (v6) or 16 (v7).
 
 ## What correlates with what
 
-Spearman rank correlations (all 17; v6-only in parentheses to remove the arm
-confound):
+Spearman rank correlations (all 17; v6-only in parentheses):
 
 | pair | ρ |
 |---|---|
@@ -55,68 +60,94 @@ confound):
 | r20 vs rules violated | +0.16 (−0.08) |
 | slot adverse rate vs leaves | −0.43 (−0.27) |
 
-Three readings, all visible in the raw table without the statistics:
+And within project, where the confound of bundle richness is held fixed —
+ρ(r20, slot adverse rate):
+
+| project | all records | v6 only |
+|---|---|---|
+| AI_READI | **+0.81** (n=6) | +1.00 (n=3) |
+| CHORUS | +0.60 (n=5) | +0.50 (n=3) |
+| CM4AI | undefined — all three rates are 8% | — |
+| VOICE | 0.00 (n=3) | 0.00 (n=3) |
+
+Three readings:
 
 1. **The rubrics measure the project, not the record.** Both rubrics
    correlate strongly with each other and with leaf coverage, and their
    variance is almost entirely between projects: every CHORUS record scores
    53–71 and every AI_READI/VOICE record 88–100, whichever arm and whatever
-   its review found. Within a project the rubric spread across replicates is
-   ≤4.2 points of r20 while the review adverse rate spans 2%→18% (AI_READI
-   v6) — the rubric cannot see the difference between the cleanest and the
-   most inference-laden replicate of the same project.
-2. **The review is near-orthogonal to the rubrics.** ρ(rubric, adverse) is
-   −0.3 to −0.1 overall and −0.2 to 0.0 within v6 — nothing, at this n.
-   The two clearest single records: **AI_READI v6 rep3** has the *highest*
-   r20 of its triplet (90.9) and the *worst* adverse rate (18%: five
-   inferred values, one not in the bundle, three weak receipts); **AI_READI
-   v7 28d** has the highest r20 of all seventeen (95.5) alongside 9 of 16
-   rules violated, an ungrounded ROR attachment, and the pass's only
-   `missed_content` chunk. Unsupported content *helps* a coverage-shaped
-   score: an inferred `data_type` fills a sub-element the rubric awards.
-3. **Rule violations are invisible to the rubrics** (ρ ≈ 0, sign unstable).
-   The v7 canaries average 7 violations against v6's 3.1 — plan-as-done,
-   Person-ranged strings, absence statements — with rubric scores
-   indistinguishable from v6's on the same projects.
+   its review found. Within the v6 replicates of a project the r20 spread is
+   ≤4.2 points (across arms AI_READI spans 6.9, but the v7 canaries are not
+   replicates of the v6 runs) while the adverse rate spans 2%→18% within
+   AI_READI v6 alone.
+2. **The pooled rubric-vs-adverse correlation is an artifact of project
+   structure, and within project the relation leans the *other way*.** The
+   pooled −0.20/−0.32 (95% CI on −0.32 at n=17 is roughly [−0.69, +0.19] —
+   compatible with anything from moderate-negative to null) exists because
+   CHORUS is both the poorest-documented and the most adverse-prone project.
+   Hold the project fixed and the sign flips or vanishes: +0.81 across the
+   six AI_READI records, +0.60 across the five CHORUS, 0 for VOICE, flat for
+   CM4AI. The flagship pair is the same fact seen record-by-record:
+   **AI_READI v6 rep3** has the highest r20 of its triplet (90.9) and the
+   worst adverse rate (18%: five inferred, one not in the bundle, three
+   weak); **AI_READI v7 28d** has the highest r20 of all seventeen (95.5)
+   beside 9 of 16 rules violated, an ungrounded ROR attachment, and the
+   pass's only `missed_content` chunk. The mechanism is visible in the
+   verdicts: an inferred `data_type` or a plan-as-done sentence *fills a
+   rubric sub-element* — unsupported content is coverage to a
+   coverage-shaped score. At n=3–6 per project none of this is conclusive;
+   the direction is consistent, the magnitudes are not trustworthy.
+3. **Rule violations are invisible to the rubrics** (pooled ρ ≈ 0, sign
+   unstable across subsets). The v7 canaries average 7.0 violations against
+   v6's 3.1 — plan-as-done, Person-ranged strings, absence statements — with
+   rubric scores indistinguishable from v6's on the same projects.
 
-So the asserted claim in the interpretation note is now shown: the rubrics
-reward what the bundle makes possible (coverage of rubric elements), the
-reviews penalise what the record did with it (inference, laundered
-receipts, misfiled content), and per record they carry close to independent
-information. Neither subsumes the other; a record needs both numbers.
+So the claim as originally asserted was half right. The rubrics do reward
+what the bundle makes possible. But the reviews are not merely orthogonal:
+within a project, the records that scored *best* on the rubrics tended to
+carry *more* unsupported content, because inference inflates both at once.
+The two instruments do not disagree about quality — they answer different
+questions, and only the review's question is about grounding.
 
 ![r20 vs review adverse rate](figures/cross_read_r20_vs_adverse.png)
+
+(Coincident points — CM4AI r2/r3, AI_READI v6 rep1 / v7 28b — are dodged
++0.45 on the x-axis; ringed markers are the v6 canonical selections.)
 
 ## Caveats
 
 - n=17, and only 5 on the v7 side — three of them AI_READI canaries under
   successive instrument fixes, two CHORUS. Arm-level conclusions wait for
-  Monday's 12-record v7 fan-out; the rubric-vs-review orthogonality does not,
-  since it holds within v6 alone (n=12).
-- The adverse rate sits on a ~50-slot sample per record: its binomial
-  standard error is ±4–6 percentage points, so single-record rates of 4% vs
-  8% do not separate; 2–4% vs 18% does.
+  the full v7 fan-out; the within-project findings rest on n=3–6 cells.
+- The adverse rate sits on a 50-slot sample per record. Binomial standard
+  error is ±2–3 percentage points at the low observed rates (2–8%) and
+  ±5–6.5pp toward 18–30%; 4% vs 8% does not separate, 2–4% vs 18% does
+  (~2.3σ).
 - One reviewer per record, no inter-rater figure; the rubric evaluations are
   single runs of the rubric agents. Both instruments are Claude judging
   Claude.
-- `slots` (the selection metric) and `leaves` are equal per record here, so
-  the canonical selection's coverage criterion inherits the rubric's
-  blindness: it, too, cannot distinguish AI_READI rep1 (4%) from a
-  hypothetical rep at 18% unless validation fails. #660 (quality metrics
-  unused in selection) now has the concrete form: the *review adverse rate*
-  is the number the selection has no view of. In this round it happened not
-  to matter — every selected replicate is also at or tied for the fewest
-  adverse items — but nothing enforced that.
+- The canonical-selection metric is **not** the `leaves` column: selection
+  counts core-record slots (AI_READI 82/79/80, CHORUS 47/43/50), and for
+  CHORUS the two rank the replicates almost inversely (slots rep3>rep1>rep2;
+  leaves rep2>rep3>rep1). What is true — by construction, not by this data —
+  is that the criterion (validates → core slots → label) has no view of the
+  adverse rate. Under the review-pass note's total-adverse count every
+  selected replicate is at or tied for fewest; under this note's slot-adverse
+  metric the selection picked the worse-sampled replicate twice (AI_READI
+  rep1 at 2 vs rep2 at 1; CHORUS rep3 at 6 vs rep2 at 3), both differences
+  inside sampling noise. That is #660's concrete form: nothing enforced even
+  the ties.
 
 ## What this implies for the instruments (feeds the issue list)
 
-- The rubric agents evaluate quality *given the documentation*; they do not
-  check grounding and should not be read as a correctness signal (#158/#159
-  scope this; no new issue).
+- The rubric agents evaluate documentation quality given the bundle; they do
+  not check grounding, and within-project their scores lean *toward*
+  inference-heavy records. They should not be read as a correctness signal.
 - The review's slot-level adverse rate is the only per-record correctness
   number the pipeline has. If it is to gate or rank anything (e.g. join the
   canonical criterion per #660), it first needs the sampling noise stated
-  (±5pp) and ideally a second reviewer on disagreement-prone records.
+  (±2–6pp depending on rate) and ideally a second reviewer on
+  disagreement-prone records.
 - The deterministic receipt validator sits between the two: it verifies
   attribution, not support. The three receipt-shaped gaps it could close
   (#804 one-leaf entry receipts, #806 irrelevant-verbatim flags, #807 v7
