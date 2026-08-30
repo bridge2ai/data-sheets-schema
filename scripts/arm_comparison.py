@@ -79,7 +79,21 @@ ARMS = (
      "Claude API via CBORG", "reps"),
     ("v5agentic", "v5 agentic (2026-08-24)",
      "2026-08-24_claude-opus-5-claudecode-generic-v5", "Claude Code", "reps"),
+    ("v6agentic", "v6 agentic (2026-08-28)",
+     "2026-08-28_claude-opus-5-claudecode-generic-v6", "Claude Code", "reps"),
+    # The v7 API arm is partial: five canary runs under four label prefixes
+    # (CHORUS ×2, AI_READI ×3), the fan-out deferred (#777). An explicit label
+    # list, not a prefix; n is 0 for CM4AI and VOICE and the table says so.
+    ("v7api", "v7 API canaries (2026-08-28…d, partial)",
+     ["2026-08-28_claude-opus-5-api-generic-v7_rep1", "2026-08-28b_claude-opus-5-api-generic-v7_rep1",
+      "2026-08-28c_claude-opus-5-api-generic-v7_rep1", "2026-08-28d_claude-opus-5-api-generic-v7_rep1"],
+     "Claude API via CBORG", "reps"),
 )
+
+
+def arm_labels(prefix) -> list[str]:
+    """The run labels an arm spans: `{prefix}_rep{1..3}`, or an explicit list."""
+    return list(prefix) if isinstance(prefix, (list, tuple)) else [f"{prefix}_rep{r}" for r in (1, 2, 3)]
 
 # metric key -> (display, source, higher-is-worse, caveat)
 METRICS: dict[str, tuple[str, str, bool, str]] = {
@@ -112,6 +126,9 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
     "wrongchunk": ("snippets not in the chunk cited", "record", True,
                    "receipts (#763): verbatim in the bundle but not in the chunk cited — "
                    "attribution precision, reported not gated; ~2% on the v7 API canaries"),
+    "leaves": ("populated leaves (full record)", "record", False,
+               "count of populated leaf values in the full record (receipts.populated_leaves); "
+               "informational — the v6 plan's prediction 5 is that it does not fall"),
     "noreceipt": ("slots without a receipt", "record", True,
                   "receipts (#708): receiptable populated leaves with no receipt; exempt "
                   "slots (runner-set, minted, commentary) are outside the denominator"),
@@ -127,8 +144,7 @@ def load(path: Path) -> dict[str, Any]:
     return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
 
 
-def run_metrics(prefix: str, rep: int, project: str) -> dict[str, Any] | None:
-    label = f"{prefix}_rep{rep}"
+def run_metrics(label: str, project: str) -> dict[str, Any] | None:
     core_dir = CONCAT / f"{METHOD}_core" / label
     full = CONCAT / METHOD / label / f"{project}_d4d.yaml"
     core = core_dir / f"{project}_d4d_core.yaml"
@@ -162,8 +178,11 @@ def run_metrics(prefix: str, rep: int, project: str) -> dict[str, Any] | None:
                         + int((rcp.get("slots") or {}).get("without_receipt_truncated") or 0)}
     else:
         receipt_vals = {"unreviewed": None, "unverified": None, "wrongchunk": None, "noreceipt": None}
+    from data_sheets_schema.receipts import populated_leaves
+    leaves = len(populated_leaves(load(full)))
     return {
         "label": label,
+        "leaves": leaves,
         **receipt_vals,
         "ungrounded": g.get("absent"),
         "minted": g.get("minted_fragment"),
@@ -185,7 +204,7 @@ def rubric_scores(prefix: str, project: str, rubric: str = "rubric10") -> list[d
         return out
     for path in sorted(evals.glob(f"{project}_*_evaluation.json")):
         d = json.loads(path.read_text(encoding="utf-8"))
-        if str(d.get("label", "")).startswith(prefix):
+        if str(d.get("label", "")) in arm_labels(prefix):
             s = d.get("overall_score") or {}
             out.append({"label": d["label"], "total": s.get("total_points"),
                         "max": s.get("max_points"),
@@ -202,7 +221,7 @@ def collect() -> dict[str, dict[str, list[dict[str, Any]]]]:
     for key, _disp, prefix, _rt, _role in ARMS:
         data[key] = {}
         for p in PROJECTS:
-            reps = [m for rep in (1, 2, 3) if (m := run_metrics(prefix, rep, p))]
+            reps = [m for label in arm_labels(prefix) if (m := run_metrics(label, p))]
             data[key][p] = reps
     return data
 
@@ -291,7 +310,7 @@ def write_markdown(data, scores) -> None:
              "judgements, so adjusted maxima can differ between comparable records.",
              "- spend: absent by design — `api_usage` and `run_observed` are different "
              "quantities (#400).", "",
-             "Arms: " + "; ".join(f"**{d}** — `{pfx}_rep{{1,2,3}}`, {rt}"
+             "Arms: " + "; ".join(f"**{d}** — " + (", ".join(f"`{l}`" for l in pfx) if isinstance(pfx, (list, tuple)) else f"`{pfx}_rep{{1,2,3}}`") + f", {rt}"
                                    + (" (also shown with its per-project worst — max for reported-only metrics — the canary-gate baseline)" if role == "worst" else "")
                                    for _k, d, pfx, rt, role in ARMS), ""]
 
@@ -348,7 +367,8 @@ def write_figures(data, scores) -> None:
     import matplotlib.pyplot as plt
 
     OUT_FIG.mkdir(parents=True, exist_ok=True)
-    colors = {"v4": "#9e9e9e", "v5api": "#4e79a7", "v5agentic": "#f28e2b"}
+    colors = {"v4": "#9e9e9e", "v5api": "#4e79a7", "v5agentic": "#f28e2b",
+              "v6agentic": "#e15759", "v7api": "#59a14f"}
 
     # One figure per metric: 4 project panels, one bar per arm = replicate mean,
     # error bar = sample SD (n printed under the bar). Replicates are dots.
