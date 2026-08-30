@@ -111,10 +111,24 @@ def normalise(text: str) -> str:
     return _WS.sub(" ", t).strip()
 
 
-def snippet_in(snippet: str, chunk_text: str, hay: str | None = None) -> tuple[bool, str]:
+def normalise_joined(text: str) -> str:
+    """The chunk with hyphenated line breaks joined: a PDF extraction that
+    wrapped mid-word ("Partic-\nipants") reads as the word a quoting model
+    wrote (#789). Tried second, after the plain form."""
+    # Only a hyphenated break joins ("Partic-\nipants"): the hyphen is the
+    # extractor's, not the word's. Every other line break stays whitespace,
+    # or "bias\nknown" would read "biasknown".
+    return normalise(re.sub(r"(\w)-[ \t]*\n[ \t]*(\w)", r"\1\2", text.replace("\r", "")))
+
+
+def snippet_in(snippet: str, chunk_text: str, hay: str | None = None,
+               hay_joined: str | None = None) -> tuple[bool, str]:
     """(verified, reason). `...` (or `[...]`) splits the snippet into parts
     matched independently, in order. `hay` is the chunk already normalised,
-    for a caller checking many snippets against one chunk (#766)."""
+    for a caller checking many snippets against one chunk (#766);
+    `hay_joined` its line-break-joined form (#789). A match found only in
+    the joined form returns the reason "linewrap-joined" so the caller can
+    count it."""
     hay = normalise(chunk_text) if hay is None else hay
     parts = [normalise(p) for p in _ELLIPSIS.split(snippet)]
     parts = [p for p in parts if p]
@@ -133,14 +147,21 @@ def snippet_in(snippet: str, chunk_text: str, hay: str | None = None) -> tuple[b
         return False, (f"too short to attest anything: {(short or parts)[0]!r} "
                        f"(every part >= {MIN_PART_CHARS}, one part >= {MIN_SNIPPET_CHARS}, "
                        f"a multi-part snippet >= {MIN_MULTIPART_CHARS} in all)")
-    pos = 0
-    for p in parts:
-        i = hay.find(p, pos)
-        if i < 0:
-            return False, (f"part not found in chunk: {p[:60]!r}" if len(parts) > 1
-                           else "not found in chunk")
-        pos = i + len(p)
-    return True, ""
+    def find_all(h: str) -> bool:
+        pos = 0
+        for p in parts:
+            i = h.find(p, pos)
+            if i < 0:
+                return False
+            pos = i + len(p)
+        return True
+    if find_all(hay):
+        return True, ""
+    hj = normalise_joined(chunk_text) if hay_joined is None else hay_joined
+    if hj and find_all(hj):
+        return True, "linewrap-joined"
+    return False, (f"part not found in chunk: {parts[0][:60]!r}" if len(parts) > 1
+                   else "not found in chunk")
 
 
 # ---------------------------------------------------------------- record walk
@@ -392,10 +413,11 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # these, every one a neighbouring chunk (#763). They are counted apart —
     # `adjacent` (the chunk before or after), `elsewhere` (any other) — and
     # reported, never gated; the floor of 0 is for text found nowhere.
-    snippets = {"total": 0, "verified": 0, "adjacent": 0, "elsewhere": 0,
+    snippets = {"total": 0, "verified": 0, "linewrap_joined": 0, "adjacent": 0, "elsewhere": 0,
                 "spans_boundary": 0, "mismatched": 0, "unchecked": 0}
     order = {cid: i for i, cid in enumerate(manifest_ids)}
     hays = {cid: normalise(t) for cid, t in chunk_texts.items()}      # once per chunk (#766)
+    hays_j = {cid: normalise_joined(t) for cid, t in chunk_texts.items()}   # line breaks joined (#789)
     for e in entries:
         if e.get("status") != "extracted":
             continue
@@ -413,14 +435,16 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
             if text is None:
                 snippets["unchecked"] += 1
                 continue
-            ok, why = snippet_in(snippet, text, hays.get(e.get("id")))
+            ok, why = snippet_in(snippet, text, hays.get(e.get("id")), hays_j.get(e.get("id")))
             if ok:
                 snippets["verified"] += 1
+                if why == "linewrap-joined":
+                    snippets["linewrap_joined"] += 1
                 continue
             # Shortness is decided before any haystack, so a too-short
             # snippet is found nowhere and stays `mismatched`.
             where = [] if why.startswith("too short") else [
-                cid for cid, h in hays.items() if cid != e.get("id") and snippet_in(snippet, "", h)[0]]
+                cid for cid, h in hays.items() if cid != e.get("id") and snippet_in(snippet, "", h, hays_j.get(cid))[0]]
             # A passage the chunk boundary cuts is in no single chunk (#781):
             # test the cited chunk joined with its neighbours, and report it
             # as spanning rather than as found nowhere.
@@ -473,6 +497,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
             "summary": (f"chunks {reviewed}/{len(manifest_ids)} reviewed · snippets "
                         f"{snippets['verified']}/{snippets['total']} verified"
                         + (f" ({snippets['unchecked']} unchecked)" if snippets["unchecked"] else "")
+                        + (f" ({snippets['linewrap_joined']} across a wrapped line)" if snippets["linewrap_joined"] else "")
                         + (f" ({snippets['adjacent']} in an adjacent chunk)" if snippets["adjacent"] else "")
                         + (f" ({snippets['elsewhere']} in another chunk)" if snippets["elsewhere"] else "")
                         + (f" ({snippets['spans_boundary']} spanning a chunk boundary)" if snippets["spans_boundary"] else "")
