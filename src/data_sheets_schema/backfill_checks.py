@@ -41,7 +41,7 @@ import yaml
 #: without it, so absence means "attested by the run".
 RECORDED_BY = "backfill_checks"
 
-BLOCKS = ("pair_consistency", "report_claims", "grounding", "form", "receipts")
+BLOCKS = ("pair_consistency", "report_claims", "grounding", "form", "receipts", "review")
 
 
 def _split_header(text: str) -> tuple[str, str]:

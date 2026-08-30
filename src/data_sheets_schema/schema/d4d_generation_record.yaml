@@ -265,6 +265,15 @@ classes:
         inlined: true
         range: AnyBlock
 
+      review:
+        description: >-
+          A reviewer's answers to the record's review pack (#787), checked:
+          items answered N/N, adverse verdicts, cannot_tell, findings, and the
+          reviewer's identity. The judgement half of the receipt design — what
+          the deterministic validator cannot decide — as a recorded artifact.
+        inlined: true
+        range: AnyBlock
+
       unverified:
         description: >-
           Values recorded but not observed. Named rather than silently trusted.
