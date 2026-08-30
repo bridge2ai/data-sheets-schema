@@ -339,6 +339,14 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
     # phase snapshots and a progress file under the same names, so the
     # survivor's record can be a mixture of both runs while its provenance
     # describes neither. That happened on 2026-08-11.
+    # A run that is tracked on another branch but not on disk must not be
+    # generated again under its label (#795): the checkout that removed it
+    # from the working tree is the only reason it looks absent.
+    from data_sheets_schema import run_guard
+    found = run_guard.runs_on_other_refs([s.label for s in specs])
+    if found:
+        raise click.ClickException(run_guard.message(found))
+
     from data_sheets_schema import run_lock
     try:
         lock_path = run_lock.acquire(label_prefix, names)

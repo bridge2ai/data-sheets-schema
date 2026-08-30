@@ -504,6 +504,14 @@ d4d api status                          # which sweeps are running, and their pi
 d4d api stop --label-prefix <prefix>    # stop one; --force for SIGKILL
 ```
 
+**Never switch branches while a sweep or an agentic run is live** (#795).
+Run data is untracked until its data PR merges; committing it on a branch
+and checking out `main` removes it from the working tree, and on 2026-08-30
+a live sweep then regenerated a run under the same label. `d4d api batch`
+now refuses a label that is tracked on any ref but absent from disk (`run_guard`);
+open data PRs from the branch and merge them before checking out `main`, or
+commit data from a separate worktree.
+
 A sweep writes a lock under `data/.run_locks/` naming its pid, label and
 projects, and **refuses to start while a live lock holds the same prefix** —
 two batches writing one label directory produce a record that is a mixture of
