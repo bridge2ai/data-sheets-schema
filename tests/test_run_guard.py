@@ -24,12 +24,21 @@ class RunGuard(unittest.TestCase):
             self.assertFalse(d.exists())
             cwd = os.getcwd(); os.chdir(tmp)
             try:
-                found = run_guard.runs_on_other_refs(["L_rep1", "L_rep2"])
-                self.assertEqual(found, [("L_rep1", "data")])
+                found = run_guard.runs_on_other_refs([("L_rep1", "claudecode_agent"), ("L_rep2", "claudecode_agent"),
+                                                      ("L_rep1", "claudecode_agent")])       # deduped
+                self.assertEqual(found, [("L_rep1", "claudecode_agent", "data")])
                 self.assertIn("tracked on data", run_guard.message(found))
+                # the method matters (#799): the same label under another arm's method is not tracked
+                self.assertEqual(run_guard.runs_on_other_refs([("L_rep1", "claudecode_agent_crate_only")]), [])
+                # archived under data/ATTIC/ counts as on disk (#801)
+                a = Path(tmp) / "data/ATTIC/old/claudecode_agent_core/L_rep1"; a.mkdir(parents=True)
+                self.assertEqual(run_guard.runs_on_other_refs([("L_rep1", "claudecode_agent")]), [])
+                import shutil; shutil.rmtree(Path(tmp) / "data/ATTIC")
                 # present on disk → not a finding, whatever the refs say
                 d.mkdir(parents=True); (d / "P_provenance.yaml").write_text("x")
-                self.assertEqual(run_guard.runs_on_other_refs(["L_rep1"]), [])
+                self.assertEqual(run_guard.runs_on_other_refs([("L_rep1", "claudecode_agent")]), [])
+                # a precomputed tracked map is honoured (one git query per batch, #800)
+                self.assertEqual(run_guard.tracked_core_dirs(), {"data": {"claudecode_agent_core/L_rep1"}})
             finally:
                 os.chdir(cwd)
 
@@ -37,7 +46,8 @@ class RunGuard(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             cwd = os.getcwd(); os.chdir(tmp)
             try:
-                self.assertEqual(run_guard.runs_on_other_refs(["L_rep1"]), [])
+                self.assertEqual(run_guard.runs_on_other_refs([("L_rep1", "claudecode_agent")]), [])
+                self.assertEqual(run_guard.tracked_core_dirs(), {})
             finally:
                 os.chdir(cwd)
 
