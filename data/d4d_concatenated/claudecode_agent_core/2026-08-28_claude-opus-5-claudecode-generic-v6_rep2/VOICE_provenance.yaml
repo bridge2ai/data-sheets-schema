@@ -383,3 +383,37 @@ validation:
     full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
     core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
   recorded_by: d4d runs validate
+review:
+  checked: true
+  items_total: 66
+  items_answered: 66
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 1
+    slot_receipted:
+      supported: 22
+      weak: 3
+    slot_receiptless:
+      bundle_supports: 23
+      inferred: 2
+    rule:
+      violated: 5
+      followed: 10
+  adverse: 10
+  cannot_tell: 0
+  findings: []
+  summary: items 66/66 answered · 10 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5
+    reviewed_at: 2026-08-30 08:15:37+00:00
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/VOICE_review_pack.yaml
+      sha256: a6054993c3a8aeb721bcb96de8fc98b58c0e0576e387bf2da38f5c83999a3bf8
+    review:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/VOICE_review.yaml
+      sha256: 50880b87c0bb0c6d069f48fc896870b6318c3542e0e4d9aefc59f37b7d4d20f7
+  recorded_by: d4d review check

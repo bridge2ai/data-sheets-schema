@@ -1,0 +1,234 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: 2026-08-30T00:00:00Z
+pack_sha256: 3ba16079df3aa2c59d9d617fc8c78357cf0d6033b2b33a4d5968301b8860c588
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1–24 are the concatenator banner and table of contents (input directory, 'Total Files: 10', ten filenames); no dataset fact"
+- id: chunk-c006
+  verdict: confirmed
+  evidence: "lines 1625–2024 are Nature reference entries (Huttlin 2015 … Skinnider 2021) with 'Article/CAS/PubMed/Google Scholar' link labels; line 1729 'OpenAI. GPT-4 Technical Report' is a citation, and the GPT-4 tool is already receipted from c004 (line 1214)"
+- id: chunk-c009
+  verdict: confirmed
+  evidence: "lines 2825–2893 are Nature site navigation, regional sites, privacy/cookie links, '© 2026 Springer Nature Limited' and the Nature Briefing sign-up banner"
+- id: chunk-c013
+  verdict: confirmed
+  evidence: "lines 4095–4176 are preprint references 33–45 plus the bioRxiv watermark (lines 4131–4148, CC-BY-NC-ND licence of the preprint itself, not of the data); nothing fills an empty slot"
+- id: chunk-c022
+  verdict: confirmed
+  evidence: "lines 6162–6166: 'Cancel', two blank lines, separator rule"
+- id: chunk-c025
+  verdict: confirmed
+  evidence: "lines 6967–7001: publish/return-to-author dialogs, empty Curation Status History, UVA footer 'v. 6.9 build 2027-e2021d3', support form captcha '8 + 9 ='"
+- id: chunk-c028
+  verdict: confirmed
+  evidence: "lines 7802–7866: package download dialog (the API datafile URL at 7807 is carried in distribution_formats[0].download_url), compute-batch/submit/publish dialogs, empty curation table, UVA footer, captcha '1 + 8 ='"
+- id: slot-008
+  verdict: supported
+  evidence: "line 6349 'expressed genome-scale CRISPRi Perturbation Cell Atlas in KOLF2.1J … 11,739 targeted genes' and line 6367 'raw sequence data from an expressed genome-scale CRISPRi Perturbation Cell Atlas' are the descriptions of the two files in the October 2025 Perturb-seq collection; the value restates both"
+- id: slot-009
+  verdict: supported
+  evidence: "lines 3333–3338 'Cell maps are annotated in a two pronged approach. First … aligned to known protein function and pathway resources, including the Gene Ontology (GO) and Reactome … Second, assemblies … annotated using a large language model (LLM) approach … assign a name confidence score' — the value paraphrases the protocol in order"
+- id: slot-010
+  verdict: supported
+  evidence: "lines 4348–4350 'Website Support & Updates: / Zhandos Sembay, UAB / zsembay8@uab.edu'; the value states exactly that role, institution and address"
+- id: slot-011
+  verdict: weak
+  evidence: "line 4679–4681 is the CC deed's gloss of 'commercial purposes' ('A commercial use is one primarily intended for commercial advantage or monetary compensation'); it defines the term but does not state the prohibition or the 'separate license negotiation with the copyright holder (UCSD, Stanford, and/or UCSF …)' that the value asserts — that sentence is at lines 3771–3773 (c012) and is not receipted for this slot"
+- id: slot-012
+  verdict: supported
+  evidence: "lines 6225–6228 (October 2025) and 7061–7064 (June 2026): 'Perturb-seq data in KOLF2.1J iPSCs (undifferentiated): Embargoed / Perturb-seq data in MDA-MB-468 breast cancer cells (+/- treatment): Embargoed' under 'External Data Links'"
+- id: slot-013
+  verdict: supported
+  evidence: "line 5604 'MD5: e38e63e4c8dfc5808a5ffa2d7829fc38' sits under 'Images-paclitaxel-provenance-graph.html / Images/paclitaxel/' (lines 5598–5599), which is the file at resources[2].file_collections[2].resources[1]"
+- id: slot-014
+  verdict: supported
+  evidence: "line 4775 'https://doi.org/10.18130/V3/B35XWX' in the March 2025 release citation; the `doi` slot is string-ranged and takes the bare DOI"
+- id: slot-015
+  verdict: supported
+  evidence: "line 4872 (and 4891, 4910, 5548, 5567, 5586, 6403, 6422) 'imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg Lab at Stanford University' on every image archive; the value claims only that"
+- id: slot-016
+  verdict: supported
+  evidence: "line 6312 'MD5: fb04933a21e4395cce56930a014c6b4e' under 'cm4ai_mass-spec_KOLF2.zip' (line 6307), the file at resources[3].file_collections[0].resources[0]"
+- id: slot-017
+  verdict: supported
+  evidence: "lines 5683–5684 'mass-spec-cancer-cells-ro-crate-metadata.json / mass-spec/cancer-cells/' — directory plus filename compose the recorded path"
+- id: slot-018
+  verdict: supported
+  evidence: "line 5501 '1 to 10 of 21 Files' on the June 2025 release; the caveat's claim that the capture lists ten of twenty-one is what the line says"
+- id: slot-019
+  verdict: supported
+  evidence: "line 5440 'Protein-protein interaction (SEC-MS), protein localization (IF imaging), and CRISPRi perturbSeq data interrogate sets of proteins which incompletely overlap' under Limitations; the value expands the abbreviations only"
+- id: slot-020
+  verdict: supported
+  evidence: "lines 5420–5425 'Sequence Read Archive (SRA) Data: NCBI BioProject / Mass Spectrometry Data (Human iPSCs): MassIVE Repository / Mass Spectrometry Data (Human Cancer Cells): MassIVE Repository' and lines 7065–7074 'CRISPRi Perturbation Atlas of iPSCs: Figshare … AP-MS data … MassIVE Repository' — link labels with no URL in the capture, as the value says"
+- id: slot-021
+  verdict: supported
+  evidence: "line 5123 '… A PERTURBATION CELL ATLAS OF HUMAN INDUCED PLURIPOTENT STEM CELLS. bioRxiv … doi https://doi.org/10.1101/2024.11.03.621734' under Related Publication"
+- id: slot-022
+  verdict: supported
+  evidence: "line 4871 'MD5: 9422486c80bc9e1d35b2fbbc72a5f043' under 'cm4ai-v0.6-beta-if-images-paclitaxel.zip' (line 4865), the file at resources[1].file_collections[2].resources[1]"
+- id: slot-023
+  verdict: supported
+  evidence: "line 2338, the Nature acknowledgement: 'Schmidt Futures … the Bridge2AI Program (NIH Common Fund; OT2 OD032742 …) … Cancer Cell Map Initiative … Cytoscape … Network Data Exchange … Canada Foundation for Innovation and Genome BC … Knut and Alice Wallenberg Foundation … Göran Gustafsson Foundation … Stanford Institute for Human-Centered AI and Param Hansa Philanthropies, and NIH grants …'; the caveat lists them as that study's funders, not the dataset's"
+- id: slot-024
+  verdict: supported
+  evidence: "lines 4829–4832 'ro-crate-metadata.json / CRISPR Perturbation Cell Atlas/ / JSON / - 31.1 KB'"
+- id: slot-025
+  verdict: supported
+  evidence: "line 1431 '… implements a series of Python packages to execute the end-to-end pipeline … (cellmaps_imagedownloader, cellmaps_ppidownloader), embedding … integrating … constructing the hierarchical cell map … annotating … Each package is pip-installable and is linked to complete user documentation hosted at ReadTheDocs' and line 1432 'https://cellmaps-pipeline.readthedocs.io/'"
+- id: slot-026
+  verdict: supported
+  evidence: "lines 3501–3502 'Both the client-side and sever-side FAIRSCAPE packages are PIP-installable and are freely available, under the MIT open-source license'"
+- id: slot-027
+  verdict: supported
+  evidence: "lines 1210–1214 'We also used our recently developed Gene Set AI (GSAI) pipeline to guide the GPT-4 model (v.gpt-4-1106-preview) to annotate assemblies'; name/confidence/rationale outputs are stated in the continuation of c004"
+- id: slot-028
+  verdict: supported
+  evidence: "line 6343 'cm4ai_perturb-seq_KOLF2_cell_atlas.zip' in the October 2025 file table"
+- id: slot-029
+  verdict: supported
+  evidence: "lines 5579–5580 'cm4ai_ifimages_MDA-MB-468_vorinostat.zip / Images/' and line 5587 Preview \"Images/cm4ai_ifimages_MDA-MB-468_vorinostat.zip\""
+- id: slot-030
+  verdict: supported
+  evidence: "line 5436 'Ethical Review: Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)'; the 'University of Montreal' affiliation and the contact ORCID are at lines 5029–5030 'Ravitsky V (University of Montreal) - ORCID: https://orcid.org/0000-0002-7080-8801'"
+- id: slot-031
+  verdict: supported
+  evidence: "lines 3307–3308 'IF images for the cell line and conditions are downloaded from the Lundberg Laboratory's deposition archive and made available for further processing'"
+- id: slot-032
+  verdict: supported
+  evidence: "lines 5456–5457 'The current release is most suitable for bioinformatics analysis of the individual datasets / Requires domain expertise for meaningful analysis'"
+- id: slot-033
+  verdict: inferred
+  evidence: "the October 2025 mass-spec files are described only as 'generated by size exclusion chromatography-mass spectroscopy (SEC-MS) …' (lines 6313, 6331); nothing says the archives hold processed rather than raw data, and the same release's raw sequencing lives in a separate archive (line 6367) — 'processed_data' is the record's classification"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "line 7268 'Published Jun 17, 2026' under 'cm4ai_perturb-seq_KOLF2_cell_atlas.zip' (line 7265), normalised to a datetime"
+- id: slot-035
+  verdict: bundle_supports
+  evidence: "line 6313 'SEC-MS on undifferentiated KOLF2.1J … in the Nevan Krogan laboratory at the University of California San Francisco' and line 6331 'SEC-MS following the treatment of vorinostat or paclitaxel on MDA-MB468 … in the Nevan Krogan laboratory'"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "the June 2025 file table labels every image archive 'ZIP Archive' (e.g. line 5543 for the paclitaxel sibling; the untreated entry immediately precedes it in lines 5501–5540); 'archive_file' is that label as the enum"
+- id: slot-037
+  verdict: exempt_by_nature
+  evidence: "LimitationTypeEnum category assigned to a limitation the bundle states at lines 5456–5457; no passage can name an enum value"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "line 6379 'cm4ai_release_metadata.zip' in the October 2025 file table"
+- id: slot-039
+  verdict: inferred
+  evidence: "lines 4294–4295 'Total Proteins Investigated / 7,023' give the count; 'Human protein measured across the project's mapping modalities' is composed from that label plus the human cell lines — no passage states the instance type in those terms"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "the collection's two files are 'mass-spec-cancer-cells-ro-crate-metadata.json' (line 5683) and 'mass-spec-cancer-cells-provenance-graph.html'; both name themselves as metadata/provenance, which is what 'metadata' as collection_type says"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "line 7300 'ZIP Archive' type label under 'cm4ai_release_metadata.zip' (line 7299) in the June 2026 table, normalised to the MIME type"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "line 5541 pattern repeated in the October 2025 table: 'cm4ai_ifimages_MDA-MB-468_paclitaxel.zip / Images/' immediately after the untreated entry at lines 6415–6421 (the vorinostat entry follows at 6434)"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "line 5619 'Images-untreated-provenance-graph.html' and line 5627 Preview \"Images/untreated/Images-untreated-provenance-graph.html\""
+- id: slot-044
+  verdict: bundle_supports
+  evidence: "line 4774 citation begins 'Clark T; Parker J; …'; lines 3422–3424 'The Standards Module of CM4AI is responsible for AI-Readiness packaging of data, software, metadata and provenance graphs. This task is performed by the FAIRSCAPE'; lines 3853–3855 'Copyright © 2024 to this software is held by the Rector and Board of Visitors of the University of Virginia'"
+- id: slot-045
+  verdict: exempt_by_nature
+  evidence: "a label the record composes for the UpdatePlan object; the cadence it names is stated at line 4405 'quarterly data releases' and line 5444 'Updates on a quarterly basis'"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "line 7234 'Published Jun 17, 2026' under 'cm4ai_mass-spec_KOLF2.zip' (line 7231), normalised to a datetime"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "'ZIP Archive' type label on the June 2026 'cm4ai_mass-spec_MDA-MB-468.zip' entry (the table at lines 7144–7310 labels all ten files 'ZIP Archive'; line 7242 is the download-options label of that entry)"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "line 4884 'cm4ai-v0.6-beta-if-images-untreated.zip'"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "line 4829 'ro-crate-metadata.json' — the file names itself as RO-Crate metadata; 'metadata_file' is that as the enum"
+- id: slot-050
+  verdict: bundle_supports
+  evidence: "line 5686 '- 343.4 KB' under 'mass-spec-cancer-cells-ro-crate-metadata.json' (line 5683)"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "both files of the AP-MS collection are labelled 'ZIP Archive' (line 7147 for cm4ai_apms_MDA-MB-468_paclitaxel.zip; the vorinostat entry follows); the collection-level 'zip' summarises its members"
+- id: slot-052
+  verdict: bundle_supports
+  evidence: "line 6419 'Published Oct 31, 2025' under 'cm4ai_ifimages_MDA-MB-468_untreated.zip / Images/' (lines 6415–6416)"
+- id: slot-053
+  verdict: bundle_supports
+  evidence: "'ZIP Archive' label on the October 2025 paclitaxel image entry (between the untreated entry at 6415 and the vorinostat entry at 6434–6436, which carries the same label)"
+- id: slot-054
+  verdict: bundle_supports
+  evidence: "lines 4847–4849 'ro-crate-metadata.json / CRISPR Perturbation RNA Sequences - Raw Sequences/ / JSON'"
+- id: slot-055
+  verdict: bundle_supports
+  evidence: "line 7191 'ZIP Archive' in the June 2026 image entries; every file in that table (lines 7144–7310) carries the label"
+- id: slot-056
+  verdict: inferred
+  evidence: "the size is stated at line 7284 '- 73.3 KB' under 'cm4ai_perturb-seq_KOLF2_raw_sra.zip' (7282), but the June 2026 entry carries no description; 'Raw sequence data' follows from the filename and from the October 2025 release's description of its same-named file at line 6367"
+- id: slot-057
+  verdict: bundle_supports
+  evidence: "line 6380 'ZIP Archive' under 'cm4ai_release_metadata.zip' (line 6379)"
+- id: rule-01
+  verdict: followed
+  evidence: "total_size_bytes and bytes omitted where only rounded sizes are displayed; created_on removed (source_caveats lines 101–105 of the record); resources[0] carries no inventory because no repository record is in the bundle; the inferences found are enum classifications (slot-033, slot-039, slot-056) and are named in notes"
+- id: rule-02
+  verdict: followed
+  evidence: "creators[4].source_caveats states both institution lists; distribution_dates[0].source_caveats states both release dates; resources[1].source_caveats states 'Version 1.4' vs 'V1'; instances[3].source_caveats keeps 563/464/523 apart rather than merging"
+- id: rule-03
+  verdict: followed
+  evidence: "full and core both carry id: https://cm4ai.org/ (core line 1230); the reconciliation report's Referent section states the choice and why the Nature U2OS map is kept in external_resources[2]"
+- id: rule-04
+  verdict: followed
+  evidence: "no slot is padded to a count: total_size_bytes, is_tabular, dialect and resources[0] inventory are absent where evidence is absent, and the report says the 245/753 receipt ratio is 'not gated'"
+- id: rule-05
+  verdict: followed
+  evidence: "creators has five objects (leadership, standards team, Lundberg Lab, Krogan lab, consortium); funders two; intended_uses two; prohibited_uses two; raw_data_sources two; each one entity"
+- id: rule-06
+  verdict: followed
+  evidence: "external_resources[6] describes the external holdings rather than saying 'see the release page'; license_terms carries the terms themselves; retention_limit.retention_details states long-term preservation and that no limit is stated — a fact plus an absence, not a pointer"
+- id: rule-07
+  verdict: followed
+  evidence: "release cadence sits in updates.frequency ('Quarterly'), the access route in distribution_formats[0].access_urls/download_url, the cell-line provenance in acquisition_methods rather than instances"
+- id: rule-08
+  verdict: followed
+  evidence: "creators[1].affiliations[0] carries id ROR:0153tk833 and name; committee_members[0] carries id, name, email, affiliation; funders[0].grants[0] carries grant_number; principal_investigator is a Person reference (not inlined in the schema), so the person's name is carried in description — the only place the schema leaves for it"
+- id: rule-09
+  verdict: followed
+  evidence: "publisher ROR:0153tk833; principal_investigator ORCID:… (record lines 167, 176, 187, 197); latest_version_doi doi:10.18130/V3/HIGT4C; resources[*].doi bare; download_url and access_urls full URLs; data_topic full IRIs because no GO/NCIT/EFO prefix is declared in the schema"
+- id: rule-10
+  verdict: followed
+  evidence: "every identifier is in the bundle: ORCID 0000-0002-1708-8454 (line 5036), 0000-0003-4060-7360 (4958), 0000-0001-7034-0850 (5023), 0000-0003-4902-337X (5021), 0000-0002-7080-8801 (5030); ROR 0153tk833 (7335); RRID CVCL_0419 (3184), CVCL_B5P3 (3213); GPT-4 (1214)"
+- id: rule-11
+  verdict: followed
+  evidence: "the 51 minted ids are fragments on attested release DOIs (e.g. doi:10.18130/V3/HIGT4C#cm4ai_apms_MDA-MB-468_paclitaxel.zip); no person hangs off an organisation id; Jillian Parker's id is mailto:jillianparker@health.ucsd.edu, the address at line 5434, used because Person.id is required and no ORCID for her is stated"
+- id: rule-12
+  verdict: followed
+  evidence: "grep of the full record for analys-/organis-/licence/programme/modelling/characteris-/behaviour/centre/labelling/colour/favour/catalogu returns nothing; 'Integrative Modelling Platform' does not appear in the record"
+- id: rule-13
+  verdict: followed
+  evidence: "distribution_dates[0].source_caveats: 'The Dataverse record … outranks project documentation under the input manifest's source priority, gives … 2026-06-17; that is the date stated here'; creators[4].source_caveats likewise names the tiers and the preference"
+- id: rule-14
+  verdict: followed
+  evidence: "fragments exist only on File and FileCollection objects, where the schema declares id required; no fragment is minted for a subset, split or person, and the same archive name gets a distinct fragment per release DOI"
+- id: rule-15
+  verdict: followed
+  evidence: "principal_investigator, ethical_reviews[0].contact_person, license_and_use_terms.contact_person and data_governance.committee_contact each hold an identifier (ORCID CURIE or mailto URI), not an object"
+notes: >-
+  Adverse items: slot-011 (weak — the receipted deed passage defines
+  'commercial use' but the prohibition and the negotiation clause the value
+  asserts sit at bundle lines 3771–3773, unreceipted for that slot); slot-033,
+  slot-039, slot-056 (inferred — enum/prose classifications the bundle does not
+  state in those terms). None is a fabrication. Two observations outside the
+  items: machine_annotation_tools[0].tools is 'GPT-4 unknown' although line 1214
+  states 'v.gpt-4-1106-preview' — that version belongs to the Nature U2OS study
+  the record deliberately keeps out of the dataset's method slots, so the choice
+  is consistent with the referent decision but loses a stated version; and
+  maintainers[1] (a website-support contact, role 'researcher') is a thin fit
+  for a dataset maintainer. No defect that the receipt validator should have
+  caught was found. The pack lists no gaps.

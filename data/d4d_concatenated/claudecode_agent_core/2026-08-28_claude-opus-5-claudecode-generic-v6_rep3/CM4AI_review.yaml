@@ -1,0 +1,235 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: "2026-08-30T08:20:00Z"
+pack_sha256: cd6148ac01ed3e1bca5142d63b784be8827bba45c24b066a6188e1abbd4e3c29
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-24 are the concatenation banner and table of contents (ten filenames, manifest path); no dataset fact"
+- id: chunk-c006
+  verdict: confirmed
+  evidence: "lines 1625-2024 are Nature reference-list entries (Huttlin 2015 through Skinnider 2021) with CAS/PubMed link labels; no CM4AI fact"
+- id: chunk-c009
+  verdict: confirmed
+  evidence: "lines 2825-2893 are the nature.com footer (journal navigation, cookie/privacy links, '(c) 2026 Springer Nature Limited', Nature Briefing sign-up)"
+- id: chunk-c013
+  verdict: confirmed
+  evidence: "lines 4095-4176 are preprint references 33-45 plus the bioRxiv page stamp; the CC-BY-NC-ND at line 4147 licenses the preprint itself, not the dataset, and is not a datasheet slot"
+- id: chunk-c022
+  verdict: confirmed
+  evidence: "lines 6162-6166: 'Cancel', two blank lines and the document separator rule"
+- id: chunk-c025
+  verdict: confirmed
+  evidence: "lines 6967-7001: publish/return-to-author modal text, empty curation-status table, UVA Dataverse copyright footer, build string, captcha"
+- id: chunk-c028
+  verdict: confirmed
+  evidence: "lines 7802-7866: package-download, compute-batch, publish and return-to-author modal text, UVA Dataverse footer, captcha; the bare API base URL at 7807 is already in distribution_formats[1].access_urls"
+- id: slot-008
+  verdict: supported
+  evidence: "line 4796 (c018, 'Keyword') lists the 29 terms verbatim in the record's order; line 4234 (c014, RePORTER 'Preferred terms') is a different vocabulary and only a secondary receipt"
+- id: slot-009
+  verdict: supported
+  evidence: "lines 5429-5430 'De-identified Samples: / Yes' (and 'Human Subjects: No' at 5427-5428); identifiable_elements_present: false is the direct reading"
+- id: slot-010
+  verdict: supported
+  evidence: "lines 4957-4958 and 5035-5036 print Clark T and Ideker T with their ORCIDs in the release author list; the point-of-contact claim is at 5037-5039 'Point of Contact ... Ideker Trey (University of California San Diego)' and the PI claim at 4202; the description restates the author block accurately"
+- id: slot-011
+  verdict: supported
+  evidence: "lines 5422-5423 'Mass Spectrometry Data (Human iPSCs): / MassIVE Repository' under 'External Data Links'; the SEC-MS/KOLF2.1J/NPC/neuron/cardiomyocyte scope is stated at line 5417 of the same release"
+- id: slot-012
+  verdict: supported
+  evidence: "line 3866 '1OT2OD032742-01 (Bridge2AI Functional Genomics) and 5U54HG012513-02 / (Bridge2AI Bridge Center)'"
+- id: slot-013
+  verdict: supported
+  evidence: "line 7036 prints https://doi.org/10.18130/V3/HIGT4C in the citation block; the other four release DOIs are also printed in the bundle (DXWOS5 at 3802; B35XWX, F3TD5R, K7TGEM in their own captures); access_urls is declared uri, so the resolver form is correct"
+- id: slot-014
+  verdict: supported
+  evidence: "line 4871 'MD5: 9422486c80bc9e1d35b2fbbc72a5f043' directly under the cm4ai-v0.6-beta-if-images-paclitaxel.zip entry (4865)"
+- id: slot-015
+  verdict: supported
+  evidence: "lines 1470-1472 'The U2OS cell map is available at https://ndexbio.org under uuid f693137a-...'; the record names it as a related, distinct dataset with target_dataset https://ndexbio.org and does not absorb it into CM4AI's own distribution"
+- id: slot-016
+  verdict: supported
+  evidence: "lines 4865-4871: filename, 'ZIP Archive', '2.6 GB', 'Published Mar 3, 2025', '95 Downloads', MD5; issued 2025-03-03 is the normalised date"
+- id: slot-017
+  verdict: weak
+  evidence: "line 4206 'Project end: 2026-08-31T00:00:00' is the NIH grant's project end; CollectionTimeframe.end_date asks for the end of data collection. The passage does not say collection ends then, and the Dataverse plan (line 5443) says augmentation continues 'through the end of the project in November 2026'; timeframe_details records the divergence, but the receipted passage answers the project period, not the collection end"
+- id: slot-018
+  verdict: weak
+  evidence: "line 3213 'The KOLF2.1J (RRID:CVCL_B5P3) iPSCs cell line was derived from a healthy male Northern European donor' and lines 3183-3185 for MDA-MB-468 are real and accurate, but Subpopulation.distribution asks for 'the distribution of instances across identified subpopulations, including counts, percentages, or proportions'; the value describes the two donors, not how instances are distributed between them"
+- id: slot-019
+  verdict: supported
+  evidence: "line 4872 '... as imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg Lab at Stanford University ... Nuclei were stained with DAPI ...; endoplasmic reticulum with a calreticulin antibody; microtubules with tubulin antibody' matches the value's imaging sentence; the HPA-antibody and pipetting-robot sentences come from the preprint (line 2973 onward)"
+- id: slot-020
+  verdict: supported
+  evidence: "lines 3179-3182 'CM4AI has elected to use the cancer cell line MDA-MB-468 (+/- treatment with paclitaxel and vorinostat) and the iPSC line KOLF2.1J (+/- neuronal and cardiomyocytic differentiation), both of which have been ethically sourced'; ATCC at 3186 and HipSci/MTA at 3214-3216"
+- id: slot-021
+  verdict: supported
+  evidence: "lines 3445-3447 'The PID system currently in use is the ARK scheme - with DOIs a future feature as supplementary PIDs for final-state publishable work' supports the value's last sentence; the five-release list is stated on the data-releases page (c016) and the value reads both correctly"
+- id: slot-022
+  verdict: supported
+  evidence: "lines 3436-3447: FAIRSCAPE-CLI creates the RO-Crate with datasets, metadata, software or resolvable references and identifier stubs; 'The RO-Crates are then sent to the FAIRSCAPE server where they are registered and assigned persistent, resolvable, globally unique persistent identifiers (PIDs)' and decomposed into components"
+- id: slot-023
+  verdict: supported
+  evidence: "lines 3852-3855 'The FAIRSCAPE AI-readiness framework is described with a tutorial and instructions for installation at https://fairscape.github.io. Copyright (c) 2024 ... Rector and Board of Visitors of the University of Virginia ... open source MIT License'"
+- id: slot-024
+  verdict: supported
+  evidence: "lines 3513-3515 'Teaming supports open dissemination of CM4AI-generated data, maps, and tools via the CM4AI web portal (http://www.cm4ai.org), using the U-BRITE platform, to support open and trustworthy data management and sharing'; DistributionFormat's class description admits 'API, GitHub, website' routes"
+- id: slot-025
+  verdict: supported
+  evidence: "lines 3255-3262: 100 chromatin regulators, MDA-MB-468 under 3 conditions, undifferentiated KOLF2 iPSC, lentiviral library with 6 guide RNAs per gene, inducible dCas9 lines, 10x Genomics 3'HT kit"
+- id: slot-026
+  verdict: supported
+  evidence: "lines 5416-5417 'This dataset is a revision of the June 2025 Data Release ... adding RGB immunofluorescent images, corrections to ro-crate metadata, and changes to naming conventions. This Beta release includes perturb-seq data ...' matches the value sentence for sentence"
+- id: slot-027
+  verdict: supported
+  evidence: "lines 3010-3012 'Its datasets and software are available to the research community under minimally restrictive terms consistent with ethical guidelines, researcher attribution, and research integrity'; file access 'Public' is printed per file in the Dataverse captures (e.g. 4875-4876)"
+- id: slot-028
+  verdict: weak
+  evidence: "line 7335 is a bare 'https://ror.org/0153tk833' printed under 'Clark T' in the June 2026 author block; it attests the identifier string but names no organization and says nothing about accountability. That the ROR is the University of Virginia is the record's positional reading against the March/June/October captures (line 4957 'Clark T (University of Virginia)'), which the record itself flags in source_caveats; the preservation claim in the description rests on line 5445, not on this passage"
+- id: slot-029
+  verdict: supported
+  evidence: "lines 5433-5434 'Data Governance Committee: / Jillian Parker (jillianparker@health.ucsd.edu)'"
+- id: slot-030
+  verdict: supported
+  evidence: "line 5445 'Long term preservation in the University of Virginia Dataverse, supported by committed institutional funds'; 'LibraData is the University of Virginia's instance of Dataverse, an NIH-approved ...' at line 3805; School of Medicine collection at 7837"
+- id: slot-031
+  verdict: supported
+  evidence: "lines 3773-3774 'A Data Access Committee will supervise ethical matters related to dataset distribution and potential dual licensing for commercial use'; the Jillian Parker sentence is at 5433-5434"
+- id: slot-032
+  verdict: supported
+  evidence: "line 4369 'Source URL: https://cm4ai.org/data-releases/' heads the capture whose first content line (4372) is 'Data Releases - Cell Maps For AI (CM4AI)'; page asks for a landing page giving information about the resource"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "line 2948 'produce ethical, AI-ready datasets of cell architecture, inferred from multimodal data'"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "line 4792 'CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center'"
+- id: slot-035
+  verdict: bundle_supports
+  evidence: "lines 3731-3732 'These data were also made available at our CodeFest in March 2024, accompanied by detailed tutorials'; 3582 'our inaugural virtual CodeFest event, we provided training'"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "line 3805 'LibraData is the University of Virginia's instance of Dataverse'; 3493 'Virginia's LibraData data archive, an instance of Harvard's Dataverse'"
+- id: slot-037
+  verdict: bundle_supports
+  evidence: "line 4218 'development in \"visible\" machine learning systems informed by multi-scale cell and tissue architecture'; 3024-3025"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "lines 3771-3772 'Commercial use requires a separate license negotiation with the copyright holder'"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "lines 3866-3867 '5U54HG012513-02 (Bridge2AI Bridge Center)'"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "line 2961 'CM4AI's objective is to deliver machine-readable hierarchical maps of cell architecture'; the name is a label for that objective"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "lines 3420-3422 '4. Standards: AI-Readiness Packaging / The Standards Module of CM4AI is responsible for AI-Readiness packaging of data'; 2970 'AI-readiness framework provide important and reusable enabling capabilities'"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "line 5445 'Long term preservation in the University of Virginia Dataverse'"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "line 3866 '1OT2OD032742-01 (Bridge2AI Functional Genomics)'"
+- id: slot-044
+  verdict: exempt_by_nature
+  evidence: "'Regulatory status' is the record's label for the object whose content is lines 5427-5432 'Human Subjects: No / De-identified Samples: Yes / FDA Regulated: No'; a heading the record gives a structural block, not a claim with a passage"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "line 2974 'affinity purification mass spectroscopy (AP-MS)'; 3028 'affinity purification-mass spectrometry (AP-MS)'"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "line 3773 'A Data Access Committee will supervise ethical matters related to dataset distribution'"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "lines 2973-2974 'CM4AI input data streams are generated using immunofluorescence (IF) subcellular microscopy for spatial proteomics data'"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "line 3001 'Input data streams are integrated via the multi-scale integrated cell (MuSIC) software pipeline'; 3250 'the CM4AI Tools Module's MuSIC pipeline'"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "lines 2936-2937 '3 - University of California San Francisco' in the preprint affiliation list; 4973 'Forget A (University of California San Francisco)'"
+- id: slot-050
+  verdict: inferred
+  evidence: "no passage names a 'CM4AI data generation team'; the label is composed from line 2946 'CM4AI is the Functional Genomics Data Generation Project' / 4200 'Data Generation Project' and the 46-name author block at 7035. A collective label for the author list, not a name the bundle states"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "line 2936 '2 - University of California San Diego'; 5039 'Ideker Trey (University of California San Diego)'"
+- id: slot-052
+  verdict: bundle_supports
+  evidence: "line 5201 'Data Access API' in the Dataverse file-access menu (repeated at 6022, 6852, 7721)"
+- id: slot-053
+  verdict: bundle_supports
+  evidence: "line 4454 'CM4AI releases data quarterly'; 5444 'Updates on a quarterly basis'"
+- id: slot-054
+  verdict: bundle_supports
+  evidence: "line 3843 'Copyright (c) 2024 to these datasets is held by the Regents of the University of California' and 3771 'Commercial use requires a separate license negotiation with the copyright holder'; the name labels those two facts"
+- id: slot-055
+  verdict: bundle_supports
+  evidence: "line 2936 '1 - University of Virginia'; 4957 'Clark T (University of Virginia)'"
+- id: slot-056
+  verdict: bundle_supports
+  evidence: "line 4214 'coordinated effort involving three complementary mapping approaches'; 4314"
+- id: slot-057
+  verdict: bundle_supports
+  evidence: "line 3338 'a name confidence score' closes the preprint's annotation paragraph (alignment to Gene Ontology/Reactome, LLM naming of assemblies); 326 'We systematically annotate this map, assisted by ... large language models'"
+- id: rule-01
+  verdict: followed
+  evidence: "the report leaves total_size_bytes, is_tabular and top-level doi/issued/version absent with reasons; every receipted value sampled was found in the bundle. One label is composed rather than stated (creators[0].name, slot-050), and two receipts read a neighbouring fact (slot-017, slot-018), none a fabrication"
+- id: rule-02
+  verdict: followed
+  evidence: "collection_timeframes[0].timeframe_details states both the RePORTER 2026-08-31 end and the Dataverse 'November 2026' end; report 'Internal consistency' records the differing MD5s for same-named archives across releases as stated rather than choosing; related_datasets[0] keeps the U2OS map distinct from CM4AI"
+- id: rule-03
+  verdict: followed
+  evidence: "report section 'Referent' names the CM4AI release series with id https://cm4ai.org/ and states the Nature study is not merged; full record line 16 and core record line 1247 both carry id: https://cm4ai.org/"
+- id: rule-04
+  verdict: followed
+  evidence: "report lists slots deliberately left absent (total_size_bytes, is_tabular, top-level doi/issued/download_url/version) with the evidence reason for each, and records two values back-ported with receipts; no density target is referenced"
+- id: rule-05
+  verdict: followed
+  evidence: "creators has three entries (the CM4AI author team, Lundberg Laboratory, Krogan Laboratory); purposes[0..2], tasks[0..1], prohibited_uses[0..1], funders[0].grants[0..1] and distribution_formats[0..2] each hold one entity per object. The single team Creator is what the Creator class description invites ('which team, research group ... This may also be considered a team')"
+- id: rule-06
+  verdict: followed
+  evidence: "raw_data_sources[0].access_details 'MassIVE Repository' answers the access question; the 'not yet in completed final form' text at full record line 378 sits in a completeness/limitation slot where that is the fact asked for; no slot holds a pointer or a 'pending' placeholder in place of its answer"
+- id: rule-07
+  verdict: followed
+  evidence: "updates.frequency 'quarterly' holds the cadence rather than a future-use slot; distribution_formats[1] (Data Access API) and [2] (web portal) are routes, which DistributionFormat's own description lists ('tarball on a website, API, GitHub'); access_urls hold URLs and doi slots hold bare DOIs (full record lines 1223, 1239)"
+- id: rule-08
+  verdict: followed
+  evidence: "creators[0] populates name, principal_investigator 'Trey Ideker' and twelve affiliations; funders[0].grants[*] carry name and grant_number; resources[*] carry doi, publisher, issued and file inventories with md5/format. ORCIDs sit in prose because principal_investigator and committee_contact are described as taking a person's name (see notes)"
+- id: rule-09
+  verdict: followed
+  evidence: "publisher and affiliations[0].id use ROR:0153tk833 (full record lines 66, 181, 1015); resources[*].id and latest_version_doi use doi: CURIEs (1077, 1220, 1236); doi slots hold bare DOIs (1223, 1239); access_urls and download_url hold https URLs; no orcid.org/ror.org/doi.org resolver appears in any id slot"
+- id: rule-10
+  verdict: followed
+  evidence: "ROR:0153tk833 is printed in the bundle at lines 7335/7343/7394; the release DOIs and preprint DOI are printed; the ORCIDs quoted in creators[0].description are those at 4957-5036. The reading of the bare ROR line as the University of Virginia is an inference the record declares in source_caveats rather than an identifier supplied from outside"
+- id: rule-11
+  verdict: followed
+  evidence: "the 51 minted fragments are all '#'-fragments on a release DOI naming a FileCollection or File (full record lines 1257-1484); property ids are fragments on the record's own id https://cm4ai.org/; no fragment is hung on ROR:0153tk833 and no undeclared prefix is used"
+- id: rule-12
+  verdict: followed
+  evidence: "grep of the full record for organisation/characteris/licence/behaviour/analyse/standardis/programme/colour/centre/labelled finds nothing; the record writes 'organized', 'characterized', 'license'"
+- id: rule-13
+  verdict: followed
+  evidence: "collection_timeframes[0].timeframe_details: 'the manifest ranks the NIH project page (tier 4) above the historical Dataverse release captures (tier 5) that carry the November 2026 date, so the RePORTER dates are stated here and the divergence is recorded' - states the preferred value, both values and the preference"
+- id: rule-14
+  verdict: followed
+  evidence: "every minted fragment is the required id of a File or FileCollection object (schema declares id required: true on both), and every DatasetProperty id is used once as that object's own identifier; no fragment is minted for a part that is only described, and the same archive keeps the same fragment across resources (e.g. doi:10.18130/V3/F3TD5R#cm4ai_ifimages_MDA-MB-468_paclitaxel.zip)"
+- id: rule-15
+  verdict: followed
+  evidence: "principal_investigator 'Trey Ideker', committee_contact 'Jillian Parker', related_datasets[0].target_dataset 'https://ndexbio.org' and used_software[*].license 'MIT' are scalars; no object is placed in a string-ranged slot and both records validated"
+notes: >-
+  Two receipted values are on-topic but answer a neighbouring question: the NIH
+  project end read as collection end_date (slot-017) and donor descriptions in
+  Subpopulation.distribution, which asks for counts/proportions (slot-018). The
+  accountable_organization receipt (slot-028) is a bare ror.org line under an
+  author name; the identification of that ROR as the University of Virginia is
+  the record's own positional inference, disclosed in source_caveats. One
+  receiptless label, creators[0].name 'CM4AI data generation team', is composed
+  rather than stated. Schema observation, not a record defect: the reconciliation
+  report says Creator.principal_investigator and DataGovernance.committee_contact
+  are string-ranged; in data_sheets_schema_all.yaml both declare range Person
+  while their descriptions ask for a person's name, and linkml-validate accepted
+  the name strings. No receipt-validator defect found: every sampled snippet was
+  at the cited chunk's lines.

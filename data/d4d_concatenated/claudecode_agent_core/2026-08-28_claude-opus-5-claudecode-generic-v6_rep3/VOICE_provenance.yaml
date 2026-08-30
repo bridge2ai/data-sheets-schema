@@ -392,3 +392,59 @@ validation:
     full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
     core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
   recorded_by: d4d runs validate
+review:
+  checked: true
+  items_total: 67
+  items_answered: 67
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 2
+    slot_receipted:
+      supported: 24
+      misread: 1
+    slot_receiptless:
+      exempt_by_nature: 1
+      bundle_supports: 23
+      inferred: 1
+    rule:
+      violated: 3
+      followed: 12
+  adverse: 5
+  cannot_tell: 0
+  findings: []
+  summary: items 67/67 answered · 5 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5
+    reviewed_at: 2026-08-30 08:30:00+00:00
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_review_pack.yaml
+      sha256: 0c99365a43e7856e333e51eea0581fa892ae02ed35b6d8d2e11cfc3b0ba74a91
+    review:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_review.yaml
+      sha256: e23a316d73cffbde8e1989fa0306e6d91f6563d6265d60767ef344ce57da097e
+  recorded_by: d4d review check
+canonical:
+  criterion: full and core both validate against the current schema, then most slots,
+    then lowest label
+  selected_from:
+  - label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1
+    slots: 78
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep2
+    slots: 76
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+    slots: 79
+    validation: valid
+    validation_recorded_at_run_time: valid
+  margin_over_runner_up: 1
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep2
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep1

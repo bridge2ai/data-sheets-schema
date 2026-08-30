@@ -37,6 +37,18 @@ class Rules(unittest.TestCase):
         self.assertEqual(rp.rules_from("no rules here\n- not a rule\n"), [])
 
 
+class ValueAt(unittest.TestCase):
+    def test_an_index_into_a_collapsed_string_does_not_resolve_to_a_character(self):
+        rec = {"a": [{"b": "collapsed into one string"}], "c": "xyz"}
+        self.assertEqual(rp._value_at(rec, "a[0].b"), "collapsed into one string")
+        self.assertEqual(rp._value_at(rec, "a[0].b[3]"), rp.UNRESOLVED)      # not "l"
+        self.assertEqual(rp._value_at(rec, "c[0]"), rp.UNRESOLVED)           # not "x"
+        self.assertEqual(rp._value_at(rec, "a[5].b"), rp.UNRESOLVED)
+        self.assertEqual(rp._value_at(rec, "a[0].zz"), rp.UNRESOLVED)
+        # a genuine null leaf is null, not unresolved (#808)
+        self.assertIsNone(rp._value_at({"n": None}, "n"))
+
+
 class Pack(unittest.TestCase):
     def _run(self, tmp):
         """A minimal run: bundle, manifest, receipt, records, provenance."""
@@ -89,6 +101,16 @@ class Pack(unittest.TestCase):
             self.assertIn("sha256 matches", p1["instruction"]["basis"]); self.assertEqual(p1["gaps"], [])
             # a different sample size changes the pack; the same one does not
             self.assertNotEqual(rp.build_pack(prov, instr, {"receipted_slots": 1})["items"], p1["items"])
+
+    def test_the_written_pack_has_no_yaml_aliases(self):
+        """Chunk spans are shared between bundle.chunks and the items; a
+        default dumper writes the second as `*id001` (#810)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = self._run(tmp)
+            out, _ = rp.write_pack(prov, instr)
+            text = Path(out).read_text()
+            self.assertNotIn("&id", text); self.assertNotIn("*id", text)
+            self.assertIn("lines:", text)
 
     def test_gaps_are_named_not_filled(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -1,0 +1,774 @@
+pack_version: 2
+run:
+  label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep2
+  project: AI_READI
+  method: claudecode_agent
+  condition: generic_v6
+provenance:
+  path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_provenance.yaml
+  request_sha256: 33e75037292d201c3ece4fb2e1c14079e31e192e04debc43ca6c83274fc160e8
+seed: 33e75037292d201c3ece4fb2e1c14079e31e192e04debc43ca6c83274fc160e8
+schema:
+- src/data_sheets_schema/schema/data_sheets_schema_all.yaml (class Dataset; slot descriptions)
+- src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml (class CoreDataset)
+gaps: []
+instruction:
+  basis: re-rendered from the recorded spec (sha256 matches)
+  path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_review_instruction.md
+  sha256: 33e75037292d201c3ece4fb2e1c14079e31e192e04debc43ca6c83274fc160e8
+  chars: 11167
+rules:
+- id: rule-01
+  block: uniform
+  text: 'Populate a slot only where the declared bundle supports it. Prefer omission over inference: an absent slot is a correct answer when the evidence is absent, and a plausible guess is not.'
+- id: rule-02
+  block: uniform
+  text: Where the declared bundle contains sources that disagree, represent what the evidence states rather than silently selecting one. Do not merge distinct entities into a single claim.
+- id: rule-03
+  block: uniform
+  text: '`Dataset` admits one referent. Choose the one the declared bundle best supports, state that choice in the reconciliation report, and hold to it consistently across both records.'
+- id: rule-04
+  block: uniform
+  text: There is no target slot count, no expected density, and no expected relationship to any other arm or project. Apply your own judgment about what the evidence supports.
+- id: rule-05
+  block: v2
+  text: When a slot's declared range is multivalued, emit one object per distinct entity. Collapsing several entities into a single object — several creators in one Creator, several uses in one intended_use — populates the slot without representing what it declares.
+- id: rule-06
+  block: v2
+  text: Populate a slot with the information the field asks for, not with a pointer to where that information lives, and not with a statement that it is pending or absent. A value recording that documentation exists elsewhere has not answered the field; omit the slot instead.
+- id: rule-07
+  block: v2
+  text: Read the slot's description before populating it. Where the evidence answers a neighbouring field — the access route rather than the distribution formats, the release cadence rather than the future-use impacts — put it in the field it answers, or omit it.
+- id: rule-08
+  block: v3
+  text: When a slot's declared range is a class, populate the fields that class declares. Placing the content in a free-text field such as `description` while the declared fields — a name, an identifier, dates, affiliations — stay empty produces an object of the correct shape holding none of the structure it exists to carry. Where the evidence answers a declared field, populate that field rather than restating it in prose.
+- id: rule-09
+  block: v5
+  text: 'In a slot whose declared range is `uriorcurie`, never write a resolver URL where the schema declares a prefix: write the CURIE — a prefix, a colon, and the local part. A `ROR:` CURIE, not the ror.org URL; an `ORCID:` CURIE, not the orcid.org URL; a `doi:` CURIE, not the doi.org resolver form. **`uriorcurie` is the range this rule exists for**: its "uri" half is the fallback for an identifier that no declared prefix covers, never permission to expand one that a prefix does cover. Two records naming one thing in one form produce one identity; the same thing written as a prefix here and a resolver URL there produces two. Check the schema''s declared prefixes and use one whenever it fits; a resolver URL in a `uriorcurie` slot whose prefix is declared is a defect even though it resolves. Three things this does not govern, and they are exempt entirely: a slot whose declared range is `uri` — not `uriorcurie` — takes a URL (`download_url` and `access_urls` are declared `uri`, and a CURIE there is wrong); a URL inside prose or a citation is text — leave both of these exactly as written; and a slot whose declared range is `string` follows its own description and pattern even when it holds an identifier — the `doi` slot takes the bare DOI, neither prefixed nor resolved.'
+- id: rule-10
+  block: v5
+  text: 'An identifier that names something outside this dataset — an organisation, a person, a publication, another dataset — is a fact about the world, subject to the same rule as any other fact: take it from the evidence or omit it. Do not supply one you recognise but the input documents do not state. A correct identifier the evidence does not contain is still an unsupported claim, and to every reader who was not present it is indistinguishable from an incorrect one. Naming an organisation the documents name is grounded; adding that organisation''s registry identifier from your own knowledge is not.'
+- id: rule-11
+  block: v5
+  text: 'An identifier that names a part of this dataset, and exists nowhere outside this record, is a label rather than a claim about the world — so no evidence can supply it and the rule above does not reach it. Mint it as a fragment on an identifier the evidence *does* supply, so the label stays traceable to something attested. This is the only case in which minting is right, and the test is whether the thing named has a referent outside this record: if it does, the rule above governs and you take the identifier from the evidence or omit it. Never invent a prefix — one the schema does not declare resolves to nothing, and where no fragment is possible either, a resolvable URL is the better answer. A person is identified by a personal-identifier registry entry and an organisation by an organisation registry entry; a fragment appended to an organisation''s identifier does not identify a person, it makes a false claim about that organisation.'
+- id: rule-12
+  block: v5
+  text: 'Write American English throughout — characterize, organization, standardized, analyze, behavior, license. This governs the prose the record states, not quoted material: a title, a name or a direct quotation keeps the spelling its source used.'
+- id: rule-13
+  block: v5
+  text: 'Where two sources in the declared bundle disagree, prefer the one the input manifest ranks higher: state its value, and record in the caveat that the sources disagreed, what each said, and which was preferred. Where the disagreeing sources share the same rank the ranking cannot decide, so represent what the evidence states rather than selecting one. This refines the earlier rule about disagreement; it does not replace it.'
+- id: rule-14
+  block: v6
+  text: 'Within the rule above, mint a fragment identifier for a part of this dataset only where another value in the record must point at that part — a split a task names, a subset a distribution cites, a collection a file belongs to. A part nothing points at is described in prose, not labeled: an identifier no value in the record uses is not a label, it is noise that reads as structure. Name the same part with the same fragment every time a value points at it, and mint nothing for a part that is only described.'
+- id: rule-15
+  block: v4
+  text: Where a slot's declared range is a scalar, populate it with the identifier of the thing it refers to, not with the thing itself. An object placed in a string-ranged slot fails validation and loses the reference it was meant to record, even where that thing is richly described elsewhere in the record.
+bundle:
+  path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  md5: 0f3abb51a333555456bedd63891fcd99
+  manifest: data/preprocessed/chunks/AI_READI_chunks.yaml
+  lines: 7376
+  chunks:
+  - id: c001
+    lines: &id001
+    - 1
+    - 25
+    source: <preamble>
+  - id: c002
+    lines:
+    - 26
+    - 425
+    source: bmjopen-2024-097449_row2.txt
+  - id: c003
+    lines: &id011
+    - 426
+    - 825
+    source: bmjopen-2024-097449_row2.txt
+  - id: c004
+    lines: &id018
+    - 826
+    - 1225
+    source: bmjopen-2024-097449_row2.txt
+  - id: c005
+    lines: &id013
+    - 1226
+    - 1625
+    source: bmjopen-2024-097449_row2.txt
+  - id: c006
+    lines: &id014
+    - 1626
+    - 1704
+    source: bmjopen-2024-097449_row2.txt
+  - id: c007
+    lines:
+    - 1705
+    - 2104
+    source: s42255-024-01165-x_row3.txt
+  - id: c008
+    lines:
+    - 2105
+    - 2160
+    source: s42255-024-01165-x_row3.txt
+  - id: c009
+    lines: &id019
+    - 2161
+    - 2197
+    source: reporter_nih_gov_project-details-10471118_row7.txt
+  - id: c010
+    lines: &id007
+    - 2198
+    - 2289
+    source: docs_aireadi_org_docs-2_row10.txt
+  - id: c011
+    lines:
+    - 2290
+    - 2375
+    source: docs_aireadi_org_docs-3_2026-07-24.txt
+  - id: c012
+    lines: &id017
+    - 2376
+    - 2661
+    source: AI-READI-LICENSE-v2.0_2026-08-12.txt
+  - id: c013
+    lines: &id016
+    - 2662
+    - 2740
+    source: fairhub_dataset_2_row12.txt
+  - id: c014
+    lines:
+    - 2741
+    - 2813
+    source: fairhub_dataset_3_2026-07-24.txt
+  - id: c015
+    lines: &id008
+    - 2814
+    - 3213
+    source: fairhub_api_dataset_3_2026-07-27.txt
+  - id: c016
+    lines: &id012
+    - 3214
+    - 3613
+    source: fairhub_api_dataset_3_2026-07-27.txt
+  - id: c017
+    lines:
+    - 3614
+    - 4013
+    source: fairhub_api_dataset_3_2026-07-27.txt
+  - id: c018
+    lines: &id010
+    - 4014
+    - 4413
+    source: fairhub_api_dataset_3_2026-07-27.txt
+  - id: c019
+    lines: &id009
+    - 4414
+    - 4813
+    source: fairhub_api_dataset_3_2026-07-27.txt
+  - id: c020
+    lines: &id020
+    - 4814
+    - 5213
+    source: fairhub_api_dataset_3_2026-07-27.txt
+  - id: c021
+    lines:
+    - 5214
+    - 5316
+    source: fairhub_api_dataset_3_2026-07-27.txt
+  - id: c022
+    lines: &id005
+    - 5317
+    - 5716
+    source: aireadi_ro_crate_metadata_2026-08-12.txt
+  - id: c023
+    lines: &id015
+    - 5717
+    - 6116
+    source: aireadi_ro_crate_metadata_2026-08-12.txt
+  - id: c024
+    lines: &id004
+    - 6117
+    - 6337
+    source: aireadi_ro_crate_metadata_2026-08-12.txt
+  - id: c025
+    lines: &id002
+    - 6338
+    - 6647
+    source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
+  - id: c026
+    lines: &id003
+    - 6648
+    - 6943
+    source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
+  - id: c027
+    lines: &id006
+    - 6944
+    - 7318
+    source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
+  - id: c028
+    lines: &id021
+    - 7319
+    - 7376
+    source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
+records:
+  full: data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml
+  core: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d_core.yaml
+  report: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_reconciliation.md
+  receipt: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_coverage_receipt.yaml
+  claims: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_receipts.yaml
+counts:
+  nothing_relevant_chunks: 3
+  receipted_slots_total: 234
+  receiptless_slots_total: 314
+  reshaped_slots_total: 0
+  sampled:
+    receipted: 25
+    receiptless: 25
+items:
+- id: chunk-c001
+  kind: chunk_nothing_relevant
+  chunk: c001
+  lines: *id001
+  source: <preamble>
+  agent_reason: concatenation preamble and table of contents only; lists the 11 source filenames and the selection manifest path, and states no fact about the dataset.
+  question: Does this chunk hold anything the record should carry and does not? Open the lines; answer against the full record.
+- id: chunk-c025
+  kind: chunk_nothing_relevant
+  chunk: c025
+  lines: *id002
+  source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
+  agent_reason: unfilled UW Human Subjects Division IRB application form template - instructions, question text and guidance only (sections 1-5.11), with the Study Title field blank and every answer box empty. The filled answers for this protocol begin at c027; this range states no fact about the AI-READI dataset.
+  question: Does this chunk hold anything the record should carry and does not? Open the lines; answer against the full record.
+- id: chunk-c026
+  kind: chunk_nothing_relevant
+  chunk: c026
+  lines: *id003
+  source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
+  agent_reason: 'continuation of the same unfilled UW IRB application form template (sections 5.11.g-10.10): question text, definitions of consent terms, and generic UW guidance with no study-specific answers. Its worked examples (acupuncture, MRI/gadolinium) are form boilerplate and not AI-READI procedures.'
+  question: Does this chunk hold anything the record should carry and does not? Open the lines; answer against the full record.
+- id: slot-004
+  kind: slot_receipted
+  slot: file_collections[2].name
+  value: environment
+  receipts:
+  - chunk: c024
+    lines: *id004
+    snippet: '"ro-crate-metadata": "environment/ro-crate-metadata.json"'
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-005
+  kind: slot_receipted
+  slot: ip_restrictions.restrictions[1]
+  value: The RO-Crate carries the copyright notice "Copyright (c) 2026 AI-READI".
+  receipts:
+  - chunk: c022
+    lines: *id005
+    snippet: '"copyrightNotice": "Copyright © 2026 AI-READI"'
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-006
+  kind: slot_receipted
+  slot: creators[16].description
+  value: Study Principal Investigator and Stanford W. Ascherman Professor in Genetics at Stanford University, reachable at mpsnyder@stanford.edu.
+  receipts:
+  - chunk: c027
+    lines: *id006
+    snippet: 'Michael Snyder
+
+      Stanford W. Ascherman, Professor in Genetics
+
+      Stanford University
+
+      mpsnyder@stanford.edu'
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-007
+  kind: slot_receipted
+  slot: confidential_elements[0].confidentiality_details
+  value: The healthsheet states that the dataset does not contain data that might be considered confidential and that no personally identifiable information is included. Elements requiring access control are held in the controlled-access release rather than the public one.
+  receipts:
+  - chunk: c010
+    lines: *id007
+    snippet: The data held under controlled access include 5-digit zip code, sex, race, ethnicity, genetic sequencing data, past health records, medications, and traffic and accident reports
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-008
+  kind: slot_receipted
+  slot: collection_consents[0].consent_details
+  value: Informed consent to participate was required before participation in any part of the protocol, including questionnaires. Potential participants were given the option to read all consent documentation electronically before their visit and give consent with an electronic signature without verbal commu…
+  receipts:
+  - chunk: c027
+    lines: *id006
+    snippet: Potential participants will receive an email with a unique code to access their e-consent, supported by UW REDCap.
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-009
+  kind: slot_receipted
+  slot: creators[0].description
+  value: Study Principal Investigator, Nathan E. Miles Endowed Chair of Ophthalmology at the University of Alabama at Birmingham; guarantor and corresponding author of the BMJ Open study protocol, reachable at cynthiaowsley@uabmc.edu.
+  receipts:
+  - chunk: c027
+    lines: *id006
+    snippet: 'Cynthia Owsley
+
+      Nathan E. Miles Endowed Chair of Ophthalmology
+
+      University of Alabama, Birmingham
+
+      cynthiaowsley@uabmc.edu'
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-010
+  kind: slot_receipted
+  slot: total_size_bytes
+  value: 3815969779678
+  receipts:
+  - chunk: c015
+    lines: *id008
+    snippet: "\"size\": 3815969779678,\n    \"fileCount\": 356343"
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-011
+  kind: slot_receipted
+  slot: human_subject_research.involves_human_subjects
+  value: true
+  receipts:
+  - chunk: c019
+    lines: *id009
+    snippet: "\"humanSubjectReviewStatus\": \"Submitted, approved\",\n        \"oversightHasDMC\": \"No\""
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-012
+  kind: slot_receipted
+  slot: updates.update_details
+  value: The dataset is released as static versions and is not updated in place. New versions are released with additional instances as more study participants complete the study visit; there are plans to release new versions approximately once a year with additional data from participants enrolled since the…
+  receipts:
+  - chunk: c018
+    lines: *id010
+    snippet: The dataset gets released as static versions. This is the third version of the dataset and consists of data collected up through the end of the second year of the study...There are plans to release new versions of the dataset approximately once a year
+  - chunk: c019
+    lines: *id009
+    snippet: The dataset will not be updated. Rather, new versions of the dataset will be released with additional instances as more study participants complete the study visit.
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-013
+  kind: slot_receipted
+  slot: external_resources[0].description
+  value: Blood derivatives are sent to the biorepository at the University of Alabama at Birmingham Center for Clinical and Translational Science and will be available to researchers for future ancillary studies. Plasma, serum and buffy coats collected at UW and UCSD are batch-shipped to UAB CCTS for integra…
+  receipts:
+  - chunk: c003
+    lines: *id011
+    snippet: 'blood  deriv-
+
+      atives  are  sent  to  the  biorepository  at  UAB’s  Center  for
+
+      Clinical  and  Translational  Science  (CCTS)'
+  - chunk: c019
+    lines: *id009
+    snippet: the remaining majority of the collected blood is processed into a variety of derivatives that are being used to establish a large repository of biospecimens at the University of Alabama at Birmingham
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-014
+  kind: slot_receipted
+  slot: file_collections[1].total_bytes
+  value: 176182781
+  receipts:
+  - chunk: c015
+    lines: *id008
+    snippet: "\"size\": 176182781,\n          \"numberOfFiles\": 7"
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-015
+  kind: slot_receipted
+  slot: file_collections[4].description
+  value: Data collected using optical coherence tomography (OCT), an imaging method using lasers for mapping subsurface structure, in a structural_oct modality directory with heidelberg_spectralis, topcon_maestro2, topcon_triton and zeiss_cirrus device directories.
+  receipts:
+  - chunk: c016
+    lines: *id012
+    snippet: This directory contains data collected using optical coherence tomography (OCT), an imaging method using lasers that is used for mapping subsurface structure.
+  - chunk: c016
+    lines: *id012
+    snippet: "\"directoryName\": \"heidelberg_spectralis\",\n                  \"directoryType\": \"device\",\n                  \"directoryDescription\": \"This directory contains OCT data collected from the Spectralis device, manufactured by Heidelberg.\""
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-016
+  kind: slot_receipted
+  slot: collection_mechanisms[10].mechanism_details
+  value: A custom-designed environmental sensor unit called the LeeLab Anura, built at the Karalis Johnson Retina Center, University of Washington, is sent home with participants for 10 continuous days and placed in a frequently used area; on return participants note where it was placed. It records particula…
+  receipts:
+  - chunk: c005
+    lines: *id013
+    snippet: 'Ambient temperature
+
+      Relative humidity
+
+      Nitrogen oxides (NO and NO2)
+
+      Volatile organic compounds
+
+      Particulate matter'
+  - chunk: c006
+    lines: *id014
+    snippet: 'Shaffer J, Gim N, Wei R, et al. Portable environmental sensor
+
+
+      enabling studies of exposome on ocular health'
+  - chunk: c018
+    lines: *id010
+    snippet: Participants will be sent home with an environmental sensor (a custom-designed sensor unit called the LeeLab Anura), which they will use for 10 continuous days
+  - chunk: c024
+    lines: *id004
+    snippet: The sensor then recorded particulate matter counts (PM 1.0, 2.5, 4, and 10), temperature, relative humidity, volatile organic compounds (VOCs), nitrogen oxides (NO and NO2), and 11 multi-spectral light intensity measurements.
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-017
+  kind: slot_receipted
+  slot: file_collections[4].name
+  value: retinal_oct
+  receipts:
+  - chunk: c023
+    lines: *id015
+    snippet: '"ro-crate-metadata": "retinal_oct/ro-crate-metadata.json"'
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-018
+  kind: slot_receipted
+  slot: third_party_sharing[0].is_shared
+  value: true
+  receipts:
+  - chunk: c019
+    lines: *id009
+    snippet: The dataset will be distributed and be available for public use.
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-019
+  kind: slot_receipted
+  slot: file_collections[2].conforms_to
+  value: ASCII File Format Guidelines for Earth Science Data
+  receipts:
+  - chunk: c016
+    lines: *id012
+    snippet: "\"standardName\": \"ASCII File Format Guidelines for Earth Science Data\",\n              \"standardDescription\": \"NASA recommended practices for formatting and describing ASCII encoded data files\""
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-020
+  kind: slot_receipted
+  slot: keywords
+  value: '[''Diabetes mellitus'', ''Machine Learning'', ''Artificial Intelligence'', ''Electrocardiography'', ''Continuous Glucose Monitoring'', ''Retinal imaging'', ''Eye exam'']'
+  receipts:
+  - chunk: c013
+    lines: *id016
+    snippet: 'Keywords
+
+      Diabetes mellitus
+
+      Machine Learning
+
+      Artificial Intelligence
+
+      Electrocardiography
+
+      Continuous Glucose Monitoring
+
+      Retinal imaging
+
+      Eye exam'
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-021
+  kind: slot_receipted
+  slot: participant_privacy[1].privacy_techniques
+  value: Static watermarking of distributed data, a verified-identity login requirement, and a license agreement that forbids attempts to identify or contact any data subject.
+  receipts:
+  - chunk: c012
+    lines: *id017
+    snippet: 'Licensee acknowledges that the Data may be
+
+      statically  watermarked  to  identify  Licensee  for  security  purposes'
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-022
+  kind: slot_receipted
+  slot: external_resources[1].external_resources[0]
+  value: https://docs.aireadi.org/
+  receipts:
+  - chunk: c004
+    lines: *id018
+    snippet: 'More  details  about  the  AI- readiness  of  the  data  set  are
+
+      provided  in  the  data  set  documentation  (https://docs.
+
+      aireadi.org/)'
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-023
+  kind: slot_receipted
+  slot: known_limitations[4].limitation_description
+  value: The fluorescence lifetime imaging ophthalmoscopy device is very sensitive and several factors can induce noise in the images; it cannot handle more than 1 centimeter of movement during image acquisition. Because FLIO takes longer than a usual Spectralis OCT and exposes participants to uncomfortable …
+  receipts:
+  - chunk: c022
+    lines: *id005
+    snippet: The device can not handle more than 1 centimeter of movement during image acquisition.
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-024
+  kind: slot_receipted
+  slot: creators[3].description
+  value: Associate Professor, recorded as the responsible party and a study principal investigator, as the FAIRhub central contact, and as the contact principal investigator for NIH award OT2OD032644.
+  receipts:
+  - chunk: c009
+    lines: *id019
+    snippet: 'Principal investigator: LEE, AARON
+
+      Organization: UNIVERSITY OF WASHINGTON'
+  - chunk: c020
+    lines: *id020
+    snippet: "\"overallOfficialFirstName\": \"Aaron\",\n            \"overallOfficialLastName\": \"Lee\",\n            \"overallOfficialDegree\": \"MD\"...\"overallOfficialRole\": \"Study Principal Investigator\""
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-025
+  kind: slot_receipted
+  slot: data_collectors[4].collector_details
+  value: Clinical Laboratory Improvement Amendments-certified laboratories local to each data collection site perform complete blood count testing on fresh whole blood samples; all other lab tests are performed by the University of Washington Nutrition and Obesity Research Center testing facility using store…
+  receipts:
+  - chunk: c028
+    lines: *id021
+    snippet: 'Phlebotomist: Responsible for blood collection from research participants'
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-026
+  kind: slot_receipted
+  slot: data_governance.accountable_organization.id
+  value: ROR:01yc7t268
+  receipts:
+  - chunk: c015
+    lines: *id008
+    snippet: "\"name\": \"Washington University in St. Louis\",\n        \"managingOrganizationIdentifier\": {\n          \"managingOrganizationIdentifierValue\": \"https://ror.org/01yc7t268\""
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-027
+  kind: slot_receipted
+  slot: description
+  value: AI-READI is a dataset of data collected from individuals with and without type 2 diabetes mellitus (T2DM), harmonized across three data collection sites. Version 3.0.0 contains data from 2280 participants collected between July 19, 2023 and May 1, 2025 and holds no protected health information; info…
+  receipts:
+  - chunk: c010
+    lines: *id007
+    snippet: The AI-READI is a dataset consisting of data collected from individuals with and without Type 2 Diabetes Mellitus (T2DM) and harmonized across 3 data collection sites
+  - chunk: c013
+    lines: *id016
+    snippet: The AI-READI project seeks to create and share a flagship ethically-sourced dataset of type 2 diabetes
+  - chunk: c015
+    lines: *id008
+    snippet: This dataset contains data from 2280 participants that was collected between from July 19, 2023 and May 01, 2025. Data from multiple modalities are included.
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-028
+  kind: slot_receipted
+  slot: is_deidentified.deidentification_details
+  value: FAIRhub records the de-identification type as "NoDeIdentification" with direct identifiers and HIPAA identifiers addressed, and explains that no identifiers were collected so no active de-identification was necessary, but that the team checked that no identifiable data per US HIPAA were present in t…
+  receipts:
+  - chunk: c015
+    lines: *id008
+    snippet: No identifiers were collected so no active de-identification was necessary but we checked that no identifiable data per US HIPAA were present in the data.
+  question: Read the passage each snippet sits in. Does it support the record's value at this slot, as the slot's description asks, and is the value the right reading?
+- id: slot-029
+  kind: slot_receiptless
+  slot: intended_uses[1].examples
+  value: '[''Development, training and adaptation of models, algorithms and programs using the data, provided the resulting artifacts do not themselves contain the data'']'
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-030
+  kind: slot_receiptless
+  slot: acquisition_methods[1].name
+  value: Biospecimen collection during the study visit
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-031
+  kind: slot_receiptless
+  slot: direct_collection[0].name
+  value: Direct collection from participants
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-032
+  kind: slot_receiptless
+  slot: known_limitations[2].limitation_type
+  value: representativeness_limitation
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-033
+  kind: slot_receiptless
+  slot: anomalies[2].name
+  value: Gaps in wearable activity data
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-034
+  kind: slot_receiptless
+  slot: creators[5].name
+  value: Amir Bahmani
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-035
+  kind: slot_receiptless
+  slot: creators[7].description
+  value: Study Principal Investigator.
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-036
+  kind: slot_receiptless
+  slot: file_collections[8].name
+  value: wearable_blood_glucose
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-037
+  kind: slot_receiptless
+  slot: purposes[2].response
+  value: To share a blueprint for collecting and sharing AI-ready datasets so that future Data Generation Projects can follow it, including guidelines for project management as well as for data collection, management and sharing.
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-038
+  kind: slot_receiptless
+  slot: acquisition_methods[0].was_directly_observed
+  value: true
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-039
+  kind: slot_receiptless
+  slot: creators[7].affiliations[0].id
+  value: ROR:00za53h95
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-040
+  kind: slot_receiptless
+  slot: file_collections[7].name
+  value: wearable_activity_monitor
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-041
+  kind: slot_receiptless
+  slot: known_limitations[5].name
+  value: Continuous glucose monitor data retention window
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-042
+  kind: slot_receiptless
+  slot: known_limitations[1].recommended_mitigation
+  value: If recruitment goals for Hispanic participants are not met, the consent form is to be translated into Spanish by UCSD translation services, with native Spanish-speaking research staff providing interpretation.
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-043
+  kind: slot_receiptless
+  slot: purposes[2].name
+  value: Share a blueprint for future data-generating projects
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-044
+  kind: slot_receiptless
+  slot: data_collectors[4].role
+  value: laboratory
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-045
+  kind: slot_receiptless
+  slot: collection_mechanisms[12].name
+  value: Monofilament testing for peripheral neuropathy
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-046
+  kind: slot_receiptless
+  slot: creators[8].description
+  value: Study Principal Investigator; first author of the published license terms for reusing the AI-READI dataset.
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-047
+  kind: slot_receiptless
+  slot: file_collections[9].conforms_to
+  value: Clinical Dataset Structure (CDS) v0.1.1
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-048
+  kind: slot_receiptless
+  slot: external_resources[0].restrictions
+  value: '[''Biobanked samples will eventually be available to scientists according to procedures and policies that are in development; during the project an infrastructure is being created to decide who may request and receive specimens for future research.'', ''There are a finite number of samples to share, an…'
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-049
+  kind: slot_receiptless
+  slot: participant_compensation[0].compensation_provided
+  value: true
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-050
+  kind: slot_receiptless
+  slot: tasks[1].name
+  value: Defining disease trajectories and genetic links across racial and ethnic cohorts
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-051
+  kind: slot_receiptless
+  slot: direct_collection[0].is_direct
+  value: true
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-052
+  kind: slot_receiptless
+  slot: file_collections[5].file_count
+  value: 173721
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-053
+  kind: slot_receiptless
+  slot: creators[7].name
+  value: Christopher G. Chute
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: rule-01
+  kind: rule
+  block: uniform
+  text: 'Populate a slot only where the declared bundle supports it. Prefer omission over inference: an absent slot is a correct answer when the evidence is absent, and a plausible guess is not.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-02
+  kind: rule
+  block: uniform
+  text: Where the declared bundle contains sources that disagree, represent what the evidence states rather than silently selecting one. Do not merge distinct entities into a single claim.
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-03
+  kind: rule
+  block: uniform
+  text: '`Dataset` admits one referent. Choose the one the declared bundle best supports, state that choice in the reconciliation report, and hold to it consistently across both records.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-04
+  kind: rule
+  block: uniform
+  text: There is no target slot count, no expected density, and no expected relationship to any other arm or project. Apply your own judgment about what the evidence supports.
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-05
+  kind: rule
+  block: v2
+  text: When a slot's declared range is multivalued, emit one object per distinct entity. Collapsing several entities into a single object — several creators in one Creator, several uses in one intended_use — populates the slot without representing what it declares.
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-06
+  kind: rule
+  block: v2
+  text: Populate a slot with the information the field asks for, not with a pointer to where that information lives, and not with a statement that it is pending or absent. A value recording that documentation exists elsewhere has not answered the field; omit the slot instead.
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-07
+  kind: rule
+  block: v2
+  text: Read the slot's description before populating it. Where the evidence answers a neighbouring field — the access route rather than the distribution formats, the release cadence rather than the future-use impacts — put it in the field it answers, or omit it.
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-08
+  kind: rule
+  block: v3
+  text: When a slot's declared range is a class, populate the fields that class declares. Placing the content in a free-text field such as `description` while the declared fields — a name, an identifier, dates, affiliations — stay empty produces an object of the correct shape holding none of the structure it exists to carry. Where the evidence answers a declared field, populate that field rather than restating it in prose.
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-09
+  kind: rule
+  block: v5
+  text: 'In a slot whose declared range is `uriorcurie`, never write a resolver URL where the schema declares a prefix: write the CURIE — a prefix, a colon, and the local part. A `ROR:` CURIE, not the ror.org URL; an `ORCID:` CURIE, not the orcid.org URL; a `doi:` CURIE, not the doi.org resolver form. **`uriorcurie` is the range this rule exists for**: its "uri" half is the fallback for an identifier that no declared prefix covers, never permission to expand one that a prefix does cover. Two records naming one thing in one form produce one identity; the same thing written as a prefix here and a resolver URL there produces two. Check the schema''s declared prefixes and use one whenever it fits; a resolver URL in a `uriorcurie` slot whose prefix is declared is a defect even though it resolves. Three things this does not govern, and they are exempt entirely: a slot whose declared range is `uri` — not `uriorcurie` — takes a URL (`download_url` and `access_urls` are declared `uri`, and a CURIE there is wrong); a URL inside prose or a citation is text — leave both of these exactly as written; and a slot whose declared range is `string` follows its own description and pattern even when it holds an identifier — the `doi` slot takes the bare DOI, neither prefixed nor resolved.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-10
+  kind: rule
+  block: v5
+  text: 'An identifier that names something outside this dataset — an organisation, a person, a publication, another dataset — is a fact about the world, subject to the same rule as any other fact: take it from the evidence or omit it. Do not supply one you recognise but the input documents do not state. A correct identifier the evidence does not contain is still an unsupported claim, and to every reader who was not present it is indistinguishable from an incorrect one. Naming an organisation the documents name is grounded; adding that organisation''s registry identifier from your own knowledge is not.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-11
+  kind: rule
+  block: v5
+  text: 'An identifier that names a part of this dataset, and exists nowhere outside this record, is a label rather than a claim about the world — so no evidence can supply it and the rule above does not reach it. Mint it as a fragment on an identifier the evidence *does* supply, so the label stays traceable to something attested. This is the only case in which minting is right, and the test is whether the thing named has a referent outside this record: if it does, the rule above governs and you take the identifier from the evidence or omit it. Never invent a prefix — one the schema does not declare resolves to nothing, and where no fragment is possible either, a resolvable URL is the better answer. A person is identified by a personal-identifier registry entry and an organisation by an organisation registry entry; a fragment appended to an organisation''s identifier does not identify a person, it makes a false claim about that organisation.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-12
+  kind: rule
+  block: v5
+  text: 'Write American English throughout — characterize, organization, standardized, analyze, behavior, license. This governs the prose the record states, not quoted material: a title, a name or a direct quotation keeps the spelling its source used.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-13
+  kind: rule
+  block: v5
+  text: 'Where two sources in the declared bundle disagree, prefer the one the input manifest ranks higher: state its value, and record in the caveat that the sources disagreed, what each said, and which was preferred. Where the disagreeing sources share the same rank the ranking cannot decide, so represent what the evidence states rather than selecting one. This refines the earlier rule about disagreement; it does not replace it.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-14
+  kind: rule
+  block: v6
+  text: 'Within the rule above, mint a fragment identifier for a part of this dataset only where another value in the record must point at that part — a split a task names, a subset a distribution cites, a collection a file belongs to. A part nothing points at is described in prose, not labeled: an identifier no value in the record uses is not a label, it is noise that reads as structure. Name the same part with the same fragment every time a value points at it, and mint nothing for a part that is only described.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-15
+  kind: rule
+  block: v4
+  text: Where a slot's declared range is a scalar, populate it with the identifier of the thing it refers to, not with the thing itself. An object placed in a string-ranged slot fails validation and loses the reference it was meant to record, even where that thing is richly described elsewhere in the record.
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+verdicts:
+  chunk_nothing_relevant:
+  - confirmed
+  - missed_content
+  - cannot_tell
+  slot_receipted:
+  - supported
+  - weak
+  - misread
+  - unsupported
+  - cannot_tell
+  slot_receiptless:
+  - bundle_supports
+  - inferred
+  - not_in_bundle
+  - exempt_by_nature
+  - cannot_tell
+  slot_reshaped:
+  - still_supported
+  - changed_meaning
+  - cannot_tell
+  rule:
+  - followed
+  - violated
+  - not_applicable
+  - cannot_tell

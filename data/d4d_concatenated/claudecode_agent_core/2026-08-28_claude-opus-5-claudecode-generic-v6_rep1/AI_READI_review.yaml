@@ -1,0 +1,221 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: "2026-08-30T08:12:15Z"
+pack_sha256: 2c50bdd41ebb5b450a6d2b62f886cb6e9f42c0030242730c8336c719810be6a4
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-25 are the concatenation tool's banner and table of contents (11 filenames, manifest path); no dataset fact"
+- id: chunk-c025
+  verdict: confirmed
+  evidence: "lines 6338-6647 are the blank UW HSD IRB protocol form template, sections 1-5.11.f: question text and unticked options only ('Study Title:' at 6373 is empty); the generic hsdinfo@uw.edu contact (6350) is the form's, not the study's"
+- id: chunk-c026
+  verdict: confirmed
+  evidence: "lines 6648-6943 continue the blank form (5.11.g-10.10): instruction text and unticked options, no study-specific answer; the filled-in answers begin only in c027/c028"
+- id: slot-004
+  verdict: weak
+  evidence: "cited snippet at line 7336 is about yearly upload of laboratory results; the value's incidental-finding thresholds (systolic >180 / <100, diastolic >120 / <60, HR >100 / <60) are stated at lines 985-995 (chunk c004), which this slot does not receipt; only the retinal-detachment/edema/tumor referral half is in the cited passage (line 7334)"
+- id: slot-005
+  verdict: supported
+  evidence: "license section F, lines 2517-2522: 'Data may not be reproduced in papers ... up to five images or figures per Paper for illustrative purposes only ... larger amounts of data shall not be published ... via supplemental files, zip archives, code packages or other means'"
+- id: slot-006
+  verdict: supported
+  evidence: "line 4427: 'initial IRB approval at the University of Washington was received on December 20, 2022 ... annual renewal application ... due within 90 days of expiration'; line 5434 '\"irbProtocolId\": \"STUDY00016228\"'"
+- id: slot-007
+  verdict: supported
+  evidence: "line 5098 overallOfficialLastName McGwin with overallOfficialFirstName Gerald in the same overallOfficialList entry"
+- id: slot-008
+  verdict: supported
+  evidence: "lines 1196-1203: 'controlled access data set contains all data available in the publicly accessible set, plus more sensitive data that are only available for use by scientists whose institutions have completed legal and privacy use agreements'; line 2247 'full dataset will be accessible by entering into a data use agreement'"
+- id: slot-009
+  verdict: supported
+  evidence: "line 4378 exclusion criteria (pregnant, gestational diabetes, type 1) support the second sentence; the first sentence's 'equal numbers of four racial/ethnic groups' is stated at line 7023 (c027) and 'Adults older than 85 years of age' at lines 4873/7054, neither receipted on this slot; value is the right reading"
+- id: slot-010
+  verdict: supported
+  evidence: "line 6150: 'The Garmin Vivosmart 5 ... There are gaps in data collection as the battery had to be charged every 2-3 days. The sampling frequency of the Fitness tracker is 5 seconds.'"
+- id: slot-011
+  verdict: weak
+  evidence: "the two c006 snippets (lines 1685, 1688) are bibliography entries for PhenX and RxNorm and state nothing about REDCap's use; the c027 snippets (lines 7128, 7135) support only the questionnaire list; the value's lead claim 'REDCap is used for collecting patient-reported data ... vitals, visual acuity, contrast sensitivity ...' is at line 1006 (c004), which this slot does not receipt"
+- id: slot-012
+  verdict: supported
+  evidence: "line 5186 '\"overallOfficialIdentifierValue\": \"https://orcid.org/0000-0003-0784-7987\"' in Michael Snyder's entry; value is the CURIE form of the same identifier"
+- id: slot-013
+  verdict: supported
+  evidence: "line 7280: 'a community advisory board that evaluates the consent forms and research protocols and their feedback will be considered in the modifications of the IRB as needed'; the 11-person count and three-site diversity are at lines 246-249 (c002)"
+- id: slot-014
+  verdict: supported
+  evidence: "line 7360: 'Research/Data scientist/Postdoctoral Fellow: Process data for release in database and development of standards'"
+- id: slot-015
+  verdict: supported
+  evidence: "line 7375: 'Domain experts: Provide guidance on issues arising from collecting data from each domain of medicine such as endocrinology and cardiology.'"
+- id: slot-016
+  verdict: supported
+  evidence: "lines 1190-1191: 'provided in the data set documentation (https://docs.\\naireadi.org/)'"
+- id: slot-017
+  verdict: supported
+  evidence: "line 3368 retinal_oct directoryDescription 'mapping subsurface structure'; line 5766 'cross-sectional view of the retina ... accurate to within at least 10-15 microns'; the four device directoryNames sit under retinal_oct in c016"
+- id: slot-018
+  verdict: supported
+  evidence: "line 4420: 'recommended data splits ... proportions (70%/15%/15%) ... balanced as well as possible for sex, race/ethnicity and diabetes status'; line 4211 'new recommended data split for the 2280 participants balancing ... age, sex, races/ethnicities, and study group'"
+- id: slot-019
+  verdict: supported
+  evidence: "line 4462: 'each individual was aware of the data collection, as this was not passive data collection or secondary use of existing data, but rather active data collection directly from participants'; the invitation-letter detail is at lines 305-315 (c002)"
+- id: slot-020
+  verdict: supported
+  evidence: "line 3843 '\"standardName\": \"Open mHealth\"' within the wearable directory entries of c017"
+- id: slot-021
+  verdict: supported
+  evidence: "line 4599 summary table, row 'Diabetes status (count)', Total columns No DM 776 | Lifestyle 560 | Oral 686 | Insulin 258"
+- id: slot-022
+  verdict: supported
+  evidence: "line 7111: '$200 stipend for participation, which will be provided when we receive the final data from participants and return of the study devices'; line 4442 'compensation of $200 for the study visit'"
+- id: slot-023
+  verdict: supported
+  evidence: "line 3026 '\"directoryName\": \"cardiac_ecg\"'"
+- id: slot-024
+  verdict: supported
+  evidence: "line 4034 '\"size\": 4169006971' in the wearable_blood_glucose entry (numberOfFiles 2246 matches file_count)"
+- id: slot-025
+  verdict: supported
+  evidence: "license lines 2549-2555: '(ii) to invade or compromise the privacy of any Data Subject, (iii) to attempt to identify or contact any Data Subject or group of Data Subjects, (iv) to extract or extrapolate any identifying information ... membership in a particular group of persons, or otherwise to cause harm or injury'"
+- id: slot-026
+  verdict: supported
+  evidence: "line 7334 'Results obtained during the study visit may be clinically actionable ... Each participant will receive a card with these results'; line 7339 'All abnormal laboratory results will be marked/flagged ... discuss the results with their primary care provider or specialist. Study will not provide interpretation'"
+- id: slot-027
+  verdict: supported
+  evidence: "line 2899 consentsDetails 'public version ... only be used for type 2 diabetes related research. A private version will allow for more generic use'; line 7278 'table at the beginning of the consent form that clarifies which information will be publicly available, and which would require an application and approval process that would contain privacy protection'"
+- id: slot-028
+  verdict: supported
+  evidence: "line 5203 overallOfficialLastName Singer with overallOfficialFirstName 'Sara J.' in the same entry"
+- id: slot-029
+  verdict: bundle_supports
+  evidence: "line 3843 '\"standardName\": \"Open mHealth\"' and line 3835 '\"standardName\": \"Clinical Data Structure (CDS) v0.1.1\"' in the wearable_activity_monitor entry; enum tokens are the normalised form"
+- id: slot-030
+  verdict: bundle_supports
+  evidence: "lines 364-365: 'The formal data collection process began on 1 December 2023.'"
+- id: slot-031
+  verdict: bundle_supports
+  evidence: "line 459 'Visual acuity and contrast sensitivity are assessed under ...'; line 476 'Contrast sensitivity is expressed as log sensitivity'"
+- id: slot-032
+  verdict: bundle_supports
+  evidence: "line 3990 '\"standardName\": \"Open mHealth\"' and line 3982 'Clinical Data Structure (CDS) v0.1.1' in the wearable_blood_glucose entry"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "lines 4929-4942: Cecilia Lee's overallOfficialAffiliation is 'Washington University in St. Louis' with identifier https://ror.org/01yc7t268"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "line 4327 'Wearable accelerometer (Physical activity monitor) ... Garmin Vivosmart 5 ... to measure data related to physical activity'; line 1861"
+- id: slot-035
+  verdict: bundle_supports
+  evidence: "line 7362: 'Clinical research coordinator/study coordinator: Responsible for contacting and consenting the research participants, ushering ... collection of ophthalmologic images, providing training ... ensuring the return of all study materials'"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "line 4472: 'Participants were permitted to withdraw consent at any time and cease study participation. However, any data that had been shared or used up to that point would stay in the dataset.'"
+- id: slot-037
+  verdict: bundle_supports
+  evidence: "line 1378 'Ambient temperature' in the environmental-sensor variable table (c005)"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "lines 52-58: 'To cite: Owsley C, Matthies DS, McGwin G, et al. Cross-sectional design and protocol for ... (AI-READI). BMJ Open 2025;15:e097449.'"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "line 7165: 'We will be extracting medical records to obtain data on general health, eye health, medical and surgical history, diabetes, medications, laboratory records, and any previous medical imaging'; the name is the record's label for that mechanism"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "lines 5013-5015 Jorge Contreras, overallOfficialDegree 'J.D.', with overallOfficialRole 'Study Principal Investigator' in the same entry"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "line 455 'administered electronically on an iPad using the MoCA Duo Application'; line 4327 'The MoCA generates a total score and six domain-specific index scores'"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "line 7369: 'Cloud engineer: Responsible for cloud infrastructure customization, configuration and deployment including integrating, configuring, deploying, and managing centrally provided common cloud services'"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "line 5853 '@id: ark:59853/rocrate-b2ai-ai-readi-retinal-octa' with '\"version\": \"3.0.0\"' at line 5872 in the same entity"
+- id: slot-044
+  verdict: bundle_supports
+  evidence: "line 362: 'Preliminary pilot enrolment occurred between 18 July 2023 and 30 November 2023'; date normalised"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "line 2005: 'We thank the Microsoft AI for Good Lab for supporting the cloud services needed for the project' (Nature Metabolism acknowledgements)"
+- id: slot-046
+  verdict: exempt_by_nature
+  evidence: "a record-authored label for the grouping object external_resources[0]; no passage can name it, and every URL it groups is in the bundle (e.g. line 1190 docs.aireadi.org, line 1179 fairhub.io)"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "line 2014: 'We thank Heidelberg Engineering (Heidelberg, Germany), Dexcom ... and Garmin ... for research discounts on study devices'"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "line 4211: 'This datasheet does not include new tasks or labeling'; the boolean is the normalised form"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "the ark:59853/rocrate-b2ai-ai-readi-retinal-photography entity carries '\"version\": \"3.0.0\"' at line 5968"
+- id: slot-050
+  verdict: bundle_supports
+  evidence: "line 1501 'AI-READI aims to establish standards, best practices and ...'; lines 1887-1888 'Blueprint for future data-generating projects. An additional aim of the AI-READI project is to share our blueprint'"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "line 4543 'the third version of the dataset was distributed in November 2025'; line 2903 'data from 2280 participants that was collected between from July 19, 2023 and May 01, 2025'"
+- id: slot-052
+  verdict: bundle_supports
+  evidence: "line 7079: 'send participant information to Adapt Inc., an SSAE16 SOC SecurityCertified and HIPAA-compliant printing and fulfillment service, to send out the recruitment letters'"
+- id: slot-053
+  verdict: bundle_supports
+  evidence: "line 3287 '\"directoryName\": \"retinal_flio\"'"
+- id: rule-01
+  verdict: followed
+  evidence: "all 25 sampled receiptless values resolve to bundle lines or are exempt by kind (slot-029..053 above); the two blank IRB-form chunks (c025, c026) were correctly left to yield nothing"
+- id: rule-02
+  verdict: followed
+  evidence: "collection_timeframes[3].source_caveats records both the BMJ Open window (2023-07-18 to 2026-11-30) and the Nature Metabolism '2022-2026' statement rather than selecting one; collection_timeframes[6].source_caveats does the same for visit duration"
+- id: rule-03
+  verdict: followed
+  evidence: "AI_READI_reconciliation.md '## Referent' (lines 12-22) names doi:10.60775/fairhub.3 as the one referent; related releases are held in related_datasets (target_dataset 10.60775/fairhub.2), not merged into the record's id"
+- id: rule-04
+  verdict: followed
+  evidence: "the record's density follows the evidence: 380 receipted slots from the 25 substantive chunks and nothing from the 3 blank/preamble chunks; no slot in the sample was filled to reach a count"
+- id: rule-05
+  verdict: followed
+  evidence: "one Creator per person (creators[2] Cecilia Lee, creators[10] Gerald McGwin, creators[14] Michael Snyder, creators[15] Sara J. Singer); one funder per organisation (funders[6] Heidelberg Engineering, funders[9] Microsoft AI for Good Lab)"
+- id: rule-06
+  verdict: followed
+  evidence: "sampled values carry the information itself (data_collectors[6].collector_details, informed_consent[0].withdrawal_mechanism, purposes[3].response); no sampled slot holds a pointer or a 'pending' statement"
+- id: rule-07
+  verdict: violated
+  evidence: "distribution_formats[6] ('Controlled access distribution') holds the access route — who may use the controlled set and the data use agreement — which is the rule's own example of a neighbouring field; the passage (lines 1196-1203, 2247) answers access, not a format"
+- id: rule-08
+  verdict: followed
+  evidence: "creators[2] populates name, principal_investigator (ORCID CURIE) and affiliations[0].{id,name} rather than prose; file_collections[8] populates name, path, file_count, total_bytes, conforms_to"
+- id: rule-09
+  verdict: followed
+  evidence: "creators[12] ORCID:0000-0003-0784-7987 and creators[2].affiliations[0].id ROR:01yc7t268 are CURIEs where the bundle gives resolver URLs (lines 5186, 4942); the only doi.org URLs in the record are inside prose (record lines 39, 1228); target_dataset is declared range string, so the bare DOI is correct"
+- id: rule-10
+  verdict: followed
+  evidence: "every sampled registry identifier is in the bundle: ROR 008s83205, 00f54p054, 03r0ha626, 01yc7t268 and ORCIDs 0000-0001-9592-1133, 0000-0002-3374-1177, 0000-0002-7899-3060, 0000-0003-1994-7213, 0000-0003-0784-7987 (grep counts 1-4 each)"
+- id: rule-11
+  verdict: followed
+  evidence: "the fragments doi:10.60775/fairhub.3#cardiac-ecg … #root-metadata-files are minted on the dataset DOI the bundle attests (line 39 'https://doi.org/10.60775/fairhub.3', line 2869); no invented prefix, no fragment on an organisation identifier"
+- id: rule-12
+  verdict: followed
+  evidence: "participant_compensation[0].notes writes 'hemodynamic' where the source (line 990) has 'haemodynamic'; no British spelling (programme, enrolment, organisation, licence, tumour) appears in the record's prose"
+- id: rule-13
+  verdict: followed
+  evidence: "collection_timeframes[6].source_caveats: 'The tier-2 IRB protocol and the tier-3 Nature Metabolism comment give 3-4 hours; the tier-3 BMJ Open protocol gives between 2.5 and 4 hours' — ranks named, values stated, higher rank preferred in timeframe_details"
+- id: rule-14
+  verdict: violated
+  evidence: "ten file_collections[*].id fragments (doi:10.60775/fairhub.3#cardiac-ecg through #root-metadata-files, record lines 1004-1128) are minted but no other value in the record points at any of them (grep 'fairhub.3#' matches exactly those 10 id lines); the rule says mint nothing for a part that is only described"
+- id: rule-15
+  verdict: followed
+  evidence: "scalar-ranged slots hold identifiers (related_datasets[1].target_dataset '10.1136/bmjopen-2024-097449', creators[14].principal_investigator 'ORCID:0000-0003-0784-7987'); provenance validation.passed is true for both records"
+notes: >-
+  Two slot_receipted items (slot-004, slot-011) are weak because the cited snippet
+  is on topic but the value's main claim lives in an unreceipted chunk (c004 lines
+  985-995 and 1006 respectively) — attribution precision rather than fabrication.
+  slot-009 and slot-013 show the same pattern in a milder form: the cited passage
+  supports part of a composite value and the rest is stated elsewhere in the bundle
+  (lines 7023 and 246-249), marked supported. Instrument note: the receipt validator
+  cannot see either pattern, since the snippets it verified are real; a per-slot
+  'value words covered by cited passages' figure would surface it. rule-14's
+  violation is structural (unused fragment ids on every file_collections entry),
+  not factual, and rule-07's is one entry (distribution_formats[6]) that duplicates
+  access-tier prose already carried elsewhere. No gaps were listed in the pack.

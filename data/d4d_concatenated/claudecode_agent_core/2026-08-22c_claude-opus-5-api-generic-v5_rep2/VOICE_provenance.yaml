@@ -400,8 +400,12 @@ intermediates:
   sha256: a00f40beb0f9c5ace718ddcc5f9a579b717ea8aa93e03fb9ab3ac6c2b687e0ce
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/intermediate/VOICE_report.md
   sha256: e48ed4c3c4accebd6ee4a8c1a7d9e873a0cd0b39229bc84e033b92a7d806985c
-canonical:
-  criterion: full and core both validate against the current schema, then most slots,
+canonical_superseded_by:
+  label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+  at: '2026-08-30T08:18:52+00:00'
+  by: d4d runs select
+canonical_history:
+- criterion: full and core both validate against the current schema, then most slots,
     then lowest label
   selected_from:
   - label: 2026-08-22c_claude-opus-5-api-generic-v5_rep1
@@ -420,3 +424,7 @@ canonical:
   selected_by: d4d runs select
   supersedes:
   - 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+  superseded_by:
+    label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+    at: '2026-08-30T08:18:52+00:00'
+    by: d4d runs select

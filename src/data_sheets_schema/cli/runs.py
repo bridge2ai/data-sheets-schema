@@ -1335,6 +1335,8 @@ def select_cmd(method, project, config, allow_unverified, execute):
         # pointer that says what replaced it.
         displaced = prior.pop("canonical", None) or {}
         pointer = {"label": winner[0], "at": stamp, "by": "d4d runs select"}
+        # the same pointer twice; ProvenanceRecord.write dumps it as two
+        # values, never as an `*id001` alias (#812)
         prior["canonical_superseded_by"] = pointer
         prior.setdefault("canonical_history", []).insert(0, {**displaced, "superseded_by": pointer})
         ProvenanceRecord(data=prior).write(other)

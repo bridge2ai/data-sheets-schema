@@ -1,0 +1,215 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: 2026-08-30T08:15:37Z
+pack_sha256: a6054993c3a8aeb721bcb96de8fc98b58c0e0576e387bf2da38f5c83999a3bf8
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-25 are the concatenation banner and table of contents (11 filenames); no dataset fact"
+- id: slot-002
+  verdict: supported
+  evidence: "line 2206 'No export controls apply to the dataset.' answers the D4D export-control question directly"
+- id: slot-003
+  verdict: supported
+  evidence: "line 2154 states the research teams, the clinicians/doctors listed as IRB co-investigators, and hospital staff logistics; value paraphrases it"
+- id: slot-004
+  verdict: supported
+  evidence: "line 4290 (c017) 'some files ... could not generate certain features and so are not included'; the differing per-file n= counts at 4280-4289 bear out the value's second sentence"
+- id: slot-005
+  verdict: weak
+  evidence: "snippet 'Bridge2AI-Voice Consortium' (line 158) is a consortium author entry, not the person's name; 'Yael Bensoussan' is stated two lines later (160-165) and at 629, 2028, but the cited snippet does not name her"
+- id: slot-006
+  verdict: supported
+  evidence: "lines 4937-4948 list nine .parquet files plus audio_quality_metrics.tsv and static_features.tsv = 11; the count is derived from the enumeration and file_collections[0].source_caveats says so"
+- id: slot-007
+  verdict: supported
+  evidence: "line 2187 supports the last sentence; the other sentences are stated at 2093, 2095 and 2107 (c008) 'Participants were screened for different disorders based on site, so they also had their data collected with different devices'"
+- id: slot-008
+  verdict: supported
+  evidence: "line 2786 states the plan to enroll socially/economically disadvantaged and underserved populations through the PEDP; Community Outreach Clinics defined at 2981ff"
+- id: slot-009
+  verdict: supported
+  evidence: "lines 2560-2561 give https://docs.b2ai-voice.org/ as the Docs source; 3811 'Project Website: https://docs.b2ai-voice.org'"
+- id: slot-010
+  verdict: supported
+  evidence: "line 1953 'Official Title: Bridge2AI-Voice'"
+- id: slot-011
+  verdict: supported
+  evidence: "line 2819 'stored for a minimum of 5 years after the completion of the study' plus line 2223 'retained as long as it is useful for research purposes, possibly indefinitely' cover both halves of the value"
+- id: slot-012
+  verdict: supported
+  evidence: "lines 2555-2562 (Prep Library Apache-2.0; Docs MIT at docs.b2ai-voice.org), 2564-2565 (FHIR profiles), 5725-5727 (docs README, MIT, zenodo.13834653)"
+- id: slot-013
+  verdict: supported
+  evidence: "line 3723/4929 (state and province removed, transcripts removed at 3724) plus 4928 Safe Harbor list and 1938 'name, civic address, and social security numbers ... All raw voice data was removed'; value is the union of these"
+- id: slot-014
+  verdict: weak
+  evidence: "snippet line 629 'University of Toronto: Alistair Johnson' is a third membership list (feasibility publication); the caveat concerns the docs list (line 2028, twelve) vs the IRB list (2970-2979, nine) and does not mention Johnson or the 629 list"
+- id: slot-015
+  verdict: supported
+  evidence: "line 3077 'MSH Jordan Lerner-Ellis, PhD Lead - Genomic data (separate IRB)'; 2986-2987 state genomic data is collected only at UofT and MSH under a separate REB"
+- id: slot-016
+  verdict: supported
+  evidence: "lines 4806-4807 'Published: May 1, 2026. Version: 3.1.0' on the current release page"
+- id: slot-017
+  verdict: supported
+  evidence: "line 5203 'Bridge2AI-Voice Pediatric Dataset v1.1.0'; the name without the version token also at 5234"
+- id: slot-018
+  verdict: weak
+  evidence: "line 3576 is a bare author-list entry on the v1.1 release page; it names Johnson but says nothing about a principal-investigator role, which is what the slot asks (line 2028 names Bensoussan and Elemento as the co-principal investigators)"
+- id: slot-019
+  verdict: supported
+  evidence: "line 629 '... Dalhousie University, Toronto, ON, Canada: Frank Rudzicz' names him; the value is the name only. Note the same passage gives Dalhousie while the record's affiliation is University of Toronto (2028, 2931) with no caveat - see rule-13"
+- id: slot-020
+  verdict: supported
+  evidence: "lines 2229-2230 'converted to be compliant with the Brain Imaging Data Structure v1.9.0'; BIDS is the enum term for that standard and conforms_to carries the verbatim name"
+- id: slot-021
+  verdict: supported
+  evidence: "lines 3805-3806 'DOI (latest version): https://doi.org/10.13026/37yb-1t42'; written as the doi: CURIE per rule-09"
+- id: slot-022
+  verdict: supported
+  evidence: "line 2155 and the IRB protocol passage both state $40 under 90 min, $80 over, max 3 sessions and $120"
+- id: slot-023
+  verdict: supported
+  evidence: "line 1423 '22 acoustic tasks are recorded through the app'; the task names in the value are in the Table 2 listing that follows (1678 Caterpillar Passage, 1726 Word-Color Stroop, 1738 Random Item generation, 1744 Cinderella Story)"
+- id: slot-024
+  verdict: supported
+  evidence: "line 2150 (directly observable, reported by subjects, diagnoses verified by clinicians via audio/imaging/EHR/prescriptions); tablet + headset from the c015 snippet; 2734 REDCap case report form"
+- id: slot-025
+  verdict: supported
+  evidence: "lines 1903-1910 give the registered route (Registered Access License, Registered Access Agreement) and the raw-audio route (DARF, DUA, DACO review, DTUA signed by an institutional official); c013 snippet states DACO approval requires a distinct application"
+- id: slot-026
+  verdict: supported
+  evidence: "line 2117 'Yes, it is saved and is not accessible publicly'; 3606-3611 'Raw Audio Data Access ... is via Synapse' with the syn72370534 URL; institutional sign-off in the distribution passage"
+- id: slot-027
+  verdict: bundle_supports
+  evidence: "line 1423 'A total of 22 acoustic tasks are recorded through the app' - the label names the protocol that passage describes"
+- id: slot-028
+  verdict: bundle_supports
+  evidence: "line 2175 'The only language option for v2.0.0 is English. Spanish versions of the protocol are under development.'; 1977 'Does not read or speak English (... Spanish protocols and Data collection will be included in future releases)'"
+- id: slot-029
+  verdict: bundle_supports
+  evidence: "line 4528 'Source URL: https://physionet.org/content/b2ai-voice/3.1.0/' and 5487 'https://physionet.org/content/b2ai-voice/'"
+- id: slot-030
+  verdict: bundle_supports
+  evidence: "line 1437 'no external data is released in this v3.0.0 release'; 4930 'Spectrograms and similar features were excluded if the audio contained free speech'; 4960 files that could not generate features"
+- id: slot-031
+  verdict: bundle_supports
+  evidence: "line 1999 'Mount Sinai Hospital' in the docs collaborator list; 2933 'Mount Sinai Hospital (MSH)' in the IRB institution table"
+- id: slot-032
+  verdict: inferred
+  evidence: "line 5487 gives the URL; no passage says the landing page reaches every published version - that follows from the version list (3828-3835, 4492-4495) on each release page"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "line 2012 'enable the development, benchmarking, or validation of clinically applicable machine-learning models'; the label condenses that passage"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "line 1391 'The public data releases do not contain an equal distribution of these categories of diseases.'"
+- id: slot-035
+  verdict: bundle_supports
+  evidence: "line 1916 'approved by the USF Single IRB and subsite IRBs through the Single IRB process'; 2984-2987 Canadian institutions apply for a separate REB"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "line 4925 'Transcriptions were generated using OpenAI's Whisper Large model.' (the schema asks for 'ToolName version' with 'unknown' when absent; no version is stated)"
+- id: slot-037
+  verdict: inferred
+  evidence: "line 3067 'USF Ruth Bahr PhD, CCC-SLP Lead Voice Disorders' and 2028 list her as a lead investigator; no passage calls her a principal investigator - 2028 names only Bensoussan and Elemento as co-PIs"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "the label names the recruitment passage at 2773-2791 (inclusion/exclusion criteria, 5,000 per category, 30 000 total) and 2953 (five predetermined disease categories)"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "line 1271 'To build a multi-modal, multi-institutional, large scale, diverse and ethically sourced human voice database linked to other biomarkers of health that is AI/ML friendly'; 1110 'our primary deliverable'"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "line 2195 'https://healthdatanexus.ai/' under Dataset Distribution; 1401 'Request Data Access to v1.0 via Health Data Nexus'"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "line 4960 'some files ... could not generate certain features and so are not included in the bundled data' - the label names that anomaly"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "line 2005 'Vanderbilt University Medical Center'; 629 'Vanderbilt University Medical Center, Nashville, TN, USA: Maria Powell'"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "line 4813 'https://www.synapse.org/Synapse:syn72370534/' under 'Raw Audio Data Access for Bridge2AI Voice Adult Cohort is via Synapse' (4808)"
+- id: slot-044
+  verdict: bundle_supports
+  evidence: "line 4808 'Raw Audio Data Access for Bridge2AI Voice Adult Cohort is via Synapse'; controlled-access wording at 1907-1910"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "line 3097 'Provider Institution: University of South Florida Board of Trustees pursuant to Agreement'"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "line 1170 'Johnson, PhD, Division of Biostatics, Hospital for [Sick Children]' (record normalizes the spelling to Biostatistics); Toronto, Ontario, Canada from 2977"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "lines 2211-2212 'Health Data Nexus, a data publishing platform maintained by the Temerty Center for Artificial Intelligence Research and Education in Medicine (T-CAIREM)'"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "line 2024 'The Bridge2AI Voice dataset is primarily intended for research applications'"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "line 2018-2019: the D4D question on recommended data splits and its answer; the label mirrors the question (but see rule-06 on the value beneath it)"
+- id: slot-050
+  verdict: bundle_supports
+  evidence: "line 1271 'To build a ... diverse and ethically sourced human voice database linked to other biomarkers of health'"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "line 4823 'https://doi.org/10.13026/8xbn-nq66' on the 3.1.0 release page; written as the doi: CURIE"
+- id: rule-01
+  verdict: violated
+  evidence: "creators[8].principal_investigator (and creators[5..11] likewise) reads 'lead investigator' (line 3067, 2028) as principal investigator; external_resources[3].description infers that every version is reachable from the landing page (5487); both are inferences the rule asks to omit. Elsewhere the record omits well (subsets, variables, credit_roles, media_type removed in Phase 3)"
+- id: rule-02
+  verdict: followed
+  evidence: "purposes[0].source_caveats records 10,000 vs 30,000 without selecting; sampling_strategies[1].source_caveats records both HVEC thresholds; funders[0].grants keeps the award numbers as separate Grant entries rather than merging them"
+- id: rule-03
+  verdict: followed
+  evidence: "report 'Referent' section names the adult dataset doi:10.13026/37yb-1t42; full id (line 17) and core id (line 1107) agree; the pediatric dataset is confined to related_datasets[0]"
+- id: rule-04
+  verdict: followed
+  evidence: "the report leaves 21 named slots absent for lack of evidence (subsets, variables, total_size_bytes, is_tabular, ...) and pads nothing; no target density is invoked"
+- id: rule-05
+  verdict: followed
+  evidence: "creators is twelve objects (one per person plus the consortium), intended_uses two objects, funders[0].grants three Grant objects, ethical_reviews two objects"
+- id: rule-06
+  verdict: violated
+  evidence: "splits[0].split_details 'The dataset comes with predefined tasks and labeling but no predefined recommended splits ... Researchers are encouraged to create their own' is a statement that the thing the field asks for is absent (bundle line 2019); the rule says omit the slot instead"
+- id: rule-07
+  verdict: violated
+  evidence: "Creator.principal_investigator asks for 'the key individual (Principal Investigator) responsible for or overseeing dataset creation'; the record sets each of creators[3..11] as their own PI on the strength of cohort-lead roles (line 3067-3078), while line 2028 names only Bensoussan and Elemento as co-principal investigators - the evidence answers Creator.description (where the role is also recorded), not this field"
+- id: rule-08
+  verdict: followed
+  evidence: "creators[*] carry name, principal_investigator and affiliations[].name with department detail in affiliations[].description; funders[0].grants[*].grant_number populated; data_governance.accountable_organization.name populated"
+- id: rule-09
+  verdict: followed
+  evidence: "id and version_access.latest_version_doi are doi: CURIEs (bundle gives the doi.org form at 3806, 4823); used_software[].id holds github URLs where no declared prefix fits; related_datasets[0].target_dataset is a string-ranged slot and access_urls/access_url are uri-ranged"
+- id: rule-10
+  verdict: followed
+  evidence: "every external identifier checked is in the bundle: RRID:SCR_007345 (24 hits), github.com/sensein/b2aiprep, senselab, zenodo.12760724, zenodo records/14989503, eipm/bridge2ai-redcap, DACO@b2ai-voice.org, U24EB037545; no ROR or ORCID was supplied and the bundle gives none; the invented media type was removed in Phase 3"
+- id: rule-11
+  verdict: followed
+  evidence: "the eight minted ids are all fragments on the attested dataset DOI (doi:10.13026/37yb-1t42#features, #metadata, #phenotype, #features-*); no prefix invented, no person or organization identifier minted"
+- id: rule-12
+  verdict: violated
+  evidence: "British spellings in the record's own prose: 'programme' (line 62, 1548), 'programmes' (633-634), 'enrol'/'enrolment' (89, 401, 628), 'analyse' (717, 830), 'analysed' (905), 'word-colour Stroop' (585), 'licence' (1485, 1538, 1556); none is inside a quoted title or name"
+- id: rule-13
+  verdict: violated
+  evidence: "creators[10].affiliations gives University of Toronto (lines 2028, 2931, tier 2) while line 629 (tier 3) gives 'Dalhousie University, Toronto, ON, Canada: Frank Rudzicz'; the higher-ranked value was stated but no caveat records the disagreement (the parallel Johnson conflict at creators[5] was caveated correctly)"
+- id: rule-14
+  verdict: followed
+  evidence: "fragments exist only on file_collections[*].id and file_collections[0].resources[*].id, where FileCollection.id and File.id are schema-required and the derived core's distributions carry them; subsets was left absent rather than minting ids nothing points at (report, 'Minted identifiers')"
+- id: rule-15
+  verdict: followed
+  evidence: "principal_investigator (range Person, not inlined), contact_person and committee_contact hold strings (creators[*].principal_investigator, license_and_use_terms.contact_person 'DACO@b2ai-voice.org'); both records pass linkml-validate per the report"
+notes: >-
+  Three receipted items are weak because the snippet cited is on topic but does
+  not state the value: slot-005 (a consortium author entry receipting a person's
+  name), slot-014 (a third membership list receipting a caveat about two other
+  lists), slot-018 (a bare author-list name receipting a principal-investigator
+  role). The principal_investigator pattern - every lead investigator recorded as
+  their own PI while line 2028 names only two co-PIs - is the one semantic issue
+  that recurs across rules 01, 07 and the receiptless sample (slot-037). The
+  Rudzicz affiliation (Dalhousie at line 629 vs University of Toronto) is a
+  same-kind conflict to the one the record caveated for Johnson, and went
+  unrecorded. No pack gaps were listed. Nothing here is a defect the deterministic
+  validator should have caught; snippets verified as claimed.

@@ -1,0 +1,227 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: 2026-08-30T00:00:00Z
+pack_sha256: 1ddbdbb13252d516487b722bd78c40a0870e157a12c814a87f871f479395f365
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-25 are the concatenation header and the eleven-entry table of contents; no dataset fact"
+- id: chunk-c006
+  verdict: confirmed
+  evidence: "lines 1626-1704 are references 14-30 of the BMJ Open protocol plus the running footer; the only dataset-bearing line is ref 16 (line 1633-1634, the v1.0.0 dataset citation), which the record carries as related_datasets[1]"
+- id: chunk-c023
+  verdict: confirmed
+  evidence: "lines 5717-6116 are the FLIO tail, retinal OCT, retinal OCTA, retinal photography and (from line 6044) the CGM subcrates; every governance/limitation/maintenance field repeats c022 verbatim (e.g. lines 5729-5742 = 5440-5453), and the modality prose (5766, 5862, 5958, 6054) is carried in collection_mechanisms[2] and file_collections[4..6]. The agent_reason omits that the chunk also opens the CGM subcrate, but nothing there is missing from the record"
+- id: chunk-c025
+  verdict: confirmed
+  evidence: "lines 6338-6647 are the UW IRB application template from the source header through question 5.11.f; every answer box is blank (e.g. lines 6380, 6385, 6420), no project-specific text"
+- id: chunk-c026
+  verdict: confirmed
+  evidence: "lines 6648-6943 continue the blank template from 5.11.g through 10.10; all checkboxes and answer spaces are unfilled (e.g. lines 6650, 6682, 6751, 6881)"
+- id: slot-006
+  verdict: weak
+  evidence: "line 3215 'This directory contains data collected through an environmental sensor device custom built for the AI-READI project' supports file_collections[2].description only; the receipt is on the whole entry (id, file_count 2232, total_bytes 55625676514, path), which this passage does not attest, and the claim sidecar names no other receipt for those leaves"
+- id: slot-007
+  verdict: supported
+  evidence: "line 4223 (healthsheet motivation Q1) states the purpose verbatim, including 'salutogenic pathways to return to health' and 'a key issue is the lack of data ready for training AI models'"
+- id: slot-008
+  verdict: supported
+  evidence: "lines 285-291: 'all patients aged >=40 years ... medical encounter within each health system site (UAB, UCSD, UW) ... screening electronic health records for ICD-10 diagnosis codes R73.09 and E11.X'. Note the source's 'respectively' literally pairs T2DM with R73.09 and pre-diabetes with E11.X; the record's glosses (R73.09 pre-diabetes, E11.X T2DM) reverse that pairing using outside knowledge"
+- id: slot-009
+  verdict: supported
+  evidence: "lines 361-365: 'Preliminary pilot enrolment occurred between 18 July 2023 and 30 November 2023 ... The formal data collection process began on 1 December 2023', which is what the last sentence of timeframe_details says"
+- id: slot-010
+  verdict: supported
+  evidence: "line 5469 '@id: ark:59853/rocrate-b2ai-ai-readi-ecg' is the ECG subcrate identifier in c022; the value is that identifier"
+- id: slot-011
+  verdict: supported
+  evidence: "line 3016 'application/dicom' in the FAIRhub dataset_description format list"
+- id: slot-012
+  verdict: supported
+  evidence: "line 2332 (docs-3 About) 'collected from individuals with and without Type 2 Diabetes Mellitus (T2DM) and harmonized across 3 data collection sites'; line 5272 'locationFacility: University of Washington' names one of the three sites; the other description sentences are receipted from other chunks"
+- id: slot-013
+  verdict: supported
+  evidence: "line 294-295 'Enrolment began on 18 July 2023 and will continue until 30 November 2026' is exactly the BMJ statement the caveat contrasts with the FAIRhub 19 July 2023 start"
+- id: slot-014
+  verdict: supported
+  evidence: "line 2187 aim 3 'Increase access to and quality of AI/ML research by recruiting and training personnel'; the internship clause is at line 1956-1957 'AI-READI hosts a year-long research internship programme'"
+- id: slot-015
+  verdict: weak
+  evidence: "line 5446 'Manual Human Curation' attests only the final sentence of acquisition_details; the receipt is on the whole acquisition_methods[0] entry whose booleans and details rest on line 4432, which this snippet does not cover"
+- id: slot-016
+  verdict: supported
+  evidence: "line 4533 'The dataset will be distributed and be available for public use.' answers the third-party distribution question; DOI at 4538, onward-sharing restriction in the license (c012)"
+- id: slot-017
+  verdict: supported
+  evidence: "line 1763 'AI-READI is enrolling 4,000 participants at three study sites over 4 years'; line 4880 'samplingMethod: Non-Probability Sample'; the wave/monitoring text is at lines 294-300"
+- id: slot-018
+  verdict: supported
+  evidence: "line 4327 '... 200 X 200 macula and ONH scans and also OCTA of the macula. Zeiss Cirrus 5000 also provides a 60-degree OCTA widefield view'; the protocol list 'Disc Cube 200x200 (OCT), Macula Cube 512x128 (OCT), Macula 6x6 (OCTA), Disc 6x6 (OCTA)' is at lines 1283-1286"
+- id: slot-019
+  verdict: supported
+  evidence: "line 4543 'the first version ... May 2024, the second ... November 2024, and the third version of the dataset was distributed in November 2025'; day-level dates at lines 2726-2729 (Nov 8, 2024; May 3, 2024) and 5777 (11/17/25)"
+- id: slot-020
+  verdict: misread
+  evidence: "line 2685 is the FAIRhub v2.0.0 page: 'This version of the dataset is no longer accessible'. The value says 'The FAIRhub pages for versions 1.0.0 and 2.0.0 state that those versions are no longer accessible' - the bundle holds no FAIRhub v1.0.0 page (TOC lines 19-20 list only fairhub_dataset_2 and _3), so the v1.0.0 half is an extension of scope the passage does not support"
+- id: slot-021
+  verdict: supported
+  evidence: "line 4432 'some data were directly observable (such as labs, vitals, and retinal imaging), whereas other data were reported by subjects ... cross-referencing entered medications with medications that were physically brought in or photographed'"
+- id: slot-022
+  verdict: supported
+  evidence: "line 4166 'The dataset gets released as static versions ... plans to release new versions of the dataset approximately once a year with additional data from participants who have been enrolled since the last dataset version release'"
+- id: slot-023
+  verdict: supported
+  evidence: "lines 355-360 'mandatory institutional compliance training ... all coordinators are required to successfully administer all protocol elements to at least three volunteer practice subjects'"
+- id: slot-024
+  verdict: weak
+  evidence: "line 3368 'data collected using optical coherence tomography (OCT), an imaging method using lasers ...' supports file_collections[4].description; the receipt is on the whole entry, and file_count 56478, total_bytes 1317625293027 and the four-device list are not in this passage nor receipted elsewhere in the claim sidecar"
+- id: slot-025
+  verdict: supported
+  evidence: "lines 1378-1390 list ambient temperature, relative humidity, NO/NO2, VOCs, PM1.0/2.5/4/10, 'Multi-spectral light intensity measurements (11)' and 'Custom designed, Karalis Johnson Retina Center, University of Washington'; line 6246 'a custom-designed sensor unit (LeeLab Anura) ... for a period of 10 days ... place the device in an area frequently used'"
+- id: slot-026
+  verdict: supported
+  evidence: "line 960 'not equipped with GPS location monitoring and are not synced with participant-owned devices'; line 1926 'a strict licence agreement and data watermarking for both public and controlled sets'; line 2571 'take no action to remove, obscure, alter or mask such watermarking'. The fourth receipt (line 7301, encrypted servers) attests nothing the value says - privacy_techniques does not mention encrypted storage"
+- id: slot-027
+  verdict: supported
+  evidence: "line 4295 'In cases of survey data, skipped questions or incomplete responses are expected'"
+- id: slot-028
+  verdict: supported
+  evidence: "lines 1878-1881 'The public set is stripped of Protected Health Information (PHI), as defined by the HIPAA ... Privacy Rule via the Safe Harbor method'; line 2890 'No identifiers were collected so no active de-identification was necessary but we checked that no identifiable data per US HIPAA were present'"
+- id: slot-029
+  verdict: supported
+  evidence: "line 3140 'clinical data collected through REDCap, including blood/urine lab values and survey data. Each CSV file in this directory is a one-to-one mapping to the OMOP CDM tables'; dqd_omop.json at lines 3197-3198"
+- id: slot-030
+  verdict: supported
+  evidence: "line 5414 'ethicalReview: Camille Nebeker, Debra Mathews, Kadija Ferryman, Nicholas Evans'; line 1943 'Through engagement with the Native Biodata Consortium, this project will provide a co-learning opportunity for understanding challenges specific to AI/AN communities'"
+- id: slot-031
+  verdict: bundle_supports
+  evidence: "line 2899 'The public version of the dataset can only be used for type 2 diabetes related research'; line 2985 'Agreeing to use the data only for type 2 diabetes related research'"
+- id: slot-032
+  verdict: exempt_by_nature
+  evidence: "boolean inferred from the object's own structure; the split itself is stated at line 4420 ('recommended data splits ... 70%/15%/15% ... training/validation/testing')"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "lines 1186-1188 'stored and shared using FAIRhub as AI-ready which enables immediate AI/ML research without reformatting and preprocessing'; lines 1929-1930 'Preparing and sharing AI-ready datasets can rapidly become time consuming and difficult for data-collecting researchers'"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "line 741 '%' is the unit entry for HbA1c in the BMJ laboratory table (whole-blood units column, in the order HbA1c, WBC, RBC, Hb, Hct, MCV, MCH, MCHC, RDW at lines 741-757, matching the test list at lines 612-628)"
+- id: slot-035
+  verdict: bundle_supports
+  evidence: "line 2729 'Version 1.0.0 / 10.60775/fairhub.1 / May 3, 2024'; line 4196 'the first version of the dataset contains data from 204 participants'; line 1203 'publicly accessible data set from pilot data collection was made available in May 2024'; readme changelog row (line 4599) 'Processing | custom / ad hoc | automated + custom'"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "line 4295 'In cases of imaging data, patient uncooperation, noise ... system malfunction, and data transfer failures are expected'; line 4327 (Optomed) 'the quality of the images vary from patient to patient and within the same patient' and (FLIO) 'exposes patients to uncomfortable levels of light, it is kept to be performed as the last modality ... patients may not be at their best possible compliance'"
+- id: slot-037
+  verdict: exempt_by_nature
+  evidence: "enum term chosen by the record; the version succession it encodes is stated at line 4196 (204 -> 1067 -> 2280 across versions) and lines 2726-2729 (v2.0.0 / fairhub.2)"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "line 2841 'doi: 10.60775/fairhub.3' and line 4538 'The dataset DOI is https://doi.org/10.60775/fairhub.3'; the value is that DOI in CURIE form"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "line 3002 'funderName: National Institutes of Health'; line 1533 'supported by National Institutes of Health grants OT2OD032644, P30DK035816, and UL1TR003096'"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "line 4420 'data splits into proportions (70%/15%/15%) ... training/validation/testing where the validation and test sets are balanced as well as possible for sex, race/ethnicity and diabetes status'; line 2187 'designed to permit downstream pseudotime manifold analysis'"
+- id: slot-041
+  verdict: not_in_bundle
+  evidence: "the only archival statement (line 4300) answers healthsheet Q10 for docs.aireadi.org and says nothing about archival versions of the CDS specification; no line states that the CDS spec is not archived"
+- id: slot-042
+  verdict: exempt_by_nature
+  evidence: "a Bridge2AI standards vocabulary term chosen to classify the instance, of a kind no passage can state; the topic it encodes (type 2 diabetes) is stated at lines 2187 and 4223. The term id itself appears nowhere in the bundle"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "line 773 '4.0-6.0' is the HbA1c entry in the BMJ table's reference-range column (order HbA1c 4.0-6.0, WBC 3.4-10.8, RBC 3.77-5.80 at lines 773-777); the record's notes correctly label it a laboratory reference range"
+- id: slot-044
+  verdict: bundle_supports
+  evidence: "lines 1717-1719 'AI-READI: rethinking AI data collection, preparation and sharing in diabetes research and beyond'; line 1870 'Volume 6 | December 2024 | 2210-2212'; line 1570 '2024;6:2210-2'; DOI at line 5406"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "readme (line 4599) 'Suggested split ... included in the participants.tsv file' with column headers Train / Val / Test; line 4420 'training/validation/testing'"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "line 1892 'https://zenodo.org/communities/aireadi; https://github.com/AI-READI'"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "lines 1006-1010 'REDCap is used for collecting patient-reported data from questionnaires and the following clinical data from the visit: medications assessment, vitals, visual acuity, contrast sensitivity, monofilament test results and CBC test results'; line 5444 'The exact forms used for data collection in REDCap are available'"
+- id: slot-048
+  verdict: not_in_bundle
+  evidence: "'mg/dL' occurs only at lines 633-651 as units of blood/urine chemistry in the BMJ laboratory table; no passage gives a unit for Dexcom G6 CGM glucose (lines 653-657 of the record and bundle line 6054 describe the device without a unit)"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "lines 1257-1267 'Spectralis HRA optical coherence tomography (OCT) and ... (OCTA) / Optic Nerve Head - Radial Circle - High Resolution (OCT) / Posterior Pole Macula - HR - 61 lines (OCT) / Macula - 20x20 - HS - 512 lines (OCTA)'; image count 6 at line 1297"
+- id: slot-050
+  verdict: inferred
+  evidence: "the bundle says REDCap is the collection tool (lines 1006-1010) and that the REDCap forms are available (line 5444), but no line states the raw data format as 'REDCap exports'; the value follows from those lines rather than being stated"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "line 1534 'OT2OD032644, P30DK035816, and UL1TR003096'; line 2005 'grants OT2OD032644 and P30 DK035816'"
+- id: slot-052
+  verdict: bundle_supports
+  evidence: "line 3064 'standardName: Clinical Data Structure (CDS) v0.1.1'; line 2985 'Accessing the dataset requires ... Login in through a verified ID system ... Agreeing to the license terms'"
+- id: slot-053
+  verdict: bundle_supports
+  evidence: "line 2890 'No identifiers were collected so no active de-identification was necessary but we checked that no identifiable data per US HIPAA were present in the data'; readme (line 4599) 'Each participant folder is named after the participant's ID number used in the study'"
+- id: slot-054
+  verdict: bundle_supports
+  evidence: "lines 2685 'This version of the dataset is no longer accessible', 2703-2704 '2.01 TB / 165,051 Files', 2726 'Version 2.0.0 / 10.60775/fairhub.2 / Nov 8, 2024', 4196 'a total of 1067 participants'"
+- id: slot-055
+  verdict: bundle_supports
+  evidence: "lines 1319-1329 'Exported in .fda file format; converted to DICOM for the data set' (device export column of the BMJ device table); 'instrument export' is the record's category label for that"
+- id: slot-056
+  verdict: still_supported
+  evidence: "the receipted passage (c011, line 2333: 'The data held under controlled access include 5-digit zip code, sex, race, ethnicity, genetic sequencing data, past health records, medications, and traffic and accident reports') now lives in sensitive_elements[0].notes, which lists the same items for the controlled-access tier; the meaning is unchanged"
+- id: rule-01
+  verdict: violated
+  evidence: "variables[0].unit 'mg/dL' has no CGM unit in the bundle (slot-048); raw_data_sources[1].raw_data_format 'REDCap exports' is inferred (slot-050); external_resources[4].archival false is stated nowhere (slot-041); version_access.version_details asserts a v1.0.0 FAIRhub page the bundle lacks (slot-020). Omission was followed elsewhere (confidentiality_level, hipaa_compliant left empty per regulatory_restrictions.source_caveats)"
+- id: rule-02
+  verdict: followed
+  evidence: "creators[0].source_caveats records the UW vs Washington University in St. Louis affiliation conflict without resolving it; subpopulations[0].source_caveats represents both the healthsheet 'No' and the README counts; human_subject_research.source_caveats carries both IRB readings"
+- id: rule-03
+  verdict: followed
+  evidence: "id doi:10.60775/fairhub.3, version 3.0.0 and instances[0].counts 2280 are held in both records; the report states the referent only in passing (section 2.10: the controlled tier 'is not the referent this record selected') rather than as a declared choice, but the choice is consistent"
+- id: rule-04
+  verdict: followed
+  evidence: "no density target is visible: enum slots confidentiality_level and hipaa_compliant were removed when no bundle value mapped (regulatory_restrictions.source_caveats), and was_inferred_derived was left unset (acquisition_methods[0].source_caveats)"
+- id: rule-05
+  verdict: violated
+  evidence: "distribution_dates[0].release_dates (multivalued) holds one string collapsing the v1.0.0, v2.0.0 and v3.0.0 release dates; version_access.versions_available (multivalued) holds one string collapsing three versions. external_resources and funders were correctly split"
+- id: rule-06
+  verdict: violated
+  evidence: "regulatory_restrictions.regulatory_restrictions[0] 'The dataset documentation answers questions about export controls ... by referring to the license' records where the answer lives rather than the answer; existing_uses[0].examples and use_repository[0].repository_details are 'None ... answers with No' statements of absence"
+- id: rule-07
+  verdict: violated
+  evidence: "distribution_formats[0].format 'Full directory tree organized per the CDS v0.1.1, distributed through the FAIRhub platform after login and license acceptance' carries the access route in the format field - the rule's own example; the schema describes format as 'File format of the distribution when no exact IANA media type applies'"
+- id: rule-08
+  verdict: violated
+  evidence: "creators[0] leaves Creator.name empty while the creator's name ('AI-READI Consortium', per FAIRhub DataCite record) is stated only in creators[0].notes; the object carries affiliations and principal_investigator but not the field that names the creator"
+- id: rule-09
+  verdict: followed
+  evidence: "id doi:10.60775/fairhub.3, version_access.latest_version_doi doi:10.60775/fairhub.3, creators[0].affiliations[0].id ROR:01yc7t268, data_topic B2AI_TOPIC:43 are CURIEs; publisher https://fairhub.io/ uses the uri fallback where no prefix covers FAIRhub; doi slot bare; access_urls a URL"
+- id: rule-10
+  verdict: followed
+  evidence: "ROR:01yc7t268 is at bundle line 2978 (managingOrganizationIdentifierValue), ORCID 0000-0002-7452-1648 at line 4645, ROR 01cwqze88 at line 3003; no registry identifier in the record is absent from the bundle"
+- id: rule-11
+  verdict: followed
+  evidence: "the only minted identifiers are subsets[*].id fragments on the attested DOI (doi:10.60775/fairhub.3#split-train etc.); no invented prefix; persons are named, not given fragment ids"
+- id: rule-12
+  verdict: violated
+  evidence: "record prose uses British spellings: 'programme' (purposes[2].response, collection_notifications[0]), 'tumour' and 'oedema' (description, data_collectors[3]), 'centred' (collection_mechanisms[10]), 'metres' (collection_mechanisms[12], variables[5]), 'colour' (file_collections[6].description), 'enrolment' (collection_timeframes[0].source_caveats)"
+- id: rule-13
+  verdict: followed
+  evidence: "collection_timeframes[0].source_caveats names the tier-1 FAIRhub and tier-3 BMJ values and says the higher-ranked source is used; license_and_use_terms.source_caveats records tier-1 rightsName vs tier-2 license title and which was preferred; creators[0].source_caveats declines to decide between equal-rank sources"
+- id: rule-14
+  verdict: violated
+  evidence: "subsets[0..2].id (#split-train, #split-validation, #split-test) are referenced by no other value: splits[0].notes points at 'the subsets slot', not at the fragments, so the identifiers are labels nothing uses. DataSubset.id is required by the schema, which forces an id, but the rule's condition (another value must point at the part) is not met"
+- id: rule-15
+  verdict: followed
+  evidence: "provenance receipts block: chunks 28/28 reviewed, snippets 138/147 verified, one entry per marker with status keys; every nothing_relevant entry carries a reason (chunk-c001..c026 above)"
+- id: rule-16
+  verdict: followed
+  evidence: "related_datasets[*].target_dataset (string) hold identifiers doi:10.60775/fairhub.2 and .1; creators[0].principal_investigator, data_governance.committee_contact and ethical_reviews[1].contact_person are names, not objects"
+notes: >-
+  Pack lists no gaps. Chunk c023's agent_reason names FLIO/OCT/OCTA/photography but the span also opens the CGM subcrate (lines 6044-6116); nothing there is missing from the record, so the verdict stands.
+  Entry-level receipts (slot-006, slot-024, slot-015) attest one field of an object; the counts and ids in those file_collections entries have no leaf receipt in the claim sidecar - a pattern worth a validator check (entry receipt whose snippet matches only the description leaf).
+  slot-026's c027 receipt (line 7301, encrypted servers) is verbatim but bears on nothing in privacy_techniques; counted under supported because the other three receipts carry the value.
+  slot-008: the BMJ sentence's 'respectively' pairs T2DM with R73.09 and pre-diabetes with E11.X; the record's glosses correct that from outside knowledge. Not counted as misread because the slot's question (source description) is answered.
+  slot-042/slot-037: enum and vocabulary terms graded exempt_by_nature; if the reviewer protocol prefers such terms under not_in_bundle, two verdicts move.
