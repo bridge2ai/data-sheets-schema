@@ -50,7 +50,9 @@ class Pack(unittest.TestCase):
         (full_dir / "P_d4d.yaml").write_text(yaml.safe_dump(FULL))
         (core / "P_d4d_core.yaml").write_text("id: x\n")
         md5 = hashlib.md5(BUNDLE.encode()).hexdigest()
-        (core / "P_coverage_receipt.yaml").write_text(yaml.safe_dump(_receipt(md5)))
+        rec = _receipt(md5)          # drop two receipts so the record has receiptless leaves
+        rec["chunks"][1]["extracted"] = [p for p in rec["chunks"][1]["extracted"] if p["slot"] not in ("title", "keywords")]
+        (core / "P_coverage_receipt.yaml").write_text(yaml.safe_dump(rec))
         instr = tmp / "instruction.md"; instr.write_text(INSTRUCTION)
         prov = core / "P_provenance.yaml"
         prov.write_text("# header\n" + yaml.safe_dump({
@@ -72,12 +74,18 @@ class Pack(unittest.TestCase):
                 kinds[i["kind"]] = kinds.get(i["kind"], 0) + 1
             self.assertEqual(kinds["chunk_nothing_relevant"], 2)          # c001, c003 in the fixture receipt
             self.assertEqual(kinds["rule"], 3)
+            # receiptless from the record and receipt themselves, not the record's list (#790)
+            self.assertEqual(kinds["slot_receiptless"], p1["counts"]["receiptless_slots_total"])
             self.assertEqual(kinds["slot_receiptless"], 2); self.assertEqual(kinds["slot_reshaped"], 1)
+            self.assertEqual(sorted(i["slot"] for i in p1["items"] if i["kind"] == "slot_receiptless"), ["keywords", "title"])
+            self.assertEqual(p1["counts"]["sampled"]["receiptless"], kinds["slot_receiptless"])
+            self.assertTrue(Path(p1["instruction"]["path"]).read_text().startswith("Generate paired"))
+            self.assertNotIn("sha256", p1["provenance"]); self.assertEqual(len(p1["bundle"]["chunks"]), 3)
             self.assertGreaterEqual(kinds["slot_receipted"], 1)
             chunk = next(i for i in p1["items"] if i["id"] == "chunk-c003")
             self.assertEqual(chunk["source"], "b.txt"); self.assertEqual(chunk["agent_reason"], "references only")
             slot = next(i for i in p1["items"] if i["kind"] == "slot_receipted")
-            self.assertIn("snippet", slot); self.assertIn("lines", slot)
+            self.assertIn("snippet", slot["receipts"][0]); self.assertIn("lines", slot["receipts"][0]); self.assertIn("value", slot)
             self.assertIn("sha256 matches", p1["instruction"]["basis"]); self.assertEqual(p1["gaps"], [])
             # a different sample size changes the pack; the same one does not
             self.assertNotEqual(rp.build_pack(prov, instr, {"receipted_slots": 1})["items"], p1["items"])
@@ -116,7 +124,14 @@ class Check(unittest.TestCase):
                   "answer_for_unknown_item", "review_of_another_pack"):
             self.assertIn(k, kinds, k)
         self.assertEqual(b["unanswered"], ["rule-01"])
-        self.assertEqual(rp.check_review(self.PACK, {"items": [{"id": "rule-01", "verdict": "cannot_tell", "evidence": "no schema"}]})["cannot_tell"], 1)
+        nohash = rp.check_review(self.PACK, {"items": [{"id": "rule-01", "verdict": "cannot_tell", "evidence": "no schema"}]})
+        self.assertEqual(nohash["cannot_tell"], 1)
+        self.assertIn("review_without_pack_hash", [f["kind"] for f in nohash["findings"]])      # #792
+        # every non-affirmative, non-cannot_tell verdict counts as adverse (#792/#793)
+        for kind, verdicts in rp.VERDICTS.items():
+            for v in verdicts:
+                self.assertEqual(v in rp.ADVERSE[kind], v not in rp.AFFIRMATIVE and v != "cannot_tell", (kind, v))
+        self.assertIn("weak", rp.ADVERSE["slot_receipted"]); self.assertIn("inferred", rp.ADVERSE["slot_receiptless"])
 
 
 if __name__ == "__main__":

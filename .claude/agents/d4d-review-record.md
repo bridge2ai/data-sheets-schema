@@ -27,18 +27,25 @@ poetry run d4d review pack --label {LABEL} --project {PROJECT} [--method {METHOD
 ```
 
 and read `data/d4d_concatenated/{METHOD}_core/{LABEL}/{PROJECT}_review_pack.yaml`.
-It names the provenance record, the instruction (re-rendered from the
-record's spec, or the launcher's file — the pack says which and whether the
-hash matches), the bundle and its chunk manifest, the full and core records,
-the reconciliation report, the coverage receipt, and a list of **items**,
-each with a `kind`, a pointer and a question. The pack's `verdicts` block is
-the closed vocabulary per kind. If the pack lists `gaps`, say so in the
-review; do not fill a gap from what you happen to know.
+It names the provenance record, the instruction — written beside the pack
+as `{PROJECT}_review_instruction.md` (re-rendered from the record's spec,
+or the launcher's file; the pack's `instruction.basis` says which and
+whether the hash matches) — the bundle with its line count and every
+chunk's span, the full and core records, the reconciliation report, the
+coverage receipt and the claim-receipt sidecar, the schema files whose slot
+descriptions the `slot_receipted` question refers to (`pack.schema`), and a
+list of **items**, each with a `kind`, a pointer, the record's value where
+one applies, and a question. The pack's `verdicts` block is the closed
+vocabulary per kind, and `counts` says how large each population is and
+how many were sampled. If the pack lists `gaps`, say so in the review; do
+not fill a gap from what you happen to know.
 
-Read the instruction in full first: its rules are the standard for the
-`rule` items, and its evidence boundary binds you too — **do not open any
-generated record other than this run's own pair, from any label or arm.**
-The bundle is the only source of dataset facts.
+Read the instruction file in full first: its rules are the standard for
+the `rule` items, and its evidence boundary binds you too — **do not open
+any generated record other than this run's own pair, from any label or
+arm**, and do not open any other run's `_review.yaml`. This run's own
+receipt, claim sidecar, pack and report are yours to read. The bundle is
+the only source of dataset facts.
 
 ## Procedure, per item
 
@@ -51,18 +58,24 @@ The bundle is the only source of dataset facts.
   turns on something outside the bundle.
 - `slot_receipted` — open the cited chunk, find the snippet, read the
   passage around it, then read the value at the slot path in the full
-  record and the slot's description in the schema digest. `supported` when
+  record and the slot's description in the schema files the pack names
+  (`pack.schema`). `supported` when
   the passage says what the value says in the sense the slot asks;
-  `misread` when the passage is real but the value misreads it (wrong
-  scope, wrong number, wrong entity, historical read as current);
-  `unsupported` when the snippet is there but does not bear on the value
-  (laundering); `cannot_tell` otherwise.
+  `weak` when the passage is real and on topic but does not answer the
+  slot's question (a bare repository name receipting a de-identification
+  method; a tagline receipting a name); `misread` when the passage is real
+  but the value misreads it (wrong scope, wrong number, wrong entity,
+  historical read as current); `unsupported` when the snippet is there but
+  does not bear on the value (laundering); `cannot_tell` otherwise.
 - `slot_receiptless` — search the bundle for the value (grep is allowed
   here: you are re-finding, not reading for the first time). `bundle_supports`
-  with the line found; `not_in_bundle` when it is not there — the rules say
-  such a value should not be in the record; `exempt_by_nature` for a value
-  that has no passage by its kind (a normalised date, a boolean the record
-  infers from structure, a minted fragment); `cannot_tell` otherwise.
+  with the line found; `inferred` when no passage states it but it follows
+  from lines that do — name them; the rules count that as an inference the
+  record should not carry, so it is adverse, and it is not a fabrication;
+  `not_in_bundle` when nothing in the bundle bears on it; `exempt_by_nature`
+  for a value that has no passage by its kind (a normalised date, a boolean
+  the record infers from structure, a minted fragment); `cannot_tell`
+  otherwise.
 - `slot_reshaped` — read the value at the reshaped location and the
   receipted passage. `still_supported` or `changed_meaning`.
 - `rule` — judge the record against the rule's text. `followed` with the

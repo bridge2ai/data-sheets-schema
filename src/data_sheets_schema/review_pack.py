@@ -30,11 +30,24 @@ import yaml
 #: The closed verdict vocabulary a review must use, per item kind.
 VERDICTS = {
     "chunk_nothing_relevant": ("confirmed", "missed_content", "cannot_tell"),
-    "slot_receipted": ("supported", "misread", "unsupported", "cannot_tell"),
-    "slot_receiptless": ("bundle_supports", "not_in_bundle", "exempt_by_nature", "cannot_tell"),
+    # `weak`: the snippet is verbatim and the passage is real, but it does
+    # not answer the slot's question (a bare repository name receipting a
+    # de-identification method) — #793.
+    "slot_receipted": ("supported", "weak", "misread", "unsupported", "cannot_tell"),
+    # `inferred`: no passage states it; it follows from stated lines. The
+    # rules say such a value is an inference the record should not carry,
+    # so it is adverse, but it is not the same finding as a fabrication.
+    "slot_receiptless": ("bundle_supports", "inferred", "not_in_bundle", "exempt_by_nature", "cannot_tell"),
     "slot_reshaped": ("still_supported", "changed_meaning", "cannot_tell"),
     "rule": ("followed", "violated", "not_applicable", "cannot_tell"),
 }
+#: The verdicts that count against the record, per kind — derived, so a
+#: verdict added above cannot be silently uncounted (#792).
+AFFIRMATIVE = {"confirmed", "supported", "bundle_supports", "exempt_by_nature", "still_supported",
+               "followed", "not_applicable"}
+ADVERSE = {k: tuple(v for v in vs if v not in AFFIRMATIVE and v != "cannot_tell") for k, vs in VERDICTS.items()}
+SCHEMA_FILES = ("src/data_sheets_schema/schema/data_sheets_schema_all.yaml (class Dataset; slot descriptions)",
+                "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml (class CoreDataset)")
 #: What a reviewer cannot resolve from the pack alone is its own verdict, not
 #: a pass: the pack reports how many, like UNMEASURABLE.
 CANNOT_TELL = "cannot_tell"
@@ -54,6 +67,7 @@ def record_paths(provenance: Path) -> dict[str, Path]:
     p["claims"] = core_dir / f"{p['project']}_receipts.yaml"
     p["review"] = core_dir / f"{p['project']}_review.yaml"
     p["pack"] = core_dir / f"{p['project']}_review_pack.yaml"
+    p["instruction"] = core_dir / f"{p['project']}_review_instruction.md"
     return p
 
 
@@ -125,6 +139,18 @@ def rules_from(instruction: str) -> list[dict[str, str]]:
     return out
 
 
+def _value_at(record: Any, path: str, limit: int = 300) -> Any:
+    """The record's value at a slot path, truncated for the pack (#791)."""
+    cur = record
+    for part in re.findall(r"[\w]+|\[\d+\]", path):
+        try:
+            cur = cur[int(part[1:-1])] if part.startswith("[") else cur[part]
+        except (KeyError, IndexError, TypeError):
+            return None
+    s = cur if isinstance(cur, (int, float, bool)) or cur is None else str(cur)
+    return s[:limit] + "…" if isinstance(s, str) and len(s) > limit else s
+
+
 def build_pack(provenance: Path, instruction_file: Path | None = None,
                sample: dict[str, int] | None = None) -> dict[str, Any]:
     from data_sheets_schema.backfill_checks import _split_header
@@ -140,16 +166,25 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     rng = random.Random(seed)
 
     pack: dict[str, Any] = {
-        "pack_version": 1,
+        "pack_version": 2,
         "run": {"label": run.get("label"), "project": run.get("project"), "method": run.get("method"),
                 "condition": (((record.get("prompts") or {}).get("request") or {}).get("spec") or {}).get("condition")},
-        "provenance": {"path": str(provenance), "sha256": _sha(provenance)},
+        # The path only: `review check --write` adds a block to this record,
+        # so a hash of it here would make every re-run pack a different pack
+        # (#792). The request hash below is what pins the run.
+        "provenance": {"path": str(provenance),
+                       "request_sha256": ((record.get("prompts") or {}).get("request") or {}).get("sha256")},
         "seed": seed,
+        "schema": list(SCHEMA_FILES),
         "gaps": [],
     }
 
     text, basis = instruction_text(record, instruction_file)
-    pack["instruction"] = {"basis": basis, "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest() if text else None,
+    ipath = paths["instruction"]
+    if text:
+        ipath.write_text(text, encoding="utf-8")            # the reviewer reads the instruction, not its hash (#791)
+    pack["instruction"] = {"basis": basis, "path": str(ipath) if text else None,
+                           "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest() if text else None,
                            "chars": len(text) if text else 0}
     pack["rules"] = rules_from(text) if text else []
     if not text:
@@ -162,7 +197,8 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                       "manifest": str(manifest_path) if manifest_path else None}
     pack["records"] = {"full": str(paths["full"]), "core": str(paths["core"]),
                        "report": str(paths["report"]),
-                       "receipt": str(paths["receipt"]) if paths["receipt"].exists() else None}
+                       "receipt": str(paths["receipt"]) if paths["receipt"].exists() else None,
+                       "claims": str(paths["claims"]) if paths["claims"].exists() else None}
 
     # --- chunks marked nothing_relevant: every one, with its lines
     items: list[dict[str, Any]] = []
@@ -170,6 +206,8 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         receipt = load_receipt(paths["receipt"])
         manifest = load_manifest(manifest_path)
         span = {c["id"]: c for c in manifest["chunks"]}
+        pack["bundle"]["lines"] = manifest.get("bundle_lines")
+        pack["bundle"]["chunks"] = [{"id": c["id"], "lines": c["lines"], "source": c["source"]} for c in manifest["chunks"]]
         for e in receipt.get("chunks") or []:
             if e.get("status") == "nothing_relevant" and e.get("id") in span:
                 c = span[e["id"]]
@@ -185,19 +223,27 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         receipted = sorted(claims["slots"])
         rng.shuffle(receipted)
         for slot in receipted[: sample["receipted_slots"]]:
-            r0 = claims["slots"][slot]["receipts"][0]
+            rs = claims["slots"][slot]["receipts"]
             items.append({"id": f"slot-{len(items) + 1:03d}", "kind": "slot_receipted", "slot": slot,
-                          "chunk": r0["chunk"], "lines": span.get(r0["chunk"], {}).get("lines"),
-                          "snippet": r0["snippet"],
-                          "question": "Read the passage the snippet sits in. Does it support the record's value at "
+                          "value": _value_at(full, slot),
+                          "receipts": [{"chunk": r["chunk"], "lines": span.get(r["chunk"], {}).get("lines"),
+                                        "snippet": r["snippet"]} for r in rs],
+                          "question": "Read the passage each snippet sits in. Does it support the record's value at "
                                       "this slot, as the slot's description asks, and is the value the right reading?"})
-        without = list(((rc.get("slots") or {}).get("without_receipt")) or [])
+        # The receiptless set from the receipt and the record themselves,
+        # not the record's 50-entry walk-order prefix (#790): every populated,
+        # non-exempt leaf no receipt path covers, sorted, then sampled.
+        from data_sheets_schema.receipts import _covers, exempt, populated_leaves
+        record_id = full.get("id") if isinstance(full.get("id"), str) else None
+        without = sorted(p for p, v in populated_leaves(full)
+                         if not exempt(p, v, record_id) and not any(_covers(r, p) for r in claims["slots"]))
         rng.shuffle(without)
         for slot in without[: sample["receiptless_slots"]]:
             items.append({"id": f"slot-{len(items) + 1:03d}", "kind": "slot_receiptless", "slot": slot,
-                          "question": "No receipt names a passage for this value. Find one in the bundle or "
-                                      "conclude the bundle does not state it (then it should not be there), or "
-                                      "that the slot is of a kind that has no passage."})
+                          "value": _value_at(full, slot),
+                          "question": "No receipt names a passage for this value. Find one in the bundle, or "
+                                      "conclude it is inferred from stated lines, or that the bundle does not "
+                                      "state it, or that the slot is of a kind that has no passage."})
         reshaped = list(((rc.get("slots") or {}).get("reshaped_by_reconcile")) or [])
         for slot in reshaped[: sample["reshaped_slots"]]:
             items.append({"id": f"slot-{len(items) + 1:03d}", "kind": "slot_reshaped", "slot": slot,
@@ -205,9 +251,10 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                                       "at the reshaped location still say what the receipted passage says?"})
         pack["counts"] = {"nothing_relevant_chunks": sum(1 for i in items if i["kind"] == "chunk_nothing_relevant"),
                           "receipted_slots_total": len(claims["slots"]),
-                          "receiptless_slots_total": len(((rc.get("slots") or {}).get("without_receipt")) or [])
-                          + int(((rc.get("slots") or {}).get("without_receipt_truncated")) or 0),
-                          "reshaped_slots_total": len(reshaped)}
+                          "receiptless_slots_total": len(without),
+                          "reshaped_slots_total": len(reshaped),
+                          "sampled": {"receipted": min(sample["receipted_slots"], len(claims["slots"])),
+                                      "receiptless": min(sample["receiptless_slots"], len(without))}}
     else:
         pack["gaps"].append("no coverage receipt or chunk manifest: chunk and slot items cannot be built")
         pack["counts"] = {}
@@ -249,17 +296,19 @@ def check_review(pack: dict[str, Any], review: dict[str, Any]) -> dict[str, Any]
             findings.append({"kind": "verdict_without_evidence", "id": a["id"]})
         answered[a["id"]] = a
     unanswered = [i for i in by_id if i not in answered]
-    if review.get("pack_sha256") and pack.get("_sha256") and review["pack_sha256"] != pack["_sha256"]:
+    if not review.get("pack_sha256"):
+        findings.append({"kind": "review_without_pack_hash"})      # which pack was answered? (#792)
+    elif pack.get("_sha256") and review["pack_sha256"] != pack["_sha256"]:
         findings.append({"kind": "review_of_another_pack", "pack": pack["_sha256"], "review": review["pack_sha256"]})
     by_kind: dict[str, dict[str, int]] = {}
     for iid, a in answered.items():
         k = by_id[iid]["kind"]; d = by_kind.setdefault(k, {})
         d[str(a.get("verdict"))] = d.get(str(a.get("verdict")), 0) + 1
-    adverse = sum(v for k, d in by_kind.items() for verdict, v in d.items()
-                  if verdict in ("missed_content", "misread", "unsupported", "not_in_bundle", "changed_meaning", "violated"))
+    adverse = sum(v for k, d in by_kind.items() for verdict, v in d.items() if verdict in ADVERSE.get(k, ()))
     cannot = sum(d.get(CANNOT_TELL, 0) for d in by_kind.values())
     return {"checked": True, "items_total": len(by_id), "items_answered": len(answered),
-            "unanswered": unanswered[:50], "by_kind": by_kind, "adverse": adverse, "cannot_tell": cannot,
+            "unanswered": unanswered[:50], "unanswered_truncated": max(0, len(unanswered) - 50) or None,
+            "by_kind": by_kind, "adverse": adverse, "cannot_tell": cannot,
             "findings": findings,
             "summary": (f"items {len(answered)}/{len(by_id)} answered · {adverse} adverse · {cannot} cannot_tell"
                         + (f" · {len(findings)} finding(s)" if findings else ""))}
