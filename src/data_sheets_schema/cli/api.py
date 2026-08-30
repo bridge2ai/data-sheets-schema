@@ -296,12 +296,15 @@ def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
 @click.option("--canary-baseline", default=None,
               help="label prefix of the arm the first run is held against; it "
                    "must be no worse on any check or the sweep stops (#579)")
+@click.option("--branch-guard/--no-branch-guard", default=True, show_default=True,
+              help="refuse a run whose label is tracked on a git ref but absent from disk (#795); "
+                   "--no-branch-guard for a run that was removed on purpose")
 @click.option("--no-canary-gate", is_flag=True,
               help="fan out even if the first run regresses against the "
                    "baseline; the comparison is still printed")
 @click.option("--yes", is_flag=True)
 def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
-              continue_on_error, canary_baseline, no_canary_gate, yes):
+              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard):
     """Run a sweep of projects x replicates, reporting cumulative cost.
 
     Each run resumes independently, so a sweep interrupted partway costs only
@@ -339,6 +342,15 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
     # phase snapshots and a progress file under the same names, so the
     # survivor's record can be a mixture of both runs while its provenance
     # describes neither. That happened on 2026-08-11.
+    # A run that is tracked on another branch but not on disk must not be
+    # generated again under its label (#795): the checkout that removed it
+    # from the working tree is the only reason it looks absent.
+    from data_sheets_schema import run_guard
+    tracked = run_guard.tracked_core_dirs() if branch_guard else {}
+    found = run_guard.runs_on_other_refs([(s.label, s.method) for s in specs], tracked) if branch_guard else []
+    if found:
+        raise click.ClickException(run_guard.message(found))
+
     from data_sheets_schema import run_lock
     try:
         lock_path = run_lock.acquire(label_prefix, names)
@@ -352,6 +364,17 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
     gating = bool(canary_baseline) and not no_canary_gate
     for i, s in enumerate(specs, 1):
         click.echo(f"\n[{i}/{len(specs)}] {s.project} {s.label}")
+        # Again, per run (#799): the checkout that empties the working tree
+        # can happen while this batch is live, and the one-shot check above
+        # has already passed by then. Outside the per-run try, so the refusal
+        # stops the batch rather than counting as one failed run.
+        if branch_guard:
+            late = run_guard.runs_on_other_refs([(s.label, s.method)], run_guard.tracked_core_dirs())
+            if late:
+                # Stop the loop and raise after the lock is released, as the
+                # canary stop does: the release below is not in a finally.
+                canary_stop = run_guard.message(late)
+                break
         try:
             res = execute(s)
             spent_in += sum(u["input_tokens"] or 0 for u in res["usage"])
