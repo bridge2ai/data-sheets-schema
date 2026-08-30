@@ -1,0 +1,107 @@
+{
+  "findings": [
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators",
+      "issue": "Slot omitted although the bundle clearly supports it. The FAIRhub dataset description declares creator: [{creatorName: \"AI-READI Consortium\", nameType: \"Organizational\"}], and the study description and RO-Crate name Aaron Lee as study/principal investigator with ORCID 0000-0002-7452-1648 and a stated affiliation, plus a named Writing Committee. Only the scalar `created_by: AI-READI Consortium` carries this, so the declared Creator structure (affiliations, principal_investigator, credit_roles) is unused."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "funders",
+      "issue": "Shape nonconformance: FundingMechanism declares `grants` (Grant[]), but the award identifier OT2OD032644, the award title \"Bridge2AI: Salutogenesis Data Generation Project\", the award URI, the award amount (USD 5,026,499) and the project period are all written as prose inside `notes`. The bundle attests each of these as discrete values (fundingReference.awardNumber, awardTitle, awardURI; NIH RePORTER fields), so they belong in the declared structured field rather than free text."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "updates.update_details",
+      "issue": "Internal/factual inaccuracy against the bundle. The README changelog table records \"+1 image device\" for the year 2 data and \"+3 image device\" for the year 3 data (four device additions in total across the two increments relative to the v1.0.0 pilot). The record states \"three additional imaging devices had been added across the year 2 and year 3 data relative to the pilot\", collapsing and understating the tabulated change."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "sensitive_elements",
+      "issue": "An attested tier-1 statement is unrepresented and is in tension with the emitted value. The RO-Crate records `rai:personalSensitiveInformation` as [\"EHR\", \"Wearable Monitoring\", \"ECG\", \"Environmental Sensor\", \"Continuous glucose monitor\", \"Wearable accelerometer\"]. The record instead asserts `sensitive_elements_present: false` for the public release on the basis of the healthsheet answer, with no caveat reconciling the two tier-1 sources (unlike the treatment given to publisher, de-identification and sampling disagreements in `source_caveats`)."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "extension_mechanism",
+      "issue": "Supported omission. The healthsheet maintenance section states: \"No, currently there is no mechanism for others to extend or augment the AI-READI dataset outside of those who are involved in the project.\" This answers ExtensionMechanism.extension_details directly and is not represented anywhere in the record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_protection_impacts",
+      "issue": "Supported omission. The healthsheet collection section states: \"No, a data protection impact analysis has not been conducted.\" This answers DataProtectionImpact.impact_details and is not represented."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "regulatory_restrictions.hipaa_compliant",
+      "issue": "Value `compliant` is an inference beyond what the bundle states. The sources attest only that deIdentHIPAA is true, that \"we checked that no identifiable data per US HIPAA were present in the data\", and that licensee storage requires a HIPAA-approved Business Associate Agreement. No source makes a HIPAA compliance determination about the dataset itself."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "regulatory_restrictions.confidentiality_level",
+      "issue": "The RO-Crate states `confidentialityLevel: \"HL7:2N (normal)\"`. The record re-codes this to the schema enum value `restricted` on the basis of the access workflow. The re-coding is disclosed in the sibling `source_caveats`, but the emitted value is a mapping judgment rather than a value the bundle states."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "regulatory_restrictions.other_compliance",
+      "issue": "Source commentary embedded in a content slot: \"No export control regime is named in the source material.\" A statement about what the evidence does not contain belongs in `source_caveats`, not in a field describing the dataset's compliance position."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "external_resources[0].restrictions",
+      "issue": "Mis-slotted content. The `restrictions` list entry mostly describes the resource (\"the dataset is otherwise self-contained but relies on this documentation...\", the per-domain content, the version selector) rather than stating restrictions, and its only restriction content is the negative \"there are no restrictions associated with its use\". Descriptive content belongs in `notes`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "known_biases[1].affected_subsets",
+      "issue": "The multivalued `affected_subsets` list holds a single prose sentence (\"All modalities, because the sampling frame governs cohort composition as a whole.\") rather than named subsets. The explanatory clause duplicates `bias_description` and belongs in `notes`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "variables[Montreal Cognitive Assessment total score].minimum_value",
+      "issue": "`minimum_value: 0.0` is not attested. The bundle states only that the total possible score is 30, that higher numbers represent better performance, that below 24 signals cognitive impairment and that 26 and above is considered normal. The floor of the scale is not given."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "informed_consent.withdrawal_mechanism",
+      "issue": "Declared field left empty although the bundle answers it: participants could withdraw consent at any time and cease participation, with data already shared or used remaining in the dataset, as communicated in the consent document. The content is present under `consent_revocations` but the InformedConsent object's own declared field is unpopulated."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_governance.accountable_organization",
+      "issue": "Declared field omitted although the bundle names the accountable party: Washington University in St. Louis appears as managingOrganization, leadSponsor and license Licensor. The information is present only as prose in `maintainers` and `license_and_use_terms`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "Emitted as the URL https://fairhub.io/ where the FAIRhub dataset description states `publisher: {publisherName: \"FAIRhub\"}` and the RO-Crate (also tier 1) states `publisher: \"AI-READI Consortium\"`. The disagreement is disclosed in top-level `source_caveats`, but the chosen value is a resolver URL for a platform rather than either stated publisher name."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "related_datasets[4].target_dataset",
+      "issue": "`target_dataset` points at https://docs.aireadi.org/, the documentation website, which is not a dataset. The same resource is already recorded under `external_resources`, so the relationship entry adds a non-dataset target to a dataset-relationship slot."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "existing_uses",
+      "issue": "Attested negative not represented: the healthsheet uses section answers \"Has the dataset been used for any tasks already?\" with \"No\", and \"Is there a repository that links to any or all papers or systems that use the dataset?\" with \"No\". Omission is defensible, but the explicit negatives are evidence the record could carry."
+    }
+  ],
+  "summary": "Audited the full record against the declared AI-READI bundle (11 sources, md5 0f3abb51a333555456bedd63891fcd99) and the Dataset schema digest. No fabricated facts and no prior-D4D contamination detected: spot checks of the quantitative claims all reconcile with tier-1 sources (2,280 participants; 356,343 files; 3,815,969,779,678 bytes; per-directory file counts and sizes summing to 356,334 plus nine root metadata files; the 1,576/352/352 split with race, sex and diabetes-status counts each summing to 2,280; DOIs 10.60775/fairhub.1-3 and their release dates; laboratory reference ranges; device makes, models, scan protocols and export formats). Enum usage is clean throughout: all conforms_to_standard, limitation_type, bias_type, collection_type, data_type, relationship_type, data_use_permission, confidentiality_level and hipaa_compliant values are drawn from the permitted sets; identifiers conform to their declared ranges (doi: CURIEs in uriorcurie slots, a bare pattern-matching DOI in the string doi slot, attested ARK identifiers as FileCollection ids, B2AI_TOPIC:43 for data_topic). Source disagreements are handled well: the top-level source_caveats block documents nine conflicts and applies the declared ranking (FAIRhub over BMJ for the collection start date, FAIRhub over Nature Metabolism for de-identification method, 4,000 over 4,600/4,000+ for target enrollment). Seventeen findings, none high. Four are medium: an omitted `creators` list that the bundle plainly supports; award identifiers pushed into `funders[].notes` instead of the declared `grants` field; a misstatement of the changelog device-addition counts in `updates.update_details`; and an unrepresented tier-1 rai:personalSensitiveInformation list that sits in tension with `sensitive_elements_present: false`. The remaining thirteen are low: three supported omissions (extension_mechanism, data_protection_impacts, existing_uses), two declared fields left empty while their content sits in prose elsewhere (informed_consent.withdrawal_mechanism, data_governance.accountable_organization), two inference-heavy regulatory values (hipaa_compliant, confidentiality_level), and six slot-hygiene issues (source commentary in other_compliance, descriptive content in external_resources restrictions, prose in affected_subsets, an unattested MoCA minimum_value, a URL publisher where names are stated, and a non-dataset target_dataset). Repairs belong in the full record; the core record must be re-projected after they land."
+}

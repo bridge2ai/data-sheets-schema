@@ -1,0 +1,666 @@
+bundle_md5: 0f3abb51a333555456bedd63891fcd99
+chunks:
+- id: c001
+  status: nothing_relevant
+  reason: >-
+    Concatenation header, input-directory listing and table of contents for the bundle itself; it
+    describes the assembly of the source files rather than the dataset.
+- id: c002
+  status: extracted
+  extracted:
+  - slot: purposes[0].response
+    snippet: "project on type 2 diabetes mellitus (T2DM) to facilitate"
+  - slot: ethical_reviews[0].reviewing_organization
+    snippet: "of the University of Washington (approval number"
+  - slot: informed_consent[0].consent_obtained
+    snippet: "consent is provided by all participants."
+  - slot: collection_timeframes[0].timeframe_details
+    snippet: "Enrolment began on 18 July 2023 and will continue until"
+  - slot: collection_timeframes[0].source_caveats
+    snippet: "2023. Preliminary data from the pilot enrollment period"
+  - slot: known_limitations[2].limitation_description
+    snippet: "diabetes are exclusionary for participation."
+  - slot: sampling_strategies[0].source_data
+    snippet: "The study base is all patients aged ≥40 years of age who"
+  - slot: sampling_strategies[0].strategies
+    snippet: "had a medical encounter within each health system site"
+  - slot: direct_collection[0].collection_details
+    snippet: "and E11.X, respectively. Patients without diabetes will not"
+  - slot: sampling_strategies[0].why_not_representative
+    snippet: "balanced in race/ethnicity, T2DM severity and biological"
+  - slot: known_biases[0].bias_description
+    snippet: "therefore, there is selection bias"
+  - slot: data_collectors[0].collector_details
+    snippet: "The protocol is performed as a single visit lasting between"
+  - slot: collection_notifications[0].notification_details
+    snippet: "vidually  in  each  pool  are  mailed  a  hardcopy  invitation"
+- id: c003
+  status: extracted
+  extracted:
+  - slot: acquisition_methods[1].acquisition_details
+    snippet: "Eligibility (no type 1 diabetes mellitus or pregnancy), diabetes health status,"
+  - slot: acquisition_methods[1].acquisition_details
+    snippet: "Current Medications with RxNorm codes29"
+  - slot: variables[4].notes
+    snippet: "Severity and outcome predictor of heart"
+  - slot: variables[5].notes
+    snippet: "Marker of myocardial injury"
+  - slot: variables[3].notes
+    snippet: "Indicator of insulin production"
+  - slot: variables[6].notes
+    snippet: "Inflammation marker; risk factor for"
+  - slot: collection_mechanisms[12].mechanism_details
+    snippet: "iPad using the MoCA Duo Application (MoCA Cognition,"
+  - slot: collection_mechanisms[14].mechanism_details
+    snippet: "Photopic letter visual acuity is measured with the"
+  - slot: collection_mechanisms[14].mechanism_details
+    snippet: "Electronic Visual Acuity tester13 (M&S Technology, Niles,"
+  - slot: collection_mechanisms[15].mechanism_details
+    snippet: "paqua, New York)15 using the routine procedure. Mesopic"
+  - slot: collection_mechanisms[13].mechanism_details
+    snippet: "monofilament test11 assessing touch perception on both"
+  - slot: collection_mechanisms[18].mechanism_details
+    snippet: "summarised in table 2. Clinical Laboratory Improvement"
+- id: c004
+  status: extracted
+  extracted:
+  - slot: preprocessing_strategies[0].preprocessing_details
+    snippet: "mapped to applicable data standard formats, such as the"
+  - slot: preprocessing_strategies[0].preprocessing_details
+    snippet: "Data Model for clinical data and the DICOM format for"
+  - slot: maintainers[0].maintainer_details
+    snippet: "called FAIRhub (https://fairhub.io/), a Microsoft Azure"
+  - slot: sensitive_elements[1].sensitivity_details
+    snippet: "fewer requirements for access. The controlled access data"
+  - slot: collection_mechanisms[9].mechanism_details
+    snippet: "how to use these monitoring devices continuously for 10"
+  - slot: participant_privacy[0].privacy_techniques
+    snippet: "concern. These devices do not capture video or audio, are"
+  - slot: participant_privacy[0].privacy_techniques
+    snippet: "not equipped with GPS location monitoring and are not"
+  - slot: preprocessing_strategies[1].preprocessing_details
+    snippet: "All participant images are exported from imaging devices"
+  - slot: preprocessing_strategies[1].preprocessing_details
+    snippet: "sion to a DICOM standard format prior to upload to an"
+  - slot: collection_mechanisms[18].mechanism_details
+    snippet: "Complete blood count analysis"
+  - slot: variables[8].notes
+    snippet: "findings before they leave a visit. Participants are recom-"
+- id: c005
+  status: extracted
+  extracted:
+  - slot: collection_mechanisms[3].mechanism_details
+    snippet: "EIDON widefield truecolor"
+  - slot: collection_mechanisms[4].mechanism_details
+    snippet: "Spectralis HRA optical"
+  - slot: collection_mechanisms[5].mechanism_details
+    snippet: "3D Wide (H) 12×9–512×128 (OCT)"
+  - slot: collection_mechanisms[6].mechanism_details
+    snippet: "Triton DRI OCT"
+  - slot: collection_mechanisms[7].mechanism_details
+    snippet: "Cirrus 5000"
+  - slot: collection_mechanisms[8].mechanism_details
+    snippet: "Fluorescence Lifetime Imaging"
+  - slot: collection_mechanisms[9].mechanism_details
+    snippet: "Blood glucose measurements (mg/dL)"
+  - slot: collection_mechanisms[10].mechanism_details
+    snippet: "Garmin VivoSmart 5 Physical"
+  - slot: collection_mechanisms[11].mechanism_details
+    snippet: "Multi- spectral light intensity"
+  - slot: collection_mechanisms[11].mechanism_details
+    snippet: "Custom designed, Karalis Johnson Retina Center,"
+  - slot: funders[0].notes
+    snippet: "This research is supported by National Institutes of Health grants"
+  - slot: funders[1].grantor
+    snippet: "OT2OD032644, P30DK035816, and UL1TR003096 and Research to Prevent"
+  - slot: known_limitations[2].recommended_mitigation
+    snippet: "Requiring that eligible participants speak, read and under-"
+  - slot: instances[0].counts
+    snippet: "sample size of 4000 persons is the largest publicly acces-"
+- id: c006
+  status: nothing_relevant
+  reason: >-
+    Bibliography of the BMJ Open protocol paper; cited literature and ORCID lines rather than facts
+    about the dataset's content, provenance or terms.
+- id: c007
+  status: extracted
+  extracted:
+  - slot: known_limitations[4].limitation_description
+    snippet: "AI-READI is enrolling 4,000 participants at three study sites over 4 years"
+  - slot: is_deidentified.source_caveats
+    snippet: "The public set is stripped of Protected"
+  - slot: is_deidentified.source_caveats
+    snippet: "Portability and Accountability Act) Privacy Rule via the “Safe Harbor”"
+  - slot: is_deidentified.identifiers_removed
+    snippet: "method, as well as information related to the sex and race/ethnicity of"
+  - slot: participant_privacy[0].anonymization_method
+    snippet: "the participants to prevent stigmatization of findings."
+  - slot: conforms_to
+    snippet: "such as the Clinical Dataset Structure (CDS), a simple and"
+  - slot: participant_privacy[0].privacy_techniques
+    snippet: "system, a strict licence agreement and data watermarking for both"
+  - slot: updates.frequency
+    snippet: "Data are released annually, and each version is"
+  - slot: participant_privacy[0].reidentification_risk
+    snippet: "could facilitate individual-level identification"
+  - slot: funders[0].notes
+    snippet: "OT2OD032644 and P30 DK035816."
+- id: c008
+  status: extracted
+  extracted:
+  - slot: notes
+    snippet: "cloud services needed for the project. We thank Topcon Corporation (Tokyo, Japan),"
+  - slot: notes
+    snippet: "Optomed (Oulu, Finland), iCare World (Raleigh, NC) and Carl Zeiss (Oberkochen, Germany)"
+  - slot: notes
+    snippet: "for loaning their devices for research purposes at no cost. We thank Heidelberg Engineering"
+  - slot: notes
+    snippet: "(Heidelberg, Germany), Dexcom (San Diego, CA) and Garmin (Olathe, KS) for research discounts"
+- id: c009
+  status: extracted
+  extracted:
+  - slot: funders[0].notes
+    snippet: "Project number: 1OT2OD032644-01"
+  - slot: funders[0].notes
+    snippet: "Award amount: 5026499"
+  - slot: funders[0].notes
+    snippet: "Project start: 2022-09-01T00:00:00"
+  - slot: funders[0].notes
+    snippet: "Project end: 2025-08-31T00:00:00"
+  - slot: known_limitations[3].limitation_description
+    snippet: "longitudinal data from 10% of the study cohort across the US"
+- id: c010
+  status: redundant_with
+  chunks: [c011, c013]
+- id: c011
+  status: extracted
+  extracted:
+  - slot: description
+    snippet: "The AI-READI is a dataset consisting of data collected from individuals with and without Type 2 Diabetes Mellitus (T2DM) and harmonized across 3 data collection sites."
+  - slot: data_governance.access_review_process
+    snippet: "The full dataset will be accessible by entering into a data use agreement."
+  - slot: sensitive_elements[1].sensitivity_details
+    snippet: "The data held under controlled access include 5-digit zip code, sex, race, ethnicity, genetic sequencing data, past health records, medications, and traffic and accident reports."
+  - slot: intended_uses[2].examples
+    snippet: "the mini-subset version of the dataset, and Azure Storage access"
+  - slot: known_limitations[4].limitation_description
+    snippet: "As enrollment is ongoing, the pilot data release and periodic updates to data releases may not have achieved balanced distribution across groups."
+- id: c012
+  status: extracted
+  extracted:
+  - slot: license
+    snippet: "AI-READI DATA LICENSE AGREEMENT (Version 2.0)"
+  - slot: license_and_use_terms.license_terms
+    snippet: "WASHINGTON UNIVERSITY IN ST. LOUIS (“Licensor”)"
+  - slot: license_and_use_terms.license_terms
+    snippet: "non-transferable license to download, reproduce and use the Data, and to create derivative works"
+  - slot: prohibited_uses[1].prohibition_reason
+    snippet: "to attempt to identify or contact any Data Subject or group of Data"
+  - slot: prohibited_uses[2].prohibition_reason
+    snippet: "Licensee shall not share or distribute Data with"
+  - slot: prohibited_uses[2].prohibition_reason
+    snippet: "for training or development purposes, even if"
+  - slot: ip_restrictions.restrictions
+    snippet: "Derivative Data is considered to be Data subject to all restrictions described herein."
+  - slot: prohibited_uses[4].prohibition_reason
+    snippet: "except that small representative samples of Data may be reproduced in up to five images"
+  - slot: prohibited_uses[5].prohibition_reason
+    snippet: "Licensee acknowledges that the Data may be"
+  - slot: ip_restrictions.restrictions
+    snippet: "Title to the Data, and all industrial and intellectual property rights"
+  - slot: ip_restrictions.restrictions
+    snippet: "algorithms and programs that are developed, trained or adapted using the Data, but which"
+  - slot: regulatory_restrictions.regulatory_restrictions
+    snippet: "established by the U.S. National Institutes of Health under its Genomic Data Sharing (GDS) Policy"
+  - slot: regulatory_restrictions.regulatory_restrictions
+    snippet: "Licensee agrees to comply with all applicable laws, regulations and"
+  - slot: license_and_use_terms.license_terms
+    snippet: "any funder of the Data in any Papers reporting use of the Data."
+- id: c013
+  status: extracted
+  extracted:
+  - slot: related_datasets[0].target_dataset
+    snippet: "10.60775/fairhub.2"
+  - slot: related_datasets[1].target_dataset
+    snippet: "10.60775/fairhub.1"
+  - slot: version_access.version_details
+    snippet: "This version of the dataset is no longer accessible."
+  - slot: license
+    snippet: "Health Data License"
+  - slot: version_access.version_details
+    snippet: "https://docs.aireadi.org/docs/2/citation"
+- id: c014
+  status: extracted
+  extracted:
+  - slot: intended_uses[2].examples
+    snippet: "A smaller version is available for pipeline development..."
+  - slot: page
+    snippet: "Access this dataset"
+  - slot: external_resources[0].external_resources
+    snippet: "View the dataset documentation"
+  - slot: doi
+    snippet: "10.60775/fairhub.3"
+- id: c015
+  status: extracted
+  extracted:
+  - slot: title
+    snippet: "\"title\": \"Flagship Dataset of Type 2 Diabetes from the AI-READI Project\""
+  - slot: total_file_count
+    snippet: "\"fileCount\": 356343"
+  - slot: total_size_bytes
+    snippet: "\"size\": 3815969779678"
+  - slot: doi
+    snippet: "\"doi\": \"10.60775/fairhub.3\""
+  - slot: version
+    snippet: "\"version\": \"3.0.0\""
+  - slot: created_by
+    snippet: "\"creatorName\": \"AI-READI Consortium\""
+  - slot: issued
+    snippet: "\"dateValue\": \"2025-11-17\""
+  - slot: collection_timeframes[0]
+    snippet: "\"dateValue\": \"2023-07-19/2025-05-01\""
+  - slot: is_deidentified.deidentification_details
+    snippet: "\"deIdentType\": \"NoDeIdentification\""
+  - slot: is_deidentified.method
+    snippet: "No identifiers were collected so no active de-identification was necessary"
+  - slot: informed_consent[0].consent_scope
+    snippet: "The public version of the dataset can only be used for type 2 diabetes related research."
+  - slot: instances[0].counts
+    snippet: "This dataset contains data from 2280 participants that was collected between from July 19, 2023 and May 01, 2025."
+  - slot: language
+    snippet: "\"language\": \"en\""
+  - slot: source_caveats
+    snippet: "\"name\": \"Washington University in St. Louis\""
+  - slot: third_party_sharing[0].notes
+    snippet: "\"accessType\": \"PublicDownloadSelfAttestationRequired\""
+  - slot: license
+    snippet: "\"rightsName\": \"AI-READI custom license v2.0\""
+  - slot: license_and_use_terms.license_terms
+    snippet: "\"rightsURI\": \"https://doi.org/10.5281/zenodo.17555036\""
+  - slot: publisher
+    snippet: "\"publisherName\": \"FAIRhub\""
+  - slot: funders[0].grantor
+    snippet: "\"funderName\": \"National Institutes of Health\""
+  - slot: funders[0].notes
+    snippet: "\"awardTitle\": \"Bridge2AI: Salutogenesis Data Generation Project\""
+  - slot: distribution_formats[0].media_type
+    snippet: "\"application/dicom\""
+  - slot: keywords
+    snippet: "\"subjectValue\": \"Diabetes mellitus\""
+  - slot: conforms_to
+    snippet: "Standard for consistently structuring and describing clinical research datasets"
+  - slot: file_collections[0].conforms_to
+    snippet: "\"standardName\": \"WaveForm DataBase (WFDB)\""
+  - slot: file_collections[0].total_bytes
+    snippet: "\"size\": 302931703"
+  - slot: file_collections[0].file_count
+    snippet: "\"numberOfFiles\": 4515"
+  - slot: file_collections[1].description
+    snippet: "This directory contains clinical data collected through REDCap, including blood/urine lab values and survey data."
+  - slot: file_collections[1].total_bytes
+    snippet: "\"size\": 176182781"
+  - slot: file_collections[1].conforms_to
+    snippet: "The Observational Medical Outcomes Partnership (OMOP) Common Data Model (CDM)"
+- id: c016
+  status: extracted
+  extracted:
+  - slot: file_collections[2].path
+    snippet: "\"directoryName\": \"environment\""
+  - slot: file_collections[2].total_bytes
+    snippet: "\"size\": 55625676514"
+  - slot: file_collections[2].file_count
+    snippet: "\"numberOfFiles\": 2232"
+  - slot: file_collections[2].conforms_to
+    snippet: "ASCII File Format Guidelines for Earth Science Data"
+  - slot: file_collections[3].total_bytes
+    snippet: "\"size\": 1069466876718"
+  - slot: file_collections[3].file_count
+    snippet: "\"numberOfFiles\": 7969"
+  - slot: file_collections[3].description
+    snippet: "This directory contains data collected through fluorescence lifetime imaging ophthalmoscopy (FLIO)"
+  - slot: file_collections[4].total_bytes
+    snippet: "\"size\": 1317625293027"
+  - slot: file_collections[4].file_count
+    snippet: "\"numberOfFiles\": 56478"
+  - slot: file_collections[4].description
+    snippet: "This directory contains data collected using optical coherence tomography (OCT)"
+  - slot: file_collections[4].conforms_to
+    snippet: "\"standardName\": \"Digital Imaging and Communications in Medicine (DICOM)\""
+  - slot: file_collections[4].description
+    snippet: "\"directoryName\": \"heidelberg_spectralis\""
+- id: c017
+  status: extracted
+  extracted:
+  - slot: file_collections[5].total_bytes
+    snippet: "\"size\": 1155908809724"
+  - slot: file_collections[5].file_count
+    snippet: "\"numberOfFiles\": 173721"
+  - slot: file_collections[6].description
+    snippet: "This directory contains retinal photography data, which are 2D images."
+  - slot: file_collections[6].total_bytes
+    snippet: "\"size\": 174381046406"
+  - slot: file_collections[6].file_count
+    snippet: "\"numberOfFiles\": 93921"
+  - slot: file_collections[7].description
+    snippet: "This directory contains data collected through a wearable fitness tracker."
+  - slot: file_collections[7].total_bytes
+    snippet: "\"size\": 38313536220"
+  - slot: file_collections[7].file_count
+    snippet: "\"numberOfFiles\": 15245"
+  - slot: file_collections[7].conforms_to
+    snippet: "\"standardName\": \"Open mHealth\""
+  - slot: file_collections[7].description
+    snippet: "\"directoryName\": \"garmin_vivosmart5\""
+- id: c018
+  status: extracted
+  extracted:
+  - slot: file_collections[8].total_bytes
+    snippet: "\"size\": 4169006971"
+  - slot: file_collections[8].file_count
+    snippet: "\"numberOfFiles\": 2246"
+  - slot: file_collections[8].description
+    snippet: "This directory contains data collected through a continuous glucose monitoring (CGM) device."
+  - slot: file_collections[8].description
+    snippet: "\"directoryName\": \"dexcom_g6\""
+  - slot: cleaning_strategies[2].cleaning_details
+    snippet: "The dataset has not undergone any formal external audits."
+  - slot: updates.update_details
+    snippet: "The dataset gets released as static versions."
+  - slot: updates.frequency
+    snippet: "There are plans to release new versions of the dataset approximately once a year"
+  - slot: updates.update_details
+    snippet: "the Snellen visual acuity variables were dropped in this version of the dataset"
+  - slot: instances[0].counts
+    snippet: "There are 2280 instances in this current version of the dataset"
+  - slot: related_datasets[1].notes
+    snippet: "the first version of the dataset contains data from 204 participants"
+  - slot: instances[0].instance_type
+    snippet: "Each instance represents an individual patient."
+  - slot: relationships[0].relationship_details
+    snippet: "Yes - all instances are part of the same prospective data generation project (AI-READI)."
+  - slot: anomalies[0].anomaly_details
+    snippet: "In cases of survey data, skipped questions or incomplete responses are expected."
+  - slot: confidential_elements[0].confidentiality_details
+    snippet: "No, the dataset does not contain data that might be considered confidential."
+  - slot: sensitive_elements[1].sensitivity_details
+    snippet: "the controlled access dataset will contain data regarding racial and ethnic origins"
+  - slot: collection_mechanisms[9].mechanism_details
+    snippet: "The Dexcom G6 is a real-time, integrated continuous glucose monitoring system (iCGM)"
+  - slot: collection_mechanisms[10].mechanism_details
+    snippet: "The Garmin Vivosmart 5 Fitness Activity tracker will be used to measure data related to physical activity."
+  - slot: collection_mechanisms[16].mechanism_details
+    snippet: "KR 800 Auto Keratometer/Refractor."
+  - slot: collection_mechanisms[14].mechanism_details
+    snippet: "M&S Technologies EVA device to test visual acuity."
+  - slot: collection_mechanisms[15].mechanism_details
+    snippet: "The MARS Letter Contrast Sensitivity test (Perceptrix) was conducted monocularly"
+  - slot: collection_mechanisms[17].mechanism_details
+    snippet: "OMRON HEM 907XL Blood Pressure Monitor, Medline MDS4001 Automatic Digital Blood Pressure Monitor"
+  - slot: collection_mechanisms[11].mechanism_details
+    snippet: "a custom-designed sensor unit called the LeeLab Anura"
+  - slot: collection_mechanisms[2].mechanism_details
+    snippet: "The Optomed Aurora IQ is a handheld fundus camera"
+  - slot: collection_mechanisms[3].mechanism_details
+    snippet: "The iCare EIDON is a widefield TrueColor confocal fundus imaging system"
+  - slot: collection_mechanisms[4].mechanism_details
+    snippet: "The Heidelberg Spectralis HRA+OCT is an ophthalmic imaging system"
+  - slot: collection_mechanisms[6].mechanism_details
+    snippet: "The DRI OCT Triton is a device from Topcon Healthcare"
+  - slot: collection_mechanisms[5].mechanism_details
+    snippet: "The Maestro2 is a robotic OCT and color fundus camera system from Topcon Healthcare."
+  - slot: collection_mechanisms[7].mechanism_details
+    snippet: "The Zeiss Cirrus 5000 Angioplex is a high-definition optical coherence tomography (OCT) system"
+  - slot: collection_mechanisms[13].mechanism_details
+    snippet: "Monofilament test is a standard clinical test to monitor peripheral neuropathy in diabetic patients."
+  - slot: collection_mechanisms[12].mechanism_details
+    snippet: "The Montreal Cognitive Assessment (MoCA) is a simple, in-office screening tool"
+  - slot: collection_mechanisms[1].mechanism_details
+    snippet: "Philips (manufacturer of Pagewriter TC30 Cardiograph)"
+  - slot: known_limitations[0].limitation_description
+    snippet: "the predominantly urban and hospital-based recruitment"
+  - slot: known_limitations[1].limitation_description
+    snippet: "it does not include other races/ethnicities such as Pacific Islanders and Native Americans"
+  - slot: cleaning_strategies[0].cleaning_details
+    snippet: "There were several quality control measures used at the time of data entry/acquisition."
+  - slot: raw_sources[0].raw_data_details
+    snippet: "The raw data is saved and expected to be preserved by the AI-READI project"
+  - slot: missing_data_documentation[0].handling_strategy
+    snippet: "No data were excluded from the dataset at the time of preprocessing."
+  - slot: instances[0].label
+    snippet: "N/A - no labels are provided"
+  - slot: future_use_impacts[1].impact_details
+    snippet: "We are suggesting a split for training/validation/testing models"
+  - slot: anomalies[3].anomaly_details
+    snippet: "there may have been a data collision at some point in the process and data has been lost"
+  - slot: missing_data_documentation[0].missing_data_patterns
+    snippet: "not all modalities are available for all participants"
+- id: c019
+  status: extracted
+  extracted:
+  - slot: splits[0].split_details
+    snippet: "the project team has prepared data splits into proportions (70%/15%/15%)"
+  - slot: ethical_reviews[0].review_details
+    snippet: "The initial IRB approval at the University of Washington was received on December 20, 2022."
+  - slot: acquisition_methods[0].acquisition_details
+    snippet: "some data were directly observable (such as labs, vitals, and retinal imaging)"
+  - slot: participant_compensation[0].compensation_amount
+    snippet: "Study subjects received a compensation of $200 for the study visit also through the grant funding."
+  - slot: collection_timeframes[0].end_date
+    snippet: "For this version of the dataset, the timeframe for data collection was July 19, 2023 to May 01, 2025."
+  - slot: direct_collection[0].is_direct
+    snippet: "The data was collected directly from participants across the three recruiting sites."
+  - slot: direct_collection[0].collection_details
+    snippet: "Recruitment pools were identified by screening Electronic Health Records (EHR) for diabetes and prediabetes ICD-10 codes"
+  - slot: collection_consents[0].consent_details
+    snippet: "Informed consent to participate was required before participation in any part of the protocol"
+  - slot: consent_revocations[0].revocation_details
+    snippet: "Participants were permitted to withdraw consent at any time and cease study participation."
+  - slot: known_limitations[2].limitation_description
+    snippet: "English language was used for communication with study participants."
+  - slot: participant_compensation[0].notes
+    snippet: "transportation assistance (rideshare services) was offered to study participants"
+  - slot: third_party_sharing[0].is_shared
+    snippet: "The dataset will be distributed and be available for public use."
+  - slot: maintainers[0].maintainer_details
+    snippet: "The AI-READI team will be supporting and maintaining the dataset."
+  - slot: maintainers[0].maintainer_details
+    snippet: "The dataset is hosted on FAIRhub through Microsoft Azure."
+  - slot: retention_limit.retention_details
+    snippet: "There are no limits on the retention of the data associated with the instances."
+  - slot: updates.update_details
+    snippet: "The dataset will not be updated. Rather, new versions of the dataset will be released with additional instances"
+  - slot: preprocessing_strategies[3].preprocessing_details
+    snippet: "This dataset is organized following the [Clinical Dataset Structure (CDS) v0.1.1]"
+  - slot: splits[0].split_details
+    snippet: "| Race/ethnicity (count)  | 204         | 369       | 343   | 660"
+  - slot: splits[0].split_details
+    snippet: "| Total                   | 1576"
+  - slot: participant_privacy[0].reidentification_risk
+    snippet: "there is a theoretical risk of future re-identification"
+  - slot: distribution_dates[0].release_dates
+    snippet: "The first version of the dataset was distributed in May 2024"
+  - slot: distribution_dates[2].release_dates
+    snippet: "the third version of the dataset was distributed in November 2025"
+  - slot: collection_timeframes[0].start_date
+    snippet: "\"startDate\": \"2023-07-19\""
+  - slot: source_caveats
+    snippet: "\"leadSponsorName\": \"Washington University in St. Louis\""
+  - slot: human_subject_research.regulatory_compliance
+    snippet: "\"isFDARegulatedDrug\": \"No\""
+  - slot: human_subject_research.irb_approval
+    snippet: "\"humanSubjectReviewStatus\": \"Submitted, approved\""
+  - slot: known_limitations[3].limitation_description
+    snippet: "\"Cross-sectional\""
+  - slot: citation
+    snippet: "please cite the resources specified in the AI-READI documentation for version 3.0.0"
+- id: c020
+  status: extracted
+  extracted:
+  - slot: source_caveats
+    snippet: "\"enrollmentCount\": \"4000\""
+  - slot: known_limitations[2].limitation_description
+    snippet: "\"minimumAge\": \"40 Years\""
+  - slot: at_risk_populations.special_protections
+    snippet: "\"maximumAge\": \"85 Years\""
+  - slot: sampling_strategies[0].strategies
+    snippet: "\"samplingMethod\": \"Non-Probability Sample\""
+  - slot: at_risk_populations.special_protections
+    snippet: "\"Gestational diabetes\""
+  - slot: human_subject_research.special_populations
+    snippet: "\"healthyVolunteers\": \"No\""
+  - slot: subpopulations[2].identification
+    snippet: "Participants with Type 2 Diabetes whose blood sugar is controlled by insulin"
+  - slot: subpopulations[2].identification
+    snippet: "\"armGroupLabel\": \"Pre-diabetes/Lifestyle Controlled\""
+- id: c021
+  status: extracted
+  extracted:
+  - slot: description
+    snippet: "\"locationFacility\": \"University of Alabama at Birmingham\""
+  - slot: description
+    snippet: "\"locationFacility\": \"University of Washington\""
+  - slot: distribution_dates[1].release_dates
+    snippet: "\"createdAt\": 1731060000"
+  - slot: related_datasets[0].target_dataset
+    snippet: "\"doi\": \"10.60775/fairhub.2\""
+  - slot: related_datasets[1].target_dataset
+    snippet: "\"doi\": \"10.60775/fairhub.1\""
+- id: c022
+  status: extracted
+  extracted:
+  - slot: source_caveats
+    snippet: "\"principalInvestigator\": \"Aaron Lee, Department of Ophthalmology, University of Washington\""
+  - slot: license_and_use_terms.license_terms
+    snippet: "\"license\": \"https://doi.org/10.5281/zenodo.17555036\""
+  - slot: data_governance.access_review_process
+    snippet: "\"conditionsOfAccess\": \"https://fairhub.io/datasets/3/access\""
+  - slot: total_size_bytes
+    snippet: "\"contentSize\": \"3.82 TB\""
+  - slot: regulatory_restrictions.source_caveats
+    snippet: "\"confidentialityLevel\": \"HL7:2N (normal)\""
+  - slot: human_subject_research.irb_approval
+    snippet: "\"irbProtocolId\": \"STUDY00016228\""
+  - slot: human_subject_research.regulatory_compliance
+    snippet: "\"fdaRegulated\": false"
+  - slot: is_deidentified.deidentification_details
+    snippet: "\"deidentified\": true"
+  - slot: data_governance.committee_name
+    snippet: "\"dataGovernanceCommittee\": \"AI-READI Consortium\""
+  - slot: ethical_reviews[1].review_details
+    snippet: "\"ethicalReview\": \"Camille Nebeker, Debra Mathews, Kadija Ferryman, Nicholas Evans\""
+  - slot: ethical_reviews[0].source_caveats
+    snippet: "\"name\": \"Washington University IRB\""
+  - slot: human_subject_research.ethics_review_board
+    snippet: "\"email\": \"hsdrely@uw.edu\""
+  - slot: citation
+    snippet: "AI-READI Consortium. (2025). Flagship Dataset of Type 2 Diabetes from the"
+  - slot: issued
+    snippet: "\"datePublished\": \"11/17/25\""
+  - slot: file_collections[0].id
+    snippet: "ark:59853/rocrate-b2ai-ai-readi-ecg"
+  - slot: file_collections[1].id
+    snippet: "ark:59853/rocrate-b2ai-ai-readi-omop"
+  - slot: file_collections[1].description
+    snippet: "Clinical data in AI-READI consists of OMOP Common Data Model–formatted health-related measurements"
+  - slot: source_caveats
+    snippet: "\"publisher\": \"AI-READI Consortium\""
+  - slot: funders[0].notes
+    snippet: "\"funder\": \"NIH grant 1OT2OD032644 to the Bridge2AI: Salutogenesis Data Generation Project"
+  - slot: known_biases[1].mitigation_strategy
+    snippet: "Uniform data collection protocols were implemented for all subjects"
+  - slot: known_biases[1].mitigation_strategy
+    snippet: "The selection of study sites was intended to ensure varied representation and minimize the potential for sampling bias."
+  - slot: instances[0].notes
+    snippet: "\"rai:dataAnnotationProtocol\": \"N/A - no labels are provided\""
+  - slot: file_collections[3].id
+    snippet: "ark:59853/rocrate-b2ai-ai-readi-flio"
+  - slot: notes
+    snippet: "This repository is under review for potential modification in compliance with Administration"
+- id: c023
+  status: extracted
+  extracted:
+  - slot: file_collections[4].id
+    snippet: "ark:59853/rocrate-b2ai-ai-readi-retinal-oct"
+  - slot: file_collections[5].id
+    snippet: "ark:59853/rocrate-b2ai-ai-readi-retinal-octa"
+  - slot: file_collections[6].id
+    snippet: "ark:59853/rocrate-b2ai-ai-readi-retinal-photography"
+  - slot: file_collections[4].description
+    snippet: "Optical Coherence Tomography (OCT) is a non-invasive diagnostic technique that renders an in vivo cross-sectional view of the retina."
+  - slot: file_collections[5].description
+    snippet: "Optical coherence tomography angiography (OCTA) is a non-invasive imaging modality"
+  - slot: file_collections[6].description
+    snippet: "Retinal photography is a non-invasive procedure that photographs the posterior segment of an eye"
+  - slot: file_collections[8].id
+    snippet: "ark:59853/rocrate-b2ai-ai-readi-wearable-blood-glucose"
+  - slot: file_collections[3].description
+    snippet: "two different .dcm files for each eye in the dataset"
+- id: c024
+  status: extracted
+  extracted:
+  - slot: file_collections[7].id
+    snippet: "ark:59853/rocrate-b2ai-ai-readi-wearable-activity-monitor"
+  - slot: file_collections[2].id
+    snippet: "ark:59853/rocrate-b2ai-ai-readi-environmental-sensor"
+  - slot: collection_mechanisms[10].mechanism_details
+    snippet: "the Garmin Vivosmart 5 fitness tracker was utilized for activity monitoring"
+  - slot: collection_mechanisms[10].mechanism_details
+    snippet: "The sampling frequency of the Fitness tracker is 5 seconds."
+  - slot: anomalies[1].anomaly_details
+    snippet: "There are gaps in data collection as the battery had to be charged every 2-3 days."
+  - slot: collection_mechanisms[11].mechanism_details
+    snippet: "a custom-designed sensor unit (LeeLab Anura) was utilized to obtain environmental sensor data"
+  - slot: variables[12].notes
+    snippet: "particulate matter counts (PM 1.0, 2.5, 4, and 10), temperature, relative humidity, volatile organic compounds (VOCs), nitrogen oxides (NO and NO2)"
+- id: c025
+  status: nothing_relevant
+  reason: >-
+    Blank sections of the University of Washington IRB protocol application template: instructions,
+    definitions and unanswered questions, with no study-specific content.
+- id: c026
+  status: nothing_relevant
+  reason: >-
+    Continuation of the blank IRB protocol application template through the consent, privacy and
+    risk/benefit sections; guidance text and unanswered questions only.
+- id: c027
+  status: extracted
+  extracted:
+  - slot: source_caveats
+    snippet: "The study will collect a cross-sectional dataset of 4600 people across the US"
+  - slot: participant_compensation[0].compensation_type
+    snippet: "There will be a $200 stipend for participation"
+  - slot: participant_compensation[0].compensation_type
+    snippet: "The payment will not be prorated."
+  - slot: participant_compensation[0].notes
+    snippet: "Study will cover reasonable costs for parking, public transit, or rideshare fees"
+  - slot: direct_collection[0].collection_details
+    snippet: "approximately 50,000 invitation letters from each site will be sent by both mail and email"
+  - slot: participant_privacy[0].privacy_techniques
+    snippet: "Confidentiality breach – low risk – all identifiable information will be kept on encrypted computers/servers"
+  - slot: collection_consents[0].consent_details
+    snippet: "Consent will be obtained in a private room by a study team member."
+  - slot: collection_consents[0].consent_details
+    snippet: "Participants will be directed to our study interface (REDCap) where they will have the opportunity to read the consent documentation and give e-consent"
+  - slot: known_limitations[2].limitation_description
+    snippet: "Must be able to read and speak English"
+  - slot: participant_privacy[0].privacy_techniques
+    snippet: "All study procedures will be conducted in private rooms."
+  - slot: known_limitations[2].recommended_mitigation
+    snippet: "Spanish language translations will be obtained if we are not meeting our recruitment goals for Hispanic participants."
+  - slot: known_biases[1].mitigation_strategy
+    snippet: "The research sites have been chosen based on strong prior experience with conducting longitudinal clinical research studies"
+- id: c028
+  status: extracted
+  extracted:
+  - slot: data_collectors[0].collector_details
+    snippet: "Clinical research coordinator/study coordinator: Responsible for contacting and consenting the research participants"
+  - slot: data_collectors[1].collector_details
+    snippet: "Database manager: Ingest data into the Redcap database and extract for processing"
+  - slot: data_collectors[2].collector_details
+    snippet: "Research/Data scientist/Postdoctoral Fellow: Process data for release in database and development of standards"
+  - slot: data_collectors[2].collector_details
+    snippet: "Phlebotomist: Responsible for blood collection from research participants"
+  - slot: participant_compensation[0].notes
+    snippet: "Subjects may incur costs for transport that will not be reimbursed if transportation fees exceed $25."
+  - slot: source_caveats
+    snippet: "the data set will be publicly available with a commercial-friendly open-source license"
