@@ -142,7 +142,11 @@ generation-path setting changes after a canary, **every production record
 generated under the earlier configuration is invalidated** — not merely
 the affected project's — and the arm restarts under a new
 condition/configuration label. No mixed-configuration arm, and no
-salvaging of same-configuration siblings across the change.
+salvaging of same-configuration siblings across the change. **Disposition
+of invalidated records**: archived under `data/ATTIC/` with their labels
+and provenance intact — the run_guard-compatible move (#795), and the one
+that keeps them out of `d4d runs select`'s candidate glob and out of any
+same-label resume's path.
 Evaluation-side changes (checkers, packs, counters — e.g. PR #837) are not
 on the generation path: they do not trigger a restart, and the 12 records'
 `receipts`/`review` blocks are backfilled under one instrument version
@@ -156,8 +160,11 @@ instrument fixes. They remain in the corpus for debugging receipts, stalls
 and token budgets (#777, #832) and for the canary-outcome section above,
 and are **not** production replicates: no production mean, spread,
 per-project statistic, **canonical selection, or hypothesis test** of the
-v7 arm includes them (adopted 2026-08-31 — `d4d runs select` for v7 draws
-its candidates from the 2026-08-31 matrix only).
+v7 arm includes them (adopted 2026-08-31 — `d4d runs select` and
+`compare-arms` for v7 are run with **the production matrix's label
+prefix**, currently `2026-08-31_claude-opus-5-api-generic-v7`, or its
+successor after any restart; never a wildcard that could sweep the
+2026-08-28 cohort in).
 
 **Launch-time re-verification** (the table above is a snapshot; main
 moves — this PR's own merge moves it): immediately before step 1, in the
