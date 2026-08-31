@@ -168,6 +168,50 @@ def _value_at(record: Any, path: str, limit: int = 300) -> Any:
     return s[:limit] + "…" if isinstance(s, str) and len(s) > limit else s
 
 
+def _id_slots(full: Any, root_class: str | None = None) -> tuple[list[dict[str, Any]], str | None]:
+    """Every populated `…id` leaf of the record with whether the schema
+    *forces* the mint (#803): `File.id` and `DataSubset.id` are LinkML
+    identifiers (FileCollection's also required), so a record that documents
+    those parts cannot omit the id — a fragment there is not the instruction
+    rule's "noise", whatever points at it. `Creator`/`DatasetProperty` ids
+    are optional; a mint there is a choice the rule judges.
+
+    Returns (entries, gap): entries carry {path, class, identifier, required,
+    forced}; a path whose class the walk cannot resolve is listed with
+    resolvable: false rather than guessed. gap names why the flags are
+    unavailable (no schema, no SchemaView), or None — named, not filled."""
+    from data_sheets_schema.receipts import populated_leaves
+    try:
+        from linkml_runtime import SchemaView
+
+        from data_sheets_schema.constants.schemas import SCHEMA_PATH
+        sv = SchemaView(str(SCHEMA_PATH))
+    except Exception as e:                                    # noqa: BLE001
+        return [], f"id slot flags unavailable: {e}"
+    root = root_class or (full.get("conforms_to_class") if isinstance(full, dict) else None) or "Dataset"
+    out: list[dict[str, Any]] = []
+    for path, _ in populated_leaves(full):
+        if path == "id" or not path.endswith(".id"):          # the record's own id is exempt (#722)
+            continue
+        cls: str | None = root
+        try:
+            for name in [n for n in re.findall(r"[\w]+|\[\d+\]", path) if not n.startswith("[")][:-1]:
+                rng = sv.induced_slot(name, cls).range
+                cls = rng if rng and sv.get_class(rng, strict=False) else None
+                if cls is None:
+                    break
+            if cls is None:
+                out.append({"path": path, "resolvable": False})
+                continue
+            slot = sv.induced_slot("id", cls)
+            ident, req = bool(slot.identifier), bool(slot.required)
+            out.append({"path": path, "class": cls, "identifier": ident,
+                        "required": req, "forced": ident or req})
+        except Exception:                                     # noqa: BLE001
+            out.append({"path": path, "resolvable": False})
+    return out, None
+
+
 def build_pack(provenance: Path, instruction_file: Path | None = None,
                sample: dict[str, int] | None = None) -> dict[str, Any]:
     from data_sheets_schema.backfill_checks import _split_header
@@ -216,6 +260,19 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                        "report": str(paths["report"]),
                        "receipt": str(paths["receipt"]) if paths["receipt"].exists() else None,
                        "claims": str(paths["claims"]) if paths["claims"].exists() else None}
+
+    # --- every minted id, with whether the schema forced it (#803): the
+    # instruction's fragment rule cannot be judged without this — a rule-14
+    # verdict on an identifier slot charges the record with the schema.
+    full_record = yaml.safe_load(paths["full"].read_text(encoding="utf-8")) or {} if paths["full"].exists() else {}
+    id_entries, id_gap = _id_slots(full_record)
+    pack["id_slots"] = {"entries": id_entries,
+                        "note": "forced: the schema declares this class's id as an identifier or required, "
+                                "so the record could not omit it; judge the fragment rule only on unforced, "
+                                "unreferenced mints. resources[*].id is also consumed by `d4d derive core`'s "
+                                "projection even when no record value cites it."}
+    if id_gap:
+        pack["gaps"].append(id_gap)
 
     # --- chunks marked nothing_relevant: every one, with its lines
     items: list[dict[str, Any]] = []

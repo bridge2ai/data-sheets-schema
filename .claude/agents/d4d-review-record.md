@@ -81,6 +81,14 @@ the only source of dataset facts.
 - `rule` — judge the record against the rule's text. `followed` with the
   slot(s) that show it, `violated` with the slot and value, `not_applicable`
   when the rule's situation does not arise in this record, `cannot_tell`.
+  For the fragment-minting rule, read the pack's `id_slots` block first
+  (#803): an id whose entry says `forced: true` is one the schema requires
+  (`File`, `FileCollection`, `DataSubset` ids are LinkML identifiers) — the
+  record could not omit it, so it never violates the rule, and
+  `resources[*].id` is additionally consumed by the core projector. Judge
+  the rule only on **unforced** mints nothing points at (persons, the
+  dataset's own parts on optional-id classes); if every mint is forced, the
+  rule is `not_applicable`, not `violated`.
 
 Every verdict carries **evidence**: a bundle line number or quoted passage,
 a slot path, or the reason it cannot be told. A verdict without evidence
