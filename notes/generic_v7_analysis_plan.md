@@ -123,7 +123,8 @@ before the projects the 2026-08-28 cohort already exercised:
 2. …same for VOICE, then AI_READI, then CHORUS (verify each: record on
    disk and non-empty, receipt beside it, canary verdict, full-phase
    %-of-cap noted against #832)
-3. d4d api batch --replicates 3 --condition generic_v7 \
+3. (only after all four canaries pass, per the adopted sequence)
+   d4d api batch --replicates 3 --condition generic_v7 \
      --label-prefix 2026-08-31_claude-opus-5-api-generic-v7 \
      --canary-baseline 2026-08-22c_claude-opus-5-api-generic-v5 --yes
    (resumes: completed rep1s are skipped; fills rep2/rep3 for all four.
@@ -135,10 +136,17 @@ before the projects the 2026-08-28 cohort already exercised:
 ```
 
 **Retention rule**: a canary that passes with **no configuration change**
-is retained as that project's rep1. **Restart rule**: if any prompt, code,
-cap, or generation-path setting changes after a canary, that canary is
-excluded and the affected project's runs restart under a new
-condition/configuration label — no mixed-configuration arm.
+is retained as that project's rep1. **Restart rule (adopted 2026-08-31,
+strengthening the registered form)**: if any prompt, code, cap, or
+generation-path setting changes after a canary, **every production record
+generated under the earlier configuration is invalidated** — not merely
+the affected project's — and the arm restarts under a new
+condition/configuration label. No mixed-configuration arm, and no
+salvaging of same-configuration siblings across the change. **Disposition
+of invalidated records**: archived under `data/ATTIC/` with their labels
+and provenance intact — the run_guard-compatible move (#795), and the one
+that keeps them out of `d4d runs select`'s candidate glob and out of any
+same-label resume's path.
 Evaluation-side changes (checkers, packs, counters — e.g. PR #837) are not
 on the generation path: they do not trigger a restart, and the 12 records'
 `receipts`/`review` blocks are backfilled under one instrument version
@@ -150,8 +158,13 @@ exploratory/canary cohort spanning two full-phase cap settings (96,000
 for 28 and both 28b runs; 128,000 for 28c and 28d) and successive
 instrument fixes. They remain in the corpus for debugging receipts, stalls
 and token budgets (#777, #832) and for the canary-outcome section above,
-and are **not** production replicates: no production mean, spread, or
-per-project statistic of the v7 arm includes them.
+and are **not** production replicates: no production mean, spread,
+per-project statistic, **canonical selection, or hypothesis test** of the
+v7 arm includes them (adopted 2026-08-31 — `d4d runs select` and
+`compare-arms` for v7 are run with **the production matrix's label
+prefix**, currently `2026-08-31_claude-opus-5-api-generic-v7`, or its
+successor after any restart; never a wildcard that could sweep the
+2026-08-28 cohort in).
 
 **Launch-time re-verification** (the table above is a snapshot; main
 moves — this PR's own merge moves it): immediately before step 1, in the
