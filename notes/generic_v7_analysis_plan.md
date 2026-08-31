@@ -85,3 +85,61 @@ existing metrics and against the receipt floors (0) on the new ones; the
 gate treats an absent receipt as UNMEASURABLE because `receipt_expected` is
 true for this condition. Sequencing per #710: after the agentic arm has run
 under the receipt protocol once, so prediction 5 has its other side.
+
+## Production arm: the 2026-08-31 matrix (registered before launch)
+
+**Frozen configuration** (verified 2026-08-31 06:11 UTC, before any
+production run):
+
+| element | value |
+|---|---|
+| condition | `generic_v7` — prompt files at their pins (`d4d api prompts check --strict`: 13/13, exit 0) |
+| code commit | `main` @ `15bc4127`, working tree clean on the generation path |
+| model route | `claude-opus-5` via CBORG (no effort suffix; recorded per #397 as unnamed) |
+| `full` max_tokens | **128,000** — `RECEIPT_PHASE_MAX_TOKENS` code default; `D4D_RECEIPT_FULL_MAX_TOKENS` unset (#778) |
+| canary baseline | `2026-08-22c_claude-opus-5-api-generic-v5` |
+
+**The matrix**: `2026-08-31_claude-opus-5-api-generic-v7_rep{1,2,3}` ×
+{AI_READI, CHORUS, CM4AI, VOICE} = 12 records, all under this one
+configuration.
+
+**Per-project production canaries, CM4AI and VOICE first.** Each project's
+rep1 is its production canary; v7 has no CM4AI or VOICE measurement and
+their full-phase token headroom is the least certain (#832), so they run
+before the projects the 2026-08-28 cohort already exercised:
+
+```
+1. d4d api batch --projects CM4AI    --replicates 1 --condition generic_v7 \
+     --label-prefix 2026-08-31_claude-opus-5-api-generic-v7 \
+     --canary-baseline 2026-08-22c_claude-opus-5-api-generic-v5 --yes
+2. …same for VOICE, then AI_READI, then CHORUS (verify each: record on
+   disk and non-empty, receipt beside it, canary verdict, full-phase
+   %-of-cap noted against #832)
+3. d4d api batch --replicates 3 --condition generic_v7 \
+     --label-prefix 2026-08-31_claude-opus-5-api-generic-v7 \
+     --canary-baseline 2026-08-22c_claude-opus-5-api-generic-v5 --yes
+   (resumes: completed rep1s are skipped; fills rep2/rep3 for all four)
+```
+
+**Retention rule**: a canary that passes with **no configuration change**
+is retained as that project's rep1. **Restart rule**: if any prompt, code,
+cap, or generation-path setting changes after a canary, that canary is
+excluded and the affected project's runs restart under a new
+condition/configuration label — no mixed-configuration arm.
+Evaluation-side changes (checkers, packs, counters — e.g. PR #837) are not
+on the generation path: they do not trigger a restart, and the 12 records'
+`receipts`/`review` blocks are backfilled under one instrument version
+after the arm completes.
+
+**The 2026-08-28 cohort is excluded.** The five August 28 records
+(`2026-08-28{,b,c,d}_…v7_rep1`: CHORUS ×2, AI_READI ×3) are an
+exploratory/canary cohort spanning three cap settings and successive
+instrument fixes. They remain in the corpus for debugging receipts, stalls
+and token budgets (#777, #832) and for the canary-outcome section above,
+and are **not** production replicates: no production mean, spread, or
+per-project statistic of the v7 arm includes them.
+
+**Launch window**: per #777 (three consecutive full-phase stalls
+02:00–10:00 UTC), the arm launches in US daytime (≥15:00 UTC), VPN
+connected, `PYTHONUNBUFFERED=1`, from a shell that will not switch
+branches while the sweep is live (#795).
