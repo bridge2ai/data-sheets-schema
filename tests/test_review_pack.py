@@ -54,7 +54,7 @@ class IdSlots(unittest.TestCase):
         """#803: File/FileCollection/DataSubset ids are schema-forced;
         Creator ids are a choice. The pack must say which is which."""
         full = {"conforms_to_class": "Dataset", "id": "doi:x",
-                "file_collections": [{"id": "doi:x#a", "resources": [{"id": "doi:x#a/f1"}]}],
+                "file_collections": [{"id": "doi:x#a", "resources": [{"id": "doi:10.999/external"}]}],
                 "subsets": [{"id": "doi:x#train"}],
                 "creators": [{"id": "doi:x#p1"}]}
         entries, gap = rp._id_slots(full)
@@ -63,12 +63,17 @@ class IdSlots(unittest.TestCase):
         self.assertNotIn("id", by)                            # the record's own id is exempt
         self.assertTrue(by["file_collections[0].id"]["forced"])
         self.assertEqual(by["file_collections[0].id"]["class"], "FileCollection")
-        self.assertTrue(by["file_collections[0].resources[0].id"]["forced"])
         self.assertTrue(by["subsets[0].id"]["forced"])
         self.assertFalse(by["creators[0].id"]["forced"])
+        # minted separates a labelled part from a world-facing reference (#823)
+        self.assertTrue(by["file_collections[0].id"]["minted"])
+        self.assertTrue(by["creators[0].id"]["minted"])
+        self.assertFalse(by["file_collections[0].resources[0].id"]["minted"])   # a real DOI
         # a path the walk cannot resolve is named, not guessed
         e2, _ = rp._id_slots({"conforms_to_class": "Dataset", "nonsuch": [{"id": "x#y"}]})
         self.assertEqual(e2, [{"path": "nonsuch[0].id", "resolvable": False}])
+        # an unknown root class and an empty record are named gaps (#827)
+        self.assertIn("not in the schema", rp._id_slots({"a": 1}, root_class="NoSuchClass")[1])
 
 
 class Pack(unittest.TestCase):

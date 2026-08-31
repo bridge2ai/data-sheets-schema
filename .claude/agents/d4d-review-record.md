@@ -82,13 +82,20 @@ the only source of dataset facts.
   slot(s) that show it, `violated` with the slot and value, `not_applicable`
   when the rule's situation does not arise in this record, `cannot_tell`.
   For the fragment-minting rule, read the pack's `id_slots` block first
-  (#803): an id whose entry says `forced: true` is one the schema requires
-  (`File`, `FileCollection`, `DataSubset` ids are LinkML identifiers) — the
-  record could not omit it, so it never violates the rule, and
-  `resources[*].id` is additionally consumed by the core projector. Judge
-  the rule only on **unforced** mints nothing points at (persons, the
-  dataset's own parts on optional-id classes); if every mint is forced, the
-  rule is `not_applicable`, not `violated`.
+  (#803; packs at `pack_version` ≤ 2 predate it — there, consult the
+  schema's `induced_slot("id", class)` yourself before ruling). Judge the
+  rule only on entries with `minted: true` (a urn or a fragment on the
+  record's own id): an entry with `minted: false` is a world-facing
+  reference — a DOI, ROR, URL — whose truth is the *evidence* rules'
+  business, never excused by `forced`. Among the mints, `forced: true`
+  (the schema declares that class's id an identifier or required — `File`,
+  `FileCollection`, `DataSubset`, and also `Person`) means the record could
+  not omit the id *given the object*, so the mint itself never violates
+  the rule; but forced settles the id's presence, not the object's — the
+  rule's remedy for an unpointed-at part is prose instead of the object,
+  and whether recording the object at all was noise-as-structure stays
+  yours to judge in the evidence. If every mint is forced, the rule is
+  `not_applicable` for the mints, judged normally for anything else.
 
 Every verdict carries **evidence**: a bundle line number or quoted passage,
 a slot path, or the reason it cannot be told. A verdict without evidence
