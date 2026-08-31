@@ -49,6 +49,33 @@ class ValueAt(unittest.TestCase):
         self.assertIsNone(rp._value_at({"n": None}, "n"))
 
 
+class IdSlots(unittest.TestCase):
+    def test_forced_and_optional_mints_are_told_apart(self):
+        """#803: File/FileCollection/DataSubset ids are schema-forced;
+        Creator ids are a choice. The pack must say which is which."""
+        full = {"conforms_to_class": "Dataset", "id": "doi:x",
+                "file_collections": [{"id": "doi:x#a", "resources": [{"id": "doi:10.999/external"}]}],
+                "subsets": [{"id": "doi:x#train"}],
+                "creators": [{"id": "doi:x#p1"}]}
+        entries, gap = rp._id_slots(full)
+        self.assertIsNone(gap)
+        by = {e["path"]: e for e in entries}
+        self.assertNotIn("id", by)                            # the record's own id is exempt
+        self.assertTrue(by["file_collections[0].id"]["forced"])
+        self.assertEqual(by["file_collections[0].id"]["class"], "FileCollection")
+        self.assertTrue(by["subsets[0].id"]["forced"])
+        self.assertFalse(by["creators[0].id"]["forced"])
+        # minted separates a labelled part from a world-facing reference (#823)
+        self.assertTrue(by["file_collections[0].id"]["minted"])
+        self.assertTrue(by["creators[0].id"]["minted"])
+        self.assertFalse(by["file_collections[0].resources[0].id"]["minted"])   # a real DOI
+        # a path the walk cannot resolve is named, not guessed
+        e2, _ = rp._id_slots({"conforms_to_class": "Dataset", "nonsuch": [{"id": "x#y"}]})
+        self.assertEqual(e2, [{"path": "nonsuch[0].id", "resolvable": False}])
+        # an unknown root class and an empty record are named gaps (#827)
+        self.assertIn("not in the schema", rp._id_slots({"a": 1}, root_class="NoSuchClass")[1])
+
+
 class Pack(unittest.TestCase):
     def _run(self, tmp):
         """A minimal run: bundle, manifest, receipt, records, provenance."""
@@ -94,6 +121,7 @@ class Pack(unittest.TestCase):
             self.assertTrue(Path(p1["instruction"]["path"]).read_text().startswith("Generate paired"))
             self.assertNotIn("sha256", p1["provenance"]); self.assertEqual(len(p1["bundle"]["chunks"]), 3)
             self.assertGreaterEqual(kinds["slot_receipted"], 1)
+            self.assertIn("id_slots", p1); self.assertIn("entries", p1["id_slots"])   # #803
             chunk = next(i for i in p1["items"] if i["id"] == "chunk-c003")
             self.assertEqual(chunk["source"], "b.txt"); self.assertEqual(chunk["agent_reason"], "references only")
             slot = next(i for i in p1["items"] if i["kind"] == "slot_receipted")

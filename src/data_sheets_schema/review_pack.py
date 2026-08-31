@@ -168,6 +168,59 @@ def _value_at(record: Any, path: str, limit: int = 300) -> Any:
     return s[:limit] + "…" if isinstance(s, str) and len(s) > limit else s
 
 
+def _id_slots(full: Any, root_class: str | None = None) -> tuple[list[dict[str, Any]], str | None]:
+    """Every populated `…id` leaf of the record with whether the schema
+    *forces* the id (#803) and whether the value is a *mint* (#823): `File`,
+    `FileCollection`, `DataSubset` — and `Person` — ids are LinkML
+    identifiers, so a record that documents those parts cannot omit the id.
+    `forced` speaks only to the id's presence given the object; `minted`
+    (a urn, or a fragment on the record's own id — `receipts._minted`) is
+    what separates a labelled part from a world-facing reference, whose
+    truth the evidence rules judge, not the fragment rule.
+
+    Returns (entries, gap): entries carry {path, class, identifier, required,
+    forced, minted}; a path whose class the walk cannot resolve is listed
+    with resolvable: false rather than guessed. gap names why the flags are
+    unavailable (no schema, no SchemaView, unknown root class) — named,
+    not filled; exception class only, so pack bytes stay machine-neutral."""
+    try:
+        from linkml_runtime import SchemaView
+
+        from data_sheets_schema.constants.schemas import SCHEMA_PATH
+        from data_sheets_schema.receipts import _minted, populated_leaves
+        schema_path = Path(SCHEMA_PATH)
+        if not schema_path.is_absolute():                     # cwd-proof (#822)
+            schema_path = Path(__file__).resolve().parents[2] / schema_path
+        sv = SchemaView(str(schema_path))
+    except Exception as e:                                    # noqa: BLE001
+        return [], f"id slot flags unavailable: {type(e).__name__}"
+    root = root_class or (full.get("conforms_to_class") if isinstance(full, dict) else None) or "Dataset"
+    if not sv.get_class(root, strict=False):
+        return [], f"id slot flags unavailable: root class {root} not in the schema"
+    record_id = full.get("id") if isinstance(full, dict) and isinstance(full.get("id"), str) else None
+    out: list[dict[str, Any]] = []
+    for path, value in populated_leaves(full):
+        if path == "id" or not path.endswith(".id"):          # the record's own id is exempt (#722)
+            continue
+        cls: str | None = root
+        try:
+            for name in [n for n in re.findall(r"[\w]+|\[\d+\]", path) if not n.startswith("[")][:-1]:
+                rng = sv.induced_slot(name, cls).range
+                cls = rng if rng and sv.get_class(rng, strict=False) else None
+                if cls is None:
+                    break
+            if cls is None:
+                out.append({"path": path, "resolvable": False})
+                continue
+            slot = sv.induced_slot("id", cls)
+            ident, req = bool(slot.identifier), bool(slot.required)
+            out.append({"path": path, "class": cls, "identifier": ident, "required": req,
+                        "forced": ident or req, "minted": _minted(value, record_id)})
+        except Exception:                                     # noqa: BLE001
+            out.append({"path": path, "resolvable": False})
+    return out, None
+
+
 def build_pack(provenance: Path, instruction_file: Path | None = None,
                sample: dict[str, int] | None = None) -> dict[str, Any]:
     from data_sheets_schema.backfill_checks import _split_header
@@ -183,7 +236,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     rng = random.Random(seed)
 
     pack: dict[str, Any] = {
-        "pack_version": 2,
+        "pack_version": 3,
         "run": {"label": run.get("label"), "project": run.get("project"), "method": run.get("method"),
                 "condition": (((record.get("prompts") or {}).get("request") or {}).get("spec") or {}).get("condition")},
         # The path only: `review check --write` adds a block to this record,
@@ -217,6 +270,22 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                        "receipt": str(paths["receipt"]) if paths["receipt"].exists() else None,
                        "claims": str(paths["claims"]) if paths["claims"].exists() else None}
 
+    # --- every minted id, with whether the schema forced it (#803): the
+    # instruction's fragment rule cannot be judged without this — a rule-14
+    # verdict on an identifier slot charges the record with the schema.
+    full_record = yaml.safe_load(paths["full"].read_text(encoding="utf-8")) or {} if paths["full"].exists() else {}
+    id_entries, id_gap = _id_slots(full_record) if full_record else ([], "id slot flags unavailable: no full record")
+    pack["id_slots"] = {"entries": id_entries,
+                        "note": "forced: the schema declares this class's id as an identifier or required, "
+                                "so the record could not omit the id given the object — it settles the id's "
+                                "presence, not the object's. minted: a urn or a fragment on the record's own "
+                                "id; false means a world-facing reference (a DOI, ROR, URL) whose truth the "
+                                "evidence rules judge, not the fragment rule. The fragment rule is judged on "
+                                "minted ids only, and a forced mint never violates it; resources[*].id is "
+                                "also consumed by `d4d derive core`'s projection."}
+    if id_gap:
+        pack["gaps"].append(id_gap)
+
     # --- chunks marked nothing_relevant: every one, with its lines
     items: list[dict[str, Any]] = []
     if paths["receipt"].exists() and manifest_path and manifest_path.exists():
@@ -234,7 +303,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                               "question": "Does this chunk hold anything the record should carry and does not? "
                                           "Open the lines; answer against the full record."})
         # --- slots
-        full = yaml.safe_load(paths["full"].read_text(encoding="utf-8")) or {} if paths["full"].exists() else {}
+        full = full_record
         claims = claim_receipts(receipt, full)
         rc = record.get("receipts") or {}
         receipted = sorted(claims["slots"])
