@@ -328,6 +328,35 @@ def claim_receipts(receipt: dict[str, Any], full: dict[str, Any] | None = None) 
     return out
 
 
+def _value_tokens(node: Any) -> set[str]:
+    """Normalised tokens (>= 4 chars) of a value or subtree, for the
+    reported overlap flags (#806, #804). Token overlap is a screen, not a
+    support judgement — NON_CHECKS still stands."""
+    if isinstance(node, (dict, list)):
+        text = yaml.safe_dump(node, allow_unicode=True)
+    else:
+        text = str(node)
+    return {t for t in normalise(text).split() if len(t) >= 4}
+
+
+def _resolve_value(record: Any, path: str) -> tuple[bool, Any]:
+    parts = re.findall(r"[\w]+|\[\d+\]", path)
+    if not parts:
+        return False, None
+    cur = record
+    for part in parts:
+        if part.startswith("["):
+            i = int(part[1:-1])
+            if not isinstance(cur, list) or i >= len(cur):
+                return False, None
+            cur = cur[i]
+        else:
+            if not isinstance(cur, dict) or part not in cur:
+                return False, None
+            cur = cur[part]
+    return True, cur
+
+
 def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[str, str],
           full: dict[str, Any], record_bundle_md5: str | None,
           original: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -413,8 +442,16 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # these, every one a neighbouring chunk (#763). They are counted apart —
     # `adjacent` (the chunk before or after), `elsewhere` (any other) — and
     # reported, never gated; the floor of 0 is for text found nowhere.
+    record_id_flag = full.get("id") if isinstance(full.get("id"), str) else None
     snippets = {"total": 0, "verified": 0, "linewrap_joined": 0, "adjacent": 0, "elsewhere": 0,
-                "spans_boundary": 0, "mismatched": 0, "unchecked": 0}
+                "spans_boundary": 0, "mismatched": 0, "unchecked": 0,
+                # Reported, never gated (#806, #804): a verified snippet whose
+                # normalised tokens overlap nothing in the value it receipts
+                # is verbatim laundering the deterministic floor cannot see
+                # alone; an entry receipt whose snippet overlaps at most one
+                # of several child leaves covers the rest by construction.
+                # Token overlap is a screen — NON_CHECKS still stands.
+                "no_value_overlap": 0, "entry_single_leaf": 0}
     order = {cid: i for i, cid in enumerate(manifest_ids)}
     hays = {cid: normalise(t) for cid, t in chunk_texts.items()}      # once per chunk (#766)
     hays_j = {cid: normalise_joined(t) for cid, t in chunk_texts.items()}   # line breaks joined (#789)
@@ -440,6 +477,31 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                 snippets["verified"] += 1
                 if why == "linewrap-joined":
                     snippets["linewrap_joined"] += 1
+                spath = str(pair.get("slot") or "")
+                resolved, value = _resolve_value(full, spath)
+                # An exempt path (the record's own id, notes, a minted
+                # fragment) is outside the receipt denominator; a receipt
+                # someone wrote on one is not screened either.
+                if resolved and spath != "id" and not exempt(spath, value, record_id_flag):
+                    stoks = {t for t in normalise(snippet).split() if len(t) >= 4}
+                    if isinstance(value, dict):
+                        # An entry receipt covers its leaves by construction
+                        # (#721); when the snippet's tokens touch at most one
+                        # of several, the rest ride along unattested (#804).
+                        kids = [(k, v) for k, v in value.items() if _is_leaf(v) and _populated(v)]
+                        if len(kids) >= 3 and stoks:
+                            hit = sum(1 for _k, v in kids if stoks & _value_tokens(v))
+                            if hit <= 1:
+                                snippets["entry_single_leaf"] += 1
+                                findings.append({"kind": "entry_receipt_covers_one_leaf",
+                                                 "chunk": e.get("id"), "slot": pair.get("slot"),
+                                                 "leaves": len(kids), "overlapping": hit})
+                    else:
+                        vtoks = _value_tokens(value)
+                        if stoks and vtoks and not (stoks & vtoks):
+                            snippets["no_value_overlap"] += 1
+                            findings.append({"kind": "snippet_no_value_overlap", "chunk": e.get("id"),
+                                             "slot": pair.get("slot"), "snippet": snippet[:60]})
                 continue
             # Shortness is decided before any haystack, so a too-short
             # snippet is found nowhere and stays `mismatched`.
@@ -482,12 +544,23 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     record_id = full.get("id") if isinstance(full.get("id"), str) else None
     receiptable = [(p, v) for p, v in leaves if not exempt(p, v, record_id)]
     without = [p for p, _v in receiptable if not any(_covers(r, p) for r in receipt_paths)]
+    # #807: `without_receipt` is a mixture on the API path. Split against the
+    # phase-1 snapshot: a path populated when the receipt was written and not
+    # covered then was *never* receipted; one the snapshot lacks was added by
+    # a later phase, which has no re-receipt route (#742). None (not 0) when
+    # there is no snapshot to split against — the agentic path re-receipts.
+    never_receipted = added_after_receipt = None
+    if original is not None:
+        never_receipted = sum(1 for p in without if resolve(original, p))
+        added_after_receipt = len(without) - never_receipted
     slots = {"populated": len(leaves), "exempt": len(leaves) - len(receiptable),
              "receiptable": len(receiptable), "with_receipt": len(receiptable) - len(without),
              "without_receipt": without[:50],
              "without_receipt_truncated": max(0, len(without) - 50) or None,
+             "never_receipted": never_receipted, "added_after_receipt": added_after_receipt,
              "receipt_paths": len(receipt_paths), "unresolved": unresolved,
-             "reshaped_by_reconcile": reshaped}
+             "reshaped_by_reconcile": reshaped,
+             "receipts_to_removed_values": len(reshaped)}
 
     chunks = {"total": len(manifest_ids), "reviewed": reviewed, "unreviewed": missing[:50],
               "by_status": by_status}
@@ -501,7 +574,14 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                         + (f" ({snippets['adjacent']} in an adjacent chunk)" if snippets["adjacent"] else "")
                         + (f" ({snippets['elsewhere']} in another chunk)" if snippets["elsewhere"] else "")
                         + (f" ({snippets['spans_boundary']} spanning a chunk boundary)" if snippets["spans_boundary"] else "")
+                        + (f" ({snippets['no_value_overlap']} bearing on no token of their value)"
+                           if snippets["no_value_overlap"] else "")
+                        + (f" ({snippets['entry_single_leaf']} entry receipt(s) overlapping one leaf)"
+                           if snippets["entry_single_leaf"] else "")
                         + f" · slots {slots['with_receipt']}/{slots['receiptable']} with a receipt"
+                        + (f" ({slots['never_receipted']} never receipted, "
+                           f"{slots['added_after_receipt']} added after the receipt)"
+                           if never_receipted is not None and without else "")
                         + (f" ({slots['exempt']} exempt)" if slots["exempt"] else "")
                         + (f" · {len(reshaped)} receipt path(s) reshaped by reconcile" if reshaped else "")),
             "non_checks": list(NON_CHECKS)}

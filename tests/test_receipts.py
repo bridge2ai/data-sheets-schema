@@ -21,7 +21,7 @@ FULL = {"id": "https://x/ds", "name": "ai-readi", "title": "AI-READI",
         "funders": [{"id": "https://x/ds#funder-1", "name": "NIH Common Fund", "grant_id": "OT2OD032644"}],
         "file_collections": [{"id": "https://x/ds#fc1", "name": "raw",
                               "resources": [{"id": "https://x/ds#f1", "name": "a.tsv", "md5": "0" * 32}]}],
-        "keywords": ["retina"]}
+        "keywords": ["multimodal"]}
 
 
 def _manifest_and_texts():
@@ -219,6 +219,56 @@ class Validator(unittest.TestCase):
         r["chunks"][0] = {"id": "c001", "status": "extracted", "extracted": [{"slot": "title", "snippet": "Something else entirely"}]}  # in c003, two away
         b = rc.check(r, self.manifest, self.texts, FULL, self.md5)
         self.assertEqual(b["snippets"]["elsewhere"], 1)
+
+    def test_a_verified_snippet_bearing_on_no_token_of_its_value_is_reported_not_gated(self):
+        """#806: verbatim text that answers nothing in the value is the
+        laundering shape the floor cannot see; a screen, not a gate."""
+        manifest, texts = _manifest_and_texts()
+        rec = _receipt(manifest["bundle_md5"])
+        full = {**FULL, "keywords": ["retina"]}        # nothing from the snippet
+        b = rc.check(rec, manifest, texts, full, manifest["bundle_md5"])
+        self.assertEqual(b["snippets"]["no_value_overlap"], 1)
+        kinds = [f["kind"] for f in b["findings"]]
+        self.assertIn("snippet_no_value_overlap", kinds)
+        from data_sheets_schema.canary import receipt_floors
+        self.assertEqual(receipt_floors(b)["receipt findings"], 0)          # reported, never gated
+        self.assertIn("bearing on no token", b["summary"])
+        # the exempt id receipt is not screened
+        self.assertNotIn("id", [f.get("slot") for f in b["findings"] if f["kind"] == "snippet_no_value_overlap"])
+
+    def test_an_entry_receipt_overlapping_one_leaf_is_reported_not_gated(self):
+        """#804: the snippet attests one leaf; the entry's other leaves are
+        covered by construction — counted, not judged."""
+        manifest, texts = _manifest_and_texts()
+        rec = _receipt(manifest["bundle_md5"])
+        full = {**FULL, "file_collections": [{"id": "https://x/ds#fc1", "name": "longitudinal",
+                                              "description": "something else", "format": "zip",
+                                              "resources": FULL["file_collections"][0]["resources"]}]}
+        b = rc.check(rec, manifest, texts, full, manifest["bundle_md5"])
+        self.assertEqual(b["snippets"]["entry_single_leaf"], 1)
+        from data_sheets_schema.canary import receipt_floors
+        self.assertEqual(receipt_floors(b)["receipt findings"], 0)
+
+    def test_without_receipt_splits_against_the_snapshot_and_is_none_without_one(self):
+        """#807: never_receipted vs added_after_receipt, measured against the
+        phase-1 snapshot; None (not 0) when there is no snapshot."""
+        manifest, texts = _manifest_and_texts()
+        rec = _receipt(manifest["bundle_md5"])
+        full = {**FULL, "version": "3.0.0"}            # added by a later phase
+        original = {**FULL, "license": "CC-BY"}        # populated at phase 1, never receipted
+        del original["funders"]
+        full2 = {**full, "license": "CC-BY"}
+        b = rc.check(rec, manifest, texts, full2, manifest["bundle_md5"], original=original)
+        self.assertEqual(b["slots"]["receipts_to_removed_values"], 0)
+        without = set(b["slots"]["without_receipt"])
+        self.assertIn("license", without); self.assertIn("version", without)
+        self.assertEqual(b["slots"]["never_receipted"],
+                         sum(1 for p in without if p != "version"))
+        self.assertEqual(b["slots"]["added_after_receipt"], 1)              # version
+        self.assertIn("never receipted", b["summary"])
+        b2 = rc.check(rec, manifest, texts, full2, manifest["bundle_md5"])
+        self.assertIsNone(b2["slots"]["never_receipted"])
+        self.assertIsNone(b2["slots"]["added_after_receipt"])
 
     def test_a_snippet_cut_by_a_chunk_boundary_is_reported_as_spanning(self):
         """#781: the passage exists in the bundle across c002/c003; no single
