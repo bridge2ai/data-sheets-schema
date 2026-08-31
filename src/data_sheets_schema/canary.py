@@ -150,14 +150,13 @@ def receipt_floors(block: dict[str, Any]) -> dict[str, int]:
         # Wrong-chunk attributions are reported, never gated (#763): the
         # text is in the bundle, so support holds; attribution precision is
         # its own reported number.
-        "receipt findings": len([f for f in block.get("findings") or []
-                                 if f.get("kind") not in ("snippet_mismatch", "snippet_empty",
-                                                          "snippet_adjacent_chunk", "snippet_elsewhere_chunk",
-                                                          "snippet_spans_boundary",
-                                                          # #806/#804: verified text whose relation to its
-                                                          # value is thin — reported, never gated
-                                                          "snippet_no_value_overlap",
-                                                          "entry_receipt_covers_one_leaf")]),
+        # Pre-cap integer when the block carries it (#840); the capped-list
+        # count is the fallback for blocks written before it existed.
+        "receipt findings": (int(block["findings_gated"]) if isinstance(block.get("findings_gated"), int)
+                             else len([f for f in block.get("findings") or []
+                                       if f.get("kind") not in ("snippet_mismatch", "snippet_empty",
+                                                                "snippet_adjacent_chunk", "snippet_elsewhere_chunk",
+                                                                "snippet_spans_boundary")])),
     }
 
 

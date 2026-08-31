@@ -228,13 +228,18 @@ class Validator(unittest.TestCase):
         full = {**FULL, "keywords": ["retina"]}        # nothing from the snippet
         b = rc.check(rec, manifest, texts, full, manifest["bundle_md5"])
         self.assertEqual(b["snippets"]["no_value_overlap"], 1)
-        kinds = [f["kind"] for f in b["findings"]]
-        self.assertIn("snippet_no_value_overlap", kinds)
+        self.assertEqual(b["snippets"]["no_value_overlap_sample"][0]["slot"], "keywords")
+        # a screen is a counter with samples, never a finding: `--strict`
+        # fails on findings and the playbook gates on strict (#839)
+        self.assertEqual(b["findings"], []); self.assertEqual(b["findings_gated"], 0)
         from data_sheets_schema.canary import receipt_floors
         self.assertEqual(receipt_floors(b)["receipt findings"], 0)          # reported, never gated
         self.assertIn("bearing on no token", b["summary"])
-        # the exempt id receipt is not screened
-        self.assertNotIn("id", [f.get("slot") for f in b["findings"] if f["kind"] == "snippet_no_value_overlap"])
+        # a boolean value is not text-screened (#841)
+        fb = {**full, "keywords": True}
+        self.assertEqual(rc.check(rec, manifest, texts, fb, manifest["bundle_md5"])["snippets"]["no_value_overlap"], 0)
+        # underscores split, so an enum token meets its prose (#841)
+        self.assertIn("omop", rc._value_tokens("OMOP_CDM"))
 
     def test_an_entry_receipt_overlapping_one_leaf_is_reported_not_gated(self):
         """#804: the snippet attests one leaf; the entry's other leaves are
@@ -246,8 +251,27 @@ class Validator(unittest.TestCase):
                                               "resources": FULL["file_collections"][0]["resources"]}]}
         b = rc.check(rec, manifest, texts, full, manifest["bundle_md5"])
         self.assertEqual(b["snippets"]["entry_single_leaf"], 1)
+        self.assertEqual(b["findings"], [])                                 # counter, not finding (#839)
         from data_sheets_schema.canary import receipt_floors
         self.assertEqual(receipt_floors(b)["receipt findings"], 0)
+        # minted ids and booleans are not attestable leaves (#842)
+        thin = {**FULL, "file_collections": [{"id": "https://x/ds#fc1", "archived": True,
+                                              "name": "longitudinal", "resources": []}]}
+        b2 = rc.check(rec, manifest, texts, thin, manifest["bundle_md5"])
+        self.assertEqual(b2["snippets"]["entry_single_leaf"], 0)            # 1 attestable leaf < 3
+
+    def test_the_gated_findings_count_survives_the_findings_cap(self):
+        """#840: 100+ reported-only findings must not crowd a gated one out
+        of the floor."""
+        manifest, texts = _manifest_and_texts()
+        rec = _receipt(manifest["bundle_md5"])
+        rec["chunks"][1]["extracted"] = rec["chunks"][1]["extracted"] + [
+            {"slot": f"nonsuch[{i}].x", "snippet": "a longitudinal, multimodal study"} for i in range(120)]
+        b = rc.check(rec, manifest, texts, FULL, manifest["bundle_md5"])
+        self.assertEqual(len(b["findings"]), 100); self.assertTrue(b["findings_truncated"])
+        self.assertEqual(b["findings_gated"], 120)
+        from data_sheets_schema.canary import receipt_floors
+        self.assertEqual(receipt_floors(b)["receipt findings"], 120)
 
     def test_without_receipt_splits_against_the_snapshot_and_is_none_without_one(self):
         """#807: never_receipted vs added_after_receipt, measured against the
