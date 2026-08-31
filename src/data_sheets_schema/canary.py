@@ -104,6 +104,10 @@ REPORTED_ONLY = (
     # Receipts (#708) are shown on every run and gated by `verdict` against
     # floors when the run's procedure wrote one; `_ran` reads `checked`, so
     # an unchecked block prints — (#727).
+    ("snippets bearing on no token of their value", "receipts",
+     lambda b: (b.get("snippets") or {}).get("no_value_overlap")),
+    ("entry receipts overlapping one leaf", "receipts",
+     lambda b: (b.get("snippets") or {}).get("entry_single_leaf")),
     ("chunks unreviewed", "receipts", lambda b: receipt_floors(b)["chunks unreviewed"]),
     ("snippets unverified", "receipts", lambda b: receipt_floors(b)["snippets unverified"]),
     # Adjacent, elsewhere and boundary-spanning together: verbatim in the
@@ -146,10 +150,13 @@ def receipt_floors(block: dict[str, Any]) -> dict[str, int]:
         # Wrong-chunk attributions are reported, never gated (#763): the
         # text is in the bundle, so support holds; attribution precision is
         # its own reported number.
-        "receipt findings": len([f for f in block.get("findings") or []
-                                 if f.get("kind") not in ("snippet_mismatch", "snippet_empty",
-                                                          "snippet_adjacent_chunk", "snippet_elsewhere_chunk",
-                                                          "snippet_spans_boundary")]),
+        # Pre-cap integer when the block carries it (#840); the capped-list
+        # count is the fallback for blocks written before it existed.
+        "receipt findings": (int(block["findings_gated"]) if isinstance(block.get("findings_gated"), int)
+                             else len([f for f in block.get("findings") or []
+                                       if f.get("kind") not in ("snippet_mismatch", "snippet_empty",
+                                                                "snippet_adjacent_chunk", "snippet_elsewhere_chunk",
+                                                                "snippet_spans_boundary")])),
     }
 
 
