@@ -85,3 +85,90 @@ existing metrics and against the receipt floors (0) on the new ones; the
 gate treats an absent receipt as UNMEASURABLE because `receipt_expected` is
 true for this condition. Sequencing per #710: after the agentic arm has run
 under the receipt protocol once, so prediction 5 has its other side.
+
+## Production arm: the 2026-08-31 matrix (registered before launch)
+
+**Frozen configuration** (verified 2026-08-31 06:11 UTC, before any
+production run):
+
+| element | value |
+|---|---|
+| condition | `generic_v7` — prompt files at their pins (`d4d api prompts check --strict`: 13/13, exit 0) |
+| code commit | `main` @ `15bc4127`, working tree clean on the generation path |
+| model route | `claude-opus-5` via CBORG (no effort suffix; recorded per #397 as unnamed) |
+| `full` max_tokens | **128,000** — `RECEIPT_PHASE_MAX_TOKENS` code default; `D4D_RECEIPT_FULL_MAX_TOKENS` unset (#778) |
+| canary baseline | `2026-08-22c_claude-opus-5-api-generic-v5` — see the gate note below |
+
+**The matrix**: `2026-08-31_claude-opus-5-api-generic-v7_rep{1,2,3}` ×
+{AI_READI, CHORUS, CM4AI, VOICE} = 12 records, all under this one
+configuration.
+
+**Gate note — two departures from the Canary rule above, named rather
+than implied.** (1) That rule registers the gate "against the v6 API
+worst-of-arm"; no API v6 arm was ever run (the only v6 labels are
+agentic), so the bar this arm is actually gated against is the **v5 API
+arm (2026-08-22c)** — a substitution this registration makes explicit.
+(2) The one-run-before-fan-out scheme is superseded for this arm by four
+per-project production canaries; the section below governs.
+
+**Per-project production canaries, CM4AI and VOICE first.** Each project's
+rep1 is its production canary; v7 has no CM4AI or VOICE measurement and
+their full-phase token headroom is the least certain (#832), so they run
+before the projects the 2026-08-28 cohort already exercised:
+
+```
+1. d4d api batch --projects CM4AI    --replicates 1 --condition generic_v7 \
+     --label-prefix 2026-08-31_claude-opus-5-api-generic-v7 \
+     --canary-baseline 2026-08-22c_claude-opus-5-api-generic-v5 --yes
+2. …same for VOICE, then AI_READI, then CHORUS (verify each: record on
+   disk and non-empty, receipt beside it, canary verdict, full-phase
+   %-of-cap noted against #832)
+3. d4d api batch --replicates 3 --condition generic_v7 \
+     --label-prefix 2026-08-31_claude-opus-5-api-generic-v7 \
+     --canary-baseline 2026-08-22c_claude-opus-5-api-generic-v5 --yes
+   (resumes: completed rep1s are skipped; fills rep2/rep3 for all four.
+   Note the step-3 gate fires on the invocation's first spec — the already
+   completed AI_READI rep1, re-verdicted from disk on resume — so fresh
+   rep2/rep3 runs are ungated by design; the CM4AI/VOICE full-phase
+   headroom risk in reps 2–3 (#832) is covered by watching their
+   %-of-cap, not by a gate.)
+```
+
+**Retention rule**: a canary that passes with **no configuration change**
+is retained as that project's rep1. **Restart rule**: if any prompt, code,
+cap, or generation-path setting changes after a canary, that canary is
+excluded and the affected project's runs restart under a new
+condition/configuration label — no mixed-configuration arm.
+Evaluation-side changes (checkers, packs, counters — e.g. PR #837) are not
+on the generation path: they do not trigger a restart, and the 12 records'
+`receipts`/`review` blocks are backfilled under one instrument version
+after the arm completes.
+
+**The 2026-08-28 cohort is excluded.** The five August 28 records
+(`2026-08-28{,b,c,d}_…v7_rep1`: CHORUS ×2, AI_READI ×3) are an
+exploratory/canary cohort spanning two full-phase cap settings (96,000
+for 28 and both 28b runs; 128,000 for 28c and 28d) and successive
+instrument fixes. They remain in the corpus for debugging receipts, stalls
+and token budgets (#777, #832) and for the canary-outcome section above,
+and are **not** production replicates: no production mean, spread, or
+per-project statistic of the v7 arm includes them.
+
+**Launch-time re-verification** (the table above is a snapshot; main
+moves — this PR's own merge moves it): immediately before step 1, in the
+shell that will launch (not another one — a missing or extra variable in
+the nohup child is the recurring failure class):
+
+```
+git diff 15bc4127..HEAD -- src/data_sheets_schema/api_runner.py \
+    src/data_sheets_schema/cli/api.py src/download/prompts/   # must be empty
+d4d api prompts check --strict                                # must exit 0
+[ -z "$D4D_RECEIPT_FULL_MAX_TOKENS" ] && echo "cap override unset"
+```
+
+A non-empty generation-path diff means the freeze no longer holds: stop
+and re-register before spending.
+
+**Launch window**: per #777 (three consecutive full-phase stalls
+02:00–10:00 UTC), the arm launches in US daytime (≥15:00 UTC), VPN
+connected, `PYTHONUNBUFFERED=1`, from a shell that will not switch
+branches while the sweep is live (#795).
