@@ -773,29 +773,29 @@ intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/intermediate/CM4AI_report.md
   sha256: 7bacd68cadae9fe33cbdd08528fc126ad7261d8f838c59912e4f0e26c0a80980
 canary:
-  status: unmeasurable
+  status: ok
   rows:
   - metric: pair errors
-    run: null
-    baseline_worst: null
+    run: 0
+    baseline_worst: 9
   - metric: report findings
-    run: null
-    baseline_worst: null
+    run: 0
+    baseline_worst: 2
   - metric: ungrounded identifiers
     run: 0
-    baseline_worst: null
+    baseline_worst: 0
   - metric: resolver URLs in identifier slots
     run: 0
-    baseline_worst: null
+    baseline_worst: 0
   - metric: organisational fragments
     run: 0
-    baseline_worst: null
+    baseline_worst: 0
   - metric: undeclared prefixes
     run: 0
-    baseline_worst: null
+    baseline_worst: 0
   - metric: British spellings
     run: 0
-    baseline_worst: null
+    baseline_worst: 0
   - metric: chunks unreviewed
     run: 0
     baseline_worst: 0
@@ -808,21 +808,15 @@ canary:
   - metric: receipt findings
     run: 0
     baseline_worst: 0
-  blind:
-  - pair errors
-  - report findings
-  unbaselined:
-  - pair errors
-  - report findings
-  - ungrounded identifiers
-  - resolver URLs in identifier slots
-  - organisational fragments
-  - undeclared prefixes
-  - British spellings
+  blind: []
+  unbaselined: []
   regressions: []
   basis: 'offline re-verdict after the path_off_by_one interpretation (#876, registered
-    in notes/generic_v7_analysis_plan.md): the batch gate ran before the checker distinguished
-    addressing slips from fabricated paths; the receipts block was re-checked strict
-    on 2026-09-01 and this verdict recomputes against the same baseline the batch
-    used'
+    in the v7 plan): the batch gate ran before the checker distinguished addressing
+    slips from fabricated paths; the receipts block was re-checked strict on 2026-09-01
+    and this verdict recomputes against the same 2026-08-22c baseline the batch used.
+    Two earlier writings in the same session were themselves defective and are superseded
+    by this one: the first passed baseline_for''s arguments reversed, the second mapped
+    the record''s block names where counts_from expects ''pair''/''report'' - both
+    recorded unmeasurable.'
   recorded_by: d4d receipts check + canary.verdict, offline (#876)
