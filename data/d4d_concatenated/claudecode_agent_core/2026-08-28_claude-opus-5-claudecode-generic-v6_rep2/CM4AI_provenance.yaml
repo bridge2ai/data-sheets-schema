@@ -247,6 +247,20 @@ pair_consistency:
     full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
     core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
   recorded_by: d4d provenance record
+  semantic_review:
+    warning: semantic-review-required
+    verdict: consistent
+    reviewed_at: '2026-09-01T01:50:00+00:00'
+    reviewed_by: supplemental pair review, Claude agent (d4d-review-record protocol;
+      read-only pass over full and core records)
+    method: id-matched field diff, whitespace-normalized, plus reading of every non-identical
+      block
+    evidence: 'All 15 core distributions match a full entry by id (5 HIGT4C collections
+      + 10 nested files) with 0 field diffs incl. md5s (e.g. #cm4ai_apms_MDA-MB-468_paclitaxel.zip
+      md5 8642317c...). total_file_count 10 = sum of collection file_counts = the
+      10 file-level distributions; core drops resources[].total_file_count (omission,
+      not contradiction). No byte sizes exist in this pair on either side.'
+    recorded_by: '#691 supplemental attestation (PR pair-warning-attestation)'
 report_claims:
   checked: true
   findings: []
