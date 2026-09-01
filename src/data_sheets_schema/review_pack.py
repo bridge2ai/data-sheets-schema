@@ -80,6 +80,7 @@ def record_paths(provenance: Path) -> dict[str, Path]:
     p["claims"] = core_dir / f"{p['project']}_receipts.yaml"
     p["review"] = core_dir / f"{p['project']}_review.yaml"
     p["pack"] = core_dir / f"{p['project']}_review_pack.yaml"
+    p["review_b"] = core_dir / f"{p['project']}_review_b.yaml"
     p["instruction"] = core_dir / f"{p['project']}_review_instruction.md"
     return p
 
@@ -448,3 +449,72 @@ def check_review(pack: dict[str, Any], review: dict[str, Any]) -> dict[str, Any]
             "findings": findings,
             "summary": (f"items {len(answered)}/{len(by_id)} answered · {adverse} adverse · {cannot} cannot_tell"
                         + (f" · {len(findings)} finding(s)" if findings else ""))}
+
+
+# ---------------------------------------------------------------- reliability
+def _verdict_class(verdict: Any) -> str:
+    if verdict == "cannot_tell":
+        return "cannot_tell"
+    return "affirmative" if verdict in AFFIRMATIVE else "adverse"
+
+
+def agree(pack: dict[str, Any], review_a: dict[str, Any], review_b: dict[str, Any]) -> dict[str, Any]:
+    """Test–retest agreement between two independent reviews of ONE pack.
+
+    Deterministic and offline. Both reviews must pin the pack's sha256 — two
+    ratings of different packs are not paired observations. Cohen's kappa is
+    computed on the collapsed affirmative/adverse/cannot_tell trichotomy: the
+    full vocabulary has too many cells for ~50 items, and the trichotomy is
+    what every downstream count (adverse rate) actually uses. Items either
+    review left unanswered are excluded from kappa and counted apart. kappa
+    is None when the marginals make chance agreement 1 (all items one class
+    in both reviews — agreement is perfect but the statistic is undefined).
+    """
+    for name, rev in (("a", review_a), ("b", review_b)):
+        if rev.get("pack_sha256") != pack.get("_sha256"):
+            raise ValueError(f"review {name} pins {rev.get('pack_sha256')!r}, not this pack")
+    va = {str(i.get("id")): i.get("verdict") for i in review_a.get("items") or []}
+    vb = {str(i.get("id")): i.get("verdict") for i in review_b.get("items") or []}
+    ids = [str(i.get("id")) for i in pack.get("items") or []]
+    kinds = {str(i.get("id")): i.get("kind") for i in pack.get("items") or []}
+    paired, unanswered = [], []
+    for i in ids:
+        if i in va and i in vb:
+            paired.append((i, va[i], vb[i]))
+        else:
+            unanswered.append(i)
+    classes = ("affirmative", "adverse", "cannot_tell")
+    n = len(paired)
+    conf = {a: {b: 0 for b in classes} for a in classes}
+    exact = 0
+    disagreements = []
+    by_kind: dict[str, dict[str, int]] = {}
+    for i, a, b in paired:
+        ca, cb = _verdict_class(a), _verdict_class(b)
+        conf[ca][cb] += 1
+        k = by_kind.setdefault(kinds.get(i, "?"), {"paired": 0, "class_agree": 0, "exact": 0})
+        k["paired"] += 1
+        if ca == cb:
+            k["class_agree"] += 1
+        if a == b:
+            exact += 1; k["exact"] += 1
+        if ca != cb:
+            disagreements.append({"id": i, "kind": kinds.get(i), "a": a, "b": b})
+    po = (sum(conf[c][c] for c in classes) / n) if n else None
+    kappa = None
+    if n:
+        pe = sum((sum(conf[c].values()) / n) * (sum(conf[r][c] for r in classes) / n) for c in classes)
+        kappa = round((po - pe) / (1 - pe), 3) if pe < 1 else None
+    adverse_a = sum(1 for _i, a, _b in paired if _verdict_class(a) == "adverse")
+    adverse_b = sum(1 for _i, _a, b in paired if _verdict_class(b) == "adverse")
+    return {"paired_items": n, "unanswered_in_either": unanswered,
+            "percent_class_agreement": round(100 * po, 1) if po is not None else None,
+            "percent_exact_agreement": round(100 * exact / n, 1) if n else None,
+            "kappa_class": kappa,
+            "confusion": conf,
+            "adverse_a": adverse_a, "adverse_b": adverse_b,
+            "adverse_delta": adverse_b - adverse_a,
+            "by_kind": by_kind,
+            "disagreements": disagreements,
+            "basis": "Cohen's kappa on affirmative/adverse/cannot_tell over items answered by both; "
+                     "exact agreement is on the full vocabulary; single pack, both reviews pin its sha256"}

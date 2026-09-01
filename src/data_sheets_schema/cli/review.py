@@ -9,6 +9,8 @@ import click
 
 from data_sheets_schema.constants import PROJECTS
 
+from data_sheets_schema import backfill_checks as bc
+
 
 @click.group()
 def review():
@@ -93,3 +95,47 @@ def check(method, label, project, write, strict):
         click.echo(f"   ✓ review block written to {prov}")
     if strict and (block["findings"] or block["unanswered"]):
         sys.exit(1)
+
+@review.command("agree")
+@click.option("--method", default="claudecode_agent", show_default=True)
+@click.option("--label", required=True)
+@click.option("--project", type=click.Choice(PROJECTS), required=True)
+@click.option("--write", is_flag=True, help="write the reliability block into the provenance record's review block")
+def agree_cmd(method, label, project, write):
+    """Test-retest agreement between {P}_review.yaml and {P}_review_b.yaml
+    against the same committed pack: percent agreement, Cohen's kappa on the
+    affirmative/adverse/cannot_tell trichotomy, and every disagreement."""
+    import hashlib
+
+    import yaml
+
+    from data_sheets_schema.provenance import ProvenanceRecord
+    from data_sheets_schema.review_pack import agree, record_paths
+    prov = _provenance(method, label, project)
+    if not prov.exists():
+        raise click.ClickException(f"no provenance record at {prov}")
+    paths = record_paths(prov)
+    for k in ("pack", "review", "review_b"):
+        if not paths[k].exists():
+            raise click.ClickException(f"missing {paths[k]}")
+    pack = yaml.safe_load(paths["pack"].read_text(encoding="utf-8")) or {}
+    pack["_sha256"] = hashlib.sha256(paths["pack"].read_bytes()).hexdigest()
+    a = yaml.safe_load(paths["review"].read_text(encoding="utf-8")) or {}
+    b = yaml.safe_load(paths["review_b"].read_text(encoding="utf-8")) or {}
+    rel = agree(pack, a, b)
+    click.echo(f"   paired {rel['paired_items']} · class agreement {rel['percent_class_agreement']}% · "
+               f"exact {rel['percent_exact_agreement']}% · kappa {rel['kappa_class']} · "
+               f"adverse {rel['adverse_a']} vs {rel['adverse_b']}")
+    for d in rel["disagreements"]:
+        click.echo(f"   ≠ {d['id']} ({d['kind']}): {d['a']} vs {d['b']}")
+    if write:
+        import yaml as _y
+        rec = _y.safe_load(bc._split_header(prov.read_text(encoding="utf-8"))[1]) or {}
+        if not isinstance(rec.get("review"), dict):
+            raise click.ClickException("no review block to attach reliability to; run `d4d review check --write` first")
+        rec["review"]["reliability"] = {**rel,
+            "review_b_sha256": hashlib.sha256(paths["review_b"].read_bytes()).hexdigest(),
+            "recorded_by": "d4d review agree"}
+        ProvenanceRecord(data=rec).write(prov)
+        click.echo(f"   ✓ reliability written into {prov}")
+
