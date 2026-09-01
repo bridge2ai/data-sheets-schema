@@ -482,7 +482,7 @@ review:
       its sha256
     review_b_sha256: 68d7cb0339feb8f35c41cace5cc40c9d6ab8c0b8f728acf02764e9f58f2c97e5
     recorded_by: d4d review agree
-    adjudication:
+    third_rating_claude:
       adjudicator: claude-sonnet-5 (Claude family — the tasked Codex agent executed
         the adjudication itself and disclosed this after recording; NOT a cross-vendor
         ruling. A same-family third rating with direct bundle/schema verification.
@@ -512,3 +512,35 @@ review:
       b_right: 2
       neither: 0
       recorded_by: '#860 follow-up adjudication'
+    adjudication:
+      adjudicator: OpenAI Codex CLI (codex-personal account), invoked directly via
+        codex-companion task job task-mti98lpf-9ysd5q, thread 01a05b8a-a4fb-7813-9210-595c26278d42;
+        cross-vendor LLM ruling, not a human one; model id not surfaced by the tooling
+        (#867)
+      adjudicated_at: '2026-09-01T06:18:10+00:00'
+      instruction_file: notes/adjudication_sheet_2026-09-01.md
+      instruction_sha256: 9ae56c13b67f6d4c01744006ab2f44f94eb6f7735b26891ede663c6cff78434f
+      rulings_file: notes/adjudication_codex_2026-09-01.md
+      items:
+      - sheet_item: 19
+        id: rule-06
+        a: followed
+        b: violated
+        adjudicated: violated
+        agrees_with: B
+      - sheet_item: 20
+        id: rule-07
+        a: violated
+        b: followed
+        adjudicated: violated
+        agrees_with: A
+      - sheet_item: 21
+        id: rule-14
+        a: violated
+        b: not_applicable
+        adjudicated: not_applicable
+        agrees_with: B
+      a_right: 1
+      b_right: 2
+      neither: 0
+      recorded_by: '#860 follow-up adjudication (cross-vendor)'

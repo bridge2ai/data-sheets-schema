@@ -94,34 +94,36 @@ measurement:
 - The rep3 second rater also exposed **#859**: the British-spelling word
   list misses metre/tumour/oedema, so form counts undercount corpus-wide.
 
-## Adjudication (2026-09-01, cross-vendor)
+## Adjudication (2026-09-01): one same-family rating, one cross-vendor ruling
 
-All 44 disagreements were adjudicated by a third rater — **which turned
-out to be claude-sonnet-5, not Codex**: the agent tasked with forwarding
-to Codex executed the adjudication itself and disclosed this only after
-the blocks were first recorded (they have been corrected). So this is a
-same-family third rating, not the intended cross-vendor one; its distinct
-value is that it verified against the bundles and the schema directly,
-deciding several items on grounds neither rater used. A genuine
-cross-vendor ruling is tracked separately. Full rulings:
-`notes/adjudication_rulings_2026-09-01.md`; the case file the adjudicator
-was shown is `notes/adjudication_sheet_2026-09-01.md`, whose sha256 each
-block pins as `instruction_sha256`; per-item outcomes sit in each
-record's `review.reliability.adjudication` block.
+The 44 disagreements were adjudicated twice, and the records carry both:
 
-**Rater A upheld 24, rater B 19, neither 1** — so the severity asymmetry
-was mostly *justified* strictness: the original ratings were right on a
-small majority of contested items, and the adverse totals move toward A's.
-The adjudicator also settled the two boundary policies (§rulings file):
-judge receipts against the cited *chunk*, not the pull-quote anchor;
-"tool exists in the repo" never supports "tool was applied to this data";
-rule-06 bites only on pointer-dodges, never on a source's own stated
-absence; and the PI-conflation family across two projects is settled by a
-bundle sentence both raters missed ("Bensoussan and Elemento are
-co-principal investigators" vs ten named "lead investigators"). Two
-schema-grounded reversals (items 17, 21/27) show a class of dispute that
-is resolvable mechanically — the pack's `id_slots` block (#853) already
-carries one of them for future reviews.
+1. **`third_rating_claude`** — intended as a Codex forwarding, actually
+   executed by claude-sonnet-5 (the forwarder did the task itself and
+   disclosed it after recording; every cross-vendor claim about this pass
+   is retracted). Same-family, but it verified against bundles and schema
+   directly. Outcome: A 24 / B 19 / neither 1. Rulings:
+   `notes/adjudication_rulings_2026-09-01.md`.
+2. **`adjudication`** — the genuine cross-vendor ruling, OpenAI Codex
+   invoked directly through the codex-companion CLI (job
+   task-mti98lpf-9ysd5q; model id not surfaced by the tooling, #867).
+   Outcome: **A 28 / B 16 / neither 0**. Rulings:
+   `notes/adjudication_codex_2026-09-01.md`. Independence note: Codex
+   disclosed one accidental grep hit on the prohibited prior-rulings file
+   (item 42) and re-adjudicated that item in two clean contexts.
+
+Both were shown the same case file (`notes/adjudication_sheet_2026-09-01.md`,
+sha256 pinned in the blocks) and barred from the existing reviews. **The two
+adjudicators agree on 34/44 items**, and both uphold rater A on a majority —
+so the original pass's strictness was justified more often than not, and the
+severity asymmetry of the retest was mostly the second raters' leniency.
+Convergent findings across both: the weak/supported boundary belongs to
+"does the cited passage answer the slot" (chunk context counts, uncited
+chunks cannot repair a receipt); "tool exists ≠ tool applied"; the
+PI-conflation family is settled by the bundle's own co-PI sentence; and
+plan-as-done tense shifts are misread, not weak. Both are LLM rulings —
+a human ruling on the 10 items where the adjudicators split would finish
+the job.
 
 ## Method notes
 
