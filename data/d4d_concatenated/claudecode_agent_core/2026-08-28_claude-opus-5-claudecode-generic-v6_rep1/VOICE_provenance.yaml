@@ -249,7 +249,6 @@ pair_consistency:
   semantic_review:
     warning: semantic-review-required
     verdict: consistent
-    reviewed_at: '2026-08-31T23:59:00+00:00'
     reviewed_by: supplemental pair review, Claude agent (d4d-review-record protocol;
       read-only pass over full and core records)
     method: id-matched field diff, whitespace-normalized, plus reading of every non-identical

@@ -131,6 +131,20 @@ class Pack(unittest.TestCase):
             # a different sample size changes the pack; the same one does not
             self.assertNotEqual(rp.build_pack(prov, instr, {"receipted_slots": 1})["items"], p1["items"])
 
+    def test_a_pair_with_matched_distributions_yields_a_reviewable_item(self):
+        """#691: the checker re-runs at pack time and its warning becomes an
+        item — and when it runs, its failure-gap is absent."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = self._run(tmp)
+            core = Path(tmp) / "d4d_concatenated/claudecode_agent_core/L/P_d4d_core.yaml"
+            core.write_text(yaml.safe_dump({"id": "https://x/ds",
+                                            "distributions": [{"id": "https://x/ds#fc1", "name": "raw"}]}))
+            pack = rp.build_pack(prov, instr)
+            pw = [i for i in pack["items"] if i["kind"] == "pair_warning"]
+            self.assertGreaterEqual(len(pw), 1)
+            self.assertIn("semantically", pw[0]["question"])
+            self.assertFalse([g for g in pack["gaps"] if "pair" in g])
+
     def test_the_written_pack_has_no_yaml_aliases(self):
         """Chunk spans are shared between bundle.chunks and the items; a
         default dumper writes the second as `*id001` (#810)."""

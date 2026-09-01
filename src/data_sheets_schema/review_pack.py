@@ -51,6 +51,12 @@ VERDICTS = {
 AFFIRMATIVE = {"confirmed", "supported", "bundle_supports", "exempt_by_nature", "still_supported",
                "followed", "not_applicable", "consistent"}
 ADVERSE = {k: tuple(v for v in vs if v not in AFFIRMATIVE and v != "cannot_tell") for k, vs in VERDICTS.items()}
+def _anchored(rel: Path) -> Path:
+    """cwd-proof (#822): a relative repo path resolved against the package
+    root, so pack content cannot depend on the launch directory."""
+    return rel if rel.is_absolute() else Path(__file__).resolve().parents[2] / rel
+
+
 PAIR_SCHEMAS = ("src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
                 "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml")
 SCHEMA_FILES = ("src/data_sheets_schema/schema/data_sheets_schema_all.yaml (class Dataset; slot descriptions)",
@@ -368,7 +374,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
             rep = validate_pair_data(
                 yaml.safe_load(full_p.read_text(encoding="utf-8")) or {},
                 yaml.safe_load(core_p.read_text(encoding="utf-8")) or {},
-                load_pair_schema(Path(PAIR_SCHEMAS[0]), Path(PAIR_SCHEMAS[1])),
+                load_pair_schema(*(_anchored(Path(x)) for x in PAIR_SCHEMAS)),
                 schema_moved=pair_predates_current_schema(core_p),
                 run_digest=(record.get("schema") or {}).get("digest_md5"))
             n = 0
