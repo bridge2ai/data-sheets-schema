@@ -227,3 +227,25 @@ git diff 15bc4127..HEAD -- src/data_sheets_schema/api_runner.py \
     src/data_sheets_schema/cli/api.py src/download/prompts/
 git log --oneline -1 -- src/download/preprocess_sources.py   # must be the #874 commit
 ```
+
+
+## Gate interpretation: path_off_by_one (2026-09-01, registered like the #763 revision)
+
+The 2026-09-01 CM4AI canary held every floor except one `slot_not_in_record`
+finding: the receipt wrote `creators[43].source_caveats` where the value —
+verbatim-supported by the cited snippet — sits at `creators[44]`. A receipt
+path that resolves nowhere as written but resolves **uniquely** when one
+index moves by one is an addressing slip, not a fabricated slot, and the
+checker now reclassifies it `path_off_by_one` (#876): reported with the
+resolved path, never gated. The class is deliberately narrow after #878
+showed a permissive version hollow (163/170 phantom citations resolved
+"uniquely" on the live record): the path must parse, only the last index
+segment may move by one, the target must be an end-overrun-by-one or the
+unique carrier of that leaf across the whole array, and the written path
+keeps **no coverage credit** — escape from the gate is all the
+reclassification grants. Everything else stays gated. The checker is not on the
+generation path, so nothing the model receives changed and no restart is
+triggered; the canary is re-checked offline rather than re-run, exactly the
+2026-08-28 reading. The generation-side cure — anchor-based receipt
+citations that remove index arithmetic from the model — is registered for
+the v8 rewrite (#803/#830/#873/#876).
