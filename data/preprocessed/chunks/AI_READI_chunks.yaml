@@ -1,8 +1,8 @@
 bundle: AI_READI_preprocessed.txt
-bundle_md5: 0f3abb51a333555456bedd63891fcd99
-bundle_sha256: a42eb3aacc8aed05f8a79e54e848db65cc5159425888397242677c4914bf2aca
+bundle_md5: 8abd7bf5389b562b95794d656af19392
+bundle_sha256: 909c0dd8a1dcade0a0af908771356d5ea13cd91849522d562e9d88107661d368
 bundle_lines: 7376
-bundle_bytes: 535189
+bundle_bytes: 535178
 rule:
   version: 2
   unit: source-document
@@ -102,8 +102,8 @@ chunks:
   lines:
   - 2198
   - 2289
-  bytes: 5035
-  sha256: d8520f3776f2ea5dca181e1f1224de64dd84b1f6a5b13bff1bd265feed27d18a
+  bytes: 5024
+  sha256: 63f0ca137b46b84baaf9c437306825ad30b75d3df32fe559b9a3a0cc40a411af
 - id: c011
   source: docs_aireadi_org_docs-3_2026-07-24.txt
   lines:

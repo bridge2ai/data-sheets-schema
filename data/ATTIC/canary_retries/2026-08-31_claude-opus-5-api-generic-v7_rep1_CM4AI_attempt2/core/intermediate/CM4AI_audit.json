@@ -1,0 +1,113 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "`publisher` is set to `doi:10.18130/V3/HIGT4C`, the dataset's own DOI. The slot declares 'the organization or entity responsible for making the resource available'; a dataset is not its own publisher. The bundle attests University of Virginia Dataverse (LibraData, UVa's Scholarly Research) as the distributing organization, and supplies ROR:0153tk833 for the University of Virginia in the June 2026 creator affiliations. Replace with the organization identifier or omit the slot."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "citation; creators[Belisle-Pipon JC].name",
+      "issue": "The Dataverse citation is quoted material and must keep its source form exactly, but the record renders 'Bélisle-Pipon JC' as 'Belisle-Pipon JC' inside the citation string, and the creator entry carries the same de-accented spelling. All four Dataverse release records in the bundle write 'Bélisle-Pipon'. The American-English rule governs composed prose only, not proper nouns or quoted citations."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "preprocessing_strategies; labeling_strategies",
+      "issue": "Both slots describe the MuSIC cell-map construction pipeline (node2vec PPI embedding, HPA image embedding, contrastive co-embedding, community detection, GO/Reactome alignment, LLM assembly naming), sourced from the tier-3 preprint's Tools Module. The tier-1 subject release states 'Computed cell maps not included in this release' and the record itself records that limitation under `known_limitations`. As written these slots assert preprocessing applied to the distributed data that the release says it does not contain — an internal inconsistency. Either scope the entries explicitly to the project pipeline rather than to this release's contents, or omit them."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "funders[0].grants[0].id",
+      "issue": "`id` on every object in the digest is declared `uriorcurie`, but the value is the bare grant number `1OT2OD032742-01`, which is neither a URI nor a CURIE with a declared prefix. The bundle supplies no identifier scheme for NIH awards; the grant number belongs in a name/label field or, if `id` must be populated, as a fragment on an attested identifier."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "file_collections[*].total_bytes",
+      "issue": "Byte counts are derived by decimal expansion of the Dataverse display strings ('113.3 KB' → 113300, '1.1 MB' → 1100000, '30.2 KB' → 30200). These are rounded display values presented as exact integers, and the conversion factor (1000 vs 1024) is not stated by the source. The same record omits `total_bytes` for the three image collections displayed in GB, so the slot is populated inconsistently across sibling entries. Either omit throughout or record the displayed size in prose."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[0].data_substrate",
+      "issue": "The immunofluorescence instance uses B2AI_SUBSTRATE:19 (Image) where the vocabulary supplied in the digest offers B2AI_SUBSTRATE:56 (Immunofluorescence Image), an exact match for what the bundle describes ('immunofluorescence-based staining (ICC-IF) and confocal microscopy'). The more specific term should be used."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[0].label_description",
+      "issue": "`label` is `false`, yet `label_description` is populated with a description of the four fluorescence channels (DAPI, calreticulin, tubulin, protein of interest). Channel composition is not label information; the slot description asks about the label associated with an instance. This content belongs in the instance's own description or in the imaging file-collection descriptions."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[*].counts",
+      "issue": "Supported omission. The tier-1 October 2025 and tier-5 June 2025 release records state that each MDA-MB-468 immunofluorescence collection covers 'the spatial localization of 464 proteins of interest', and the March 2025 release states 563 for its own image sets. No per-condition protein count appears anywhere in the record, although `counts` is available on Instance and the value is attested for the image sets carried forward into this release."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "related_datasets",
+      "issue": "Supported omission. The subject release lists a second Related Publication — Nourreddine S et al., 'A PERTURBATION CELL ATLAS OF HUMAN INDUCED PLURIPOTENT STEM CELLS', bioRxiv 2024, doi 10.1101/2024.11.03.621734, PMCID PMC11580897 — which describes the perturb-seq component distributed here. It appears nowhere in the record, while the Clark et al. preprint is represented."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "version_access.versions_available",
+      "issue": "`versions_available` is multivalued but holds a single prose string enumerating four prior releases with their DOIs and versions. One entry per version would represent the distinct entities the slot declares; the collapsed form also duplicates content already carried by `related_datasets`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_dates[0].release_dates",
+      "issue": "A single DistributionDate entry merges the current release date, the later image-file publication date, and the dates of four prior releases into one prose blob. `distribution_dates` is multivalued; distinct release events should be separate entries."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "ethical_reviews[*].review_details",
+      "issue": "Both entries state only that ethical review 'is identified in the release record as the responsibility of named ethics leads' — a pointer to where the information sits rather than the review information itself, with the substantive content (who) already carried by `contact_person`. The bundle states no IRB number, reviewing body or determination for this release, so the details field adds nothing; `reviewing_organization` is also unpopulated."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_governance.committee_contact",
+      "issue": "The release names the Data Governance Committee contact as 'Jillian Parker (jillianparker@health.ucsd.edu)'. The record attaches ORCID:0000-0003-4535-3486, taken from the creator listed as 'Parker J'. The bundle never equates the two forms of the name; the ORCID linkage is inferred, however plausible. The attested email is not recorded anywhere."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_governance.accountable_organization",
+      "issue": "'University of California San Diego' as the accountable organization is inferred from the governance contact's email domain and the copyright statement naming the Regents of the University of California; the bundle does not name an accountable organization for the data over time. The release does attest that long-term preservation sits with the University of Virginia Dataverse, which the record places under `retention_limit` instead."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "language",
+      "issue": "`language: en` is not stated anywhere in the bundle. It is a safe inference from the material but remains an unattested value under the evidence boundary."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "created_by",
+      "issue": "Supported omission. The release records 'Depositor: Niestroy, Justin' with 'Deposit Date 2025-02-27'. This is currently buried in a `maintainers` entry, where the depositor role fits poorly (Maintainer.role is set to `academic_institution` for an individual); `created_by` is the fitting scalar slot."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "keywords",
+      "issue": "Supported omission. All four Dataverse release records state 'Subject: Medicine, Health and Life Sciences', a classification term absent from the keyword list and from the description."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "known_limitations[2].limitation_type",
+      "issue": "The entry describing incomplete final form and temporary pre-publication embargo is typed `integration_limitation`. Embargo and incompleteness are not integration constraints; `scope_limitation` or `temporal_limitation` fit the described condition better, and the enum offers no completeness term."
+    }
+  ],
+  "summary": "Eighteen findings against the full record, one high, four medium, thirteen low. The single high-severity defect is `publisher` set to the dataset's own DOI, a value that is both semantically wrong and easily repaired from attested evidence. Medium findings concern fidelity and consistency rather than fabrication: an accented proper noun altered inside a quoted Dataverse citation; preprocessing and labeling strategies that describe cell-map construction the subject release explicitly states it does not contain; a bare grant number in a slot the digest declares `uriorcurie`; and byte counts derived by expanding rounded display strings, applied to some file collections but not others. Low findings are chiefly under-specification (a generic image substrate where an immunofluorescence term exists, channel description misplaced in `label_description`, pointer-style `review_details`), multivalued slots collapsed into single prose entries (`versions_available`, `distribution_dates`), two inferred identity or organization linkages, one unattested `language` value, and four supported omissions (per-condition protein counts, the second Related Publication, the depositor, the Dataverse subject term). No fabricated dataset facts, no enum violations, and no prior-D4D reuse were detected; the record's handling of the Sali affiliation conflict, the U2OS scope exclusion, and the project-level aggregate counts is correctly reasoned and documented in `source_caveats`."
+}
