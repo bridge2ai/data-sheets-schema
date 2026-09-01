@@ -255,6 +255,19 @@ pair_consistency:
     full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
     core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
   recorded_by: d4d provenance record
+  semantic_review:
+    warning: semantic-review-required
+    verdict: consistent
+    reviewed_at: '2026-08-31T23:59:00+00:00'
+    reviewed_by: supplemental pair review, Claude agent (d4d-review-record protocol;
+      read-only pass over full and core records)
+    method: id-matched field diff, whitespace-normalized, plus reading of every non-identical
+      block
+    evidence: '10 file_collections <-> 10 distributions matched by id; names/descriptions
+      byte-identical; all 9 byte totals equal full total_bytes (e.g. retinal_oct 1317625293027);
+      no core-only distributions. Full''s 9 ark: subcrate resources have no core counterpart
+      - granularity, not contradiction.'
+    recorded_by: '#691 supplemental attestation (PR pair-warning-attestation)'
 report_claims:
   checked: true
   findings: []
