@@ -553,34 +553,50 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     unresolved = [p for p in receipt_paths if not resolve(full, p)]
     reshaped = [p for p in unresolved if p and original is not None and resolve(original, p)]
     unresolved = [p for p in unresolved if p not in reshaped]
-    # A path that resolves nowhere as written but resolves UNIQUELY when one
-    # index moves by one is an addressing slip, not a fabricated slot — the
-    # 2026-09-01 CM4AI canary wrote creators[43].source_caveats for the
-    # value at creators[44] (#876). Deterministic: vary each [n] by ±1, one
-    # at a time; exactly one populated resolution reclassifies the path as
-    # `path_off_by_one` (reported, never gated — the #763 class at the path
-    # level) and the RESOLVED path earns the coverage credit. Zero or
-    # several resolutions leave the path gated as before.
+    # A path that resolves nowhere as written may be an addressing slip
+    # rather than a fabricated slot — the 2026-09-01 CM4AI canary wrote
+    # creators[43].source_caveats for the value at creators[44] (#876). The
+    # first version reclassified any unique ±1 resolution and transferred
+    # coverage credit; on a live record 163/170 phantom citations resolved
+    # "uniquely", so that rule was hollow (#878). The class is now narrow:
+    # the path must parse (#879: the lax prober laundered malformed paths),
+    # only the LAST index segment may move, by exactly one, and the target
+    # must be either an end-overrun by one (the written index is len(list))
+    # or the UNIQUE carrier of that leaf across the whole array (no other
+    # entry has the leaf, so the address carries no information the leaf
+    # name does not). Reported with the resolved path; the written path
+    # keeps NO coverage credit (#878) — escape from the gate is all the
+    # reclassification grants, and NON_CHECKS still names snippet-supports-
+    # value as unchecked.
     off_by_one = []
     still = []
     for pth in unresolved:
-        hits = []
-        for m in re.finditer(r"\[(\d+)\]", pth):
-            n = int(m.group(1))
-            for d in (-1, 1):
-                if n + d < 0:
-                    continue
-                cand = pth[:m.start()] + f"[{n + d}]" + pth[m.end():]
-                ok, val = _resolve_value(full, cand)
-                if ok and _populated(val):
-                    hits.append(cand)
-        if len(set(hits)) == 1:
-            off_by_one.append({"path": pth, "resolved_path": hits[0]})
+        m = None
+        if pth and re.fullmatch(r"\w+(\[\d+\])*(\.\w+(\[\d+\])*)*", pth):
+            for m2 in re.finditer(r"\[(\d+)\]", pth):
+                m = m2                                       # last index segment
+        if m is None:
+            still.append(pth); continue
+        n = int(m.group(1)); head, tail = pth[:m.start()], pth[m.end():]
+        ok_parent, arr = _resolve_value(full, head) if head else (True, full)
+        if not (ok_parent and isinstance(arr, list)):
+            still.append(pth); continue
+        leaf = tail.lstrip(".")
+        carriers = [k for k, e in enumerate(arr)
+                    if isinstance(e, dict) and leaf and resolve(e, leaf)
+                    and _populated(_resolve_value(e, leaf)[1])] if leaf else []
+        target = None
+        if n == len(arr) and n - 1 >= 0:                     # end-overrun by one
+            cand = f"{head}[{n - 1}]{tail}"
+            if resolve(full, cand):
+                target = cand
+        elif leaf and len(carriers) == 1 and abs(carriers[0] - n) == 1:
+            target = f"{head}[{carriers[0]}]{tail}"          # unique carrier, one away
+        if target:
+            off_by_one.append({"path": pth, "resolved_path": target})
         else:
             still.append(pth)
     unresolved = still
-    receipt_paths = sorted(set(receipt_paths) - {o["path"] for o in off_by_one}
-                           | {o["resolved_path"] for o in off_by_one})
     for p in unresolved:
         findings.append({"kind": "slot_not_in_record" if p else "slot_empty", "slot": p})
     leaves = populated_leaves(full)

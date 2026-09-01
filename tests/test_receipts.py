@@ -294,39 +294,55 @@ class Validator(unittest.TestCase):
         self.assertIsNone(b2["slots"]["never_receipted"])
         self.assertIsNone(b2["slots"]["added_after_receipt"])
 
-    def test_an_off_by_one_path_is_reported_and_credits_the_resolved_slot(self):
-        """#876: a receipt path resolving uniquely one index away is an
-        addressing slip, reported never gated; the resolved path takes the
-        coverage credit. An ambiguous or unresolvable path stays gated."""
+    def test_off_by_one_is_narrow_reported_and_transfers_no_credit(self):
+        """#876/#878: only an end-overrun by one or a unique-carrier leaf one
+        away is reclassified; the written path keeps no coverage credit;
+        malformed, shared-leaf and far-off paths stay gated."""
         manifest, texts = _manifest_and_texts()
-        rec = _receipt(manifest["bundle_md5"])
-        # cite funders[1].grant_id where only funders[0] exists
-        for e in rec["chunks"]:
-            for pr in e.get("extracted") or []:
-                if pr["slot"] == "funders[0].grant_id":
-                    pr["slot"] = "funders[1].grant_id"
-        b = rc.check(rec, manifest, texts, FULL, manifest["bundle_md5"])
-        self.assertEqual(b["slots"]["path_off_by_one_count"], 1)
-        self.assertEqual(b["slots"]["path_off_by_one"][0],
-                         {"path": "funders[1].grant_id", "resolved_path": "funders[0].grant_id"})
-        self.assertNotIn("slot_not_in_record", [f["kind"] for f in b["findings"]])
-        self.assertEqual(b["findings_gated"], 0)
-        self.assertNotIn("funders[0].grant_id", b["slots"]["without_receipt"])   # credit lands
-        self.assertIn("off by one index", b["summary"])
         from data_sheets_schema.canary import receipt_floors
+
+        def cite(slot, full):
+            rec = _receipt(manifest["bundle_md5"])
+            for e in rec["chunks"]:
+                for pr in e.get("extracted") or []:
+                    if pr["slot"] == "funders[0].grant_id":
+                        pr["slot"] = slot
+            return rc.check(rec, manifest, texts, full, manifest["bundle_md5"])
+
+        # (a) end-overrun by one on a 1-element list: reported, no credit
+        b = cite("funders[1].grant_id", FULL)
+        self.assertEqual(b["slots"]["path_off_by_one_count"], 1)
+        self.assertEqual(b["slots"]["path_off_by_one"][0]["resolved_path"], "funders[0].grant_id")
+        self.assertEqual(b["findings_gated"], 0)
         self.assertEqual(receipt_floors(b)["receipt findings"], 0)
-        # ambiguous (both neighbours populated) stays gated
-        full2 = {**FULL, "funders": [dict(FULL["funders"][0]), {"id": "https://x/ds#f2", "name": "Other",
-                                                                "grant_id": "X999"},
-                                     {"id": "https://x/ds#f3", "name": "Third", "grant_id": "Y111"}]}
-        rec2 = _receipt(manifest["bundle_md5"])
-        for e in rec2["chunks"]:
-            for pr in e.get("extracted") or []:
-                if pr["slot"] == "funders[0].grant_id":
-                    pr["slot"] = "funders[9].grant_id"          # resolves nowhere, no neighbour
-        b2 = rc.check(rec2, manifest, texts, full2, manifest["bundle_md5"])
-        self.assertEqual(b2["slots"]["path_off_by_one_count"], 0)
-        self.assertIn("slot_not_in_record", [f["kind"] for f in b2["findings"]])
+        self.assertIn("funders[0].grant_id", b["slots"]["without_receipt"])     # no credit transfer (#878)
+        self.assertIn("off by one index", b["summary"])
+
+        # (b) unique-carrier leaf, one away, interior index: reported
+        three = {**FULL, "funders": [{"id": "https://x/ds#f1", "name": "A"},
+                                     {"id": "https://x/ds#f2", "name": "B"},
+                                     {"id": "https://x/ds#f3", "name": "C", "grant_id": "OT2OD032644"}]}
+        b2 = cite("funders[1].grant_id", three)
+        self.assertEqual(b2["slots"]["path_off_by_one"][0]["resolved_path"], "funders[2].grant_id")
+        self.assertEqual(b2["findings_gated"], 0)
+
+        # (c) leaf on both neighbours: ambiguous, stays gated (#878)
+        both = {**FULL, "funders": [{"id": "x#f1", "name": "A", "grant_id": "G0"},
+                                    {"id": "x#f2", "name": "B"},
+                                    {"id": "x#f3", "name": "C", "grant_id": "G2"}]}
+        b3 = cite("funders[1].grant_id", both)
+        self.assertEqual(b3["slots"]["path_off_by_one_count"], 0)
+        self.assertIn("slot_not_in_record", [f["kind"] for f in b3["findings"]])
+
+        # (d) malformed path never launders as an index slip (#879)
+        b4 = cite("funders[0]grant_id", FULL)
+        self.assertEqual(b4["slots"]["path_off_by_one_count"], 0)
+        self.assertIn("slot_not_in_record", [f["kind"] for f in b4["findings"]])
+
+        # (e) far off the end: gated
+        b5 = cite("funders[9].grant_id", FULL)
+        self.assertEqual(b5["slots"]["path_off_by_one_count"], 0)
+        self.assertIn("slot_not_in_record", [f["kind"] for f in b5["findings"]])
 
     def test_a_snippet_cut_by_a_chunk_boundary_is_reported_as_spanning(self):
         """#781: the passage exists in the bundle across c002/c003; no single
