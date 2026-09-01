@@ -243,6 +243,16 @@ pair_consistency:
     full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
     core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
   recorded_by: d4d provenance record
+  semantic_review:
+    warning: semantic-review-required
+    verdict: consistent
+    reviewed_by: supplemental pair review, Claude agent (d4d-review-record protocol;
+      read-only pass over full and core records)
+    method: id-matched field diff, whitespace-normalized, plus reading of every non-identical
+      block
+    evidence: 3 <-> 14, per-file record counts identical between full nested files
+      and core (29,278/32,522/28,640/31,855/31,872/29,289). Zero field diffs.
+    recorded_by: '#691 supplemental attestation (PR pair-warning-attestation)'
 report_claims:
   checked: true
   findings: []

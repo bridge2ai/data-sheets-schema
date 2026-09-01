@@ -40,12 +40,25 @@ VERDICTS = {
     "slot_receiptless": ("bundle_supports", "inferred", "not_in_bundle", "exempt_by_nature", "cannot_tell"),
     "slot_reshaped": ("still_supported", "changed_meaning", "cannot_tell"),
     "rule": ("followed", "violated", "not_applicable", "cannot_tell"),
+    # A `semantic-review-required` pair warning (#691): the deterministic
+    # checker matched related full/core content and cannot judge whether the
+    # relation holds semantically. `consistent`: the matched content says the
+    # same thing; `divergent`: it does not, with paths and what differs.
+    "pair_warning": ("consistent", "divergent", "cannot_tell"),
 }
 #: The verdicts that count against the record, per kind — derived, so a
 #: verdict added above cannot be silently uncounted (#792).
 AFFIRMATIVE = {"confirmed", "supported", "bundle_supports", "exempt_by_nature", "still_supported",
-               "followed", "not_applicable"}
+               "followed", "not_applicable", "consistent"}
 ADVERSE = {k: tuple(v for v in vs if v not in AFFIRMATIVE and v != "cannot_tell") for k, vs in VERDICTS.items()}
+def _anchored(rel: Path) -> Path:
+    """cwd-proof (#822): a relative repo path resolved against the package
+    root, so pack content cannot depend on the launch directory."""
+    return rel if rel.is_absolute() else Path(__file__).resolve().parents[2] / rel
+
+
+PAIR_SCHEMAS = ("src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+                "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml")
 SCHEMA_FILES = ("src/data_sheets_schema/schema/data_sheets_schema_all.yaml (class Dataset; slot descriptions)",
                 "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml (class CoreDataset)")
 #: What a reviewer cannot resolve from the pack alone is its own verdict, not
@@ -350,6 +363,37 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     for r in pack["rules"]:
         items.append({"id": r["id"], "kind": "rule", "block": r["block"], "text": r["text"],
                       "question": "Did the record follow this rule? Cite the slot(s) that show it, or the violation."})
+    # --- semantic-review-required pair warnings (#691): the provenance block
+    # stores only a count, so the deterministic checker is re-run on the two
+    # records; failure to run is a named gap, never a silent absence.
+    try:
+        from data_sheets_schema.d4d_pair_consistency import (
+            load_pair_schema, pair_predates_current_schema, validate_pair_data)
+        full_p, core_p = Path(pack["records"]["full"]), Path(pack["records"]["core"])
+        if full_p.exists() and core_p.exists():
+            rep = validate_pair_data(
+                yaml.safe_load(full_p.read_text(encoding="utf-8")) or {},
+                yaml.safe_load(core_p.read_text(encoding="utf-8")) or {},
+                load_pair_schema(*(_anchored(Path(x)) for x in PAIR_SCHEMAS)),
+                schema_moved=pair_predates_current_schema(core_p),
+                run_digest=(record.get("schema") or {}).get("digest_md5"))
+            n = 0
+            for w in rep.warnings:
+                if getattr(w, "code", None) != "semantic-review-required":
+                    continue
+                n += 1
+                items.append({"id": f"pair-{n:02d}", "kind": "pair_warning",
+                              "path": w.path, "checker_message": w.message,
+                              "question": "The deterministic checker matched this related full/core "
+                                          "content but cannot judge the relation semantically. Open "
+                                          "both records at the path; do the matched values say the "
+                                          "same thing? Answer with the paths compared and what "
+                                          "differs, if anything."})
+        else:
+            pack["gaps"].append("pair warnings: full or core record missing; the checker did not run")
+    except Exception as e:                                    # noqa: BLE001
+        pack["gaps"].append(f"pair warnings unavailable: {type(e).__name__}")
+
     pack["items"] = items
     pack["verdicts"] = {k: list(v) for k, v in VERDICTS.items()}
     return pack

@@ -122,6 +122,7 @@ class Pack(unittest.TestCase):
             self.assertNotIn("sha256", p1["provenance"]); self.assertEqual(len(p1["bundle"]["chunks"]), 3)
             self.assertGreaterEqual(kinds["slot_receipted"], 1)
             self.assertIn("id_slots", p1); self.assertIn("entries", p1["id_slots"])   # #803
+            self.assertIn("pair_warning", p1["verdicts"])                              # #691
             chunk = next(i for i in p1["items"] if i["id"] == "chunk-c003")
             self.assertEqual(chunk["source"], "b.txt"); self.assertEqual(chunk["agent_reason"], "references only")
             slot = next(i for i in p1["items"] if i["kind"] == "slot_receipted")
@@ -129,6 +130,20 @@ class Pack(unittest.TestCase):
             self.assertIn("sha256 matches", p1["instruction"]["basis"]); self.assertEqual(p1["gaps"], [])
             # a different sample size changes the pack; the same one does not
             self.assertNotEqual(rp.build_pack(prov, instr, {"receipted_slots": 1})["items"], p1["items"])
+
+    def test_a_pair_with_matched_distributions_yields_a_reviewable_item(self):
+        """#691: the checker re-runs at pack time and its warning becomes an
+        item — and when it runs, its failure-gap is absent."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = self._run(tmp)
+            core = Path(tmp) / "d4d_concatenated/claudecode_agent_core/L/P_d4d_core.yaml"
+            core.write_text(yaml.safe_dump({"id": "https://x/ds",
+                                            "distributions": [{"id": "https://x/ds#fc1", "name": "raw"}]}))
+            pack = rp.build_pack(prov, instr)
+            pw = [i for i in pack["items"] if i["kind"] == "pair_warning"]
+            self.assertGreaterEqual(len(pw), 1)
+            self.assertIn("semantically", pw[0]["question"])
+            self.assertFalse([g for g in pack["gaps"] if "pair" in g])
 
     def test_the_written_pack_has_no_yaml_aliases(self):
         """Chunk spans are shared between bundle.chunks and the items; a
@@ -147,6 +162,23 @@ class Pack(unittest.TestCase):
             self.assertEqual(p["rules"], []); self.assertTrue(any(g.startswith("instruction") for g in p["gaps"]))
             other = Path(tmp) / "other.md"; other.write_text("edited\n")
             self.assertIn("does NOT match", rp.build_pack(prov, other)["instruction"]["basis"])
+
+
+class PairWarnings(unittest.TestCase):
+    def test_the_vocabulary_counts_divergent_as_adverse_and_consistent_as_not(self):
+        """#691: a semantic-review-required warning becomes a reviewable item."""
+        self.assertIn("pair_warning", rp.VERDICTS)
+        self.assertIn("consistent", rp.AFFIRMATIVE)
+        self.assertEqual(rp.ADVERSE["pair_warning"], ("divergent",))
+
+    def test_an_answered_pair_item_counts(self):
+        pack = {"_sha256": "abc", "items": [{"id": "pair-01", "kind": "pair_warning"}]}
+        good = rp.check_review(pack, {"pack_sha256": "abc", "items": [
+            {"id": "pair-01", "verdict": "consistent", "evidence": "file_collections[0] vs distributions[0]"}]})
+        self.assertEqual((good["adverse"], good["cannot_tell"]), (0, 0))
+        bad = rp.check_review(pack, {"pack_sha256": "abc", "items": [
+            {"id": "pair-01", "verdict": "divergent", "evidence": "counts disagree"}]})
+        self.assertEqual(bad["adverse"], 1)
 
 
 class Check(unittest.TestCase):
