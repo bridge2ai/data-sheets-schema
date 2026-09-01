@@ -428,3 +428,68 @@ review:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/VOICE_review.yaml
       sha256: 50880b87c0bb0c6d069f48fc896870b6318c3542e0e4d9aefc59f37b7d4d20f7
   recorded_by: d4d review check
+  reliability:
+    paired_items: 66
+    unanswered_in_either: []
+    percent_class_agreement: 92.4
+    percent_exact_agreement: 86.4
+    kappa_class: 0.629
+    confusion:
+      affirmative:
+        affirmative: 56
+        adverse: 0
+        cannot_tell: 0
+      adverse:
+        affirmative: 5
+        adverse: 5
+        cannot_tell: 0
+      cannot_tell:
+        affirmative: 0
+        adverse: 0
+        cannot_tell: 0
+    adverse_a: 10
+    adverse_b: 5
+    adverse_delta: -5
+    by_kind:
+      chunk_nothing_relevant:
+        paired: 1
+        class_agree: 1
+        exact: 1
+      slot_receipted:
+        paired: 25
+        class_agree: 24
+        exact: 24
+      slot_receiptless:
+        paired: 25
+        class_agree: 24
+        exact: 20
+      rule:
+        paired: 15
+        class_agree: 12
+        exact: 12
+    disagreements:
+    - id: slot-005
+      kind: slot_receipted
+      a: weak
+      b: supported
+    - id: slot-037
+      kind: slot_receiptless
+      a: inferred
+      b: bundle_supports
+    - id: rule-01
+      kind: rule
+      a: violated
+      b: followed
+    - id: rule-06
+      kind: rule
+      a: violated
+      b: followed
+    - id: rule-07
+      kind: rule
+      a: violated
+      b: followed
+    basis: Cohen's kappa on affirmative/adverse/cannot_tell over items answered by
+      both; exact agreement is on the full vocabulary; single pack, both reviews pin
+      its sha256
+    review_b_sha256: 1001c5c6de5036eafb9b777f9c4d57945df18730e03f203a8b72df7035aa004f
+    recorded_by: d4d review agree

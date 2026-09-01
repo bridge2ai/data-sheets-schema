@@ -1,0 +1,530 @@
+reviewer: second-rater (test-retest)
+model: claude-fable-5
+reviewed_at: '2026-08-31T00:00:00Z'
+pack_sha256: 1c0df45a8f6378eea98d241e0bb4c6ef7bd9d0e979cff57f439d9a5b78805e0a
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: >-
+    Lines 1-18 are the concatenation banner, file count, input directory,
+    extensions, manifest path and the four-entry table of contents. Nothing
+    there states a fact about the CHoRUS dataset that any datasheet slot could
+    carry.
+- id: slot-002
+  verdict: supported
+  evidence: >-
+    Line 1447 reads "An online documentation SOP for Data Acquisition Module",
+    the repository description directly under data_acq_SOP (line 1445), inside
+    c007. The value is that description verbatim, on the software entry for
+    that repository.
+- id: slot-003
+  verdict: supported
+  evidence: >-
+    Line 37 reads "Principal investigator: ROSENTHAL, ERIC S." — the NIH
+    RePORTER page names him as PI, exactly what the slot's description asks
+    (the name of the key individual responsible for dataset creation). The
+    direct-order rendering is also attested by "Eric Rosenthal" at line 173.
+- id: slot-004
+  verdict: weak
+  evidence: >-
+    Lines 1106-1108: "Contact Us / Ciera McCrary, MGH, Program Manager /
+    cmccrary@mgh.havard.edu". The passage is real and the value transcribes it
+    faithfully (typo preserved and caveated), but it is a website contact
+    listing: it does not say she is responsible for maintaining the dataset,
+    which is what maintainer_details asks. The value itself only claims
+    "listed as the contact", so the reading is honest, but the passage does
+    not answer the slot's maintainer question.
+- id: slot-005
+  verdict: weak
+  evidence: >-
+    Lines 186-187 ("Parisa Rashidi / University of Florida", under "Bridge2AI
+    CHoRUS Leadership Team" at line 171) support the name, affiliation and
+    leadership listing, and the entry's own name says "leadership team
+    member". But the field populated is principal_investigator, whose
+    description asks for "the key individual (Principal Investigator)
+    responsible for or overseeing dataset creation"; the slide does not say
+    Rashidi is a PI (line 37 names Rosenthal as the PI). Schema-shape note:
+    Creator offers no other field for a person's name, so this is a
+    structural tension rather than laundering.
+- id: slot-006
+  verdict: supported
+  evidence: >-
+    Lines 444-446 (registration form with name, email, institution; email sent
+    once access granted and compute provisioned), lines 452-455 (licensing
+    agreement in the registration form required before access), and lines
+    883-886 (".edu" email required for dataset access) state each element of
+    the value; "Access is controlled" is the webinar's own repeated access
+    label (line 240 and the table). The value answers who submits and what is
+    required, as the slot asks.
+- id: slot-007
+  verdict: supported
+  evidence: >-
+    Line 45: "As part of the NIH Common Fund's Bridge2AI program" — the
+    grantor slot asks for the name of the supporting organization, and the NIH
+    Common Fund is that organization; line 1094 ("funded by the NIH under
+    award number OT2OD032701") corroborates.
+- id: slot-008
+  verdict: supported
+  evidence: >-
+    Lines 1610-1618: "chorus-extract-upload Public / Repository with tools to
+    create and upload a CHoRUS Data Extract / Python / MIT". Name, description
+    and license all sit in that repository listing, and a data-extract
+    upload tool belongs under the collection mechanism's used_software.
+- id: slot-009
+  verdict: supported
+  evidence: >-
+    Lines 1228-1248 state the four numbered offerings the value paraphrases
+    (software/tooling, validated semantic mappings, SOPs for contributing
+    sites, project management overviews); the chorus-mapping, chorus-developer
+    and package status page sentences come from lines 1290-1294, 1353-1355 and
+    1357-1359 of the same chunk.
+- id: slot-010
+  verdict: supported
+  evidence: >-
+    Line 45: "The project's overarching goal is to develop a publicly
+    available, AI-ready critical care dataset, while ensuring the methods
+    promote privacy, accountability, and clinical benefit..." — the value's
+    response is this sentence nearly verbatim and the purpose slot asks
+    exactly for the reason the dataset was created.
+- id: slot-011
+  verdict: weak
+  evidence: >-
+    Lines 189-190 ("Manlik Kwong / Tufts University", leadership team slide)
+    support name, affiliation and leadership listing, but the
+    principal_investigator field asks for the PI overseeing dataset creation
+    and the bundle names only Rosenthal as PI (line 37). Same structural
+    tension as slot-005.
+- id: slot-012
+  verdict: supported
+  evidence: >-
+    Line 1445: "data_acq_SOP" is the repository's name in the GitHub popular
+    repositories listing; the value is it verbatim.
+- id: slot-013
+  verdict: supported
+  evidence: >-
+    Lines 346-348: "Imaging (from PACS) / DICOM" — adjacent cells of the
+    webinar's data-type table; line 341's "Yes (DICOM schema)" corroborates
+    the imaging-DICOM pairing despite the table's scrambled extraction.
+- id: slot-014
+  verdict: supported
+  evidence: >-
+    Line 1094: "This project is funded by the NIH under award number
+    OT2OD032701. The content on this website is solely the responsibility of
+    the authors and does not necessarily represent the official views of the
+    NIH." — the value's two claims (NIH/Bridge2AI funding, the disclaimer)
+    are this passage plus line 45's Common Fund sentence.
+- id: slot-015
+  verdict: supported
+  evidence: >-
+    Lines 1413-1415: "privacy_scan_tool / A Privacy Scan tools for medical
+    records". Name and description verbatim, the grammatical slip preserved
+    and flagged in source_caveats rather than silently corrected.
+- id: slot-016
+  verdict: supported
+  evidence: >-
+    Lines 1064-1075: "Snapshot of the dataset / Anticipated Final Dataset /
+    100,000 / Patient admissions / 9 / Different data modalities / 14 / Data
+    contributing hospitals / ... Current Released Dataset / 50,000" — the
+    growth framing the value states. Its August-2025 sentences are attested at
+    lines 251-254 and the status-update sentence at lines 1323-1334.
+- id: slot-017
+  verdict: supported
+  evidence: >-
+    Lines 1504-1512: "Chorus_SOP Public / ChoRUS centralized SOP documentation
+    site / MDX / 3 / Apache-2.0" — the Apache-2.0 badge sits inside the
+    Chorus_SOP repository listing, supporting the license on that software
+    entry.
+- id: slot-018
+  verdict: supported
+  evidence: >-
+    Lines 1644-1652: "chorus_waveform Public / CHoRUS waveform documentation
+    and various waveform conversion scripts / Jupyter Notebook / 3 / MIT" —
+    MIT sits in the chorus_waveform listing.
+- id: slot-019
+  verdict: supported
+  evidence: >-
+    Line 1185 (and repeatedly, e.g. 1264, 1336): the page's own URL
+    "https://github.com/chorus-ai#table-of-contents". The chunk documents the
+    contribution routes hosted there (SOPs, mapping repo, discussions), so
+    the org URL answers contribution_url; dropping the #table-of-contents
+    fragment keeps the same referent.
+- id: slot-020
+  verdict: supported
+  evidence: >-
+    Line 45: "The dataset will also provision a holdout test set, accessible
+    for model external validation to aid marketplace adoption of AI-developed
+    models for implementation in acute and critical care." — the task's
+    response is this sentence nearly verbatim.
+- id: slot-021
+  verdict: supported
+  evidence: >-
+    Lines 265-314 list the five EHR data types with OMOP standards and
+    "Controlled" access repeated; "Yes (OMOP schema with extensions)" at
+    lines 335-336 exists in the table without a safely attributable row, and
+    the value states exactly that hedged reading, with the scrambled-table
+    reasoning in source_caveats. The 1.6-billion-rows sentence is line
+    1077-1078.
+- id: slot-022
+  verdict: weak
+  evidence: >-
+    Lines 177-178 ("Azra Bihorac / University of Florida", leadership team
+    slide) support name, affiliation and leadership listing, but not
+    PI status; the principal_investigator field asks for the PI and the
+    bundle names only Rosenthal (line 37). Same structural tension as
+    slot-005.
+- id: slot-023
+  verdict: supported
+  evidence: >-
+    Line 1423 (and 1646): "CHoRUS waveform documentation and various waveform
+    conversion scripts" — the repository description verbatim.
+- id: slot-024
+  verdict: supported
+  evidence: >-
+    Lines 1127-1145: the GitHub page titled "CHoRUS for Equitable AI" for the
+    chorus-ai organization ("chorus-ai / Overview / Repositories 28 ...").
+    Appending "GitHub organization" to the org's displayed name is the right
+    reading for an external-resource name.
+- id: slot-025
+  verdict: supported
+  evidence: >-
+    Line 1073 ("60+ / CHoRUS consortium members across 20 different
+    institutions"), lines 1202-1204 ("This collaboration spans 20 academic
+    centers, of which 14 will contribute as Data Acquisition centers"),
+    line 45 (the three pillars), and lines 1273-1277 (sub-teams Standards,
+    Data Acquisition, Tooling) together state every clause of the value.
+- id: slot-026
+  verdict: supported
+  evidence: >-
+    Lines 1079-1080: "7,642 / Admissions with Radiology Data" supports the
+    released count; DICOM under controlled access with a published DICOM
+    schema is lines 341 and 346-348. The caveat correctly refuses to equate
+    7,642 admissions with the webinar's 1000 images (lines 251-252).
+- id: slot-027
+  verdict: bundle_supports
+  evidence: >-
+    Lines 1212-1214: "A visualization and annotation environment will label
+    data with targets important for prediction." The name is that phrase.
+- id: slot-028
+  verdict: inferred
+  evidence: >-
+    "Controlled" access is stated (line 240) and the training program
+    "expands access to Bridge2AI CHoRUS data" to trainees (lines 215-217)
+    from eligible outside organizations (lines 861-879), but no line states
+    sharing "beyond the contributing institutions"; the name's distinctive
+    claim follows from those lines rather than being stated. An inference the
+    rules say the record should not carry, though not a fabrication.
+- id: slot-029
+  verdict: bundle_supports
+  evidence: >-
+    Lines 215-217: the AIM-AHEAD program "expands access to Bridge2AI CHoRUS
+    data" to trainees, and lines 444-455 describe granting them dataset
+    access — the dataset is distributed to parties external to the creating
+    entity, which is what is_shared: true asserts.
+- id: slot-030
+  verdict: bundle_supports
+  evidence: >-
+    Lines 308-310 ("Clinical notes (extracted and tokenized using OHNLP
+    toolkit)"), lines 338-339 ("Yes (OHNLP open source schema)"), line 45
+    ("tokenized unstructured electronic health record data") and line 247
+    ("Clinical notes - stored locally except tokens") state each clause;
+    "rather than released as text" restates the except-tokens line.
+- id: slot-031
+  verdict: exempt_by_nature
+  evidence: >-
+    limitation_type is a LimitationTypeEnum categorization the record assigns
+    to the stated limitation (released 50,000 vs anticipated 100,000, lines
+    1064-1075); an enum bucket has no passage by its kind.
+- id: slot-032
+  verdict: bundle_supports
+  evidence: >-
+    Lines 1127-1145: "CHoRUS for Equitable AI" is the chorus-ai GitHub
+    organization's displayed name; the name value is that plus the
+    "GitHub organization" descriptor, same composition as slot-024.
+- id: slot-033
+  verdict: bundle_supports
+  evidence: >-
+    Line 1210: "Unified standards will harmonize multi-modal EHR, waveform,
+    imaging, and text data." The name is a direct label of that sentence.
+- id: slot-034
+  verdict: bundle_supports
+  evidence: >-
+    Lines 1064-1075: "Snapshot of the dataset / Anticipated Final Dataset /
+    100,000 ... Current Released Dataset / 50,000" — the name labels exactly
+    the released-snapshot-to-anticipated-final relation those lines state.
+- id: slot-035
+  verdict: bundle_supports
+  evidence: >-
+    Lines 308-310: "Clinical notes (extracted and tokenized using OHNLP
+    toolkit)" — the name is that operation.
+- id: slot-036
+  verdict: bundle_supports
+  evidence: >-
+    Line 1220: "Federated access will enable sampling methods to ensure a
+    balanced and diverse cohort." The name is that phrase.
+- id: slot-037
+  verdict: bundle_supports
+  evidence: >-
+    Lines 256-258: "Datasets are being used for training activities and
+    publications"; lines 465-467: trainees "leverage the data and tools to
+    create practical use cases". The name lists exactly those three.
+- id: slot-038
+  verdict: bundle_supports
+  evidence: >-
+    Line 1076: "Patient admissions from ICU, PICU, and NICU" — the name
+    "Care unit of admission" labels the distinction those three units draw.
+- id: slot-039
+  verdict: exempt_by_nature
+  evidence: >-
+    limitation_type is an enum categorization of the stated imaging
+    limitation (lines 251-252); the bucket itself has no passage by its kind.
+- id: slot-040
+  verdict: inferred
+  evidence: >-
+    Lines 251-252 state "currently 1000 images available with de-id in
+    process for larger cohort"; that imaging-based analyses are therefore
+    limited to the released subset is a consequence the record draws, not a
+    statement any line makes. The scope_impact field invites exactly this
+    consequence, but it remains the record's inference from those lines.
+- id: slot-041
+  verdict: inferred
+  evidence: >-
+    Line 45 states the publicly-available goal, line 240 controlled access,
+    lines 215-217 and 444-455 the trainee access route — each sentence of the
+    description is grounded except "extended beyond the contributing
+    institutions", which follows from the program lines (trainees from
+    eligible outside organizations, lines 861-879) without being stated.
+    Same inference as slot-028.
+- id: slot-042
+  verdict: bundle_supports
+  evidence: >-
+    Line 45: "As part of the NIH Common Fund's Bridge2AI program" — the
+    funder name is that phrase reordered; line 1094 corroborates NIH as the
+    funder.
+- id: slot-043
+  verdict: bundle_supports
+  evidence: >-
+    Line 45 (structured EHR data), lines 346 ("Imaging (from PACS)"),
+    350-352 ("Waveform telemetry (bedside monitors, gateway/middleware)")
+    and 364-365 ("Waveform EEG (hospital database)") state each source type
+    the value lists; "electronic health record systems" is a fair rendering
+    of the stated EHR data's origin.
+- id: slot-044
+  verdict: bundle_supports
+  evidence: >-
+    Line 238: "Retrospective data collection"; the from-hospital-clinical-
+    systems half is the modality sources at lines 346-365. The name labels
+    stated content.
+- id: slot-045
+  verdict: bundle_supports
+  evidence: >-
+    Research and training are both stated uses: lines 256-258 (training
+    activities and publications) and lines 465-467 ("innovative data-driven
+    research"); line 45's ML/AI applications. The category string names what
+    those lines state; use_category is a single-valued string whose own
+    description invites "one or more categories".
+- id: slot-046
+  verdict: bundle_supports
+  evidence: >-
+    Line 45: "standardize data to the OMOP Common Data Model" — the name is
+    that operation.
+- id: slot-047
+  verdict: inferred
+  evidence: >-
+    Lines 245-247: "OMOP and telemetry in enclave except: Clinical notes -
+    stored locally except tokens". That enclave analyses therefore work from
+    tokenized representations rather than note text is the record's drawn
+    consequence, stated by no line. Same pattern as slot-040.
+- id: slot-048
+  verdict: bundle_supports
+  evidence: >-
+    Lines 245-247: "OMOP and telemetry in enclave except: Clinical notes -
+    stored locally except tokens" — the name states exactly this.
+- id: slot-049
+  verdict: bundle_supports
+  evidence: >-
+    Line 1093: "CHoRUS Consortium" (section heading), and line 1073 "CHoRUS
+    consortium members" — the name is the bundle's own term.
+- id: slot-050
+  verdict: bundle_supports
+  evidence: >-
+    Line 1538: "Open source code to geocode OMOP Location entities via
+    DeGauss" supports "Geocoding of location entities"; "for contextual
+    factors" is line 45's "data elements feature appropriate contextual
+    factors such as geographic distance to the nearest hospital". Both
+    halves of the label are stated; joining them is the entry's judgment but
+    the name itself asserts nothing unstated.
+- id: slot-051
+  verdict: bundle_supports
+  evidence: >-
+    Line 45: "structured electronic health record data" and "standardize
+    data to the OMOP Common Data Model"; the webinar table (lines 265-314)
+    shows the EHR data types under OMOP. The name is those stated facts.
+- id: rule-01
+  verdict: followed
+  evidence: >-
+    The reconciliation's deliberate-omissions list (collection_timeframes,
+    known_biases, doi, version, license, publisher, citation, etc.) shows
+    omission chosen where evidence is absent, and disagreements are caveated
+    rather than guessed (instances[0].source_caveats). Borderline inferences
+    exist and are disclosed where they occur: human_subject_research.
+    special_populations expands PICU/NICU with its own caveat saying so, and
+    the scope_impact values (slot-040, slot-047) are drawn consequences.
+    These are readings of stated lines, not plausible guesses, so the rule
+    is followed on balance.
+- id: rule-02
+  verdict: followed
+  evidence: >-
+    instances[0].source_caveats states both the website's 50,000 (line 1075)
+    and the webinar's 45K (lines 242-244) and which was preferred;
+    distribution_formats[2].source_caveats holds the 7,642-admissions vs
+    1000-images figures as non-comparable rather than choosing;
+    funders[0].grants[0].source_caveats records both award-number notations.
+    No distinct entities merged: seven creators, two maintainers, separate
+    software entries.
+- id: rule-03
+  verdict: followed
+  evidence: >-
+    Both records carry id: https://chorus4ai.org/ and name: CHoRUS dataset;
+    the reconciliation's Referent section states the choice; the AIM-AHEAD
+    training program is held as external_resources[1] and its curriculum
+    deliberately not extracted (receipt c004/c005 notes), so no second
+    referent leaks in.
+- id: rule-04
+  verdict: followed
+  evidence: >-
+    The receipt's c004 and c005 notes decline to extract the training
+    program's curriculum, stipend and application logistics with stated
+    reasons — evidence of judgment about support rather than density-seeking;
+    no slot shows padding to a target.
+- id: rule-05
+  verdict: followed
+  evidence: >-
+    creators[0..6] emit one object per person plus one for the consortium;
+    distribution_formats one per modality; purposes and tasks split into
+    3 and 4 entries; maintainers[0..1] separate the program manager from the
+    GitHub organization. intended_uses[0] holds three example uses in its
+    multivalued examples slot, which that slot's own description ("List of
+    example intended uses") declares as its shape, so it is not a collapse.
+- id: rule-06
+  verdict: followed
+  evidence: >-
+    No slot records that documentation is pending or absent; absences are
+    genuinely absent and explained in source_caveats or the report.
+    machine_annotation_tools' "OHNLP toolkit unknown" follows the tools
+    slot's own prescribed convention. Borderline but not violating: the last
+    sentence of distribution_formats[5].description records where the
+    public-facing webpage lives inside an otherwise substantive value.
+- id: rule-07
+  verdict: followed
+  evidence: >-
+    The access route (registration, licensing agreement, .edu email) sits in
+    data_governance.access_review_process and license_and_use_terms, not in
+    distribution_formats; the anticipated-final figures sit in updates and
+    known_limitations[3], not in instances[0].counts; trainee program facts
+    sit on the external resource. distribution_formats[5] "Cloud enclave"
+    answers DistributionFormat's own question ("How will the dataset be
+    distributed") as a channel entry.
+- id: rule-08
+  verdict: followed
+  evidence: >-
+    funders[0].grants[0].grant_number carries 1OT2OD032701-01 (Grant declares
+    no date or amount fields, so those correctly live in description);
+    creators[*].affiliations[*].name carry institutions; instances[0].counts
+    is the integer 50000; distribution_formats[*].format carry the formats.
+    Declared fields are populated before prose throughout.
+- id: rule-09
+  verdict: not_applicable
+  evidence: >-
+    The bundle contains no ROR, ORCID, DOI or other prefix-covered identifier
+    and the record asserts none; every uriorcurie value is a fragment on
+    https://chorus4ai.org/, the uri fallback for identifiers no declared
+    prefix covers, and contribution_url is a uri-ranged slot holding a URL.
+    The situation the rule governs does not arise.
+- id: rule-10
+  verdict: followed
+  evidence: >-
+    Organizations the bundle names are recorded as names only —
+    creators[0].affiliations[0] is {name: Massachusetts General Hospital}
+    with no id, likewise University of Florida, UTHealth Houston, Tufts —
+    and no registry identifier appears anywhere in either record though ROR
+    ids for these institutions are widely known; the restraint the rule asks
+    for is visible.
+- id: rule-11
+  verdict: followed
+  evidence: >-
+    Every minted id is a fragment on https://chorus4ai.org/, which the bundle
+    attests (line 1041, "Source URL: https://chorus4ai.org/"); no prefix
+    outside the schema's declared set is invented; no fragment is hung on an
+    organization identifier to name a person — persons appear as name
+    strings in principal_investigator per that slot's description, and no
+    Person objects are minted.
+- id: rule-12
+  verdict: followed
+  evidence: >-
+    A sweep of both records for British spellings (organis-, analysed,
+    behaviour, licence, programme, centre, standardis-, characteris-,
+    harmonis-, tokenis-) finds none; generated prose uses standardized,
+    organization, analyzed, license. Quoted source text keeps its source's
+    spelling ("repoitory", "A Privacy Scan tools"), each flagged in
+    source_caveats.
+- id: rule-13
+  verdict: followed
+  evidence: >-
+    instances[0].source_caveats names the tiers (website tier 2, webinar
+    tier 4), states both values (50,000 vs over 45K), and says the
+    higher-ranked website figure was preferred — the exact three elements
+    the rule requires. The top-level source_caveats declares the full
+    ranking.
+- id: rule-14
+  verdict: violated
+  evidence: >-
+    Every minted fragment appears exactly once in the full record — no other
+    value points at any of them (grep of '#[a-z0-9-]+' shows count 1 for all
+    ~45 fragments, splits[0]'s #split-holdout included; no task names the
+    split, no distribution cites a subset). The schema forces ids only where
+    it declares them required/identifier (Software, Person, File,
+    FileCollection, DataSubset): the ~13 used_software mints are therefore
+    forced and never violate, but the ~32 mints on DatasetProperty
+    subclasses — purposes[*], tasks[*], addressing_gaps[0], creators[*],
+    funders[0], instances[0], subpopulations[0], known_limitations[*],
+    confidential_elements[0], splits[0], acquisition_methods[0],
+    collection_mechanisms[*], sampling_strategies[0], data_collectors[0],
+    raw_data_sources[0], ethical_reviews[0], human_subject_research,
+    is_deidentified, preprocessing_strategies[*], cleaning_strategies[0],
+    labeling_strategies[0], machine_annotation_tools[0], existing_uses[0],
+    intended_uses[0], distribution_formats[*], third_party_sharing[0],
+    license_and_use_terms, data_governance, maintainers[*], updates,
+    extension_mechanism, external_resources[*] — sit on classes whose id the
+    schema declares "An optional identifier for this property"
+    (required=false), are pointed at by nothing, and are exactly the
+    "identifier no value in the record uses" the rule calls noise that reads
+    as structure.
+- id: rule-15
+  verdict: followed
+  evidence: >-
+    No object sits in a scalar slot: principal_investigator holds the
+    person's name string as its own description prescribes (#360) — the
+    reconciliation records this as Phase 1 correction 6 — tools holds
+    "OHNLP toolkit unknown" strings, counts holds the integer 50000, and
+    grantor holds a name string.
+notes: >-
+  Three observations outside the sampled items. (1) The reconciliation
+  report's Minted identifiers review claims "Fragments are minted only for
+  objects the schema requires an `id` on; nothing is labeled that the schema
+  would have accepted without one" — this is contradicted by the schema,
+  which declares id optional on every DatasetProperty subclass; only the
+  Software entries' ids are forced. The rule-14 violation above is thus also
+  a false claim in the report's own self-review. (2) instances[0].description
+  states each released admission carries "multimodal data across 9 data
+  modalities", but the website's "9 / Different data modalities" (lines
+  1068-1069) sits under "Anticipated Final Dataset", and the webinar shows
+  EEG extraction in process and imaging partial as of August 2025 (lines
+  251-254) — an anticipated-final figure read as a property of released
+  instances, in the exact pattern the report's own semantic review says it
+  guarded against. Not a sampled item, so recorded here rather than as a
+  verdict. (3) The pack's counts block says receipted_slots_total 94 and
+  receiptless_slots_total 58; the pack lists no slot_reshaped items and
+  gaps is empty, consistent with what I saw. Pack_version 2 predates the
+  id_slots block, so the forced/unforced analysis for rule-14 was done
+  directly against the schema's id declarations as the reviewer protocol
+  directs.
