@@ -294,6 +294,40 @@ class Validator(unittest.TestCase):
         self.assertIsNone(b2["slots"]["never_receipted"])
         self.assertIsNone(b2["slots"]["added_after_receipt"])
 
+    def test_an_off_by_one_path_is_reported_and_credits_the_resolved_slot(self):
+        """#876: a receipt path resolving uniquely one index away is an
+        addressing slip, reported never gated; the resolved path takes the
+        coverage credit. An ambiguous or unresolvable path stays gated."""
+        manifest, texts = _manifest_and_texts()
+        rec = _receipt(manifest["bundle_md5"])
+        # cite funders[1].grant_id where only funders[0] exists
+        for e in rec["chunks"]:
+            for pr in e.get("extracted") or []:
+                if pr["slot"] == "funders[0].grant_id":
+                    pr["slot"] = "funders[1].grant_id"
+        b = rc.check(rec, manifest, texts, FULL, manifest["bundle_md5"])
+        self.assertEqual(b["slots"]["path_off_by_one_count"], 1)
+        self.assertEqual(b["slots"]["path_off_by_one"][0],
+                         {"path": "funders[1].grant_id", "resolved_path": "funders[0].grant_id"})
+        self.assertNotIn("slot_not_in_record", [f["kind"] for f in b["findings"]])
+        self.assertEqual(b["findings_gated"], 0)
+        self.assertNotIn("funders[0].grant_id", b["slots"]["without_receipt"])   # credit lands
+        self.assertIn("off by one index", b["summary"])
+        from data_sheets_schema.canary import receipt_floors
+        self.assertEqual(receipt_floors(b)["receipt findings"], 0)
+        # ambiguous (both neighbours populated) stays gated
+        full2 = {**FULL, "funders": [dict(FULL["funders"][0]), {"id": "https://x/ds#f2", "name": "Other",
+                                                                "grant_id": "X999"},
+                                     {"id": "https://x/ds#f3", "name": "Third", "grant_id": "Y111"}]}
+        rec2 = _receipt(manifest["bundle_md5"])
+        for e in rec2["chunks"]:
+            for pr in e.get("extracted") or []:
+                if pr["slot"] == "funders[0].grant_id":
+                    pr["slot"] = "funders[9].grant_id"          # resolves nowhere, no neighbour
+        b2 = rc.check(rec2, manifest, texts, full2, manifest["bundle_md5"])
+        self.assertEqual(b2["slots"]["path_off_by_one_count"], 0)
+        self.assertIn("slot_not_in_record", [f["kind"] for f in b2["findings"]])
+
     def test_a_snippet_cut_by_a_chunk_boundary_is_reported_as_spanning(self):
         """#781: the passage exists in the bundle across c002/c003; no single
         chunk holds it, and it must not read as found nowhere."""

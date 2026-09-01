@@ -553,6 +553,34 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     unresolved = [p for p in receipt_paths if not resolve(full, p)]
     reshaped = [p for p in unresolved if p and original is not None and resolve(original, p)]
     unresolved = [p for p in unresolved if p not in reshaped]
+    # A path that resolves nowhere as written but resolves UNIQUELY when one
+    # index moves by one is an addressing slip, not a fabricated slot — the
+    # 2026-09-01 CM4AI canary wrote creators[43].source_caveats for the
+    # value at creators[44] (#876). Deterministic: vary each [n] by ±1, one
+    # at a time; exactly one populated resolution reclassifies the path as
+    # `path_off_by_one` (reported, never gated — the #763 class at the path
+    # level) and the RESOLVED path earns the coverage credit. Zero or
+    # several resolutions leave the path gated as before.
+    off_by_one = []
+    still = []
+    for pth in unresolved:
+        hits = []
+        for m in re.finditer(r"\[(\d+)\]", pth):
+            n = int(m.group(1))
+            for d in (-1, 1):
+                if n + d < 0:
+                    continue
+                cand = pth[:m.start()] + f"[{n + d}]" + pth[m.end():]
+                ok, val = _resolve_value(full, cand)
+                if ok and _populated(val):
+                    hits.append(cand)
+        if len(set(hits)) == 1:
+            off_by_one.append({"path": pth, "resolved_path": hits[0]})
+        else:
+            still.append(pth)
+    unresolved = still
+    receipt_paths = sorted(set(receipt_paths) - {o["path"] for o in off_by_one}
+                           | {o["resolved_path"] for o in off_by_one})
     for p in unresolved:
         findings.append({"kind": "slot_not_in_record" if p else "slot_empty", "slot": p})
     leaves = populated_leaves(full)
@@ -578,6 +606,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
              "without_receipt_truncated": max(0, len(without) - 50) or None,
              "never_receipted": never_receipted, "added_after_receipt": added_after_receipt,
              "receipt_paths": len(receipt_paths), "unresolved": unresolved,
+             "path_off_by_one": off_by_one[:20],
+             "path_off_by_one_count": len(off_by_one),
              "reshaped_by_reconcile": reshaped,
              "receipts_to_removed_values": len(reshaped)}
 
@@ -611,7 +641,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                            f"{slots['added_after_receipt']} added after the receipt)"
                            if never_receipted is not None and without else "")
                         + (f" ({slots['exempt']} exempt)" if slots["exempt"] else "")
-                        + (f" · {len(reshaped)} receipt path(s) reshaped by reconcile" if reshaped else "")),
+                        + (f" · {len(reshaped)} receipt path(s) reshaped by reconcile" if reshaped else "")
+                        + (f" · {len(off_by_one)} receipt path(s) off by one index" if off_by_one else "")),
             "non_checks": list(NON_CHECKS)}
 
 
