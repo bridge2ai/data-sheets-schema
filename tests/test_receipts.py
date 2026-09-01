@@ -74,6 +74,16 @@ class Normalisation(unittest.TestCase):
         # #784: version strings and figure labels pin nothing
         for weak in ("3.0.0", "v3.0.0", "Table 1", "Fig. 1", "1,000"):   # "10 days" (7 chars, 2 digits) pins, as the review measured
             self.assertFalse(rc.snippet_in(weak, f"see {weak} here")[0], weak)
+        # #882: a stray artifact line interrupting a sentence must not fail an
+        # honest multi-line quote; line breaks act as implicit ellipses,
+        # in order, under the same floors
+        ok, why = rc.snippet_in("upon any breach of any term\nof this Agreement",
+                                "will terminate automatically upon any breach of any term\n7.\nof this Agreement by Licensee")
+        self.assertTrue(ok); self.assertEqual(why, "split-at-linebreaks")
+        self.assertFalse(rc.snippet_in("of this Agreement\nupon any breach of any term",
+                                       "upon any breach of any term\n7.\nof this Agreement")[0])   # out of order
+        self.assertFalse(rc.snippet_in("upon any breach of any term\nzz",
+                                       "upon any breach of any term\n7.\nof this Agreement")[0])   # short part floor holds
         # #789: a word the extraction wrapped mid-line is the word a reader quotes
         ok, why = rc.snippet_in("Participants are volunteers; therefore, there is selection bias",
                                 "Partic-\nipants  are  volunteers;  therefore,  there  is  selection  bias\n")

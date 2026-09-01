@@ -160,6 +160,29 @@ def snippet_in(snippet: str, chunk_text: str, hay: str | None = None,
     hj = normalise_joined(chunk_text) if hay_joined is None else hay_joined
     if hj and find_all(hj):
         return True, "linewrap-joined"
+    # A stray extraction artifact can interrupt a sentence mid-quote — the
+    # AI_READI license text reads "…of any term / 7. / of this Agreement"
+    # (#882) — so an honest multi-line quotation fails contiguity while every
+    # line of it is verbatim. Retry with the snippet's own line breaks as
+    # implicit ellipsis separators: the same parts logic, same #720 floors,
+    # same in-order requirement the explicit "..." form already gets. Parity,
+    # not relaxation — and counted apart as "split-at-linebreaks".
+    if "\n" in snippet:
+        nl_parts = [normalise(x) for x in snippet.split("\n")]
+        nl_parts = [x for x in nl_parts if x]
+        if (len(nl_parts) > 1 and not [x for x in nl_parts if len(x) < MIN_PART_CHARS]
+                and any(pins(x) for x in nl_parts)
+                and sum(len(x) for x in nl_parts) >= MIN_MULTIPART_CHARS):
+            def find_all_parts(h: str, ps: list) -> bool:
+                pos = 0
+                for x in ps:
+                    i = h.find(x, pos)
+                    if i < 0:
+                        return False
+                    pos = i + len(x)
+                return True
+            if find_all_parts(hay, nl_parts) or (hj and find_all_parts(hj, nl_parts)):
+                return True, "split-at-linebreaks"
     return False, (f"part not found in chunk: {parts[0][:60]!r}" if len(parts) > 1
                    else "not found in chunk")
 
@@ -444,7 +467,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # reported, never gated; the floor of 0 is for text found nowhere.
     record_id_flag = full.get("id") if isinstance(full.get("id"), str) else None
     snippets = {"total": 0, "verified": 0, "linewrap_joined": 0, "adjacent": 0, "elsewhere": 0,
-                "spans_boundary": 0, "mismatched": 0, "unchecked": 0,
+                "spans_boundary": 0, "split_at_linebreaks": 0, "mismatched": 0, "unchecked": 0,
                 # Reported, never gated (#806, #804): a verified snippet whose
                 # normalised tokens overlap nothing in the value it receipts
                 # is verbatim laundering the deterministic floor cannot see
@@ -480,6 +503,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                 snippets["verified"] += 1
                 if why == "linewrap-joined":
                     snippets["linewrap_joined"] += 1
+                elif why == "split-at-linebreaks":
+                    snippets["split_at_linebreaks"] += 1
                 spath = str(pair.get("slot") or "")
                 # Prefer the value the receipt was written against: on the
                 # API path reconcile/repair rewrite after the receipt (#844).
@@ -645,6 +670,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                         f"{snippets['verified']}/{snippets['total']} verified"
                         + (f" ({snippets['unchecked']} unchecked)" if snippets["unchecked"] else "")
                         + (f" ({snippets['linewrap_joined']} across a wrapped line)" if snippets["linewrap_joined"] else "")
+                        + (f" ({snippets['split_at_linebreaks']} split at line breaks)" if snippets["split_at_linebreaks"] else "")
                         + (f" ({snippets['adjacent']} in an adjacent chunk)" if snippets["adjacent"] else "")
                         + (f" ({snippets['elsewhere']} in another chunk)" if snippets["elsewhere"] else "")
                         + (f" ({snippets['spans_boundary']} spanning a chunk boundary)" if snippets["spans_boundary"] else "")
