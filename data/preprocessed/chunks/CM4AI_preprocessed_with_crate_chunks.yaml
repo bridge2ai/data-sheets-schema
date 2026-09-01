@@ -1,8 +1,8 @@
 bundle: CM4AI_preprocessed_with_crate.txt
-bundle_md5: c62ede765a0cd1f925aab35d4c2e22ee
-bundle_sha256: c7e8db5c220ff8c301a3b5e96ca192f704547e969ee6f7be181994b1a65cca38
+bundle_md5: 1b28f783af65d6525af7ffe9df873cdb
+bundle_sha256: 2b5b1543b748b065b152622f162c0c369a2b9cd1b96afad9fc98215d1d87d040
 bundle_lines: 10077
-bundle_bytes: 436792
+bundle_bytes: 436535
 rule:
   version: 2
   unit: source-document
@@ -166,8 +166,8 @@ chunks:
   lines:
   - 4510
   - 4765
-  bytes: 6073
-  sha256: 969d2d577222cccaa20ba25b4587947d5bb1bca8033f379064cfd85307c37c19
+  bytes: 5816
+  sha256: 08babc4aabf1e844ff650dd042e3659115066a78038944428f0c40eca0a7bbce
 - id: c018
   source: dataverse_10.18130_V3_B35XWX_row16.txt
   lines:

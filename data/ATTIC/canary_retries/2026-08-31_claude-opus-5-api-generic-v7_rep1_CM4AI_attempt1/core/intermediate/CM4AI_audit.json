@@ -1,0 +1,113 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators",
+      "issue": "Each Creator object carries only an `id` holding an ORCID CURIE and no other populated field. The Creator class declares `affiliations` (Organization[]), `principal_investigator` (Person), `credit_roles` and `notes`; the bundle supplies an affiliation string for every listed author (e.g. Clark T — University of Virginia; Ideker T — University of California San Diego) and identifies Ideker T as principal investigator and point of contact. Populating only an opaque identifier produces 38 objects of the correct shape carrying none of the structure the class exists to hold, contrary to the rule that a class-ranged slot must be populated with the fields that class declares. Repair: populate `affiliations` for each creator from the release author list, and set `principal_investigator` on the Ideker entry."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators",
+      "issue": "The record omits nine of the 47 authors listed on the June 2026 release (Axelsson U, Chinn B, Fall J, Johannesson A, Khaliq H, Muralidharan M, Pan E, Polacco B, Zhang Y) solely because the source gives no ORCID for them. Their authorship is attested by the bundle and by the citation string already carried in `citation`; omitting them makes `creators` inconsistent with `citation` within the same record. A Creator entry requires no `id` under the schema digest (Creator has no required keys), so these authors can be represented by affiliation and notes without minting an identifier. The `source_caveats` note acknowledging the omission documents the defect rather than curing it."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "`publisher` is set to `ROR:0153tk833`. The bundle contains the string `https://ror.org/0153tk833` only inside the June 2026 Dataverse author-affiliation fields, where it stands in for the University of Virginia as an author affiliation — it is never stated as the publisher of the dataset. The publishing body attested by the bundle is the University of Virginia Dataverse. Asserting an organization identifier in the `publisher` slot on the strength of its appearance in a different slot's context is an unsupported inference. Repair: either omit `publisher` or record it only if the bundle states the publishing organization directly."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances",
+      "issue": "Two Instance entries carry `counts` values that are project-wide portal figures, not counts of instances in the referent release: `counts: 53788` for images and `counts: 1374` for AP-MS interaction records. The record itself flags this in the accompanying `notes` on each entry, which is an admission that the value does not answer the slot. `counts` on an Instance is a count of that instance type in the dataset; a figure for a different scope belongs in prose, not in the numeric slot. Repair: remove both `counts` values, retaining the project-wide figures in `description` where they already appear."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances",
+      "issue": "The Instance entry for AP-MS records asserts `counts: 1374` for the June 2026 release, but the same release's AP-MS archives are described in `file_collections` as covering only treated MDA-MB-468 cells (two archives, 113.3 KB and 135.8 KB), and `source_caveats` states the portal figures are project-wide. The record therefore carries two mutually inconsistent scopes for AP-MS content — a project-level count in `instances` and a release-level scope in `file_collections`."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "other_tasks",
+      "issue": "`other_tasks: []` is an empty list. An empty multivalued slot conveys nothing that omission does not, and the schema treats absence as the correct representation of absent evidence. Repair: omit the slot."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "data_governance",
+      "issue": "The DataGovernance object places the committee contact's name and email inside the free-text `access_review_process` prose while leaving the declared field `committee_contact` (range Person) unpopulated. The class declares fields for exactly this content. The same object also leaves `accountable_organization` empty although the bundle names UCSD, Stanford and UCSF as copyright-holding institutions and UCSD as the contact's institution. Repair: move Jillian Parker into `committee_contact`."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "ethical_reviews",
+      "issue": "Both EthicalReview entries leave `contact_person` (range Person) empty while embedding the reviewers' names and email addresses (Vardit Ravitsky, ravitskyv@thehastingscenter.org; Jean-Christophe Belisle-Pipon, jean-christophe_belisle-pipon@sfu.ca) in the free-text `review_details`. `reviewing_organization` is populated with the string 'CM4AI Ethics Module' on both entries, which the bundle supports as the module name, but the declared person field is the field the evidence answers. Repair: populate `contact_person` on the first entry."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "external_resources",
+      "issue": "Six of the seven ExternalResource entries populate only `external_resources` (a free-text description) and leave the declared boolean `archival` and the `future_guarantees` field empty, even where the bundle states archival status directly — the Zenodo long-term archive for production-ready tools, and the University of Virginia Dataverse long-term preservation supported by committed institutional funds. Where the evidence answers a declared field, that field should be populated rather than the fact being restated only in prose."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "related_datasets",
+      "issue": "All four DatasetRelationship entries use `relationship_type: is_new_version_of` pointing from this release to each earlier release. The bundle attests that the June 2026 release supersedes the October 2025 release, and that all five are successive quarterly releases of the same resource, but it does not support the claim that June 2026 is a new version of the May 2024 release specifically as opposed to a later member of a series. The enum offers `is_version_of` and `replaces`; `is_new_version_of` applied uniformly across a four-deep series overstates the pairwise relationship the evidence supports for the older entries."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "collection_timeframes",
+      "issue": "The CollectionTimeframe entry sets `start_date: '2022-09-01'`, which the bundle gives as the NIH RePORTER *project* start date, not as a data-collection start. `end_date` is left empty although the entry's own prose discusses two candidate end dates (2026-08-31 from RePORTER, November 2026 from the Dataverse maintenance plan). Using a funding-period boundary as a collection start conflates the award period with the acquisition period; the bundle does not state when data collection began."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "sampling_strategies",
+      "issue": "`is_representative: false` and `why_not_representative` are populated from the release's 'Potential Sources of Bias' statement about cell-line derivation, while `strategies` describes protein/gene target selection. These are two different sampling questions — which proteins were targeted, and whether the cell lines represent the population — collapsed into a single SamplingStrategy object. The multivalued slot should carry one object per distinct strategy."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "file_collections",
+      "issue": "Every FileCollection populates `file_count` but none populates `total_bytes`, although per-file sizes are stated in the bundle for all ten files (e.g. 4.6 GB, 3.8 GB, 4.2 GB for the three IF archives). `total_bytes` is a declared field of FileCollection whose value the evidence supports by summation of stated per-file sizes; the sizes currently appear only inside `description` prose. Consistently, the top-level `total_size_bytes` is omitted with a caveat, which is defensible for the project-wide figure but not for the per-collection totals."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "raw_data_sources",
+      "issue": "Five RawDataSource entries populate `source_description` and `access_details` but none populates `source_type` consistently with a controlled vocabulary or `raw_data_format`, although the bundle states the formats implicitly (mass spectrometry raw files; sequencing reads). More materially, the fifth entry conflates two distinct deposits — the KOLF2.1J iPSC atlas raw sequences and the MDA-MB-468 Perturb-seq raw sequences — into one object, whereas the bundle lists them as two separately embargoed external links. A multivalued slot should carry one object per distinct entity."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "version",
+      "issue": "`version: '2.0'` is taken from the June 2026 page header. The same page's citation string, already reproduced verbatim in `citation`, gives 'V2'. `source_caveats` documents this inconsistency across releases but the record does not note that the two forms within this single release page are the same version rendered two ways, leaving a reader to wonder whether 2.0 and V2 are distinct."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "known_biases",
+      "issue": "A single DatasetBias entry of type `representation_bias` covers the cell-line derivation point. The bundle also supports a distinct selection-bias observation: the protein and gene panels were chosen by targeted selection of chromatin modifiers and metabolic enzymes implicated in specific disorders, and the release states that the three modalities interrogate incompletely overlapping protein sets. That second bias is currently recorded only as an integration *limitation*, not as a bias, though the evidence bears on both."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "labeling_strategies",
+      "issue": "The single LabelingStrategy populates only `labeling_details`. The class declares `data_annotation_protocol` and `inter_annotator_agreement`; the bundle describes a two-pronged annotation protocol (alignment to Gene Ontology and Reactome, then LLM naming with a confidence score) that answers `data_annotation_protocol` directly, and the LLM confidence score is a quality measure the class has fields for. The content is present but placed in free text rather than the declared fields."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "conforms_to_standard",
+      "issue": "`conforms_to_standard: [RO_CRATE]` is correct for the packaging, but the record does not record that the imaging data follow no declared standard while the release also references JSON-LD/RDF-XML serializations and the EVI Evidence Graph Ontology. This is a minor under-specification rather than an error; the single enum value is defensible."
+    }
+  ],
+  "summary": "Seventeen findings against the full record. Two are high severity and both concern `creators`: all 38 Creator objects carry an ORCID `id` and nothing else, leaving the class's declared `affiliations` and `principal_investigator` fields empty although the bundle states an affiliation for every author and names Ideker as PI and point of contact; and nine attested authors are dropped entirely for lacking an ORCID, which contradicts the `citation` value in the same record and is unnecessary since Creator has no required keys. Eight medium findings: `publisher` asserts a ROR CURIE the bundle supplies only as an author affiliation, never as the publisher; two `instances` entries carry project-wide portal counts in the release-scoped `counts` field, one of which also contradicts the release-scoped AP-MS description in `file_collections`; `other_tasks` is an empty list where omission is correct; and `data_governance`, `ethical_reviews` and `external_resources` each bury content in free text that the declared fields `committee_contact`, `contact_person` and `archival` exist to hold. Seven low findings concern scope and granularity rather than support: a funding-period date used as a collection start, uniform `is_new_version_of` across a four-deep release series, single objects collapsing distinct entities in `sampling_strategies` and `raw_data_sources`, unpopulated `total_bytes` on collections whose per-file sizes are stated, an unreconciled 2.0/V2 version rendering, and annotation and bias content placed in prose rather than declared fields. No slot was found to assert a fact the bundle contradicts; the defects are of shape, scope and placement, concentrated in class-ranged slots populated as prose."
+}

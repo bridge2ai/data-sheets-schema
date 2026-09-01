@@ -185,3 +185,45 @@ and re-register before spending.
 02:00–10:00 UTC), the arm launches in US daytime (≥15:00 UTC), VPN
 connected, `PYTHONUNBUFFERED=1`, from a shell that will not switch
 branches while the sweep is live (#795).
+
+
+## Restart under 2026-09-01 (registered before launch)
+
+The 2026-08-31 matrix is retired without a retained record: #872 found
+double-encoded mojibake in two raw sources (the CM4AI CC-license page, an
+AI_READI docs page), and the CM4AI canary attempt 3 tripped the
+snippets-unverified floor by quoting the license *correctly* against the
+corrupt bytes. Per the adopted restart rule, fixing the input restarts the
+arm: preprocessing now repairs double-encoding conservatively
+(`fix_mojibake`, #872), both bundles were rebuilt — new md5s
+`50037fc631eafda807e19f83f6579818` (CM4AI), `8abd7bf5389b562b95794d656af19392`
+(AI_READI) — the CM4AI crate bundle re-derived, all 12 chunk manifests
+rebuilt (`d4d bundle chunk --check --strict` and `audit-bundles --strict`
+clean). CHORUS and VOICE bundles are byte-identical to before.
+
+**The production matrix is now `2026-09-01_claude-opus-5-api-generic-v7_rep{1,2,3}`**
+× four projects; everything else in the 2026-08-31 registration — freeze,
+canary order (CM4AI, VOICE, AI_READI, CHORUS), retention/restart rules,
+baseline, launch-time re-verification (run it against the same frozen
+commit; the diff must stay empty) — carries over unchanged. All three
+2026-08-31 CM4AI attempts and the VOICE stall join the exploratory cohort
+under `data/ATTIC/canary_retries/`; the 2026-08-31 labels are excluded
+from production statistics exactly as the 2026-08-28 cohort is. #873 (the
+systematic -1 chunk attribution) is a reported number, not a gate, and
+carries to the v8 prompt work.
+
+**Reported side effect of the rebuild** (#452 discipline): 65 records newly
+drift — 27 pin the old CM4AI document md5, 32 the old AI_READI md5, 6 the
+old CM4AI with_crate md5 — bringing `d4d runs check` to 109 drifted / 56
+match / 82 no hash. Expected and non-fatal: those records correctly state
+the bytes they read; the paths they name now resolve to the repaired
+bytes. **Scope of the repair**: the em-dash-class signature only —
+accented-only mojibake is not repaired (#875) — and the JSON/PDF paths are
+uncovered. Since `src/download/preprocess_sources.py` now produces the
+input bytes, the launch-time re-verification diff adds it:
+
+```
+git diff 15bc4127..HEAD -- src/data_sheets_schema/api_runner.py \
+    src/data_sheets_schema/cli/api.py src/download/prompts/
+git log --oneline -1 -- src/download/preprocess_sources.py   # must be the #874 commit
+```

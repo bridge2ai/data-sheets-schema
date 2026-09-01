@@ -1,0 +1,119 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "Value is `doi:10.18130/V3/HIGT4C`, the dataset's own DOI. `publisher` is declared as 'The organization or entity responsible for making the resource available' — the value asserts the dataset publishes itself. The bundle supports University of Virginia Dataverse (LibraData, an NIH-approved generalist repository) as the publishing entity. Either name that organization or omit the slot."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "id",
+      "issue": "`id` is written as the resolver URL `https://doi.org/10.18130/V3/HIGT4C` while `version_access.latest_version_doi` and every `related_datasets.target_dataset` in the same record use the `doi:` CURIE form for the same class of identifier (including `doi:10.18130/V3/HIGT4C` for this very dataset). One dataset named in two identifier forms within one record produces two identities; `id` is `uriorcurie` and a `doi:` prefix is in use, so the CURIE form applies."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators[].name / citation",
+      "issue": "The bundle spells the author 'Bélisle-Pipon JC' in every Dataverse release and in the preprint. The record writes 'Belisle-Pipon JC' in `creators` and, more seriously, inside `citation`, which reproduces the release's own styled citation verbatim except for this alteration. Proper nouns and quoted citation text must keep the form the source gives; the American-English rule governs composed prose only. (The same person's email in `ethical_reviews` retains the source form, so the record is internally inconsistent about the name as well.)"
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "data_governance.committee_name",
+      "issue": "Value 'Data Access Committee' merges two differently named bodies from two sources: the June 2026 release states 'Data Governance Committee: Jillian Parker (jillianparker@health.ucsd.edu)', while the tier-3 preprint states 'A Data Access Committee will supervise ethical matters related to dataset distribution and potential dual licensing for commercial use.' The named contact is attached to the release's Data Governance Committee, not to the preprint's Data Access Committee. The higher-ranked source's name should be used, with the discrepancy recorded in `source_caveats`."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "preprocessing_strategies / labeling_strategies / machine_annotation_tools",
+      "issue": "All three slots describe the MuSIC cell-map construction pipeline (node2vec PPI embedding, HPA image embedding, contrastive co-embedding, community detection, GO/Reactome alignment, LLM assembly naming). The same record states in `known_limitations` and `source_caveats` that 'Computed cell maps not included in this release' and that the release 'is most suitable for bioinformatics analysis of the individual datasets'. Preprocessing, labeling and machine-annotation steps that were not applied to the data this record describes are attributed to it. These belong in project-level narrative (`description`/`notes`) or should be omitted, unless scoped explicitly as pipeline steps not applied to this release."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "use_repository",
+      "issue": "`UseRepository` is declared for 'Repositories or registries tracking how the dataset has been used' (papers-with-code, citation indices). The single entry points at https://cm4ai.org/data-releases/ and carries the CM4AI portal's project-wide production counters (1,374 protein interactions; 53,788 immunofluorescent images; 7,023 proteins investigated; 11,739 genes targeted; 21.4 TB). These are production volume figures, not use tracking, and the page is a release listing, not a use registry. The content answers a different question than the slot asks."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "file_collections[].total_bytes",
+      "issue": "Byte counts are decimal conversions of Dataverse's rounded display sizes (113.3 KB → 113300; 135.8 KB → 135800; 1.1 MB → 1100000; 30.2 KB → 30200; 73.3 KB → 73300; 171.8 KB → 171800; 93.9 KB → 93900). The bundle attests no exact byte counts, Dataverse displays binary-prefix sizes, and the values carry false precision. The same slot is handled inconsistently: the three IF archives received no `total_bytes` but a prose `notes: Reported size 3.8 GB`, so one release's ten files are described two different ways. Either omit `total_bytes` throughout and record the displayed sizes uniformly, or state the rounding basis in `source_caveats`."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "ethical_reviews[1].review_details",
+      "issue": "Value reads 'Ethical review contact for the data release.' — a restatement of what the field is, not the review details the field asks for. The substantive content in that object is the contact person. Either fold this contact into the first `EthicalReview` object (both names are given together in the same release field) or supply actual review details."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators[].principal_investigator",
+      "issue": "Trey Ideker appears twice inside one Creator object: as the object's own `id`/`name` (`ORCID:0000-0002-1708-8454` / 'Ideker T') and again as a nested `principal_investigator` Person carrying the identical ORCID under a different name form ('Trey Ideker'). One ORCID bound to two name strings in adjacent values, and a creator that is its own principal investigator, is a self-referential structure. The PI role is attested (NIH RePORTER: 'Principal investigator: IDEKER, TREY'); it should be expressed once, with a single name form."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "language",
+      "issue": "`en` is not stated anywhere in the bundle. It is a safe inference from the material but is an unsupported assertion under the evidence boundary."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "last_updated_on",
+      "issue": "`2026-07-15T00:00:00Z` is derived from the publication date of three IF archive files, not from any stated dataset modification date. The release itself is dated 2026-06-17 and the Dataverse version is 2.0. The inference is reasonable but should be flagged in `source_caveats` alongside the existing note about the 2025-06-30 description date."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "sensitive_elements[0].sensitive_elements_present",
+      "issue": "`false` is inferred from the release's 'Human Subjects: No' / 'De-identified Samples: Yes' governance flags. The bundle makes no statement about sensitive data elements as such. The accompanying `sensitivity_details` correctly cites what the source does say, so the boolean is a step beyond the evidence."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "related_datasets",
+      "issue": "All three prior releases (October 2025, June 2025, March 2025) are typed `is_new_version_of`. Only the October 2025 release is the immediate predecessor — and the bundle's ranking marks that one specifically as superseded by this release. The two earlier releases are better typed `is_version_of` or left as predecessors of the October release; asserting three direct new-version relationships flattens a version chain the bundle presents as sequential."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "funders[0].grants[0].grant_number",
+      "issue": "`grant_number` is not enumerated for the `Grant` range in the supplied schema digest, so its existence cannot be confirmed from the digest alone. If the slot is not declared, this key will fail validation; verify against the full schema. The value itself (1OT2OD032742-01) is well attested in both the Dataverse funding field and the portal."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "notes",
+      "issue": "Per #385 `notes` is residual content only, after structured slots and `description`. The pillar/module organization and the nine-institution collaborator list are substantive project description that `description` can hold; only the Dataverse 'under review for potential modification' notice is genuinely residual."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "content_warnings",
+      "issue": "The single object carries only `content_warnings_present: false` with no `warnings`. The bundle makes no statement about content warnings either way; a negative assertion on an unaddressed topic adds no information the omission of the slot would not convey."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "external_resources",
+      "issue": "The CM4AI portal entry ('CM4AI project web portal at https://cm4ai.org/ ... giving access to data releases, tools, product documentation, publications, and training materials') duplicates the resource already recorded under `use_repository`. One external resource described in two slots."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_governance.accountable_organization",
+      "issue": "Omission the bundle supports. The release and preprint both name the accountable copyright-holding institutions ('Copyright ... held by the Regents of the University of California, except where otherwise indicated'; 'Commercial use requires a separate license negotiation with the copyright holder (UCSD, Stanford, and/or UCSF ...)'). This is currently carried only as prose inside `ip_restrictions`; the declared `accountable_organization` field is empty."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "was_derived_from",
+      "issue": "Omission the bundle supports. The June 2026 release is an incremental extension of the October 2025 release (same DOI family, same file set plus AP-MS additions), a relationship the record expresses only through `related_datasets`. `was_derived_from` is available for the predecessor release identifier."
+    }
+  ],
+  "summary": "Nineteen findings against the full record; the core record introduces nothing of its own, being a projection. One high-severity defect: `publisher` holds the dataset's own DOI rather than an organization, making the dataset its own publisher when the bundle plainly supports University of Virginia Dataverse. Eight medium findings cluster into four kinds. (1) Identifier and name hygiene: `id` uses a resolver URL while every sibling DOI reference uses the `doi:` CURIE, and 'Bélisle-Pipon' is de-accented in `creators` and inside the verbatim `citation` block. (2) Scope drift: `preprocessing_strategies`, `labeling_strategies` and `machine_annotation_tools` describe the MuSIC cell-map pipeline, which the same record twice states produced nothing included in this release; `use_repository` holds project-wide production counters rather than use tracking. (3) Source conflation: `data_governance.committee_name` merges the release's 'Data Governance Committee' with the preprint's 'Data Access Committee' while attaching the former's contact. (4) Structural defects: `total_bytes` carries decimal conversions of rounded display sizes and is applied to seven of ten files while three get prose size notes instead; one `EthicalReview` states a field label in place of review details; and Trey Ideker is nested as his own `principal_investigator` with one ORCID bound to two name forms. Ten low findings cover unattested inferences (`language`, `last_updated_on`, `sensitive_elements_present`), a flattened version chain in `related_datasets`, an unverifiable `grant_number` key, misplaced narrative in `notes`, a vacuous `content_warnings` object, a duplicated portal resource, and two supported omissions (`accountable_organization`, `was_derived_from`). The record's referent choice — the June 2026 release rather than the U2OS Nature dataset — is correct, consistently held, and well defended in `source_caveats`, and the ROR and ORCID CURIEs are all traceable to identifiers the bundle states."
+}

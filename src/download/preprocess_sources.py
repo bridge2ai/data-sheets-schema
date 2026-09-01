@@ -21,6 +21,49 @@ import yaml
 from data_sheets_schema.constants import PROJECTS
 
 
+MOJIBAKE_SIGNATURE = "\u00e2\u0080"      # a-circumflex + C1 control: U+20xx double-decoded
+
+
+def fix_mojibake(text: str) -> str:
+    """Repair UTF-8-read-as-Latin-1 double encoding, conservatively (#872).
+
+    A page served as UTF-8 but decoded as Latin-1 turns an em-dash into the
+    three characters U+00E2 U+0080 U+0094; re-encoding as Latin-1 and
+    decoding as UTF-8 restores the original. Applied only when the signature
+    is present, the round trip succeeds, and it strictly removes the
+    signature without introducing replacement characters - otherwise the
+    text is returned unchanged. The repair happens at preprocess time so
+    raw downloads stay the bytes we fetched.
+
+    Scope, stated precisely (#874 review): the trigger is the em-dash-class
+    signature only - a page whose double encoding hits only accented
+    characters (e.g. \u00c3\u00a9 for e-acute, no smart punctuation) is NOT
+    repaired (#875). The guard is per FILE: when the whole-text round trip
+    fires, lines without the signature are rewritten too (that is the
+    correct repair for a genuinely double-encoded page, and it is what
+    fixed the CC language list). And the acceptance check is
+    all-or-nothing: if any line is unrepairable, the whole text is returned
+    unchanged rather than half-repaired.
+    """
+    if MOJIBAKE_SIGNATURE not in text:
+        return text
+    try:
+        repaired = text.encode("latin-1").decode("utf-8")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        out = []
+        for line in text.split("\n"):
+            if MOJIBAKE_SIGNATURE in line:
+                try:
+                    line = line.encode("latin-1").decode("utf-8")
+                except (UnicodeEncodeError, UnicodeDecodeError):
+                    pass
+            out.append(line)
+        repaired = "\n".join(out)
+    if MOJIBAKE_SIGNATURE not in repaired and "\ufffd" not in repaired:
+        return repaired
+    return text
+
+
 def extract_pdf_text(pdf_path: Path) -> str:
     """Extract text from PDF using pdfminer."""
     try:
@@ -35,7 +78,7 @@ def extract_html_text(html_path: Path) -> str:
     """Extract text from HTML using BeautifulSoup."""
     try:
         with open(html_path, 'r', encoding='utf-8', errors='ignore') as f:
-            soup = BeautifulSoup(f.read(), 'html.parser')
+            soup = BeautifulSoup(fix_mojibake(f.read()), 'html.parser')
 
         # Remove scripts and styles
         for script in soup(["script", "style", "noscript"]):
@@ -109,7 +152,7 @@ def extract_source_text(source_path: Path) -> str:
     """Convert one supported raw source artifact to text."""
     suffix = source_path.suffix.lower()
     if suffix in {".txt", ".md"}:
-        return source_path.read_text(encoding="utf-8", errors="ignore")
+        return fix_mojibake(source_path.read_text(encoding="utf-8", errors="ignore"))
     if suffix == ".json":
         data = json.loads(_decode(source_path))
         return json.dumps(data, indent=2, ensure_ascii=False)

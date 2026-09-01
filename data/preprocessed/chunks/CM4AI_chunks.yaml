@@ -1,8 +1,8 @@
 bundle: CM4AI_preprocessed.txt
-bundle_md5: 1dfd34e5610fed7c22bea1f09c0bc60c
-bundle_sha256: f138e6d5841609841994e0b3e91b2477c824f5675eb91c83d51db0b8d11504d2
+bundle_md5: 50037fc631eafda807e19f83f6579818
+bundle_sha256: 5f81bb53f43f9ec6debc3ab7297bb3897d30c675888eefeaf840ebbbaca9ecc4
 bundle_lines: 7866
-bundle_bytes: 321056
+bundle_bytes: 320799
 rule:
   version: 2
   unit: source-document
@@ -166,8 +166,8 @@ chunks:
   lines:
   - 4485
   - 4740
-  bytes: 6073
-  sha256: 969d2d577222cccaa20ba25b4587947d5bb1bca8033f379064cfd85307c37c19
+  bytes: 5816
+  sha256: 08babc4aabf1e844ff650dd042e3659115066a78038944428f0c40eca0a7bbce
 - id: c018
   source: dataverse_10.18130_V3_B35XWX_row16.txt
   lines:
