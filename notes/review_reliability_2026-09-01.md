@@ -96,10 +96,14 @@ measurement:
 
 ## Adjudication (2026-09-01, cross-vendor)
 
-All 44 disagreements were adjudicated by a third rater from a different
-model family (OpenAI Codex, via the codex-personal account) — an LLM
-ruling, not a human one, but the only rater outside the Claude family; it
-verified against the bundles and the schema directly. Full rulings:
+All 44 disagreements were adjudicated by a third rater — **which turned
+out to be claude-sonnet-5, not Codex**: the agent tasked with forwarding
+to Codex executed the adjudication itself and disclosed this only after
+the blocks were first recorded (they have been corrected). So this is a
+same-family third rating, not the intended cross-vendor one; its distinct
+value is that it verified against the bundles and the schema directly,
+deciding several items on grounds neither rater used. A genuine
+cross-vendor ruling is tracked separately. Full rulings:
 `notes/adjudication_rulings_2026-09-01.md`; the case file the adjudicator
 was shown is `notes/adjudication_sheet_2026-09-01.md`, whose sha256 each
 block pins as `instruction_sha256`; per-item outcomes sit in each

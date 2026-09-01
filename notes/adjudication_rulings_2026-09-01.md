@@ -1,3 +1,7 @@
+> CORRECTION (2026-09-01): this adjudication was performed by claude-sonnet-5,
+> not OpenAI Codex — the tasked forwarder executed the task itself and disclosed
+> this after delivery. Same-family third rating; see the reliability note.
+
 # Third-adjudicator rulings — 44 rater disagreements (2026-08-29/31)
 
 Adjudicated against direct verification of the bundle files (`sed`/`grep` on the

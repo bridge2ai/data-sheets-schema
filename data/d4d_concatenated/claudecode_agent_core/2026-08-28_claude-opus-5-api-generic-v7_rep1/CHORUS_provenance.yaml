@@ -641,8 +641,9 @@ review:
     review_b_sha256: 14337b1b3f01225645de02c7be1ba82a58573ae4da046b6c5e896e8c6ce23106
     recorded_by: d4d review agree
     adjudication:
-      adjudicator: OpenAI Codex CLI (codex-personal account); cross-vendor LLM, not
-        a human ruling
+      adjudicator: claude-sonnet-5 (Claude family — the tasked Codex agent executed
+        the adjudication itself and disclosed this after recording; NOT a cross-vendor
+        ruling. A same-family third rating with direct bundle/schema verification.
       instruction_file: notes/adjudication_sheet_2026-09-01.md
       instruction_sha256: 9ae56c13b67f6d4c01744006ab2f44f94eb6f7735b26891ede663c6cff78434f
       rulings_file: notes/adjudication_rulings_2026-09-01.md
