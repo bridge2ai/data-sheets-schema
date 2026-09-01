@@ -418,3 +418,80 @@ review:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CHORUS_review.yaml
       sha256: bb8d0872f60d9dcce74e5fd0c3512b2650d872b952a2bb49572a690bfaed3c76
   recorded_by: d4d review check
+  reliability:
+    paired_items: 66
+    unanswered_in_either: []
+    percent_class_agreement: 87.9
+    percent_exact_agreement: 84.8
+    kappa_class: 0.494
+    confusion:
+      affirmative:
+        affirmative: 53
+        adverse: 1
+        cannot_tell: 0
+      adverse:
+        affirmative: 7
+        adverse: 5
+        cannot_tell: 0
+      cannot_tell:
+        affirmative: 0
+        adverse: 0
+        cannot_tell: 0
+    adverse_a: 12
+    adverse_b: 6
+    adverse_delta: -6
+    by_kind:
+      chunk_nothing_relevant:
+        paired: 1
+        class_agree: 1
+        exact: 1
+      slot_receipted:
+        paired: 25
+        class_agree: 21
+        exact: 21
+      slot_receiptless:
+        paired: 25
+        class_agree: 23
+        exact: 23
+      rule:
+        paired: 15
+        class_agree: 13
+        exact: 11
+    disagreements:
+    - id: slot-014
+      kind: slot_receipted
+      a: misread
+      b: supported
+    - id: slot-020
+      kind: slot_receipted
+      a: weak
+      b: supported
+    - id: slot-022
+      kind: slot_receipted
+      a: weak
+      b: supported
+    - id: slot-023
+      kind: slot_receipted
+      a: weak
+      b: supported
+    - id: slot-037
+      kind: slot_receiptless
+      a: bundle_supports
+      b: inferred
+    - id: slot-050
+      kind: slot_receiptless
+      a: inferred
+      b: bundle_supports
+    - id: rule-06
+      kind: rule
+      a: violated
+      b: followed
+    - id: rule-07
+      kind: rule
+      a: violated
+      b: followed
+    basis: Cohen's kappa on affirmative/adverse/cannot_tell over items answered by
+      both; exact agreement is on the full vocabulary; single pack, both reviews pin
+      its sha256
+    review_b_sha256: 87ba8f950423ab48e8e26a6eeda4f8721e32c5c1539563a78fa164bf472236e1
+    recorded_by: d4d review agree

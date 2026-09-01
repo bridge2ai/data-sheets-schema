@@ -416,3 +416,88 @@ review:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CHORUS_review.yaml
       sha256: 8253c875f72995777d1ae5852f132e6bb609a0d4b7e086177219530ca61e98a7
   recorded_by: d4d review check
+  reliability:
+    paired_items: 66
+    unanswered_in_either: []
+    percent_class_agreement: 84.8
+    percent_exact_agreement: 84.8
+    kappa_class: 0.357
+    confusion:
+      affirmative:
+        affirmative: 52
+        adverse: 5
+        cannot_tell: 0
+      adverse:
+        affirmative: 5
+        adverse: 4
+        cannot_tell: 0
+      cannot_tell:
+        affirmative: 0
+        adverse: 0
+        cannot_tell: 0
+    adverse_a: 9
+    adverse_b: 9
+    adverse_delta: 0
+    by_kind:
+      chunk_nothing_relevant:
+        paired: 1
+        class_agree: 1
+        exact: 1
+      slot_receipted:
+        paired: 25
+        class_agree: 22
+        exact: 22
+      slot_receiptless:
+        paired: 25
+        class_agree: 23
+        exact: 23
+      rule:
+        paired: 15
+        class_agree: 10
+        exact: 10
+    disagreements:
+    - id: slot-005
+      kind: slot_receipted
+      a: supported
+      b: weak
+    - id: slot-011
+      kind: slot_receipted
+      a: supported
+      b: weak
+    - id: slot-022
+      kind: slot_receipted
+      a: supported
+      b: weak
+    - id: slot-028
+      kind: slot_receiptless
+      a: bundle_supports
+      b: inferred
+    - id: slot-041
+      kind: slot_receiptless
+      a: bundle_supports
+      b: inferred
+    - id: rule-01
+      kind: rule
+      a: violated
+      b: followed
+    - id: rule-06
+      kind: rule
+      a: violated
+      b: followed
+    - id: rule-07
+      kind: rule
+      a: violated
+      b: followed
+    - id: rule-08
+      kind: rule
+      a: violated
+      b: followed
+    - id: rule-11
+      kind: rule
+      a: violated
+      b: followed
+    basis: Cohen's kappa on affirmative/adverse/cannot_tell over items answered by
+      both; exact agreement is on the full vocabulary; single pack, both reviews pin
+      its sha256
+    review_b_sha256: ce05ad2197843a469b38f388fe1b50581e61ded9cb109aaa03944733c34f23d1
+    recorded_by: d4d review agree
