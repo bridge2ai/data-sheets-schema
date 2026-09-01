@@ -515,8 +515,7 @@ review:
     adjudication:
       adjudicator: OpenAI Codex CLI (codex-personal account), invoked directly via
         codex-companion task job task-mti98lpf-9ysd5q, thread 01a05b8a-a4fb-7813-9210-595c26278d42;
-        cross-vendor LLM ruling, not a human one; model id not surfaced by the tooling
-        (#867)
+        cross-vendor LLM ruling, not a human one
       adjudicated_at: '2026-09-01T06:18:10+00:00'
       instruction_file: notes/adjudication_sheet_2026-09-01.md
       instruction_sha256: 9ae56c13b67f6d4c01744006ab2f44f94eb6f7735b26891ede663c6cff78434f
@@ -544,3 +543,9 @@ review:
       b_right: 2
       neither: 0
       recorded_by: '#860 follow-up adjudication (cross-vendor)'
+      model:
+        value: gpt-5.6-sol
+        reasoning_effort: ultra
+        basis: the ~/.codex/config.toml default at run time; asserted from config,
+          not observed from the response (#867) - the tooling surfaces no runtime
+          model id

@@ -106,7 +106,8 @@ The 44 disagreements were adjudicated twice, and the records carry both:
    `notes/adjudication_rulings_2026-09-01.md`.
 2. **`adjudication`** — the genuine cross-vendor ruling, OpenAI Codex
    invoked directly through the codex-companion CLI (job
-   task-mti98lpf-9ysd5q; model id not surfaced by the tooling, #867).
+   task-mti98lpf-9ysd5q; model gpt-5.6-sol at reasoning effort ultra per the
+   Codex config default — asserted from config, not runtime-observed, #867).
    Outcome: **A 28 / B 16 / neither 0**. Rulings:
    `notes/adjudication_codex_2026-09-01.md`. Independence note: Codex
    disclosed one accidental grep hit on the prohibited prior-rulings file
