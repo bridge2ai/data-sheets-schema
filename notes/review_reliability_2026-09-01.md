@@ -94,6 +94,38 @@ measurement:
 - The rep3 second rater also exposed **#859**: the British-spelling word
   list misses metre/tumour/oedema, so form counts undercount corpus-wide.
 
+## Adjudication (2026-09-01): one same-family rating, one cross-vendor ruling
+
+The 44 disagreements were adjudicated twice, and the records carry both:
+
+1. **`third_rating_claude`** — intended as a Codex forwarding, actually
+   executed by claude-sonnet-5 (the forwarder did the task itself and
+   disclosed it after recording; every cross-vendor claim about this pass
+   is retracted). Same-family, but it verified against bundles and schema
+   directly. Outcome: A 24 / B 19 / neither 1. Rulings:
+   `notes/adjudication_rulings_2026-09-01.md`.
+2. **`adjudication`** — the genuine cross-vendor ruling, OpenAI Codex
+   invoked directly through the codex-companion CLI (job
+   task-mti98lpf-9ysd5q; model gpt-5.6-sol at reasoning effort ultra per the
+   Codex config default — asserted from config, not runtime-observed, #867).
+   Outcome: **A 28 / B 16 / neither 0**. Rulings:
+   `notes/adjudication_codex_2026-09-01.md`. Independence note: Codex
+   disclosed one accidental grep hit on the prohibited prior-rulings file
+   (item 42) and re-adjudicated that item in two clean contexts.
+
+Both were shown the same case file (`notes/adjudication_sheet_2026-09-01.md`,
+sha256 pinned in the blocks) and barred from the existing reviews. **The two
+adjudicators agree on 34/44 items**, and both uphold rater A on a majority —
+so the original pass's strictness was justified more often than not, and the
+severity asymmetry of the retest was mostly the second raters' leniency.
+Convergent findings across both: the weak/supported boundary belongs to
+"does the cited passage answer the slot" (chunk context counts, uncited
+chunks cannot repair a receipt); "tool exists ≠ tool applied"; the
+PI-conflation family is settled by the bundle's own co-PI sentence; and
+plan-as-done tense shifts are misread, not weak. Both are LLM rulings —
+a human ruling on the 10 items where the adjudicators split would finish
+the job.
+
 ## Method notes
 
 Second ratings: the same model, fresh context — so this measures rating
