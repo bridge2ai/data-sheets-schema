@@ -496,6 +496,7 @@ review:
     adjudication:
       adjudicator: OpenAI Codex CLI (codex-personal account); cross-vendor LLM, not
         a human ruling
+      instruction_file: notes/adjudication_sheet_2026-09-01.md
       instruction_sha256: 9ae56c13b67f6d4c01744006ab2f44f94eb6f7735b26891ede663c6cff78434f
       rulings_file: notes/adjudication_rulings_2026-09-01.md
       items:

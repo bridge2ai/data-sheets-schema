@@ -100,7 +100,9 @@ All 44 disagreements were adjudicated by a third rater from a different
 model family (OpenAI Codex, via the codex-personal account) — an LLM
 ruling, not a human one, but the only rater outside the Claude family; it
 verified against the bundles and the schema directly. Full rulings:
-`notes/adjudication_rulings_2026-09-01.md`; per-item outcomes sit in each
+`notes/adjudication_rulings_2026-09-01.md`; the case file the adjudicator
+was shown is `notes/adjudication_sheet_2026-09-01.md`, whose sha256 each
+block pins as `instruction_sha256`; per-item outcomes sit in each
 record's `review.reliability.adjudication` block.
 
 **Rater A upheld 24, rater B 19, neither 1** — so the severity asymmetry
