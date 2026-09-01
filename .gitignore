@@ -193,3 +193,4 @@ data/poster_assets/
 
 # Run locks for in-flight API sweeps (#513) — process state, not artifacts
 data/.run_locks/
+notes/arm_comparison_deck_*.pdf
