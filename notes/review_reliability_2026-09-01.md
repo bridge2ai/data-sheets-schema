@@ -94,6 +94,29 @@ measurement:
 - The rep3 second rater also exposed **#859**: the British-spelling word
   list misses metre/tumour/oedema, so form counts undercount corpus-wide.
 
+## Adjudication (2026-09-01, cross-vendor)
+
+All 44 disagreements were adjudicated by a third rater from a different
+model family (OpenAI Codex, via the codex-personal account) — an LLM
+ruling, not a human one, but the only rater outside the Claude family; it
+verified against the bundles and the schema directly. Full rulings:
+`notes/adjudication_rulings_2026-09-01.md`; per-item outcomes sit in each
+record's `review.reliability.adjudication` block.
+
+**Rater A upheld 24, rater B 19, neither 1** — so the severity asymmetry
+was mostly *justified* strictness: the original ratings were right on a
+small majority of contested items, and the adverse totals move toward A's.
+The adjudicator also settled the two boundary policies (§rulings file):
+judge receipts against the cited *chunk*, not the pull-quote anchor;
+"tool exists in the repo" never supports "tool was applied to this data";
+rule-06 bites only on pointer-dodges, never on a source's own stated
+absence; and the PI-conflation family across two projects is settled by a
+bundle sentence both raters missed ("Bensoussan and Elemento are
+co-principal investigators" vs ten named "lead investigators"). Two
+schema-grounded reversals (items 17, 21/27) show a class of dispute that
+is resolvable mechanically — the pack's `id_slots` block (#853) already
+carries one of them for future reviews.
+
 ## Method notes
 
 Second ratings: the same model, fresh context — so this measures rating

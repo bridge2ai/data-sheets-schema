@@ -640,3 +640,85 @@ review:
       its sha256
     review_b_sha256: 14337b1b3f01225645de02c7be1ba82a58573ae4da046b6c5e896e8c6ce23106
     recorded_by: d4d review agree
+    adjudication:
+      adjudicator: OpenAI Codex CLI (codex-personal account); cross-vendor LLM, not
+        a human ruling
+      instruction_sha256: 9ae56c13b67f6d4c01744006ab2f44f94eb6f7735b26891ede663c6cff78434f
+      rulings_file: notes/adjudication_rulings_2026-09-01.md
+      items:
+      - sheet_item: 33
+        id: slot-003
+        a: weak
+        b: supported
+        adjudicated: weak
+        agrees_with: A
+      - sheet_item: 34
+        id: slot-004
+        a: weak
+        b: supported
+        adjudicated: weak
+        agrees_with: A
+      - sheet_item: 35
+        id: slot-007
+        a: weak
+        b: supported
+        adjudicated: supported
+        agrees_with: B
+      - sheet_item: 36
+        id: slot-009
+        a: misread
+        b: supported
+        adjudicated: misread
+        agrees_with: A
+      - sheet_item: 37
+        id: slot-011
+        a: weak
+        b: supported
+        adjudicated: weak
+        agrees_with: A
+      - sheet_item: 38
+        id: slot-018
+        a: weak
+        b: supported
+        adjudicated: weak
+        agrees_with: A
+      - sheet_item: 39
+        id: slot-019
+        a: weak
+        b: supported
+        adjudicated: supported
+        agrees_with: B
+      - sheet_item: 40
+        id: slot-029
+        a: inferred
+        b: bundle_supports
+        adjudicated: inferred
+        agrees_with: A
+      - sheet_item: 41
+        id: slot-030
+        a: bundle_supports
+        b: inferred
+        adjudicated: inferred
+        agrees_with: B
+      - sheet_item: 42
+        id: slot-043
+        a: inferred
+        b: exempt_by_nature
+        adjudicated: exempt_by_nature
+        agrees_with: B
+      - sheet_item: 43
+        id: slot-051
+        a: inferred
+        b: bundle_supports
+        adjudicated: inferred
+        agrees_with: A
+      - sheet_item: 44
+        id: rule-06
+        a: violated
+        b: followed
+        adjudicated: violated
+        agrees_with: A
+      a_right: 8
+      b_right: 4
+      neither: 0
+      recorded_by: '#860 follow-up adjudication'

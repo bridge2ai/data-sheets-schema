@@ -501,3 +501,73 @@ review:
       its sha256
     review_b_sha256: ce05ad2197843a469b38f388fe1b50581e61ded9cb109aaa03944733c34f23d1
     recorded_by: d4d review agree
+    adjudication:
+      adjudicator: OpenAI Codex CLI (codex-personal account); cross-vendor LLM, not
+        a human ruling
+      instruction_sha256: 9ae56c13b67f6d4c01744006ab2f44f94eb6f7735b26891ede663c6cff78434f
+      rulings_file: notes/adjudication_rulings_2026-09-01.md
+      items:
+      - sheet_item: 9
+        id: slot-005
+        a: supported
+        b: weak
+        adjudicated: weak
+        agrees_with: B
+      - sheet_item: 10
+        id: slot-011
+        a: supported
+        b: weak
+        adjudicated: weak
+        agrees_with: B
+      - sheet_item: 11
+        id: slot-022
+        a: supported
+        b: weak
+        adjudicated: weak
+        agrees_with: B
+      - sheet_item: 12
+        id: slot-028
+        a: bundle_supports
+        b: inferred
+        adjudicated: bundle_supports
+        agrees_with: A
+      - sheet_item: 13
+        id: slot-041
+        a: bundle_supports
+        b: inferred
+        adjudicated: bundle_supports
+        agrees_with: A
+      - sheet_item: 14
+        id: rule-01
+        a: violated
+        b: followed
+        adjudicated: followed
+        agrees_with: B
+      - sheet_item: 15
+        id: rule-06
+        a: violated
+        b: followed
+        adjudicated: followed
+        agrees_with: B
+      - sheet_item: 16
+        id: rule-07
+        a: violated
+        b: followed
+        adjudicated: violated
+        agrees_with: A
+      - sheet_item: 17
+        id: rule-08
+        a: violated
+        b: followed
+        adjudicated: followed
+        agrees_with: B
+      - sheet_item: 18
+        id: rule-11
+        a: violated
+        b: followed
+        adjudicated: violated
+        agrees_with: A
+      a_right: 4
+      b_right: 6
+      neither: 0
+      recorded_by: '#860 follow-up adjudication'
