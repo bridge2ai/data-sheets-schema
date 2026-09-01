@@ -479,7 +479,9 @@ def agree(pack: dict[str, Any], review_a: dict[str, Any], review_b: dict[str, An
     kinds = {str(i.get("id")): i.get("kind") for i in pack.get("items") or []}
     paired, unanswered = [], []
     for i in ids:
-        if i in va and i in vb:
+        # An item without a verdict is unanswered, not a rating: a missing
+        # or null verdict must not class as adverse (#861).
+        if va.get(i) is not None and vb.get(i) is not None:
             paired.append((i, va[i], vb[i]))
         else:
             unanswered.append(i)

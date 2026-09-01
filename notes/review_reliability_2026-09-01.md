@@ -22,22 +22,29 @@ the full vocabulary. Reliability blocks live in each record's provenance
 | CHORUS v7 28 | 68 | 82.4% | 80.9% | 0.50 | 20 | 10 |
 
 **Pooled: n = 402 paired items, class agreement 89.1%, κ = 0.534, bootstrap
-95% CI [0.41, 0.65].** Zero `cannot_tell` from either rater on any item.
+95% CI [0.41, 0.65]** (percentile, seed 0, 2,000 draws over pooled items —
+`scripts/review_reliability_stats.py` reproduces every number in this note;
+the item bootstrap ignores record clustering, and with six records a
+cluster CI is unstable — the by-record mean κ is 0.531). Zero `cannot_tell`
+from either rater on any item.
 
 ## What agrees and what does not
 
 Per kind (paired items, class agreement): chunk verdicts 10, **100%**;
-receiptless slots 150, **93.3%**; receipted slots 150, **88.0%**; rules 91,
-**82.4%**. The disagreement is concentrated exactly where the investigation
+receiptless slots 150, **93.3%** (nine inferred↔bundle_supports-family
+splits and one inferred↔exempt); receipted slots 150, **88.0%**; rules 91,
+**82.4%**; the one paired `slot_reshaped` item agreed (100%) — 402 in all. The disagreement is concentrated exactly where the investigation
 predicted:
 
 - **weak ↔ supported** (16 of the 18 receipted-slot disagreements; 13 in the
   A-weak→B-supported direction). The boundary "the snippet is verbatim but
   does it *answer* the slot" is the instrument's soft spot.
-- **violated ↔ followed** (13 of 16 rule disagreements, all A→B direction;
-  plus 2 violated→not_applicable that are not noise at all — the second
-  raters applied the post-#853 `id_slots` reasoning to rule-14, which the
-  originals predated. Instrument evolution, correctly reflected).
+- **violated ↔ followed** (14 of 16 rule disagreements: 13 A→B and one
+  the other way — AI_READI v6 rep2's rule-06, where the second rater was
+  stricter). The remaining 2 are violated→not_applicable, which are not
+  noise at all: the second raters applied the post-#853 `id_slots`
+  reasoning to rule-14, which the originals predated. Instrument
+  evolution, correctly reflected.
 - Receiptless `inferred ↔ bundle_supports` splits nearly evenly (5 vs 4) —
   genuine judgment noise, no directional bias.
 
@@ -89,7 +96,11 @@ measurement:
 
 ## Method notes
 
-Second ratings: same model family, fresh context, committed v2 packs (no
+Second ratings: the same model, fresh context — so this measures rating
+stability, not model-independence; the instruction-confound paragraph above
+rests on this session's records, not on committed artifacts (the review_b
+files carry only reviewer and model fields — #863 tracks recording the
+instruction hash). Committed v2 packs (no
 regeneration — hashes intact), one file written per record, originals never
 opened. `d4d review agree` refuses reviews that pin different pack hashes;
 κ is None (not 0) when marginals make chance agreement 1. The six records:

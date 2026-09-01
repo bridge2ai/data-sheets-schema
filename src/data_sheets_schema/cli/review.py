@@ -110,7 +110,7 @@ def agree_cmd(method, label, project, write):
     import yaml
 
     from data_sheets_schema.provenance import ProvenanceRecord
-    from data_sheets_schema.review_pack import agree, record_paths
+    from data_sheets_schema.review_pack import agree, check_review, record_paths
     prov = _provenance(method, label, project)
     if not prov.exists():
         raise click.ClickException(f"no provenance record at {prov}")
@@ -122,6 +122,15 @@ def agree_cmd(method, label, project, write):
     pack["_sha256"] = hashlib.sha256(paths["pack"].read_bytes()).hexdigest()
     a = yaml.safe_load(paths["review"].read_text(encoding="utf-8")) or {}
     b = yaml.safe_load(paths["review_b"].read_text(encoding="utf-8")) or {}
+    # A rating pair is only as good as its ratings: an invalid review
+    # (duplicate ids, out-of-vocabulary verdicts, unknown items) must not
+    # silently enter a reliability figure (#861).
+    for name, rev in (("review", a), ("review_b", b)):
+        bad = check_review(pack, rev)["findings"]
+        if bad:
+            raise click.ClickException(
+                f"{paths[name]} has {len(bad)} check finding(s) "
+                f"(first: {bad[0].get('kind')}); fix the review before pairing")
     rel = agree(pack, a, b)
     click.echo(f"   paired {rel['paired_items']} · class agreement {rel['percent_class_agreement']}% · "
                f"exact {rel['percent_exact_agreement']}% · kappa {rel['kappa_class']} · "

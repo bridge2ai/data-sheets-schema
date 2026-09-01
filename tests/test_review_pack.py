@@ -201,7 +201,7 @@ class Agree(unittest.TestCase):
         self.assertEqual((r["adverse_a"], r["adverse_b"], r["adverse_delta"]), (2, 2, 0))
         self.assertIsNotNone(r["kappa_class"])
         # weak vs unsupported: same class, not exact — agreement splits
-        r2 = rp.agree(self.PACK, self._rev(("weak",) * 4 if False else ("supported", "weak", "inferred", "followed")),
+        r2 = rp.agree(self.PACK, self._rev(("supported", "weak", "inferred", "followed")),
                       self._rev(("supported", "unsupported", "inferred", "followed")))
         self.assertEqual(r2["percent_class_agreement"], 100.0)
         self.assertEqual(r2["percent_exact_agreement"], 75.0)
@@ -214,6 +214,18 @@ class Agree(unittest.TestCase):
     def test_reviews_of_different_packs_refuse_to_pair(self):
         with self.assertRaises(ValueError):
             rp.agree(self.PACK, {"pack_sha256": "zzz", "items": []}, self._rev(("supported",) * 4))
+
+    def test_a_missing_verdict_is_unanswered_not_adverse(self):
+        """#861: {'id': ...} with no verdict must not count as a rating."""
+        a = self._rev(("supported", "weak", "inferred", "followed"))
+        b = {"pack_sha256": "abc", "items": [{"id": "slot-001", "verdict": "supported"},
+                                             {"id": "slot-002"},
+                                             {"id": "slot-003", "verdict": None},
+                                             {"id": "rule-01", "verdict": "followed"}]}
+        r = rp.agree(self.PACK, a, b)
+        self.assertEqual(r["paired_items"], 2)
+        self.assertEqual(r["unanswered_in_either"], ["slot-002", "slot-003"])
+        self.assertEqual(r["adverse_b"], 0)
 
     def test_unanswered_items_are_excluded_and_named(self):
         a = self._rev(("supported", "weak", "inferred", "followed"))
