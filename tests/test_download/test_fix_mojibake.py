@@ -21,6 +21,13 @@ class FixMojibake(unittest.TestCase):
         mixed = f"good {EMDASH} line\nbad {BROKEN} line"
         self.assertEqual(fix_mojibake(mixed), f"good {EMDASH} line\nbad {EMDASH} line")
 
+    def test_the_signature_guard_is_load_bearing(self):
+        """A text merely QUOTING accent-mojibake (no em-dash signature) must
+        pass through; an eager round-trip-everything variant would rewrite
+        it (#874 review, finding 5)."""
+        s = "the string \u00c3\u00a9 denotes mojibake"
+        self.assertEqual(fix_mojibake(s), s)
+
     def test_unrepairable_text_is_returned_unchanged(self):
         s = f"{BROKEN} then \u2603 snowman breaks latin-1 on the same line"
         self.assertEqual(fix_mojibake(s), s)

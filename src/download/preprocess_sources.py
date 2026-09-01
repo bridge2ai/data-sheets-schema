@@ -34,6 +34,16 @@ def fix_mojibake(text: str) -> str:
     signature without introducing replacement characters - otherwise the
     text is returned unchanged. The repair happens at preprocess time so
     raw downloads stay the bytes we fetched.
+
+    Scope, stated precisely (#874 review): the trigger is the em-dash-class
+    signature only - a page whose double encoding hits only accented
+    characters (e.g. \u00c3\u00a9 for e-acute, no smart punctuation) is NOT
+    repaired (#875). The guard is per FILE: when the whole-text round trip
+    fires, lines without the signature are rewritten too (that is the
+    correct repair for a genuinely double-encoded page, and it is what
+    fixed the CC language list). And the acceptance check is
+    all-or-nothing: if any line is unrepairable, the whole text is returned
+    unchanged rather than half-repaired.
     """
     if MOJIBAKE_SIGNATURE not in text:
         return text

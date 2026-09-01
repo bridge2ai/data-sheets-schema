@@ -211,3 +211,19 @@ under `data/ATTIC/canary_retries/`; the 2026-08-31 labels are excluded
 from production statistics exactly as the 2026-08-28 cohort is. #873 (the
 systematic -1 chunk attribution) is a reported number, not a gate, and
 carries to the v8 prompt work.
+
+**Reported side effect of the rebuild** (#452 discipline): 65 records newly
+drift — 27 pin the old CM4AI document md5, 32 the old AI_READI md5, 6 the
+old CM4AI with_crate md5 — bringing `d4d runs check` to 109 drifted / 56
+match / 82 no hash. Expected and non-fatal: those records correctly state
+the bytes they read; the paths they name now resolve to the repaired
+bytes. **Scope of the repair**: the em-dash-class signature only —
+accented-only mojibake is not repaired (#875) — and the JSON/PDF paths are
+uncovered. Since `src/download/preprocess_sources.py` now produces the
+input bytes, the launch-time re-verification diff adds it:
+
+```
+git diff 15bc4127..HEAD -- src/data_sheets_schema/api_runner.py \
+    src/data_sheets_schema/cli/api.py src/download/prompts/
+git log --oneline -1 -- src/download/preprocess_sources.py   # must be the #874 commit
+```
