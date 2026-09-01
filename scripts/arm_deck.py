@@ -104,25 +104,28 @@ def main() -> int:
             "adjacent/mismatched residue is the grounding story the rubric pages cannot "
             "see — see the cross-read slide.",
         ])
+        # One row per record carrying a review.reliability block — globbed,
+        # not hardcoded, so a seventh double-review appears by itself (#871);
+        # per-record try so one bad record drops one named row (#869).
         rel = []
-        try:
-            import yaml as _y
-            for proj, label in (("CHORUS","2026-08-28_claude-opus-5-claudecode-generic-v6_rep1"),
-                                ("CHORUS","2026-08-28_claude-opus-5-claudecode-generic-v6_rep2"),
-                                ("AI_READI","2026-08-28_claude-opus-5-claudecode-generic-v6_rep2"),
-                                ("AI_READI","2026-08-28_claude-opus-5-claudecode-generic-v6_rep3"),
-                                ("VOICE","2026-08-28_claude-opus-5-claudecode-generic-v6_rep2"),
-                                ("CHORUS","2026-08-28_claude-opus-5-api-generic-v7_rep1")):
-                r = _y.safe_load(open(CORE / label / f"{proj}_provenance.yaml"))["review"]["reliability"]
+        for f in sorted(CORE.glob("*/*_provenance.yaml")):
+            try:
+                r = (yaml.safe_load(open(f)).get("review") or {}).get("reliability")
+                if not r:
+                    continue
+                proj = f.name.split("_prov")[0]
+                label = f.parent.name
+                tag = ("v7 " if "api-generic" in label else "v6 ") + label.rsplit("_", 1)[1]
                 adj = r.get("adjudication") or {}
-                rel.append(f"  {proj:9s} {label[:34]:34s} kappa {r['kappa_class']}  adverse {r['adverse_a']} vs "
-                           f"{r['adverse_b']}  adjudicated A {adj.get('a_right','-')} / B {adj.get('b_right','-')}")
-        except Exception as e:                                # noqa: BLE001
-            rel.append(f"  (reliability blocks unavailable: {type(e).__name__})")
+                rel.append(f"  {proj:9s} {tag:8s} kappa {r['kappa_class']}  adverse {r['adverse_a']} vs "
+                           f"{r['adverse_b']}  adjudicated (Codex) A {adj.get('a_right','-')} / B {adj.get('b_right','-')}")
+            except Exception as e:                            # noqa: BLE001
+                rel.append(f"  {f}: unavailable ({type(e).__name__})")
         text_page(pdf, "Review reliability and adjudication", [
             "Six records double-reviewed against the same committed packs (test-retest): "
             "pooled kappa 0.534 [0.41, 0.65] over 402 paired items, class agreement 89.1%. "
-            "Chunk verdicts 100% stable; disagreement sits at weak/supported and rule boundaries.",
+            "Chunk verdicts 100% stable; disagreement sits at weak/supported and rule boundaries. "
+            "Rows show the cross-vendor (Codex) adjudication splits.",
             "\n".join(rel),
             "All 44 disagreements adjudicated twice: claude-sonnet-5 (same family; A 24 / B 19 / neither 1) "
             "and OpenAI Codex via codex-personal, direct CLI (cross-vendor; A 28 / B 16 / 0). The two agree "
@@ -133,7 +136,7 @@ def main() -> int:
         for png, title in FIGURES:
             p = FIG / png
             if p.exists():
-                image_page(pdf, p, title + ("  [intermediate]" if partial and "review" in png else ""))
+                image_page(pdf, p, title + ("  [intermediate]" if partial and "review_adverse" in png else ""))
     print(f"wrote {out}")
     return 0
 
