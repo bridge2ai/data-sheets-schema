@@ -519,7 +519,7 @@ receipts:
     without_receipt_truncated: 297
     never_receipted: 329
     added_after_receipt: 18
-    receipt_paths: 181
+    receipt_paths: 184
     unresolved: []
     path_off_by_one: []
     path_off_by_one_count: 0

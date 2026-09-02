@@ -622,11 +622,16 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                                  "slot": pair.get("slot"), "snippet": snippet[:60], "reason": why})
 
     # --- slots: paths resolve; every receiptable populated leaf has one
+    all_paths = sorted({str(p.get("slot") or "") for e in entries if e.get("status") == "extracted"
+                        for p in (e.get("extracted") or [])})
     attesting = {str(p.get("slot") or "") for e in entries if e.get("status") == "extracted"
                  for p in (e.get("extracted") or [])
                  if (e.get("id"), str(p.get("slot") or ""), p.get("snippet")) not in unattesting_pairs}
-    receipt_paths = sorted({str(p.get("slot") or "") for e in entries if e.get("status") == "extracted"
-                            for p in (e.get("extracted") or [])} & attesting | attesting)
+    # #893: an unattesting snippet forfeits coverage, but its PATH is still a
+    # claim about the record's structure - it runs the same resolution,
+    # off-by-one and addressing checks, so a fabricated path cannot hide
+    # behind a tiny snippet.
+    receipt_paths = all_paths
     unresolved = [p for p in receipt_paths if not resolve(full, p)]
     reshaped = [p for p in unresolved if p and original is not None and resolve(original, p)]
     unresolved = [p for p in unresolved if p not in reshaped]
@@ -703,7 +708,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     leaves = populated_leaves(full)
     record_id = full.get("id") if isinstance(full.get("id"), str) else None
     receiptable = [(p, v) for p, v in leaves if not exempt(p, v, record_id)]
-    without = [p for p, _v in receiptable if not any(_covers(r, p) for r in receipt_paths)]
+    without = [p for p, _v in receiptable if not any(_covers(r, p) for r in attesting)]
     # #807: `without_receipt` is a mixture on the API path. Split against the
     # phase-1 snapshot: a path populated when the receipt was written and not
     # covered then was *never* receipted; one the snapshot lacks was added by

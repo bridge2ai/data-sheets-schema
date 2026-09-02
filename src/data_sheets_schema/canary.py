@@ -104,6 +104,8 @@ REPORTED_ONLY = (
     # Receipts (#708) are shown on every run and gated by `verdict` against
     # floors when the run's procedure wrote one; `_ran` reads `checked`, so
     # an unchecked block prints — (#727).
+    ("snippets unattesting (below the floors)", "receipts",
+     lambda b: (b.get("snippets") or {}).get("unattesting")),
     ("snippets bearing on no token of their value", "receipts",
      lambda b: (b.get("snippets") or {}).get("no_value_overlap")),
     ("entry receipts overlapping one leaf", "receipts",
@@ -147,11 +149,15 @@ def receipt_floors(block: dict[str, Any]) -> dict[str, int]:
         # to receipt exposure - ceil(total snippets / 200) - because a floor
         # of zero over 200+ probabilistic items gates on bookkeeping, not
         # fabrication. Fabrication-shaped paths stay in "receipt findings".
+        # Denominator is VERIFIED snippets (#893): padding a receipt with
+        # unattesting snippets must not buy tolerance.
         "addressing slips over tolerance": max(0, int(((block.get("slots") or {}).get("addressing_slips_count")) or 0)
-                                               - -(-int(sn.get("total") or 0) // 200)),
+                                               - -(-int(sn.get("verified") or 0) // 200)),
         # A receipt over a non-empty bundle that extracted nothing is not a
         # clean receipt; it is `checked: 0` wearing a pass (#684, DisMech #7252).
-        "receipts vacuous": int(total > 0 and int(sn.get("total") or 0) == 0),
+        # #893: vacuity is about ATTESTATION - a receipt whose snippets are
+        # all below the floors has verified nothing (#684's lesson again).
+        "receipts vacuous": int(total > 0 and int(sn.get("verified") or 0) == 0),
         # Findings not already counted above: a mismatched snippet is one
         # defect, not two lines (#727).
         # Wrong-chunk attributions are reported, never gated (#763): the

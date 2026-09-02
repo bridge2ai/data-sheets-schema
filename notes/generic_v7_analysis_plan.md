@@ -286,7 +286,19 @@ path; no restart):
    canary floor at **ceil(total snippets / 200)** per run. Fabrication-
    shaped paths (no such structure) remain gated findings at zero.
 
+Stated plainly, per the #892 review: (a) coverage is reported, never
+gated, so the unattesting reclassification trades a gated defect for a
+reported coverage loss; (b) unattesting snippets escape the token-overlap
+screens (which run on verified snippets only); (c) the closures adopted
+with the revision — vacuity fires on zero VERIFIED snippets over a
+non-empty bundle, an unattesting pair's path still runs the full
+resolution/addressing checks, and both tolerances use verified snippets
+as denominator so padding buys nothing; (d) the residual per-run
+laundering budget is the addressing tolerance itself, ceil(verified/200),
+over a fabrication surface the review measured at 47 arrays x 132 leaf
+names on the live record.
+
 AI_READI rep1 attempt 4 re-verdicts `ok` under this revision (3
-unattesting, 1 addressing slip within its tolerance of 2) and is
-retained; the offline verdict is recorded in its provenance with basis.
-The fabrication floor is unchanged everywhere.
+unattesting reported, 1 addressing slip within its tolerance of
+ceil(221/200)=2) and is retained; the offline verdict is recorded in its
+provenance with basis. The fabrication floor is unchanged everywhere.

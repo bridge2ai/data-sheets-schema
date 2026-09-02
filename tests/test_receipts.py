@@ -422,6 +422,28 @@ class Validator(unittest.TestCase):
         self.assertEqual(b6["slots"]["addressing_slips_count"], 0)
         self.assertIn("slot_not_in_record", [f["kind"] for f in b6["findings"]])
 
+    def test_the_laundering_closures_hold(self):
+        """#893: an all-unattesting receipt is vacuous; a fabricated path
+        cannot hide behind a tiny snippet; padding buys no tolerance."""
+        manifest, texts = _manifest_and_texts()
+        from data_sheets_schema.canary import receipt_floors
+        rec = _receipt(manifest["bundle_md5"])
+        for e in rec["chunks"]:
+            for pr in e.get("extracted") or []:
+                pr["snippet"] = "OT2"                            # everything under-floor
+        b = rc.check(rec, manifest, texts, FULL, manifest["bundle_md5"])
+        self.assertEqual(b["snippets"]["verified"], 0)
+        self.assertEqual(receipt_floors(b)["receipts vacuous"], 1)
+        rec2 = _receipt(manifest["bundle_md5"])
+        rec2["chunks"][1]["extracted"].append({"slot": "totally.fabricated[3].slot", "snippet": "OT2"})
+        b2 = rc.check(rec2, manifest, texts, FULL, manifest["bundle_md5"])
+        self.assertIn("slot_not_in_record", [f["kind"] for f in b2["findings"]])   # path still gated
+        # padding: tolerance uses verified, so unattesting inflation buys nothing
+        blk={"chunks":{"total":1,"reviewed":1},
+             "snippets":{"total":400,"verified":150,"mismatched":0,"unchecked":0},
+             "slots":{"addressing_slips_count":2},"findings":[]}
+        self.assertEqual(receipt_floors(blk)["addressing slips over tolerance"], 1)
+
     def test_unattesting_snippets_and_the_exposure_tolerance(self):
         """#891, registered: an under-floor snippet attests nothing - counted,
         never a misquote, and its slot earns no coverage; addressing slips
@@ -442,7 +464,7 @@ class Validator(unittest.TestCase):
         self.assertEqual(receipt_floors(b)["snippets unverified"], 0)
         # tolerance math on a synthetic block: 1 slip within ceil(150/200)=1;
         # 3 slips over it by 2
-        blk={"chunks":{"total":1,"reviewed":1},"snippets":{"total":150,"mismatched":0,"unchecked":0},
+        blk={"chunks":{"total":1,"reviewed":1},"snippets":{"total":150,"verified":150,"mismatched":0,"unchecked":0},
              "slots":{"addressing_slips_count":1},"findings":[]}
         self.assertEqual(receipt_floors(blk)["addressing slips over tolerance"], 0)
         blk["slots"]["addressing_slips_count"]=3
