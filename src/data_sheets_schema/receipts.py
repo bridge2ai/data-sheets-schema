@@ -500,6 +500,10 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     record_id_flag = full.get("id") if isinstance(full.get("id"), str) else None
     snippets = {"total": 0, "verified": 0, "linewrap_joined": 0, "adjacent": 0, "elsewhere": 0,
                 "spans_boundary": 0, "split_at_linebreaks": 0, "artifact_elided": 0,
+                # #891: a snippet below the #720 floors attests nothing - it is
+                # not evidence and not a misquote. Counted apart, no coverage
+                # credit for a slot whose only snippets are unattesting.
+                "unattesting": 0, "unattesting_sample": [],
                 "mismatched": 0, "unchecked": 0,
                 # Reported, never gated (#806, #804): a verified snippet whose
                 # normalised tokens overlap nothing in the value it receipts
@@ -512,6 +516,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                 "no_value_overlap": 0, "no_value_overlap_sample": [],
                 "entry_single_leaf": 0, "entry_single_leaf_sample": []}
     order = {cid: i for i, cid in enumerate(manifest_ids)}
+    unattesting_pairs: set = set()
     hays = {cid: normalise(t) for cid, t in chunk_texts.items()}      # once per chunk (#766)
     hays_j = {cid: normalise_joined(t) for cid, t in chunk_texts.items()}   # line breaks joined (#789)
     hays_e = {cid: normalise(elide_artifact_lines(t)) for cid, t in chunk_texts.items()}       # #887/#890
@@ -581,9 +586,14 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                             snippets["no_value_overlap_sample"].append(
                                 {"chunk": e.get("id"), "slot": spath, "snippet": snippet[:60]})
                 continue
-            # Shortness is decided before any haystack, so a too-short
-            # snippet is found nowhere and stays `mismatched`.
-            where = [] if why.startswith("too short") else [
+            if why.startswith("too short"):
+                snippets["unattesting"] += 1
+                snippets["unattesting_sample"].append({"chunk": e.get("id"),
+                                                       "slot": pair.get("slot"),
+                                                       "snippet": snippet[:40]})
+                unattesting_pairs.add((e.get("id"), str(pair.get("slot") or ""), snippet))
+                continue
+            where = [
                 cid for cid, h in hays.items() if cid != e.get("id")
                 and snippet_in(snippet, "", h, hays_j.get(cid), hays_e.get(cid), hays_je.get(cid))[0]]
             # A passage the chunk boundary cuts is in no single chunk (#781):
@@ -612,8 +622,16 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                                  "slot": pair.get("slot"), "snippet": snippet[:60], "reason": why})
 
     # --- slots: paths resolve; every receiptable populated leaf has one
-    receipt_paths = sorted({str(p.get("slot") or "") for e in entries if e.get("status") == "extracted"
-                            for p in (e.get("extracted") or [])})
+    all_paths = sorted({str(p.get("slot") or "") for e in entries if e.get("status") == "extracted"
+                        for p in (e.get("extracted") or [])})
+    attesting = {str(p.get("slot") or "") for e in entries if e.get("status") == "extracted"
+                 for p in (e.get("extracted") or [])
+                 if (e.get("id"), str(p.get("slot") or ""), p.get("snippet")) not in unattesting_pairs}
+    # #893: an unattesting snippet forfeits coverage, but its PATH is still a
+    # claim about the record's structure - it runs the same resolution,
+    # off-by-one and addressing checks, so a fabricated path cannot hide
+    # behind a tiny snippet.
+    receipt_paths = all_paths
     unresolved = [p for p in receipt_paths if not resolve(full, p)]
     reshaped = [p for p in unresolved if p and original is not None and resolve(original, p)]
     unresolved = [p for p in unresolved if p not in reshaped]
@@ -661,12 +679,36 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
         else:
             still.append(pth)
     unresolved = still
+    # #891: an unresolved path is ADDRESSING-SHAPED when it parses, its
+    # parent array resolves, and the leaf name exists on at least one
+    # sibling entry - the variables[24].notes shape: a real passage filed
+    # at a wrong interior index that the narrow #878 rule rightly refuses
+    # to relocate. Counted apart; the canary floor tolerates
+    # ceil(snippets_total/200) of them (exposure-adjusted, registered in
+    # the v7 plan). A path that names no real structure stays a finding.
+    addressing = []
+    kept = []
+    for pth in unresolved:
+        shaped = False
+        if pth and re.fullmatch(r"\w+(\[\d+\])*(\.\w+(\[\d+\])*)*", pth):
+            m = None
+            for m2 in re.finditer(r"\[(\d+)\]", pth):
+                m = m2
+            if m is not None:
+                head, tail = pth[:m.start()], pth[m.end():]
+                okp, arr = _resolve_value(full, head) if head else (True, full)
+                leaf = tail.lstrip(".")
+                if okp and isinstance(arr, list) and leaf and any(
+                        isinstance(x, dict) and resolve(x, leaf) for x in arr):
+                    shaped = True
+        (addressing if shaped else kept).append(pth)
+    unresolved = kept
     for p in unresolved:
         findings.append({"kind": "slot_not_in_record" if p else "slot_empty", "slot": p})
     leaves = populated_leaves(full)
     record_id = full.get("id") if isinstance(full.get("id"), str) else None
     receiptable = [(p, v) for p, v in leaves if not exempt(p, v, record_id)]
-    without = [p for p, _v in receiptable if not any(_covers(r, p) for r in receipt_paths)]
+    without = [p for p, _v in receiptable if not any(_covers(r, p) for r in attesting)]
     # #807: `without_receipt` is a mixture on the API path. Split against the
     # phase-1 snapshot: a path populated when the receipt was written and not
     # covered then was *never* receipted; one the snapshot lacks was added by
@@ -688,10 +730,13 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
              "receipt_paths": len(receipt_paths), "unresolved": unresolved,
              "path_off_by_one": off_by_one[:20],
              "path_off_by_one_count": len(off_by_one),
+             "addressing_slips": addressing[:20],
+             "addressing_slips_count": len(addressing),
              "reshaped_by_reconcile": reshaped,
              "receipts_to_removed_values": len(reshaped)}
 
     snippets["no_value_overlap_sample"] = snippets["no_value_overlap_sample"][:10]
+    snippets["unattesting_sample"] = snippets["unattesting_sample"][:10]
     snippets["entry_single_leaf_sample"] = snippets["entry_single_leaf_sample"][:10]
     chunks = {"total": len(manifest_ids), "reviewed": reviewed, "unreviewed": missing[:50],
               "by_status": by_status}
@@ -711,6 +756,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                         + (f" ({snippets['linewrap_joined']} across a wrapped line)" if snippets["linewrap_joined"] else "")
                         + (f" ({snippets['split_at_linebreaks']} split at line breaks)" if snippets["split_at_linebreaks"] else "")
                         + (f" ({snippets['artifact_elided']} across an artifact line)" if snippets["artifact_elided"] else "")
+                        + (f" ({snippets['unattesting']} unattesting, below the floors)" if snippets["unattesting"] else "")
                         + (f" ({snippets['adjacent']} in an adjacent chunk)" if snippets["adjacent"] else "")
                         + (f" ({snippets['elsewhere']} in another chunk)" if snippets["elsewhere"] else "")
                         + (f" ({snippets['spans_boundary']} spanning a chunk boundary)" if snippets["spans_boundary"] else "")
@@ -724,7 +770,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                            if never_receipted is not None and without else "")
                         + (f" ({slots['exempt']} exempt)" if slots["exempt"] else "")
                         + (f" · {len(reshaped)} receipt path(s) reshaped by reconcile" if reshaped else "")
-                        + (f" · {len(off_by_one)} receipt path(s) off by one index" if off_by_one else "")),
+                        + (f" · {len(off_by_one)} receipt path(s) off by one index" if off_by_one else "")
+                        + (f" · {len(addressing)} addressing slip(s)" if addressing else "")),
             "non_checks": list(NON_CHECKS)}
 
 

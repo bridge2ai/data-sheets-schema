@@ -265,3 +265,40 @@ the AI_READI run: its second gated metric, two undeclared `nih:` prefixes
 (baseline 0, the record's own caveat admitting the prefix is undeclared),
 is a genuine defect, so the run is archived and the canary retried under
 the unchanged configuration.
+
+
+## Gate revision: exposure-adjusted floors (2026-09-02, user-adopted, #891)
+
+Four AI_READI canary attempts each failed on one or two single-count
+bookkeeping slips while every fabrication-class metric held at zero across
+all four (no wrong values, no invented text, no ungrounded identifiers).
+At a floor of zero over the arm's largest receipt load (N~220-240
+snippets), the per-attempt pass probability stays ~25-35% regardless of
+quality. Adopted revision, applied by the checker (not the generation
+path; no restart):
+
+1. **A snippet below the #720 floors is `unattesting`, not a misquote**:
+   it attests nothing, so it is counted apart, produces no finding, and
+   its slot earns no coverage credit (the receipt is treated as absent).
+2. **Addressing-shaped unresolved paths** — the path parses, its parent
+   array resolves, and the leaf exists on at least one sibling entry (the
+   `variables[24].notes` shape) — are counted apart and tolerated by the
+   canary floor at **ceil(total snippets / 200)** per run. Fabrication-
+   shaped paths (no such structure) remain gated findings at zero.
+
+Stated plainly, per the #892 review: (a) coverage is reported, never
+gated, so the unattesting reclassification trades a gated defect for a
+reported coverage loss; (b) unattesting snippets escape the token-overlap
+screens (which run on verified snippets only); (c) the closures adopted
+with the revision — vacuity fires on zero VERIFIED snippets over a
+non-empty bundle, an unattesting pair's path still runs the full
+resolution/addressing checks, and both tolerances use verified snippets
+as denominator so padding buys nothing; (d) the residual per-run
+laundering budget is the addressing tolerance itself, ceil(verified/200),
+over a fabrication surface the review measured at 47 arrays x 132 leaf
+names on the live record.
+
+AI_READI rep1 attempt 4 re-verdicts `ok` under this revision (3
+unattesting reported, 1 addressing slip within its tolerance of
+ceil(221/200)=2) and is retained; the offline verdict is recorded in its
+provenance with basis. The fabrication floor is unchanged everywhere.
