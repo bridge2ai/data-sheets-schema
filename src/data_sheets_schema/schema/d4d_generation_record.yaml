@@ -265,6 +265,17 @@ classes:
         inlined: true
         range: AnyBlock
 
+      canary:
+        description: >-
+          A canary verdict recorded on the run: status (ok / regressed /
+          unmeasurable), the metric rows against the baseline, and a basis
+          naming who computed it and when. Written by the batch gate's
+          offline re-verdict route (#877, #891) — a run whose gate verdict
+          was interpreted after the fact carries the interpretation here
+          rather than only in a terminal transcript.
+        inlined: true
+        range: AnyBlock
+
       review:
         description: >-
           A reviewer's answers to the record's review pack (#787), checked:
