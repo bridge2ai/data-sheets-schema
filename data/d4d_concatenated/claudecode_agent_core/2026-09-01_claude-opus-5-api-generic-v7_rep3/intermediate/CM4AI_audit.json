@@ -1,0 +1,143 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "Value `ROR:0153tk833` is not supported by the bundle as an identifier for the publisher. The bundle contains the string `https://ror.org/0153tk833` only inside the June 2026 Dataverse author-affiliation fields (used in place of an institution name for the University of Virginia authors: Clark T, Al Manir S, Levinson MA, Niestroy J, Ratcliffe S). No source states that the University of Virginia is the publisher of the release, and the bundle nowhere associates that ROR with a publisher role. The publisher slot should either be omitted or carry an attested designation of the publishing entity (Dataverse states only 'University of Virginia Dataverse')."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators[*].affiliations[*].id",
+      "issue": "Four Creator entries (ORCID:0000-0003-4060-7360, ORCID:0000-0003-4647-3877, ORCID:0000-0003-0384-8499, ORCID:0000-0002-1103-3882) plus ORCID:0000-0002-6644-8284 carry `affiliations: [{id: ROR:0153tk833}]` while 34 other creators, whose affiliations the bundle states as plain institution names (University of California San Diego, Stanford University, etc.), carry no affiliation at all. The asymmetry is an artifact of the June 2026 Dataverse listing happening to print a ROR URL for UVA authors and institution names for everyone else; it misrepresents the record as knowing UVA affiliations and not the others. Either populate affiliations consistently from the attested institution names, or omit the slot throughout."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators",
+      "issue": "Nine of the 47 authors listed in the bundle's Dataverse citation (Axelsson U, Chinn B, Fall J, Johannesson A, Khaliq H, Muralidharan M, Pan E, Polacco B, Zhang Y) are omitted from the creators list entirely because they lack ORCIDs in the source. The bundle clearly supports their status as creators. The Creator class in the schema digest accepts `notes`, so each could be represented with a minted fragment id (e.g. doi:10.18130/V3/HIGT4C#creator-axelsson-u) and the attested name and affiliation in `notes`, or the omission should at minimum be reconciled — the record currently claims 38 creators where the source states 47."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "data_governance.committee_contact / regulatory_restrictions.governance_committee_contact",
+      "issue": "Both slots are populated with `id: ORCID:0000-0003-4535-3486`, which the bundle attests as the ORCID of author 'Parker J'. The bundle names the Data Governance Committee contact as 'Jillian Parker (jillianparker@health.ucsd.edu)'. Equating the release's author 'Parker J' with the governance contact 'Jillian Parker' is an inference the bundle does not state; no source in the bundle gives Jillian Parker's ORCID or links the two forms of the name. The identification is plausible but unattested."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "data_governance.committee_members",
+      "issue": "Vardit Ravitsky (ORCID:0000-0002-7080-8801) and Jean-Christophe Bélisle-Pipon (ORCID:0000-0002-8965-8153) are listed as members of the 'CM4AI Data Access Committee'. The bundle names them only as 'Ethical Review' contacts for the release, a distinct role recorded separately under the release's 'Data Governance & Ethics' heading. No source states they are members of a Data Access Committee. Their correct placement is `ethical_reviews.contact_person` (where Ravitsky already appears) and `stewardship_roles` (where both already appear)."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "data_governance.committee_name",
+      "issue": "`CM4AI Data Access Committee` is a composed name. The May 2024 preprint states 'A Data Access Committee will supervise ethical matters related to dataset distribution and potential dual licensing for commercial use' (future tense, unnamed); the June 2026 release names a 'Data Governance Committee' contact. The bundle nowhere uses the string 'CM4AI Data Access Committee'. Two differently-named bodies in two sources have been merged into one invented name."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "license_and_use_terms.contact_person",
+      "issue": "Populated with `id: ORCID:0000-0002-1708-8454` (Trey Ideker). The bundle lists Ideker as the dataset's Point of Contact on the Dataverse landing page, but nowhere designates him as the contact for license or use terms. For commercial licensing the bundle points instead to 'a separate license negotiation with the copyright holder (UCSD, Stanford, and/or UCSF depending upon the specific data package in question)'. The slot attributes a licensing role the evidence does not assign."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances[3].data_substrate",
+      "issue": "The perturb-seq instance is assigned `B2AI_SUBSTRATE:64` (Perturb-seq Data), which fits, but the paired `data_topic: B2AI_TOPIC:34` (Transcriptome) is a weaker fit than the available B2AI_TOPIC:12 (Gene) or B2AI_TOPIC:52; more materially, instance 1's `data_substrate: B2AI_SUBSTRATE:56` (Immunofluorescence Image) is correct while its `data_topic: B2AI_TOPIC:19` (Microscale Imaging) sits alongside an unused and better-matching B2AI_TOPIC:15 (Image). These are judgment calls rather than defects, but instance 3's `data_substrate: B2AI_SUBSTRATE:58` (Mass Spectrometry Data) for AP-MS versus instance 2's `B2AI_SUBSTRATE:59` (Size Exclusion Chromatography-Mass Spectrometry Data) for SEC-MS is correct and consistent. Flagging only for review of the two topic assignments."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "total_file_count",
+      "issue": "Set to 10, matching the June 2026 file listing ('1 to 10 of 10 Files'). However `file_collections` enumerates file_count values of 3+2+2+2+1 = 10, which is consistent, while `total_size_bytes` is omitted despite the bundle supplying per-file sizes for all ten archives (3.8 GB, 4.6 GB, 4.2 GB, 113.3 KB, 135.8 KB, 171.8 KB, 93.9 KB, 30.2 KB, 73.3 KB, 1.1 MB). The omission is supportable if unit conversion is judged unreliable, but the aggregate is clearly derivable from the bundle."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "file_collections[*].compression",
+      "issue": "Every file collection carries `compression: zip` and the top-level record also carries `compression: zip`. The release metadata archive and all others are indeed .zip per the bundle, so the values are supported; however the top-level `compression` describes the dataset as a whole, which comprises ten separate ZIP archives rather than being itself a single compressed object. Low-confidence redundancy rather than a factual error."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "related_datasets[3].target_dataset",
+      "issue": "`doi:10.18130/V3/DXWOS5` (May 2024 Data Release) is drawn from the bioRxiv preprint's Data and Software Availability Statement, which cites 'Clark T, Mohan J, Schaffer L, Obernier K, et al. Cell Maps for Artificial Intelligence - Data Release, https://doi.org/10.18130/V3/DXWOS5'. The accompanying `name` field renders this as 'Cell Maps for Artificial Intelligence - Data Release (May 2024)'; the parenthetical date is composed, not part of the cited title. The CM4AI portal separately lists a 'May 2024 Data Release' in its archive without a DOI, so the association is inferred rather than stated."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "related_datasets[*].name",
+      "issue": "`DatasetRelationship` in the schema digest requires only `relationship_type` and `target_dataset` and otherwise accepts the same slots as the top-level Dataset listing, so `name` is valid. No defect; noted only because five of six entries carry a `name` sourced verbatim from the bundle while the sixth (DXWOS5) carries a partly composed one — see the preceding finding."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "last_updated_on",
+      "issue": "Set to `2026-07-15T00:00:00Z`, the publication date of the three immunofluorescence image archives. The Dataverse landing page gives the dataset publication date as 2026-06-17 and the version as 2.0; it does not state a dataset-level modification date of 2026-07-15. Deriving the dataset's last-updated timestamp from the latest per-file publication date is a reasonable inference but is not stated by any source."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "status",
+      "issue": "'Beta release, published' is a composed two-part value. The bundle supports 'Beta' (from the title and the portal's 'June 2026 Data Release (Beta)') and the files are marked Published in the Dataverse listing, but the concatenation is the record's own phrasing rather than a status term any source states."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "language",
+      "issue": "`en` is not stated anywhere in the bundle. It is a safe inference from the documents being in English, but is not attested."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "collection_timeframes[0]",
+      "issue": "The start_date 2022-09-01 and end_date 2026-08-31 are the NIH RePORTER project period, not a data collection timeframe. The `timeframe_details` correctly characterizes them as the project period 'during which the data in this and other quarterly releases were generated', but populating `start_date`/`end_date` with grant-period boundaries asserts a collection window the bundle does not state. NIH RePORTER is tier 4, the lowest-ranked source carrying these dates."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "sampling_strategies[0].strategies[1]",
+      "issue": "States imaging of '464 proteins of interest ... under each of three treatment conditions'. The June 2026 file listing carries no per-file descriptions; 464 is carried over from the October 2025 release descriptions. The source_caveats correctly documents this and the conflict with the March 2025 figure of 563, so the value is traceable, but the record asserts 464 for the June 2026 release on the basis of a prior release's file descriptions, and the June 2026 image archives have different MD5 checksums from the October 2025 ones (also noted in source_caveats) — i.e. the archives were regenerated and the protein count is not confirmed for this release."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "funders[0].notes",
+      "issue": "Grant identifiers (1OT2OD032742-01, OT2OD032742, application 11211616, 3OT2OD032742-01S2), the award amount and the project period are recorded as prose in `notes` rather than in the `grants` slot, whose declared range is `Grant[]`. The source_caveats explains this as a consequence of the Grant class structure being unavailable in the schema digest. This is an honest workaround, but the digest does declare `grants: Grant[]` on FundingMechanism and `id` is available on every object, so at minimum a Grant object with an id could carry the identifier."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "external_resources[5].notes",
+      "issue": "The Nature 2025 publication (doi:10.1038/s41586-025-08878-3) is included under external_resources with a note explaining it concerns U2OS cells and is 'a separate study rather than a description of the cell lines and conditions in this release'. This is accurate and well-caveated. However the same publication is not represented in `related_datasets`, where an `is_referenced_by` or `references` relationship would be the schema's typed home for it. Minor placement issue only."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "preprocessing_strategies / labeling_strategies / cleaning_strategies",
+      "issue": "All four preprocessing_strategies entries, the labeling_strategies entry, and cleaning_strategies[0] describe the MuSIC pipeline and FAIRSCAPE packaging — steps that produce cell maps which, per the release's own completeness statement, are NOT included in this release. Two of these carry a source_caveats noting this; preprocessing_strategies[0] through [2] and cleaning_strategies[0] do not. As written, the record attributes to the released artifacts a processing history that was not applied to them."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "notes",
+      "issue": "Carries the CM4AI portal's project-wide totals (1,374 protein interactions; 53,788 immunofluorescent images; 7,023 proteins; 11,739 genes; 21.4 TB) with a correct caveat that these are cumulative across releases rather than for this release. Appropriate placement, but the figure '11,739 genes targeted' also appears as a release-specific fact in `instances[3].instance_type` and `sampling_strategies[0].strategies[2]` sourced from the perturb-seq atlas description — the same number arriving from two different scopes without the record distinguishing them."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "conforms_to_standard",
+      "issue": "`RO_CRATE` is correct and attested. Note however that `conforms_to` prose also describes JSON-Schema, JSON-LD, RDF-XML and the EVI Evidence Graph Ontology; only RO-Crate maps to a permitted enum term, and the others are correctly left in prose. No defect — recorded as a positive check."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "is_tabular",
+      "issue": "Set to `false`. Defensible for a release dominated by image archives and RO-Crate packages, but not stated by any source; the SEC-MS and perturb-seq archives plausibly contain tabular content. Unattested inference."
+    }
+  ],
+  "summary": "Audited the full record (98-slot Dataset class) against the 28-chunk CM4AI bundle. The record is broadly well-grounded: the referent choice (June 2026 release, doi:10.18130/V3/HIGT4C) follows the declared ranking, four genuine source conflicts are documented in source_caveats with the higher-ranked source preferred, DOIs and ORCIDs are correctly formed as CURIEs in uriorcurie slots, the `doi` string slot carries the bare DOI, file_collection fragment ids are minted on the attested dataset DOI, enum values (compression: zip; conforms_to_standard: RO_CRATE; collection_type; bias_type; limitation_type; data_use_permission: no_commercial_use; confidentiality_level: unrestricted; role: academic_institution/researcher) all draw from the permitted sets, and multivalued slots emit one object per distinct entity throughout. Twenty-two findings. Three are high severity and share one root cause — identifiers asserted beyond what the bundle attests: `publisher: ROR:0153tk833` repurposes a ROR that appears in the bundle only as an author-affiliation string, the same ROR is attached as an affiliation to five creators while 34 equally-attested institutional affiliations are dropped, and nine of 47 listed authors are omitted from `creators` solely for lacking ORCIDs. Six medium findings concern governance: an invented committee name ('CM4AI Data Access Committee') merging two differently-named bodies from two sources, ethical-review contacts promoted to committee members, and three ORCID identifications (Parker J as the governance contact Jillian Parker; Ideker as the license contact) that the bundle supports by name-similarity or role-adjacency rather than statement. The remaining findings are low severity: several unattested but reasonable inferences (`language: en`, `is_tabular: false`, `last_updated_on` derived from the latest per-file date, `status` as a composed phrase), grant identifiers held as prose in `notes` rather than in the `grants: Grant[]` slot, `total_size_bytes` omitted though derivable, and — the most substantive of these — four preprocessing and one cleaning entry describing the MuSIC pipeline that produces cell maps which this release explicitly does not contain, only two of which carry the caveat noting that. No enum violations, no prose-where-list-required, no scalar/object range errors, and no source commentary embedded inside name, identifier or affiliation values were found."
+}

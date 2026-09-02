@@ -84,10 +84,15 @@ ARMS = (
     # The v7 API arm is partial: five canary runs under four label prefixes
     # (CHORUS ×2, AI_READI ×3), the fan-out deferred (#777). An explicit label
     # list, not a prefix; n is 0 for CM4AI and VOICE and the table says so.
-    ("v7api", "v7 API canaries (2026-08-28…d, partial)",
+    ("v7api", "v7 API canaries (2026-08-28…d, exploratory)",
      ["2026-08-28_claude-opus-5-api-generic-v7_rep1", "2026-08-28b_claude-opus-5-api-generic-v7_rep1",
       "2026-08-28c_claude-opus-5-api-generic-v7_rep1", "2026-08-28d_claude-opus-5-api-generic-v7_rep1"],
      "Claude API via CBORG", "reps"),
+    # The v7 PRODUCTION matrix (2026-09-01, 12 records): the registered arm
+    # (#838/#849), excluded cohort separate above. The first API arm complete
+    # under the receipt protocol - the 12-vs-12 comparison against v6 agentic.
+    ("v7prod", "v7 API production (2026-09-01)",
+     "2026-09-01_claude-opus-5-api-generic-v7", "Claude API via CBORG", "reps"),
 )
 
 
@@ -376,7 +381,7 @@ def write_figures(data, scores) -> None:
 
     OUT_FIG.mkdir(parents=True, exist_ok=True)
     colors = {"v4": "#9e9e9e", "v5api": "#4e79a7", "v5agentic": "#f28e2b",
-              "v6agentic": "#e15759", "v7api": "#59a14f"}
+              "v6agentic": "#e15759", "v7api": "#59a14f", "v7prod": "#1b7f3b"}
 
     # One figure per metric: 4 project panels, one bar per arm = replicate mean,
     # error bar = sample SD (n printed under the bar). Replicates are dots.

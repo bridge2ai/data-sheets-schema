@@ -1,0 +1,916 @@
+pack_version: 3
+run:
+  label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+  project: AI_READI
+  method: claudecode_agent
+  condition: generic_v7
+provenance:
+  path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_provenance.yaml
+  request_sha256: 2b3b985b126ddb0a6f18487fcbedd6ad5f5e7d9aef727bc1073718bc830a2089
+seed: 2b3b985b126ddb0a6f18487fcbedd6ad5f5e7d9aef727bc1073718bc830a2089
+schema:
+- src/data_sheets_schema/schema/data_sheets_schema_all.yaml (class Dataset; slot descriptions)
+- src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml (class CoreDataset)
+gaps: []
+instruction:
+  basis: re-rendered from the recorded spec (sha256 matches)
+  path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_review_instruction.md
+  sha256: 2b3b985b126ddb0a6f18487fcbedd6ad5f5e7d9aef727bc1073718bc830a2089
+  chars: 12390
+rules:
+- id: rule-01
+  block: uniform
+  text: 'Populate a slot only where the declared bundle supports it. Prefer omission over inference: an absent slot is a correct answer when the evidence is absent, and a plausible guess is not.'
+- id: rule-02
+  block: uniform
+  text: Where the declared bundle contains sources that disagree, represent what the evidence states rather than silently selecting one. Do not merge distinct entities into a single claim.
+- id: rule-03
+  block: uniform
+  text: '`Dataset` admits one referent. Choose the one the declared bundle best supports, state that choice in the reconciliation report, and hold to it consistently across both records.'
+- id: rule-04
+  block: uniform
+  text: There is no target slot count, no expected density, and no expected relationship to any other arm or project. Apply your own judgment about what the evidence supports.
+- id: rule-05
+  block: v2
+  text: When a slot's declared range is multivalued, emit one object per distinct entity. Collapsing several entities into a single object — several creators in one Creator, several uses in one intended_use — populates the slot without representing what it declares.
+- id: rule-06
+  block: v2
+  text: Populate a slot with the information the field asks for, not with a pointer to where that information lives, and not with a statement that it is pending or absent. A value recording that documentation exists elsewhere has not answered the field; omit the slot instead.
+- id: rule-07
+  block: v2
+  text: Read the slot's description before populating it. Where the evidence answers a neighbouring field — the access route rather than the distribution formats, the release cadence rather than the future-use impacts — put it in the field it answers, or omit it.
+- id: rule-08
+  block: v3
+  text: When a slot's declared range is a class, populate the fields that class declares. Placing the content in a free-text field such as `description` while the declared fields — a name, an identifier, dates, affiliations — stay empty produces an object of the correct shape holding none of the structure it exists to carry. Where the evidence answers a declared field, populate that field rather than restating it in prose.
+- id: rule-09
+  block: v5
+  text: 'In a slot whose declared range is `uriorcurie`, never write a resolver URL where the schema declares a prefix: write the CURIE — a prefix, a colon, and the local part. A `ROR:` CURIE, not the ror.org URL; an `ORCID:` CURIE, not the orcid.org URL; a `doi:` CURIE, not the doi.org resolver form. **`uriorcurie` is the range this rule exists for**: its "uri" half is the fallback for an identifier that no declared prefix covers, never permission to expand one that a prefix does cover. Two records naming one thing in one form produce one identity; the same thing written as a prefix here and a resolver URL there produces two. Check the schema''s declared prefixes and use one whenever it fits; a resolver URL in a `uriorcurie` slot whose prefix is declared is a defect even though it resolves. Three things this does not govern, and they are exempt entirely: a slot whose declared range is `uri` — not `uriorcurie` — takes a URL (`download_url` and `access_urls` are declared `uri`, and a CURIE there is wrong); a URL inside prose or a citation is text — leave both of these exactly as written; and a slot whose declared range is `string` follows its own description and pattern even when it holds an identifier — the `doi` slot takes the bare DOI, neither prefixed nor resolved.'
+- id: rule-10
+  block: v5
+  text: 'An identifier that names something outside this dataset — an organisation, a person, a publication, another dataset — is a fact about the world, subject to the same rule as any other fact: take it from the evidence or omit it. Do not supply one you recognise but the input documents do not state. A correct identifier the evidence does not contain is still an unsupported claim, and to every reader who was not present it is indistinguishable from an incorrect one. Naming an organisation the documents name is grounded; adding that organisation''s registry identifier from your own knowledge is not.'
+- id: rule-11
+  block: v5
+  text: 'An identifier that names a part of this dataset, and exists nowhere outside this record, is a label rather than a claim about the world — so no evidence can supply it and the rule above does not reach it. Mint it as a fragment on an identifier the evidence *does* supply, so the label stays traceable to something attested. This is the only case in which minting is right, and the test is whether the thing named has a referent outside this record: if it does, the rule above governs and you take the identifier from the evidence or omit it. Never invent a prefix — one the schema does not declare resolves to nothing, and where no fragment is possible either, a resolvable URL is the better answer. A person is identified by a personal-identifier registry entry and an organisation by an organisation registry entry; a fragment appended to an organisation''s identifier does not identify a person, it makes a false claim about that organisation.'
+- id: rule-12
+  block: v5
+  text: 'Write American English throughout — characterize, organization, standardized, analyze, behavior, license. This governs the prose the record states, not quoted material: a title, a name or a direct quotation keeps the spelling its source used.'
+- id: rule-13
+  block: v5
+  text: 'Where two sources in the declared bundle disagree, prefer the one the input manifest ranks higher: state its value, and record in the caveat that the sources disagreed, what each said, and which was preferred. Where the disagreeing sources share the same rank the ranking cannot decide, so represent what the evidence states rather than selecting one. This refines the earlier rule about disagreement; it does not replace it.'
+- id: rule-14
+  block: v6
+  text: 'Within the rule above, mint a fragment identifier for a part of this dataset only where another value in the record must point at that part — a split a task names, a subset a distribution cites, a collection a file belongs to. A part nothing points at is described in prose, not labeled: an identifier no value in the record uses is not a label, it is noise that reads as structure. Name the same part with the same fragment every time a value points at it, and mint nothing for a part that is only described.'
+- id: rule-15
+  block: v7
+  text: 'After the full record, emit a second document: the coverage receipt for the declared bundle. The bundle is divided into chunks, each opening with a marker of the form `[cNNN]` on its own line. Write the record, then a line reading exactly `--- COVERAGE RECEIPT ---`, then a YAML document with `bundle_md5` (as given with the bundle) and `chunks`: one entry per marker, in order, each with `id` and a `status` from exactly these, each status with its own key — `extracted`, whose `extracted` key lists every `{slot, snippet}` pair the chunk supplied, the slot being the record path the value fills (a leaf, or an entry where one passage attests the whole entry) and the snippet a verbatim phrase copied from that chunk, never a lone short word; `redundant_with`, whose `chunks` key names the chunks that already receipted everything it holds; `nothing_relevant`, with a `reason`; or `duplicate_of`, whose `of` key names the chunk it repeats. Every value in the record that the bundle supplied appears in some chunk''s receipt; a value with no receipt is one the record must not carry. The phase instruction shows the exact shape.'
+- id: rule-16
+  block: v4
+  text: Where a slot's declared range is a scalar, populate it with the identifier of the thing it refers to, not with the thing itself. An object placed in a string-ranged slot fails validation and loses the reference it was meant to record, even where that thing is richly described elsewhere in the record.
+bundle:
+  path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  md5: 8abd7bf5389b562b95794d656af19392
+  manifest: data/preprocessed/chunks/AI_READI_chunks.yaml
+  lines: 7376
+  chunks:
+  - id: c001
+    lines:
+    - 1
+    - 25
+    source: <preamble>
+  - id: c002
+    lines:
+    - 26
+    - 425
+    source: bmjopen-2024-097449_row2.txt
+  - id: c003
+    lines:
+    - 426
+    - 825
+    source: bmjopen-2024-097449_row2.txt
+  - id: c004
+    lines:
+    - 826
+    - 1225
+    source: bmjopen-2024-097449_row2.txt
+  - id: c005
+    lines:
+    - 1226
+    - 1625
+    source: bmjopen-2024-097449_row2.txt
+  - id: c006
+    lines:
+    - 1626
+    - 1704
+    source: bmjopen-2024-097449_row2.txt
+  - id: c007
+    lines:
+    - 1705
+    - 2104
+    source: s42255-024-01165-x_row3.txt
+  - id: c008
+    lines:
+    - 2105
+    - 2160
+    source: s42255-024-01165-x_row3.txt
+  - id: c009
+    lines:
+    - 2161
+    - 2197
+    source: reporter_nih_gov_project-details-10471118_row7.txt
+  - id: c010
+    lines:
+    - 2198
+    - 2289
+    source: docs_aireadi_org_docs-2_row10.txt
+  - id: c011
+    lines:
+    - 2290
+    - 2375
+    source: docs_aireadi_org_docs-3_2026-07-24.txt
+  - id: c012
+    lines:
+    - 2376
+    - 2661
+    source: AI-READI-LICENSE-v2.0_2026-08-12.txt
+  - id: c013
+    lines:
+    - 2662
+    - 2740
+    source: fairhub_dataset_2_row12.txt
+  - id: c014
+    lines:
+    - 2741
+    - 2813
+    source: fairhub_dataset_3_2026-07-24.txt
+  - id: c015
+    lines:
+    - 2814
+    - 3213
+    source: fairhub_api_dataset_3_2026-07-27.txt
+  - id: c016
+    lines:
+    - 3214
+    - 3613
+    source: fairhub_api_dataset_3_2026-07-27.txt
+  - id: c017
+    lines:
+    - 3614
+    - 4013
+    source: fairhub_api_dataset_3_2026-07-27.txt
+  - id: c018
+    lines:
+    - 4014
+    - 4413
+    source: fairhub_api_dataset_3_2026-07-27.txt
+  - id: c019
+    lines:
+    - 4414
+    - 4813
+    source: fairhub_api_dataset_3_2026-07-27.txt
+  - id: c020
+    lines:
+    - 4814
+    - 5213
+    source: fairhub_api_dataset_3_2026-07-27.txt
+  - id: c021
+    lines:
+    - 5214
+    - 5316
+    source: fairhub_api_dataset_3_2026-07-27.txt
+  - id: c022
+    lines:
+    - 5317
+    - 5716
+    source: aireadi_ro_crate_metadata_2026-08-12.txt
+  - id: c023
+    lines:
+    - 5717
+    - 6116
+    source: aireadi_ro_crate_metadata_2026-08-12.txt
+  - id: c024
+    lines:
+    - 6117
+    - 6337
+    source: aireadi_ro_crate_metadata_2026-08-12.txt
+  - id: c025
+    lines:
+    - 6338
+    - 6647
+    source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
+  - id: c026
+    lines:
+    - 6648
+    - 6943
+    source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
+  - id: c027
+    lines:
+    - 6944
+    - 7318
+    source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
+  - id: c028
+    lines:
+    - 7319
+    - 7376
+    source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
+records:
+  full: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml
+  core: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d_core.yaml
+  report: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_reconciliation.md
+  receipt: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_coverage_receipt.yaml
+  claims: null
+id_slots:
+  entries:
+  - path: funders[0].grants[0].id
+    class: Grant
+    identifier: false
+    required: false
+    forced: false
+    minted: false
+  - path: data_governance.accountable_organization.id
+    class: Organization
+    identifier: false
+    required: false
+    forced: false
+    minted: false
+  - path: file_collections[0].id
+    class: FileCollection
+    identifier: true
+    required: false
+    forced: true
+    minted: true
+  - path: file_collections[1].id
+    class: FileCollection
+    identifier: true
+    required: false
+    forced: true
+    minted: true
+  - path: file_collections[2].id
+    class: FileCollection
+    identifier: true
+    required: false
+    forced: true
+    minted: true
+  - path: file_collections[3].id
+    class: FileCollection
+    identifier: true
+    required: false
+    forced: true
+    minted: true
+  - path: file_collections[4].id
+    class: FileCollection
+    identifier: true
+    required: false
+    forced: true
+    minted: true
+  - path: file_collections[5].id
+    class: FileCollection
+    identifier: true
+    required: false
+    forced: true
+    minted: true
+  - path: file_collections[6].id
+    class: FileCollection
+    identifier: true
+    required: false
+    forced: true
+    minted: true
+  - path: file_collections[7].id
+    class: FileCollection
+    identifier: true
+    required: false
+    forced: true
+    minted: true
+  - path: file_collections[8].id
+    class: FileCollection
+    identifier: true
+    required: false
+    forced: true
+    minted: true
+  - path: subsets[0].id
+    class: DataSubset
+    identifier: true
+    required: true
+    forced: true
+    minted: true
+  - path: subsets[1].id
+    class: DataSubset
+    identifier: true
+    required: true
+    forced: true
+    minted: true
+  - path: subsets[2].id
+    class: DataSubset
+    identifier: true
+    required: true
+    forced: true
+    minted: true
+  note: 'forced: the schema declares this class''s id as an identifier or required, so the record could not omit the id given the object — it settles the id''s presence, not the object''s. minted: a urn or a fragment on the record''s own id; false means a world-facing reference (a DOI, ROR, URL) whose truth the evidence rules judge, not the fragment rule. The fragment rule is judged on minted ids only, and a forced mint never violates it; resources[*].id is also consumed by `d4d derive core`''s projection.'
+counts:
+  nothing_relevant_chunks: 4
+  receipted_slots_total: 162
+  receiptless_slots_total: 217
+  reshaped_slots_total: 6
+  sampled:
+    receipted: 25
+    receiptless: 25
+items:
+- id: chunk-c001
+  kind: chunk_nothing_relevant
+  chunk: c001
+  lines:
+  - 1
+  - 25
+  source: <preamble>
+  agent_reason: Concatenation header and table of contents listing the eleven source files; contains no dataset facts.
+  question: Does this chunk hold anything the record should carry and does not? Open the lines; answer against the full record.
+- id: chunk-c006
+  kind: chunk_nothing_relevant
+  chunk: c006
+  lines:
+  - 1626
+  - 1704
+  source: bmjopen-2024-097449_row2.txt
+  agent_reason: Bibliographic reference list of the BMJ Open protocol; the substantive claims it supports are receipted from the body text of the same publication.
+  question: Does this chunk hold anything the record should carry and does not? Open the lines; answer against the full record.
+- id: chunk-c025
+  kind: chunk_nothing_relevant
+  chunk: c025
+  lines:
+  - 6338
+  - 6647
+  source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
+  agent_reason: 'Blank University of Washington IRB application template: instructions, definitions and unanswered questions for sections 1 through 5.11.f, with no AI-READI-specific content.'
+  question: Does this chunk hold anything the record should carry and does not? Open the lines; answer against the full record.
+- id: chunk-c026
+  kind: chunk_nothing_relevant
+  chunk: c026
+  lines:
+  - 6648
+  - 6943
+  source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
+  agent_reason: Continuation of the blank IRB application template (sections 5.11.g through 10.10), consisting of guidance text and unanswered questions with no AI-READI-specific content.
+  question: Does this chunk hold anything the record should carry and does not? Open the lines; answer against the full record.
+- id: slot-005
+  kind: slot_receipted
+  slot: file_collections[3]
+  value: '{''id'': ''doi:10.60775/fairhub.3#retinal_flio'', ''name'': ''retinal_flio'', ''path'': ''retinal_flio'', ''collection_type'': ''processed_data'', ''file_count'': 7969, ''total_bytes'': 1069466876718, ''description'': ''Data collected through fluorescence lifetime imaging ophthalmoscopy (FLIO), an imaging modality for in …'
+  receipts:
+  - chunk: c016
+    lines:
+    - 3214
+    - 3613
+    snippet: '"directoryName": "retinal_flio"'
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-006
+  kind: slot_receipted
+  slot: source_caveats
+  value: 'Several source disagreements were encountered. (1) Project name: the FAIRhub structured metadata, the healthsheet, the dataset README and the NIH RePORTER record all expand AI-READI as "Artificial Intelligence Ready and Exploratory Atlas for Diabetes Insights", while the BMJ Open protocol paper expa…'
+  receipts:
+  - chunk: c009
+    lines:
+    - 2161
+    - 2197
+    snippet: The Artificial Intelligence Ready and Exploratory Atlas for Diabetes Insights (AI-READI) project
+  - chunk: c021
+    lines:
+    - 5214
+    - 5316
+    snippet: '"study_title": "AI Ready and Exploratory Atlas for Diabetes Insights"'
+  - chunk: c027
+    lines:
+    - 6944
+    - 7318
+    snippet: The study will collect a cross-sectional dataset of 4600 people
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-007
+  kind: slot_receipted
+  slot: variables[0].quality_notes
+  value: The BMJ Open protocol reports a laboratory reference range of 4.0 to 6.0 percent, provided by the testing laboratory; a reference range is not the observed minimum and maximum of the variable in this dataset, so it is recorded here rather than in the minimum_value and maximum_value fields.
+  receipts:
+  - chunk: c004
+    lines:
+    - 826
+    - 1225
+    snippet: reference ranges were provided by the testing laboratories
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-008
+  kind: slot_receipted
+  slot: sampling_strategies[0].is_sample
+  value: true
+  receipts:
+  - chunk: c018
+    lines:
+    - 4014
+    - 4413
+    snippet: The dataset contains all possible instances.
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-009
+  kind: slot_receipted
+  slot: informed_consent[0].consent_scope
+  value: The public version of the dataset can only be used for type 2 diabetes related research; a private (controlled access) version will allow for more generic use. The recorded consent is not restricted to non-commercial use, is not geographically restricted, is not limited to genetic studies and does n…
+  receipts:
+  - chunk: c015
+    lines:
+    - 2814
+    - 3213
+    snippet: The public version of the dataset can only be used for type 2 diabetes related research.
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-010
+  kind: slot_receipted
+  slot: informed_consent[0].consent_type
+  value: Written informed consent, obtained either electronically (e-consent with an electronic signature in REDCap, accessed through a unique code emailed to the participant) or in person at the start of the visit. The FAIRhub dataset description records the registry consent type as "ConsentSpecifiedNotElse…
+  receipts:
+  - chunk: c027
+    lines:
+    - 6944
+    - 7318
+    snippet: Potential participants will receive an email with a unique code to access their e-consent
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-011
+  kind: slot_receipted
+  slot: external_resources[0].restrictions
+  value: '[''The documentation is shared under the CC-BY 4.0 license, so there are no restrictions associated with its use.'']'
+  receipts:
+  - chunk: c018
+    lines:
+    - 4014
+    - 4413
+    snippet: The documentation is shared under the CC-BY 4.0 license
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-012
+  kind: slot_receipted
+  slot: known_limitations[2].limitation_description
+  value: The public release omits protected health information as well as sex, race/ethnicity and medication information; 5-digit zip code, sex, race, ethnicity, genetic sequencing data, past health records, medications, and traffic and accident reports are available only under controlled access. Raw, pre-st…
+  receipts:
+  - chunk: c011
+    lines:
+    - 2290
+    - 2375
+    snippet: The data held under controlled access include 5-digit zip code, sex, race, ethnicity, genetic sequencing data
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-013
+  kind: slot_receipted
+  slot: prohibited_uses[1].prohibition_reason
+  value: Licensees shall not use or attempt to use the data, alone or in concert with other information, to compromise or otherwise infringe the confidentiality of information about a data subject, to invade or compromise the privacy of any data subject, to attempt to identify or contact any data subject or …
+  receipts:
+  - chunk: c012
+    lines:
+    - 2376
+    - 2661
+    snippet: cause harm or injury to any Data Subject
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-014
+  kind: slot_receipted
+  slot: prohibited_uses[3].prohibition_reason
+  value: Licensees shall not transfer, license, sublicense, sell, assign, display, share or otherwise convey any portion of the data or any derivative work to any third party other than another licensee bound by an agreement on identical terms, because secondary sharing controls are what protect the study pa…
+  receipts:
+  - chunk: c012
+    lines:
+    - 2376
+    - 2661
+    snippet: sublicense, sell, assign, display, share or otherwise convey any portion of the Data
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-015
+  kind: slot_receipted
+  slot: variables[2].quality_notes
+  value: Lower numbers indicate better resolution. The Snellen visual acuity variables were dropped in version 3.0.0, so only logMAR measurements are available.
+  receipts:
+  - chunk: c018
+    lines:
+    - 4014
+    - 4413
+    snippet: the Snellen visual acuity variables were dropped in this version of the dataset
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-016
+  kind: slot_receipted
+  slot: sensitive_elements[0].sensitivity_details
+  value: The healthsheet states that the public dataset does not contain data that is considered sensitive. The controlled access dataset contains data regarding racial and ethnic origins, location (5-digit zip code), and motor vehicle accident reports, as well as sex, genetic sequencing data, past health re…
+  receipts:
+  - chunk: c018
+    lines:
+    - 4014
+    - 4413
+    snippet: No, the public dataset will not contain data that is considered sensitive.
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-017
+  kind: slot_receipted
+  slot: file_collections[6].file_count
+  value: 93921
+  receipts:
+  - chunk: c017
+    lines:
+    - 3614
+    - 4013
+    snippet: '"numberOfFiles": 93921'
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-018
+  kind: slot_receipted
+  slot: total_file_count
+  value: 356343
+  receipts:
+  - chunk: c015
+    lines:
+    - 2814
+    - 3213
+    snippet: '"fileCount": 356343'
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-019
+  kind: slot_receipted
+  slot: collection_mechanisms[10].mechanism_details
+  value: Peripheral neuropathy assessed with a standard 10 g monofilament applied to three locations on the plantar surface of each foot with the participant's eyes closed, with insensate areas retested for confirmation; responses recorded on an iPad, laptop or paper questionnaire and entered into REDCap. Co…
+  receipts:
+  - chunk: c018
+    lines:
+    - 4014
+    - 4413
+    snippet: Monofilament test is a standard clinical test
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-020
+  kind: slot_receipted
+  slot: collection_mechanisms[9].mechanism_details
+  value: 'Vision and ocular measurement instruments: M&S Technologies EVA for visual acuity at 4 metres, Mars Letter Contrast Sensitivity charts, Topcon KR 800 auto keratometer/refractor for autorefraction, and lensometers (NIDEK LM-600P, Topcon CL-200 and Topcon CL-300).'
+  receipts:
+  - chunk: c018
+    lines:
+    - 4014
+    - 4413
+    snippet: M&S Technologies EVA device to test visual acuity
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-021
+  kind: slot_receipted
+  slot: publisher
+  value: https://fairhub.io/
+  receipts:
+  - chunk: c015
+    lines:
+    - 2814
+    - 3213
+    snippet: '"publisherName": "FAIRhub"'
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-022
+  kind: slot_receipted
+  slot: file_collections[3].file_count
+  value: 7969
+  receipts:
+  - chunk: c016
+    lines:
+    - 3214
+    - 3613
+    snippet: '"numberOfFiles": 7969'
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-023
+  kind: slot_receipted
+  slot: license_and_use_terms.license_terms
+  value: AI-READI Data License Agreement, Version 2.0, with Washington University in St. Louis as Licensor (https://doi.org/10.5281/zenodo.17555036). The license is a custom license specifically tailored to enable reuse of the AI-READI dataset for commercial or research purposes while placing strong requirem…
+  receipts:
+  - chunk: c012
+    lines:
+    - 2376
+    - 2661
+    snippet: non-transferable license to download, reproduce and use the Data
+  - chunk: c013
+    lines:
+    - 2662
+    - 2740
+    snippet: Health Data License
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-024
+  kind: slot_receipted
+  slot: retention_limit.retention_details
+  value: There are no limits on the retention of the data associated with the instances; participants were not told that their data would be retained for a fixed period and then deleted. Older versions of the dataset are superseded by new releases rather than updated.
+  receipts:
+  - chunk: c019
+    lines:
+    - 4414
+    - 4813
+    snippet: There are no limits on the retention of the data associated with the instances.
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-025
+  kind: slot_receipted
+  slot: splits[0].split_details
+  value: Version 3.0.0 introduces a recommended data split, new in this release. Because sex, race and ethnicity are not released with the public version of the dataset, the project team prepared splits in proportions of 70%/15%/15% for training, validation and testing, where the validation and test sets are…
+  receipts:
+  - chunk: c018
+    lines:
+    - 4014
+    - 4413
+    snippet: It does include a new recommended data split for the 2280 participants
+  - chunk: c019
+    lines:
+    - 4414
+    - 4813
+    snippet: proportions (70%/15%/15%)
+  - chunk: c019
+    lines:
+    - 4414
+    - 4813
+    snippet: 60.8 ± 11.3
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-026
+  kind: slot_receipted
+  slot: confidential_elements[0].confidentiality_details
+  value: The dataset does not contain data that might be considered confidential, and no personally identifiable information is included.
+  receipts:
+  - chunk: c018
+    lines:
+    - 4014
+    - 4413
+    snippet: No, the dataset does not contain data that might be considered confidential.
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-027
+  kind: slot_receipted
+  slot: is_deidentified.method
+  value: No identifiers were collected, so no active de-identification was necessary; the team verified that no identifiable data per US HIPAA were present in the data. The public set is stripped of Protected Health Information as defined by the HIPAA Privacy Rule using the Safe Harbor method. On that basis …
+  receipts:
+  - chunk: c015
+    lines:
+    - 2814
+    - 3213
+    snippet: No identifiers were collected so no active de-identification was necessary
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-028
+  kind: slot_receipted
+  slot: related_datasets[0].target_dataset
+  value: doi:10.60775/fairhub.2
+  receipts:
+  - chunk: c013
+    lines:
+    - 2662
+    - 2740
+    snippet: 10.60775/fairhub.2
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-029
+  kind: slot_receipted
+  slot: related_datasets[1].target_dataset
+  value: doi:10.60775/fairhub.1
+  receipts:
+  - chunk: c022
+    lines:
+    - 5317
+    - 5716
+    snippet: https://doi.org/10.1038/s42255-024-01165-x
+  question: 'Read the passage each snippet sits in. Does it support the record''s value at this slot, as the slot''s description asks, and is the value the right reading? A value of ''<path does not resolve in the record>'' means the final record has no value at this path: answer cannot_tell unless the receipt''s statement survives elsewhere.'
+- id: slot-030
+  kind: slot_receiptless
+  slot: raw_data_sources[2].access_details
+  value: Not shared outside the project team in raw form.
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-031
+  kind: slot_receiptless
+  slot: raw_data_sources[3].source_type
+  value: Wearable device export
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-032
+  kind: slot_receiptless
+  slot: subsets[2].description
+  value: A smaller version of the version 3.0.0 dataset made available for pipeline development. The FAIRhub API records it as a child dataset (child id 4) of the main release. The version 3.0.0 documentation includes a section covering the mini-subset version alongside access and training prerequisites.
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-033
+  kind: slot_receiptless
+  slot: informed_consent[0].withdrawal_mechanism
+  value: Participants were permitted to withdraw consent at any time and cease study participation.
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-034
+  kind: slot_receiptless
+  slot: subsets[1].name
+  value: Controlled access release
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-035
+  kind: slot_receiptless
+  slot: raw_data_sources[5].source_type
+  value: Environmental sensor export
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-036
+  kind: slot_receiptless
+  slot: related_datasets[2].relationship_type
+  value: is_described_by
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-037
+  kind: slot_receiptless
+  slot: known_limitations[0].limitation_type
+  value: representativeness_limitation
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-038
+  kind: slot_receiptless
+  slot: raw_data_sources[5].source_description
+  value: LeeLab Anura custom home environmental sensor exports.
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-039
+  kind: slot_receiptless
+  slot: related_datasets[3].description
+  value: Owsley C, Matthies DS, McGwin G, et al. "Cross-sectional design and protocol for Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights (AI-READI)." BMJ Open 2025;15:e097449. Describes the study design, recruitment, protocol, measurement instruments, laboratory panel and bioreposito…
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-040
+  kind: slot_receiptless
+  slot: anomalies[2].anomaly_details
+  value: In imaging data, participant uncooperation, noise that may obscure the images, technical failures such as system malfunction, and data transfer failures are expected.
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-041
+  kind: slot_receiptless
+  slot: purposes[1].response
+  value: To create a model and blueprint for developing large, scalable, ethically sourced datasets, and to establish standards, best practices and guidelines for the collection, preparation and sharing of data for AI/ML, following the Findable, Accessible, Interoperable, Reusable (FAIR) principles.
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-042
+  kind: slot_receiptless
+  slot: addressing_gaps[0].response
+  value: The ability to understand and affect the course of complex, multi-organ diseases such as type 2 diabetes mellitus has been limited by a lack of well-designed, high quality, large and inclusive multimodal datasets.
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-043
+  kind: slot_receiptless
+  slot: acquisition_methods[0].was_directly_observed
+  value: true
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-044
+  kind: slot_receiptless
+  slot: acquisition_methods[0].was_validated_verified
+  value: true
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-045
+  kind: slot_receiptless
+  slot: raw_data_sources[4].raw_data_format
+  value: .csv
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-046
+  kind: slot_receiptless
+  slot: raw_data_sources[6].source_description
+  value: MoCA Duo application exports of the Montreal Cognitive Assessment total score, section subscores, Memory Index Score and task completion times.
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-047
+  kind: slot_receiptless
+  slot: missing_data_documentation[0].missing_data_patterns
+  value: Not all modalities are available for all participants; missingness is at the level of whole study elements or whole device datasets rather than scattered fields.
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-048
+  kind: slot_receiptless
+  slot: distribution_formats[2].media_type
+  value: application/dicom
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-049
+  kind: slot_receiptless
+  slot: subsets[1].description
+  value: A controlled access version containing all data available in the publicly accessible set plus more sensitive data. The variables held under controlled access are 5-digit zip code, sex, race, ethnicity, genetic sequencing data, past health records, medications, and traffic and accident reports. The f…
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-050
+  kind: slot_receiptless
+  slot: is_deidentified.identifiable_elements_present
+  value: false
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-051
+  kind: slot_receiptless
+  slot: known_limitations[1].recommended_mitigation
+  value: Use the recommended training/validation/testing splits, whose validation and test sets are balanced as far as possible for sex, race/ethnicity and diabetes status.
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-052
+  kind: slot_receiptless
+  slot: ethical_reviews[2].review_details
+  value: Through engagement with the Native Biodata Consortium, the project pursues a co-learning opportunity for understanding challenges specific to American Indian and Alaska Native communities and for evaluating tools for addressing them, such as data usage agreements, contract negotiations, transparent …
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-053
+  kind: slot_receiptless
+  slot: raw_data_sources[5].raw_data_format
+  value: .csv
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-054
+  kind: slot_receiptless
+  slot: variables[3].quality_notes
+  value: Higher numbers mean better sensitivity; log contrast sensitivity is recorded by multiplying the number of errors prior to the final correct letter by 0.04 and subtracting the result from the log CS value at the final correct letter.
+  question: No receipt names a passage for this value. Find one in the bundle, or conclude it is inferred from stated lines, or that the bundle does not state it, or that the slot is of a kind that has no passage.
+- id: slot-055
+  kind: slot_reshaped
+  slot: content_warnings[0].notes
+  question: A later phase reshaped this path after the receipt. Does the value now at the reshaped location still say what the receipted passage says?
+- id: slot-056
+  kind: slot_reshaped
+  slot: data_protection_impacts[0].impact_details
+  question: A later phase reshaped this path after the receipt. Does the value now at the reshaped location still say what the receipted passage says?
+- id: slot-057
+  kind: slot_reshaped
+  slot: distribution_formats[0].media_type
+  question: A later phase reshaped this path after the receipt. Does the value now at the reshaped location still say what the receipted passage says?
+- id: slot-058
+  kind: slot_reshaped
+  slot: extension_mechanism.extension_details
+  question: A later phase reshaped this path after the receipt. Does the value now at the reshaped location still say what the receipted passage says?
+- id: slot-059
+  kind: slot_reshaped
+  slot: labeling_strategies[0].labeling_details
+  question: A later phase reshaped this path after the receipt. Does the value now at the reshaped location still say what the receipted passage says?
+- id: slot-060
+  kind: slot_reshaped
+  slot: purposes[3].response
+  question: A later phase reshaped this path after the receipt. Does the value now at the reshaped location still say what the receipted passage says?
+- id: rule-01
+  kind: rule
+  block: uniform
+  text: 'Populate a slot only where the declared bundle supports it. Prefer omission over inference: an absent slot is a correct answer when the evidence is absent, and a plausible guess is not.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-02
+  kind: rule
+  block: uniform
+  text: Where the declared bundle contains sources that disagree, represent what the evidence states rather than silently selecting one. Do not merge distinct entities into a single claim.
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-03
+  kind: rule
+  block: uniform
+  text: '`Dataset` admits one referent. Choose the one the declared bundle best supports, state that choice in the reconciliation report, and hold to it consistently across both records.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-04
+  kind: rule
+  block: uniform
+  text: There is no target slot count, no expected density, and no expected relationship to any other arm or project. Apply your own judgment about what the evidence supports.
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-05
+  kind: rule
+  block: v2
+  text: When a slot's declared range is multivalued, emit one object per distinct entity. Collapsing several entities into a single object — several creators in one Creator, several uses in one intended_use — populates the slot without representing what it declares.
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-06
+  kind: rule
+  block: v2
+  text: Populate a slot with the information the field asks for, not with a pointer to where that information lives, and not with a statement that it is pending or absent. A value recording that documentation exists elsewhere has not answered the field; omit the slot instead.
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-07
+  kind: rule
+  block: v2
+  text: Read the slot's description before populating it. Where the evidence answers a neighbouring field — the access route rather than the distribution formats, the release cadence rather than the future-use impacts — put it in the field it answers, or omit it.
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-08
+  kind: rule
+  block: v3
+  text: When a slot's declared range is a class, populate the fields that class declares. Placing the content in a free-text field such as `description` while the declared fields — a name, an identifier, dates, affiliations — stay empty produces an object of the correct shape holding none of the structure it exists to carry. Where the evidence answers a declared field, populate that field rather than restating it in prose.
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-09
+  kind: rule
+  block: v5
+  text: 'In a slot whose declared range is `uriorcurie`, never write a resolver URL where the schema declares a prefix: write the CURIE — a prefix, a colon, and the local part. A `ROR:` CURIE, not the ror.org URL; an `ORCID:` CURIE, not the orcid.org URL; a `doi:` CURIE, not the doi.org resolver form. **`uriorcurie` is the range this rule exists for**: its "uri" half is the fallback for an identifier that no declared prefix covers, never permission to expand one that a prefix does cover. Two records naming one thing in one form produce one identity; the same thing written as a prefix here and a resolver URL there produces two. Check the schema''s declared prefixes and use one whenever it fits; a resolver URL in a `uriorcurie` slot whose prefix is declared is a defect even though it resolves. Three things this does not govern, and they are exempt entirely: a slot whose declared range is `uri` — not `uriorcurie` — takes a URL (`download_url` and `access_urls` are declared `uri`, and a CURIE there is wrong); a URL inside prose or a citation is text — leave both of these exactly as written; and a slot whose declared range is `string` follows its own description and pattern even when it holds an identifier — the `doi` slot takes the bare DOI, neither prefixed nor resolved.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-10
+  kind: rule
+  block: v5
+  text: 'An identifier that names something outside this dataset — an organisation, a person, a publication, another dataset — is a fact about the world, subject to the same rule as any other fact: take it from the evidence or omit it. Do not supply one you recognise but the input documents do not state. A correct identifier the evidence does not contain is still an unsupported claim, and to every reader who was not present it is indistinguishable from an incorrect one. Naming an organisation the documents name is grounded; adding that organisation''s registry identifier from your own knowledge is not.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-11
+  kind: rule
+  block: v5
+  text: 'An identifier that names a part of this dataset, and exists nowhere outside this record, is a label rather than a claim about the world — so no evidence can supply it and the rule above does not reach it. Mint it as a fragment on an identifier the evidence *does* supply, so the label stays traceable to something attested. This is the only case in which minting is right, and the test is whether the thing named has a referent outside this record: if it does, the rule above governs and you take the identifier from the evidence or omit it. Never invent a prefix — one the schema does not declare resolves to nothing, and where no fragment is possible either, a resolvable URL is the better answer. A person is identified by a personal-identifier registry entry and an organisation by an organisation registry entry; a fragment appended to an organisation''s identifier does not identify a person, it makes a false claim about that organisation.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-12
+  kind: rule
+  block: v5
+  text: 'Write American English throughout — characterize, organization, standardized, analyze, behavior, license. This governs the prose the record states, not quoted material: a title, a name or a direct quotation keeps the spelling its source used.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-13
+  kind: rule
+  block: v5
+  text: 'Where two sources in the declared bundle disagree, prefer the one the input manifest ranks higher: state its value, and record in the caveat that the sources disagreed, what each said, and which was preferred. Where the disagreeing sources share the same rank the ranking cannot decide, so represent what the evidence states rather than selecting one. This refines the earlier rule about disagreement; it does not replace it.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-14
+  kind: rule
+  block: v6
+  text: 'Within the rule above, mint a fragment identifier for a part of this dataset only where another value in the record must point at that part — a split a task names, a subset a distribution cites, a collection a file belongs to. A part nothing points at is described in prose, not labeled: an identifier no value in the record uses is not a label, it is noise that reads as structure. Name the same part with the same fragment every time a value points at it, and mint nothing for a part that is only described.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-15
+  kind: rule
+  block: v7
+  text: 'After the full record, emit a second document: the coverage receipt for the declared bundle. The bundle is divided into chunks, each opening with a marker of the form `[cNNN]` on its own line. Write the record, then a line reading exactly `--- COVERAGE RECEIPT ---`, then a YAML document with `bundle_md5` (as given with the bundle) and `chunks`: one entry per marker, in order, each with `id` and a `status` from exactly these, each status with its own key — `extracted`, whose `extracted` key lists every `{slot, snippet}` pair the chunk supplied, the slot being the record path the value fills (a leaf, or an entry where one passage attests the whole entry) and the snippet a verbatim phrase copied from that chunk, never a lone short word; `redundant_with`, whose `chunks` key names the chunks that already receipted everything it holds; `nothing_relevant`, with a `reason`; or `duplicate_of`, whose `of` key names the chunk it repeats. Every value in the record that the bundle supplied appears in some chunk''s receipt; a value with no receipt is one the record must not carry. The phase instruction shows the exact shape.'
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: rule-16
+  kind: rule
+  block: v4
+  text: Where a slot's declared range is a scalar, populate it with the identifier of the thing it refers to, not with the thing itself. An object placed in a string-ranged slot fails validation and loses the reference it was meant to record, even where that thing is richly described elsewhere in the record.
+  question: Did the record follow this rule? Cite the slot(s) that show it, or the violation.
+- id: pair-01
+  kind: pair_warning
+  path: $.file_collections <-> $.distributions
+  checker_message: Phase 4 must semantically review related distribution content; deterministic matches=9 (9 at collection level, 0 at nested resource level), unmatched core distributions=[]
+  question: The deterministic checker matched this related full/core content but cannot judge the relation semantically. Open both records at the path; do the matched values say the same thing? Answer with the paths compared and what differs, if anything.
+verdicts:
+  chunk_nothing_relevant:
+  - confirmed
+  - missed_content
+  - cannot_tell
+  slot_receipted:
+  - supported
+  - weak
+  - misread
+  - unsupported
+  - cannot_tell
+  slot_receiptless:
+  - bundle_supports
+  - inferred
+  - not_in_bundle
+  - exempt_by_nature
+  - cannot_tell
+  slot_reshaped:
+  - still_supported
+  - changed_meaning
+  - cannot_tell
+  rule:
+  - followed
+  - violated
+  - not_applicable
+  - cannot_tell
+  pair_warning:
+  - consistent
+  - divergent
+  - cannot_tell

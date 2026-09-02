@@ -1,0 +1,131 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "instances[0].instance_details",
+      "issue": "The Instance class in the schema digest does not declare an `instance_details` key. Permitted keys are counts, data_substrate, data_topic, instance_type, label, label_description, missing_information, notes, sampling_strategies, source_caveats. Inventing a key is a schema violation (#380). The channel/staining description must be moved into `notes`, and the accompanying `source_caveats` value flagging this can then be dropped."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators[4].id",
+      "issue": "The id value `Uma Axelsson` is neither a URI nor a CURIE, and the given name 'Uma' appears nowhere in the declared bundle — the bundle states only 'Axelsson U (KTH Royal Institute of Technology,)'. This invents a person's name and places an unresolvable string in a `uriorcurie`-ranged slot. No ORCID is supplied for this author in any bundle source, so no attested identifier exists; the entry should either be omitted or carry a name-only value with a minted identifier that does not falsely claim a registry entry. Under the v5 rule, an identifier for a person outside this dataset must come from the evidence or be omitted; a fragment on an organization identifier is explicitly forbidden for a person."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators[0].affiliations[0].id",
+      "issue": "`https://ror.org/0168r3w48` is supplied for University of California San Diego. The declared bundle nowhere states a ROR identifier for UCSD; the only ROR identifier appearing anywhere in the bundle is `https://ror.org/0153tk833` (University of Virginia, in the June 2026 release author block). This is an unsupported external identifier drawn from model knowledge, prohibited by the v5 rule. The record's own `source_caveats` on this creator concedes the identifier 'is not stated in the declared bundle' while the value is nonetheless emitted — an internal contradiction. Additionally, a resolver URL is used where a `ROR:` CURIE would be required if the identifier were attested."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "`publisher` is populated with `doi:10.18130/V3/HIGT4C`, the dataset's own DOI, which identifies the dataset rather than the organization responsible for making it available. The bundle supports University of Virginia Dataverse (LibraData) as publisher; the June 2026 author block supplies `https://ror.org/0153tk833` for the University of Virginia, which would render as a `ROR:` CURIE. Self-referential publisher value is an internal inconsistency."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "conforms_to",
+      "issue": "`conforms_to` is set to `RO-Crate` and `conforms_to_standard` to `RO_CRATE`. RO-Crate is the packaging format for the metadata and provenance graphs (the `cm4ai_release_metadata.zip` archive and, in prior releases, `ro-crate-metadata.json` files), not a standard the dataset's own scientific content follows. The slot description restricts this to imaging, waveform, file-layout or common-data-model standards followed by the data. Arguably defensible for the metadata packaging, but the bundle does not state that the image, mass-spectrometry or sequencing content conforms to RO-Crate; flagged as a possible category error."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "file_collections[*].total_bytes",
+      "issue": "Inconsistent unit conversion across sibling values. The three IF archives use decimal conversion (4.6 GB → 4600000000), while the small archives use binary conversion (113.3 KB → 116019; 1.1 MB → 1153434). The record's `source_caveats` acknowledges both conventions but applies them inconsistently within one slot. All are approximations of rounded repository figures; a single convention should be chosen, or the slot omitted for the same reason `total_size_bytes` was omitted."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators[38].source_caveats",
+      "issue": "The Andrej Sali affiliation conflict is correctly identified, but the v5 disagreement rule is not applied. The June 2026 Dataverse release (tier 1) and the Nature publication / bioRxiv preprint (tier 3) disagree; the ranking decides in favor of the tier-1 source. The caveat states the sources are 'not reconciled by it' rather than recording that the higher-ranked source was preferred and why. The emitted affiliation does follow the tier-1 source, so the value is correct; the caveat's reasoning is not."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "distribution_formats[0].access_urls",
+      "issue": "The Dataverse landing page URL is placed in `access_urls`. The schema declares `access_urls` as `uri[]`, so the type is correct, but a landing page is not a data access URL — the slot description for the sibling `download_url` distinguishes the landing page (a page describing the dataset) from the data itself. The same URL is not carried in the top-level `page` slot, which holds `https://cm4ai.org/data-releases/` instead; the Dataverse landing page is the more specific page for this release."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_governance.committee_name",
+      "issue": "`CM4AI Data Access Committee` is a synthesized name. The June 2026 release labels the field 'Data Governance Committee' and names a contact; the preprint refers to 'A Data Access Committee' without a formal name and without the 'CM4AI' prefix. The `source_caveats` discloses the choice, but the emitted value prefixes 'CM4AI' onto a term neither source uses as a proper name."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "created_by",
+      "issue": "`created_by` is populated with the project name 'Cell Maps for Artificial Intelligence (CM4AI)'. The bundle attributes copyright to the Regents of the University of California (with Stanford holding raw image copyright), and names Trey Ideker as principal investigator. The project name is a defensible reading of 'person or organization primarily responsible', but is not stated by the bundle as the creator of record; the copyright holders are."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[1].name",
+      "issue": "`Tim Clark` expands the bundle's 'Clark T' / 'Clark, T'. The bioRxiv preprint author list gives 'Timothy Clark'. 'Tim' is a diminutive appearing nowhere in the bundle. Minor, but an unattested form of a personal name."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[4].name",
+      "issue": "The name value `U Axelsson` inverts the bundle's 'Axelsson U' (surname-initial order) into initial-surname order without evidence that 'U' is a given-name initial rather than part of a differently ordered form. Same concern applies in weaker form to other initial-only creators (F Ballllosero Navarro, J Gao, Y H Lee, A Sigaeva), which are consistent with the bundle's own rendering."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "collection_timeframes[0]",
+      "issue": "The timeframe carries the NIH award period (2022-09-01 to 2026-08-31) as `start_date`/`end_date`. This is the funding period, not the period during which data were collected — the slot description asks for collection start and end dates. The bundle states a data creation date of 2025-02-27 for this release but does not state a collection window. Populating the collection timeframe with award dates answers a neighboring field."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "external_resources",
+      "issue": "Every entry places prose in the `external_resources` sub-key rather than distinguishing the resources. The class declares `external_resources`, `archival`, `future_guarantees`, `restrictions`, `notes`, `source_caveats` — there is no name or URL key, so prose is the only carrier available, and this is not a schema violation. Noted only because several entries bundle multiple distinct depositions (four separate MassIVE accessions in one entry) into a single object, contrary to the v2 rule that a multivalued slot takes one object per distinct entity."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "keywords",
+      "issue": "`Medicine, Health and Life Sciences` is the Dataverse Subject field, not a keyword. The bundle lists it under 'Subject' and lists the twenty-nine keywords separately under 'Keyword'. Minor conflation of two distinct metadata fields."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "total_file_count",
+      "issue": "Set to 10, matching the June 2026 release file listing, which is correct for that release. However `file_collections` also enumerates exactly 10 entries, so the value is consistent. Flagged only to note that no `file_count` is supplied on any individual FileCollection, so the aggregate cannot be verified from within the record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[1].data_substrate",
+      "issue": "SEC-MS elution profiles are mapped to B2AI_SUBSTRATE:59 (Size Exclusion Chromatography-Mass Spectrometry Data), which fits. AP-MS interactions are mapped to B2AI_SUBSTRATE:58 (Mass Spectrometry Data) — also defensible. Perturb-seq is mapped to B2AI_SUBSTRATE:63 (Single-cell RNA Sequence Data) where B2AI_SUBSTRATE:64 (Perturb-seq Data) exists and is the exact term. No evidence problem; a more precise term is available."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "errata[0]",
+      "issue": "The erratum describes a revision to the June 2025 release (a different dataset, doi:10.18130/V3/F3TD5R), not to the dataset this record describes. The `notes` field discloses this. An erratum against a related dataset arguably belongs in that dataset's relationship notes rather than in this record's `errata`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "existing_uses",
+      "issue": "Both entries describe training and dissemination activities (CodeFest, internship) rather than research, commercial or analytical uses of the dataset. The bundle does not state any downstream research use of this release. Arguably these belong in `notes` or are better omitted, since the slot asks for applications of the dataset."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "at_risk_populations",
+      "issue": "Omitted. Defensible given the bundle states no human subjects are involved, but `human_subject_research.involves_human_subjects: false` is asserted and the parallel `at_risk_populations.at_risk_groups_included: false` is not. Minor asymmetry in how the no-human-subjects fact is represented across sibling slots."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "download_url",
+      "issue": "Omitted. The bundle supplies the Dataverse Data Access API base (`https://dataverse.lib.virginia.edu/api/access/datafile/`) and the release landing page, but no direct download URL for the dataset as a whole — the record correctly notes the dataset is too large to download as a single archive. Omission is defensible; flagged for completeness of the audit."
+    }
+  ],
+  "summary": "Twenty findings against the full record. Three are high severity and require repair before the record is sound: an invented key `instance_details` on Instance (schema violation, #380); an invented given name and non-CURIE identifier for creator 'Axelsson U'; and an unsupported ROR identifier for UCSD contradicted by the record's own source_caveats. Six medium findings concern a self-referential `publisher` value, a possible category error in `conforms_to`/`conforms_to_standard` (RO-Crate is the metadata packaging rather than a content standard), inconsistent decimal/binary byte conversions across sibling file_collections, failure to apply the tier-based disagreement rule in the Sali affiliation caveat, a landing page placed in `access_urls`, and `page` pointing at the project data-releases index rather than the release's own landing page. The remaining eleven are low severity: a synthesized committee name, minor unattested expansions of personal names, the NIH award period standing in for a collection timeframe, several distinct external depositions collapsed into single objects, a Dataverse Subject value carried among keywords, an available-but-unused B2AI substrate term for Perturb-seq, and an erratum describing a sibling release. Provenance discipline is otherwise strong: the record correctly selects the June 2026 release as referent under the declared ranking, correctly declines to attribute U2OS figures from the Nature paper or portal-level project totals to this release, correctly omits total_size_bytes rather than summing approximations, and correctly withholds affiliation identifiers the bundle does not supply — making the two invented identifiers the sharpest inconsistencies in an otherwise disciplined record."
+}

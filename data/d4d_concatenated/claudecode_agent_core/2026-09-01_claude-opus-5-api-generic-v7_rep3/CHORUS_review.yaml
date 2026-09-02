@@ -1,0 +1,471 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: "2026-09-02T23:06:18Z"
+pack_sha256: 1c103f4dbd10a4a51a0e9d79c816463a1a88b8a1cb8258d714c138e1d2a56518
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: >-
+    lines 1-17 are the concatenation banner, file inventory, and table of contents naming the
+    four source files; every dataset fact lives in c002-c008, and nothing here belongs in a
+    datasheet slot.
+- id: slot-002
+  verdict: supported
+  evidence: >-
+    lines 1079-1080 "7,642 / Admissions with Radiology Data" under "Current Released Dataset";
+    instances[8] is the admissions-with-radiology-imaging instance type, so counts=7642 is the
+    right reading of the passage in the sense the counts slot asks.
+- id: slot-003
+  verdict: supported
+  evidence: >-
+    lines 41-42 "Project start: 2022-09-01T00:00:00 / Project end: 2026-11-30T00:00:00" in the
+    NIH RePORTER source; the caveat's positive claim - that the dates given are the NIH award
+    period for OT2OD032701 recorded by RePORTER - is exactly what the passage states.
+- id: slot-004
+  verdict: supported
+  evidence: >-
+    lines 251-252 "Imaging - currently 1000 images available with de-id in process for larger
+    cohort"; webinar date September 09, 2025 at line 74; metadata "Planned" and "Yes (DICOM
+    schema)" in the same table (lines 341, 360). The notes value reads all three correctly.
+- id: slot-005
+  verdict: supported
+  evidence: >-
+    line 1385 "Website: www.bridge2ai.org/chorus" in the GitHub overview's Contact section;
+    labeling it the Bridge2AI CHoRUS program page is a fair description of that URL as an
+    external resource.
+- id: slot-006
+  verdict: supported
+  evidence: >-
+    lines 1044-1056: the chorus4ai.org navigation lists Team, Project Overview, Tools, Data
+    Acquisition, Standards, Community Engagement, Ethics, Dataset, Learning Resources; source
+    URL at line 1041. The value enumerates exactly these pages.
+- id: slot-007
+  verdict: supported
+  evidence: >-
+    path removed in Phase 4, but the receipt's statement survives in creators[1].notes
+    ("Manlik Kwong (Tufts University)"); lines 189-190 "Manlik Kwong / Tufts University" under
+    the Bridge2AI CHoRUS Leadership Team heading (line 171) state exactly that.
+- id: slot-008
+  verdict: supported
+  evidence: >-
+    line 45 "acquiring an AI-ready data set from more than 100,000 critically ill patients"
+    verbatim; lines 1065-1071 "Anticipated Final Dataset / 100,000 Patient admissions / 9
+    Different data modalities / 14 Data contributing hospitals" support the first clause.
+- id: slot-009
+  verdict: supported
+  evidence: >-
+    path removed in Phase 4; the statement survives in creators[1].notes as "Parisa Rashidi
+    (University of Florida)", a leadership-team member - which is what lines 186-187 under the
+    line-171 heading actually say (the passage never called her a PI).
+- id: slot-010
+  verdict: supported
+  evidence: >-
+    line 1254 anchors the passage; lines 1256-1262 describe the step-by-step process for
+    extracting and contributing clinical data with SOPs internally validated in the Chorus_SOP
+    repository, and lines 1323-1325 the regular status updates on progress creating and
+    curating extracts. All elements of the value are in the surrounding passage.
+- id: slot-011
+  verdict: supported
+  evidence: >-
+    lines 301-303 "Nursing flowsheets (high-frequency documentation)" in the webinar data-type
+    table, whose standard/metadata columns place flowsheets under OMOP with extensions (lines
+    335-336); instance_type is string-ranged prose and reads the table correctly.
+- id: slot-012
+  verdict: weak
+  evidence: >-
+    lines 1353-1359 really do say a web guide is compiled in chorus-developer and that package
+    versions/maintainers are on the package status page - but maintainer_details asks who is
+    "responsible for maintaining the dataset", and a statement about CHoRUS software package
+    maintenance does not answer that question.
+- id: slot-013
+  verdict: supported
+  evidence: >-
+    line 247 "Clinical notes - stored locally except tokens"; same chunk's table gives OHNLP,
+    metadata Planned, "Yes (OHNLP open source schema)" (lines 308-310, 320-324, 338-339).
+- id: slot-014
+  verdict: supported
+  evidence: >-
+    path removed in Phase 4; survives in creators[1].notes "Manlik Kwong (Tufts University)";
+    lines 189-190 state it, as a leadership-team member per line 171.
+- id: slot-015
+  verdict: supported
+  evidence: >-
+    lines 1122 and 1185 give https://github.com/chorus-ai#table-of-contents; the org page is
+    where the contribution workflow (Chorus_SOP, discussions, chorus-mapping) lives, so the
+    fragment-stripped org URL answers contribution_url (range uri) correctly.
+- id: slot-016
+  verdict: supported
+  evidence: >-
+    line 1094 "This project is funded by the NIH under award number OT2OD032701."; the Common
+    Fund / Bridge2AI qualifier is stated at line 45 ("As part of the NIH Common Fund's
+    Bridge2AI program"), which the receipt carries at the funders[0] entry level.
+- id: slot-017
+  verdict: unsupported
+  evidence: >-
+    the cited passage (lines 177-178) says "Azra Bihorac / University of Florida"; the value
+    now at creators[1].affiliations[0].name is "CHoRUS Consortium" - the Phase-4 consortium
+    Creator - which this passage does not bear on. The consortium affiliation is supported
+    elsewhere (lines 1073, 1093) but not by this receipt; the receipt is a stale pre-reshape
+    pointer.
+- id: slot-018
+  verdict: supported
+  evidence: >-
+    lines 293-296 "Medication administration (dosing time-stamped upon each infusion change or
+    dose administration)" verbatim; the table's standard column ties it to OMOP.
+- id: slot-019
+  verdict: supported
+  evidence: >-
+    lines 452-455 (licensing agreement in the registration form before gaining access to the
+    dataset), lines 883-886 (".edu" email required for dataset access), lines 888-892 (program
+    administrators assist); controlled access for every data type from the table (lines
+    260-376). The value assembles these correctly.
+- id: slot-020
+  verdict: supported
+  evidence: >-
+    lines 305-306 "Diagnoses (documentation by providers)" in the OMOP data-type table.
+- id: slot-021
+  verdict: supported
+  evidence: >-
+    path removed in Phase 4; survives in creators[1].notes "Azra Bihorac (University of
+    Florida)"; lines 177-178 under the leadership-team heading state exactly that.
+- id: slot-022
+  verdict: weak
+  evidence: >-
+    lines 1070-1071 "14 / Data contributing hospitals" (and line 1073 "across 20 different
+    institutions") attest the counts, but no passage says admissions are identified or
+    distinguished by contributing hospital, which is what the identification slot asks
+    (how subpopulations are identified and defined); the framing is the record's construal.
+- id: slot-023
+  verdict: supported
+  evidence: >-
+    lines 1228-1244: "The CHoRUS GitHub organization houses active repositories that provide"
+    software and tooling, validated semantic mappings, SOPs, and project management overviews -
+    the value's four items, plus the org URL at line 1122.
+- id: slot-024
+  verdict: supported
+  evidence: >-
+    line 402 "Gain experience with AI/ML in the Bridge2AI CHoRUS ecosystem"; lines 479-486
+    OHDSI tool stack and OHDSI/OMOP CDM workshops; line 770 "AI/ML for Clinical Care canonical
+    Jupyter Notebooks"; lines 491-493 Collaborative Cloud.
+- id: slot-025
+  verdict: supported
+  evidence: >-
+    line 45 "transform data using approaches that limit re-identification" verbatim; the
+    imaging clause is grounded at lines 251-252 (de-id in process before images become
+    available).
+- id: slot-026
+  verdict: weak
+  evidence: >-
+    lines 1196-1200 state a goal - "develop the most diverse, high-resolution, ethically
+    sourced, AI-ready data set to answer the grand challenge" - and the value inverts it into
+    "Existing resources do not provide a sufficiently... data set", a claim about existing
+    resources the passage does not make. On topic, but not what the passage says.
+- id: slot-027
+  verdict: inferred
+  evidence: >-
+    no passage states "modality coverage is incomplete relative to the planned dataset"; it
+    follows from lines 251-254 (1000 images, de-id in process, EEG extraction in process),
+    line 74 (September 2025 webinar), and lines 1065-1069 (planned 100,000 admissions, 9
+    modalities). The components are stated; the limitation claim is the record's synthesis.
+- id: slot-028
+  verdict: bundle_supports
+  evidence: >-
+    line 45 "tokenized unstructured electronic health record data"; lines 308-310 "Clinical
+    notes (extracted and tokenized using OHNLP toolkit)"; lines 251-252 imaging de-id.
+- id: slot-029
+  verdict: bundle_supports
+  evidence: >-
+    lines 245-247 "OMOP and telemetry in enclave except: Clinical notes - stored locally
+    except tokens".
+- id: slot-030
+  verdict: bundle_supports
+  evidence: >-
+    lines 1075-1076 "50,000 / Patient admissions from ICU, PICU, and NICU"; line 45 "critically
+    ill patients"; the parenthetical only expands the acronyms.
+- id: slot-031
+  verdict: bundle_supports
+  evidence: >-
+    line 346 "Imaging (from PACS)" and line 1080 "Admissions with Radiology Data"; PACS
+    expanded to its standard full name.
+- id: slot-032
+  verdict: exempt_by_nature
+  evidence: >-
+    enum token (representativeness_limitation) has no passage by kind; the entry's factual
+    basis is stated at lines 1202-1204 (20 centers, 14 contributing) and 1075-1076 (ICU, PICU,
+    NICU).
+- id: slot-033
+  verdict: bundle_supports
+  evidence: >-
+    lines 308-310 "extracted and tokenized using OHNLP toolkit"; line 45 "unstructured
+    electronic health record data" (free text).
+- id: slot-034
+  verdict: exempt_by_nature
+  evidence: >-
+    boolean inferred from structure; its sibling details rest on lines 245-247 (notes kept at
+    sites, only tokens transferred).
+- id: slot-035
+  verdict: bundle_supports
+  evidence: >-
+    lines 1077-1078 "1.6 Billion / Rows of EHR OMOP data"; line 45 "structured electronic
+    health record data" and "standardize data to the OMOP Common Data Model".
+- id: slot-036
+  verdict: exempt_by_nature
+  evidence: >-
+    boolean inferred from structure; note the sibling identification's hospital-subpopulation
+    framing is judged weak at slot-022.
+- id: slot-037
+  verdict: bundle_supports
+  evidence: >-
+    line 1538 "Open source code to geocode OMOP Location entities via DeGauss" verbatim.
+- id: slot-038
+  verdict: exempt_by_nature
+  evidence: >-
+    boolean inferred from structure; the patient-level data types it summarizes are stated in
+    the table at lines 260-376 and line 45.
+- id: slot-039
+  verdict: exempt_by_nature
+  evidence: >-
+    boolean the record infers from structure: the bundle states OMOP tables alongside imaging
+    (DICOM), waveforms (WFDB, EDF+/Persyst), and tokenized notes (lines 260-376), so the
+    dataset is not purely tabular; no passage states the boolean itself.
+- id: slot-040
+  verdict: exempt_by_nature
+  evidence: >-
+    ontology term with no passage by its kind; the instance's data type is attested at lines
+    293-296 (medication administration). Term label not resolvable from pack.schema (see
+    notes).
+- id: slot-041
+  verdict: exempt_by_nature
+  evidence: >-
+    ontology term; the EEG waveform data type is attested at lines 364-368 ("Waveform EEG
+    (hospital database)", EDF+ and Persyst).
+- id: slot-042
+  verdict: exempt_by_nature
+  evidence: >-
+    ontology term; waveform telemetry attested at lines 350-354 ("Waveform telemetry (bedside
+    monitors, gateway/middleware)", WFDB).
+- id: slot-043
+  verdict: exempt_by_nature
+  evidence: >-
+    enum token (integration_limitation); factual basis stated at lines 245-247 (notes local,
+    tokens only in enclave).
+- id: slot-044
+  verdict: bundle_supports
+  evidence: >-
+    line 346 "Imaging (from PACS)".
+- id: slot-045
+  verdict: bundle_supports
+  evidence: >-
+    line 354 "WFDB"; lines 343-344 "Yes (PhysioNet schema extended)" in the same table row
+    group.
+- id: slot-046
+  verdict: bundle_supports
+  evidence: >-
+    lines 1196-1200 "The goal of the CHoRUS Network is to develop the most... AI-ready data
+    set" (the Network develops the dataset); line 1162 the full expansion "Patient-Focused
+    Collaborative Hospital Repository Uniting Standards (CHoRUS)"; lines 1073 and 1093 the
+    consortium.
+- id: slot-047
+  verdict: exempt_by_nature
+  evidence: >-
+    ontology term; DICOM for imaging attested at line 348.
+- id: slot-048
+  verdict: bundle_supports
+  evidence: >-
+    lines 364-365 "Waveform EEG (hospital database)".
+- id: slot-049
+  verdict: bundle_supports
+  evidence: >-
+    line 1252 "Data Site Managers" heading; line 1254 "data managers at data contributing
+    sites".
+- id: slot-050
+  verdict: bundle_supports
+  evidence: >-
+    lines 350-352 "Waveform telemetry (bedside monitors, gateway/middleware)".
+- id: slot-051
+  verdict: bundle_supports
+  evidence: >-
+    line 1534 "UF-Geocoding Public" with its description at line 1538.
+- id: slot-052
+  verdict: still_supported
+  evidence: >-
+    creators[0].principal_investigator now holds the bare string "Eric S. Rosenthal"; line 37
+    "Principal investigator: ROSENTHAL, ERIC S." - same person, same claim; the change is
+    shape (string in a Person-ranged slot, judged under rule-08), not meaning.
+- id: slot-053
+  verdict: still_supported
+  evidence: >-
+    Bihorac now appears in creators[1].notes as a leadership-team member at the University of
+    Florida - exactly what lines 177-178 under the line-171 heading say; the passage never
+    asserted her as PI, so the reshaped prose is closer to it, not further.
+- id: slot-054
+  verdict: still_supported
+  evidence: >-
+    "Xiaoqian Jiang (UTHealth Houston)" survives in creators[1].notes; lines 180-181.
+- id: slot-055
+  verdict: still_supported
+  evidence: >-
+    "Xiaoqian Jiang" in creators[1].notes; lines 180-181, as a leadership-team member.
+- id: slot-056
+  verdict: still_supported
+  evidence: >-
+    "Yulia Strekalova (University of Florida)" in creators[1].notes; lines 183-184.
+- id: slot-057
+  verdict: still_supported
+  evidence: >-
+    "Parisa Rashidi (University of Florida)" in creators[1].notes; lines 186-187.
+- id: slot-058
+  verdict: still_supported
+  evidence: >-
+    "Manlik Kwong (Tufts University)" in creators[1].notes; lines 189-190.
+- id: slot-059
+  verdict: still_supported
+  evidence: >-
+    "Manlik Kwong" in creators[1].notes; lines 189-190.
+- id: slot-060
+  verdict: still_supported
+  evidence: >-
+    the old creators[6] consortium note survives in creators[1].notes ("more than 60 members
+    across 20 different institutions"); lines 1072-1073 "60+ / CHoRUS consortium members
+    across 20 different institutions".
+- id: rule-01
+  verdict: violated
+  evidence: >-
+    addressing_gaps[1].response asserts "Existing resources do not provide a sufficiently
+    diverse... data set", which no passage states - lines 1196-1200 state a development goal,
+    not an insufficiency of existing resources; subpopulations[1].identification asserts
+    admissions are "distinguished by contributing hospital", which no passage states (lines
+    1070-1071 give only the count). The record otherwise follows the rule well - doi, version,
+    citation, license, at_risk_populations, human_subject_research all omitted with the
+    absence named in source_caveats - but these carried inferences are populated slots the
+    bundle does not support as stated.
+- id: rule-02
+  verdict: followed
+  evidence: >-
+    instances[0].source_caveats and the top-level source_caveats record both the tier-2
+    50,000-admissions figure and the tier-4 45K+ figure and say which was preferred; no silent
+    selection, and distinct entities (project, consortium, training program, dataset) are not
+    merged.
+- id: rule-03
+  verdict: followed
+  evidence: >-
+    reconciliation report line 5 states the referent (the CHoRUS dataset, not the project,
+    consortium, or training program); both records carry id https://chorus4ai.org/#chorus-dataset
+    and name "CHoRUS dataset", and the top-level source_caveats states project-level material
+    is used only where it describes the data.
+- id: rule-04
+  verdict: followed
+  evidence: >-
+    density tracks the evidence: Phase 4 removed unsupported values (B2AI_SUBSTRATE:37,
+    was_directly_observed, the third subpopulation, at_risk_populations) rather than padding,
+    and thin sources (c008) yield few slots.
+- id: rule-05
+  verdict: followed
+  evidence: >-
+    one object per entity throughout: purposes (4), tasks (4), instances (11), data_collectors
+    (3), external_resources (5 entries), machine_annotation_tools (2), intended_uses (3 by
+    use_category). creators holds the two attested creator entities (the PI and the
+    consortium); the five leadership members are deliberately prose context in
+    creators[1].notes because the bundle does not attest them as creators - an evidence
+    decision under rule-01, not a collapse of creator entities.
+- id: rule-06
+  verdict: followed
+  evidence: >-
+    absences are recorded in source_caveats (e.g. top-level: no DOI, version, citation,
+    retention policy), not as slot values; no field answers with a pointer or a pending
+    placeholder. The "metadata is planned" phrases in instances[*].notes transcribe the
+    webinar table's Metadata column - a fact about the dataset, not a statement that the
+    record's answer is pending.
+- id: rule-07
+  verdict: violated
+  evidence: >-
+    data_governance.committee_contact holds "Jared Houghtaling", attested only as an
+    access-request contact (line 1383) - the slot asks for the governance committee's contact,
+    and the record's own caveat concedes no source names a committee; license_and_use_terms.contact_person
+    holds "Ciera McCrary", attested only as program manager (line 1107), with the caveat
+    conceding no licensing-specific contact exists; maintainers[1].maintainer_details answers
+    software-package maintenance (lines 1353-1359) in a dataset-maintainer slot. The rule's
+    remedy for evidence that answers a neighbouring question is to put it there or omit.
+- id: rule-08
+  verdict: violated
+  evidence: >-
+    three Person-ranged slots hold bare name strings with the class's declared fields empty:
+    creators[0].principal_investigator ("Eric S. Rosenthal"), data_governance.committee_contact
+    ("Jared Houghtaling"), license_and_use_terms.contact_person ("Ciera McCrary"). The Phase-4
+    report (section 2.4) states this shape was chosen deliberately to avoid minting person
+    identifiers (Person.id is forced by the schema and the bundle supplies no registry ids) -
+    a real conflict among the rules, but the rule as written is not met: the evidence answers
+    Person.name and the declared field is not populated.
+- id: rule-09
+  verdict: followed
+  evidence: >-
+    data_topic and data_substrate use CURIEs (B2AI_TOPIC:4, B2AI_SUBSTRATE:11, ...); no
+    ror.org, orcid.org, or doi.org resolver URL appears anywhere in either record; the
+    record's id uses a URL because no declared prefix covers chorus4ai.org (the uri fallback);
+    contribution_url is uri-ranged and correctly holds a URL.
+- id: rule-10
+  verdict: followed
+  evidence: >-
+    no registry identifier is supplied from model knowledge; creators[1].source_caveats and
+    the top-level source_caveats state that no ORCID/ROR appears in the bundle and none is
+    recorded; every URL in the record appears in the bundle (chorus4ai.org line 1041,
+    github.com/chorus-ai line 1122, reporter.nih.gov line 28, bridge2ai.org/chorus line 1385).
+- id: rule-11
+  verdict: not_applicable
+  evidence: >-
+    id_slots.entries is empty - the final record mints no part identifiers (Phase 4 removed
+    every #person-*/#organization-*/#creator-* fragment, per reconciliation section 2.2); the
+    only fragment in the record is its own id on the attested chorus4ai.org URL, and no
+    invented prefix appears.
+- id: rule-12
+  verdict: followed
+  evidence: >-
+    a scan of both records for British spellings (organis-, standardis-, analys-, behaviour,
+    licence, characteris-, etc.) finds none; the "This repoitory..." banner and the
+    award title keep source spelling and are marked as quotations, per the rule's carve-out.
+- id: rule-13
+  verdict: followed
+  evidence: >-
+    the manifest ranks documentation (chorus4ai.org) at tier 2 and tutorial (the webinar) at
+    tier 4; instances[0] states the tier-2 value (50000), and instances[0].source_caveats
+    records that the sources disagreed, what each said (50,000 vs over 45K), and that the
+    higher-ranked one was preferred.
+- id: rule-14
+  verdict: followed
+  evidence: >-
+    nothing in the record points at a part, and no part fragment is minted; the sequestered
+    holdout test set is described in prose in splits[0].split_details, unlabeled, exactly the
+    rule's remedy for a part nothing points at.
+- id: rule-15
+  verdict: violated
+  evidence: >-
+    the receipt document itself is well-formed (bundle_md5 matches 9b2ef4b65d67957f79362266cab0bc7a,
+    chunks c001-c008 in order, closed statuses, verbatim multi-word snippets), but the rule's
+    coverage clause - "every value in the record that the bundle supplied appears in some
+    chunk's receipt" - fails: bundle-supplied phase-1 values carry no receipt, e.g. name
+    "CHoRUS dataset" (bundle line 236), created_by (lines 1196, 1093), instances[0].instance_type
+    (lines 1075-1076), description, keywords, and all five raw_data_sources entries (lines
+    245-247, 346, 350-352, 364-365). 111 of 201 counted slots are receiptless, and the
+    sampled 25 came back mostly bundle_supports - values the bundle supplied that the receipt
+    never named.
+- id: rule-16
+  verdict: followed
+  evidence: >-
+    no object sits in a scalar-ranged slot: grantor, instance_type, role, license_terms and
+    the other string-ranged slots all hold strings; the one shape defect runs the opposite
+    direction (bare strings in Person-ranged slots) and is judged under rule-08.
+notes: >-
+  (1) The pack's claims sidecar is null; receipts were matched from the coverage receipt
+  alone. (2) slot-017 is a stale pre-reshape receipt: Phase 4 rebuilt creators after the
+  receipt was written, so the cited snippet (University of Florida) now sits under a path
+  holding the consortium affiliation - the unsupported verdict is against the pair as posed,
+  and the underlying cause is the no-receipt-route reconcile rewrite (#742), an instrument
+  reporting matter as much as a record defect; the four "<path does not resolve>" items
+  (slot-007/009/014/021) are the same rewrite seen from the other side. (3) B2AI_TOPIC and
+  B2AI_SUBSTRATE term labels are not resolvable from the schema files the pack names (only
+  the prefix is declared), so the correctness of specific term choices (e.g. B2AI_TOPIC:8
+  for medication administration) could not be checked - the exempt_by_nature verdicts attest
+  the underlying data types, not the term mappings. (4) Minor: the core record's
+  conforms_to_schema holds a file path while the full record holds the w3id URI - two forms
+  for one identity (excluded slot, so reported here only); maintainers[*].role
+  "academic_institution" is a loose enum fit for the GitHub organization in maintainers[1].

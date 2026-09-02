@@ -1,0 +1,95 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators[1..5].principal_investigator",
+      "issue": "Five of the six Creator entries (Bihorac, Jiang, Strekalova, Rashidi, Kwong) place the person in the `principal_investigator` slot. The bundle describes these individuals only as members of the 'Bridge2AI CHoRUS Leadership Team' (cohort_2_webinar); NIH RePORTER (nih_reporter_project) names ROSENTHAL, ERIC S. as the sole principal investigator of OT2OD032701. The record's own source_caveats acknowledge this contradiction yet the slot asserts the contradicted role anyway. Only creators[0] is supported in that slot; the others should use a non-PI representation (e.g. Creator with affiliations plus notes, or credit_roles) or be omitted."
+    },
+    {
+      "severity": "moderate",
+      "record": "full",
+      "slot": "data_governance.access_review_process",
+      "issue": "The registration form (name, email, institution), the signed licensing agreement, the compute-provisioning email, and the '.edu' email requirement are stated in cohort_2_webinar exclusively in the context of admission to the AIM-AHEAD Bridge2AI for Clinical Care Training Program cohort 2 ('Accessing the Data', 'Eligibility Requirements', with the footnote 'This requirement is not a barrier to acceptance into the program'). The record presents them as the general access-review process for the dataset. This generalizes a program-specific enrollment procedure into dataset-wide governance, which the bundle does not support."
+    },
+    {
+      "severity": "moderate",
+      "record": "full",
+      "slot": "license_and_use_terms.license_terms",
+      "issue": "Same over-generalization as data_governance.access_review_process: the licensing agreement and institutional-email requirement are attested only for training-program participants, not as the terms governing all dataset access."
+    },
+    {
+      "severity": "moderate",
+      "record": "full",
+      "slot": "data_governance.committee_members",
+      "issue": "The two entries are the access-request contacts printed on the chorus-ai GitHub page ('Request access: dbold@emory.edu or jared.houghtaling@tuftsmedicine.org'). The bundle names no committee and the record's own caveat says so, yet the values are placed in `committee_members`, asserting membership of a body the evidence does not establish. DataGovernance declares `committee_contact` (Person) for a contact route; the access contacts belong there or in a non-committee field."
+    },
+    {
+      "severity": "moderate",
+      "record": "full",
+      "slot": "funders[0].notes",
+      "issue": "FundingMechanism declares `grants` (range Grant[]). The award identifiers and amounts (OT2OD032701, 1OT2OD032701-01, application ID 10472824, USD 5,880,300, project period 2022-09-01 to 2026-11-30) are all packed into free-text `notes` while the declared structured field stays empty — an object of the right shape carrying none of the structure it exists to hold."
+    },
+    {
+      "severity": "moderate",
+      "record": "full",
+      "slot": "data_governance.accountable_organization",
+      "issue": "'Massachusetts General Hospital' as the organization accountable for the data over time is an inference from the NIH RePORTER awardee organization field plus the MGH-based program manager. The bundle nowhere assigns long-term data stewardship or accountability to MGH. The caveat discloses the inference but the slot still states it as fact."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "at_risk_populations.at_risk_groups_included",
+      "issue": "Set to true solely from the website statement that released admissions come from 'ICU, PICU, and NICU'. The bundle never characterizes the cohort as an at-risk population, describes no assent, guardian consent, or special protections, and the object carries no other populated declared field. The boolean is an inference presented as an attested fact; consider omitting the object or moving the PICU/NICU observation to a field that states only what the source states."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "preprocessing_strategies[4]",
+      "issue": "Joins two independent statements into one causal claim: the GitHub repository listing says UF-Geocoding is 'Open source code to geocode OMOP Location entities via DeGauss', and the NIH abstract separately says data elements should 'feature appropriate contextual factors such as geographic distance to the nearest hospital'. The bundle does not state that the geocoding tool is what supports those contextual elements, nor that geocoding was applied to the released dataset."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "known_limitations[2].limitation_description",
+      "issue": "'at 14 contributing hospitals in the United States' — the bundle states 14 data contributing hospitals and gives the chorus-ai GitHub organization location as 'United States of America', but never states that all contributing hospitals are US-based. The geographic qualifier is unsupported inference."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "maintainers[0].role",
+      "issue": "`academic_institution` is the closest available enum value but the entity described is a hospital program-management office; the bundle does not characterize the maintainer's organizational type. Either accept the approximation explicitly in notes or omit the enum."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "description",
+      "issue": "Describes the released admissions as coming from 'adult, pediatric, and neonatal intensive care units'. The source (chorus4ai.org) writes 'ICU, PICU, and NICU'; 'adult' is an expansion the source does not make explicit. Minor, but it adds a population characterization not in the evidence."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "machine_annotation_tools",
+      "issue": "Omitted, though the bundle repeatedly names the OHNLP toolkit as the automated tool used to extract and tokenize clinical notes (cohort_2_webinar modality table; also reflected in preprocessing_strategies and distribution_formats). MachineAnnotationTools.tools/tool_descriptions would carry this; whether tokenization counts as annotation is a judgment call, so this is flagged rather than asserted as a required addition."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "external_resources",
+      "issue": "Omitted, though the bundle supplies dataset-level external resources: the chorus-ai GitHub organization (28 repositories, package status page, chorus-developer documentation guide, Chorus_SOP, chorus-mapping, chorus_waveform) and the alternate project page www.bridge2ai.org/chorus. These are currently mentioned only inside prose in extension_mechanism and maintainers rather than in the slot declared for them."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[1..5].source_caveats",
+      "issue": "The identical caveat sentence is repeated verbatim on five sibling objects. Not a validation defect, but the same trust annotation stated five times where one record-level or slot-level statement would carry it; redundancy of this kind obscures which entry the caveat is actually discriminating."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "notes",
+      "issue": "Top-level `notes` holds only the website banner quotation ('This repoitory is under review for potential modification in compliance with Administration directives'). This is admissible residual content, but it bears on the dataset's current availability/status and overlaps the `status` slot, which currently says nothing about the review. Consider whether it belongs with status rather than as residue."
+    }
+  ],
+  "summary": "Audit of the full CHoRUS record against the declared bundle found 15 issues: 1 high, 5 moderate, 9 low. No schema-shape violations were found — all enum values (conforms_to_standard, limitation_type, Maintainer.role), CURIE forms (B2AI_TOPIC, B2AI_SUBSTRATE), uri-ranged values (contribution_url), integer counts, and list-valued slots conform to the digest, and multivalued slots correctly emit one object per distinct entity. The dominant defect class is unsupported role or scope assertion rather than fabricated content: the record places five Leadership Team members in the `principal_investigator` slot against NIH RePORTER, generalizes an AIM-AHEAD training-program enrollment procedure into dataset-wide access governance and license terms, files GitHub access-request contacts as data-governance committee members, and infers organizational accountability and US geography from adjacent facts. One structural finding: award identifiers are packed into FundingMechanism.notes while the declared `grants` field is empty. Two supportable omissions (machine_annotation_tools for the OHNLP toolkit, external_resources for the chorus-ai repositories and alternate project page) are noted. Numeric and modality content is well grounded, and source disagreements between chorus4ai.org and the cohort 2 webinar (50,000 vs 45K admissions; 7,642 admissions with radiology vs ~1,000 images) are correctly surfaced with the higher-ranked source preferred rather than silently merged."
+}

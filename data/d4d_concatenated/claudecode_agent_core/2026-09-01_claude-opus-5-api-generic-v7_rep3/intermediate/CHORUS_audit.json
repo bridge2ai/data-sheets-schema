@@ -1,0 +1,71 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators[1..5].principal_investigator",
+      "issue": "Azra Bihorac, Xiaoqian Jiang, Yulia Strekalova, Parisa Rashidi and Manlik Kwong are placed in the `principal_investigator` slot. The bundle names them only as members of the \"Bridge2AI CHoRUS Leadership Team\" (cohort_2_webinar); NIH RePORTER (nih_reporter_project) names ROSENTHAL, ERIC S. as the sole principal investigator of OT2OD032701. Populating a Person-ranged slot named `principal_investigator` with people the evidence does not identify as PIs asserts a fact the bundle contradicts; the embedded `source_caveats` documents the problem but does not remove the assertion. Either restrict `principal_investigator` to Rosenthal and carry the remaining leadership names in `notes` on a single consortium Creator, or omit them."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators[*].principal_investigator.id, creators[*].affiliations[*].id, data_governance.accountable_organization.id",
+      "issue": "Identifiers are minted for entities that exist outside this record — persons (`https://chorus4ai.org/#person-eric-s-rosenthal`, `#person-azra-bihorac`, etc.) and organizations (`#organization-massachusetts-general-hospital`, `#organization-university-of-florida`, `#organization-uthealth-houston`, `#organization-tufts-university`, `#organization-chorus-consortium`). The minting rule covers only parts of this dataset; a person or organization is identified by a registry entry taken from the evidence or not at all. The bundle supplies no ORCID, ROR or equivalent for any of these. Fragments appended to the dataset URI also make the false structural claim that these people and institutions are parts of chorus4ai.org. Omit these `id` values."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators[*].id",
+      "issue": "Fragment identifiers (`#creator-rosenthal`, `#creator-bihorac`, `#creator-jiang`, `#creator-strekalova`, `#creator-rashidi`, `#creator-kwong`, `#creator-consortium`) are minted for Creator objects that no other value in the record points at. An identifier nothing references is not a label; under the minting rule it should be omitted. The same applies to `funders[0].grants[0].id` insofar as nothing references it."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "data_governance.committee_contact / license_and_use_terms.contact_person",
+      "issue": "The bundle supplies named contacts — \"Request access: dbold@emory.edu or jared.houghtaling@tuftsmedicine.org\" (github_organization_overview) and \"Ciera McCrary, MGH, Program Manager, cmccrary@mgh.havard.edu\" (project_documentation) — but the record carries them only as prose inside `data_governance.access_review_process`, `data_governance.stewardship_roles` and `maintainers[0].maintainer_details`. Both `DataGovernance.committee_contact` and `LicenseAndUseTerms.contact_person` declare a Person range and are left empty. Populate the declared Person-ranged fields (name only; no minted person identifier — see finding above)."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "at_risk_populations.at_risk_groups_included",
+      "issue": "Set to `true` on the record's own reasoning that ICU/PICU/NICU admissions imply children and neonates. The bundle nowhere characterizes the cohort as containing at-risk or special populations, describes no assent procedure, guardian consent or special protection, and the object's `source_caveats` concedes this. The slot is populated by inference rather than evidence, and the resulting object carries no protection information — which is what the slot exists to record. Omit the slot; the PICU/NICU composition is already stated in `description`, `instances` and `subpopulations`."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "human_subject_research",
+      "issue": "Internal inconsistency: the record is willing to infer `at_risk_populations.at_risk_groups_included: true` from the ICU/PICU/NICU composition, yet omits `human_subject_research` entirely, although the same evidence (patient-level hospital records of critically ill patients, an Ethics pillar, community ethics focus groups determining what data is appropriate for public sharing) bears at least as directly on `involves_human_subjects`. The two decisions should be made on one standard: either both are supported inferences or neither is. The stricter reading — omit both, since no source states IRB approval, ethics-board review or human-subjects determination for the dataset — is preferable."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[1].data_substrate",
+      "issue": "`B2AI_SUBSTRATE:37` (Relational Database) is assigned to OMOP EHR rows. The bundle states only \"1.6 Billion Rows of EHR OMOP data\" and that data are standardized to the OMOP Common Data Model; no source names a storage substrate. The term is an approximation, and the digest instructs omitting the slot rather than approximating."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subpopulations[2]",
+      "issue": "Recasts contextual/SDoH data elements (\"data elements feature appropriate contextual factors such as geographic distance to the nearest hospital\") as a subpopulation identification. The bundle presents these as variables in the data, not as a basis on which subpopulations are defined or reported. The claim that they \"allow subgroups to be distinguished\" is the record's own inference; `sensitive_elements` and `preprocessing_strategies` already carry this content faithfully."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "acquisition_methods[0].was_directly_observed",
+      "issue": "Set to `true` for retrospective extraction of records already documented by clinicians and devices. The bundle describes \"Retrospective data collection\" and acquisition of existing EHR, PACS, telemetry and EEG holdings; no source characterizes the acquisition as direct observation for the dataset. The accompanying `acquisition_details` text is accurate, so the boolean adds an unsupported classification."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "license_and_use_terms.license_terms / data_governance.access_review_process",
+      "issue": "The AIM-AHEAD training-program registration and licensing-agreement procedure is stated twice, in near-identical prose, across two slots. One statement belongs in the access-review field (the process) and the other should be reduced to the terms themselves (signed licensing agreement required; .edu email required; controlled access), so the two slots do not duplicate one another."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "funders[0].grants[0].id",
+      "issue": "`https://reporter.nih.gov/project-details/10472824` is the NIH RePORTER landing page for the award, not an identifier of the grant. The grant identifier attested by the bundle is the project number 1OT2OD032701-01 / core project number OT2OD032701, already carried in `name`. No declared prefix covers NIH award numbers, so the URL is a tolerable fallback, but it misidentifies a page as a grant."
+    }
+  ],
+  "summary": "Eleven findings against the full record, two high. The record's factual content tracks the bundle closely and its disagreement handling (50,000 released admissions from the tier-2 project documentation versus 45K+ from the tier-4 webinar, both recorded, higher tier preferred) is correct, as are its omissions of doi, citation, version, license, errata, retention and known_biases. The defects are concentrated in identity and inference. Identity: fragment identifiers are minted under the dataset URI for persons and organizations that have referents outside this record and for which the bundle supplies no registry identifier, and further fragments are minted for Creator objects nothing points at. Semantics: five members of the CHoRUS leadership team are asserted into the Person-ranged `principal_investigator` slot although only Rosenthal is attested as PI, an assertion the objects' own caveats acknowledge. Inference: `at_risk_populations` is populated from ICU unit types with no protection information, and it sits inconsistently beside an omitted `human_subject_research`; smaller inferences appear in a substrate term, a subpopulation recast from SDoH variables, and a directly-observed flag on retrospective extraction. Placement: named access contacts supplied by the bundle sit in prose while the declared Person-ranged contact fields on DataGovernance and LicenseAndUseTerms stay empty, and the training-program access procedure is duplicated across two slots. No enum value outside the schema digest and no list/prose range violation were found."
+}
