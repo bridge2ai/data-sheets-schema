@@ -79,11 +79,26 @@ class Normalisation(unittest.TestCase):
         # in order, under the same floors
         ok, why = rc.snippet_in("upon any breach of any term\nof this Agreement",
                                 "will terminate automatically upon any breach of any term\n7.\nof this Agreement by Licensee")
+        self.assertTrue(ok); self.assertEqual(why, "artifact-line-elided")   # elision fires first (#887)
+        # a NON-numeric interruption still needs the split route (#882)
+        ok, why = rc.snippet_in("upon any breach of any term\nof this Agreement",
+                                "will terminate automatically upon any breach of any term\nSEE APPENDIX\nof this Agreement by Licensee")
         self.assertTrue(ok); self.assertEqual(why, "split-at-linebreaks")
         self.assertFalse(rc.snippet_in("of this Agreement\nupon any breach of any term",
                                        "upon any breach of any term\n7.\nof this Agreement")[0])   # out of order
         self.assertFalse(rc.snippet_in("upon any breach of any term\nzz",
                                        "upon any breach of any term\n7.\nof this Agreement")[0])   # short part floor holds
+        # #887: a lone section-number line mid-sentence must not fail a
+        # single-line honest quote; the elided haystack catches it
+        ok, why = rc.snippet_in("data security and privacy standards established by the NIH",
+                                "comply with all data security and privacy standards\n6.\nestablished by the NIH under its policy")
+        self.assertTrue(ok); self.assertEqual(why, "artifact-line-elided")
+        # a genuinely absent quote still fails against the elided haystack
+        self.assertFalse(rc.snippet_in("standards established by the FDA",
+                                       "privacy standards\n6.\nestablished by the NIH")[0])
+        # an artifact number inside a real sentence is NOT elided (only lone lines are)
+        self.assertFalse(rc.snippet_in("standards established by the NIH",
+                                       "privacy standards under section 6. established by the FDA")[0])
         # single-line failures are never retried as parts (#885)
         self.assertFalse(rc.snippet_in("upon any breach of many terms",
                                        "upon any breach of any term\n7.\nof this Agreement")[0])

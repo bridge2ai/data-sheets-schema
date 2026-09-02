@@ -111,6 +111,18 @@ def normalise(text: str) -> str:
     return _WS.sub(" ", t).strip()
 
 
+_ARTIFACT_LINE = re.compile(r"\s*\d{1,3}\.?\s*$")
+
+
+def elide_artifact_lines(text: str) -> str:
+    """The haystack with lone section-number lines removed (#887): PDF
+    extraction drops stray "6." / "7." lines mid-sentence, so an honest
+    single-line quotation of the surrounding sentence cannot match any
+    contiguous form. Haystack-side, like the linewrap join — the snippet is
+    never edited (#720)."""
+    return "\n".join(l for l in text.split("\n") if not _ARTIFACT_LINE.fullmatch(l))
+
+
 def normalise_joined(text: str) -> str:
     """The chunk with hyphenated line breaks joined: a PDF extraction that
     wrapped mid-word ("Partic-\nipants") reads as the word a quoting model
@@ -160,6 +172,15 @@ def snippet_in(snippet: str, chunk_text: str, hay: str | None = None,
     hj = normalise_joined(chunk_text) if hay_joined is None else hay_joined
     if hj and find_all(hj):
         return True, "linewrap-joined"
+    # #887: the single-line variant of the artifact interruption — try the
+    # haystack with lone section-number lines elided (both plain and
+    # linewrap-joined forms).
+    he = normalise(elide_artifact_lines(chunk_text))
+    if he and he != hay and find_all(he):
+        return True, "artifact-line-elided"
+    hje = normalise_joined(elide_artifact_lines(chunk_text))
+    if hje and hje != hj and find_all(hje):
+        return True, "artifact-line-elided"
     # A stray extraction artifact can interrupt a sentence mid-quote — the
     # AI_READI license text reads "…of any term / 7. / of this Agreement"
     # (#882) — so an honest multi-line quotation fails contiguity while every
@@ -181,7 +202,8 @@ def snippet_in(snippet: str, chunk_text: str, hay: str | None = None,
                         return False
                     pos = i + len(x)
                 return True
-            if find_all_parts(hay, nl_parts) or (hj and find_all_parts(hj, nl_parts)):
+            if (find_all_parts(hay, nl_parts) or (hj and find_all_parts(hj, nl_parts))
+                    or (he and find_all_parts(he, nl_parts)) or (hje and find_all_parts(hje, nl_parts))):
                 return True, "split-at-linebreaks"
     return False, (f"part not found in chunk: {parts[0][:60]!r}" if len(parts) > 1
                    else "not found in chunk")
@@ -467,7 +489,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # reported, never gated; the floor of 0 is for text found nowhere.
     record_id_flag = full.get("id") if isinstance(full.get("id"), str) else None
     snippets = {"total": 0, "verified": 0, "linewrap_joined": 0, "adjacent": 0, "elsewhere": 0,
-                "spans_boundary": 0, "split_at_linebreaks": 0, "mismatched": 0, "unchecked": 0,
+                "spans_boundary": 0, "split_at_linebreaks": 0, "artifact_elided": 0,
+                "mismatched": 0, "unchecked": 0,
                 # Reported, never gated (#806, #804): a verified snippet whose
                 # normalised tokens overlap nothing in the value it receipts
                 # is verbatim laundering the deterministic floor cannot see
@@ -505,6 +528,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                     snippets["linewrap_joined"] += 1
                 elif why == "split-at-linebreaks":
                     snippets["split_at_linebreaks"] += 1
+                elif why == "artifact-line-elided":
+                    snippets["artifact_elided"] += 1
                 spath = str(pair.get("slot") or "")
                 # Prefer the value the receipt was written against: on the
                 # API path reconcile/repair rewrite after the receipt (#844).
@@ -671,6 +696,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                         + (f" ({snippets['unchecked']} unchecked)" if snippets["unchecked"] else "")
                         + (f" ({snippets['linewrap_joined']} across a wrapped line)" if snippets["linewrap_joined"] else "")
                         + (f" ({snippets['split_at_linebreaks']} split at line breaks)" if snippets["split_at_linebreaks"] else "")
+                        + (f" ({snippets['artifact_elided']} across an artifact line)" if snippets["artifact_elided"] else "")
                         + (f" ({snippets['adjacent']} in an adjacent chunk)" if snippets["adjacent"] else "")
                         + (f" ({snippets['elsewhere']} in another chunk)" if snippets["elsewhere"] else "")
                         + (f" ({snippets['spans_boundary']} spanning a chunk boundary)" if snippets["spans_boundary"] else "")
