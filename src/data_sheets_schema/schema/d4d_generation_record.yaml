@@ -268,11 +268,13 @@ classes:
       canary:
         description: >-
           A canary verdict recorded on the run: status (ok / regressed /
-          unmeasurable), the metric rows against the baseline, and a basis
-          naming who computed it and when. Written by the batch gate's
-          offline re-verdict route (#877, #891) — a run whose gate verdict
-          was interpreted after the fact carries the interpretation here
-          rather than only in a terminal transcript.
+          unmeasurable), the metric rows against the baseline, a basis
+          saying when and from what it was computed, and recorded_by naming
+          who. Written offline when a gate verdict is re-derived after a
+          checker revision (#877, #892) — a run whose gate verdict was
+          interpreted after the fact carries the interpretation here rather
+          than only in a terminal transcript. No batch code writes this
+          block; the offline act is its own definition.
         inlined: true
         range: AnyBlock
 
