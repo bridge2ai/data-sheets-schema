@@ -111,6 +111,24 @@ def normalise(text: str) -> str:
     return _WS.sub(" ", t).strip()
 
 
+#: A lone one-or-two-digit section number WITH its dot ("6.", "7.") — the
+#: observed PDF artifact class (#887). Deliberately narrow (#889): bare
+#: numbers (journal volumes, table cells) and 3+ digits are NOT elided, so
+#: a quote omitting a meaningful number still fails. The accepted residual:
+#: numbered-LIST markers match, so items quoted as one phrase verify — a
+#: test pins that as known behavior.
+_ARTIFACT_LINE = re.compile(r"\s*\d{1,2}\.\s*")
+
+
+def elide_artifact_lines(text: str) -> str:
+    """The haystack with lone section-number lines removed (#887): PDF
+    extraction drops stray "6." / "7." lines mid-sentence, so an honest
+    single-line quotation of the surrounding sentence cannot match any
+    contiguous form. Haystack-side, like the linewrap join — the snippet is
+    never edited (#720)."""
+    return "\n".join(l for l in text.split("\n") if not _ARTIFACT_LINE.fullmatch(l))
+
+
 def normalise_joined(text: str) -> str:
     """The chunk with hyphenated line breaks joined: a PDF extraction that
     wrapped mid-word ("Partic-\nipants") reads as the word a quoting model
@@ -122,7 +140,8 @@ def normalise_joined(text: str) -> str:
 
 
 def snippet_in(snippet: str, chunk_text: str, hay: str | None = None,
-               hay_joined: str | None = None) -> tuple[bool, str]:
+               hay_joined: str | None = None, hay_elided: str | None = None,
+               hay_joined_elided: str | None = None) -> tuple[bool, str]:
     """(verified, reason). `...` (or `[...]`) splits the snippet into parts
     matched independently, in order. `hay` is the chunk already normalised,
     for a caller checking many snippets against one chunk (#766);
@@ -160,6 +179,18 @@ def snippet_in(snippet: str, chunk_text: str, hay: str | None = None,
     hj = normalise_joined(chunk_text) if hay_joined is None else hay_joined
     if hj and find_all(hj):
         return True, "linewrap-joined"
+    # #887: the single-line variant of the artifact interruption — try the
+    # haystack with lone section-number lines elided (both plain and
+    # linewrap-joined forms).
+    if hay_elided is None:
+        hay_elided = normalise(elide_artifact_lines(chunk_text)) if chunk_text else ""
+    if hay_joined_elided is None:
+        hay_joined_elided = normalise_joined(elide_artifact_lines(chunk_text)) if chunk_text else ""
+    he, hje = hay_elided, hay_joined_elided
+    if he and he != hay and find_all(he):
+        return True, "artifact-line-elided"
+    if hje and hje != hj and find_all(hje):
+        return True, "artifact-line-elided"
     # A stray extraction artifact can interrupt a sentence mid-quote — the
     # AI_READI license text reads "…of any term / 7. / of this Agreement"
     # (#882) — so an honest multi-line quotation fails contiguity while every
@@ -181,7 +212,8 @@ def snippet_in(snippet: str, chunk_text: str, hay: str | None = None,
                         return False
                     pos = i + len(x)
                 return True
-            if find_all_parts(hay, nl_parts) or (hj and find_all_parts(hj, nl_parts)):
+            if (find_all_parts(hay, nl_parts) or (hj and find_all_parts(hj, nl_parts))
+                    or (he and find_all_parts(he, nl_parts)) or (hje and find_all_parts(hje, nl_parts))):
                 return True, "split-at-linebreaks"
     return False, (f"part not found in chunk: {parts[0][:60]!r}" if len(parts) > 1
                    else "not found in chunk")
@@ -467,7 +499,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # reported, never gated; the floor of 0 is for text found nowhere.
     record_id_flag = full.get("id") if isinstance(full.get("id"), str) else None
     snippets = {"total": 0, "verified": 0, "linewrap_joined": 0, "adjacent": 0, "elsewhere": 0,
-                "spans_boundary": 0, "split_at_linebreaks": 0, "mismatched": 0, "unchecked": 0,
+                "spans_boundary": 0, "split_at_linebreaks": 0, "artifact_elided": 0,
+                "mismatched": 0, "unchecked": 0,
                 # Reported, never gated (#806, #804): a verified snippet whose
                 # normalised tokens overlap nothing in the value it receipts
                 # is verbatim laundering the deterministic floor cannot see
@@ -481,6 +514,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     order = {cid: i for i, cid in enumerate(manifest_ids)}
     hays = {cid: normalise(t) for cid, t in chunk_texts.items()}      # once per chunk (#766)
     hays_j = {cid: normalise_joined(t) for cid, t in chunk_texts.items()}   # line breaks joined (#789)
+    hays_e = {cid: normalise(elide_artifact_lines(t)) for cid, t in chunk_texts.items()}       # #887/#890
+    hays_je = {cid: normalise_joined(elide_artifact_lines(t)) for cid, t in chunk_texts.items()}
     for e in entries:
         if e.get("status") != "extracted":
             continue
@@ -498,13 +533,16 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
             if text is None:
                 snippets["unchecked"] += 1
                 continue
-            ok, why = snippet_in(snippet, text, hays.get(e.get("id")), hays_j.get(e.get("id")))
+            ok, why = snippet_in(snippet, text, hays.get(e.get("id")), hays_j.get(e.get("id")),
+                                 hays_e.get(e.get("id")), hays_je.get(e.get("id")))
             if ok:
                 snippets["verified"] += 1
                 if why == "linewrap-joined":
                     snippets["linewrap_joined"] += 1
                 elif why == "split-at-linebreaks":
                     snippets["split_at_linebreaks"] += 1
+                elif why == "artifact-line-elided":
+                    snippets["artifact_elided"] += 1
                 spath = str(pair.get("slot") or "")
                 # Prefer the value the receipt was written against: on the
                 # API path reconcile/repair rewrite after the receipt (#844).
@@ -546,7 +584,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
             # Shortness is decided before any haystack, so a too-short
             # snippet is found nowhere and stays `mismatched`.
             where = [] if why.startswith("too short") else [
-                cid for cid, h in hays.items() if cid != e.get("id") and snippet_in(snippet, "", h, hays_j.get(cid))[0]]
+                cid for cid, h in hays.items() if cid != e.get("id")
+                and snippet_in(snippet, "", h, hays_j.get(cid), hays_e.get(cid), hays_je.get(cid))[0]]
             # A passage the chunk boundary cuts is in no single chunk (#781):
             # test the cited chunk joined with its neighbours, and report it
             # as spanning rather than as found nowhere.
@@ -671,6 +710,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                         + (f" ({snippets['unchecked']} unchecked)" if snippets["unchecked"] else "")
                         + (f" ({snippets['linewrap_joined']} across a wrapped line)" if snippets["linewrap_joined"] else "")
                         + (f" ({snippets['split_at_linebreaks']} split at line breaks)" if snippets["split_at_linebreaks"] else "")
+                        + (f" ({snippets['artifact_elided']} across an artifact line)" if snippets["artifact_elided"] else "")
                         + (f" ({snippets['adjacent']} in an adjacent chunk)" if snippets["adjacent"] else "")
                         + (f" ({snippets['elsewhere']} in another chunk)" if snippets["elsewhere"] else "")
                         + (f" ({snippets['spans_boundary']} spanning a chunk boundary)" if snippets["spans_boundary"] else "")
