@@ -93,6 +93,18 @@ class Normalisation(unittest.TestCase):
         ok, why = rc.snippet_in("data security and privacy standards established by the NIH",
                                 "comply with all data security and privacy standards\n6.\nestablished by the NIH under its policy")
         self.assertTrue(ok); self.assertEqual(why, "artifact-line-elided")
+        # #889: bare numbers and 3+ digits are NOT elided - a quote omitting
+        # a meaningful number still fails
+        self.assertFalse(rc.snippet_in("a fine of dollars shall be paid by the licensee",
+                                       "a fine of\n500.\ndollars shall be paid by the licensee")[0])
+        self.assertFalse(rc.snippet_in("Trends in biotechnology reported the assembly results",
+                                       "Trends in biotechnology reported\n19\nthe assembly results")[0])
+        self.assertFalse(rc.snippet_in("proceedings of the conference",
+                                       "the proceedings\n2026.\nof the conference")[0])
+        # accepted residual, pinned (#889): numbered-list markers elide, so
+        # items quoted as one phrase verify - known behavior, not a defect
+        self.assertTrue(rc.snippet_in("consent forms protocols for participants",
+                                      "1.\nconsent forms\n2.\nprotocols for participants")[0])
         # a genuinely absent quote still fails against the elided haystack
         self.assertFalse(rc.snippet_in("standards established by the FDA",
                                        "privacy standards\n6.\nestablished by the NIH")[0])
@@ -229,6 +241,25 @@ class Validator(unittest.TestCase):
         r["chunks"][2] = {"id": "c003", "status": "duplicate_of", "of": "c003"}
         self.assertEqual(rc.check(r, self.manifest, self.texts, FULL, self.md5)["findings"][0]["kind"],
                          "duplicate_of_unknown_chunk")
+
+    def test_the_elided_route_reaches_the_where_probe(self):
+        """#890: a snippet that only elided-verifies in ANOTHER chunk is
+        adjacent/elsewhere (reported), never mismatched (gated)."""
+        manifest, texts = _manifest_and_texts()
+        rec = _receipt(manifest["bundle_md5"])
+        # put an artifact line into c002's text and cite from c003
+        texts = dict(texts)
+        texts["c002"] = texts["c002"].replace("longitudinal, multimodal",
+                                              "longitudinal,\n7.\nmultimodal")
+        for e in rec["chunks"]:
+            if e["id"] == "c003":
+                e["status"] = "extracted"
+                e["extracted"] = [{"slot": "description", "snippet": "a longitudinal, multimodal study"}]
+            if e["id"] == "c002":
+                e["extracted"] = [p for p in e.get("extracted") or [] if p["slot"] != "description"]
+        b = rc.check(rec, manifest, texts, FULL, manifest["bundle_md5"])
+        self.assertEqual(b["snippets"]["mismatched"], 0)
+        self.assertEqual(b["snippets"]["adjacent"], 1)
 
     def test_split_verifying_counts_as_verified_at_check_level(self):
         """#885: split-at-linebreaks folds into verified in the block."""

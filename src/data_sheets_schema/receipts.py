@@ -111,7 +111,13 @@ def normalise(text: str) -> str:
     return _WS.sub(" ", t).strip()
 
 
-_ARTIFACT_LINE = re.compile(r"\s*\d{1,3}\.?\s*$")
+#: A lone one-or-two-digit section number WITH its dot ("6.", "7.") — the
+#: observed PDF artifact class (#887). Deliberately narrow (#889): bare
+#: numbers (journal volumes, table cells) and 3+ digits are NOT elided, so
+#: a quote omitting a meaningful number still fails. The accepted residual:
+#: numbered-LIST markers match, so items quoted as one phrase verify — a
+#: test pins that as known behavior.
+_ARTIFACT_LINE = re.compile(r"\s*\d{1,2}\.\s*")
 
 
 def elide_artifact_lines(text: str) -> str:
@@ -134,7 +140,8 @@ def normalise_joined(text: str) -> str:
 
 
 def snippet_in(snippet: str, chunk_text: str, hay: str | None = None,
-               hay_joined: str | None = None) -> tuple[bool, str]:
+               hay_joined: str | None = None, hay_elided: str | None = None,
+               hay_joined_elided: str | None = None) -> tuple[bool, str]:
     """(verified, reason). `...` (or `[...]`) splits the snippet into parts
     matched independently, in order. `hay` is the chunk already normalised,
     for a caller checking many snippets against one chunk (#766);
@@ -175,10 +182,13 @@ def snippet_in(snippet: str, chunk_text: str, hay: str | None = None,
     # #887: the single-line variant of the artifact interruption — try the
     # haystack with lone section-number lines elided (both plain and
     # linewrap-joined forms).
-    he = normalise(elide_artifact_lines(chunk_text))
+    if hay_elided is None:
+        hay_elided = normalise(elide_artifact_lines(chunk_text)) if chunk_text else ""
+    if hay_joined_elided is None:
+        hay_joined_elided = normalise_joined(elide_artifact_lines(chunk_text)) if chunk_text else ""
+    he, hje = hay_elided, hay_joined_elided
     if he and he != hay and find_all(he):
         return True, "artifact-line-elided"
-    hje = normalise_joined(elide_artifact_lines(chunk_text))
     if hje and hje != hj and find_all(hje):
         return True, "artifact-line-elided"
     # A stray extraction artifact can interrupt a sentence mid-quote — the
@@ -504,6 +514,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     order = {cid: i for i, cid in enumerate(manifest_ids)}
     hays = {cid: normalise(t) for cid, t in chunk_texts.items()}      # once per chunk (#766)
     hays_j = {cid: normalise_joined(t) for cid, t in chunk_texts.items()}   # line breaks joined (#789)
+    hays_e = {cid: normalise(elide_artifact_lines(t)) for cid, t in chunk_texts.items()}       # #887/#890
+    hays_je = {cid: normalise_joined(elide_artifact_lines(t)) for cid, t in chunk_texts.items()}
     for e in entries:
         if e.get("status") != "extracted":
             continue
@@ -521,7 +533,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
             if text is None:
                 snippets["unchecked"] += 1
                 continue
-            ok, why = snippet_in(snippet, text, hays.get(e.get("id")), hays_j.get(e.get("id")))
+            ok, why = snippet_in(snippet, text, hays.get(e.get("id")), hays_j.get(e.get("id")),
+                                 hays_e.get(e.get("id")), hays_je.get(e.get("id")))
             if ok:
                 snippets["verified"] += 1
                 if why == "linewrap-joined":
@@ -571,7 +584,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
             # Shortness is decided before any haystack, so a too-short
             # snippet is found nowhere and stays `mismatched`.
             where = [] if why.startswith("too short") else [
-                cid for cid, h in hays.items() if cid != e.get("id") and snippet_in(snippet, "", h, hays_j.get(cid))[0]]
+                cid for cid, h in hays.items() if cid != e.get("id")
+                and snippet_in(snippet, "", h, hays_j.get(cid), hays_e.get(cid), hays_je.get(cid))[0]]
             # A passage the chunk boundary cuts is in no single chunk (#781):
             # test the cited chunk joined with its neighbours, and report it
             # as spanning rather than as found nowhere.
