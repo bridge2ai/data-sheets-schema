@@ -74,6 +74,19 @@ class Normalisation(unittest.TestCase):
         # #784: version strings and figure labels pin nothing
         for weak in ("3.0.0", "v3.0.0", "Table 1", "Fig. 1", "1,000"):   # "10 days" (7 chars, 2 digits) pins, as the review measured
             self.assertFalse(rc.snippet_in(weak, f"see {weak} here")[0], weak)
+        # #882: a stray artifact line interrupting a sentence must not fail an
+        # honest multi-line quote; line breaks act as implicit ellipses,
+        # in order, under the same floors
+        ok, why = rc.snippet_in("upon any breach of any term\nof this Agreement",
+                                "will terminate automatically upon any breach of any term\n7.\nof this Agreement by Licensee")
+        self.assertTrue(ok); self.assertEqual(why, "split-at-linebreaks")
+        self.assertFalse(rc.snippet_in("of this Agreement\nupon any breach of any term",
+                                       "upon any breach of any term\n7.\nof this Agreement")[0])   # out of order
+        self.assertFalse(rc.snippet_in("upon any breach of any term\nzz",
+                                       "upon any breach of any term\n7.\nof this Agreement")[0])   # short part floor holds
+        # single-line failures are never retried as parts (#885)
+        self.assertFalse(rc.snippet_in("upon any breach of many terms",
+                                       "upon any breach of any term\n7.\nof this Agreement")[0])
         # #789: a word the extraction wrapped mid-line is the word a reader quotes
         ok, why = rc.snippet_in("Participants are volunteers; therefore, there is selection bias",
                                 "Partic-\nipants  are  volunteers;  therefore,  there  is  selection  bias\n")
@@ -201,6 +214,19 @@ class Validator(unittest.TestCase):
         r["chunks"][2] = {"id": "c003", "status": "duplicate_of", "of": "c003"}
         self.assertEqual(rc.check(r, self.manifest, self.texts, FULL, self.md5)["findings"][0]["kind"],
                          "duplicate_of_unknown_chunk")
+
+    def test_split_verifying_counts_as_verified_at_check_level(self):
+        """#885: split-at-linebreaks folds into verified in the block."""
+        manifest, texts = _manifest_and_texts()
+        rec = _receipt(manifest["bundle_md5"])
+        for e in rec["chunks"]:
+            for p in e.get("extracted") or []:
+                if p["slot"] == "description":
+                    p["snippet"] = "The AI-READI dataset\nis a longitudinal, multimodal study"
+        b = rc.check(rec, manifest, texts, FULL, manifest["bundle_md5"])
+        self.assertEqual(b["snippets"]["split_at_linebreaks"], 1)
+        self.assertEqual(b["snippets"]["mismatched"], 0)
+        self.assertEqual(b["snippets"]["verified"], b["snippets"]["total"])
 
     def test_a_snippet_in_a_neighbouring_chunk_is_reported_not_gated(self):
         """#763: both v7 canaries cited the chunk next door for ~2% of

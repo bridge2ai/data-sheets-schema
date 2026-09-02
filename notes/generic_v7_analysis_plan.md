@@ -249,3 +249,19 @@ triggered; the canary is re-checked offline rather than re-run, exactly the
 2026-08-28 reading. The generation-side cure — anchor-based receipt
 citations that remove index arithmetic from the model — is registered for
 the v8 rewrite (#803/#830/#873/#876).
+
+
+## Gate interpretation: split-at-linebreaks (2026-09-01, registered)
+
+The AI_READI canary's two "unverified" snippets are honest quotations of
+the data-use agreement that fail contiguity only because stray
+section-number lines ("6.", "7.") interrupt the sentences in the PDF
+extraction (#882). `snippet_in` now retries a failed multi-line snippet
+with its line breaks as implicit ellipsis separators — the same in-order
+parts logic and #720 floors the explicit "..." form already gets, parity
+not relaxation — counted apart as `split_at_linebreaks` and folded into
+verified. The checker is not on the generation path. This does NOT retain
+the AI_READI run: its second gated metric, two undeclared `nih:` prefixes
+(baseline 0, the record's own caveat admitting the prefix is undeclared),
+is a genuine defect, so the run is archived and the canary retried under
+the unchanged configuration.
