@@ -153,7 +153,7 @@ class Validator(unittest.TestCase):
         r = _receipt(self.md5)
         r["chunks"].pop()                                              # c003 unreviewed
         r["chunks"][1]["extracted"][0]["snippet"] = "Grant OT2OD099999"  # not in chunk
-        r["chunks"][1]["extracted"].append({"slot": "nowhere.at_all", "snippet": "study"})
+        r["chunks"][1]["extracted"].append({"slot": "nowhere.at_all", "snippet": "a longitudinal, multimodal study"})
         r["chunks"].append({"id": "c999", "status": "duplicate_of", "of": "c001"})
         r["chunks"].append({"id": "c002", "status": "nothing_relevant", "reason": ""})
         r["chunks"].append({"id": "c001", "status": "bogus"})
@@ -398,23 +398,55 @@ class Validator(unittest.TestCase):
         self.assertEqual(b2["slots"]["path_off_by_one"][0]["resolved_path"], "funders[2].grant_id")
         self.assertEqual(b2["findings_gated"], 0)
 
-        # (c) leaf on both neighbours: ambiguous, stays gated (#878)
+        # (c) leaf on both neighbours: no auto-relocation (#878); since #891
+        # it is an ADDRESSING SLIP - counted, tolerated up to the exposure
+        # allowance, never silently credited
         both = {**FULL, "funders": [{"id": "x#f1", "name": "A", "grant_id": "G0"},
                                     {"id": "x#f2", "name": "B"},
                                     {"id": "x#f3", "name": "C", "grant_id": "G2"}]}
         b3 = cite("funders[1].grant_id", both)
         self.assertEqual(b3["slots"]["path_off_by_one_count"], 0)
-        self.assertIn("slot_not_in_record", [f["kind"] for f in b3["findings"]])
+        self.assertEqual(b3["slots"]["addressing_slips_count"], 1)
+        self.assertNotIn("slot_not_in_record", [f["kind"] for f in b3["findings"]])
 
         # (d) malformed path never launders as an index slip (#879)
         b4 = cite("funders[0]grant_id", FULL)
         self.assertEqual(b4["slots"]["path_off_by_one_count"], 0)
         self.assertIn("slot_not_in_record", [f["kind"] for f in b4["findings"]])
 
-        # (e) far off the end: gated
+        # (e) far off the end but the leaf is real structure: addressing slip
         b5 = cite("funders[9].grant_id", FULL)
-        self.assertEqual(b5["slots"]["path_off_by_one_count"], 0)
-        self.assertIn("slot_not_in_record", [f["kind"] for f in b5["findings"]])
+        self.assertEqual(b5["slots"]["addressing_slips_count"], 1)
+        # (f) a leaf that exists on NO sibling is fabrication-shaped: gated
+        b6 = cite("funders[1].zzz_nonexistent", FULL)
+        self.assertEqual(b6["slots"]["addressing_slips_count"], 0)
+        self.assertIn("slot_not_in_record", [f["kind"] for f in b6["findings"]])
+
+    def test_unattesting_snippets_and_the_exposure_tolerance(self):
+        """#891, registered: an under-floor snippet attests nothing - counted,
+        never a misquote, and its slot earns no coverage; addressing slips
+        are tolerated at ceil(total/200) by the canary floor."""
+        manifest, texts = _manifest_and_texts()
+        rec = _receipt(manifest["bundle_md5"])
+        for e in rec["chunks"]:
+            for pr in e.get("extracted") or []:
+                if pr["slot"] == "funders[0].grant_id":
+                    pr["snippet"] = "HbA1c"                      # below the floors
+        b = rc.check(rec, manifest, texts, FULL, manifest["bundle_md5"])
+        self.assertEqual(b["snippets"]["unattesting"], 1)
+        self.assertEqual(b["snippets"]["mismatched"], 0)
+        self.assertNotIn("snippet_mismatch", [f["kind"] for f in b["findings"]])
+        self.assertIn("funders[0].grant_id", b["slots"]["without_receipt"])   # no coverage
+        self.assertIn("unattesting", b["summary"])
+        from data_sheets_schema.canary import receipt_floors
+        self.assertEqual(receipt_floors(b)["snippets unverified"], 0)
+        # tolerance math on a synthetic block: 1 slip within ceil(150/200)=1;
+        # 3 slips over it by 2
+        blk={"chunks":{"total":1,"reviewed":1},"snippets":{"total":150,"mismatched":0,"unchecked":0},
+             "slots":{"addressing_slips_count":1},"findings":[]}
+        self.assertEqual(receipt_floors(blk)["addressing slips over tolerance"], 0)
+        blk["slots"]["addressing_slips_count"]=3
+        self.assertEqual(receipt_floors(blk)["addressing slips over tolerance"], 2)
 
     def test_a_snippet_cut_by_a_chunk_boundary_is_reported_as_spanning(self):
         """#781: the passage exists in the bundle across c002/c003; no single

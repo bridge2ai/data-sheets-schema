@@ -1,0 +1,101 @@
+{
+  "findings": [
+    {
+      "severity": "major",
+      "record": "full",
+      "slot": "collection_timeframes[1].timeframe_details, relationships[0].relationship_details",
+      "issue": "Both state that \"approximately four to ten percent of participants are expected to return for a follow-up examination in year four\". No source states a range. The healthsheet (collection q5) says \"Approximately 4% of participants are expected to undergo a follow-up examination in Year 4\"; the FAIRhub README, RO-Crate description and NIH RePORTER separately say \"longitudinal data from 10% of the study cohort\". The record merges two distinct figures into a synthesized interval that appears in no source. State the 4% follow-up figure and the 10% longitudinal-arm figure as the sources give them, and record the discrepancy in source_caveats."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "download_url",
+      "issue": "Set to https://fairhub.io/datasets/3/access, which is the conditions-of-access / request page (RO-Crate `conditionsOfAccess`), not a URL pointing at the data. The slot description explicitly excludes pages that describe or gate the dataset. The bundle supplies no direct download URL; the RO-Crate `contentUrl` is the DOI resolver. Omit the slot, or move the access route to the access_review_process text already present in data_governance."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "data_governance.committee_name",
+      "issue": "\"AI-READI Data Access Committee\" is a coined proper name. The BMJ protocol says only \"the Data Access Committee\"; the RO-Crate (tier 1) gives `dataGovernanceCommittee` as \"AI-READI Consortium\". Use one of the attested names and record the divergence in source_caveats rather than compounding them."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "data_governance.committee_contact",
+      "issue": "Aaron Lee (ORCID:0000-0002-7452-1648) is asserted as the access-committee contact. The bundle names him as study PI, responsible party, overall official and central study contact (contact@aireadi.org); no source attaches him to the Data Access Committee. The dataset-level contact routes are https://aireadi.org/contact and the README. Unsupported role attribution — omit, or move to a maintainer/contact context."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "sensitive_elements[1]",
+      "issue": "Referent drift. The record's declared referent is the public v3.0.0 release (id doi:10.60775/fairhub.3, described as containing no PHI, with sex/race/ethnicity/medications removed), and sensitive_elements[0] correctly asserts sensitive_elements_present: false. Entry [1] then asserts sensitive_elements_present: true for the controlled-access version, which is a different, unreleased artifact. Describe the controlled-access holdings in prose (description or notes) rather than as a boolean assertion about this dataset."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "data_protection_impacts",
+      "issue": "The single DataProtectionImpact object carries only the statement that no impact analysis has been conducted. The class has no boolean to carry a negative (unlike Confidentiality or ContentWarning), so this populates the slot with an absence rather than with the information the slot asks for. Omit the slot; the fact can sit in notes if wanted."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "extension_mechanism.extension_details",
+      "issue": "Leads with the statement that no mechanism exists for outside contribution, then adds that the project maintains GitHub and Zenodo presences \"for its software and guidelines\" — which the bundle does not present as a route for contributing to the dataset. The slot is populated chiefly with an absence; omit it, or restrict it to an attested contribution route."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "informed_consent[0].withdrawal_mechanism",
+      "issue": "Declared field left empty although the bundle supports it: the healthsheet (collection q10) states participants could withdraw consent at any time and cease participation, with data already shared or used remaining in the dataset, and that this is communicated in the consent document. The content is present in consent_revocations but the declared field on InformedConsent is unpopulated."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "variables[particulate_matter], variables[nitrogen_oxides], variables[multispectral_light_intensity]",
+      "issue": "Distinct measured channels are collapsed into single VariableMetadata entries: the bundle enumerates PM1.0, PM2.5, PM4 and PM10 as separate particulate fractions, NO and NO2 as separate gases, and eleven multi-spectral light intensity measurements. One object per distinct variable is what the multivalued slot declares."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "subsets, splits",
+      "issue": "The same train/validation/test partition is stated twice: once in prose in splits[0].split_details and once as three DataSubset objects. The three minted fragment ids (#split-train, #split-validation, #split-test) are referenced by nothing else in the record, so they label parts nothing points at. Keep one representation."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "creators[0]",
+      "issue": "The attested creator — FAIRhub `creator`: \"AI-READI Consortium\", nameType Organizational — appears only inside creators[0].notes as source commentary, while the object's id is the project website and its only structured person is principal_investigator. The organizational creator itself is not carried structurally."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "regulatory_restrictions.confidentiality_level",
+      "issue": "Set to `restricted`. The bundle states `confidentialityLevel`: \"HL7:2N (normal)\" (RO-Crate) and `accessType`: \"PublicDownloadSelfAttestationRequired\" (FAIRhub). The enum mapping is the record's interpretation, not a source value; if retained it needs a source_caveat naming what the sources actually said."
+    },
+    {
+      "severity": "info",
+      "record": "full",
+      "slot": "source_caveats",
+      "issue": "Item (1) states that the FAIRhub expansion \"Exploratory\" \"is used in this record where the expansion is needed\", but the record never expands the acronym anywhere. The caveat documents a resolution the record does not exercise."
+    },
+    {
+      "severity": "info",
+      "record": "full",
+      "slot": "subpopulations",
+      "issue": "Inconsistent internal treatment: entries [0] and [1] set subpopulation_elements_present: false, entries [2] (diabetes status) and [3] (age) omit the boolean although diabetes status and age are not among the controlled-access variables listed in the healthsheet. Additionally, entry [3].notes carries commentary that applies to the whole slot (\"The healthsheet answers 'No' to the question of whether the dataset identifies demographic sub-populations\") rather than to the age entry."
+    },
+    {
+      "severity": "info",
+      "record": "full",
+      "slot": "human_subject_research.irb_approval, human_subject_research.regulatory_compliance, human_subject_research.special_populations, at_risk_populations.special_protections, ip_restrictions.restrictions, regulatory_restrictions.regulatory_restrictions, data_governance.stewardship_roles",
+      "issue": "These string-typed sub-slots are emitted as YAML lists. The schema digest supplied above annotates multivalence only via object ranges (e.g. `committee_members: Person[]`) and declares no multivalence for these, so the list shape cannot be confirmed conformant from the digest alone; verify each against the schema and demote to a scalar where it is single-valued."
+    },
+    {
+      "severity": "info",
+      "record": "full",
+      "slot": "license",
+      "issue": "The value embeds the rights URI inside the license name string: \"AI-READI custom license v2.0 (https://doi.org/10.5281/zenodo.17555036)\". The sources carry these as separate fields (`rightsName` / `rightsURI`); the URI is already recorded in license_and_use_terms.license_terms, so the name field could hold the name alone."
+    }
+  ],
+  "summary": "Audited the full record (2,280-participant AI-READI v3.0.0 release) against the declared bundle; the core record was treated as a projection and generated no independent findings. Sixteen findings: one major, eleven minor, four informational. The major finding is a synthesized \"four to ten percent\" follow-up figure that merges two distinct source values (4% follow-up exam, 10% longitudinal arm) into a range no source states; it occurs twice and must be repaired in both places. Minor findings cluster around three patterns: values placed in fields they do not answer (download_url pointing at the access-request page), slots populated with absences rather than content (data_protection_impacts, extension_mechanism), and unattested or coined identity claims (committee_name, committee_contact). One referent-scope defect: sensitive_elements asserts both false and true because the second entry describes the controlled-access dataset rather than the declared public release. Quantitative content verified as internally consistent: the nine file_collections sum to 356,334 files and 3,815,969,360,064 bytes against declared totals of 356,343 and 3,815,969,779,678, the difference being exactly the nine root CDS metadata files; all split, sex, race/ethnicity and diabetes-status counts reconcile to 2,280 and to the FAIRhub README table. All enum values used (conforms_to_standard, collection_type, bias_type, limitation_type, data_use_permission, hipaa_compliant, confidentiality_level, data_type, relationship_type, Maintainer.role) fall within the digest's permitted sets, the doi slot carries the bare DOI, issued carries a UTC offset, and all ROR and ORCID identifiers are attested in the bundle. Top-level source_caveats correctly documents the five substantive source conflicts (acronym expansion, accountable institution, target enrolment, enrolment start date, pilot-versus-year-two framing)."
+}
