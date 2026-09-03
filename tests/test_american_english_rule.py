@@ -131,5 +131,5 @@ class TestItDidNotRedefineACondition(unittest.TestCase):
         for (_rt, project), info in runs.items():
             with self.subTest(project=project):
                 status, why = canonical_prompt_status(
-                    "claudecode_agent", info["label"], project)
+                    info["method"], info["label"], project)
                 self.assertIn(status, ("canonical", "superseded"), why)

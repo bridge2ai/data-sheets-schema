@@ -129,7 +129,7 @@ class TestAgainstTheCorpus(unittest.TestCase):
         runs = {f"{rt}:{p}": i for rt, found in canonical_sets().items() for p, i in found.items()}
         if not runs:
             self.skipTest("no canonical records")
-        statuses = {playbook_drift("claudecode_agent", i["label"], p.split(":", 1)[1])[0]
+        statuses = {playbook_drift(i["method"], i["label"], p.split(":", 1)[1])[0]
                     for p, i in runs.items()}
         self.assertTrue(statuses - {PLAYBOOK_UNRECORDED},
                         "no canonical record records a playbook hash")

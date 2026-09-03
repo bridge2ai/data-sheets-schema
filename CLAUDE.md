@@ -226,7 +226,8 @@ make gen-d4d-html
 
 | Method | Status | Best For | Quality | Speed |
 |--------|--------|----------|---------|-------|
-| **claudecode_agent** | ✅ Current (v5+) | Production datasheets | ⭐⭐⭐⭐⭐ | Fast (parallel) |
+| **claudecode_agent** | ✅ Current (v5+) | Production datasheets (agentic runtime; both runtimes through v7) | ⭐⭐⭐⭐⭐ | Fast (parallel) |
+| **claudecode_api** | ✅ From generic_v8 (#690) | Production datasheets, API runtime baseline | — | Fast (batch) |
 | claudecode_assistant | Alternative | Interactive refinement | ⭐⭐⭐⭐⭐ | Medium |
 | claudecode | Legacy | API automation | ⭐⭐⭐ | Medium |
 | gpt5 | Comparison | Benchmarking | ⭐⭐ | Slow |

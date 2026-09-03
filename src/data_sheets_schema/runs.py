@@ -4,9 +4,11 @@ Naming convention
 -----------------
 ``data/d4d_concatenated/{METHOD}/{DATE}_{MODEL}_r{N}/{PROJECT}_d4d[_core].yaml``
 
-- **METHOD** encodes the arm (``claudecode_agent`` = baseline,
-  ``claudecode_agent_crate`` = de novo, ``claudecode_agent_healthsheet`` =
-  healthsheet-only, plus their ``_core`` counterparts).
+- **METHOD** encodes the arm (``claudecode_agent`` = baseline — both
+  runtimes through generic_v7; ``claudecode_api`` = the API runtime's
+  baseline from generic_v8 (#690); ``claudecode_agent_crate`` = de novo,
+  ``claudecode_agent_healthsheet`` = healthsheet-only, plus their ``_core``
+  counterparts).
 - **{DATE}_{MODEL}** identifies the configuration.
 - **r{N}** is the replicate index.
 
@@ -432,10 +434,11 @@ def canonical_runs(concat_dir: Path | None = None,
     if ambiguous:
         detail = "; ".join(f"{p}: {', '.join(sorted(labels))}"
                            for p, labels in sorted(ambiguous.items()))
+        hint = ("" if runtime else " or runtime= ('api' / 'agentic') where the marks "
+                "belong to different runtimes")
         raise AmbiguousCanonical(
             f"more than one canonical record per project ({detail}). "
-            "Pass config= to say which configuration you mean, or runtime= "
-            "('api' / 'agentic') where the marks belong to different runtimes.")
+            f"Pass config= to say which configuration you mean{hint}.")
     return dict(sorted(out.items()))
 
 

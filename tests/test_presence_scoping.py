@@ -138,7 +138,7 @@ class TestAgainstTheCorpus(unittest.TestCase):
         live = schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
         checked = 0
         for (_rt, project), info in sorted(runs.items()):
-            base = (ROOT / "data/d4d_concatenated/claudecode_agent_core"
+            base = (ROOT / "data/d4d_concatenated" / f"{info['method']}_core"
                     / info["label"])
             core = base / f"{project}_d4d_core.yaml"
             prov = base / f"{project}_provenance.yaml"

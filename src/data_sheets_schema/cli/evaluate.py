@@ -15,8 +15,6 @@ def evaluate():
     pass
 
 @evaluate.command("verifiable")
-@click.option("--runtime", type=click.Choice(["api", "agentic"]), default=None,
-              help="which runtime's canonical set (#690), where no records are given")
 @click.option("--project", default=None, help="limit to one project")
 @click.option("--method", default="claudecode_agent")
 @click.option("--label", "labels", multiple=True, help="run label(s); default all")
@@ -209,8 +207,9 @@ def plan_cmd(config, paths_only, all_replicates, runtime):
         # config until re-selection settles — or, since #690, under both
         # runtimes. `plan` is right to propagate rather than choose one
         # (#308); rendering it is this boundary's job (#342).
+        head = str(exc).split(". Pass config=", 1)[0]
         raise click.ClickException(
-            f"{exc} Pass --config to say which configuration you mean, "
+            f"{head}. Pass --config to say which configuration you mean, "
             "--runtime api|agentic to say which arm's canonical set, or "
             "re-run `d4d runs select --execute` to settle the mark.")
 
@@ -226,6 +225,8 @@ def plan_cmd(config, paths_only, all_replicates, runtime):
 
 
 @evaluate.command("related-datasets")
+@click.option("--runtime", type=click.Choice(["api", "agentic"]), default=None,
+              help="which runtime's canonical set (#690), where no records are given")
 @click.argument("records", nargs=-1, type=click.Path(exists=True))
 @click.option("--project", default=None,
               help="Limit to one project when reading the canonical set.")

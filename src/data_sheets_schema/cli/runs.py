@@ -1474,13 +1474,15 @@ def redundancy_cmd(method, label, project, threshold, show, runtime):
 
     kwargs = {} if threshold is None else {"threshold": threshold}
     if label:
-        targets = [(p, label) for p in ([project] if project else PROJECTS)]
+        targets = [(p, label, method, None) for p in ([project] if project else PROJECTS)]
     else:
         # Every runtime's canonical set unless one is named (#690): the
         # report is per record, so a project marked under both runtimes
-        # simply appears twice, once per arm.
+        # appears twice, once per arm, each row naming its runtime and
+        # label and read from the directory its mark names.
         sets = ({runtime: canonical_runs(runtime=runtime)} if runtime else canonical_sets())
-        targets = [(p, info["label"]) for found in sets.values() for p, info in found.items()
+        targets = [(p, info["label"], info.get("method") or method, rt)
+                   for rt, found in sets.items() for p, info in found.items()
                    if not project or p == project]
         if not targets:
             raise click.ClickException(
@@ -1489,12 +1491,12 @@ def redundancy_cmd(method, label, project, threshold, show, runtime):
 
     total_sentences = total_prose = total_structural = 0
     rows = []
-    for proj, lab in sorted(targets):
-        path = _Path(CONCAT_DIR) / method / lab / f"{proj}_d4d.yaml"
+    for proj, lab, meth, rt in sorted(targets, key=lambda t: (t[0], t[3] or "", t[1])):
+        path = _Path(CONCAT_DIR) / meth / lab / f"{proj}_d4d.yaml"
         if not path.exists():
             continue
         summary = red.summarize(red.load(path), **kwargs)
-        rows.append((proj, lab, summary))
+        rows.append((proj, lab, rt, summary))
         total_sentences += summary["sentences"]
         total_prose += summary["prose_restatements"]
         total_structural += summary["structural_restatements"]
@@ -1502,11 +1504,11 @@ def redundancy_cmd(method, label, project, threshold, show, runtime):
     if not rows:
         raise click.ClickException("no records found for that selection")
 
-    click.echo(f"{'project':17}{'sentences':>10}{'restated':>10}{'rate':>8}"
-               f"{'structural':>12}")
-    for proj, _lab, s in rows:
-        click.echo(f"{proj:17}{s['sentences']:>10}{s['prose_restatements']:>10}"
-                   f"{s['rate']:>7.1%}{s['structural_restatements']:>12}")
+    click.echo(f"{'project':17}{'runtime':9}{'sentences':>10}{'restated':>10}{'rate':>8}"
+               f"{'structural':>12}  label")
+    for proj, lab, rt, s in rows:
+        click.echo(f"{proj:17}{(rt or '-'):9}{s['sentences']:>10}{s['prose_restatements']:>10}"
+                   f"{s['rate']:>7.1%}{s['structural_restatements']:>12}  {lab}")
     rate = (total_prose / total_sentences) if total_sentences else 0.0
     used = red.THRESHOLD if threshold is None else threshold
     # The threshold is printed with the rate because the rate is meaningless
@@ -1521,10 +1523,10 @@ def redundancy_cmd(method, label, project, threshold, show, runtime):
     click.echo(f"{total_structural} further pair(s) are structural (a URL or a "
                "nested resource) and are not redundancy.")
 
-    for proj, _lab, s in rows:
+    for proj, lab, rt, s in rows:
         if not s["restatements"]:
             continue
-        click.echo(f"\n{proj} — {len(s['slots_involved'])} slots involved:")
+        click.echo(f"\n{proj} [{rt or '-'}: {lab}] — {len(s['slots_involved'])} slots involved:")
         for r in sorted(s["restatements"],
                         key=lambda x: -x.similarity)[:show]:
             click.echo(f"   {r.similarity:.2f}  {r.slot_a} | {r.slot_b}")

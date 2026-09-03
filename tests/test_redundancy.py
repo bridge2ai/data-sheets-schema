@@ -99,7 +99,7 @@ class TestAgainstTheCanonicalSet(unittest.TestCase):
         from data_sheets_schema.runs import canonical_sets
         for _rt, found in canonical_sets().items():
           for project, info in found.items():
-            path = CORE / info["label"] / f"{project}_d4d.yaml"
+            path = CORE.parent / info["method"] / info["label"] / f"{project}_d4d.yaml"
             if not path.exists():
                 continue
             summary = red.summarize(red.load(path))
@@ -117,7 +117,7 @@ class TestAgainstTheCanonicalSet(unittest.TestCase):
         from data_sheets_schema.runs import canonical_runs
 
         info = canonical_runs(runtime="api").get("AI_READI")
-        path = CORE / info["label"] / "AI_READI_d4d.yaml" if info else None
+        path = CORE.parent / info["method"] / info["label"] / "AI_READI_d4d.yaml" if info else None
         if not path or not path.exists():
             self.skipTest("AI_READI canonical record absent")
         found = red.restatements(red.load(path))

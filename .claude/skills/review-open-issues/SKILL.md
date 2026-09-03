@@ -280,7 +280,7 @@ Before citing any of the following, confirm how it was obtained:
 - Some residuals ask for evidence the repository records as unrecoverable
   (`capture_postdates_run`, killed invocations' `api_usage`, #656); say so
   and recommend superseding rather than leaving them open indefinitely.
-- Both arms share the `claudecode_agent` method directory (#690); do not
+- Both arms shared the `claudecode_agent` method directory through generic_v7; from v8 the API baseline writes under `claudecode_api` and canonical marks are runtime-scoped (#690); do not
   infer runtime from the directory, read `model.agent_runtime` or the label.
 
 ## Related
