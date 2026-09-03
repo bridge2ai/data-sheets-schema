@@ -195,8 +195,11 @@ def _raw_value(record: Any, path: str) -> Any:
 def _registry_label(value: Any) -> str | None:
     """The pinned registry label for a `values_from` CURIE (#912): the digest
     shows the model `id=name` pairs for B2AI_TOPIC / B2AI_SUBSTRATE, the
-    pack showed the reviewer the bare CURIE, and seven of twelve v7 reviews
-    could score one only as well-formed. None for anything else."""
+    pack showed the reviewer the bare CURIE; seven of the twelve v7 review
+    files say the term cannot be checked (verdicts `exempt_by_nature` x5,
+    `cannot_tell` x1). Scans every pinned vocabulary rather than the slot's
+    own `values_from` — safe while the vocabularies are self-prefixed and
+    disjoint (#917 scopes it). None for anything else."""
     if not isinstance(value, str) or ":" not in value:
         return None
     try:

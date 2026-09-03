@@ -68,7 +68,9 @@ the only source of dataset facts.
   identity or (no snapshot, the agentic path) by index. A `values_from`
   CURIE (`B2AI_TOPIC:43`) carries its pinned registry label as
   `value_label` (#912): judge whether the *label* is what the passage
-  supports — a well-formed CURIE for the wrong concept is `misread`.
+  supports — a well-formed CURIE for the wrong concept is `misread`, and
+  `exempt_by_nature` no longer applies to a term that carries its label
+  (it did when the pack showed only the bare CURIE).
   `pack.reference_attributes` lists the class-ranged attributes that are
   *references* (`Creator.principal_investigator → Person (reference — a
   string, not an object)`, #805): a string is the only form that

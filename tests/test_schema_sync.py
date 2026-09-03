@@ -78,7 +78,9 @@ class DigestIsAFunctionOfContentTest(unittest.TestCase):
         record's validity moves; the slot inventory recorded under the new
         digest is identical to the old one. Every run from here records the
         new digest; the v7 arm keeps `580992ed`, which is one of the things
-        v7-vs-v8 measures.
+        v7-vs-v8 measures. The CoreDataset digest moves with it
+        (`b0c42638` → `10d60d20`); it is not pinned here because the ledger
+        keys on the Dataset digest (`LEDGER_KEY_CLASS`).
         """
         if not self.SCHEMA.exists():
             self.skipTest("merged schema not present in this checkout")

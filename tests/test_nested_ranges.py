@@ -201,3 +201,25 @@ class DepthTwo(unittest.TestCase):
     def test_the_second_level_stays_within_budget(self):
         self.assertLess(len(schema_digest.digest_text("Dataset")), 44_000)
         self.assertEqual(schema_digest.NESTING_DEPTH, 2)
+
+    def test_every_class_reachable_through_an_inlined_attribute_is_rendered(self):
+        """The general property behind the three names above: from any
+        rendered class, every non-universal inlined attribute's class range
+        is itself rendered (depth two closes the walk), and no reference
+        attribute's range is asserted as an object."""
+        from linkml_runtime import SchemaView
+        digest = schema_digest.build("Dataset")
+        sv = SchemaView(str(schema_digest.resolve_schema(schema_digest.CLASS_SCHEMA["Dataset"])))
+        rendered = {n.name for n in digest.nested}
+        missing, unmarked = [], []
+        for n in digest.nested:
+            for sub in sv.class_induced_slots(n.name):
+                if not sub.range or sv.get_class(sub.range) is None or sub.name in schema_digest.UNIVERSAL_ATTRIBUTES:
+                    continue
+                if sub.inlined or sub.inlined_as_list:
+                    if sub.range not in rendered:
+                        missing.append(f"{n.name}.{sub.name} → {sub.range}")
+                elif "(reference" not in n.ranges.get(str(sub.name), ""):
+                    unmarked.append(f"{n.name}.{sub.name} → {sub.range}")
+        self.assertEqual(missing, [])
+        self.assertEqual(unmarked, [])

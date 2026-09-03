@@ -192,8 +192,9 @@ def render_values_from(names: list[str]) -> str | None:
 
 
 #: Ranges that hold on essentially every object range, stated once rather than
-#: repeated 67 times (#486). `id` is `uriorcurie` on all 67 nested classes and
-#: `used_software` is `Software[]` on 64 — so a per-class line would be bloat
+#: repeated per class (#486). `id` is `uriorcurie` on all 71 nested classes
+#: (67 before the depth-two digest, #916) and `used_software` is `Software[]`
+#: on 64 — so a per-class line would be bloat
 #: that an existing guard already forbids, while the information itself is the
 #: most valuable here: `id → uriorcurie` is the whole #402/#457 family, and a
 #: bare token validates exactly as cleanly as a ROR IRI.
