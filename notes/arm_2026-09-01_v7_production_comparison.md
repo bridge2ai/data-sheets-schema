@@ -206,7 +206,7 @@ reviewers' ~24 lines were real), v5 baseline 88. Under v3 the AI_READI
 rep1 canary reads *regressed* on the British row (45 vs the baseline's
 worst 43): decision D4 (#906, adopted 2026-09-03, PR #920) re-derived its
 verdict offline under v3, with the prior v2-basis verdict kept under
-`supersedes`. The record stays retained in the completed arm — the
+`prior_verdict`. The record stays retained in the completed arm — the
 retention now sits under a regressed-on-British v3 verdict, and every
 other row is unchanged.
 

@@ -284,7 +284,7 @@ of them may land between a v8 canary and its fill.
   pack half landed in #916. Nothing to decide.
 - **D4 (#906)** — adopted 2026-09-03, option (a), PR #920: the v7 rep1
   AI_READI canary carries an offline re-verdict under instrument v3
-  (regressed on the British row, prior verdict under `supersedes`). The
+  (regressed on the British row, prior verdict under `prior_verdict`). The
   v7 form blocks already hold v3 counts, so the baseline v8's canaries
   are gated against is v3 either way; this decided only that one
   recorded verdict. CM4AI rep1's block (v2 baseline numbers, pre-#891

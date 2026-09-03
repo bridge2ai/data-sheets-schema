@@ -808,10 +808,10 @@ canary:
     the same baseline the British row now reads 45 vs baseline worst 43 — regressed
     on that row, every other row unchanged from the prior verdict. The record stays
     retained as part of the completed 2026-09-01 arm; this is bookkeeping, not a retry.
-    The prior verdict is kept under `supersedes`.'
+    The prior verdict is kept under `prior_verdict`.'
   recorded_by: canary.verdict, offline (#906)
   recorded_at: '2026-09-03T06:37:02+00:00'
-  supersedes:
+  prior_verdict:
     status: ok
     rows:
     - metric: pair errors
