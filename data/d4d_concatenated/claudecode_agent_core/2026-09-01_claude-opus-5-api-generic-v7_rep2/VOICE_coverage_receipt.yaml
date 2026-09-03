@@ -1,0 +1,349 @@
+bundle_md5: dcd717170da6762569c0b4eeafc1c3d2
+chunks:
+- id: c001
+  status: nothing_relevant
+  reason: >-
+    Concatenation header, file inventory and table of contents for the bundle itself; contains no
+    statements about the dataset.
+- id: c002
+  status: extracted
+  extracted:
+  - slot: purposes[0].response
+    snippet: "aims to generate a large-scale, ethically sourced voice, speech, and cough database linked to health metadata"
+  - slot: addressing_gaps[0].response
+    snippet: "Current literature on this topic has only been studied on small- to medium-sized data sets"
+  - slot: addressing_gaps[1].response
+    snippet: "comparing studies and pooling data is challenging due to a lack of existing standards in how voice and other acoustics are measured and collected"
+  - slot: purposes[2].response
+    snippet: "establishment of voice bioinformatic standards, development of an infrastructure for audiomic data storage"
+- id: c003
+  status: redundant_with
+  chunks: [c002]
+- id: c004
+  status: nothing_relevant
+  reason: >-
+    Closing boilerplate of the PubMed Central page (data availability restatement, NCBI navigation
+    and footer links); no dataset facts.
+- id: c005
+  status: extracted
+  extracted:
+  - slot: purposes[0].source_caveats
+    snippet: "build a publicly available database of 30 000 human voices"
+  - slot: addressing_gaps[2].response
+    snippet: "datasets are often private, limiting the ability to audit ML models and the accuracy of training data labels"
+  - slot: addressing_gaps[3].response
+    snippet: "the limited size, quality, and diversity of existing open-source datasets"
+  - slot: purposes[3].response
+    snippet: "potential reidentification of patients by their voice, voice hacking, and data ownership"
+- id: c006
+  status: extracted
+  extracted:
+  - slot: funders[0]
+    snippet: "Core project number: OT2OD032720"
+  - slot: funders[0].notes
+    snippet: "Award amount: 4660942"
+  - slot: funders[0].notes
+    snippet: "Project start: 2022-09-01T00:00:00"
+  - slot: creators[0].principal_investigator.name
+    snippet: "Principal investigator: BENSOUSSAN, YAEL EMILIE"
+  - slot: participant_privacy[0].privacy_techniques
+    snippet: "supported by federated learning technology to protect data privacy"
+- id: c007
+  status: extracted
+  extracted:
+  - slot: description
+    snippet: "large, ethically sourced, and demographically diverse voice dataset linked to health information"
+  - slot: raw_data_sources[0].access_details
+    snippet: "Access to the original raw audio is restricted to controlled access due to privacy concerns"
+  - slot: subpopulations[0].identification
+    snippet: "Voice Disorders\nNeurological and Neurodegenerative Disorders\nMood and Psychiatric Disorders"
+  - slot: subpopulations[0].distribution
+    snippet: "The public data releases do not contain an equal distribution of these categories of diseases"
+  - slot: direct_collection[0].collection_details
+    snippet: "Data is collected in the clinic with the assistance of a trained research assistant"
+  - slot: notes
+    snippet: "A total of 22 acoustic tasks are recorded through the app"
+  - slot: labeling_strategies[0].labeling_details
+    snippet: "Clinical validation is performed by a qualified physician or practitioner based on established gold standards for diagnosis"
+  - slot: collection_mechanisms[3].mechanism_details
+    snippet: "all data is collected using\nreproschema-ui\nwith the Bridge2AI-Voice pediatric protocol"
+  - slot: external_resources[0].notes
+    snippet: "The supporting REDCap data dictionary, metadata, and instrument PDFs are available at"
+- id: c008
+  status: extracted
+  extracted:
+  - slot: data_governance.access_review_process
+    snippet: "Complete the Data Access Request Form (DARF)"
+  - slot: is_deidentified.deidentification_details
+    snippet: "Does this dataset achieve K-anonymization (k>=2)?"
+  - slot: is_deidentified.identifiers_removed
+    snippet: "All direct identifiers were removed, as these would reveal the identity of the research participant"
+  - slot: purposes[0].source_caveats
+    snippet: "Enrollment Count (Anticipated by 2027): 10,000"
+  - slot: sampling_strategies[0].strategies
+    snippet: "Sampling Method\nNon-Probability Sample"
+  - slot: instances[0].counts
+    snippet: "There are currently around 833 instances."
+  - slot: sampling_strategies[0].is_sample
+    snippet: "It is a sample of a larger, ongoing collection."
+  - slot: sampling_strategies[0].why_not_representative
+    snippet: "The data is not representative because it was collected at a limited number of geographic locations"
+  - slot: missing_data_documentation[0].missing_data_causes
+    snippet: "Yes, some questions are optional."
+  - slot: relationships[0].relationship_details
+    snippet: "No, they are unrelated."
+  - slot: anomalies[0].anomaly_details
+    snippet: "Yes, different sites have different collection configurations. The collection protocol changed over the course of the study."
+  - slot: sensitive_elements[0].sensitivity_details
+    snippet: "racial or ethnic origins:\nThe dataset includes race information."
+  - slot: sensitive_elements[1].sensitivity_details
+    snippet: "The dataset includes sexual orientation information."
+  - slot: confidential_elements[0].confidentiality_details
+    snippet: "Does the dataset contain data that might be considered confidential"
+  - slot: content_warnings[0].warnings
+    snippet: "This dataset includes the transcription of free speech tasks."
+  - slot: creators
+    snippet: "Voice as a Biomarker of Health is being co-led by Dr. Yaël Bensoussan, MD, MSc, from USF Health Morsani College of Medicine and Olivier Elemento, PhD, from Weill Cornell Medicine"
+  - slot: funders[0].grantor
+    snippet: "Who funded the creation of the dataset?"
+  - slot: collection_mechanisms[1].mechanism_details
+    snippet: "Data is collected on iPads (9th or 10th generation), iPad Air (5th generation) using an Avid AE-36 microphone"
+  - slot: discouraged_uses[0].discouragement_details
+    snippet: "the dataset should not be used for non-research applications, such as hiring decisions, insurance premium adjustments"
+  - slot: prohibited_uses[0].prohibition_reason
+    snippet: "to attempt to re-identify research participants, nor any actions that could reasonably lead to re-identification"
+  - slot: prohibited_uses[2].prohibition_reason
+    snippet: "intellectual property protections, database rights, or related rights may not be used in a manner that restricts or limits access to any part of the dataset"
+  - slot: human_subject_research.irb_approval
+    snippet: "Submitted and approved by the USF Single IRB and subsite IRBs through the Single IRB process."
+  - slot: informed_consent[0].consent_scope
+    snippet: "Participants who consent also permit investigators to access medical information through EHR platforms"
+- id: c009
+  status: extracted
+  extracted:
+  - slot: known_biases[2].bias_description
+    snippet: "The data were recorded with a head-mounted headset with a microphone that could be at slightly different distances."
+  - slot: known_biases[0].bias_description
+    snippet: "Groups that have less trust in the medical system, AI, or are less proximal to the collection sites would have been less likely to be recruited."
+  - slot: subpopulations[1].identification
+    snippet: "Age, Gender, Sex, Ethnicity, Socioeconomic status"
+  - slot: cleaning_strategies[0].cleaning_details
+    snippet: "Was there any pre-processing for cleaning the data?"
+  - slot: labeling_strategies[1].labeling_details
+    snippet: "this assessment was determined by using the participants EHR record or using an active prescription"
+  - slot: labeling_strategies[0].data_annotation_protocol
+    snippet: "Per Bridge2AI Protocols and ICD-10 codes."
+  - slot: acquisition_methods[1].acquisition_details
+    snippet: "Clinical diagnoses were verified by clinicians reviewing audio and/or imaging data, looking at electronic health records, or medication prescriptions."
+  - slot: data_collectors[0].collector_details
+    snippet: "Research teams, which may include medical, graduate, or undergraduate students, coordinated with clinicians/doctors to identify appropriate participants."
+  - slot: participant_compensation[0].compensation_amount
+    snippet: "Participants currently receive $40 for a data collection session that takes less than 90 minutes"
+  - slot: collection_timeframes[0].timeframe_details
+    snippet: "The data was collected over a period of 12 months."
+  - slot: collection_notifications[0].notification_details
+    snippet: "Yes, participants went through an IRB-approved consent process."
+  - slot: consent_revocations[0].revocation_details
+    snippet: "Participants are informed that research data (including voice recordings) cannot be removed from the database once the voice data collection process is completed."
+  - slot: data_protection_impacts[0].impact_details
+    snippet: "Has an analysis of the potential impact of the dataset and its use on data subjects been conducted?"
+  - slot: known_limitations[0].limitation_description
+    snippet: "The only language option for v2.0.0 is English. Spanish versions of the protocol are under development."
+  - slot: existing_uses[0].examples
+    snippet: "A restricted version of the dataset containing raw audio has been used in the Bridge2AI Summer School and hackathon."
+  - slot: future_use_impacts[0].impact_details
+    snippet: "this dataset has skews based on disorder category, site, and other demographic factors"
+  - slot: third_party_sharing[0].notes
+    snippet: "The dataset will be distributed broadly to individuals outside of the entity who created the dataset."
+  - slot: ip_restrictions.restrictions
+    snippet: "You agree not to use intellectual property protection in ways that would prevent or block access to, or use of, any element of these Data"
+  - slot: regulatory_restrictions.regulatory_restrictions
+    snippet: "No export controls apply to the dataset."
+  - slot: maintainers[2].maintainer_details
+    snippet: "Temerty Center for Artificial Intelligence Research and Education in Medicine (T-CAIREM) based at the University of Toronto"
+  - slot: updates.frequency
+    snippet: "further versions of the dataset will be released on a semi-annual (twice a year) basis"
+  - slot: retention_limit.retention_details
+    snippet: "the data will be retained as long as it is useful for research purposes, possibly indefinitely"
+  - slot: version_access.version_details
+    snippet: "By default, older versions of the dataset will continue to be supported, hosted, and made available to researchers."
+  - slot: extension_mechanism.extension_details
+    snippet: "it is possible for others to publish a derivative dataset on the Health Data Nexus which references the original source"
+  - slot: conforms_to
+    snippet: "Brain Imaging Data Structure v1.9.0"
+  - slot: preprocessing_strategies[7].preprocessing_details
+    snippet: "organizing and preprocessing the dataset"
+  - slot: cleaning_strategies[0].cleaning_details
+    snippet: "Generate missingness tables\nCheck distributions and outliers"
+- id: c010
+  status: extracted
+  extracted:
+  - slot: external_resources[1].restrictions
+    snippet: "License: Apache-2.0"
+  - slot: external_resources[1].notes
+    snippet: "The code used to preprocess the raw audio waveforms into the parquet file and to merge the source data into the phenotype files."
+  - slot: external_resources[5].notes
+    snippet: "FHIR profiles for voice as a biomarker."
+- id: c011
+  status: extracted
+  extracted:
+  - slot: purposes[0].source_caveats
+    snippet: "Sample Size	30 000 participants"
+  - slot: participant_privacy[0].privacy_techniques
+    snippet: "Algorithms are run on data at each institution and model updates are shared to a central node."
+  - slot: human_subject_research.special_populations
+    snippet: "Pediatric patients will be enrolled ONLY through the pediatric sites and not at USF."
+  - slot: sampling_strategies[0].strategies
+    snippet: "Participants will be screened for eligibility prior to the consent process"
+  - slot: known_limitations[3].limitation_description
+    snippet: "NO ADDITIONAL IMAGING WILL BE PERFORMED IN THE CONTEXT OF THIS STUDY"
+- id: c012
+  status: extracted
+  extracted:
+  - slot: retention_limit.retention_details
+    snippet: "kept in each institution on local cloud storage for a maximum of 10 years after study completion"
+  - slot: informed_consent[0].consent_documentation
+    snippet: "All paper and electronic versions of consent will be stored for a minimum of 5 years after the completion of the study"
+  - slot: informed_consent[0].withdrawal_mechanism
+    snippet: "If participants withdraw during or before the voice data collection is completed their data will not be included in the database."
+  - slot: at_risk_populations.assent_procedures
+    snippet: "children will provide verbal assent where appropriate"
+  - slot: at_risk_populations.guardian_consent
+    snippet: "this research is minimal risk and does not require permission from both parents or legal guardians"
+  - slot: human_subject_research.regulatory_compliance
+    snippet: "A partial HIPAA waiver is being requested for recruitment purposes"
+  - slot: informed_consent[0].consent_type
+    snippet: "Consent may also take place through video recording within an application."
+- id: c013
+  status: extracted
+  extracted:
+  - slot: prohibited_uses[2].prohibition_reason
+    snippet: "Sale of all or part of the Data on any media is not permitted."
+  - slot: prohibited_uses[3].prohibition_reason
+    snippet: "Recipient will not use the Data, either alone or in concert with any other information, to make any effort to contact individuals"
+  - slot: prohibited_uses[4].prohibition_reason
+    snippet: "shall not disclose, release, sell, rent, lease, loan, or otherwise grant access to the Data to any third party"
+  - slot: regulatory_restrictions.other_compliance
+    snippet: "the Data is covered under a Certificate of Confidentiality"
+  - slot: retention_limit.retention_details
+    snippet: "Two years after the Start Date, upon completion of the project, upon termination, or upon expiration of the applicable ethics approval"
+  - slot: data_governance.stewardship_roles
+    snippet: "Collaborators at other research organizations, and other research teams at the same\norganization, must apply independently for access"
+  - slot: data_governance.accountable_organization.name
+    snippet: "University of South Florida Board of Trustees"
+- id: c014
+  status: nothing_relevant
+  reason: >-
+    Remaining clauses of the data transfer agreement covering platform-specific requirements,
+    unilateral amendment by the provider, a state labor declaration and the signature list; none of
+    these were recorded in the datasheet.
+- id: c015
+  status: extracted
+  extracted:
+  - slot: version_access.version_details
+    snippet: "provides 12,523 recordings for 306 participants collected across five sites in North America"
+  - slot: version_access.version_details
+    snippet: "b2ai-voice v1.1:\nThis release added Mel-frequency cepstral coefficients (MFCCs)."
+  - slot: related_datasets[3].target_dataset
+    snippet: "https://doi.org/10.57764/qb6h-em84"
+  - slot: is_deidentified.identifiers_removed
+    snippet: "State and province were removed. Country of data collection was retained."
+- id: c016
+  status: extracted
+  extracted:
+  - slot: related_datasets[1].description
+    snippet: "Bridge2AI-Voice v3.0 contains data for 833 participants across five sites in North America."
+  - slot: related_datasets[1].target_dataset
+    snippet: "https://doi.org/10.13026/k81f-qr68"
+  - slot: preprocessing_strategies[0].preprocessing_details
+    snippet: "Raw audio was preprocessed by converting to monaural and resampling to 16 kHz with a Butterworth anti-aliasing filter applied."
+  - slot: acquisition_methods[0].acquisition_details
+    snippet: "Data collection was conducted using a custom application on a tablet with a headset used for data collection when possible."
+- id: c017
+  status: extracted
+  extracted:
+  - slot: version_access.version_details
+    snippet: "A major update with new data for an additional 391 participants."
+  - slot: version_access.version_details
+    snippet: "This release provides data for an additional 136 new participants."
+  - slot: errata[0].erratum_details
+    snippet: "Spectrograms were reprocessed to fix some minor issues identified in the previous release."
+  - slot: errata[1].erratum_details
+    snippet: "b2ai-voice v2.0.1:\nCorrections in the authorship list."
+  - slot: is_deidentified.deidentification_details
+    snippet: "Spectrograms and similar features were excluded if the audio contained free speech."
+  - slot: distribution_formats[2].notes
+    snippet: "all of the TSV data files have a data dictionary available with the data file"
+  - slot: instances[0].notes
+    snippet: "there may be more than one row per participant in the data files"
+  - slot: license_and_use_terms.license_terms
+    snippet: "Only credentialed users who sign the DUA can access the files."
+- id: c018
+  status: extracted
+  extracted:
+  - slot: id
+    snippet: "https://doi.org/10.13026/8xbn-nq66"
+  - slot: title
+    snippet: "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information"
+  - slot: issued
+    snippet: "Published: May 1, 2026. Version:\n3.1.0"
+  - slot: description
+    snippet: "Bridge2AI-Voice v3.1 contains data for 833 participants across five sites in North America."
+  - slot: raw_data_sources[0].access_details
+    snippet: "Please reach out to the access committee if you are interested in access: DACO@b2ai-voice.org"
+  - slot: external_resources[4].future_guarantees
+    snippet: "https://www.synapse.org/Synapse:syn72370534/"
+  - slot: citation
+    snippet: "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 3.1.0)"
+  - slot: preprocessing_strategies[1].preprocessing_details
+    snippet: "Spectrograms were further downsampled by a factor of two in the time domain after derivation."
+- id: c019
+  status: extracted
+  extracted:
+  - slot: instances[1].notes
+    snippet: "torchaudio_spectrograms.parquet (n=29278)"
+  - slot: instances[1].notes
+    snippet: "torchaudio_pitch.parquet (n=32522)"
+  - slot: preprocessing_strategies[3].preprocessing_details
+    snippet: "kinematic traces of vocal tract articulators and source features as well as measures of loudness, periodicity, and pitch"
+  - slot: preprocessing_strategies[4].preprocessing_details
+    snippet: "time-varying categorical distribution over acoustic units of speech (e.g., phonemes) at 100Hz"
+  - slot: distribution_formats[1].notes
+    snippet: "audio_quality_metrics.tsv - One feature per audio recording derived from the raw audio related to quality control metrics."
+  - slot: errata[2].erratum_details
+    snippet: "Fixed broken parquet files from previous release."
+  - slot: ethical_reviews[0].review_details
+    snippet: "Data collection and sharing was approved by the University of South Florida Institutional Review Board."
+  - slot: license
+    snippet: "License (for files):\nBridge2AI Voice Registered Access License"
+  - slot: version_access.latest_version_doi
+    snippet: "DOI (latest version):\nhttps://doi.org/10.13026/37yb-1t42"
+  - slot: keywords
+    snippet: "Topics:\nhealth\nbiomarkers\nbridge2ai\nvoice"
+  - slot: variables[0].notes
+    snippet: "a unique identifier for the participant (participant_id), a unique identifier for the recording session (session_id)"
+  - slot: preprocessing_strategies[7].preprocessing_details
+    snippet: "This release was generated with b2aiprep v3.0.0."
+- id: c020
+  status: extracted
+  extracted:
+  - slot: related_datasets[0].description
+    snippet: "contains derived audio features for 23,533 recordings collected from 300 participants aged 2-18"
+  - slot: related_datasets[0].target_dataset
+    snippet: "https://doi.org/10.13026/h995-bt35"
+  - slot: external_resources[4].future_guarantees
+    snippet: "https://www.synapse.org/Synapse:syn73617068"
+- id: c021
+  status: extracted
+  extracted:
+  - slot: ethical_reviews[1].review_details
+    snippet: "Data collection and sharing was approved by the Research Ethics Board at the Hospital for Sick Children."
+  - slot: collection_mechanisms[3].mechanism_details
+    snippet: "All data was collected through customized software"
+- id: c022
+  status: extracted
+  extracted:
+  - slot: external_resources[3].notes
+    snippet: "Docs for the Bridge2AI Voice Project."
+  - slot: external_resources[3].restrictions
+    snippet: "License: MIT"

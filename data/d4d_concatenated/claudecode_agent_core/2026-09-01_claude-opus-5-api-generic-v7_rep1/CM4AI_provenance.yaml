@@ -820,3 +820,43 @@ canary:
     the record''s block names where counts_from expects ''pair''/''report'' - both
     recorded unmeasurable.'
   recorded_by: d4d receipts check + canary.verdict, offline (#876)
+review:
+  checked: true
+  items_total: 83
+  items_answered: 83
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 7
+    slot_receipted:
+      supported: 24
+      unsupported: 1
+    slot_receiptless:
+      bundle_supports: 17
+      exempt_by_nature: 3
+      inferred: 5
+    slot_reshaped:
+      still_supported: 9
+    rule:
+      violated: 3
+      followed: 12
+      not_applicable: 1
+    pair_warning:
+      consistent: 1
+  adverse: 9
+  cannot_tell: 0
+  findings: []
+  summary: items 83/83 answered · 9 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5
+    reviewed_at: 2026-09-03 00:02:55+00:00
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_review_pack.yaml
+      sha256: fc15f6f7117bc46a2bbe230199dc582896d3da6dbff1e62cf65eeb58e942f1ab
+    review:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_review.yaml
+      sha256: 27c0846f078d0b71665db0cfba08904abe1c33cf9cc031c57f96d1d7f0ac1201
+  recorded_by: d4d review check

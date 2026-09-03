@@ -1,0 +1,232 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: '2026-09-02T00:00:00Z'
+pack_sha256: 7f98416b0d31ce6e9cf3aeb2402e751fdbdaf0dfb44da9ab4f99ae59d0a6a63a
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-25 are the concatenation banner and table of contents; every line is a filename or separator, no dataset fact appears"
+- id: chunk-c004
+  verdict: confirmed
+  evidence: "lines 826-895 are NCBI page furniture plus the feasibility article's generic Data Availability Statement (line 834, about the pilot article's own data, not this dataset); nothing belongs in a slot the record leaves empty or states otherwise"
+- id: slot-003
+  verdict: supported
+  evidence: "lines 2874-2877: 'Participants may consent by signing a physical paper copy, by indicating electronic consent within the app or through REDCap surveys, or through video recording within the app', with the read-aloud verification at line 2875; 'prospective informed consent' attested at line 2165"
+- id: slot-004
+  verdict: supported
+  evidence: "each cited passage backs a specific discrepancy the caveat records: 14 institutions (line 246), 30,000 voices (1111) vs 10,000 (1380), 12 institutions (1108), ~61,937 recordings from 833 (1352), 30,000 enrollment target (2791); the grant snippet '#1OT2OD032720-01' is real but sits at line 524 in c003, not c002 - the adjacent-chunk case the validator already reports"
+- id: slot-005
+  verdict: supported
+  evidence: "line 4391 'all of the TSV data files have a data dictionary available with the data file' plus the surrounding c017 passage (static_features.tsv at 4278, phenotype tables confounders/demographics/diagnosis/enrollment/questionnaire/task at 4295-4390) support the value; audio quality metrics per v3.1.0 at line 4947"
+- id: slot-006
+  verdict: supported
+  evidence: "the DTUA clause at lines 3453-3457 states exactly what the value states (no contact without IRB approval, written provider approval, informed consent); the passage actually sits in c013, one chunk before the cited c014 span - attribution imprecision the validator reports, support holds"
+- id: slot-007
+  verdict: supported
+  evidence: "lines 1119-1122: '(4) defining ethical and legal norms safeguarding patients' data while supporting data-sharing efforts; (5) developing infrastruc-ture for audiomics data storage sharing within and across research institutions' - the value combines aims (5) and (4) faithfully"
+- id: slot-008
+  verdict: supported
+  evidence: "line 1955 'Enrollment Count (Anticipated by 2027): 10,000' and line 2055 'It is a sample of a larger, ongoing collection' together state the value as the larger-set slot asks"
+- id: slot-009
+  verdict: supported
+  evidence: "line 4562 (v3.1.0 page title) carries the title verbatim"
+- id: slot-010
+  verdict: supported
+  evidence: "line 1263: 'integrate the use of voice as biomarker of health in clinical care... build predictive models to assist in screening, diagnosis, and treatment of a broad range of diseases'; the added 'monitoring' is attested at line 2022"
+- id: slot-011
+  verdict: supported
+  evidence: "line 2076: 'This dataset includes the transcription of free speech tasks. While the inclusion of information of that type is unlikely, it cannot be completely avoided, as research participants are responsible for their choice of language'; the reduced-risk clause is attested at lines 3724/4930 (transcripts removed, spectrogram-family features excluded)"
+- id: slot-012
+  verdict: supported
+  evidence: "line 2201 (IP terms: copyright, no transfer, downstream discoveries with non-obstructive licensing) and line 2204 'No IP-based restrictions have been imposed by third parties' state what the value states; DTUA equivalent at lines 3210-3217. The second snippet is verbatim at 2201 (c009), not the cited c013 - validator-reported elsewhere case"
+- id: slot-013
+  verdict: supported
+  evidence: "line 2049 'Each instance represents a person', with lines 2052-2053 identifying instances as patients/subjects, supports 'research participant' as the instance type"
+- id: slot-014
+  verdict: supported
+  evidence: "line 2223: 'Once data is contributed, the data will be retained as long as it is useful for research purposes, possibly indefinitely' - the value restates it exactly"
+- id: slot-015
+  verdict: supported
+  evidence: "c016 carries the full version-date sidebar at lines 4486-4495 (1.1 Jan 17 2025, 2.0.0 Apr 16 2025, 2.0.1 Aug 18 2025, 3.0.0 Dec 16 2025, 3.1.0 May 1 2026) around the cited 'Published: Dec. 16, 2025' snippet (4130); the HDN end-of-November-2024 date is at line 2198"
+- id: slot-016
+  verdict: supported
+  evidence: "lines 2051 ('currently around 833 instances'), 4221 and 4890 ('data for 833 participants across five sites') state the count 833 as the slot asks"
+- id: slot-017
+  verdict: supported
+  evidence: "lines 1260-1261 give the project start 2022-09-01 and end 2026-11-30 verbatim; line 1257 'Organization: UNIVERSITY OF SOUTH FLORIDA' supports the administration clause"
+- id: slot-018
+  verdict: supported
+  evidence: "lines 2555-2557: 'B2Ai-Voice | Prep Library... License: Apache-2.0' - the license restriction on external_resources[1] (b2aiprep) is stated verbatim"
+- id: slot-019
+  verdict: supported
+  evidence: "line 2893: 'parents or guardians will provide consent... Parental permission will be obtained from one or both parents; this research is minimal risk and does not require permission from both parents or legal guardians' - the value is a faithful paraphrase"
+- id: slot-020
+  verdict: supported
+  evidence: "line 4917 (also 3714, 4248): 'Raw audio was preprocessed by converting to monaural and resampling to 16 kHz with a Butterworth anti-aliasing filter applied' - verbatim basis for the value"
+- id: slot-021
+  verdict: supported
+  evidence: "line 2084: 'The dataset includes sexual orientation information.' - the value is the passage verbatim"
+- id: slot-022
+  verdict: supported
+  evidence: "line 2055 states the core claim ('not representative because it was collected at a limited number of geographic locations'); five sites at line 2097, USA and Canada at 2169, English-only at 1977/1980 support the elaboration"
+- id: slot-023
+  verdict: supported
+  evidence: "line 4959: 'ppgs.parquet... contains the phonetic posteriorgram probabilities across 40 phoneme categories... frame rate of 100Hz'; line 4924 attests generation 'via the ppgs package'"
+- id: slot-024
+  verdict: supported
+  evidence: "line 1977: 'Does not read or speak English (Please note, the Spanish protocols and Data collection will be included in future releases)' - exclusion criterion supporting the coverage limitation"
+- id: slot-025
+  verdict: supported
+  evidence: "lines 4391-4392: the phenotype-row rule verbatim plus the repeated-visits/varying-responses clause - the value restates both"
+- id: slot-026
+  verdict: supported
+  evidence: "line 2893: assent where appropriate, documented; young children not asked 'due to limitations in understanding due to age and development... typically holds for children under seven years of age' - the value tracks the passage"
+- id: slot-027
+  verdict: supported
+  evidence: "line 3781: reference [9] names 'Bridge2AI-Voice... (version 1.0). Health Data Nexus. https://doi.org/10.57764/qb6h-em84' - the target of the is_new_version_of relation, written as the doi: CURIE per the rules"
+- id: slot-028
+  verdict: bundle_supports
+  evidence: "line 2150 'The data was directly observable and reported by subjects'; lines 1428-1434: demographic data, confounder surveys and validated questionnaires collected through the smartphone application"
+- id: slot-029
+  verdict: bundle_supports
+  evidence: "lines 2085-2086: 'financial or health data: The dataset includes socioeconomic and health information.'"
+- id: slot-030
+  verdict: bundle_supports
+  evidence: "line 2028 names 'Jean-Christophe Bélisle-Pipon, PhD (Simon Fraser University)' among lead investigators; also lines 629 and 3913 (author lists)"
+- id: slot-031
+  verdict: bundle_supports
+  evidence: "line 4925 (also 3719, 4256), inside the preprocessing methods list: 'Transcriptions were generated using OpenAI's Whisper Large model'"
+- id: slot-032
+  verdict: bundle_supports
+  evidence: "line 2055: 'We hope to make it more representative by shifting to remote collection and designing our recruiting approach in a way that controls for more variables'"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "line 2141 gives https://github.com/sensein/b2aiprep as the open-source repository; lines 2226-2228 describe its pull-request contribution mechanism"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "lines 2083-2084: 'sexual orientations: The dataset includes sexual orientation information.'"
+- id: slot-035
+  verdict: exempt_by_nature
+  evidence: "data_topic is a vocabulary-term slot (schema declares values_from B2AI_TOPIC and directs an ontology term over prose), so no bundle passage can state the CURIE; the underlying fact - that instances[1] are audio recordings - is at lines 4950/2057. Whether local part 36 denotes an audio topic is not checkable from bundle or schema (registry is external); see notes"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "line 2165: 'Yes, all participants have been duly informed and agreed to the collection and the use of their data via prospective informed consent'"
+- id: slot-037
+  verdict: bundle_supports
+  evidence: "line 2028: 'Satrajit Ghosh, PhD (Massachusetts Institute of Technology)'; also line 629 (consortium list with MIT, Boston, MA)"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "line 2024: 'The dataset can be used for AI model pretraining, fine-tuning, benchmarking, or validation'"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "lines 4831 (doi = {10.13026/8xbn-nq66}) and 5137-5138 ('DOI (version 3.1.0): https://doi.org/10.13026/8xbn-nq66'); bare-DOI form per the doi slot's own pattern"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "line 4950: 'a unique identifier for the recording session (session_id)' - session_id is stated to be an identifier"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "lines 5139-5140: 'DOI (latest version): https://doi.org/10.13026/37yb-1t42', recorded as the doi: CURIE"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "line 1938: 'All raw voice data was removed, as this data has the potential to cause individual re-identification or to be used for illicit or unauthorized purposes'"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "line 2233: 'converted to the Brain Imaging Data Structure (BIDS)'; line 2230 names v1.9.0 - BIDS is the normalized DataStandardEnum term for the standard the sources name"
+- id: slot-044
+  verdict: exempt_by_nature
+  evidence: "bias_type is a BiasTypeEnum token (representation_bias is a schema permissible value) that no bundle passage can state; the categorized fact is at line 2055: 'The data is not representative because it was collected at a limited number of geographic locations'"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "line 2143 gives https://github.com/sensein/senselab; lines 2472-2473: 'SenseLab: processing audio files for research tasks'"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "line 2022: 'facilitate the use of voice as a non-invasive, cost-effective biomarker for the screening, diagnosis, and monitoring of a wide range of health conditions'"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "line 2028 names 'Anaïs Rameau, MD, MPhil (Weill Cornell Medicine)' among lead investigators; also lines 2923, 3063"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "line 2086: 'The dataset includes socioeconomic and health information.' - verbatim"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "line 2026: 'the dataset is not to be used... b) for any purpose that could foreseeably cause harm or stigmatization to research participants, their families, communities, or specific populations'"
+- id: slot-050
+  verdict: bundle_supports
+  evidence: "lines 2454-2459 (direct and indirect identifiers, sensitive fields removed; sensitive REDCap fields removed), line 4927 (HIPAA Safe Harbor identifiers removed), line 1938 (all raw voice data removed) - each element of the composite is stated"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "line 3574 'Restricted Access' and line 5169 'This is a restricted-access resource' state the access class the enum value records"
+- id: slot-052
+  verdict: bundle_supports
+  evidence: "lines 1927-1928 (HIPAA de-identification rules applied), line 2727 (NIH Strides partners with pre-negotiated contracts for data privacy and HIPAA protection), lines 1917-1922 (not a drug study, not a device study, no data monitoring committee)"
+- id: slot-053
+  verdict: still_supported
+  evidence: "receipted passage line 1256 'Principal investigator: BENSOUSSAN, YAEL EMILIE'; the reshaped location (full record line 71) reads 'principal_investigator: Yael Bensoussan' - the same person, meaning preserved. The shape (name string in a Person-ranged slot) is judged under rule-08, not here"
+- id: slot-054
+  verdict: still_supported
+  evidence: "receipted passage line 629 lists consortium members with affiliations (Bensoussan/USF, Elemento/Weill Cornell...); after the entry's removal the same facts survive in created_by 'Bridge2AI-Voice Consortium' and in creators[0]/[1] with matching affiliations, and the contributor-count fact in source_caveats ('over 120 contributors')"
+- id: slot-055
+  verdict: still_supported
+  evidence: "receipted passages lines 2479-2549 (Table 4 scores); the reshaped locations carry the same figures - description tail: FAIRness 100, provenance 100, characterization 80, pre-model explainability 100, ethics 100, sustainability 50, computability 75 (lines 2483/2493/2503/2515/2523/2533/2543); known_limitations[5] names exactly the four zero-scored criteria (2511 Data Quality 2.e, 2535 Domain-appropriate 5.b, 2539 Associated 5.d, 2549 Contextualized 6.d)"
+- id: rule-01
+  verdict: followed
+  evidence: "every sampled receiptless value resolves to bundle text (e.g. sensitive_elements[2].sensitivity_details verbatim at line 2086; latest_version_doi at 5140) and the record omits rather than guesses - no download_url invented (distribution_formats notes say why), external_resources[4] carries no URL because the bundle gives none"
+- id: rule-02
+  verdict: followed
+  evidence: "source_caveats (full record lines 982-1006) records the counts disagreement (~61,937 vs per-feature counts), five grant-number renderings, three consortium-size statements, the 30,000-vs-10,000 enrollment target, and two name-spelling conflicts; collection_timeframes[0].source_caveats records the 12-month vs four-year tension without merging"
+- id: rule-03
+  verdict: followed
+  evidence: "one referent held throughout: the adult PhysioNet release pinned at 3.1.0 (id doi:10.13026/8xbn-nq66, line 15), the pediatric release expressed as related_datasets[0] exactly as the manifest scope declares (express_as: related_datasets); reconciliation report section 1 states the identity choice"
+- id: rule-04
+  verdict: followed
+  evidence: "population tracks the evidence, not a target: variables holds only the four columns the PhysioNet pages document (participant_id, session_id, task_name, n_frames, lines 4950), splits records that none are provided (line 2019), and thin evidence yields thin entries (external_resources[4])"
+- id: rule-05
+  verdict: followed
+  evidence: "fifteen Creator objects, one per named investigator (full record lines 70-117); five purposes, five prohibited_uses, four addressing_gaps each one entity per object. Borderline, not a collapse of entities: distribution_dates[0].release_dates packs six dated releases into one string element"
+- id: rule-06
+  verdict: followed
+  evidence: "no slot is populated with a pointer or a pending-statement in place of an answer; download_url is omitted and the absence explained in notes (a residual field), and each external_resources entry describes the resource itself"
+- id: rule-07
+  verdict: followed
+  evidence: "evidence lands in the field it answers: release cadence in updates.frequency, retention in retention_limit, access gating in data_governance.access_review_process and raw_data_sources[0].access_details rather than in distribution_formats' format"
+- id: rule-08
+  verdict: violated
+  evidence: "creators[*].principal_investigator is declared range Person (declared fields id/name/orcid/affiliation; Person.id is a uriorcurie identifier), but Phase 4 deliberately flattened all fifteen from {name: ...} to bare name strings (full record line 71 'principal_investigator: Yael Bensoussan'; reconciliation report section 5 records the conversion). The declared field that was populated (name) is now abandoned, and the name string sits where a Person reference (uriorcurie id) belongs"
+- id: rule-09
+  verdict: followed
+  evidence: "every uriorcurie slot holds a CURIE, not a resolver URL: id doi:10.13026/8xbn-nq66 (line 15), related_datasets targets doi:10.13026/h995-bt35 and doi:10.57764/qb6h-em84 (lines 965, 974), latest_version_doi doi:10.13026/37yb-1t42 (line 889), data_topic/data_substrate B2AI CURIEs; the doi slot holds the bare DOI (line 51) and access_urls (range uri) hold URLs"
+- id: rule-10
+  verdict: followed
+  evidence: "every world-facing identifier is in the bundle: 10.13026/8xbn-nq66 (line 4831), 37yb-1t42 (5140), h995-bt35 (5494), qb6h-em84 (3781), 249v-w155 (3621), k81f-qr68 (4162), mf9s-5r03 (5659), zenodo 10.5281/zenodo.12760724 (1447) and 13834653 (5727), RRID:SCR_007345 inside the quoted citation (4820-4823). B2AI_TOPIC/B2AI_SUBSTRATE local parts are schema-directed vocabulary (values_from B2AI_TOPIC), noted in notes"
+- id: rule-11
+  verdict: not_applicable
+  evidence: "the pack's id_slots block lists no entries: the record mints no urn and no fragment; its own id is the evidence-attested DOI CURIE (line 15)"
+- id: rule-12
+  verdict: followed
+  evidence: "American English throughout ('standardized', 'organized', 'license', 'authorized', 'de-identification'); a grep for licence/organisation/standardise/behaviour/colour/analyse finds none; the quoted title keeps its source form 'ethically-sourced' (line 17)"
+- id: rule-13
+  verdict: followed
+  evidence: "the manifest's source_priority ranks data resource (PhysioNet pages) tier 1 above documentation tier 2 and publications tier 3; the record prefers PhysioNet and says so with both sides recorded (content_warnings[0].source_caveats, the counts sentence in source_caveats); where sources share rank the caveat leaves it unsettled (collection_timeframes[0].source_caveats: 'the sources do not settle whether the 12 months are a subset')"
+- id: rule-14
+  verdict: not_applicable
+  evidence: "no fragment identifiers exist to judge (id_slots entries empty); parts such as the phenotype folder and feature files are described in prose, not labeled"
+- id: rule-15
+  verdict: violated
+  evidence: "the receipt was emitted, well-formed and validated (bundle_md5 dcd71717... matches, 22/22 chunks reviewed, statuses from the closed set), but it covers 120 of 287 slot values: the rule says a value with no receipt is one the record must not carry, and many receiptless values are bundle-supplied and untouched by later phases - sensitive_elements[2]/[3] (lines 2086, 1938), creators[2..14] (line 2028), tasks[1]/[2] (lines 2024, 2022), variables[1] (line 4950). Phase-4 rewrites (doi, id) legitimately lack a receipt route (#742), but the phase-1 receipt under-covered the record it accompanied"
+- id: rule-16
+  verdict: followed
+  evidence: "no object sits in a scalar-ranged slot: grantor (range string) holds 'National Institutes of Health Common Fund' (line 119), instance_type holds a string, created_by holds the consortium name; the one scalar-vs-class defect runs the other way and is recorded under rule-08"
+notes: >-
+  Instrument findings, not verdicts: (1) the receipt validator already reports the six
+  adjacent/elsewhere snippet attributions I confirmed (slot-004 c002->c003 line 524,
+  slot-006 c014->c013 lines 3453-3457, slot-012 c013 snippet verbatim at line 2201 in
+  c009); support holds in every case. (2) Receipt coverage is inconsistent in kind:
+  sensitive_elements[1].sensitivity_details is receipted while the identically shaped
+  [2] and [3] are not - this is the substance of the rule-15 verdict. (3) The
+  B2AI_TOPIC:36 / B2AI_TOPIC:25 / B2AI_SUBSTRATE:30 local parts cannot be verified
+  against the bundle or the schema (the registry behind the schema-declared prefix is
+  external); if the registry resolves them to non-audio concepts the values would be
+  wrong in a way this review cannot detect. (4) The reconciliation report itself states
+  that the schema declares principal_investigator with range Person and then records
+  the flattening to a scalar as a normalization - the rule-08 violation was introduced
+  deliberately in Phase 4, not by the generation phase.

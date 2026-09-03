@@ -751,3 +751,43 @@ canary:
     against the same 2026-08-22c baseline the batch used, with the correct pair/report
     key mapping.'
   recorded_by: d4d receipts check + canary.verdict, offline (#891)
+review:
+  checked: true
+  items_total: 78
+  items_answered: 78
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 4
+    slot_receipted:
+      supported: 21
+      weak: 4
+    slot_receiptless:
+      inferred: 2
+      bundle_supports: 19
+      exempt_by_nature: 4
+    slot_reshaped:
+      still_supported: 7
+    rule:
+      violated: 3
+      followed: 12
+      not_applicable: 1
+    pair_warning:
+      consistent: 1
+  adverse: 9
+  cannot_tell: 0
+  findings: []
+  summary: items 78/78 answered · 9 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5
+    reviewed_at: '2026-09-03T00:07:20Z'
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_review_pack.yaml
+      sha256: 3a41faaa87c85038c074c4285351578a12fb1637c348cfe16cfe2509b928797d
+    review:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_review.yaml
+      sha256: 37de592ba181d0201f5b4e326023ad69a0cc1dbe1bb324e0257709f88971043a
+  recorded_by: d4d review check

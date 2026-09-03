@@ -1,0 +1,577 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-09-02T20:32:42+00:00'
+run:
+  label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+  project: CHORUS
+  method: claudecode_agent
+  arm: baseline
+  replicate: 2
+model:
+  generation_method: schema-grounded API, four model phases with the core derived
+    from the full record (#694)
+  agent_runtime: Claude API (direct)
+  provider: LBL CBORG (proxy to Anthropic)
+  base_url: https://api.cborg.lbl.gov
+  model: claude-opus-5
+  max_tokens_by_phase:
+    full: 128000
+    reconcile_full: 96000
+    repair_full: 96000
+    audit: 24000
+    report: 24000
+  context:
+    peak_request_tokens: 76811
+    peak_phase: report
+    peak_basis: 'observed: input + cache_read + cache_write of the largest request'
+    limit_tokens: null
+    limit_basis: not stated by the route and not returned by the provider; headroom
+      cannot be computed from this record
+  temperature: null
+  temperature_basis: not applicable to this model
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: src/download/prompts/d4d_generic_arm_prompt_v7.md
+    sha256: 08a26ae430cc7d145a6906c3457d5deaeac499d3d3be3edf965718f674d43fbf
+    bytes: 13203
+    exists: true
+  request:
+    sha256: 27a6de5035f42e44744ac89f0b24a3ec28dd1d2590b2b0d48b12b561122f5e23
+    bytes: 12420
+    note: the instruction as sent, after substitution; the files above are what it
+      was built from
+    spec:
+      condition: generic_v7
+      arm: BASELINE (input documents only)
+      manifest_line: '# Source manifest: data/preprocessed/source_manifest.yaml'
+      run_date: '2026-09-02'
+      runtime: Claude API (direct)
+      provider: LBL CBORG (proxy to Anthropic)
+      bundle: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+  resolved:
+    sha256: 27a6de5035f42e44744ac89f0b24a3ec28dd1d2590b2b0d48b12b561122f5e23
+    bytes: 12420
+  assembly:
+    sha256: d2f014803f68a7660a3d2b47f8682116725eaac57852c02baeb4939401f1756b
+    layout: schema digest, input bundle, source ranking, declared naming, arm prompt,
+      carried artifacts, phase instruction; core derived from the full record, not
+      generated (#694); audit and reconcile_full address the full record only, the
+      core being its projection (#705); under a receipt condition the bundle carries
+      [cNNN] chunk markers and the full phase instruction asks for the coverage receipt
+      after the record (#710)
+playbooks:
+  hash_algorithm: sha256
+  files:
+  - path: .claude/commands/d4d-full-core.md
+    sha256: 9552cd7e5fca3576d647e467820849aa3b35f73664e2e065c2970db43f9d8313
+    bytes: 46172
+    exists: true
+  - path: .claude/commands/d4d-agent.md
+    sha256: a9a56cd791a6a4876e4dd756011460d6c7a24f634c928af8b0e2fc3057d6bc0d
+    bytes: 12138
+    exists: true
+  - path: .claude/agents/d4d-provenance-guard.md
+    sha256: 2b8889f4f698847294eb1c017f4bf095da3f0d919dc5903b984270df8f1c8278
+    bytes: 6910
+    exists: true
+  - path: .claude/commands/d4d-uniform-rules.md
+    sha256: 34b47643a3de8b41a2cf4074219f04cdb8b817b4c80fac7932bcfb163570aec7
+    bytes: 8330
+    exists: true
+  consumed: false
+  consumed_basis: this runtime renders a condition prompt and sends nothing else,
+    so these were not read; they are hashed so an unchanged hash shows that (#545)
+phase_log: null
+schema:
+  declared_version: 2.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+  merged_schema_carries_version: true
+  digest_md5: 580992ed7037762157c110fc9e671c81
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: b01b7d60374f54f372e765b094c3b86f977e0f27
+  commit_short: b01b7d60
+  branch: main
+  dirty: true
+  dirty_file_count: 6
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+  chunks:
+    path: data/preprocessed/chunks/CHORUS_chunks.yaml
+    sha256: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
+    rule:
+      version: 2
+      unit: source-document
+      boundary: 'FILE: line followed by PATH: or ROLE:'
+      preamble: own-chunk
+      split: line-window
+      max_lines: 400
+      max_bytes: 48000
+    chunk_count: 8
+  receipt_expected: true
+  bundle_md5: 9b2ef4b65d67957f79362266cab0bc7a
+  bundle_bytes: 35920
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: 6c71e8d26497a5808e09e2edd19c1ba4
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml
+    bytes: 28444
+    slots: 48
+  core:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d_core.yaml
+    bytes: 27205
+    slots: 45
+  report:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_reconciliation.md
+    bytes: 13469
+    slots: null
+companions:
+  reasoning_log:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_reasoning.jsonl
+    present: true
+    md5: fc71e59189b6318691789da87918af63
+    note: one JSON line per phase; absent for a runtime that cannot report its own
+      token accounting (#400)
+  telemetry_report:
+    path: data/run_telemetry/2026-09-01_claude-opus-5-api-generic-v7.yaml
+    present: false
+    note: derived from records like this one, per label rather than per run; `d4d
+      runs telemetry` writes it
+  prompt_registry:
+    path: src/download/prompts/canonical_hashes.yaml
+    present: true
+    md5: dd0cd5fd0dee6e95a2d2104cad22ac0d
+    note: the pins the recorded prompt hashes were judged against
+  digest_inventory:
+    path: src/data_sheets_schema/schema/digest_inventory.yaml
+    present: true
+    md5: 25da69bd7533b1f1b950d15a9589b7e3
+    note: digest to slot inventory, which decides whether a slot predates a pair
+unrecoverable: null
+unverified:
+- field: model.reasoning_effort
+  value: null
+  reason: 'no effort is recorded: the header carries none and the route ''claude-opus-5''
+    exposes no effort ladder, so the provider default applied. That is not a value
+    this run chose, and it is not comparable with a run that named one.'
+- field: model.temperature
+  value: null
+  reason: 'claude-opus-5 rejects `temperature` (400: deprecated for this model), so
+    the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config is not
+    sent and does not apply. Sampling for this model family is selected by model-name
+    suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+notes:
+- 'Generated via Claude API (direct). claude-opus-5 rejects `temperature` (400: deprecated
+  for this model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config
+  is not sent and does not apply. Sampling for this model family is selected by model-name
+  suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+- Model settings read from .github/workflows/d4d_assistant_deterministic.config.
+- 'Endpoint: LBL CBORG (proxy to Anthropic) at https://api.cborg.lbl.gov.'
+api_usage:
+- phase: full
+  attempt: 1
+  started_at: '2026-09-02T20:14:29+00:00'
+  seconds: 442.049
+  input_tokens: 5214
+  output_tokens: 40186
+  cache_read: 15921
+  cache_write: 14223
+  max_tokens: 128000
+  stop_reason: end_turn
+- phase: audit
+  attempt: 1
+  started_at: '2026-09-02T20:21:55+00:00'
+  seconds: 100.963
+  input_tokens: 14670
+  output_tokens: 7892
+  cache_read: 0
+  cache_write: 30144
+  max_tokens: 24000
+  stop_reason: end_turn
+- phase: reconcile_full
+  attempt: 1
+  started_at: '2026-09-02T20:23:36+00:00'
+  seconds: 481.447
+  input_tokens: 17880
+  output_tokens: 14270
+  cache_read: 0
+  cache_write: 30144
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: report
+  attempt: 1
+  started_at: '2026-09-02T20:31:45+00:00'
+  seconds: 56.744
+  input_tokens: 46667
+  output_tokens: 4792
+  cache_read: 30144
+  cache_write: 0
+  max_tokens: 24000
+  stop_reason: end_turn
+- phase: repair_full
+  attempt: 1
+  started_at: '2026-09-02T20:32:53+00:00'
+  seconds: 95.632
+  input_tokens: 10557
+  output_tokens: 10602
+  cache_read: 0
+  cache_write: 15971
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: report_after_repair
+  attempt: 1
+  input_tokens: 46627
+  output_tokens: 3964
+  cache_read: 30144
+  cache_write: 0
+  stop_reason: end_turn
+phases_skipped: null
+repair:
+- phase: repair_full
+  round: 1
+  outcome: applied
+  findings: 3
+- phase: repair_core
+  round: 1
+  outcome: re-derived from the repaired full record; validates
+report_regenerated_after_repair:
+  changed:
+  - core
+  - full
+  why: repair rewrote a record after the report was written; a report describing bytes
+    that no longer exist is the artifact a reviewer reads instead of the diff
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml
+      md5: 4ad0d3e9045ce918c7edfe6845215449
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d_core.yaml
+      md5: 0f66f869ea75b3c2a15b6ad03ea4ee9c
+  schema:
+    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
+    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+  recorded_by: api_runner.execute
+core_derivation:
+  derived: true
+  rule: shared slots copied from the full record; resources projected by id with full-only
+    nested slots dropped; distributions built from file_collections (one per collection
+    over the shared slots, total_bytes as bytes) and from each collection's File entries
+    (one per file over the slots CoreDistribution and File share); dialect from the
+    File entries when they agree on one value, else absent
+  from:
+    path: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml
+    md5: 4ad0d3e9045ce918c7edfe6845215449
+  identity_slots: 79
+  projected_slots:
+  - resources
+  distribution_slots:
+    collection:
+    - compression
+    - conforms_to
+    - conforms_to_standard
+    - description
+    - id
+    - name
+    - notes
+    - path
+    - source_caveats
+    file:
+    - bytes
+    - compression
+    - conforms_to
+    - conforms_to_standard
+    - description
+    - encoding
+    - format
+    - hash
+    - id
+    - md5
+    - media_type
+    - name
+    - notes
+    - path
+    - sha256
+    - source_caveats
+  conditional:
+    dialect: derived only when every File-level dialect in the full record agrees
+      on one value
+  phase: repair_core
+pair_consistency:
+  ran: true
+  consistent: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml
+      md5: 4ad0d3e9045ce918c7edfe6845215449
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d_core.yaml
+      md5: 0f66f869ea75b3c2a15b6ad03ea4ee9c
+  errors: 0
+  warnings: 0
+  identity_slots: 79
+  schema_moved: false
+  findings: []
+  findings_truncated: null
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_reconciliation.md
+      md5: 8f3e0c4f4c6b0f8b5b9a3a338074b003
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml
+      md5: 4ad0d3e9045ce918c7edfe6845215449
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d_core.yaml
+      md5: 0f66f869ea75b3c2a15b6ad03ea4ee9c
+  schema:
+    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
+    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+grounding:
+  checked: true
+  counts:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+      md5: 9b2ef4b65d67957f79362266cab0bc7a
+form:
+  checked: true
+  records:
+  - data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml
+  - data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d_core.yaml
+  undeclared_prefixes: {}
+  undeclared_prefix_occurrences: 0
+  british_spellings: 0
+  organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
+receipts:
+  expected: true
+  non_checks:
+  - that a chunk marked nothing_relevant truly held nothing for the record — a judgement;
+    sample by chunk id in review
+  - that a verified snippet supports the value it is attached to — a snippet can be
+    real and irrelevant; sample by slot path in review
+  checked: true
+  chunks:
+    total: 8
+    reviewed: 8
+    unreviewed: []
+    by_status:
+      extracted: 7
+      redundant_with: 0
+      nothing_relevant: 1
+      duplicate_of: 0
+  snippets:
+    total: 100
+    verified: 99
+    linewrap_joined: 0
+    adjacent: 1
+    elsewhere: 0
+    spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
+    mismatched: 0
+    unchecked: 0
+    no_value_overlap: 1
+    no_value_overlap_sample:
+    - chunk: c004
+      slot: creators[5].principal_investigator.name
+      snippet: 'Jared
+
+        Houghtaling'
+    entry_single_leaf: 0
+    entry_single_leaf_sample: []
+  slots:
+    populated: 168
+    exempt: 26
+    receiptable: 142
+    with_receipt: 48
+    without_receipt:
+    - name
+    - page
+    - status
+    - keywords
+    - conforms_to
+    - conforms_to_standard
+    - created_by
+    - creators[0].principal_investigator
+    - creators[1].affiliations[0].name
+    - creators[2].affiliations[0].name
+    - creators[3].affiliations[0].name
+    - creators[4].affiliations[0].name
+    - creators[5].affiliations[0].name
+    - funders[0].grants[0].id
+    - funders[0].grants[0].name
+    - funders[0].grants[0].description
+    - tasks[0].response
+    - tasks[1].response
+    - tasks[2].response
+    - tasks[3].response
+    - instances[0].instance_type
+    - instances[0].data_topic
+    - instances[1].data_topic
+    - instances[2].instance_type
+    - instances[2].data_topic
+    - instances[2].data_substrate
+    - instances[3].data_topic
+    - instances[3].data_substrate
+    - instances[4].instance_type
+    - instances[4].data_topic
+    - instances[4].data_substrate
+    - instances[5].instance_type
+    - instances[5].data_topic
+    - instances[5].data_substrate
+    - subpopulations[0].subpopulation_elements_present
+    - subpopulations[0].identification
+    - collection_mechanisms[1].mechanism_details
+    - collection_mechanisms[2].mechanism_details
+    - collection_mechanisms[3].mechanism_details
+    - collection_mechanisms[4].mechanism_details
+    - data_collectors[0].role
+    - data_collectors[1].collector_details
+    - data_collectors[1].role
+    - direct_collection[0].is_direct
+    - direct_collection[0].collection_details
+    - sampling_strategies[0].strategies
+    - raw_data_sources[0].source_description
+    - raw_data_sources[0].source_type
+    - raw_data_sources[1].source_description
+    - raw_data_sources[1].source_type
+    without_receipt_truncated: 44
+    never_receipted: 82
+    added_after_receipt: 12
+    receipt_paths: 74
+    unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    reshaped_by_reconcile:
+    - creators[0].principal_investigator.name
+    - creators[1].principal_investigator.name
+    - creators[1].source_caveats
+    - creators[2].principal_investigator.name
+    - creators[3].principal_investigator.name
+    - creators[4].principal_investigator.name
+    - creators[5].principal_investigator.name
+    - data_governance.committee_members[0].id
+    - data_governance.committee_members[1].name
+    - notes
+    - preprocessing_strategies[4].preprocessing_details
+    - sampling_strategies[0].strategies[0]
+    - sampling_strategies[0].strategies[1]
+    receipts_to_removed_values: 13
+  findings:
+  - kind: snippet_adjacent_chunk
+    chunk: c008
+    found_in:
+    - c007
+    slot: license_and_use_terms.source_caveats
+    snippet: Chorus_SOP Public
+  findings_truncated: null
+  findings_gated: 0
+  summary: chunks 8/8 reviewed · snippets 99/100 verified (1 in an adjacent chunk)
+    (1 bearing on no token of their value) · slots 48/142 with a receipt (82 never
+    receipted, 12 added after the receipt) (26 exempt) · 13 receipt path(s) reshaped
+    by reconcile
+  artifacts:
+    receipt:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_coverage_receipt.yaml
+      sha256: 9c93ca4fa646371bee4d5a514d21cb59eb339c57d7453df084b6e82081320364
+    manifest:
+      path: data/preprocessed/chunks/CHORUS_chunks.yaml
+      sha256: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
+intermediates:
+- path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/CHORUS_audit.json
+  sha256: 89c3f72cea40ea6d07feb672a092a6d3d8356de147e62a1cfba00bda54c425f7
+- path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/CHORUS_core.yaml
+  sha256: 9beb719c3e4eda856c402bca422176c008ac54099a9a486ac8271825d2831cb3
+- path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/CHORUS_coverage_receipt.yaml
+  sha256: 9c93ca4fa646371bee4d5a514d21cb59eb339c57d7453df084b6e82081320364
+- path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/CHORUS_full.yaml
+  sha256: cd9b8dd91479503eece90ef3a89ad6cd03429ba8d10516c4bc540bd0f7eab9e9
+- path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/CHORUS_reconcile_core.yaml
+  sha256: 8f373e0dd90a340578c73641ceb24bf5830eab0670006e947a0997d0304f8331
+- path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/CHORUS_reconcile_full.yaml
+  sha256: e3cce49d5e5fd423e65f7b868161eb758532a97812234c1ee91503ddb90a31b6
+- path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/CHORUS_repair_full_r1.yaml
+  sha256: d96b8b8fb1dbc2748fc5cfcab49aa2eb745a8bcd3c8e83978ca4226b93922379
+- path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/CHORUS_report.md
+  sha256: f6ce55db0ef617ddfefb9e11694963a391d301137ca2bbbd2e5c5f8b1818dd1f
+review:
+  checked: true
+  items_total: 80
+  items_answered: 80
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 1
+    slot_receipted:
+      supported: 20
+      misread: 3
+      weak: 2
+    slot_receiptless:
+      bundle_supports: 23
+      inferred: 2
+    slot_reshaped:
+      still_supported: 13
+    rule:
+      violated: 4
+      followed: 10
+      not_applicable: 2
+  adverse: 11
+  cannot_tell: 0
+  findings: []
+  summary: items 80/80 answered · 11 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5
+    reviewed_at: 2026-09-02 23:06:05+00:00
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_review_pack.yaml
+      sha256: 0b853c5d8e0904448aefb75950f1ecdec6d4fee66129f196d5a79cd0aa969701
+    review:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_review.yaml
+      sha256: d78792679bf21f4aedf13a43e892e48ea988050892f2e368e9f93c386df5dbc2
+  recorded_by: d4d review check

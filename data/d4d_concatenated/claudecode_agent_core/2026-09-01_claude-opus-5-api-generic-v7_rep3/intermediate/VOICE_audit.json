@@ -1,0 +1,83 @@
+{
+  "findings": [
+    {
+      "severity": "major",
+      "record": "full",
+      "slot": "updates",
+      "issue": "Shape defect. The schema digest declares `updates` as a single-valued slot of range UpdatePlan (no [many] marker), but the record emits it as a YAML list (`updates:` followed by `- frequency: ...`). Every other single-valued object slot in the record (data_governance, version_access, retention_limit, extension_mechanism, license_and_use_terms, ip_restrictions, regulatory_restrictions, is_deidentified, human_subject_research, at_risk_populations) is correctly emitted as a mapping; `updates` is the lone exception and will fail validation as an array where an object is required."
+    },
+    {
+      "severity": "major",
+      "record": "full",
+      "slot": "creators",
+      "issue": "Supported omission. The bundle amply attests dataset authorship — the PhysioNet v3.1.0 author list names Bensoussan, Sigaras, Rameau, Elemento, Powell, Dorr, Payne, Ravitsky, Bélisle-Pipon, Bahr, Watts, Bolser, Siu, Lerner-Ellis, Rudzicz and Ghosh among many others, and the project documentation names the two co-principal investigators with their institutions (Yaël Bensoussan, USF Health Morsani College of Medicine; Olivier Elemento, Weill Cornell Medicine) and lead investigators with affiliations. The `creators` slot (Creator[], with declared `affiliations`, `principal_investigator` and `credit_roles`) is left empty and the content is instead packed into the free-text `created_by` string. This is the pattern the guidance forbids: structured slots first, prose only for what structure cannot hold."
+    },
+    {
+      "severity": "moderate",
+      "record": "full",
+      "slot": "content_warnings[0].warnings[0]",
+      "issue": "Unsupported value. The warning that phenotype tables 'contain self-reported responses to instruments covering depression, suicidal ideation, anxiety, post-traumatic stress, substance use and psychiatric history, which some users may find distressing' is not attested. The bundle's healthsheet answers the offensive/safety-risk question solely with reference to free-speech transcription; it nowhere characterizes questionnaire content as a content warning. 'Suicidal ideation' in particular is supplied from outside knowledge of PHQ-9 item content — the bundle names PHQ-9 only as a validated instrument and never enumerates its items."
+    },
+    {
+      "severity": "moderate",
+      "record": "full",
+      "slot": "funders[0]",
+      "issue": "Structure under-used. FundingMechanism declares `grants` with range Grant[], but the record places all award identifiers (OT2OD032720, 3OT2OD032720-01S1, 1OT2OD032720-01, 3OT2OD032720-01S3, application ID 11376382, award amount 4,660,942 USD, project period 2022-09-01 to 2026-11-30) into the `notes` free-text field. These are exactly the discrete grant facts the `grants` structure exists to carry."
+    },
+    {
+      "severity": "moderate",
+      "record": "full",
+      "slot": "file_collections",
+      "issue": "Supported omission. The bundle supplies explicit, named directory trees for the v3.1.0 release — a `features` folder (nine named Parquet files plus static_features.tsv and audio_quality_metrics.tsv), a `metadata` folder, and a `phenotype` folder with confounders/demographics/diagnosis/enrollment/questionnaire/task subfolders and every TSV/JSON pair listed by name — as well as the BIDS-compliant audio layout. The FileCollection slot (with `collection_type`, `path`, `file_count`) is populated nowhere; the structure is described only in prose inside `description` and `preprocessing_strategies`."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "instances[1].counts",
+      "issue": "Inferred value. 32,522 is stated in the bundle as the record count for torchaudio_pitch.parquet specifically, not as a total number of recordings in v3.1.0. The record adopts the largest per-feature count as the instance total. The accompanying `notes` discloses the per-feature variation, which mitigates but does not remove the inference; the bundle gives no attested recording total for this version."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "external_resources[6]",
+      "issue": "Slot misuse. The final ExternalResource entry states 'The dataset itself is self-contained and does not rely on external resources for interpretation' with `archival: false`. This is a negative statement about the absence of external dependencies, not an external resource; it occupies an ExternalResource object without naming one. The healthsheet's 'It is self-contained' answer belongs in prose (description or notes), not as a resource entry."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "labeling_strategies[0].inter_annotator_agreement",
+      "issue": "Inferred value. 'Not assessed' is a conclusion the record draws; the bundle states only 'Single labeler per data' and 'How many labelers provide a label per instance? 1'. The absence of a second labeler makes agreement unmeasurable, but the bundle never states that agreement was not assessed."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "data_governance.accountable_organization",
+      "issue": "Supported omission. The Data Transfer and Use Agreement names the University of South Florida Board of Trustees as the provider institution, and the healthsheet names the NIH as supporting the dataset. `accountable_organization` (range Organization) is left empty while this content sits in the `stewardship_roles` prose list."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "errata / updates.update_details",
+      "issue": "Internal tension. `updates.update_details` states 'There is no separate erratum document; a changelog for each dataset version is published online with the dataset metadata', while the `errata` slot is populated with three entries drawn from the PhysioNet release notes. Both statements are individually sourced, but the record does not signal that the errata entries are derived from changelog text rather than from an erratum, leaving the two slots reading as contradictory."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "distribution_dates[0].release_dates",
+      "issue": "Incomplete against the bundle. The healthsheet states the v1.0 dataset 'was published and made available at the end of November, 2024', and the PhysioNet references cite a Health Data Nexus v1.0 (DOI 10.57764/qb6h-em84). The release_dates list begins at 2025-01-17 (v1.1) and omits the v1.0 release, although v1.0 is acknowledged in `version_access.versions_available` and `related_datasets`."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "external_resources[5].archival",
+      "issue": "Inferred value. `archival: true` is asserted for the Interspeech 2024 protocol publication on the basis of its ISCA archive URL. The bundle provides the URL but makes no statement about archival guarantees for it; the healthsheet answers the external-resource permanence questions with 'NA'."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "subsets",
+      "issue": "Supported omission. The bundle's Table 1 defines the disease cohorts (voice disorders, respiratory, neurological/neurodegenerative, mood and psychiatric, controls) as explicit partitions with per-cohort inclusion criteria, exclusion criteria and gold-standard validation methods, and the phenotype/diagnosis folder is organized by condition. `subsets` (DataSubset[]) is unpopulated; cohort structure appears only as prose in `description` and `subpopulations`."
+    }
+  ],
+  "summary": "Thirteen findings against the full record. Two are major: `updates` is emitted as a list although the schema declares it single-valued (a validation-blocking shape defect), and `creators` is omitted entirely despite an extensive attested author list and named co-principal investigators with affiliations, its content displaced into the free-text `created_by` string. Three are moderate: an unattested content warning about questionnaire distress and suicidal ideation, where the bundle attributes content risk only to free-speech transcription; grant identifiers packed into FundingMechanism `notes` rather than the declared `grants` structure; and omission of `file_collections` despite explicit named directory trees in the bundle. The remaining eight are minor — an instance count taken from the largest per-feature total rather than an attested recording total, a non-resource statement occupying an ExternalResource object, two small inferences (inter-annotator agreement 'not assessed', archival status of a publication), an unpopulated `accountable_organization`, a tension between `errata` and `updates.update_details`, a missing v1.0 release date, and omission of `subsets` despite well-defined cohort partitions. Referent selection (the adult v3.1.0 PhysioNet release), version/DOI handling, enum usage across DatasetBias, DatasetLimitation, DatasetRelationship, LicenseAndUseTerms and ExportControlRegulatoryRestrictions, CURIE-versus-URI discipline in `doi`/`id`/`access_urls`, required-key satisfaction on RawDataSource and DatasetRelationship, and source-conflict handling in `source_caveats` (v3.1.0 over v3.0.0; documentation and IRB co-ranked on the enrollment target) are all sound and generate no findings."
+}
