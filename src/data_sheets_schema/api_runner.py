@@ -601,6 +601,9 @@ PHASE_INSTRUCTIONS = {
         "then `description`, with `notes` last and only for content "
         "`description` cannot hold; evidence commentary in `source_caveats` "
         "— never an invented key. Output only the YAML."),
+    # The four "also flag" classes are v8 plan step E2 (PR #928). This
+    # instruction is shared by every condition, so adding them moved every
+    # condition's assembly digest — one re-baseline, registered in the plan.
     "audit": (
         "Phase 3. Audit the FULL record against the declared bundle and the "
         "evidence boundary. The core record supplied above is a projection "
@@ -613,14 +616,14 @@ PHASE_INSTRUCTIONS = {
         "inconsistency, and any value whose shape does not conform to the "
         "schema digest supplied above — prose where the schema requires a "
         "list, enum values the schema does not define, or source commentary "
-        "embedded inside a name, identifier or affiliation value. Also flag "
-        "(v8 plan step E2): a value that states documentation is absent, "
-        "pending or held elsewhere instead of answering the field; a value "
-        "answering a neighbouring field (an access route in "
-        "`future_guarantees` or `format`, a prohibition where its reason "
-        "belongs); a plan, proposal or earlier release stated as the "
-        "dataset's current state; and a figure computed from other figures "
-        "presented as one a source reported. Output only JSON."),
+        "embedded inside a name, identifier or affiliation value. Also flag: "
+        "a value that states documentation is absent, pending or held "
+        "elsewhere instead of answering the field; a value answering a "
+        "neighbouring field (an access route in `future_guarantees` or "
+        "`format`, a prohibition statement in `prohibition_reason`); a plan, "
+        "proposal or earlier release stated as the dataset's current state; "
+        "and a figure computed from other figures presented as one a source "
+        "reported. Output only JSON."),
     "reconcile_full": (
         "Phase 4a. Apply the audit findings and emit the corrected full "
         "record in its entirety, header block included. The core record "

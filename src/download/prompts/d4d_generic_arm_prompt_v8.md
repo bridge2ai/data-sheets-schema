@@ -248,29 +248,34 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   other class-ranged attribute takes an object carrying the keys the digest
   lists for that class — a `Grant` under `grants` with its `grant_number`, an
   `Organization` under `affiliations`, a `Person` under
-  `principal_investigator` with its `name` and, where the evidence states
-  them, `orcid`, `email` and `affiliation`. The earlier rule about scalar
-  ranges governs scalar ranges only; a reconcile or repair phase must never
-  reduce an object the digest asks for to a string, nor inflate a marked
-  reference into an object, and an audit finding that an object in an
-  object-ranged slot is "the thing, not its identifier" is wrong on its face.
+  `principal_investigator` with its `id`, its `name` and, where the evidence
+  states them, `orcid`, `email` and `affiliation` (itself an object list, as
+  the digest shows). The rule below about scalar ranges governs scalar ranges
+  only; a reconcile or repair phase must never reduce an object the digest
+  asks for to a string, nor inflate a marked reference into an object, and an
+  audit finding that an object in an object-ranged slot is "the thing, not
+  its identifier" is wrong on its face.
 - Before writing a value from a passage, name to yourself what the passage is
   about and when. A plan, a proposal, a protocol's intention or a future
   release is stated as such — in the tense the source uses — or omitted; it
   is never the current state of the dataset. A description of an earlier
   release, an archived version or a superseded file is a fact about that
-  version, not about the referent's current release. A passage under a source
-  the declared bundle names as related-but-distinct describes that other
-  dataset; its facts belong only in `related_datasets`, never in the
-  referent's own slots. The coverage receipt's snippet for a value must come
-  from a passage about the referent, in the present.
+  version, not about the referent's current release. A passage whose subject
+  is another dataset — a companion release, a sibling cohort, a dataset the
+  documents cite — describes that other dataset; its facts belong only in
+  `related_datasets`, never in the referent's own slots. The coverage
+  receipt's snippet for a value comes from a passage about the value's own
+  subject: the referent's current state for its own slots, the other dataset
+  for an entry in `related_datasets`, that version for a statement about an
+  earlier version.
 - A figure the record derives from attested figures — a sum, a difference, a
   fraction, a count — is stated as the record's own computation, with the
   inputs it was computed from named beside it, never as a figure a source
-  reported; a passage cannot receipt an arithmetic result it does not
-  contain. Where the derived figure and a stated total disagree, record both
-  and the difference in `source_caveats`, and do not resolve the disagreement
-  by adjusting either.
+  reported. It is receipted at its own path by the passages that state its
+  inputs — a passage cannot receipt an arithmetic result it does not contain,
+  and the receipt says so by citing the inputs. Where the derived figure and
+  a stated total disagree, record both and the difference in
+  `source_caveats`, and do not resolve the disagreement by adjusting either.
 - Where a slot is a list of objects the bundle states one by one — creators,
   funders, variables, file collections, files — each entry carries its own
   receipt naming the passage that states that entry. A roster receipted by

@@ -146,13 +146,14 @@ to every project:
 - **Name to yourself what a passage is about and when before writing it as
   the referent's current state** (v8, R2): a plan, proposal or future release
   is stated as such or omitted; an earlier release or archived version is a
-  fact about that version; a passage under a related-but-distinct source
+  fact about that version; a passage whose subject is another dataset
   describes that other dataset and belongs only in `related_datasets`. A
-  receipt's snippet comes from a passage about the referent, in the present.
+  receipt's snippet comes from a passage about the value's own subject.
 
 - **A figure the record derives — a sum, difference, fraction, count — is
   stated as the record's own computation with its inputs named, never as a
-  figure a source reported** (v8, R3); a passage cannot receipt an
+  figure a source reported** (v8, R3); it is receipted at its own path by
+  the passages stating its inputs, since a passage cannot receipt an
   arithmetic result it does not contain. Where a derived figure and a stated
   total disagree, record both and the difference in `source_caveats`.
 
