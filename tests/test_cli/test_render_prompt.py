@@ -20,14 +20,17 @@ from pathlib import Path
 from click.testing import CliRunner
 
 from data_sheets_schema.api_runner import RunSpec, resolve_prompt
-from data_sheets_schema.cli.api import api
+from data_sheets_schema.cli.api import ARMS, api
 
 BUNDLE = Path("data/preprocessed/concatenated/VOICE_preprocessed.txt")
 
 
 def _spec(**kw):
+    # The method follows the arm, as the command's own spec does (#690, D6):
+    # `{METHOD}` is substituted into the text, so a hand-pinned method here
+    # would hash a different request from the one the command renders.
     base = dict(project="VOICE", arm="BASELINE (input documents only)",
-                method="claudecode_agent", bundle=BUNDLE,
+                method=ARMS["baseline"][1], bundle=BUNDLE,
                 label="2026-08-10_test_rep1", condition="generic_v3")
     base.update(kw)
     return RunSpec(**base)
