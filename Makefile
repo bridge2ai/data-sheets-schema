@@ -253,8 +253,11 @@ test-modules:
 	done
 	@echo "All D4D module schemas validated successfully!"
 
+# pytest, not `unittest discover`: it is what the merge gate runs locally,
+# and its `--durations` output is how a slow or hanging test is found on a
+# runner that prints nothing until a line of dots completes (#926).
 test-python:
-	$(RUN) python -m unittest discover
+	$(RUN) pytest tests -q -p no:cacheprovider --durations=25
 
 lint:
 	$(RUN) linkml-lint $(SOURCE_SCHEMA_PATH)

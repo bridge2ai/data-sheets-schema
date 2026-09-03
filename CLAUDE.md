@@ -357,7 +357,12 @@ baseline arm no longer saw, for a day, with nothing to detect it.
 
 **One layer up, `d4d runs check` reports bundle drift** (#452): does the file at
 a record's `inputs.bundle_path` still hash to the `bundle_md5` that record
-pinned? Currently **64 records drifted, 12 current, 82 with no hash recorded**.
+pinned? As of 2026-09-03: **136 records drifted, 41 current, 82 with no hash
+recorded** (64/12/82 when #452 was filed; the mojibake repair #874 and the
+docx/accent fixes #921 rewrote every document bundle since). The test that
+guards this no longer pins the count (#910): it asserts that every drifted
+record pins a hash some `bundle_hash_history` event in the source manifest
+names as its `before` — a rewrite nobody recorded there is what fails.
 
 The two checks are mirror images. `audit-bundles` asks whether a *bundle* still
 matches what its inputs produce; this asks whether a *record's declared input*

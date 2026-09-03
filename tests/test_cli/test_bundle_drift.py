@@ -141,19 +141,96 @@ class TestBundleDrift(unittest.TestCase):
         self.assertEqual(self._status()[0], BUNDLE_DRIFTED)
 
 
+MANIFEST = Path("data/preprocessed/source_manifest.yaml")
+
+
+def _history_befores(manifest: Path = MANIFEST) -> set[str]:
+    """Every md5 the manifest's `bundle_hash_history` names as a `before`.
+
+    An `after` is not an acknowledgment of anything: a hash that is only an
+    `after` is a bundle no later event has replaced, and a record pinning it
+    should be `current`. Only a `before` says "this hash was superseded, and
+    here is why".
+    """
+    history = (yaml.safe_load(manifest.read_text(encoding="utf-8")) or {}
+               ).get("bundle_hash_history") or {}
+    found: set[str] = set()
+
+    def walk(node):
+        if isinstance(node, dict):
+            for key, value in node.items():
+                if key == "before" and isinstance(value, str):
+                    found.add(value)
+                else:
+                    walk(value)
+        elif isinstance(node, list):
+            for item in node:
+                walk(item)
+
+    walk(history.get("events") or [])
+    return found
+
+
+def _pinned_md5(method: str, label: str, project: str) -> str:
+    from data_sheets_schema.provenance import record_path_for
+    record = yaml.safe_load(record_path_for(project, method, label)
+                            .read_text(encoding="utf-8")) or {}
+    return str((record.get("inputs") or {}).get("bundle_md5"))
+
+
+class TestWhatTheHistoryExplains(unittest.TestCase):
+    """The invariant's edge: only a `before` acknowledges a drift."""
+
+    def _manifest(self, events):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        path = Path(tmp.name) / "source_manifest.yaml"
+        path.write_text(yaml.safe_dump({"bundle_hash_history":
+                                        {"events": events}}), encoding="utf-8")
+        return path
+
+    def test_a_before_explains_a_drift_and_an_after_does_not(self):
+        path = self._manifest([{"issue": 1, "projects": {
+            "P": {"before": "aaaa", "after": "bbbb"}}}])
+        explained = _history_befores(path)
+        self.assertIn("aaaa", explained)
+        # A record pinning `bbbb` should be current; if it has drifted, the
+        # rewrite that replaced `bbbb` is the unrecorded event.
+        self.assertNotIn("bbbb", explained)
+
+    def test_no_history_explains_nothing(self):
+        self.assertEqual(_history_befores(self._manifest([])), set())
+        empty = self._manifest([])
+        empty.write_text("{}", encoding="utf-8")
+        self.assertEqual(_history_befores(empty), set())
+
+
 @unittest.skipUnless(Path("data/d4d_concatenated").exists(), "corpus absent")
 class TestAgainstTheRealCorpus(unittest.TestCase):
-    def test_the_corpus_drift_is_what_the_issue_measured(self):
-        """64 drifted / 12 current, the figures #452 was filed on.
+    def test_every_drift_is_a_named_event(self):
+        """A corpus-wide input change must be acknowledged, not absorbed —
+        which is the whole defect: #421 and #445 both changed bundles
+        correctly and neither was detected.
 
-        Pinned so the next corpus-wide input change is a visible test failure
-        rather than an unreported absorption — which is the whole defect: #421
-        and #445 both changed bundles correctly and neither was detected.
+        Until #910 this pinned the drift count (64 when #452 was filed, 68
+        after #539), so the next bundle change would fail here and be
+        acknowledged by updating the number. It was: the mojibake repair
+        (#874) moved it to 109 and the docx/accent fixes (#921) to 136, and
+        each time the acknowledgment already existed in a better place — the
+        manifest's `bundle_hash_history`, which names the md5 every event
+        replaced. So the invariant is the history itself: a drifted record
+        pins a hash that some recorded event names as its `before`. A
+        rewrite nobody recorded leaves records pinning a hash no event
+        explains, and that is what fails now; the count is reported, never
+        asserted.
         """
         from data_sheets_schema.runs import discover, is_complete
 
+        explained = _history_befores()
+        self.assertGreater(len(explained), 0, "no bundle_hash_history events")
         counts = {BUNDLE_CURRENT: 0, BUNDLE_DRIFTED: 0,
                   BUNDLE_ABSENT: 0, BUNDLE_UNRECORDED: 0}
+        unexplained = []
         for run in discover():
             # The same filter `d4d runs check` applies. `discover` yields the
             # full and _core methods as separate runs over one provenance
@@ -163,17 +240,19 @@ class TestAgainstTheRealCorpus(unittest.TestCase):
             for project in run.projects:
                 if not is_complete(run.method, run.label, project):
                     continue
-                counts[bundle_drift(run.method, run.label, project)[0]] += 1
-
-        # 64 was the figure #452 was filed on; 68 since 2026-08-12, when the
-        # AI_READI bundle absorbed the release-3.0.0 RO-Crate and the v2.0
-        # licence (#539). Four AI_READI records that still matched now do not.
-        #
-        # The number is pinned rather than computed precisely so that it cannot
-        # grow *silently*: a corpus absorbing an input change is exactly the
-        # event this check exists to report, and updating this line is how that
-        # event gets acknowledged rather than absorbed.
-        self.assertEqual(counts[BUNDLE_DRIFTED] + counts[BUNDLE_ABSENT], 68)
+                status, _reason, declared = bundle_drift_detail(
+                    run.method, run.label, project)
+                counts[status] += 1
+                if status in (BUNDLE_DRIFTED, BUNDLE_ABSENT):
+                    pinned = _pinned_md5(run.method, run.label, project)
+                    if pinned not in explained:
+                        unexplained.append(
+                            f"{run.label} {project}: pins {pinned[:8]} for "
+                            f"{Path(declared).name}, named by no event")
+        self.assertEqual(unexplained, [],
+                         "drifted records whose pinned bundle hash no "
+                         "bundle_hash_history event names as `before` "
+                         f"(counts: {counts})")
         # `current` grows as fresh runs land — 12 when filed, 14 after the
         # 2026-08-11 canaries, which are drift-free by construction. Asserted
         # as a floor rather than a fixed number so a new run does not fail the
