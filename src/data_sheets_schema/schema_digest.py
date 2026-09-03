@@ -337,12 +337,14 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
     # **through an inlined attribute** — `inlined` or `inlined_as_list` —
     # and not through the universal ones (`used_software: Software[]` sits on
     # 64 classes and is stated once as UNIVERSAL_RANGES). An attribute that
-    # is not inlined is a *reference*: `Creator.principal_investigator:
-    # Person` takes a string, and an inline Person object fails validation
-    # (#805, verified with linkml-validate on the #916 review) — rendering
-    # Person under "takes an object … or the record fails validation" would
-    # instruct the invalid form. Deeper than two reproduces the schema and
-    # defeats the digest.
+    # is not inlined — by LinkML's rule, `SchemaView.is_inlined` — is a
+    # *reference* and takes a string; an inline object there fails
+    # validation (verified with linkml-validate on the #916 review, when
+    # `Creator.principal_investigator: Person` was one; #805 inlined the
+    # five Person slots). Rendering a reference's class under "takes an
+    # object … or the record fails validation" would instruct the invalid
+    # form, so its attribute is marked. Deeper than two reproduces the
+    # schema and defeats the digest.
     seen: set[str] = set()
 
     def nested_for(rng: str) -> tuple[NestedClass | None, list[str]]:
@@ -357,17 +359,22 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
             if sub.range:
                 shown = f"{sub.range}[]" if sub.multivalued else str(sub.range)
                 is_class = sv.get_class(str(sub.range)) is not None
-                if is_class and not (sub.inlined or sub.inlined_as_list):
-                    # A class-ranged attribute that is not inlined is a
-                    # reference and takes a string; the object form fails
-                    # validation (#805). Said on the range so that both the
-                    # digest and the judge's view carry it (#486), and so
-                    # the "Object ranges" header's "takes an object" does
-                    # not reach these eight attributes.
+                # LinkML's own rule, not the slot's flags (#927 review): a
+                # class range with no identifier is inlined implicitly —
+                # `Person.affiliation: Organization[]` takes objects even
+                # though the slot declares nothing — and only a class range
+                # WITH an identifier and no `inlined` is a reference, whose
+                # object form fails validation. Said on the range so that
+                # both the digest and the judge's view carry it (#486), and
+                # so the "Object ranges" header's "takes an object" does not
+                # reach a reference. With the five Person slots inlined
+                # (#805) the current schema has no reference attribute; the
+                # marking stays for the next one.
+                inlined = bool(is_class and sv.is_inlined(sub))
+                if is_class and not inlined:
                     shown += " (reference — a string, not an object)"
                 ranges[str(sub.name)] = shown
-                if (is_class and (sub.inlined or sub.inlined_as_list)
-                        and str(sub.name) not in UNIVERSAL_ATTRIBUTES):
+                if inlined and str(sub.name) not in UNIVERSAL_ATTRIBUTES:
                     inlined_ranges.append(str(sub.range))
             if sub.values_from:
                 values_from[str(sub.name)] = [str(v) for v in sub.values_from]

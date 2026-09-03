@@ -355,6 +355,8 @@ class ReferenceAttributes(unittest.TestCase):
             prov, instr = Pack()._run(tmp)
             p = rp.build_pack(prov, instr)
             entries = p["reference_attributes"]["entries"]
-            self.assertIn("Person.affiliation → Organization[] (reference — a string, not an object)", entries)
-            self.assertEqual(len(entries), 3)                                  # #805 inlined the five Person slots
+            # none since #805 inlined the five Person slots and the marking
+            # follows LinkML's own rule (#927 review); the block stays so a
+            # future reference attribute is named to the reviewer
+            self.assertEqual(entries, [])
             self.assertIn("not inlined", p["reference_attributes"]["note"])

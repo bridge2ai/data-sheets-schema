@@ -6533,10 +6533,12 @@ classes:
       principal_investigator:
         name: principal_investigator
         description: 'The key individual (Principal Investigator) responsible for
-          or overseeing dataset creation, as a Person object — their `name`, and where
-          the evidence states them `orcid`, `email` and `affiliation` — never a bare
-          name string and never a yes/no flag (the slot name reads like a boolean;
-          the value is not one, #360). Inlined (#805): a string here fails validation.'
+          or overseeing dataset creation, as a Person object — an `id` (the ORCID
+          CURIE where the evidence states one, else a fragment minted on the record''s
+          own id), their `name`, and where the evidence states them `orcid`, `email`
+          and `affiliation` — never a bare name string and never a yes/no flag (the
+          slot name reads like a boolean; the value is not one, #360). Inlined (#805):
+          a string here fails validation.'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
         broad_mappings:
         - dcterms:creator
@@ -32627,8 +32629,9 @@ classes:
       contact_person:
         name: contact_person
         description: 'Contact person for questions about ethical review, as a Person
-          object — `name`, and where the evidence states them `email`, `affiliation`
-          and `orcid`. Inlined (#805): a bare name string fails validation.'
+          object — an `id` (an ORCID CURIE where stated, else a fragment minted on
+          the record''s own id), `name`, and where the evidence states them `email`,
+          `affiliation` and `orcid`. Inlined (#805): a bare name string fails validation.'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/ethics
         broad_mappings:
         - schema:contactPoint
@@ -38280,9 +38283,11 @@ classes:
       contact_person:
         name: contact_person
         description: 'Contact person for licensing questions, as a Person object —
-          `name`, and where the evidence states them `email`, `affiliation` and `orcid`.
-          This person can answer questions about licensing terms, usage restrictions,
-          fees and permissions. Inlined (#805): a bare name string fails validation.'
+          an `id` (an ORCID CURIE where stated, else a fragment minted on the record''s
+          own id), `name`, and where the evidence states them `email`, `affiliation`
+          and `orcid`. This person can answer questions about licensing terms, usage
+          restrictions, fees and permissions. Inlined (#805): a bare name string fails
+          validation.'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
         broad_mappings:
         - schema:contactPoint
@@ -39960,7 +39965,8 @@ classes:
       committee_contact:
         name: committee_contact
         description: 'Contact point for the governance committee, as a Person object
-          — the `name` and, where the evidence states them, `email` and `affiliation`
+          — an `id` (an ORCID CURIE where stated, else a fragment minted on the record''s
+          own id), the `name` and, where the evidence states them, `email` and `affiliation`
           of the person who answers questions about access policy, procedure and oversight.
           Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`.
           Inlined (#805): a bare name string fails validation.'

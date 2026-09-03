@@ -72,9 +72,10 @@ classes:
           "d4d:docExample": "health_medical_biomedical_research"
       contact_person:
         description: >-
-          Contact person for licensing questions, as a Person object — `name`,
-          and where the evidence states them `email`, `affiliation` and
-          `orcid`. This person can answer questions about licensing terms,
+          Contact person for licensing questions, as a Person object — an
+          `id` (an ORCID CURIE where stated, else a fragment minted on the
+          record's own id), `name`, and where the evidence states them
+          `email`, `affiliation` and `orcid`. This person can answer questions about licensing terms,
           usage restrictions, fees and permissions. Inlined (#805): a bare
           name string fails validation.
         range: Person
@@ -207,8 +208,9 @@ classes:
       committee_contact:
         description: >-
           Contact point for the governance committee, as a Person object —
-          the `name` and, where the evidence states them, `email` and
-          `affiliation` of the person who answers questions about access
+          an `id` (an ORCID CURIE where stated, else a fragment minted on the
+          record's own id), the `name` and, where the evidence states them,
+          `email` and `affiliation` of the person who answers questions about access
           policy, procedure and oversight. Replaces
           `ExportControlRegulatoryRestrictions.governance_committee_contact`.
           Inlined (#805): a bare name string fails validation.

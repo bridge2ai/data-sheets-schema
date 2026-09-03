@@ -47,10 +47,14 @@ rule violations, and those are where v8 has leverage:
    stand, the string form's only meaning. `Dataset` carries no list of
    Person entries for a reference to resolve to, so the decision (D1) is
    three-way, and until it is made the digest must say which attributes
-   are references — it did, on all eight, until D1 was adopted (below)
-   and the five Person slots became inlined objects; three references
-   remain (`Person.affiliation`, `Instance.sampling_strategies`,
-   `Instance.missing_information`).
+   are references — it did, on the five Person slots, until D1 was
+   adopted (below) and they became inlined objects. The #927 review then
+   found that the marking's test (the slot's own `inlined` flags) was
+   wrong: LinkML inlines a class range with no identifier implicitly, so
+   `Person.affiliation: Organization[]` and Instance's
+   `sampling_strategies` / `missing_information` take objects too. The
+   marking now follows `SchemaView.is_inlined`; no attribute of the current
+   schema is a reference.
 3. **The class the reviews found most often — a true statement in the
    wrong tense or scope** — has no rule at all: prospective stated as
    current (plan-as-done: CHORUS rep2 slot-008/024, CM4AI rep2
@@ -85,10 +89,13 @@ class reachable from a rendered nested class through an `inlined` /
 `inlined_as_list` attribute — `Grant`, `Organization`, `Person` (via
 `committee_members`) and `File` (via `FileCollection.resources`) —
 under the same "required / optional / ranges / enums" shape; and mark
-the eight class-ranged attributes that are references
+the class-ranged attributes that are references (eight at the time, the five Person slots among them)
 (`principal_investigator: Person (reference — a string, not an
-object)`) in the one function both the digest and the judge's view read
-(#486), so the "takes an object" header cannot reach them. The
+object)`, as it read before D1) in the one function both the digest and
+the judge's view read (#486), so the "takes an object" header cannot
+reach them — by LinkML's own rule (`SchemaView.is_inlined`), after the
+#927 review showed the slot-flag test marked three implicitly inlined
+attributes falsely. The
 "mirrors the top-level listing" shortcut is now limited to classes
 large enough to be truncated — it had fired on `Organization` and told
 the model an Organization accepts every Dataset slot. Measured: 67 → 71
@@ -126,9 +133,9 @@ existing record holding a string there is invalid under this schema;
 verdicts stay pinned to the schema they were reached against (#426), as
 after the #646 doi move, and commands that re-validate live (`d4d runs
 select`) report them invalid — a re-selection across pre-v8 arms must use
-the recorded verdicts. The digest moves `163c7e4d` → `4b488a28` (43,589
-chars; 411 headroom, the five reference markers gone), the Core digest
-with it.
+the recorded verdicts. The digest moves `163c7e4d` → `ffe03dd4` (43,582 chars; 418
+headroom; no reference marker remains, and SamplingStrategy and
+MissingInfo now render — 72 nested classes), the Core digest with it.
 
 D. **`ADDED IN v8`** — four rules (R1–R4; the decisions below are
 D1–D6, a different series), each naming a mechanism rather than
@@ -140,9 +147,9 @@ restating a prohibition:
    object with the keys the digest lists for that class — `Grant` under
    `grants`, `Organization` under `affiliations` — and a reconcile or
    repair phase must never reduce such an object to a string, nor
-   inflate a reference to an object. (#900's Grant half; the Person
-   slots follow D1 — if D1 chooses `inlined: true`, they move from the
-   first sentence to the second and the digest marking moves with them.)
+   inflate a reference to an object. (#900's Grant half; with D1 adopted
+   the Person slots are objects and the current schema marks no
+   reference — the first sentence is there for the next one.)
 2. (R2) *Tense and scope.* Before writing a value from a passage, name to
    yourself what the passage is about and when: a plan, a proposal or
    a future release is stated as such or omitted, never as the current
@@ -158,8 +165,8 @@ restating a prohibition:
    source reported; a passage cannot receipt an arithmetic result it
    does not contain. (#914)
 4. (R4) *Receipts per entry for rosters.* Where a slot is a list of objects
-   the bundle states one by one — creators, funders, variables,
-   files — each entry carries its own receipt naming the passage that
+   the bundle states one by one — creators, funders, variables, file
+   collections, files — each entry carries its own receipt naming the passage that
    states it; a roster receipted by one passage for one entry has
    receipted one entry. (#902 — decision D2)
 
@@ -174,13 +181,16 @@ does not show is regenerated once with the contradiction named (#684,
 #914's checker half). No prompt change; a runner change, so part of the
 v8 configuration.
 
-E2. **Audit phase looks for absence statements and misplaced access
-routes** (code, `PHASE_INSTRUCTIONS["audit"]`): the audit's list of what
-to flag gains "a value that states documentation is absent, pending or
-held elsewhere, and a value answering a neighbouring field (an access
-route in `future_guarantees` or `format`, a prohibition in
-`prohibition_reason`)", so reconcile removes or moves them. The
-mechanism for the v2 rule and for prediction 3; a runner change like E.
+E2. **Audit phase looks for the four classes the rules forbid and the
+reviews keep finding** (code, `PHASE_INSTRUCTIONS["audit"]`, PR #928):
+a value stating documentation is absent, pending or held elsewhere; a
+value answering a neighbouring field (an access route in
+`future_guarantees` or `format`, a prohibition in `prohibition_reason`);
+a plan, proposal or earlier release stated as the current state; a
+figure computed from other figures presented as one a source reported.
+The mechanism for the v2 rule and for prediction 3; a runner change like
+E. The audit instruction is shared by every condition, so this moves
+every condition's assembly digest — one re-baseline, stated here.
 
 F. **Bundle fixes before manifests are cut**: #886 (the dropped
 sentence-initial character), #875 (accent-only mojibake). Both move
@@ -264,7 +274,8 @@ steps need:
    descriptions), `make gen-project` + `gen-core-schema`, schema tests;
    the digest moved to `4b488a28`.
 3. **A** (done in #916) re-measured after C: 71 nested classes, 43,589
-   chars, three reference markers.
+   chars, no reference marker (the marking follows LinkML's rule since
+   the #927 review).
 4. **D** — `d4d_generic_arm_prompt_v8.md` = v7 + `ADDED IN v8`, the
    version-diff test, `CONDITION_PROMPTS`/`CONDITION_AXES`/
    `RECEIPT_CONDITIONS` gain `generic_v8`, commit, then pin
@@ -272,7 +283,10 @@ steps need:
    `tests/test_playbook_reach.py`) — the agentic playbook must carry
    the same four rules even if no agentic v8 arm runs, or the parity
    test says which rules reach only one runtime.
-5. **E + E2** — report gate and the audit-phase additions in the runner.
+5. **E2** landed with D (PR #928); **E** (the report gate) is #929 and
+   lands before the canaries or after the arm, never between. D's R1
+   example (a Person object under `principal_investigator`) is true only
+   once C (PR #927) has merged — #928 asserts that order in a test.
 6. Register the production matrix here (as v7's plan did), then the
    four canaries, then the fill.
 
