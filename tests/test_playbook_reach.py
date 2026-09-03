@@ -111,6 +111,15 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
         # v6 (#685): the density norm on minting.
         "minting density":
             ("must point at that part", "must point at that part"),
+        # v8 (R1-R4 of notes/generic_v8_analysis_plan.md).
+        "reference vs object ranges":
+            ("(reference — a string, not an object)", "(reference — a string, not an object)"),
+        "tense and scope":
+            ("about and when", "about and when"),
+        "derived figures":
+            ("record's own computation", "record's own computation"),
+        "receipts per roster entry":
+            ("receipted entry by entry", "each entry carries its own receipt"),
     }
 
     #: Rules the playbook carries that the condition prompts deliberately do
@@ -134,7 +143,7 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
             "`test_the_naming_rule_reaches_the_api_path` guards the render."),
     }
 
-    CURRENT_PROMPT = "d4d_generic_arm_prompt_v6.md"
+    CURRENT_PROMPT = "d4d_generic_arm_prompt_v8.md"
 
     def test_the_naming_rule_reaches_the_api_path(self):
         """The render is the API path's copy of the rule; guard its substance.

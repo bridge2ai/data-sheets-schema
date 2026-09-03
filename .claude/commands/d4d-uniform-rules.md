@@ -133,6 +133,34 @@ to every project:
   are provenance of where the mapping came from — never write one into a
   record.
 
+- **A class-ranged attribute the schema digest marks `(reference — a string,
+  not an object)` takes exactly that string; every other class-ranged
+  attribute takes an object with the keys the digest lists for that class**
+  (v8, R1) — a `Grant` under `grants` with its `grant_number`, an
+  `Organization` under `affiliations`, a `Person` under
+  `principal_investigator` with its `name` and, where the evidence states
+  them, `orcid`, `email` and `affiliation`. The scalar-range rule governs
+  scalar ranges only; never reduce an object the digest asks for to a
+  string, nor inflate a marked reference into an object.
+
+- **Name to yourself what a passage is about and when before writing it as
+  the referent's current state** (v8, R2): a plan, proposal or future release
+  is stated as such or omitted; an earlier release or archived version is a
+  fact about that version; a passage under a related-but-distinct source
+  describes that other dataset and belongs only in `related_datasets`. A
+  receipt's snippet comes from a passage about the referent, in the present.
+
+- **A figure the record derives — a sum, difference, fraction, count — is
+  stated as the record's own computation with its inputs named, never as a
+  figure a source reported** (v8, R3); a passage cannot receipt an
+  arithmetic result it does not contain. Where a derived figure and a stated
+  total disagree, record both and the difference in `source_caveats`.
+
+- **A roster the bundle states entry by entry — creators, funders,
+  variables, file collections, files — is receipted entry by entry** (v8,
+  R4): each entry carries its own receipt naming the passage that states it;
+  a roster receipted by one passage for one entry has receipted one entry.
+
 The rule about there being no target slot count is the load-bearing one: it is
 what makes a slot count an observation rather than a target. Named rather than
 referred to by position, so inserting a rule cannot silently point this sentence
