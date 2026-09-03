@@ -4,9 +4,14 @@ Status of this note: final — receipts, rubrics, the complete 12/12
 review pass, and the executed canonical selection.
 The registered matrix (#838/#849) completed 12/12 with zero failed runs:
 four production canaries (CM4AI retained under #877's off-by-one
-interpretation; VOICE and CHORUS passed outright; AI_READI retained under
-the #891 exposure-adjusted revision after four attempts whose failures
-were bookkeeping-class only) and eight fill records in one resumed sweep.
+interpretation; VOICE and CHORUS passed outright; AI_READI retained on
+its fourth attempt under the #891 exposure-adjusted revision — attempt
+4's remaining gate failures were instrument/bookkeeping-class per the
+canary basis, while attempts 1–3, archived under `data/ATTIC/
+canary_retries/`, included failures their own READMEs call genuine)
+and eight fill records in one resumed sweep. "12/12 zero failed runs"
+counts the production matrix as registered: retried canary attempts are
+archived, not counted.
 
 ## Receipts, matched 12-vs-12 (the like-for-like grounding measurement)
 
@@ -29,6 +34,8 @@ essentially fabrication-free at the snippet level.
 
 ## Rubrics (label-aware semantic, same evaluator family)
 
+| project | rep | rubric10 | rubric20 |
+|---|---|---|---|
 | AI_READI | rep1 | 49/50 (98.0%) | 82/88 (93.2%) |
 | AI_READI | rep2 | 50/50 (100.0%) | 81/88 (92.0%) |
 | AI_READI | rep3 | 50/50 (100.0%) | 80/88 (90.9%) |
@@ -57,10 +64,16 @@ thin margins throughout, per the criterion's own caveat. Executing the
 v7 selection demoted the four v6 canonical marks to `canonical_history`
 (the tool keeps one live mark per project; every demotion records what
 replaced it and nothing moved or was deleted). Per #660 the criterion
-has no view of the review's adverse counts; for CM4AI the review ranking
-(rep1 9 < rep2 11 < rep3 15 adverse) and the slot criterion happen to
-disagree only at the margin, and for the other projects the selected
-replicate is at or near fewest-adverse. Corroboration, not causation.
+has no view of the review's adverse counts — and this arm shows the two
+rankings **anti-agreeing in three of four projects**: the slot criterion
+picked the most-adverse replicate for AI_READI (rep2 at 12 vs 9/9) and
+VOICE (rep2 at 7, over rep1 at 2 — the record this note calls the
+cleanest of either arm), and the tied-most for CHORUS (rep1 at 11 vs
+rep3's 9); only CM4AI's pick sits mid-ranking (rep2 at 11 between 9 and
+15). Under the v6 selection the picks were at or tied for fewest
+adverse; here the coverage criterion actively opposes the grounding
+instrument. That is #660's concrete form at its sharpest so far, and an
+argument for joining the adverse count into the criterion.
 
 ## Review pass (12 of 12, complete)
 
@@ -102,7 +115,7 @@ cleanest record of either arm.
 **Recurring findings with structure (issue candidates):**
 
 1. **Stale receipt paths after reconciliation** — confirmed independently
-   by four reviewers (AI_READI rep1 variables[22–26] off by one;
+   by five reviewers (AI_READI rep1 variables[22–26] off by one;
    AI_READI rep3 slot-029 unsupported purely from the v1.0.0 insertion;
    CM4AI rep1 external_resources[8]→[7]; CM4AI rep2 slots 013/028 after
    the MassIVE split; CM4AI rep3 creators[38] after nine insertions).
@@ -111,12 +124,14 @@ cleanest record of either arm.
    onto wrong entries and manufacture `unsupported` verdicts for
    bundle-attested values. Proposed fix (rv2-AI_READI-r3): key the
    claims join to entry identity rather than list index.
-2. **rule-15 coverage-degree, all 12 records** — every receipt is
-   well-formed with all chunks reviewed, but covers 106–161 of ~280–510
-   receiptable slots; sampled receiptless values are overwhelmingly
-   bundle-supplied (large creator rosters especially). Zero
-   `not_in_bundle` verdicts anywhere in the arm: the gap is coverage
-   degree, not fabrication.
+2. **rule-15 coverage degree, violated in 8 of 12 records** (followed
+   for AI_READI rep2/rep3 and VOICE rep2/rep3, whose reviewers credited
+   the receipts as compliant) — every receipt is well-formed with all
+   chunks reviewed, but per the provenance receipts blocks coverage runs
+   48–208 of 142–508 receiptable slots per record; sampled receiptless
+   values are overwhelmingly bundle-supplied (large creator rosters
+   especially). Zero `not_in_bundle` verdicts anywhere in the arm: the
+   gap is coverage degree, not fabrication.
 3. **Reconcile over-flattening class-ranged slots** — CM4AI rep2's §2.4
    flattened valid Person objects citing the v4 scalar rule (emails and
    ORCIDs present in bundle, discarded); all three CM4AI reps leave
@@ -141,7 +156,7 @@ report/record contradiction (`extension_mechanism` claimed retained,
 absent from both records) and `is_sample: true` receipted by the very
 passage denying it.
 
-## Rubric-flagged items for the review pass
+## Rubric-flagged items (as handed to the review pass; adjudications above)
 
 - AI_READI (all reps): WUSTL-vs-UW PI/licensor affiliation conflict
   (declared in caveats; tier-1 source followed).
