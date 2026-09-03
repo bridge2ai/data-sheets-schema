@@ -72,11 +72,14 @@ the only source of dataset facts.
   `exempt_by_nature` no longer applies to a term that carries its label
   (it did when the pack showed only the bare CURIE).
   `pack.reference_attributes` lists the class-ranged attributes that are
-  *references* (`Creator.principal_investigator → Person (reference — a
+  *references* (`Person.affiliation → Organization[] (reference — a
   string, not an object)`, #805): a string is the only form that
   validates there, so the "populate the fields that class declares" rule
-  is `not_applicable` to them — six v7 reviews charged rule-08 on exactly
-  this and were wrong on validity. Judge the string's support instead. `supported` when
+  is `not_applicable` to them — six v7 reviews charged rule-08 on
+  `principal_investigator` when it was still a reference and were wrong
+  on validity; since #805 (D1) the five Person slots are inlined objects
+  and the rule applies to them again. Judge a reference's string on its
+  support, not its shape. `supported` when
   the passage says what the value says in the sense the slot asks;
   `weak` when the passage is real and on topic but does not answer the
   slot's question (a bare repository name receipting a de-identification

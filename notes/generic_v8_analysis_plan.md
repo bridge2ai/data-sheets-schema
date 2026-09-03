@@ -47,7 +47,10 @@ rule violations, and those are where v8 has leverage:
    stand, the string form's only meaning. `Dataset` carries no list of
    Person entries for a reference to resolve to, so the decision (D1) is
    three-way, and until it is made the digest must say which attributes
-   are references — it now does, on all eight.
+   are references — it did, on all eight, until D1 was adopted (below)
+   and the five Person slots became inlined objects; three references
+   remain (`Person.affiliation`, `Instance.sampling_strategies`,
+   `Instance.missing_information`).
 3. **The class the reviews found most often — a true statement in the
    wrong tense or scope** — has no rule at all: prospective stated as
    current (plan-as-done: CHORUS rep2 slot-008/024, CM4AI rep2
@@ -109,12 +112,23 @@ reviewer does not. `build_pack` resolves `values_from` CURIEs through
 No regeneration; not part of the v8 configuration, listed here only
 because the plan's first draft put it in the digest.
 
-C. **Schema wording** (#805; a schema edit, so the digest moves): keep
-`range: Person` on `principal_investigator` and `committee_contact`;
-rewrite the descriptions to say a Person object — `name`, and where the
-bundle states them `orcid`/`email`/`affiliations` — never a bare name
-string. Decision D1 below; the recommendation is to keep the range
-because the bundles do carry ORCIDs and emails the reviewers located.
+C. **Schema: the five Person-ranged slots inlined** (#805, decision D1
+option (a), adopted 2026-09-03): `principal_investigator`, both
+`contact_person`s, `committee_contact` and the deprecated
+`governance_committee_contact` carry `inlined: true` and descriptions
+that ask for the object — `name`, and where the evidence states them
+`orcid`, `email`, `affiliation`. Verified with `linkml-validate` on the
+regenerated schema: a bare name string now fails, an object with an `id`
+validates, an object without one fails (`Person.id` is the class
+identifier, so a PI without an ORCID gets a forced fragment mint — exempt
+from rule-14 by #803's `id_slots` logic). Consequence stated: every
+existing record holding a string there is invalid under this schema;
+verdicts stay pinned to the schema they were reached against (#426), as
+after the #646 doi move, and commands that re-validate live (`d4d runs
+select`) report them invalid — a re-selection across pre-v8 arms must use
+the recorded verdicts. The digest moves `163c7e4d` → `4b488a28` (43,589
+chars; 411 headroom, the five reference markers gone), the Core digest
+with it.
 
 D. **`ADDED IN v8`** — four rules (R1–R4; the decisions below are
 D1–D6, a different series), each naming a mechanism rather than
@@ -246,10 +260,11 @@ steps need:
 1. **F** — bundle fixes (#886, #875), rebuilt bundles and manifests,
    `audit-bundles --strict` clean. Moves `bundle_md5` for every project
    touched; existing records drift (reported, not fatal, #452).
-2. **C (D1)** — #805 decided and applied (`inlined: true` and the
-   descriptions, or the string range), `make gen-project`, schema tests;
-   the digest moves again, and its budget with it if (a) is chosen.
-3. **A** (done in #916) re-measured after C.
+2. **C (D1)** — done: #805 applied (`inlined: true` and the
+   descriptions), `make gen-project` + `gen-core-schema`, schema tests;
+   the digest moved to `4b488a28`.
+3. **A** (done in #916) re-measured after C: 71 nested classes, 43,589
+   chars, three reference markers.
 4. **D** — `d4d_generic_arm_prompt_v8.md` = v7 + `ADDED IN v8`, the
    version-diff test, `CONDITION_PROMPTS`/`CONDITION_AXES`/
    `RECEIPT_CONDITIONS` gain `generic_v8`, commit, then pin
@@ -266,20 +281,16 @@ of them may land between a v8 canary and its fill.
 
 ## Decisions needed before step 3
 
-- **D1 (#805)**, three-way: (a) `inlined: true` on the five Person-ranged
-  slots and descriptions rewritten to ask for the object (recommended:
-  the bundles state ORCIDs and emails the reviewers located; the v3
-  rule and the depth-two digest then apply; costs digest budget — the
-  headroom is 183 chars, so the budget moves with it); (b) `range:
-  string` with the descriptions as they stand (the rule-08 class is
-  void for these slots by design); (c) keep reference semantics and
-  require an identifier string (a name is then wrong, and `Dataset` has
-  no Person list for a reference to resolve to — the incoherent
-  option). Any of the three moves the digest; (a) is the only one that
-  captures what the bundles state.
-- **D2 (#902)**: receipts per roster entry as a v8 rule (R4; recommended
-  — it is the only route that raises coverage rather than reporting
-  it), or reporting only.
+- **D1 (#805)** — adopted 2026-09-03, option (a), applied in step C:
+  `inlined: true` on the five Person-ranged slots with descriptions that
+  ask for the object. The rejected options: (b) `range: string` (the
+  rule-08 class void by design); (c) reference semantics with an
+  identifier string (incoherent — `Dataset` has no Person list for a
+  reference to resolve to). (a) is the only one that captures what the
+  bundles state; the budget cost turned out negative (the markers left).
+- **D2 (#902)** — adopted 2026-09-03: receipts per roster entry as a v8
+  rule (R4), the only route that raises coverage rather than reporting
+  it.
 - **D3** — withdrawn: #912's digest half already existed (#538); the
   pack half landed in #916. Nothing to decide.
 - **D4 (#906)** — adopted 2026-09-03, option (a), PR #920: the v7 rep1
@@ -289,8 +300,14 @@ of them may land between a v8 canary and its fill.
   are gated against is v3 either way; this decided only that one
   recorded verdict. CM4AI rep1's block (v2 baseline numbers, pre-#891
   rows) is the same shape and is #922.
-- **D5**: API-only v8 first (recommended — the agentic arm needs #688's
-  launcher and the parity update before a v8 playbook run is cheap
-  enough to repeat), or both arms.
-- **D6 (#690)**: whether to split the method directory before v8 writes
-  another twelve records into `claudecode_agent/`.
+- **D5** — adopted 2026-09-03: API-only v8 first; the agentic arm needs
+  #688's launcher and the parity update before a v8 playbook run is
+  cheap enough to repeat.
+- **D6 (#690)** — adopted 2026-09-03: split the method directory before
+  v8 writes records. Design: a runtime-qualified method directory
+  (`claudecode_api`, with `_core`) for API-runtime runs from v8 on, plus
+  runtime-aware canonical selection (one canonical per project per
+  runtime, read from `model.agent_runtime`) so the 104 historical
+  API-runtime records and the 90 agentic ones under `claudecode_agent`
+  keep separate canonicals; migrating the historical labels is a filed
+  follow-up, not a corpus rewrite inside this chain.

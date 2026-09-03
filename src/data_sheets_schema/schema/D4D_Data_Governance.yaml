@@ -72,11 +72,13 @@ classes:
           "d4d:docExample": "health_medical_biomedical_research"
       contact_person:
         description: >-
-          Contact person for licensing questions. Provides structured contact
-          information including name, email, affiliation, and optional ORCID.
-          This person can answer questions about licensing terms, usage restrictions,
-          fees, and permissions.
+          Contact person for licensing questions, as a Person object — `name`,
+          and where the evidence states them `email`, `affiliation` and
+          `orcid`. This person can answer questions about licensing terms,
+          usage restrictions, fees and permissions. Inlined (#805): a bare
+          name string fails validation.
         range: Person
+        inlined: true
         slot_uri: d4d:licenseContactPoint
         broad_mappings:
           - schema:contactPoint
@@ -149,6 +151,7 @@ classes:
           is not an export-control fact and should not have to be nested inside
           one to be stated.
         range: Person
+        inlined: true
         slot_uri: d4d:governanceContactPoint
         broad_mappings:
           - schema:contactPoint
@@ -203,10 +206,14 @@ classes:
         slot_uri: d4d:governanceCommitteeMember
       committee_contact:
         description: >-
-          Contact point for the governance committee — the person or address
-          that answers questions about access policy, procedure and oversight.
-          Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`.
+          Contact point for the governance committee, as a Person object —
+          the `name` and, where the evidence states them, `email` and
+          `affiliation` of the person who answers questions about access
+          policy, procedure and oversight. Replaces
+          `ExportControlRegulatoryRestrictions.governance_committee_contact`.
+          Inlined (#805): a bare name string fails validation.
         range: Person
+        inlined: true
         slot_uri: d4d:governanceContactPoint
         broad_mappings:
           - schema:contactPoint

@@ -47,9 +47,12 @@ classes:
     attributes:
       contact_person:
         description: >-
-          Contact person for questions about ethical review. Provides structured
-          contact information including name, email, affiliation, and optional ORCID.
+          Contact person for questions about ethical review, as a Person
+          object — `name`, and where the evidence states them `email`,
+          `affiliation` and `orcid`. Inlined (#805): a bare name string
+          fails validation.
         range: Person
+        inlined: true
         slot_uri: d4d:ethicsContactPoint
         broad_mappings:
           - schema:contactPoint

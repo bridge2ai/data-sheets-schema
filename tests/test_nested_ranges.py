@@ -42,8 +42,8 @@ class TestTheDigestCarriesNestedRanges(unittest.TestCase):
         if nested is None:
             self.skipTest("DataGovernance not a nested range")
         self.assertEqual(nested.ranges.get("committee_members"), "Person[]")
-        # not inlined: a reference, marked as such since #916 (#805)
-        self.assertEqual(nested.ranges.get("committee_contact"), "Person (reference — a string, not an object)")
+        # inlined since #805 (D1): an object range like committee_members
+        self.assertEqual(nested.ranges.get("committee_contact"), "Person")
 
     def test_uriorcurie_attributes_are_covered(self):
         """The case that motivated this. A bare token in a nested `id`
@@ -190,12 +190,15 @@ class DepthTwo(unittest.TestCase):
         (`shown_ranges`, #486) both carry the marker; Person is still
         rendered because `committee_members` inlines it."""
         digest = schema_digest.build("Dataset")
+        person = next(n for n in digest.nested if n.name == "Person")
+        self.assertEqual(person.ranges["affiliation"], "Organization[] (reference — a string, not an object)")
+        self.assertIn("affiliation", schema_digest.shown_ranges(person))
         creator = next(n for n in digest.nested if n.name == "Creator")
-        self.assertEqual(creator.ranges["principal_investigator"], "Person (reference — a string, not an object)")
-        self.assertIn("principal_investigator", schema_digest.shown_ranges(creator))
+        self.assertEqual(creator.ranges["principal_investigator"], "Person")      # inlined since #805 (D1)
         self.assertEqual(creator.ranges["affiliations"], "Organization[]")           # inlined: an object
         text = schema_digest.digest_text("Dataset")
-        self.assertEqual(text.count("(reference — a string, not an object)"), 8)
+        # Person.affiliation and Instance.sampling_strategies / missing_information
+        self.assertEqual(text.count("(reference — a string, not an object)"), 3)
         self.assertIn("**Person**", text)
 
     def test_the_second_level_stays_within_budget(self):

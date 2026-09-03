@@ -4701,7 +4701,7 @@
     },
     {
       "name": "creator__principal_investigator",
-      "description": "The name of the key individual (Principal Investigator) responsible for or overseeing dataset creation \u2014 a person's name such as 'Aaron Lee', never a yes/no flag. The slot name reads like a boolean; the value is not one (#360).",
+      "description": "The key individual (Principal Investigator) responsible for or overseeing dataset creation, as a Person object \u2014 their `name`, and where the evidence states them `orcid`, `email` and `affiliation` \u2014 never a bare name string and never a yes/no flag (the slot name reads like a boolean; the value is not one, #360). Inlined (#805): a string here fails validation.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/principalInvestigator"
@@ -4717,6 +4717,7 @@
         "Creator"
       ],
       "range": "Person",
+      "inlined": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7378,7 +7379,7 @@
     },
     {
       "name": "ethicalReview__contact_person",
-      "description": "Contact person for questions about ethical review. Provides structured contact information including name, email, affiliation, and optional ORCID.",
+      "description": "Contact person for questions about ethical review, as a Person object \u2014 `name`, and where the evidence states them `email`, `affiliation` and `orcid`. Inlined (#805): a bare name string fails validation.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/ethicsContactPoint"
@@ -7393,6 +7394,7 @@
         "EthicalReview"
       ],
       "range": "Person",
+      "inlined": true,
       "@type": "SlotDefinition"
     },
     {
@@ -8043,7 +8045,7 @@
     },
     {
       "name": "licenseAndUseTerms__contact_person",
-      "description": "Contact person for licensing questions. Provides structured contact information including name, email, affiliation, and optional ORCID. This person can answer questions about licensing terms, usage restrictions, fees, and permissions.",
+      "description": "Contact person for licensing questions, as a Person object \u2014 `name`, and where the evidence states them `email`, `affiliation` and `orcid`. This person can answer questions about licensing terms, usage restrictions, fees and permissions. Inlined (#805): a bare name string fails validation.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/licenseContactPoint"
@@ -8058,6 +8060,7 @@
         "LicenseAndUseTerms"
       ],
       "range": "Person",
+      "inlined": true,
       "@type": "SlotDefinition"
     },
     {
@@ -8189,6 +8192,7 @@
         "ExportControlRegulatoryRestrictions"
       ],
       "range": "Person",
+      "inlined": true,
       "@type": "SlotDefinition"
     },
     {
@@ -8235,7 +8239,7 @@
     },
     {
       "name": "dataGovernance__committee_contact",
-      "description": "Contact point for the governance committee \u2014 the person or address that answers questions about access policy, procedure and oversight. Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`.",
+      "description": "Contact point for the governance committee, as a Person object \u2014 the `name` and, where the evidence states them, `email` and `affiliation` of the person who answers questions about access policy, procedure and oversight. Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`. Inlined (#805): a bare name string fails validation.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/governanceContactPoint"
@@ -8250,6 +8254,7 @@
         "DataGovernance"
       ],
       "range": "Person",
+      "inlined": true,
       "@type": "SlotDefinition"
     },
     {
@@ -10438,13 +10443,14 @@
       "attributes": [
         {
           "name": "principal_investigator",
-          "description": "The name of the key individual (Principal Investigator) responsible for or overseeing dataset creation \u2014 a person's name such as 'Aaron Lee', never a yes/no flag. The slot name reads like a boolean; the value is not one (#360).",
+          "description": "The key individual (Principal Investigator) responsible for or overseeing dataset creation, as a Person object \u2014 their `name`, and where the evidence states them `orcid`, `email` and `affiliation` \u2014 never a bare name string and never a yes/no flag (the slot name reads like a boolean; the value is not one, #360). Inlined (#805): a string here fails validation.",
           "broad_mappings": [
             "dcterms:creator",
             "schema:creator"
           ],
           "slot_uri": "d4d:principalInvestigator",
           "range": "Person",
+          "inlined": true,
           "@type": "SlotDefinition"
         },
         {
@@ -13096,12 +13102,13 @@
       "attributes": [
         {
           "name": "contact_person",
-          "description": "Contact person for questions about ethical review. Provides structured contact information including name, email, affiliation, and optional ORCID.",
+          "description": "Contact person for questions about ethical review, as a Person object \u2014 `name`, and where the evidence states them `email`, `affiliation` and `orcid`. Inlined (#805): a bare name string fails validation.",
           "broad_mappings": [
             "schema:contactPoint"
           ],
           "slot_uri": "d4d:ethicsContactPoint",
           "range": "Person",
+          "inlined": true,
           "@type": "SlotDefinition"
         },
         {
@@ -13695,12 +13702,13 @@
         },
         {
           "name": "contact_person",
-          "description": "Contact person for licensing questions. Provides structured contact information including name, email, affiliation, and optional ORCID. This person can answer questions about licensing terms, usage restrictions, fees, and permissions.",
+          "description": "Contact person for licensing questions, as a Person object \u2014 `name`, and where the evidence states them `email`, `affiliation` and `orcid`. This person can answer questions about licensing terms, usage restrictions, fees and permissions. Inlined (#805): a bare name string fails validation.",
           "broad_mappings": [
             "schema:contactPoint"
           ],
           "slot_uri": "d4d:licenseContactPoint",
           "range": "Person",
+          "inlined": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -13824,6 +13832,7 @@
           ],
           "slot_uri": "d4d:governanceContactPoint",
           "range": "Person",
+          "inlined": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -13882,12 +13891,13 @@
         },
         {
           "name": "committee_contact",
-          "description": "Contact point for the governance committee \u2014 the person or address that answers questions about access policy, procedure and oversight. Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`.",
+          "description": "Contact point for the governance committee, as a Person object \u2014 the `name` and, where the evidence states them, `email` and `affiliation` of the person who answers questions about access policy, procedure and oversight. Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`. Inlined (#805): a bare name string fails validation.",
           "broad_mappings": [
             "schema:contactPoint"
           ],
           "slot_uri": "d4d:governanceContactPoint",
           "range": "Person",
+          "inlined": true,
           "@type": "SlotDefinition"
         },
         {
@@ -14328,7 +14338,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-08-14T16:22:27",
   "source_file_size": 34754,
-  "generation_date": "2026-08-21T12:56:36",
+  "generation_date": "2026-09-03T10:44:43",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

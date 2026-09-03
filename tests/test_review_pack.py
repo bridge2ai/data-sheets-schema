@@ -355,6 +355,6 @@ class ReferenceAttributes(unittest.TestCase):
             prov, instr = Pack()._run(tmp)
             p = rp.build_pack(prov, instr)
             entries = p["reference_attributes"]["entries"]
-            self.assertIn("Creator.principal_investigator → Person (reference — a string, not an object)", entries)
-            self.assertEqual(len(entries), 8)
+            self.assertIn("Person.affiliation → Organization[] (reference — a string, not an object)", entries)
+            self.assertEqual(len(entries), 3)                                  # #805 inlined the five Person slots
             self.assertIn("not inlined", p["reference_attributes"]["note"])

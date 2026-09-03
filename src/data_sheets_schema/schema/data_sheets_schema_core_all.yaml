@@ -6532,10 +6532,11 @@ classes:
     attributes:
       principal_investigator:
         name: principal_investigator
-        description: The name of the key individual (Principal Investigator) responsible
-          for or overseeing dataset creation — a person's name such as 'Aaron Lee',
-          never a yes/no flag. The slot name reads like a boolean; the value is not
-          one (#360).
+        description: 'The key individual (Principal Investigator) responsible for
+          or overseeing dataset creation, as a Person object — their `name`, and where
+          the evidence states them `orcid`, `email` and `affiliation` — never a bare
+          name string and never a yes/no flag (the slot name reads like a boolean;
+          the value is not one, #360). Inlined (#805): a string here fails validation.'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
         broad_mappings:
         - dcterms:creator
@@ -6546,6 +6547,7 @@ classes:
         domain_of:
         - Creator
         range: Person
+        inlined: true
       affiliations:
         name: affiliations
         description: Organizations with which the creator or team is affiliated.
@@ -32624,8 +32626,9 @@ classes:
     attributes:
       contact_person:
         name: contact_person
-        description: Contact person for questions about ethical review. Provides structured
-          contact information including name, email, affiliation, and optional ORCID.
+        description: 'Contact person for questions about ethical review, as a Person
+          object — `name`, and where the evidence states them `email`, `affiliation`
+          and `orcid`. Inlined (#805): a bare name string fails validation.'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/ethics
         broad_mappings:
         - schema:contactPoint
@@ -32636,6 +32639,7 @@ classes:
         - EthicalReview
         - LicenseAndUseTerms
         range: Person
+        inlined: true
       reviewing_organization:
         name: reviewing_organization
         description: 'Name or identifier of the organization that conducted the ethical
@@ -38275,10 +38279,10 @@ classes:
         range: DataUsePermissionEnum
       contact_person:
         name: contact_person
-        description: Contact person for licensing questions. Provides structured contact
-          information including name, email, affiliation, and optional ORCID. This
-          person can answer questions about licensing terms, usage restrictions, fees,
-          and permissions.
+        description: 'Contact person for licensing questions, as a Person object —
+          `name`, and where the evidence states them `email`, `affiliation` and `orcid`.
+          This person can answer questions about licensing terms, usage restrictions,
+          fees and permissions. Inlined (#805): a bare name string fails validation.'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
         broad_mappings:
         - schema:contactPoint
@@ -38289,6 +38293,7 @@ classes:
         - EthicalReview
         - LicenseAndUseTerms
         range: Person
+        inlined: true
       id:
         name: id
         annotations:
@@ -39406,6 +39411,7 @@ classes:
         domain_of:
         - ExportControlRegulatoryRestrictions
         range: Person
+        inlined: true
       id:
         name: id
         annotations:
@@ -39953,9 +39959,11 @@ classes:
         inlined_as_list: true
       committee_contact:
         name: committee_contact
-        description: Contact point for the governance committee — the person or address
-          that answers questions about access policy, procedure and oversight. Replaces
-          `ExportControlRegulatoryRestrictions.governance_committee_contact`.
+        description: 'Contact point for the governance committee, as a Person object
+          — the `name` and, where the evidence states them, `email` and `affiliation`
+          of the person who answers questions about access policy, procedure and oversight.
+          Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`.
+          Inlined (#805): a bare name string fails validation.'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
         broad_mappings:
         - schema:contactPoint
@@ -39965,6 +39973,7 @@ classes:
         domain_of:
         - DataGovernance
         range: Person
+        inlined: true
       access_review_process:
         name: access_review_process
         annotations:
