@@ -65,7 +65,10 @@ the only source of dataset facts.
   after reconciliation's inserts and reorders, joined by entry identity —
   judge the value at `resolved_path`, and do not score an index shift as
   `unsupported`. `pack.receipt_join.basis` says whether the join was by
-  identity or (no snapshot, the agentic path) by index. `supported` when
+  identity or (no snapshot, the agentic path) by index. A `values_from`
+  CURIE (`B2AI_TOPIC:43`) carries its pinned registry label as
+  `value_label` (#912): judge whether the *label* is what the passage
+  supports — a well-formed CURIE for the wrong concept is `misread`. `supported` when
   the passage says what the value says in the sense the slot asks;
   `weak` when the passage is real and on topic but does not answer the
   slot's question (a bare repository name receipting a de-identification

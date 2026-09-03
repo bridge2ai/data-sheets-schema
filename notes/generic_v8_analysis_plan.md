@@ -65,19 +65,23 @@ A. **Digest depth two for object-valued nested classes** (code,
 `schema_digest.py`): render the keys of every class reachable *from a
 rendered nested class* — `Person`, `Grant`, `Organization`, `Software`
 and whatever else the one-level walk currently truncates — under the
-same "required / optional / ranges / enums" shape, deduplicated, with
-the digest's byte growth measured before it is adopted (40,922 chars
-today; the fitness cache keys on the digest fingerprint, so this moves
-every condition's assembly digest and is itself a re-baseline).
-Closes the digest half of #900.
+same "required / optional / ranges / enums" shape, deduplicated. Measured
+on this branch: 67 → 72 nested classes (Person, Grant, Organization and
+two more), 40,922 → 43,620 chars against the 44,000 budget — 380 chars
+of headroom, so any further digest addition must first raise the budget
+deliberately. The Dataset digest fingerprint moves `580992ed` →
+`0d7b6c32` (recorded in `digest_inventory.yaml` and the schema-sync
+test); the fitness cache keys on it, so this moves every condition's
+assembly digest and is itself a re-baseline. Closes the digest half of
+#900.
 
-B. **Registry term labels in the digest** (code, `render_values_from`):
-for `values_from` slots whose registry vocabulary is pinned
-(`B2AI_TOPIC`, `B2AI_SUBSTRATE`, `B2AI_ORG` are in
-`b2ai_registry_vocabularies.yaml`), render `CURIE — label` pairs, not
-the bare CURIE list, so the model chooses a labelled term and the pack
-can show the reviewer what it chose. Closes #912's digest half; the pack
-half (#912, no regeneration) rides along in the same PR.
+B. **Registry term labels — pack side only** (#912). The digest already
+renders `id=name` pairs for `data_topic`/`data_substrate`
+(`render_values_from`, #538), so the model sees the labels; the
+reviewer does not. `build_pack` resolves `values_from` CURIEs through
+`schema_digest.vocabularies()` and shows `CURIE — label` on the item.
+No regeneration; not part of the v8 configuration, listed here only
+because the plan's first draft put it in the digest.
 
 C. **Schema wording** (#805; a schema edit, so the digest moves): keep
 `range: Person` on `principal_investigator` and `committee_contact`;

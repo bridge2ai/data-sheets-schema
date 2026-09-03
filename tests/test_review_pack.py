@@ -325,3 +325,23 @@ class GoneEntries(unittest.TestCase):
             grant2 = next(i for i in p2["items"] if i.get("slot") == "funders[0].grant_id")
             self.assertEqual(grant2["resolution"], "not_in_snapshot"); self.assertEqual(grant2["value"], rp.UNRESOLVED)
             self.assertIn("funders[0].grant_id", {i["slot"] for i in p2["items"] if i["kind"] == "slot_receiptless"})
+
+
+class RegistryLabels(unittest.TestCase):
+    def test_a_values_from_curie_carries_its_pinned_label(self):
+        """#912: the digest shows the model `id=name`; the pack shows the reviewer the same."""
+        from data_sheets_schema.schema_digest import vocabularies
+        topics = vocabularies().get("B2AI_TOPIC") or {}
+        self.assertTrue(topics, "the pinned vocabulary must be present")
+        curie, label = next(iter(topics.items()))
+        self.assertEqual(rp._registry_label(curie), label)
+        self.assertIsNone(rp._registry_label("B2AI_TOPIC:999999"))
+        self.assertIsNone(rp._registry_label("plain text")); self.assertIsNone(rp._registry_label(None))
+        from tests.test_receipts import FULL
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = Pack()._run(tmp)
+            full_p = Path(tmp) / "d4d_concatenated/claudecode_agent/L/P_d4d.yaml"
+            full_p.write_text(yaml.safe_dump({**FULL, "data_topic": [curie]}))
+            p = rp.build_pack(prov, instr, {"receiptless_slots": 50})
+            item = next(i for i in p["items"] if str(i.get("slot", "")).startswith("data_topic"))
+            self.assertEqual(item["value_label"], label)

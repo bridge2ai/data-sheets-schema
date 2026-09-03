@@ -182,6 +182,33 @@ def _value_at(record: Any, path: str, limit: int = 300) -> Any:
     return s[:limit] + "…" if isinstance(s, str) and len(s) > limit else s
 
 
+def _raw_value(record: Any, path: str) -> Any:
+    """The untruncated value at a path; a one-item list of a scalar is that
+    scalar (`data_topic: [B2AI_TOPIC:43]`)."""
+    from data_sheets_schema.receipts import _resolve_value
+    ok, v = _resolve_value(record, path)
+    if ok and isinstance(v, list) and len(v) == 1 and isinstance(v[0], str):
+        return v[0]
+    return v if ok else None
+
+
+def _registry_label(value: Any) -> str | None:
+    """The pinned registry label for a `values_from` CURIE (#912): the digest
+    shows the model `id=name` pairs for B2AI_TOPIC / B2AI_SUBSTRATE, the
+    pack showed the reviewer the bare CURIE, and seven of twelve v7 reviews
+    could score one only as well-formed. None for anything else."""
+    if not isinstance(value, str) or ":" not in value:
+        return None
+    try:
+        from data_sheets_schema.schema_digest import vocabularies
+        for terms in vocabularies().values():
+            if value in terms:
+                return str(terms[value])
+    except Exception:                                         # noqa: BLE001
+        return None
+    return None
+
+
 def _id_slots(full: Any, root_class: str | None = None) -> tuple[list[dict[str, Any]], str | None]:
     """Every populated `…id` leaf of the record with whether the schema
     *forces* the id (#803) and whether the value is a *mint* (#823): `File`,
@@ -363,6 +390,9 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                     item["question"] += (" A later phase rewrote this value after the receipt: `value_at_receipt` "
                                          "is what the receipt attested, `value` is what the record now says — "
                                          "judge whether the passage supports the current value.")
+            label = _registry_label(_raw_value(full, at) if at else None)
+            if label:
+                item["value_label"] = label
             items.append(item)
         # The receiptless set from the receipt and the record themselves,
         # not the record's 50-entry walk-order prefix (#790): every populated,
@@ -378,11 +408,15 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                          if not exempt(p, v, record_id) and not any(_covers(r, p) for r in covering))
         rng.shuffle(without)
         for slot in without[: sample["receiptless_slots"]]:
-            items.append({"id": f"slot-{len(items) + 1:03d}", "kind": "slot_receiptless", "slot": slot,
-                          "value": _value_at(full, slot),
-                          "question": "No receipt names a passage for this value. Find one in the bundle, or "
-                                      "conclude it is inferred from stated lines, or that the bundle does not "
-                                      "state it, or that the slot is of a kind that has no passage."})
+            item = {"id": f"slot-{len(items) + 1:03d}", "kind": "slot_receiptless", "slot": slot,
+                    "value": _value_at(full, slot),
+                    "question": "No receipt names a passage for this value. Find one in the bundle, or "
+                                "conclude it is inferred from stated lines, or that the bundle does not "
+                                "state it, or that the slot is of a kind that has no passage."}
+            label = _registry_label(_raw_value(full, slot))
+            if label:
+                item["value_label"] = label
+            items.append(item)
         reshaped = list(((rc.get("slots") or {}).get("reshaped_by_reconcile")) or [])
         for slot in reshaped[: sample["reshaped_slots"]]:
             items.append({"id": f"slot-{len(items) + 1:03d}", "kind": "slot_reshaped", "slot": slot,

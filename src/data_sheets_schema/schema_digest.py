@@ -57,6 +57,11 @@ DESCRIPTION_CHARS = 300
 # unable to choose and will approximate instead. At this size the whole
 # vocabulary costs 38 bytes more than the clipped one, in a cached prefix.
 MAX_ENUM_VALUES = 60
+#: How many levels of object range the digest renders (#900, v8 plan A):
+#: 1 renders the classes the target's slots range over; 2 also renders the
+#: classes *their* attributes range over (Person under Creator, Grant under
+#: FundingMechanism), reached through non-universal attributes only.
+NESTING_DEPTH = 2
 
 # Attribute names every class inherits. Listing them on all 66 nested classes
 # would be 264 tokens saying nothing — the model already reaches for
@@ -320,18 +325,21 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
         ))
     digest.slots.sort(key=lambda s: s.name)
 
-    # One level of nesting only. Deeper recursion reproduces most of the schema
-    # and defeats the point of a digest; one level is what a generation run
-    # needs to populate a slot's object without guessing its required keys.
+    # Two levels of nesting (#900, v8 plan step A). One level renders the
+    # classes the target's slots range over — `Creator`, `FundingMechanism` —
+    # and names their attributes' ranges: `principal_investigator: Person`,
+    # `grants: Grant[]`. It never rendered `Person` or `Grant` themselves, so
+    # a run was told the range and never the keys, and the v3 rule ("populate
+    # the fields that class declares") asked for fields the digest did not
+    # show: six of twelve v7 records left `grant_number` empty with the award
+    # number in prose, and reconcile flattened Person objects to names. The
+    # second level renders every class a first-level attribute ranges over,
+    # except through the universal attributes (`used_software: Software[]`
+    # sits on 64 classes and is stated once as UNIVERSAL_RANGES). Deeper than
+    # that reproduces the schema and defeats the digest.
     seen: set[str] = set()
-    for slot in digest.slots:
-        rng = slot.range
-        if not rng or rng in seen:
-            continue
-        cls = sv.get_class(rng)
-        if cls is None:
-            continue
-        seen.add(rng)
+
+    def nested_for(rng: str) -> NestedClass | None:
         req, opt = [], []
         enums: dict[str, list[str]] = {}
         enums_truncated: dict[str, int] = {}
@@ -351,11 +359,27 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
                 extra = len(values) - MAX_ENUM_VALUES
                 if extra > 0:
                     enums_truncated[str(sub.name)] = extra
-        if req or opt:
-            digest.nested.append(NestedClass(
-                name=rng, required=sorted(req), optional=sorted(opt),
-                enums=enums, enums_truncated=enums_truncated,
-                ranges=ranges, values_from=values_from))
+        if not (req or opt):
+            return None
+        return NestedClass(name=rng, required=sorted(req), optional=sorted(opt),
+                           enums=enums, enums_truncated=enums_truncated,
+                           ranges=ranges, values_from=values_from)
+
+    frontier = [slot.range for slot in digest.slots if slot.range]
+    for depth in range(NESTING_DEPTH):
+        next_frontier: list[str] = []
+        for rng in frontier:
+            if rng in seen or sv.get_class(rng) is None:
+                continue
+            seen.add(rng)
+            nested = nested_for(rng)
+            if nested is None:
+                continue
+            digest.nested.append(nested)
+            next_frontier.extend(
+                r.rstrip("[]") for k, r in nested.ranges.items()
+                if k not in UNIVERSAL_ATTRIBUTES)
+        frontier = next_frontier
     digest.nested.sort(key=lambda n: n.name)
     return digest
 

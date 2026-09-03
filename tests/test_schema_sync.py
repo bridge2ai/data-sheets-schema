@@ -67,12 +67,20 @@ class DigestIsAFunctionOfContentTest(unittest.TestCase):
         file scope; the count is scope-dependent, the location is not) lives
         in labels from 2026-08-12 or earlier,
         which keep the verdicts they were pinned with (#426).
+
+        `580992ed` → `0d7b6c32` on 2026-09-03: the digest renders two levels
+        of object range (`NESTING_DEPTH`, #900, v8 plan step A) — Person,
+        Grant, Organization and two more classes join the 67 — with no
+        change to the schema itself, so no record's validity moves; the slot
+        inventory recorded under the new digest is identical to the old
+        one. Every run from here records the new digest; the v7 arm keeps
+        `580992ed`, which is one of the things v7-vs-v8 measures.
         """
         if not self.SCHEMA.exists():
             self.skipTest("merged schema not present in this checkout")
         self.assertEqual(
             schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
-            "580992ed7037762157c110fc9e671c81")
+            "0d7b6c324d61a38f42f2df2e4f1df68c")
 
 
 class SyncCheckTest(unittest.TestCase):

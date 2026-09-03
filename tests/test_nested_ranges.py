@@ -160,3 +160,29 @@ class TestCachedJudgementsCannotSurviveThis(unittest.TestCase):
         for nested in digest.nested:
             with self.subTest(nested=nested.name):
                 self.assertNotIn("id", schema_digest.shown_ranges(nested))
+
+
+class DepthTwo(unittest.TestCase):
+    """#900 / v8 plan A: the classes a first-level attribute ranges over are
+    rendered too — a run told `principal_investigator: Person` must also be
+    told what a Person carries — but not through the universal attributes,
+    and not deeper."""
+
+    def test_person_and_grant_are_rendered_with_their_keys(self):
+        digest = schema_digest.build("Dataset")
+        names = {n.name for n in digest.nested}
+        self.assertIn("Person", names); self.assertIn("Grant", names); self.assertIn("Organization", names)
+        person = next(n for n in digest.nested if n.name == "Person")
+        self.assertIn("orcid", person.optional); self.assertIn("email", person.optional)
+        grant = next(n for n in digest.nested if n.name == "Grant")
+        self.assertIn("grant_number", grant.optional)
+        text = schema_digest.digest_text("Dataset")
+        self.assertIn("**Person**", text); self.assertIn("**Grant**", text)
+
+    def test_software_is_reached_only_through_a_universal_attribute_and_stays_out(self):
+        digest = schema_digest.build("Dataset")
+        self.assertNotIn("Software", {n.name for n in digest.nested})
+
+    def test_the_second_level_stays_within_budget(self):
+        self.assertLess(len(schema_digest.digest_text("Dataset")), 44_000)
+        self.assertEqual(schema_digest.NESTING_DEPTH, 2)
