@@ -42,7 +42,8 @@ class TestTheDigestCarriesNestedRanges(unittest.TestCase):
         if nested is None:
             self.skipTest("DataGovernance not a nested range")
         self.assertEqual(nested.ranges.get("committee_members"), "Person[]")
-        self.assertEqual(nested.ranges.get("committee_contact"), "Person")
+        # not inlined: a reference, marked as such since #916 (#805)
+        self.assertEqual(nested.ranges.get("committee_contact"), "Person (reference — a string, not an object)")
 
     def test_uriorcurie_attributes_are_covered(self):
         """The case that motivated this. A bare token in a nested `id`
@@ -182,6 +183,20 @@ class DepthTwo(unittest.TestCase):
     def test_software_is_reached_only_through_a_universal_attribute_and_stays_out(self):
         digest = schema_digest.build("Dataset")
         self.assertNotIn("Software", {n.name for n in digest.nested})
+
+    def test_a_reference_attribute_says_so_in_both_views(self):
+        """#805: an inline Person on `principal_investigator` fails validation
+        — the attribute is a reference. The digest and the judge's view
+        (`shown_ranges`, #486) both carry the marker; Person is still
+        rendered because `committee_members` inlines it."""
+        digest = schema_digest.build("Dataset")
+        creator = next(n for n in digest.nested if n.name == "Creator")
+        self.assertEqual(creator.ranges["principal_investigator"], "Person (reference — a string, not an object)")
+        self.assertIn("principal_investigator", schema_digest.shown_ranges(creator))
+        self.assertEqual(creator.ranges["affiliations"], "Organization[]")           # inlined: an object
+        text = schema_digest.digest_text("Dataset")
+        self.assertEqual(text.count("(reference — a string, not an object)"), 8)
+        self.assertIn("**Person**", text)
 
     def test_the_second_level_stays_within_budget(self):
         self.assertLess(len(schema_digest.digest_text("Dataset")), 44_000)

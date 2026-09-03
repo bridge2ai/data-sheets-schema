@@ -327,29 +327,47 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
 
     # Two levels of nesting (#900, v8 plan step A). One level renders the
     # classes the target's slots range over — `Creator`, `FundingMechanism` —
-    # and names their attributes' ranges: `principal_investigator: Person`,
-    # `grants: Grant[]`. It never rendered `Person` or `Grant` themselves, so
-    # a run was told the range and never the keys, and the v3 rule ("populate
-    # the fields that class declares") asked for fields the digest did not
-    # show: six of twelve v7 records left `grant_number` empty with the award
-    # number in prose, and reconcile flattened Person objects to names. The
-    # second level renders every class a first-level attribute ranges over,
-    # except through the universal attributes (`used_software: Software[]`
-    # sits on 64 classes and is stated once as UNIVERSAL_RANGES). Deeper than
-    # that reproduces the schema and defeats the digest.
+    # and names their attributes' ranges: `grants: Grant[]`. It never
+    # rendered `Grant` itself, so a run was told the range and never the
+    # keys, and the v3 rule ("populate the fields that class declares")
+    # asked for fields the digest did not show: `grant_number` is populated
+    # in none of the twelve v7 records, the award numbers sit in prose. The
+    # second level renders every class a first-level attribute ranges over
+    # **through an inlined attribute** — `inlined` or `inlined_as_list` —
+    # and not through the universal ones (`used_software: Software[]` sits on
+    # 64 classes and is stated once as UNIVERSAL_RANGES). An attribute that
+    # is not inlined is a *reference*: `Creator.principal_investigator:
+    # Person` takes a string, and an inline Person object fails validation
+    # (#805, verified with linkml-validate on the #916 review) — rendering
+    # Person under "takes an object … or the record fails validation" would
+    # instruct the invalid form. Deeper than two reproduces the schema and
+    # defeats the digest.
     seen: set[str] = set()
 
-    def nested_for(rng: str) -> NestedClass | None:
+    def nested_for(rng: str) -> tuple[NestedClass | None, list[str]]:
         req, opt = [], []
         enums: dict[str, list[str]] = {}
         enums_truncated: dict[str, int] = {}
         ranges: dict[str, str] = {}
         values_from: dict[str, list[str]] = {}
+        inlined_ranges: list[str] = []
         for sub in sv.class_induced_slots(rng):
             (req if sub.required else opt).append(str(sub.name))
             if sub.range:
-                ranges[str(sub.name)] = (
-                    f"{sub.range}[]" if sub.multivalued else str(sub.range))
+                shown = f"{sub.range}[]" if sub.multivalued else str(sub.range)
+                is_class = sv.get_class(str(sub.range)) is not None
+                if is_class and not (sub.inlined or sub.inlined_as_list):
+                    # A class-ranged attribute that is not inlined is a
+                    # reference and takes a string; the object form fails
+                    # validation (#805). Said on the range so that both the
+                    # digest and the judge's view carry it (#486), and so
+                    # the "Object ranges" header's "takes an object" does
+                    # not reach these eight attributes.
+                    shown += " (reference — a string, not an object)"
+                ranges[str(sub.name)] = shown
+                if (is_class and (sub.inlined or sub.inlined_as_list)
+                        and str(sub.name) not in UNIVERSAL_ATTRIBUTES):
+                    inlined_ranges.append(str(sub.range))
             if sub.values_from:
                 values_from[str(sub.name)] = [str(v) for v in sub.values_from]
             sub_enum = sv.get_enum(sub.range) if sub.range else None
@@ -360,10 +378,10 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
                 if extra > 0:
                     enums_truncated[str(sub.name)] = extra
         if not (req or opt):
-            return None
+            return None, inlined_ranges
         return NestedClass(name=rng, required=sorted(req), optional=sorted(opt),
                            enums=enums, enums_truncated=enums_truncated,
-                           ranges=ranges, values_from=values_from)
+                           ranges=ranges, values_from=values_from), inlined_ranges
 
     frontier = [slot.range for slot in digest.slots if slot.range]
     for depth in range(NESTING_DEPTH):
@@ -372,13 +390,11 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
             if rng in seen or sv.get_class(rng) is None:
                 continue
             seen.add(rng)
-            nested = nested_for(rng)
+            nested, reachable = nested_for(rng)
             if nested is None:
                 continue
             digest.nested.append(nested)
-            next_frontier.extend(
-                r.rstrip("[]") for k, r in nested.ranges.items()
-                if k not in UNIVERSAL_ATTRIBUTES)
+            next_frontier.extend(reachable)
         frontier = next_frontier
     digest.nested.sort(key=lambda n: n.name)
     return digest

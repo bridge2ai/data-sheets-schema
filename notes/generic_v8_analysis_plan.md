@@ -26,21 +26,28 @@ So a v8 that adds more rule text of the same kind is the change the
 evidence predicts will not work. Three things in the evidence are *not*
 rule violations, and those are where v8 has leverage:
 
-1. **The digest never shows the keys of the objects that get flattened.**
-   `schema_digest` renders one level of nesting: `Creator` (with
-   `principal_investigator: Person`) and `FundingMechanism` (with
-   `grants: Grant[]`) are rendered; `Person`, `Grant`, `Organization`,
-   `Software` are not — the model is told the range and never the keys.
-   The v3 rule asks it to populate fields it cannot see. This is the
-   concrete root of #900's "no key list for Grant" and half of the Person
-   flattening.
-2. **#805's description contradicts its range.** `principal_investigator`
-   is `range: Person` and its description says "a person's name such as
-   'Aaron Lee'". The reconcile phase then cites the v4 rule ("a
-   scalar-ranged slot takes the identifier, not the thing") to flatten
-   the Person object the `full` phase produced — the reviewers were
-   right that v4 governs scalar ranges, and the model applied it to a
-   slot whose own description reads as scalar.
+1. **The digest never shows the keys of the objects it asks for.**
+   `schema_digest` rendered one level of nesting: `FundingMechanism`
+   (with `grants: Grant[]`) is rendered; `Grant` is not — the model is
+   told the range and never the keys, and the v3 rule asks it to
+   populate fields it cannot see. This is the concrete root of #900's
+   Grant half: `grant_number` is populated in none of the twelve records
+   while the award numbers sit in prose.
+2. **The Person "flattening" was the schema, not the model** (found by
+   the #916 review and verified with `linkml-validate`): none of the five
+   Person-ranged slots (`principal_investigator`, the two
+   `contact_person`s, `committee_contact`, the deprecated
+   `governance_committee_contact`) is `inlined`, so LinkML treats them as
+   *references* — an inline Person object is rejected and the bare string
+   is the only form that validates. All twelve v7 records carry strings
+   and all twelve validate. The reconcile phase produced the only valid
+   shape; the reviews' rule-08 verdicts on those slots (six records)
+   charge the records with a schema constraint and are void; and #805's
+   description ("a person's name such as 'Aaron Lee'") is, as things
+   stand, the string form's only meaning. `Dataset` carries no list of
+   Person entries for a reference to resolve to, so the decision (D1) is
+   three-way, and until it is made the digest must say which attributes
+   are references — it now does, on all eight.
 3. **The class the reviews found most often — a true statement in the
    wrong tense or scope** — has no rule at all: prospective stated as
    current (plan-as-done, CHORUS rep1/CM4AI rep3), historical stated as
@@ -61,19 +68,23 @@ generation half of #836/#859 and needs the same treatment as the others
 
 ## What v8 changes
 
-A. **Digest depth two for object-valued nested classes** (code,
-`schema_digest.py`): render the keys of every class reachable *from a
-rendered nested class* — `Person`, `Grant`, `Organization`, `Software`
-and whatever else the one-level walk currently truncates — under the
-same "required / optional / ranges / enums" shape, deduplicated. Measured
-on this branch: 67 → 72 nested classes (Person, Grant, Organization and
-two more), 40,922 → 43,620 chars against the 44,000 budget — 380 chars
-of headroom, so any further digest addition must first raise the budget
+A. **Digest depth two, through inlined attributes, with references
+marked** (code, `schema_digest.py`, PR #916): render the keys of every
+class reachable from a rendered nested class through an `inlined` /
+`inlined_as_list` attribute — `Grant`, `Organization`, `Person` (via
+`committee_members`) and one more — under the same "required / optional
+/ ranges / enums" shape; and mark the eight class-ranged attributes that
+are references (`principal_investigator: Person (reference — a string,
+not an object)`) in the one function both the digest and the judge's
+view read (#486), so the "takes an object" header cannot reach them.
+Measured: 67 → 71 nested classes, 40,922 → 43,817 chars against the
+44,000 budget — **183 chars of headroom**, so any further digest
+addition (D1's option (a) included) must first raise the budget
 deliberately. The Dataset digest fingerprint moves `580992ed` →
-`0d7b6c32` (recorded in `digest_inventory.yaml` and the schema-sync
+`e3e060fe` (recorded in `digest_inventory.yaml` and the schema-sync
 test); the fitness cache keys on it, so this moves every condition's
 assembly digest and is itself a re-baseline. Closes the digest half of
-#900.
+#900; the Person half is D1.
 
 B. **Registry term labels — pack side only** (#912). The digest already
 renders `id=name` pairs for `data_topic`/`data_substrate`
@@ -93,13 +104,15 @@ because the bundles do carry ORCIDs and emails the reviewers located.
 D. **`ADDED IN v8`** — four rules, each naming a mechanism rather than
 restating a prohibition:
 
-1. *Scalar vs class ranges, by name.* The v4 rule governs slots whose
-   declared range is a scalar (`string`, `uriorcurie`, an enum). A slot
-   whose range is a class the digest lists — `Person`, `Grant`,
-   `Organization` — takes an object with that class's keys, and a
-   reconcile or repair phase must never reduce such an object to a
-   string: an audit finding that a Person object is "the thing, not
-   its identifier" is wrong on its face. (#900, #805)
+1. *Inlined vs reference ranges, by the digest's marking.* A class-ranged
+   attribute the digest marks `(reference — a string, not an object)`
+   takes exactly that; every other class-ranged attribute takes an
+   object with the keys the digest lists for that class — `Grant` under
+   `grants`, `Organization` under `affiliations` — and a reconcile or
+   repair phase must never reduce such an object to a string, nor
+   inflate a reference to an object. (#900's Grant half; the Person
+   slots follow D1 — if D1 chooses `inlined: true`, they move from the
+   first sentence to the second and the digest marking moves with them.)
 2. *Tense and scope.* Before writing a value from a passage, name to
    yourself what the passage is about and when: a plan, a proposal or
    a future release is stated as such or omitted, never as the current
@@ -145,7 +158,7 @@ work with a migration of committed values; separate).
 
 | # | metric | attributed to | prediction |
 |---|---|---|---|
-| 1 | rule-08 violated (Person/Grant flattening) in the review pass | A + C + D1 | 0 of 12, from 6 of 12 on v7 |
+| 1 | rule-08 violated in the review pass, on inlined class ranges only (Grant; Person too if D1 inlines it) — reviewers told which attributes are references | A + C + D1 | 0 of 12; on v7 the 6 of 12 were Person slots the schema forced to strings, which the corrected pack no longer charges |
 | 2 | `grant_number`/`grant_title` populated where the bundle states an award number | A | every funder with an award number in the bundle; v7 had none |
 | 3 | rule-06/07 violated (absence statements, access routes) | D2 | ≤ 2 of 12, from 7 of 12; a fall that does not reach this says restatement, not mechanism, was tried |
 | 4 | misread verdicts of the tense/scope class (plan-as-done, historical-as-current, related-dataset clause) | D2 | 0 in the sampled receipted slots, from 5 instances on v7 |
@@ -221,10 +234,17 @@ of them may land between a v8 canary and its fill.
 
 ## Decisions needed before step 3
 
-- **D1 (#805)**: keep `range: Person` and fix the descriptions
-  (recommended: the bundles state ORCIDs and emails; a string range
-  throws that away and makes the v3 rule moot for these slots), or
-  change the range to `string`.
+- **D1 (#805)**, three-way: (a) `inlined: true` on the five Person-ranged
+  slots and descriptions rewritten to ask for the object (recommended:
+  the bundles state ORCIDs and emails the reviewers located; the v3
+  rule and the depth-two digest then apply; costs digest budget — the
+  headroom is 183 chars, so the budget moves with it); (b) `range:
+  string` with the descriptions as they stand (the rule-08 class is
+  void for these slots by design); (c) keep reference semantics and
+  require an identifier string (a name is then wrong, and `Dataset` has
+  no Person list for a reference to resolve to — the incoherent
+  option). Any of the three moves the digest; (a) is the only one that
+  captures what the bundles state.
 - **D2 (#902)**: receipts per roster entry as a v8 rule (recommended —
   it is the only route that raises coverage rather than reporting it),
   or reporting only.

@@ -345,3 +345,16 @@ class RegistryLabels(unittest.TestCase):
             p = rp.build_pack(prov, instr, {"receiptless_slots": 50})
             item = next(i for i in p["items"] if str(i.get("slot", "")).startswith("data_topic"))
             self.assertEqual(item["value_label"], label)
+
+
+class ReferenceAttributes(unittest.TestCase):
+    def test_the_pack_names_the_reference_attributes(self):
+        """#805/#916: the reviewer is told which class-ranged attributes take a
+        string, so rule-08 is not charged on a Person reference."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = Pack()._run(tmp)
+            p = rp.build_pack(prov, instr)
+            entries = p["reference_attributes"]["entries"]
+            self.assertIn("Creator.principal_investigator → Person (reference — a string, not an object)", entries)
+            self.assertEqual(len(entries), 8)
+            self.assertIn("not inlined", p["reference_attributes"]["note"])

@@ -328,6 +328,23 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     if id_gap:
         pack["gaps"].append(id_gap)
 
+    # --- class-ranged attributes that are references (#805, #916): a string
+    # is the only form that validates there, so a rule that asks for the
+    # class's fields (rule-08 on the v7 packs) does not apply. Six of twelve
+    # v7 reviews charged `principal_investigator: <name>` under it.
+    try:
+        from data_sheets_schema.schema_digest import build as _build_digest
+        refs = sorted(f"{n.name}.{k} → {v}" for n in _build_digest("Dataset").nested
+                      for k, v in n.ranges.items() if "(reference" in v)
+    except Exception as e:                                    # noqa: BLE001
+        refs, ref_gap = [], f"reference attributes unavailable: {type(e).__name__}"
+        pack["gaps"].append(ref_gap)
+    pack["reference_attributes"] = {
+        "entries": refs,
+        "note": "A class-ranged attribute that is not inlined is a reference: the record must hold a "
+                "string there (an inline object fails validation, #805), so a rule asking for the "
+                "class's declared fields does not apply to it — judge the string's support, not its shape."}
+
     # --- chunks marked nothing_relevant: every one, with its lines
     items: list[dict[str, Any]] = []
     if paths["receipt"].exists() and manifest_path and manifest_path.exists():
