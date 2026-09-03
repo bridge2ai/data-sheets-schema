@@ -67,12 +67,26 @@ class DigestIsAFunctionOfContentTest(unittest.TestCase):
         file scope; the count is scope-dependent, the location is not) lives
         in labels from 2026-08-12 or earlier,
         which keep the verdicts they were pinned with (#426).
+
+        `580992ed` → `163c7e4d` on 2026-09-03: the digest renders two levels
+        of object range (`NESTING_DEPTH`, #900, v8 plan step A) reached
+        through inlined attributes — Grant, Organization, Person (via
+        `committee_members`) and File join the 67 — and marks the eight
+        class-ranged attributes that are references, not inlined objects
+        (`principal_investigator: Person (reference — a string, not an
+        object)`, #805), with no change to the schema itself, so no
+        record's validity moves; the slot inventory recorded under the new
+        digest is identical to the old one. Every run from here records the
+        new digest; the v7 arm keeps `580992ed`, which is one of the things
+        v7-vs-v8 measures. The CoreDataset digest moves with it
+        (`b0c42638` → `10d60d20`); it is not pinned here because the ledger
+        keys on the Dataset digest (`LEDGER_KEY_CLASS`).
         """
         if not self.SCHEMA.exists():
             self.skipTest("merged schema not present in this checkout")
         self.assertEqual(
             schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
-            "580992ed7037762157c110fc9e671c81")
+            "163c7e4db1d637e1cc458047813cd2c4")
 
 
 class SyncCheckTest(unittest.TestCase):

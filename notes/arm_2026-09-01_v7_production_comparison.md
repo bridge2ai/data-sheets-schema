@@ -206,6 +206,17 @@ rep1 canary would read *regressed* on the British row (45 vs the
 baseline's worst 43); its recorded verdict stands on its v2 basis and the
 decision is #906.
 
+**Correction (2026-09-03, #805/#916):** the rule-08 verdicts on the
+Person-ranged slots — `principal_investigator`, `contact_person`,
+`committee_contact` — in six records (CM4AI rep1/2/3, VOICE rep1, CHORUS
+rep3, AI_READI rep3) are void on validity: those slots are not `inlined`,
+an inline Person object fails `linkml-validate`, and the string the
+reviewers charged is the only form that validates. The arm's rule
+violations (44/192) and those six records' adverse totals include them;
+the Grant half of the same finding (`grant_number` empty, award numbers
+in prose) stands. The review pack now lists `reference_attributes` so a
+reviewer is told which class-ranged attributes take a string.
+
 ## Rubric-flagged items (as handed to the review pass; adjudications above)
 
 - AI_READI (all reps): WUSTL-vs-UW PI/licensor affiliation conflict

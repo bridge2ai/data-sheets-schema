@@ -57,6 +57,11 @@ DESCRIPTION_CHARS = 300
 # unable to choose and will approximate instead. At this size the whole
 # vocabulary costs 38 bytes more than the clipped one, in a cached prefix.
 MAX_ENUM_VALUES = 60
+#: How many levels of object range the digest renders (#900, v8 plan A):
+#: 1 renders the classes the target's slots range over; 2 also renders the
+#: classes *their* attributes range over (Person under Creator, Grant under
+#: FundingMechanism), reached through non-universal attributes only.
+NESTING_DEPTH = 2
 
 # Attribute names every class inherits. Listing them on all 66 nested classes
 # would be 264 tokens saying nothing — the model already reaches for
@@ -187,8 +192,9 @@ def render_values_from(names: list[str]) -> str | None:
 
 
 #: Ranges that hold on essentially every object range, stated once rather than
-#: repeated 67 times (#486). `id` is `uriorcurie` on all 67 nested classes and
-#: `used_software` is `Software[]` on 64 — so a per-class line would be bloat
+#: repeated per class (#486). `id` is `uriorcurie` on all 71 nested classes
+#: (67 before the depth-two digest, #916) and `used_software` is `Software[]`
+#: on 64 — so a per-class line would be bloat
 #: that an existing guard already forbids, while the information itself is the
 #: most valuable here: `id → uriorcurie` is the whole #402/#457 family, and a
 #: bare token validates exactly as cleanly as a ROR IRI.
@@ -320,28 +326,49 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
         ))
     digest.slots.sort(key=lambda s: s.name)
 
-    # One level of nesting only. Deeper recursion reproduces most of the schema
-    # and defeats the point of a digest; one level is what a generation run
-    # needs to populate a slot's object without guessing its required keys.
+    # Two levels of nesting (#900, v8 plan step A). One level renders the
+    # classes the target's slots range over — `Creator`, `FundingMechanism` —
+    # and names their attributes' ranges: `grants: Grant[]`. It never
+    # rendered `Grant` itself, so a run was told the range and never the
+    # keys, and the v3 rule ("populate the fields that class declares")
+    # asked for fields the digest did not show: `grant_number` is populated
+    # in none of the twelve v7 records, the award numbers sit in prose. The
+    # second level renders every class a first-level attribute ranges over
+    # **through an inlined attribute** — `inlined` or `inlined_as_list` —
+    # and not through the universal ones (`used_software: Software[]` sits on
+    # 64 classes and is stated once as UNIVERSAL_RANGES). An attribute that
+    # is not inlined is a *reference*: `Creator.principal_investigator:
+    # Person` takes a string, and an inline Person object fails validation
+    # (#805, verified with linkml-validate on the #916 review) — rendering
+    # Person under "takes an object … or the record fails validation" would
+    # instruct the invalid form. Deeper than two reproduces the schema and
+    # defeats the digest.
     seen: set[str] = set()
-    for slot in digest.slots:
-        rng = slot.range
-        if not rng or rng in seen:
-            continue
-        cls = sv.get_class(rng)
-        if cls is None:
-            continue
-        seen.add(rng)
+
+    def nested_for(rng: str) -> tuple[NestedClass | None, list[str]]:
         req, opt = [], []
         enums: dict[str, list[str]] = {}
         enums_truncated: dict[str, int] = {}
         ranges: dict[str, str] = {}
         values_from: dict[str, list[str]] = {}
+        inlined_ranges: list[str] = []
         for sub in sv.class_induced_slots(rng):
             (req if sub.required else opt).append(str(sub.name))
             if sub.range:
-                ranges[str(sub.name)] = (
-                    f"{sub.range}[]" if sub.multivalued else str(sub.range))
+                shown = f"{sub.range}[]" if sub.multivalued else str(sub.range)
+                is_class = sv.get_class(str(sub.range)) is not None
+                if is_class and not (sub.inlined or sub.inlined_as_list):
+                    # A class-ranged attribute that is not inlined is a
+                    # reference and takes a string; the object form fails
+                    # validation (#805). Said on the range so that both the
+                    # digest and the judge's view carry it (#486), and so
+                    # the "Object ranges" header's "takes an object" does
+                    # not reach these eight attributes.
+                    shown += " (reference — a string, not an object)"
+                ranges[str(sub.name)] = shown
+                if (is_class and (sub.inlined or sub.inlined_as_list)
+                        and str(sub.name) not in UNIVERSAL_ATTRIBUTES):
+                    inlined_ranges.append(str(sub.range))
             if sub.values_from:
                 values_from[str(sub.name)] = [str(v) for v in sub.values_from]
             sub_enum = sv.get_enum(sub.range) if sub.range else None
@@ -351,11 +378,25 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
                 extra = len(values) - MAX_ENUM_VALUES
                 if extra > 0:
                     enums_truncated[str(sub.name)] = extra
-        if req or opt:
-            digest.nested.append(NestedClass(
-                name=rng, required=sorted(req), optional=sorted(opt),
-                enums=enums, enums_truncated=enums_truncated,
-                ranges=ranges, values_from=values_from))
+        if not (req or opt):
+            return None, inlined_ranges
+        return NestedClass(name=rng, required=sorted(req), optional=sorted(opt),
+                           enums=enums, enums_truncated=enums_truncated,
+                           ranges=ranges, values_from=values_from), inlined_ranges
+
+    frontier = [slot.range for slot in digest.slots if slot.range]
+    for depth in range(NESTING_DEPTH):
+        next_frontier: list[str] = []
+        for rng in frontier:
+            if rng in seen or sv.get_class(rng) is None:
+                continue
+            seen.add(rng)
+            nested, reachable = nested_for(rng)
+            if nested is None:
+                continue
+            digest.nested.append(nested)
+            next_frontier.extend(reachable)
+        frontier = next_frontier
     digest.nested.sort(key=lambda n: n.name)
     return digest
 
@@ -421,7 +462,12 @@ def render(digest: ClassDigest) -> str:
             optional = [k for k in n.optional if k not in UNIVERSAL_ATTRIBUTES]
             if optional:
                 own = [k for k in optional if k not in top_level]
-                mirrors = 1 - len(own) / len(optional) >= MIRRORS_TOP_LEVEL
+                # Only a class large enough to be truncated takes the shortcut
+                # (#916 review): `Organization` has two optionals, both
+                # top-level names, and the bare overlap test told a run that
+                # an Organization accepts every Dataset slot.
+                mirrors = (len(optional) > MAX_OPTIONAL_SHOWN
+                           and 1 - len(own) / len(optional) >= MIRRORS_TOP_LEVEL)
                 if mirrors:
                     extra = (" plus " + ", ".join(f"`{k}`" for k in own)) if own else ""
                     lines.append("    - also accepts the same slots as the "

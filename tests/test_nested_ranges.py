@@ -42,7 +42,8 @@ class TestTheDigestCarriesNestedRanges(unittest.TestCase):
         if nested is None:
             self.skipTest("DataGovernance not a nested range")
         self.assertEqual(nested.ranges.get("committee_members"), "Person[]")
-        self.assertEqual(nested.ranges.get("committee_contact"), "Person")
+        # not inlined: a reference, marked as such since #916 (#805)
+        self.assertEqual(nested.ranges.get("committee_contact"), "Person (reference — a string, not an object)")
 
     def test_uriorcurie_attributes_are_covered(self):
         """The case that motivated this. A bare token in a nested `id`
@@ -160,3 +161,65 @@ class TestCachedJudgementsCannotSurviveThis(unittest.TestCase):
         for nested in digest.nested:
             with self.subTest(nested=nested.name):
                 self.assertNotIn("id", schema_digest.shown_ranges(nested))
+
+
+class DepthTwo(unittest.TestCase):
+    """#900 / v8 plan A: the classes a first-level attribute ranges over are
+    rendered too — a run told `principal_investigator: Person` must also be
+    told what a Person carries — but not through the universal attributes,
+    and not deeper."""
+
+    def test_person_and_grant_are_rendered_with_their_keys(self):
+        digest = schema_digest.build("Dataset")
+        names = {n.name for n in digest.nested}
+        self.assertIn("Person", names); self.assertIn("Grant", names); self.assertIn("Organization", names)
+        person = next(n for n in digest.nested if n.name == "Person")
+        self.assertIn("orcid", person.optional); self.assertIn("email", person.optional)
+        grant = next(n for n in digest.nested if n.name == "Grant")
+        self.assertIn("grant_number", grant.optional)
+        text = schema_digest.digest_text("Dataset")
+        self.assertIn("**Person**", text); self.assertIn("**Grant**", text)
+
+    def test_software_is_reached_only_through_a_universal_attribute_and_stays_out(self):
+        digest = schema_digest.build("Dataset")
+        self.assertNotIn("Software", {n.name for n in digest.nested})
+
+    def test_a_reference_attribute_says_so_in_both_views(self):
+        """#805: an inline Person on `principal_investigator` fails validation
+        — the attribute is a reference. The digest and the judge's view
+        (`shown_ranges`, #486) both carry the marker; Person is still
+        rendered because `committee_members` inlines it."""
+        digest = schema_digest.build("Dataset")
+        creator = next(n for n in digest.nested if n.name == "Creator")
+        self.assertEqual(creator.ranges["principal_investigator"], "Person (reference — a string, not an object)")
+        self.assertIn("principal_investigator", schema_digest.shown_ranges(creator))
+        self.assertEqual(creator.ranges["affiliations"], "Organization[]")           # inlined: an object
+        text = schema_digest.digest_text("Dataset")
+        self.assertEqual(text.count("(reference — a string, not an object)"), 8)
+        self.assertIn("**Person**", text)
+
+    def test_the_second_level_stays_within_budget(self):
+        self.assertLess(len(schema_digest.digest_text("Dataset")), 44_000)
+        self.assertEqual(schema_digest.NESTING_DEPTH, 2)
+
+    def test_every_class_reachable_through_an_inlined_attribute_is_rendered(self):
+        """The general property behind the three names above: from any
+        rendered class, every non-universal inlined attribute's class range
+        is itself rendered (depth two closes the walk), and no reference
+        attribute's range is asserted as an object."""
+        from linkml_runtime import SchemaView
+        digest = schema_digest.build("Dataset")
+        sv = SchemaView(str(schema_digest.resolve_schema(schema_digest.CLASS_SCHEMA["Dataset"])))
+        rendered = {n.name for n in digest.nested}
+        missing, unmarked = [], []
+        for n in digest.nested:
+            for sub in sv.class_induced_slots(n.name):
+                if not sub.range or sv.get_class(sub.range) is None or sub.name in schema_digest.UNIVERSAL_ATTRIBUTES:
+                    continue
+                if sub.inlined or sub.inlined_as_list:
+                    if sub.range not in rendered:
+                        missing.append(f"{n.name}.{sub.name} → {sub.range}")
+                elif "(reference" not in n.ranges.get(str(sub.name), ""):
+                    unmarked.append(f"{n.name}.{sub.name} → {sub.range}")
+        self.assertEqual(missing, [])
+        self.assertEqual(unmarked, [])

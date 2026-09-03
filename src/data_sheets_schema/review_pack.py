@@ -182,6 +182,36 @@ def _value_at(record: Any, path: str, limit: int = 300) -> Any:
     return s[:limit] + "…" if isinstance(s, str) and len(s) > limit else s
 
 
+def _raw_value(record: Any, path: str) -> Any:
+    """The untruncated value at a path; a one-item list of a scalar is that
+    scalar (`data_topic: [B2AI_TOPIC:43]`)."""
+    from data_sheets_schema.receipts import _resolve_value
+    ok, v = _resolve_value(record, path)
+    if ok and isinstance(v, list) and len(v) == 1 and isinstance(v[0], str):
+        return v[0]
+    return v if ok else None
+
+
+def _registry_label(value: Any) -> str | None:
+    """The pinned registry label for a `values_from` CURIE (#912): the digest
+    shows the model `id=name` pairs for B2AI_TOPIC / B2AI_SUBSTRATE, the
+    pack showed the reviewer the bare CURIE; seven of the twelve v7 review
+    files say the term cannot be checked (verdicts `exempt_by_nature` x5,
+    `cannot_tell` x1). Scans every pinned vocabulary rather than the slot's
+    own `values_from` — safe while the vocabularies are self-prefixed and
+    disjoint (#917 scopes it). None for anything else."""
+    if not isinstance(value, str) or ":" not in value:
+        return None
+    try:
+        from data_sheets_schema.schema_digest import vocabularies
+        for terms in vocabularies().values():
+            if value in terms:
+                return str(terms[value])
+    except Exception:                                         # noqa: BLE001
+        return None
+    return None
+
+
 def _id_slots(full: Any, root_class: str | None = None) -> tuple[list[dict[str, Any]], str | None]:
     """Every populated `…id` leaf of the record with whether the schema
     *forces* the id (#803) and whether the value is a *mint* (#823): `File`,
@@ -301,6 +331,23 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     if id_gap:
         pack["gaps"].append(id_gap)
 
+    # --- class-ranged attributes that are references (#805, #916): a string
+    # is the only form that validates there, so a rule that asks for the
+    # class's fields (rule-08 on the v7 packs) does not apply. Six of twelve
+    # v7 reviews charged `principal_investigator: <name>` under it.
+    try:
+        from data_sheets_schema.schema_digest import build as _build_digest
+        refs = sorted(f"{n.name}.{k} → {v}" for n in _build_digest("Dataset").nested
+                      for k, v in n.ranges.items() if "(reference" in v)
+    except Exception as e:                                    # noqa: BLE001
+        refs, ref_gap = [], f"reference attributes unavailable: {type(e).__name__}"
+        pack["gaps"].append(ref_gap)
+    pack["reference_attributes"] = {
+        "entries": refs,
+        "note": "A class-ranged attribute that is not inlined is a reference: the record must hold a "
+                "string there (an inline object fails validation, #805), so a rule asking for the "
+                "class's declared fields does not apply to it — judge the string's support, not its shape."}
+
     # --- chunks marked nothing_relevant: every one, with its lines
     items: list[dict[str, Any]] = []
     if paths["receipt"].exists() and manifest_path and manifest_path.exists():
@@ -363,6 +410,9 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                     item["question"] += (" A later phase rewrote this value after the receipt: `value_at_receipt` "
                                          "is what the receipt attested, `value` is what the record now says — "
                                          "judge whether the passage supports the current value.")
+            label = _registry_label(_raw_value(full, at) if at else None)
+            if label:
+                item["value_label"] = label
             items.append(item)
         # The receiptless set from the receipt and the record themselves,
         # not the record's 50-entry walk-order prefix (#790): every populated,
@@ -378,11 +428,15 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                          if not exempt(p, v, record_id) and not any(_covers(r, p) for r in covering))
         rng.shuffle(without)
         for slot in without[: sample["receiptless_slots"]]:
-            items.append({"id": f"slot-{len(items) + 1:03d}", "kind": "slot_receiptless", "slot": slot,
-                          "value": _value_at(full, slot),
-                          "question": "No receipt names a passage for this value. Find one in the bundle, or "
-                                      "conclude it is inferred from stated lines, or that the bundle does not "
-                                      "state it, or that the slot is of a kind that has no passage."})
+            item = {"id": f"slot-{len(items) + 1:03d}", "kind": "slot_receiptless", "slot": slot,
+                    "value": _value_at(full, slot),
+                    "question": "No receipt names a passage for this value. Find one in the bundle, or "
+                                "conclude it is inferred from stated lines, or that the bundle does not "
+                                "state it, or that the slot is of a kind that has no passage."}
+            label = _registry_label(_raw_value(full, slot))
+            if label:
+                item["value_label"] = label
+            items.append(item)
         reshaped = list(((rc.get("slots") or {}).get("reshaped_by_reconcile")) or [])
         for slot in reshaped[: sample["reshaped_slots"]]:
             items.append({"id": f"slot-{len(items) + 1:03d}", "kind": "slot_reshaped", "slot": slot,
