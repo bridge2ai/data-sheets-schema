@@ -24,7 +24,7 @@ jobs:
     steps:
 
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # `fairscape_models` is a git submodule imported by
       # `src/fairscape_integration`, not a pip dependency. An un-initialised
@@ -35,7 +35,7 @@ jobs:
         run: git submodule update --init fairscape_models
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 

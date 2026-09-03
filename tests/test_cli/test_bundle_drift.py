@@ -171,6 +171,31 @@ def _history_befores(manifest: Path = MANIFEST) -> set[str]:
     return found
 
 
+BUNDLE_DIR = Path("data/preprocessed/concatenated")
+
+
+def _history_terminal(manifest: Path = MANIFEST) -> dict[str, tuple[str, int]]:
+    """For every bundle the history names, the `after` of its last event.
+
+    Two shapes, both present in the manifest: `projects.<P>` is
+    `<P>_preprocessed.txt`, `crate_bundles.<P>` is
+    `<P>_preprocessed_with_crate.txt`. The last `after` is the hash the
+    history claims is live — which is what an unrecorded rewrite breaks
+    even when no record pins the hash it replaced (#935 review).
+    """
+    history = (yaml.safe_load(manifest.read_text(encoding="utf-8")) or {}
+               ).get("bundle_hash_history") or {}
+    terminal: dict[str, tuple[str, int]] = {}
+    for event in history.get("events") or []:
+        for key, suffix in (("projects", "_preprocessed.txt"),
+                            ("crate_bundles", "_preprocessed_with_crate.txt")):
+            for project, hashes in (event.get(key) or {}).items():
+                after = (hashes or {}).get("after")
+                if isinstance(after, str):
+                    terminal[f"{project}{suffix}"] = (after, event.get("issue"))
+    return terminal
+
+
 def _pinned_md5(method: str, label: str, project: str) -> str:
     from data_sheets_schema.provenance import record_path_for
     record = yaml.safe_load(record_path_for(project, method, label)
@@ -197,6 +222,16 @@ class TestWhatTheHistoryExplains(unittest.TestCase):
         # A record pinning `bbbb` should be current; if it has drifted, the
         # rewrite that replaced `bbbb` is the unrecorded event.
         self.assertNotIn("bbbb", explained)
+
+    def test_the_terminal_hash_is_the_last_events_after_per_bundle(self):
+        path = self._manifest([
+            {"issue": 1, "projects": {"P": {"before": "a1", "after": "a2"}},
+             "crate_bundles": {"P": {"before": "c1", "after": "c2"}}},
+            {"issue": 2, "projects": {"P": {"before": "a2", "after": "a3"}}},
+        ])
+        self.assertEqual(_history_terminal(path), {
+            "P_preprocessed.txt": ("a3", 2),
+            "P_preprocessed_with_crate.txt": ("c2", 1)})
 
     def test_no_history_explains_nothing(self):
         self.assertEqual(_history_befores(self._manifest([])), set())
@@ -253,9 +288,33 @@ class TestAgainstTheRealCorpus(unittest.TestCase):
                          "drifted records whose pinned bundle hash no "
                          "bundle_hash_history event names as `before` "
                          f"(counts: {counts})")
-        # `current` grows as fresh runs land — 12 when filed, 14 after the
-        # 2026-08-11 canaries, which are drift-free by construction. Asserted
-        # as a floor rather than a fixed number so a new run does not fail the
-        # test, while a *drop* still would: that would mean a bundle moved
-        # under records that were current.
-        self.assertGreaterEqual(counts[BUNDLE_CURRENT], 12)
+        # No floor on `current` any more (it was 12, then 41 by 2026-09-03):
+        # a drop is what a *recorded* rewrite legitimately does to the records
+        # that were current, and an unrecorded one is what the test below
+        # catches. The counts are in the message above, not asserted.
+
+    def test_every_bundle_the_history_names_still_hashes_to_its_last_after(self):
+        """The half the invariant above cannot see (#935 review).
+
+        A drift is only visible through a record that pins the replaced
+        hash, and the #427 event recorded CHORUS with before == after (the
+        strip removed nothing there), so CHORUS's live hash is already a
+        `before` and an unrecorded rewrite of it would have passed. The
+        history's own claim closes that: the last event's `after` for each
+        bundle it names is the hash that should be live, whatever the
+        records pin. Recording the rewrite is the way to make this pass.
+        """
+        terminal = _history_terminal()
+        self.assertGreater(len(terminal), 0)
+        stale = []
+        for name, (after, issue) in sorted(terminal.items()):
+            bundle = BUNDLE_DIR / name
+            if not bundle.exists():
+                stale.append(f"{name}: missing; history (#{issue}) says {after[:8]}")
+                continue
+            live = hashlib.md5(bundle.read_bytes()).hexdigest()
+            if live != after:
+                stale.append(f"{name}: hashes {live[:8]}, history's last event "
+                             f"(#{issue}) says {after[:8]}")
+        self.assertEqual(stale, [], "bundles rewritten with no bundle_hash_history "
+                                    "event recording it")
