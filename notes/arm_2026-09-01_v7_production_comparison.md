@@ -7,7 +7,8 @@ four production canaries (CM4AI retained under #877's off-by-one
 interpretation; VOICE and CHORUS passed outright; AI_READI retained on
 its fourth attempt under the #891 exposure-adjusted revision — attempt
 4's remaining gate failures were instrument/bookkeeping-class per the
-canary basis, while attempts 1–3, archived under `data/ATTIC/
+canary basis, and its verdict was later re-derived under spelling
+instrument v3 as regressed on the British row (#906, PR #920) — while attempts 1–3, archived under `data/ATTIC/
 canary_retries/`, included failures their own READMEs call genuine)
 and eight fill records in one resumed sweep. "12/12 zero failed runs"
 counts the production matrix as registered: retried canary attempts are
@@ -202,9 +203,12 @@ two amended records predate the amendments and are listed as such.
 **British spellings, instrument v3 (#836/#859).** Every form block was
 recomputed: v6 arm 47, v7 production 139 (AI_READI 45/38/52 — the
 reviewers' ~24 lines were real), v5 baseline 88. Under v3 the AI_READI
-rep1 canary would read *regressed* on the British row (45 vs the
-baseline's worst 43); its recorded verdict stands on its v2 basis and the
-decision is #906.
+rep1 canary reads *regressed* on the British row (45 vs the baseline's
+worst 43): decision D4 (#906, adopted 2026-09-03, PR #920) re-derived its
+verdict offline under v3, with the prior v2-basis verdict kept under
+`prior_verdict`. The record stays retained in the completed arm — the
+retention now sits under a regressed-on-British v3 verdict, and every
+other row is unchanged.
 
 **Correction (2026-09-03, #805/#916):** the rule-08 verdicts on the
 Person-ranged slots — `principal_investigator`, `contact_person`,
