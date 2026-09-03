@@ -979,10 +979,12 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
     declared = declared_slots()
     written = skipped = 0
     import yaml as _yaml
-    from datetime import date
+    from datetime import datetime, timezone
 
     from data_sheets_schema.backfill_checks import _split_header
+    from data_sheets_schema.grounding import BRITISH_INSTRUMENT
     for p in paths:
+        withheld: list[str] = []
         try:
             blocks = compute(p, declared, only=wanted)
             if "form" in blocks and overwrite:
@@ -993,15 +995,16 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
                 prior = ((_yaml.safe_load(_split_header(p.read_text(encoding="utf-8"))[1]) or {})
                          .get("form") or {})
                 if prior:
-                    note = (f"form recomputed {date.today().isoformat()} under british instrument v3 "
-                            f"(#836/#859); previous british={prior.get('british_spellings')}")
+                    note = (f"form recomputed {datetime.now(timezone.utc).date().isoformat()} by "
+                            f"backfill-checks --overwrite, british instrument {BRITISH_INSTRUMENT}; "
+                            f"previous british={prior.get('british_spellings')}")
                     if prior.get("instrument_note"):
                         note = f"{prior['instrument_note']} | {note}"
                     blocks["form"]["instrument_note"] = note
             # Inside the same guard as compute: a write that raises halfway
             # through 192 records leaves a corpus in two states, and the reason
             # it raised is exactly the kind a reader needs to see per-record.
-            changed = apply(p, blocks, overwrite=overwrite) if execute else True
+            changed = apply(p, blocks, overwrite=overwrite, withheld=withheld) if execute else True
         except Exception as exc:                               # noqa: BLE001
             click.echo(f"   ✗ {p.parts[-2]}/{p.name}: {exc}")
             continue
@@ -1010,7 +1013,8 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
             continue
         written += 1
         click.echo(f"   {'✔' if execute else '·'} {p.parts[-2][:38]:38} "
-                   f"{p.name[:-16]:16} {summarise(blocks)}")
+                   f"{p.name[:-16]:16} {summarise(blocks)}"
+                   + (f" · kept attested {','.join(withheld)} (recomputation could not measure)" if withheld else ""))
     verb = "written" if execute else "would be written"
     click.echo(f"\n{written} record(s) {verb}"
                + (f", {skipped} already carried the blocks" if skipped else ""))

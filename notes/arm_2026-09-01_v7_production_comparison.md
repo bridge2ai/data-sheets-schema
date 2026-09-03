@@ -175,7 +175,7 @@ join fixes); 6 paths the model mis-addressed at phase 1 (CM4AI rep3's
 reconciliation shift); 3 whose index another entry now occupies (CHORUS
 rep3 `creators[1]`, where an unnamed entry replaced Azra Bihorac — the
 misjoin the pack used to commit silently, now uncredited and reported);
-2 unresolved. So the reviewers were right that the pack was judging the
+1 ambiguous; 2 unresolved. So the reviewers were right that the pack was judging the
 wrong entry, and mostly wrong about why: the dominant mechanism is
 rewriting in place, not reordering. Coverage figures above change by at
 most two slots per record (AI_READI rep3 164→166).

@@ -204,6 +204,8 @@ BRITISH_FORMS = ("licence", "analyse", "organisation", "enrolment", "programme",
 #: `favour`, `honour` join the list — a genuinely British "colour fundus" in
 #: an AI_READI record was invisible to the old instrument while American
 #: "analyses" counted against it.
+#: Named so a recompute's audit note says which instrument counted (#907).
+BRITISH_INSTRUMENT = "v3 (#836/#859)"
 BRITISH_PATTERNS = tuple(re.compile(rx) for rx in (
     # v2.1 (#670 review): the organise verb family — 76 occurrences in the v4
     # arm — had escaped both instruments; bare enrol/enrols, the licenced/

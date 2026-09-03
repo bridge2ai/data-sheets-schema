@@ -206,8 +206,6 @@ def disposition(method, label, project, item, disposition, note, slot_path, old,
     def append_entry() -> None:
         rec = yaml.safe_load(bc._split_header(prov.read_text(encoding="utf-8"))[1]) or {}
         rec.setdefault("dispositions", []).append(entry)
-        if "_validation" in entry:
-            rec["validation"] = entry.pop("_validation")
         ProvenanceRecord(data=rec).write(prov)
 
     if disposition == "amend":

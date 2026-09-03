@@ -229,8 +229,10 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
 
 
 def apply(provenance: Path, blocks: dict[str, Any],
-          overwrite: bool = False) -> bool:
+          overwrite: bool = False, withheld: list[str] | None = None) -> bool:
     """Write the blocks into the record. Returns whether anything changed.
+    `withheld`, when given, receives the names of blocks kept because the
+    recomputation could not measure what the record already attests.
 
     Rewrites through `safe_dump` after splitting the leading comments off and
     re-emitting them verbatim, so the header the reader relies on survives.
@@ -256,10 +258,12 @@ def apply(provenance: Path, blocks: dict[str, Any],
         # with `checked: false / bundle drifted` by a `--blocks receipts`
         # pass over a bundle that had since moved. The attested block is
         # the record of what the run read; today's inability to re-read
-        # it is reported on stdout, not written over it.
+        # it is named to the caller (`withheld`), not written over it.
         old, new = record.get(name), blocks[name]
         if (overwrite and isinstance(old, dict) and isinstance(new, dict)
                 and old.get("checked") is True and new.get("checked") is False):
+            if withheld is not None:
+                withheld.append(name)
             continue
         if name == "receipts" and name not in record:
             # A receipts block saying "none, and none was expected" adds

@@ -340,9 +340,12 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         for slot in receipted[: sample["receipted_slots"]]:
             claim = claims["slots"][slot]
             rs = claim["receipts"]
-            at = claim.get("resolved_path") or slot
+            # With a snapshot, a None resolution means the receipted entry is
+            # gone: the reviewer sees UNRESOLVED, never the value of whatever
+            # now sits at the written index (#907 review, A).
+            at = claim.get("resolved_path") if original is not None else slot
             item = {"id": f"slot-{len(items) + 1:03d}", "kind": "slot_receipted", "slot": slot,
-                    "value": _value_at(full, at),
+                    "value": _value_at(full, at) if at else UNRESOLVED,
                     "receipts": [{"chunk": r["chunk"], "lines": span.get(r["chunk"], {}).get("lines"),
                                   "snippet": r["snippet"]} for r in rs],
                     "question": "Read the passage each snippet sits in. Does it support the record's value at "
@@ -352,7 +355,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
             if original is not None:
                 item["resolved_path"] = claim.get("resolved_path")
                 item["resolution"] = claim.get("resolution")
-                if at != slot:
+                if at and at != slot:
                     item["question"] += (" The receipt was written at `slot`; the entry it receipted now sits "
                                          "at `resolved_path` (followed by identity, #899) — judge the value there.")
                 if "value_at_receipt" in claim:

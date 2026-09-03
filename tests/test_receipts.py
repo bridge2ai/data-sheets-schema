@@ -360,6 +360,14 @@ class Validator(unittest.TestCase):
         self.assertEqual(b["slots"]["never_receipted"],
                          sum(1 for p in without if p != "version"))
         self.assertEqual(b["slots"]["added_after_receipt"], 1)              # version
+        # #899/#907: a snapshot WITHOUT funders makes the funders receipts
+        # paths the snapshot never had — uncredited, and their leaves
+        # count as added after the receipt (this fixture used to delete
+        # funders and still expect the credit)
+        no_funders = {k: v for k, v in original.items() if k != "funders"}
+        b3 = rc.check(rec, manifest, texts, full2, manifest["bundle_md5"], original=no_funders)
+        self.assertEqual(b3["slots"]["path_not_in_snapshot_count"], 2)
+        self.assertEqual(b3["slots"]["added_after_receipt"], 1 + 2)         # version + name, grant_id (the fragment id is exempt)
         self.assertIn("never receipted", b["summary"])
         b2 = rc.check(rec, manifest, texts, full2, manifest["bundle_md5"])
         self.assertIsNone(b2["slots"]["never_receipted"])

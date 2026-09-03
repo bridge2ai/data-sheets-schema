@@ -568,6 +568,11 @@ def claim_receipts(receipt: dict[str, Any], full: dict[str, Any] | None = None,
         target = slot
         if full is not None and original is not None:
             rm = remap_path(slot, original, full)
+            # A path the snapshot never had resolves nowhere the receipt
+            # can vouch for, whatever the final record holds there — the
+            # same rule check() applies (#907 review, B).
+            if rm["basis"] == "not_in_snapshot":
+                rm = {"path": None, "basis": rm["basis"]}
             item["resolved_path"] = rm["path"]
             item["resolution"] = rm["basis"]
             target = rm["path"] or slot

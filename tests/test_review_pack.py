@@ -298,3 +298,30 @@ class IdentityJoin(unittest.TestCase):
             receiptless = {i["slot"] for i in p["items"] if i["kind"] == "slot_receiptless"}
             self.assertIn("funders[0].name", receiptless)            # the inserted entry
             self.assertNotIn("funders[1].name", receiptless)         # the moved, receipted one
+
+
+class GoneEntries(unittest.TestCase):
+    def test_a_receipt_whose_entry_is_gone_shows_unresolved_and_covers_nothing(self):
+        """#907 review A/B: never the value of whatever now sits at the index;
+        a path the snapshot never had is not credited by the pack either."""
+        from tests.test_receipts import FULL
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = Pack()._run(tmp)
+            core = prov.parent
+            full_p = Path(tmp) / "d4d_concatenated/claudecode_agent/L/P_d4d.yaml"
+            (core / "intermediate").mkdir()
+            (core / "intermediate/P_full.yaml").write_text(yaml.safe_dump(FULL))
+            replaced = {**FULL, "funders": [{"id": "https://x/ds#funder-9", "name": "Someone Else", "grant_id": "OTHER"}]}
+            full_p.write_text(yaml.safe_dump(replaced))
+            p = rp.build_pack(prov, instr, {"receipted_slots": 50})
+            grant = next(i for i in p["items"] if i.get("slot") == "funders[0].grant_id")
+            self.assertIsNone(grant["resolved_path"]); self.assertEqual(grant["resolution"], "entry_dropped")
+            self.assertEqual(grant["value"], rp.UNRESOLVED)
+            receiptless = {i["slot"] for i in p["items"] if i["kind"] == "slot_receiptless"}
+            self.assertIn("funders[0].grant_id", receiptless)          # the replacement is unreceipted
+            (core / "intermediate/P_full.yaml").write_text(yaml.safe_dump({**FULL, "funders": []}))
+            full_p.write_text(yaml.safe_dump(FULL))
+            p2 = rp.build_pack(prov, instr, {"receipted_slots": 50})
+            grant2 = next(i for i in p2["items"] if i.get("slot") == "funders[0].grant_id")
+            self.assertEqual(grant2["resolution"], "not_in_snapshot"); self.assertEqual(grant2["value"], rp.UNRESOLVED)
+            self.assertIn("funders[0].grant_id", {i["slot"] for i in p2["items"] if i["kind"] == "slot_receiptless"})

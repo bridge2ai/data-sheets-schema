@@ -501,7 +501,7 @@ as it stands; normalisation (`str` → `[str]`) and extension (a dict that
 gained keys, a list that gained items) are not rewrites. On the 2026-09-01
 arm's 1,412 unique receipt paths: 1,146 unchanged · 184 rewritten in place
 (13.0%) · 48 leaves and 17 entries removed · 5 moved · 6 the snapshot never
-had · 3 whose index another entry now occupies · 2 unresolved. The pack
+had · 3 whose index another entry now occupies · 1 ambiguous · 2 unresolved. The pack
 shows the reviewer both `value_at_receipt` and the current `value`; items
 carry `resolved_path`/`resolution` from `pack_version` 4, and
 `pack.receipt_join.basis` is `index` on the agentic path, which writes no
@@ -509,8 +509,10 @@ snapshot. **With a snapshot, identity decides**: a path whose entry is gone
 (`entry_dropped`, `leaf_dropped`, `ambiguous`) or that the snapshot never
 had (`not_in_snapshot` — the model mis-addressed it at phase 1) is never
 resolved as written even when another entry now sits at that index; those
-are reported as `index_reused_by_another_entry` / `path_not_in_snapshot`,
-counted under `reshaped_by_reconcile`, and carry no coverage credit.
+are reported as `index_reused_by_another_entry` / `path_not_in_snapshot`
+and carry no coverage credit; the gone-entry classes also count under
+`reshaped_by_reconcile` (they resolved in the snapshot), a never-present
+path does not.
 Keyless entries whose only leaves are lists still join by position (#908).
 
 ## Canonical selection with the review (#660)
