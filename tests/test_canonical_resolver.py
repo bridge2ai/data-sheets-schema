@@ -114,7 +114,7 @@ class TestTheCommand(unittest.TestCase):
         out = self._run("--paths-only")
         self.assertEqual(out.exit_code, 0, out.output)
         lines = [l for l in out.output.splitlines() if l.strip()]
-        self.assertEqual(len(lines), 2 * len(canonical_runs()),
+        self.assertEqual(len(lines), 2 * len(canonical_runs(runtime="api")),
                          "one full and one core per canonical project")
         for line in lines:
             self.assertTrue((REPO / line).is_file(), line)
@@ -123,7 +123,7 @@ class TestTheCommand(unittest.TestCase):
         """Derived, not literal. This pair used to assert `"VOICE" in output`;
         #292 was fixed, every project gained a mark, and the gap is now empty —
         so the old assertion tested that generation was still broken."""
-        gap = set(PROJECTS) - set(canonical_runs())
+        gap = set(PROJECTS) - set(canonical_runs(runtime="api"))
         out = self._run("--missing")
         self.assertEqual(out.exit_code, 0, out.output)
         if not gap:
@@ -147,7 +147,7 @@ class TestTheCommand(unittest.TestCase):
         nothing on the real corpus to exercise, so the case is skipped here and
         the behaviour is held by the library-level test above.
         """
-        gap = sorted(set(PROJECTS) - set(canonical_runs()))
+        gap = sorted(set(PROJECTS) - set(canonical_runs(runtime="api")))
         if not gap:
             self.skipTest("every project has a canonical record")
         out = self._run("--project", gap[0])
