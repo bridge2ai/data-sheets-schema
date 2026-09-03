@@ -72,11 +72,14 @@ classes:
           "d4d:docExample": "health_medical_biomedical_research"
       contact_person:
         description: >-
-          Contact person for licensing questions. Provides structured contact
-          information including name, email, affiliation, and optional ORCID.
-          This person can answer questions about licensing terms, usage restrictions,
-          fees, and permissions.
+          Contact person for licensing questions, as a Person object — an
+          `id` (an ORCID CURIE where stated, else a fragment minted on the
+          record's own id), `name`, and where the evidence states them
+          `email`, `affiliation` and `orcid`. This person can answer questions about licensing terms,
+          usage restrictions, fees and permissions. Inlined (#805): a bare
+          name string fails validation.
         range: Person
+        inlined: true
         slot_uri: d4d:licenseContactPoint
         broad_mappings:
           - schema:contactPoint
@@ -144,11 +147,15 @@ classes:
         range: ConfidentialityLevelEnum
       governance_committee_contact:
         description: >-
-          DEPRECATED — use `DataGovernance.committee_contact` (#503). Kept so
-          the records that already populate it stay valid; a governance contact
-          is not an export-control fact and should not have to be nested inside
-          one to be stated.
+          DEPRECATED — use `DataGovernance.committee_contact` (#503). Kept
+          declared so the slot still parses; since #805 it is an inlined
+          Person object like its replacement, so the pre-#805 records that
+          populate it with a bare name string (CM4AI v7 rep1 among them)
+          no longer validate against the current schema and keep the
+          verdicts they were pinned with (#426). A new record should not
+          populate it.
         range: Person
+        inlined: true
         slot_uri: d4d:governanceContactPoint
         broad_mappings:
           - schema:contactPoint
@@ -203,10 +210,15 @@ classes:
         slot_uri: d4d:governanceCommitteeMember
       committee_contact:
         description: >-
-          Contact point for the governance committee — the person or address
-          that answers questions about access policy, procedure and oversight.
-          Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`.
+          Contact point for the governance committee, as a Person object —
+          an `id` (an ORCID CURIE where stated, else a fragment minted on the
+          record's own id), the `name` and, where the evidence states them,
+          `email` and `affiliation` of the person who answers questions about access
+          policy, procedure and oversight. Replaces
+          `ExportControlRegulatoryRestrictions.governance_committee_contact`.
+          Inlined (#805): a bare name string fails validation.
         range: Person
+        inlined: true
         slot_uri: d4d:governanceContactPoint
         broad_mappings:
           - schema:contactPoint

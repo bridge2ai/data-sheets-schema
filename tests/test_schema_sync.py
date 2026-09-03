@@ -81,12 +81,25 @@ class DigestIsAFunctionOfContentTest(unittest.TestCase):
         v7-vs-v8 measures. The CoreDataset digest moves with it
         (`b0c42638` → `10d60d20`); it is not pinned here because the ledger
         keys on the Dataset digest (`LEDGER_KEY_CLASS`).
+
+        `163c7e4d` → `ffe03dd4` on 2026-09-03 (D1, #805): the five
+        Person-ranged slots are `inlined: true` with descriptions that ask
+        for the object, and the reference marking now follows LinkML's own
+        rule (`SchemaView.is_inlined`: a class range with no identifier is
+        inlined implicitly — the #927 review found the three markers the
+        slot-flag test had left were false). No reference attribute remains
+        in this schema; SamplingStrategy and MissingInfo join the rendered
+        classes (72). A schema content change: a bare name string in those
+        slots no longer validates, so records that predate it keep the
+        verdicts they were pinned with (#426) and re-validate as invalid
+        under this schema — the #646 precedent. The CoreDataset digest
+        moves with it (`10d60d20` → `386a470d`).
         """
         if not self.SCHEMA.exists():
             self.skipTest("merged schema not present in this checkout")
         self.assertEqual(
             schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
-            "163c7e4db1d637e1cc458047813cd2c4")
+            "ffe03dd469feb388e0a4149e4f5ccb6f")
 
 
 class SyncCheckTest(unittest.TestCase):

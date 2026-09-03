@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-08-21T12:56:38
+# Generation date: 2026-09-03T12:16:20
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -970,13 +970,13 @@ class Creator(DatasetProperty):
     class_name: ClassVar[str] = "Creator"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Creator
 
-    principal_investigator: Optional[Union[str, PersonId]] = None
+    principal_investigator: Optional[Union[dict, Person]] = None
     affiliations: Optional[Union[Union[dict, Organization], list[Union[dict, Organization]]]] = empty_list()
     credit_roles: Optional[Union[Union[str, "CRediTRoleEnum"], list[Union[str, "CRediTRoleEnum"]]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self.principal_investigator is not None and not isinstance(self.principal_investigator, PersonId):
-            self.principal_investigator = PersonId(self.principal_investigator)
+        if self.principal_investigator is not None and not isinstance(self.principal_investigator, Person):
+            self.principal_investigator = Person(**as_dict(self.principal_investigator))
 
         if not isinstance(self.affiliations, list):
             self.affiliations = [self.affiliations] if self.affiliations is not None else []
@@ -2389,13 +2389,13 @@ class EthicalReview(DatasetProperty):
     class_name: ClassVar[str] = "EthicalReview"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.EthicalReview
 
-    contact_person: Optional[Union[str, PersonId]] = None
+    contact_person: Optional[Union[dict, Person]] = None
     reviewing_organization: Optional[str] = None
     review_details: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self.contact_person is not None and not isinstance(self.contact_person, PersonId):
-            self.contact_person = PersonId(self.contact_person)
+        if self.contact_person is not None and not isinstance(self.contact_person, Person):
+            self.contact_person = Person(**as_dict(self.contact_person))
 
         if self.reviewing_organization is not None and not isinstance(self.reviewing_organization, str):
             self.reviewing_organization = str(self.reviewing_organization)
@@ -2705,7 +2705,7 @@ class LicenseAndUseTerms(DatasetProperty):
 
     license_terms: Optional[str] = None
     data_use_permission: Optional[Union[str, "DataUsePermissionEnum"]] = None
-    contact_person: Optional[Union[str, PersonId]] = None
+    contact_person: Optional[Union[dict, Person]] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self.license_terms is not None and not isinstance(self.license_terms, str):
@@ -2714,8 +2714,8 @@ class LicenseAndUseTerms(DatasetProperty):
         if self.data_use_permission is not None and not isinstance(self.data_use_permission, DataUsePermissionEnum):
             self.data_use_permission = DataUsePermissionEnum(self.data_use_permission)
 
-        if self.contact_person is not None and not isinstance(self.contact_person, PersonId):
-            self.contact_person = PersonId(self.contact_person)
+        if self.contact_person is not None and not isinstance(self.contact_person, Person):
+            self.contact_person = Person(**as_dict(self.contact_person))
 
         super().__post_init__(**kwargs)
 
@@ -2763,7 +2763,7 @@ class ExportControlRegulatoryRestrictions(DatasetProperty):
     hipaa_compliant: Optional[Union[str, "ComplianceStatusEnum"]] = None
     other_compliance: Optional[str] = None
     confidentiality_level: Optional[Union[str, "ConfidentialityLevelEnum"]] = None
-    governance_committee_contact: Optional[Union[str, PersonId]] = None
+    governance_committee_contact: Optional[Union[dict, Person]] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if not isinstance(self.regulatory_restrictions, list):
@@ -2779,8 +2779,8 @@ class ExportControlRegulatoryRestrictions(DatasetProperty):
         if self.confidentiality_level is not None and not isinstance(self.confidentiality_level, ConfidentialityLevelEnum):
             self.confidentiality_level = ConfidentialityLevelEnum(self.confidentiality_level)
 
-        if self.governance_committee_contact is not None and not isinstance(self.governance_committee_contact, PersonId):
-            self.governance_committee_contact = PersonId(self.governance_committee_contact)
+        if self.governance_committee_contact is not None and not isinstance(self.governance_committee_contact, Person):
+            self.governance_committee_contact = Person(**as_dict(self.governance_committee_contact))
 
         super().__post_init__(**kwargs)
 
@@ -2803,7 +2803,7 @@ class DataGovernance(DatasetProperty):
 
     committee_name: Optional[str] = None
     committee_members: Optional[Union[dict[Union[str, PersonId], Union[dict, Person]], list[Union[dict, Person]]]] = empty_dict()
-    committee_contact: Optional[Union[str, PersonId]] = None
+    committee_contact: Optional[Union[dict, Person]] = None
     access_review_process: Optional[str] = None
     access_decision_timeframe: Optional[str] = None
     appeal_process: Optional[str] = None
@@ -2816,8 +2816,8 @@ class DataGovernance(DatasetProperty):
 
         self._normalize_inlined_as_list(slot_name="committee_members", slot_type=Person, key_name="id", keyed=True)
 
-        if self.committee_contact is not None and not isinstance(self.committee_contact, PersonId):
-            self.committee_contact = PersonId(self.committee_contact)
+        if self.committee_contact is not None and not isinstance(self.committee_contact, Person):
+            self.committee_contact = Person(**as_dict(self.committee_contact))
 
         if self.access_review_process is not None and not isinstance(self.access_review_process, str):
             self.access_review_process = str(self.access_review_process)
@@ -4508,7 +4508,7 @@ slots.addressingGap__response = Slot(uri=D4D.questionResponse, name="addressingG
                    model_uri=DATA_SHEETS_SCHEMA.addressingGap__response, domain=None, range=Optional[str])
 
 slots.creator__principal_investigator = Slot(uri=D4D.principalInvestigator, name="creator__principal_investigator", curie=D4D.curie('principalInvestigator'),
-                   model_uri=DATA_SHEETS_SCHEMA.creator__principal_investigator, domain=None, range=Optional[Union[str, PersonId]])
+                   model_uri=DATA_SHEETS_SCHEMA.creator__principal_investigator, domain=None, range=Optional[Union[dict, Person]])
 
 slots.creator__affiliations = Slot(uri=D4D.teamAffiliation, name="creator__affiliations", curie=D4D.curie('teamAffiliation'),
                    model_uri=DATA_SHEETS_SCHEMA.creator__affiliations, domain=None, range=Optional[Union[Union[dict, Organization], list[Union[dict, Organization]]]])
@@ -4898,7 +4898,7 @@ slots.extensionMechanism__extension_details = Slot(uri=DCTERMS.description, name
                    model_uri=DATA_SHEETS_SCHEMA.extensionMechanism__extension_details, domain=None, range=Optional[str])
 
 slots.ethicalReview__contact_person = Slot(uri=D4D.ethicsContactPoint, name="ethicalReview__contact_person", curie=D4D.curie('ethicsContactPoint'),
-                   model_uri=DATA_SHEETS_SCHEMA.ethicalReview__contact_person, domain=None, range=Optional[Union[str, PersonId]])
+                   model_uri=DATA_SHEETS_SCHEMA.ethicalReview__contact_person, domain=None, range=Optional[Union[dict, Person]])
 
 slots.ethicalReview__reviewing_organization = Slot(uri=SCHEMA.provider, name="ethicalReview__reviewing_organization", curie=SCHEMA.curie('provider'),
                    model_uri=DATA_SHEETS_SCHEMA.ethicalReview__reviewing_organization, domain=None, range=Optional[str])
@@ -4997,7 +4997,7 @@ slots.licenseAndUseTerms__data_use_permission = Slot(uri=DUO['0000001'], name="l
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__data_use_permission, domain=None, range=Optional[Union[str, "DataUsePermissionEnum"]])
 
 slots.licenseAndUseTerms__contact_person = Slot(uri=D4D.licenseContactPoint, name="licenseAndUseTerms__contact_person", curie=D4D.curie('licenseContactPoint'),
-                   model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__contact_person, domain=None, range=Optional[Union[str, PersonId]])
+                   model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__contact_person, domain=None, range=Optional[Union[dict, Person]])
 
 slots.iPRestrictions__restrictions = Slot(uri=DCTERMS.rights, name="iPRestrictions__restrictions", curie=DCTERMS.curie('rights'),
                    model_uri=DATA_SHEETS_SCHEMA.iPRestrictions__restrictions, domain=None, range=Optional[Union[str, list[str]]])
@@ -5015,7 +5015,7 @@ slots.exportControlRegulatoryRestrictions__confidentiality_level = Slot(uri=D4D.
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__confidentiality_level, domain=None, range=Optional[Union[str, "ConfidentialityLevelEnum"]])
 
 slots.exportControlRegulatoryRestrictions__governance_committee_contact = Slot(uri=D4D.governanceContactPoint, name="exportControlRegulatoryRestrictions__governance_committee_contact", curie=D4D.curie('governanceContactPoint'),
-                   model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__governance_committee_contact, domain=None, range=Optional[Union[str, PersonId]])
+                   model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__governance_committee_contact, domain=None, range=Optional[Union[dict, Person]])
 
 slots.dataGovernance__committee_name = Slot(uri=D4D.governanceCommitteeName, name="dataGovernance__committee_name", curie=D4D.curie('governanceCommitteeName'),
                    model_uri=DATA_SHEETS_SCHEMA.dataGovernance__committee_name, domain=None, range=Optional[str])
@@ -5024,7 +5024,7 @@ slots.dataGovernance__committee_members = Slot(uri=D4D.governanceCommitteeMember
                    model_uri=DATA_SHEETS_SCHEMA.dataGovernance__committee_members, domain=None, range=Optional[Union[dict[Union[str, PersonId], Union[dict, Person]], list[Union[dict, Person]]]])
 
 slots.dataGovernance__committee_contact = Slot(uri=D4D.governanceContactPoint, name="dataGovernance__committee_contact", curie=D4D.curie('governanceContactPoint'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataGovernance__committee_contact, domain=None, range=Optional[Union[str, PersonId]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataGovernance__committee_contact, domain=None, range=Optional[Union[dict, Person]])
 
 slots.dataGovernance__access_review_process = Slot(uri=D4D.accessReviewProcess, name="dataGovernance__access_review_process", curie=D4D.curie('accessReviewProcess'),
                    model_uri=DATA_SHEETS_SCHEMA.dataGovernance__access_review_process, domain=None, range=Optional[str])

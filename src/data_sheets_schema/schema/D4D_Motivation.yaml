@@ -91,11 +91,16 @@ classes:
     attributes:
       principal_investigator:
         description: >-
-          The name of the key individual (Principal Investigator)
-          responsible for or overseeing dataset creation — a person's name
-          such as 'Aaron Lee', never a yes/no flag. The slot name reads like
-          a boolean; the value is not one (#360).
+          The key individual (Principal Investigator) responsible for or
+          overseeing dataset creation, as a Person object — an `id` (the
+          ORCID CURIE where the evidence states one, else a fragment minted
+          on the record's own id), their `name`, and where the evidence
+          states them `orcid`, `email` and `affiliation` — never a bare name
+          string and never a yes/no flag
+          (the slot name reads like a boolean; the value is not one, #360).
+          Inlined (#805): a string here fails validation.
         range: Person
+        inlined: true
         slot_uri: d4d:principalInvestigator
         broad_mappings:
           - dcterms:creator

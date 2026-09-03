@@ -42,8 +42,8 @@ class TestTheDigestCarriesNestedRanges(unittest.TestCase):
         if nested is None:
             self.skipTest("DataGovernance not a nested range")
         self.assertEqual(nested.ranges.get("committee_members"), "Person[]")
-        # not inlined: a reference, marked as such since #916 (#805)
-        self.assertEqual(nested.ranges.get("committee_contact"), "Person (reference — a string, not an object)")
+        # inlined since #805 (D1): an object range like committee_members
+        self.assertEqual(nested.ranges.get("committee_contact"), "Person")
 
     def test_uriorcurie_attributes_are_covered(self):
         """The case that motivated this. A bare token in a nested `id`
@@ -184,19 +184,33 @@ class DepthTwo(unittest.TestCase):
         digest = schema_digest.build("Dataset")
         self.assertNotIn("Software", {n.name for n in digest.nested})
 
-    def test_a_reference_attribute_says_so_in_both_views(self):
-        """#805: an inline Person on `principal_investigator` fails validation
-        — the attribute is a reference. The digest and the judge's view
-        (`shown_ranges`, #486) both carry the marker; Person is still
-        rendered because `committee_members` inlines it."""
+    def test_the_reference_marking_follows_linkmls_own_rule(self):
+        """#805/#927 review: a class range with no identifier is inlined
+        implicitly (`SchemaView.is_inlined`), so `Person.affiliation:
+        Organization[]` takes objects although the slot declares nothing —
+        the slot-flag test had marked it a reference, and a string there
+        fails validation. With the five Person slots inlined, no attribute
+        of this schema is a reference; the marking exists for the next one,
+        and every class-ranged attribute is marked iff LinkML says it is
+        not inlined."""
+        from linkml_runtime import SchemaView
         digest = schema_digest.build("Dataset")
+        sv = SchemaView(str(schema_digest.resolve_schema(schema_digest.CLASS_SCHEMA["Dataset"])))
+        marker = "(reference — a string, not an object)"
+        mismatched = []
+        for n in digest.nested:
+            for sub in sv.class_induced_slots(n.name):
+                if not sub.range or sv.get_class(sub.range) is None:
+                    continue
+                marked = marker in n.ranges.get(str(sub.name), "")
+                if marked != (not sv.is_inlined(sub)):
+                    mismatched.append(f"{n.name}.{sub.name}")
+        self.assertEqual(mismatched, [])
+        person = next(n for n in digest.nested if n.name == "Person")
+        self.assertEqual(person.ranges["affiliation"], "Organization[]")           # implicitly inlined
         creator = next(n for n in digest.nested if n.name == "Creator")
-        self.assertEqual(creator.ranges["principal_investigator"], "Person (reference — a string, not an object)")
-        self.assertIn("principal_investigator", schema_digest.shown_ranges(creator))
-        self.assertEqual(creator.ranges["affiliations"], "Organization[]")           # inlined: an object
-        text = schema_digest.digest_text("Dataset")
-        self.assertEqual(text.count("(reference — a string, not an object)"), 8)
-        self.assertIn("**Person**", text)
+        self.assertEqual(creator.ranges["principal_investigator"], "Person")      # inlined since #805 (D1)
+        self.assertEqual(schema_digest.digest_text("Dataset").count(marker), 0)
 
     def test_the_second_level_stays_within_budget(self):
         self.assertLess(len(schema_digest.digest_text("Dataset")), 44_000)
@@ -216,7 +230,7 @@ class DepthTwo(unittest.TestCase):
             for sub in sv.class_induced_slots(n.name):
                 if not sub.range or sv.get_class(sub.range) is None or sub.name in schema_digest.UNIVERSAL_ATTRIBUTES:
                     continue
-                if sub.inlined or sub.inlined_as_list:
+                if sv.is_inlined(sub):
                     if sub.range not in rendered:
                         missing.append(f"{n.name}.{sub.name} → {sub.range}")
                 elif "(reference" not in n.ranges.get(str(sub.name), ""):

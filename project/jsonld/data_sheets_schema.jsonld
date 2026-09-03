@@ -4701,7 +4701,7 @@
     },
     {
       "name": "creator__principal_investigator",
-      "description": "The name of the key individual (Principal Investigator) responsible for or overseeing dataset creation \u2014 a person's name such as 'Aaron Lee', never a yes/no flag. The slot name reads like a boolean; the value is not one (#360).",
+      "description": "The key individual (Principal Investigator) responsible for or overseeing dataset creation, as a Person object \u2014 an `id` (the ORCID CURIE where the evidence states one, else a fragment minted on the record's own id), their `name`, and where the evidence states them `orcid`, `email` and `affiliation` \u2014 never a bare name string and never a yes/no flag (the slot name reads like a boolean; the value is not one, #360). Inlined (#805): a string here fails validation.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/principalInvestigator"
@@ -4717,6 +4717,7 @@
         "Creator"
       ],
       "range": "Person",
+      "inlined": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7378,7 +7379,7 @@
     },
     {
       "name": "ethicalReview__contact_person",
-      "description": "Contact person for questions about ethical review. Provides structured contact information including name, email, affiliation, and optional ORCID.",
+      "description": "Contact person for questions about ethical review, as a Person object \u2014 an `id` (an ORCID CURIE where stated, else a fragment minted on the record's own id), `name`, and where the evidence states them `email`, `affiliation` and `orcid`. Inlined (#805): a bare name string fails validation.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/ethicsContactPoint"
@@ -7393,6 +7394,7 @@
         "EthicalReview"
       ],
       "range": "Person",
+      "inlined": true,
       "@type": "SlotDefinition"
     },
     {
@@ -8043,7 +8045,7 @@
     },
     {
       "name": "licenseAndUseTerms__contact_person",
-      "description": "Contact person for licensing questions. Provides structured contact information including name, email, affiliation, and optional ORCID. This person can answer questions about licensing terms, usage restrictions, fees, and permissions.",
+      "description": "Contact person for licensing questions, as a Person object \u2014 an `id` (an ORCID CURIE where stated, else a fragment minted on the record's own id), `name`, and where the evidence states them `email`, `affiliation` and `orcid`. This person can answer questions about licensing terms, usage restrictions, fees and permissions. Inlined (#805): a bare name string fails validation.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/licenseContactPoint"
@@ -8058,6 +8060,7 @@
         "LicenseAndUseTerms"
       ],
       "range": "Person",
+      "inlined": true,
       "@type": "SlotDefinition"
     },
     {
@@ -8174,7 +8177,7 @@
     },
     {
       "name": "exportControlRegulatoryRestrictions__governance_committee_contact",
-      "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept so the records that already populate it stay valid; a governance contact is not an export-control fact and should not have to be nested inside one to be stated.",
+      "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept declared so the slot still parses; since #805 it is an inlined Person object like its replacement, so the pre-#805 records that populate it with a bare name string (CM4AI v7 rep1 among them) no longer validate against the current schema and keep the verdicts they were pinned with (#426). A new record should not populate it.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/governanceContactPoint"
@@ -8189,6 +8192,7 @@
         "ExportControlRegulatoryRestrictions"
       ],
       "range": "Person",
+      "inlined": true,
       "@type": "SlotDefinition"
     },
     {
@@ -8235,7 +8239,7 @@
     },
     {
       "name": "dataGovernance__committee_contact",
-      "description": "Contact point for the governance committee \u2014 the person or address that answers questions about access policy, procedure and oversight. Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`.",
+      "description": "Contact point for the governance committee, as a Person object \u2014 an `id` (an ORCID CURIE where stated, else a fragment minted on the record's own id), the `name` and, where the evidence states them, `email` and `affiliation` of the person who answers questions about access policy, procedure and oversight. Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`. Inlined (#805): a bare name string fails validation.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/governanceContactPoint"
@@ -8250,6 +8254,7 @@
         "DataGovernance"
       ],
       "range": "Person",
+      "inlined": true,
       "@type": "SlotDefinition"
     },
     {
@@ -10438,13 +10443,14 @@
       "attributes": [
         {
           "name": "principal_investigator",
-          "description": "The name of the key individual (Principal Investigator) responsible for or overseeing dataset creation \u2014 a person's name such as 'Aaron Lee', never a yes/no flag. The slot name reads like a boolean; the value is not one (#360).",
+          "description": "The key individual (Principal Investigator) responsible for or overseeing dataset creation, as a Person object \u2014 an `id` (the ORCID CURIE where the evidence states one, else a fragment minted on the record's own id), their `name`, and where the evidence states them `orcid`, `email` and `affiliation` \u2014 never a bare name string and never a yes/no flag (the slot name reads like a boolean; the value is not one, #360). Inlined (#805): a string here fails validation.",
           "broad_mappings": [
             "dcterms:creator",
             "schema:creator"
           ],
           "slot_uri": "d4d:principalInvestigator",
           "range": "Person",
+          "inlined": true,
           "@type": "SlotDefinition"
         },
         {
@@ -13096,12 +13102,13 @@
       "attributes": [
         {
           "name": "contact_person",
-          "description": "Contact person for questions about ethical review. Provides structured contact information including name, email, affiliation, and optional ORCID.",
+          "description": "Contact person for questions about ethical review, as a Person object \u2014 an `id` (an ORCID CURIE where stated, else a fragment minted on the record's own id), `name`, and where the evidence states them `email`, `affiliation` and `orcid`. Inlined (#805): a bare name string fails validation.",
           "broad_mappings": [
             "schema:contactPoint"
           ],
           "slot_uri": "d4d:ethicsContactPoint",
           "range": "Person",
+          "inlined": true,
           "@type": "SlotDefinition"
         },
         {
@@ -13695,12 +13702,13 @@
         },
         {
           "name": "contact_person",
-          "description": "Contact person for licensing questions. Provides structured contact information including name, email, affiliation, and optional ORCID. This person can answer questions about licensing terms, usage restrictions, fees, and permissions.",
+          "description": "Contact person for licensing questions, as a Person object \u2014 an `id` (an ORCID CURIE where stated, else a fragment minted on the record's own id), `name`, and where the evidence states them `email`, `affiliation` and `orcid`. This person can answer questions about licensing terms, usage restrictions, fees and permissions. Inlined (#805): a bare name string fails validation.",
           "broad_mappings": [
             "schema:contactPoint"
           ],
           "slot_uri": "d4d:licenseContactPoint",
           "range": "Person",
+          "inlined": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -13818,12 +13826,13 @@
         },
         {
           "name": "governance_committee_contact",
-          "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept so the records that already populate it stay valid; a governance contact is not an export-control fact and should not have to be nested inside one to be stated.",
+          "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept declared so the slot still parses; since #805 it is an inlined Person object like its replacement, so the pre-#805 records that populate it with a bare name string (CM4AI v7 rep1 among them) no longer validate against the current schema and keep the verdicts they were pinned with (#426). A new record should not populate it.",
           "broad_mappings": [
             "schema:contactPoint"
           ],
           "slot_uri": "d4d:governanceContactPoint",
           "range": "Person",
+          "inlined": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -13882,12 +13891,13 @@
         },
         {
           "name": "committee_contact",
-          "description": "Contact point for the governance committee \u2014 the person or address that answers questions about access policy, procedure and oversight. Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`.",
+          "description": "Contact point for the governance committee, as a Person object \u2014 an `id` (an ORCID CURIE where stated, else a fragment minted on the record's own id), the `name` and, where the evidence states them, `email` and `affiliation` of the person who answers questions about access policy, procedure and oversight. Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`. Inlined (#805): a bare name string fails validation.",
           "broad_mappings": [
             "schema:contactPoint"
           ],
           "slot_uri": "d4d:governanceContactPoint",
           "range": "Person",
+          "inlined": true,
           "@type": "SlotDefinition"
         },
         {
@@ -14328,7 +14338,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-08-14T16:22:27",
   "source_file_size": 34754,
-  "generation_date": "2026-08-21T12:56:36",
+  "generation_date": "2026-09-03T12:16:19",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
