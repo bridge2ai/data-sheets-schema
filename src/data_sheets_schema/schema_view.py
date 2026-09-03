@@ -1,7 +1,7 @@
 """One SchemaView per schema file (#926).
 
-linkml_runtime 1.9.4 wraps 67 ``SchemaView`` methods in
-``functools.lru_cache(None)``. ``self`` is part of every cache key, so a view
+linkml_runtime 1.9.4 wraps 66 ``SchemaView`` methods in ``functools.lru_cache``
+(64 of them unbounded, ``lru_cache(None)``). ``self`` is part of every cache key, so a view
 is pinned for the life of the process by its own method caches — ``del``
 frees nothing, and ``gc.collect()`` finds nothing to collect. A view of the
 merged Dataset schema holds 30–80 MB once induced slots have been computed.
