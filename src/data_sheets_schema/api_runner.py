@@ -72,11 +72,16 @@ GENERIC_PROMPT_V5 = PROMPTS / "d4d_generic_arm_prompt_v5.md"
 # for the derived core (#694). Two counted differences; see the file.
 GENERIC_PROMPT_V6 = PROMPTS / "d4d_generic_arm_prompt_v6.md"
 GENERIC_PROMPT_V7 = PROMPTS / "d4d_generic_arm_prompt_v7.md"
+# v8: v7 plus one block of four rules (R1-R4 of the v8 plan) — inlined vs
+# reference ranges read off the digest's marking, tense and scope, derived
+# figures, receipts per roster entry. Registered as one configuration with
+# the depth-two digest (#916) and the inlined Person slots (#805).
+GENERIC_PROMPT_V8 = PROMPTS / "d4d_generic_arm_prompt_v8.md"
 #: Conditions whose `full` phase emits a coverage receipt (#710). The bundle
 #: they see carries chunk markers and the phase instruction asks for the
 #: second document, so this is a condition boundary, never a flag on an
 #: existing condition.
-RECEIPT_CONDITIONS = frozenset({"generic_v7"})
+RECEIPT_CONDITIONS = frozenset({"generic_v7", "generic_v8"})
 RECEIPT_MARK = "--- COVERAGE RECEIPT ---"
 CONDITION_PROMPTS = {"generic": GENERIC_PROMPT,
                      "generic_v2": GENERIC_PROMPT_V2,
@@ -85,6 +90,7 @@ CONDITION_PROMPTS = {"generic": GENERIC_PROMPT,
                      "generic_v5": GENERIC_PROMPT_V5,
                      "generic_v6": GENERIC_PROMPT_V6,
                      "generic_v7": GENERIC_PROMPT_V7,
+                     "generic_v8": GENERIC_PROMPT_V8,
                      "tuned": GENERIC_PROMPT}
 
 # Which generic base each condition is built on. The generic/tuned comparison
@@ -105,6 +111,7 @@ CONDITION_AXES = {
     "generic_v5": {"base": "v5", "tuned": False},
     "generic_v6": {"base": "v6", "tuned": False},
     "generic_v7": {"base": "v7", "tuned": False},
+    "generic_v8": {"base": "v8", "tuned": False},
     "tuned":      {"base": "v1", "tuned": True},
 }
 
@@ -594,6 +601,9 @@ PHASE_INSTRUCTIONS = {
         "then `description`, with `notes` last and only for content "
         "`description` cannot hold; evidence commentary in `source_caveats` "
         "— never an invented key. Output only the YAML."),
+    # The four "also flag" classes are v8 plan step E2 (PR #928). This
+    # instruction is shared by every condition, so adding them moved every
+    # condition's assembly digest — one re-baseline, registered in the plan.
     "audit": (
         "Phase 3. Audit the FULL record against the declared bundle and the "
         "evidence boundary. The core record supplied above is a projection "
@@ -606,8 +616,14 @@ PHASE_INSTRUCTIONS = {
         "inconsistency, and any value whose shape does not conform to the "
         "schema digest supplied above — prose where the schema requires a "
         "list, enum values the schema does not define, or source commentary "
-        "embedded inside a name, identifier or affiliation value. Output only "
-        "JSON."),
+        "embedded inside a name, identifier or affiliation value. Also flag: "
+        "a value that states documentation is absent, pending or held "
+        "elsewhere instead of answering the field; a value answering a "
+        "neighbouring field (an access route in `future_guarantees` or "
+        "`format`, a prohibition statement in `prohibition_reason`); a plan, "
+        "proposal or earlier release stated as the dataset's current state; "
+        "and a figure computed from other figures presented as one a source "
+        "reported. Output only JSON."),
     "reconcile_full": (
         "Phase 4a. Apply the audit findings and emit the corrected full "
         "record in its entirety, header block included. The core record "
