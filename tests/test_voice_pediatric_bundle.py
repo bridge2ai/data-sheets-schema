@@ -28,7 +28,12 @@ CONCAT = REPO / "data" / "preprocessed" / "concatenated"
 #: recorded them in `inputs.bundle_md5`, and a hash with no name is
 #: indistinguishable from a corrupted one. `source_manifest.yaml`'s
 #: `bundle_hash_history` carries the same mapping for all five projects.
-VOICE_BUNDLE_MD5 = "dcd717170da6762569c0b4eeafc1c3d2"
+#: #921 (2026-09-03) changed it a third time, for a different reason: the docx
+#: extractor had been dropping w:sdt-wrapped runs (#886), and the VOICE
+#: investigator table gained its ☒/☐ marks. Same discipline: superseded
+#: value kept beside it, and in the manifest's history.
+VOICE_BUNDLE_MD5 = "9193c3cbe60b62a2fc0f704a2c4d23a3"
+VOICE_BUNDLE_MD5_PRE_921 = "dcd717170da6762569c0b4eeafc1c3d2"
 VOICE_BUNDLE_MD5_PRE_427 = "3e5c24df7b46d97204cb007c43b99e92"
 VOICE_BUNDLE_MD5_PRE_421 = "e637eb752ee8cab5f9f7a52782250469"
 
@@ -95,9 +100,9 @@ class TestTheBundles(unittest.TestCase):
         """9 runs record the pre-#421 hash. Keeping the superseded values here
         is what lets someone reading those records tell "consumed the pre-#421
         bundle" from "consumed something unidentifiable"."""
-        supers = {VOICE_BUNDLE_MD5_PRE_421, VOICE_BUNDLE_MD5_PRE_427}
+        supers = {VOICE_BUNDLE_MD5_PRE_421, VOICE_BUNDLE_MD5_PRE_427, VOICE_BUNDLE_MD5_PRE_921}
         self.assertNotIn(VOICE_BUNDLE_MD5, supers)
-        self.assertEqual(2, len(supers))
+        self.assertEqual(3, len(supers))
         for h in supers:
             self.assertEqual(32, len(h))
 
@@ -105,10 +110,12 @@ class TestTheBundles(unittest.TestCase):
         """Two places record the same mapping; if they disagree, the one a
         reader happens to open is a coin toss."""
         events = yaml.safe_load(MANIFEST.read_text())["bundle_hash_history"]["events"]
-        by_issue = {e["issue"]: e["projects"]["VOICE"] for e in events}
+        by_issue = {e["issue"]: e["projects"]["VOICE"] for e in events if "VOICE" in e["projects"]}
         self.assertEqual(VOICE_BUNDLE_MD5_PRE_421, by_issue[421]["before"])
         self.assertEqual(VOICE_BUNDLE_MD5_PRE_427, by_issue[427]["before"])
-        self.assertEqual(VOICE_BUNDLE_MD5, by_issue[427]["after"])
+        self.assertEqual(VOICE_BUNDLE_MD5_PRE_921, by_issue[427]["after"])
+        self.assertEqual(VOICE_BUNDLE_MD5_PRE_921, by_issue[921]["before"])
+        self.assertEqual(VOICE_BUNDLE_MD5, by_issue[921]["after"])
 
     def test_the_pediatric_bundle_exists_and_is_smaller(self):
         ped = CONCAT / "VOICE_PEDIATRIC_preprocessed.txt"

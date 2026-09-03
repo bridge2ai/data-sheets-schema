@@ -2611,7 +2611,7 @@ Linkedin
 
 FILE: gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt
 PATH: data/preprocessed/individual/VOICE/gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt
-SIZE: 77201 bytes
+SIZE: 77352 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -2643,11 +2643,38 @@ John Templeton, PhD – Assistant Professor, Department of Computer Science and 
 Stephanie Watts, PhD, CCC-SLP – Assistant Professor, Department of OTOHNS
 Theresa Zesiewicz, MD – Professor, Department of Neurology
 Participating institutions and investigators outside USF under Single IRB:
+Lead Investigator
+Weill Cornell Medicine (WCM)	Alexandros Sigaras, PhD
+Anais Rameau, MD, MPhil
+Olivier Elemento, PhD
+Massachusetts Institute of Technology (MIT)	Satrajit Ghosh, PhD
+Vanderbilt University Medical Center (VUMC)	Maria Powell, PhD
+Alexander Gelbard, MD
+Massachusetts Eye and Ear (MEEI)	Phillip Song MD
+Matthew Naunheim, MD
+Emory University	Anthony Law, MD PhD
 Participating institutions and investigators outside USF under Separate REB (Canadian):
+University of Toronto (UofT)	Frank Rudzicz, PhD
+Hospital for Sick Children (HSC)	Alistair Johnson, DPhil
+Mount Sinai Hospital (MSH)	Jordan Lerner-Ellis, PhD
 VERSION NUMBER/DATE:
 V1. January 17th, 2023
 REVISION HISTORY
 *This table should only be used during submission of a Modification application to the IRB.
+Revision #	Version Date	Summary of Changes	Consent Change?
+V2	May 3,2023	Modified to include pediatric cohort under single IRB	Yes
+V3	August 15, 2023	Modified to include compensation for participating adults	No
+V4	December 11, 2023	Modified to allow for electronic consent and change the options for consent levels. Added USF REDCap protocol language and social media recruitment.	Yes
+V5	January 31, 2024	Modified to include data collection for controls. Updated personnel (USF co-investigators and outside investigators). Added new disease categories of interest.	Yes
+V6	February 22, 2024	Removes Table: Disease Cohorts per Site of Data Collection	No
+V7	July 19, 2024	Included e-consent and remote consent options. Changed compensation amount for participation.	Yes
+V8	September 27, 2024	Included options for remote enrollment through an app used as a recruitment tool (Bridge2AI Enrollment Web app) and for remote data collection (Bridge2AI Voice Web app). Changed compensation amount for participation. Added USF co-investigator.	Yes
+V9	November 15, 2024	Updated protocol to clarify the current state of research.	No
+V10	January 17, 2025	Clarified that remote data collection will take place on two different platforms, the Bridge2AI Voice Web app and the Bridge2AI Voice iOS app. Added USF co-investigator.	No
+V11	February 10, 2025	Updated to include data collection from Spanish language speakers. Added a new platform for patient recruitment. Added USF co-investigator. Added further sites for USF data collection. Added satisfaction survey for participants who decide not to complete data collection.	Yes
+V12	May 6, 2025	Updated language about the platforms for remote consent and data collection.	No
+V13	July 11, 2025	Added sentence regarding the use of flyers for recruitment. Added sentence regarding other sites for recruitment at Vanderbilt.	No
+
 Table of Contents
 1.0	Study Summary	4
 2.0	Objectives	7
@@ -2675,6 +2702,52 @@ Table of Contents
 24.0	References	24
 Study Summary
 1.1 Brief Summary of study:
+Study Title	Bridge2AI Voice Data Acquisition
+Study Design	Prospective Cohort Study
+Primary Objective/Purpose	To build a large multi-institutional database of human voices, speech and respiratory sounds that is ethically sourced, diverse, and linked to multimodal health biomarkers to fuel voice AI research
+Secondary Objective(s)/Purposes	To build a data collection application and IT infrastructure for human voice, speech and respiratory sounds linked to other health biomarkers such as radiomics, and genomics, and supported by federated learning technology to protect data privacy. Data collected through this application will exist in the database.
+Research Intervention(s)	N/A
+ClinicalTrials.gov NCT #	N/A
+Study Population	Participants with known diagnosed diseases from 5 disease categories (Respiratory disorders, Voice disorders, Neurological disorders, Mood disorders, Pediatric voice and speech disorders), as well as participants without the identified conditions from the above 5 disease categories who can serve as controls in the database.  Participants will be recruited primarily from individuals presenting at USF specialty clinics or at one of the participating institutions described below and included in the SINGLE IRB PROCESS.
+Sample Size	30 000 participants
+Study Duration for individual participants	Up to 4 years
+Study Specific Abbreviations/ Definitions	Abbreviations:
+Machine Learning (ML)
+Artificial Intelligence (AI)
+Smart Phones (SP)
+CAPE-V (Consensus Auditory Perceptual Evaluation of Voice)
+Rainbow Passage: a standard text that contains all the phonemes of the English language.
+HVEC- High Volume Expert Clinics
+COC- Community Outreach Clinics
+PEDP- Plan for Enhancing Diverse Perspectives
+(EHR)- Electronic Health Records
+Definitions:
+Participating institutions
+University of South Florida, Tampa, Florida, US (USF)
+Weill Cornell Medicine, New York, New York, US (WCM)
+Vanderbilt University Medical Center, Nashville, Tennessee, US (VUMC)
+University of Toronto, Toronto, Ontario, Canada (UofT)
+Mount Sinai Hospital, Toronto, Ontario, Canada (MSH)
+Massachusetts Institute of Technology (MIT), Boston, Massachusetts, US (MIT)
+Hospital for Sick Children, Toronto, Ontario, Canada (HSC)
+Massachusetts Eye and Ear Institute, Boston, Massachusetts, US (MEEI)
+Emory University, Atlanta, Georgia, US (EU)
+High Volume Expert Clinics:
+These are clinics within participating institutions who see a high volume of patients with the specific disease studied (ex; The Alzheimer’s and Mild Cognitive impairment clinic at USF for Alzheimer’s).
+All US-based institutions will abide to the SINGLE IRB Process. Once this protocol is approved at USF, each of the participating institution will submit review based on the SINGLE IRB at USF
+The exceptions to the single IRB are the following:
+Genomic data will only be collected and analyzed at the University of Toronto and Mount Sinai Hospital in Canada. Therefore, that team will have a separate protocol for genomic data collection and analysis. Once approved, a copy of the protocol and Research Ethics board approval will be submitted to USF IRB.
+Canadian Institutions (MSH, SickKids and UofT) do not abide to the SINGLE IRB process and will apply for a separate REB (research ethics board application) to comply with the Canadian regulations. A copy of this approved IRB will also be submitted with their application
+Longitudinal Data Collection:
+For specific disease cohorts that are progressive or degenerative (i.e Alzheimer's, Parkinson’s), Longitudinal data collection may be collected.
+The longitudinal data will be collected in 2 forms:
+1: Longitudinal data in clinic during clinic visits:
+This data collection will happen in clinic during REGULAR follow up visits. No additional visits outside of regular follow up plans for disease monitoring
+2: Longitudinal data “at home”:
+In between clinic visit, certain cohorts could be asked to perform voice data collection at home through participants’ own smartphone application that will be downloaded for them in clinic. This is just for longitudinal data cohort only. This data collection will be asked at intervals of 1-6 months depending on disease cohorts and for a maximum of 3 years total duration. Participants can decide to leave the study at any point during that time.
+NIH Stride Partner:
+  An initiative allows NIH to explore the use of cloud environments to streamline NIH data use by partnering with commercial providers. NIH’s STRIDES Initiative aims to modernize biomedical research by reducing economic and process barriers in utilizing commercial cloud services. These partnerships enable access to rich datasets and advanced computational infrastructure, tools, and services.
+
 Objectives
 2.1 Our group aims to integrate the use of voice as biomarker of health with clinical care by generating a substantial multi-institutional, ethically sourced, and diverse voice database linked to multimodal health biomarkers to fuel voice AI research. Data collection will be made possible by software through a smartphone application linked to other health biomarkers such as radiomics, and genomics, and supported by federated learning technology to protect data privacy.
  Primary: To create a database of human voices, speech and respiratory sounds linked to other health biomarkers such as imaging, demographic and clinical data.
@@ -2726,6 +2799,14 @@ There will also be a Feasibility Assessment:
 Throughout the data collection process, feasibility measures will be taken directly from the app. Measures such as time taken to complete each task, drop-out rates, and time taken in clinic will be captured. Qualitative data will also be captured to get feedback from participants on experience with using data collection tools and feasibility of protocols within clinical workflow (through questionnaires and voice recording).
 Please see Annex A for full Scope of Work (SOW) and deliverables for phase 1
 6.2 Please select the methods that will be employed in this study (select all that apply):
+☒ Audio/Video Recording	☒ Psychophysiological Recording
+☐ Behavioral Interventions	☐ Record Review - Educational
+☐ Behavioral Observations and Experimentations	☐ Record Review - Employee
+☐ Deception	☒ Record Review- Medical
+☐ Focus Groups	☐ Record Review - Other
+☐ Interviews	☐ Specimen collection and analysis
+☒ Investigational Device – Non-Significant Risk (e.g. Mobile Applications)	☒ Surveys and/or questionnaires
+☐Psychometric Testing	☒ Other Social-Behavioral Procedures
 
 Data will be collected at USF and 11 other participating institutions.
 High Volume Expert Clinics
@@ -2734,6 +2815,15 @@ Community Outreach Clinics and underserved populations
 We define Community Outreach Clinics (COC) as clinics within or outside academic institution’s whose main mission is to provide health services to underserved and under-represented populations.
 Table 1
 Phased approach of Data Acquisition over a 4-year period
+Phase 1	Phase 2	Phase 3	Phase 4
+Exploratory	Pilot	Expansion	Outreach
+IT and cloud infrastructure
+Software and app development
+Data collection for up to 180 participants (30 participants from each disease category and controls, at main sites only
+(Completed November 2023)	Data collection to cumulatively reach up to 600 participants (100 participants from each disease category and controls) at:
+Main sites
+HVEC in participating institutions
+(Begun November 2023, ongoing in November 2024)	Expansion to COC, other HVEC and expansion phase of data acquisition to cumulatively reach data collection from up to 3000 participants (500 from each disease category and controls)	Expansion to normal cohorts though partnerships, expansion through HVEC and COC to cumulatively reach 5000 participants
 Data types collected across all categories:
 Voice, Speech, and other acoustic data:
 Voice samples will be collected in a prospective manner, for all participants undergoing gold standard diagnostic evaluation in all the described disease categories. Voice, breath, cough, and speech data will be recorded. Data collected will include prolonged vowel sounds, free speech, and spontaneous speech, as well as snoring sounds, coughing sounds and breathing sounds.
@@ -2742,6 +2832,23 @@ Imaging: Different type of imaging modality will be collected from patients char
 Validated tools: Validated tools for each disease category will be integrated within the app for data collection. For example, the Voice-Handicap Index-10 (see Annex B) will be used for the Voice Disorders. Scores will be automatically uploaded to the corresponding database.
 Genomic: No genetic information will be collected at the USF site. This will only be performed at MSH and UofT which are 2 Canadian participating institutions. Therefore, a separate REB will be submitted and obtained at these institutions for this portion of the study
 Table 2. Type of Data Modality Collected per Disease Category:
+Category	Acoustic	Imaging	Genomic	Descriptive/normative
+Voice Disorders	Voice and Speech	Video-Laryngoscopy images	Demographic data
+Validated Questionnaire Scores
+Respiratory Disorders	Voice and Speech
+Breathing Sounds	Chest X rays	Oxygen saturation
+Demographic data
+Validated Questionnaire Scores
+Forced Expiratory Volumes
+Mood Disorders	Voice and Speech	Demographic data
+Validated Questionnaire Scores
+Neurological Disorders	Voice and Speech	Brain CT Scan
+Brain MRI	Whole Genome Sequencing	Demographic data
+Validated Questionnaire Scores
+Pediatric Disorders	Voice and Speech	Demographic data
+Validated Questionnaire Scores
+Controls	Voice and Speech	Demographic data
+Validated Questionnaire Scores
 *Imaging will be collected retrospectively. No additional imaging will be performed in this study.
 Sample Sizes
 For all participants mentioned above, complete data acquisition including multi-modal data will be performed for up to 5000 participants per category (disease category and controls). As this database is intended to fuel AI research and develop ML/AI models to assist diagnosis and treatment of health conditions, there is no sample size calculation applicable to our methodology. The sample sizes have been defined according to the existing literature. Currently published AI/ML models linking voice to these categories of diseases consist of datasets of small sizes ranging from 20-400 patients and reach high diagnostic accuracies.
@@ -2786,6 +2893,21 @@ This data collection will happen in clinic during REGULAR follow up visits. No a
 2: Longitudinal data “at home”:
 In between clinic visit, certain cohorts could be asked to perform voice data collection at home through a smartphone application that will be downloaded for them in clinic. This data collection will be asked at intervals of 1-6 months depending on disease cohorts and for a maximum of 4 years total duration. Participants can decide to leave the study at any point during that time.
 Table 3. Overall study timeline per phase
+Phase 1: Exploratory	Phase 2
+Pilot	Phase 3
+Expansion	Phase 4
+Outreach
+Single IRB process @ USF
+Integration of participating institutions to Single IRB
+App Development
+Protocol and app refinement
+IT infrastructure and data storage platform development
+Preliminary data collection
+Pilot data collection (began November 2023)
+Expansion phase of data collection
+Outreach phase of Data collection
+Data sharing and access management
+Transfer of data sharing to open-source access
 10.0 Inclusion and Exclusion Criteria
 10.1 Eligibility screening:
 -Patients will be screened for eligibility prior to the consent process
@@ -2817,6 +2939,10 @@ Pediatric patients will be enrolled ONLY through the pediatric sites and not at 
 13. Recruitment Methods
 13.1 Potential participants will be recruited through clinic appointments at the participating facilities in this study. Additionally, recruitment flyers will be placed in well-trafficked areas to recruit participants in HVEC and COC. Recruitment for remote data collection will include flyers posted at other locations outside of HVEC. At some participating facilities, recruitment flyers will link through a QR code to a secure REDCap survey, which will be used to screen participants and facilitate enrollment. At some facilities where approval by the facilities has been granted, approved research staff will recruit individuals in waiting rooms, including those accompanying patients for clinical appointments. All entries to the REDCap system will be deleted once patients are enrolled, or within 90 days of their submission, whichever comes first. Recruitment will also take place through social media platforms, where information may be presented in the form of posts, reels, stories, or links. Platforms for recruitment will include: LinkedIn, X, Facebook, Instagram, YouTube, the Bridge2AI-Voice website (www.b2ai-voice.org), and the Bridge2AI website (www.bridge2ai.org). Recruitment will also take place through FlowTrials, an online platform where studies passively publicize their requests for participation. Participating facilities will recruit through their own websites in coming years. If specific diagnoses and/or severities are under-represented in the dataset, participants will be identified by medical record review, based on voice-disorder related diagnostic codes.
 The Bridge2AI Enrollment Web app is launched in a browser on the participant's computer, tablet, or phone device. No software is downloaded or installed. The app is itself HIPAA-compliant, and only stores data during the collection phase. The data are removed as soon as the page is closed. There is no login required. The data are sent similar to the in-clinic collection over a secure https protocol to a HIPAA-compliant storage server.
+☐ Email	☒ Online/Social Media Advertisement
+☒ Flyer	☒ Record Review
+☐ Letter	☐ SONA
+☐ News Advertisement	☒ Other
 13.2 Potential participants will be recruited through clinic appointments at the participating facilities in this study. Additionally, recruitment flyers will be placed in well-trafficked areas to recruit participants in HVEC and COC. Recruitment for remote data collection will include flyers posted at other locations outside of HVEC. At some participating facilities, recruitment flyers will link through a QR code to a secure REDCap survey, which will be used to screen participants and facilitate enrollment. At some facilities where approval by the facilities has been granted, approved research staff will recruit individuals in waiting rooms, including those accompanying patients for clinical appointments.
 Recruitment will also take place through social media platforms, where information may be presented in the form of posts, reels, stories, or links. Platforms for recruitment will include: LinkedIn, X, Facebook, Instagram, YouTube, the Bridge2AI-Voice website (www.b2ai-voice.org), and the Bridge2AI website (www.bridge2ai.org). Recruitment will also take place through FlowTrials, an online platform where studies passively publicize their requests for participation. Participating facilities will recruit through their own websites in coming years. If specific diagnoses and/or severities are under-represented in the dataset, participants will be identified by medical record review, based on voice-disorder related diagnostic codes.
 The Bridge2AI Enrollment Web app is launched in a browser on the participant's computer, tablet, or phone device. No software is downloaded or installed. The app is itself HIPAA-compliant, and only stores data during the collection phase. The data are removed as soon as the page is closed. There is no login required. The data are sent similar to the in-clinic collection over a secure https protocol to a HIPAA-compliant storage server.
@@ -2854,8 +2980,11 @@ Each subsequent year of the study (2-4) 10% of the data will be selected at rand
 The study team will also be utilizing federated learning. Federated learning is a technology that allows sharing data for AI analysis without the data actually leaving the institution. Algorithms are run on data at each institution and model updates are shared to a central node. Therefore, researchers can benefit from other institutions' data without the need to share the actual data. In academia and medicine, this is the solution to the most important boundaries to collaborative research dure to the heavy legal and administrative burden linked to data sharing.
 Identifiable data and datasheets linking participant numbers to participant information will be kept in each institution on local cloud storage for a maximum of 10 years after study completion. Identifiable data will then be destroyed. This will be the responsibility of each local PI.
 17.5 If you will review/access and/or collect/obtain Protected Health Information (PHI) during recruitment or the main study, select all that apply:
-We do not plan to share PHI (identifiers plus health information) with anyone outside the USF research staff.
-A partial HIPAA waiver is being requested for recruitment purposes to allow the study team to review EHR information for incoming clinic patients ahead of their appointments. PHI will be collected at this time to screen potential participants for qualification into the research study; the PHI collected at this time will therefore be limited to the study’s inclusion criteria. This criterion includes:
+☒Obtaining Signed Authorization	☒Waiver of HIPAA Authorization for Recruitment/Screening Purposes Only
+☐Obtaining Online or Verbal Authorization (Alteration of HIPAA Authorization)	☐Waiver of HIPAA Authorization for Entire Study
+☒Data Use Agreement	☐Business Associate Agreement
+	We do not plan to share PHI (identifiers plus health information) with anyone outside the USF research staff.
+	A partial HIPAA waiver is being requested for recruitment purposes to allow the study team to review EHR information for incoming clinic patients ahead of their appointments. PHI will be collected at this time to screen potential participants for qualification into the research study; the PHI collected at this time will therefore be limited to the study’s inclusion criteria. This criterion includes:
  Inclusion criteria:
 For treatment population:
 - Being diagnosed and/or treated for a voice, respiratory, pediatric, mood, or neurological disorder affecting voice, cough, breath and/or speech (see Section 3: Background) at one of USF Health’s or participating institutions’ HVEC (see Annex C table 4 for participating institutions)
@@ -2873,7 +3002,7 @@ Exclusion criteria:
 - Not speaking the English or Spanish Language
 - Having had a surgical intervention significantly altering the symptoms of the disease studied
 - Not consenting (or, in the case of pediatric participants, not receiving consent from a parent or legal guardian) to voice and clinical de-identified data being uploaded to an open-sourced database
-This will allow the clinician to have a study team member available to consent a participant ahead of time and allow for a more seamless transition during the clinic appointment should the patient express interest in participating in research. PHI will not be reused/disclosed to any other person or entity except as required by law, for authorized oversight of the research project, or for other research which use/disclosure of PHI would be permitted by the HIPAA privacy regulations.
+	This will allow the clinician to have a study team member available to consent a participant ahead of time and allow for a more seamless transition during the clinic appointment should the patient express interest in participating in research. PHI will not be reused/disclosed to any other person or entity except as required by law, for authorized oversight of the research project, or for other research which use/disclosure of PHI would be permitted by the HIPAA privacy regulations.
 We plan to protect identifiers collected under the waiver from improper use and/or disclosure by only allowing authorized study personnel to access it and storing any PHI in HIPAA protected data bases and cloud servers such as REDCap and through Federated Learning.
 We will destroy the identifiers collected under the waiver at the earliest opportunity consistent with the conduct of the research.
 It is not practicable to obtain signed HIPAA Authorizations from the participants before using or disclosing their PHI in our study because we want to be able to screen incoming clinic patients for qualifications to research before approaching them about the research. We do not want to offer someone to join research they do not qualify for and we need to be able to have research staff on hand the days that there are qualified interested potential participants to help with the consent process so this all requires planning and access prior to contact with the participant so consent before would not be possible.
@@ -2891,8 +3020,15 @@ HIPAA protected information associated with the participant who provides the voi
 21.1 Compensation will be provided to the adult population only.
 21.2 If you will provide compensation to participants, select all that apply:
 Participants will be compensated with gift cards. Participants will be given a $40 gift card for sessions lasting under 90 minutes, and an $80 gift card for sessions lasting over 90 minutes, for a maximum of three sessions and $120.
+☐No Compensation	☐Tokens (pens, food items, etc.)
+☒Financial Compensation (cash, gift cards)	☐Other
+☐Course Credit (i.e. extra credit, SONA points)
 22.0 Consent Process
 22.1 Select the consent options you will use during the course of the study. Each selection below must have a description in the subsequent section(s). Choose all that apply:
+☒Obtaining Signed Consent (Subject or Legally Authorized Representative)	☒Obtaining Consent Online (Waiver of Written Documentation of Consent )
+☐Obtaining Signed Parental Permission	☒Obtaining Verbal Consent (Waiver of Written Documentation of Consent)
+☒Obtaining Signed Assent for Children or Adults Unable to Consent	☐Waiving Consent and/or Parental Permission (Waiver of Consent Process)
+☐Obtaining Verbal Assent for Children or Adults Unable to Consent	☒Waiving Assent/Assent is Not Appropriate
 22.2 	This is a human subjects research project, so an informed consent should be required by the IRB. We have an ethical obligation to provide the participants with the information provided during the consent process and offer the same due diligences we would offer if it were a human subject research project. This is to ensure that the participants are aware and sure of their choice to participate voluntarily.
 Please see Consent, Assent and Parental Permission Documents
 In most cases, consent/assent process will take place in the clinic setting of the recruiting HVEC and will be conducted by the research assistants. Consent may also take place remotely through REDCap survey forms, accessed electronically.
@@ -2942,146 +3078,6 @@ Please note that not all deliverables from year 1 include patient studies and th
 ANNEX B: VOICE HANDICAP INDEX (VHI-10)
 ANNEX C – PARTICIPATING INSTITUTIONS AND LEAD INVESTIGATORS PER SITE
 Table 4 Participating Institutions and Lead investigators per site
-Lead Investigator
-Weill Cornell Medicine (WCM)	Alexandros Sigaras, PhD
-Anais Rameau, MD, MPhil
-Olivier Elemento, PhD
-Massachusetts Institute of Technology (MIT)	Satrajit Ghosh, PhD
-Vanderbilt University Medical Center (VUMC)	Maria Powell, PhD
-Alexander Gelbard, MD
-Massachusetts Eye and Ear (MEEI)	Phillip Song MD
-Matthew Naunheim, MD
-Emory University	Anthony Law, MD PhD
-University of Toronto (UofT)	Frank Rudzicz, PhD
-Hospital for Sick Children (HSC)	Alistair Johnson, DPhil
-Mount Sinai Hospital (MSH)	Jordan Lerner-Ellis, PhD
-Revision #	Version Date	Summary of Changes	Consent Change?
-V2	May 3,2023	Modified to include pediatric cohort under single IRB	Yes
-V3	August 15, 2023	Modified to include compensation for participating adults	No
-V4	December 11, 2023	Modified to allow for electronic consent and change the options for consent levels. Added USF REDCap protocol language and social media recruitment.	Yes
-V5	January 31, 2024	Modified to include data collection for controls. Updated personnel (USF co-investigators and outside investigators). Added new disease categories of interest.	Yes
-V6	February 22, 2024	Removes Table: Disease Cohorts per Site of Data Collection	No
-V7	July 19, 2024	Included e-consent and remote consent options. Changed compensation amount for participation.	Yes
-V8	September 27, 2024	Included options for remote enrollment through an app used as a recruitment tool (Bridge2AI Enrollment Web app) and for remote data collection (Bridge2AI Voice Web app). Changed compensation amount for participation. Added USF co-investigator.	Yes
-V9	November 15, 2024	Updated protocol to clarify the current state of research.	No
-V10	January 17, 2025	Clarified that remote data collection will take place on two different platforms, the Bridge2AI Voice Web app and the Bridge2AI Voice iOS app. Added USF co-investigator.	No
-V11	February 10, 2025	Updated to include data collection from Spanish language speakers. Added a new platform for patient recruitment. Added USF co-investigator. Added further sites for USF data collection. Added satisfaction survey for participants who decide not to complete data collection.	Yes
-V12	May 6, 2025	Updated language about the platforms for remote consent and data collection.	No
-V13	July 11, 2025	Added sentence regarding the use of flyers for recruitment. Added sentence regarding other sites for recruitment at Vanderbilt.	No
-Study Title	Bridge2AI Voice Data Acquisition
-Study Design	Prospective Cohort Study
-Primary Objective/Purpose	To build a large multi-institutional database of human voices, speech and respiratory sounds that is ethically sourced, diverse, and linked to multimodal health biomarkers to fuel voice AI research
-Secondary Objective(s)/Purposes	To build a data collection application and IT infrastructure for human voice, speech and respiratory sounds linked to other health biomarkers such as radiomics, and genomics, and supported by federated learning technology to protect data privacy. Data collected through this application will exist in the database.
-Research Intervention(s)	N/A
-ClinicalTrials.gov NCT #	N/A
-Study Population	Participants with known diagnosed diseases from 5 disease categories (Respiratory disorders, Voice disorders, Neurological disorders, Mood disorders, Pediatric voice and speech disorders), as well as participants without the identified conditions from the above 5 disease categories who can serve as controls in the database.  Participants will be recruited primarily from individuals presenting at USF specialty clinics or at one of the participating institutions described below and included in the SINGLE IRB PROCESS.
-Sample Size	30 000 participants
-Study Duration for individual participants	Up to 4 years
-Study Specific Abbreviations/ Definitions	Abbreviations:
-
-Machine Learning (ML)
-Artificial Intelligence (AI)
-Smart Phones (SP)
-CAPE-V (Consensus Auditory Perceptual Evaluation of Voice)
-Rainbow Passage: a standard text that contains all the phonemes of the English language.
-HVEC- High Volume Expert Clinics
-COC- Community Outreach Clinics
-PEDP- Plan for Enhancing Diverse Perspectives
-(EHR)- Electronic Health Records
-
-Definitions:
-
-Participating institutions
-University of South Florida, Tampa, Florida, US (USF)
-Weill Cornell Medicine, New York, New York, US (WCM)
-Vanderbilt University Medical Center, Nashville, Tennessee, US (VUMC)
-University of Toronto, Toronto, Ontario, Canada (UofT)
-Mount Sinai Hospital, Toronto, Ontario, Canada (MSH)
-Massachusetts Institute of Technology (MIT), Boston, Massachusetts, US (MIT)
-Hospital for Sick Children, Toronto, Ontario, Canada (HSC)
-Massachusetts Eye and Ear Institute, Boston, Massachusetts, US (MEEI)
-Emory University, Atlanta, Georgia, US (EU)
-
-High Volume Expert Clinics:
-These are clinics within participating institutions who see a high volume of patients with the specific disease studied (ex; The Alzheimer’s and Mild Cognitive impairment clinic at USF for Alzheimer’s).
-
-All US-based institutions will abide to the SINGLE IRB Process. Once this protocol is approved at USF, each of the participating institution will submit review based on the SINGLE IRB at USF
-The exceptions to the single IRB are the following:
-Genomic data will only be collected and analyzed at the University of Toronto and Mount Sinai Hospital in Canada. Therefore, that team will have a separate protocol for genomic data collection and analysis. Once approved, a copy of the protocol and Research Ethics board approval will be submitted to USF IRB.
-Canadian Institutions (MSH, SickKids and UofT) do not abide to the SINGLE IRB process and will apply for a separate REB (research ethics board application) to comply with the Canadian regulations. A copy of this approved IRB will also be submitted with their application
-
-Longitudinal Data Collection:
-For specific disease cohorts that are progressive or degenerative (i.e Alzheimer's, Parkinson’s), Longitudinal data collection may be collected.
-The longitudinal data will be collected in 2 forms:
-1: Longitudinal data in clinic during clinic visits:
-This data collection will happen in clinic during REGULAR follow up visits. No additional visits outside of regular follow up plans for disease monitoring
-2: Longitudinal data “at home”:
-In between clinic visit, certain cohorts could be asked to perform voice data collection at home through participants’ own smartphone application that will be downloaded for them in clinic. This is just for longitudinal data cohort only. This data collection will be asked at intervals of 1-6 months depending on disease cohorts and for a maximum of 3 years total duration. Participants can decide to leave the study at any point during that time.
-NIH Stride Partner:
-  An initiative allows NIH to explore the use of cloud environments to streamline NIH data use by partnering with commercial providers. NIH’s STRIDES Initiative aims to modernize biomedical research by reducing economic and process barriers in utilizing commercial cloud services. These partnerships enable access to rich datasets and advanced computational infrastructure, tools, and services.
-Audio/Video Recording	Psychophysiological Recording
-Behavioral Interventions	Record Review - Educational
-Behavioral Observations and Experimentations	Record Review - Employee
-Deception	Record Review- Medical
-Focus Groups	Record Review - Other
-Interviews	Specimen collection and analysis
-Investigational Device – Non-Significant Risk (e.g. Mobile Applications)	Surveys and/or questionnaires
-Psychometric Testing	Other Social-Behavioral Procedures
-Phase 1	Phase 2	Phase 3	Phase 4
-Exploratory	Pilot	Expansion	Outreach
-IT and cloud infrastructure
-Software and app development
-Data collection for up to 180 participants (30 participants from each disease category and controls, at main sites only
-(Completed November 2023)	Data collection to cumulatively reach up to 600 participants (100 participants from each disease category and controls) at:
-Main sites
-HVEC in participating institutions
-(Begun November 2023, ongoing in November 2024)	Expansion to COC, other HVEC and expansion phase of data acquisition to cumulatively reach data collection from up to 3000 participants (500 from each disease category and controls)	Expansion to normal cohorts though partnerships, expansion through HVEC and COC to cumulatively reach 5000 participants
-Category	Acoustic	Imaging	Genomic	Descriptive/normative
-Voice Disorders	Voice and Speech	Video-Laryngoscopy images	Demographic data
-Validated Questionnaire Scores
-Respiratory Disorders	Voice and Speech
-Breathing Sounds	Chest X rays	Oxygen saturation
-Demographic data
-Validated Questionnaire Scores
-Forced Expiratory Volumes
-Mood Disorders	Voice and Speech	Demographic data
-Validated Questionnaire Scores
-Neurological Disorders	Voice and Speech	Brain CT Scan
-Brain MRI	Whole Genome Sequencing	Demographic data
-Validated Questionnaire Scores
-Pediatric Disorders	Voice and Speech	Demographic data
-Validated Questionnaire Scores
-Controls	Voice and Speech	Demographic data
-Validated Questionnaire Scores
-Phase 1: Exploratory	Phase 2
-Pilot	Phase 3
-Expansion	Phase 4
-Outreach
-Single IRB process @ USF
-Integration of participating institutions to Single IRB
-App Development
-Protocol and app refinement
-IT infrastructure and data storage platform development
-Preliminary data collection
-Pilot data collection (began November 2023)
-Expansion phase of data collection
-Outreach phase of Data collection
-Data sharing and access management
-Transfer of data sharing to open-source access
-Email	Online/Social Media Advertisement
-Flyer	Record Review
-Letter	SONA
-News Advertisement	Other
-Obtaining Signed Authorization	Waiver of HIPAA Authorization for Recruitment/Screening Purposes Only
-Obtaining Online or Verbal Authorization (Alteration of HIPAA Authorization)	Waiver of HIPAA Authorization for Entire Study
-Data Use Agreement	Business Associate Agreement
-No Compensation	Tokens (pens, food items, etc.)
-Financial Compensation (cash, gift cards)	Other
-Course Credit (i.e. extra credit, SONA points)
-Obtaining Signed Consent (Subject or Legally Authorized Representative)	Obtaining Consent Online (Waiver of Written Documentation of Consent )
-Obtaining Signed Parental Permission	Obtaining Verbal Consent (Waiver of Written Documentation of Consent)
-Obtaining Signed Assent for Children or Adults Unable to Consent	Waiving Consent and/or Parental Permission (Waiver of Consent Process)
-Obtaining Verbal Assent for Children or Adults Unable to Consent	Waiving Assent/Assent is Not Appropriate
 Lead Investigator	Role
 USF	Yael Bensoussan MD, MSc	Co-Lead of Data Acquisition
 WCM	Anais Rameau, MD, MPhil	Co-Lead of Data Acquisition

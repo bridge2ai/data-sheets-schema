@@ -278,5 +278,58 @@ projects:
         self.assertEqual(stats["errors"], 1)
 
 
+class DocxStructuredDocumentTags(unittest.TestCase):
+    """#886: runs, cells and rows wrapped in `w:sdt` (a Google Docs export
+    artefact) were dropped by python-docx's `.text`; the bundle read "tudy
+    visit". The extractor walks the XML in document order, looks through
+    sdt wrappers at every level, and reaches a nested table exactly once
+    (#921 review)."""
+
+    NS = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"'
+
+    def _sdt(self, inner):
+        from docx.oxml import parse_xml
+        return parse_xml(f'<w:sdt {self.NS}><w:sdtPr><w:tag w:val="goog_rdk_1"/></w:sdtPr>'
+                         f'<w:sdtContent>{inner}</w:sdtContent></w:sdt>')
+
+    def _docx(self, path):
+        import docx
+        d = docx.Document()
+        d.add_paragraph("Before the table.")
+        t = d.add_table(rows=2, cols=2)
+        t.rows[0].cells[0].text = "left"
+        p = t.rows[0].cells[1].paragraphs[0]
+        p.add_run("tudy visit will take hours.")
+        # a run-level sdt inside a cell paragraph
+        p._p.insert(list(p._p).index(p.runs[0]._r), self._sdt('<w:r><w:t xml:space="preserve">The s</w:t></w:r>'))
+        # a row-level sdt wrapping a whole cell: the ☒ answer cell
+        row = t.rows[1]._tr
+        row.remove(row.findall(f"{{{self.NS.split(chr(34))[1]}}}tc")[1])
+        row.append(self._sdt('<w:tc><w:p><w:r><w:t>☒ Yes</w:t></w:r></w:p></w:tc>'))
+        t.rows[1].cells[0].text = "Multi-site study"
+        # a nested table inside a cell
+        inner = t.rows[0].cells[0].add_table(rows=1, cols=2)
+        inner.rows[0].cells[0].text = "CES-D-10 survey"; inner.rows[0].cells[1].text = "depression"
+        d.add_paragraph("After the table.")
+        d.save(path)
+
+    def test_sdt_runs_cells_and_nested_tables_are_kept_once_in_document_order(self):
+        import tempfile
+        from pathlib import Path
+        from src.download.preprocess_sources import extract_docx_text
+        with tempfile.TemporaryDirectory() as tmp:
+            f = Path(tmp) / "doc.docx"
+            self._docx(f)
+            text = extract_docx_text(f)
+        self.assertIn("The study visit will take hours.", text)
+        self.assertNotIn("\ntudy", text)
+        self.assertEqual(text.count("CES-D-10 survey"), 1)                 # nested table once
+        self.assertIn("Multi-site study\t☒ Yes", text)                     # row-level sdt cell kept
+        lines = text.splitlines()
+        self.assertEqual(lines[0], "Before the table.")
+        self.assertTrue(lines[1].startswith("left"))
+        self.assertEqual(lines[-1], "After the table.")
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -1,8 +1,8 @@
 bundle: AI_READI_preprocessed.txt
-bundle_md5: 8abd7bf5389b562b95794d656af19392
-bundle_sha256: 909c0dd8a1dcade0a0af908771356d5ea13cd91849522d562e9d88107661d368
-bundle_lines: 7376
-bundle_bytes: 535178
+bundle_md5: d22b61a9f8443545c9ae14ee941c3e88
+bundle_sha256: 613f5bd62c519179d6927086faca1120f2b72808a59f3c3c37723d36426d6446
+bundle_lines: 7446
+bundle_bytes: 542513
 rule:
   version: 2
   unit: source-document
@@ -236,39 +236,39 @@ chunks:
   source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
   lines:
   - 6338
-  - 6647
-  bytes: 47918
-  sha256: 86e8e9fdb79cf43023102e40a1116e0254ffe0521049502c1a8d2cadb67bbb65
+  - 6631
+  bytes: 47999
+  sha256: 3fd1b07daadb080be9fb9abb2b329671ffc977876f205d40e8cf1de87fd65912
   part:
   - 1
   - 4
 - id: c026
   source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
   lines:
-  - 6648
-  - 6943
-  bytes: 47934
-  sha256: 513821547b216259599e79c9124202f015bd86daade65cc9dd86974279fa404f
+  - 6632
+  - 7031
+  bytes: 46088
+  sha256: 282418754bffb74a9b423ed545122bc2d863efc5dddbda0c28df6bf42ebc91b2
   part:
   - 2
   - 4
 - id: c027
   source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
   lines:
-  - 6944
-  - 7318
-  bytes: 47986
-  sha256: 37ecf96ef69504d68977e8615625de8691e5de8bd18adfa031a320b48154a3d7
+  - 7032
+  - 7348
+  bytes: 47437
+  sha256: b31eba0430e6c4cb65d8e490feb29a4990dc74e40a86c2b14038b6852a59d8d5
   part:
   - 3
   - 4
 - id: c028
   source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
   lines:
-  - 7319
-  - 7376
-  bytes: 7651
-  sha256: 678ef5a9ff2f213945716ba567be3cb018cfbe5989bfac3a00245abf10c3ab79
+  - 7349
+  - 7446
+  bytes: 17300
+  sha256: 9ca190a667614997d64e311f3c8d70129a9176a566318ba755584589ee398807
   part:
   - 4
   - 4
