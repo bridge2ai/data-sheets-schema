@@ -130,4 +130,6 @@ form:
   undeclared_prefix_occurrences: 0
   british_spellings: 0
   organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
   recorded_by: backfill_checks

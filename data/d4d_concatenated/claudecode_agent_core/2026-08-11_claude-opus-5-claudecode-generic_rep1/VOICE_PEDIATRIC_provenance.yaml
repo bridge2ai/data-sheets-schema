@@ -185,8 +185,10 @@ form:
   - data/d4d_concatenated/claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_PEDIATRIC_d4d.yaml
   - data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_PEDIATRIC_d4d_core.yaml
   undeclared_prefixes:
-    urn: 29
+    urn:b2ai-voice-pediatric: 29
   undeclared_prefix_occurrences: 29
-  british_spellings: 15
+  british_spellings: 19
   organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
   recorded_by: backfill_checks

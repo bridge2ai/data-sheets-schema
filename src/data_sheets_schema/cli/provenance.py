@@ -921,7 +921,12 @@ def backfill_prompts(execute, label):
 @click.option('--project', default=None, help='restrict to one project')
 @click.option('--overwrite', is_flag=True,
               help='replace blocks that are already present')
-def backfill_checks(execute, method, label, project, overwrite):
+@click.option('--blocks', default=None,
+              help='comma-separated subset to write (pair_consistency, report_claims, form, '
+                   'grounding, receipts); the others are neither computed for the report '
+                   'nor touched — an instrument revision to one block must not overwrite '
+                   'a grounding block the run attested on bytes that have since drifted')
+def backfill_checks(execute, method, label, project, overwrite, blocks):
     """Recompute the pair, report and grounding checks for older records (#552).
 
     #544, #546 and #547 each added a block that `d4d api run` writes from then
@@ -961,13 +966,21 @@ def backfill_checks(execute, method, label, project, overwrite):
         click.echo("no records matched")
         return
 
+    from data_sheets_schema.backfill_checks import BLOCKS
+    wanted = None
+    if blocks:
+        wanted = {b.strip() for b in blocks.split(",") if b.strip()}
+        unknown = wanted - set(BLOCKS)
+        if unknown:
+            raise click.ClickException(f"unknown block(s) {sorted(unknown)}; choose from {list(BLOCKS)}")
+
     # Built once. Each call loads two SchemaViews, which over 122 records is
     # the difference between seconds and minutes.
     declared = declared_slots()
     written = skipped = 0
     for p in paths:
         try:
-            blocks = compute(p, declared)
+            blocks = compute(p, declared, only=wanted)
             # Inside the same guard as compute: a write that raises halfway
             # through 192 records leaves a corpus in two states, and the reason
             # it raised is exactly the kind a reader needs to see per-record.

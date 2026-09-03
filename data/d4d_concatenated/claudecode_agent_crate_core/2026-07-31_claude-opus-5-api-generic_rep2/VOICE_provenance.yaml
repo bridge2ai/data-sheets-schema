@@ -210,4 +210,8 @@ form:
   undeclared_prefix_occurrences: 0
   british_spellings: 19
   organisational_fragments: 0
+  gc_label_variants:
+    Bridge2AI-Voice: 27
+    Bridge2AI Voice: 15
+  gc_label_variant_occurrences: 42
   recorded_by: backfill_checks

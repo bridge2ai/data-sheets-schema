@@ -150,6 +150,11 @@ form:
   undeclared_prefixes:
     b2ai-voice: 284
   undeclared_prefix_occurrences: 284
-  british_spellings: 10
+  british_spellings: 12
   organisational_fragments: 0
+  gc_label_variants:
+    Bridge2AI-Voice: 57
+    Bridge2AI Voice: 18
+    B2AI-Voice: 2
+  gc_label_variant_occurrences: 77
   recorded_by: backfill_checks

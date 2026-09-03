@@ -84,9 +84,14 @@ def declared_bundle(record: dict[str, Any]) -> Path | None:
     return Path(path) if path else None
 
 
-def compute(provenance: Path, declared: dict[str, set[str]] | None = None
-            ) -> dict[str, Any]:
-    """The three blocks for one record, or reasons they cannot be computed."""
+def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
+            only: set[str] | None = None) -> dict[str, Any]:
+    """The check blocks for one record, or reasons they cannot be computed.
+    `only` restricts the computation to the named blocks (`--blocks`): the
+    receipts and grounding checks read the bundle and every chunk, which
+    over the corpus is the difference between minutes and hours when the
+    revision being backfilled touches only `form`."""
+    want = (lambda name: only is None or name in only)
     from data_sheets_schema.grounding import check_run
     from data_sheets_schema.identifiers import uriorcurie_slots
     from data_sheets_schema.provenance import (CORE_SCHEMA, FULL_SCHEMA,
@@ -100,7 +105,9 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None
     out: dict[str, Any] = {}
 
     # --- pair consistency -------------------------------------------------
-    if not (full.exists() and core.exists()):
+    if not want("pair_consistency"):
+        pass
+    elif not (full.exists() and core.exists()):
         missing = [str(p) for p in (full, core) if not p.exists()]
         out["pair_consistency"] = {"checked": False, "ran": False,
                                    "reason": f"missing: {', '.join(missing)}",
@@ -147,7 +154,9 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None
             "recorded_by": RECORDED_BY}
 
     # --- report claims ----------------------------------------------------
-    if not report.exists():
+    if not want("report_claims"):
+        pass
+    elif not report.exists():
         out["report_claims"] = {"checked": False,
                                 "reason": "no reconciliation report",
                                 "recorded_by": RECORDED_BY}
@@ -165,12 +174,15 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None
     # --- form -------------------------------------------------------------
     # Computed from the records alone, so unlike grounding it is available even
     # where the bundle has drifted (#602).
-    from data_sheets_schema.grounding import form_facts
-    out["form"] = {**form_facts(full, core), "recorded_by": RECORDED_BY}
+    if want("form"):
+        from data_sheets_schema.grounding import form_facts
+        out["form"] = {**form_facts(full, core), "recorded_by": RECORDED_BY}
 
     # --- grounding --------------------------------------------------------
     bundle = declared_bundle(record)
-    if bundle is None:
+    if not want("grounding"):
+        pass
+    elif bundle is None:
         out["grounding"] = {"checked": False,
                             "reason": "the record names no input bundle",
                             "recorded_by": RECORDED_BY}
@@ -206,12 +218,13 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None
     # claim (`inputs.receipt_expected`); the block carries it so the gate can
     # tell "none from a procedure that writes none" from "none from one that
     # does". A receipt that exists is checked either way.
-    from data_sheets_schema.receipts import block_for, receipt_path
-    inputs = record.get("inputs") or {}
-    out["receipts"] = {**block_for(full, receipt_path(provenance.parent, paths["project"]),
-                                   bundle, inputs.get("bundle_md5"),
-                                   bool(inputs.get("receipt_expected"))),
-                       "recorded_by": RECORDED_BY}
+    if want("receipts"):
+        from data_sheets_schema.receipts import block_for, receipt_path
+        inputs = record.get("inputs") or {}
+        out["receipts"] = {**block_for(full, receipt_path(provenance.parent, paths["project"]),
+                                       bundle, inputs.get("bundle_md5"),
+                                       bool(inputs.get("receipt_expected"))),
+                           "recorded_by": RECORDED_BY}
     return out
 
 

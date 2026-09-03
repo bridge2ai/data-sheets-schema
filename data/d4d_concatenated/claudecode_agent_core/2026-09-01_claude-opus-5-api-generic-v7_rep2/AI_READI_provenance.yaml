@@ -387,11 +387,12 @@ form:
   - data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_d4d_core.yaml
   undeclared_prefixes: {}
   undeclared_prefix_occurrences: 0
-  british_spellings: 13
+  british_spellings: 38
   organisational_fragments: 0
   gc_label_variants:
     AI READI: 2
   gc_label_variant_occurrences: 2
+  recorded_by: backfill_checks
 receipts:
   expected: true
   non_checks:
@@ -518,6 +519,34 @@ receipts:
     path_off_by_one_count: 0
     addressing_slips: []
     addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt:
+    - path: creators[0]
+      resolved_path: creators[0]
+    - path: creators[0].affiliations
+      resolved_path: creators[0].affiliations
+    - path: data_governance.notes
+      resolved_path: data_governance.notes
+    - path: external_resources[3].external_resources
+      resolved_path: external_resources[3].external_resources
+    - path: external_resources[5].external_resources
+      resolved_path: external_resources[5].external_resources
+    - path: human_subject_research.ethics_review_board
+      resolved_path: human_subject_research.ethics_review_board
+    - path: is_deidentified.deidentification_details
+      resolved_path: is_deidentified.deidentification_details
+    - path: is_deidentified.method
+      resolved_path: is_deidentified.method
+    - path: notes
+      resolved_path: notes
+    - path: regulatory_restrictions.other_compliance
+      resolved_path: regulatory_restrictions.other_compliance
+    - path: sampling_strategies[0].source_caveats
+      resolved_path: sampling_strategies[0].source_caveats
+    - path: source_caveats
+      resolved_path: source_caveats
+    value_changed_after_receipt_count: 12
     reshaped_by_reconcile:
     - creators[0].principal_investigator
     - data_governance.committee_contact
@@ -591,7 +620,8 @@ receipts:
     line) (1 unattesting, below the floors) (8 in an adjacent chunk) (1 in another
     chunk) (4 bearing on no token of their value) (3 entry receipt(s) overlapping
     one leaf) · slots 208/439 with a receipt (228 never receipted, 3 added after the
-    receipt) (39 exempt) · 4 receipt path(s) reshaped by reconcile
+    receipt) (39 exempt) · 4 receipt path(s) reshaped by reconcile · 12 value(s) changed
+    after the receipt
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_coverage_receipt.yaml
@@ -599,6 +629,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/AI_READI_chunks.yaml
       sha256: b46977b4c4b66adb903c6d288428646024275da21f9dbc2fb931b5c36d48ac0a
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/AI_READI_audit.json
   sha256: 8de0b11630007667d15984e9c7c3e893e799920884ac8bc276c7590cb3094499
@@ -658,8 +689,12 @@ review:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_review.yaml
       sha256: fe450aa57d5116979ae13828e445cc7d3ba72bfb2080b56ac7c8a86e25404dde
   recorded_by: d4d review check
-canonical:
-  criterion: full and core both validate against the current schema, then most slots,
+canonical_superseded_by:
+  label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+  at: '2026-09-03T02:00:03+00:00'
+  by: d4d runs select
+canonical_history:
+- criterion: full and core both validate against the current schema, then most slots,
     then lowest label
   selected_from:
   - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
@@ -680,3 +715,7 @@ canonical:
   - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1
   - 2026-08-22c_claude-opus-5-api-generic-v5_rep2
   - 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+  superseded_by:
+    label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    at: '2026-09-03T02:00:03+00:00'
+    by: d4d runs select

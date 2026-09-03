@@ -305,7 +305,7 @@ form:
   gc_label_variants:
     AI READI: 2
   gc_label_variant_occurrences: 2
-  recorded_by: d4d provenance record
+  recorded_by: backfill_checks
 receipts:
   expected: true
   non_checks:

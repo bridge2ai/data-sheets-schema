@@ -154,6 +154,8 @@ form:
   undeclared_prefixes:
     chorus: 268
   undeclared_prefix_occurrences: 268
-  british_spellings: 56
+  british_spellings: 70
   organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
   recorded_by: backfill_checks

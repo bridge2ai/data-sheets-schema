@@ -210,6 +210,8 @@ form:
     external: 4
     related: 2
   undeclared_prefix_occurrences: 302
-  british_spellings: 18
+  british_spellings: 23
   organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
   recorded_by: backfill_checks

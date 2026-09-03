@@ -59,7 +59,13 @@ the only source of dataset facts.
 - `slot_receipted` — open the cited chunk, find the snippet, read the
   passage around it, then read the value at the slot path in the full
   record and the slot's description in the schema files the pack names
-  (`pack.schema`). `supported` when
+  (`pack.schema`). From `pack_version` 4 the item carries `resolved_path`
+  and `resolution` (#899): `slot` is the path as the receipt wrote it
+  against the phase-1 record, `resolved_path` is where that entry sits
+  after reconciliation's inserts and reorders, joined by entry identity —
+  judge the value at `resolved_path`, and do not score an index shift as
+  `unsupported`. `pack.receipt_join.basis` says whether the join was by
+  identity or (no snapshot, the agentic path) by index. `supported` when
   the passage says what the value says in the sense the slot asks;
   `weak` when the passage is real and on topic but does not answer the
   slot's question (a bare repository name receipting a de-identification

@@ -166,8 +166,10 @@ form:
   - data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep3/CM4AI_d4d.yaml
   - data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep3/CM4AI_d4d_core.yaml
   undeclared_prefixes:
-    urn: 184
+    urn:cm4ai: 184
   undeclared_prefix_occurrences: 184
   british_spellings: 16
   organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
   recorded_by: backfill_checks

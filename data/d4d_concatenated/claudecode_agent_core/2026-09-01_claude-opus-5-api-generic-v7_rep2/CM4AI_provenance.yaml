@@ -391,6 +391,7 @@ form:
   organisational_fragments: 0
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
+  recorded_by: backfill_checks
 receipts:
   expected: true
   non_checks:
@@ -536,6 +537,50 @@ receipts:
     addressing_slips:
     - creators[38].source_caveats
     addressing_slips_count: 1
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt:
+    - path: created_by
+      resolved_path: created_by
+    - path: distribution_dates[0].release_dates
+      resolved_path: distribution_dates[0].release_dates
+    - path: external_resources[0].external_resources
+      resolved_path: external_resources[0].external_resources
+    - path: external_resources[3].external_resources
+      resolved_path: external_resources[3].external_resources
+    - path: external_resources[5].external_resources
+      resolved_path: external_resources[5].external_resources
+    - path: external_resources[6].external_resources
+      resolved_path: external_resources[6].external_resources
+    - path: external_resources[7].external_resources
+      resolved_path: external_resources[7].external_resources
+    - path: file_collections[0]
+      resolved_path: file_collections[0]
+    - path: file_collections[1]
+      resolved_path: file_collections[1]
+    - path: file_collections[2]
+      resolved_path: file_collections[2]
+    - path: file_collections[3]
+      resolved_path: file_collections[3]
+    - path: file_collections[4]
+      resolved_path: file_collections[4]
+    - path: file_collections[5]
+      resolved_path: file_collections[5]
+    - path: file_collections[6]
+      resolved_path: file_collections[6]
+    - path: file_collections[7]
+      resolved_path: file_collections[7]
+    - path: file_collections[8]
+      resolved_path: file_collections[8]
+    - path: file_collections[9]
+      resolved_path: file_collections[9]
+    - path: instances[0].notes
+      resolved_path: instances[0].notes
+    - path: keywords
+      resolved_path: keywords
+    - path: notes
+      resolved_path: notes
+    value_changed_after_receipt_count: 22
     reshaped_by_reconcile:
     - collection_timeframes[0].end_date
     - collection_timeframes[0].start_date
@@ -805,7 +850,7 @@ receipts:
     (5 in another chunk) (1 bearing on no token of their value) (10 entry receipt(s)
     overlapping one leaf) · slots 153/413 with a receipt (247 never receipted, 13
     added after the receipt) (67 exempt) · 6 receipt path(s) reshaped by reconcile
-    · 1 addressing slip(s)
+    · 1 addressing slip(s) · 22 value(s) changed after the receipt
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_coverage_receipt.yaml
@@ -813,6 +858,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/CM4AI_chunks.yaml
       sha256: 3d2d86bac4e9f89d2c6cfb6b5f5361c237995d899ecb6ae41382f82359aedde4
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/CM4AI_audit.json
   sha256: 12aa8280dfc478e3b1a39e6e427b621955134d882fc0f3a44293b40157f221a0
@@ -874,7 +920,35 @@ review:
       sha256: 26f022924ccff22134675556a2e79fa24e875d58190f249dc0d2a0046ad1adf3
   recorded_by: d4d review check
 canonical:
-  criterion: full and core both validate against the current schema, then most slots,
+  criterion: full and core both validate against the current schema, then fewest review
+    adverse verdicts (differences of at most 2 a tie), then most slots, then lowest
+    label
+  selected_from:
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    slots: 70
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 9
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+    slots: 73
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 11
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+    slots: 62
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 15
+  margin_over_runner_up: 3
+  reviews_applied: true
+  review_margin: 2
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep1
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+canonical_history:
+- criterion: full and core both validate against the current schema, then most slots,
     then lowest label
   selected_from:
   - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
@@ -895,3 +969,8 @@ canonical:
   - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
   - 2026-08-22c_claude-opus-5-api-generic-v5_rep1
   - 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+  superseded_by:
+    label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+    at: '2026-09-03T02:00:34+00:00'
+    by: d4d runs select
+    reason: re-selected

@@ -156,6 +156,8 @@ form:
   undeclared_prefixes:
     aireadi: 340
   undeclared_prefix_occurrences: 340
-  british_spellings: 104
+  british_spellings: 143
   organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
   recorded_by: backfill_checks

@@ -381,6 +381,7 @@ form:
   organisational_fragments: 0
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
+  recorded_by: backfill_checks
 receipts:
   expected: true
   non_checks:
@@ -460,12 +461,12 @@ receipts:
     - creators[22].id
     - creators[23].id
     - creators[23].affiliations[0].id
+    - creators[24].id
     - creators[27].id
     - creators[28].id
     - creators[29].id
     - creators[30].id
     - creators[31].id
-    - creators[33].id
     - creators[34].id
     - creators[35].id
     - creators[36].id
@@ -492,6 +493,25 @@ receipts:
     path_off_by_one_count: 0
     addressing_slips: []
     addressing_slips_count: 0
+    remapped_by_identity:
+    - path: creators[24].id
+      resolved_path: creators[33].id
+      basis: by_id
+    remapped_by_identity_count: 1
+    value_changed_after_receipt:
+    - path: data_governance.access_review_process
+      resolved_path: data_governance.access_review_process
+    - path: instances[0].instance_type
+      resolved_path: instances[0].instance_type
+    - path: license_and_use_terms.license_terms
+      resolved_path: license_and_use_terms.license_terms
+    - path: license_and_use_terms.notes
+      resolved_path: license_and_use_terms.notes
+    - path: notes
+      resolved_path: notes
+    - path: source_caveats
+      resolved_path: source_caveats
+    value_changed_after_receipt_count: 6
     reshaped_by_reconcile:
     - collection_timeframes[0].end_date
     - collection_timeframes[0].start_date
@@ -558,7 +578,8 @@ receipts:
   summary: chunks 28/28 reviewed · snippets 73/81 verified (7 in an adjacent chunk)
     (1 in another chunk) (4 bearing on no token of their value) · slots 60/270 with
     a receipt (196 never receipted, 14 added after the receipt) (88 exempt) · 4 receipt
-    path(s) reshaped by reconcile
+    path(s) reshaped by reconcile · 1 receipt path(s) followed by identity · 6 value(s)
+    changed after the receipt
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/CM4AI_coverage_receipt.yaml
@@ -566,6 +587,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/CM4AI_chunks.yaml
       sha256: 3d2d86bac4e9f89d2c6cfb6b5f5361c237995d899ecb6ae41382f82359aedde4
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/intermediate/CM4AI_audit.json
   sha256: b2d5ba72000f0f154e6b20f5f06daf38b70318e33581a5604c29bd03a9a160dc
@@ -623,3 +645,18 @@ review:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/CM4AI_review.yaml
       sha256: 1ce1d9c39b51fc41920d42eb989f3f9982b67a6ff71d44b7f1e72c102df990d7
   recorded_by: d4d review check
+dispositions:
+- item: slot-030
+  verdict: misread
+  disposition: retain
+  note: instances[0].instance_type states the DAPI/calreticulin/tubulin/protein staining
+    channels from the October 2025 archive descriptions (bundle lines 6403/6422/6441)
+    as facts about the June 2026 IF instances, which have no per-file descriptions;
+    the record withdrew the 464-protein count on exactly the regenerated-archives
+    ground and kept the channel details. Whether the channels changed between archives
+    is not stated by the bundle either way, so the curator neither confirms nor removes
+    the sentence; a third figure ('IF images for 523 proteins', line 4433) in the
+    563-vs-464 conflict is also unmentioned. Non-canonical replicate; left as generated,
+    documented here (#903).
+  at: '2026-09-03T01:16:40+00:00'
+  recorded_by: d4d review disposition

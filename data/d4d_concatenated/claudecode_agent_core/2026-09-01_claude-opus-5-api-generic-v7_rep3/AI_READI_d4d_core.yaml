@@ -1090,9 +1090,7 @@ source_caveats: 'Several source disagreements were encountered. (1) Project name
   nine corresponds to the nine root-level metadata files also listed in that source (CHANGELOG.md,
   dataset_description.json, dataset_structure_description.json, healthsheet.md, LICENSE.txt,
   participants.json, participants.tsv, README.md, study_description.json). (7) Directory sizes:
-  the nine datatype directory sizes given in the FAIRhub structure description sum to 3,815,974,377,264
-  bytes, which exceeds the dataset total_size_bytes of 3,815,969,779,678 reported by the same
-  source by 4,597,586 bytes; the bundle does not explain the discrepancy and both figures
+  the nine datatype directory sizes given in the FAIRhub structure description sum to 3,815,969,360,064 bytes, which falls 419,614 bytes short of the dataset total_size_bytes of 3,815,969,779,678 reported by the same source; the bundle does not explain the discrepancy and both figures
   are recorded as stated. (8) Release scope: the healthsheet describes version 3.0.0 as covering
   data "up through the end of the second year of the study", while the README changelog labels
   it the main study release combining year-2 and year-3 data; the collection window of 2023-07-19

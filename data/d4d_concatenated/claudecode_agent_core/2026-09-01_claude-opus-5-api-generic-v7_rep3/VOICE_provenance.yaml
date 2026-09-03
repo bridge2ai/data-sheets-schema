@@ -383,6 +383,7 @@ form:
     Bridge2AI-Voice: 30
     Bridge2AI Voice: 10
   gc_label_variant_occurrences: 40
+  recorded_by: backfill_checks
 receipts:
   expected: true
   non_checks:
@@ -491,6 +492,38 @@ receipts:
     path_off_by_one_count: 0
     addressing_slips: []
     addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt:
+    - path: content_warnings[0].warnings
+      resolved_path: content_warnings[0].warnings
+    - path: created_by
+      resolved_path: created_by
+    - path: data_governance.stewardship_roles
+      resolved_path: data_governance.stewardship_roles
+    - path: distribution_dates[0].release_dates
+      resolved_path: distribution_dates[0].release_dates
+    - path: existing_uses[0].examples
+      resolved_path: existing_uses[0].examples
+    - path: funders[0].grantor
+      resolved_path: funders[0].grantor
+    - path: funders[0].notes
+      resolved_path: funders[0].notes
+    - path: instances[1].notes
+      resolved_path: instances[1].notes
+    - path: is_deidentified.identifiers_removed
+      resolved_path: is_deidentified.identifiers_removed
+    - path: machine_annotation_tools[0].tool_descriptions
+      resolved_path: machine_annotation_tools[0].tool_descriptions
+    - path: missing_data_documentation[0].missing_data_causes
+      resolved_path: missing_data_documentation[0].missing_data_causes
+    - path: missing_data_documentation[0].missing_data_patterns
+      resolved_path: missing_data_documentation[0].missing_data_patterns
+    - path: participant_privacy[0].privacy_techniques
+      resolved_path: participant_privacy[0].privacy_techniques
+    - path: sampling_strategies[0].strategies
+      resolved_path: sampling_strategies[0].strategies
+    value_changed_after_receipt_count: 14
     reshaped_by_reconcile:
     - instances[1].counts
     receipts_to_removed_values: 1
@@ -578,7 +611,7 @@ receipts:
   summary: chunks 22/22 reviewed · snippets 146/158 verified (9 in an adjacent chunk)
     (3 in another chunk) (3 bearing on no token of their value) · slots 121/369 with
     a receipt (147 never receipted, 101 added after the receipt) (71 exempt) · 1 receipt
-    path(s) reshaped by reconcile
+    path(s) reshaped by reconcile · 14 value(s) changed after the receipt
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/VOICE_coverage_receipt.yaml
@@ -586,6 +619,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/VOICE_chunks.yaml
       sha256: f748d123c5f40b18d70a657088392eebfeb9fc3d5ae051f4aae760084ec182b9
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/intermediate/VOICE_audit.json
   sha256: 0f76675c6bc0ec3af4a08ac716fad9018f8871de3ae139a6b0c703cf6338d5de

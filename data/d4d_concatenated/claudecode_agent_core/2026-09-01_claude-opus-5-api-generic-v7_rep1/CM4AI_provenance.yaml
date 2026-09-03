@@ -401,6 +401,7 @@ form:
   organisational_fragments: 0
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
+  recorded_by: backfill_checks
 receipts:
   expected: true
   non_checks:
@@ -425,6 +426,10 @@ receipts:
     adjacent: 21
     elsewhere: 5
     spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
     mismatched: 0
     unchecked: 0
     no_value_overlap: 2
@@ -542,6 +547,52 @@ receipts:
     - path: creators[43].source_caveats
       resolved_path: creators[44].source_caveats
     path_off_by_one_count: 1
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt:
+    - path: data_governance.committee_contact
+      resolved_path: data_governance.committee_contact
+    - path: description
+      resolved_path: description
+    - path: ethical_reviews[0].contact_person
+      resolved_path: ethical_reviews[0].contact_person
+    - path: ethical_reviews[1].contact_person
+      resolved_path: ethical_reviews[1].contact_person
+    - path: existing_uses[0].examples
+      resolved_path: existing_uses[0].examples
+    - path: existing_uses[1].examples
+      resolved_path: existing_uses[1].examples
+    - path: external_resources[10].external_resources
+      resolved_path: external_resources[10].external_resources
+    - path: external_resources[3].external_resources
+      resolved_path: external_resources[3].external_resources
+    - path: external_resources[5].external_resources
+      resolved_path: external_resources[5].external_resources
+    - path: external_resources[7].external_resources
+      resolved_path: external_resources[7].external_resources
+    - path: external_resources[8].external_resources
+      resolved_path: external_resources[8].external_resources
+    - path: external_resources[9].external_resources
+      resolved_path: external_resources[9].external_resources
+    - path: file_collections[0]
+      resolved_path: file_collections[0]
+    - path: file_collections[1]
+      resolved_path: file_collections[1]
+    - path: file_collections[2]
+      resolved_path: file_collections[2]
+    - path: file_collections[3]
+      resolved_path: file_collections[3]
+    - path: file_collections[4]
+      resolved_path: file_collections[4]
+    - path: file_collections[5]
+      resolved_path: file_collections[5]
+    - path: file_collections[6]
+      resolved_path: file_collections[6]
+    - path: file_collections[7]
+      resolved_path: file_collections[7]
+    value_changed_after_receipt_count: 26
     reshaped_by_reconcile:
     - created_by
     - funders[0].grants[0].grant_number
@@ -746,7 +797,7 @@ receipts:
     (5 in another chunk) (2 bearing on no token of their value) (10 entry receipt(s)
     overlapping one leaf) · slots 132/420 with a receipt (259 never receipted, 29
     added after the receipt) (38 exempt) · 9 receipt path(s) reshaped by reconcile
-    · 1 receipt path(s) off by one index
+    · 1 receipt path(s) off by one index · 26 value(s) changed after the receipt
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_coverage_receipt.yaml
@@ -754,7 +805,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/CM4AI_chunks.yaml
       sha256: 3d2d86bac4e9f89d2c6cfb6b5f5361c237995d899ecb6ae41382f82359aedde4
-  recorded_by: d4d receipts check
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/intermediate/CM4AI_audit.json
   sha256: e890b4d12343646310a4c710034d8fc66136a93416afc20ed42c64a605a084b2

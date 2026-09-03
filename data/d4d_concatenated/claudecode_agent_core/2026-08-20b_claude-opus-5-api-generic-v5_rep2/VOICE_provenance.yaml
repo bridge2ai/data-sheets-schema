@@ -373,10 +373,6 @@ form:
     Bridge2AI Voice: 22
   gc_label_variant_occurrences: 57
   recorded_by: backfill_checks
-  instrument_note: 'form recomputed 2026-08-22 under British instrument v2.1 and undeclared-prefix
-    classification v2.1 (ark scheme excluded and grounded instead; urn NID-aware —
-    a urn under an unregistered NID counts as urn:<nid>; #671). gc_label_variant fields
-    date from recompute, not the run. Previous british=2, undeclared=0'
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/intermediate/VOICE_audit.json
   sha256: 87ad720c390c6a1505fe51449287c46d9f08aca0616e17e266b11c008a60d059

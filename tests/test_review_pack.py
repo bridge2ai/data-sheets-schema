@@ -271,3 +271,30 @@ class Check(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class IdentityJoin(unittest.TestCase):
+    def test_a_receipted_item_follows_its_entry_and_the_receiptless_set_excludes_it(self):
+        """#899: with a phase-1 snapshot the pack joins receipt paths to the
+        final record by entry identity; without one it says so."""
+        from tests.test_receipts import FULL
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = Pack()._run(tmp)
+            core = prov.parent
+            full_p = Path(tmp) / "d4d_concatenated/claudecode_agent/L/P_d4d.yaml"
+            j0 = rp.build_pack(prov, instr)["receipt_join"]
+            self.assertEqual(j0["basis"], "index"); self.assertIn("no phase-1 snapshot", j0["reason"])
+            (core / "intermediate").mkdir()
+            (core / "intermediate/P_full.yaml").write_text(yaml.safe_dump(FULL))
+            moved = {**FULL, "funders": [{"id": "https://x/ds#funder-0", "name": "Other"}, FULL["funders"][0]]}
+            full_p.write_text(yaml.safe_dump(moved))
+            p = rp.build_pack(prov, instr, {"receipted_slots": 50})
+            self.assertEqual(p["receipt_join"]["basis"], "identity"); self.assertEqual(p["gaps"], [])
+            self.assertEqual(p["pack_version"], 4)
+            grant = next(i for i in p["items"] if i.get("slot") == "funders[0].grant_id")
+            self.assertEqual(grant["resolved_path"], "funders[1].grant_id")
+            self.assertEqual(grant["resolution"], "by_id"); self.assertEqual(grant["value"], "OT2OD032644")
+            self.assertIn("followed by identity", grant["question"])
+            receiptless = {i["slot"] for i in p["items"] if i["kind"] == "slot_receiptless"}
+            self.assertIn("funders[0].name", receiptless)            # the inserted entry
+            self.assertNotIn("funders[1].name", receiptless)         # the moved, receipted one

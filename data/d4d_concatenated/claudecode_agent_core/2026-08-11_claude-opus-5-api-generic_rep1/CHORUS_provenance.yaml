@@ -384,8 +384,10 @@ form:
   - data/d4d_concatenated/claudecode_agent/2026-08-11_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml
   - data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/CHORUS_d4d_core.yaml
   undeclared_prefixes:
-    urn: 25
+    urn:chorus: 25
   undeclared_prefix_occurrences: 25
   british_spellings: 2
   organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
   recorded_by: backfill_checks

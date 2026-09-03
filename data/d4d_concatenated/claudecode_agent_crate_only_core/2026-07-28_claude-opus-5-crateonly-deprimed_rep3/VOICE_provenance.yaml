@@ -134,9 +134,12 @@ form:
   - data/d4d_concatenated/claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep3/VOICE_d4d.yaml
   - data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep3/VOICE_d4d_core.yaml
   undeclared_prefixes:
-    ark: 38
     b2ai-voice: 381
-  undeclared_prefix_occurrences: 419
-  british_spellings: 8
+  undeclared_prefix_occurrences: 381
+  british_spellings: 2
   organisational_fragments: 0
+  gc_label_variants:
+    Bridge2AI-Voice: 22
+    VOICE: 24
+  gc_label_variant_occurrences: 46
   recorded_by: backfill_checks

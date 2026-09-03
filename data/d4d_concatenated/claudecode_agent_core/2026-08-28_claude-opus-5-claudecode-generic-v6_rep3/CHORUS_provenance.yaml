@@ -284,7 +284,7 @@ form:
   organisational_fragments: 0
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
-  recorded_by: d4d provenance record
+  recorded_by: backfill_checks
 receipts:
   expected: true
   non_checks:

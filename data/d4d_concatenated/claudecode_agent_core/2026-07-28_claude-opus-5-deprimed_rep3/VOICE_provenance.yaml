@@ -143,6 +143,11 @@ form:
     filecollection: 5
     distribution: 9
   undeclared_prefix_occurrences: 40
-  british_spellings: 10
+  british_spellings: 19
   organisational_fragments: 0
+  gc_label_variants:
+    Bridge2AI-Voice: 67
+    Bridge2AI Voice: 28
+    B2AI-Voice: 10
+  gc_label_variant_occurrences: 105
   recorded_by: backfill_checks

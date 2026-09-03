@@ -186,6 +186,12 @@ form:
   - data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_d4d_core.yaml
   undeclared_prefixes: {}
   undeclared_prefix_occurrences: 0
-  british_spellings: 32
+  british_spellings: 42
   organisational_fragments: 0
+  gc_label_variants:
+    Voice as a Biomarker of Health project: 1
+    Bridge2AI-Voice: 37
+    Bridge2AI Voice: 23
+    VOICE: 369
+  gc_label_variant_occurrences: 430
   recorded_by: backfill_checks

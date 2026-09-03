@@ -250,7 +250,8 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     rng = random.Random(seed)
 
     pack: dict[str, Any] = {
-        "pack_version": 3,
+        # 4: receipted items carry resolved_path/resolution (#899)
+        "pack_version": 4,
         "run": {"label": run.get("label"), "project": run.get("project"), "method": run.get("method"),
                 "condition": (((record.get("prompts") or {}).get("request") or {}).get("spec") or {}).get("condition")},
         # The path only: `review check --write` adds a block to this record,
@@ -318,27 +319,56 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                                           "Open the lines; answer against the full record."})
         # --- slots
         full = full_record
-        claims = claim_receipts(receipt, full)
+        # Receipt paths are joined to the final record by entry identity
+        # against the phase-1 snapshot (#899): reconciliation's inserts and
+        # reorders otherwise shift a receipt onto a neighbouring entry and
+        # the reviewer scores a bundle-attested value `unsupported`. The
+        # item carries the path as written and where it resolves.
+        from data_sheets_schema.receipts import phase1_snapshot
+        original = phase1_snapshot(paths["receipt"])
+        # Not a gap: the agentic path writes no snapshot by design (its
+        # Phase 3 re-receipts what it changes), so an index join there is
+        # the instrument, not a defect in this pack.
+        pack["receipt_join"] = ({"basis": "identity", "snapshot": "intermediate/ phase-1 full record"}
+                                if original is not None else
+                                {"basis": "index", "reason": "no phase-1 snapshot under intermediate/; "
+                                                             "receipt paths joined by index, not entry identity (#899)"})
+        claims = claim_receipts(receipt, full, original)
         rc = record.get("receipts") or {}
         receipted = sorted(claims["slots"])
         rng.shuffle(receipted)
         for slot in receipted[: sample["receipted_slots"]]:
-            rs = claims["slots"][slot]["receipts"]
-            items.append({"id": f"slot-{len(items) + 1:03d}", "kind": "slot_receipted", "slot": slot,
-                          "value": _value_at(full, slot),
-                          "receipts": [{"chunk": r["chunk"], "lines": span.get(r["chunk"], {}).get("lines"),
-                                        "snippet": r["snippet"]} for r in rs],
-                          "question": "Read the passage each snippet sits in. Does it support the record's value at "
-                                      "this slot, as the slot's description asks, and is the value the right reading? "
-                                      f"A value of {UNRESOLVED!r} means the final record has no value at this path: "
-                                      "answer cannot_tell unless the receipt's statement survives elsewhere."})
+            claim = claims["slots"][slot]
+            rs = claim["receipts"]
+            at = claim.get("resolved_path") or slot
+            item = {"id": f"slot-{len(items) + 1:03d}", "kind": "slot_receipted", "slot": slot,
+                    "value": _value_at(full, at),
+                    "receipts": [{"chunk": r["chunk"], "lines": span.get(r["chunk"], {}).get("lines"),
+                                  "snippet": r["snippet"]} for r in rs],
+                    "question": "Read the passage each snippet sits in. Does it support the record's value at "
+                                "this slot, as the slot's description asks, and is the value the right reading? "
+                                f"A value of {UNRESOLVED!r} means the final record has no value at this path: "
+                                "answer cannot_tell unless the receipt's statement survives elsewhere."}
+            if original is not None:
+                item["resolved_path"] = claim.get("resolved_path")
+                item["resolution"] = claim.get("resolution")
+                if at != slot:
+                    item["question"] += (" The receipt was written at `slot`; the entry it receipted now sits "
+                                         "at `resolved_path` (followed by identity, #899) — judge the value there.")
+                if "value_at_receipt" in claim:
+                    item["value_at_receipt"] = claim["value_at_receipt"]
+                    item["question"] += (" A later phase rewrote this value after the receipt: `value_at_receipt` "
+                                         "is what the receipt attested, `value` is what the record now says — "
+                                         "judge whether the passage supports the current value.")
+            items.append(item)
         # The receiptless set from the receipt and the record themselves,
         # not the record's 50-entry walk-order prefix (#790): every populated,
         # non-exempt leaf no receipt path covers, sorted, then sampled.
         from data_sheets_schema.receipts import _covers, exempt, populated_leaves
         record_id = full.get("id") if isinstance(full.get("id"), str) else None
+        covering = {(c.get("resolved_path") or s) for s, c in claims["slots"].items()}
         without = sorted(p for p, v in populated_leaves(full)
-                         if not exempt(p, v, record_id) and not any(_covers(r, p) for r in claims["slots"]))
+                         if not exempt(p, v, record_id) and not any(_covers(r, p) for r in covering))
         rng.shuffle(without)
         for slot in without[: sample["receiptless_slots"]]:
             items.append({"id": f"slot-{len(items) + 1:03d}", "kind": "slot_receiptless", "slot": slot,

@@ -257,8 +257,12 @@ form:
   - data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d.yaml
   - data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d_core.yaml
   undeclared_prefixes:
-    urn: 5
+    urn:b2ai-voice: 5
   undeclared_prefix_occurrences: 5
-  british_spellings: 10
+  british_spellings: 9
   organisational_fragments: 0
+  gc_label_variants:
+    Bridge2AI-Voice: 48
+    Bridge2AI Voice: 21
+  gc_label_variant_occurrences: 69
   recorded_by: backfill_checks

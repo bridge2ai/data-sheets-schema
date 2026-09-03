@@ -284,7 +284,7 @@ form:
     Bridge2AI-Voice: 54
     Bridge2AI Voice: 16
   gc_label_variant_occurrences: 70
-  recorded_by: d4d provenance record
+  recorded_by: backfill_checks
 receipts:
   expected: true
   non_checks:

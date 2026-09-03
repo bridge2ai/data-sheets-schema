@@ -42,6 +42,18 @@ class Battery(unittest.TestCase):
         ("a multi-centre colour-coded trial", 2),
         # Identifiers with underscores are not prose.
         ("see data_centre_config", 0),
+        # v3 (#836, #859): the families the review pass found at 0.
+        ("tumour and oedema measured in metres while travelling", 4),
+        ("two centimetres of colour artefacts, minimised and personalised", 5),
+        ("generalisability was prioritised, totalling three", 3),
+        ("paediatric haemoglobin, anaemia and ageing", 4),
+        ("randomised trials, a visualisation, hypothesised and authorised", 4),
+        ("macula-centred fibre counsellors practised", 4),
+        # American controls and homographs: the noun `practice`, the
+        # American `specialist`/`emphasis`, `cancellation`, `program`.
+        ("tumor edema meters traveling artifact minimize personalized totaling", 0),
+        ("in practice the specialist put emphasis on the cancellation of the program", 0),
+        ("the synthesis and hypothesis of the analysis", 0),
     )
 
     def test_the_battery(self):

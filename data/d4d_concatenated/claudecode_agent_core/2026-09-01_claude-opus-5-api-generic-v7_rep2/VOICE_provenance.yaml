@@ -268,14 +268,14 @@ validation:
   artifacts:
     full:
       path: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d.yaml
-      md5: 2d2f514c1f2921d6f326373969398f7d
+      md5: 0e2f4a838ed71a7f3c539f259b52b91e
     core:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d_core.yaml
-      md5: e45abdb72b699b11e259a61f54fa5fc3
+      md5: 9655cb1cb959c931c714fb7d1705bf2e
   schema:
     full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
     core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
-  recorded_by: api_runner.execute
+  recorded_by: d4d runs validate
 core_derivation:
   derived: true
   rule: shared slots copied from the full record; resources projected by id with full-only
@@ -324,19 +324,23 @@ core_derivation:
 pair_consistency:
   ran: true
   consistent: true
-  artifacts:
-    full:
-      path: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d.yaml
-      md5: 2d2f514c1f2921d6f326373969398f7d
-    core:
-      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d_core.yaml
-      md5: e45abdb72b699b11e259a61f54fa5fc3
   errors: 0
   warnings: 0
   identity_slots: 79
   schema_moved: false
   findings: []
   findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d.yaml
+      md5: 0e2f4a838ed71a7f3c539f259b52b91e
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d_core.yaml
+      md5: 9655cb1cb959c931c714fb7d1705bf2e
+  schema:
+    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
+    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+  recorded_by: backfill_checks
 report_claims:
   checked: true
   findings: []
@@ -346,15 +350,7 @@ report_claims:
     report:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_reconciliation.md
       md5: d7c0803d4cdf3bf75a8afb67bd00cfa3
-    full:
-      path: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d.yaml
-      md5: 2d2f514c1f2921d6f326373969398f7d
-    core:
-      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d_core.yaml
-      md5: e45abdb72b699b11e259a61f54fa5fc3
-  schema:
-    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
-    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+  recorded_by: backfill_checks
 grounding:
   checked: true
   counts:
@@ -370,6 +366,7 @@ grounding:
     bundle:
       path: data/preprocessed/concatenated/VOICE_preprocessed.txt
       md5: dcd717170da6762569c0b4eeafc1c3d2
+  recorded_by: backfill_checks
 form:
   checked: true
   records:
@@ -383,6 +380,7 @@ form:
     Bridge2AI-Voice: 40
     Bridge2AI Voice: 10
   gc_label_variant_occurrences: 50
+  recorded_by: backfill_checks
 receipts:
   expected: true
   non_checks:
@@ -485,6 +483,28 @@ receipts:
     path_off_by_one_count: 0
     addressing_slips: []
     addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt:
+    - path: acquisition_methods[0].acquisition_details
+      resolved_path: acquisition_methods[0].acquisition_details
+    - path: conforms_to
+      resolved_path: conforms_to
+    - path: creators
+      resolved_path: creators
+    - path: existing_uses[0].examples
+      resolved_path: existing_uses[0].examples
+    - path: external_resources[5].notes
+      resolved_path: external_resources[5].notes
+    - path: instances[0].notes
+      resolved_path: instances[0].notes
+    - path: purposes[0].response
+      resolved_path: purposes[0].response
+    - path: purposes[0].source_caveats
+      resolved_path: purposes[0].source_caveats
+    - path: related_datasets[0].description
+      resolved_path: related_datasets[0].description
+    value_changed_after_receipt_count: 9
     reshaped_by_reconcile:
     - at_risk_populations.assent_procedures
     - at_risk_populations.guardian_consent
@@ -527,7 +547,8 @@ receipts:
   summary: chunks 22/22 reviewed · snippets 132/137 verified (1 across a wrapped line)
     (3 in an adjacent chunk) (1 in another chunk) (1 bearing on no token of their
     value) · slots 96/338 with a receipt (206 never receipted, 36 added after the
-    receipt) (37 exempt) · 5 receipt path(s) reshaped by reconcile
+    receipt) (37 exempt) · 5 receipt path(s) reshaped by reconcile · 9 value(s) changed
+    after the receipt
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_coverage_receipt.yaml
@@ -535,6 +556,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/VOICE_chunks.yaml
       sha256: f748d123c5f40b18d70a657088392eebfeb9fc3d5ae051f4aae760084ec182b9
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/VOICE_audit.json
   sha256: 2a47eb6716eaf932f084cb7ab21e7add3ad1a9d61bfaf3cd5b8be38f99a295c2
@@ -591,8 +613,41 @@ review:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_review.yaml
       sha256: 942cbee341c652e0b746806adbb512966c0ca2d178534821f55b38015ae37f77
   recorded_by: d4d review check
-canonical:
-  criterion: full and core both validate against the current schema, then most slots,
+dispositions:
+- item: slot-009
+  verdict: misread
+  disposition: amend
+  note: 'Review slot-009 (misread): the clause ''or, where appropriate, by a parent
+    or decision-maker'' comes from the pediatric dataset''s methods (bundle line 5570,
+    under FILE physionet_b2ai-voice-pediatric_1.1.0), which the manifest declares
+    related-but-distinct from the adult referent (#441 class); no adult-referent passage
+    states it. Reconciliation relocated three pediatric items and missed this one.
+    The clause is removed; the remainder of the value is receipted against the adult
+    documentation. Rubric evaluations of this record predate the amendment (#903).'
+  at: '2026-09-03T01:16:11+00:00'
+  recorded_by: d4d review disposition
+  path: acquisition_methods[0].acquisition_details
+  replace: were self-reported by participants or, where appropriate, by a parent or
+    decision-maker.
+  with: were self-reported by participants.
+  files:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d.yaml
+      sha256_before: 50fa5567b3a359948bb234a7e7b5c7167a303ef8a69d09bf9d2a9f031e9cfced
+      sha256_after: 9b103567b3c018761b67ea065d6e6e7c336b1866ed5d161a36d890566e1e9459
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d_core.yaml
+      sha256_before: c84011e28073c639bc47810433b70876bb3498ed712343eeac72abc539607813
+      sha256_after: 785c5a1c2633b0272bdd43c495dd325dd893d18458185fb975f254b173142c2a
+  evaluations_predating:
+  - data/evaluation_llm/rubric10_semantic/label_aware/VOICE_2026-09-01api_rep2_evaluation.json
+  - data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-09-01api_rep2_evaluation.json
+canonical_superseded_by:
+  label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+  at: '2026-09-03T02:00:49+00:00'
+  by: d4d runs select
+canonical_history:
+- criterion: full and core both validate against the current schema, then most slots,
     then lowest label
   selected_from:
   - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
@@ -613,3 +668,7 @@ canonical:
   - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
   - 2026-08-22c_claude-opus-5-api-generic-v5_rep2
   - 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+  superseded_by:
+    label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    at: '2026-09-03T02:00:49+00:00'
+    by: d4d runs select
