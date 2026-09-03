@@ -895,7 +895,7 @@
                             "type": "null"
                         }
                     ],
-                    "description": "The key individual (Principal Investigator) responsible for or overseeing dataset creation, as a Person object \u2014 their `name`, and where the evidence states them `orcid`, `email` and `affiliation` \u2014 never a bare name string and never a yes/no flag (the slot name reads like a boolean; the value is not one, #360). Inlined (#805): a string here fails validation."
+                    "description": "The key individual (Principal Investigator) responsible for or overseeing dataset creation, as a Person object \u2014 an `id` (the ORCID CURIE where the evidence states one, else a fragment minted on the record's own id), their `name`, and where the evidence states them `orcid`, `email` and `affiliation` \u2014 never a bare name string and never a yes/no flag (the slot name reads like a boolean; the value is not one, #360). Inlined (#805): a string here fails validation."
                 },
                 "source_caveats": {
                     "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
@@ -1108,7 +1108,7 @@
                             "type": "null"
                         }
                     ],
-                    "description": "Contact point for the governance committee, as a Person object \u2014 the `name` and, where the evidence states them, `email` and `affiliation` of the person who answers questions about access policy, procedure and oversight. Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`. Inlined (#805): a bare name string fails validation."
+                    "description": "Contact point for the governance committee, as a Person object \u2014 an `id` (an ORCID CURIE where stated, else a fragment minted on the record's own id), the `name` and, where the evidence states them, `email` and `affiliation` of the person who answers questions about access policy, procedure and oversight. Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`. Inlined (#805): a bare name string fails validation."
                 },
                 "committee_members": {
                     "description": "Members of the governance or data access committee. One entry per person; do not collapse several members into one. Record only members the sources name \u2014 committee membership is frequently undisclosed, and an absent list is a correct answer.",
@@ -4157,7 +4157,7 @@
                             "type": "null"
                         }
                     ],
-                    "description": "Contact person for questions about ethical review, as a Person object \u2014 `name`, and where the evidence states them `email`, `affiliation` and `orcid`. Inlined (#805): a bare name string fails validation."
+                    "description": "Contact person for questions about ethical review, as a Person object \u2014 an `id` (an ORCID CURIE where stated, else a fragment minted on the record's own id), `name`, and where the evidence states them `email`, `affiliation` and `orcid`. Inlined (#805): a bare name string fails validation."
                 },
                 "description": {
                     "description": "A human-readable description for this property.",
@@ -4309,7 +4309,7 @@
                             "type": "null"
                         }
                     ],
-                    "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept so the records that already populate it stay valid; a governance contact is not an export-control fact and should not have to be nested inside one to be stated."
+                    "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept declared so the slot still parses; since #805 it is an inlined Person object like its replacement, so the pre-#805 records that populate it with a bare name string (CM4AI v7 rep1 among them) no longer validate against the current schema and keep the verdicts they were pinned with (#426). A new record should not populate it."
                 },
                 "hipaa_compliant": {
                     "$ref": "#/$defs/ComplianceStatusEnum",
@@ -6370,7 +6370,7 @@
                             "type": "null"
                         }
                     ],
-                    "description": "Contact person for licensing questions, as a Person object \u2014 `name`, and where the evidence states them `email`, `affiliation` and `orcid`. This person can answer questions about licensing terms, usage restrictions, fees and permissions. Inlined (#805): a bare name string fails validation."
+                    "description": "Contact person for licensing questions, as a Person object \u2014 an `id` (an ORCID CURIE where stated, else a fragment minted on the record's own id), `name`, and where the evidence states them `email`, `affiliation` and `orcid`. This person can answer questions about licensing terms, usage restrictions, fees and permissions. Inlined (#805): a bare name string fails validation."
                 },
                 "data_use_permission": {
                     "$ref": "#/$defs/DataUsePermissionEnum",

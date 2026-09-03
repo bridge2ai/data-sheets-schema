@@ -272,8 +272,8 @@ steps need:
    touched; existing records drift (reported, not fatal, #452).
 2. **C (D1)** — done: #805 applied (`inlined: true` and the
    descriptions), `make gen-project` + `gen-core-schema`, schema tests;
-   the digest moved to `4b488a28`.
-3. **A** (done in #916) re-measured after C: 71 nested classes, 43,589
+   the digest moved to `ffe03dd4`.
+3. **A** (done in #916) re-measured after C: 72 nested classes, 43,582
    chars, no reference marker (the marking follows LinkML's rule since
    the #927 review).
 4. **D** — `d4d_generic_arm_prompt_v8.md` = v7 + `ADDED IN v8`, the
