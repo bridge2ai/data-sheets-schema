@@ -1,8 +1,8 @@
 bundle: VOICE_preprocessed.txt
-bundle_md5: dcd717170da6762569c0b4eeafc1c3d2
-bundle_sha256: a075e1124b91c58283113f6d8d1198daee295e84d585f7e8b35a098bbdd7c7ea
-bundle_lines: 5746
-bundle_bytes: 376295
+bundle_md5: 9193c3cbe60b62a2fc0f704a2c4d23a3
+bundle_sha256: 7c4f71ab2e85d70396e479d39cb5db9454bd9f13c7274b51b4418fc2d452518c
+bundle_lines: 5742
+bundle_bytes: 376446
 rule:
   version: 2
   unit: source-document
@@ -108,27 +108,27 @@ chunks:
   source: gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt
   lines:
   - 2588
-  - 2829
-  bytes: 47742
-  sha256: 49097cd09aaf725c17a32be50890375c6bb728ad1c6563a2a71bd0d050559c88
+  - 2921
+  bytes: 47946
+  sha256: ded4955a2213ed9ebdbd0a5752adf995362c25fea3f7e57feb27240faec53db7
   part:
   - 1
   - 2
 - id: c012
   source: gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt
   lines:
-  - 2830
-  - 3082
-  bytes: 29792
-  sha256: 6f32cc9ceda9894cb8d4e02da65557e7f06c5aa5daf7cd9875d251f115f5eb88
+  - 2922
+  - 3078
+  bytes: 29739
+  sha256: 657de38babfac990cfa1d43b7eb05fff2cc3693291a444318a792b6fe841c111
   part:
   - 2
   - 2
 - id: c013
   source: gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt
   lines:
-  - 3083
-  - 3482
+  - 3079
+  - 3478
   bytes: 15555
   sha256: 8f6bcdf6ac6438ee976517922ff1b504f69f7a89fa74191f3c9fae06746772fb
   part:
@@ -137,8 +137,8 @@ chunks:
 - id: c014
   source: gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt
   lines:
-  - 3483
-  - 3531
+  - 3479
+  - 3527
   bytes: 1589
   sha256: 48c02b415883e14d01619b09b7561c153c23e9dd9941fcc23e7d7bb107ab9877
   part:
@@ -147,15 +147,15 @@ chunks:
 - id: c015
   source: physionet_b2ai-voice_1.1_row17.txt
   lines:
-  - 3532
-  - 3852
+  - 3528
+  - 3848
   bytes: 23538
   sha256: 11db4b98b1ba1227c07c94427a6453d7abcda011e07b62e087b1e3973017f8c6
 - id: c016
   source: physionet_b2ai-voice_3.0.0_row18.txt
   lines:
-  - 3853
-  - 4252
+  - 3849
+  - 4248
   bytes: 25545
   sha256: c707beb1a666ce6e8d4b5d3df0bebfc3219cac8de87711e0c187b399f4dc3749
   part:
@@ -164,8 +164,8 @@ chunks:
 - id: c017
   source: physionet_b2ai-voice_3.0.0_row18.txt
   lines:
-  - 4253
-  - 4518
+  - 4249
+  - 4514
   bytes: 16351
   sha256: 3ae0a74407197ca8e006f69afef7b4ece64f2bcd5c88230107a23681fb69a877
   part:
@@ -174,8 +174,8 @@ chunks:
 - id: c018
   source: physionet_b2ai-voice_3.1.0_2026-07-24.txt
   lines:
-  - 4519
-  - 4918
+  - 4515
+  - 4914
   bytes: 25471
   sha256: 4ed4ba310cf7606fb57c8957129892e472a758353f1bc4cfb0a1d79cf338bfc7
   part:
@@ -184,8 +184,8 @@ chunks:
 - id: c019
   source: physionet_b2ai-voice_3.1.0_2026-07-24.txt
   lines:
-  - 4919
-  - 5190
+  - 4915
+  - 5186
   bytes: 17622
   sha256: 63b2e29ba70d4b7a6975ef172870e73b6a426ad32d8b1637905f2fc27c07e94d
   part:
@@ -194,8 +194,8 @@ chunks:
 - id: c020
   source: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt
   lines:
-  - 5191
-  - 5590
+  - 5187
+  - 5586
   bytes: 25545
   sha256: e1a5c764be4e78e6033c70bf44b92a476b48a3fdc3acb67c2aadd6700c6cc62f
   part:
@@ -204,8 +204,8 @@ chunks:
 - id: c021
   source: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt
   lines:
-  - 5591
-  - 5704
+  - 5587
+  - 5700
   bytes: 5578
   sha256: 9054f042c02bdbc8ab6fd884f14b1049dd4a198e964a2a01cfb371641c5ff0c2
   part:
@@ -214,7 +214,7 @@ chunks:
 - id: c022
   source: github_eipm_bridge2ai-docs_README_row22.txt
   lines:
-  - 5705
-  - 5746
+  - 5701
+  - 5742
   bytes: 1855
   sha256: 4875084509427d8422493623c52c957caba39bade4d6fa99b00570a64ac4eb1e

@@ -1,8 +1,8 @@
 bundle: VOICE_PEDIATRIC_preprocessed.txt
-bundle_md5: 008212accc7ec95bf3f0121566b588c2
-bundle_sha256: d4905f0b2d52fb91097ec2f52bc6b23e56e396276146da0044be34158bc05d97
-bundle_lines: 2870
-bundle_bytes: 205857
+bundle_md5: 0350223711484a63c21b2dd57af6f4c9
+bundle_sha256: eb823708a16342a3b12cc1dabb57529cea4f95fd596abf9cbecd657a17d61e47
+bundle_lines: 2866
+bundle_bytes: 206008
 rule:
   version: 2
   unit: source-document
@@ -44,27 +44,27 @@ chunks:
   source: gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt
   lines:
   - 535
-  - 776
-  bytes: 47742
-  sha256: 49097cd09aaf725c17a32be50890375c6bb728ad1c6563a2a71bd0d050559c88
+  - 868
+  bytes: 47946
+  sha256: ded4955a2213ed9ebdbd0a5752adf995362c25fea3f7e57feb27240faec53db7
   part:
   - 1
   - 2
 - id: c005
   source: gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt
   lines:
-  - 777
-  - 1029
-  bytes: 29792
-  sha256: 6f32cc9ceda9894cb8d4e02da65557e7f06c5aa5daf7cd9875d251f115f5eb88
+  - 869
+  - 1025
+  bytes: 29739
+  sha256: 657de38babfac990cfa1d43b7eb05fff2cc3693291a444318a792b6fe841c111
   part:
   - 2
   - 2
 - id: c006
   source: docs_b2ai-voice_org_row10.txt
   lines:
-  - 1030
-  - 1429
+  - 1026
+  - 1425
   bytes: 20371
   sha256: 552d711069bd4a33b257fe4277c4094c0c98b838ec81e5d78790bb7c5523ca9a
   part:
@@ -73,8 +73,8 @@ chunks:
 - id: c007
   source: docs_b2ai-voice_org_row10.txt
   lines:
-  - 1430
-  - 1829
+  - 1426
+  - 1825
   bytes: 23663
   sha256: e44d35f4a97dc07689beed8bcb5b2ee88f4f8b84b64329374660b20ee88cfe04
   part:
@@ -83,8 +83,8 @@ chunks:
 - id: c008
   source: docs_b2ai-voice_org_row10.txt
   lines:
-  - 1830
-  - 2229
+  - 1826
+  - 2225
   bytes: 24499
   sha256: 7ce385094acb63c7c5a04d241f757c89d862b7728f291726d7a2a1367a12f919
   part:
@@ -93,8 +93,8 @@ chunks:
 - id: c009
   source: docs_b2ai-voice_org_row10.txt
   lines:
-  - 2230
-  - 2322
+  - 2226
+  - 2318
   bytes: 1934
   sha256: 2de4849329b7c594d64b7db3956166cfa6d3d33367adbe7c9a2c892392dc9752
   part:
@@ -103,15 +103,15 @@ chunks:
 - id: c010
   source: reporter_nih_gov_project-details-11376382_row7.txt
   lines:
-  - 2323
-  - 2379
+  - 2319
+  - 2375
   bytes: 6814
   sha256: b2ab2863be46ba00c529684ea8a1476056733fffa459fd14ced6090acb5e5964
 - id: c011
   source: gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt
   lines:
-  - 2380
-  - 2779
+  - 2376
+  - 2775
   bytes: 15555
   sha256: 8f6bcdf6ac6438ee976517922ff1b504f69f7a89fa74191f3c9fae06746772fb
   part:
@@ -120,8 +120,8 @@ chunks:
 - id: c012
   source: gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt
   lines:
-  - 2780
-  - 2828
+  - 2776
+  - 2824
   bytes: 1589
   sha256: 48c02b415883e14d01619b09b7561c153c23e9dd9941fcc23e7d7bb107ab9877
   part:
@@ -130,7 +130,7 @@ chunks:
 - id: c013
   source: github_eipm_bridge2ai-docs_README_row22.txt
   lines:
-  - 2829
-  - 2870
+  - 2825
+  - 2866
   bytes: 1855
   sha256: 4875084509427d8422493623c52c957caba39bade4d6fa99b00570a64ac4eb1e

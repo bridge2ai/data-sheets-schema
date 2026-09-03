@@ -280,3 +280,40 @@ projects:
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class DocxStructuredDocumentTags(unittest.TestCase):
+    """#886: runs wrapped in `w:sdt` (a Google Docs export artefact) were
+    dropped by python-docx's `.text`; the bundle read "tudy visit". The
+    extractor walks the XML in document order and keeps them."""
+
+    def _docx_with_sdt(self, path):
+        import docx
+        from docx.oxml import parse_xml
+        d = docx.Document()
+        d.add_paragraph("Before the table.")
+        t = d.add_table(rows=1, cols=2)
+        t.rows[0].cells[0].text = "left"
+        p = t.rows[0].cells[1].paragraphs[0]
+        p.add_run("tudy visit will take hours.")
+        ns = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"'
+        sdt = parse_xml(f'<w:sdt {ns}><w:sdtPr><w:tag w:val="goog_rdk_1"/></w:sdtPr>'
+                        f'<w:sdtContent><w:r><w:t xml:space="preserve">The s</w:t></w:r></w:sdtContent></w:sdt>')
+        p._p.insert(list(p._p).index(p.runs[0]._r), sdt)
+        d.add_paragraph("After the table.")
+        d.save(path)
+
+    def test_sdt_runs_are_kept_in_document_order(self):
+        import tempfile
+        from pathlib import Path
+        from src.download.preprocess_sources import extract_docx_text
+        with tempfile.TemporaryDirectory() as tmp:
+            f = Path(tmp) / "doc.docx"
+            self._docx_with_sdt(f)
+            text = extract_docx_text(f)
+        self.assertIn("The study visit will take hours.", text)
+        self.assertNotIn("\ntudy", text)
+        lines = text.splitlines()
+        self.assertEqual(lines[0], "Before the table.")
+        self.assertEqual(lines[1], "left\tThe study visit will take hours.")
+        self.assertEqual(lines[2], "After the table.")

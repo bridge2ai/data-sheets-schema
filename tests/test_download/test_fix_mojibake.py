@@ -32,6 +32,23 @@ class FixMojibake(unittest.TestCase):
         s = f"{BROKEN} then \u2603 snowman breaks latin-1 on the same line"
         self.assertEqual(fix_mojibake(s), s)
 
+    def test_accent_only_double_encoding_is_repaired_when_it_is_the_page_not_a_quote(self):
+        """#875: a page whose double encoding hits only accented characters
+        carries no em-dash signature. It is repaired when the accent-class
+        signature recurs across the text and the whole-text round trip
+        removes every one of them; a single quoted `\u00c3\u00a9` (the #874
+        guard) is still left alone."""
+        page = "Beno\u00eet Ren\u00e9 caf\u00e9 na\u00efve".encode("utf-8").decode("latin-1")
+        self.assertEqual(fix_mojibake(f"{page}\nplain line"), "Beno\u00eet Ren\u00e9 caf\u00e9 na\u00efve\nplain line")
+        quote = "the string \u00c3\u00a9 denotes mojibake"
+        self.assertEqual(fix_mojibake(quote), quote)
+        # two accent signatures on one line still count as a page, not a quote
+        two = "caf\u00e9 Ren\u00e9".encode("utf-8").decode("latin-1")
+        self.assertEqual(fix_mojibake(two), "caf\u00e9 Ren\u00e9")
+        # a genuinely Latin-1 text with real accented letters is untouched
+        real = "caf\u00e9 cr\u00e8me br\u00fbl\u00e9e"
+        self.assertEqual(fix_mojibake(real), real)
+
 
 if __name__ == "__main__":
     unittest.main()

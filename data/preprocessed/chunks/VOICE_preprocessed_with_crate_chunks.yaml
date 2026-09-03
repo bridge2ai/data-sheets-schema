@@ -1,8 +1,8 @@
 bundle: VOICE_preprocessed_with_crate.txt
-bundle_md5: ebca872f3275e7bd0e685c0486ee4881
-bundle_sha256: 7ec9268db70504ded2eb36639e0f55f02b11a816ec627b56648ee4162e743089
-bundle_lines: 15715
-bundle_bytes: 697350
+bundle_md5: 8e8263f5f92ad197073e6169d2a4c68f
+bundle_sha256: 961771b5d61e156878c033a9776e42d9490f326df8ab6bbb8372aa4c530df57e
+bundle_lines: 15711
+bundle_bytes: 697501
 rule:
   version: 2
   unit: source-document
@@ -108,27 +108,27 @@ chunks:
   source: gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt
   lines:
   - 2612
-  - 2853
-  bytes: 47742
-  sha256: 49097cd09aaf725c17a32be50890375c6bb728ad1c6563a2a71bd0d050559c88
+  - 2945
+  bytes: 47946
+  sha256: ded4955a2213ed9ebdbd0a5752adf995362c25fea3f7e57feb27240faec53db7
   part:
   - 1
   - 2
 - id: c012
   source: gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt
   lines:
-  - 2854
-  - 3106
-  bytes: 29792
-  sha256: 6f32cc9ceda9894cb8d4e02da65557e7f06c5aa5daf7cd9875d251f115f5eb88
+  - 2946
+  - 3102
+  bytes: 29739
+  sha256: 657de38babfac990cfa1d43b7eb05fff2cc3693291a444318a792b6fe841c111
   part:
   - 2
   - 2
 - id: c013
   source: gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt
   lines:
-  - 3107
-  - 3506
+  - 3103
+  - 3502
   bytes: 15555
   sha256: 8f6bcdf6ac6438ee976517922ff1b504f69f7a89fa74191f3c9fae06746772fb
   part:
@@ -137,8 +137,8 @@ chunks:
 - id: c014
   source: gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt
   lines:
-  - 3507
-  - 3555
+  - 3503
+  - 3551
   bytes: 1589
   sha256: 48c02b415883e14d01619b09b7561c153c23e9dd9941fcc23e7d7bb107ab9877
   part:
@@ -147,15 +147,15 @@ chunks:
 - id: c015
   source: physionet_b2ai-voice_1.1_row17.txt
   lines:
-  - 3556
-  - 3876
+  - 3552
+  - 3872
   bytes: 23538
   sha256: 11db4b98b1ba1227c07c94427a6453d7abcda011e07b62e087b1e3973017f8c6
 - id: c016
   source: physionet_b2ai-voice_3.0.0_row18.txt
   lines:
-  - 3877
-  - 4276
+  - 3873
+  - 4272
   bytes: 25545
   sha256: c707beb1a666ce6e8d4b5d3df0bebfc3219cac8de87711e0c187b399f4dc3749
   part:
@@ -164,8 +164,8 @@ chunks:
 - id: c017
   source: physionet_b2ai-voice_3.0.0_row18.txt
   lines:
-  - 4277
-  - 4542
+  - 4273
+  - 4538
   bytes: 16351
   sha256: 3ae0a74407197ca8e006f69afef7b4ece64f2bcd5c88230107a23681fb69a877
   part:
@@ -174,8 +174,8 @@ chunks:
 - id: c018
   source: physionet_b2ai-voice_3.1.0_2026-07-24.txt
   lines:
-  - 4543
-  - 4942
+  - 4539
+  - 4938
   bytes: 25471
   sha256: 4ed4ba310cf7606fb57c8957129892e472a758353f1bc4cfb0a1d79cf338bfc7
   part:
@@ -184,8 +184,8 @@ chunks:
 - id: c019
   source: physionet_b2ai-voice_3.1.0_2026-07-24.txt
   lines:
-  - 4943
-  - 5214
+  - 4939
+  - 5210
   bytes: 17622
   sha256: 63b2e29ba70d4b7a6975ef172870e73b6a426ad32d8b1637905f2fc27c07e94d
   part:
@@ -194,8 +194,8 @@ chunks:
 - id: c020
   source: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt
   lines:
-  - 5215
-  - 5614
+  - 5211
+  - 5610
   bytes: 25545
   sha256: e1a5c764be4e78e6033c70bf44b92a476b48a3fdc3acb67c2aadd6700c6cc62f
   part:
@@ -204,8 +204,8 @@ chunks:
 - id: c021
   source: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt
   lines:
-  - 5615
-  - 5728
+  - 5611
+  - 5724
   bytes: 5578
   sha256: 9054f042c02bdbc8ab6fd884f14b1049dd4a198e964a2a01cfb371641c5ff0c2
   part:
@@ -214,15 +214,15 @@ chunks:
 - id: c022
   source: github_eipm_bridge2ai-docs_README_row22.txt
   lines:
-  - 5729
-  - 5777
+  - 5725
+  - 5773
   bytes: 2116
   sha256: 7369951906704b4785bd1ff89e36fb4ac796b07803dea68286a733f160024f1d
 - id: c023
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 5778
-  - 6177
+  - 5774
+  - 6173
   bytes: 27741
   sha256: 72d94a04052cffdddcf2f3b648acbbbe628b8acc4c5b9de775509d1f7e72f1bc
   part:
@@ -231,8 +231,8 @@ chunks:
 - id: c024
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 6178
-  - 6577
+  - 6174
+  - 6573
   bytes: 10434
   sha256: 2c8363f3c1799ce774d1216ff1aaebdf72db4686efd04d34feccb9be78736bf5
   part:
@@ -241,8 +241,8 @@ chunks:
 - id: c025
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 6578
-  - 6977
+  - 6574
+  - 6973
   bytes: 9831
   sha256: 812786f075c23762faf20a8e420e7a681a80029d67dcd06f2e02526e367e92f0
   part:
@@ -251,8 +251,8 @@ chunks:
 - id: c026
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 6978
-  - 7377
+  - 6974
+  - 7373
   bytes: 9718
   sha256: 5e1149572b88a1008a7c291f99ba8e12cab6043cfef209de64e8e970ff6af607
   part:
@@ -261,8 +261,8 @@ chunks:
 - id: c027
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 7378
-  - 7777
+  - 7374
+  - 7773
   bytes: 10478
   sha256: 6622f0a58a931844f172f0da6a16047aaa0f73c9afaa6da4839ce04e2184694d
   part:
@@ -271,8 +271,8 @@ chunks:
 - id: c028
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 7778
-  - 8177
+  - 7774
+  - 8173
   bytes: 9865
   sha256: 71a98db5e07b113cfee936296eebd7f191af927a04a70cb57694f91aa4226a44
   part:
@@ -281,8 +281,8 @@ chunks:
 - id: c029
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 8178
-  - 8577
+  - 8174
+  - 8573
   bytes: 10559
   sha256: 0d31b6b3553d41b5f018108421519db87875f92f97871a2592535681a6a333d3
   part:
@@ -291,8 +291,8 @@ chunks:
 - id: c030
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 8578
-  - 8977
+  - 8574
+  - 8973
   bytes: 9263
   sha256: 6ea9897ae580ecd32857b42f605d599018e1a322a79e624b0af5b7e7850577a7
   part:
@@ -301,8 +301,8 @@ chunks:
 - id: c031
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 8978
-  - 9377
+  - 8974
+  - 9373
   bytes: 11577
   sha256: 375ced9e6a2cd8726ca6ef210e5f080167f5c93adf6fd4911a00adb3ecfe039c
   part:
@@ -311,8 +311,8 @@ chunks:
 - id: c032
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 9378
-  - 9777
+  - 9374
+  - 9773
   bytes: 9704
   sha256: 414dd67c0f9fe171df730f6ffb7c12668b98afc983d8ccc743660151ad4533af
   part:
@@ -321,8 +321,8 @@ chunks:
 - id: c033
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 9778
-  - 10177
+  - 9774
+  - 10173
   bytes: 9751
   sha256: 46d4dc7a2a82c683839ed62ed759ece4474ced244cd353fbb1a323e4c7d337ad
   part:
@@ -331,8 +331,8 @@ chunks:
 - id: c034
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 10178
-  - 10577
+  - 10174
+  - 10573
   bytes: 9632
   sha256: ad301310a88eaffdd632babde0aa4d5497b313cacf3429b36e8501c3735c1c58
   part:
@@ -341,8 +341,8 @@ chunks:
 - id: c035
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 10578
-  - 10977
+  - 10574
+  - 10973
   bytes: 10305
   sha256: db2f1c60da2296481e1af046f3013ad5005ad7cafc939d08b70ac42c61228cc7
   part:
@@ -351,8 +351,8 @@ chunks:
 - id: c036
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 10978
-  - 11377
+  - 10974
+  - 11373
   bytes: 12631
   sha256: f7d84f080dc79d349a337b1721699ddc3161b4a6b73fa23404aa4e02e0dcda5a
   part:
@@ -361,8 +361,8 @@ chunks:
 - id: c037
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 11378
-  - 11777
+  - 11374
+  - 11773
   bytes: 16949
   sha256: 7e9019195498254a5837f6664d10f21c97781df15d6285f9317638007f6b2abc
   part:
@@ -371,8 +371,8 @@ chunks:
 - id: c038
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 11778
-  - 12177
+  - 11774
+  - 12173
   bytes: 16644
   sha256: 389a3d5297f7b5150213934fa39068f1583f0f70a3c8754242e5a2a980802228
   part:
@@ -381,8 +381,8 @@ chunks:
 - id: c039
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 12178
-  - 12577
+  - 12174
+  - 12573
   bytes: 15893
   sha256: da01940cef683bfb2b86b58768a87ca4a2d6e2ee7c966504b8ddbc6490cd9f96
   part:
@@ -391,8 +391,8 @@ chunks:
 - id: c040
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 12578
-  - 12977
+  - 12574
+  - 12973
   bytes: 16008
   sha256: ec1e4e4042a77c4318c221986dfe9dd573190a9466821aba04417aa4519580a7
   part:
@@ -401,8 +401,8 @@ chunks:
 - id: c041
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 12978
-  - 13377
+  - 12974
+  - 13373
   bytes: 18455
   sha256: 5dc192db904f756cd7b9f177435125c4e1a56adf3cf45fbf34605f2134551c8b
   part:
@@ -411,8 +411,8 @@ chunks:
 - id: c042
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 13378
-  - 13777
+  - 13374
+  - 13773
   bytes: 12833
   sha256: 74695f99f1d23c6418575db5ea1aa80ad3c27dd5795ad2910ae749fbdf3fe5bb
   part:
@@ -421,8 +421,8 @@ chunks:
 - id: c043
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 13778
-  - 14177
+  - 13774
+  - 14173
   bytes: 11341
   sha256: 57229706e78847f9742bdcb0910c2a9be27c25c0f4b022a2c049bccc5981e373
   part:
@@ -431,8 +431,8 @@ chunks:
 - id: c044
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 14178
-  - 14577
+  - 14174
+  - 14573
   bytes: 11419
   sha256: bd6db6db0b0c5ced27d80343c5ef8321f2b04a44e4ac04d1821d4e147c9ab6b5
   part:
@@ -441,8 +441,8 @@ chunks:
 - id: c045
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 14578
-  - 14977
+  - 14574
+  - 14973
   bytes: 11901
   sha256: b819ec4b16e227fd1840e035943a40f7288c034832c8dbd6f485b65cecfac713
   part:
@@ -451,8 +451,8 @@ chunks:
 - id: c046
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 14978
-  - 15377
+  - 14974
+  - 15373
   bytes: 11522
   sha256: cbaf70dfe872d90cb93c96d1e78edfae7765ddf8a1859d7107ee65419f4d5498
   part:
@@ -461,8 +461,8 @@ chunks:
 - id: c047
   source: VOICE_crate_metadata_reduced.json
   lines:
-  - 15378
-  - 15582
+  - 15374
+  - 15578
   bytes: 5164
   sha256: 67d85a0e088917f3eeaa3a7c290f15c8a814a8a7b4d8a760251656cdc7864af3
   part:
@@ -471,7 +471,7 @@ chunks:
 - id: c048
   source: ai_ready_score.json
   lines:
-  - 15583
-  - 15715
+  - 15579
+  - 15711
   bytes: 9784
   sha256: 19fdcf43717c5978f8479a94cea442b4df61d36e39a8fdc34e73f2786022cfbc

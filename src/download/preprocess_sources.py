@@ -22,6 +22,12 @@ from data_sheets_schema.constants import PROJECTS
 
 
 MOJIBAKE_SIGNATURE = "\u00e2\u0080"      # a-circumflex + C1 control: U+20xx double-decoded
+#: The accent class (#875): A-tilde + a Latin-1 continuation byte, which is
+#: what every U+00C0\u2013U+00FF letter becomes when UTF-8 is read as Latin-1.
+ACCENT_MOJIBAKE = re.compile("\u00c3[\u0080-\u00bf]")
+#: Occurrences before the accent class counts as the page's encoding rather
+#: than a quoted example: a double-encoded page hits every accented letter.
+ACCENT_MOJIBAKE_MIN = 2
 
 
 def fix_mojibake(text: str) -> str:
@@ -45,21 +51,34 @@ def fix_mojibake(text: str) -> str:
     all-or-nothing: if any line is unrepairable, the whole text is returned
     unchanged rather than half-repaired.
     """
-    if MOJIBAKE_SIGNATURE not in text:
+    # #875: the accent class (\u00c3 followed by a Latin-1 continuation byte \u2014
+    # \u00e9 as U+00C3 U+00A9, \u00ee as U+00C3 U+00AE) has no smart-punctuation
+    # signature to fire on. It counts as a signature when it recurs
+    # (ACCENT_MOJIBAKE_MIN occurrences) \u2014 a page's double encoding hits
+    # every accented letter, a text merely quoting one `\u00c3\u00a9` (the #874
+    # guard) hits one \u2014 and the acceptance check then requires that every
+    # accent-class sequence is gone too.
+    accent_hits = len(ACCENT_MOJIBAKE.findall(text))
+    fired = MOJIBAKE_SIGNATURE in text or accent_hits >= ACCENT_MOJIBAKE_MIN
+    if not fired:
         return text
+
+    def broken(s: str) -> bool:
+        return MOJIBAKE_SIGNATURE in s or bool(ACCENT_MOJIBAKE.search(s))
+
     try:
         repaired = text.encode("latin-1").decode("utf-8")
     except (UnicodeEncodeError, UnicodeDecodeError):
         out = []
         for line in text.split("\n"):
-            if MOJIBAKE_SIGNATURE in line:
+            if broken(line):
                 try:
                     line = line.encode("latin-1").decode("utf-8")
                 except (UnicodeEncodeError, UnicodeDecodeError):
                     pass
             out.append(line)
         repaired = "\n".join(out)
-    if MOJIBAKE_SIGNATURE not in repaired and "\ufffd" not in repaired:
+    if not broken(repaired) and "\ufffd" not in repaired:
         return repaired
     return text
 
@@ -95,18 +114,56 @@ def extract_html_text(html_path: Path) -> str:
         return ""
 
 
+_W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+
+
+def _docx_paragraph_text(p) -> str:
+    """Every `w:t` under a paragraph, in order — including runs wrapped in a
+    `w:sdt` structured-document tag, which python-docx's `.text` skips
+    (#886): a Google Docs export wrapped "The s" of "The study visit" in one,
+    and the bundle read "tudy visit". Tabs and line breaks keep their place."""
+    parts = []
+    for node in p.iter():
+        if node.tag == f"{_W}t":
+            parts.append(node.text or "")
+        elif node.tag == f"{_W}tab":
+            parts.append("\t")
+        elif node.tag in (f"{_W}br", f"{_W}cr"):
+            parts.append("\n")
+    return "".join(parts)
+
+
+def _docx_block_texts(container) -> list:
+    """Paragraphs and table rows under a body-level container, in document
+    order (the earlier extractor emitted every paragraph, then every table,
+    whatever their order on the page), descending into `w:sdt` blocks."""
+    out = []
+    for child in container:
+        if child.tag == f"{_W}p":
+            text = _docx_paragraph_text(child)
+            if text.strip():
+                out.append(text)
+        elif child.tag == f"{_W}tbl":
+            for row in child.iter(f"{_W}tr"):
+                cells = []
+                for cell in row.findall(f"{_W}tc"):
+                    cell_text = "\n".join(t for t in _docx_block_texts(cell) if t.strip())
+                    if cell_text.strip():
+                        cells.append(cell_text.strip())
+                if cells:
+                    out.append("\t".join(cells))
+        elif child.tag == f"{_W}sdt":
+            content = child.find(f"{_W}sdtContent")
+            if content is not None:
+                out.extend(_docx_block_texts(content))
+    return out
+
+
 def extract_docx_text(docx_path: Path) -> str:
-    """Extract text from DOCX using python-docx."""
+    """Extract text from DOCX by walking the document XML in order."""
     try:
         doc = Document(str(docx_path))
-        paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
-        # Also extract text from tables
-        for table in doc.tables:
-            for row in table.rows:
-                row_text = '\t'.join(cell.text.strip() for cell in row.cells if cell.text.strip())
-                if row_text:
-                    paragraphs.append(row_text)
-        return '\n'.join(paragraphs)
+        return "\n".join(_docx_block_texts(doc.element.body))
     except Exception as e:
         print(f"    ⚠️  Error extracting DOCX {docx_path.name}: {e}")
         return ""
