@@ -199,34 +199,56 @@ def disposition(method, label, project, item, disposition, note, slot_path, old,
                       "evaluations_predating": sorted(str(p) for p in Path("data/evaluation_llm").glob(
                           f"*/label_aware/{project}_*{label.rsplit('_', 1)[-1]}_evaluation.json")
                           if label.split("_")[0] in p.read_text(encoding="utf-8", errors="ignore")[:4000])})
-        if execute:
-            for v in files.values():
-                Path(v["path"]).write_text(v["_text"], encoding="utf-8")
-            # the check blocks now describe bytes the run did not write: recompute
-            # the ones that read the records; grounding only where the bundle
-            # has not drifted (compute() decides), never the review block
-            blocks = bc.compute(prov)
-            bc.apply(prov, {k: v for k, v in blocks.items() if k != "review"}, overwrite=True)
-            click.echo("   check blocks recomputed on the amended records")
-
     if not execute:
         click.echo("   dry run; re-run with --execute to write")
         return
-    rec = yaml.safe_load(bc._split_header(prov.read_text(encoding="utf-8"))[1]) or {}
+
+    def append_entry() -> None:
+        rec = yaml.safe_load(bc._split_header(prov.read_text(encoding="utf-8"))[1]) or {}
+        rec.setdefault("dispositions", []).append(entry)
+        if "_validation" in entry:
+            rec["validation"] = entry.pop("_validation")
+        ProvenanceRecord(data=rec).write(prov)
+
     if disposition == "amend":
-        # The validation verdict pins the artifacts' md5s (#426), so the
-        # amended files would report STALE — the #657 signal for an edit
-        # nobody recorded. This edit is recorded in the entry below, so the
-        # verdict is refreshed in the same act, naming this command.
-        from data_sheets_schema.api_runner import RunSpec, validate_outputs, validation_block
-        spec = RunSpec(project=project, arm="", method=method,
-                       bundle=Path("data/preprocessed/concatenated") / f"{project}_preprocessed.txt", label=label)
-        problems = validate_outputs(spec)
-        rec["validation"] = validation_block(spec, problems, recorded_by="d4d review disposition")
-        entry["validation_after"] = "valid" if not problems else f"{len(problems)} problem(s)"
-        click.echo(f"   re-validated: {entry['validation_after']}")
-    rec.setdefault("dispositions", []).append(entry)
-    ProvenanceRecord(data=rec).write(prov)
+        # The records are written and the entry recorded in one step before
+        # anything that can fail: an amended record with no `dispositions`
+        # entry is the #657 laundering (#907 review). The recompute and the
+        # re-validation follow; if either raises, the entry already names
+        # the edit and gains the error.
+        for v in files.values():
+            Path(v["path"]).write_text(v["_text"], encoding="utf-8")
+        append_entry()
+        try:
+            # the check blocks now describe bytes the run did not write:
+            # recompute the ones that read the records (grounding only where
+            # the bundle has not drifted — compute() decides; apply() never
+            # erases a checked block), never the review block
+            blocks = bc.compute(prov)
+            bc.apply(prov, {k: v for k, v in blocks.items() if k != "review"}, overwrite=True)
+            click.echo("   check blocks recomputed on the amended records")
+            # The validation verdict pins the artifacts' md5s (#426), so the
+            # amended files would report STALE — the signal for an edit
+            # nobody recorded. This edit is recorded, so the verdict is
+            # refreshed in the same act, naming this command.
+            from data_sheets_schema.api_runner import RunSpec, validate_outputs, validation_block
+            spec = RunSpec(project=project, arm="", method=method,
+                           bundle=Path("data/preprocessed/concatenated") / f"{project}_preprocessed.txt", label=label)
+            problems = validate_outputs(spec)
+            rec = yaml.safe_load(bc._split_header(prov.read_text(encoding="utf-8"))[1]) or {}
+            rec["validation"] = validation_block(spec, problems, recorded_by="d4d review disposition")
+            rec["dispositions"][-1]["validation_after"] = "valid" if not problems else f"{len(problems)} problem(s)"
+            ProvenanceRecord(data=rec).write(prov)
+            click.echo(f"   re-validated: {rec['dispositions'][-1]['validation_after']}")
+        except Exception as exc:                                     # noqa: BLE001
+            rec = yaml.safe_load(bc._split_header(prov.read_text(encoding="utf-8"))[1]) or {}
+            rec["dispositions"][-1]["error"] = f"{type(exc).__name__}: {str(exc)[:200]}"
+            ProvenanceRecord(data=rec).write(prov)
+            raise click.ClickException(f"amended and recorded, but the recompute/re-validation failed: {exc}; "
+                                       "run `d4d provenance backfill-checks --overwrite` and "
+                                       "`d4d runs validate --recheck` for this record") from exc
+    else:
+        append_entry()
     click.echo(f"   ✓ disposition written to {prov}")
 
 

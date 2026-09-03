@@ -382,6 +382,8 @@ form:
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=0
 receipts:
   expected: true
   non_checks:
@@ -500,6 +502,10 @@ receipts:
     - path: license_and_use_terms.source_caveats
       resolved_path: license_and_use_terms.source_caveats
     value_changed_after_receipt_count: 5
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
     - creators[0].principal_investigator.name
     - creators[1].principal_investigator.name

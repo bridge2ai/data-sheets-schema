@@ -402,6 +402,8 @@ form:
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=0
 receipts:
   expected: true
   non_checks:
@@ -560,22 +562,6 @@ receipts:
       resolved_path: ethical_reviews[0].contact_person
     - path: ethical_reviews[1].contact_person
       resolved_path: ethical_reviews[1].contact_person
-    - path: existing_uses[0].examples
-      resolved_path: existing_uses[0].examples
-    - path: existing_uses[1].examples
-      resolved_path: existing_uses[1].examples
-    - path: external_resources[10].external_resources
-      resolved_path: external_resources[10].external_resources
-    - path: external_resources[3].external_resources
-      resolved_path: external_resources[3].external_resources
-    - path: external_resources[5].external_resources
-      resolved_path: external_resources[5].external_resources
-    - path: external_resources[7].external_resources
-      resolved_path: external_resources[7].external_resources
-    - path: external_resources[8].external_resources
-      resolved_path: external_resources[8].external_resources
-    - path: external_resources[9].external_resources
-      resolved_path: external_resources[9].external_resources
     - path: file_collections[0]
       resolved_path: file_collections[0]
     - path: file_collections[1]
@@ -592,7 +578,24 @@ receipts:
       resolved_path: file_collections[6]
     - path: file_collections[7]
       resolved_path: file_collections[7]
-    value_changed_after_receipt_count: 26
+    - path: file_collections[8]
+      resolved_path: file_collections[8]
+    - path: file_collections[9]
+      resolved_path: file_collections[9]
+    - path: funders[0].notes
+      resolved_path: funders[0].notes
+    - path: id
+      resolved_path: id
+    - path: publisher
+      resolved_path: publisher
+    - path: source_caveats
+      resolved_path: source_caveats
+    value_changed_after_receipt_count: 18
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    path_not_in_snapshot:
+    - creators[43].source_caveats
+    path_not_in_snapshot_count: 1
     reshaped_by_reconcile:
     - created_by
     - funders[0].grants[0].grant_number
@@ -797,7 +800,8 @@ receipts:
     (5 in another chunk) (2 bearing on no token of their value) (10 entry receipt(s)
     overlapping one leaf) · slots 132/420 with a receipt (259 never receipted, 29
     added after the receipt) (38 exempt) · 9 receipt path(s) reshaped by reconcile
-    · 1 receipt path(s) off by one index · 26 value(s) changed after the receipt
+    · 1 receipt path(s) off by one index · 18 value(s) changed after the receipt ·
+    1 receipt path(s) not in the snapshot
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_coverage_receipt.yaml

@@ -158,3 +158,5 @@ form:
     B2AI-Voice: 2
   gc_label_variant_occurrences: 77
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=10

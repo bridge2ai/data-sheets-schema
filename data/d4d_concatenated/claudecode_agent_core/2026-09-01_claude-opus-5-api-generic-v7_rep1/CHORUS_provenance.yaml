@@ -382,6 +382,8 @@ form:
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=0
 receipts:
   expected: true
   non_checks:
@@ -507,8 +509,6 @@ receipts:
       resolved_path: existing_uses[1]
     - path: existing_uses[1].examples
       resolved_path: existing_uses[1].examples
-    - path: external_resources[0].external_resources
-      resolved_path: external_resources[0].external_resources
     - path: funders[0]
       resolved_path: funders[0]
     - path: funders[0].grantor
@@ -531,7 +531,13 @@ receipts:
       resolved_path: license_and_use_terms.license_terms
     - path: notes
       resolved_path: notes
-    value_changed_after_receipt_count: 26
+    - path: participant_privacy[0].privacy_techniques
+      resolved_path: participant_privacy[0].privacy_techniques
+    value_changed_after_receipt_count: 23
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
     - creators[0].principal_investigator.name
     - external_resources[1].external_resources
@@ -549,7 +555,7 @@ receipts:
   summary: chunks 8/8 reviewed · snippets 80/81 verified (1 in an adjacent chunk)
     (1 bearing on no token of their value) (1 entry receipt(s) overlapping one leaf)
     · slots 59/170 with a receipt (95 never receipted, 16 added after the receipt)
-    (29 exempt) · 3 receipt path(s) reshaped by reconcile · 26 value(s) changed after
+    (29 exempt) · 3 receipt path(s) reshaped by reconcile · 23 value(s) changed after
     the receipt
   artifacts:
     receipt:
@@ -613,6 +619,65 @@ review:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_review.yaml
       sha256: 34ba2acd5f7dddf8dbafd716328614c7dbc5113dbbc864a3d76109b7e72b6d76
   recorded_by: d4d review check
+canonical_history:
+- criterion: full and core both validate against the current schema, then fewest review
+    adverse verdicts (differences of at most 2 a tie), then most slots, then lowest
+    label
+  selected_from:
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    slots: 53
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 11
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+    slots: 48
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 11
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+    slots: 53
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 9
+  margin_over_runner_up: 0
+  reviews_applied: true
+  review_margin: 2
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep3
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep3
+  superseded_by:
+    label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    at: '2026-09-03T03:01:12+00:00'
+    by: d4d runs select
+    reason: re-selected
+- criterion: full and core both validate against the current schema, then most slots,
+    then lowest label
+  selected_from:
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    slots: 53
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+    slots: 48
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+    slots: 53
+    validation: valid
+    validation_recorded_at_run_time: valid
+  margin_over_runner_up: 0
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep3
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep3
+  superseded_by:
+    label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    at: '2026-09-03T02:00:18+00:00'
+    by: d4d runs select
+    reason: re-selected
 canonical:
   criterion: full and core both validate against the current schema, then fewest review
     adverse verdicts (differences of at most 2 a tie), then most slots, then lowest
@@ -641,30 +706,3 @@ canonical:
   - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
   - 2026-08-22c_claude-opus-5-api-generic-v5_rep3
   - 2026-08-20b_claude-opus-5-api-generic-v5_rep3
-canonical_history:
-- criterion: full and core both validate against the current schema, then most slots,
-    then lowest label
-  selected_from:
-  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
-    slots: 53
-    validation: valid
-    validation_recorded_at_run_time: valid
-  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
-    slots: 48
-    validation: valid
-    validation_recorded_at_run_time: valid
-  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
-    slots: 53
-    validation: valid
-    validation_recorded_at_run_time: valid
-  margin_over_runner_up: 0
-  selected_by: d4d runs select
-  supersedes:
-  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
-  - 2026-08-22c_claude-opus-5-api-generic-v5_rep3
-  - 2026-08-20b_claude-opus-5-api-generic-v5_rep3
-  superseded_by:
-    label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
-    at: '2026-09-03T02:00:18+00:00'
-    by: d4d runs select
-    reason: re-selected

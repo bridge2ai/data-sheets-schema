@@ -380,6 +380,8 @@ form:
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=0
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/intermediate/AI_READI_audit.json
   sha256: 286f28d966ca7d33768d5e6c2660e43d0a294859b35e75a5d21810b9f92e0fc6

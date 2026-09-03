@@ -163,17 +163,22 @@ Four instrument changes followed from this pass (#899, #660, #836/#859,
 
 **Receipt paths, joined by identity (#899).** The five reviewers'
 "stale path" reports decomposed, against the phase-1 snapshots, into
-classes the instrument now reports over the arm's 1,733 receipt paths:
-1,319 unchanged; **322 values rewritten at the same path after the
-receipt** (18.6% — the CM4AI rep2 `page` case; the receipt attested the
-earlier value and the current one has no re-receipt route, #742); 34
-leaves and 22 entries removed by reconciliation; 5 entries moved (the
-only class an identity join fixes); 3 ambiguous; and 6 paths the model
-mis-addressed at phase 1 (CM4AI rep3's `creators[38]` pointed past the
-end of its own 38-entry snapshot — not a reconciliation shift). So the
-reviewers were right that the pack was judging the wrong entry, and
-mostly wrong about why: the dominant mechanism is rewriting in place, not
-reordering. Coverage figures above change by at most one slot per record.
+classes the instrument now reports over the arm's **1,412 unique receipt
+paths** (1,733 is the snippet count — the first version of this addendum
+conflated the two): 1,146 unchanged; **184 values rewritten at the same
+path after the receipt** (13.0% — the CM4AI rep2 `page` case; the receipt
+attested the earlier value and the current one has no re-receipt route,
+#742; normalisation and extension excluded); 48 leaves and 17 entries
+removed by reconciliation; 5 entries moved (the only class an identity
+join fixes); 6 paths the model mis-addressed at phase 1 (CM4AI rep3's
+`creators[38]` pointed past the end of its own 38-entry snapshot — not a
+reconciliation shift); 3 whose index another entry now occupies (CHORUS
+rep3 `creators[1]`, where an unnamed entry replaced Azra Bihorac — the
+misjoin the pack used to commit silently, now uncredited and reported);
+2 unresolved. So the reviewers were right that the pack was judging the
+wrong entry, and mostly wrong about why: the dominant mechanism is
+rewriting in place, not reordering. Coverage figures above change by at
+most two slots per record (AI_READI rep3 164→166).
 
 **Selection re-run under the review criterion (#660).** Validity → fewest
 adverse (±2 a tie) → slots → label: AI_READI **rep1** (9 adverse, tied

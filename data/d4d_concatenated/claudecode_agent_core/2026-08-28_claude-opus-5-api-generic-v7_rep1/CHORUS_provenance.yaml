@@ -379,6 +379,8 @@ form:
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=0
 receipts:
   expected: true
   non_checks:
@@ -491,27 +493,15 @@ receipts:
       resolved_path: collection_timeframes[0].timeframe_details
     - path: description
       resolved_path: description
-    - path: distribution_dates[0].release_dates
-      resolved_path: distribution_dates[0].release_dates
-    - path: existing_uses[0].examples
-      resolved_path: existing_uses[0].examples
-    - path: existing_uses[1].examples
-      resolved_path: existing_uses[1].examples
-    - path: external_resources[0].external_resources
-      resolved_path: external_resources[0].external_resources
-    - path: external_resources[1].external_resources
-      resolved_path: external_resources[1].external_resources
-    - path: external_resources[2].external_resources
-      resolved_path: external_resources[2].external_resources
-    - path: external_resources[3].external_resources
-      resolved_path: external_resources[3].external_resources
-    - path: funders[0]
-      resolved_path: funders[0]
     - path: is_deidentified.deidentification_details
       resolved_path: is_deidentified.deidentification_details
     - path: source_caveats
       resolved_path: source_caveats
-    value_changed_after_receipt_count: 12
+    value_changed_after_receipt_count: 4
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
     - creators[0].principal_investigator.name
     receipts_to_removed_values: 1
@@ -533,7 +523,7 @@ receipts:
   summary: chunks 8/8 reviewed · snippets 107/109 verified (2 in an adjacent chunk)
     (2 bearing on no token of their value) · slots 61/173 with a receipt (98 never
     receipted, 14 added after the receipt) (36 exempt) · 1 receipt path(s) reshaped
-    by reconcile · 12 value(s) changed after the receipt
+    by reconcile · 4 value(s) changed after the receipt
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-api-generic-v7_rep1/CHORUS_coverage_receipt.yaml

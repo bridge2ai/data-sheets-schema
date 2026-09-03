@@ -384,6 +384,8 @@ form:
     Bridge2AI Voice: 15
   gc_label_variant_occurrences: 71
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=0
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/intermediate/VOICE_audit.json
   sha256: 8dcc3cce816f3a8b8867a0f6052b483d76d5d024bcf61e0edf86c4504468ecde

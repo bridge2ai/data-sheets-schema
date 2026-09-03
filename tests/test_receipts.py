@@ -352,7 +352,6 @@ class Validator(unittest.TestCase):
         rec = _receipt(manifest["bundle_md5"])
         full = {**FULL, "version": "3.0.0"}            # added by a later phase
         original = {**FULL, "license": "CC-BY"}        # populated at phase 1, never receipted
-        del original["funders"]
         full2 = {**full, "license": "CC-BY"}
         b = rc.check(rec, manifest, texts, full2, manifest["bundle_md5"], original=original)
         self.assertEqual(b["slots"]["receipts_to_removed_values"], 0)
@@ -775,3 +774,35 @@ class IdentityRemap(unittest.TestCase):
         c = rc.claim_receipts(_receipt("m"), final, original)["slots"]["description"]
         self.assertEqual(c["value_at_receipt"], "a longitudinal, multimodal study")
         self.assertNotIn("value_at_receipt", rc.claim_receipts(_receipt("m"), final, original)["slots"]["title"])
+
+    def test_a_gone_entry_or_a_path_the_snapshot_never_had_is_never_credited_as_written(self):
+        """#907 review: identity says the entry is gone, another sits at its
+        index — the written path must not resolve to it."""
+        manifest, texts = _manifest_and_texts()
+        md5 = manifest["bundle_md5"]
+        original = {**FULL, "funders": [{"id": "https://x/ds#funder-1", "name": "NIH Common Fund",
+                                          "grant_id": "OT2OD032644"}]}
+        final = {**FULL, "funders": [{"id": "https://x/ds#funder-9", "name": "Someone Else",
+                                      "grant_id": "OTHER"}]}
+        b = rc.check(_receipt(md5), manifest, texts, final, md5, original=original)
+        self.assertEqual(b["slots"]["index_reused_by_another_entry_count"], 2)     # funders[0].grant_id, .name
+        self.assertIn("funders[0].grant_id", b["slots"]["without_receipt"])
+        self.assertIn("funders[0].grant_id", b["slots"]["reshaped_by_reconcile"])
+        self.assertEqual(b["findings_gated"], 0)
+        # a path the snapshot never had, resolving into structure added later
+        original2 = {**FULL, "funders": []}
+        final2 = {**FULL, "funders": [{"id": "https://x/ds#funder-1", "name": "NIH Common Fund", "grant_id": "OT2OD032644"}]}
+        b2 = rc.check(_receipt(md5), manifest, texts, final2, md5, original=original2)
+        self.assertEqual(b2["slots"]["path_not_in_snapshot_count"], 2)
+        self.assertIn("funders[0].grant_id", b2["slots"]["without_receipt"])
+        self.assertEqual(b2["findings_gated"], 0)
+        self.assertNotIn("funders[0].grant_id", b2["slots"]["unresolved"])
+
+    def test_normalisation_and_extension_are_not_rewrites(self):
+        self.assertFalse(rc._rewritten("a b", ["a  b"]))
+        self.assertFalse(rc._rewritten({"name": "N"}, {"name": "N", "notes": "added"}))
+        self.assertFalse(rc._rewritten(["x"], ["x", "y"]))
+        self.assertTrue(rc._rewritten("a", "b"))
+        self.assertTrue(rc._rewritten({"name": "N"}, {"name": "M"}))
+        self.assertTrue(rc._rewritten(["x", "y"], ["x"]))
+        self.assertTrue(rc._rewritten("a", {"name": "a"}))

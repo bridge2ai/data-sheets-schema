@@ -243,7 +243,7 @@ validation:
   schema:
     full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
     core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
-  recorded_by: d4d runs validate
+  recorded_by: d4d review disposition
 core_derivation:
   derived: true
   rule: shared slots copied from the full record; resources projected by id with full-only
@@ -347,6 +347,8 @@ form:
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=25
 receipts:
   expected: true
   non_checks:
@@ -541,6 +543,10 @@ receipts:
     - path: funders[0].notes
       resolved_path: funders[0].notes
     value_changed_after_receipt_count: 44
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
     - content_warnings[0].notes
     - data_protection_impacts[0].impact_details
@@ -656,7 +662,7 @@ dispositions:
     (the sum is 419,614 under the total). Arithmetic re-verified by the curator from
     the record''s values before amending; the nine inputs and the total are unchanged.
     Rubric evaluations of this record predate the amendment (#903).'
-  at: '2026-09-03T01:15:44+00:00'
+  at: '2026-09-03T02:39:33+00:00'
   recorded_by: d4d review disposition
   path: source_caveats
   replace: sum to 3,815,974,377,264 bytes, which exceeds the dataset total_size_bytes
@@ -675,6 +681,7 @@ dispositions:
   evaluations_predating:
   - data/evaluation_llm/rubric10_semantic/label_aware/AI_READI_2026-09-01api_rep3_evaluation.json
   - data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-09-01api_rep3_evaluation.json
+  validation_after: valid
 - item: slot-058
   verdict: cannot_tell
   disposition: retain
@@ -682,7 +689,7 @@ dispositions:
     was retained; it is absent from both records. Restoring a value is generation-class
     work (#742: no re-receipt route), so the record is left as generated and the report/record
     contradiction stands documented here and in the review block (#903).'
-  at: '2026-09-03T01:16:05+00:00'
+  at: '2026-09-03T02:39:55+00:00'
   recorded_by: d4d review disposition
 - item: slot-008
   verdict: misread
@@ -693,5 +700,5 @@ dispositions:
     that re-scoping is legitimate is a judgement the curator declines to overrule
     by editing a boolean against the record''s stated reasoning. Left as generated;
     the review verdict (misread) is the record of the defect (#903).'
-  at: '2026-09-03T01:16:08+00:00'
+  at: '2026-09-03T02:39:56+00:00'
   recorded_by: d4d review disposition

@@ -978,9 +978,26 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
     # the difference between seconds and minutes.
     declared = declared_slots()
     written = skipped = 0
+    import yaml as _yaml
+    from datetime import date
+
+    from data_sheets_schema.backfill_checks import _split_header
     for p in paths:
         try:
             blocks = compute(p, declared, only=wanted)
+            if "form" in blocks and overwrite:
+                # The audit trail of a form recompute (#907 review): the
+                # prior instrument note and British count are carried
+                # into the new block, so an instrument revision reads as
+                # a sequence rather than replacing its own history.
+                prior = ((_yaml.safe_load(_split_header(p.read_text(encoding="utf-8"))[1]) or {})
+                         .get("form") or {})
+                if prior:
+                    note = (f"form recomputed {date.today().isoformat()} under british instrument v3 "
+                            f"(#836/#859); previous british={prior.get('british_spellings')}")
+                    if prior.get("instrument_note"):
+                        note = f"{prior['instrument_note']} | {note}"
+                    blocks["form"]["instrument_note"] = note
             # Inside the same guard as compute: a write that raises halfway
             # through 192 records leaves a corpus in two states, and the reason
             # it raised is exactly the kind a reader needs to see per-record.

@@ -275,7 +275,7 @@ validation:
   schema:
     full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
     core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
-  recorded_by: d4d runs validate
+  recorded_by: d4d review disposition
 core_derivation:
   derived: true
   rule: shared slots copied from the full record; resources projected by id with full-only
@@ -381,6 +381,8 @@ form:
     Bridge2AI Voice: 10
   gc_label_variant_occurrences: 50
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=0
 receipts:
   expected: true
   non_checks:
@@ -492,8 +494,6 @@ receipts:
       resolved_path: conforms_to
     - path: creators
       resolved_path: creators
-    - path: existing_uses[0].examples
-      resolved_path: existing_uses[0].examples
     - path: external_resources[5].notes
       resolved_path: external_resources[5].notes
     - path: instances[0].notes
@@ -504,7 +504,11 @@ receipts:
       resolved_path: purposes[0].source_caveats
     - path: related_datasets[0].description
       resolved_path: related_datasets[0].description
-    value_changed_after_receipt_count: 9
+    value_changed_after_receipt_count: 8
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
     - at_risk_populations.assent_procedures
     - at_risk_populations.guardian_consent
@@ -547,7 +551,7 @@ receipts:
   summary: chunks 22/22 reviewed · snippets 132/137 verified (1 across a wrapped line)
     (3 in an adjacent chunk) (1 in another chunk) (1 bearing on no token of their
     value) · slots 96/338 with a receipt (206 never receipted, 36 added after the
-    receipt) (37 exempt) · 5 receipt path(s) reshaped by reconcile · 9 value(s) changed
+    receipt) (37 exempt) · 5 receipt path(s) reshaped by reconcile · 8 value(s) changed
     after the receipt
   artifacts:
     receipt:
@@ -624,7 +628,7 @@ dispositions:
     states it. Reconciliation relocated three pediatric items and missed this one.
     The clause is removed; the remainder of the value is receipted against the adult
     documentation. Rubric evaluations of this record predate the amendment (#903).'
-  at: '2026-09-03T01:16:11+00:00'
+  at: '2026-09-03T02:39:57+00:00'
   recorded_by: d4d review disposition
   path: acquisition_methods[0].acquisition_details
   replace: were self-reported by participants or, where appropriate, by a parent or
@@ -642,9 +646,10 @@ dispositions:
   evaluations_predating:
   - data/evaluation_llm/rubric10_semantic/label_aware/VOICE_2026-09-01api_rep2_evaluation.json
   - data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-09-01api_rep2_evaluation.json
+  validation_after: valid
 canonical_superseded_by:
   label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
-  at: '2026-09-03T02:00:49+00:00'
+  at: '2026-09-03T03:01:43+00:00'
   by: d4d runs select
 canonical_history:
 - criterion: full and core both validate against the current schema, then most slots,
@@ -670,5 +675,5 @@ canonical_history:
   - 2026-08-20b_claude-opus-5-api-generic-v5_rep1
   superseded_by:
     label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
-    at: '2026-09-03T02:00:49+00:00'
+    at: '2026-09-03T03:01:43+00:00'
     by: d4d runs select

@@ -384,6 +384,8 @@ form:
     Bridge2AI Voice: 10
   gc_label_variant_occurrences: 40
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=2
 receipts:
   expected: true
   non_checks:
@@ -431,7 +433,7 @@ receipts:
     populated: 440
     exempt: 71
     receiptable: 369
-    with_receipt: 121
+    with_receipt: 117
     without_receipt:
     - name
     - title
@@ -483,9 +485,9 @@ receipts:
     - creators[16].credit_roles
     - purposes[1].response
     - tasks[0].response
-    without_receipt_truncated: 198
-    never_receipted: 147
-    added_after_receipt: 101
+    without_receipt_truncated: 202
+    never_receipted: 148
+    added_after_receipt: 104
     receipt_paths: 121
     unresolved: []
     path_off_by_one: []
@@ -501,8 +503,6 @@ receipts:
       resolved_path: created_by
     - path: data_governance.stewardship_roles
       resolved_path: data_governance.stewardship_roles
-    - path: distribution_dates[0].release_dates
-      resolved_path: distribution_dates[0].release_dates
     - path: existing_uses[0].examples
       resolved_path: existing_uses[0].examples
     - path: funders[0].grantor
@@ -523,10 +523,19 @@ receipts:
       resolved_path: participant_privacy[0].privacy_techniques
     - path: sampling_strategies[0].strategies
       resolved_path: sampling_strategies[0].strategies
-    value_changed_after_receipt_count: 14
+    value_changed_after_receipt_count: 13
+    index_reused_by_another_entry:
+    - path: external_resources[5]
+      basis: ambiguous
+    index_reused_by_another_entry_count: 1
+    path_not_in_snapshot:
+    - updates.frequency
+    - updates.update_details
+    path_not_in_snapshot_count: 2
     reshaped_by_reconcile:
+    - external_resources[5]
     - instances[1].counts
-    receipts_to_removed_values: 1
+    receipts_to_removed_values: 2
   findings:
   - kind: snippet_adjacent_chunk
     chunk: c002
@@ -609,9 +618,10 @@ receipts:
   findings_truncated: null
   findings_gated: 0
   summary: chunks 22/22 reviewed · snippets 146/158 verified (9 in an adjacent chunk)
-    (3 in another chunk) (3 bearing on no token of their value) · slots 121/369 with
-    a receipt (147 never receipted, 101 added after the receipt) (71 exempt) · 1 receipt
-    path(s) reshaped by reconcile · 14 value(s) changed after the receipt
+    (3 in another chunk) (3 bearing on no token of their value) · slots 117/369 with
+    a receipt (148 never receipted, 104 added after the receipt) (71 exempt) · 2 receipt
+    path(s) reshaped by reconcile · 13 value(s) changed after the receipt · 1 receipt
+    index(es) reused by another entry · 2 receipt path(s) not in the snapshot
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/VOICE_coverage_receipt.yaml

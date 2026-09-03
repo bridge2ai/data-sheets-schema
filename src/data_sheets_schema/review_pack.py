@@ -366,7 +366,11 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         # non-exempt leaf no receipt path covers, sorted, then sampled.
         from data_sheets_schema.receipts import _covers, exempt, populated_leaves
         record_id = full.get("id") if isinstance(full.get("id"), str) else None
-        covering = {(c.get("resolved_path") or s) for s, c in claims["slots"].items()}
+        # A claim whose identity resolution is None (entry gone, index
+        # reused, not in the snapshot) covers nothing — never the written
+        # index (#907 review).
+        covering = {(c["resolved_path"] if original is not None else s)
+                    for s, c in claims["slots"].items()} - {None}
         without = sorted(p for p, v in populated_leaves(full)
                          if not exempt(p, v, record_id) and not any(_covers(r, p) for r in covering))
         rng.shuffle(without)

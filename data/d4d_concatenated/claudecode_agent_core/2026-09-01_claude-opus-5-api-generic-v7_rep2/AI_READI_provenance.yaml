@@ -393,6 +393,8 @@ form:
     AI READI: 2
   gc_label_variant_occurrences: 2
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=13
 receipts:
   expected: true
   non_checks:
@@ -528,10 +530,6 @@ receipts:
       resolved_path: creators[0].affiliations
     - path: data_governance.notes
       resolved_path: data_governance.notes
-    - path: external_resources[3].external_resources
-      resolved_path: external_resources[3].external_resources
-    - path: external_resources[5].external_resources
-      resolved_path: external_resources[5].external_resources
     - path: human_subject_research.ethics_review_board
       resolved_path: human_subject_research.ethics_review_board
     - path: is_deidentified.deidentification_details
@@ -546,7 +544,11 @@ receipts:
       resolved_path: sampling_strategies[0].source_caveats
     - path: source_caveats
       resolved_path: source_caveats
-    value_changed_after_receipt_count: 12
+    value_changed_after_receipt_count: 10
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
     - creators[0].principal_investigator
     - data_governance.committee_contact
@@ -620,7 +622,7 @@ receipts:
     line) (1 unattesting, below the floors) (8 in an adjacent chunk) (1 in another
     chunk) (4 bearing on no token of their value) (3 entry receipt(s) overlapping
     one leaf) · slots 208/439 with a receipt (228 never receipted, 3 added after the
-    receipt) (39 exempt) · 4 receipt path(s) reshaped by reconcile · 12 value(s) changed
+    receipt) (39 exempt) · 4 receipt path(s) reshaped by reconcile · 10 value(s) changed
     after the receipt
   artifacts:
     receipt:

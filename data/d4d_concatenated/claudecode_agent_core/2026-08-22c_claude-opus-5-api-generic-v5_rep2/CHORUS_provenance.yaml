@@ -353,6 +353,8 @@ form:
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=0
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/intermediate/CHORUS_audit.json
   sha256: 900cbb744468526139e7d315fe65bf6d9bbc8f175a7f6533ec9d87bf1040e32b

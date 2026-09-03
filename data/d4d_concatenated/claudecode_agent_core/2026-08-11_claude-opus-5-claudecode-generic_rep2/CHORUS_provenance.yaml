@@ -192,6 +192,8 @@ form:
     CHORUS: 183
   gc_label_variant_occurrences: 183
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=2
 canonical_superseded_by:
   label: 2026-08-20b_claude-opus-5-api-generic-v5_rep3
   at: '2026-08-22T02:19:43+00:00'

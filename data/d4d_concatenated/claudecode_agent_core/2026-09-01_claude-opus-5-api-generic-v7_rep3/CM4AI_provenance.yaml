@@ -382,6 +382,8 @@ form:
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=2
 receipts:
   expected: true
   non_checks:
@@ -432,7 +434,7 @@ receipts:
     populated: 358
     exempt: 88
     receiptable: 270
-    with_receipt: 60
+    with_receipt: 59
     without_receipt:
     - id
     - title
@@ -471,6 +473,7 @@ receipts:
     - creators[35].id
     - creators[36].id
     - creators[37].id
+    - creators[38].id
     - creators[39].id
     - creators[40].id
     - creators[41].id
@@ -483,10 +486,9 @@ receipts:
     - funders[0].grantor
     - funders[1].grantor
     - maintainers[0].maintainer_details
-    - maintainers[0].role
-    without_receipt_truncated: 160
+    without_receipt_truncated: 161
     never_receipted: 196
-    added_after_receipt: 14
+    added_after_receipt: 15
     receipt_paths: 76
     unresolved: []
     path_off_by_one: []
@@ -512,6 +514,11 @@ receipts:
     - path: source_caveats
       resolved_path: source_caveats
     value_changed_after_receipt_count: 6
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    path_not_in_snapshot:
+    - creators[38].id
+    path_not_in_snapshot_count: 1
     reshaped_by_reconcile:
     - collection_timeframes[0].end_date
     - collection_timeframes[0].start_date
@@ -576,10 +583,10 @@ receipts:
   findings_truncated: null
   findings_gated: 0
   summary: chunks 28/28 reviewed · snippets 73/81 verified (7 in an adjacent chunk)
-    (1 in another chunk) (4 bearing on no token of their value) · slots 60/270 with
-    a receipt (196 never receipted, 14 added after the receipt) (88 exempt) · 4 receipt
+    (1 in another chunk) (4 bearing on no token of their value) · slots 59/270 with
+    a receipt (196 never receipted, 15 added after the receipt) (88 exempt) · 4 receipt
     path(s) reshaped by reconcile · 1 receipt path(s) followed by identity · 6 value(s)
-    changed after the receipt
+    changed after the receipt · 1 receipt path(s) not in the snapshot
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/CM4AI_coverage_receipt.yaml
@@ -658,5 +665,5 @@ dispositions:
     the sentence; a third figure ('IF images for 523 proteins', line 4433) in the
     563-vs-464 conflict is also unmentioned. Non-canonical replicate; left as generated,
     documented here (#903).
-  at: '2026-09-03T01:16:40+00:00'
+  at: '2026-09-03T02:40:18+00:00'
   recorded_by: d4d review disposition

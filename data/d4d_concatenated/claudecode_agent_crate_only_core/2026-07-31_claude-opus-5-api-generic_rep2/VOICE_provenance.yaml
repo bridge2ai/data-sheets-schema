@@ -297,3 +297,5 @@ form:
     VOICE: 25
   gc_label_variant_occurrences: 50
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=6

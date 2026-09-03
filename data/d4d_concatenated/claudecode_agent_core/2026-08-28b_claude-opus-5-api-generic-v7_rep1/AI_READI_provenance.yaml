@@ -426,6 +426,8 @@ form:
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=25
 receipts:
   expected: true
   non_checks:
@@ -433,9 +435,157 @@ receipts:
     sample by chunk id in review
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
-  checked: false
-  reason: bundle drifted since the run; the receipt's chunks are not today's bytes
-  recorded_by: backfill_checks
+  checked: true
+  chunks:
+    total: 28
+    reviewed: 28
+    unreviewed: []
+    by_status:
+      extracted: 23
+      redundant_with: 1
+      nothing_relevant: 4
+      duplicate_of: 0
+  snippets:
+    total: 286
+    verified: 276
+    adjacent: 8
+    elsewhere: 1
+    mismatched: 1
+    unchecked: 0
+  slots:
+    populated: 446
+    exempt: 52
+    receiptable: 394
+    with_receipt: 160
+    without_receipt:
+    - id
+    - name
+    - status
+    - is_tabular
+    - conforms_to_standard
+    - creators[0].id
+    - creators[0].name
+    - creators[0].description
+    - creators[0].principal_investigator
+    - funders[0].grants[0].id
+    - funders[0].grants[0].name
+    - funders[0].grants[0].description
+    - funders[0].grants[1].id
+    - funders[0].grants[1].name
+    - funders[0].grants[1].description
+    - funders[0].grants[2].id
+    - funders[0].grants[2].name
+    - funders[0].grants[2].description
+    - purposes[1].response
+    - purposes[2].response
+    - addressing_gaps[0].response
+    - addressing_gaps[1].response
+    - addressing_gaps[2].response
+    - tasks[0].response
+    - tasks[1].response
+    - instances[0].data_topic
+    - subpopulations[0].subpopulation_elements_present
+    - subpopulations[0].identification
+    - subpopulations[0].distribution
+    - subpopulations[1].subpopulation_elements_present
+    - subpopulations[1].identification
+    - subpopulations[1].distribution
+    - subpopulations[2].subpopulation_elements_present
+    - subpopulations[2].distribution
+    - splits[1].split_details
+    - splits[2].split_details
+    - anomalies[2].anomaly_details
+    - anomalies[4].anomaly_details
+    - known_limitations[0].limitation_type
+    - known_limitations[0].scope_impact
+    - known_limitations[1].limitation_type
+    - known_limitations[1].scope_impact
+    - known_limitations[2].limitation_type
+    - known_limitations[2].scope_impact
+    - known_limitations[3].limitation_type
+    - known_limitations[3].scope_impact
+    - known_limitations[4].limitation_type
+    - known_limitations[4].scope_impact
+    - known_biases[0].bias_type
+    - known_biases[0].mitigation_strategy
+    without_receipt_truncated: 184
+    receipt_paths: 178
+    unresolved: []
+    reshaped_by_reconcile: []
+  findings:
+  - kind: snippet_mismatch
+    chunk: c002
+    slot: collection_notifications[0].notification_details
+    snippet: vidually  in  each  pool  are  mailed  a  hardcopy  invitati
+    reason: not found in chunk
+  - kind: snippet_adjacent_chunk
+    chunk: c003
+    found_in:
+    - c002
+    slot: acquisition_methods[1].acquisition_details
+    snippet: Eligibility (no type 1 diabetes mellitus or pregnancy), diab
+  - kind: snippet_adjacent_chunk
+    chunk: c003
+    found_in:
+    - c002
+    slot: acquisition_methods[1].acquisition_details
+    snippet: Current Medications with RxNorm codes29
+  - kind: snippet_adjacent_chunk
+    chunk: c008
+    found_in:
+    - c007
+    slot: notes
+    snippet: cloud services needed for the project. We thank Topcon Corpo
+  - kind: snippet_adjacent_chunk
+    chunk: c008
+    found_in:
+    - c007
+    slot: notes
+    snippet: 'Optomed (Oulu, Finland), iCare World (Raleigh, NC) and Carl '
+  - kind: snippet_adjacent_chunk
+    chunk: c008
+    found_in:
+    - c007
+    slot: notes
+    snippet: 'for loaning their devices for research purposes at no cost. '
+  - kind: snippet_adjacent_chunk
+    chunk: c008
+    found_in:
+    - c007
+    slot: notes
+    snippet: (Heidelberg, Germany), Dexcom (San Diego, CA) and Garmin (Ol
+  - kind: snippet_adjacent_chunk
+    chunk: c018
+    found_in:
+    - c017
+    - c019
+    slot: file_collections[8].description
+    snippet: 'This directory contains data collected through a continuous '
+  - kind: snippet_elsewhere_chunk
+    chunk: c022
+    found_in:
+    - c010
+    - c011
+    - c013
+    - c014
+    slot: notes
+    snippet: This repository is under review for potential modification i
+  - kind: snippet_adjacent_chunk
+    chunk: c023
+    found_in:
+    - c022
+    slot: file_collections[3].description
+    snippet: two different .dcm files for each eye in the dataset
+  findings_truncated: null
+  summary: chunks 28/28 reviewed · snippets 276/286 verified (8 in an adjacent chunk)
+    (1 in another chunk) · slots 160/394 with a receipt (52 exempt)
+  artifacts:
+    receipt:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_coverage_receipt.yaml
+      sha256: ab0a7c665fe10f86384a7d61d77294bcdc3671606adc3a4f4fe4dabdd1c9ad65
+    manifest:
+      path: data/preprocessed/chunks/AI_READI_chunks.yaml
+      sha256: 631788768d84a9ae689f722a37f2244be4f67393de390c2055585b81f27f33cf
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/intermediate/AI_READI_audit.json
   sha256: 793847840c0dd719bc5db93e122325b6a23f13a97ec4a7ee0a95ab334e8f51ab

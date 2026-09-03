@@ -382,6 +382,8 @@ form:
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=21
 receipts:
   expected: true
   non_checks:
@@ -389,9 +391,176 @@ receipts:
     sample by chunk id in review
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
-  checked: false
-  reason: bundle drifted since the run; the receipt's chunks are not today's bytes
-  recorded_by: backfill_checks
+  checked: true
+  chunks:
+    total: 28
+    reviewed: 28
+    unreviewed: []
+    by_status:
+      extracted: 23
+      redundant_with: 1
+      nothing_relevant: 4
+      duplicate_of: 0
+  snippets:
+    total: 219
+    verified: 207
+    linewrap_joined: 1
+    adjacent: 12
+    elsewhere: 0
+    spans_boundary: 0
+    mismatched: 0
+    unchecked: 0
+  slots:
+    populated: 685
+    exempt: 49
+    receiptable: 636
+    with_receipt: 157
+    without_receipt:
+    - id
+    - name
+    - created_on
+    - status
+    - is_tabular
+    - was_derived_from
+    - conforms_to_standard
+    - creators[0].id
+    - creators[0].name
+    - creators[0].description
+    - creators[0].principal_investigator
+    - purposes[1].response
+    - addressing_gaps[0].response
+    - addressing_gaps[1].response
+    - addressing_gaps[3].response
+    - tasks[1].response
+    - intended_uses[0].use_category
+    - intended_uses[1].use_category
+    - intended_uses[1].examples
+    - intended_uses[1].usage_notes
+    - other_tasks[0].task_details
+    - discouraged_uses[0].discouragement_details
+    - prohibited_uses[3].prohibition_reason
+    - future_use_impacts[0].impact_details
+    - existing_uses[0].examples
+    - use_repository[0].repository_details
+    - acquisition_methods[0].was_directly_observed
+    - acquisition_methods[0].acquisition_details
+    - acquisition_methods[1].was_reported_by_subjects
+    - acquisition_methods[1].acquisition_details
+    - acquisition_methods[2].was_directly_observed
+    - collection_mechanisms[1].mechanism_details
+    - collection_mechanisms[2].mechanism_details
+    - collection_timeframes[0].end_date
+    - collection_timeframes[0].timeframe_details
+    - data_collectors[0].role
+    - data_collectors[0].collector_details
+    - data_collectors[1].role
+    - data_collectors[1].collector_details
+    - data_collectors[2].role
+    - data_collectors[2].collector_details
+    - direct_collection[0].is_direct
+    - sampling_strategies[0].is_sample
+    - sampling_strategies[0].is_representative
+    - sampling_strategies[0].why_not_representative
+    - instances[0].label
+    - instances[0].data_topic
+    - relationships[0].relationship_details
+    - subsets[0].name
+    - subsets[0].is_data_split
+    without_receipt_truncated: 429
+    receipt_paths: 167
+    unresolved: []
+    reshaped_by_reconcile:
+    - publisher
+  findings:
+  - kind: snippet_adjacent_chunk
+    chunk: c003
+    found_in:
+    - c002
+    slot: collection_mechanisms[0].mechanism_details
+    snippet: Screens for depressive symptoms.
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c018
+    - c022
+    - c023
+    - c024
+    slot: instances[0].label_description
+    snippet: N/A - no labels are provided.
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c018
+    slot: version_access.versions_available
+    snippet: the first version of the dataset contains data from 204 part
+  - kind: snippet_adjacent_chunk
+    chunk: c020
+    found_in:
+    - c021
+    slot: description
+    snippet: '"locationFacility": "University of Alabama at Birmingham"'
+  - kind: snippet_adjacent_chunk
+    chunk: c023
+    found_in:
+    - c022
+    slot: file_collections[3].description
+    snippet: FLIO stands for Fluorescence Lifetime Imaging Ophthalmoscopy
+  - kind: snippet_adjacent_chunk
+    chunk: c023
+    found_in:
+    - c022
+    slot: anomalies[4].anomaly_details
+    snippet: The device can not handle more than 1 centimeter of movement
+  - kind: snippet_adjacent_chunk
+    chunk: c026
+    found_in:
+    - c027
+    slot: source_caveats
+    snippet: The study will collect a cross-sectional dataset of 4600 peo
+  - kind: snippet_adjacent_chunk
+    chunk: c026
+    found_in:
+    - c027
+    slot: participant_compensation[0].compensation_rationale
+    snippet: There will be a $200 stipend for participation
+  - kind: snippet_adjacent_chunk
+    chunk: c026
+    found_in:
+    - c027
+    slot: participant_compensation[1].compensation_rationale
+    snippet: Study will cover reasonable costs for parking, public transi
+  - kind: snippet_adjacent_chunk
+    chunk: c026
+    found_in:
+    - c020
+    - c027
+    slot: at_risk_populations.special_protections
+    snippet: Adults older than 85 years of age
+  - kind: snippet_adjacent_chunk
+    chunk: c026
+    found_in:
+    - c027
+    slot: collection_notifications[0].notification_details
+    snippet: 'approximately 50,000 invitation letters from each site will '
+  - kind: snippet_adjacent_chunk
+    chunk: c026
+    found_in:
+    - c019
+    - c027
+    slot: informed_consent[0].consent_scope
+    snippet: Data will be placed in an open-source repository
+  findings_truncated: null
+  summary: chunks 28/28 reviewed · snippets 207/219 verified (1 across a wrapped line)
+    (12 in an adjacent chunk) · slots 157/636 with a receipt (49 exempt) · 1 receipt
+    path(s) reshaped by reconcile
+  artifacts:
+    receipt:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_coverage_receipt.yaml
+      sha256: e89ed1343899f406e1685d2050d432896cee7cff3a0131d264098216109b90da
+    manifest:
+      path: data/preprocessed/chunks/AI_READI_chunks.yaml
+      sha256: 631788768d84a9ae689f722a37f2244be4f67393de390c2055585b81f27f33cf
+  recorded_by: d4d receipts check
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-28d_claude-opus-5-api-generic-v7_rep1/intermediate/AI_READI_audit.json
   sha256: 4727e58a66a46c5d6c2dd9bc6a229d499a8ac7bdd98e5b9b37bced916d0af6c3

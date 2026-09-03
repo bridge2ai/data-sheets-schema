@@ -384,6 +384,8 @@ form:
     Bridge2AI Voice: 8
   gc_label_variant_occurrences: 55
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=0
 receipts:
   expected: true
   non_checks:
@@ -503,22 +505,10 @@ receipts:
       resolved_path: creators[1]
     - path: description
       resolved_path: description
-    - path: distribution_dates[0].release_dates
-      resolved_path: distribution_dates[0].release_dates
-    - path: existing_uses[0].examples
-      resolved_path: existing_uses[0].examples
-    - path: external_resources[0]
-      resolved_path: external_resources[0]
-    - path: external_resources[1]
-      resolved_path: external_resources[1]
-    - path: external_resources[3]
-      resolved_path: external_resources[3]
     - path: external_resources[4]
       resolved_path: external_resources[4]
     - path: id
       resolved_path: id
-    - path: machine_annotation_tools[0].tools
-      resolved_path: machine_annotation_tools[0].tools
     - path: page
       resolved_path: page
     - path: related_datasets[0]
@@ -529,7 +519,11 @@ receipts:
       resolved_path: related_datasets[0].target_dataset
     - path: source_caveats
       resolved_path: source_caveats
-    value_changed_after_receipt_count: 17
+    value_changed_after_receipt_count: 11
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
     - creators[0].principal_investigator.name
     - creators[15]
@@ -599,7 +593,7 @@ receipts:
   summary: chunks 22/22 reviewed · snippets 145/154 verified (7 in an adjacent chunk)
     (2 in another chunk) (3 bearing on no token of their value) · slots 121/288 with
     a receipt (164 never receipted, 3 added after the receipt) (18 exempt) · 3 receipt
-    path(s) reshaped by reconcile · 17 value(s) changed after the receipt
+    path(s) reshaped by reconcile · 11 value(s) changed after the receipt
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_coverage_receipt.yaml
@@ -674,6 +668,35 @@ canonical:
   - label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
     slots: 82
     validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 7
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+    slots: 81
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 5
+  margin_over_runner_up: null
+  reviews_applied: true
+  review_margin: 2
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-09-01_claude-opus-5-api-generic-v7_rep2
+  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep2
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+canonical_history:
+- criterion: full and core both validate against the current schema, then fewest review
+    adverse verdicts (differences of at most 2 a tie), then most slots, then lowest
+    label
+  selected_from:
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    slots: 77
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 2
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+    slots: 82
+    validation: valid
     validation_recorded_at_run_time: stale
     review_adverse: 7
   - label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
@@ -690,3 +713,8 @@ canonical:
   - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
   - 2026-08-22c_claude-opus-5-api-generic-v5_rep2
   - 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+  superseded_by:
+    label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    at: '2026-09-03T03:01:43+00:00'
+    by: d4d runs select
+    reason: re-selected

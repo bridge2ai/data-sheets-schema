@@ -424,6 +424,41 @@ def remap_path(path: str, original: dict[str, Any] | None, full: dict[str, Any])
     return {"path": new, "basis": basis}
 
 
+def _rewritten(before: Any, after: Any) -> bool:
+    """Whether a receipted value was rewritten after the receipt, as
+    distinct from normalised or extended: `str` → `[str]` (multivalued
+    coercion of the same text), a dict that gained keys, a list that
+    gained items are not rewrites — the receipted content is still there
+    verbatim. A scalar that differs after whitespace folding, a dict whose
+    receipted key now holds something else, a list missing a receipted
+    item, are (#907 review: 21 of the first count were `str → [same str]`)."""
+    def scalar(v: Any) -> bool:
+        return isinstance(v, (str, int, float, bool))
+
+    def norm(v: Any) -> Any:
+        return " ".join(str(v).split()) if scalar(v) else v
+    b, a = before, after
+    # multivalued coercion: a scalar and a one-item list of it are the same value
+    if scalar(b) and isinstance(a, list) and len(a) == 1 and scalar(a[0]):
+        a = a[0]
+    elif scalar(a) and isinstance(b, list) and len(b) == 1 and scalar(b[0]):
+        b = b[0]
+    b, a = norm(b), norm(a)
+    if isinstance(b, dict) and isinstance(a, dict):
+        return any(k not in a or _rewritten(v, a[k]) for k, v in b.items())
+    if isinstance(b, list) and isinstance(a, list):
+        rest = list(a)
+        for item in b:
+            hit = next((i for i, x in enumerate(rest) if not _rewritten(item, x)), None)
+            if hit is None:
+                return True
+            rest.pop(hit)
+        return False
+    if isinstance(b, (dict, list)) != isinstance(a, (dict, list)):
+        return True
+    return b != a
+
+
 def phase1_snapshot(receipt: Path) -> dict[str, Any] | None:
     """The record as the `full` phase wrote it: the API runner's phase-1
     snapshot beside the receipt under intermediate/ (#758) — written after
@@ -539,7 +574,7 @@ def claim_receipts(receipt: dict[str, Any], full: dict[str, Any] | None = None,
             if rm["path"]:
                 ok_o, v_o = _resolve_value(original, slot)
                 ok_f, v_f = _resolve_value(full, rm["path"])
-                if ok_o and ok_f and v_o != v_f:
+                if ok_o and ok_f and _rewritten(v_o, v_f):
                     s = v_o if isinstance(v_o, (int, float, bool)) or v_o is None else str(v_o)
                     item["value_at_receipt"] = s[:300] + "…" if isinstance(s, str) and len(s) > 300 else s
         if pmap is not None:
@@ -812,19 +847,44 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # both values' presence, never gated; coverage credit is left as it
     # stands, so the count states the size of the class the credit hides.
     value_changed: list[dict[str, Any]] = []
+    # With a snapshot, identity decides: a path whose entry is gone
+    # (`entry_dropped`, `leaf_dropped`, `ambiguous`) or that the snapshot
+    # never had (`not_in_snapshot`) is NOT resolved as written even when
+    # another entry now sits at that index — that is the misjoin, and the
+    # first version of this join fell back to it silently (#907 review:
+    # CHORUS rep3 `creators[1]` credited to an unnamed entry that replaced
+    # Azra Bihorac; CM4AI rep3 `creators[38].id` credited to a creator
+    # added after the receipt). Those paths are reported and carry no credit.
+    gone: dict[str, str] = {}
+    index_reused: list[dict[str, Any]] = []
+    not_in_snapshot: list[str] = []
     if original is not None:
         for p in receipt_paths:
             rm = remap_path(p, original, full)
-            if rm["path"] and rm["path"] != p:
+            if rm["basis"] == "not_in_snapshot":
+                not_in_snapshot.append(p)
+                gone[p] = rm["basis"]
+                continue
+            if rm["path"] is None:
+                gone[p] = rm["basis"]
+                if resolve(full, p):
+                    index_reused.append({"path": p, "basis": rm["basis"]})
+                continue
+            if rm["path"] != p:
                 remapped.append({"path": p, "resolved_path": rm["path"], "basis": rm["basis"]})
                 effective[p] = rm["path"]
-            if rm["path"]:
-                ok_o, v_o = _resolve_value(original, p)
-                ok_f, v_f = _resolve_value(full, rm["path"])
-                if ok_o and ok_f and v_o != v_f:
-                    value_changed.append({"path": p, "resolved_path": rm["path"]})
-    unresolved = [p for p in receipt_paths if not resolve(full, effective.get(p, p))]
+            ok_o, v_o = _resolve_value(original, p)
+            ok_f, v_f = _resolve_value(full, rm["path"])
+            if ok_o and ok_f and _rewritten(v_o, v_f):
+                value_changed.append({"path": p, "resolved_path": rm["path"]})
+    unresolved = [p for p in receipt_paths if p in gone or not resolve(full, effective.get(p, p))]
     reshaped = [p for p in unresolved if p and original is not None and resolve(original, p)]
+    # A path the snapshot never had and the final record resolves is an
+    # address into structure added after the receipt: reported here, kept
+    # out of the findings (the model wrote it; the class is measured) and
+    # out of coverage.
+    unresolved = [p for p in unresolved if p not in not_in_snapshot or not resolve(full, p)]
+    attesting = {p for p in attesting if p not in gone}
     unresolved = [p for p in unresolved if p not in reshaped]
     # A path that resolves nowhere as written may be an addressing slip
     # rather than a fabricated slot — the 2026-09-01 CM4AI canary wrote
@@ -928,6 +988,10 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
              "remapped_by_identity_count": len(remapped),
              "value_changed_after_receipt": value_changed[:20],
              "value_changed_after_receipt_count": len(value_changed) if original is not None else None,
+             "index_reused_by_another_entry": index_reused[:20],
+             "index_reused_by_another_entry_count": len(index_reused) if original is not None else None,
+             "path_not_in_snapshot": not_in_snapshot[:20],
+             "path_not_in_snapshot_count": len(not_in_snapshot) if original is not None else None,
              "reshaped_by_reconcile": reshaped,
              "receipts_to_removed_values": len(reshaped)}
 
@@ -969,7 +1033,9 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                         + (f" · {len(off_by_one)} receipt path(s) off by one index" if off_by_one else "")
                         + (f" · {len(addressing)} addressing slip(s)" if addressing else "")
                         + (f" · {len(remapped)} receipt path(s) followed by identity" if remapped else "")
-                        + (f" · {len(value_changed)} value(s) changed after the receipt" if value_changed else "")),
+                        + (f" · {len(value_changed)} value(s) changed after the receipt" if value_changed else "")
+                        + (f" · {len(index_reused)} receipt index(es) reused by another entry" if index_reused else "")
+                        + (f" · {len(not_in_snapshot)} receipt path(s) not in the snapshot" if not_in_snapshot else "")),
             "non_checks": list(NON_CHECKS)}
 
 

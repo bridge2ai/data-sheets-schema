@@ -250,6 +250,17 @@ def apply(provenance: Path, blocks: dict[str, Any],
             continue
         if name not in blocks:
             continue
+        # A recomputation that could not measure must never erase a
+        # measurement (#907 review): the receipts blocks of three AI_READI
+        # canaries — checked and attested at run time — were overwritten
+        # with `checked: false / bundle drifted` by a `--blocks receipts`
+        # pass over a bundle that had since moved. The attested block is
+        # the record of what the run read; today's inability to re-read
+        # it is reported on stdout, not written over it.
+        old, new = record.get(name), blocks[name]
+        if (overwrite and isinstance(old, dict) and isinstance(new, dict)
+                and old.get("checked") is True and new.get("checked") is False):
+            continue
         if name == "receipts" and name not in record:
             # A receipts block saying "none, and none was expected" adds
             # nothing to a record that predates receipts, and writing it into
@@ -269,25 +280,41 @@ def apply(provenance: Path, blocks: dict[str, Any],
 
 
 def summarise(blocks: dict[str, Any]) -> str:
-    """A one-line account of what was computed, for the report line."""
+    """A one-line account of what was computed, for the report line. A block
+    absent from `blocks` (skipped by `--blocks`) is named as skipped, not
+    shown as the dash that means "could not compute"."""
     bits = []
+    skipped = [b for b in ("pair_consistency", "report_claims", "form", "grounding", "receipts")
+               if b not in blocks]
+    if skipped:
+        bits.append("skipped " + ",".join(skipped))
     pair = blocks.get("pair_consistency") or {}
-    if pair.get("ran"):
+    if "pair_consistency" not in blocks:
+        pass
+    elif pair.get("ran"):
         bits.append("pair ok" if pair.get("consistent")
                     else f"pair {pair.get('errors')} err")
     else:
         bits.append("pair —")
     rep = blocks.get("report_claims") or {}
-    bits.append(f"report {len(rep.get('findings') or [])}" if rep.get("checked")
-                else "report —")
+    if "report_claims" in blocks:
+        bits.append(f"report {len(rep.get('findings') or [])}" if rep.get("checked")
+                    else "report —")
     gr = blocks.get("grounding") or {}
-    if gr.get("checked"):
+    if "grounding" not in blocks:
+        pass
+    elif gr.get("checked"):
         absent = (gr.get("distinct") or gr.get("counts") or {}).get("absent", 0)
         bits.append(f"ungrounded {absent}")
     else:
         bits.append("grounding —")
+    fm = blocks.get("form") or {}
+    if "form" in blocks and "british_spellings" in fm:
+        bits.append(f"british {fm['british_spellings']}")
     rcp = blocks.get("receipts") or {}
-    if rcp.get("checked"):
+    if "receipts" not in blocks:
+        pass
+    elif rcp.get("checked"):
         bits.append(f"receipts {rcp['chunks']['reviewed']}/{rcp['chunks']['total']} chunks, "
                     f"{rcp['snippets']['verified']}/{rcp['snippets']['total']} snippets")
     else:
