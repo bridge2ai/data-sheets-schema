@@ -314,7 +314,7 @@
 <tr>
 <td><a href="../contact_person/">contact_person</a></td>
 <td>0..1 <br/> <a href="../Person/">Person</a></td>
-<td>Contact person for licensing questions</td>
+<td>Contact person for licensing questions, as a Person object — an <code>id</code> (an ORCI...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -455,9 +455,11 @@ attributes:
     range: DataUsePermissionEnum
   contact_person:
     name: contact_person
-    description: Contact person for licensing questions. Provides structured contact
-      information including name, email, affiliation, and optional ORCID. This person
-      can answer questions about licensing terms, usage restrictions, fees, and permissions.
+    description: 'Contact person for licensing questions, as a Person object — an
+      `id` (an ORCID CURIE where stated, else a fragment minted on the record''s own
+      id), `name`, and where the evidence states them `email`, `affiliation` and `orcid`.
+      This person can answer questions about licensing terms, usage restrictions,
+      fees and permissions. Inlined (#805): a bare name string fails validation.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     broad_mappings:
     - schema:contactPoint
@@ -466,6 +468,7 @@ attributes:
     - EthicalReview
     - LicenseAndUseTerms
     range: Person
+    inlined: true
 
 </code></pre>
 </details>
@@ -522,9 +525,11 @@ attributes:
     range: DataUsePermissionEnum
   contact_person:
     name: contact_person
-    description: Contact person for licensing questions. Provides structured contact
-      information including name, email, affiliation, and optional ORCID. This person
-      can answer questions about licensing terms, usage restrictions, fees, and permissions.
+    description: 'Contact person for licensing questions, as a Person object — an
+      `id` (an ORCID CURIE where stated, else a fragment minted on the record''s own
+      id), `name`, and where the evidence states them `email`, `affiliation` and `orcid`.
+      This person can answer questions about licensing terms, usage restrictions,
+      fees and permissions. Inlined (#805): a bare name string fails validation.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     broad_mappings:
     - schema:contactPoint
@@ -535,6 +540,7 @@ attributes:
     - EthicalReview
     - LicenseAndUseTerms
     range: Person
+    inlined: true
   id:
     name: id
     annotations:

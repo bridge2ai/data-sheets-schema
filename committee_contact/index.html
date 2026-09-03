@@ -384,7 +384,7 @@
 
 
 <h1 id="slot-committee_contact">Slot: committee_contact</h1>
-<p><em>Contact point for the governance committee — the person or address that answers questions about access policy, procedure and oversight. Replaces <code>ExportControlRegulatoryRestrictions.governance_committee_contact</code>.</em></p>
+<p><em>Contact point for the governance committee, as a Person object — an <code>id</code> (an ORCID CURIE where stated, else a fragment minted on the record's own id), the <code>name</code> and, where the evidence states them, <code>email</code> and <code>affiliation</code> of the person who answers questions about access policy, procedure and oversight. Replaces <code>ExportControlRegulatoryRestrictions.governance_committee_contact</code>. Inlined (#805): a bare name string fails validation.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/governanceContactPoint">d4d:governanceContactPoint</a>
 Alias: committee_contact</p>
 <!-- no inheritance hierarchy -->
@@ -442,8 +442,12 @@ Alias: committee_contact</p>
 <details>
 
 <pre><code class="language-yaml">name: committee_contact
-description: Contact point for the governance committee — the person or address that
-  answers questions about access policy, procedure and oversight. Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`.
+description: 'Contact point for the governance committee, as a Person object — an
+  `id` (an ORCID CURIE where stated, else a fragment minted on the record''s own id),
+  the `name` and, where the evidence states them, `email` and `affiliation` of the
+  person who answers questions about access policy, procedure and oversight. Replaces
+  `ExportControlRegulatoryRestrictions.governance_committee_contact`. Inlined (#805):
+  a bare name string fails validation.'
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 broad_mappings:
 - schema:contactPoint
@@ -454,6 +458,7 @@ owner: DataGovernance
 domain_of:
 - DataGovernance
 range: Person
+inlined: true
 
 </code></pre>
 

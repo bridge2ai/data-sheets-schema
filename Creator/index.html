@@ -311,7 +311,7 @@
 <tr>
 <td><a href="../principal_investigator/">principal_investigator</a></td>
 <td>0..1 <br/> <a href="../Person/">Person</a></td>
-<td>The name of the key individual (Principal Investigator) responsible for or ov...</td>
+<td>The key individual (Principal Investigator) responsible for or overseeing dat...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -428,9 +428,12 @@ is_a: DatasetProperty
 attributes:
   principal_investigator:
     name: principal_investigator
-    description: The name of the key individual (Principal Investigator) responsible
-      for or overseeing dataset creation — a person's name such as 'Aaron Lee', never
-      a yes/no flag. The slot name reads like a boolean; the value is not one (#360).
+    description: 'The key individual (Principal Investigator) responsible for or overseeing
+      dataset creation, as a Person object — an `id` (the ORCID CURIE where the evidence
+      states one, else a fragment minted on the record''s own id), their `name`, and
+      where the evidence states them `orcid`, `email` and `affiliation` — never a
+      bare name string and never a yes/no flag (the slot name reads like a boolean;
+      the value is not one, #360). Inlined (#805): a string here fails validation.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
     broad_mappings:
     - dcterms:creator
@@ -440,6 +443,7 @@ attributes:
     domain_of:
     - Creator
     range: Person
+    inlined: true
   affiliations:
     name: affiliations
     description: Organizations with which the creator or team is affiliated.
@@ -482,9 +486,12 @@ is_a: DatasetProperty
 attributes:
   principal_investigator:
     name: principal_investigator
-    description: The name of the key individual (Principal Investigator) responsible
-      for or overseeing dataset creation — a person's name such as 'Aaron Lee', never
-      a yes/no flag. The slot name reads like a boolean; the value is not one (#360).
+    description: 'The key individual (Principal Investigator) responsible for or overseeing
+      dataset creation, as a Person object — an `id` (the ORCID CURIE where the evidence
+      states one, else a fragment minted on the record''s own id), their `name`, and
+      where the evidence states them `orcid`, `email` and `affiliation` — never a
+      bare name string and never a yes/no flag (the slot name reads like a boolean;
+      the value is not one, #360). Inlined (#805): a string here fails validation.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
     broad_mappings:
     - dcterms:creator
@@ -496,6 +503,7 @@ attributes:
     domain_of:
     - Creator
     range: Person
+    inlined: true
   affiliations:
     name: affiliations
     description: Organizations with which the creator or team is affiliated.

@@ -293,7 +293,7 @@
 <tr>
 <td><a href="../contact_person/">contact_person</a></td>
 <td>0..1 <br/> <a href="../Person/">Person</a></td>
-<td>Contact person for questions about ethical review</td>
+<td>Contact person for questions about ethical review, as a Person object — an `i...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -411,8 +411,10 @@ is_a: DatasetProperty
 attributes:
   contact_person:
     name: contact_person
-    description: Contact person for questions about ethical review. Provides structured
-      contact information including name, email, affiliation, and optional ORCID.
+    description: 'Contact person for questions about ethical review, as a Person object
+      — an `id` (an ORCID CURIE where stated, else a fragment minted on the record''s
+      own id), `name`, and where the evidence states them `email`, `affiliation` and
+      `orcid`. Inlined (#805): a bare name string fails validation.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/ethics
     broad_mappings:
     - schema:contactPoint
@@ -422,6 +424,7 @@ attributes:
     - EthicalReview
     - LicenseAndUseTerms
     range: Person
+    inlined: true
   reviewing_organization:
     name: reviewing_organization
     description: 'Name or identifier of the organization that conducted the ethical
@@ -471,8 +474,10 @@ is_a: DatasetProperty
 attributes:
   contact_person:
     name: contact_person
-    description: Contact person for questions about ethical review. Provides structured
-      contact information including name, email, affiliation, and optional ORCID.
+    description: 'Contact person for questions about ethical review, as a Person object
+      — an `id` (an ORCID CURIE where stated, else a fragment minted on the record''s
+      own id), `name`, and where the evidence states them `email`, `affiliation` and
+      `orcid`. Inlined (#805): a bare name string fails validation.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/ethics
     broad_mappings:
     - schema:contactPoint
@@ -484,6 +489,7 @@ attributes:
     - EthicalReview
     - LicenseAndUseTerms
     range: Person
+    inlined: true
   reviewing_organization:
     name: reviewing_organization
     description: 'Name or identifier of the organization that conducted the ethical
