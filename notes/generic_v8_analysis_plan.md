@@ -282,10 +282,13 @@ of them may land between a v8 canary and its fill.
   it), or reporting only.
 - **D3** — withdrawn: #912's digest half already existed (#538); the
   pack half landed in #916. Nothing to decide.
-- **D4 (#906)**: whether the v7 rep1 AI_READI canary carries an offline
-  re-verdict under instrument v3. The v7 form blocks already hold v3
-  counts, so the baseline v8's canaries are gated against is v3 either
-  way; this decides only that one recorded verdict.
+- **D4 (#906)** — adopted 2026-09-03, option (a), PR #920: the v7 rep1
+  AI_READI canary carries an offline re-verdict under instrument v3
+  (regressed on the British row, prior verdict under `supersedes`). The
+  v7 form blocks already hold v3 counts, so the baseline v8's canaries
+  are gated against is v3 either way; this decided only that one
+  recorded verdict. CM4AI rep1's block (v2 baseline numbers, pre-#891
+  rows) is the same shape and is #922.
 - **D5**: API-only v8 first (recommended — the agentic arm needs #688's
   launcher and the parity update before a v8 playbook run is cheap
   enough to repeat), or both arms.
