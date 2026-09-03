@@ -176,6 +176,10 @@ form:
   undeclared_prefixes:
     aireadi: 239
   undeclared_prefix_occurrences: 239
-  british_spellings: 88
+  british_spellings: 136
   organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=88

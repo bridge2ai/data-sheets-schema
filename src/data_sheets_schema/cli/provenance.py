@@ -921,7 +921,12 @@ def backfill_prompts(execute, label):
 @click.option('--project', default=None, help='restrict to one project')
 @click.option('--overwrite', is_flag=True,
               help='replace blocks that are already present')
-def backfill_checks(execute, method, label, project, overwrite):
+@click.option('--blocks', default=None,
+              help='comma-separated subset to write (pair_consistency, report_claims, form, '
+                   'grounding, receipts); the others are neither computed for the report '
+                   'nor touched — an instrument revision to one block must not overwrite '
+                   'a grounding block the run attested on bytes that have since drifted')
+def backfill_checks(execute, method, label, project, overwrite, blocks):
     """Recompute the pair, report and grounding checks for older records (#552).
 
     #544, #546 and #547 each added a block that `d4d api run` writes from then
@@ -961,17 +966,45 @@ def backfill_checks(execute, method, label, project, overwrite):
         click.echo("no records matched")
         return
 
+    from data_sheets_schema.backfill_checks import BLOCKS
+    wanted = None
+    if blocks:
+        wanted = {b.strip() for b in blocks.split(",") if b.strip()}
+        unknown = wanted - set(BLOCKS)
+        if unknown:
+            raise click.ClickException(f"unknown block(s) {sorted(unknown)}; choose from {list(BLOCKS)}")
+
     # Built once. Each call loads two SchemaViews, which over 122 records is
     # the difference between seconds and minutes.
     declared = declared_slots()
     written = skipped = 0
+    import yaml as _yaml
+    from datetime import datetime, timezone
+
+    from data_sheets_schema.backfill_checks import _split_header
+    from data_sheets_schema.grounding import BRITISH_INSTRUMENT
     for p in paths:
+        withheld: list[str] = []
         try:
-            blocks = compute(p, declared)
+            blocks = compute(p, declared, only=wanted)
+            if "form" in blocks and overwrite:
+                # The audit trail of a form recompute (#907 review): the
+                # prior instrument note and British count are carried
+                # into the new block, so an instrument revision reads as
+                # a sequence rather than replacing its own history.
+                prior = ((_yaml.safe_load(_split_header(p.read_text(encoding="utf-8"))[1]) or {})
+                         .get("form") or {})
+                if prior:
+                    note = (f"form recomputed {datetime.now(timezone.utc).date().isoformat()} by "
+                            f"backfill-checks --overwrite, british instrument {BRITISH_INSTRUMENT}; "
+                            f"previous british={prior.get('british_spellings')}")
+                    if prior.get("instrument_note"):
+                        note = f"{prior['instrument_note']} | {note}"
+                    blocks["form"]["instrument_note"] = note
             # Inside the same guard as compute: a write that raises halfway
             # through 192 records leaves a corpus in two states, and the reason
             # it raised is exactly the kind a reader needs to see per-record.
-            changed = apply(p, blocks, overwrite=overwrite) if execute else True
+            changed = apply(p, blocks, overwrite=overwrite, withheld=withheld) if execute else True
         except Exception as exc:                               # noqa: BLE001
             click.echo(f"   ✗ {p.parts[-2]}/{p.name}: {exc}")
             continue
@@ -980,7 +1013,8 @@ def backfill_checks(execute, method, label, project, overwrite):
             continue
         written += 1
         click.echo(f"   {'✔' if execute else '·'} {p.parts[-2][:38]:38} "
-                   f"{p.name[:-16]:16} {summarise(blocks)}")
+                   f"{p.name[:-16]:16} {summarise(blocks)}"
+                   + (f" · kept attested {','.join(withheld)} (recomputation could not measure)" if withheld else ""))
     verb = "written" if execute else "would be written"
     click.echo(f"\n{written} record(s) {verb}"
                + (f", {skipped} already carried the blocks" if skipped else ""))

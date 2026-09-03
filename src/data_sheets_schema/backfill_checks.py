@@ -84,9 +84,14 @@ def declared_bundle(record: dict[str, Any]) -> Path | None:
     return Path(path) if path else None
 
 
-def compute(provenance: Path, declared: dict[str, set[str]] | None = None
-            ) -> dict[str, Any]:
-    """The three blocks for one record, or reasons they cannot be computed."""
+def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
+            only: set[str] | None = None) -> dict[str, Any]:
+    """The check blocks for one record, or reasons they cannot be computed.
+    `only` restricts the computation to the named blocks (`--blocks`): the
+    receipts and grounding checks read the bundle and every chunk, which
+    over the corpus is the difference between minutes and hours when the
+    revision being backfilled touches only `form`."""
+    want = (lambda name: only is None or name in only)
     from data_sheets_schema.grounding import check_run
     from data_sheets_schema.identifiers import uriorcurie_slots
     from data_sheets_schema.provenance import (CORE_SCHEMA, FULL_SCHEMA,
@@ -100,7 +105,9 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None
     out: dict[str, Any] = {}
 
     # --- pair consistency -------------------------------------------------
-    if not (full.exists() and core.exists()):
+    if not want("pair_consistency"):
+        pass
+    elif not (full.exists() and core.exists()):
         missing = [str(p) for p in (full, core) if not p.exists()]
         out["pair_consistency"] = {"checked": False, "ran": False,
                                    "reason": f"missing: {', '.join(missing)}",
@@ -147,7 +154,9 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None
             "recorded_by": RECORDED_BY}
 
     # --- report claims ----------------------------------------------------
-    if not report.exists():
+    if not want("report_claims"):
+        pass
+    elif not report.exists():
         out["report_claims"] = {"checked": False,
                                 "reason": "no reconciliation report",
                                 "recorded_by": RECORDED_BY}
@@ -165,12 +174,15 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None
     # --- form -------------------------------------------------------------
     # Computed from the records alone, so unlike grounding it is available even
     # where the bundle has drifted (#602).
-    from data_sheets_schema.grounding import form_facts
-    out["form"] = {**form_facts(full, core), "recorded_by": RECORDED_BY}
+    if want("form"):
+        from data_sheets_schema.grounding import form_facts
+        out["form"] = {**form_facts(full, core), "recorded_by": RECORDED_BY}
 
     # --- grounding --------------------------------------------------------
     bundle = declared_bundle(record)
-    if bundle is None:
+    if not want("grounding"):
+        pass
+    elif bundle is None:
         out["grounding"] = {"checked": False,
                             "reason": "the record names no input bundle",
                             "recorded_by": RECORDED_BY}
@@ -206,18 +218,21 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None
     # claim (`inputs.receipt_expected`); the block carries it so the gate can
     # tell "none from a procedure that writes none" from "none from one that
     # does". A receipt that exists is checked either way.
-    from data_sheets_schema.receipts import block_for, receipt_path
-    inputs = record.get("inputs") or {}
-    out["receipts"] = {**block_for(full, receipt_path(provenance.parent, paths["project"]),
-                                   bundle, inputs.get("bundle_md5"),
-                                   bool(inputs.get("receipt_expected"))),
-                       "recorded_by": RECORDED_BY}
+    if want("receipts"):
+        from data_sheets_schema.receipts import block_for, receipt_path
+        inputs = record.get("inputs") or {}
+        out["receipts"] = {**block_for(full, receipt_path(provenance.parent, paths["project"]),
+                                       bundle, inputs.get("bundle_md5"),
+                                       bool(inputs.get("receipt_expected"))),
+                           "recorded_by": RECORDED_BY}
     return out
 
 
 def apply(provenance: Path, blocks: dict[str, Any],
-          overwrite: bool = False) -> bool:
+          overwrite: bool = False, withheld: list[str] | None = None) -> bool:
     """Write the blocks into the record. Returns whether anything changed.
+    `withheld`, when given, receives the names of blocks kept because the
+    recomputation could not measure what the record already attests.
 
     Rewrites through `safe_dump` after splitting the leading comments off and
     re-emitting them verbatim, so the header the reader relies on survives.
@@ -236,6 +251,19 @@ def apply(provenance: Path, blocks: dict[str, Any],
         if name in record and not overwrite:
             continue
         if name not in blocks:
+            continue
+        # A recomputation that could not measure must never erase a
+        # measurement (#907 review): the receipts blocks of three AI_READI
+        # canaries — checked and attested at run time — were overwritten
+        # with `checked: false / bundle drifted` by a `--blocks receipts`
+        # pass over a bundle that had since moved. The attested block is
+        # the record of what the run read; today's inability to re-read
+        # it is named to the caller (`withheld`), not written over it.
+        old, new = record.get(name), blocks[name]
+        if (overwrite and isinstance(old, dict) and isinstance(new, dict)
+                and old.get("checked") is True and new.get("checked") is False):
+            if withheld is not None:
+                withheld.append(name)
             continue
         if name == "receipts" and name not in record:
             # A receipts block saying "none, and none was expected" adds
@@ -256,25 +284,41 @@ def apply(provenance: Path, blocks: dict[str, Any],
 
 
 def summarise(blocks: dict[str, Any]) -> str:
-    """A one-line account of what was computed, for the report line."""
+    """A one-line account of what was computed, for the report line. A block
+    absent from `blocks` (skipped by `--blocks`) is named as skipped, not
+    shown as the dash that means "could not compute"."""
     bits = []
+    skipped = [b for b in ("pair_consistency", "report_claims", "form", "grounding", "receipts")
+               if b not in blocks]
+    if skipped:
+        bits.append("skipped " + ",".join(skipped))
     pair = blocks.get("pair_consistency") or {}
-    if pair.get("ran"):
+    if "pair_consistency" not in blocks:
+        pass
+    elif pair.get("ran"):
         bits.append("pair ok" if pair.get("consistent")
                     else f"pair {pair.get('errors')} err")
     else:
         bits.append("pair —")
     rep = blocks.get("report_claims") or {}
-    bits.append(f"report {len(rep.get('findings') or [])}" if rep.get("checked")
-                else "report —")
+    if "report_claims" in blocks:
+        bits.append(f"report {len(rep.get('findings') or [])}" if rep.get("checked")
+                    else "report —")
     gr = blocks.get("grounding") or {}
-    if gr.get("checked"):
+    if "grounding" not in blocks:
+        pass
+    elif gr.get("checked"):
         absent = (gr.get("distinct") or gr.get("counts") or {}).get("absent", 0)
         bits.append(f"ungrounded {absent}")
     else:
         bits.append("grounding —")
+    fm = blocks.get("form") or {}
+    if "form" in blocks and "british_spellings" in fm:
+        bits.append(f"british {fm['british_spellings']}")
     rcp = blocks.get("receipts") or {}
-    if rcp.get("checked"):
+    if "receipts" not in blocks:
+        pass
+    elif rcp.get("checked"):
         bits.append(f"receipts {rcp['chunks']['reviewed']}/{rcp['chunks']['total']} chunks, "
                     f"{rcp['snippets']['verified']}/{rcp['snippets']['total']} snippets")
     else:

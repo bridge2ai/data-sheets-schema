@@ -156,6 +156,56 @@ report/record contradiction (`extension_mechanism` claimed retained,
 absent from both records) and `is_sample: true` receipted by the very
 passage denying it.
 
+## Addendum (2026-09-03): what the review pass changed
+
+Four instrument changes followed from this pass (#899, #660, #836/#859,
+#903) and three of them moved facts stated above.
+
+**Receipt paths, joined by identity (#899).** The five reviewers'
+"stale path" reports decomposed, against the phase-1 snapshots, into
+classes the instrument now reports over the arm's **1,412 unique receipt
+paths** (1,733 is the snippet count — the first version of this addendum
+conflated the two): 1,146 unchanged; **184 values rewritten at the same
+path after the receipt** (13.0% — the CM4AI rep2 `page` case; the receipt
+attested the earlier value and the current one has no re-receipt route,
+#742; normalisation and extension excluded); 48 leaves and 17 entries
+removed by reconciliation; 5 entries moved (the only class an identity
+join fixes); 6 paths the model mis-addressed at phase 1 (CM4AI rep3's
+`creators[38]` pointed past the end of its own 38-entry snapshot — not a
+reconciliation shift); 3 whose index another entry now occupies (CHORUS
+rep3 `creators[1]`, where an unnamed entry replaced Azra Bihorac — the
+misjoin the pack used to commit silently, now uncredited and reported);
+1 ambiguous; 2 unresolved. So the reviewers were right that the pack was judging the
+wrong entry, and mostly wrong about why: the dominant mechanism is
+rewriting in place, not reordering. Coverage figures above change by at
+most two slots per record (AI_READI rep3 164→166).
+
+**Selection re-run under the review criterion (#660).** Validity → fewest
+adverse (±2 a tie) → slots → label: AI_READI **rep1** (9 adverse, tied
+with rep3 on 79 slots, label decided), CHORUS rep1 (11/11/9 all within the
+margin; coverage tie, label decided — still arbitrary), CM4AI rep2 (11,
+with rep1 at 9 within the margin and 3 slots behind), VOICE **rep1** (2
+adverse, the arm's cleanest). The rep2 marks for AI_READI and VOICE moved
+to `canonical_history`. The selection table earlier in this note records
+the coverage-only outcome it describes.
+
+**Dispositions (#903).** Two amendments and three retains, each under
+`dispositions` in the record's provenance with before/after hashes:
+AI_READI rep3's byte-sum sentence now states the correct sum
+(3,815,969,360,064, 419,614 under the total — re-verified from the
+record's own nine `total_bytes` values); VOICE rep2's pediatric clause is
+removed from `acquisition_methods[0]`. Retained: AI_READI rep3's
+`extension_mechanism` report/record contradiction and its `is_sample`
+receipt, CM4AI rep3's archive-channel sentence. Rubric evaluations of the
+two amended records predate the amendments and are listed as such.
+
+**British spellings, instrument v3 (#836/#859).** Every form block was
+recomputed: v6 arm 47, v7 production 139 (AI_READI 45/38/52 — the
+reviewers' ~24 lines were real), v5 baseline 88. Under v3 the AI_READI
+rep1 canary would read *regressed* on the British row (45 vs the
+baseline's worst 43); its recorded verdict stands on its v2 basis and the
+decision is #906.
+
 ## Rubric-flagged items (as handed to the review pass; adjudications above)
 
 - AI_READI (all reps): WUSTL-vs-UW PI/licensor affiliation conflict

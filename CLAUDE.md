@@ -486,6 +486,69 @@ precision is its own number. When false, the
 block is not a metric for that run: earlier arms and the API arm before v7
 (#710) wrote none, and "no receipt" from them is not a measurement.
 
+## Receipt paths after reconciliation (#899)
+
+A receipt is written against the `full`-phase record; reconciliation then
+inserts, splits, reorders and rewrites (#742). With the phase-1 snapshot
+(`intermediate/{P}_full.yaml`) the validator, the claims sidecar and the
+review pack follow each receipt path to its entry **by identity**
+(`receipts.remap_path`: `id`/`name`/… keys, else the unique best overlap of
+scalar pairs, else the same index for a keyless entry of the same shape) —
+reported as `slots.remapped_by_identity`, with coverage credited at the new
+address. A value rewritten *at the same path* after the receipt is
+`slots.value_changed_after_receipt` — reported, never gated, coverage left
+as it stands; normalisation (`str` → `[str]`) and extension (a dict that
+gained keys, a list that gained items) are not rewrites. On the 2026-09-01
+arm's 1,412 unique receipt paths: 1,146 unchanged · 184 rewritten in place
+(13.0%) · 48 leaves and 17 entries removed · 5 moved · 6 the snapshot never
+had · 3 whose index another entry now occupies · 1 ambiguous · 2 unresolved. The pack
+shows the reviewer both `value_at_receipt` and the current `value`; items
+carry `resolved_path`/`resolution` from `pack_version` 4, and
+`pack.receipt_join.basis` is `index` on the agentic path, which writes no
+snapshot. **With a snapshot, identity decides**: a path whose entry is gone
+(`entry_dropped`, `leaf_dropped`, `ambiguous`) or that the snapshot never
+had (`not_in_snapshot` — the model mis-addressed it at phase 1) is never
+resolved as written even when another entry now sits at that index; those
+are reported as `index_reused_by_another_entry` / `path_not_in_snapshot`
+and carry no coverage credit; the gone-entry classes also count under
+`reshaped_by_reconcile` (they resolved in the snapshot), a never-present
+path does not.
+Keyless entries whose only leaves are lists still join by position (#908).
+
+## Canonical selection with the review (#660)
+
+`d4d runs select` ranks validity → **fewest review adverse verdicts**
+(differences ≤ `--review-margin`, default 2, are a tie: a 50-slot sample
+carries ±2–3 of binomial noise) → most slots → label. The review rank
+applies only when every eligible replicate carries a checked `review` block
+(`--ignore-reviews` switches it off), and the `canonical` block records
+`reviews_applied`, each candidate's `review_adverse`, and the criterion
+text. Under the coverage-only criterion the v7 arm picked the most-adverse
+replicate in 3 of 4 projects; under this one AI_READI and VOICE moved to
+rep1.
+
+## Review dispositions (#903)
+
+`d4d review disposition --item slot-008 --disposition retain|amend --note …
+[--path P --replace OLD --with NEW] --execute` records a curator's answer to
+a review finding under `dispositions` in the provenance record. `retain`
+documents and leaves the record as generated. `amend` edits the raw record
+text (the records are the model's own YAML and no dumper round-trips them),
+matching `--replace` across line wrapping, and is proven by the parse:
+exactly one leaf changes, at `--path`, by exactly the replacement — then the
+check blocks are recomputed and the validation verdict refreshed, all
+naming this command. Evaluations that predate an amendment are listed as
+predating it, never re-attributed. A generated record edited without an
+entry here is indistinguishable from one the generator wrote.
+
+`d4d provenance backfill-checks --blocks form,receipts` restricts a backfill
+to the named blocks and computes only those — an instrument revision to one
+block must not overwrite a grounding block the run attested on bytes that
+have since drifted. British spellings are instrument **v3** (#836/#859):
+the form blocks of all 264 records were recomputed under it in the same
+change; v2 numbers in earlier notes are not comparable (see #906 for the
+canary consequence).
+
 ## Canonical Prompt Registry
 
 Each condition's prompt files are pinned by hash in

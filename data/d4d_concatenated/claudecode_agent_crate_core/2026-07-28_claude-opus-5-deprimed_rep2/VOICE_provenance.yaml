@@ -140,6 +140,14 @@ form:
     b2ai.voice.org: 32
     b2ai.voice.grant: 8
   undeclared_prefix_occurrences: 40
-  british_spellings: 11
+  british_spellings: 13
   organisational_fragments: 0
+  gc_label_variants:
+    Bridge2AI-Voice: 77
+    Bridge2AI Voice: 33
+    B2AI-Voice: 12
+    VOICE: 21
+  gc_label_variant_occurrences: 143
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=11

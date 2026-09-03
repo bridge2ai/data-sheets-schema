@@ -338,3 +338,58 @@ class TestTheRationaleMatchesTheMeasurement(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestReviewCriterion(TestSelect):
+    """#660: the review's adverse count joins the criterion, ahead of coverage,
+    when every eligible replicate carries a checked review block."""
+
+    def _review(self, label, adverse, checked=True):
+        p = self.root / "claudecode_agent_core" / label / "P_provenance.yaml"
+        d = yaml.safe_load(p.read_text())
+        d["review"] = {"checked": checked, "adverse": adverse, "items_answered": 70}
+        p.write_text(yaml.safe_dump(d))
+
+    def test_fewest_adverse_beats_coverage(self):
+        self._review("cfg_rep1", 2); self._review("cfg_rep2", 12); self._review("cfg_rep3", 9)
+        out = self._run("--execute")
+        self.assertEqual(out.exit_code, 0, out.output)
+        self.assertIn("→ cfg_rep1", out.output)                      # 4 slots, but 2 adverse
+        self.assertIn("2 adverse", out.output)
+        prov = yaml.safe_load((self.root / "claudecode_agent_core" / "cfg_rep1" / "P_provenance.yaml").read_text())
+        canon = prov["canonical"]
+        self.assertTrue(canon["reviews_applied"]); self.assertEqual(canon["review_margin"], 2)
+        self.assertIn("fewest review adverse", canon["criterion"])
+        self.assertEqual({c["label"]: c["review_adverse"] for c in canon["selected_from"]},
+                         {"cfg_rep1": 2, "cfg_rep2": 12, "cfg_rep3": 9})
+
+    def test_within_the_margin_coverage_decides(self):
+        self._review("cfg_rep1", 9); self._review("cfg_rep2", 11); self._review("cfg_rep3", 15)
+        out = self._run()
+        self.assertIn("→ cfg_rep2", out.output)                      # 11 is within 2 of 9; 9 slots wins
+        self.assertIn("out of contention", out.output)               # rep3 at 15 is not
+        out = self._run("--review-margin", "0")
+        self.assertIn("→ cfg_rep1", out.output)
+
+    def test_one_unreviewed_replicate_reverts_to_coverage_and_says_so(self):
+        self._review("cfg_rep1", 2); self._review("cfg_rep3", 9)
+        out = self._run("--execute")
+        self.assertIn("→ cfg_rep2", out.output)
+        self.assertIn("no checked review block on cfg_rep2", out.output)
+        prov = yaml.safe_load((self.root / "claudecode_agent_core" / "cfg_rep2" / "P_provenance.yaml").read_text())
+        self.assertFalse(prov["canonical"]["reviews_applied"])
+        self.assertIn("cfg_rep2", prov["canonical"]["reviews_not_applied_because"])
+        self.assertNotIn("adverse", prov["canonical"]["criterion"])
+
+    def test_an_unchecked_review_block_is_no_review_and_the_flag_switches_it_off(self):
+        self._review("cfg_rep1", 2); self._review("cfg_rep2", 12, checked=False); self._review("cfg_rep3", 9)
+        self.assertIn("→ cfg_rep2", self._run().output)
+        self._review("cfg_rep2", 12)
+        self.assertIn("→ cfg_rep1", self._run().output)
+        out = self._run("--ignore-reviews")
+        self.assertIn("→ cfg_rep2", out.output); self.assertIn("--ignore-reviews", out.output)
+
+    def test_validity_still_outranks_the_review(self):
+        self._review("cfg_rep1", 2); self._review("cfg_rep2", 12); self._review("cfg_rep3", 9)
+        out = self._run(valid={"cfg_rep1": False})
+        self.assertIn("→ cfg_rep3", out.output)

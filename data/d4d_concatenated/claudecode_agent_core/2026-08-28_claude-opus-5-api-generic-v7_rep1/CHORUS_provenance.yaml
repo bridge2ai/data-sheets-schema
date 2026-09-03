@@ -379,6 +379,8 @@ form:
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=0
 receipts:
   expected: true
   non_checks:
@@ -399,10 +401,26 @@ receipts:
   snippets:
     total: 109
     verified: 107
+    linewrap_joined: 0
     adjacent: 2
     elsewhere: 0
+    spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
     mismatched: 0
     unchecked: 0
+    no_value_overlap: 2
+    no_value_overlap_sample:
+    - chunk: c003
+      slot: regulatory_restrictions.confidentiality_level
+      snippet: Controlled access
+    - chunk: c007
+      slot: cleaning_strategies[2].cleaning_details
+      snippet: SOP documents that have undergone an internal validation and
+    entry_single_leaf: 0
+    entry_single_leaf_sample: []
   slots:
     populated: 209
     exempt: 36
@@ -460,10 +478,33 @@ receipts:
     - data_collectors[0].role
     - data_collectors[1].collector_details
     without_receipt_truncated: 62
+    never_receipted: 98
+    added_after_receipt: 14
     receipt_paths: 74
     unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt:
+    - path: collection_timeframes[0].timeframe_details
+      resolved_path: collection_timeframes[0].timeframe_details
+    - path: description
+      resolved_path: description
+    - path: is_deidentified.deidentification_details
+      resolved_path: is_deidentified.deidentification_details
+    - path: source_caveats
+      resolved_path: source_caveats
+    value_changed_after_receipt_count: 4
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
     - creators[0].principal_investigator.name
+    receipts_to_removed_values: 1
   findings:
   - kind: snippet_adjacent_chunk
     chunk: c004
@@ -478,8 +519,11 @@ receipts:
     slot: license_and_use_terms.license_terms
     snippet: 'Once access is granted and compute is provisioned, an email '
   findings_truncated: null
+  findings_gated: 0
   summary: chunks 8/8 reviewed · snippets 107/109 verified (2 in an adjacent chunk)
-    · slots 61/173 with a receipt (36 exempt) · 1 receipt path(s) reshaped by reconcile
+    (2 bearing on no token of their value) · slots 61/173 with a receipt (98 never
+    receipted, 14 added after the receipt) (36 exempt) · 1 receipt path(s) reshaped
+    by reconcile · 4 value(s) changed after the receipt
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-api-generic-v7_rep1/CHORUS_coverage_receipt.yaml
@@ -487,7 +531,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/CHORUS_chunks.yaml
       sha256: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
-  recorded_by: d4d receipts check
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-api-generic-v7_rep1/intermediate/CHORUS_audit.json
   sha256: d9bbe09c432b97012d545e3910b7cd9df781e6805d36a5c39c74a3b51e7196c5

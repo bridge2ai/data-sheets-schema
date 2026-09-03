@@ -236,14 +236,14 @@ validation:
   artifacts:
     full:
       path: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml
-      md5: fba0a34d4f2c8e972053f7c0f6cf5097
+      md5: 92d1a92dad256da5c5b5e7b4a2adc306
     core:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d_core.yaml
-      md5: 61b02a6c94434af3e5fefaa971d196a5
+      md5: 2356176c42a856e4150602894d59c59b
   schema:
     full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
     core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
-  recorded_by: api_runner.execute
+  recorded_by: d4d review disposition
 core_derivation:
   derived: true
   rule: shared slots copied from the full record; resources projected by id with full-only
@@ -292,19 +292,23 @@ core_derivation:
 pair_consistency:
   ran: true
   consistent: true
-  artifacts:
-    full:
-      path: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml
-      md5: fba0a34d4f2c8e972053f7c0f6cf5097
-    core:
-      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d_core.yaml
-      md5: 61b02a6c94434af3e5fefaa971d196a5
   errors: 0
   warnings: 1
   identity_slots: 79
   schema_moved: false
   findings: []
   findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml
+      md5: 92d1a92dad256da5c5b5e7b4a2adc306
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d_core.yaml
+      md5: 2356176c42a856e4150602894d59c59b
+  schema:
+    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
+    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+  recorded_by: backfill_checks
 report_claims:
   checked: true
   findings: []
@@ -314,15 +318,7 @@ report_claims:
     report:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_reconciliation.md
       md5: 4acd48437c90d43c40437365b2cc8aac
-    full:
-      path: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml
-      md5: fba0a34d4f2c8e972053f7c0f6cf5097
-    core:
-      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d_core.yaml
-      md5: 61b02a6c94434af3e5fefaa971d196a5
-  schema:
-    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
-    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+  recorded_by: backfill_checks
 grounding:
   checked: true
   counts:
@@ -338,6 +334,7 @@ grounding:
     bundle:
       path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
       md5: 8abd7bf5389b562b95794d656af19392
+  recorded_by: backfill_checks
 form:
   checked: true
   records:
@@ -345,10 +342,13 @@ form:
   - data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d_core.yaml
   undeclared_prefixes: {}
   undeclared_prefix_occurrences: 0
-  british_spellings: 25
+  british_spellings: 52
   organisational_fragments: 0
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
+  recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=25
 receipts:
   expected: true
   non_checks:
@@ -429,7 +429,7 @@ receipts:
     populated: 440
     exempt: 59
     receiptable: 381
-    with_receipt: 164
+    with_receipt: 166
     without_receipt:
     - id
     - name
@@ -444,7 +444,6 @@ receipts:
     - regulatory_restrictions.confidentiality_level
     - regulatory_restrictions.hipaa_compliant
     - purposes[1].response
-    - purposes[2].response
     - addressing_gaps[0].response
     - addressing_gaps[2].response
     - tasks[2].response
@@ -481,8 +480,9 @@ receipts:
     - known_limitations[0].scope_impact
     - known_limitations[1].limitation_type
     - known_limitations[1].recommended_mitigation
-    without_receipt_truncated: 167
-    never_receipted: 164
+    - known_limitations[2].limitation_type
+    without_receipt_truncated: 165
+    never_receipted: 162
     added_after_receipt: 53
     receipt_paths: 162
     unresolved: []
@@ -490,14 +490,69 @@ receipts:
     path_off_by_one_count: 0
     addressing_slips: []
     addressing_slips_count: 0
+    remapped_by_identity:
+    - path: distribution_formats[0].media_type
+      resolved_path: distribution_formats[2].media_type
+      basis: by_overlap
+    - path: purposes[3].response
+      resolved_path: purposes[2].response
+      basis: by_overlap
+    - path: related_datasets[1].target_dataset
+      resolved_path: related_datasets[2].target_dataset
+      basis: by_overlap
+    remapped_by_identity_count: 3
+    value_changed_after_receipt:
+    - path: acquisition_methods[0].acquisition_details
+      resolved_path: acquisition_methods[0].acquisition_details
+    - path: anomalies[4].anomaly_details
+      resolved_path: anomalies[4].anomaly_details
+    - path: at_risk_populations.special_protections
+      resolved_path: at_risk_populations.special_protections
+    - path: citation
+      resolved_path: citation
+    - path: cleaning_strategies[1].cleaning_details
+      resolved_path: cleaning_strategies[1].cleaning_details
+    - path: collection_timeframes[0].source_caveats
+      resolved_path: collection_timeframes[0].source_caveats
+    - path: collection_timeframes[0].timeframe_details
+      resolved_path: collection_timeframes[0].timeframe_details
+    - path: creators[0].principal_investigator
+      resolved_path: creators[0].principal_investigator
+    - path: creators[0].source_caveats
+      resolved_path: creators[0].source_caveats
+    - path: data_governance.access_review_process
+      resolved_path: data_governance.access_review_process
+    - path: data_governance.notes
+      resolved_path: data_governance.notes
+    - path: data_governance.stewardship_roles
+      resolved_path: data_governance.stewardship_roles
+    - path: description
+      resolved_path: description
+    - path: distribution_dates[0].release_dates
+      resolved_path: distribution_dates[0].release_dates
+    - path: ethical_reviews[1].review_details
+      resolved_path: ethical_reviews[1].review_details
+    - path: external_resources[1].external_resources
+      resolved_path: external_resources[1].external_resources
+    - path: file_collections[0]
+      resolved_path: file_collections[0]
+    - path: funders[0].grants[0]
+      resolved_path: funders[0].grants[0]
+    - path: funders[0].grants[0].name
+      resolved_path: funders[0].grants[0].name
+    - path: funders[0].notes
+      resolved_path: funders[0].notes
+    value_changed_after_receipt_count: 44
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
     - content_warnings[0].notes
     - data_protection_impacts[0].impact_details
-    - distribution_formats[0].media_type
     - extension_mechanism.extension_details
     - labeling_strategies[0].labeling_details
-    - purposes[3].response
-    receipts_to_removed_values: 6
+    receipts_to_removed_values: 4
   findings:
   - kind: snippet_adjacent_chunk
     chunk: c005
@@ -527,8 +582,9 @@ receipts:
   findings_gated: 0
   summary: chunks 28/28 reviewed · snippets 204/208 verified (4 in an adjacent chunk)
     (12 bearing on no token of their value) (3 entry receipt(s) overlapping one leaf)
-    · slots 164/381 with a receipt (164 never receipted, 53 added after the receipt)
-    (59 exempt) · 6 receipt path(s) reshaped by reconcile
+    · slots 166/381 with a receipt (162 never receipted, 53 added after the receipt)
+    (59 exempt) · 4 receipt path(s) reshaped by reconcile · 3 receipt path(s) followed
+    by identity · 44 value(s) changed after the receipt
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_coverage_receipt.yaml
@@ -536,6 +592,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/AI_READI_chunks.yaml
       sha256: b46977b4c4b66adb903c6d288428646024275da21f9dbc2fb931b5c36d48ac0a
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/intermediate/AI_READI_audit.json
   sha256: f0e6125c221a00b62edd93caece80e2fdf4597d849835420b4dd78a8259f36c1
@@ -595,3 +652,53 @@ review:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_review.yaml
       sha256: ec0e6ce82219845bbf694065c29e814ae0fb68759078d7b7091f54b8bd20f020
   recorded_by: d4d review check
+dispositions:
+- item: rule-01
+  verdict: violated
+  disposition: amend
+  note: 'Review rule-01: the record''s own nine directory total_bytes values (file_collections[*].total_bytes,
+    copied correctly from bundle lines 3134-4034) sum to 3,815,969,360,064, not 3,815,974,377,264;
+    the claimed excess of 4,597,586 was a miscomputation in both value and direction
+    (the sum is 419,614 under the total). Arithmetic re-verified by the curator from
+    the record''s values before amending; the nine inputs and the total are unchanged.
+    Rubric evaluations of this record predate the amendment (#903).'
+  at: '2026-09-03T02:39:33+00:00'
+  recorded_by: d4d review disposition
+  path: source_caveats
+  replace: sum to 3,815,974,377,264 bytes, which exceeds the dataset total_size_bytes
+    of 3,815,969,779,678 reported by the same source by 4,597,586 bytes
+  with: sum to 3,815,969,360,064 bytes, which falls 419,614 bytes short of the dataset
+    total_size_bytes of 3,815,969,779,678 reported by the same source
+  files:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml
+      sha256_before: ef198c419a0733c35d09f1b2b948e99a2bf50d46e3e757dee0c0caad9f8b4aa3
+      sha256_after: d221e2b36c2a98ebe21f57bc72039e6b840323b37d5155053e592fe9fb247409
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d_core.yaml
+      sha256_before: e71177444a264ccf16af765c46f1295c152b878b34f61719366d68cf629fd20f
+      sha256_after: 58d6b3a594ba339761c0f81b7b40f4a91326ff48d872c933a004703dab5b18df
+  evaluations_predating:
+  - data/evaluation_llm/rubric10_semantic/label_aware/AI_READI_2026-09-01api_rep3_evaluation.json
+  - data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-09-01api_rep3_evaluation.json
+  validation_after: valid
+- item: slot-058
+  verdict: cannot_tell
+  disposition: retain
+  note: 'The reconciliation report (sections 2.1, 3, 4) claims extension_mechanism
+    was retained; it is absent from both records. Restoring a value is generation-class
+    work (#742: no re-receipt route), so the record is left as generated and the report/record
+    contradiction stands documented here and in the review block (#903).'
+  at: '2026-09-03T02:39:55+00:00'
+  recorded_by: d4d review disposition
+- item: slot-008
+  verdict: misread
+  disposition: retain
+  note: 'sampling_strategies[0].is_sample: true is receipted by healthsheet line 4270,
+    which answers the is_sample question with ''The dataset contains all possible
+    instances''. The record re-scoped the question to the EHR study base; whether
+    that re-scoping is legitimate is a judgement the curator declines to overrule
+    by editing a boolean against the record''s stated reasoning. Left as generated;
+    the review verdict (misread) is the record of the defect (#903).'
+  at: '2026-09-03T02:39:56+00:00'
+  recorded_by: d4d review disposition

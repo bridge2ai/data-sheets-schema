@@ -426,7 +426,7 @@ form:
   undeclared_prefixes:
     nih: 6
   undeclared_prefix_occurrences: 6
-  british_spellings: 103
+  british_spellings: 132
   organisational_fragments: 0
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
@@ -434,4 +434,5 @@ form:
   instrument_note: 'form recomputed 2026-08-22 under British instrument v2.1 and undeclared-prefix
     classification v2.1 (ark scheme excluded and grounded instead; urn NID-aware —
     a urn under an unregistered NID counts as urn:<nid>; #671). gc_label_variant fields
-    date from recompute, not the run. Previous british=103, undeclared=6'
+    date from recompute, not the run. Previous british=103, undeclared=6 | form recomputed
+    2026-09-02 under british instrument v3 (#836/#859); previous british=103'

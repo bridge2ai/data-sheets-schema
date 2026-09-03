@@ -204,6 +204,8 @@ BRITISH_FORMS = ("licence", "analyse", "organisation", "enrolment", "programme",
 #: `favour`, `honour` join the list — a genuinely British "colour fundus" in
 #: an AI_READI record was invisible to the old instrument while American
 #: "analyses" counted against it.
+#: Named so a recompute's audit note says which instrument counted (#907).
+BRITISH_INSTRUMENT = "v3 (#836/#859)"
 BRITISH_PATTERNS = tuple(re.compile(rx) for rx in (
     # v2.1 (#670 review): the organise verb family — 76 occurrences in the v4
     # arm — had escaped both instruments; bare enrol/enrols, the licenced/
@@ -226,6 +228,42 @@ BRITISH_PATTERNS = tuple(re.compile(rx) for rx in (
     r"\bcolour(?:s|ed|ings?|ful)?\b",
     r"\b(?:un)?favour(?:s|ed|ing|abl[ye]|ites?)?\b",
     r"\bhonour(?:s|ed|ing|able)?\b",
+    # v3 (#836, #859): the review pass found tumour/oedema/metres/travelling
+    # in a record the instrument scored 0, and the v7 reviewers listed
+    # personalised, centimetre, colour, generalisability, artefacts,
+    # minimise, totalling, prioritising. The -ise verb family is one
+    # pattern; `analyse` stays separate above because of "analyses".
+    # Forms with an American homograph (practice, license, specialist,
+    # emphasis, cancellation, judgement, program) are excluded or require
+    # a suffix that only the British form takes.
+    r"\b(?:centi|milli|kilo)?metres?\b",
+    r"\btumours?\b",
+    r"\boedema(?:tous)?\b",
+    r"\bpaediatrics?\b",
+    r"\bhaem(?:o\w*|atolog\w*|orrhag\w*)\b",
+    r"\banaemi[ac]\b",
+    r"\bageing\b",
+    r"\btravell(?:ing|ed|ers?)\b",
+    r"\bcounsell(?:ing|ed|ors?)\b",
+    r"\bcancell(?:ed|ing)\b",
+    r"\bmodell(?:ing|ed|ers?)\b",
+    r"\btotall(?:ing|ed)\b",
+    r"\bartefacts?\b",
+    r"\bfibres?\b",
+    r"\blitres?\b",
+    r"\b(?:neighbour|labour|harbour|humour|vapour|flavour|rumour|armour|endeavour)"
+    r"(?:s|ed|ing|hoods?|ous|able)?\b",
+    r"\b(?:defence|offence|pretence)s?\b",
+    r"\bfulfil(?:s|ment)?\b",
+    r"\bpractis(?:e|ed|es|ing)\b",
+    r"\bsceptic(?:al|ism|s)?\b",
+    r"\bsulphur\w*\b",
+    r"\b(?:minimis|maximis|optimis|personalis|generalis|prioritis|characteris|harmonis|"
+    r"normalis|anonymis|pseudonymis|visualis|randomis|customis|centralis|finalis|"
+    r"stabilis|sterilis|immunis|sensitis|categoris|capitalis|mobilis|realis|specialis|"
+    r"emphasis|hypothesis|synthesis|digitis|authoris|criticis|italicis|localis|"
+    r"marginalis|neutralis|operationalis|popularis|scrutinis|serialis|symbolis|"
+    r"tokenis|vaporis|vocalis|westernis)(?:e|ed|es|ing|ations?|ability|ers?)\b",
 ))
 _QUOTED = re.compile(r'"[^"\n]*"')
 
@@ -242,6 +280,11 @@ def british_spellings(text: str) -> int:
     not comparable with these; recorded form blocks for both study arms and
     every canary were recomputed under this instrument in the same change, so
     the corpus a gate reads speaks one instrument.
+
+    Instrument v3 (#836, #859): the medical and measurement families
+    (tumour, oedema, metre, paediatric, haem-) and the -ise verb family the
+    reviews kept finding at 0. Recomputed corpus-wide in the same change,
+    by the same discipline: `d4d provenance backfill-checks --blocks form`.
     """
     prose = _QUOTED.sub(" ", text).lower()
     return sum(len(p.findall(prose)) for p in BRITISH_PATTERNS)

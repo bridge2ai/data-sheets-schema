@@ -352,7 +352,6 @@ class Validator(unittest.TestCase):
         rec = _receipt(manifest["bundle_md5"])
         full = {**FULL, "version": "3.0.0"}            # added by a later phase
         original = {**FULL, "license": "CC-BY"}        # populated at phase 1, never receipted
-        del original["funders"]
         full2 = {**full, "license": "CC-BY"}
         b = rc.check(rec, manifest, texts, full2, manifest["bundle_md5"], original=original)
         self.assertEqual(b["slots"]["receipts_to_removed_values"], 0)
@@ -361,6 +360,14 @@ class Validator(unittest.TestCase):
         self.assertEqual(b["slots"]["never_receipted"],
                          sum(1 for p in without if p != "version"))
         self.assertEqual(b["slots"]["added_after_receipt"], 1)              # version
+        # #899/#907: a snapshot WITHOUT funders makes the funders receipts
+        # paths the snapshot never had — uncredited, and their leaves
+        # count as added after the receipt (this fixture used to delete
+        # funders and still expect the credit)
+        no_funders = {k: v for k, v in original.items() if k != "funders"}
+        b3 = rc.check(rec, manifest, texts, full2, manifest["bundle_md5"], original=no_funders)
+        self.assertEqual(b3["slots"]["path_not_in_snapshot_count"], 2)
+        self.assertEqual(b3["slots"]["added_after_receipt"], 1 + 2)         # version + name, grant_id (the fragment id is exempt)
         self.assertIn("never receipted", b["summary"])
         b2 = rc.check(rec, manifest, texts, full2, manifest["bundle_md5"])
         self.assertIsNone(b2["slots"]["never_receipted"])
@@ -648,3 +655,162 @@ class Gate(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class IdentityRemap(unittest.TestCase):
+    """#899: a receipt path follows its entry through reconciliation's
+    inserts and reorders by identity, not by index."""
+
+    ORIGINAL = {"id": "https://x/ds",
+                "external_resources": [{"id": "https://a", "name": "A"},
+                                       {"id": "https://b", "name": "B", "notes": "b-note"}],
+                "creators": [{"name": "Ada"}, {"name": "Bob", "orcid": "0000-1"}],
+                "keywords": ["one", "two"],
+                "variables": [{"variable_name": "age"}, {"variable_name": "sex"}]}
+    FINAL = {"id": "https://x/ds",
+             # an entry inserted ahead, B moved from [1] to [2]
+             "external_resources": [{"id": "https://new", "name": "New"},
+                                    {"id": "https://a", "name": "A"},
+                                    {"id": "https://b", "name": "B", "notes": "b-note"}],
+             # Ada dropped; Bob now first and keyed by name
+             "creators": [{"name": "Bob", "orcid": "0000-1"}, {"name": "Cy"}],
+             "keywords": ["two", "one"],
+             "variables": [{"variable_name": "age"}, {"variable_name": "sex"}]}
+
+    def test_moved_inserted_dropped_and_scalar_entries(self):
+        r = rc.remap_path("external_resources[1].notes", self.ORIGINAL, self.FINAL)
+        self.assertEqual(r, {"path": "external_resources[2].notes", "basis": "by_id"})
+        r = rc.remap_path("creators[1].orcid", self.ORIGINAL, self.FINAL)
+        self.assertEqual(r, {"path": "creators[0].orcid", "basis": "by_name"})
+        self.assertEqual(rc.remap_path("creators[0].name", self.ORIGINAL, self.FINAL)["basis"], "entry_dropped")
+        self.assertIsNone(rc.remap_path("creators[0].name", self.ORIGINAL, self.FINAL)["path"])
+        self.assertEqual(rc.remap_path("keywords[0]", self.ORIGINAL, self.FINAL),
+                         {"path": "keywords[1]", "basis": "by_value"})
+        self.assertEqual(rc.remap_path("variables[1].variable_name", self.ORIGINAL, self.FINAL),
+                         {"path": "variables[1].variable_name", "basis": "same"})
+        # a leaf reconcile removed from an entry that survived
+        self.assertEqual(rc.remap_path("external_resources[0].name", self.ORIGINAL,
+                                       {"external_resources": [{"id": "https://a"}]})["basis"], "leaf_dropped")
+        # no snapshot: by index, as written
+        self.assertEqual(rc.remap_path("external_resources[1].name", None, self.FINAL),
+                         {"path": "external_resources[1].name", "basis": "no_snapshot"})
+        self.assertIsNone(rc.remap_path("external_resources[1].notes", None, self.FINAL)["path"])
+        # a path the snapshot never had resolves as written when the final record has it
+        self.assertEqual(rc.remap_path("creators[1].name", self.ORIGINAL, self.FINAL)["basis"], "by_name")
+        self.assertEqual(rc.remap_path("variables[1].notes", {"variables": [{}]}, self.FINAL)["basis"],
+                         "not_in_snapshot")
+        self.assertEqual(rc.remap_path("not a path!", self.ORIGINAL, self.FINAL)["basis"], "unresolved")
+
+    def test_a_moved_entry_keeps_its_coverage_and_is_no_slip(self):
+        manifest, texts = _manifest_and_texts()
+        md5 = manifest["bundle_md5"]
+        original = {**FULL, "funders": [{"id": "https://x/ds#funder-1", "name": "NIH Common Fund",
+                                          "grant_id": "OT2OD032644"}]}
+        final = {**FULL, "funders": [{"id": "https://x/ds#funder-0", "name": "Other"},
+                                     {"id": "https://x/ds#funder-1", "name": "NIH Common Fund",
+                                      "grant_id": "OT2OD032644"}]}
+        rec = _receipt(md5)
+        b = rc.check(rec, manifest, texts, final, md5, original=original)
+        self.assertEqual(b["slots"]["remapped_by_identity_count"], 2)         # funders[0].grant_id, funders[0].name
+        self.assertEqual({r["resolved_path"] for r in b["slots"]["remapped_by_identity"]},
+                         {"funders[1].grant_id", "funders[1].name"})
+        self.assertNotIn("funders[1].grant_id", b["slots"]["without_receipt"])
+        self.assertIn("funders[0].name", b["slots"]["without_receipt"])          # the inserted entry has none
+        self.assertEqual(b["slots"]["addressing_slips_count"], 0)
+        self.assertEqual(b["slots"]["path_off_by_one_count"], 0)
+        self.assertEqual(b["slots"]["reshaped_by_reconcile"], [])
+        self.assertIn("followed by identity", b["summary"])
+        # without the snapshot the same receipt credits the inserted entry — the defect
+        b2 = rc.check(rec, manifest, texts, final, md5)
+        self.assertEqual(b2["slots"]["remapped_by_identity_count"], 0)
+        self.assertIn("funders[1].grant_id", b2["slots"]["without_receipt"])
+
+    def test_claims_carry_the_resolved_path_and_core_path_follows_it(self):
+        original = {**FULL, "file_collections": [{"id": "https://x/ds#fc1", "name": "raw",
+                                                   "resources": [{"id": "https://x/ds#f1", "name": "a.tsv"}]}]}
+        final = {**FULL, "file_collections": [{"id": "https://x/ds#fc0", "name": "new"},
+                                              {"id": "https://x/ds#fc1", "name": "raw",
+                                               "resources": [{"id": "https://x/ds#f1", "name": "a.tsv"}]}]}
+        claims = rc.claim_receipts(_receipt("m"), final, original)
+        c = claims["slots"]["file_collections[0]"]
+        self.assertEqual(c["resolved_path"], "file_collections[1]"); self.assertEqual(c["resolution"], "by_id")
+        self.assertEqual(c["core_path"], "distributions[1]")
+        self.assertEqual(claims["slots"]["description"]["resolution"], "same")
+        self.assertNotIn("resolved_path", rc.claim_receipts(_receipt("m"), final)["slots"]["description"])
+
+    def test_keyless_entries_join_by_scalar_overlap_and_ties_are_ambiguous(self):
+        original = {"related_datasets": [{"target_dataset": "doi:a", "relationship_type": "cites"},
+                                         {"target_dataset": "doi:b", "relationship_type": "cites"}],
+                    "external_resources": [{"external_resources": "https://u", "archival": False}]}
+        final = {"related_datasets": [{"target_dataset": "doi:new", "relationship_type": "is_new_version_of"},
+                                      {"target_dataset": "doi:a", "relationship_type": "cites"},
+                                      {"target_dataset": "doi:b", "relationship_type": "cites", "description": "d"}],
+                 "external_resources": [{"external_resources": "https://v"},
+                                        {"external_resources": "https://u", "archival": True, "notes": "n"}]}
+        self.assertEqual(rc.remap_path("related_datasets[1].target_dataset", original, final),
+                         {"path": "related_datasets[2].target_dataset", "basis": "by_overlap"})
+        self.assertEqual(rc.remap_path("external_resources[0].external_resources", original, final),
+                         {"path": "external_resources[1].external_resources", "basis": "by_overlap"})
+        # two final entries tie on overlap and neither is at the written index
+        self.assertEqual(rc.remap_path("x[0].a", {"x": [{"a": "1"}]},
+                                       {"x": [{"q": "5"}, {"a": "1", "b": "2"}, {"a": "1", "b": "3"}]})["basis"],
+                         "ambiguous")
+        self.assertEqual(rc.remap_path("x[1].a", {"x": [{"z": "9"}, {"a": "1"}]},
+                                       {"x": [{"z": "9"}, {"a": "1", "b": "2"}, {"a": "1", "b": "3"}]})["basis"], "same")
+        # a keyless entry whose text was rewritten in place joins by position;
+        # a keyed one that matches nothing is gone
+        self.assertEqual(rc.remap_path("relationships[0].relationship_details",
+                                       {"relationships": [{"relationship_details": "old text"}]},
+                                       {"relationships": [{"relationship_details": "new text"}]}),
+                         {"path": "relationships[0].relationship_details", "basis": "same"})
+        self.assertEqual(rc.remap_path("creators[0].principal_investigator.name",
+                                       {"creators": [{"principal_investigator": {"name": "E"}, "notes": "x"}]},
+                                       {"creators": [{"principal_investigator": "E", "notes": "y"}]})["basis"],
+                         "leaf_dropped")
+
+    def test_a_value_rewritten_after_the_receipt_is_reported_with_both_values(self):
+        manifest, texts = _manifest_and_texts()
+        md5 = manifest["bundle_md5"]
+        original = dict(FULL)
+        final = {**FULL, "description": "a rewritten description"}
+        b = rc.check(_receipt(md5), manifest, texts, final, md5, original=original)
+        self.assertEqual(b["slots"]["value_changed_after_receipt_count"], 1)
+        self.assertEqual(b["slots"]["value_changed_after_receipt"][0]["path"], "description")
+        self.assertIn("changed after the receipt", b["summary"])
+        self.assertEqual(b["findings_gated"], 0)
+        self.assertIsNone(rc.check(_receipt(md5), manifest, texts, final, md5)["slots"]["value_changed_after_receipt_count"])
+        c = rc.claim_receipts(_receipt("m"), final, original)["slots"]["description"]
+        self.assertEqual(c["value_at_receipt"], "a longitudinal, multimodal study")
+        self.assertNotIn("value_at_receipt", rc.claim_receipts(_receipt("m"), final, original)["slots"]["title"])
+
+    def test_a_gone_entry_or_a_path_the_snapshot_never_had_is_never_credited_as_written(self):
+        """#907 review: identity says the entry is gone, another sits at its
+        index — the written path must not resolve to it."""
+        manifest, texts = _manifest_and_texts()
+        md5 = manifest["bundle_md5"]
+        original = {**FULL, "funders": [{"id": "https://x/ds#funder-1", "name": "NIH Common Fund",
+                                          "grant_id": "OT2OD032644"}]}
+        final = {**FULL, "funders": [{"id": "https://x/ds#funder-9", "name": "Someone Else",
+                                      "grant_id": "OTHER"}]}
+        b = rc.check(_receipt(md5), manifest, texts, final, md5, original=original)
+        self.assertEqual(b["slots"]["index_reused_by_another_entry_count"], 2)     # funders[0].grant_id, .name
+        self.assertIn("funders[0].grant_id", b["slots"]["without_receipt"])
+        self.assertIn("funders[0].grant_id", b["slots"]["reshaped_by_reconcile"])
+        self.assertEqual(b["findings_gated"], 0)
+        # a path the snapshot never had, resolving into structure added later
+        original2 = {**FULL, "funders": []}
+        final2 = {**FULL, "funders": [{"id": "https://x/ds#funder-1", "name": "NIH Common Fund", "grant_id": "OT2OD032644"}]}
+        b2 = rc.check(_receipt(md5), manifest, texts, final2, md5, original=original2)
+        self.assertEqual(b2["slots"]["path_not_in_snapshot_count"], 2)
+        self.assertIn("funders[0].grant_id", b2["slots"]["without_receipt"])
+        self.assertEqual(b2["findings_gated"], 0)
+        self.assertNotIn("funders[0].grant_id", b2["slots"]["unresolved"])
+
+    def test_normalisation_and_extension_are_not_rewrites(self):
+        self.assertFalse(rc._rewritten("a b", ["a  b"]))
+        self.assertFalse(rc._rewritten({"name": "N"}, {"name": "N", "notes": "added"}))
+        self.assertFalse(rc._rewritten(["x"], ["x", "y"]))
+        self.assertTrue(rc._rewritten("a", "b"))
+        self.assertTrue(rc._rewritten({"name": "N"}, {"name": "M"}))
+        self.assertTrue(rc._rewritten(["x", "y"], ["x"]))
+        self.assertTrue(rc._rewritten("a", {"name": "a"}))

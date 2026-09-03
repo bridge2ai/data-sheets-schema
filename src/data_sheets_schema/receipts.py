@@ -297,6 +297,189 @@ def _covers(receipt_path: str, leaf_path: str) -> bool:
     return leaf_path == receipt_path or leaf_path.startswith(receipt_path + ".")
 
 
+# ---------------------------------------------------------- identity remap
+#: Keys that identify a list entry across a reshape, in the order tried. An
+#: entry with none of them is identified by its content.
+ENTRY_KEYS = ("id", "name", "title", "label", "variable_name", "url", "download_url",
+              "access_url", "path", "grant_id", "grant_number")
+
+
+def _entry_key(node: Any) -> tuple[str, str] | None:
+    """What identifies a list entry: the first `ENTRY_KEYS` string it carries;
+    a scalar entry is its own key. None for an entry with no such key — it
+    is then located by `_scalar_pairs` overlap."""
+    if isinstance(node, dict):
+        for k in ENTRY_KEYS:
+            v = node.get(k)
+            if isinstance(v, str) and v.strip():
+                return (k, v.strip())
+        return None
+    if isinstance(node, str) and node.strip():
+        return ("value", node.strip())
+    return None
+
+
+def _scalar_pairs(node: Any) -> set[tuple[str, str]]:
+    """The entry's scalar leaves as (key, value) pairs — its identity when
+    it carries no `ENTRY_KEYS` key (a `related_datasets` entry is its
+    `target_dataset`; a CM4AI `external_resources` entry is the URL under
+    the key of the same name)."""
+    if not isinstance(node, dict):
+        return set()
+    return {(k, str(v).strip()) for k, v in node.items()
+            if isinstance(v, (str, int, float, bool)) and str(v).strip()}
+
+
+def _locate(entry: Any, i: int, candidates: list[Any]) -> tuple[int | None, str]:
+    """The index in `candidates` of the entry that is `entry`, and how it was
+    found: `same` (the key matches at the same index), `by_<key>` (the key
+    matches elsewhere), `by_overlap` (no key; the unique best overlap of
+    scalar pairs, sharing at least one), or None — the same index is never
+    assumed when identity says otherwise (#899)."""
+    key = _entry_key(entry)
+    if key is not None:
+        hits = [k for k, e in enumerate(candidates) if _entry_key(e) == key]
+        if hits:
+            return (i, "same") if i in hits else (hits[0], f"by_{key[0]}")
+        if key[0] == "value":
+            return None, "entry_dropped"
+    pairs = _scalar_pairs(entry)
+    scored = [(len(pairs & _scalar_pairs(e)), k) for k, e in enumerate(candidates)]
+    best = max((s for s, _k in scored), default=0)
+    if best == 0:
+        # No scalar survived unchanged. A keyless entry whose slot at the
+        # same index still holds an entry of the same shape is that entry
+        # with its text rewritten (reconcile edits `relationship_details`,
+        # flattens a PI object to a string) — joined by position, and the
+        # rewrite shows as `value_changed_after_receipt`. A keyed entry
+        # (`name: Ada`) that matches nothing is gone: the entry now at its
+        # index is someone else.
+        same_shape = (key is None and i < len(candidates) and isinstance(entry, dict)
+                      and isinstance(candidates[i], dict)
+                      and bool(set(entry) & set(candidates[i])))
+        return (i, "same") if same_shape else (None, "entry_dropped")
+    winners = [k for s, k in scored if s == best]
+    if len(winners) > 1 and i not in winners:
+        return None, "ambiguous"
+    j = i if i in winners else winners[0]
+    return (j, "same" if j == i else "by_overlap")
+
+
+def remap_path(path: str, original: dict[str, Any] | None, full: dict[str, Any]) -> dict[str, Any]:
+    """Where a receipt path written against `original` (the phase-1 snapshot)
+    points in `full` (the final record), following each list entry by its
+    identity rather than its index (#899).
+
+    Reconciliation inserts, splits and reorders list entries after the
+    receipt is written (#742): the CM4AI rep1 receipt on `external_resources[8]`
+    attested the entry that reconciliation moved to `[7]`; the AI_READI rep3
+    receipt on `related_datasets[1]` pointed at the v1.0.0 entry inserted
+    ahead of it. Joined by index, both credit the wrong entry and manufacture
+    an `unsupported` review verdict for a bundle-attested value. Joined by
+    identity they resolve.
+
+    Returns `{path, basis}`: `path` is the resolved path in `full` (None when
+    the entry or leaf is gone) and `basis` says how — `same` (unchanged),
+    `by_<key>` (the entry moved; found by that key), `by_overlap` (moved; no
+    key, found by its scalar pairs), `not_in_snapshot` (the written path did
+    not resolve in the snapshot, so identity could not be read — resolved as
+    written when it resolves in `full`), `no_snapshot`, `entry_dropped` (the
+    identified entry is not in `full`), `ambiguous` (two final entries tie on
+    overlap and neither is at the written index), `leaf_dropped` (the entry
+    is there, the leaf is not), `unresolved` (the path does not parse or the
+    structures disagree)."""
+    parts = re.findall(r"[\w]+|\[\d+\]", path)
+    if not parts or not re.fullmatch(r"\w+(\[\d+\])*(\.\w+(\[\d+\])*)*", path):
+        return {"path": None, "basis": "unresolved"}
+    if original is None:
+        return {"path": path if resolve(full, path) else None, "basis": "no_snapshot"}
+    cur_o: Any = original
+    cur_f: Any = full
+    out: list[str] = []
+    basis = "same"
+    for part in parts:
+        if part.startswith("["):
+            i = int(part[1:-1])
+            if not isinstance(cur_o, list) or i >= len(cur_o):
+                return {"path": path if resolve(full, path) else None, "basis": "not_in_snapshot"}
+            if not isinstance(cur_f, list):
+                return {"path": None, "basis": "unresolved"}
+            j, how = _locate(cur_o[i], i, cur_f)
+            if j is None:
+                return {"path": None, "basis": how}
+            if how != "same":
+                basis = how
+            out.append(f"[{j}]")
+            cur_o, cur_f = cur_o[i], cur_f[j]
+        else:
+            if not isinstance(cur_o, dict) or part not in cur_o:
+                return {"path": path if resolve(full, path) else None, "basis": "not_in_snapshot"}
+            if not isinstance(cur_f, dict) or part not in cur_f:
+                return {"path": None, "basis": "leaf_dropped"}
+            out.append(part)
+            cur_o, cur_f = cur_o[part], cur_f[part]
+    new = ""
+    for p in out:
+        new += p if p.startswith("[") or not new else "." + p
+    return {"path": new, "basis": basis}
+
+
+def _rewritten(before: Any, after: Any) -> bool:
+    """Whether a receipted value was rewritten after the receipt, as
+    distinct from normalised or extended: `str` → `[str]` (multivalued
+    coercion of the same text), a dict that gained keys, a list that
+    gained items are not rewrites — the receipted content is still there
+    verbatim. A scalar that differs after whitespace folding, a dict whose
+    receipted key now holds something else, a list missing a receipted
+    item, are (#907 review: 21 of the first count were `str → [same str]`)."""
+    def scalar(v: Any) -> bool:
+        return isinstance(v, (str, int, float, bool))
+
+    def norm(v: Any) -> Any:
+        return " ".join(str(v).split()) if scalar(v) else v
+    b, a = before, after
+    # multivalued coercion: a scalar and a one-item list of it are the same value
+    if scalar(b) and isinstance(a, list) and len(a) == 1 and scalar(a[0]):
+        a = a[0]
+    elif scalar(a) and isinstance(b, list) and len(b) == 1 and scalar(b[0]):
+        b = b[0]
+    b, a = norm(b), norm(a)
+    if isinstance(b, dict) and isinstance(a, dict):
+        return any(k not in a or _rewritten(v, a[k]) for k, v in b.items())
+    if isinstance(b, list) and isinstance(a, list):
+        rest = list(a)
+        for item in b:
+            hit = next((i for i, x in enumerate(rest) if not _rewritten(item, x)), None)
+            if hit is None:
+                return True
+            rest.pop(hit)
+        return False
+    if isinstance(b, (dict, list)) != isinstance(a, (dict, list)):
+        return True
+    return b != a
+
+
+def phase1_snapshot(receipt: Path) -> dict[str, Any] | None:
+    """The record as the `full` phase wrote it: the API runner's phase-1
+    snapshot beside the receipt under intermediate/ (#758) — written after
+    the runner's value normalisation, so shapes match the record at the
+    path level while the receipt itself came from the raw text. A same-
+    label re-run appends _2, _3 to the snapshot names while the top-level
+    receipt is overwritten, so the contemporary snapshot is the highest-
+    numbered one (#761). Absent on the agentic path, whose Phase 3
+    re-receipts what it changes."""
+    stem = receipt.name.replace("_coverage_receipt.yaml", "_full")
+    snaps = sorted((receipt.parent / "intermediate").glob(f"{stem}.yaml")) + sorted(
+        (receipt.parent / "intermediate").glob(f"{stem}_[0-9]*.yaml"),
+        key=lambda p: int(p.stem.rsplit("_", 1)[1]))
+    if not snaps:
+        return None
+    try:
+        return yaml.safe_load(snaps[-1].read_text(encoding="utf-8")) or None
+    except yaml.YAMLError:
+        return None
+
+
 # ---------------------------------------------------------------- derived core
 def core_path_map(full: dict[str, Any]) -> dict[str, str]:
     """Full-record path prefix → derived-core path prefix (#694, #711 review
@@ -362,9 +545,14 @@ def load_receipt(path: Path) -> dict[str, Any]:
     return data
 
 
-def claim_receipts(receipt: dict[str, Any], full: dict[str, Any] | None = None) -> dict[str, Any]:
+def claim_receipts(receipt: dict[str, Any], full: dict[str, Any] | None = None,
+                   original: dict[str, Any] | None = None) -> dict[str, Any]:
     """The coverage receipt inverted by slot. With the full record, each
-    claim also names its derived-core path (or `null` for a full-only slot)."""
+    claim also names its derived-core path (or `null` for a full-only slot).
+    With the phase-1 snapshot as well, each claim names `resolved_path` —
+    where the receipted entry sits in the final record, joined by identity
+    (#899) — and `resolution`, the basis of that join; the core path is then
+    taken from the resolved path, since that is the entry the core carries."""
     pmap = core_path_map(full) if full is not None else None
     slots: dict[str, list[dict[str, Any]]] = {}
     for entry in receipt.get("chunks") or []:
@@ -377,8 +565,25 @@ def claim_receipts(receipt: dict[str, Any], full: dict[str, Any] | None = None) 
     out: dict[str, Any] = {"bundle_md5": receipt.get("bundle_md5"), "slots": {}}
     for slot in sorted(slots):
         item: dict[str, Any] = {"receipts": slots[slot]}
+        target = slot
+        if full is not None and original is not None:
+            rm = remap_path(slot, original, full)
+            # A path the snapshot never had resolves nowhere the receipt
+            # can vouch for, whatever the final record holds there — the
+            # same rule check() applies (#907 review, B).
+            if rm["basis"] == "not_in_snapshot":
+                rm = {"path": None, "basis": rm["basis"]}
+            item["resolved_path"] = rm["path"]
+            item["resolution"] = rm["basis"]
+            target = rm["path"] or slot
+            if rm["path"]:
+                ok_o, v_o = _resolve_value(original, slot)
+                ok_f, v_f = _resolve_value(full, rm["path"])
+                if ok_o and ok_f and _rewritten(v_o, v_f):
+                    s = v_o if isinstance(v_o, (int, float, bool)) or v_o is None else str(v_o)
+                    item["value_at_receipt"] = s[:300] + "…" if isinstance(s, str) and len(s) > 300 else s
         if pmap is not None:
-            item["core_path"] = core_path(slot, pmap)
+            item["core_path"] = core_path(target, pmap)
         out["slots"][slot] = item
     return out
 
@@ -632,8 +837,59 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # off-by-one and addressing checks, so a fabricated path cannot hide
     # behind a tiny snippet.
     receipt_paths = all_paths
-    unresolved = [p for p in receipt_paths if not resolve(full, p)]
+    # #899: with the phase-1 snapshot, every path is followed to the entry it
+    # receipted by identity, so a list entry reconciliation moved, split
+    # around or inserted ahead of keeps its receipt. A path that remaps is
+    # resolved at its new address for coverage and for the resolution
+    # classes below; the written address is reported beside it. Without a
+    # snapshot (the agentic path) the join is by index, as before.
+    remapped: list[dict[str, Any]] = []
+    effective: dict[str, str] = {}
+    # Also #899: a value rewritten at the same path after the receipt — the
+    # CM4AI rep2 `page` receipt cites the phase-1 URL, reconcile replaced it
+    # with the Dataverse landing page. The receipt attested the earlier
+    # value; the current one has no re-receipt route (#742). Reported with
+    # both values' presence, never gated; coverage credit is left as it
+    # stands, so the count states the size of the class the credit hides.
+    value_changed: list[dict[str, Any]] = []
+    # With a snapshot, identity decides: a path whose entry is gone
+    # (`entry_dropped`, `leaf_dropped`, `ambiguous`) or that the snapshot
+    # never had (`not_in_snapshot`) is NOT resolved as written even when
+    # another entry now sits at that index — that is the misjoin, and the
+    # first version of this join fell back to it silently (#907 review:
+    # CHORUS rep3 `creators[1]` credited to an unnamed entry that replaced
+    # Azra Bihorac; CM4AI rep3 `creators[38].id` credited to a creator
+    # added after the receipt). Those paths are reported and carry no credit.
+    gone: dict[str, str] = {}
+    index_reused: list[dict[str, Any]] = []
+    not_in_snapshot: list[str] = []
+    if original is not None:
+        for p in receipt_paths:
+            rm = remap_path(p, original, full)
+            if rm["basis"] == "not_in_snapshot":
+                not_in_snapshot.append(p)
+                gone[p] = rm["basis"]
+                continue
+            if rm["path"] is None:
+                gone[p] = rm["basis"]
+                if resolve(full, p):
+                    index_reused.append({"path": p, "basis": rm["basis"]})
+                continue
+            if rm["path"] != p:
+                remapped.append({"path": p, "resolved_path": rm["path"], "basis": rm["basis"]})
+                effective[p] = rm["path"]
+            ok_o, v_o = _resolve_value(original, p)
+            ok_f, v_f = _resolve_value(full, rm["path"])
+            if ok_o and ok_f and _rewritten(v_o, v_f):
+                value_changed.append({"path": p, "resolved_path": rm["path"]})
+    unresolved = [p for p in receipt_paths if p in gone or not resolve(full, effective.get(p, p))]
     reshaped = [p for p in unresolved if p and original is not None and resolve(original, p)]
+    # A path the snapshot never had and the final record resolves is an
+    # address into structure added after the receipt: reported here, kept
+    # out of the findings (the model wrote it; the class is measured) and
+    # out of coverage.
+    unresolved = [p for p in unresolved if p not in not_in_snapshot or not resolve(full, p)]
+    attesting = {p for p in attesting if p not in gone}
     unresolved = [p for p in unresolved if p not in reshaped]
     # A path that resolves nowhere as written may be an addressing slip
     # rather than a fabricated slot — the 2026-09-01 CM4AI canary wrote
@@ -708,7 +964,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     leaves = populated_leaves(full)
     record_id = full.get("id") if isinstance(full.get("id"), str) else None
     receiptable = [(p, v) for p, v in leaves if not exempt(p, v, record_id)]
-    without = [p for p, _v in receiptable if not any(_covers(r, p) for r in attesting)]
+    attesting_at = {effective.get(r, r) for r in attesting}
+    without = [p for p, _v in receiptable if not any(_covers(r, p) for r in attesting_at)]
     # #807: `without_receipt` is a mixture on the API path. Split against the
     # phase-1 snapshot: a path populated when the receipt was written and not
     # covered then was *never* receipted; one the snapshot lacks was added by
@@ -732,6 +989,14 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
              "path_off_by_one_count": len(off_by_one),
              "addressing_slips": addressing[:20],
              "addressing_slips_count": len(addressing),
+             "remapped_by_identity": remapped[:20],
+             "remapped_by_identity_count": len(remapped),
+             "value_changed_after_receipt": value_changed[:20],
+             "value_changed_after_receipt_count": len(value_changed) if original is not None else None,
+             "index_reused_by_another_entry": index_reused[:20],
+             "index_reused_by_another_entry_count": len(index_reused) if original is not None else None,
+             "path_not_in_snapshot": not_in_snapshot[:20],
+             "path_not_in_snapshot_count": len(not_in_snapshot) if original is not None else None,
              "reshaped_by_reconcile": reshaped,
              "receipts_to_removed_values": len(reshaped)}
 
@@ -771,7 +1036,11 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                         + (f" ({slots['exempt']} exempt)" if slots["exempt"] else "")
                         + (f" · {len(reshaped)} receipt path(s) reshaped by reconcile" if reshaped else "")
                         + (f" · {len(off_by_one)} receipt path(s) off by one index" if off_by_one else "")
-                        + (f" · {len(addressing)} addressing slip(s)" if addressing else "")),
+                        + (f" · {len(addressing)} addressing slip(s)" if addressing else "")
+                        + (f" · {len(remapped)} receipt path(s) followed by identity" if remapped else "")
+                        + (f" · {len(value_changed)} value(s) changed after the receipt" if value_changed else "")
+                        + (f" · {len(index_reused)} receipt index(es) reused by another entry" if index_reused else "")
+                        + (f" · {len(not_in_snapshot)} receipt path(s) not in the snapshot" if not_in_snapshot else "")),
             "non_checks": list(NON_CHECKS)}
 
 
@@ -827,26 +1096,11 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
                 "reason": "bundle drifted since the run; the receipt's chunks are not today's bytes"}
     texts = dict(zip([c["id"] for c in m["chunks"]], _texts(raw.decode("utf-8"), m["chunks"])))
     full = (yaml.safe_load(full_path.read_text(encoding="utf-8")) or {}) if full_path.exists() else {}
-    # The record as the `full` phase wrote it: the API runner's phase-1
-    # snapshot beside the receipt under intermediate/ (#758) — written after
-    # the runner's value normalisation, so shapes match the record at the
-    # path level while the receipt itself came from the raw text. A same-
-    # label re-run appends _2, _3 to the snapshot names while the top-level
-    # receipt is overwritten, so the contemporary snapshot is the highest-
-    # numbered one (#761). Absent on the agentic path, whose Phase 3
-    # re-receipts what it changes. A reshaped path is kept out of the
-    # findings and is *not* credited for coverage: its leaves show under
-    # `without_receipt` until something re-receipts them.
-    original = None
-    stem = receipt.name.replace("_coverage_receipt.yaml", "_full")
-    snaps = sorted((receipt.parent / "intermediate").glob(f"{stem}.yaml")) + sorted(
-        (receipt.parent / "intermediate").glob(f"{stem}_[0-9]*.yaml"),
-        key=lambda p: int(p.stem.rsplit("_", 1)[1]))
-    if snaps:
-        try:
-            original = yaml.safe_load(snaps[-1].read_text(encoding="utf-8")) or None
-        except yaml.YAMLError:
-            original = None
+    # A reshaped path is kept out of the findings and is *not* credited for
+    # coverage: its leaves show under `without_receipt` until something
+    # re-receipts them. A path whose entry merely moved is followed to it
+    # by identity (#899, `remap_path`).
+    original = phase1_snapshot(receipt)
     block = check(rec, m, texts, full, record_bundle_md5, original)
     block["artifacts"] = {
         "receipt": {"path": str(receipt), "sha256": hashlib.sha256(receipt.read_bytes()).hexdigest()},

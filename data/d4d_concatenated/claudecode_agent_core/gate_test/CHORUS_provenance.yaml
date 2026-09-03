@@ -331,6 +331,10 @@ form:
   undeclared_prefixes:
     bridge2ai: 245
   undeclared_prefix_occurrences: 245
-  british_spellings: 2
+  british_spellings: 0
   organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=2

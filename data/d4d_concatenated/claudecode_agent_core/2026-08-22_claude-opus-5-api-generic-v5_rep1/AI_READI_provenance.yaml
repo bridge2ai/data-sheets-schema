@@ -372,7 +372,7 @@ form:
   - data/d4d_concatenated/claudecode_agent_core/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
   undeclared_prefixes: {}
   undeclared_prefix_occurrences: 0
-  british_spellings: 0
+  british_spellings: 9
   organisational_fragments: 0
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
@@ -380,7 +380,8 @@ form:
   instrument_note: 'form recomputed 2026-08-22 under British instrument v2.1 and undeclared-prefix
     classification v2.1 (ark scheme excluded and grounded instead; urn NID-aware —
     a urn under an unregistered NID counts as urn:<nid>; #671). gc_label_variant fields
-    date from recompute, not the run. Previous british=0, undeclared=0'
+    date from recompute, not the run. Previous british=0, undeclared=0 | form recomputed
+    2026-09-02 under british instrument v3 (#836/#859); previous british=0'
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-22_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_audit.json
   sha256: 787f4d47c7405e9c6b5557cab59adbf220884522aa70c4010260d3f8e7bb0066

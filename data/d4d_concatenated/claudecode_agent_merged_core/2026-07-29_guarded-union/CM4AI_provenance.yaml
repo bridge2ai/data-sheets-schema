@@ -94,8 +94,12 @@ form:
   records:
   - data/d4d_concatenated/claudecode_agent_merged/2026-07-29_guarded-union/CM4AI_d4d.yaml
   undeclared_prefixes:
-    urn: 91
+    urn:cm4ai: 91
   undeclared_prefix_occurrences: 91
-  british_spellings: 9
+  british_spellings: 8
   organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=9

@@ -383,6 +383,9 @@ form:
     Bridge2AI-Voice: 47
     Bridge2AI Voice: 8
   gc_label_variant_occurrences: 55
+  recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=0
 receipts:
   expected: true
   non_checks:
@@ -407,6 +410,10 @@ receipts:
     adjacent: 7
     elsewhere: 2
     spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
     mismatched: 0
     unchecked: 0
     no_value_overlap: 3
@@ -485,6 +492,38 @@ receipts:
     unresolved: []
     path_off_by_one: []
     path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt:
+    - path: content_warnings[0].warnings
+      resolved_path: content_warnings[0].warnings
+    - path: creators[0]
+      resolved_path: creators[0]
+    - path: creators[1]
+      resolved_path: creators[1]
+    - path: description
+      resolved_path: description
+    - path: external_resources[4]
+      resolved_path: external_resources[4]
+    - path: id
+      resolved_path: id
+    - path: page
+      resolved_path: page
+    - path: related_datasets[0]
+      resolved_path: related_datasets[0]
+    - path: related_datasets[0].description
+      resolved_path: related_datasets[0].description
+    - path: related_datasets[0].target_dataset
+      resolved_path: related_datasets[0].target_dataset
+    - path: source_caveats
+      resolved_path: source_caveats
+    value_changed_after_receipt_count: 11
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
     - creators[0].principal_investigator.name
     - creators[15]
@@ -554,7 +593,7 @@ receipts:
   summary: chunks 22/22 reviewed · snippets 145/154 verified (7 in an adjacent chunk)
     (2 in another chunk) (3 bearing on no token of their value) · slots 121/288 with
     a receipt (164 never receipted, 3 added after the receipt) (18 exempt) · 3 receipt
-    path(s) reshaped by reconcile
+    path(s) reshaped by reconcile · 11 value(s) changed after the receipt
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_coverage_receipt.yaml
@@ -562,6 +601,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/VOICE_chunks.yaml
       sha256: f748d123c5f40b18d70a657088392eebfeb9fc3d5ae051f4aae760084ec182b9
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/intermediate/VOICE_audit.json
   sha256: f799f19d7ed010d71a343d7a55dfd3550238b0978a81341825f8e2559c607eae
@@ -615,3 +655,66 @@ review:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_review.yaml
       sha256: 9d4e216e7837d361274ac4c0218e97c2b2efdcd136d82fd99880479cd9e21a25
   recorded_by: d4d review check
+canonical:
+  criterion: full and core both validate against the current schema, then fewest review
+    adverse verdicts (differences of at most 2 a tie), then most slots, then lowest
+    label
+  selected_from:
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    slots: 77
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 2
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+    slots: 82
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 7
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+    slots: 81
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 5
+  margin_over_runner_up: null
+  reviews_applied: true
+  review_margin: 2
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-09-01_claude-opus-5-api-generic-v7_rep2
+  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep2
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+canonical_history:
+- criterion: full and core both validate against the current schema, then fewest review
+    adverse verdicts (differences of at most 2 a tie), then most slots, then lowest
+    label
+  selected_from:
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    slots: 77
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 2
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+    slots: 82
+    validation: valid
+    validation_recorded_at_run_time: stale
+    review_adverse: 7
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+    slots: 81
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 5
+  margin_over_runner_up: null
+  reviews_applied: true
+  review_margin: 2
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-09-01_claude-opus-5-api-generic-v7_rep2
+  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep2
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+  superseded_by:
+    label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    at: '2026-09-03T03:01:43+00:00'
+    by: d4d runs select
+    reason: re-selected

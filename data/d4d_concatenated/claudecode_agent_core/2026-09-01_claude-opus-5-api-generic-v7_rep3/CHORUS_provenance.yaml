@@ -381,6 +381,9 @@ form:
   organisational_fragments: 0
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
+  recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=0
 receipts:
   expected: true
   non_checks:
@@ -427,7 +430,7 @@ receipts:
     populated: 210
     exempt: 31
     receiptable: 179
-    with_receipt: 68
+    with_receipt: 67
     without_receipt:
     - id
     - name
@@ -440,6 +443,7 @@ receipts:
     - tasks[2].response
     - tasks[3].response
     - creators[0].principal_investigator
+    - creators[1].affiliations[0].name
     - instances[0].instance_type
     - instances[0].data_topic
     - instances[1].instance_type
@@ -478,9 +482,8 @@ receipts:
     - raw_data_sources[0].raw_data_format
     - raw_data_sources[0].access_details
     - raw_data_sources[1].source_description
-    - raw_data_sources[1].source_type
-    without_receipt_truncated: 61
-    never_receipted: 109
+    without_receipt_truncated: 62
+    never_receipted: 110
     added_after_receipt: 2
     receipt_paths: 90
     unresolved: []
@@ -488,8 +491,30 @@ receipts:
     path_off_by_one_count: 0
     addressing_slips: []
     addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt:
+    - path: data_governance.access_review_process
+      resolved_path: data_governance.access_review_process
+    - path: funders[0]
+      resolved_path: funders[0]
+    - path: funders[0].notes
+      resolved_path: funders[0].notes
+    - path: license_and_use_terms.license_terms
+      resolved_path: license_and_use_terms.license_terms
+    value_changed_after_receipt_count: 4
+    index_reused_by_another_entry:
+    - path: creators[1]
+      basis: entry_dropped
+    - path: creators[1].affiliations[0].name
+      basis: entry_dropped
+    index_reused_by_another_entry_count: 2
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
     - creators[0].principal_investigator.name
+    - creators[1]
+    - creators[1].affiliations[0].name
     - creators[1].principal_investigator.name
     - creators[2].affiliations[0].name
     - creators[2].principal_investigator.name
@@ -498,7 +523,7 @@ receipts:
     - creators[5].affiliations[0].name
     - creators[5].principal_investigator.name
     - creators[6].notes
-    receipts_to_removed_values: 9
+    receipts_to_removed_values: 11
   findings:
   - kind: snippet_adjacent_chunk
     chunk: c008
@@ -509,9 +534,10 @@ receipts:
   findings_truncated: null
   findings_gated: 0
   summary: chunks 8/8 reviewed · snippets 107/108 verified (1 in an adjacent chunk)
-    (2 bearing on no token of their value) · slots 68/179 with a receipt (109 never
-    receipted, 2 added after the receipt) (31 exempt) · 9 receipt path(s) reshaped
-    by reconcile
+    (2 bearing on no token of their value) · slots 67/179 with a receipt (110 never
+    receipted, 2 added after the receipt) (31 exempt) · 11 receipt path(s) reshaped
+    by reconcile · 4 value(s) changed after the receipt · 2 receipt index(es) reused
+    by another entry
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_coverage_receipt.yaml
@@ -519,6 +545,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/CHORUS_chunks.yaml
       sha256: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/intermediate/CHORUS_audit.json
   sha256: fcc23408dc211f608443d80be097522bba1e657d45b33a53f6cbb42c1a79a31b

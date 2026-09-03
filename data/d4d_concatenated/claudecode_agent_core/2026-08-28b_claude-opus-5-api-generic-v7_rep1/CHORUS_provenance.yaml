@@ -389,6 +389,8 @@ form:
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=0
 receipts:
   expected: true
   non_checks:
@@ -409,10 +411,29 @@ receipts:
   snippets:
     total: 98
     verified: 96
+    linewrap_joined: 0
     adjacent: 2
     elsewhere: 0
+    spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
     mismatched: 0
     unchecked: 0
+    no_value_overlap: 3
+    no_value_overlap_sample:
+    - chunk: c003
+      slot: regulatory_restrictions.confidentiality_level
+      snippet: Controlled access
+    - chunk: c003
+      slot: distribution_formats[4].format
+      snippet: Yes (open source EDF+ and
+    - chunk: c006
+      slot: funders[0].grantor
+      snippet: This project is funded by the NIH under award number OT2OD03
+    entry_single_leaf: 0
+    entry_single_leaf_sample: []
   slots:
     populated: 195
     exempt: 28
@@ -470,8 +491,42 @@ receipts:
     - acquisition_methods[4].acquisition_details
     - acquisition_methods[4].was_validated_verified
     without_receipt_truncated: 63
+    never_receipted: 113
+    added_after_receipt: 0
     receipt_paths: 80
     unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity:
+    - path: instances[3].counts
+      resolved_path: instances[2].counts
+      basis: by_overlap
+    - path: instances[4].notes
+      resolved_path: instances[3].notes
+      basis: by_overlap
+    remapped_by_identity_count: 2
+    value_changed_after_receipt:
+    - path: collection_timeframes[0].timeframe_details
+      resolved_path: collection_timeframes[0].timeframe_details
+    - path: distribution_formats[3].format
+      resolved_path: distribution_formats[3].format
+    - path: distribution_formats[4].format
+      resolved_path: distribution_formats[4].format
+    - path: instances
+      resolved_path: instances
+    - path: instances[3].counts
+      resolved_path: instances[2].counts
+    - path: maintainers[0].maintainer_details
+      resolved_path: maintainers[0].maintainer_details
+    - path: source_caveats
+      resolved_path: source_caveats
+    value_changed_after_receipt_count: 7
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
     - at_risk_populations.at_risk_groups_included
     - creators[0].principal_investigator.name
@@ -482,13 +537,12 @@ receipts:
     - creators[5].principal_investigator.name
     - data_governance.committee_contact.name
     - human_subject_research.involves_human_subjects
-    - instances[3].counts
-    - instances[4].notes
     - missing_data_documentation[0].missing_data_patterns[1]
     - missing_data_documentation[0].missing_data_patterns[3]
     - notes
     - sampling_strategies[0].strategies[0]
     - sampling_strategies[0].strategies[1]
+    receipts_to_removed_values: 14
   findings:
   - kind: snippet_adjacent_chunk
     chunk: c004
@@ -503,8 +557,12 @@ receipts:
     slot: ip_restrictions.restrictions[0]
     snippet: Apache-2.0
   findings_truncated: null
+  findings_gated: 0
   summary: chunks 8/8 reviewed · snippets 96/98 verified (2 in an adjacent chunk)
-    · slots 54/167 with a receipt (28 exempt) · 16 receipt path(s) reshaped by reconcile
+    (3 bearing on no token of their value) · slots 54/167 with a receipt (113 never
+    receipted, 0 added after the receipt) (28 exempt) · 14 receipt path(s) reshaped
+    by reconcile · 2 receipt path(s) followed by identity · 7 value(s) changed after
+    the receipt
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/CHORUS_coverage_receipt.yaml
@@ -512,7 +570,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/CHORUS_chunks.yaml
       sha256: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
-  recorded_by: d4d receipts check
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/intermediate/CHORUS_audit.json
   sha256: d8fba00f4c8660225cce0d53f6a24200a3a62f7b0dc576487e3fe9064ba201eb

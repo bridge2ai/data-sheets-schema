@@ -377,10 +377,13 @@ form:
   - data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d_core.yaml
   undeclared_prefixes: {}
   undeclared_prefix_occurrences: 0
-  british_spellings: 30
+  british_spellings: 45
   organisational_fragments: 0
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
+  recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=30
 receipts:
   expected: true
   non_checks:
@@ -517,8 +520,8 @@ receipts:
     - sampling_strategies[0].is_random
     - sampling_strategies[0].is_representative
     without_receipt_truncated: 297
-    never_receipted: 329
-    added_after_receipt: 18
+    never_receipted: 330
+    added_after_receipt: 17
     receipt_paths: 184
     unresolved: []
     path_off_by_one: []
@@ -526,6 +529,58 @@ receipts:
     addressing_slips:
     - variables[24].notes
     addressing_slips_count: 1
+    remapped_by_identity:
+    - path: variables[33].measurement_technique
+      resolved_path: variables[37].measurement_technique
+      basis: by_variable_name
+    remapped_by_identity_count: 1
+    value_changed_after_receipt:
+    - path: collection_timeframes[1].timeframe_details
+      resolved_path: collection_timeframes[1].timeframe_details
+    - path: creators[0].notes
+      resolved_path: creators[0].notes
+    - path: creators[0].principal_investigator
+      resolved_path: creators[0].principal_investigator
+    - path: data_governance.access_review_process
+      resolved_path: data_governance.access_review_process
+    - path: data_governance.stewardship_roles
+      resolved_path: data_governance.stewardship_roles
+    - path: description
+      resolved_path: description
+    - path: ip_restrictions.restrictions
+      resolved_path: ip_restrictions.restrictions
+    - path: is_deidentified.deidentification_details
+      resolved_path: is_deidentified.deidentification_details
+    - path: license
+      resolved_path: license
+    - path: maintainers[0].maintainer_details
+      resolved_path: maintainers[0].maintainer_details
+    - path: missing_data_documentation[0].missing_data_causes
+      resolved_path: missing_data_documentation[0].missing_data_causes
+    - path: notes
+      resolved_path: notes
+    - path: participant_privacy[0].privacy_techniques
+      resolved_path: participant_privacy[0].privacy_techniques
+    - path: regulatory_restrictions.other_compliance
+      resolved_path: regulatory_restrictions.other_compliance
+    - path: relationships[0].relationship_details
+      resolved_path: relationships[0].relationship_details
+    - path: sampling_strategies[0].strategies
+      resolved_path: sampling_strategies[0].strategies
+    - path: sensitive_elements[0].sensitivity_details
+      resolved_path: sensitive_elements[0].sensitivity_details
+    - path: source_caveats
+      resolved_path: source_caveats
+    - path: splits[0].split_details
+      resolved_path: splits[0].split_details
+    - path: variables[31].measurement_technique
+      resolved_path: variables[31].measurement_technique
+    value_changed_after_receipt_count: 21
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    path_not_in_snapshot:
+    - variables[24].notes
+    path_not_in_snapshot_count: 1
     reshaped_by_reconcile:
     - data_protection_impacts[0].impact_details
     - download_url
@@ -674,9 +729,10 @@ receipts:
   summary: chunks 28/28 reviewed · snippets 221/243 verified (1 across an artifact
     line) (3 unattesting, below the floors) (17 in an adjacent chunk) (2 in another
     chunk) (12 bearing on no token of their value) (1 entry receipt(s) overlapping
-    one leaf) · slots 161/508 with a receipt (329 never receipted, 18 added after
+    one leaf) · slots 161/508 with a receipt (330 never receipted, 17 added after
     the receipt) (54 exempt) · 7 receipt path(s) reshaped by reconcile · 1 addressing
-    slip(s)
+    slip(s) · 1 receipt path(s) followed by identity · 21 value(s) changed after the
+    receipt · 1 receipt path(s) not in the snapshot
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_coverage_receipt.yaml
@@ -684,7 +740,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/AI_READI_chunks.yaml
       sha256: b46977b4c4b66adb903c6d288428646024275da21f9dbc2fb931b5c36d48ac0a
-  recorded_by: d4d receipts check
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/intermediate/AI_READI_audit.json
   sha256: e4e68a2f83dbe289fac9f32442d4f8150e6e3b289feb1877ff44d7ab952e2ebc
@@ -791,3 +847,66 @@ review:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_review.yaml
       sha256: 37de592ba181d0201f5b4e326023ad69a0cc1dbe1bb324e0257709f88971043a
   recorded_by: d4d review check
+canonical:
+  criterion: full and core both validate against the current schema, then fewest review
+    adverse verdicts (differences of at most 2 a tie), then most slots, then lowest
+    label
+  selected_from:
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    slots: 79
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 9
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+    slots: 81
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 12
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+    slots: 79
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 9
+  margin_over_runner_up: 0
+  reviews_applied: true
+  review_margin: 2
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-09-01_claude-opus-5-api-generic-v7_rep2
+  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep2
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+canonical_history:
+- criterion: full and core both validate against the current schema, then fewest review
+    adverse verdicts (differences of at most 2 a tie), then most slots, then lowest
+    label
+  selected_from:
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    slots: 79
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 9
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+    slots: 81
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 12
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+    slots: 79
+    validation: valid
+    validation_recorded_at_run_time: stale
+    review_adverse: 9
+  margin_over_runner_up: 0
+  reviews_applied: true
+  review_margin: 2
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-09-01_claude-opus-5-api-generic-v7_rep2
+  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep2
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+  superseded_by:
+    label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    at: '2026-09-03T03:00:57+00:00'
+    by: d4d runs select
+    reason: re-selected

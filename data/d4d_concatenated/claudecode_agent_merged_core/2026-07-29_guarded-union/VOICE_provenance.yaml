@@ -96,6 +96,13 @@ form:
   - data/d4d_concatenated/claudecode_agent_merged/2026-07-29_guarded-union/VOICE_d4d.yaml
   undeclared_prefixes: {}
   undeclared_prefix_occurrences: 0
-  british_spellings: 19
+  british_spellings: 34
   organisational_fragments: 0
+  gc_label_variants:
+    Bridge2AI-Voice: 42
+    Bridge2AI Voice: 19
+    B2AI-Voice: 3
+  gc_label_variant_occurrences: 64
   recorded_by: backfill_checks
+  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=19

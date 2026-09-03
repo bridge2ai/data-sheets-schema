@@ -191,3 +191,26 @@ class RefusalTest(unittest.TestCase):
         p = self._write("# only comments\n")
         with self.assertRaises(ValueError):
             apply(p, {"grounding": {"checked": True}})
+
+
+class NeverEraseAMeasurement(unittest.TestCase):
+    def test_an_unchecked_recomputation_does_not_overwrite_a_checked_block(self):
+        """#907 review: a --blocks receipts pass over a drifted bundle erased
+        three run-attested receipts blocks with `checked: false`."""
+        import tempfile
+        from pathlib import Path
+
+        import yaml
+
+        from data_sheets_schema.backfill_checks import apply
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "P_provenance.yaml"
+            p.write_text("# h\n" + yaml.safe_dump({"run": {"label": "L"},
+                                                    "receipts": {"checked": True, "chunks": {"reviewed": 28}},
+                                                    "form": {"british_spellings": 3}}))
+            changed = apply(p, {"receipts": {"checked": False, "reason": "bundle drifted"},
+                                "form": {"british_spellings": 5}}, overwrite=True)
+            rec = yaml.safe_load(p.read_text())
+            self.assertTrue(changed)
+            self.assertEqual(rec["receipts"]["chunks"]["reviewed"], 28)
+            self.assertEqual(rec["form"]["british_spellings"], 5)

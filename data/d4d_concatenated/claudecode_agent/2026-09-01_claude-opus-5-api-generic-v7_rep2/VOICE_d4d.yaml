@@ -378,8 +378,7 @@ acquisition_methods:
   was_reported_by_subjects: true
   acquisition_details: >-
     Acoustic tasks were recorded directly from participants with a tablet application, while
-    demographics, confounders and validated questionnaires were self-reported by participants or,
-    where appropriate, by a parent or decision-maker.
+    demographics, confounders and validated questionnaires were self-reported by participants.
 - was_validated_verified: true
   acquisition_details: >-
     Clinical diagnoses were verified by clinicians reviewing audio and imaging data, electronic

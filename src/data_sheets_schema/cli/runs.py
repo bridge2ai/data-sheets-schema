@@ -1141,7 +1141,14 @@ def _validates(record: Path) -> tuple[bool, str]:
 @click.option("--execute", is_flag=True,
               help="Record the choice in the winner's provenance. Without "
                    "this, report and write nothing.")
-def select_cmd(method, project, config, allow_unverified, execute):
+@click.option("--ignore-reviews", is_flag=True,
+              help="Rank on coverage alone even when every eligible replicate "
+                   "carries a checked review block (#660).")
+@click.option("--review-margin", default=2, show_default=True, type=int,
+              help="Adverse-count differences at or below this are a tie "
+                   "(binomial noise on a 50-slot sample is ±2–3 at the observed "
+                   "rates); coverage then decides.")
+def select_cmd(method, project, config, allow_unverified, execute, ignore_reviews, review_margin):
     """Mark one replicate canonical, keeping all of them.
 
     Selection, not merging. Replicates state different facts on **47-63% of the
@@ -1162,11 +1169,23 @@ def select_cmd(method, project, config, allow_unverified, execute):
     the old number did was make the case look stronger than the evidence for
     it, which is worth not repeating.
 
-    The criterion is **validity first, coverage second**. Coverage alone is
-    close to arbitrary here: margins across the generic-v2 config are +0, +1,
-    +2 and +1 slots, and AI-READI is an outright tie. Validity is decisive —
-    it breaks that tie, eliminates a higher-coverage CM4AI replicate, and shows
-    that no VOICE replicate is shippable at all.
+    The criterion is **validity first, then the review's adverse count, then
+    coverage**. Coverage alone is close to arbitrary here: margins across the
+    generic-v2 config are +0, +1, +2 and +1 slots, and AI-READI is an
+    outright tie. Validity is decisive — it breaks that tie, eliminates a
+    higher-coverage CM4AI replicate, and shows that no VOICE replicate is
+    shippable at all.
+
+    The adverse count joins the criterion because coverage opposed it
+    (#660): on the 2026-09-01 v7 arm the coverage pick was the most-adverse
+    replicate for AI_READI (12 vs 9/9) and VOICE (7, over the arm's cleanest
+    record at 2) and tied-most for CHORUS. It applies only when *every*
+    eligible replicate carries a checked `review` block — a criterion that
+    compares a reviewed record with an unreviewed one would reward not
+    being reviewed — and adverse-count differences within `--review-margin`
+    are a tie, because a 50-slot sample carries ±2–3 of binomial noise at
+    the observed rates. Without reviews the criterion is the earlier one,
+    and the recorded block says which applied.
 
     Nothing is moved or copied. The winner's provenance gains a `canonical`
     block naming every candidate and the criterion, so the choice is auditable
@@ -1184,8 +1203,25 @@ def select_cmd(method, project, config, allow_unverified, execute):
             f"selection needs at least two replicates of {config!r}; "
             f"found {len(labels)}")
 
+    def review_adverse(label: str) -> int | None:
+        """The checked review block's adverse count, or None when the record
+        carries none (absence is not zero adverse)."""
+        pp = record_path_for(project, method, label, CONCAT_DIR)
+        if not pp.exists():
+            return None
+        try:
+            rec = _yaml.safe_load(pp.read_text(encoding="utf-8")) or {}
+        except (_yaml.YAMLError, OSError, UnicodeDecodeError):
+            return None
+        rv = rec.get("review") if isinstance(rec, dict) else None
+        if not isinstance(rv, dict) or not rv.get("checked") or not isinstance(rv.get("adverse"), int):
+            return None
+        return rv["adverse"]
+
     candidates = []
+    adverse_of: dict[str, int | None] = {}
     for label in labels:
+        adverse_of[label] = review_adverse(label)
         record = base_dir / label / f"{project}_d4d.yaml"
         if not record.exists():
             candidates.append((label, None, "no record", 0, "no record", "no record"))
@@ -1217,7 +1253,9 @@ def select_cmd(method, project, config, allow_unverified, execute):
         drift = (f"  (provenance says {recorded}; the schema has moved since "
                  f"this run)" if recorded != status and
                  recorded in (VALID, INVALID) else "")
-        click.echo(f" {mark}{label:52s} {slots:3d} slots  {detail}{drift}")
+        adv = adverse_of.get(label)
+        rv = f"  {adv:2d} adverse" if adv is not None else "  no review"
+        click.echo(f" {mark}{label:52s} {slots:3d} slots{rv}  {detail}{drift}")
 
     if not eligible:
         raise click.ClickException(
@@ -1226,15 +1264,45 @@ def select_cmd(method, project, config, allow_unverified, execute):
             f"to be broken. Fix the generator and rerun, or pass "
             f"--allow-unverified if the statuses are merely unrecorded.")
 
-    # Coverage second, and the label as a deterministic tie-break so repeated
-    # runs agree. Margins are thin enough that ties are ordinary, not freak.
+    # The review's adverse count, when every eligible replicate has one and
+    # it is not switched off; those within `review_margin` of the fewest are
+    # the contenders, and coverage then decides among them, with the label
+    # as a deterministic tie-break so repeated runs agree (#660).
+    unreviewed = [c[0] for c in eligible if adverse_of.get(c[0]) is None]
+    if ignore_reviews:
+        reviews_applied, why = False, "--ignore-reviews"
+    elif unreviewed:
+        reviews_applied, why = False, f"no checked review block on {', '.join(unreviewed)}"
+    else:
+        reviews_applied, why = True, None
+    if reviews_applied:
+        fewest = min(adverse_of[c[0]] for c in eligible)
+        contenders = [c for c in eligible if adverse_of[c[0]] - fewest <= review_margin]
+        criterion = ("full and core both validate against the current schema, then fewest "
+                     f"review adverse verdicts (differences of at most {review_margin} a tie), "
+                     "then most slots, then lowest label")
+    else:
+        contenders = list(eligible)
+        criterion = "full and core both validate against the current schema, then most slots, then lowest label"
+    contenders.sort(key=lambda c: (-c[3], c[0]))
     eligible.sort(key=lambda c: (-c[3], c[0]))
-    winner = eligible[0]
-    runner_up = eligible[1] if len(eligible) > 1 else None
+    winner = contenders[0]
+    runner_up = contenders[1] if len(contenders) > 1 else None
     margin = winner[3] - runner_up[3] if runner_up else None
 
-    click.echo(f"\n→ {winner[0]}  ({winner[3]} slots)")
-    if margin == 0:
+    click.echo(f"\n→ {winner[0]}  ({winner[3]} slots"
+               + (f", {adverse_of[winner[0]]} adverse" if reviews_applied else "") + ")")
+    if reviews_applied:
+        out_of = [c for c in eligible if c not in contenders]
+        click.echo(f"   review adverse counts decided first (margin {review_margin}): "
+                   + ", ".join(f"{c[0].rsplit('_', 1)[-1]} {adverse_of[c[0]]}" for c in eligible)
+                   + (f"; {len(out_of)} replicate(s) out of contention on adverse count" if out_of else
+                      "; all within the margin, coverage decided"))
+    else:
+        click.echo(f"   coverage decided; reviews not applied ({why})")
+    if runner_up is None:
+        pass
+    elif margin == 0:
         click.echo("   Tied on coverage with the runner-up; the label broke the "
                    "tie. The choice between them is arbitrary on this "
                    "criterion.")
@@ -1293,12 +1361,15 @@ def select_cmd(method, project, config, allow_unverified, execute):
     own_prior = data.pop("canonical", None) or {}
     data.pop("canonical_superseded_by", None)
     data["canonical"] = {
-        "criterion": "full and core both validate against the current schema, then most slots, then lowest label",
+        "criterion": criterion,
         "selected_from": [
             {"label": lab, "slots": n, "validation": detail,
-             "validation_recorded_at_run_time": rec}
+             "validation_recorded_at_run_time": rec,
+             "review_adverse": adverse_of.get(lab)}
             for lab, _r, st, n, rec, detail in candidates],
         "margin_over_runner_up": margin,
+        "reviews_applied": reviews_applied,
+        **({"reviews_not_applied_because": why} if why else {"review_margin": review_margin}),
         "selected_by": "d4d runs select",
     }
     # Named, not merely removed. A mark that vanishes leaves no trace of what

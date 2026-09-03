@@ -409,7 +409,8 @@ form:
   instrument_note: 'form recomputed 2026-08-22 under British instrument v2.1 and undeclared-prefix
     classification v2.1 (ark scheme excluded and grounded instead; urn NID-aware —
     a urn under an unregistered NID counts as urn:<nid>; #671). gc_label_variant fields
-    date from recompute, not the run. Previous british=2, undeclared=0'
+    date from recompute, not the run. Previous british=2, undeclared=0 | form recomputed
+    2026-09-02 under british instrument v3 (#836/#859); previous british=2'
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-20_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_audit.json
   sha256: 9908271b12b0c6c1f0ff7f5fbc0c332d55793a3769665bfc0e884ffe31a5948e

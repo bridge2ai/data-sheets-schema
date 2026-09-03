@@ -287,6 +287,21 @@ classes:
         inlined: true
         range: AnyBlock
 
+      dispositions:
+        description: >-
+          Curator dispositions of review-pass findings on this record (#903),
+          in order: each names the review item, the disposition — `retain`
+          (documented and left as generated) or `amend` (one literal
+          replacement applied to the full record and, where it carries the
+          text, the core record, with both files' sha256 before and after) —
+          the note, and who and when. Written by `d4d review disposition
+          --execute`; nothing else writes it. An amendment is a curator act
+          on a generated record and is its own definition; evaluations made
+          before it are named as predating it, never re-attributed.
+        multivalued: true
+        inlined_as_list: true
+        range: AnyBlock
+
       unverified:
         description: >-
           Values recorded but not observed. Named rather than silently trusted.
