@@ -583,3 +583,43 @@ intermediates:
   sha256: 206c62821db4d7dc688ccff5de23020294dca149aa36de7682cafdfd9a083ad6
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/intermediate/CM4AI_report.md
   sha256: b0ad606bc876900feb0c42b8d4845d3efbfb41f74c1cb746adc2e2b3865d445d
+review:
+  checked: true
+  items_total: 82
+  items_answered: 82
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 11
+    slot_receipted:
+      supported: 22
+      weak: 1
+      misread: 2
+    slot_receiptless:
+      bundle_supports: 17
+      exempt_by_nature: 3
+      inferred: 5
+    slot_reshaped:
+      still_supported: 4
+    rule:
+      violated: 7
+      followed: 9
+    pair_warning:
+      consistent: 1
+  adverse: 15
+  cannot_tell: 0
+  findings: []
+  summary: items 82/82 answered · 15 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5
+    reviewed_at: 2026-09-03 00:07:08+00:00
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/CM4AI_review_pack.yaml
+      sha256: 395fc33a3a177e0df748fa4238401ce900e00814628d866ef947cb6fd1ba8729
+    review:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/CM4AI_review.yaml
+      sha256: 1ce1d9c39b51fc41920d42eb989f3f9982b67a6ff71d44b7f1e72c102df990d7
+  recorded_by: d4d review check

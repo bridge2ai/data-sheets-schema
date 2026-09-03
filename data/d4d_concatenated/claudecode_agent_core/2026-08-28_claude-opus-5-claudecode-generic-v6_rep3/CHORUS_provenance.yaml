@@ -416,8 +416,12 @@ review:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CHORUS_review.yaml
       sha256: ff96d4a6f513e1d04c942647e1212ef9707957f8ccfd2472a05ae48142ad1d2e
   recorded_by: d4d review check
-canonical:
-  criterion: full and core both validate against the current schema, then most slots,
+canonical_superseded_by:
+  label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+  at: '2026-09-03T00:10:53+00:00'
+  by: d4d runs select
+canonical_history:
+- criterion: full and core both validate against the current schema, then most slots,
     then lowest label
   selected_from:
   - label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1
@@ -437,3 +441,7 @@ canonical:
   supersedes:
   - 2026-08-22c_claude-opus-5-api-generic-v5_rep3
   - 2026-08-20b_claude-opus-5-api-generic-v5_rep3
+  superseded_by:
+    label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    at: '2026-09-03T00:10:53+00:00'
+    by: d4d runs select

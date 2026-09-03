@@ -562,3 +562,25 @@ review:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_review.yaml
       sha256: 34ba2acd5f7dddf8dbafd716328614c7dbc5113dbbc864a3d76109b7e72b6d76
   recorded_by: d4d review check
+canonical:
+  criterion: full and core both validate against the current schema, then most slots,
+    then lowest label
+  selected_from:
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    slots: 53
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+    slots: 48
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+    slots: 53
+    validation: valid
+    validation_recorded_at_run_time: valid
+  margin_over_runner_up: 0
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep3
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep3

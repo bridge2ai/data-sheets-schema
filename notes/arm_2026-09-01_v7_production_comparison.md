@@ -1,8 +1,7 @@
 # v7 API production arm (2026-09-01): completion and 12-vs-12 comparison
 
-Status of this note: receipts and rubric sections final; the review
-section carries 1 of 12 reviews (the other 11 agents are suspended at a
-session-usage reset and resume tonight) and is finalized when they land.
+Status of this note: final — receipts, rubrics, the complete 12/12
+review pass, and the executed canonical selection.
 The registered matrix (#838/#849) completed 12/12 with zero failed runs:
 four production canaries (CM4AI retained under #877's off-by-one
 interpretation; VOICE and CHORUS passed outright; AI_READI retained under
@@ -50,18 +49,97 @@ cost rubric quality; per the cross-read (#815) these numbers measure the
 projects and the records' coverage, not grounding — the review pass is
 the grounding instrument.
 
-## Canonical selection (dry run; executed after the review pass)
+## Canonical selection (executed 2026-09-03)
 
-AI_READI rep2 (81 slots), CHORUS rep1 (53), CM4AI rep2 (73), VOICE rep2
-(82) — thin margins throughout, per the criterion's own caveat.
+AI_READI rep2 (81 slots), CHORUS rep1 (53, tie with rep3 broken by
+label — arbitrary on this criterion), CM4AI rep2 (73), VOICE rep2 (82) —
+thin margins throughout, per the criterion's own caveat. Executing the
+v7 selection demoted the four v6 canonical marks to `canonical_history`
+(the tool keeps one live mark per project; every demotion records what
+replaced it and nothing moved or was deleted). Per #660 the criterion
+has no view of the review's adverse counts; for CM4AI the review ranking
+(rep1 9 < rep2 11 < rep3 15 adverse) and the slot criterion happen to
+disagree only at the margin, and for the other projects the selected
+replicate is at or near fewest-adverse. Corroboration, not causation.
 
-## Review pass (1 of 12; in progress)
+## Review pass (12 of 12, complete)
 
-CHORUS rep1: 70/70 answered · 11 adverse · 0 cannot_tell — rule-15
-(111/179 receiptless incl. phase-1 values), four weak receipts (incl. the
-CTP-deid bare-repo-name exemplar), four inferred values, rule-01/06.
-Remaining 11 reviews resume after the session-usage reset; the adverse
-table, the v6-vs-v7 adverse comparison, and the cross-read update follow.
+One `d4d-review-record` agent per record, all checks passed `--strict`,
+review blocks written into every provenance record. `slot adv` counts
+non-affirmative verdicts on the 50 sampled receipted+receiptless slots
+(same construction as the cross-read note); `rules` is violated/16.
+
+| record | items | slot adv | rules | total adverse | cannot_tell |
+|---|---|---|---|---|---|
+| AI_READI rep1 | 78/78 | 6/50 (12%) | 3 | 9 | 0 |
+| AI_READI rep2 | 74/74 | 8/50 (16%) | 4 | 12 | 2 |
+| AI_READI rep3 | 77/77 | 3/50 (6%) | 6 | 9 | 3 |
+| CHORUS rep1 ✓ | 70/70 | 8/50 (16%) | 3 | 11 | 0 |
+| CHORUS rep2 | 80/80 | 7/50 (14%) | 4 | 11 | 0 |
+| CHORUS rep3 | 76/76 | 5/50 (10%) | 4 | 9 | 0 |
+| CM4AI rep1 | 83/83 | 6/50 (12%) | 3 | 9 | 0 |
+| CM4AI rep2 ✓ | 78/78 | 7/50 (14%) | 3 | 11 | 0 |
+| CM4AI rep3 | 82/82 | 8/50 (16%) | 7 | 15 | 0 |
+| VOICE rep1 | 71/71 | 0/50 (0%) | 2 | 2 | 0 |
+| VOICE rep2 ✓ | 74/74 | 4/50 (8%) | 3 | 7 | 0 |
+| VOICE rep3 | 71/71 | 3/50 (6%) | 2 | 5 | 1 |
+
+(✓ = the executed v7 canonical selection; AI_READI rep2 is also ✓.)
+
+**v6-vs-v7 adverse comparison.** v7 production: slot adverse 65/600
+(10.8%), rules violated 44/192 (mean 3.7/16). v6 agentic (cross-read
+note): 55/600 (9.2%), 37 violations (mean 3.1/15). The +1.6pp slot
+difference is inside the sampling noise the cross-read states (±2–3pp at
+these rates); the rule means are close. The headline is what production
+did to the exploratory v7 canaries' rule discipline: the Aug-28 cohort
+averaged **7.0** violations against production's **3.7** — the plan-as-
+done, Person-ranged-string and absence-statement failures that marked
+the canaries mostly did not recur, consistent with those records being
+generated under successive instrument fixes rather than the frozen
+configuration. VOICE rep1 at 0/50 slot adverse and 2 violations is the
+cleanest record of either arm.
+
+**Recurring findings with structure (issue candidates):**
+
+1. **Stale receipt paths after reconciliation** — confirmed independently
+   by four reviewers (AI_READI rep1 variables[22–26] off by one;
+   AI_READI rep3 slot-029 unsupported purely from the v1.0.0 insertion;
+   CM4AI rep1 external_resources[8]→[7]; CM4AI rep2 slots 013/028 after
+   the MassIVE split; CM4AI rep3 creators[38] after nine insertions).
+   Receipts describe the `full`-phase record (#742) while the pack
+   samples the reconciled one, so list insertions/reorders shift receipts
+   onto wrong entries and manufacture `unsupported` verdicts for
+   bundle-attested values. Proposed fix (rv2-AI_READI-r3): key the
+   claims join to entry identity rather than list index.
+2. **rule-15 coverage-degree, all 12 records** — every receipt is
+   well-formed with all chunks reviewed, but covers 106–161 of ~280–510
+   receiptable slots; sampled receiptless values are overwhelmingly
+   bundle-supplied (large creator rosters especially). Zero
+   `not_in_bundle` verdicts anywhere in the arm: the gap is coverage
+   degree, not fabrication.
+3. **Reconcile over-flattening class-ranged slots** — CM4AI rep2's §2.4
+   flattened valid Person objects citing the v4 scalar rule (emails and
+   ORCIDs present in bundle, discarded); all three CM4AI reps leave
+   `Grant.grant_number` empty with award numbers in notes because the
+   reconcile schema digest carries no key list for Grant.
+4. **Unforced identifier mints** — CM4AI rep3's twelve `#creator-*`/
+   `#grant-*` fragments naming real persons and NIH awards that nothing
+   references (rule-11/14); pack `id_slots` also classifies constructed
+   `file_collections[*].id` fragments as minted:false (AI_READI rep1).
+5. **Scope leak survivals** — VOICE rep2 carries one pediatric-methods
+   clause in an adult-referent slot (the #441 class; reconciliation
+   caught three others); CM4AI rep3 reads Oct-2025 archive channel
+   details as current June-2026 instances while withdrawing the protein
+   count on exactly that ground.
+
+**Rubric flags adjudicated by the reviews:** the AI_READI rep3 byte-sum
+flag is confirmed and worse than self-inconsistency — the claimed sum is
+wrong in value and direction (states +4,597,586 over; attested values
+sum 419,614 under) while the copied inputs are correct, a miscomputation
+presented as sourced fact. AI_READI rep3 also has the arm's only
+report/record contradiction (`extension_mechanism` claimed retained,
+absent from both records) and `is_sample: true` receipted by the very
+passage denying it.
 
 ## Rubric-flagged items for the review pass
 

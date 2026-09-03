@@ -1,0 +1,256 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: '2026-09-03T00:07:20Z'
+pack_sha256: 3a41faaa87c85038c074c4285351578a12fb1637c348cfe16cfe2509b928797d
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-25 are the concatenation banner and table of contents naming the eleven source files; no dataset fact appears"
+- id: chunk-c006
+  verdict: confirmed
+  evidence: "lines 1626-1704 are the BMJ Open reference list and page footer; the only dataset-adjacent line (ref 16, the v1.0.0 FAIRhub citation with docs.aireadi.org, lines 1633-1634) is already carried in version_access.versions_available and external_resources[0]"
+- id: chunk-c025
+  verdict: confirmed
+  evidence: "lines 6338-6647 are the blank UW IRB application template - source metadata header, then instructions and unanswered prompts only (e.g. lines 6351-6357 INSTRUCTIONS, 6392-6396 empty determination questions); the study's own answers begin in c027"
+- id: chunk-c026
+  verdict: confirmed
+  evidence: "lines 6648-6943 continue the blank IRB template - consent/assent/privacy question boilerplate with no study-specific answer anywhere in the span"
+- id: slot-005
+  verdict: supported
+  evidence: "license section 3.C, lines 2492-2499, states the prohibition, the even-if-BAA clause, the model-weight-modification definition of training, and the short-term prompting/querying exception - all as the value states; minor note: the license's 'where training includes...' (a scope definition) is rendered as 'because training includes...' (a rationale), which does not change what is prohibited"
+- id: slot-006
+  verdict: supported
+  evidence: "lines 2828 and 2852 state the exact title '\"title\": \"Flagship Dataset of Type 2 Diabetes from the AI-READI Project\"'"
+- id: slot-007
+  verdict: supported
+  evidence: "the datasetConsent block the snippet sits in (lines 2892-2900) states the classification verbatim and consentsDetails' T2D-only/public-vs-private note, both restated in the value; the value's opening clause (full protocol, open-source repository, biospecimens to sample repository) is bundle-attested in the study briefSummary at line 4725 rather than in this passage"
+- id: slot-008
+  verdict: weak
+  evidence: "the c022 passage supports half the value - fdaRegulated: false at line 5436 sits in the same RO-Crate block as the cited confidentialityLevel snippet (5415); but the c015 receipt (accessType, line 2983) no longer bears on the value at this slot: reconciliation finding 12 moved the accessType/HL7 content into regulatory_restrictions.source_caveats and rewrote other_compliance to the FDA statements, whose FAIRhub half is attested at lines 4719-4720, unreceipted"
+- id: slot-009
+  verdict: weak
+  evidence: "line 7358 'Database manager: Ingest data into the Redcap database and extract for processing' is a real on-topic role description but states neither of the value's claims; QC-before-FAIRhub is at lines 1183-1185 (c004) and UAB training at lines 346-360 (c002), neither cited here; note also lines 359-360 say data managers at each site oversee certification, while the value attributes oversight to UAB"
+- id: slot-010
+  verdict: supported
+  evidence: "lines 3209-3210 '\"size\": 176182781, \"numberOfFiles\": 7' sit inside the clinical_data directory entry (directoryName at line 3138), which is file_collections[1]"
+- id: slot-011
+  verdict: supported
+  evidence: "lines 1915-1927 state ELSI 'considered at every stage of the project cycle' and the review of datasheets/healthsheets documentation approaches; line 5414 names the four ethical reviewers; the bioethicist-guidance clause is attested at line 1503 (BMJ ethics section)"
+- id: slot-012
+  verdict: supported
+  evidence: "lines 957-961 (no video/audio, no GPS, not synced, chosen with privacy as primary concern), lines 968-983 (results returned by HIPAA-compliant encrypted email), and lines 1923-1927 (dissemination system, strict licence agreement, watermarking for both sets) together state the value; the licensee watermarking obligations are additionally at lines 2569-2571"
+- id: slot-013
+  verdict: supported
+  evidence: "line 4368 carries the full QC answer: flagged in REDCap, reports viewed by CRCs and Data Managers, credibility range checks, skip patterns, missing data filled from other portions, omission/duplication - matching the value clause by clause"
+- id: slot-014
+  verdict: supported
+  evidence: "line 4467 states consent required before any part of the protocol including questionnaires, the e-consent read-and-sign option without verbal communication, and the REDCap decide-not-to-participate route; in-person consent at visit start is attested at lines 343-345"
+- id: slot-015
+  verdict: supported
+  evidence: "line 4295 'In cases of survey data, skipped questions or incomplete responses are expected' - near verbatim"
+- id: slot-016
+  verdict: supported
+  evidence: "line 4201 'the Snellen visual acuity variables were dropped in this version of the dataset, such that now only logMAR visual acuity measurements are available' - the value states exactly this"
+- id: slot-017
+  verdict: supported
+  evidence: "license section 3.D, lines 2501-2508, states the permission to make/reproduce/distribute models not containing the Data and the pre-dissemination memorization-minimisation obligation, matching the value"
+- id: slot-018
+  verdict: supported
+  evidence: "line 2985 (verified-ID login, T2D-only agreement, license terms), lines 1195-1203 (yearly two-set release, controlled set needs institutional legal/privacy agreements), lines 1392-1395 (requirements being developed by the Data Access Committee) - each sentence of the value is in one of the cited passages; the access-page URL is at line 5411"
+- id: slot-019
+  verdict: weak
+  evidence: "line 4603 attests the topic is diabetes ('AI Ready and Exploratory Atlas for Diabetes Insights') but cannot attest the coded value: B2AI_TOPIC:43's referent lives in the external standards registry, which is neither in the bundle nor in the pack's schema files (the schema declares only values_from: B2AI_TOPIC), so the code rests on knowledge outside the declared evidence"
+- id: slot-020
+  verdict: weak
+  evidence: "line 7347 states the dataset 'will be publicly available with a commercial-friendly open-source license' - on topic but it does not state the T2D-only restriction or the agree-to-license access condition; those are attested at lines 2899 and 2985 (c015), not cited for this slot"
+- id: slot-021
+  verdict: supported
+  evidence: "lines 246-249 (CAB of 11 persons from the three sites including diversity in race and ethnicity, contributes to protocol development) and line 7280 (evaluates consent forms and research protocols, feedback considered in IRB modifications) together state the value"
+- id: slot-022
+  verdict: supported
+  evidence: "line 4290 'all instances are part of the same prospective data generation project (AI-READI). There is currently only one visit per participant'; the 4% figure is at line 4447 and the 10% figure at lines 4599/5356, so the value's caveat half is also bundle-stated"
+- id: slot-023
+  verdict: supported
+  evidence: "line 5453 '\"rai:dataAnnotationProtocol\": \"N/A - no labels are provided\"' supports the no-label claim; the hypothesis-agnostic rationale sentence is attested at line 4400"
+- id: slot-024
+  verdict: supported
+  evidence: "line 1358-1359 names the Garmin VivoSmart 5; the c024 passage (line 6150) around the 5-second snippet also states the 10 consecutive days and the return form recording worn wrist and dominant hand - every clause of the value is in the cited passages"
+- id: slot-025
+  verdict: supported
+  evidence: "line 4327's Optomed section: handheld, non-mydriatic, undilated images, 'the quality of the images vary from patient to patient and within the same patient' - matches the value"
+- id: slot-026
+  verdict: supported
+  evidence: "lines 294-295 ('Enrolment began on 18 July 2023...') and lines 361-365 (pilot enrolment 18 July - 30 November 2023, formal collection from 1 December 2023) state exactly what the caveat attributes to BMJ Open; the FAIRhub 19 July value it prefers is at line 2874"
+- id: slot-027
+  verdict: supported
+  evidence: "path removed by reconciliation finding 7, but the receipt's statement survives in top-level notes ('there is currently no mechanism for others outside the project to extend or augment the dataset'), and line 4595 states it, including the outside-the-project qualifier"
+- id: slot-028
+  verdict: supported
+  evidence: "line 2332 (with/without T2DM, harmonized across 3 sites), line 2903 (2280 participants, July 19 2023 - May 01 2025), line 4599 (356,343 files, ~3.82 TB) - the three cited passages state the description's principal quantitative and scope claims"
+- id: slot-029
+  verdict: supported
+  evidence: "table 2, lines 561-565 and 692-693: C reactive protein high sensitivity, mg/L, 0.0-10.0, 'Inflammation marker; risk factor for T2DM' - both sentences of the value"
+- id: slot-030
+  verdict: inferred
+  evidence: "no passage discourages this use; the value re-frames the generalization-limits answer (line 4334 / line 5440: cohort 'may not provide a comprehensive representation of the population', Pacific Islanders/Native Americans absent, urban and hospital-based recruitment) as a discouragement, and the healthsheet's own discouraged-uses answer (line 4233) points only to the license"
+- id: slot-031
+  verdict: bundle_supports
+  evidence: "lines 573-574 'Low-density lipoprotein cholesterol (calculated)' in the lab table; the snake_case name is the record's normalization of that row"
+- id: slot-032
+  verdict: inferred
+  evidence: "no passage states fairness analyses cannot be performed; it follows from line 4420 (sex, race, ethnicity 'are not being released with the public version') and lines 4355-4356 (splits aimed at reducing disparities 'when demographic labels are unavailable'); the balanced-splits half is stated at 4420"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "line 5438 '\"humanSubjectResearch\": \"Yes\"' and lines 4451-4452 healthsheet 'Does the dataset relate to people?' -> 'Yes'"
+- id: slot-034
+  verdict: exempt_by_nature
+  evidence: "a LinkML data-type token has no passage by its kind - 'float'/'integer' appear nowhere in the bundle (grep); the NO2 channel is attested as a measured quantity at line 1380 ('Nitrogen oxides (NO and NO2)') and line 6246"
+- id: slot-035
+  verdict: bundle_supports
+  evidence: "lines 378-379 'Systolic blood pressure, diastolic blood pressure and heart rate were measured twice separated by 2 min'; the variable_name is the record's snake_case normalization"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "lines 242-243 'Written informed consent is provided by all participants' and lines 337-345 (remote e-consent by computer, tablet or smart phone through REDCap; otherwise in person at the start of the visit)"
+- id: slot-037
+  verdict: bundle_supports
+  evidence: "line 3017: the dataset_description format list includes 'text/markdown' verbatim"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "line 3210 '\"numberOfFiles\": 7' in the clinical_data directory entry (line 3138); the same line pair is receipted under file_collections[1].total_bytes"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "line 3633 '\"numberOfFiles\": 173721' in the retinal_octa directory entry (line 3480)"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "line 3287 '\"directoryName\": \"retinal_flio\"'"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "table 2 lists NT-proBNP under 'EDTA plasma tests' (lines 520-535) and lines 490-492 state all non-CBC lab tests are performed by the UW NORC testing facility; table 3 lines 1074-1076 confirm NT-proBNP tested from EDTA plasma at UW NORC"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "lines 1729-1731/1737-1739 (dataset 'optimized for artificial intelligence research in type 2 diabetes mellitus'; AI-ready dataset for studying T2DM) and line 2899 ('only be used for type 2 diabetes related research'); the category label summarizes these stated lines"
+- id: slot-043
+  verdict: exempt_by_nature
+  evidence: "'processed_data' is a schema enum token no source states by its kind; the processed character of the collection is attested at lines 1334-1338 (.sdt exported, converted to DICOM for the data set) and 943-946"
+- id: slot-044
+  verdict: bundle_supports
+  evidence: "lines 1878-1882: public set 'stripped of Protected Health Information (PHI), as defined by the HIPAA ... Privacy Rule via the \"Safe Harbor\" method, as well as information related to the sex and race/ethnicity of the participants to prevent stigmatization of findings'"
+- id: slot-045
+  verdict: exempt_by_nature
+  evidence: "a composed fragment label: the base https://fairhub.io/datasets/3 is bundle-stated (line 2732 region, receipted at c014 'page') and the directory name 'environment' at line 3213; the composite URL itself appears nowhere and exists only as this record's label for the part (the pack's id_slots marks it minted: false only because it is not a fragment on the record's own doi)"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "line 4373 (raw data preserved but not shared outside the project team) and line 3140 ('Each CSV file in this directory is a one-to-one mapping to the OMOP CDM tables', clinical_data directory)"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "lines 861-884: table 2 continuation gives Urine albumin with unit mg/dL"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "line 6246: 'a custom-designed sensor unit (LeeLab Anura) was utilized to obtain environmental sensor data from each subject's home for a period of 10 days'; ambient temperature is in its recorded-channel list"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "lines 3831-3859: wearable_activity_monitor relatedStandard - CDS v0.1.1 'directory and its sub-directories are named and organized following the specification from this standard' and Open mHealth 'All the data files within this directory follow the format specified in this standard'"
+- id: slot-050
+  verdict: bundle_supports
+  evidence: "line 4320: 'No, the public dataset will not contain data that is considered sensitive.'"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "line 4255 'Each instance represents an individual patient.' and line 4280 'Each instance consists of all of the data available for an individual participating in the study.'"
+- id: slot-052
+  verdict: bundle_supports
+  evidence: "line 3215 ('environmental sensor device custom built for the AI-READI project'), line 3258 (modality directory environmental_sensor), line 3262 (leelab_anura device directory)"
+- id: slot-053
+  verdict: bundle_supports
+  evidence: "BMJ table 4 (lines 1225-1338) names Aurora IQ (Optomed), EIDON (iCare), Spectralis HRA, Maestro2 3D OCT-1, Triton DRI OCT, Cirrus 5000, and FLIO with their export formats; the healthsheet devices answer (line 4327) names Optomed Aurora IQ, iCare EIDON, Heidelberg Spectralis, Triton, Maestro2, FLIO and Zeiss Cirrus 5000"
+- id: slot-054
+  verdict: exempt_by_nature
+  evidence: "a LinkML data-type token has no passage by its kind - 'float' appears nowhere in the bundle (grep); triglycerides is attested as a decimal-ranged serum quantity at lines 569/665 (mg/dL, <150)"
+- id: slot-055
+  verdict: still_supported
+  evidence: "receipted passage line 4482 'No, a data protection impact analysis has not been conducted'; after reconciliation finding 6 the statement lives in top-level notes ('no data protection impact analysis of the potential impact of the dataset and its use on data subjects has been conducted') - same claim"
+- id: slot-056
+  verdict: still_supported
+  evidence: "receipted passage line 5411 '\"conditionsOfAccess\": \"https://fairhub.io/datasets/3/access\"'; after reconciliation finding 2 the URL lives in data_governance.access_review_process as 'The access route for version 3.0.0 is the FAIRhub access page at https://fairhub.io/datasets/3/access' - consistent with conditionsOfAccess"
+- id: slot-057
+  verdict: still_supported
+  evidence: "receipted passage line 4595; the statement now in top-level notes keeps the qualifier 'others outside the project', matching the passage's 'outside of those who are involved in the project'"
+- id: slot-058
+  verdict: still_supported
+  evidence: "receipted passage line 4521 'there is a theoretical risk of future re-identification'; now stated in participant_privacy[0].reidentification_risk ('The healthsheet records a theoretical risk of future re-identification'), same claim with source attribution"
+- id: slot-059
+  verdict: still_supported
+  evidence: "receipted passages lines 1199-1202 and line 2333; the collapsed sensitive_elements[0].sensitivity_details still states the controlled-access holdings and marks that set as 'not this release'; one list item ('sex') was dropped from this enumeration but the passage's claim is not contradicted (contains, not only), and sex withholding survives in description and is_deidentified.identifiers_removed"
+- id: slot-060
+  verdict: still_supported
+  evidence: "receipted passage lines 4345-4346 (healthsheet answers 'No' to identifying demographic sub-populations); the reshaped per-entry source_caveats on subpopulations[0] and [1] state exactly that answer and why it holds per variable"
+- id: slot-061
+  verdict: still_supported
+  evidence: "receipted passage: README split table at line 4599 (train race counts 204/369/343/660); splits[0].split_details now carries the same counts ('Hispanic 204, Asian 369, Black 343, White 660') along with the rest of the table"
+- id: rule-01
+  verdict: violated
+  evidence: "two sampled values carry entailments no passage states: discouraged_uses[0].discouragement_details (the 'is discouraged' framing - see slot-030, from lines 4334/5440) and known_limitations[3].scope_impact ('fairness analyses cannot be performed' - see slot-032, from lines 4420/4355-4356); both are deductions from stated lines rather than guesses, and elsewhere the record shows strong omission discipline (download_url, extension_mechanism, data_protection_impacts removed rather than filled), but the rule prefers omission over inference and these were carried"
+- id: rule-02
+  verdict: followed
+  evidence: "disagreements are represented, not silently resolved: collection_timeframes[0].source_caveats (18 vs 19 July), collection_timeframes[1].source_caveats and relationships[0] (4% vs 10% recorded side by side), top-level source_caveats items (1)-(6) covering the acronym expansion, accountable institution, target enrolment 4000/4000+/4600, and pilot-vs-year-two framing"
+- id: rule-03
+  verdict: followed
+  evidence: "one referent held throughout: id doi:10.60775/fairhub.3, version 3.0.0 public release; description and sensitive_elements[0] explicitly mark the controlled-access version as 'not the artifact this record describes'/'not this release'; the reconciliation report's finding 5 states that referent boundary and that the record asserts exactly one boolean about its declared referent"
+- id: rule-04
+  verdict: followed
+  evidence: "density tracks the evidence rather than a target: variables[38] keeps the eleven light channels as one array with a notes explaining the sources name no channels (record lines 1262-1270), and slots without evidence were removed rather than filled (reconciliation findings 2, 6, 7)"
+- id: rule-05
+  verdict: followed
+  evidence: "one object per entity: funders split into NIH and Research to Prevent Blindness; six prohibited_uses, three intended_uses, four purposes; reconciliation finding 9 split the composite particulate-matter and nitrogen-oxide variables into one entry per fraction/gas"
+- id: rule-06
+  verdict: followed
+  evidence: "absence-statements and pointers were removed from answer slots: download_url (access-gate URL), extension_mechanism, and data_protection_impacts were deleted and their facts moved to notes/access_review_process (reconciliation findings 2, 6, 7); remaining populated slots answer their own questions"
+- id: rule-07
+  verdict: followed
+  evidence: "content sits in the field it answers: the access route in data_governance.access_review_process rather than download_url; release cadence in updates.frequency/update_details; the re-identification risk in participant_privacy[0].reidentification_risk rather than future_use_impacts"
+- id: rule-08
+  verdict: followed
+  evidence: "class-ranged slots carry declared fields: affiliations are {id, name} Organization objects with ROR CURIEs; funders[0].grants[0] carries {id, name}; data_governance.accountable_organization carries {id, name}; principal_investigator holds the person's name as the schema's own slot description directs"
+- id: rule-09
+  verdict: followed
+  evidence: "declared prefixes are used wherever they fit: ROR:01yc7t268 etc. in all Organization ids, ORCID:0000-0002-7452-1648 in the PI string, doi:10.60775/fairhub.3 in id/latest_version_doi/related_datasets targets, bare DOI in the string-ranged doi slot; URLs appear only where no declared prefix covers the identifier (https://aireadi.org/, https://reporter.nih.gov/..., fairhub fragment ids)"
+- id: rule-10
+  verdict: followed
+  evidence: "every world-facing identifier is bundle-attested: the seven collaborator RORs at lines 4663-4714, WUSTL ROR at 4633, UW ROR in c021, Aaron Lee's ORCID at line 4645, NCT06002048 at 4612, grants P30DK035816/UL1TR003096 at lines 1533-1534, license DOI at 5410; the one strain is instances[0].data_topic B2AI_TOPIC:43, whose registry meaning is outside the bundle - recorded as weak at slot-019 rather than as a violation because the schema's values_from directs that vocabulary"
+- id: rule-11
+  verdict: followed
+  evidence: "no invented prefixes; persons carry a personal registry id (ORCID, line 4645) and organizations organization-registry ids (ROR); the only record-local labels (file_collections[*].id) are fragments composed on the evidence-supplied https://fairhub.io/datasets/3 page URL, per the rule's prescription"
+- id: rule-12
+  verdict: violated
+  evidence: "British spellings in the record's own prose, not quotations: 'programme' (record lines 47, 161, 1478), 'personalised' (368), 'macula-centred' (267), 'licence agreement' (449), 'colour fundus photographs' (767), 'centimetre' (841), 'generalisability' (866), 'prioritising' (939), 'artefacts' (1299), 'minimise' (1301)"
+- id: rule-13
+  verdict: followed
+  evidence: "collection_timeframes[0] states the higher-ranked FAIRhub value (19 July 2023) and records the BMJ disagreement in source_caveats; data_governance.source_caveats prefers the tier-1 FAIRhub committee name and accountable organization; equal-rank disagreements (4% vs 10%, both tier 1) are represented side by side rather than decided"
+- id: rule-14
+  verdict: not_applicable
+  evidence: "the pack's id_slots lists no entry with minted: true - every populated id is a world-facing reference, and the ten FileCollection ids are forced (schema declares the class id an identifier); the rule's compliance is nonetheless visible in reconciliation finding 10, which removed the three minted split fragments that nothing in the record referenced"
+- id: rule-15
+  verdict: violated
+  evidence: "the emission clause was followed (receipt beside the record, bundle_md5 matches, all 28 chunks in order with statuses from the closed set; validator: 28/28 reviewed, 221/243 snippets verified, 0 mismatched) but the completeness clause was not: only 161 of 508 receiptable slots carry receipts, and bundle-stated values carry none - e.g. participant_privacy[0].anonymization_method (lines 1878-1882), variables[10].variable_name (lines 573-574), file_collections[2].description (line 3215), informed_consent[0].consent_type (lines 337-345) - values the rule says the record must not carry without a receipt"
+- id: rule-16
+  verdict: followed
+  evidence: "no object sits in a scalar-ranged slot; reconciliation finding 11 converted principal_investigator from an object to the string form the slot description asks for, and finding 16 collapsed list-shaped values in string-ranged sub-slots (sampling_strategies[0].strategies, privacy_techniques, missing_data_patterns/causes); both records validate"
+- id: pair-01
+  verdict: consistent
+  evidence: "compared $.file_collections (full) against $.distributions (core), all ten entries in order: id, name, path, description, conforms_to, conforms_to_standard identical, and core 'bytes' equals full 'total_bytes' in every entry; collection_type and file_count are absent from the core because the core schema declares no such slots (grep of data_sheets_schema_core_all.yaml), a projection difference, not a divergence"
+notes: >-
+  Three instrument observations. (1) Reshape artifacts surfaced as receipted items: the
+  c015 accessType receipt under regulatory_restrictions.other_compliance (slot-008)
+  describes the pre-reconciliation value that finding 12 moved into source_caveats -
+  the post-receipt rewrite path (#742) rather than laundering. (2) The coverage
+  receipt's variables[22]-[26] paths are one higher than the final record (receipt
+  c002 variables[25] = monofilament test; final monofilament is variables[24]) -
+  index drift from the reconciliation's variable edits; the sampled items did not hit
+  these paths, but the path_off_by_one class is doing work here. (3) The pack's
+  id_slots marks file_collections[*].id minted: false because the flag keys on the
+  record's own doi, yet these ids are constructed fragment labels on the attested
+  fairhub page URL that no bundle line states as composites; they therefore fall to
+  the receiptless track, where I read them as exempt-by-nature fragments (slot-045) -
+  a classification edge the pack schema might want to name. Also worth noting:
+  instances[0].data_topic (B2AI_TOPIC:43) is checkable against neither the bundle nor
+  the pack's schema files - only the external standards registry can confirm the code
+  denotes diabetes.

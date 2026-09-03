@@ -830,3 +830,68 @@ intermediates:
   sha256: af41bfae4fd0cea107b3468ad46e9a1a1599e297bfa5dd92739c48e6008f30b1
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/CM4AI_report.md
   sha256: a74c71ae75e71aca86708e7091af3271fb16c72e9529e010b9312e5c0c5535f9
+review:
+  checked: true
+  items_total: 78
+  items_answered: 78
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 5
+    slot_receipted:
+      supported: 21
+      weak: 1
+      unsupported: 2
+      misread: 1
+    slot_receiptless:
+      bundle_supports: 19
+      exempt_by_nature: 3
+      inferred: 3
+    slot_reshaped:
+      still_supported: 5
+      changed_meaning: 1
+    rule:
+      followed: 12
+      violated: 3
+      not_applicable: 1
+    pair_warning:
+      consistent: 1
+  adverse: 11
+  cannot_tell: 0
+  findings: []
+  summary: items 78/78 answered · 11 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5
+    reviewed_at: 2026-09-03 00:06:01+00:00
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_review_pack.yaml
+      sha256: 52aa1f1385dc1bfd3739572d9cd4d2a0b9daf2468f3c4f0755fb08916051d8f1
+    review:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_review.yaml
+      sha256: 26f022924ccff22134675556a2e79fa24e875d58190f249dc0d2a0046ad1adf3
+  recorded_by: d4d review check
+canonical:
+  criterion: full and core both validate against the current schema, then most slots,
+    then lowest label
+  selected_from:
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    slots: 70
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+    slots: 73
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+    slots: 62
+    validation: valid
+    validation_recorded_at_run_time: valid
+  margin_over_runner_up: 3
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep1
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep1

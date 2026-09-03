@@ -552,3 +552,64 @@ intermediates:
   sha256: 50fa5567b3a359948bb234a7e7b5c7167a303ef8a69d09bf9d2a9f031e9cfced
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/VOICE_report.md
   sha256: 0731fffaa7c60ae89476d2881e76ac241393976636ad85ed5d37e65f86a4181d
+review:
+  checked: true
+  items_total: 74
+  items_answered: 74
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 3
+    slot_receipted:
+      supported: 22
+      misread: 2
+      weak: 1
+    slot_receiptless:
+      inferred: 1
+      bundle_supports: 18
+      exempt_by_nature: 6
+    slot_reshaped:
+      still_supported: 5
+    rule:
+      violated: 3
+      followed: 12
+      not_applicable: 1
+  adverse: 7
+  cannot_tell: 0
+  findings: []
+  summary: items 74/74 answered · 7 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5
+    reviewed_at: 2026-09-03 00:02:00+00:00
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_review_pack.yaml
+      sha256: 02220c1e3b540d57f22b57be6ca0b7b40a4a702f92b3328f4cb013e7eff06568
+    review:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_review.yaml
+      sha256: 942cbee341c652e0b746806adbb512966c0ca2d178534821f55b38015ae37f77
+  recorded_by: d4d review check
+canonical:
+  criterion: full and core both validate against the current schema, then most slots,
+    then lowest label
+  selected_from:
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    slots: 77
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+    slots: 82
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+    slots: 81
+    validation: valid
+    validation_recorded_at_run_time: valid
+  margin_over_runner_up: 1
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep2
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep1

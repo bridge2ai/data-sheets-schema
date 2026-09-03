@@ -616,3 +616,67 @@ intermediates:
   sha256: c56d8261656557a68a8d94045593dd5c6b1b408d84f6aa98af5745955ef67f61
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/AI_READI_report.md
   sha256: e208c572d60a25b8685305e075a6e5f37903774cb54311a918f9619da45a55b9
+review:
+  checked: true
+  items_total: 74
+  items_answered: 74
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 3
+    slot_receipted:
+      supported: 22
+      weak: 1
+      cannot_tell: 1
+      unsupported: 1
+    slot_receiptless:
+      bundle_supports: 19
+      inferred: 6
+    slot_reshaped:
+      still_supported: 3
+      cannot_tell: 1
+    rule:
+      violated: 4
+      followed: 10
+      not_applicable: 2
+    pair_warning:
+      consistent: 1
+  adverse: 12
+  cannot_tell: 2
+  findings: []
+  summary: items 74/74 answered · 12 adverse · 2 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5
+    reviewed_at: 2026-09-02 23:05:04+00:00
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_review_pack.yaml
+      sha256: af8d49f5d2557addc646025831519d00b1feb3ca72d69f20580869f362482708
+    review:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_review.yaml
+      sha256: fe450aa57d5116979ae13828e445cc7d3ba72bfb2080b56ac7c8a86e25404dde
+  recorded_by: d4d review check
+canonical:
+  criterion: full and core both validate against the current schema, then most slots,
+    then lowest label
+  selected_from:
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    slots: 79
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+    slots: 81
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+    slots: 79
+    validation: valid
+    validation_recorded_at_run_time: valid
+  margin_over_runner_up: 2
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep2
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep1

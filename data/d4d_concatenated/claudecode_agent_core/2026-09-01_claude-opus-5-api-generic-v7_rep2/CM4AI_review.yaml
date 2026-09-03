@@ -1,0 +1,256 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: 2026-09-03T00:06:01Z
+pack_sha256: 52aa1f1385dc1bfd3739572d9cd4d2a0b9daf2468f3c4f0755fb08916051d8f1
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-24 are the concatenation banner and ten-file table of contents; no dataset fact appears"
+- id: chunk-c009
+  verdict: confirmed
+  evidence: "lines 2825-2893 are Nature journal footer navigation, imprint and newsletter signup; no dataset fact appears"
+- id: chunk-c022
+  verdict: confirmed
+  evidence: "lines 6162-6166 hold only 'Cancel' and a file separator; nothing to extract"
+- id: chunk-c025
+  verdict: confirmed
+  evidence: "lines 6967-7001 are Dataverse publish/return-to-author dialogs, copyright footer and support form; no dataset fact the record lacks"
+- id: chunk-c028
+  verdict: confirmed
+  evidence: "lines 7802-7866 are Dataverse package-download help, publish prompts and support form; the download-URL stub at 7807 is a truncated API path already covered by the record's Data Access API note"
+- id: slot-006
+  verdict: supported
+  evidence: "lines 3773-3774 state verbatim that a Data Access Committee will supervise ethical matters of distribution and dual licensing, and 3771-3773 the commercial-license negotiation with UCSD/Stanford/UCSF; the value restates both as the access review process, the only review process the bundle offers. The passage sits in c012, not the cited c013 (attribution off by one)"
+- id: slot-007
+  verdict: weak
+  evidence: "line 7108 (and 5459, 6266) states the prohibition verbatim, so the text is real and exact - but prohibition_reason's description asks for 'reasons why this use is prohibited (e.g., license restriction, ethical concern)', and the value is the prohibition itself, not a reason; ProhibitedUse.description is the field that statement answers"
+- id: slot-008
+  verdict: supported
+  evidence: "lines 7146-7151 list cm4ai_apms_MDA-MB-468_paclitaxel.zip, 113.3 KB, Published Jun 17 2026, MD5 8642317c...; description supported by 7057 'AP-MS data for MDA-MB-468 breast cancer cells + treatment' and 7071 '(treated with paclitaxel)'"
+- id: slot-009
+  verdict: supported
+  evidence: "lines 3253-3262 state the CRISPR library (100 chromatin factors, 6 gRNAs/gene), inducible dCas9 MDA-MB-468 and KOLF2 lines, and 10x Genomics 3'HT kit; the value tracks the passage. The passage sits in c010, not the cited c011"
+- id: slot-010
+  verdict: supported
+  evidence: "line 4798 gives the Related Publication DOI http://doi.org/10.1101/2024.05.21.589311; value renders it as the doi: CURIE per the uniform CURIE rule, relationship is_described_by matches its 'Related Publication' role"
+- id: slot-011
+  verdict: supported
+  evidence: "lines 3377-3384 describe the pipeline annotating MuSIC communities with PDB, AlphaFoldDB, crosslinking MS and disorder prediction, and ranking communities by structural information as a feasibility proxy - each element of the value. The passage sits in c011, not the cited c012"
+- id: slot-012
+  verdict: supported
+  evidence: "line 4342 'NIH funding award number: 1OT2OD032742-01' in the cited chunk c015; the grant id matches exactly"
+- id: slot-013
+  verdict: unsupported
+  evidence: "the cited snippet (IMP 'integrative modeling platform software...', actually at line 2206/4150-4152) does not bear on the value, which is the CM4AI web portal; reconciliation split one MassIVE entry into four, shifting the receipt's external_resources[6] (IMP) to [9], so this receipt now sits under the portal entry. The portal itself is stated at 3513-3514 and 4248, but not by this passage"
+- id: slot-014
+  verdict: supported
+  evidence: "lines 7033 and 7332 state the title verbatim: 'Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta)'"
+- id: slot-015
+  verdict: supported
+  evidence: "lines 4590-4628 are the CC BY-NC-SA 4.0 deed (Share/Adapt, Attribution, NonCommercial, ShareAlike, No additional restrictions); the attribution-and-citation clause is at 3768-3771 and 3808-3810; the value restates these as the license terms the slot asks for"
+- id: slot-016
+  verdict: supported
+  evidence: "lines 769-771 give https://github.com/idekerlab/cellmaps_pipeline as the toolkit 'to facilitate continued map improvement, incorporation of new datasets, and construction of new cell maps', and 1433 notes 'a step-by-step guide is provided at the GitHub repository' - a contribution-process URL in the slot's sense"
+- id: slot-017
+  verdict: supported
+  evidence: "lines 7163-7168 list cm4ai_apms_MDA-MB-468_vorinostat.zip, 135.8 KB, Jun 17 2026, MD5 b941f28d...; description supported by 7073 'AP-MS data in MDA-MB-468 breast cancer cells (treated with vorinostat)'"
+- id: slot-018
+  verdict: supported
+  evidence: "lines 769-771: the Cell Mapping Toolkit implements the end-to-end pipeline as Python packages with full user documentation and 'provides a flexible and generalizable framework for cell map construction, enabling researchers to integrate and construct cell maps via multiple input modalities' - the value paraphrases this and 1428-1433 faithfully"
+- id: slot-019
+  verdict: misread
+  evidence: "the cited passage (line 6313, October 2025 file description) says SEC-MS 'on undifferentiated KOLF2.1J human induced pluripotent stem cells'; the value describes the June 2026 file as covering 'KOLF2.1J ... cells and derivatives', dropping 'undifferentiated' and extending scope. The derivatives claim comes from release-level lines 7056/7067, not from the cited file description, and the June 2026 page (7231-7236) carries no per-file description"
+- id: slot-020
+  verdict: supported
+  evidence: "line 5398 gives https://doi.org/10.18130/V3/F3TD5R for the June 2025 release; value is the CURIE form of the same DOI"
+- id: slot-021
+  verdict: supported
+  evidence: "path removed at reconciliation, but the receipt's statement survives in dataset-level notes ('made available at the CM4AI CodeFest in March 2024 with tutorials explaining how the data were derived and integrated'), which lines 3731-3733 state verbatim. Passage sits in c012, not the cited c013"
+- id: slot-022
+  verdict: supported
+  evidence: "lines 5035-5036 'Ideker T (University of California San Diego) - ORCID: https://orcid.org/0000-0002-1708-8454' (also 7495-7498); value is the ORCID CURIE. The passage sits in c018, not the cited c019, which is pure Dataverse boilerplate"
+- id: slot-023
+  verdict: supported
+  evidence: "lines 3865-3868: 'funded by the National Institutes of Health under awards 1OT2OD032742-01 ... and 5U54HG012513-02 (Bridge2AI Bridge Center)'; grant id and name match. Passage sits in c012, not the cited c013"
+- id: slot-024
+  verdict: supported
+  evidence: "lines 7214-7219 list cm4ai_ifimages_MDA-MB-468_vorinostat.zip, 4.2 GB, Published Jul 15 2026, MD5 df796327...; the description matches the vorinostat IF file description at 6441"
+- id: slot-025
+  verdict: supported
+  evidence: "lines 3224-3239: SEC-MS as orthogonal MS approach, 72/100 chromatin modifiers with 52 integral to complexes, over a thousand complexes in MDA-MB-468, >700 complexes in parental iPSCs and differentiated neurons - each figure in the value. Passage sits in c010, not the cited c011"
+- id: slot-026
+  verdict: supported
+  evidence: "path removed at reconciliation (undeclared Instance key), but the receipt's statement survives in instances[0].notes; lines 4872/4891/4910 state the DAPI/calreticulin/tubulin/protein-of-interest channel scheme verbatim"
+- id: slot-027
+  verdict: supported
+  evidence: "lines 439-451 describe GPT-4 as a generative LLM generating descriptive names, referenced analysis essays and confidence self-assessments for assemblies; 'GSAI pipeline' named at 1228-1230; the value's description matches"
+- id: slot-028
+  verdict: unsupported
+  evidence: "the cited snippet is https://cm4ai.org/data-releases/ (line 4369) - the pre-reconciliation page value; the current value (Dataverse landing page for HIGT4C) is not stated by that passage. It appears only in the source-metadata header at line 7011; the receipt was not rewritten after Phase 4 repointed page"
+- id: slot-029
+  verdict: supported
+  evidence: "lines 4421-4431 state SEC-MS capturing ~7,000 proteins for both the iPSC and TNBC flagship datasets; the coverage sentence is supported by 7056 (MDA-MB-468 +/- treatment, undifferentiated KOLF2.1J, NPCs, neurons, cardiomyocytes)"
+- id: slot-030
+  verdict: supported
+  evidence: "line 2338 'the Bridge2AI Program (NIH Common Fund; OT2 OD032742...)' supports NIH as grantor of the OT2 award, corroborated by 7650-7651 'Funding Information National Institutes of Health: 1OT2OD032742-01'. The passage sits in c007, not the cited c005"
+- id: slot-031
+  verdict: bundle_supports
+  evidence: "line 4982 'Lee YH (University of California San Diego)' and 7386"
+- id: slot-032
+  verdict: bundle_supports
+  evidence: "lines 5031-5032 and 7489-7490 'Sali A ... ORCID: https://orcid.org/0000-0003-0435-6197'"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "lines 2962-2963 '100 chromatin modifiers and 100 metabolic enzymes involved in cancer, neuropsychiatric, and cardiac disorders' and 4405; targeted (non-random) selection stated at 3255-3257"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "line 5014 and 7453 'Chen JY (The University of Alabama at Birmingham)'"
+- id: slot-035
+  verdict: bundle_supports
+  evidence: "line 4967 and 7354-7356 'Churas CP (University of California San Diego) https://orcid.org/0000-0001-9998-705X'"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "line 4975 and 7371 'Gao J (University of California San Diego)'; reconciliation kept the bundle's surname-initial form"
+- id: slot-037
+  verdict: bundle_supports
+  evidence: "line 2928 bioRxiv author list gives the full form 'Yesh Doctor'"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "lines 7532-7533 'Data Governance Committee: Jillian Parker (jillianparker@health.ucsd.edu)'"
+- id: slot-039
+  verdict: exempt_by_nature
+  evidence: "boolean the record infers from structure; the direct instrument observation it classifies is stated at 3224-3228 (AP-MS acquired on endogenously tagged cell lines)"
+- id: slot-040
+  verdict: inferred
+  evidence: "no passage states a version relation between HIGT4C and B35XWX; it follows from lines 4439-4451 (June 2026 as 'Our latest data release' with March 2025 in the Archive list of the same series). Enum classification of a relation the bundle implies but never states"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "line 2928 bioRxiv author list gives the full form 'Antoine Forget'"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "lines 3036-3038 'Cell maps are shared via the Network Data Exchange (NDEx) and can be visualized in a web browser or accessed via tools such as Cytoscape, HiView, and the Python ndex2 library'; https://ndexbio.org at 1472"
+- id: slot-043
+  verdict: exempt_by_nature
+  evidence: "boolean classification of the deposition stated at 7069-7070 ('SEC-MS data in MDA-MB-468 breast cancer cells (+/- treatment): MassIVE Repository'); no passage could state 'archival: true'"
+- id: slot-044
+  verdict: bundle_supports
+  evidence: "line 4975 and 7371-7372 'Gao J (University of California San Diego)'"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "line 7535 names Jean-Christophe Belisle-Pipon as ethical review contact; accented full form at 2931"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "lines 3022-3023 'Cell maps provide a foundation for downstream applications in human genomics, including interpretation of genetic variants and mutations' - near verbatim"
+- id: slot-047
+  verdict: inferred
+  evidence: "'Biological analysis' is a category label the record composed over line 7099's stated use 'Cellular process analysis'; no passage states the label"
+- id: slot-048
+  verdict: inferred
+  evidence: "the bundle states the modality targets (lines 3222-3248) but no passage scopes the selection bias to 'AP-MS, SEC-MS and immunofluorescence targets in the MDA-MB-468 arm'; the subset list is composed"
+- id: slot-049
+  verdict: exempt_by_nature
+  evidence: "BiasTypeEnum classification; the targeted-selection facts it classifies are at 2962-2963 and 3255-3257, but no passage names a bias type"
+- id: slot-050
+  verdict: bundle_supports
+  evidence: "line 2933 bioRxiv author list gives the full form 'Vardit Ravitsky'; contact role at 7535"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "line 7099 'Cellular process analysis' under Intended Use, verbatim"
+- id: slot-052
+  verdict: bundle_supports
+  evidence: "lines 7532-7533 'Data Governance Committee: Jillian Parker'"
+- id: slot-053
+  verdict: bundle_supports
+  evidence: "line 3184 (MDA-MB-468 triple negative breast cancer line), 3213-3214 (KOLF2.1J iPSC line), 7056 (iPSC-derived NPCs, neurons, cardiomyocytes)"
+- id: slot-054
+  verdict: bundle_supports
+  evidence: "line 7058 'IF images in MDA-MB-468 breast cancer cells +/- treatment' and 6403 'imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy' - the type label paraphrases these"
+- id: slot-055
+  verdict: bundle_supports
+  evidence: "line 2930 bioRxiv author list 'Justin Niestroy'; Depositor 'Niestroy, Justin' at 7653"
+- id: slot-056
+  verdict: still_supported
+  evidence: "the receipted 'Project end: 2026-08-31T00:00:00' (line 4206) survives in collection_timeframes[0].timeframe_details as the award project period, now correctly framed as bounding, not defining, the collection window"
+- id: slot-057
+  verdict: still_supported
+  evidence: "the receipted 'Project start: 2022-09-01T00:00:00' (line 4205) survives in timeframe_details with the same value and the corrected framing as an award period"
+- id: slot-058
+  verdict: still_supported
+  evidence: "line 5416's revision description survives in related_datasets[1].notes ('add RGB immunofluorescent images, correct RO-Crate metadata, and change naming conventions'), now correctly attributed to the June 2025 release rather than carried as an erratum of this dataset"
+- id: slot-059
+  verdict: still_supported
+  evidence: "lines 3731-3733 survive in dataset-level notes: CodeFest March 2024 with tutorials explaining how the data were derived and integrated - same claim, reclassified from existing_uses to training/dissemination"
+- id: slot-060
+  verdict: changed_meaning
+  evidence: "lines 3590-3591 and 3616-3620 state a plan - 'Our in-person internship will be hosted at Yale University and the University of California San Diego... will provide participants with the opportunity to learn' - but the reshaped location (dataset-level notes) states it as current fact: 'an in-person internship hosted at Yale University and the University of California San Diego trains participants...'. Prospective read as actual"
+- id: slot-061
+  verdict: still_supported
+  evidence: "the DAPI/calreticulin/tubulin channel scheme (lines 4872/4891/4910) survives verbatim in instances[0].notes after the undeclared instance_details key was merged away"
+- id: rule-01
+  verdict: followed
+  evidence: "omission preferred where evidence ran out: total_bytes omitted on all file_collections with the rounded-units caveat, collection start/end dates removed as award dates, existing_uses omitted with the reasoning in source_caveats; sampled receiptless values trace to bundle lines. The few inferences found (intended_uses[2].use_category, known_biases[1].affected_subsets, related_datasets[2].relationship_type) are classification labels counted adversely in their slot items"
+- id: rule-02
+  verdict: followed
+  evidence: "creators[37].source_caveats records the Sali affiliation disagreement with both values; instances[0].notes attributes 464 vs 563 imaged proteins to their releases instead of merging; data_governance.source_caveats records the two committee names"
+- id: rule-03
+  verdict: followed
+  evidence: "referent stated in the reconciliation report as the June 2026 release doi:10.18130/V3/HIGT4C and held consistently: id, doi, title, version 2.0 in both records; earlier releases carried as related_datasets"
+- id: rule-04
+  verdict: followed
+  evidence: "density tracks the evidence: dense where the bundle is rich (39 creators, 10 file collections), absent where it is not (no download_url, no total_size_bytes, no existing_uses); nothing_relevant chunks verified genuinely empty"
+- id: rule-05
+  verdict: followed
+  evidence: "one object per entity throughout: 39 creators, four funders split by grant, external_resources split into one entry per MassIVE deposition at reconciliation, five intended_uses, four acquisition_methods"
+- id: rule-06
+  verdict: followed
+  evidence: "no value records that documentation exists elsewhere in place of an answer; existing_uses was omitted rather than filled with a pointer, and raw_data_sources[*].access_details state the deposit locations as access facts, which is what that field asks"
+- id: rule-07
+  verdict: violated
+  evidence: "prohibited_uses[0].prohibition_reason holds the prohibition statement itself ('These laboratory data are not to be used in clinical decision-making...', line 7108) where the slot's description asks for the reasons why the use is prohibited; the statement answers ProhibitedUse.description's question, not this field's. Elsewhere the rule is followed (page repointed to the release landing page, landing page removed from access_urls)"
+- id: rule-08
+  verdict: violated
+  evidence: "ethical_reviews[0].contact_person, ethical_reviews[1].contact_person, data_governance.committee_contact, regulatory_restrictions.governance_committee_contact and creators[0].principal_investigator are Person-ranged (class range) yet hold bare name strings ('Jillian Parker', 'Vardit Ravitsky'), leaving Person's declared fields empty although the bundle answers them (emails at 7533/7535, ORCIDs at 7486/7447). Reconciliation section 2.4 flattened valid Person objects citing the v4 scalar rule, which governs scalar-ranged slots, not these"
+- id: rule-09
+  verdict: followed
+  evidence: "uriorcurie slots carry CURIEs: creators[*].id as ORCID:..., publisher and affiliations as ROR:0153tk833, id as doi:10.18130/V3/HIGT4C; uri-ranged page and extension_mechanism.contribution_url correctly hold URLs; doi slot holds the bare DOI 10.18130/V3/HIGT4C"
+- id: rule-10
+  verdict: followed
+  evidence: "sampled identifiers all trace to the bundle: Sali ORCID (7489-7490), Ideker ORCID (5035-5036), ROR:0153tk833 (7335), grant ids 1OT2OD032742-01 (4342), 3OT2OD032742-01S2 (4198), 5U54HG012513-02 (3866), RRIDs CVCL_0419 (3184) and CVCL_B5P3 (3213); the unsupported UCSD ROR was withdrawn at reconciliation per the report"
+- id: rule-11
+  verdict: followed
+  evidence: "all minted ids are fragments on the evidence-supplied dataset DOI (line 7036), e.g. doi:10.18130/V3/HIGT4C#apms-paclitaxel; no invented prefix; the Axelsson creator (creators[4]) correctly carries no id rather than a minted one, with the gap recorded in source_caveats"
+- id: rule-12
+  verdict: followed
+  evidence: "record prose is American English throughout ('color', 'organization', 'analysis', 'license'); a spelling scan finds no British forms outside quoted source titles"
+- id: rule-13
+  verdict: followed
+  evidence: "creators[37].source_caveats names the tiers (June 2026 Dataverse release tier 1 vs Nature/bioRxiv tier 3), states the preferred value and the disagreement; dataset-level source_caveats applies the ranking to prefer June 2026 over October 2025"
+- id: rule-15
+  verdict: violated
+  evidence: "the receipt document has the required shape (28 chunk entries, closed statuses, matching bundle_md5), but the coverage clause fails: 260 of 381 slots carry no receipt, and sampled receiptless values are bundle-supplied - creators[13].name (line 4982), creators[37].id (5031-5032), intended_uses[2].examples (7099) - values the rule says must appear in some chunk's receipt if the record carries them. Chunk attribution is also systematically off: snippets receipted to c005/c006/c011/c013/c019 actually sit one to two chunks earlier (lines 2338, 2206, 3255, 3773, 5035), and c019 (5141-5361) is pure Dataverse boilerplate receipted as 'extracted' with six slots whose passages all sit in c018"
+- id: rule-16
+  verdict: followed
+  evidence: "no object remains in a scalar-ranged slot in either final record; distribution_dates[0].release_dates is a proper list; version_access.latest_version_doi holds the identifier doi:10.18130/V3/HIGT4C rather than an object; the section 2.4 corrections apply to slots this rule does not govern (see rule-08) but introduce no scalar-slot objects"
+- id: rule-14
+  verdict: not_applicable
+  evidence: "all ten minted ids (file_collections[0-9].id) are forced per the pack's id_slots block (FileCollection id is an identifier), so the mints cannot violate the rule; there are no unforced mints to judge"
+- id: pair-01
+  verdict: consistent
+  evidence: "all ten core distributions match the full record's file_collections one-to-one at $.distributions[0-9] vs $.file_collections[0-9]: identical ids, names, paths, descriptions, notes (MD5s and sizes) and source_caveats; the core drops collection_type and issued and keeps conforms_to/conforms_to_standard on the release-metadata entry - schema-driven shape differences only"
+notes: >-
+  Instrument findings, not verdicts: (1) the Phase 1 receipt was never rewritten
+  after Phase 4 reshapes (#742), so the pack pairs stale receipts with
+  post-reshape paths - slot-013 pairs the IMP receipt (old external_resources[6])
+  with the CM4AI portal now at that index after the MassIVE split, and slot-028
+  pairs the old page value's receipt with the repointed landing page; both read
+  as 'unsupported' here though the underlying values are bundle-stated
+  elsewhere (lines 3513-3514, 7011). (2) The receipt's chunk attributions run
+  systematically one to two chunks late (funders[0].grantor receipted to c005,
+  passage at 2338 in c007; c019 receipted as extracted though its span
+  5141-5361 is pure boilerplate and all six passages sit in c018) - the
+  validator's adjacent/elsewhere class (#763) should be counting these; if the
+  provenance receipts block reports few 'snippets in another chunk' for this
+  run, that is worth an issue. (3) The reconciliation report's section 2.4
+  describes flattening Person objects to name strings as a v4 scalar-rule
+  correction; the affected slots are Person-ranged, so the audit misapplied the
+  rule (see rule-08).

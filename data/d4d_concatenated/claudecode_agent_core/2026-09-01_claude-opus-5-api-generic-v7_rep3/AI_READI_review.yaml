@@ -1,0 +1,251 @@
+reviewer: d4d-review-record
+model: claude-fable-5
+reviewed_at: 2026-09-03T00:07:13Z
+pack_sha256: a423596fd456b285aa7120ad442b65536ff89d9726b9d418deeee486349feb39
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-25 are the concatenation banner and table of contents naming the eleven source files; no dataset fact appears"
+- id: chunk-c006
+  verdict: confirmed
+  evidence: "lines 1626-1704 are the BMJ Open protocol's bibliographic reference list (refs 14-30) plus the page footer; the one dataset-adjacent line, ref 16 citing v1.0.0 on FAIRhub (line 1633), is carried by the record from other chunks (version_access, related_datasets[1])"
+- id: chunk-c025
+  verdict: confirmed
+  evidence: "lines 6338-6647 are the unfilled UW IRB application template (instructions, definitions, unanswered questions 1.1-5.11.f); the Study Title field at line 6373 is blank; no AI-READI-specific content"
+- id: chunk-c026
+  verdict: confirmed
+  evidence: "lines 6648-6943 continue the blank template (5.11.g-10.10), guidance text and unanswered checkboxes only"
+- id: slot-005
+  verdict: supported
+  evidence: "lines 3287-3363: retinal_flio directory entry with size 1069466876718 and numberOfFiles 7969; description, modality flio and device heidelberg_flio match the entry; the receipt on the entry covers its leaves"
+- id: slot-006
+  verdict: supported
+  evidence: "line 2187 (RePORTER 'Exploratory' expansion), line 5289 (study_title 'AI Ready and Exploratory Atlas'), line 7002 ('cross-sectional dataset of 4600 people') each support the caveat item they receipt; the value's item (7) arithmetic is wrong but is not what these receipts attest — see rule-01"
+- id: slot-007
+  verdict: supported
+  evidence: "line 939 (c004): 'The above reference ranges were provided by the testing laboratories'; the 4.0-6.0 figure is verbatim at line 773, in c003 — the same BMJ laboratory table crossing the chunk boundary, an attribution-precision gap not a support gap"
+- id: slot-008
+  verdict: misread
+  evidence: "line 4270 answers the healthsheet's all-instances-or-sample question — the exact question is_sample asks ('Indicates whether it is a sample of a larger set') — with 'The dataset contains all possible instances', i.e. not a sample; the record states true by re-scoping to the EHR study base and cites the contradicting passage as its receipt"
+- id: slot-009
+  verdict: supported
+  evidence: "lines 2892-2899: consentsDetails states the public/type-2-diabetes restriction verbatim, and consentNoncommercial/consentGeogRestrict/consentGeneticOnly/consentNoMethods all false support the value's second sentence"
+- id: slot-010
+  verdict: supported
+  evidence: "line 7282 (e-consent via unique emailed code, UW REDCap) plus line 2893 (consentType ConsentSpecifiedNotElsewhereCategorised); in-person alternative at the healthsheet consent answer (c019)"
+- id: slot-011
+  verdict: supported
+  evidence: "line 4300: 'The documentation is shared under the CC-BY 4.0 license, so there are no restrictions associated with its use' — verbatim"
+- id: slot-012
+  verdict: supported
+  evidence: "line 2333 lists the controlled-access variables including medications; PHI/sex/race removal at line 4599 (README) and raw-data non-sharing at line 4373 carry the rest of the value"
+- id: slot-013
+  verdict: supported
+  evidence: "lines 2547-2555 (license §4.B) state each clause of the value, ending 'cause harm or injury to any Data Subject'"
+- id: slot-014
+  verdict: supported
+  evidence: "lines 2477-2484 (license §3.A) state the prohibition verbatim; the 'protect the study participants' rationale is the license's stated purpose (README license section, line 4599)"
+- id: slot-015
+  verdict: supported
+  evidence: "line 4201 states the Snellen variables were dropped leaving only logMAR; 'Lower numbers are better resolution' is verbatim at lines 470-471 (c003) — supported, attributed to a neighboring chunk"
+- id: slot-016
+  verdict: supported
+  evidence: "line 4320: 'No, the public dataset will not contain data that is considered sensitive. However, the controlled access dataset will contain...racial and ethnic origins, location (5-digit zip code)...motor vehicle accident reports'; the added items (sex, genetic sequencing, past health records, medications) are the same source's summary at line 4154 and line 2333"
+- id: slot-017
+  verdict: supported
+  evidence: "line 3806: numberOfFiles 93921 inside the retinal_photography directory entry (c017), matching file_collections[6]"
+- id: slot-018
+  verdict: supported
+  evidence: "line 2832: '\"fileCount\": 356343' in the FAIRhub API dataset data block"
+- id: slot-019
+  verdict: supported
+  evidence: "line 4327 (healthsheet devices) gives the monofilament procedure, plantar surface, retest of insensate areas, iPad/laptop/paper into REDCap; 'three locations on each foot' and 'eyes are closed' are at lines 448-452 (BMJ protocol); the value is a faithful merge"
+- id: slot-020
+  verdict: supported
+  evidence: "line 4327 names M&S EVA at 4 meters, Mars charts, 'KR 800 Auto Keratometer/Refractor' and the three lensometers; one defect: the value's manufacturer attribution 'Topcon KR 800' is nowhere in the bundle (the source says only 'KR 800') — noted under rule-01"
+- id: slot-021
+  verdict: supported
+  evidence: "line 2994: publisherName FAIRhub; the slot is uriorcurie with docExample 'use a ROR ID, DOI, or URL — not a plain name', no registry id for FAIRhub is in the bundle, and https://fairhub.io/ is the platform's own URL as given at line 1176"
+- id: slot-022
+  verdict: supported
+  evidence: "line 3363: numberOfFiles 7969 in the retinal_flio entry (c016)"
+- id: slot-023
+  verdict: supported
+  evidence: "lines 2388-2390 and 2451-2453 (Licensor Washington University in St. Louis; non-exclusive, non-transferable license to download, reproduce and use), storage/derivative/acknowledgment/termination clauses in the same chunk; 'Health Data License' label at line 2707 (c013)"
+- id: slot-024
+  verdict: supported
+  evidence: "line 4585 answers the retention question (whose text at line 4584 defines limits as being told data would be retained for a fixed period then deleted) with 'There are no limits'; versions-not-updated at lines 4581/4590"
+- id: slot-025
+  verdict: supported
+  evidence: "line 4211 (new recommended split for the 2280 participants), line 4420 (70%/15%/15%, val/test balanced 'as well as possible' for sex, race/ethnicity, diabetes status), README table at line 4599 with the exact per-split counts and mean ages the value states"
+- id: slot-026
+  verdict: supported
+  evidence: "line 4305: 'No, the dataset does not contain data that might be considered confidential. No personally identifiable information is included in the dataset' — the value restates it"
+- id: slot-027
+  verdict: supported
+  evidence: "lines 2883-2890: deIdentType NoDeIdentification with deIdentDirect/deIdentHIPAA true, dates/nonarr/kanon false, and deIdentDetails 'No identifiers were collected...'; Safe Harbor at line 1880 (Nature Metabolism)"
+- id: slot-028
+  verdict: supported
+  evidence: "line 2725: '10.60775/fairhub.2' on the FAIRhub v2 page whose banner (line 2685) also supports the entry's 'no longer accessible' description"
+- id: slot-029
+  verdict: unsupported
+  evidence: "the cited snippet (line 5406, associatedPublication DOI 10.1038/s42255-024-01165-x) does not bear on the value now at related_datasets[1].target_dataset, doi:10.60775/fairhub.1 — reconciliation inserted the v1.0.0 entry at index 1, shifting the receipted Nature Metabolism entry to index 2; the value itself is attested (lines 2728, 5309), so this is receipt-path drift, not fabrication"
+- id: slot-030
+  verdict: bundle_supports
+  evidence: "line 4373: raw data 'is not anticipated to be shared outside the project team right now' — stated for all raw data, applied per-source"
+- id: slot-031
+  verdict: bundle_supports
+  evidence: "line 4327 calls the Garmin Vivosmart 5 a 'wearable fitness tracker'/'Wearable accelerometer' and Table 3 (line 1358) lists its data export; the label restates attested facts"
+- id: slot-032
+  verdict: bundle_supports
+  evidence: "line 2784 ('A smaller version is available for pipeline development'), line 2343 (docs section on the mini-subset alongside access and training prerequisites), line 2837 ('\"child\": 4'); the identification of child id 4 with the mini subset is the record's own join of two attested facts"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "line 4472: 'Participants were permitted to withdraw consent at any time and cease study participation' — verbatim"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "'controlled access' is the sources' own term for this tier (lines 2333, 4320, 4373); the name restates it"
+- id: slot-035
+  verdict: bundle_supports
+  evidence: "Table 3 lists 'Environmental Sensor' with its export (line 1373) and line 4327 describes the LeeLab Anura home environmental sensor; the label restates attested facts"
+- id: slot-036
+  verdict: exempt_by_nature
+  evidence: "an enum token normalizing the attested relation — the RO-Crate lists the Nature Metabolism paper as associatedPublication (line 5406); no passage can state the schema's enum value"
+- id: slot-037
+  verdict: exempt_by_nature
+  evidence: "an enum classification of attested prose (line 4334: cohort 'may not provide a comprehensive representation of the population', urban and hospital-based recruitment); the token itself has no passage by its kind"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "line 4327: 'a custom-designed sensor unit called the LeeLab Anura' used at home; custom design also at lines 1387-1390"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "lines 47-53: 'Cynthia Owsley, Dawn S Matthies, Gerald McGwin...' and 'To cite: Owsley C, Matthies DS...BMJ Open 2025;15:e097449'; the described content (design, recruitment, protocol, instruments, laboratory panel, biorepository) is that paper's content in c002-c006"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "line 4295: 'In cases of imaging data, patient uncooperation, noise that may obscure the images and technical failure such as system malfunction, and data transfer failures are expected'"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "line 2187 (RePORTER aims: create a model for developing large scalable datasets; FAIR principles), line 1888 ('share our blueprint'), lines 125/1501 ('standards, best practices and guidelines for collection...')"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "line 4599 (README): 'The ability to understand and affect the course of complex, multi-organ diseases such as T2DM has been limited by a lack of well-designed, high quality, large, and inclusive multimodal datasets' — near-verbatim"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "line 4432: 'some data were directly observable (such as labs, vitals, and retinal imaging)'"
+- id: slot-044
+  verdict: bundle_supports
+  evidence: "line 4432: 'Verification of data entry was performed when possible (e.g. cross-referencing entered medications with medications that were physically brought in or photographed...)'"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "Table 3 (lines 1348-1356): Dexcom G6 Continuous Glucose Monitor, data format .csv"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "lines 1168-1170: 'MoCA Duo application (total score, section subscores, Memory Index Score and task completion times; .csv)'"
+- id: slot-047
+  verdict: inferred
+  evidence: "first clause verbatim at line 4285 ('not all modalities are available for all participants', with element/device-level causes); the contrast 'rather than scattered fields' is the record's own synthesis and no passage states it — line 4295 even expects skipped survey questions, which is field-level missingness"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "line 3016: 'application/dicom' in the FAIRhub format array"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "line 2333 (controlled-access variable list), lines 1201-1202 ('scientists whose institutions have completed legal and privacy use agreements with the AI-READI research programme', Data Access Committee at lines 1379-1381), line 4373 (raw data possibly in future controlled-access releases)"
+- id: slot-050
+  verdict: bundle_supports
+  evidence: "line 2890 ('No identifiers were collected...no identifiable data per US HIPAA were present') and line 4305 ('No personally identifiable information is included')"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "line 4420: splits 'where the validation and test sets are balanced as well as possible for sex, race/ethnicity and diabetes status' — the value paraphrases it as the mitigation"
+- id: slot-052
+  verdict: bundle_supports
+  evidence: "lines 1943-1950: co-learning with the Native Biodata Consortium, data usage agreements, contracts negotiations, transparent access agreements, return of benefit, Tribal data; tribal consultation at line 2187"
+- id: slot-053
+  verdict: bundle_supports
+  evidence: "Table 3 (lines 1373-1386): Environmental Sensor, data format .csv"
+- id: slot-054
+  verdict: bundle_supports
+  evidence: "line 477: 'with higher numbers meaning better sensitivity'; the 0.04-per-error formula verbatim in the MARS passage at line 4327"
+- id: slot-055
+  verdict: cannot_tell
+  evidence: "the path does not resolve: reconciliation removed content_warnings as an absence-recording value (report §2.1); the receipted healthsheet negative (question at line 4309 answered 'No.') survives nowhere, by documented design"
+- id: slot-056
+  verdict: cannot_tell
+  evidence: "the path does not resolve: data_protection_impacts was removed as an absence-recording value (report §2.1); the receipted 'No, a data protection impact analysis has not been conducted' survives nowhere, by documented design"
+- id: slot-057
+  verdict: still_supported
+  evidence: "the receipted value moved to distribution_formats[2].media_type after two access-route entries were prepended; it still reads application/dicom, identical to the passage at line 3016"
+- id: slot-058
+  verdict: cannot_tell
+  evidence: "no value exists at any location: extension_mechanism is absent from both records even though the reconciliation report says it was retained in the full record (§2.1, §3, §4) — a report/record contradiction, flagged in notes; the receipted statement (line 4593 region, 'there is no mechanism for others to extend or augment') survives nowhere"
+- id: slot-059
+  verdict: still_supported
+  evidence: "labeling_strategies was removed but the receipted statement (line 4400, 'no specific labeling was performed...hypothesis-agnostic') survives with the same meaning in description ('deliberately hypothesis-agnostic and ships without labels...no annotation or labeling was performed', full record lines 52-56) and instances[0].label: false"
+- id: slot-060
+  verdict: still_supported
+  evidence: "the receipted RePORTER aim (line 2187, 'Increase access to and quality of AI/ML research by recruiting and training personnel') now sits at purposes[2] after the purposes list shrank from four to three; wording preserved"
+- id: rule-01
+  verdict: violated
+  evidence: "source_caveats item (7) states the nine directory sizes 'sum to 3,815,974,377,264 bytes, which exceeds the dataset total_size_bytes...by 4,597,586 bytes' — the nine attested values (lines 3134-4034) actually sum to 3,815,969,360,064, i.e. 419,614 bytes BELOW the total; both the sum and the direction are unsupported miscomputation presented as sourced fact, and description forwards readers to it. Lesser instances: 'Topcon KR 800' (collection_mechanisms[9], variables[3] context) where line 4327 says only 'KR 800'; the derived confidentiality_level/hipaa_compliant enums are carried but disclosed as derived in their own source_caveats"
+- id: rule-02
+  verdict: followed
+  evidence: "source_caveats items (1)-(11) represent each disagreement rather than silently selecting (name expansion, WashU/UW, IRB name, start date, enrollment target, license name, 4%/10%); sensitive_elements keeps both tier-1 readings as separate entries with caveats"
+- id: rule-03
+  verdict: violated
+  evidence: "both records hold consistently to one referent (id doi:10.60775/fairhub.3, version 3.0.0, throughout full and core), but the reconciliation report nowhere states the referent choice — none of its 177 lines names which dataset/version was chosen as the rule requires; the violation is the missing statement, not the consistency"
+- id: rule-04
+  verdict: followed
+  evidence: "density follows the evidence; the report's §3 records eighteen deliberate omissions/retentions with rationale (discouraged_uses, existing_uses, imputation_protocols, download_url, compression, errata, etc.) rather than filling toward any target"
+- id: rule-05
+  verdict: violated
+  evidence: "funders[3] collapses seven distinct organizations (Topcon, Optomed, iCare World, Carl Zeiss, Heidelberg Engineering, Dexcom, Garmin) into one Funder object whose grantor reads 'Device manufacturers providing in-kind contributions'; elsewhere the rule is followed (three distribution_dates objects, seven anomalies, three ethical_reviews, split affected_subsets)"
+- id: rule-06
+  verdict: violated
+  evidence: "variables[8] ('Representative subset marker') is by its own quality_notes 'not a variable present in the dataset'; its content records that the full variable inventory is documented at docs.aireadi.org — a pointer/meta statement occupying a data slot instead of an omission; the rest of the record follows the rule (absence-recording values removed in §2.1)"
+- id: rule-07
+  verdict: followed
+  evidence: "the reconciliation enforced field-fit broadly (§2.4: watermarking out of preprocessing_strategies, access route into distribution_formats[0].access_urls, audit-history sentence removed); marginal residue: distribution_formats[0]/[1].format hold 'FAIRhub platform download with self-attestation' and 'Mini-subset for pipeline development' where the field's description asks for a file format, but DistributionFormat declares no other label field and the class-level question (how distributed) is the one answered"
+- id: rule-08
+  verdict: violated
+  evidence: "creators[0] leaves the declared name field empty (Creator inherits name from DatasetProperty) while the attested creator — creatorName 'AI-READI Consortium', nameType Organizational, line 2862 — is carried in affiliations[0].name and notes prose; the evidence answers the declared field and it was not populated"
+- id: rule-09
+  verdict: followed
+  evidence: "declared prefixes used where they fit: data_governance.accountable_organization.id ROR:01yc7t268 (from the ror.org URL at line 2978), id/related_datasets/latest_version_doi as doi: CURIEs; URL fallback only where no declared prefix covers the identifier (funders[0].grants[0].id RePORTER URL, publisher fairhub.io); access_urls kept as uri"
+- id: rule-10
+  verdict: followed
+  evidence: "every world-facing identifier is in the bundle: ROR 01yc7t268 (line 2978), ORCID 0000-0002-7452-1648 (line 4645), award URI project-details/10885481 (line 3010), NCT06002048 (line 4612), DOIs fairhub.1/2/3, 10.5281/zenodo.17555036, 10.1038/s42255-024-01165-x, 10.1136/bmjopen-2024-097449 (line 1700)"
+- id: rule-11
+  verdict: followed
+  evidence: "all minted ids are fragments on the evidence-supplied dataset DOI (doi:10.60775/fairhub.3#cardiac_ecg...#mini_subset); no invented prefixes; the one person identified is identified by ORCID, not a fragment"
+- id: rule-12
+  verdict: violated
+  evidence: "British spellings pervade the record's own prose: 'totalling' (lines 49, 1348, 1353, 1371, 1375, 1438), 'programme' (66, 342, 1215, 1450, 1630), 'licence' (322, 444, 1225), 'enrolment' in non-quoted prose (900), 'personalised' (643, 941, 1213), 'generalisability' (610), 'prioritisation' (642), 'centimetre' (550), 'metres' (730, 875), 'favour' (1381) — none inside quoted titles or direct quotations"
+- id: rule-13
+  verdict: followed
+  evidence: "caveats state the ranked preference and both sides where recorded: items (1), (4), (5), (10) name the higher-ranked FAIRhub value as preferred; items (3) and (9) record both readings because the disagreeing sources share a rank; collection_timeframes[0].source_caveats does the same at the point of use"
+- id: rule-14
+  verdict: not_applicable
+  evidence: "per the pack's id_slots every minted id is forced (file_collections[0-8].id: FileCollection id is an identifier; subsets[0-2].id: DataSubset id required), so the mints cannot violate the rule; no unforced mints exist, and the two minted:false entries (grant id, accountable organization id) are world-facing references judged under rules 9/10"
+- id: rule-15
+  verdict: followed
+  evidence: "AI_READI_coverage_receipt.yaml sits beside the core record with bundle_md5 8abd7bf5389b562b95794d656af19392 matching the pack, all 28 chunks in order, statuses from the closed set with the required keys (22 extracted, 2 redundant_with, 4 nothing_relevant); the provenance receipts block records chunks 28/28 reviewed; the 217 receiptless slots are the documented reconcile-rewrite effect (#742), not a missing receipt"
+- id: rule-16
+  verdict: followed
+  evidence: "no object sits in a scalar slot; the one audit finding (creators[0].principal_investigator as an object) was corrected to the string 'Aaron Lee (ORCID:0000-0002-7452-1648)' per report §2.7, and the slot's own description asks for a person's name"
+- id: pair-01
+  verdict: consistent
+  evidence: "the nine core distributions match the nine full file_collections one-to-one on id, name, path, description, conforms_to, conforms_to_standard and bytes (compared cardiac_ecg through wearable_blood_glucose; clinical_data's source_caveats also carried over); the core omits file_count, which the core Distribution shape does not carry — no meaning shifts"
+notes: >-
+  Three findings the items cannot fully carry. (1) The rubric evaluator's flag is
+  confirmed and is worse than self-inconsistency: source_caveats item (7) is
+  arithmetically wrong in both magnitude and direction — the attested per-directory
+  sizes sum to 3,815,969,360,064 (419,614 bytes under the declared total), not the
+  stated 3,815,974,377,264 (claimed 4,597,586 over) — recorded as the rule-01
+  violation. Item (6)'s file-count arithmetic (356,334 + 9 root files) checks out.
+  (2) The reconciliation report contradicts the records: §2.1, §3 and §4 say
+  extension_mechanism was retained in the full record, but it is absent from both
+  records (slot-058). (3) Instrument note: the pack joins pre-reconciliation
+  receipt paths to post-reconciliation indices, so list insertions shift receipts
+  onto the wrong entries — slot-029 (related_datasets) is scored unsupported on an
+  index shift even though its value is bundle-attested, and slot-057 only resolves
+  because the moved value is findable; a claims join keyed to entry identity rather
+  than index would remove this artifact.

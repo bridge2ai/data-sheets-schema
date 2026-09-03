@@ -537,3 +537,41 @@ intermediates:
   sha256: d96b8b8fb1dbc2748fc5cfcab49aa2eb745a8bcd3c8e83978ca4226b93922379
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/CHORUS_report.md
   sha256: f6ce55db0ef617ddfefb9e11694963a391d301137ca2bbbd2e5c5f8b1818dd1f
+review:
+  checked: true
+  items_total: 80
+  items_answered: 80
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 1
+    slot_receipted:
+      supported: 20
+      misread: 3
+      weak: 2
+    slot_receiptless:
+      bundle_supports: 23
+      inferred: 2
+    slot_reshaped:
+      still_supported: 13
+    rule:
+      violated: 4
+      followed: 10
+      not_applicable: 2
+  adverse: 11
+  cannot_tell: 0
+  findings: []
+  summary: items 80/80 answered · 11 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5
+    reviewed_at: 2026-09-02 23:06:05+00:00
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_review_pack.yaml
+      sha256: 0b853c5d8e0904448aefb75950f1ecdec6d4fee66129f196d5a79cd0aa969701
+    review:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_review.yaml
+      sha256: d78792679bf21f4aedf13a43e892e48ea988050892f2e368e9f93c386df5dbc2
+  recorded_by: d4d review check
