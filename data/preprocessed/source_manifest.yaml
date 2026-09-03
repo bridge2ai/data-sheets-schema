@@ -107,6 +107,66 @@ bundle_hash_history:
           after: ebca872f3275e7bd0e685c0486ee4881
           removed: 3 curation notes, 1 verification URL
 
+    # #540 (2026-08-12): the AI-READI release-3.0.0 RO-Crate and the v2.0
+    # licence were added to the AI_READI sources. Not a curator-text strip,
+    # and not recorded here at the time — the two events below found the
+    # hole. AI_READI only.
+    - changed_on: '2026-08-12'
+      issue: 540
+      change: added the release-3.0.0 RO-Crate and the v2.0 licence sources
+      bundles: 'AI_READI_preprocessed.txt'
+      projects:
+        AI_READI:
+          before: 20150c107a363ff1d3b6a328288bc087
+          after: 0f3abb51a333555456bedd63891fcd99
+
+    # #874 (2026-09-01): double-encoded UTF-8 (mojibake) repaired at
+    # preprocess time; the v7 arm restarted under the 2026-09-01 label on
+    # the repaired bytes. AI_READI and CM4AI document bundles and the CM4AI
+    # crate bundle moved; CHORUS, VOICE, VOICE_PEDIATRIC did not.
+    - changed_on: '2026-09-01'
+      issue: 874
+      change: repaired UTF-8-read-as-Latin-1 double encoding (fix_mojibake, #872)
+      bundles: '{PROJECT}_preprocessed.txt and CM4AI_preprocessed_with_crate.txt'
+      projects:
+        AI_READI:
+          before: 0f3abb51a333555456bedd63891fcd99
+          after: 8abd7bf5389b562b95794d656af19392
+        CM4AI:
+          before: 1dfd34e5610fed7c22bea1f09c0bc60c
+          after: 50037fc631eafda807e19f83f6579818
+      crate_bundles:
+        CM4AI:
+          before: c62ede765a0cd1f925aab35d4c2e22ee
+          after: 1b28f783af65d6525af7ffe9df873cdb
+
+    # #886 / #921 (2026-09-03, v8 plan step F): the docx extractor kept
+    # nothing inside w:sdt structured-document tags (a Google Docs export
+    # artefact) and emitted nested tables and gridSpan-merged cells wrongly;
+    # it now walks the document XML in order. The AI_READI IRB protocol
+    # gains 5,613 non-whitespace characters (checked-box answers, the study
+    # rationale, a nested questionnaire table, template placeholders), the
+    # VOICE investigator table 43; VOICE_PEDIATRIC shares the VOICE docx.
+    # 27 provenance records pin the `before` hashes (reported drift, #452).
+    - changed_on: '2026-09-03'
+      issue: 921
+      change: docx extraction keeps w:sdt-wrapped runs, rows and cells; nested tables once; document order (#886)
+      bundles: '{PROJECT}_preprocessed.txt and VOICE_preprocessed_with_crate.txt'
+      projects:
+        AI_READI:
+          before: 8abd7bf5389b562b95794d656af19392
+          after: d22b61a9f8443545c9ae14ee941c3e88
+        VOICE:
+          before: dcd717170da6762569c0b4eeafc1c3d2
+          after: 9193c3cbe60b62a2fc0f704a2c4d23a3
+        VOICE_PEDIATRIC:
+          before: 008212accc7ec95bf3f0121566b588c2
+          after: 0350223711484a63c21b2dd57af6f4c9
+      crate_bundles:
+        VOICE:
+          before: ebca872f3275e7bd0e685c0486ee4881
+          after: 8e8263f5f92ad197073e6169d2a4c68f
+
 scope:
   # What each project's record is *about* (#422). The bundle is the evidence;
   # this is the referent, and it is declared here because scope is a property
