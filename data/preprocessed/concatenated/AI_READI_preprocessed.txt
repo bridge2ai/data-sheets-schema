@@ -6337,7 +6337,7 @@ Raw file: data/raw/AI_READI/aireadi_ro_crate_metadata_2026-08-12.json
 
 FILE: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
 PATH: data/preprocessed/individual/AI_READI/gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
-SIZE: 156596 bytes
+SIZE: 158571 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -6388,6 +6388,7 @@ Examples of studies for which there is likely to be a related IRB application: U
 Providing this information (if relevant) may significantly improve the efficiency and consistency of the IRB’s review.
 ☒ No
 ☐ Yes → Briefly describe the other studies or applications and how they relate to the proposed activities. If the other applications were reviewed by the UW IRB, please also provide: the UW IRB number, the study title, and the lead researcher’s name.
+Click or tap here to enter text.
 1.4. [DETERMINATION]  Externally-imposed urgency or time deadlines. Are there any externally-imposed deadlines or urgency that affect the proposed activity?
 HSD recognizes that everyone would like their IRB applications to be reviewed as quickly as possible. To ensure fairness, it is HSD policy to review applications in the order in which they are received. However, HSD will assign a higher priority to research with externally-imposed urgency that is beyond the control of the researcher. Researchers are encouraged to communicate as soon as possible with their HSD staff contact person when there is an urgent situation (in other words, before submitting the IRB application). Examples: a researcher plans to test an experimental vaccine that has just been developed for a newly emerging epidemic; a researcher has an unexpected opportunity to collect data from students when the end of the school year is only four weeks away.
 HSD may ask for documentation of the externally-imposed urgency. A higher priority should not be requested to compensate for a researcher’s failure to prepare an IRB application in a timely manner. Note that IRB review requires a certain minimum amount of time; without sufficient time, the IRB may not be able to review and approve an application by a deadline.
@@ -6403,19 +6404,20 @@ Cross-sectional and longitudinal observational study with data and sample collec
 1.7. [DETERMINATION]  Intent. Check all the descriptors that apply to your study. You must check at least one box.
 This question is essential for ensuring that your application is correctly reviewed. Please read each option carefully.
 Check all that apply	Descriptor
-Class project or other activity whose purpose is to provide an educational experience for the researcher (for example, to learn about the process or methods of doing research).
-Part of an institution, organization, or program’s own internal operational monitoring.
-Improve the quality of service provided by a specific institution, organization, or program.
-Designed to expand the knowledge based of a scientific discipline or other scholarly field of study, and produce results that:
+☐	Class project or other activity whose purpose is to provide an educational experience for the researcher (for example, to learn about the process or methods of doing research).
+☐	Part of an institution, organization, or program’s own internal operational monitoring.
+☐	Improve the quality of service provided by a specific institution, organization, or program.
+☒	Designed to expand the knowledge based of a scientific discipline or other scholarly field of study, and produce results that:
 Are expected to applicable to a larger population beyond the site of data collection or the specific subjects studied, or
 Are intended to be used to develop, test, or support theories, principles, and statements of relationships, or to inform policy beyond the study.
-Focus directly on the specific individuals about whom the information or biospecimens are collected through oral history, journalism, biography, or historical scholarship activities, to provide an accurate and evidence-based portrayal of the individuals.
-A quality improvement or program improvement activity conducted to improve the implementation (delivery or quality) of an accepted practice, or to collect data about the implementation of the practice for clinical, practical, or administrative purposes. This does not include the evaluation of the efficacy of different accepted practices, or a comparison of their efficacy.
-Public health surveillance activities conducted, requested, or authorized by a public health authority for the sole purpose of identifying or investigating potential public health signals or timely awareness and priority setting during a situation that threatens public health.
-Preliminary, exploratory or research development activities (such as pilot and feasibility studies, or reliability/validation testing of a questionnaire).
-Expanded access use of a drug or device not yet approved for this purpose.
-Use of a Humanitarian Use Device.
-Other. Explain:
+☐	Focus directly on the specific individuals about whom the information or biospecimens are collected through oral history, journalism, biography, or historical scholarship activities, to provide an accurate and evidence-based portrayal of the individuals.
+☐	A quality improvement or program improvement activity conducted to improve the implementation (delivery or quality) of an accepted practice, or to collect data about the implementation of the practice for clinical, practical, or administrative purposes. This does not include the evaluation of the efficacy of different accepted practices, or a comparison of their efficacy.
+☐	Public health surveillance activities conducted, requested, or authorized by a public health authority for the sole purpose of identifying or investigating potential public health signals or timely awareness and priority setting during a situation that threatens public health.
+☐	Preliminary, exploratory or research development activities (such as pilot and feasibility studies, or reliability/validation testing of a questionnaire).
+☐	Expanded access use of a drug or device not yet approved for this purpose.
+☐	Use of a Humanitarian Use Device.
+☐	Other. Explain:
+Click or tap here to enter text.
 1.8. Background, experience, and preliminary work. Answer this question only if the proposed activity has one or more of the following characteristics. The purpose of this question is to provide the IRB with information that is relevant to its risk/benefit analysis.
 Involves more than minimal risk (physical or non-physical)
 Is a clinical trial, or
@@ -6435,25 +6437,25 @@ The study team includes a diverse group of investigators from multiple instituti
 1.9. Supplements. Check all boxes that apply, to identify relevant SUPPLEMENTS that should be completed and uploaded to Zipline.
 This section is here instead of at the end of the form to reduce the risk of duplicating information in this IRB Protocol form that you will need to provide in these Supplements.
 Check all that apply	Type of Research	Supplement Name and Link
-Department of Defense
+☐	Department of Defense
 The research involves Department of Defense funding, facilities, data, or personnel.	SUPPLEMENT Department of Defense
-Department of Energy
+☐	Department of Energy
 The research involves Department of Energy funding, facilities, data, or personnel.	SUPPLEMENT Department of Energy
-Drug, biologic, botanical, supplement
+☒	Drug, biologic, botanical, supplement
 Procedures involve the use of any drug, biologic, botanical or supplement, even if the item is not the focus of the proposed research.	SUPPLEMENT Drugs
-Emergency exception to informed consent
+☐	Emergency exception to informed consent
 Research that requires this special consent waiver for research involving more than minimal risk.	SUPPLEMENT Exception from Informed Consent for Emergency Research (EFIC)
-Genomic data sharing
+☒	Genomic data sharing
 Genomic data are being collected and will be deposited in an external database (such as the NIH dbGaP database) for sharing with other researchers, and the UW is being asked to provide the required certification or to ensure that the consent forms can be certified.	SUPPLEMENT Genomic Data Sharing
-Medical device
+☒	Medical device
 Procedures involve the use of any medical device, even if the device is not the focus of the proposed research, except when the device is FDA-approved and is being used through a clinical facility in the manner for which it is approved.	SUPPLEMENT Devices
-Multi-site or collaborative study
+☒	Multi-site or collaborative study
 The UW IRB is being asked to review on behalf of one or more non-UW institutions in a multi-site or collaborative study.	SUPPLEMENT Multi-site or Collaborative Research
-Non-UW Individual Investigators
+☐	Non-UW Individual Investigators
 The UW IRB is being asked to review on behalf of one or more non-UW individuals who are not affiliated with another organization for the purpose of the research.	SUPPLEMENT Non-UW Individual Investigators
-Other REDCap Installation Attestation for Electronic Consent
+☐	Other REDCap Installation Attestation for Electronic Consent
 The research will use a non-UW installation of REDCap for conducting and/or documenting informed consent.	SUPPLEMENT Other REDCap Installation
-None of the above.
+☐	None of the above.
 1.10. [DETERMINATION]  Confirm by checking the box below that you will comply with the COVID requirements described on HSD’s COVID webpage, which are based on the location of the in-person study procedures and the vaccination status of study team members and study participants.
 Review the HSD website for current guidelines about which in-person research activities are allowable.
 ☒ Confirmed
@@ -6479,23 +6481,28 @@ For example, a longitudinal study of youth with drug problems is likely to have 
 ☐ Yes → If a subject becomes a prisoner while participating in the study, will any study procedures and/or data collection related to the subject be continued while the subject is a prisoner?
 ☐ No
 ☐ Yes → Describe the procedures and/or data collection that will continue with prisoner subjects.
+Click or tap here to enter text.
 2.4. [DETERMINATION]  Will the proposed research recruit or obtain data from individuals that are known to be prisoners?
 For records reviews: if the records do not indicate prisoner status and prisoners are not a target population, select “No”. See the GUIDANCE Prisoners for the definition of “prisoner”, which is not necessarily tied to the type of facility in which a person is residing.
 ☒ No
 ☐ Yes → Answer the following questions (2.4.a. – 2.4.d.)
 2.4.a. Describe the type of prisoners, and their locations(s).
+Click or tap here to enter text.
 2.4.b. One concern about prisoner research is whether the effect of participation on prisoners’ general living conditions, medical care, quality of food, amenities, and/or opportunity for earnings in prison will be so great that it will make it difficult for prisoners to adequately consider the research risks. How will the chances of this be reduced?
+Click or tap here to enter text.
 2.4.c. Describe what will be done to make sure that (a) recruitment and subject selection procedures will be fair to all eligible prisoners and (b) prison authorities or other prisoners will not be able to arbitrarily prevent or require particular prisoners from participating.
+Click or tap here to enter text.
 2.4.d. If the research is funded by one of these federal departments and agencies (Health & Human Services; Energy; Defense; Homeland Security; CIA; Social Security Administration), and/or will involve prisoners in federal facilities or in state/local facilities outside of Washington State: check the box below to provide assurance that study team members will (a) not encourage or facilitate the use of a prisoner’s participation in the research to influence parole or pardon decisions, and (b) clearly inform each prisoner in advance (for example, in a consent form) that participation in the research will have no effect on his or her parole or pardon.
 ☐ Confirmed
 2.5. [DETERMINATION]  Protected populations. IRB approval is required for the use of the subject populations listed here. Check the boxes for any of these populations that will be purposefully included. (In other words, being a part of the populations is an inclusion criterion for the study.)
 The WORKSHEETS describe the criteria for approval but do not need to be completed and should not be submitted.
 Check all that apply	Population	Worksheet Name and Link
-Fetuses in utero	WORKSHEET Pregnant Women
-Neonates of uncertain viability	WORKSHEET Neonates
-Non-viable neonates	WORKSHEET Neonates
-Pregnant women	WORKSHEET Pregnant Women
+☐	Fetuses in utero	WORKSHEET Pregnant Women
+☐	Neonates of uncertain viability	WORKSHEET Neonates
+☐	Non-viable neonates	WORKSHEET Neonates
+☐	Pregnant women	WORKSHEET Pregnant Women
 2.5.a. If you check any of the boxes above, use this space to provide any information that may be relevant for the IRB to consider.
+Click or tap here to enter text.
 2.6. [DETERMINATION]  Native Americans or non-U.S. indigenous populations. Will Native American or non-U.S. indigenous populations be actively recruited through a tribe, tribe-focused organization, or similar community-based organization?
 Indigenous people are defined in international or national legislation as having a set of specific rights based on their historical ties to a particular territory and their cultural or historical distinctiveness from other populations that are often politically dominant.
 Examples: a reservation school or health clinic; recruiting during a tribal community gathering.
@@ -6520,6 +6527,7 @@ By age – for example, children who are 6, 10, or 14 years old.
 The IRB reviews the number of subjects in the context of risks and benefits. Unless otherwise specified, if the IRB determines that the research involves no more than minimal risk: there are no restrictions on the total number of subjects that may be enrolled. If the research involves more than minimal risk: The number of enrolled subjects must be limited to the number described in this application. If it is necessary later to increase the number of subjects, submit a Modification. Exceeding the IRB-approved number (over-enrollment) will be considered non-compliance.
 ☐ No → Provide the rationale in the box below. Also, provide any other available information about the scope/size of the research. You do not need to complete the table.
 Example: It may not be possible to predict the number of subjects who will complete an online survey advertised through Craigslist, but you can state that the survey will be posted for two weeks and the number who respond is the number who will be in the study.
+Click or tap here to enter text.
 ☒ Yes → For each subject group, use the table below to provide the estimate of the maximum desired number of individuals (or other subject unit, such as families) who will complete the research.
 Group name/description	Maximum desired number or individuals (or other subject unit) who will complete the research
 Provide numbers for the site(s) reviewed by the UW IRB and for the study-wide total number; example: 20/100
@@ -6527,6 +6535,8 @@ No type 2 diabetes	1000
 Type 2 diabetes controlled by diet/lifestyle and/or has a diagnosis of prediabetes or borderline diabetes	1000
 Type 2 diabetes controlled by oral and/or non-insulin injectable medications	1000
 Type 2 diabetes dependent on insulin	1000
+Click or tap here to enter text.	Click or tap here to enter text.
+Click or tap here to enter text.	Click or tap here to enter text.
 3. NON-UW RESEARCH SETTINGS
 Complete this section only if UW investigators and people named in the SUPPLEMENT Non-UW Individual Investigators will conduct research procedures outside of UW and Harborview
 3.1. [DETERMINATION]  Research locations and rationale. Identify the locations where the research will be conducted and include a description of the reason(s) for choosing the locations. If the research will be conducted internationally, be sure to list all the countries where the research will take place.
@@ -6620,8 +6630,10 @@ For a study in which possible subjects are identified by screening records: ther
 For a study in which individuals respond to an announcement and call into a study phone line: the study team person talking to the individual may obtain non-written consent to ask eligibility questions over the phone.
 ☒ No → Skip the rest of this section; go to question 5.1.
 ☐ Yes → Describe the consent process.
+Click or tap here to enter text.
 4.7.a. Documentation of consent. Will a written or verifiable electronic signature from the subject on a consent form be used to document consent for the recruiting and screening procedures?
 ☐ No → Describe the information that will be provided during the consent process and for which procedures.
+Click or tap here to enter text.
 ☐ Yes, written → If yes, and a written signature will be used to document consent:
 Upload the consent form to Zipline.
 ☐ Yes, electronic → If yes, and an electronic signature will be used to document consent:
@@ -6683,6 +6695,7 @@ This means scans that are performed solely for research purposes or clinical sca
 What is the purpose of the scan(s)? Examples: obtain research data; safety assessment associated with a research procedure.
 Which subjects will receive an MRI scan?
 Describe the minimum and maximum number of scans per subject, and over what time period the scans will occur. For example: all subjects will undergo two MRI scans, six months apart.
+Click or tap here to enter text.
 5.3.b. MRI facility. At which facility(ies) will the MRI scans occur? Check all that apply.
 ☐ UWMC Radiology/Imaging Services (the UWMC clinical facility)
 ☐ DISC Diagnostic Imaging Sciences Center (UWMC research facility)
@@ -6692,63 +6705,13 @@ Describe the minimum and maximum number of scans per subject, and over what time
 ☐ SCCA Imaging Services
 ☐ Northwest Diagnostic Imaging
 ☐ Other: identify in the text box below:
+Click or tap here to enter text.
 5.3.c. Personnel. For MRI scans that will be conducted at the DISC, CHN or BMIC research facilities: Indicate who will be responsible for operating the MRI scanner by checking all that apply.
 ☐ MRI technician who is formally qualified
 ☐ Researcher who has completed scanner operator training provided by a qualified MRI operator
 5.4. [DETERMINATION]  Data variables. Describe the specific data that will be obtained (including a description of the most sensitive items). Alternatively, a list of the data variables may be uploaded to Zipline.
 List of variables is uploaded and listed below:
 List of variables
-Domain	Variable
-Questionnaires	Medical history, past medical/surgical history, medications, basic demographics
-Center for Epidemiological Studies – Depression (CES-D-10 survey)
-CES-10 survey
-Diabetes self-care activities measurements (SDSCA)
-Diet questionnaire
-Medication Log
-General Health Survey
-Problem Areas In Diabetes questionnaire (PAID-5)
-Social Determinants of Health questionnaire (PhenX surveys)Alcohol, Smoking, Marijuana and Vaping Use and History Questionnaire (UW and UCSD sites) OR Alcohol, Smoking and Vaping use and History Questionnaire (UAB site only)
-Exit survey
-Vitals	Height, weight, BMI, hip to waist circumference
-Vitals	Systolic / Diastolic blood pressure
-Vitals	Heart Rate
-Vitals	Oxygen (SpO2) saturation
-Cognitive Assessment	MoCA cognitive test (Montreal Cognitive Assessment)
-Eye Health	Best corrected visual acuity of each eye
-Eye refraction
-Eye Health	Contrast Sensitivity of each eye
-Systemic Health	Complete Blood Count (white blood cell count, red blood cell count, platelet count, hemoglobin, hematocrit, MCV, MCH, MCHC, RDW), apolipoprotein genotyping, phosphotau epitopes
-Systemic Health	Comprehensive Metabolic Panel (Glucose, Calcium, Total Protein, Albumin, Chloride, Carbon Dioxide, Potassium, Sodium, ALT, AST, Bilirubin, Alkaline Phosphatase, BUN (Blood Urea Nitrogen), Creatinine
-Systemic Health	Hemoglobin A1c
-Systemic Health	Lipid Panel (Total Cholesterol, Triglycerides, HDL Cholesterol, VLDL Cholesterol)
-Urine Analysis	Urine Albumin
-Urine Analysis	Urine Creatinine
-Medical Imaging	Fundus Photo
-Medical Imaging	Optical Coherence Tomography (OCT)
-Medical Imaging	Optical Coherence Tomography Angiography (OCTA)
-Medical Imaging	Fluorescence Lifetime Imaging Ophthalmoscopy (FLIO)
-Wearables	Continuous Glucose Measurements for 10 days
-Wearables	Fitness Tracker for 10 days
-Banking for future studies	Buffy coat for future DNA extractions, serum samples, plasma samples, PAXgene RNA samples, and PBMC samples
-Cardiology	Standard 12-lead ECG
-Cardiology	High sensitivity troponin (hs-TNI)
-Cardiology	BNP
-Peripheral Neuropathy	Monofilament Test
-Endocrinology	Hs-CRP
-Endocrinology	C-peptide
-Environmental	Home air quality, environmental data measuring
-Genomics	Whole Genome Sequencing in Years 2-4 (Funding permitted)
-DOL External Data	Driving accident history
-EMR	Medications
-Vitals (BP, weight, HR, etc.)
-Diagnosis and procedure codes
-Clinical exam evaluation notes
-Surgery notes
-Laboratory values
-Imaging studies (both eye and non-eye related), both scans and reports
-Diagnostic codes and procedural codes
-Demographics
-Insurance data
 Domain	Variable
 Questionnaires	Medical history, past medical/surgical history, medications, basic demographics
 Center for Epidemiological Studies – Depression (CES-D-10 survey)
@@ -6820,6 +6783,7 @@ Name, MRN, DOB, age, sex, race/ethnicity, address, phone number, driver’s lice
 This agreement should be available upon request from the IRB. Examples: a Data Use Agreement, Repository Gatekeeping form, or documented email.
 ☐ There are written policies and procedures for the repository/database/data management center that prohibit the release of the identifiers (or identifying link). This includes situations involving an Honest Broker.
 ☐ There are other legal requirements prohibiting the release of the identifiers or key. Describe them below.
+Click or tap here to enter text.
 5.6.b. Will you or any study team members obtain any direct or indirect identifiers?
 ☒ Yes → Describe which identifiers and for which data/specimens.
 Age (DOB), sex, race/ethnicity, ZIP code (5 digits), driver’s license number
@@ -6830,11 +6794,13 @@ Age (DOB), sex, race/ethnicity, ZIP code (5 digits), driver’s license number
 This agreement should be available upon request from the IRB. Examples: a Data Use Agreement, Repository Gatekeeping form, or documented email.
 ☐ There are written policies and procedures for the repository/database/data management center that prohibit the release of the identifiers (or identifying link). This includes situations involving an Honest Broker.
 ☐ There are other legal requirements prohibiting the release of the identifiers or key. Describe them below.
+Click or tap here to enter text.
 5.6.c. If any identifiers will be obtained, indicate how the identifiers will be stored (and for which data). NOT: Do not describe the data security plan here, that information is requested in question 9.6.
 ☐ Identifiers will be stored with the data. Describe the data to which this applies:
 ☒ Identifiers and study data will be stored separately but a link will be maintained between the identifiers and the study data (for example, through the use of a code). Describe the data to which this applies:
 All data.
 ☐ Identifiers and study data will be stored separately, with no link between the identifiers and the study data. Describe the data to which this applies:
+Click or tap here to enter text.
 5.6.d. Research collaboration. Will individuals who provide coded information or specimens for the research also collaborate on other activities for this research? If yes, identify the activities and provide the name of the collaborator’s institution/organization.
 Examples include but are not limited to: (1) study, interpretation, or analysis of the data that results from the coded information or specimens; and (2) authorship on presentations or manuscripts related to this work.
 Collaborators at all institutions involved in the study will collect, analyze, and interpret data; collect specimens; be involved in preparation of manuscripts, presentations, grants, and other materials stemming from this research.
@@ -6920,6 +6886,7 @@ Whole genome sequencing is sequencing of a human germline or somatic specimen wi
 ☐ Study participants will use or consume any of the above items on campus or in any UW-owned or leased facility
 ☒ None of the above
 5.10.b. If you checked any box except “None of the above”, provide the following information about each cannabis and related item your research will involve: Name of the item, how you will obtain it, the source, and whether it contains ≥0.3% THC (tetrahydrocannabinol).
+Click or tap here to enter text.
 5.11. Possible secondary use or sharing of information, specimens, or subject contact information. Is it likely that the obtained or collected information, specimens, or subject contact information will be used for any of the following:
 Future research not described in this application (in other words, secondary research)
 Submission to a repository, registry, or database managed by the study team, colleagues, or others for research purposes
@@ -6965,6 +6932,7 @@ Examples include: To invite for a follow up study visit, to ask for interests in
 If there are no alternative procedures or treatments, select “No”. Examples of advantageous alternatives: earning extra class credit in some time-equivalent way other than research participation; obtaining supportive care or a standard clinical treatment from a health care provider instead of participating in research with an experimental drug.
 ☒ No
 ☐ Yes → Describe the alternatives.
+Click or tap here to enter text.
 5.15. Upload to Zipline all data collection forms (if any) that will be directly used by or with the subjects, and any scripts/talking points that will be used to collect the data. Do not include data collection forms that will be used to abstract data from other sources (such as medical or academic records), or video recordings.
 Examples: survey, questionnaires, subject logs or diaries, focus group questions.
 NOTE: Sometimes the IRB can approve the general content of surveys and other data collection instruments rather than the specific form itself. This prevents the need to submit a modification request for future minor changes that do not add new topics or increase the sensitivity of the questions. To request this general approval, use the text box below to identify the questionnaires/surveys/ etc. for which you are seeking this more general approval. Then briefly describe the scope of the topics that will be covered and the most personal and sensitive questions. The HSD staff person who screens this application will let you know whether this is sufficient or whether you will need to provide more information.
@@ -6980,6 +6948,7 @@ The general content of questionnaires, surveys and similar instruments for which
 Name the testing lab
 Confirm that the lab and its use of this test is CLIA certified or certified by the Washington State Department of Health
 Describe whether you will return the results to the participants and, if yes, who will do it and how (including any information you would provide to subjects with positive test results).
+Click or tap here to enter text.
 6. CHILDREN (MINORS) AND PARENTAL PERMISSION
 6.1. [DETERMINATION]  Involvement of minors. Does the research include minors (children)?
 Minor or child means someone who has not yet attained the legal age for consent for the research procedures, as described in the applicable laws of the jurisdiction in which the research will be conducted. This may or may not be the same as the definition used by funding agencies such as the National Institutes of Health.
@@ -6988,6 +6957,7 @@ There are some procedures for which the age of consent is much lower in Washingt
 The generic age of consent may be different in other states, and in other countries.
 ☒ No → Go to Section 8.
 ☐ Yes → Provide the age range of the minor subjects for this study and the legal age for consent in the study population(s). If there is more than one answer, explain.
+Click or tap here to enter text.
 ☐ Don’t know → This means is it not possible to know the age of the subjects. For example, this may be true for some research involving social media, the Internet, or a dataset that is obtained from another researcher or from a government agency. Go to Section 8.
 6.2. Parental permission. Parental permission means actively obtaining the permission of the parents. This is not the same as “passive” or “opt out” permission where it is assumed that parents are allowing their children to participate because they have been provided with information about the research and have not objected or returned a form indicating they don’t want their children to participate.
 6.2.a. Will parental permission be obtained for:
@@ -6997,6 +6967,11 @@ The generic age of consent may be different in other states, and in other countr
 Be sure to consider all research procedures and plans, including screening, future contact, and sharing/banking of data and specimens for future work.
 Children Group1	Describe the procedures or data/specimen collection (if any) for which there will be NO parental permission2	Reason why parental permission will not be obtained	Will parents be informed about the research?3
 YES	NO
+Click or tap here to enter text.	Click or tap here to enter text.	Click or tap here to enter text.	☐	☐
+Click or tap here to enter text.	Click or tap here to enter text.	Click or tap here to enter text.	☐	☐
+Click or tap here to enter text.	Click or tap here to enter text.	Click or tap here to enter text.	☐	☐
+Click or tap here to enter text.	Click or tap here to enter text.	Click or tap here to enter text.	☐	☐
+Click or tap here to enter text.	Click or tap here to enter text.	Click or tap here to enter text.	☐	☐
 Table footnotes
 If the answer is the same for all children groups or all procedures: collapse the answer across the groups and/or procedures.
 If identifiable information or biospecimens will be obtained without parent permission, any waiver granted by the IRB does not override parents’ refusal to provide broad consent (for example, through the Northwest Biotrust).
@@ -7006,6 +6981,7 @@ Will parents be informed about the research beforehand even though active permis
 ☐ One parent, even if the other parent is alive, known, competent, reasonably available, and shares legal responsibility for the care and custody of the child.
 This is all that is required for minimal risk research.
 If both are checked explain:
+Click or tap here to enter text.
 6.3. Children who are wards. Will any of the children be wards of the State or any other agency, institution, or entity?
 ☐ No
 ☐ Yes → An advocate may need to be appointed for each child who is a ward. The advocate must be in addition to any other individual acting on behalf of the child as guardian or in loco parentis. The same individual can serve as advocate for all children who are wards.
@@ -7013,6 +6989,7 @@ Describe who will be the advocate(s). The description must address the following
 Background and experience
 Willingness to act in the best interests of the child for the duration of the research
 Independence of the research, research team, and any guardian organization
+Click or tap here to enter text.
 6.4. UW Office of the Youth Protection Coordinator. If the project involves interaction (in-person or remotely) with individuals under the age of 18, researchers must comply with UW Administrative Policy Statement 10.13 and the requirements listed at this website. This includes activities that are deemed to be Not Research or Exempt. It does not apply to third-party led research (i.e., research conducted by a non-UW PI). Information and FAQs for researchers are available.
 This point is advisory only; there is no need to provide a response.
 7. ASSENT OF CHILDREN (MINORS)
@@ -7025,27 +7002,43 @@ When designing assent processes and forms, researchers should first review the G
 ☐ Some of your research procedures and child groups → Use the table below to identify the procedures for which assent will not be obtained.
 Be sure to consider all research procedures and plans, including screening, future contact, and sharing/banking of data and specimens for future work.
 Children Group1	Describe the procedures or data/specimen collection (if any) for which assent will not be obtained	Reason why assent will not be obtained
+Click or tap here to enter text.	Click or tap here to enter text.	Click or tap here to enter text.
+Click or tap here to enter text.	Click or tap here to enter text.	Click or tap here to enter text.
+Click or tap here to enter text.	Click or tap here to enter text.	Click or tap here to enter text.
+Click or tap here to enter text.	Click or tap here to enter text.	Click or tap here to enter text.
+Click or tap here to enter text.	Click or tap here to enter text.	Click or tap here to enter text.
 Table footnotes
 If the answer is the same for all children groups or all procedures, collapse your answer across the groups and/or procedures.
 7.2. Assent process. Describe how assent will be obtained, for each child group. If the research involves children of different ages, answer separately for each group. If the children are non-English speakers, include a description of how their comprehension of the information will be evaluated.
+Click or tap here to enter text.
 7.3. Dissent or resistance. Describe how a child’s objection or resistance to participation (including non-verbal indications) will be identified during the research, and what the response will be.
+Click or tap here to enter text.
 7.4. E-consent. Will any electronic processes (email, websites, electronic signatures, etc.) be used to present assent information to subjects/and or to obtain documentation (signatures) of assent? If yes, describe how this will be done.
+Click or tap here to enter text.
 7.5. Documentation of assent. Which of the following statements describes whether documentation of assent will be obtained?
 	☐ None of the research procedures and child groups 	→ Use the table below to provide justification, then go to question 7.5.b.
 ☐ All of the research procedures and child groups 		→ Go to question 7.5.a., do not complete the table.
 	☐ Some of the research procedures and/or child groups 	→ Complete the table below and then go to question 7.5.a.
 Children Group1	Describe the procedures or data/specimen collection (if any) for which assent will NOT be documented
+Click or tap here to enter text.	Click or tap here to enter text.
+Click or tap here to enter text.	Click or tap here to enter text.
+Click or tap here to enter text.	Click or tap here to enter text.
+Click or tap here to enter text.	Click or tap here to enter text.
+Click or tap here to enter text.	Click or tap here to enter text.
 Table footnotes
 If the answer is the same for all children groups or all procedures, collapse your answer across the groups and/or procedures.
 7.5.a. Describe how assent will be documented. If the children are functionally illiterate or are not fluent in English, include a description of the documentation process for them.
+Click or tap here to enter text.
 7.5.b. Upload all assent materials (talking points, videos, forms, etc.) to Zipline. Assent materials are not required to provide all of the standard elements of adult consent; the information should be appropriate to the age, population, and research procedures. The documents should be in Word, if possible.
 7.6. Children who reach the legal age of consent during participation in longitudinal research.
 When children are enrolled at a young age and continue for many years, it is best practice to re-obtain assent (or to obtain it for the first time, if it was not obtained at the beginning of their participation).
 When children reach the legal age of consent, informed consent must be obtained from the now-adult subject for (1) any ongoing interactions or interventions with the subjects, or (2) the continued analysis of specimens or data for which the subject’s identify is readily identifiable to the researcher, unless the IRB waives this requirement.
 7.6.a. Describe the plans (if any) to re-obtain assent from children.
+Click or tap here to enter text.
 7.6.b. Describe the plans (if any) to obtain consent for children who reach the legal age of consent.
 If adult consent will be obtained from them, describe what will happen regarding now-adult subjects who cannot be contacted.
 If consent will not be obtained or will not be possible, explain why.
+Click or tap here to enter text.
 7.7. Other regulatory requirements. (This is for information only; no answer or response is required.) Researchers are responsible for determining whether their research conducted in schools, with student records, or over the Internet comply with permission, consent, and inspection requirements of the following federal regulations:
 PPRA – Protection of Pupil Rights Amendment
 FERPA – Family Education Rights and Privacy Act
@@ -7085,6 +7078,12 @@ The issue of consent for recruiting and screening activities is address in quest
 Be sure to consider all research procedures and plans, including future contact, and sharing/banking of data and specimens for future work.
 Group1	Describe the procedures of data/specimen collection (if any) for which there will be NO consent process	Reason why consent will not be obtained	Will subjects be provided with info about the research after they finish? (Check Yes or No)
 YES	NO
+Click or tap here to enter text.	Click or tap here to enter text.	Click or tap here to enter text.	☐	☐
+Click or tap here to enter text.	Click or tap here to enter text.	Click or tap here to enter text.	☐	☐
+Click or tap here to enter text.	Click or tap here to enter text.	Click or tap here to enter text.	☐	☐
+Click or tap here to enter text.	Click or tap here to enter text.	Click or tap here to enter text.	☐	☐
+Click or tap here to enter text.	Click or tap here to enter text.	Click or tap here to enter text.	☐	☐
+Click or tap here to enter text.	Click or tap here to enter text.	Click or tap here to enter text.	☐	☐
 Table footnotes
 1. If the answer is the same for all groups, collapse your answer across the groups and/or procedures.
 8.2.b. Describe the consent process, if consent will be obtained for any or all procedures, for any or all groups. Address groups and procedures separately if the consent processes are different.
@@ -7143,6 +7142,11 @@ Documentation of consent that is obtained electronically is not considered writt
 Adult subject group1	Describe the procedures or data/specimen collection (if any) for which there will be NO documentation of consent	Will they be provided with a written statement describing the research (optional)?
 (Check Yes or No)
 YES	NO
+Click or tap here to enter text.	Click or tap here to enter text.	☐	☐
+Click or tap here to enter text.	Click or tap here to enter text.	☐	☐
+Click or tap here to enter text.	Click or tap here to enter text.	☐	☐
+Click or tap here to enter text.	Click or tap here to enter text.	☐	☐
+Click or tap here to enter text.	Click or tap here to enter text.	☐	☐
 Table footnotes
 1. If the answer is the same for all adult groups or all procedures, collapse the answer across the groups and/or procedures.
 8.4.b. Electronic consent signature. For studies in which documentation of consent will be obtained, will subjects use an electronic method to provide their consent signature?
@@ -7155,16 +7159,21 @@ Having subjects check a box at the beginning of an emailed or web-based question
 	☐ Other REDCap installation → Please name the institutional version you will be using (e.g., Vanderbilt, Univ. of Cincinnati) in the following field and provide a completed SUPPLEMENT Other REDCap Installation with your submission.
 ☐ UW DocuSign
 	☐ Other 	→ Please describe in the following field and provide a signed TEMPLATE Other E-signature Attestation Letter with your submission.
+Click or tap here to enter text.
 8.4.b.1. Is this method legally valid in the jurisdiction where the research will occur?
 NOTE: UW ITHS REDCap (excludes REDCap Mobile application) and UW DocuSign have been vetted for compliance with Washington State and federal laws regarding electronic signatures.
 ☐ No
 ☐ Yes → What is the source of information about legal validity?
+Click or tap here to enter text.
 8.4.b.2. Will verification of the subject’s identity be obtained if the signature is not personally witnessed by a member of the study team? Note that this is required for FDA-regulated studies.
 See the GUIDANCE Consent Documentation of Consent for information and examples
 ☐ No → Provide the rationale for why this is not required or necessary to protect subjects or the integrity of the research. Also, what would be the risks to the actual subject if somebody other than the intended signer provides the consent signature?
+Click or tap here to enter text.
 	☐ Yes → Describe how subject identity will be verified, providing a non-technical description that the reviewer will understand.
+Click or tap here to enter text.
 8.4.b.3. How will the requirement be met to provide a copy of the consent information (consent form) to individuals who provide an e-signature?
 The copy can be paper or electronic and may be provided on an electronic storage device or via email. If the electronic consent information uses hyperlinks or other websites or podcasts to convey information specifically related to the research, the information in these hyperlinks should be included in the copy provided to the subjects and the website must be maintained for the duration of the entire study.
+Click or tap here to enter text.
 8.4.c. Barriers to written documentation of consent. There are many possible barriers to obtaining written documentation of consent. Consider, for example, individuals who are functionally illiterate; do not read English well; or have sensory or motor impairments that may impede the ability to read and sign a consent form.
 8.4.c.1. Describe the plans (if any) for obtaining written documentation of consent from potential subjects who may have difficulty with the standard documentation process (that is, reading and signing a consent form).
 Examples of solutions: Translated consent forms; use of the Short Form consent process; reading the form to the person before they sign it; excluding individuals who cannot read and understand the consent form.
@@ -7185,23 +7194,32 @@ NOTE: “Blinding” subjects to their study group/condition/arm is not consider
 ☒ No
 ☐ Yes → Describe what information and why.
 Example: it may be necessary to deceive subjects about the purpose of the study (describe why).
+Click or tap here to enter text.
 8.6.a. Will subjects be informed beforehand that they will be unaware of or misled regarding the nature or purposes of the research? (Note: this is not necessarily required.)
 ☐ No
 ☐ Yes
 8.6.b. Will subjects be debriefed later? (Note: this is not necessarily required.)
 ☐ No → Provide your reasoning for not debriefing subjects.
+Click or tap here to enter text.
 ☐ Yes → Describe how and when this will occur. Upload any debriefing materials, including talking points or a script, to Zipline.
+Click or tap here to enter text.
 8.7. [DETERMINATION] Cognitively impaired adults, and other adults unable to consent. Will such individuals be included in the research?
 Examples: individuals with Traumatic Brain Injury (TBI) or dementia; individuals who are unconscious, or who are significantly intoxicated.
 ☒ No → Go to question 8.8.
 ☐ Yes → Answer the following question.
 8.7.a. Rationale. Provide the rationale for including this population.
+Click or tap here to enter text.
 8.7.b. Capacity for consent/decision making capacity. Describe the process that will be used to determine whether a cognitively impaired individual is capable of consent decision making with respect to the research protocol and setting.
+Click or tap here to enter text.
 8.7.b.1. If there will be repeated interactions with the impaired subjects over a time period when cognitive capacity could increase of diminish, also describe how (if at all) decision-making capacity will be re-assessed and (if appropriate) consent obtained during that time.
+Click or tap here to enter text.
 8.7.c. Permission (surrogate consent). If the research will include adults who cannot consent for themselves, describe the process for obtaining permission (“surrogate-consent”) from a legally authorized representative (LAR).
 For research conducted in Washington State, see GUIDANCE Consent Diminished and Fluctuating Consent Capacity and Use of a Legally Authorized Representative (LAR) to learn which individuals meet the state definition of “legally authorized representative”.
+Click or tap here to enter text.
 8.7.d. Assent. Describe whether assent will be required of all, some, or none of the subjects. If some, indicate which subjects will be required to assent and which will not (and why not). Describe any process that will be used to obtain and document assent from the subjects.
+Click or tap here to enter text.
 8.7.e. Dissent or resistance. Describe how a subject’s objection or resistance to participation (including non-verbal) during the research will be identified, and what will occur in response.
+Click or tap here to enter text.
 8.8. Research use of human fetal tissue obtained from elective abortion. Federal and UW Policy specify some requirements for the consent process. If you are conducing this type of research, check the boxes to confirm these requirements will be followed.
 ☐ Informed consent for the donation of fetal tissue for research use will be obtained by someone other than the person who obtained the informed consent for abortion.
 ☐ Informed consent for the donation of fetal tissue for research use will be obtained after the informed consent for abortion.
@@ -7226,6 +7244,7 @@ All study data and identifiable information will be kept on encrypted servers, o
 ☐ Yes → Will subject consent be obtained for this use?
 ☐ Yes
 ☐ No → Describe the steps that will be taken to protect subjects (or small groups of subjects) from being identifiable.
+Click or tap here to enter text.
 9.3. [DETERMINATION]  State mandatory reporting. Each state has reporting laws that require some types of individuals to report some kinds of abuse, and medical conditions that are under public health surveillance. These include:
 Child abuse
 Abuse, abandonment, neglect, or financial exploitation of a vulnerable adult
@@ -7235,6 +7254,7 @@ Medical conditions subject to mandatory reporting (notification) for public heal
 Are you or a member of the research team likely to learn of any of the above events or circumstances while conducting the research AND feel obligated to report it to state authorities?
 ☒ No
 ☐ Yes → The UW IRB expects subjects to be informed of this possibility in the consent form or during the consent process, unless you provide a rationale for not doing so:
+Click or tap here to enter text.
 9.4. [DETERMINATION]  Retention of identifiers and data. Check the box below to indicate assurance that any identifiers (or links between identifiers and data/specimens) and data that are part of the research records will not be destroyed until after the end of the applicable records retention requirements (e.g. Washington State; funding agency or sponsor; Food and Drug Administration). If it is important to say something about destruction of identifiers (or links to identifiers) in the consent form, state something like “the link between your identifier and the research data will be destroyed after the records retention period required by state and/or federal law.”
 See the “Research Data” sections of the following website for UW Records management for the Washington State research records retention schedules that apply in general to the UW (not involving UW Medicine data): http://f2.washington.edu/fm/recmgt/gs/research?title=R
 See the “Research Records and Data” information in Section 8 of this document for the retention schedules for UW Medicine Records: https://www.uwmedicine.org/recordsmanagementuwm-records-retention-schedule.pdf
@@ -7246,6 +7266,7 @@ See the “Research Records and Data” information in Section 8 of this documen
 9.6.a. Which level of protections will be applied to the data and specimens? If more than one level will be used, describe which level will apply to which data and which specimens and at which sites.
 Level 3
 9.6.b. Use this space to provide additional information, details, or to describe protections that do not fit into one of the levels. If there are any protections within the level listed in 9.6.a which will not be followed, list those here, including identifying the sites where this exception will apply. For example, if you intend to store subject identifiers with study data (not permitted under requirement U9 for Risk Levels 3-5), then indicate this in the box below (e.g., “We will not adhere to requirement U9 for screening data”).
+Click or tap here to enter text.
 10. RISK / BENEFIT ASSESSMENT
 10.1. [DETERMINATION]  Anticipated risks. Describe the reasonably foreseeable risks of harm, discomforts, and hazards to the subjects and others of the research procedures. For each harm, discomfort, or hazard:
 Describe the magnitude, probability, duration, and/or reversibility of the harm, discomfort, or hazard, AND
@@ -7272,36 +7293,45 @@ Examples: direct teratogenic effects; possible germline effects; effects on fert
 ☒ No → Go to question 10.3.
 ☐ Yes → Answer the following questions:
 10.2.a. Risks. Describe the magnitude, probability, duration and/or reversibility of the risks.
+Click or tap here to enter text.
 10.2.b. Steps to minimize risk. Describe the specific steps that will be taken to minimize the magnitude, probability or duration of these risks.
 Examples: inform the subjects about the risks and how to minimize them; require a pregnancy test before and during the study; require subjects to use contraception; advise subjects about banking of sperm and ova.
 If the use of contraception will be required, describe the allowable methods and the time period when contraception must be used.
+Click or tap here to enter text.
 10.2.c. Pregnancy. Describe what will be done if a subject (or a subject’s partner) becomes pregnant.
 For example; will subjects be required to immediately notify study staff, so that the study procedures can be discontinue or modified, or for a discussion of risks, and/or referrals or counseling?
+Click or tap here to enter text.
 10.3. [DETERMINATION]  MRI risk management. A rare but serious adverse reaction called nephrogenic systemic fibrosis (NSF) has been observed in individuals with kidney disease who received gadolinium-based contrast agents (GBCAs) for the scans. Also, a few healthy individuals have a severe allergic reaction to GBCAs.
 10.3.a. Use of gadolinium. Will any of the MRI scans involve the use of a gadolinium-based contrast agent (GBCA)?
 ☐ No
 ☐ Yes → Which agents will be used? Check all that apply.
 Check all that apply	Brand Name	Generic Name	Chemical Structure
-Dotarem	Gadoterate meglumine	Macrocylic
-Eovist / Primovist	Gadoxetate disodium	Linear
-Gadavist	Gadobutro	Macrocyclic
-Magnevist	Gadpentetate dimeglumine	Linear
-MultiHance	Gadobenate dimeglumine	Linear
-Omniscan	Gadodiamide	Linear
-OptiMARK	Gadoversetamide	Linear
-ProHance	Gadoteridol	Macrocyclic
-Other, provide name:
+☐	Dotarem	Gadoterate meglumine	Macrocylic
+☐	Eovist / Primovist	Gadoxetate disodium	Linear
+☐	Gadavist	Gadobutro	Macrocyclic
+☐	Magnevist	Gadpentetate dimeglumine	Linear
+☐	MultiHance	Gadobenate dimeglumine	Linear
+☐	Omniscan	Gadodiamide	Linear
+☐	OptiMARK	Gadoversetamide	Linear
+☐	ProHance	Gadoteridol	Macrocyclic
+☐	Other, provide name:
+Click or tap here to enter text.
 10.3.a.1. The FDA has concluded that gadolinium is retained in the body and brain for a significantly longer time than previously recognized, especially for linear GBCAs. The health-related risks of this longer retention are not yet clearly established. However, the UW IRB expects researchers to provide a compelling justification for using a linear GBCA instead of a macrocyclic GBCA, to manage the risks associated with GBCAs.
 Describe why it is important to use a GBCA with the MRI scan(s). Describe the dose that will be used and (if it is more than the standard clinical dose recommended by the manufacturer) why it is necessary to use a higher dose. If a linear GBCA will be used, explain why a macrocyclic GBCA cannot be used.
+Click or tap here to enter text.
 10.3.a.2. Information for subjects. Confirm by checking this box that subjects will be provided with the FDA-approved Patient Medication Guide for the GBCA being used in the research or that the same information will be inserted into the consent form.
 ☐ Confirmed
 10.3.b. Who will (1) calculate the dose of GBCA; (2) prepare it for injection; (3) insert and remove the IV catheter; (4) administer the GBCA; and (5) monitor for any adverse effects of the GCBA? Also, what are the qualifications and training of these individual(s)?
+Click or tap here to enter text.
 10.3.c. Describe how the renal function of subjects will be assessed prior to MRI scans and how that information will be used to exclude subjects at risk for NSF.
+Click or tap here to enter text.
 10.3.d. Describe the protocol for handling a severe allergic reaction to the GBCA or any other medical event/emergency during the MRI scan, including who will be responsible for which actions.
+Click or tap here to enter text.
 10.4. [DETERMINATION]  Unforeseeable risks. Are there any research procedures that may have risks that are currently unforeseeable?
 Example: using a drug that hasn’t been used before in this subject population.
 ☒ No
 ☐ Yes → Identify the procedures.
+Click or tap here to enter text.
 10.5. Subjects who will be under regional or general anesthesia. Will any research procedures occur while patients are under general or regional anesthesia, or during the 3 hours preceding general or regional anesthesia (supplied for non-research reasons)?
 ☒ No
 ☐ Yes → Check all the boxes that apply.
@@ -7314,6 +7344,7 @@ Example: using a drug that hasn’t been used before in this subject population.
 ☐ Other manipulations or procedures performed solely for research purposes (e.g., experimental liver dialysis, experimental brain stimulation)
 If any of the boxes are checked:
 Provide the name and institutional affiliation of a physician anesthesiologist who is a member of the research team or who will serve as a safety consultant about the interactions between the research procedures and the general or regional anesthesia of the subject-patients. If the procedures will be performed at a UW Medicine facility or affiliate, the anesthesiologist must be a UW faculty member, and  the Vice Chair of Clinical Research in the UW Department of Anesthesiology and Pain Medicine must be consulted in advance for feasibility, safety and billing.
+Click or tap here to enter text.
 ** If the box about radio-isotopes is checked, the study team is responsible for informing in advance all appropriate clinical personnel (e.g., nurses, technicians, anesthesiologists, surgeons) about the administration and use of the radio-isotope, to ensure that any personal safety issues (e.g., pregnancy) can be appropriately addressed. This is a condition of IRB approval.
 10.6. Data and Safety Monitoring. A Data and Safety Monitoring Plan (DSMP) is required for clinical trials (as defined by NIH). If required for this research, or if there is a DSMP for the research regardless of whether it is required, upload the DSMP to Zipline. If it is embedded in another document being uploading (for example, a Study Protocol) use the text box below to name the document that has the DSMP. Alternatively, provide a description of the DSMP in the text box below. For guidance on developing a DSMP, see the ITHS webpage on Data and Safety Monitoring Plans.
 N/A
@@ -7369,6 +7400,7 @@ There are no plans for the researchers involved in collecting the data set to de
  11. ECONOMIC BURDEN TO PARTICIPANTS
 11.1. Financial responsibility for research-related injuries. Answer this question only if the lead researcher is not a UW student, staff member, or faculty member whose primary paid appointment is at the UW.
 For each institution involved in conducting the research: Describe who will be financially responsible for research-related injuries experienced by subjects, and any limitations. Describe the process (if any) by which participants may obtain treatment/compensation.
+Click or tap here to enter text.
 11.2. Costs to subjects. Describe any research-related costs for which subjects and/or their health insurance may be responsible (examples might include: CT scan required for research eligibility screening; co-pays; surgical costs when a subject is randomized to a specific procedure; cost of a device; travel and parking expenses that will not be reimbursed).
 Subjects may incur costs for transport that will not be reimbursed if transportation fees exceed $25.
  12. RESOURCES
@@ -7376,6 +7408,7 @@ Subjects may incur costs for transport that will not be reimbursed if transporta
 Advisor’s name
 Your relationship with your advisor (for example: graduate advisor; course instructor)
 Your plans for communication/consultation with your advisor about progress, problems, and changes.
+Click or tap here to enter text.
 12.2. UW Principal Investigator Qualifications. Upload a current or recent Curriculum Vitae (CV), Biosketch (as provided to federal funding agencies), or similar document to the Local Site Documents page in Zipline. The purpose of this is to address the PI’s qualifications to conduct the proposed research (education, experience, training, certifications, etc.).
 For help with creating a CV, see http://adai.uw.edu/grants/nsf_biosketch_template.pdf and https://medicine.uw.edu/faculty/academic-human-resources/curriculum-vitae-cv
 ☒ The CV will be uploaded.
@@ -7404,8 +7437,10 @@ The PI assumes the responsibility that each study team member is trained and rec
 13. OTHER APPROVALS, PERMISSIONS, AND REGULATORY ISSUES
 13.1. [DETERMINATION]  Approvals and permissions. Identify any other approvals or permissions that will be obtained. For example: from a school, external site/organization, funding agency, employee union, UW Medicine clinical unit.
 Do not attach the approvals and permissions unless requested by the IRB.
+Click or tap here to enter text.
 13.2. Financial Conflict of Interest. Does any UW member of the team have ownership or other Significant Financial Interest (SFI) with this research as defined by UW policy GIM 10?
 ☒ No
 ☐ Yes → Has the Office of Research made a determination regarding this SFI as it pertains to the proposed research?
 ☐ No → Contact the Office of Research (206.616.0804, research@uw.edu) for guidance on how to obtain the determination.
 ☐ Yes → Upload the Conflict Management Plan for every UW team member who has a FCOI with respect to the research, to Zipline. If it is not yet available, use the text box to describe whether the Significant Financial Interest has been disclosed already to the UW Office of Research and include the FIDS Disclosure ID if available.
+Click or tap here to enter text.

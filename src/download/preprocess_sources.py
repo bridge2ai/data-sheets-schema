@@ -133,29 +133,41 @@ def _docx_paragraph_text(p) -> str:
     return "".join(parts)
 
 
+def _docx_children(el, *tags):
+    """Direct children of `el` with one of `tags`, looking through `w:sdt`
+    wrappers at that level: a structured-document tag may wrap a paragraph
+    or table in the body, a row in a table, or a cell in a row (#921
+    review — 195 of the AI_READI file's tags wrap cells, five of them the
+    only ☒ answers on their rows). Direct children only: a nested table is
+    reached through its cell's recursion, once, in place."""
+    for child in el:
+        if child.tag in tags:
+            yield child
+        elif child.tag == f"{_W}sdt":
+            content = child.find(f"{_W}sdtContent")
+            if content is not None:
+                yield from _docx_children(content, *tags)
+
+
 def _docx_block_texts(container) -> list:
-    """Paragraphs and table rows under a body-level container, in document
-    order (the earlier extractor emitted every paragraph, then every table,
-    whatever their order on the page), descending into `w:sdt` blocks."""
+    """Paragraphs and table rows under a container, in document order (the
+    earlier extractor emitted every paragraph, then every table, whatever
+    their order on the page), descending into `w:sdt` wrappers."""
     out = []
-    for child in container:
+    for child in _docx_children(container, f"{_W}p", f"{_W}tbl"):
         if child.tag == f"{_W}p":
             text = _docx_paragraph_text(child)
             if text.strip():
                 out.append(text)
-        elif child.tag == f"{_W}tbl":
-            for row in child.iter(f"{_W}tr"):
+        else:
+            for row in _docx_children(child, f"{_W}tr"):
                 cells = []
-                for cell in row.findall(f"{_W}tc"):
+                for cell in _docx_children(row, f"{_W}tc"):
                     cell_text = "\n".join(t for t in _docx_block_texts(cell) if t.strip())
                     if cell_text.strip():
                         cells.append(cell_text.strip())
                 if cells:
                     out.append("\t".join(cells))
-        elif child.tag == f"{_W}sdt":
-            content = child.find(f"{_W}sdtContent")
-            if content is not None:
-                out.extend(_docx_block_texts(content))
     return out
 
 
