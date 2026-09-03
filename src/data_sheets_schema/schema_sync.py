@@ -108,7 +108,13 @@ def check_one(merged: Path, source: Path, class_name: str,
         try:
             live = schema_digest.fingerprint(
                 schema_digest.digest_text(class_name, merged))
-            fresh = schema_digest.fingerprint(
+            # Identical bytes digest identically (the digest is a function of
+            # content — `DigestIsAFunctionOfContentTest`), so the rebuilt file
+            # is digested only when it differs. Digesting it every time built
+            # a SchemaView of a fresh temp path per check, pinned for the
+            # life of the process by linkml's method caches (#926) and kept
+            # again by the digest's own path-keyed caches.
+            fresh = live if same else schema_digest.fingerprint(
                 schema_digest.digest_text(class_name, rebuilt))
         except Exception as exc:                               # noqa: BLE001
             return {**out, "status": UNCHECKED,

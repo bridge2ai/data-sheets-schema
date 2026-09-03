@@ -60,8 +60,8 @@ ADDRESSED_BY = {
 @functools.lru_cache(maxsize=1)
 def _vocabulary() -> tuple[frozenset[str], dict[str, str]]:
     """Permissible values, and the alias table that maps onto them."""
-    from linkml_runtime import SchemaView
-    view = SchemaView(str(FULL_SCHEMA))
+    from data_sheets_schema.schema_view import shared_view
+    view = shared_view(FULL_SCHEMA)
     for name in view.all_enums():
         if "elationship" in name:
             values = view.get_enum(name).permissible_values

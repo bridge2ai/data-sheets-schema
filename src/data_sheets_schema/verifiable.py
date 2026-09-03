@@ -185,8 +185,8 @@ def identifier_slots(schema_path: Path = FULL_SCHEMA) -> set[str]:
     A dict in such a slot is still walked — the *fields inside* a nested Person
     are ordinary assertions. Only the identifier string is exempt.
     """
-    from linkml_runtime import SchemaView
-    sv = SchemaView(str(schema_path))
+    from data_sheets_schema.schema_view import shared_view
+    sv = shared_view(schema_path)
     classes = set(sv.all_classes())
     out = {s.name for s in sv.all_slots().values() if s.identifier}
     out |= {s.name for s in sv.all_slots().values() if s.range in classes}

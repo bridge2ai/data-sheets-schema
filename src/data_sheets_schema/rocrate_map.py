@@ -29,6 +29,7 @@ from typing import Any
 
 import yaml
 from linkml_runtime import SchemaView
+from data_sheets_schema.schema_view import shared_view
 
 MAPPING_TSV = Path("data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv")
 FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
@@ -461,7 +462,7 @@ def map_project(project: str, packages_dir: Path = PACKAGES_DIR,
             f"No ro-crate-metadata.json under {project_dir}/raw or {project_dir}/crate"
         )
 
-    sv = sv or SchemaView(str(FULL_SCHEMA))
+    sv = sv or shared_view(FULL_SCHEMA)
     rows = rows if rows is not None else load_mapping()
     graph = json.loads(source.read_text(encoding="utf-8")).get("@graph", [])
 

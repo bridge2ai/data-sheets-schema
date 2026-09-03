@@ -28,6 +28,7 @@ from typing import Any
 
 import yaml
 from linkml_runtime import SchemaView
+from data_sheets_schema.schema_view import shared_view
 
 FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
 TARGET_CLASS = "Dataset"
@@ -523,7 +524,7 @@ def normalize_project(project: str, packages_dir: Path = PACKAGES_DIR,
             f"No crate artifacts found under {project_dir}/raw or {project_dir}/crate"
         )
 
-    sv = sv or SchemaView(str(FULL_SCHEMA))
+    sv = sv or shared_view(FULL_SCHEMA)
     out_dir = project_dir / "processed"
     out_dir.mkdir(parents=True, exist_ok=True)
 

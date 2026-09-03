@@ -47,6 +47,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 from typing import Any
+from data_sheets_schema.schema_view import shared_view
 
 #: A change cell asserting the slot is gone. Anchored to the cell, so a reason
 #: cell mentioning removal cannot trigger it.
@@ -434,7 +435,7 @@ def declared_slots() -> dict[str, set[str]]:
     out: dict[str, set[str]] = {}
     for schema, classes in ((FULL_SCHEMA, ("Dataset",)),
                             (CORE_SCHEMA, ("CoreDataset", "CoreDistribution"))):
-        view = SchemaView(str(schema))
+        view = shared_view(schema)
         for cls in classes:
             if cls in view.all_classes():
                 out[cls] = {s.name for s in view.class_induced_slots(cls)}

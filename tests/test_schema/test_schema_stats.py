@@ -141,7 +141,12 @@ class TestDigestBuildIsMemoised(unittest.TestCase):
             schema_digest.build("Dataset")
         cached = (time.perf_counter() - start) / 10
 
+        # Cold means the schema is read again. Since #926 the SchemaView is
+        # shared per file (`schema_view`), so clearing the digest cache alone
+        # leaves a build that costs milliseconds against linkml's own caches.
         schema_digest._BUILD_CACHE.clear()
+        from data_sheets_schema import schema_view
+        schema_view._VIEWS.clear()
         start = time.perf_counter()
         schema_digest.build("Dataset")
         cold = time.perf_counter() - start

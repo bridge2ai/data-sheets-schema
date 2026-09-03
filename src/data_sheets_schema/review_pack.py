@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from data_sheets_schema.schema_view import shared_view
 
 #: The closed verdict vocabulary a review must use, per item kind.
 VERDICTS = {
@@ -235,7 +236,7 @@ def _id_slots(full: Any, root_class: str | None = None) -> tuple[list[dict[str, 
         schema_path = Path(SCHEMA_PATH)
         if not schema_path.is_absolute():                     # cwd-proof (#822)
             schema_path = Path(__file__).resolve().parents[2] / schema_path
-        sv = SchemaView(str(schema_path))
+        sv = shared_view(schema_path)
     except Exception as e:                                    # noqa: BLE001
         return [], f"id slot flags unavailable: {type(e).__name__}"
     root = root_class or (full.get("conforms_to_class") if isinstance(full, dict) else None) or "Dataset"

@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any
 
 from linkml_runtime import SchemaView
+from data_sheets_schema.schema_view import shared_view
 
 FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
 CORE_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml")
@@ -288,7 +289,7 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
             f"No schema known for class {class_name!r}; pass schema_path "
             f"explicitly. Known: {sorted(CLASS_SCHEMA)}")
     path = resolve_schema(path)
-    sv = SchemaView(str(path))
+    sv = shared_view(path)
     # The digest names the schema it came from, and that name is rendered into
     # the digest text — so an identical schema read from a different location
     # produced a different fingerprint. Verifying a digest by rebuilding the
