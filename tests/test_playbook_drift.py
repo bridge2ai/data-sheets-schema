@@ -125,10 +125,11 @@ class TestAgainstTheCorpus(unittest.TestCase):
     def test_the_real_records_carry_playbook_hashes_to_check(self):
         """If this ever finds none, the guard above is vacuous."""
         from data_sheets_schema.runs import canonical_runs
-        runs = canonical_runs()
+        from data_sheets_schema.runs import canonical_sets
+        runs = {f"{rt}:{p}": i for rt, found in canonical_sets().items() for p, i in found.items()}
         if not runs:
             self.skipTest("no canonical records")
-        statuses = {playbook_drift("claudecode_agent", i["label"], p)[0]
+        statuses = {playbook_drift(i["method"], i["label"], p.split(":", 1)[1])[0]
                     for p, i in runs.items()}
         self.assertTrue(statuses - {PLAYBOOK_UNRECORDED},
                         "no canonical record records a playbook hash")

@@ -131,13 +131,14 @@ class TestAgainstTheCorpus(unittest.TestCase):
         from data_sheets_schema import schema_digest
         from data_sheets_schema.runs import canonical_runs
 
-        runs = canonical_runs()
+        from data_sheets_schema.runs import canonical_sets
+        runs = {(rt, p): i for rt, found in canonical_sets().items() for p, i in found.items()}
         if not runs:
             self.skipTest("no canonical records")
         live = schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
         checked = 0
-        for project, info in sorted(runs.items()):
-            base = (ROOT / "data/d4d_concatenated/claudecode_agent_core"
+        for (_rt, project), info in sorted(runs.items()):
+            base = (ROOT / "data/d4d_concatenated" / f"{info['method']}_core"
                     / info["label"])
             core = base / f"{project}_d4d_core.yaml"
             prov = base / f"{project}_provenance.yaml"

@@ -26,7 +26,9 @@ REPO = Path(__file__).resolve().parents[1]
 class TestCanonicalRuns(unittest.TestCase):
 
     def setUp(self):
-        self.found = canonical_runs()
+        # The API runtime's canonical set (#690): the corpus carries one per
+        # runtime since the v6 agentic marks were re-marked beside the v7 ones.
+        self.found = canonical_runs(runtime="api")
 
     def test_it_finds_the_marked_records(self):
         """Which projects are marked is a property of the corpus, not of the
@@ -104,14 +106,15 @@ class TestCanonicalRuns(unittest.TestCase):
 class TestTheCommand(unittest.TestCase):
 
     def _run(self, *args):
-        return CliRunner().invoke(runs, ["canonical", *args])
+        # the corpus carries one canonical per runtime since #690; ask for the API arm's
+        return CliRunner().invoke(runs, ["canonical", "--runtime", "api", *args])
 
     def test_paths_only_is_pipeable(self):
         """What an evaluation sweep consumes."""
         out = self._run("--paths-only")
         self.assertEqual(out.exit_code, 0, out.output)
         lines = [l for l in out.output.splitlines() if l.strip()]
-        self.assertEqual(len(lines), 2 * len(canonical_runs()),
+        self.assertEqual(len(lines), 2 * len(canonical_runs(runtime="api")),
                          "one full and one core per canonical project")
         for line in lines:
             self.assertTrue((REPO / line).is_file(), line)
@@ -120,7 +123,7 @@ class TestTheCommand(unittest.TestCase):
         """Derived, not literal. This pair used to assert `"VOICE" in output`;
         #292 was fixed, every project gained a mark, and the gap is now empty —
         so the old assertion tested that generation was still broken."""
-        gap = set(PROJECTS) - set(canonical_runs())
+        gap = set(PROJECTS) - set(canonical_runs(runtime="api"))
         out = self._run("--missing")
         self.assertEqual(out.exit_code, 0, out.output)
         if not gap:
@@ -144,7 +147,7 @@ class TestTheCommand(unittest.TestCase):
         nothing on the real corpus to exercise, so the case is skipped here and
         the behaviour is held by the library-level test above.
         """
-        gap = sorted(set(PROJECTS) - set(canonical_runs()))
+        gap = sorted(set(PROJECTS) - set(canonical_runs(runtime="api")))
         if not gap:
             self.skipTest("every project has a canonical record")
         out = self._run("--project", gap[0])
@@ -215,3 +218,48 @@ class TestAmbiguity(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestRuntimeScopedCanonicals(unittest.TestCase):
+    """#690 (v8 plan D6): the API and agentic arms each keep one canonical
+    per project, told apart by `model.agent_runtime`."""
+
+    def _corpus(self, tmp, marks):
+        import yaml
+        root = Path(tmp)
+        for label, runtime in marks:
+            d = root / "m_core" / label
+            d.mkdir(parents=True)
+            rec = {"run": {"project": "CHORUS", "label": label, "method": "m"},
+                   "canonical": {"criterion": "c", "selected_from": [{}, {}]},
+                   "outputs": {"full": {"path": f"{label}/f.yaml"}, "core": {"path": f"{label}/c.yaml"}}}
+            if runtime:
+                rec["model"] = {"agent_runtime": runtime}
+            (d / "CHORUS_provenance.yaml").write_text(yaml.safe_dump(rec))
+        return root
+
+    def test_one_mark_per_runtime_coexists_and_a_runtime_filter_picks(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._corpus(tmp, [("2026-08-28_agentic-v6_rep3", "Claude Code"),
+                                      ("2026-09-01_api-v7_rep1", "Claude API (direct)")])
+            with self.assertRaises(AmbiguousCanonical) as ctx:
+                canonical_runs(concat_dir=root)
+            self.assertIn("[agentic]", str(ctx.exception)); self.assertIn("[api]", str(ctx.exception))
+            self.assertIn("runtime=", str(ctx.exception))
+            self.assertEqual(canonical_runs(concat_dir=root, runtime="api")["CHORUS"]["label"], "2026-09-01_api-v7_rep1")
+            self.assertEqual(canonical_runs(concat_dir=root, runtime="agentic")["CHORUS"]["runtime"], "agentic")
+
+    def test_two_marks_in_one_runtime_still_raise(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._corpus(tmp, [("2026-09-01_api-v7_rep1", "Claude API (direct)"),
+                                      ("2026-09-20_api-v8_rep1", "Claude API (direct)")])
+            with self.assertRaises(AmbiguousCanonical):
+                canonical_runs(concat_dir=root, runtime="api")
+
+    def test_a_record_without_a_runtime_is_unknown_not_guessed(self):
+        from data_sheets_schema.runs import runtime_of
+        self.assertIsNone(runtime_of({"model": {}})); self.assertIsNone(runtime_of({}))
+        self.assertEqual(runtime_of({"model": {"agent_runtime": "Claude Code"}}), "agentic")
+        self.assertEqual(runtime_of({"model": {"agent_runtime": "claude api (direct)"}}), "api")

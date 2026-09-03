@@ -226,7 +226,8 @@ make gen-d4d-html
 
 | Method | Status | Best For | Quality | Speed |
 |--------|--------|----------|---------|-------|
-| **claudecode_agent** | ✅ Current (v5+) | Production datasheets | ⭐⭐⭐⭐⭐ | Fast (parallel) |
+| **claudecode_agent** | ✅ Current (v5+) | Production datasheets (agentic runtime; both runtimes through v7) | ⭐⭐⭐⭐⭐ | Fast (parallel) |
+| **claudecode_api** | ✅ From generic_v8 (#690) | Production datasheets, API runtime baseline | — | Fast (batch) |
 | claudecode_assistant | Alternative | Interactive refinement | ⭐⭐⭐⭐⭐ | Medium |
 | claudecode | Legacy | API automation | ⭐⭐⭐ | Medium |
 | gpt5 | Comparison | Benchmarking | ⭐⭐ | Slow |
@@ -514,6 +515,23 @@ and carry no coverage credit; the gone-entry classes also count under
 `reshaped_by_reconcile` (they resolved in the snapshot), a never-present
 path does not.
 Keyless entries whose only leaves are lists still join by position (#908).
+
+## Method directories and runtime-scoped canonicals (#690, v8 D6)
+
+Through generic_v7 the API and agentic runtimes both wrote under
+`claudecode_agent/` and were told apart only by the label (`-api-` /
+`-claudecode-`) and `model.agent_runtime` (104 API-runtime and 90 agentic
+records there). From generic_v8 the API path's baseline arm writes under
+**`claudecode_api/`** (+ `_core`); the crate/healthsheet arms keep their
+directories; nothing historical moves (a migration of the old labels is a
+filed follow-up). A canonical mark is **scoped to a runtime**: `d4d runs
+select` supersedes only prior marks of the winner's runtime (read from
+`model.agent_runtime`; `--supersede-all-runtimes` restores the old
+behaviour), the `canonical` block records `runtime`, and `canonical_runs`
+/ `d4d runs canonical --runtime api|agentic` pick one — a project marked
+under both runtimes without a runtime filter is ambiguous and refused, as
+two configurations are. The v6 agentic canonicals (2026-08-28 rep1/rep3)
+were re-marked beside the v7 API ones.
 
 ## Canonical selection with the review (#660)
 

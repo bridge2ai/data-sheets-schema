@@ -13,8 +13,10 @@ METHODS = [
     "curated",                  # ChatGPT chat interface (see note below)
     "gpt5",                     # GPT-5 generated
     "claudecode",               # Claude Code deterministic (legacy API-based)
-    "claudecode_agent",         # Claude Code agent (current - v5+)
+    "claudecode_agent",         # Claude Code agent (current - v5+); API-runtime baseline runs up to v7 also live here (#690)
     "claudecode_agent_core",    # Claude Code agent — D4D Core schema (exchange layer)
+    "claudecode_api",           # Claude API runtime, baseline arm, from generic_v8 on (#690, v8 plan D6)
+    "claudecode_api_core",      # ... its D4D Core counterpart
     "claudecode_assistant",     # Claude Code assistant (interactive)
     "rocrate_mapped",           # RO-Crate via UPSTREAM's ro-crate-linkml.yaml, no model
     "rocrate_static_map",       # RO-Crate via OUR mapping table, no model

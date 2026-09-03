@@ -124,11 +124,12 @@ class TestItDidNotRedefineACondition(unittest.TestCase):
         """
         from data_sheets_schema.runs import (canonical_prompt_status,
                                              canonical_runs)
-        runs = canonical_runs()
+        from data_sheets_schema.runs import canonical_sets
+        runs = {(rt, p): i for rt, found in canonical_sets().items() for p, i in found.items()}
         if not runs:
             self.skipTest("no canonical records on disk")
-        for project, info in runs.items():
+        for (_rt, project), info in runs.items():
             with self.subTest(project=project):
                 status, why = canonical_prompt_status(
-                    "claudecode_agent", info["label"], project)
+                    info["method"], info["label"], project)
                 self.assertIn(status, ("canonical", "superseded"), why)

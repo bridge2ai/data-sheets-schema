@@ -171,9 +171,13 @@ class TestTheCanonicalSetIsClean(unittest.TestCase):
 
     def test_no_canonical_record_has_a_related_datasets_defect(self):
         from data_sheets_schema.evaluation_plan import NothingSelected, plan
-        try:
-            paths = {e.path for e in plan()}
-        except NothingSelected:
+        paths = set()
+        for runtime in ("api", "agentic"):                    # every arm's canonical set (#690)
+            try:
+                paths |= {e.path for e in plan(runtime=runtime)}
+            except NothingSelected:
+                pass
+        if not paths:
             self.skipTest("no canonical record on disk")
         for path in sorted(paths):
             record = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}

@@ -49,6 +49,8 @@
         "claudecode",
         "claudecode_agent",
         "claudecode_agent_core",
+        "claudecode_api",
+        "claudecode_api_core",
         "claudecode_assistant",
         "rocrate_mapped",
         "rocrate_static_map",
