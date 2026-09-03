@@ -188,7 +188,10 @@ class TestTheByReferenceShortcut(unittest.TestCase):
                 shortcut = "also accepts the same slots" in _block(text, n.name)
                 with self.subTest(target=target, nested=n.name,
                                   overlap=round(overlap, 2)):
-                    self.assertEqual(shortcut, overlap >= MIRRORS_TOP_LEVEL)
+                    # large enough to be truncated, and mirroring (#916):
+                    # a two-attribute class never takes the shortcut
+                    self.assertEqual(shortcut, len(optional) > MAX_OPTIONAL_SHOWN
+                                     and overlap >= MIRRORS_TOP_LEVEL)
 
     def test_no_distinguishing_attribute_is_lost_on_either_target(self):
         """The by-reference shortcut's whole risk, checked everywhere it runs."""

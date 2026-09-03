@@ -461,7 +461,12 @@ def render(digest: ClassDigest) -> str:
             optional = [k for k in n.optional if k not in UNIVERSAL_ATTRIBUTES]
             if optional:
                 own = [k for k in optional if k not in top_level]
-                mirrors = 1 - len(own) / len(optional) >= MIRRORS_TOP_LEVEL
+                # Only a class large enough to be truncated takes the shortcut
+                # (#916 review): `Organization` has two optionals, both
+                # top-level names, and the bare overlap test told a run that
+                # an Organization accepts every Dataset slot.
+                mirrors = (len(optional) > MAX_OPTIONAL_SHOWN
+                           and 1 - len(own) / len(optional) >= MIRRORS_TOP_LEVEL)
                 if mirrors:
                     extra = (" plus " + ", ".join(f"`{k}`" for k in own)) if own else ""
                     lines.append("    - also accepts the same slots as the "
