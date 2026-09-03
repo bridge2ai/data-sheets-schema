@@ -515,6 +515,23 @@ and carry no coverage credit; the gone-entry classes also count under
 path does not.
 Keyless entries whose only leaves are lists still join by position (#908).
 
+## Method directories and runtime-scoped canonicals (#690, v8 D6)
+
+Through generic_v7 the API and agentic runtimes both wrote under
+`claudecode_agent/` and were told apart only by the label (`-api-` /
+`-claudecode-`) and `model.agent_runtime` (104 API-runtime and 90 agentic
+records there). From generic_v8 the API path's baseline arm writes under
+**`claudecode_api/`** (+ `_core`); the crate/healthsheet arms keep their
+directories; nothing historical moves (a migration of the old labels is a
+filed follow-up). A canonical mark is **scoped to a runtime**: `d4d runs
+select` supersedes only prior marks of the winner's runtime (read from
+`model.agent_runtime`; `--supersede-all-runtimes` restores the old
+behaviour), the `canonical` block records `runtime`, and `canonical_runs`
+/ `d4d runs canonical --runtime api|agentic` pick one — a project marked
+under both runtimes without a runtime filter is ambiguous and refused, as
+two configurations are. The v6 agentic canonicals (2026-08-28 rep1/rep3)
+were re-marked beside the v7 API ones.
+
 ## Canonical selection with the review (#660)
 
 `d4d runs select` ranks validity → **fewest review adverse verdicts**

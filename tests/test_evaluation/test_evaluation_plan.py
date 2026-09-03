@@ -362,7 +362,7 @@ class TestTheLiveCorpus(unittest.TestCase):
 
     def test_the_plan_is_derivable_and_self_consistent(self):
         try:
-            got = plan()
+            got = plan(runtime="api")   # the corpus carries one canonical per runtime (#690)
         except NothingSelected:
             self.skipTest("no canonical record on disk")
         self.assertEqual(

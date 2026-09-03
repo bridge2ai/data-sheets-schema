@@ -393,3 +393,35 @@ class TestReviewCriterion(TestSelect):
         self._review("cfg_rep1", 2); self._review("cfg_rep2", 12); self._review("cfg_rep3", 9)
         out = self._run(valid={"cfg_rep1": False})
         self.assertIn("→ cfg_rep3", out.output)
+
+
+class TestRuntimeScopedSupersession(TestSelect):
+    """#690 (v8 plan D6): selecting under one runtime leaves the other
+    runtime's canonical in place unless asked."""
+
+    def _runtime(self, label, runtime):
+        p = self.root / "claudecode_agent_core" / label / "P_provenance.yaml"
+        d = yaml.safe_load(p.read_text()); d["model"] = {"agent_runtime": runtime}
+        p.write_text(yaml.safe_dump(d))
+
+    def test_another_runtimes_mark_is_kept_by_default(self):
+        for lab in ("cfg_rep1", "cfg_rep2", "cfg_rep3"):
+            self._runtime(lab, "Claude API (direct)")
+        # an agentic canonical on a different configuration
+        other = self.root / "claudecode_agent_core" / "old_rep1"; other.mkdir(parents=True)
+        (other / "P_provenance.yaml").write_text(yaml.safe_dump({
+            "run": {"method": "claudecode_agent", "label": "old_rep1", "project": "P"},
+            "model": {"agent_runtime": "Claude Code"},
+            "canonical": {"criterion": "c", "selected_from": []}}))
+        out = self._run("--execute")
+        self.assertEqual(out.exit_code, 0, out.output)
+        self.assertIn("kept the agentic canonical on old_rep1", out.output)
+        kept = yaml.safe_load((other / "P_provenance.yaml").read_text())
+        self.assertIn("canonical", kept); self.assertNotIn("canonical_superseded_by", kept)
+        winner = yaml.safe_load((self.root / "claudecode_agent_core" / "cfg_rep2" / "P_provenance.yaml").read_text())
+        self.assertEqual(winner["canonical"]["runtime"], "api")
+        self.assertEqual(winner["canonical"]["supersedes_runtimes"], "api")
+        out = self._run("--execute", "--supersede-all-runtimes")
+        self.assertEqual(out.exit_code, 0, out.output)
+        demoted = yaml.safe_load((other / "P_provenance.yaml").read_text())
+        self.assertNotIn("canonical", demoted); self.assertIn("canonical_superseded_by", demoted)

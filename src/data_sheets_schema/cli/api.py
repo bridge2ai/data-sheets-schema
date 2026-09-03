@@ -10,8 +10,12 @@ from data_sheets_schema.api_runner import CONDITION_PROMPTS
 
 from data_sheets_schema.constants import PROJECTS
 
+# `baseline` writes under `claudecode_api` from generic_v8 on (#690, v8 plan
+# D6): the API and agentic runtimes shared `claudecode_agent` through v7 and
+# were told apart only by the label and `model.agent_runtime`. The other arms
+# were only ever run on the API path and keep their directories.
 ARMS = {
-    "baseline": ("BASELINE (input documents only)", "claudecode_agent",
+    "baseline": ("BASELINE (input documents only)", "claudecode_api",
                  "{p}_preprocessed.txt",
                  "# Source manifest: data/preprocessed/source_manifest.yaml"),
     "de_novo": ("DE NOVO WITH CRATE (documents + RO-Crate evidence)",

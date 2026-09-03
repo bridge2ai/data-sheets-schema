@@ -104,6 +104,7 @@ def replicates_of(canonical: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def plan(concat_dir: Path | None = None, config: str | None = None,
+         runtime: str | None = None,
          rubrics: tuple[str, ...] = SEMANTIC_RUBRICS,
          all_replicates: bool = False) -> list[Evaluation]:
     """Every evaluation the canonical set implies, in a stable order.
@@ -121,7 +122,7 @@ def plan(concat_dir: Path | None = None, config: str | None = None,
     """
     from data_sheets_schema.runs import canonical_runs
 
-    found = canonical_runs(concat_dir=concat_dir, config=config)
+    found = canonical_runs(concat_dir=concat_dir, config=config, runtime=runtime)
     if all_replicates:
         return _replicate_plan(found, rubrics, concat_dir)
     out: list[Evaluation] = []

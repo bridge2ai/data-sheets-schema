@@ -50,6 +50,11 @@ LEGACY_REVISION_RE = re.compile(r"^(?P<config>.+?)-r(?P<revision>\d+)$")
 ARM_BY_METHOD = {
     "claudecode_agent": "baseline",
     "claudecode_agent_core": "baseline",
+    # The API runtime's baseline directory from generic_v8 on (#690, v8 plan
+    # D6). Up to v7 the API and agentic runtimes shared `claudecode_agent`
+    # and were told apart only by the label and `model.agent_runtime`.
+    "claudecode_api": "baseline",
+    "claudecode_api_core": "baseline",
     "claudecode_agent_crate": "de_novo",
     "claudecode_agent_crate_core": "de_novo",
     "claudecode_agent_healthsheet": "healthsheet_only",
@@ -60,6 +65,20 @@ ARM_BY_METHOD = {
     "rocrate_static_map": "deterministic_ours",
 }
 DETERMINISTIC = {"rocrate_mapped", "rocrate_static_map"}
+#: Method-directory prefixes that hold model-generated agent-family runs.
+AGENT_FAMILY = ("claudecode_agent", "claudecode_api")
+
+#: `model.agent_runtime` as the records write it, folded to a runtime key.
+RUNTIME_KEYS = {"claude code": "agentic", "claude api (direct)": "api"}
+
+
+def runtime_of(record: dict) -> str | None:
+    """`api`, `agentic`, or None when the record does not say (#690)."""
+    model = record.get("model") if isinstance(record, dict) else None
+    value = (model or {}).get("agent_runtime") if isinstance(model, dict) else None
+    if not isinstance(value, str):
+        return None
+    return RUNTIME_KEYS.get(value.strip().lower())
 
 
 @dataclass
@@ -350,8 +369,15 @@ class AmbiguousCanonical(RuntimeError):
 
 
 def canonical_runs(concat_dir: Path | None = None,
-                   config: str | None = None) -> dict[str, dict]:
+                   config: str | None = None,
+                   runtime: str | None = None) -> dict[str, dict]:
     """project -> the run marked canonical for it, and where its records are.
+
+    A canonical mark is scoped to a runtime (#690, v8 plan D6): the API
+    and agentic arms each keep one canonical per project, side by side.
+    `runtime` (`api` / `agentic`) picks one; without it a project marked
+    under both runtimes is ambiguous and refused, naming both, exactly as a
+    project marked under two configurations is.
 
     `d4d runs select` writes a `canonical` block and nothing read it (#306). A
     mark with no reader answers "which record *is* the CHORUS datasheet" only
@@ -383,10 +409,14 @@ def canonical_runs(concat_dir: Path | None = None,
         if config and not label.startswith(config):
             continue
         outputs = data.get("outputs") or {}
-        seen.setdefault(project, []).append(label)
+        rt = runtime_of(data)
+        if runtime and rt != runtime:
+            continue
+        seen.setdefault(project, []).append(f"{label} [{rt or 'runtime unknown'}]")
         out[project] = {
             "project": project,
             "label": label,
+            "runtime": rt,
             "method": run.get("method"),
             "criterion": (data["canonical"] or {}).get("criterion"),
             "candidates": len((data["canonical"] or {}).get("selected_from") or []),
@@ -404,9 +434,23 @@ def canonical_runs(concat_dir: Path | None = None,
                            for p, labels in sorted(ambiguous.items()))
         raise AmbiguousCanonical(
             f"more than one canonical record per project ({detail}). "
-            "Pass config= to say which configuration you mean.")
+            "Pass config= to say which configuration you mean, or runtime= "
+            "('api' / 'agentic') where the marks belong to different runtimes.")
     return dict(sorted(out.items()))
 
+
+
+def canonical_sets(concat_dir: Path | None = None,
+                   config: str | None = None) -> dict[str, dict[str, dict]]:
+    """runtime -> project -> canonical run, for callers that want every arm's
+    canonical set rather than one answer per project (#690). Keys are `api`,
+    `agentic`, and `unknown` for marks whose record names no runtime."""
+    out: dict[str, dict[str, dict]] = {}
+    for rt in ("api", "agentic"):
+        found = canonical_runs(concat_dir=concat_dir, config=config, runtime=rt)
+        if found:
+            out[rt] = found
+    return out
 
 def record_mode(method: str, label: str, project: str,
                 concat_dir: Path = CONCAT_DIR) -> str:
@@ -499,9 +543,10 @@ def requires_request(label: str, method: str) -> bool:
     label counts as subject: a run that cannot say when it happened is a new
     run for this purpose.
     """
-    # Every agentic layout starts with this prefix — `_crate`, `_crate_only`,
-    # `_healthsheet` and the `_core` companions are all variants of it.
-    if not method.startswith("claudecode_agent"):
+    # Every agent-family layout starts with one of these prefixes — `_crate`,
+    # `_crate_only`, `_healthsheet` and the `_core` companions are variants
+    # of the first; `claudecode_api` is the API runtime's directory (#690).
+    if not method.startswith(AGENT_FAMILY):
         return False
     m = re.match(r"(\d{4}-\d{2}-\d{2})", label or "")
     if not m:

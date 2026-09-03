@@ -331,7 +331,9 @@ def restore(labels, projects, execute):
               help="Print record paths and nothing else, for piping.")
 @click.option("--missing", is_flag=True,
               help="List projects that have no canonical record instead.")
-def canonical_cmd(project, config, paths_only, missing):
+@click.option("--runtime", type=click.Choice(["api", "agentic"]), default=None,
+              help="Which runtime's canonical (#690); required where a project is marked under both.")
+def canonical_cmd(project, config, paths_only, missing, runtime):
     """Which record is the datasheet, per project.
 
     `select` marks a replicate canonical and nothing read the mark (#306), so
@@ -347,7 +349,7 @@ def canonical_cmd(project, config, paths_only, missing):
     from data_sheets_schema.runs import AmbiguousCanonical, canonical_runs
 
     try:
-        found = canonical_runs(config=config)
+        found = canonical_runs(config=config, runtime=runtime)
     except AmbiguousCanonical as exc:
         # Naming the configurations, because --config is the answer and the
         # user cannot pass it without knowing what to pass (#308).
@@ -381,6 +383,7 @@ def canonical_cmd(project, config, paths_only, missing):
     for name, entry in found.items():
         click.echo(f"{name}")
         click.echo(f"   label     {entry['label']}")
+        click.echo(f"   runtime   {entry.get('runtime') or 'unknown'}")
         click.echo(f"   full      {entry['full']}")
         click.echo(f"   core      {entry['core']}")
         click.echo(f"   chosen    from {entry['candidates']} candidates — "
@@ -1144,11 +1147,16 @@ def _validates(record: Path) -> tuple[bool, str]:
 @click.option("--ignore-reviews", is_flag=True,
               help="Rank on coverage alone even when every eligible replicate "
                    "carries a checked review block (#660).")
+@click.option("--supersede-all-runtimes", is_flag=True,
+              help="Clear prior canonical marks of every runtime, not only the "
+                   "winner's (#690): by default an API-runtime selection leaves "
+                   "the agentic arm's canonical in place, and vice versa.")
 @click.option("--review-margin", default=2, show_default=True, type=int,
               help="Adverse-count differences at or below this are a tie "
                    "(binomial noise on a 50-slot sample is ±2–3 at the observed "
                    "rates); coverage then decides.")
-def select_cmd(method, project, config, allow_unverified, execute, ignore_reviews, review_margin):
+def select_cmd(method, project, config, allow_unverified, execute, ignore_reviews, review_margin,
+               supersede_all_runtimes):
     """Mark one replicate canonical, keeping all of them.
 
     Selection, not merging. Replicates state different facts on **47-63% of the
@@ -1324,7 +1332,10 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
     # hoping. `select` used to leave a previous mark in place, so re-selecting
     # under a new config left the project with two and the resolver had to
     # refuse (#308). Superseding is what re-selection means.
+    from data_sheets_schema.runs import runtime_of
+    winner_runtime = runtime_of(_yaml.safe_load(prov_path.read_text(encoding="utf-8")) or {})
     superseded = []
+    skipped_runtimes = []
     for other in sorted(CONCAT_DIR.rglob(f"{project}_provenance.yaml")):
         if other == prov_path:
             continue
@@ -1348,6 +1359,11 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
                 "could not be cleared.")
         if "canonical" not in prior:
             continue
+        # One canonical per project *per runtime* (#690): a mark of another
+        # runtime is a different arm's answer and stays unless asked.
+        if not supersede_all_runtimes and runtime_of(prior) != winner_runtime:
+            skipped_runtimes.append(((prior.get("run") or {}).get("label") or str(other), runtime_of(prior)))
+            continue
         superseded.append(((prior.get("run") or {}).get("label") or str(other),
                            other, prior))
 
@@ -1368,6 +1384,8 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
              "review_adverse": adverse_of.get(lab)}
             for lab, _r, st, n, rec, detail in candidates],
         "margin_over_runner_up": margin,
+        "runtime": winner_runtime,
+        "supersedes_runtimes": "all" if supersede_all_runtimes else (winner_runtime or "unknown"),
         "reviews_applied": reviews_applied,
         **({"reviews_not_applied_because": why} if why else {"review_margin": review_margin}),
         "selected_by": "d4d runs select",
@@ -1414,6 +1432,9 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
         click.echo(f"   demoted the prior mark on {label} to canonical_history")
 
     click.echo(f"\nRecorded in {prov_path}")
+    for lab, rt in skipped_runtimes:
+        click.echo(f"   kept the {rt or 'runtime-unknown'} canonical on {lab} (another runtime's arm; "
+                   "--supersede-all-runtimes to clear it)")
     if superseded:
         click.echo(f"Superseded {len(superseded)} earlier mark(s); each records "
                    "what replaced it.")
@@ -1431,7 +1452,9 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
                    "same statement (default 0.6)")
 @click.option("--show", default=3, type=int, show_default=True,
               help="example restatements to print per project")
-def redundancy_cmd(method, label, project, threshold, show):
+@click.option("--runtime", type=click.Choice(["api", "agentic"]), default=None,
+              help="which runtime's canonical set, where no label is given (#690)")
+def redundancy_cmd(method, label, project, threshold, show, runtime):
     """How often one fact is stated in more than one slot (#501).
 
     Reported, never fatal. The repetition is **intended**: the decision on #501
@@ -1447,14 +1470,18 @@ def redundancy_cmd(method, label, project, threshold, show):
 
     from data_sheets_schema import redundancy as red
     from data_sheets_schema.constants import PROJECTS
-    from data_sheets_schema.runs import CONCAT_DIR, canonical_runs
+    from data_sheets_schema.runs import CONCAT_DIR, canonical_runs, canonical_sets
 
     kwargs = {} if threshold is None else {"threshold": threshold}
     if label:
-        targets = {p: label for p in ([project] if project else PROJECTS)}
+        targets = [(p, label) for p in ([project] if project else PROJECTS)]
     else:
-        targets = {p: info["label"] for p, info in canonical_runs().items()
-                   if not project or p == project}
+        # Every runtime's canonical set unless one is named (#690): the
+        # report is per record, so a project marked under both runtimes
+        # simply appears twice, once per arm.
+        sets = ({runtime: canonical_runs(runtime=runtime)} if runtime else canonical_sets())
+        targets = [(p, info["label"]) for found in sets.values() for p, info in found.items()
+                   if not project or p == project]
         if not targets:
             raise click.ClickException(
                 "no canonical records; pass --label, or run "
@@ -1462,7 +1489,7 @@ def redundancy_cmd(method, label, project, threshold, show):
 
     total_sentences = total_prose = total_structural = 0
     rows = []
-    for proj, lab in sorted(targets.items()):
+    for proj, lab in sorted(targets):
         path = _Path(CONCAT_DIR) / method / lab / f"{proj}_d4d.yaml"
         if not path.exists():
             continue
