@@ -245,14 +245,21 @@ files:
       retired_on: '2026-08-27'
       sha256: 2291399646298845e0ee4c406bc2b2b5c1ccddbc00eceb7abf9a6cbe2db9d37e
   src/download/prompts/d4d_generic_arm_prompt_v8.md:
-    body_sha256: 174a421b79709e9796065ba981736307810d2b2abe0211d8c196464e557a4c24
-    bytes: 15537
-    pinned_at_commit: 7536607921b5116d5d35c687b9a2824fb17b5d5f
+    body_sha256: d89924f6179c045e881999507fe125c429ec48a873bbe5b037ffac32a5475f31
+    bytes: 15912
+    pinned_at_commit: 2dbd2b994fafdb503f250d88a2034d75d4b84332
     pinned_on: '2026-09-03'
-    reason: 'generic_v8: v7 plus the ADDED IN v8 block (R1-R4 of notes/generic_v8_analysis_plan.md),
-      registered as one configuration with the depth-two digest (#916) and the inlined Person
-      slots (#805); pinned before any run names it'
-    sha256: 00f15ae82d91c9845c3c6e19cabae79d450d6e45d20eb831204b1ef30a4b7018
+    reason: 'generic_v8 after the #928 review: R1 names the id and the affiliation object
+      list; R2 routes by the passage''s subject and says what receipts a related-dataset value;
+      R3 says a derived figure is receipted by its inputs; the rule-order reference corrected'
+    sha256: 06666c4d10786d4689170acdfd68350d451f84d2f94d4b5a22be6e569d3824f1
+    superseded:
+    - pinned_on: '2026-09-03'
+      reason: 'generic_v8: v7 plus the ADDED IN v8 block (R1-R4 of notes/generic_v8_analysis_plan.md),
+        registered as one configuration with the depth-two digest (#916) and the inlined Person
+        slots (#805); pinned before any run names it'
+      retired_on: '2026-09-03'
+      sha256: 00f15ae82d91c9845c3c6e19cabae79d450d6e45d20eb831204b1ef30a4b7018
   src/download/prompts/d4d_tuned_arm_prompt.md:
     bytes: 2877
     pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
