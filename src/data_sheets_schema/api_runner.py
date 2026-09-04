@@ -2485,9 +2485,15 @@ def normalise_mailto_ids(text: str, *, phase: str | None = None) -> str:
 
 
 def normalise_record_text(text: str, *, phase: str | None = None) -> str:
-    """Every write-time normalisation, in the order the record is written."""
-    return normalise_mailto_ids(normalise_identifier_form(normalise_multivalued(
-        normalise_enum_aliases(normalise_temporal(text))), phase=phase), phase=phase)
+    """Every write-time normalisation, in the order the record is written.
+
+    Spelling runs last (#1002): it reads prose, and the identifier
+    normalisers before it have already settled every id.
+    """
+    from data_sheets_schema.american_spelling import normalise_british_spellings
+    return normalise_british_spellings(normalise_mailto_ids(normalise_identifier_form(normalise_multivalued(
+        normalise_enum_aliases(normalise_temporal(text))), phase=phase), phase=phase),
+        phase=phase, log=_REWRITE_LOG.get())
 
 
 def identifier_rewrite_summary(log: list[dict[str, Any]] | None) -> dict[str, Any]:
@@ -2502,10 +2508,12 @@ def identifier_rewrite_summary(log: list[dict[str, Any]] | None) -> dict[str, An
         return {ph: {sl: {"occurrences": c["occurrences"], "distinct": len(c["values"]),
                           "examples": sorted(c["values"])[:3]}
                      for sl, c in slots.items()} for ph, slots in by.items()}
+    from data_sheets_schema.american_spelling import NORMALISER_VERSION
     entries = list(log or [])
     forms = [e for e in entries if e.get("kind") is None]
     mailto = [e for e in entries if e.get("kind") == "mailto_id"]
     skipped = [e for e in entries if e.get("kind") == "mailto_id_skipped"]
+    british = [e for e in entries if e.get("kind") == "british_spelling"]
     rewrites = forms + mailto
     return {"identifier_form": fold(forms),
             "mailto_ids": fold(mailto),
@@ -2513,7 +2521,15 @@ def identifier_rewrite_summary(log: list[dict[str, Any]] | None) -> dict[str, An
                                     "reason": e.get("reason")} for e in skipped][:20],
             "mailto_ids_skipped_count": len(skipped),
             "occurrences": len(rewrites),
-            "distinct_values": len({e["from"] for e in rewrites})}
+            "distinct_values": len({e["from"] for e in rewrites}),
+            # What the model wrote in British (#1002): occurrences by phase
+            # and slot, and the distinct words, so the canary's British row
+            # (an invariant once this runs) is read beside the model's own
+            # count.
+            "british_spellings": fold(british),
+            "british_occurrences": len(british),
+            "british_distinct": sorted({e["from"].lower() for e in british})[:40],
+            "british_normaliser": NORMALISER_VERSION}
 
 
 def normalise_multivalued(text: str) -> str:
