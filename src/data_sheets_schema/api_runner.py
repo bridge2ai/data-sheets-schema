@@ -2514,6 +2514,7 @@ def identifier_rewrite_summary(log: list[dict[str, Any]] | None) -> dict[str, An
     mailto = [e for e in entries if e.get("kind") == "mailto_id"]
     skipped = [e for e in entries if e.get("kind") == "mailto_id_skipped"]
     british = [e for e in entries if e.get("kind") == "british_spelling"]
+    british_skipped = [e for e in entries if e.get("kind") == "british_spelling_skipped"]
     rewrites = forms + mailto
     return {"identifier_form": fold(forms),
             "mailto_ids": fold(mailto),
@@ -2529,6 +2530,11 @@ def identifier_rewrite_summary(log: list[dict[str, Any]] | None) -> dict[str, An
             "british_spellings": fold(british),
             "british_occurrences": len(british),
             "british_distinct": sorted({e["from"].lower() for e in british})[:40],
+            # Left as written on purpose — a title-case run or a genus name —
+            # and still counted by the form instrument: the honest split.
+            "british_skipped": [{"phase": e.get("phase"), "slot": e.get("slot"), "value": e["from"],
+                                 "reason": e.get("reason")} for e in british_skipped][:20],
+            "british_skipped_count": len(british_skipped),
             "british_normaliser": NORMALISER_VERSION}
 
 

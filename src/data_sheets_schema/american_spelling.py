@@ -28,11 +28,21 @@ what the American form is.
   such a file still shows a count, which is honest: the count is a fact
   about the text and the file name is a fact about the source.
 
-**What this cannot know**: a proper noun in unquoted prose ("the Wellcome
-Centre", "Programme Director") is rewritten like any other word. The
-instrument counts it the same way, so the model was already asked to quote
-it; the log names every rewrite, and a curator can restore one through
-`d4d review disposition --amend` (#903).
+**Proper nouns** (review of #1003): a Capitalised match that sits in a
+title-case run — the word before or after it is Capitalised too ("Temerty
+Centre for …", "Programme Director", "Favour Okonkwo") — is left as
+written and logged as skipped, with the few genus names the corpus could
+carry (`PROPER_NOUNS`). The VOICE bundle names the Temerty Centre, a real
+institution; the instrument counts it either way, and a count with a
+named skip beside it is the honest split. A proper noun in lower case, or
+one the run does not catch ("the programme run by Wellcome"), is still
+rewritten; the log names it and `d4d review disposition --amend` (#903)
+restores it.
+
+**Documented limits** (0 occurrences in the API corpus): keys in flow
+mappings and quoted keys are rewritten like values; a double-quoted scalar
+spanning lines is exempt only on its first line, as the instrument's own
+line-local exemption is.
 """
 
 from __future__ import annotations
@@ -120,10 +130,21 @@ RULES: tuple[tuple[re.Pattern[str], Callable[[str], str]], ...] = tuple(
     (re.compile(src, re.IGNORECASE), fn) for src, fn in _RULE_TABLE)
 
 #: Spans left as written: the instrument's quoted-text exemption, and tokens
-#: shaped like an identifier, a path or a file name rather than a word.
+#: shaped like an identifier, a path or a file name rather than a word. A
+#: `.` or `:` counts only when a word character follows it (`programme.csv`,
+#: `doi:10.1`, `e.g.programme`, `10:30`): a full stop before a closing quote
+#: or bracket (`programme.'`, `programme.)`) is punctuation, and the corpus
+#: writes single-quoted sentences ending in one often (#1003 review).
 _QUOTED = re.compile(r'"[^"\n]*"')
-_IDENTIFIER_TOKEN = re.compile(r"\S*(?:://|/|@|:\S|\.\S)\S*")
+_IDENTIFIER_TOKEN = re.compile(r"\S*(?:://|/|@|:\w|\.\w)\S*")
 _PROTECTED = re.compile(f"{_QUOTED.pattern}|{_IDENTIFIER_TOKEN.pattern}")
+
+#: Names the rules would otherwise read as British: genus names keep their
+#: Latin spelling in American English.
+PROPER_NOUNS = frozenset({"haemophilus"})
+_CAPITALISED = re.compile(r"^[A-Z][a-z]")
+_WORD_BEFORE = re.compile(r"([A-Za-z][\w'’-]*)[^\w\n]*$")
+_WORD_AFTER = re.compile(r"^[^\w\n]*([A-Za-z][\w'’-]*)")
 
 #: The YAML lines this walks: a mapping key (possibly a list item), a bare
 #: list item, and a block-scalar indicator on a key line.
@@ -139,18 +160,40 @@ def _case_like(source: str, american: str) -> str:
     return american
 
 
-def americanise(prose: str) -> tuple[str, list[tuple[str, str]]]:
-    """Rewrite one span of prose; returns the text and the (from, to) pairs.
+def _proper_noun(segment: str, m: "re.Match[str]") -> str | None:
+    """Why a match is left as written, or None: a genus name, or a
+    Capitalised word in a title-case run (the word before or after is
+    Capitalised too)."""
+    src = m.group(0)
+    if src.lower() in PROPER_NOUNS:
+        return "proper noun"
+    if not _CAPITALISED.match(src):
+        return None
+    before = _WORD_BEFORE.search(segment[:m.start()])
+    after = _WORD_AFTER.match(segment[m.end():])
+    if (before and _CAPITALISED.match(before.group(1))) or (after and _CAPITALISED.match(after.group(1))):
+        return "title-case run"
+    return None
+
+
+def americanise(prose: str) -> tuple[str, list[tuple[str, str]], list[tuple[str, str]]]:
+    """Rewrite one span of prose; returns the text, the (from, to) pairs
+    rewritten, and the (word, reason) pairs left as written.
 
     Protected spans (quoted text, identifier-shaped tokens) are cut out first
     and put back untouched, so a rule never sees them.
     """
     rewrites: list[tuple[str, str]] = []
+    skipped: list[tuple[str, str]] = []
 
     def rewrite(segment: str) -> str:
         for pattern, fn in RULES:
             def sub(m: re.Match[str]) -> str:
                 src = m.group(0)
+                why = _proper_noun(segment, m)
+                if why:
+                    skipped.append((src, why))
+                    return src
                 out = _case_like(src, fn(src.lower()))
                 if out != src:
                     rewrites.append((src, out))
@@ -165,7 +208,18 @@ def americanise(prose: str) -> tuple[str, list[tuple[str, str]]]:
         out.append(m.group(0))
         pos = m.end()
     out.append(rewrite(prose[pos:]))
-    return "".join(out), rewrites
+    return "".join(out), rewrites, skipped
+
+
+_TRAILING_COMMENT = re.compile(r"^(.*?\S)(\s+#)(.*)$")
+
+
+def _split_comment(segment: str) -> tuple[str, str, str]:
+    """`value  # comment` → (value, "  #", " comment"); no comment → (segment, "", "")."""
+    m = _TRAILING_COMMENT.match(segment)
+    if not m or '"' in m.group(3) and m.group(1).count('"') % 2:
+        return segment, "", ""
+    return m.group(1), m.group(2), m.group(3)
 
 
 def normalise_british_spellings(text: str, *, phase: str | None = None,
@@ -187,13 +241,25 @@ def normalise_british_spellings(text: str, *, phase: str | None = None,
     def width(s: str) -> int:
         return len(s.expandtabs(8))
 
-    def emit(segment: str, owner: str | None) -> str:
-        new, pairs = americanise(segment)
+    def emit(segment: str, owner: str | None, *, prose: bool = False) -> str:
+        # A value that is a comment, or the comment after a value, is not
+        # the record's prose (#1004): left as the header is. Inside a block
+        # scalar a `#` is content and `prose` says so.
+        if prose:
+            body, sep, comment = segment, "", ""
+        elif segment.lstrip().startswith("#"):
+            return segment
+        else:
+            body, sep, comment = _split_comment(segment)
+        new, pairs, skips = americanise(body)
         if log is not None:
             for src, dst in pairs:
                 log.append({"phase": phase, "kind": "british_spelling", "slot": owner,
                             "from": src, "to": dst})
-        return new
+            for src, why in skips:
+                log.append({"phase": phase, "kind": "british_spelling_skipped", "slot": owner,
+                            "from": src, "reason": why})
+        return new + sep + comment
 
     for line in text.splitlines(keepends=True):
         body = line.rstrip("\r\n")
@@ -201,7 +267,7 @@ def normalise_british_spellings(text: str, *, phase: str | None = None,
         if block_indent is not None:
             if not body.strip() or width(body[:len(body) - len(body.lstrip())]) > block_indent:
                 owner = enclosing[-1][1] if enclosing else None
-                out.append(emit(body, owner) + eol)
+                out.append(emit(body, owner, prose=True) + eol)
                 continue
             block_indent = None
         if body.lstrip().startswith("#") or not body.strip():
@@ -228,7 +294,12 @@ def normalise_british_spellings(text: str, *, phase: str | None = None,
             col = width(it.group("indent"))
             enclosing = [(c, sl) for c, sl in enclosing if c <= col]
             owner = enclosing[-1][1] if enclosing else None
-            out.append(body[:it.end()] + emit(body[it.end():], owner) + eol)
+            rest = body[it.end():]
+            if _BLOCK.match(rest):                 # `- |`: a block scalar as a list item
+                block_indent = col
+                out.append(line)
+                continue
+            out.append(body[:it.end()] + emit(rest, owner) + eol)
             continue
         owner = enclosing[-1][1] if enclosing else None
         out.append(emit(body, owner) + eol)

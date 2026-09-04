@@ -78,9 +78,9 @@ class TestTheRules(unittest.TestCase):
     def test_every_sample_is_rewritten_to_its_american_form(self):
         for british, american in SAMPLES.items():
             with self.subTest(british):
-                out, pairs = americanise(f"the {british} here")
+                out, pairs, skipped = americanise(f"the {british} here")
                 self.assertEqual(out, f"the {american} here")
-                self.assertEqual(pairs, [(british, american)])
+                self.assertEqual((pairs, skipped), ([(british, american)], []))
 
     def test_every_instrument_pattern_is_exercised_by_a_sample(self):
         for pattern in grounding.BRITISH_PATTERNS:
@@ -88,31 +88,52 @@ class TestTheRules(unittest.TestCase):
                 self.assertTrue(any(pattern.search(w) for w in SAMPLES), "no sample hits this pattern")
 
     def test_the_instrument_counts_zero_on_what_the_normaliser_writes(self):
-        prose = " ".join(SAMPLES) + ". " + " ".join(SAMPLES).title()
+        # Capitalised forms between lower-case words: a title-case run would be skipped on purpose.
+        prose = " ".join(SAMPLES) + ". the " + " the ".join(w.capitalize() for w in SAMPLES) + " the end"
         self.assertGreater(grounding.british_spellings(prose), 0)
-        out, _ = americanise(prose)
+        out, _, _ = americanise(prose)
         self.assertEqual(grounding.british_spellings(out), 0)
 
     def test_american_homographs_are_untouched(self):
         text = " ".join(UNTOUCHED)
-        out, pairs = americanise(text)
+        out, pairs, _ = americanise(text)
         self.assertEqual((out, pairs), (text, []))
 
     def test_case_is_preserved(self):
-        out, _ = americanise("Programme PROGRAMME programme Organisation ANAEMIA")
+        out, _, _ = americanise("Programme PROGRAMME programme Organisation ANAEMIA")
         self.assertEqual(out, "Program PROGRAM program Organization ANEMIA")
 
     def test_quoted_spans_and_identifier_shaped_tokens_are_left_as_written(self):
         text = ('the programme "the Bridge2AI Programme" https://x.org/programme/ programme.csv '
                 "doi:10.1/programme a@programme.org  centre_of_data programme")
-        out, pairs = americanise(text)
+        out, pairs, _ = americanise(text)
         self.assertEqual(out, ('the program "the Bridge2AI Programme" https://x.org/programme/ programme.csv '
                                "doi:10.1/programme a@programme.org  centre_of_data program"))
         self.assertEqual(pairs, [("programme", "program"), ("programme", "program")])
 
+    def test_punctuation_after_a_full_stop_is_not_an_identifier(self):
+        """#1004 (1): `'the programme.'` was exempt as an identifier — 10 residuals across the corpus."""
+        for text, want in (("'the programme.'", "'the program.'"), ("(programme.)", "(program.)"),
+                            ('programme."', 'program."'), ("programme...", "program..."),
+                            ("e.g.programme", "e.g.programme"), ("10:30 programme", "10:30 program"),
+                            ("programme: next", "program: next")):
+            with self.subTest(text):
+                self.assertEqual(americanise(text)[0], want)
+
+    def test_title_case_runs_and_genus_names_are_left_as_written_and_reported(self):
+        """#1004 (2): the VOICE bundle names the Temerty Centre; "Temerty Center" would be a grounding error."""
+        text = ("Temerty Centre for Artificial Intelligence, the Programme Director, Favour Okonkwo, "
+                "Haemophilus influenzae; the programme's centre. Programme data")
+        out, pairs, skipped = americanise(text)
+        self.assertEqual(out, ("Temerty Centre for Artificial Intelligence, the Programme Director, Favour Okonkwo, "
+                               "Haemophilus influenzae; the program's center. Program data"))
+        self.assertEqual(skipped, [("Programme", "title-case run"), ("Centre", "title-case run"),
+                                   ("Favour", "title-case run"), ("Haemophilus", "proper noun")])
+        self.assertEqual(pairs, [("programme", "program"), ("Programme", "Program"), ("centre", "center")])
+
     def test_it_is_idempotent(self):
-        once, _ = americanise(" ".join(SAMPLES))
-        twice, pairs = americanise(once)
+        once, _, _ = americanise(" ".join(SAMPLES))
+        twice, pairs, _ = americanise(once)
         self.assertEqual((once, pairs), (twice, []))
 
 
@@ -149,28 +170,50 @@ class TestTheYamlWalker(unittest.TestCase):
         self.assertIn("download_url: https://x.org/programme.zip", out)
         self.assertIn("path: data/programme.csv", out)
         doc = yaml.safe_load(out)
-        self.assertEqual(doc["title"], "The Program Title")
+        self.assertEqual(doc["title"], "The Programme Title")             # a title-case run: skipped, logged
         self.assertEqual(doc["description"],
                          "A program of work. The organization analyzed \"the programme's\" data\n"
                          "and cataloged its behavior at the center.\n")
         self.assertEqual(doc["keywords"], ["program", "organization catalog", "quoted programme"])
-        self.assertEqual(doc["funders"][0]["name"], "Wellcome Program")
+        self.assertEqual(doc["funders"][0]["name"], "Wellcome Programme")   # likewise
         self.assertEqual(doc["funders"][0]["notes"], "the favorable center\n")
-        # What the instrument still counts: the header line and the four
-        # identifier-shaped tokens (`/programme`, `programme.zip`, …) — left
-        # as written on purpose, and counted on purpose.
-        self.assertEqual(grounding.british_spellings(out), 5)
+        # What the instrument still counts: the header line, the four
+        # identifier-shaped tokens (`/programme`, `programme.zip`, …) and the
+        # two title-case runs — left as written on purpose, and counted on
+        # purpose.
+        self.assertEqual(grounding.british_spellings(out), 7)
         # Rule order, not text order: the fold by phase and slot does not care.
-        self.assertEqual(sorted((e["slot"], e["from"], e["to"]) for e in log),
-                         sorted([("title", "Programme", "Program"),
-                          ("description", "programme", "program"), ("description", "organisation", "organization"),
+        self.assertEqual(sorted((e["slot"], e["from"]) for e in log if e["kind"] == "british_spelling_skipped"),
+                         [("name", "Programme"), ("title", "Programme")])
+        self.assertEqual(sorted((e["slot"], e["from"], e["to"]) for e in log if e["kind"] == "british_spelling"),
+                         sorted([("description", "programme", "program"), ("description", "organisation", "organization"),
                           ("description", "analysed", "analyzed"), ("description", "catalogued", "cataloged"),
                           ("description", "behaviour", "behavior"), ("description", "centre", "center"),
                           ("keywords", "programme", "program"),
                           ("keywords", "organisation", "organization"), ("keywords", "catalogue", "catalog"),
-                          ("name", "Programme", "Program"),
                           ("notes", "favourable", "favorable"), ("notes", "centre", "center")]))
-        self.assertTrue(all(e["phase"] == "full" and e["kind"] == "british_spelling" for e in log))
+        self.assertTrue(all(e["phase"] == "full" for e in log))
+
+    def test_block_scalar_list_items_and_comments(self):
+        """#1004 (3, 4): `- |` is a block; a comment value and a trailing comment are not prose."""
+        log = []
+        text = ("notes:\n- |\n  # programme heading\n  programme: details\n  - programme item\n"
+                "- programme  # programme comment\ncaveat: #programme\n")
+        out = normalise_british_spellings(text, log=log)
+        self.assertEqual(out, ("notes:\n- |\n  # program heading\n  program: details\n  - program item\n"
+                               "- program  # programme comment\ncaveat: #programme\n"))
+        self.assertEqual([e["slot"] for e in log], ["notes"] * 4)
+        self.assertEqual(yaml.safe_load(out)["caveat"], None)
+
+    def test_skips_reach_the_log_and_the_summary(self):
+        log = []
+        normalise_british_spellings("publisher:\n  name: Temerty Centre for AI\n", phase="full", log=log)
+        self.assertEqual(log, [{"phase": "full", "kind": "british_spelling_skipped", "slot": "name",
+                                "from": "Centre", "reason": "title-case run"}])
+        summary = identifier_rewrite_summary(log)
+        self.assertEqual(summary["british_skipped_count"], 1)
+        self.assertEqual(summary["british_skipped"][0]["value"], "Centre")
+        self.assertEqual(summary["british_occurrences"], 0)
 
     def test_layout_is_preserved(self):
         out = normalise_british_spellings(RECORD)

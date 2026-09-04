@@ -240,10 +240,13 @@ classes:
 
       normalisation:
         description: >-
-          What the write-time normalisers changed (#974): identifier rewrites
-          by phase and slot with occurrence and distinct-value counts, so the
-          record says how often the model wrote a resolver URL although the
-          record as written carries none.
+          What the write-time normalisers changed: identifier rewrites (#974)
+          and mailto ids (#981) by phase and slot with occurrence and
+          distinct-value counts, and British spellings rewritten to American
+          (#1002: `british_spellings` by phase and slot, `british_occurrences`,
+          `british_distinct`, `british_skipped` for the title-case runs and
+          genus names left as written) — so the record says what the model
+          wrote although the record as written carries none of it.
         inlined: true
         range: AnyBlock
 
