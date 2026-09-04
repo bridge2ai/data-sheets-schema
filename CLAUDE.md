@@ -498,11 +498,16 @@ the claim form `report_claims` reads — `removed` rows must be absent,
 and regenerates it once with the contradictions named (`report_regate`;
 the first report is kept as `intermediate/{P}_report_before_regate.md`);
 `report_gate` in the record says what was found before and after. **Gate
-reading (#684)**: a report with `claims_checked: 0` is unmeasured, not zero
-findings — `report findings` is `None`/blind for that run — and a baseline
-arm that resolved but never measured a report claim (11 of 12 v7 production
-records) is a floor of 0 with `baseline_basis` on the row, never a missing
-baseline. `companions` is hashed after the last phase (#652).
+reading (#684)**: a report with no finding and no readable claim is
+vacuous (`canary.report_vacuous`), never a held floor of 0. A run whose
+report block says `dispositions_expected` (every run this runner writes)
+and is still vacuous is blind — UNMEASURABLE, the receipt precedent; an
+earlier record's vacuous row is shown as unmeasured and not gated, so the
+arm that defined the gate still satisfies it. The baseline skips vacuous
+replicates, and a baseline arm that resolved but never measured a report
+claim (11 of 12 v7 production records) is a floor of 0 with
+`baseline_basis` on the row, never a missing baseline. `companions` is
+hashed after the last phase (#652).
 
 **The gate** (`canary.verdict`): when `inputs.receipt_expected` is true — set
 by `d4d provenance record --receipt-expected`, which the receipt-writing

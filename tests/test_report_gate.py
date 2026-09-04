@@ -88,22 +88,39 @@ class TestTheGateReading(unittest.TestCase):
 
     BLOCKS = {"pair": {"ran": True, "errors": 0}, "grounding": {"checked": True},
               "form": {"checked": True}}
+    BASE = {n: 0 for n, _, _ in canary.METRICS}
 
-    def test_no_readable_claim_reads_as_none(self):
-        counts = canary.counts_from({**self.BLOCKS, "report": {"checked": True, "findings": [], "claims_checked": 0}})
-        self.assertIsNone(counts["report findings"])
-        counts = canary.counts_from({**self.BLOCKS, "report": {"checked": True, "findings": [], "claims_checked": 3}})
-        self.assertEqual(counts["report findings"], 0)
+    def test_vacuity_is_no_finding_over_no_readable_claim(self):
+        self.assertTrue(canary.report_vacuous({"checked": True, "findings": [], "claims_checked": 0}))
+        self.assertTrue(canary.report_vacuous({"checked": True, "findings": []}))        # legacy block
+        self.assertFalse(canary.report_vacuous({"checked": True, "findings": [], "claims_checked": 3}))
+        self.assertFalse(canary.report_vacuous({"checked": True, "findings": [{"kind": "false_schema_claim"}],
+                                                "claims_checked": 0}))                    # a finding is a finding
+        self.assertFalse(canary.report_vacuous({"checked": False}))
 
-    def test_a_run_with_no_readable_claim_is_unmeasurable(self):
-        base = {n: 0 for n, _, _ in canary.METRICS}
-        v = canary.verdict({**self.BLOCKS, "report": {"checked": True, "findings": [], "claims_checked": 0}}, base)
+    def test_an_earlier_records_vacuous_row_is_unmeasured_and_not_gated(self):
+        v = canary.verdict({**self.BLOCKS, "report": {"checked": True, "findings": []}}, self.BASE)
+        self.assertEqual(v["status"], canary.OK)
+        row = next(r for r in v["rows"] if r["metric"] == "report findings")
+        self.assertIsNone(row["run"])
+        self.assertIn("unmeasured", row["note"])
+        self.assertNotIn("report findings", v["blind"])
+
+    def test_a_run_asked_for_the_table_that_reads_no_claim_is_blind(self):
+        v = canary.verdict({**self.BLOCKS, "report": {"checked": True, "findings": [], "claims_checked": 0,
+                                                       "dispositions_expected": True}}, self.BASE)
         self.assertEqual(v["status"], canary.UNMEASURABLE)
         self.assertIn("report findings", v["blind"])
 
+    def test_a_measured_row_is_gated_as_before(self):
+        checks = {**self.BLOCKS, "report": {"checked": True, "findings": [{"kind": "retention_not_shown"}],
+                                            "claims_checked": 2, "dispositions_expected": True}}
+        self.assertEqual(canary.verdict(checks, self.BASE)["status"], canary.REGRESSED)
+
     def test_a_baseline_that_resolved_but_never_measured_the_report_is_a_floor_with_its_basis(self):
-        base = {n: 0 for n, _, _ in canary.METRICS}; base["report findings"] = None
-        checks = {**self.BLOCKS, "report": {"checked": True, "findings": [], "claims_checked": 2}}
+        base = dict(self.BASE); base["report findings"] = None
+        checks = {**self.BLOCKS, "report": {"checked": True, "findings": [], "claims_checked": 2,
+                                            "dispositions_expected": True}}
         v = canary.verdict(checks, base)
         self.assertEqual(v["status"], canary.OK)
         row = next(r for r in v["rows"] if r["metric"] == "report findings")
@@ -118,6 +135,20 @@ class TestTheGateReading(unittest.TestCase):
         base = {n: None for n, _, _ in canary.METRICS}
         v = canary.verdict({**self.BLOCKS, "report": {"checked": True, "findings": [], "claims_checked": 2}}, base)
         self.assertEqual(v["status"], canary.UNMEASURABLE)
+
+    def test_the_baseline_skips_vacuous_replicates(self):
+        """The v7 production arm: 11 of 12 reports carry no readable claim."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for rep, block in (("rep1", {"checked": True, "findings": []}),
+                               ("rep2", {"checked": True, "findings": [], "claims_checked": 0})):
+                d = root / "m_core" / f"2026-01-01_x_{rep}"; d.mkdir(parents=True)
+                (d / "P_provenance.yaml").write_text(yaml.safe_dump({
+                    "pair_consistency": {"ran": True, "errors": 1}, "report_claims": block,
+                    "grounding": {"checked": True}, "form": {"checked": True}}))
+            bar = canary.baseline_for("P", "2026-01-01_x", method="m", concat_dir=root)
+        self.assertEqual(bar["pair errors"], 1)
+        self.assertIsNone(bar["report findings"])
 
 
 class _ReportFake(FakeMessages):
@@ -164,6 +195,7 @@ class TestTheRunnerGate(unittest.TestCase):
         self.assertEqual((g["claims_checked_before"], g["claims_checked_after"]), (1, 1))
         self.assertEqual(d["report_claims"]["findings"], [])
         self.assertEqual(d["report_claims"]["claims_checked"], 1)
+        self.assertTrue(d["report_claims"]["dispositions_expected"])
         regate = next(c for c in fake.calls if PHASE_INSTRUCTIONS["report_regate"] in
                       " ".join(p.get("text", "") for p in c["messages"][0]["content"]))
         blob = " ".join(p.get("text", "") for p in regate["messages"][0]["content"])

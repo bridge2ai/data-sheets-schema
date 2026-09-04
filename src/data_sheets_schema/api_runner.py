@@ -3000,7 +3000,11 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
                     "usage": existing.get("api_usage") or [],
                     "skipped": list(PHASES), "validation_problems": problems,
                     "checks": {"pair": pair_consistency(spec),
-                               "report": report_claims_block(spec),
+                               # A run this runner produced asked for the
+                               # dispositions table (#929); its record says so.
+                               "report": {**(report_claims_block(spec) or {}),
+                                          **({"dispositions_expected": True}
+                                             if existing.get("report_gate") else {})},
                                "grounding": grounding_block(spec),
                                "form": _form_block(spec),
                                "receipts": _receipts_block(spec, existing)},
@@ -3324,7 +3328,10 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # completes, and a contradicting report is regenerated once. Recorded
     # beside the final `report_claims` block, which is recomputed below.
     rec.data["report_gate"] = _gate_report(spec, client, settings, usage, carry)
-    rec.data["report_claims"] = report_claims_block(spec)
+    # `dispositions_expected`: the report phase was asked for the table, so
+    # a report with no readable claim is blind at the gate (#684), not
+    # unmeasured-and-tolerated as an earlier record's is.
+    rec.data["report_claims"] = {**(report_claims_block(spec) or {}), "dispositions_expected": True}
     rec.data["grounding"] = grounding_block(spec)
     # Properties of the records alone, so they survive a drifted bundle (#602).
     from data_sheets_schema.grounding import form_facts

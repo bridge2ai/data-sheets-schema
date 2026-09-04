@@ -312,8 +312,10 @@ steps need:
    window as G: the report phase ends with a dispositions table the
    checker reads (#684's two-form limit lifted for the form v8 writes), the
    runner checks it in-process and regenerates once with the contradictions
-   named (`report_regate`), and the gate reads `claims_checked: 0` as
-   unmeasured. **Instrument revision, registered here**: `report_claims`
+   named (`report_regate`), and the gate reads a report with no finding and
+   no readable claim as unmeasured — blind for a run that was asked for the
+   table, tolerated on earlier records so their arm still satisfies its own
+   gate. **Instrument revision, registered here**: `report_claims`
    now also checks `retained`/`changed`/`added` rows (`retention_not_shown`,
    `change_not_shown`); no earlier report writes the table, so recomputing
    v7's blocks changes nothing there (`claims_checked` stays 0 on 11 of 12)

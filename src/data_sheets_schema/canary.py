@@ -46,10 +46,7 @@ UNMEASURABLE = "unmeasurable"
 #: even when the schema has moved — unlike anything schema-dependent (#576).
 METRICS = (
     ("pair errors", "pair", lambda b: int(b.get("errors") or 0)),
-    # None when the checker read no claim at all: findings 0 over
-    # claims_checked 0 is not a held floor, it is unmeasured (#684).
-    ("report findings", "report",
-     lambda b: (None if not int(b.get("claims_checked") or 0) else len(b.get("findings") or []))),
+    ("report findings", "report", lambda b: len(b.get("findings") or [])),
     ("ungrounded identifiers", "grounding",
      lambda b: int((b.get("distinct") or b.get("counts") or {}).get("absent") or 0)),
     # #591. Invisible to the other three: a resolver URL for a declared prefix
@@ -176,6 +173,18 @@ def receipt_floors(block: dict[str, Any]) -> dict[str, int]:
     }
 
 
+def report_vacuous(block: Any) -> bool:
+    """A report check that read no claim and found nothing (#684).
+
+    `findings: []` over `claims_checked: 0` is not a held floor of zero: the
+    checker had nothing to test. Findings with no checked claim (a false
+    schema claim) are still findings, so only the empty case is vacuous.
+    """
+    if not isinstance(block, dict) or not _ran(block):
+        return False
+    return not (block.get("findings") or []) and not int(block.get("claims_checked") or 0)
+
+
 def _ran(block: Any) -> bool:
     if not isinstance(block, dict):
         return False
@@ -216,6 +225,8 @@ def baseline_for(project: str, label_prefix: str,
                               "report": rec.get("report_claims"),
                               "grounding": rec.get("grounding"),
                               "form": rec.get("form")})
+        if report_vacuous(rec.get("report_claims")):
+            counts["report findings"] = None          # unmeasured, not 0 (#684)
         for name, value in counts.items():
             if value is None:
                 continue
@@ -238,7 +249,20 @@ def verdict(checks: dict[str, Any], baseline: dict[str, int | None],
     not "fine" — missed inside the gate built to enforce it.
     """
     counts = counts_from(checks)
-    blind = [name for name, value in counts.items() if value is None]
+    # A vacuous report row (#684) is unmeasured. Under step E (#929) the
+    # report phase is asked for a dispositions table, so a run whose block
+    # says `dispositions_expected` and still reads no claim is blind — the
+    # receipt precedent. An earlier record's vacuous row is reported as
+    # unmeasured and not gated: the arm that defined this gate wrote no
+    # readable claim, and the gate must stay satisfiable by it.
+    rb = (checks or {}).get("report")
+    report_note = None
+    if report_vacuous(rb):
+        counts["report findings"] = None
+        if not (isinstance(rb, dict) and rb.get("dispositions_expected")):
+            report_note = "unmeasured: the report carried no claim the checker reads (#684)"
+    blind = [name for name, value in counts.items()
+             if value is None and not (name == "report findings" and report_note)]
     unbaselined = [name for name, value in baseline.items() if value is None]
     # The report metric is unmeasured on 11 of 12 v7 production records
     # (#684): their reports carried no claim the checker reads. A baseline
@@ -258,6 +282,8 @@ def verdict(checks: dict[str, Any], baseline: dict[str, int | None],
             bar = row["baseline_worst"] = 0
             row["baseline_basis"] = ("floor 0: no baseline replicate carried a report "
                                      "claim the checker reads (#684)")
+        if name == "report findings" and report_note:
+            row["note"] = report_note
         if value is not None and bar is not None and value > bar:
             row["regressed"] = True
             regressions.append(f"{name}: {value} against a baseline worst of {bar}")
