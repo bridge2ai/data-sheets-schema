@@ -74,14 +74,50 @@ class TestPresenceClaims(unittest.TestCase):
         self.assertEqual([f["kind"] for f in out["findings"]], ["removal_not_performed"])
         self.assertEqual(out["claims_checked"], 1)
 
-    def test_both_on_a_slot_the_core_does_not_declare_reads_as_full(self):
-        """#990: `retained | both` on `citation` cannot be satisfied — CoreDataset has no such slot."""
+    def test_both_on_a_slot_the_core_does_not_declare_is_a_finding_that_names_the_cause(self):
+        """#990/#992: `retained | both` on `citation` is read as written, and the finding says why it fails."""
         out = check_report(_report(self.dir, "| `funders` | retained | both | kept |\n"), FULL, CORE, DECLARED)
-        self.assertEqual(out["findings"], [])                     # funders is not a CoreDataset slot in DECLARED
+        (f,) = out["findings"]                                     # funders is not a CoreDataset slot in DECLARED
+        self.assertEqual((f["kind"], f["record"]), ("retention_not_shown", "both"))
+        self.assertIn("declares no `funders` slot, so the row must name `full`", f["detail"])
+        self.assertEqual(out["claims_core_cannot_hold"], 1)
+        self.assertTrue(out["instrument"].startswith("v2 (#990)"))
+        # Indexed and dotted paths reduce to their root; `changed` counts like `retained`.
+        out = check_report(_report(self.dir, "| `funders[0].name` | changed | both | fixed |\n"), FULL, CORE, DECLARED)
+        (f,) = out["findings"]
+        self.assertEqual(f["kind"], "change_not_shown")
+        self.assertIn("declares no `funders` slot", f["detail"])
+        self.assertEqual(out["claims_core_cannot_hold"], 1)
+        # A declared slot absent from the core is a substantive contradiction, not counted there.
         out = check_report(_report(self.dir, "| `keywords` | retained | both | kept |\n"), FULL, {"id": "x"}, DECLARED)
-        self.assertEqual([f["kind"] for f in out["findings"]], ["retention_not_shown"])   # declared on both, absent from core
+        (f,) = out["findings"]
+        self.assertEqual(f["kind"], "retention_not_shown")
+        self.assertNotIn("declares no", f["detail"])
+        self.assertEqual(out["claims_core_cannot_hold"], 0)
+        # `core` stays literal and names no cause: the row asked for the core.
         out = check_report(_report(self.dir, "| `funders` | retained | core | kept |\n"), FULL, CORE, DECLARED)
-        self.assertEqual([f["kind"] for f in out["findings"]], ["retention_not_shown"])   # `core` stays literal
+        (f,) = out["findings"]
+        self.assertEqual(f["kind"], "retention_not_shown")
+        self.assertNotIn("declares no", f["detail"])
+        self.assertEqual(out["claims_core_cannot_hold"], 0)
+        # A row the core satisfies is no finding, whatever the record column.
+        out = check_report(_report(self.dir, "| `license` | retained | full | kept |\n"),
+                           {**FULL, "license": "CC0"}, CORE, DECLARED)
+        self.assertEqual(out["findings"], [])
+
+    def test_declared_slots_without_the_core_class_is_refused(self):
+        """#993: a broken core schema must not read every `both` row as `full` silently."""
+        with self.assertRaises(ValueError):
+            check_report(_report(self.dir, "| `funders` | retained | both | kept |\n"), FULL, CORE,
+                         {"Dataset": DECLARED["Dataset"]})
+
+    def test_a_removal_finding_under_both_describes_the_live_value(self):
+        """#995: `funders | removed | both` when only the full record carries it names the full value."""
+        out = check_report(_report(self.dir, "| `funders` | removed | both | gone |\n"), FULL, CORE, DECLARED)
+        (f,) = out["findings"]
+        self.assertEqual(f["kind"], "removal_not_performed")
+        self.assertNotIn("has None", f["detail"])
+        self.assertNotIn("has an empty", f["detail"])
 
     def test_a_row_naming_no_record_is_a_finding_only_when_neither_record_carries_it(self):
         out = check_report(_report(self.dir, "| `license` | retained | | kept |\n"), FULL, CORE, DECLARED)

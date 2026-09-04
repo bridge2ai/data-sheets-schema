@@ -264,6 +264,7 @@ excluded from every v8 comparison as they were from v7's.
 | project | label | verdict | basis |
 |---|---|---|---|
 | CM4AI | `2026-09-04c_claude-opus-5-api-generic-v8_rep1` | **regressed** on one metric under instrument v2: undeclared prefixes 6 vs 0, all `mailto:` person ids (D1 forces `Person.id`). Everything else passed: receipts clean with no re-addressing needed, resolver URLs 0 with 0 rewrites, report gate 1 → 0 among 9 claims, British 0. **Prediction 5: 1.3%** (from 28.3% and 36.0%); 6: 70.4%; 9: +94% (full output 80,319); 2: 0. | Step I (#981/#982): `mailto:` ids get a mechanism and the counter its v3. **Re-verdicted OK under v3** (6 → 0, prior verdict kept in the block) — and **not retained for the fill** (#984): the mechanism and R5 landed after it, so CM4AI runs a fourth time under the final package after VOICE, AI_READI and CHORUS. |
+| VOICE | `2026-09-04d_claude-opus-5-api-generic-v8_rep1` | **regressed** on two metrics: report findings 5 vs 0 (18 → 5 among 94 claims after the regate; all five `retained | both` rows on slots CoreDataset does not declare — `citation`, `consent_revocations`, `participant_compensation`, `third_party_sharing`, `collection_consents` — which the regate could not fix because its detail named no cause) and British spellings 8 vs 2 (one word, `programme`, four times in the full record's prose, counted again in the core). Everything else passed: receipts 22/22 chunks, 242/260 snippets verified, 1 entry re-addressed and none unresolved; resolver URLs 0; undeclared prefixes 0 under v3; pair errors 0. Prediction 5: 27.7% (54/195 changed after receipt, against < 10%); 6: 54.5%; 9: 79,582 (+4.5% against the v7 VOICE mean of 76,159); 2: 0. | The report findings were a defect on both sides (#990/#992): the report instruction now says `both` only where the core carries the slot, the finding names the cause, and the checker is instrument v2 (#996) — the strict reading stays, so the block stays at 5 and the verdict stands. Generation-path change: **VOICE runs again under the final package**. British spellings: decision pending (a write-time normaliser over the instrument's own word list, or retain with basis). |
 | CM4AI | `2026-09-04b_claude-opus-5-api-generic-v8_rep1` | **regressed** on one metric: resolver URLs in identifier slots 16 vs 0 (the dataset DOI as a URL under `id` plus 15 minted fragments); every receipt metric passed — the re-addressing turn dropped the one mis-addressed entry and the report gate regenerated 1 contradiction among 40 claims to 0, both firing on a live run for the first time. Coverage 288/407 (70.8%). British 2 (= v7 worst). One repair round (14). | **Deferred fix, step H (#974)**: identifier form is a rule with no mechanism; the normaliser lands before the third canary. Predictions: 2 unfavourable (0), 5 unfavourable (36.0%), 6 favourable (70.8%), 9 unfavourable (−26.7%). |
 | CM4AI | `2026-09-04_claude-opus-5-api-generic-v8_rep1` | **regressed** on one metric: receipt findings 1 against a floor of 0; every other gated metric equal to or better than the v7 per-project worst (British spellings 0 vs 2). Full-phase output 31,207 of 128,000 (24%). One repair round (11 findings). Receipts: 28/28 chunks, 117/168 snippets verified (45 adjacent, 6 elsewhere), 206/342 slots with a receipt (60.2%). | **v8 defect (#952)**, the plan owner's decision on 2026-09-04: the finding is one receipt entry addressed to `subject`, a name the schema has no slot for, for a value the record holds under `keywords` — the v8 receipt rule names the record path the value fills, so the model broke a rule it was given. Not the v7 retained-with-basis pattern. No fill and no further canary until fixed and re-canaried; fix chosen: the runner re-addressing turn (step G, #953); the re-canary runs under a new prefix, `2026-09-04b_claude-opus-5-api-generic-v8`. Recorded in the record's `canary` block (with the withdrawn retained-with-basis reading as `prior_disposition`). **Predictions this record measures (n=1):** 2 favourable (`grant_number` populated 2 of 3); 6 favourable (60.2%); **5 unfavourable** (`value_changed_after_receipt` 41/145 = 28.3% against <10%; v7 CM4AI replicates 17.0/17.4/7.9%); **9 unfavourable** (`full` output 31,207 against the v7 CM4AI mean 41,370, −24.6%, outside ±10%). First launch stopped on a CBORG 403 (off-VPN) before any phase; resumed on the VPN. |
 
@@ -362,8 +363,22 @@ steps need:
     fill** (#984). VOICE runs next; the canary order becomes VOICE,
     AI_READI, CHORUS, CM4AI. (b) is an instrument revision registered here
     with both sides recomputed.
+11. **`both` rows on slots the core cannot hold (#990/#992, 2026-09-04).**
+    The VOICE canary's five remaining report findings were `retained |
+    both` rows on slots CoreDataset does not declare. The first reading
+    (PR #991 as opened) read such a row against the full record alone;
+    both reviews found that the instruction defines `both` as present
+    in both, so the instrument would have accepted a false claim about
+    the core that the CM4AI 2026-09-04c regate had correctly rewritten.
+    Adopted: the strict reading stays; the finding names the cause and
+    the report instruction says up front that a slot the core schema
+    does not declare is `full`. The checker carries `instrument: v2`
+    from here (#996); no recorded block moves. The instruction text is a
+    generation-path change, so the VOICE canary is not retained and
+    runs again under the final package; the order becomes VOICE
+    (again), AI_READI, CHORUS, CM4AI.
 
-Each of 2–5 and 7–10 is a generation-path change; per the production rule
+Each of 2–5, 7–10 and 11 is a generation-path change; per the production rule
 none of them may land between a v8 canary and its fill.
 
 ## Decisions needed before step 3
