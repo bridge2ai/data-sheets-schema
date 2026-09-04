@@ -153,7 +153,10 @@ RULES: tuple[tuple[re.Pattern[str], Callable[[str], str]], ...] = tuple(
 #: or bracket (`programme.'`, `programme.)`) is punctuation, and the corpus
 #: writes single-quoted sentences ending in one often (#1003 review).
 _QUOTED = re.compile(r'"[^"\n]*"')
-_IDENTIFIER_TOKEN = re.compile(r"\S*(?:://|/|@|#|:\w|\.\w)\S*|(?<!\S)[&*!]\S+")
+#: An anchor, alias or tag starts the token with `&`, `*` or `!` and a word
+#: character; Markdown emphasis (`*programme*`, `**colour**`) ends in `*`
+#: and is prose (#1007 final pass).
+_IDENTIFIER_TOKEN = re.compile(r"\S*(?:://|/|@|#|:\w|\.\w)\S*|(?<!\S)(?:[&!]\w\S*|\*\w\S*(?<!\*)(?!\S))")
 _PROTECTED = re.compile(f"{_QUOTED.pattern}|{_IDENTIFIER_TOKEN.pattern}")
 
 #: Names the rules would otherwise read as British: genus names keep their

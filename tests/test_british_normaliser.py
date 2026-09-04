@@ -121,6 +121,8 @@ class TestTheRules(unittest.TestCase):
                             # #1005: a fragment on a bare id, anchors, aliases and tags are not prose
                             ("id: x#person-favour", "id: x#person-favour"), ("&programme centre", "&programme center"),
                             ("*programme", "*programme"), ("!programme centre", "!programme center"),
+                            ("the *programme* was", "the *program* was"), ("**colour** image", "**color** image"),
+                            ("*emphasised*", "*emphasized*"), ("R&D programme", "R&D program"),
                             ("[programme](#programme)", "[programme](#programme)")):   # one token with `#`: protected whole
             with self.subTest(text):
                 self.assertEqual(americanise(text)[0], want)
