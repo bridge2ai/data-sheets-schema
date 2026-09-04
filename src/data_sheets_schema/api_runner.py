@@ -1446,8 +1446,8 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
     Returns the receipt text to write and a summary for the usage entry, or
     the receipt unchanged and None when every slot already resolves. Paths
     are resolved against the record as `execute` will write it — the same
-    enum, temporal and multivalued normalisation, applied to the same text
-    (#957) — so a path that resolves here resolves on disk. The re-addressing
+    write-time normalisation chain (`normalise_record_text`), applied to the
+    same text (#957) — so a path that resolves here resolves on disk. The re-addressing
     is attempted once (transient transport failures are retried inside
     `_call_with_retry` like any call); whatever goes wrong — a transport
     failure, an unusable answer, a parse error — leaves the receipt as the
@@ -1455,7 +1455,11 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
     has already succeeded (#955).
     """
     try:
-        record = yaml.safe_load(normalise_record_text(record_body))
+        token = _REWRITE_LOG.set(None)                       # a resolution, not a write
+        try:
+            record = yaml.safe_load(normalise_record_text(record_body))
+        finally:
+            _REWRITE_LOG.reset(token)
         receipt = yaml.safe_load(receipt_body)
     except yaml.YAMLError:
         return receipt_body, None
@@ -2167,81 +2171,155 @@ _SCALAR_LINE = re.compile(
     r"(?!\s*$).*?)\s*$")
 
 
-_IDENTIFIER_LINE = re.compile(r"^(?P<head>[ \t]*-?[ \t]*(?P<slot>[a-z_]+):[ \t]+)"
-                              r"(?P<q>[\"']?)(?P<value>https?://[^\s\"']+)(?P=q)[ \t]*$")
-_ITEM_LINE = re.compile(r"^(?P<head>[ \t]*-[ \t]+)(?P<q>[\"']?)(?P<value>https?://[^\s\"']+)(?P=q)[ \t]*$")
-_KEY_LINE = re.compile(r"^(?P<indent>[ \t]*)-?[ \t]*(?P<slot>[a-z_]+):[ \t]*$")
+_IDENTIFIER_LINE = re.compile(r"^(?P<head>[ \t]*(?:-[ \t]+)?(?P<slot>[a-z_]+):[ \t]+)"
+                              r"(?P<q>[\"']?)(?P<value>https?://[^\s\"'#]+(?:#[^\s\"']*)?)(?P=q)"
+                              r"(?P<tail>[ \t]+#.*)?(?P<eol>\r?)$")
+_ITEM_LINE = re.compile(r"^(?P<head>[ \t]*-[ \t]+)"
+                        r"(?P<q>[\"']?)(?P<value>https?://[^\s\"'#]+(?:#[^\s\"']*)?)(?P=q)"
+                        r"(?P<tail>[ \t]+#.*)?(?P<eol>\r?)$")
+_ANY_KEY = re.compile(r"^(?P<indent>[ \t]*)(?P<dash>-[ \t]+)?(?P<slot>[A-Za-z_][\w]*):"
+                      r"(?:[ \t]+(?P<value>[^\r\n]*?))?[ \t]*\r?$")
+_ANY_ITEM = re.compile(r"^(?P<indent>[ \t]*)-([ \t]|\r?$)")
+
+#: Identifier rewrites of the current run, by phase (#974 review): the
+#: canary's resolver-URL metric reads the record as written, which is now
+#: clean by construction, so what the model wrote is recorded here instead.
+import contextvars as _cv
+_REWRITE_LOG: "_cv.ContextVar[list[dict[str, Any]] | None]" = _cv.ContextVar("identifier_rewrites", default=None)
 
 
 @lru_cache(maxsize=1)
 def _identifier_form_tables() -> tuple[frozenset[str], tuple[tuple[str, str], ...]]:
+    """(identifier slots, resolver bases the normaliser may rewrite).
+
+    A base that ends without a delimiter (`https://w3id.org/linkml/report`)
+    would turn `…/report/foo` into `datasets:/foo`; the detector may report
+    such a value, the normaliser must not rewrite it (#976 review).
+    """
     from data_sheets_schema.grounding import declared_bases
     from data_sheets_schema.identifiers import uriorcurie_slots
-    return frozenset(uriorcurie_slots()), tuple(declared_bases())
+    bases = tuple((b, p) for b, p in declared_bases() if b.endswith(("/", "#", "_", ":")))
+    return frozenset(uriorcurie_slots()), bases
+
+
+def _split_base(base: str) -> tuple[str, str]:
+    """(scheme://host/, path) of a declared base: the first part compares
+    case-insensitively, the path exactly — URL paths are case-sensitive, and
+    `mlcommons.org/croissant/RAI/` and `/rai/` are two declared prefixes."""
+    m = re.match(r"^(https?://[^/]+/?)(.*)$", base, re.I)
+    return (m.group(1).lower(), m.group(2)) if m else (base.lower(), "")
 
 
 def curie_form(value: str, bases: tuple[tuple[str, str], ...]) -> str | None:
     """`prefix:local` for a resolver URL of a declared prefix, else None."""
-    low = value.lower()
     for base, prefix in bases:
-        if low.startswith(base) and len(value) > len(base):
-            return f"{prefix}:{value[len(base):]}"
+        host, path = _split_base(base)
+        if (value[:len(host)].lower() == host and value[len(host):].startswith(path)
+                and len(value) > len(host) + len(path)):
+            return f"{prefix}:{value[len(host) + len(path):]}"
     return None
 
 
-def normalise_identifier_form(text: str) -> str:
+def normalise_identifier_form(text: str, *, phase: str | None = None) -> str:
     """Rewrite a resolver URL in a `uriorcurie` slot to the CURIE it names (#974).
 
     The rule has been in every arm prompt since v5 — write `doi:…`, not the
     doi.org resolver form — and the v8 CM4AI re-canary wrote the dataset's own
     DOI as a URL under `id`, with 15 fragments minted on it: 16 resolver URLs
-    against 0 across the v5, v6 and v7 arms. A rule the model breaks one run in
+    against 0 on every 12-record fill since v5 (five arms, 60 records). A rule the model breaks one run in
     two is a rule that needs a mechanism, like the enum aliases and the dates
     before it. Text-level for the same reason as those: re-dumping the YAML
     would drop the `#` provenance header.
 
     Only `uriorcurie`-ranged slots (induced, from the schema) and only
     resolver bases the schema declares (`grounding.declared_bases`, longest
-    first); fragments survive (`doi:10.1/x#collection-apms`); a `uri`-ranged
-    slot such as `download_url` keeps its URL. Scalar values on the slot's
-    line and `- ` items under a multivalued identifier slot are covered; a
-    URL inside prose is not touched.
+    first, scheme and host case-insensitive, path exact); fragments survive
+    (`doi:10.1/x#collection-apms`); a `uri`-ranged slot such as `download_url`
+    keeps its URL. Scalar values on the slot's line and `- ` items under a
+    multivalued identifier slot are covered; block scalars (`|`, `>`) are
+    skipped whole, so prose that looks like a key line is never touched;
+    trailing comments and CRLF survive. Every rewrite is appended to the run's
+    `_REWRITE_LOG` when one is set, with `phase`, so the record can say how
+    often the model wrote the resolver form.
     """
     slots, bases = _identifier_form_tables()
     if not slots or not bases:
         return text
+    log = _REWRITE_LOG.get()
+
+    def width(ws: str) -> int:
+        return len(ws.expandtabs(2))
+
     out = []
-    enclosing: list[tuple[int, str]] = []          # (indent, slot) of open keys
+    enclosing: list[tuple[int, str]] = []          # (key column, slot) of open container keys
+    block_indent: int | None = None                # inside a `|`/`>` scalar
     for line in text.split("\n"):
-        k = _KEY_LINE.match(line)
+        bare = line.rstrip("\r")
+        if block_indent is not None:
+            if not bare.strip() or width(bare[:len(bare) - len(bare.lstrip())]) > block_indent:
+                out.append(line); continue                       # still inside the block
+            block_indent = None
+        k = _ANY_KEY.match(line)
         if k:
-            indent = len(k.group("indent").expandtabs(2))
-            enclosing = [(i, sl) for i, sl in enclosing if i < indent] + [(indent, k.group("slot"))]
-            out.append(line)
-            continue
-        m = _IDENTIFIER_LINE.match(line)
-        if m and m.group("slot") in slots:
-            curie = curie_form(m.group("value"), bases)
-            if curie:
-                out.append(f"{m.group('head')}{m.group('q')}{curie}{m.group('q')}")
-                continue
-        m = _ITEM_LINE.match(line)
-        if m:
-            indent = len(m.group("head").expandtabs(2)) - 2
-            owner = next((sl for i, sl in reversed(enclosing) if i < indent + 1), None)
-            if owner in slots:
+            col = width(k.group("indent")) + (width(k.group("dash")) if k.group("dash") else 0)
+            enclosing = [(c, sl) for c, sl in enclosing if c < col]
+            value = (k.group("value") or "").strip()
+            if value.split("#", 1)[0].strip() in ("|", ">", "|-", ">-", "|+", ">+"):
+                block_indent = col
+                out.append(line); continue
+            if not value or value.startswith("#"):
+                enclosing.append((col, k.group("slot")))        # a container key
+            m = _IDENTIFIER_LINE.match(line)
+            if m and m.group("slot") in slots:
                 curie = curie_form(m.group("value"), bases)
                 if curie:
-                    out.append(f"{m.group('head')}{m.group('q')}{curie}{m.group('q')}")
+                    if log is not None:
+                        log.append({"phase": phase, "slot": m.group("slot"), "from": m.group("value"), "to": curie})
+                    out.append(f"{m.group('head')}{m.group('q')}{curie}{m.group('q')}"
+                               f"{m.group('tail') or ''}{m.group('eol')}")
+                    continue
+            out.append(line); continue
+        it = _ANY_ITEM.match(line)
+        if it:
+            col = width(it.group("indent"))
+            # A `- ` item belongs to the nearest open key at a column <= its
+            # dash; keys opened deeper than the dash (a sibling item's
+            # mapping) are closed by it (#974 review).
+            enclosing = [(c, sl) for c, sl in enclosing if c <= col]
+            owner = enclosing[-1][1] if enclosing else None
+            m = _ITEM_LINE.match(line)
+            if m and owner in slots:
+                curie = curie_form(m.group("value"), bases)
+                if curie:
+                    if log is not None:
+                        log.append({"phase": phase, "slot": owner, "from": m.group("value"), "to": curie})
+                    out.append(f"{m.group('head')}{m.group('q')}{curie}{m.group('q')}"
+                               f"{m.group('tail') or ''}{m.group('eol')}")
                     continue
         out.append(line)
     return "\n".join(out)
 
 
-def normalise_record_text(text: str) -> str:
+def normalise_record_text(text: str, *, phase: str | None = None) -> str:
     """Every write-time normalisation, in the order the record is written."""
     return normalise_identifier_form(normalise_multivalued(
-        normalise_enum_aliases(normalise_temporal(text))))
+        normalise_enum_aliases(normalise_temporal(text))), phase=phase)
+
+
+def identifier_rewrite_summary(log: list[dict[str, Any]] | None) -> dict[str, Any]:
+    """`{phase: {slot: {occurrences, distinct}}}` plus totals, for the record."""
+    by: dict[str, dict[str, dict[str, Any]]] = {}
+    for e in log or []:
+        ph = str(e.get("phase") or "unknown")
+        cell = by.setdefault(ph, {}).setdefault(str(e["slot"]), {"occurrences": 0, "values": set()})
+        cell["occurrences"] += 1
+        cell["values"].add(e["from"])
+    out = {ph: {sl: {"occurrences": c["occurrences"], "distinct": len(c["values"]),
+                     "examples": sorted(c["values"])[:3]}
+                for sl, c in slots.items()} for ph, slots in by.items()}
+    return {"identifier_form": out,
+            "occurrences": sum(e and 1 for e in (log or [])),
+            "distinct_values": len({e["from"] for e in (log or [])})}
 
 
 def normalise_multivalued(text: str) -> str:
@@ -2387,7 +2465,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             # re-projected rather than the core being repaired on its own,
             # which would let the pair diverge again (#694).
             from data_sheets_schema.derive_core import core_text
-            text = normalise_record_text(core_text(spec.full_path, phase4_complete=True)[0])
+            text = normalise_record_text(core_text(spec.full_path, phase4_complete=True)[0], phase="repair_core")
             spec.core_path.write_text(text, encoding="utf-8")
             errors, failure = _validator_lines(path, schema, cls)
             log.append({"phase": ph, "round": 1,
@@ -2461,7 +2539,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 log.append({"phase": ph, "round": rnd,
                             "outcome": f"unusable response: {exc}"})
                 continue
-            body = normalise_record_text(body)
+            body = normalise_record_text(body, phase=ph)
             path.write_text(body, encoding="utf-8")
             _snapshot(spec, f"{spec.project}_{ph}_r{rnd}.yaml", body)
             applied_from = len(errors)
@@ -3014,6 +3092,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # report claims and grounding all describe a record that remains usable
     # evidence; this corrupts the run's central input, and there would be
     # nothing to preserve by continuing.
+    _rewrites: list[dict[str, Any]] = []
+    _rewrite_token = _REWRITE_LOG.set(_rewrites)
     from data_sheets_schema.schema_sync import blocking, check as _schema_check
     stale = blocking(_schema_check())
     if stale:
@@ -3267,7 +3347,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         elif artifact:
             target.parent.mkdir(parents=True, exist_ok=True)
             if artifact in ("full", "core"):
-                body = normalise_record_text(body)
+                body = normalise_record_text(body, phase=ph)
             target.write_text(body, encoding="utf-8")
             # Reconcile (and later repair) overwrite the artifact in place;
             # the snapshot is the only record of what this phase produced.
@@ -3428,7 +3508,11 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         # record. The claim is made only when the core on disk is byte-equal
         # to a fresh derivation of the full on disk.
         from data_sheets_schema.derive_core import core_text, derivation_facts
-        fresh = normalise_record_text(core_text(spec.full_path, phase4_complete=True)[0])
+        token = _REWRITE_LOG.set(None)                       # a comparison, not a write
+        try:
+            fresh = normalise_record_text(core_text(spec.full_path, phase4_complete=True)[0])
+        finally:
+            _REWRITE_LOG.reset(token)
         on_disk = spec.core_path.read_text(encoding="utf-8") if spec.core_path.exists() else None
         repaired = any(r.get("phase") == "repair_core" for r in (rec.data.get("repair") or []))
         if on_disk == fresh:
@@ -3458,6 +3542,10 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # v8 step E (#929): the report's claims are checked before the run
     # completes, and a contradicting report is regenerated once. Recorded
     # beside the final `report_claims` block, which is recomputed below.
+    # What the model wrote before the write-time normalisers (#974): the
+    # resolver-URL metric reads the record as written, clean by construction.
+    _REWRITE_LOG.reset(_rewrite_token)
+    rec.data["normalisation"] = identifier_rewrite_summary(_rewrites)
     rec.data["report_gate"] = _gate_report(spec, client, settings, usage, carry)
     # The context facts were frozen before the gate could add a call (#967).
     rec.data["model"]["context"] = context_facts(settings["name"], usage)

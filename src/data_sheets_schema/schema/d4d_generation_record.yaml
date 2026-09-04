@@ -238,6 +238,15 @@ classes:
         inlined: true
         range: AnyBlock
 
+      normalisation:
+        description: >-
+          What the write-time normalisers changed (#974): identifier rewrites
+          by phase and slot with occurrence and distinct-value counts, so the
+          record says how often the model wrote a resolver URL although the
+          record as written carries none.
+        inlined: true
+        range: AnyBlock
+
       report_gate:
         description: >-
           What the in-process report check found before the run completed

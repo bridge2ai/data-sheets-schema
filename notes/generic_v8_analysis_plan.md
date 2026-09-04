@@ -332,8 +332,9 @@ steps need:
 
 9. **H (#974)** — after the CM4AI re-canary (`2026-09-04b_…_rep1`, PR #975)
    passed every receipt metric and the report gate but wrote the dataset's
-   own DOI as a resolver URL under `id` (16 resolver URLs vs 0 across the
-   v5, v6 and v7 arms): a write-time normaliser rewrites a resolver URL in a
+   own DOI as a resolver URL under `id` (16 resolver URLs vs 0 on every
+   12-record fill since v5 — five arms, 60 records; the v5 2026-08-19 and
+   v7 2026-08-28b exploratory canaries were not 0): a write-time normaliser rewrites a resolver URL in a
    `uriorcurie` slot to the CURIE it names (`normalise_identifier_form`, in
    the same chain as the enum, temporal and multivalued normalisers). A
    runner change with no prompt or digest movement; registered here as a

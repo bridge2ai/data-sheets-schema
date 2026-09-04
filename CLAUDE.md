@@ -792,7 +792,13 @@ the slots whose induced range is `uriorcurie`; a `uri`-ranged slot such as
 `download_url` keeps its URL. Each is a mechanism behind a rule the prompt
 already states, added when a run broke the rule (#974: the v8 CM4AI
 re-canary wrote its own DOI as a URL under `id`, 16 resolver URLs against 0
-across three arms). Text-level, so the `#` provenance header survives.
+on every 12-record fill since v5 — five arms, 60 records; two exploratory
+canaries were not 0). Text-level, so the `#` provenance header survives;
+block scalars are skipped whole and trailing comments kept. Because the
+record as written is then clean by construction, the canary's resolver-URL
+row is an invariant for forms the normaliser does not cover, and what the
+model actually wrote is in the record's `normalisation.identifier_form`
+block (occurrences and distinct values by phase and slot).
 
 ## Null/Empty Value Handling
 
