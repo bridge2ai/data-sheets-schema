@@ -1,0 +1,155 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "related_datasets",
+      "issue": "All four inter-release relationships are semantically inverted. The record is the June 2026 release (published 2026-06-17); it declares `relationship_type: is_previous_version_of` toward the October 2025 (doi:10.18130/V3/K7TGEM, published 2025-10-31), June 2025 (doi:10.18130/V3/F3TD5R, published 2025-07-01), March 2025 (doi:10.18130/V3/B35XWX, published 2025-03-03) and initial (doi:10.18130/V3/DXWOS5) releases. Those releases precede this one, so the correct enum is `is_new_version_of` (or `replaces`). As written the record asserts that the newest release precedes each of its own predecessors."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "instances[0].instance_description",
+      "issue": "`instance_description` is not a key the schema digest declares on Instance. Instance accepts only `counts`, `data_substrate`, `data_topic`, `instance_type`, `label`, `label_description`, `missing_information`, `notes`, `sampling_strategies`, `source_caveats`. The content ('Each image records the spatial localization of one protein of interest in MDA-MB-468 cells, with reference channels for nucleus, endoplasmic reticulum and microtubules') belongs in `label_description` or `notes`; as written it is an invented key."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "total_size_bytes",
+      "issue": "Arithmetic error in the record's own derived figure. Summing the sizes the june_2026_dataverse_release file table displays — 3.8 GB + 4.6 GB + 4.2 GB + 113.3 KB + 135.8 KB + 171.8 KB + 93.9 KB + 30.2 KB + 73.3 KB + 1.1 MB, under the 10^9/10^6/10^3 convention the source_caveats declares — gives 12,601,718,300, not the 12,601,728,000 stated. The stated value is 9,700 higher than its own declared inputs."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators[].affiliations[].id, creators[].id, data_governance.committee_contact.id",
+      "issue": "Minted identifiers for entities outside this dataset. Fragment identifiers of the form `https://dataverse.lib.virginia.edu/cm4ai#person-axelsson-u`, `#person-chinn-b`, `#person-fall-j`, `#person-johannesson-a`, `#person-khaliq-h`, `#person-muralidharan-m`, `#person-pan-e`, `#person-polacco-b`, `#person-zhang-y`, `#person-parker-j` and `#org-ucsd`, `#org-ucsf`, `#org-stanford`, `#org-kth`, `#org-uab`, `#org-ua`, `#org-yale`, `#org-sfu`, `#org-utaustin`, `#org-montreal` are invented for people and organizations that exist outside this record. Minting is permitted only for parts of this dataset; identifiers for external entities must be taken from the bundle or omitted. Organization declares no required `id`, so those objects can carry `name` alone."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "data_governance.committee_contact.id",
+      "issue": "Identity split for one person. Jillian Parker is identified as `https://orcid.org/0000-0003-4535-3486` in `creators` but as the minted `https://dataverse.lib.virginia.edu/cm4ai#person-parker-j` here, while carrying the same ORCID in the object's `orcid` field. The same person is named by two identifiers within one record, and the minted one is used where an attested identifier was available."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators[].id, creators[].principal_investigator.orcid, ethical_reviews[].contact_person.id, data_governance.committee_contact.orcid",
+      "issue": "Resolver URLs written into `uriorcurie` slots where a declared prefix covers the identifier. ORCIDs are written as `https://orcid.org/0000-...` throughout rather than as `ORCID:` CURIEs, and the University of Virginia ROR is written as `https://ror.org/0153tk833` rather than a `ROR:` CURIE. The bundle presents these as URLs, but an identifier slot is not quoted prose."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "preprocessing_strategies",
+      "issue": "Processing that produces an output this release does not contain is stated as preprocessing of this dataset. Entries 3 and 4 describe contrastive co-embedding of PPI and image embeddings and multi-resolution community detection whose stated product is 'the final cell map', while the release itself states 'Computed cell maps not included in this release' and `known_limitations` repeats that. These describe the MuSIC pipeline's downstream stages, not preparation applied to the files distributed here."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "labeling_strategies",
+      "issue": "Annotation of cell maps (alignment to Gene Ontology and Reactome, LLM naming with confidence scores) is stated as this dataset's labeling strategy, but its subject is the cell map, which the release states is not included. No labeling of the AP-MS, SEC-MS, immunofluorescence or perturb-seq files distributed in this release is attested."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "extension_mechanism.extension_details",
+      "issue": "Two problems. The passage describing the Cell Mapping Toolkit as 'a series of Python packages, each pip-installable and linked to user documentation ... a flexible and generalizable framework for cell map construction' comes from the Nature U2OS study (nature_publication), a different dataset, and describes software availability rather than a mechanism by which others may propose additions or corrections to this dataset. `contribution_url` is left empty although the toolkit repository URL appears in the bundle."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "external_resources[].archival",
+      "issue": "`archival` is asserted true for the MassIVE and Figshare deposits and false for the cm4ai.org portal and NDEx, but the bundle makes no statement about the archival status or long-term guarantees of any of these external hosts. The boolean is inferred from the kind of host rather than from evidence."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "distribution_formats[0].notes",
+      "issue": "Access-route content placed in a format object. The note carries the 1.9 GB per-file download limit, the statement that the dataset is too large to download in one operation, the Data Access API, and Wget/download-manager instructions — none of which describe the distribution format. The format object should carry format, media type and access URLs; the routing belongs elsewhere."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "file_collections[1].description",
+      "issue": "A protein count is carried onto files it was not stated for. '464 proteins of interest' is stated by october_2025_dataverse_release and june_2025_dataverse_release for their image archives; june_2026_dataverse_release states no protein count and its three image archives carry different MD5 checksums (6c1a8652..., 6d066e6b..., df796327...) from the October 2025 archives (0d972b80..., a98affcc..., ad4e68cc...), so they are not the same files. The source_caveats discusses the 563-vs-464 disagreement but does not disclose that the figure is being transferred from different files."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "file_collections[].resources[].bytes",
+      "issue": "Rounded display sizes presented as exact byte counts. The Dataverse file table shows '3.8 GB', '113.3 KB', '1.1 MB' and so on; these are rendered as 3800000000, 113300, 1100000 with no per-file indication that they are conversions of rounded displays. The top-level `source_caveats` flags the approximation only for the aggregate."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "ethical_reviews[0].review_details",
+      "issue": "Ongoing project-level ethics activity is stated in place of an ethical review of this dataset. The text describes the CM4AI Ethics module's Value-Sensitive Design methodology and says the team 'is formulating the CM4AI Life Cycle, a framework ... elucidating governance milestones' — in the preprint this is prospective programme work, not a review, approval or determination applied to this release. The release itself attests only that named individuals are the ethical-review contacts."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "prohibited_uses[1]",
+      "issue": "License terms restated as a prohibition, duplicating `license_and_use_terms` and `ip_restrictions`. The release's own 'Prohibited Uses' section lists exactly one item (clinical decision-making without regulatory oversight). The CC BY-NC-SA non-commercial condition and the separate-negotiation requirement are already carried in `license_and_use_terms.license_terms`, `license_and_use_terms.data_use_permission: no_commercial_use` and `ip_restrictions.restrictions`."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "regulatory_restrictions.regulatory_restrictions",
+      "issue": "The single list entry, 'The release records FDA Regulated: No.', states the absence of a restriction rather than a restriction, and states it as a fact about the release page rather than about the data. A slot for regulatory and export-control restrictions is not answered by recording that none apply; omit, or express the determination through a typed field."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[45].principal_investigator",
+      "issue": "Self-nesting. The Creator object for Trey Ideker carries a `principal_investigator` Person that is the same individual as the Creator itself, with the same id, name and ORCID. The PI role is attested (NIH RePORTER, 'Principal investigator: IDEKER, TREY'), but recording it by nesting the person inside his own Creator entry duplicates the identity rather than qualifying it; `credit_roles` or a distinct governance slot would carry the role without the recursion."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "funders[0].notes",
+      "issue": "Two different NIH records conflated in one note. The grant number carried is 1OT2OD032742-01, which is the funding line the release states; the note then supplies the award amount 5289382, project start 2022-09-01 and project end 2026-08-31 from NIH RePORTER application 11211616, whose project number is 3OT2OD032742-01S2 — a supplement, not the award named in `grant_number`. The shared core project OT2OD032742 is not stated as the basis for merging them."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "language",
+      "issue": "`language: en` is not stated anywhere in the bundle. It is a safe inference from the prose, but it is an inference rather than an attested value."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "last_updated_on",
+      "issue": "2026-07-15 is derived from the publication date of the three immunofluorescence archives in the file table rather than from any statement that the dataset was last updated on that date. The derivation is not disclosed in `source_caveats`, which addresses only the file count and byte total."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "maintainers[2]",
+      "issue": "Depositor recorded as maintainer. The Dataverse metadata states 'Depositor: Niestroy, Justin' and 'Deposit Date 2025-02-27'; deposit is not maintenance, and the bundle does not state that this person maintains the dataset. The same fact would sit correctly in `created_by` or in provenance."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "ip_restrictions.restrictions",
+      "issue": "The copyright allocation ('Copyright the Regents of the University of California except where otherwise noted; spatial proteomics raw image data ... Leland Stanford Junior University') is stated by march_2025_dataverse_release and june_2025_dataverse_release, both tier 5 historical releases describing their own contents, and by the preprint. The june_2026 release does not restate it. Carrying it forward as this release's IP position is an extrapolation from superseded sources and is not noted in `source_caveats`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_formats[0].access_urls",
+      "issue": "The value is the dataset landing page, not an access URL for the distribution. The slot sits beside `download_url` in DistributionFormat; the landing page is already carried in the top-level `page`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "is_tabular",
+      "issue": "`false` is a reasonable reading of a release composed of image archives and zipped mass-spectrometry and sequencing outputs, but no source states the dataset's structural form; the value is inferred from file types."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "created_by",
+      "issue": "Supported omission. The Dataverse metadata names a depositor ('Niestroy, Justin', deposit date 2025-02-27), which answers `created_by` directly; the slot is left empty while the same fact is placed in `maintainers`."
+    }
+  ],
+  "summary": "24 findings against the full record. Four are high severity: all four inter-release `related_datasets` relationships are inverted, declaring the June 2026 release to be the previous version of each release that precedes it; `instances[0]` carries an `instance_description` key the Instance class does not declare; `total_size_bytes` is 9,700 higher than the sum of the very inputs its own caveat names; and roughly twenty identifiers are minted for people and organizations that exist outside this dataset, including one that splits Jillian Parker's identity between a minted fragment and her attested ORCID. Medium findings cluster around three patterns. First, subject drift: `preprocessing_strategies` and `labeling_strategies` describe production and annotation of the cell map, which the release explicitly states it does not contain, and `extension_mechanism` draws on the Nature U2OS study's toolkit description. Second, unsupported or transferred figures: `external_resources[].archival` booleans are inferred from host type, per-file `bytes` present rounded displays as exact counts, and the '464 proteins' figure is carried onto image archives whose checksums differ from the archives that figure was stated for. Third, neighbouring-field placement: access-route detail in a DistributionFormat note, license terms restated as a prohibition, and an absence-of-restriction statement filling `regulatory_restrictions`. ORCID and ROR identifiers are written as resolver URLs throughout rather than CURIEs. The record's evidentiary discipline is otherwise strong — the referent is held consistently at the June 2026 release, the 563-vs-464 source conflict and the project-wide cm4ai.org aggregates are both handled explicitly in `source_caveats`, and the derived nature of the file count and byte total is disclosed even though the total's arithmetic is wrong."
+}

@@ -1,0 +1,1317 @@
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-09-04T07:32:15+00:00'
+run:
+  label: 2026-09-04b_claude-opus-5-api-generic-v8_rep1
+  project: CM4AI
+  method: claudecode_api
+  arm: baseline
+  replicate: 1
+model:
+  generation_method: schema-grounded API, four model phases with the core derived
+    from the full record (#694)
+  agent_runtime: Claude API (direct)
+  provider: LBL CBORG (proxy to Anthropic)
+  base_url: https://api.cborg.lbl.gov
+  model: claude-opus-5
+  max_tokens_by_phase:
+    full: 128000
+    reconcile_full: 96000
+    repair_full: 96000
+    audit: 24000
+    report: 24000
+    full_readdress: 8000
+    report_regate: 24000
+  context:
+    peak_request_tokens: 234448
+    peak_phase: report_regate
+    peak_basis: 'observed: input + cache_read + cache_write of the largest request'
+    limit_tokens: null
+    limit_basis: not stated by the route and not returned by the provider; headroom
+      cannot be computed from this record
+  temperature: null
+  temperature_basis: not applicable to this model
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: src/download/prompts/d4d_generic_arm_prompt_v8.md
+    sha256: 06666c4d10786d4689170acdfd68350d451f84d2f94d4b5a22be6e569d3824f1
+    bytes: 15912
+    exists: true
+  request:
+    sha256: eed3e5b9cb78aef8401539e257fb674a122f5a57e20ec415f96b38a66889f5b8
+    bytes: 15287
+    note: the instruction as sent, after substitution; the files above are what it
+      was built from
+    spec:
+      condition: generic_v8
+      arm: BASELINE (input documents only)
+      manifest_line: '# Source manifest: data/preprocessed/source_manifest.yaml'
+      run_date: '2026-09-04'
+      runtime: Claude API (direct)
+      provider: LBL CBORG (proxy to Anthropic)
+      bundle: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+  resolved:
+    sha256: eed3e5b9cb78aef8401539e257fb674a122f5a57e20ec415f96b38a66889f5b8
+    bytes: 15287
+  assembly:
+    sha256: 975f4e8ca0ef1f4fee75650296ff48a036a7755c92c15dfe83b4a03ba7829ff5
+    layout: schema digest, input bundle, source ranking, declared naming, arm prompt,
+      carried artifacts, phase instruction; core derived from the full record, not
+      generated (#694); audit and reconcile_full address the full record only, the
+      core being its projection (#705); under a receipt condition the bundle carries
+      [cNNN] chunk markers and the full phase instruction asks for the coverage receipt
+      after the record (#710); a receipt entry whose slot is not a path in the record
+      just written gets one follow-up turn — the full-phase exchange replayed as an
+      assistant turn, then the unresolved entries with their chunk and ordinal and
+      the re-addressing instruction — whose answer moves the entry only to a resolving
+      path or drops it (#952); the report phase ends with a dispositions table, checked
+      against the records before the run completes, and a report whose claims contradict
+      them is regenerated once with the contradictions named (#929)
+playbooks:
+  hash_algorithm: sha256
+  files:
+  - path: .claude/commands/d4d-full-core.md
+    sha256: 9552cd7e5fca3576d647e467820849aa3b35f73664e2e065c2970db43f9d8313
+    bytes: 46172
+    exists: true
+  - path: .claude/commands/d4d-agent.md
+    sha256: a9a56cd791a6a4876e4dd756011460d6c7a24f634c928af8b0e2fc3057d6bc0d
+    bytes: 12138
+    exists: true
+  - path: .claude/agents/d4d-provenance-guard.md
+    sha256: 2b8889f4f698847294eb1c017f4bf095da3f0d919dc5903b984270df8f1c8278
+    bytes: 6910
+    exists: true
+  - path: .claude/commands/d4d-uniform-rules.md
+    sha256: 2fa5efeb2786bc9b81df6481564612a7c9b027e7ef4620fa961416a832e92e05
+    bytes: 10142
+    exists: true
+  consumed: false
+  consumed_basis: this runtime renders a condition prompt and sends nothing else,
+    so these were not read; they are hashed so an unchanged hash shows that (#545)
+phase_log: null
+schema:
+  declared_version: 2.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
+  merged_schema_carries_version: true
+  digest_md5: ffe03dd469feb388e0a4149e4f5ccb6f
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: a844827e2beb4d9fc053e9d31a7ef5ee5e17d20f
+  commit_short: a844827e
+  branch: main
+  dirty: true
+  dirty_file_count: 3
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+  chunks:
+    path: data/preprocessed/chunks/CM4AI_chunks.yaml
+    sha256: 3d2d86bac4e9f89d2c6cfb6b5f5361c237995d899ecb6ae41382f82359aedde4
+    rule:
+      version: 2
+      unit: source-document
+      boundary: 'FILE: line followed by PATH: or ROLE:'
+      preamble: own-chunk
+      split: line-window
+      max_lines: 400
+      max_bytes: 48000
+    chunk_count: 28
+  receipt_expected: true
+  bundle_md5: 50037fc631eafda807e19f83f6579818
+  bundle_bytes: 320799
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: 41408d33c174b55434ac2fc14e6ab411
+  dispositions_expected: true
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_api/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml
+    bytes: 43423
+    slots: 61
+  core:
+    path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d_core.yaml
+    bytes: 40177
+    slots: 56
+  report:
+    path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_reconciliation.md
+    bytes: 18501
+    slots: null
+companions:
+  reasoning_log:
+    path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_reasoning.jsonl
+    present: true
+    md5: d59f3faceea5e906dbeaed70ebfeee7e
+    note: one JSON line per phase; absent for a runtime that cannot report its own
+      token accounting (#400)
+  telemetry_report:
+    path: data/run_telemetry/2026-09-04b_claude-opus-5-api-generic-v8.yaml
+    present: false
+    note: derived from records like this one, per label rather than per run; `d4d
+      runs telemetry` writes it
+  prompt_registry:
+    path: src/download/prompts/canonical_hashes.yaml
+    present: true
+    md5: e9e6a9ae3e9f0e3dc2eab3f4bbb97ce7
+    note: the pins the recorded prompt hashes were judged against
+  digest_inventory:
+    path: src/data_sheets_schema/schema/digest_inventory.yaml
+    present: true
+    md5: eea3e60e40aa0a9a73cb2b6a3fe58171
+    note: digest to slot inventory, which decides whether a slot predates a pair
+unrecoverable: null
+unverified:
+- field: model.reasoning_effort
+  value: null
+  reason: 'no effort is recorded: the header carries none and the route ''claude-opus-5''
+    exposes no effort ladder, so the provider default applied. That is not a value
+    this run chose, and it is not comparable with a run that named one.'
+- field: model.temperature
+  value: null
+  reason: 'claude-opus-5 rejects `temperature` (400: deprecated for this model), so
+    the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config is not
+    sent and does not apply. Sampling for this model family is selected by model-name
+    suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+notes:
+- 'Generated via Claude API (direct). claude-opus-5 rejects `temperature` (400: deprecated
+  for this model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config
+  is not sent and does not apply. Sampling for this model family is selected by model-name
+  suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+- Model settings read from .github/workflows/d4d_assistant_deterministic.config.
+- 'Endpoint: LBL CBORG (proxy to Anthropic) at https://api.cborg.lbl.gov.'
+api_usage:
+- phase: full
+  attempt: 1
+  started_at: '2026-09-04T07:20:29+00:00'
+  seconds: 291.213
+  input_tokens: 6134
+  output_tokens: 30328
+  cache_read: 0
+  cache_write: 147375
+  max_tokens: 128000
+  stop_reason: end_turn
+- phase: full_readdress
+  attempt: 1
+  started_at: '2026-09-04T07:25:22+00:00'
+  max_tokens: 8000
+  input_tokens: 36788
+  output_tokens: 156
+  cache_read: 147375
+  cache_write: 0
+  stop_reason: end_turn
+  seconds: 6.531
+  readdress:
+    unresolved_before:
+    - chunk: c018
+      entry: 52
+      slot: subject
+      snippet: Medicine, Health and Life Sciences
+    moved: []
+    dropped:
+    - chunk: c018
+      entry: 52
+      slot: subject
+      reason: The Dataverse "Subject" field value "Medicine, Health and Life Sciences"
+        was not carried into the record. The Dataset class declares no `subject` slot,
+        and the value was not folded into `keywords` (which reproduces only the release's
+        own Keyword list) nor into `description`. No path in the record holds this
+        value.
+    rejected: []
+    emptied: []
+    answers: 1
+    still_unresolved: []
+- phase: audit
+  attempt: 1
+  started_at: '2026-09-04T07:25:29+00:00'
+  seconds: 159.441
+  input_tokens: 25252
+  output_tokens: 12697
+  cache_read: 147375
+  cache_write: 0
+  max_tokens: 24000
+  stop_reason: end_turn
+- phase: reconcile_full
+  attempt: 1
+  started_at: '2026-09-04T07:28:08+00:00'
+  seconds: 163.096
+  input_tokens: 30517
+  output_tokens: 17515
+  cache_read: 147375
+  cache_write: 0
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: report
+  attempt: 1
+  started_at: '2026-09-04T07:30:51+00:00'
+  seconds: 83.795
+  input_tokens: 82059
+  output_tokens: 6754
+  cache_read: 147375
+  cache_write: 0
+  max_tokens: 24000
+  stop_reason: end_turn
+- phase: repair_full
+  attempt: 1
+  started_at: '2026-09-04T07:32:22+00:00'
+  seconds: 160.386
+  input_tokens: 19589
+  output_tokens: 17849
+  cache_read: 0
+  cache_write: 17419
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: report_after_repair
+  attempt: 1
+  started_at: '2026-09-04T07:35:11+00:00'
+  seconds: 64.991
+  input_tokens: 82085
+  output_tokens: 4787
+  cache_read: 147375
+  cache_write: 0
+  stop_reason: end_turn
+- phase: report_regate
+  attempt: 1
+  started_at: '2026-09-04T07:36:16+00:00'
+  seconds: 51.826
+  input_tokens: 87073
+  output_tokens: 4923
+  cache_read: 147375
+  cache_write: 0
+  stop_reason: end_turn
+phases_skipped: null
+repair:
+- phase: repair_full
+  round: 1
+  outcome: applied
+  findings: 14
+- phase: repair_core
+  round: 1
+  outcome: re-derived from the repaired full record; validates
+report_regenerated_after_repair:
+  changed:
+  - core
+  - full
+  why: repair rewrote a record after the report was written; a report describing bytes
+    that no longer exist is the artifact a reviewer reads instead of the diff
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_api/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml
+      md5: 7538f1d7ec8ec173eb871a6ae60e8d98
+    core:
+      path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d_core.yaml
+      md5: 90bdb1a588098ba32161094f8ed60a5d
+  schema:
+    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
+    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
+  recorded_by: api_runner.execute
+core_derivation:
+  derived: true
+  rule: shared slots copied from the full record; resources projected by id with full-only
+    nested slots dropped; distributions built from file_collections (one per collection
+    over the shared slots, total_bytes as bytes) and from each collection's File entries
+    (one per file over the slots CoreDistribution and File share); dialect from the
+    File entries when they agree on one value, else absent
+  from:
+    path: data/d4d_concatenated/claudecode_api/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml
+    md5: 7538f1d7ec8ec173eb871a6ae60e8d98
+  identity_slots: 79
+  projected_slots:
+  - resources
+  distribution_slots:
+    collection:
+    - compression
+    - conforms_to
+    - conforms_to_standard
+    - description
+    - id
+    - name
+    - notes
+    - path
+    - source_caveats
+    file:
+    - bytes
+    - compression
+    - conforms_to
+    - conforms_to_standard
+    - description
+    - encoding
+    - format
+    - hash
+    - id
+    - md5
+    - media_type
+    - name
+    - notes
+    - path
+    - sha256
+    - source_caveats
+  conditional:
+    dialect: derived only when every File-level dialect in the full record agrees
+      on one value
+  phase: repair_core
+pair_consistency:
+  ran: true
+  consistent: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_api/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml
+      md5: 7538f1d7ec8ec173eb871a6ae60e8d98
+    core:
+      path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d_core.yaml
+      md5: 90bdb1a588098ba32161094f8ed60a5d
+  errors: 0
+  warnings: 1
+  identity_slots: 79
+  schema_moved: false
+  findings: []
+  findings_truncated: null
+report_gate:
+  checked: true
+  claims_checked_before: 40
+  findings_before: 1
+  regenerated: true
+  claims_checked_after: 40
+  findings_after: 0
+  remaining: []
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 40
+  claims_unnamed: 0
+  disposition_rows: 40
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_reconciliation.md
+      md5: 6fb73745a02c38ebf640e1bd9847c3bc
+    full:
+      path: data/d4d_concatenated/claudecode_api/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml
+      md5: 7538f1d7ec8ec173eb871a6ae60e8d98
+    core:
+      path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d_core.yaml
+      md5: 90bdb1a588098ba32161094f8ed60a5d
+  schema:
+    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
+    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
+  dispositions_expected: true
+grounding:
+  checked: true
+  counts:
+    grounded: 86
+    minted_fragment: 30
+    absent: 0
+  findings:
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.id
+    value: https://doi.org/10.18130/V3/HIGT4C
+    prefix: doi
+    record: full
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.file_collections[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#collection-apms
+    prefix: doi
+    record: full
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.file_collections[].resources[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-apms-paclitaxel
+    prefix: doi
+    record: full
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.file_collections[].resources[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-apms-vorinostat
+    prefix: doi
+    record: full
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.file_collections[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#collection-ifimages
+    prefix: doi
+    record: full
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.file_collections[].resources[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-if-paclitaxel
+    prefix: doi
+    record: full
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.file_collections[].resources[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-if-untreated
+    prefix: doi
+    record: full
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.file_collections[].resources[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-if-vorinostat
+    prefix: doi
+    record: full
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.file_collections[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#collection-secms
+    prefix: doi
+    record: full
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.file_collections[].resources[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-secms-kolf2
+    prefix: doi
+    record: full
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.file_collections[].resources[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-secms-mdamb468
+    prefix: doi
+    record: full
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.file_collections[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#collection-perturbseq
+    prefix: doi
+    record: full
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.file_collections[].resources[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-perturbseq-atlas
+    prefix: doi
+    record: full
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.file_collections[].resources[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-perturbseq-raw
+    prefix: doi
+    record: full
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.file_collections[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#collection-metadata
+    prefix: doi
+    record: full
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.file_collections[].resources[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-release-metadata
+    prefix: doi
+    record: full
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.distributions[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#collection-apms
+    prefix: doi
+    record: core
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.distributions[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-apms-paclitaxel
+    prefix: doi
+    record: core
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.distributions[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-apms-vorinostat
+    prefix: doi
+    record: core
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.distributions[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#collection-ifimages
+    prefix: doi
+    record: core
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.distributions[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-if-paclitaxel
+    prefix: doi
+    record: core
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.distributions[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-if-untreated
+    prefix: doi
+    record: core
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.distributions[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-if-vorinostat
+    prefix: doi
+    record: core
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.distributions[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#collection-secms
+    prefix: doi
+    record: core
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.distributions[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-secms-kolf2
+    prefix: doi
+    record: core
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.distributions[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-secms-mdamb468
+    prefix: doi
+    record: core
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.distributions[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#collection-perturbseq
+    prefix: doi
+    record: core
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.distributions[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-perturbseq-atlas
+    prefix: doi
+    record: core
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.distributions[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-perturbseq-raw
+    prefix: doi
+    record: core
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.distributions[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#collection-metadata
+    prefix: doi
+    record: core
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.distributions[].id
+    value: https://doi.org/10.18130/V3/HIGT4C#file-release-metadata
+    prefix: doi
+    record: core
+  - kind: resolver_url_in_identifier_slot
+    slot: id
+    path: $.id
+    value: https://doi.org/10.18130/V3/HIGT4C
+    prefix: doi
+    record: core
+  distinct:
+    grounded: 39
+    minted_fragment: 15
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+      md5: 50037fc631eafda807e19f83f6579818
+form:
+  checked: true
+  records:
+  - data/d4d_concatenated/claudecode_api/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml
+  - data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d_core.yaml
+  undeclared_prefixes: {}
+  undeclared_prefix_occurrences: 0
+  british_spellings: 2
+  organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
+receipts:
+  expected: true
+  non_checks:
+  - that a chunk marked nothing_relevant truly held nothing for the record — a judgement;
+    sample by chunk id in review
+  - that a verified snippet supports the value it is attached to — a snippet can be
+    real and irrelevant; sample by slot path in review
+  checked: true
+  chunks:
+    total: 28
+    reviewed: 28
+    unreviewed: []
+    by_status:
+      extracted: 17
+      redundant_with: 6
+      nothing_relevant: 5
+      duplicate_of: 0
+  snippets:
+    total: 209
+    verified: 175
+    linewrap_joined: 0
+    adjacent: 30
+    elsewhere: 4
+    spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
+    mismatched: 0
+    unchecked: 0
+    no_value_overlap: 0
+    no_value_overlap_sample: []
+    entry_single_leaf: 11
+    entry_single_leaf_sample:
+    - chunk: c002
+      slot: related_datasets[6]
+      leaves: 3
+      overlapping: 1
+    - chunk: c026
+      slot: file_collections[0].resources[0]
+      leaves: 6
+      overlapping: 0
+    - chunk: c026
+      slot: file_collections[0].resources[1]
+      leaves: 6
+      overlapping: 0
+    - chunk: c026
+      slot: file_collections[1].resources[0]
+      leaves: 6
+      overlapping: 0
+    - chunk: c026
+      slot: file_collections[1].resources[1]
+      leaves: 6
+      overlapping: 0
+    - chunk: c026
+      slot: file_collections[1].resources[2]
+      leaves: 6
+      overlapping: 0
+    - chunk: c026
+      slot: file_collections[2].resources[0]
+      leaves: 6
+      overlapping: 0
+    - chunk: c026
+      slot: file_collections[2].resources[1]
+      leaves: 6
+      overlapping: 0
+    - chunk: c026
+      slot: file_collections[3].resources[0]
+      leaves: 6
+      overlapping: 0
+    - chunk: c026
+      slot: file_collections[3].resources[1]
+      leaves: 6
+      overlapping: 0
+  slots:
+    populated: 455
+    exempt: 48
+    receiptable: 407
+    with_receipt: 288
+    without_receipt:
+    - name
+    - status
+    - page
+    - conforms_to
+    - conforms_to_standard
+    - total_file_count
+    - created_by
+    - creators[0].name
+    - creators[0].affiliations[0].name
+    - funders[0].grantor
+    - funders[1].grantor
+    - funders[1].grants[0].grant_number
+    - funders[2].grantor
+    - tasks[3].response
+    - intended_uses[0].use_category
+    - intended_uses[1].use_category
+    - intended_uses[2].use_category
+    - intended_uses[3].use_category
+    - known_limitations[0].limitation_type
+    - known_limitations[1].limitation_type
+    - known_limitations[2].limitation_type
+    - known_limitations[3].limitation_type
+    - known_limitations[3].recommended_mitigation
+    - known_biases[0].bias_type
+    - is_deidentified.deidentification_details
+    - ethical_reviews[1].review_details
+    - data_governance.committee_name
+    - license_and_use_terms.data_use_permission
+    - acquisition_methods[0].was_directly_observed
+    - acquisition_methods[1].was_directly_observed
+    - acquisition_methods[2].was_directly_observed
+    - acquisition_methods[3].was_directly_observed
+    - collection_mechanisms[2].mechanism_details
+    - data_collectors[0].role
+    - data_collectors[1].role
+    - direct_collection[0].is_direct
+    - sampling_strategies[0].is_sample
+    - sampling_strategies[0].is_representative
+    - sampling_strategies[0].why_not_representative
+    - sampling_strategies[0].strategies
+    - instances[0].instance_type
+    - instances[0].data_substrate
+    - instances[0].data_topic
+    - instances[0].label_description
+    - instances[1].instance_type
+    - instances[1].data_substrate
+    - instances[1].data_topic
+    - instances[2].instance_type
+    - instances[2].data_substrate
+    - instances[2].data_topic
+    without_receipt_truncated: 69
+    never_receipted: 116
+    added_after_receipt: 3
+    receipt_paths: 164
+    unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity:
+    - path: creators[10]
+      resolved_path: creators[7]
+      basis: by_overlap
+    - path: creators[11]
+      resolved_path: creators[8]
+      basis: by_overlap
+    - path: creators[12]
+      resolved_path: creators[9]
+      basis: by_overlap
+    - path: creators[13]
+      resolved_path: creators[10]
+      basis: by_overlap
+    - path: creators[14]
+      resolved_path: creators[41]
+      basis: by_overlap
+    - path: creators[15]
+      resolved_path: creators[42]
+      basis: by_overlap
+    - path: creators[16]
+      resolved_path: creators[11]
+      basis: by_overlap
+    - path: creators[17]
+      resolved_path: creators[12]
+      basis: by_overlap
+    - path: creators[18]
+      resolved_path: creators[13]
+      basis: by_overlap
+    - path: creators[19]
+      resolved_path: creators[14]
+      basis: by_overlap
+    - path: creators[20]
+      resolved_path: creators[15]
+      basis: by_overlap
+    - path: creators[21]
+      resolved_path: creators[43]
+      basis: by_overlap
+    - path: creators[22]
+      resolved_path: creators[16]
+      basis: by_overlap
+    - path: creators[23]
+      resolved_path: creators[17]
+      basis: by_overlap
+    - path: creators[24]
+      resolved_path: creators[18]
+      basis: by_overlap
+    - path: creators[25]
+      resolved_path: creators[44]
+      basis: by_overlap
+    - path: creators[26]
+      resolved_path: creators[45]
+      basis: by_overlap
+    - path: creators[27]
+      resolved_path: creators[19]
+      basis: by_overlap
+    - path: creators[28]
+      resolved_path: creators[20]
+      basis: by_overlap
+    - path: creators[29]
+      resolved_path: creators[21]
+      basis: by_overlap
+    remapped_by_identity_count: 46
+    value_changed_after_receipt:
+    - path: creators[0].id
+      resolved_path: creators[0].id
+    - path: creators[10]
+      resolved_path: creators[7]
+    - path: creators[11]
+      resolved_path: creators[8]
+    - path: creators[12]
+      resolved_path: creators[9]
+    - path: creators[13]
+      resolved_path: creators[10]
+    - path: creators[14]
+      resolved_path: creators[41]
+    - path: creators[15]
+      resolved_path: creators[42]
+    - path: creators[16]
+      resolved_path: creators[11]
+    - path: creators[17]
+      resolved_path: creators[12]
+    - path: creators[18]
+      resolved_path: creators[13]
+    - path: creators[19]
+      resolved_path: creators[14]
+    - path: creators[1]
+      resolved_path: creators[1]
+    - path: creators[20]
+      resolved_path: creators[15]
+    - path: creators[21]
+      resolved_path: creators[43]
+    - path: creators[22]
+      resolved_path: creators[16]
+    - path: creators[23]
+      resolved_path: creators[17]
+    - path: creators[24]
+      resolved_path: creators[18]
+    - path: creators[25]
+      resolved_path: creators[44]
+    - path: creators[26]
+      resolved_path: creators[45]
+    - path: creators[27]
+      resolved_path: creators[19]
+    value_changed_after_receipt_count: 59
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
+    reshaped_by_reconcile:
+    - creators[0].affiliations[0].id
+    - known_biases[0].scope_impact
+    - labeling_strategies[0].labeling_details
+    - last_updated_on
+    - maintainers[2].maintainer_details
+    - preprocessing_strategies[2].preprocessing_details
+    - preprocessing_strategies[3].preprocessing_details
+    - regulatory_restrictions.regulatory_restrictions
+    receipts_to_removed_values: 8
+  findings:
+  - kind: snippet_elsewhere_chunk
+    chunk: c002
+    found_in:
+    - c008
+    slot: related_datasets[6].target_dataset
+    snippet: https://doi.org/10.1038/s41586-025-08878-3
+  - kind: snippet_elsewhere_chunk
+    chunk: c004
+    found_in:
+    - c007
+    slot: related_datasets[6].notes
+    snippet: Bridge2AI Program (NIH Common Fund; OT2 OD032742
+  - kind: snippet_adjacent_chunk
+    chunk: c004
+    found_in:
+    - c005
+    slot: related_datasets[6].notes
+    snippet: under uuid f693137a-d2d7-11ef-8e41-005056ae3c32
+  - kind: snippet_adjacent_chunk
+    chunk: c004
+    found_in:
+    - c005
+    slot: related_datasets[6].notes
+    snippet: 'MassIVE under the identifier
+
+      MSV000097168'
+  - kind: snippet_adjacent_chunk
+    chunk: c004
+    found_in:
+    - c005
+    slot: related_datasets[6].notes
+    snippet: 'Proteome Xchange under the identifier
+
+      PXD052362'
+  - kind: snippet_elsewhere_chunk
+    chunk: c010
+    found_in:
+    - c002
+    slot: addressing_gaps[1].response
+    snippet: Human cells are organized across a spatial hierarchy
+  - kind: snippet_adjacent_chunk
+    chunk: c012
+    found_in:
+    - c011
+    slot: data_governance.access_review_process
+    snippet: 'plan for ethical preparation, licensing, dissemination, and '
+  - kind: snippet_adjacent_chunk
+    chunk: c012
+    found_in:
+    - c011
+    slot: ethical_reviews[0].review_details
+    snippet: methodology inspired by Value-Sensitive Design (VSD)
+  - kind: snippet_adjacent_chunk
+    chunk: c012
+    found_in:
+    - c011
+    slot: ethical_reviews[0].review_details
+    snippet: 'CM4AI Life
+
+      Cycle, a framework designed to elucidate governan'
+  - kind: snippet_adjacent_chunk
+    chunk: c013
+    found_in:
+    - c012
+    slot: funders[0].grants[0].grant_number
+    snippet: 1OT2OD032742-01 (Bridge2AI Functional Genomics)
+  - kind: snippet_elsewhere_chunk
+    chunk: c013
+    found_in:
+    - c010
+    slot: external_resources[8].external_resources
+    snippet: Cell maps are shared via the Network Data Exchange (NDEx)
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    slot: related_datasets[1].target_dataset
+    snippet: https://doi.org/10.18130/V3/F3TD5R
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    slot: related_datasets[1].notes
+    snippet: June 2025 Data Release of Cell Maps for Artificial Intellige
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    slot: related_datasets[1].notes
+    snippet: adding RGB immunofluorescent images, corrections to ro-crate
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: human_subject_research.involves_human_subjects
+    snippet: 'Human Subjects:
+
+      No'
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: is_deidentified.identifiable_elements_present
+    snippet: 'De-identified Samples:
+
+      Yes'
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: regulatory_restrictions.regulatory_restrictions
+    snippet: 'FDA Regulated:
+
+      No'
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: data_governance.committee_contact
+    snippet: 'Data Governance Committee:
+
+      Jillian Parker (jillianparker@hea'
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: ethical_reviews[0].contact_person
+    snippet: Vardit Ravitsky (ravitskyv@thehastingscenter.org)
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: ethical_reviews[1].contact_person
+    snippet: Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: known_limitations[2].limitation_description
+    snippet: Some datasets are under temporary pre-publication embargo
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: known_limitations[1].limitation_description
+    snippet: interrogate sets of proteins which incompletely overlap
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: updates.update_details
+    snippet: regularly updated and augmented through the end of the proje
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: retention_limit.retention_details
+    snippet: Long term preservation in the University of Virginia Dataver
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: intended_uses[0].examples
+    snippet: AI-ready datasets to support research in functional genomics
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: intended_uses[1].examples
+    snippet: AI model training
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: intended_uses[2].examples
+    snippet: Cellular process analysis
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: intended_uses[3].examples
+    snippet: Cell architectural changes and interactions in presence of s
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: known_limitations[0].limitation_description
+    snippet: Does not contain predicted cell maps, which will be added in
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: known_limitations[3].limitation_description
+    snippet: Requires domain expertise for meaningful analysis
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: prohibited_uses[0].prohibition_reason
+    snippet: not to be used in clinical decision-making or in any context
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: known_biases[0].bias_description
+    snippet: derived from commercially available de-identified human cell
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c021
+    - c023
+    - c024
+    - c026
+    - c027
+    slot: known_biases[0].scope_impact
+    snippet: Does not represent all biological variants which may be seen
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c020
+    - c023
+    slot: source_caveats
+    snippet: spatial localization of 464 proteins of interest
+  findings_truncated: null
+  findings_gated: 0
+  summary: chunks 28/28 reviewed · snippets 175/209 verified (30 in an adjacent chunk)
+    (4 in another chunk) (11 entry receipt(s) overlapping one leaf) · slots 288/407
+    with a receipt (116 never receipted, 3 added after the receipt) (48 exempt) ·
+    8 receipt path(s) reshaped by reconcile · 46 receipt path(s) followed by identity
+    · 59 value(s) changed after the receipt
+  artifacts:
+    receipt:
+      path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_coverage_receipt.yaml
+      sha256: ee1a80e320115f73ace71ad5ead5833334c90de1adf781421eaaae0581f04a1f
+    manifest:
+      path: data/preprocessed/chunks/CM4AI_chunks.yaml
+      sha256: 3d2d86bac4e9f89d2c6cfb6b5f5361c237995d899ecb6ae41382f82359aedde4
+intermediates:
+- path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_audit.json
+  sha256: 97acf6ff2c6a18902ee84f5603ee3c7d576b908cd15a73c1f784bb751e9ed842
+- path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_core.yaml
+  sha256: 912e5c09cfaa0c02b5924d9fcd23f82f12e54200daa6ee11734cda55492d7d17
+- path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_coverage_receipt.yaml
+  sha256: ee1a80e320115f73ace71ad5ead5833334c90de1adf781421eaaae0581f04a1f
+- path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_coverage_receipt_as_written.yaml
+  sha256: 40b4d3ff0cdf67c700d869ad1c598ffba3d5d4b88df906fa10c73b03cdb12637
+- path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_full.yaml
+  sha256: f9f5194c69cd88e25c89b2581c648a27ebd5ff3798617971148510f6a5ef6f3b
+- path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_reconcile_core.yaml
+  sha256: 996cdd264a3401ea29606340c08b7c804066255530deb5d40d58f0c1c72ffd6b
+- path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_reconcile_full.yaml
+  sha256: 9d724540376812e99df0f344d140c9b9698b7008f6178f9278666f24c08ef7d4
+- path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_repair_full_r1.yaml
+  sha256: a8b8bbfe23a83f22dc0549067c5b2c6b17337312923a2a9bf2faac4b1011cfae
+- path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_report.md
+  sha256: 432223c50c42d20f3ff5eaa0ff37c99e30b0b79a83c4bb172efaf90d48a9ebca
+- path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_report_before_regate.md
+  sha256: 6a343f79c6464600d61df81e6d13473d1d8cac1dc03f54fc50c52e33d769f5f4
+canary:
+  status: regressed
+  rows:
+  - metric: pair errors
+    run: 0
+    baseline_worst: 0
+  - metric: report findings
+    run: 0
+    baseline_worst: 0
+    baseline_basis: 'floor 0: 3 baseline replicate(s) ran the report check and read
+      no claim, none measured one (#684)'
+  - metric: ungrounded identifiers
+    run: 0
+    baseline_worst: 0
+  - metric: resolver URLs in identifier slots
+    run: 16
+    baseline_worst: 0
+    regressed: true
+  - metric: organisational fragments
+    run: 0
+    baseline_worst: 0
+  - metric: undeclared prefixes
+    run: 0
+    baseline_worst: 0
+  - metric: British spellings
+    run: 2
+    baseline_worst: 2
+  - metric: chunks unreviewed
+    run: 0
+    baseline_worst: 0
+  - metric: snippets unverified
+    run: 0
+    baseline_worst: 0
+  - metric: addressing slips over tolerance
+    run: 0
+    baseline_worst: 0
+  - metric: receipts vacuous
+    run: 0
+    baseline_worst: 0
+  - metric: receipt findings
+    run: 0
+    baseline_worst: 0
+  blind: []
+  unbaselined: []
+  regressions:
+  - 'resolver URLs in identifier slots: 16 against a baseline worst of 0'
+  basis: 'offline write of the verdict the batch gate printed at 2026-09-04T06:4xZ
+    and stopped on (`d4d api batch ... --canary-baseline 2026-09-01_claude-opus-5-api-generic-v7`;
+    the gate writes no block), recomputed from this record''s own check blocks against
+    the same baseline with the gate''s functions, including the #684 report basis
+    (v7 CM4AI: 3 vacuous, 0 measured → floor 0).'
+  recorded_at: '2026-09-04T07:39:46+00:00'
+  recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-04
+  readings:
+    note: registered v8 predictions this record measures on its own (plan, 'Predictions,
+      registered'); n=1, none gated
+    prediction_2_grant_number: populated 0 (the 2026-09-04 rep1 populated 2 of 3)
+      — unfavourable
+    prediction_5_value_changed_after_receipt: 59 of 164 receipt paths = 36.0%, against
+      a predicted <10% (v7 CM4AI 17.0/17.4/7.9%; the 2026-09-04 rep1 28.3%) — unfavourable
+    prediction_6_receipt_coverage: 288 of 407 receiptable slots = 70.8%, against a
+      predicted >40% — favourable
+    prediction_9_full_output_tokens: '30,328 against the v7 CM4AI accepted-attempt
+      mean of 41,370: -26.7%, outside the ±10% band — unfavourable'
+    mechanisms: 'full_readdress: 1 entry dropped (`subject`, the same mis-addressing
+      as the 2026-09-04 rep1), 0 unresolved, receipt findings 0; report_regate: 40
+      claims checked, 1 contradiction before, 0 after; one repair round (14 findings).'
+  disposition: 'regressed on identifier form only; the fix (a write-time CURIE normaliser)
+    is filed as #974 and deferred by the plan owner on 2026-09-04. Every receipt metric
+    passed: the re-addressing turn (#952) dropped the one mis-addressed entry and
+    the report gate (#929) regenerated the one contradiction to zero — both mechanisms
+    fired for the first time on a live run. The 16 resolver URLs are one identifier
+    (the dataset DOI under `id`) and its 15 minted fragments; the value resolves and
+    nothing in the record is wrong. No fill launched; whether the fill proceeds on
+    this basis is the plan owner''s call.'
