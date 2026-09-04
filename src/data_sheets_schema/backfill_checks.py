@@ -239,17 +239,29 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
 #: Keys a reviewer writes into a check block that no recomputation produces
 #: (#856): `pair_consistency.semantic_review` is a supplemental pair review's
 #: verdict and evidence. Rebuilding the block from the checker dropped it.
-ATTESTATIONS = {"pair_consistency": ("semantic_review",)}
+ATTESTATIONS = {"pair_consistency": ("semantic_review",),
+                "review": ("reliability",)}          # `review agree --write` (#973)
 
 
 def carry_attestations(name: str, old: Any, new: Any) -> Any:
-    """`new` with the attestation keys of `old` carried forward."""
+    """`new` with the attestation keys of `old` carried forward.
+
+    Bound to what was attested (#969): a review's evidence names the md5s
+    of the pair it read. When the new block's `artifacts` differ from the
+    old block's, the review is carried marked `stale: true` with the
+    `attested_artifacts` it was written against, never re-attributed to a
+    pair it never saw.
+    """
     if not (isinstance(old, dict) and isinstance(new, dict)):
         return new
     out = dict(new)
+    same_pair = old.get("artifacts") == new.get("artifacts")
     for key in ATTESTATIONS.get(name, ()):
         if key in old and key not in out:
-            out[key] = old[key]
+            carried = old[key]
+            if not same_pair and isinstance(carried, dict):
+                carried = {**carried, "stale": True, "attested_artifacts": old.get("artifacts")}
+            out[key] = carried
     return out
 
 

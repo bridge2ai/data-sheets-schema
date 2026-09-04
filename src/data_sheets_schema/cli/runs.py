@@ -30,8 +30,8 @@ def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
     validation outcomes and what timing evidence exists (see the schema's
     timing_basis for how honest each figure is).
     """
-    from data_sheets_schema.runs import method_for_label
-    method = method or method_for_label(label_prefix)
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or resolve_method(label_prefix)
     import subprocess
     import yaml as _yaml
 
@@ -988,8 +988,7 @@ def validate_cmd(method, project, label, recheck, dry_run):
 
 
 @runs.command("merge")
-@click.option("--method", default="claudecode_agent",
-              help="Method directory the replicates live under.")
+@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--project", required=True)
 @click.option("--label", "labels", multiple=True,
               help="Replicate labels to merge. Omit to use every replicate of "
@@ -1028,6 +1027,12 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
     other is how a reader ends up believing whichever help text they opened.
     Use this when a union is what you want and you can defend the splice.
     """
+    from data_sheets_schema.cli.method import resolve_method
+    if method is None:
+        found = {resolve_method(lab, project) for lab in (labels or [config])}
+        if len(found) != 1:
+            raise click.ClickException(f'labels live under {sorted(found)}; pass --method')
+        method = found.pop()
     import yaml as _yaml
     from data_sheets_schema.merge import union_merge, write_merge
 
@@ -1134,8 +1139,7 @@ def _validates(record: Path) -> tuple[bool, str]:
 
 
 @runs.command("select")
-@click.option("--method", default="claudecode_agent",
-              help="Method directory the replicates live under.")
+@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--project", required=True)
 @click.option("--config", required=True,
               help="Config prefix whose replicates are the candidates, e.g. "
@@ -1201,6 +1205,8 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
     block naming every candidate and the criterion, so the choice is auditable
     and reversible.
     """
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or resolve_method(config, project)
     import yaml as _yaml
     from data_sheets_schema.runs import (
         CONCAT_DIR, INVALID, UNVERIFIED, VALID, is_complete, validation_status)
@@ -1445,7 +1451,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
 
 
 @runs.command("redundancy")
-@click.option("--method", default="claudecode_agent", show_default=True)
+@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--label", default=None,
               help="one run label; default is each project's canonical record")
 @click.option("--project", default=None)
@@ -1468,6 +1474,8 @@ def redundancy_cmd(method, label, project, threshold, show, runtime):
     the canonical set when that was decided; a later arm at 30% would mean
     something changed that nobody chose.
     """
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or (resolve_method(label, project) if label else 'claudecode_agent')
     from pathlib import Path as _Path
 
     from data_sheets_schema import redundancy as red
@@ -1545,7 +1553,7 @@ def redundancy_cmd(method, label, project, threshold, show, runtime):
 @runs.command("compare-arms")
 @click.option("--a", "prefix_a", required=True, help="label prefix of one arm")
 @click.option("--b", "prefix_b", required=True, help="label prefix of the other")
-@click.option("--method", default="claudecode_agent", show_default=True)
+@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 def compare_arms(prefix_a, prefix_b, method):
     """What differs between two arms besides the thing you meant to change.
 
@@ -1557,9 +1565,15 @@ def compare_arms(prefix_a, prefix_b, method):
     alone. That does not make the arms incomparable — it makes the comparison a
     measurement of their sum, and saying so is the honest form of the result.
     """
+    from data_sheets_schema.cli.method import resolve_method
+    # Each arm lives in its own directory — v7 under claudecode_agent, v8
+    # under claudecode_api — so one method for both compared nothing (#973).
+    # `--method` still forces both when given.
+    method_a = method or resolve_method(prefix_a)
+    method_b = method or resolve_method(prefix_b)
     from data_sheets_schema.runs import arm_confounds, arm_facts
 
-    a, b = arm_facts(prefix_a, method), arm_facts(prefix_b, method)
+    a, b = arm_facts(prefix_a, method_a), arm_facts(prefix_b, method_b)
     for arm in (a, b):
         click.echo(f"{arm['prefix']}\n   {len(arm['labels'])} label(s), "
                    f"{len(arm['projects'])} project(s)")

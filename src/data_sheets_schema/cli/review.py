@@ -36,8 +36,8 @@ def pack(method, label, project, instruction_file, receipted, receiptless):
     their cited passage, the receiptless and reshaped slots, and the
     instruction's rules as a checklist — each item with its pointer and its
     question, and a closed verdict vocabulary per kind."""
-    from data_sheets_schema.runs import method_for_label
-    method = method or method_for_label(label, project)
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or resolve_method(label, project)
     from data_sheets_schema.review_pack import write_pack
     prov = _provenance(method, label, project)
     if not prov.exists():
@@ -64,8 +64,8 @@ def check(method, label, project, write, strict):
     """Check `{PROJECT}_review.yaml` against its pack: every item answered
     once with a verdict from its kind's vocabulary and evidence; counts are
     affirmative and cannot_tell is its own number."""
-    from data_sheets_schema.runs import method_for_label
-    method = method or method_for_label(label, project)
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or resolve_method(label, project)
     import hashlib
 
     import yaml
@@ -127,8 +127,8 @@ def disposition(method, label, project, item, disposition, note, slot_path, old,
     Evaluations that predate an amendment are not re-attributed: the entry
     names them as predating it.
     """
-    from data_sheets_schema.runs import method_for_label
-    method = method or method_for_label(label, project)
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or resolve_method(label, project)
     import hashlib
     from datetime import datetime, timezone
 
@@ -265,8 +265,8 @@ def agree_cmd(method, label, project, write):
     """Test-retest agreement between {P}_review.yaml and {P}_review_b.yaml
     against the same committed pack: percent agreement, Cohen's kappa on the
     affirmative/adverse/cannot_tell trichotomy, and every disagreement."""
-    from data_sheets_schema.runs import method_for_label
-    method = method or method_for_label(label, project)
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or resolve_method(label, project)
     import hashlib
 
     import yaml

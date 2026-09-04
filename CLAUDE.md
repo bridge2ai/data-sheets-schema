@@ -575,15 +575,26 @@ under both runtimes without a runtime filter is ambiguous and refused, as
 two configurations are. The v6 agentic canonicals (2026-08-28 rep1/rep3)
 were re-marked beside the v7 API ones.
 
-**Every downstream `--method` defaults to the directory the label lives in**
-(#934, `runs.method_for_label`): `claudecode_agent` through v7, `claudecode_api`
-for the v8 API baseline. A label under both, or under neither, is refused
-with the directories named — pass `--method`. `canary.baseline_for` and
-`report_basis` read both directories when given no method. `d4d receipts
-check --strict` fails on exactly the gate's receipt floors (#881), not on
-wrong-chunk attributions, which are reported and never gated. A reviewer's
-`pair_consistency.semantic_review` survives every recomputation of the
-block (#856, `backfill_checks.carry_attestations`).
+**The `--method` of every review, receipt, telemetry, evaluate and runs
+command defaults to the directory the label lives in** (#934,
+`runs.method_for_label`): `claudecode_agent` through v7, `claudecode_api`
+for the v8 API baseline. An exact directory wins over prefix matches; with
+a project, the directory holding its record is preferred and the one that
+exists is the fallback (the receipt check runs before the record, #730). A
+label under both families, or under neither, or one also present under a
+crate/healthsheet arm, is a click error naming the directories — pass
+`--method`. `canary.baseline_for` and `report_basis`
+search both directories when given no method and refuse a prefix that
+spans them. Not resolved: `agreement.DEFAULT_METHOD` (a script argument)
+and `form_defects.attribute` (its callers name the method). `d4d receipts
+check --strict` fails on exactly the gate's receipt floors (#881) plus an
+expected-but-unchecked receipt, not on wrong-chunk attributions, which are
+reported and never gated. A reviewer's `pair_consistency.semantic_review`
+and a reviewer's `review.reliability` survive every recomputation of
+their block — backfill, the runner's record write, `provenance record`
+re-recording and `review check --write` (#856/#973,
+`backfill_checks.carry_attestations`) — marked `stale` with the artifacts
+they attested when the pair or the pack has since changed (#969).
 
 ## Canonical selection with the review (#660)
 

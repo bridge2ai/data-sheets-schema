@@ -77,7 +77,9 @@ def _method_for(label: str, project: str) -> str:
     try:
         from data_sheets_schema.runs import method_for_label
         return method_for_label(label, project, concat_dir=CONCAT)
-    except LookupError:
+    except LookupError as exc:
+        if "both" in str(exc):
+            raise                       # two copies is a question, not a default
         return METHOD
 
 # (key, display, label prefix, runtime, role). Every arm is shown as mean ± SD

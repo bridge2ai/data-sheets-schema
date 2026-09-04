@@ -32,13 +32,19 @@ def verifiable_cmd(project, method, labels, show):
     nothing is trivially correct on everything it states, so the ratio alone
     would rank an empty record top.
     """
-    from data_sheets_schema.runs import method_for_label
-    # One label resolves; several must agree; none keeps the pre-v8 default.
-    if method is None:
-        found = {method_for_label(lab, project) for lab in labels}
-        if len(found) > 1:
-            raise click.ClickException(f'labels live under {sorted(found)}; pass --method')
-        method = found.pop() if found else 'claudecode_agent'
+    from data_sheets_schema.cli.method import resolve_method
+    # Each named label is read from its own directory (#973): v7 and v8
+    # labels together evaluate both, not one. An explicit --method that a
+    # named label is not under is an error, not a silent omission. With no
+    # label, the pre-v8 default holds.
+    by_label = {lab: resolve_method(lab, project) for lab in labels}
+    if method is not None:
+        outside = sorted(lab for lab, m in by_label.items() if m != method)
+        if outside:
+            raise click.ClickException(f"not under {method}: {', '.join(outside)}")
+        methods = {method}
+    else:
+        methods = set(by_label.values()) or {"claudecode_agent"}
     import yaml as _yaml
     from data_sheets_schema.runs import discover, record_path
     from data_sheets_schema.verifiable import (
@@ -52,9 +58,9 @@ def verifiable_cmd(project, method, labels, show):
         # Skip core/deterministic runs only when the caller did not name one.
         # Filtering them unconditionally made `--method claudecode_agent_core`
         # report "No records matched" for records that plainly exist.
-        if run.method != method:
+        if run.method not in methods:
             continue
-        if (run.is_core or run.deterministic) and method == "claudecode_agent":
+        if (run.is_core or run.deterministic) and run.method == "claudecode_agent":
             continue
         if wanted and run.label not in wanted:
             continue
@@ -296,8 +302,12 @@ def spelling_cmd(method, label, project, show_quoted):
     Conservative in the direction of silence. A false "quoted" merely fails to
     report; a false "generated" would invite someone to edit evidence.
     """
-    from data_sheets_schema.runs import method_for_label
-    method = method or (method_for_label(label, project) if label else 'claudecode_agent')
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or (resolve_method(label, project) if label else 'claudecode_agent')
+    if label and not (Path(f"data/d4d_concatenated/{method}_core") / label).is_dir():
+        # The resolver accepts a prefix; the filter below compares labels
+        # exactly, and a prefix printed a clean zero (#973).
+        raise click.ClickException(f"{label!r} is not an exact label under {method}_core; name the replicate")
     from pathlib import Path as _Path
 
     import yaml as _yaml

@@ -210,10 +210,14 @@ def _baseline_records(base: Path, method: str | None, label_prefix: str,
     a v8 arm under claudecode_api, and a gate should not have to know."""
     from data_sheets_schema.runs import AGENT_FAMILY
     methods = [method] if method else list(AGENT_FAMILY)
-    out: list[Path] = []
-    for m in methods:
-        out.extend(sorted(base.glob(f"{m}_core/{label_prefix}*/{project}_provenance.yaml")))
-    return out
+    found = {m: sorted(base.glob(f"{m}_core/{label_prefix}*/{project}_provenance.yaml")) for m in methods}
+    found = {m: ps for m, ps in found.items() if ps}
+    if len(found) > 1:
+        # Two runtimes are two arms; a baseline that mixed them would bar
+        # one against the other's spread. Refused, like `method_for_label`.
+        raise LookupError(f"baseline prefix {label_prefix!r} matches runs under "
+                          f"{' and '.join(sorted(found))}; name the method")
+    return next(iter(found.values()), [])
 
 
 def baseline_for(project: str, label_prefix: str,

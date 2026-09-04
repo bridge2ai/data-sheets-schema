@@ -45,8 +45,8 @@ def check(method, label, project, write, strict, bundle_opt):
     the run's procedure was to write one, which the provenance record says
     (`inputs.receipt_expected`).
     """
-    from data_sheets_schema.runs import method_for_label
-    method = method or method_for_label(label, project)
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or resolve_method(label, project)
     import yaml
 
     from data_sheets_schema import backfill_checks as bc

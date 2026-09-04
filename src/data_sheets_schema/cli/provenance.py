@@ -411,8 +411,8 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     line. A spec that does not re-render to the hash is not written: that
     would assert a condition the run may not have used.
     """
-    from data_sheets_schema.runs import method_for_label
-    method = method or method_for_label(label, project)
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or resolve_method(label, project)
     import hashlib
     from datetime import date, timedelta
 
