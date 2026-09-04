@@ -263,7 +263,7 @@ excluded from every v8 comparison as they were from v7's.
 
 | project | label | verdict | basis |
 |---|---|---|---|
-| CM4AI | `2026-09-04_claude-opus-5-api-generic-v8_rep1` | **regressed** on one metric: receipt findings 1 against a floor of 0; every other gated metric equal to or better than the v7 per-project worst (British spellings 0 vs 2). Full-phase output 31,207 of 128,000 (24%). One repair round (11 findings). Receipts: 28/28 chunks, 117/168 snippets verified (45 adjacent, 6 elsewhere), 206/342 slots with a receipt (60.2%). | **v8 defect (#952)**, the plan owner's decision on 2026-09-04: the finding is one receipt entry addressed to `subject`, a name the schema has no slot for, for a value the record holds under `keywords` — the v8 receipt rule names the record path the value fills, so the model broke a rule it was given. Not the v7 retained-with-basis pattern. No fill and no further canary until fixed and re-canaried; fix options in #952. Recorded in the record's `canary` block (with the withdrawn retained-with-basis reading as `prior_disposition`). **Predictions this record measures (n=1):** 2 favourable (`grant_number` populated 2 of 3); 6 favourable (60.2%); **5 unfavourable** (`value_changed_after_receipt` 41/145 = 28.3% against <10%; v7 CM4AI replicates 17.0/17.4/7.9%); **9 unfavourable** (`full` output 31,207 against the v7 CM4AI mean 41,370, −24.6%, outside ±10%). First launch stopped on a CBORG 403 (off-VPN) before any phase; resumed on the VPN. |
+| CM4AI | `2026-09-04_claude-opus-5-api-generic-v8_rep1` | **regressed** on one metric: receipt findings 1 against a floor of 0; every other gated metric equal to or better than the v7 per-project worst (British spellings 0 vs 2). Full-phase output 31,207 of 128,000 (24%). One repair round (11 findings). Receipts: 28/28 chunks, 117/168 snippets verified (45 adjacent, 6 elsewhere), 206/342 slots with a receipt (60.2%). | **v8 defect (#952)**, the plan owner's decision on 2026-09-04: the finding is one receipt entry addressed to `subject`, a name the schema has no slot for, for a value the record holds under `keywords` — the v8 receipt rule names the record path the value fills, so the model broke a rule it was given. Not the v7 retained-with-basis pattern. No fill and no further canary until fixed and re-canaried; fix chosen: the runner re-addressing turn (step G, #953); the re-canary runs under a new prefix, `2026-09-04b_claude-opus-5-api-generic-v8`. Recorded in the record's `canary` block (with the withdrawn retained-with-basis reading as `prior_disposition`). **Predictions this record measures (n=1):** 2 favourable (`grant_number` populated 2 of 3); 6 favourable (60.2%); **5 unfavourable** (`value_changed_after_receipt` 41/145 = 28.3% against <10%; v7 CM4AI replicates 17.0/17.4/7.9%); **9 unfavourable** (`full` output 31,207 against the v7 CM4AI mean 41,370, −24.6%, outside ±10%). First launch stopped on a CBORG 403 (off-VPN) before any phase; resumed on the VPN. |
 
 ## Sequencing (PRs, in order)
 
@@ -296,7 +296,19 @@ steps need:
 6. Register the production matrix here (as v7's plan did), then the
    four canaries, then the fill.
 
-Each of 2–5 is a generation-path change; per the production rule none
+7. **G (#952)** — after the CM4AI canary (`2026-09-04_claude-opus-5-api-generic-v8_rep1`,
+   PR #951) stopped on one `slot_not_in_record` receipt entry, decided a v8
+   defect: the API runner asks the model once, inside the `full` phase, to
+   re-address receipt entries whose slot is not a path in the record it just
+   wrote (`full_readdress`; the receipt as written is snapshotted, the usage
+   entry records before/after). The instruction joins `PHASE_INSTRUCTIONS`,
+   so the **assembly digest moves** for every condition from here — one
+   re-baseline, registered here as #352's was; the prompt pin does not move.
+   The CM4AI canary is re-run under a new label; the 2026-09-04 rep1 stays on
+   disk as the defect's evidence and is excluded from the v8 comparison like
+   the Aug-28 exploratory records.
+
+Each of 2–5 and 7 is a generation-path change; per the production rule none
 of them may land between a v8 canary and its fill.
 
 ## Decisions needed before step 3

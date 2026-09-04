@@ -481,6 +481,15 @@ The receipt describes the record the `full` phase wrote: `reconcile_full`
 and repair rewrite it afterwards with no receipt route on this path, so
 their slots are reported under `slots.without_receipt`, never gated (#742).
 A full record with no receipt beside it does not resume past `full`.
+**Re-addressing (#952, API path only — the agentic protocol has no
+equivalent)**: before the receipt is accepted, an entry whose
+`slot` is not a path in the record just written (the `slot_not_in_record`
+class `receipts.check` gates on) gets one follow-up turn asking where the
+value went; an answer moves the entry only to a path that resolves, `drop`
+removes it, anything else is left as written for the gate to count. The
+receipt as the model wrote it is kept as `intermediate/{P}_coverage_receipt_as_written.yaml`,
+and the `full_readdress` entry in `api_usage` records what was unresolved
+before and after. The v8 CM4AI canary stopped on exactly one such entry.
 
 **The gate** (`canary.verdict`): when `inputs.receipt_expected` is true — set
 by `d4d provenance record --receipt-expected`, which the receipt-writing

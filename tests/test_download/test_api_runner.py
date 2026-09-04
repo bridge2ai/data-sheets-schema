@@ -542,6 +542,12 @@ class FakeMessages:
 
     def create(self, **kw):
         self.calls.append(kw)
+        # The re-addressing turn (#952) comes after the full-phase exchange,
+        # so it is recognised by its own instruction in the *last* message.
+        last = kw["messages"][-1]
+        if last["role"] == "user" and isinstance(last["content"], list) and any(
+                PHASE_INSTRUCTIONS["full_readdress"] in p.get("text", "") for p in last["content"]):
+            return FakeResponse(self.readdress_response())
         blob = " ".join(p.get("text", "") for p in kw["messages"][0]["content"])
         # Match the actual instruction text. Substring-matching "Phase 3" fails:
         # the prompt body itself enumerates all four playbook phases, so every
@@ -562,6 +568,10 @@ class FakeMessages:
         if phase == "report":
             return FakeResponse("# Reconciliation\nNo discrepancies.\n")
         return FakeResponse(f"```yaml\n# {phase}\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n```")
+
+    def readdress_response(self) -> str:
+        """Subclasses that write receipts override this."""
+        return "readdress: []\n"
 
     def stream(self, **kw):
         """Mirror the SDK's streaming context manager.
