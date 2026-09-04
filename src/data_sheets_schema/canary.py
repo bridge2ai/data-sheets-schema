@@ -235,8 +235,35 @@ def baseline_for(project: str, label_prefix: str,
     return worst
 
 
+def report_basis(project: str, label_prefix: str,
+                 method: str = "claudecode_agent",
+                 concat_dir: Path | None = None) -> dict[str, int]:
+    """How the baseline arm's replicates stand on the report metric: how many
+    measured a claim, how many were vacuous (ran, read none), how many never
+    ran. `baseline_for` folds the last two into one None; the floor in
+    `verdict` needs them apart (#599 again): a baseline whose checker never
+    ran is not a baseline of zero findings.
+    """
+    import yaml
+    from data_sheets_schema.provenance import CONCAT_DIR
+    base = concat_dir or CONCAT_DIR
+    out = {"measured": 0, "vacuous": 0, "unchecked": 0}
+    for path in sorted(base.glob(
+            f"{method}_core/{label_prefix}*/{project}_provenance.yaml")):
+        rec = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        block = rec.get("report_claims")
+        if report_vacuous(block):
+            out["vacuous"] += 1
+        elif _ran(block):
+            out["measured"] += 1
+        else:
+            out["unchecked"] += 1
+    return out
+
+
 def verdict(checks: dict[str, Any], baseline: dict[str, int | None],
-            baseline_requested: bool = True) -> dict[str, Any]:
+            baseline_requested: bool = True,
+            report_basis: dict[str, int] | None = None) -> dict[str, Any]:
     """Compare one run's checks against a baseline. See module docstring.
 
     `baseline_requested` distinguishes the two ways a bar can be missing, which
@@ -257,20 +284,28 @@ def verdict(checks: dict[str, Any], baseline: dict[str, int | None],
     # readable claim, and the gate must stay satisfiable by it.
     rb = (checks or {}).get("report")
     report_note = None
+    report_blind_note = None
     if report_vacuous(rb):
         counts["report findings"] = None
-        if not (isinstance(rb, dict) and rb.get("dispositions_expected")):
+        if isinstance(rb, dict) and rb.get("dispositions_expected"):
+            report_blind_note = ("blind: the run was asked for a dispositions table and the "
+                                 "report carried no claim the checker reads (#929)")
+        else:
             report_note = "unmeasured: the report carried no claim the checker reads (#684)"
     blind = [name for name, value in counts.items()
              if value is None and not (name == "report findings" and report_note)]
     unbaselined = [name for name, value in baseline.items() if value is None]
     # The report metric is unmeasured on 11 of 12 v7 production records
     # (#684): their reports carried no claim the checker reads. A baseline
-    # that resolved (some metric measured) but has no report figure is a
-    # floor of 0 with its basis on the row — not a mistyped prefix, which
-    # leaves every metric None and stays fatal (#599).
+    # whose replicates were *vacuous* — the checker ran and read nothing —
+    # and none measured is a floor of 0 with its basis on the row. Only
+    # that: a baseline whose checker never ran, or a mistyped prefix, stays
+    # a missing baseline and fatal (#599). The caller says which it was
+    # through `report_basis`; without it there is no floor.
     report_floor = ("report findings" in unbaselined
-                    and any(v is not None for v in baseline.values()))
+                    and bool(report_basis)
+                    and report_basis.get("measured", 0) == 0
+                    and report_basis.get("vacuous", 0) > 0)
     if report_floor:
         unbaselined = [n for n in unbaselined if n != "report findings"]
     rows = []
@@ -280,10 +315,10 @@ def verdict(checks: dict[str, Any], baseline: dict[str, int | None],
         row = {"metric": name, "run": value, "baseline_worst": bar}
         if name == "report findings" and report_floor:
             bar = row["baseline_worst"] = 0
-            row["baseline_basis"] = ("floor 0: no baseline replicate carried a report "
-                                     "claim the checker reads (#684)")
-        if name == "report findings" and report_note:
-            row["note"] = report_note
+            row["baseline_basis"] = (f"floor 0: {report_basis['vacuous']} baseline replicate(s) "
+                                     "ran the report check and read no claim, none measured one (#684)")
+        if name == "report findings" and (report_note or report_blind_note):
+            row["note"] = report_note or report_blind_note
         if value is not None and bar is not None and value > bar:
             row["regressed"] = True
             regressions.append(f"{name}: {value} against a baseline worst of {bar}")

@@ -278,7 +278,17 @@ _DISPOSITION = re.compile(r"^\W*(?:\*\*)?(removed|deleted|dropped|retained|kept|
 
 
 def disposition_rows(text: str) -> list[dict[str, str]]:
-    """Rows of every table whose header names a `disposition` column."""
+    """Rows of every table whose header names `slot` and `disposition` columns.
+
+    A slot is a backticked name read through `_named` (so "moved into
+    `notes`" names no slot), or a bare path that starts with a letter (a
+    numbered finding table whose column happens to be called Disposition
+    yields nothing, #962). For `changed`/`added` rows written as
+    "`old` -> `new`" the claim is about the destination. The `record` cell
+    must be exactly `full`, `core` or `both`; empty reads as `either`, and
+    anything else is `invalid`, which the checker counts as unnamed rather
+    than guess at.
+    """
     rows: list[dict[str, str]] = []
     header: dict[str, int] | None = None
     for line in text.splitlines():
@@ -289,7 +299,10 @@ def disposition_rows(text: str) -> list[dict[str, str]]:
             header = None
             continue
         low = [c.lower() for c in cells]
-        if "disposition" in low and header is None:
+        if "disposition" in low and "slot" in low and header is None:
+            # Both columns, or it is some other table with a Disposition
+            # column — a numbered finding table, say (#962) — whose rows are
+            # not claims about slots.
             header = {name: i for i, name in enumerate(low)}
             continue
         if header is None:
@@ -298,14 +311,20 @@ def disposition_rows(text: str) -> list[dict[str, str]]:
         m = _DISPOSITION.match(d)
         if not m:
             continue
-        slot_cell = cells[header.get("slot", 0)] if header.get("slot", 0) < len(cells) else cells[0]
-        names = _TICKED.findall(slot_cell) or ([slot_cell.strip()] if re.fullmatch(r"[\w.\[\]]+", slot_cell.strip()) else [])
+        slot_col = header.get("slot", 0)
+        slot_cell = cells[slot_col] if slot_col < len(cells) else cells[0]
+        names = _named(slot_cell)
+        if not names and re.fullmatch(r"[A-Za-z_][\w.\[\]]*", slot_cell.strip()):
+            names = [slot_cell.strip()]
+        disposition = m.group(1).lower()
+        if len(names) > 1 and disposition in ("changed", "amended", "corrected", "added"):
+            names = names[-1:]
         record = ""
         if "record" in header and header["record"] < len(cells):
             record = cells[header["record"]].strip().lower()
+        record = record if record in ("full", "core", "both") else ("either" if not record else "invalid")
         for name in names:
-            rows.append({"slot": name, "disposition": m.group(1).lower(),
-                         "record": record if record in ("full", "core", "both") else "either",
+            rows.append({"slot": name, "disposition": disposition, "record": record,
                          "line": line.strip()})
     return rows
 
@@ -358,9 +377,14 @@ def check_report(report: Path, full: dict, core: dict,
                     "detail": f"report says removed; record has {_describe(v)}",
                     "claim": claim[:240]})
 
+    # Rows of a dispositions table (#929) are read below, column by column;
+    # the generic scan would read their free-text `reason` cell as a removal
+    # claim ("Dropped the duplicate entry; slot kept", #962).
+    rows = disposition_rows(text)
+    disposition_lines = {row["line"] for row in rows}
     for line in text.splitlines():
         cells = _cells(line)
-        if not cells:
+        if not cells or line.strip() in disposition_lines:
             continue
         # The change cell is found rather than assumed at a fixed index: one
         # report writes `| core | \`distributions\` | removed; … |`, putting the
@@ -459,15 +483,25 @@ def check_report(report: Path, full: dict, core: dict,
     # One claim can be stated twice — a summary table row and the prose that
     # elaborates it. Reporting it twice inflates the count a reader uses to
     # judge how bad a report is.
-    # Presence claims from the dispositions table (#929). A `removed` row
-    # is already a removal claim above (its cell matches _CELL_REMOVED); a
-    # retained/changed/added row claims the slot is there, in the record the
-    # row names, or in the core when it names none (the `_target` reading).
-    rows = disposition_rows(text)
+    # The dispositions table (#929), column by column. A `removed` row is a
+    # removal claim against the record the row names — the column the
+    # instruction promises is honoured (#964), so `both` must be absent from
+    # both (#578's direction) and `full` is read against the full record. A
+    # retained/changed/added row claims the slot is present in the record
+    # named, or in *either* record when it names none (#963): reconciliation
+    # legitimately keeps a full-only slot out of the derived core.
+    _CONTEXT = {"full": "from the full record", "core": "from the core record",
+                "both": "from the full record and core record", "either": "", "invalid": ""}
     for row in rows:
+        if row["disposition"] in ("removed", "deleted", "dropped"):
+            if row["record"] == "invalid":
+                unnamed += 1
+                continue
+            removal([row["slot"]], _CONTEXT[row["record"]], row["line"])
+            continue
         if row["disposition"] not in _PRESENCE_DISPOSITIONS:
             continue
-        if re.search(r"\[\d+\]$", row["slot"]):
+        if row["record"] == "invalid":
             unnamed += 1
             continue
         claims += 1
@@ -476,7 +510,7 @@ def check_report(report: Path, full: dict, core: dict,
         present = {"core": in_core and _populated(v_core),
                    "full": in_full and _populated(v_full),
                    "both": (in_core and _populated(v_core)) and (in_full and _populated(v_full)),
-                   "either": in_core and _populated(v_core)}[row["record"]]
+                   "either": (in_core and _populated(v_core)) or (in_full and _populated(v_full))}[row["record"]]
         if not present:
             findings.append({
                 "kind": ("retention_not_shown" if row["disposition"] in

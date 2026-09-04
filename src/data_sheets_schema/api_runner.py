@@ -1077,11 +1077,15 @@ def plan(spec: RunSpec) -> dict[str, Any]:
         # Not costed above: made only when a receipt entry names a slot the
         # record does not carry, and its input is the full-phase exchange
         # replayed (#952/#959).
-        "conditional_calls": (["full_readdress: one follow-up inside the full phase when a "
-                               "receipt entry's slot is not a path in the record; input is "
-                               "the full-phase exchange, output at most "
-                               f"{READDRESS_MAX_TOKENS} tokens"]
-                              if spec.condition in RECEIPT_CONDITIONS else []),
+        "conditional_calls": ((["full_readdress: one follow-up inside the full phase when a "
+                                "receipt entry's slot is not a path in the record; input is "
+                                "the full-phase exchange, output at most "
+                                f"{READDRESS_MAX_TOKENS} tokens"]
+                               if spec.condition in RECEIPT_CONDITIONS else [])
+                              + ["report_regate: one regeneration of the report when its "
+                                 "dispositions contradict the records (#929); the report "
+                                 "request plus the report and the contradictions, output at "
+                                 f"most {PHASE_MAX_TOKENS.get('report', settings['max_tokens'])} tokens"]),
     }
 
 
@@ -2641,6 +2645,8 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
     if len(needed) != len(PHASE_NEEDS["report"]):
         return False                # cannot rebuild it honestly; leave it
     req = build_phase(spec, "report", carry=needed)
+    started = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    t0 = time.monotonic()
     if contradictions is not None:
         listing = yaml.safe_dump([{k: v for k, v in c.items() if k in ("kind", "slot", "record", "detail", "claim")}
                                   for c in contradictions], sort_keys=False, allow_unicode=True)
@@ -2660,7 +2666,12 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
         return False                # a stale report is better than none
     text = "".join(getattr(b, "text", "") for b in getattr(resp, "content", [])
                    if getattr(b, "type", None) == "text")
-    usage.append({"phase": phase, "attempt": 1,
+    cap = reasoning.capture(resp)
+    reasoning.append(_reasoning_path(spec),
+                     {"phase": phase, "label": spec.label, "project": spec.project,
+                      "model": settings["name"], "attempt": 1, **cap.to_dict()})
+    usage.append({"phase": phase, "attempt": 1, "started_at": started,
+                  "seconds": round(time.monotonic() - t0, 3),
                   "input_tokens": getattr(resp.usage, "input_tokens", None),
                   "output_tokens": getattr(resp.usage, "output_tokens", None),
                   "cache_read": getattr(resp.usage,
@@ -2668,6 +2679,8 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
                   "cache_write": getattr(resp.usage,
                                          "cache_creation_input_tokens", None),
                   "stop_reason": getattr(resp, "stop_reason", None)})
+    if getattr(resp, "stop_reason", None) == "max_tokens":
+        return False                # a truncated report is not a report (#967)
     try:
         body = _extract(text, "md")
     except RuntimeError:
@@ -2696,14 +2709,51 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
     if not before.get("checked"):
         out["reason"] = before.get("reason")
         return out
-    if not before.get("findings"):
+    # The table the phase was asked for is itself a claim the gate checks:
+    # a report without it reads no claim and would only be caught, as
+    # blind, by the canary (#967). Its absence is regenerated like a
+    # contradiction, once.
+    contradictions = list(before.get("findings") or [])
+    if not before.get("disposition_rows"):
+        contradictions.append({"kind": "dispositions_table_missing",
+                               "detail": "the report has no `## Dispositions` table with "
+                                         "`slot` and `disposition` columns; every slot the "
+                                         "audit touched, changed or questioned needs a row"})
+        out["table_missing_before"] = True
+    if not contradictions:
         return out
-    _snapshot(spec, f"{spec.project}_report_before_regate.md",
-              spec.report_path.read_text(encoding="utf-8") if spec.report_path.exists() else "")
+    # Once per run, not once per invocation: a resumed invocation whose
+    # earlier pass already regenerated the report must not spend again
+    # (#965). The prior gate is kept under `prior`.
+    prior = None
+    if spec.provenance_path.exists():
+        try:
+            prior = (yaml.safe_load(spec.provenance_path.read_text(encoding="utf-8")) or {}).get("report_gate")
+        except yaml.YAMLError:
+            prior = None
+    if isinstance(prior, dict) and prior.get("regenerated"):
+        out.update({"reason": "regenerated in a prior invocation; not repeated", "prior": prior,
+                    "findings_after": out["findings_before"],
+                    "remaining": (before.get("findings") or [])[:20]})
+        return out
+    as_written = spec.report_path.read_text(encoding="utf-8") if spec.report_path.exists() else ""
+    _snapshot(spec, f"{spec.project}_report_before_regate.md", as_written)
     out["regenerated"] = _regenerate_report(spec, client, settings, usage, carry,
                                             phase="report_regate",
-                                            contradictions=before["findings"])
+                                            contradictions=contradictions)
     after = report_claims_block(spec) or {}
+    worse = (out["regenerated"] and (
+        (before.get("disposition_rows") and not after.get("disposition_rows"))
+        or len(after.get("findings") or []) > len(before.get("findings") or [])))
+    if worse:
+        # A prose reply that drops the table, or a rewrite with more
+        # contradictions than before, is not an improvement (#965/#967). The
+        # report as written is restored and the gate says so.
+        spec.report_path.write_text(as_written, encoding="utf-8")
+        out["regenerated"] = False
+        out["reason"] = ("the re-check answer was worse than the report as written "
+                         "(table dropped or more contradictions); the report as written was kept")
+        after = before
     out["claims_checked_after"] = after.get("claims_checked")
     out["findings_after"] = len(after.get("findings") or [])
     out["remaining"] = (after.get("findings") or [])[:20]
@@ -3328,10 +3378,16 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # completes, and a contradicting report is regenerated once. Recorded
     # beside the final `report_claims` block, which is recomputed below.
     rec.data["report_gate"] = _gate_report(spec, client, settings, usage, carry)
+    # The context facts were frozen before the gate could add a call (#967).
+    rec.data["model"]["context"] = context_facts(settings["name"], usage)
     # `dispositions_expected`: the report phase was asked for the table, so
     # a report with no readable claim is blind at the gate (#684), not
     # unmeasured-and-tolerated as an earlier record's is.
     rec.data["report_claims"] = {**(report_claims_block(spec) or {}), "dispositions_expected": True}
+    # Also on `inputs`, beside `receipt_expected`: a backfill rebuilds the
+    # report block from the report alone and would drop the flag (#961);
+    # `backfill_checks` restores it from here.
+    rec.data.setdefault("inputs", {})["dispositions_expected"] = True
     rec.data["grounding"] = grounding_block(spec)
     # Properties of the records alone, so they survive a drifted bundle (#602).
     from data_sheets_schema.grounding import form_facts

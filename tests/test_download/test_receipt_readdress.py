@@ -224,7 +224,10 @@ class TestEndToEnd(unittest.TestCase):
     def test_the_plan_names_the_conditional_call_and_the_record_its_cap(self):
         s = spec(out_dir=self.out, condition="generic_v7")
         self.assertTrue(any("full_readdress" in c for c in api_runner.plan(s)["conditional_calls"]))
-        self.assertEqual(api_runner.plan(spec(out_dir=self.out))["conditional_calls"], [])
+        # A non-receipt condition has no re-addressing call; the report re-check (#929) applies to all.
+        plain = api_runner.plan(spec(out_dir=self.out))["conditional_calls"]
+        self.assertFalse(any("full_readdress" in c for c in plain))
+        self.assertTrue(any("report_regate" in c for c in plain))
         s, res, fake = self._run(_ReceiptFake())
         d = yaml.safe_load((self.out / "CHORUS_provenance.yaml").read_text())
         self.assertEqual(d["model"]["max_tokens_by_phase"]["full_readdress"], api_runner.READDRESS_MAX_TOKENS)

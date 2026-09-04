@@ -504,10 +504,18 @@ report block says `dispositions_expected` (every run this runner writes)
 and is still vacuous is blind — UNMEASURABLE, the receipt precedent; an
 earlier record's vacuous row is shown as unmeasured and not gated, so the
 arm that defined the gate still satisfies it. The baseline skips vacuous
-replicates, and a baseline arm that resolved but never measured a report
-claim (11 of 12 v7 production records) is a floor of 0 with
-`baseline_basis` on the row, never a missing baseline. `companions` is
-hashed after the last phase (#652).
+replicates; a baseline arm whose replicates ran the check and read no
+claim, none measuring one (`canary.report_basis`: the v7 production arm for
+CHORUS, CM4AI and VOICE; AI_READI measured 0 on rep3), is a floor of 0 with
+`baseline_basis` on the row, while a baseline whose checker never ran stays
+a missing baseline (#599). A report without the table is regenerated once
+like a contradiction; a rewrite that is truncated, drops the table or
+carries more contradictions is rolled back to the report as written (#967). The expectation is
+recorded on `inputs.dispositions_expected` too, so a backfill cannot drop
+it (#961). Residual: a run whose report phase completed under the pre-E
+runner and is resumed under this one gets no table and is blind by
+construction; no such run exists. `companions` is hashed after the last
+phase (#652).
 
 **The gate** (`canary.verdict`): when `inputs.receipt_expected` is true — set
 by `d4d provenance record --receipt-expected`, which the receipt-writing

@@ -79,7 +79,8 @@ _PHASE_KEYS = frozenset({"name", "completed", "iterations", "artifacts",
 def _known_phases() -> frozenset[str]:
     from data_sheets_schema.api_runner import PHASES
     return frozenset(PHASES) | {"repair_full", "repair_core",
-                                "report_after_repair"} | AGENTIC_PHASES
+                                "report_after_repair", "full_readdress",
+                                "report_regate"} | AGENTIC_PHASES
 
 
 def _inline_checks(path: Path) -> None:

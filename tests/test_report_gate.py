@@ -45,9 +45,10 @@ class TestDispositionRows(unittest.TestCase):
         self.assertEqual([(r["slot"], r["disposition"], r["record"]) for r in rows],
                          [("keywords", "retained", "full"), ("license", "removed", "core")])
 
-    def test_a_record_cell_outside_the_vocabulary_reads_as_either(self):
-        rows = disposition_rows("| slot | disposition | record |\n|---|---|---|\n| `keywords` | changed | all |\n")
-        self.assertEqual(rows[0]["record"], "either")
+    def test_a_record_cell_outside_the_vocabulary_reads_as_invalid_and_an_empty_one_as_either(self):
+        rows = disposition_rows("| slot | disposition | record |\n|---|---|---|\n| `keywords` | changed | all |\n"
+                                "| `keywords` | changed | |\n")
+        self.assertEqual([r["record"] for r in rows], ["invalid", "either"])
 
 
 class TestPresenceClaims(unittest.TestCase):
@@ -73,9 +74,54 @@ class TestPresenceClaims(unittest.TestCase):
         self.assertEqual([f["kind"] for f in out["findings"]], ["removal_not_performed"])
         self.assertEqual(out["claims_checked"], 1)
 
-    def test_a_row_naming_no_record_is_read_against_the_core(self):
-        out = check_report(_report(self.dir, "| `funders` | retained | | kept |\n"), FULL, CORE, DECLARED)
+    def test_a_row_naming_no_record_is_a_finding_only_when_neither_record_carries_it(self):
+        out = check_report(_report(self.dir, "| `license` | retained | | kept |\n"), FULL, CORE, DECLARED)
         self.assertEqual([f["kind"] for f in out["findings"]], ["retention_not_shown"])
+
+    def test_removal_rows_honour_the_record_column(self):
+        """#964: `removed | both` with the slot still in full is a finding; `removed | full` is read against full."""
+        out = check_report(_report(self.dir, "| `funders` | removed | both | gone |\n"), FULL, CORE, DECLARED)
+        self.assertEqual([(f["kind"], f["record"]) for f in out["findings"]], [("removal_not_performed", "both")])
+        out = check_report(_report(self.dir, "| `funders` | removed | core | gone |\n"), FULL, CORE, DECLARED)
+        self.assertEqual(out["findings"], [])                     # core has no funders: performed
+        out = check_report(_report(self.dir, "| `funders` | removed | full | gone |\n"), FULL, CORE, DECLARED)
+        self.assertEqual([f["record"] for f in out["findings"]], ["full"])
+
+    def test_an_unnamed_retention_is_present_if_either_record_carries_it(self):
+        """#963: a full-only slot is legitimately absent from the derived core."""
+        out = check_report(_report(self.dir, "| `funders` | retained | | kept |\n"), FULL, CORE, DECLARED)
+        self.assertEqual(out["findings"], [])
+        self.assertEqual(out["claims_checked"], 1)
+
+    def test_a_record_cell_outside_the_vocabulary_is_unnamed_not_guessed(self):
+        out = check_report(_report(self.dir, "| `funders` | retained | full only | kept |\n"), FULL, CORE, DECLARED)
+        self.assertEqual((out["findings"], out["claims_checked"], out["claims_unnamed"]), ([], 0, 1))
+
+    def test_a_reason_cell_beginning_with_a_removal_verb_is_not_a_removal_claim(self):
+        """#962: the generic table scan must not read the free-text reason column."""
+        out = check_report(_report(self.dir, "| `funders` | retained | full | Dropped the duplicate second entry; slot kept |\n"),
+                           FULL, CORE, DECLARED)
+        self.assertEqual(out["findings"], [])
+        self.assertEqual(out["claims_checked"], 1)
+
+    def test_a_numbered_finding_table_with_a_disposition_column_yields_no_claim(self):
+        """#962: the bare-name fallback must not accept digits."""
+        p = self.dir / "r.md"
+        p.write_text("| # | Finding | Disposition | Notes |\n|---|---|---|---|\n| 1 | dup | Changed: replaced | x |\n"
+                     "| 2 | odd | Retained | y |\n", encoding="utf-8")
+        out = check_report(p, FULL, CORE, DECLARED)
+        self.assertEqual((out["findings"], out["claims_checked"]), ([], 0))
+
+    def test_an_arrow_slot_cell_claims_the_destination(self):
+        out = check_report(_report(self.dir, "| `license` -> `keywords` | changed | full | moved |\n"), FULL, CORE, DECLARED)
+        self.assertEqual(out["findings"], [])
+        self.assertEqual(out["claims_checked"], 1)
+
+    def test_a_retained_indexed_entry_is_checked(self):
+        out = check_report(_report(self.dir, "| `funders[0]` | retained | full | kept |\n| `funders[4]` | retained | full | kept |\n"),
+                           FULL, CORE, DECLARED)
+        self.assertEqual([f["slot"] for f in out["findings"]], ["funders[4]"])
+        self.assertEqual(out["claims_checked"], 2)
 
     def test_a_report_without_the_table_still_reads_zero_claims(self):
         p = self.dir / "r.md"; p.write_text("# Reconciliation\nNo discrepancies.\n", encoding="utf-8")
@@ -112,29 +158,52 @@ class TestTheGateReading(unittest.TestCase):
         self.assertEqual(v["status"], canary.UNMEASURABLE)
         self.assertIn("report findings", v["blind"])
 
+    def test_the_blind_row_says_why(self):
+        v = canary.verdict({**self.BLOCKS, "report": {"checked": True, "findings": [], "claims_checked": 0,
+                                                       "dispositions_expected": True}}, self.BASE)
+        row = next(r for r in v["rows"] if r["metric"] == "report findings")
+        self.assertIn("asked for a dispositions table", row["note"])
+
     def test_a_measured_row_is_gated_as_before(self):
         checks = {**self.BLOCKS, "report": {"checked": True, "findings": [{"kind": "retention_not_shown"}],
                                             "claims_checked": 2, "dispositions_expected": True}}
         self.assertEqual(canary.verdict(checks, self.BASE)["status"], canary.REGRESSED)
 
-    def test_a_baseline_that_resolved_but_never_measured_the_report_is_a_floor_with_its_basis(self):
+    def test_a_vacuous_baseline_is_a_floor_with_its_basis_but_an_unchecked_one_is_not(self):
         base = dict(self.BASE); base["report findings"] = None
         checks = {**self.BLOCKS, "report": {"checked": True, "findings": [], "claims_checked": 2,
                                             "dispositions_expected": True}}
-        v = canary.verdict(checks, base)
+        v = canary.verdict(checks, base, report_basis={"measured": 0, "vacuous": 3, "unchecked": 0})
         self.assertEqual(v["status"], canary.OK)
         row = next(r for r in v["rows"] if r["metric"] == "report findings")
         self.assertEqual(row["baseline_worst"], 0)
         self.assertIn("floor 0", row["baseline_basis"])
         self.assertNotIn("report findings", v["unbaselined"])
         checks["report"]["findings"] = [{"kind": "retention_not_shown"}]
-        self.assertEqual(canary.verdict(checks, base)["status"], canary.REGRESSED)
+        self.assertEqual(canary.verdict(checks, base, report_basis={"measured": 0, "vacuous": 3, "unchecked": 0})["status"],
+                         canary.REGRESSED)
+        # #599's distinction: a baseline whose checker never ran is not a floor of zero.
+        checks["report"]["findings"] = []
+        self.assertEqual(canary.verdict(checks, base, report_basis={"measured": 0, "vacuous": 0, "unchecked": 3})["status"],
+                         canary.UNMEASURABLE)
+        self.assertEqual(canary.verdict(checks, base)["status"], canary.UNMEASURABLE)   # no basis given
 
     def test_a_baseline_that_resolved_nothing_is_still_unmeasurable(self):
         """#599: a mistyped prefix must not become a floor of 0 on every metric."""
         base = {n: None for n, _, _ in canary.METRICS}
         v = canary.verdict({**self.BLOCKS, "report": {"checked": True, "findings": [], "claims_checked": 2}}, base)
         self.assertEqual(v["status"], canary.UNMEASURABLE)
+
+    def test_report_basis_counts_measured_vacuous_and_unchecked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for rep, block in (("rep1", {"checked": True, "findings": []}),
+                               ("rep2", {"checked": True, "findings": [], "claims_checked": 4}),
+                               ("rep3", {"checked": False, "reason": "no report"})):
+                d = root / "m_core" / f"2026-01-01_x_{rep}"; d.mkdir(parents=True)
+                (d / "P_provenance.yaml").write_text(yaml.safe_dump({"report_claims": block}))
+            self.assertEqual(canary.report_basis("P", "2026-01-01_x", method="m", concat_dir=root),
+                             {"measured": 1, "vacuous": 1, "unchecked": 1})
 
     def test_the_baseline_skips_vacuous_replicates(self):
         """The v7 production arm: 11 of 12 reports carry no readable claim."""
@@ -218,6 +287,98 @@ class TestTheRunnerGate(unittest.TestCase):
         self.assertEqual([u["phase"] for u in res["usage"]], ["full", "audit", "reconcile_full", "report"])
         self.assertEqual((d["report_gate"]["findings_before"], d["report_gate"]["regenerated"]), (0, False))
 
+    def test_a_prior_invocations_regeneration_is_not_repeated(self):
+        """#965: once per run, not once per invocation."""
+        s = spec(out_dir=self.out)
+        s.provenance_path.parent.mkdir(parents=True, exist_ok=True)
+        s.full_path.write_text(yaml.safe_dump(FULL)); s.core_path.write_text(yaml.safe_dump(CORE))
+        s.report_path.write_text("# R\n\n## Dispositions\n\n| slot | disposition | record | reason |\n|---|---|---|---|\n"
+                                 "| `keywords` | removed | full | gone |\n")
+        s.provenance_path.write_text(yaml.safe_dump({"report_gate": {"regenerated": True, "findings_after": 1}}))
+        class Boom:
+            messages = property(lambda self: (_ for _ in ()).throw(AssertionError("must not call")))
+        out = api_runner._gate_report(s, Boom(), {"name": "m", "max_tokens": 10, "temperature": None,
+                                                   "temperature_applies": False}, [], {})
+        self.assertFalse(out["regenerated"])
+        self.assertIn("prior invocation", out["reason"])
+        self.assertEqual(out["prior"]["regenerated"], True)
+
+    def test_a_report_without_the_table_is_regenerated_once(self):
+        """The table is itself a claim the gate checks; its absence is a contradiction."""
+        fake = _ReportFake("unused", "| `keywords` | retained | full | kept |\n")
+        _orig = fake.create
+        def create(**kw):
+            blob = " ".join(p.get("text", "") for p in kw["messages"][0]["content"])
+            if PHASE_INSTRUCTIONS["report"] in blob and PHASE_INSTRUCTIONS["report_regate"] not in blob:
+                fake.calls.append(kw); return FakeResponse("# Reconciliation\n\nNo discrepancies.\n")
+            return _orig(**kw)
+        fake.create = create
+        s, res, d = self._run(fake)
+        g = d["report_gate"]
+        self.assertTrue(g["table_missing_before"])
+        self.assertEqual((g["findings_before"], g["regenerated"], g["findings_after"]), (0, True, 0))
+        self.assertEqual(d["report_claims"]["claims_checked"], 1)
+        regate = next(c for c in fake.calls if PHASE_INSTRUCTIONS["report_regate"] in
+                      " ".join(p.get("text", "") for p in c["messages"][0]["content"]))
+        self.assertIn("dispositions_table_missing", " ".join(p.get("text", "") for p in regate["messages"][0]["content"]))
+
+    def test_a_worse_rewrite_is_rolled_back(self):
+        fake = _ReportFake("| `keywords` | removed | full | gone |\n",
+                           "| `keywords` | removed | full | gone |\n| `license` | retained | full | kept |\n")
+        s, res, d = self._run(fake)
+        g = d["report_gate"]
+        self.assertFalse(g["regenerated"])
+        self.assertIn("worse", g["reason"])
+        self.assertEqual(g["findings_after"], 1)
+        self.assertNotIn("license", s.report_path.read_text())
+
+    def test_a_truncated_rewrite_is_not_written(self):
+        fake = _ReportFake("| `keywords` | removed | full | gone |\n", "| `keywords` | retained | full | kept |\n")
+        _orig = fake.create
+        def create(**kw):
+            resp = _orig(**kw)
+            blob = " ".join(p.get("text", "") for p in kw["messages"][0]["content"])
+            if PHASE_INSTRUCTIONS["report_regate"] in blob:
+                resp.stop_reason = "max_tokens"
+            return resp
+        fake.create = create
+        s, res, d = self._run(fake)
+        self.assertFalse(d["report_gate"]["regenerated"])
+        self.assertIn("| `keywords` | removed |", s.report_path.read_text())
+        self.assertEqual(d["report_gate"]["findings_after"], 1)
+
+    def test_a_prose_answer_restores_the_report_as_written(self):
+        """#965: a reply that drops the table is not a report."""
+        fake = _ReportFake("| `keywords` | removed | full | gone |\n", "unused")
+        _orig = fake.create
+        def create(**kw):
+            blob = " ".join(p.get("text", "") for p in kw["messages"][0]["content"])
+            if PHASE_INSTRUCTIONS["report_regate"] in blob:
+                fake.calls.append(kw); return FakeResponse("You are right, keywords was not removed.\n")
+            return _orig(**kw)
+        fake.create = create
+        s, res, d = self._run(fake)
+        g = d["report_gate"]
+        self.assertFalse(g["regenerated"])
+        self.assertIn("worse", g["reason"])
+        self.assertIn("| `keywords` | removed |", s.report_path.read_text())
+        self.assertEqual(g["findings_after"], 1)
+
+    def test_a_backfill_keeps_the_expectation(self):
+        """#961: the flag lives on inputs, and a rebuilt block carries it again."""
+        from data_sheets_schema import backfill_checks
+        fake = _ReportFake("| `keywords` | retained | full | kept |\n", "unused")
+        s, res, d = self._run(fake)
+        self.assertTrue(d["inputs"]["dispositions_expected"])
+        blocks = backfill_checks.compute(s.provenance_path, only={"report_claims"})
+        self.assertTrue(blocks["report_claims"]["dispositions_expected"])
+        # and never added to a record that lacks it
+        rec = yaml.safe_load(s.provenance_path.read_text())
+        rec["inputs"].pop("dispositions_expected"); rec["report_claims"].pop("dispositions_expected")
+        s.provenance_path.write_text(yaml.safe_dump(rec))
+        blocks = backfill_checks.compute(s.provenance_path, only={"report_claims"})
+        self.assertNotIn("dispositions_expected", blocks["report_claims"])
+
     def test_the_companions_hash_is_of_the_log_as_it_ends(self):
         """#652: at record build the md5 was of a prefix of the reasoning log."""
         fake = _ReportFake("| `keywords` | removed | full | gone |\n", "| `keywords` | retained | full | kept |\n")
@@ -227,7 +388,10 @@ class TestTheRunnerGate(unittest.TestCase):
 
 
 class TestTheAssemblyDigestCoversIt(unittest.TestCase):
-    def test_editing_either_instruction_moves_the_digest(self):
+    def test_the_instructions_exist_and_editing_either_moves_the_digest(self):
+        self.assertIn("## Dispositions", PHASE_INSTRUCTIONS["report"])
+        self.assertIn("report_regate", PHASE_INSTRUCTIONS)
+        self.assertIn("#929", api_runner.ASSEMBLY_LAYOUT)
         before = api_runner.assembly_digest()["sha256"]
         for key in ("report", "report_regate"):
             with unittest.mock.patch.dict(PHASE_INSTRUCTIONS, {key: "changed"}):

@@ -317,10 +317,15 @@ steps need:
    table, tolerated on earlier records so their arm still satisfies its own
    gate. **Instrument revision, registered here**: `report_claims`
    now also checks `retained`/`changed`/`added` rows (`retention_not_shown`,
-   `change_not_shown`); no earlier report writes the table, so recomputing
-   v7's blocks changes nothing there (`claims_checked` stays 0 on 11 of 12)
-   and the v7 baseline for `report findings` is a floor of 0 with its basis
-   on the row. The v7-vs-v8 report metric is therefore one-sided: measured
+   `change_not_shown`); the 2026-09-01 v7 arm writes no such table, so
+   recomputing its blocks changes nothing there (`claims_checked` stays 0 on
+   11 of 12) and the v7 baseline for `report findings` is a floor of 0 with
+   its basis on the row for CHORUS, CM4AI and VOICE, and a measured 0 for
+   AI_READI (rep3 read 4 claims). **Fifteen older records** (v2–v5 API and crate
+   arms) do carry disposition-column tables and would recompute differently
+   under this instrument (e.g. 2026-08-13 v4 rep1 CM4AI 6/3 → 16/12); no
+   backfill is scheduled, and `baseline_for` reads recorded blocks, so
+   nothing moves until one is run and registered. The v7-vs-v8 report metric is therefore one-sided: measured
    on v8, unmeasured on v7 — say so wherever it is tabled. `companions` is
    hashed after the last phase (#652).
 
