@@ -481,7 +481,8 @@ The receipt describes the record the `full` phase wrote: `reconcile_full`
 and repair rewrite it afterwards with no receipt route on this path, so
 their slots are reported under `slots.without_receipt`, never gated (#742).
 A full record with no receipt beside it does not resume past `full`.
-**Re-addressing (#952)**: before the receipt is accepted, an entry whose
+**Re-addressing (#952, API path only — the agentic protocol has no
+equivalent)**: before the receipt is accepted, an entry whose
 `slot` is not a path in the record just written (the `slot_not_in_record`
 class `receipts.check` gates on) gets one follow-up turn asking where the
 value went; an answer moves the entry only to a path that resolves, `drop`

@@ -42,8 +42,8 @@ class TestUnresolved(unittest.TestCase):
         r = _receipt({"slot": "title", "snippet": "T"},
                      {"slot": "subject", "snippet": "Medicine, Health and Life Sciences"},
                      {"slot": "funders[3].name", "snippet": "NIH"})
-        self.assertEqual([u["slot"] for u in unresolved_receipt_slots(RECORD, r)],
-                         ["subject", "funders[3].name"])
+        self.assertEqual([(u["entry"], u["slot"]) for u in unresolved_receipt_slots(RECORD, r)],
+                         [(1, "subject"), (2, "funders[3].name")])
 
     def test_entries_and_leaves_that_resolve_are_not(self):
         r = _receipt({"slot": "funders[0]", "snippet": "NIH"}, {"slot": "keywords[1]", "snippet": "M"})
@@ -57,44 +57,93 @@ class TestApply(unittest.TestCase):
                      {"slot": "nowhere", "snippet": "z"},
                      {"slot": "title", "snippet": "T"})
         out = apply_readdress(r, RECORD, [
-            {"chunk": "c001", "slot": "subject", "new_slot": "keywords[1]"},
-            {"chunk": "c001", "slot": "funders[3].name", "new_slot": "funders[7].name"},   # still wrong
-            {"chunk": "c001", "slot": "nowhere", "drop": True, "reason": "not in the record"},
-            {"chunk": "c001", "slot": "title", "new_slot": "id"},                          # resolves: untouched
+            {"chunk": "c001", "entry": 0, "slot": "subject", "new_slot": "keywords[1]"},
+            {"chunk": "c001", "entry": 1, "slot": "funders[3].name", "new_slot": "funders[7].name"},  # still wrong
+            {"chunk": "c001", "entry": 2, "slot": "nowhere", "drop": True, "reason": "not in the record"},
+            {"chunk": "c001", "entry": 3, "slot": "title", "new_slot": "id"},                        # resolves: untouched
         ])
         slots = [e["slot"] for e in r["chunks"][0]["extracted"]]
         self.assertEqual(slots, ["keywords[1]", "funders[3].name", "title"])
         self.assertEqual([m["new_slot"] for m in out["moved"]], ["keywords[1]"])
         self.assertEqual([d["slot"] for d in out["dropped"]], ["nowhere"])
-        self.assertEqual([x["slot"] for x in out["rejected"]], ["funders[3].name"])
+        self.assertEqual([(x["slot"], x["reason"]) for x in out["rejected"]],
+                         [("funders[3].name", "new_slot does not resolve"), ("title", "already resolves")])
+        self.assertEqual(out["emptied"], [])
 
-    def test_an_entry_the_answer_does_not_name_is_untouched(self):
+    def test_duplicate_slots_in_one_chunk_are_addressed_by_ordinal(self):
+        """#954: (chunk, slot) is not an identity — 27 of 29 receipts repeat one."""
+        r = _receipt({"slot": "subject", "snippet": "a"}, {"slot": "subject", "snippet": "Medicine"})
+        out = apply_readdress(r, RECORD, [
+            {"chunk": "c001", "entry": 0, "slot": "subject", "new_slot": "keywords[0]"},
+            {"chunk": "c001", "entry": 1, "slot": "subject", "new_slot": "keywords[1]"},
+        ])
+        self.assertEqual([e["slot"] for e in r["chunks"][0]["extracted"]], ["keywords[0]", "keywords[1]"])
+        self.assertEqual(len(out["moved"]), 2)
+
+    def test_answers_are_typed_and_exclusive(self):
+        """#958: any truthy drop deleted the entry; drop plus new_slot was accepted."""
+        r = _receipt({"slot": "subject", "snippet": "a"}, {"slot": "subject", "snippet": "b"},
+                     {"slot": "subject", "snippet": "c"}, {"slot": "subject", "snippet": "d"})
+        out = apply_readdress(r, RECORD, [
+            {"chunk": "c001", "entry": 0, "slot": "subject", "drop": "false"},
+            {"chunk": "c001", "entry": 1, "slot": "subject", "drop": True, "new_slot": "keywords[0]"},
+            {"chunk": "c001", "entry": 2, "slot": "title", "new_slot": "keywords[0]"},     # slot mismatch
+            {"chunk": "c001", "entry": 9, "slot": "subject", "new_slot": "keywords[0]"},   # no such entry
+            {"chunk": "c001", "slot": "subject", "new_slot": "keywords[0]"},               # no ordinal
+        ])
+        self.assertEqual(len(r["chunks"][0]["extracted"]), 4, "nothing applied")
+        self.assertEqual(sorted(x["reason"].split(" ")[0] for x in out["rejected"]),
+                         sorted(["drop", "both", "entry", "no", "no"]))
+
+    def test_a_chunk_emptied_by_drops_becomes_nothing_relevant(self):
+        """#958: an `extracted` chunk with no pairs is itself a gated finding."""
         r = _receipt({"slot": "subject", "snippet": "Medicine"})
-        out = apply_readdress(r, RECORD, [])
-        self.assertEqual(r["chunks"][0]["extracted"][0]["slot"], "subject")
-        self.assertEqual(out, {"moved": [], "dropped": [], "rejected": []})
+        out = apply_readdress(r, RECORD, [
+            {"chunk": "c001", "entry": 0, "slot": "subject", "drop": True, "reason": "the record has no subject"}])
+        chunk = r["chunks"][0]
+        self.assertEqual(chunk["status"], "nothing_relevant")
+        self.assertNotIn("extracted", chunk)
+        self.assertIn("the record has no subject", chunk["reason"])
+        self.assertEqual(out["emptied"], ["c001"])
+
+    def test_non_dict_entries_are_passed_through(self):
+        r = _receipt({"slot": "subject", "snippet": "Medicine"})
+        r["chunks"][0]["extracted"].insert(0, "bad")
+        out = apply_readdress(r, RECORD, [
+            {"chunk": "c001", "entry": 1, "slot": "subject", "new_slot": "keywords[1]"}])
+        self.assertEqual(r["chunks"][0]["extracted"][0], "bad")
+        self.assertEqual(len(out["moved"]), 1)
 
 
 class _ReceiptFake(FakeMessages):
     """A full phase that writes a receipt with one mis-addressed entry, and a
     re-addressing answer that moves it."""
 
-    def __init__(self, bad_slot="subject", answer=None):
+    def __init__(self, bad_slot="subject", answer=None, raise_on_readdress=None, truncate=False):
         super().__init__()
-        self.bad_slot, self.answer = bad_slot, answer
+        self.bad_slot, self.answer, self.raise_on_readdress = bad_slot, answer, raise_on_readdress
+        self.truncate = truncate
 
     def create(self, **kw):
         last = kw["messages"][-1]
         if last["role"] == "user" and isinstance(last["content"], list) and any(
                 PHASE_INSTRUCTIONS["full_readdress"] in p.get("text", "") for p in last["content"]):
             self.calls.append(kw)
-            return FakeResponse(self.answer or
-                                "readdress:\n- chunk: c001\n  slot: subject\n  new_slot: keywords[0]\n")
+            if self.raise_on_readdress:
+                raise self.raise_on_readdress
+            resp = FakeResponse(self.answer or
+                                "readdress:\n- chunk: c001\n  entry: 1\n  slot: subject\n  new_slot: keywords[0]\n")
+            if self.truncate:
+                resp.stop_reason = "max_tokens"
+            return resp
         blob = " ".join(p.get("text", "") for p in kw["messages"][0]["content"])
         if PHASE_INSTRUCTIONS["full"] in blob:
             self.calls.append(kw)
+            # `keywords: a` is a scalar in a multivalued slot: the write path
+            # normalises it to a list, so `keywords[0]` resolves only against
+            # the normalised record (#957).
             return FakeResponse(
-                "```yaml\n# full\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n```\n"
+                "```yaml\n# full\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: a\n```\n"
                 f"{RECEIPT_MARK}\n```yaml\nbundle_md5: m\nchunks:\n- id: c001\n  status: extracted\n"
                 "  extracted:\n  - slot: title\n    snippet: \"a verbatim phrase here\"\n"
                 f"  - slot: {self.bad_slot}\n    snippet: \"Medicine, Health and Life Sciences\"\n"
@@ -126,8 +175,9 @@ class TestEndToEnd(unittest.TestCase):
         written = yaml.safe_load(api_runner._receipt_path(s).read_text())
         self.assertEqual([e["slot"] for e in written["chunks"][0]["extracted"]], ["title", "keywords[0]"])
         r = next(u for u in res["usage"] if u["phase"] == "full_readdress")["readdress"]
-        self.assertEqual([u["slot"] for u in r["unresolved_before"]], ["subject"])
-        self.assertEqual(r["moved"], [{"chunk": "c001", "slot": "subject", "new_slot": "keywords[0]"}])
+        self.assertEqual([(u["entry"], u["slot"]) for u in r["unresolved_before"]], [(1, "subject")])
+        self.assertEqual(r["moved"], [{"chunk": "c001", "entry": 1, "slot": "subject", "new_slot": "keywords[0]"}])
+        self.assertEqual(yaml.safe_load(s.full_path.read_text())["keywords"], ["a"], "normalised on disk")
         self.assertEqual(r["still_unresolved"], [])
         inter = s.provenance_path.parent / "intermediate"
         original = yaml.safe_load((inter / "CHORUS_coverage_receipt_as_written.yaml").read_text())
@@ -151,10 +201,62 @@ class TestEndToEnd(unittest.TestCase):
     def test_an_unusable_answer_leaves_the_receipt_as_written(self):
         s, res, fake = self._run(_ReceiptFake(answer="I cannot help with that.\n"))
         r = next(u for u in res["usage"] if u["phase"] == "full_readdress")["readdress"]
-        self.assertIn("unusable", r)
+        self.assertIn("not a YAML mapping", r["call_failed"])
         self.assertEqual([u["slot"] for u in r["still_unresolved"]], ["subject"])
         written = yaml.safe_load(api_runner._receipt_path(s).read_text())
         self.assertEqual(written["chunks"][0]["extracted"][1]["slot"], "subject")
+
+
+    def test_a_failing_corrective_call_leaves_the_receipt_as_written_and_the_run_completes(self):
+        """#955: the full phase had succeeded; the follow-up must not undo it."""
+        s, res, fake = self._run(_ReceiptFake(raise_on_readdress=RuntimeError("boom")))
+        phases = [u["phase"] for u in res["usage"]]
+        self.assertEqual(phases, ["full", "full_readdress", "audit", "reconcile_full", "report"])
+        r = next(u for u in res["usage"] if u["phase"] == "full_readdress")["readdress"]
+        self.assertIn("RuntimeError", r["call_failed"])
+        self.assertEqual([u["slot"] for u in r["still_unresolved"]], ["subject"])
+        written = yaml.safe_load(api_runner._receipt_path(s).read_text())
+        self.assertEqual(written["chunks"][0]["extracted"][1]["slot"], "subject")
+        self.assertEqual(sum(1 for c in fake.calls if c["messages"][-1]["role"] == "user"
+                             and PHASE_INSTRUCTIONS["full"] in " ".join(p.get("text", "") for p in c["messages"][0]["content"])
+                             and len(c["messages"]) == 1), 1, "the full phase ran once")
+
+    def test_the_plan_names_the_conditional_call_and_the_record_its_cap(self):
+        s = spec(out_dir=self.out, condition="generic_v7")
+        self.assertTrue(any("full_readdress" in c for c in api_runner.plan(s)["conditional_calls"]))
+        self.assertEqual(api_runner.plan(spec(out_dir=self.out))["conditional_calls"], [])
+        s, res, fake = self._run(_ReceiptFake())
+        d = yaml.safe_load((self.out / "CHORUS_provenance.yaml").read_text())
+        self.assertEqual(d["model"]["max_tokens_by_phase"]["full_readdress"], api_runner.READDRESS_MAX_TOKENS)
+
+
+@unittest.skipUnless(Path("data/preprocessed/chunks/CHORUS_chunks.yaml").exists(), "manifest absent")
+class TestTruncation(TestEndToEnd):
+    # Inherits setUp/_run only; the parent's tests are not re-collected here.
+    test_a_mis_addressed_entry_is_re_addressed_once_and_the_original_kept = None
+    test_a_receipt_whose_slots_all_resolve_makes_no_extra_call = None
+    test_an_unusable_answer_leaves_the_receipt_as_written = None
+    test_a_failing_corrective_call_leaves_the_receipt_as_written_and_the_run_completes = None
+    test_the_plan_names_the_conditional_call_and_the_record_its_cap = None
+    def test_a_truncated_answer_applies_nothing(self):
+        """A cut-off list parses as a shorter list; `drop: tru` parses as a string."""
+        fake = _ReceiptFake(answer="readdress:\n- chunk: c001\n  entry: 1\n  slot: subject\n  drop: tru",
+                            truncate=True)
+        s, res, fake = self._run(fake)
+        r = next(u for u in res["usage"] if u["phase"] == "full_readdress")["readdress"]
+        self.assertIn("truncated", r["call_failed"])
+        self.assertEqual([u["slot"] for u in r["still_unresolved"]], ["subject"])
+        written = yaml.safe_load(api_runner._receipt_path(s).read_text())
+        self.assertEqual(len(written["chunks"][0]["extracted"]), 2, "nothing dropped")
+
+
+class TestTelemetryAcceptsThePhase(unittest.TestCase):
+    def test_the_phase_enum_names_it(self):
+        """#956: the telemetry copies every api_usage phase into PhaseEnum."""
+        from data_sheets_schema.run_telemetry import SCHEMA_PATH
+        from data_sheets_schema.schema_view import shared_view
+        sv = shared_view(Path(SCHEMA_PATH) if Path(SCHEMA_PATH).is_absolute() else Path(SCHEMA_PATH))
+        self.assertIn("full_readdress", sv.get_enum("PhaseEnum").permissible_values)
 
 
 class TestTheAssemblyDigestCoversIt(unittest.TestCase):

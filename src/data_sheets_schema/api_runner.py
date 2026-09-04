@@ -421,7 +421,13 @@ ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, "
                    "core being its projection (#705); "
                    "under a receipt condition the bundle carries [cNNN] chunk "
                    "markers and the full phase instruction asks for the "
-                   "coverage receipt after the record (#710)")
+                   "coverage receipt after the record (#710); a receipt entry "
+                   "whose slot is not a path in the record just written gets "
+                   "one follow-up turn — the full-phase exchange replayed as an "
+                   "assistant turn, then the unresolved entries with their "
+                   "chunk and ordinal and the re-addressing instruction — whose "
+                   "answer moves the entry only to a resolving path or drops it "
+                   "(#952)")
 
 
 def assembly_digest() -> dict[str, Any]:
@@ -600,15 +606,17 @@ PHASE_INSTRUCTIONS = {
     # broke is the receipt rule above; this is the mechanism behind it.
     "full_readdress": (
         "Receipt re-addressing. The receipt entries listed above name a "
-        "`slot` that is not a path in the record you just wrote. For each, "
-        "answer with the path in that record where the snippet's value "
-        "actually sits (`new_slot`), or `drop: true` with a `reason` when the "
-        "record does not carry the value at all. Do not change the record and "
-        "do not add entries. Output only a YAML document of exactly this "
-        "shape:\n"
+        "`slot` that is not a path in the record you just wrote; each is "
+        "identified by its chunk and its `entry` ordinal within that chunk's "
+        "`extracted` list. For each, answer with exactly one action: "
+        "`new_slot`, the path in that record where the snippet's value "
+        "actually sits, or `drop: true` with a `reason` when the record does "
+        "not carry the value at all. Echo `chunk`, `entry` and `slot` as "
+        "given. Do not change the record and do not add entries. Output only "
+        "a YAML document of exactly this shape:\n"
         "readdress:\n"
-        "- chunk: c026\n  slot: subject\n  new_slot: keywords[12]\n"
-        "- chunk: c003\n  slot: funders[9].award\n  drop: true\n  reason: <why>"),
+        "- chunk: c026\n  entry: 4\n  slot: subject\n  new_slot: keywords[12]\n"
+        "- chunk: c003\n  entry: 0\n  slot: funders[9].award\n  drop: true\n  reason: <why>"),
     "core": (
         "Phase 2. Produce the CORE D4D record for class `CoreDataset`, using "
         "the declared bundle and the completed full record supplied above. The "
@@ -1045,6 +1053,14 @@ def plan(spec: RunSpec) -> dict[str, Any]:
         "estimate_basis": basis,
         "outputs": {"full": str(spec.full_path), "core": str(spec.core_path),
                     "report": str(spec.report_path)},
+        # Not costed above: made only when a receipt entry names a slot the
+        # record does not carry, and its input is the full-phase exchange
+        # replayed (#952/#959).
+        "conditional_calls": (["full_readdress: one follow-up inside the full phase when a "
+                               "receipt entry's slot is not a path in the record; input is "
+                               "the full-phase exchange, output at most "
+                               f"{READDRESS_MAX_TOKENS} tokens"]
+                              if spec.condition in RECEIPT_CONDITIONS else []),
     }
 
 
@@ -1273,12 +1289,15 @@ def unresolved_receipt_slots(record: Any, receipt: dict[str, Any]) -> list[dict[
     for chunk in receipt.get("chunks") or []:
         if not isinstance(chunk, dict):
             continue
-        for entry in chunk.get("extracted") or []:
+        for i, entry in enumerate(chunk.get("extracted") or []):
             if not isinstance(entry, dict):
                 continue
             slot = str(entry.get("slot") or "")
             if not resolve(record, slot):
-                out.append({"chunk": chunk.get("id"), "slot": slot,
+                # `entry` is the ordinal in the chunk's list: the same slot
+                # is receipted more than once in a chunk in 27 of 29 existing
+                # receipts, so (chunk, slot) is not an identity (#954).
+                out.append({"chunk": chunk.get("id"), "entry": i, "slot": slot,
                             "snippet": entry.get("snippet")})
     return out
 
@@ -1315,45 +1334,82 @@ def _extract_readdress(text: str) -> list[dict[str, Any]]:
     raise RuntimeError("the re-addressing response is not a YAML mapping with a `readdress` list")
 
 
+def _answer_action(a: dict[str, Any]) -> tuple[str | None, str | None]:
+    """(action, reason-if-rejected). Exactly one typed action per answer
+    (#958): `new_slot` a non-empty string, or `drop` the boolean True — a
+    truthy string is not a drop, and an answer carrying both is ambiguous."""
+    new = a.get("new_slot")
+    drop = a.get("drop")
+    has_new = isinstance(new, str) and bool(new.strip())
+    has_drop = drop is True
+    if has_new and (has_drop or drop not in (None, False)):
+        return None, "both new_slot and drop"
+    if has_new:
+        return "move", None
+    if has_drop:
+        return "drop", None
+    if drop not in (None, False):
+        return None, f"drop must be the boolean true, got {drop!r}"
+    return None, "no action"
+
+
 def apply_readdress(receipt: dict[str, Any], record: Any,
                     answers: list[dict[str, Any]]) -> dict[str, Any]:
     """Apply the model's answers to the receipt in place; say what happened.
 
-    An answer moves an entry only to a path that resolves in the record —
-    a second wrong address is left as it was and stays a gated finding.
-    `drop` removes the entry: a receipt for a value the record does not carry
-    attests nothing. Entries the answer does not name are untouched.
+    An answer names an entry by chunk id and ordinal (#954) and must carry
+    exactly one typed action (#958). A move goes only to a path that
+    resolves in the record — a second wrong address is left as it was and
+    stays a gated finding. `drop` removes the entry: a receipt for a value
+    the record does not carry attests nothing. A chunk whose every entry was
+    dropped becomes `nothing_relevant` with a reason naming the drops, since
+    an `extracted` chunk with no pairs is itself a gated finding. Entries the
+    answers do not name, and anything that is not a dict, are untouched.
     """
     from data_sheets_schema.receipts import resolve
-    by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    moved: list[dict[str, Any]] = []
+    dropped: list[dict[str, Any]] = []
+    rejected: list[dict[str, Any]] = []
+    emptied: list[str] = []
+    chunks = {str(c.get("id")): c for c in (receipt.get("chunks") or []) if isinstance(c, dict)}
+    to_drop: dict[str, set[int]] = {}
     for a in answers:
-        by_key[(str(a.get("chunk")), str(a.get("slot")))] = a
-    moved: list[dict[str, str]] = []
-    dropped: list[dict[str, str]] = []
-    rejected: list[dict[str, str]] = []
-    for chunk in receipt.get("chunks") or []:
-        if not isinstance(chunk, dict) or not isinstance(chunk.get("extracted"), list):
-            continue
-        kept = []
-        for entry in chunk["extracted"]:
-            key = (str(chunk.get("id")), str((entry or {}).get("slot")))
-            a = by_key.get(key)
-            if a is None or resolve(record, key[1]):
-                kept.append(entry)
-                continue
-            if a.get("drop"):
-                dropped.append({"chunk": key[0], "slot": key[1],
-                                "reason": str(a.get("reason") or "")})
-                continue
-            new = str(a.get("new_slot") or "")
-            if new and resolve(record, new):
-                entry["slot"] = new
-                moved.append({"chunk": key[0], "slot": key[1], "new_slot": new})
-            else:
-                rejected.append({"chunk": key[0], "slot": key[1], "new_slot": new})
-            kept.append(entry)
-        chunk["extracted"] = kept
-    return {"moved": moved, "dropped": dropped, "rejected": rejected}
+        cid, ordinal, slot = str(a.get("chunk")), a.get("entry"), str(a.get("slot") or "")
+        where = {"chunk": cid, "entry": ordinal, "slot": slot}
+        action, why = _answer_action(a)
+        if action is None:
+            rejected.append({**where, "reason": why}); continue
+        chunk = chunks.get(cid)
+        entries = chunk.get("extracted") if isinstance(chunk, dict) else None
+        if not isinstance(ordinal, int) or isinstance(ordinal, bool) or not isinstance(entries, list) \
+                or not (0 <= ordinal < len(entries)) or not isinstance(entries[ordinal], dict):
+            rejected.append({**where, "reason": "no such entry"}); continue
+        entry = entries[ordinal]
+        if slot and str(entry.get("slot") or "") != slot:
+            rejected.append({**where, "reason": f"entry {ordinal} of {cid} is {entry.get('slot')!r}, not {slot!r}"}); continue
+        if resolve(record, str(entry.get("slot") or "")):
+            rejected.append({**where, "reason": "already resolves"}); continue
+        if action == "drop":
+            to_drop.setdefault(cid, set()).add(ordinal)
+            dropped.append({**where, "reason": str(a.get("reason") or "")}); continue
+        new = str(a["new_slot"]).strip()
+        if resolve(record, new):
+            entry["slot"] = new
+            moved.append({**where, "new_slot": new})
+        else:
+            rejected.append({**where, "new_slot": new, "reason": "new_slot does not resolve"})
+    for cid, ordinals in to_drop.items():
+        chunk = chunks[cid]
+        chunk["extracted"] = [e for i, e in enumerate(chunk["extracted"]) if i not in ordinals]
+        if not chunk["extracted"]:
+            reasons = "; ".join(f"{d['slot']}: {d['reason'] or 'no reason given'}"
+                                for d in dropped if d["chunk"] == cid)
+            chunk.pop("extracted", None)
+            chunk["status"] = "nothing_relevant"
+            chunk["reason"] = ("every extracted entry was dropped at re-addressing (#952) — "
+                               "the record does not carry the value: " + reasons)
+            emptied.append(cid)
+    return {"moved": moved, "dropped": dropped, "rejected": rejected, "emptied": emptied}
 
 
 def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
@@ -1363,12 +1419,19 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
     """One bounded re-addressing pass over a full-phase receipt (#952).
 
     Returns the receipt text to write and a summary for the usage entry, or
-    the receipt unchanged and None when every slot already resolves. One
-    call, never retried on its own account: a re-addressing that fails to
-    parse leaves the receipt as written, and the gate counts what remains.
+    the receipt unchanged and None when every slot already resolves. Paths
+    are resolved against the record as `execute` will write it — the same
+    enum, temporal and multivalued normalisation, applied to the same text
+    (#957) — so a path that resolves here resolves on disk. The re-addressing
+    is attempted once (transient transport failures are retried inside
+    `_call_with_retry` like any call); whatever goes wrong — a transport
+    failure, an unusable answer, a parse error — leaves the receipt as the
+    model wrote it for the gate to count, and never fails a full phase that
+    has already succeeded (#955).
     """
     try:
-        record = yaml.safe_load(record_body)
+        record = yaml.safe_load(normalise_multivalued(normalise_enum_aliases(
+            normalise_temporal(record_body))))
         receipt = yaml.safe_load(receipt_body)
     except yaml.YAMLError:
         return receipt_body, None
@@ -1378,43 +1441,48 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
     if not unresolved:
         return receipt_body, None
     _snapshot(spec, f"{spec.project}_coverage_receipt_as_written.yaml", receipt_body)
-    rreq = build_readdress(req, response_text, unresolved)
+    cap_tokens = min(READDRESS_MAX_TOKENS, output_limit(settings["name"]))
     started = datetime.now(timezone.utc).isoformat(timespec="seconds")
     t0 = time.monotonic()
-    resp = _call_with_retry(client, model=settings["name"],
-                            max_tokens=min(READDRESS_MAX_TOKENS, output_limit(settings["name"])),
-                            temperature=settings["temperature"],
-                            system=rreq.system, messages=rreq.messages)
-    text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
-    cap = reasoning.capture(resp)
-    reasoning.append(_reasoning_path(spec),
-                     {"phase": "full_readdress", "label": spec.label,
-                      "project": spec.project, "model": settings["name"],
-                      "attempt": 1, **cap.to_dict()})
-    summary: dict[str, Any] = {"unresolved_before": unresolved}
+    summary: dict[str, Any] = {"unresolved_before": unresolved,
+                               "moved": [], "dropped": [], "rejected": [], "emptied": []}
+    entry: dict[str, Any] = {"phase": "full_readdress", "attempt": 1, "started_at": started,
+                             "max_tokens": cap_tokens}
     try:
+        rreq = build_readdress(req, response_text, unresolved)
+        resp = _call_with_retry(client, model=settings["name"], max_tokens=cap_tokens,
+                                temperature=settings["temperature"],
+                                system=rreq.system, messages=rreq.messages)
+        text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
+        cap = reasoning.capture(resp)
+        reasoning.append(_reasoning_path(spec),
+                         {"phase": "full_readdress", "label": spec.label,
+                          "project": spec.project, "model": settings["name"],
+                          "attempt": 1, **cap.to_dict()})
+        entry.update({
+            "input_tokens": getattr(resp.usage, "input_tokens", None),
+            "output_tokens": getattr(resp.usage, "output_tokens", None),
+            "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
+            "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
+            "stop_reason": getattr(resp, "stop_reason", None)})
+        if getattr(resp, "stop_reason", None) == "max_tokens":
+            # A cut-off list parses as a shorter list; `drop: tru` even
+            # parses as a string. Nothing from a truncated answer is applied.
+            raise RuntimeError(f"re-addressing answer truncated at {cap_tokens} tokens")
         answers = _extract_readdress(text)
         summary.update(apply_readdress(receipt, record, answers))
         summary["answers"] = len(answers)
         receipt_body = yaml.safe_dump(receipt, sort_keys=False, allow_unicode=True, width=10_000)
-    except RuntimeError as exc:
-        summary.update({"moved": [], "dropped": [], "rejected": [],
-                        "unusable": str(exc)})
+    except Exception as exc:                                   # noqa: BLE001
+        summary["call_failed"] = f"{type(exc).__name__}: {str(exc)[:300]}"
     summary["still_unresolved"] = unresolved_receipt_slots(record, yaml.safe_load(receipt_body))
-    usage.append({
-        "phase": "full_readdress", "attempt": 1, "started_at": started,
-        "seconds": round(time.monotonic() - t0, 3),
-        "input_tokens": getattr(resp.usage, "input_tokens", None),
-        "output_tokens": getattr(resp.usage, "output_tokens", None),
-        "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
-        "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
-        "max_tokens": min(READDRESS_MAX_TOKENS, output_limit(settings["name"])),
-        "stop_reason": getattr(resp, "stop_reason", None),
-        "readdress": summary,
-    })
+    entry["seconds"] = round(time.monotonic() - t0, 3)
+    entry["readdress"] = summary
+    usage.append(entry)
     print(f"   receipt re-addressed: {len(summary['moved'])} moved, "
-          f"{len(summary['dropped'])} dropped, "
-          f"{len(summary['still_unresolved'])} still unresolved")
+          f"{len(summary['dropped'])} dropped, {len(summary['rejected'])} rejected, "
+          f"{len(summary['still_unresolved'])} still unresolved"
+          + (f" ({summary['call_failed']})" if "call_failed" in summary else ""))
     return receipt_body, summary
 
 
@@ -3077,8 +3145,10 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         # Through phase_max_tokens, so a receipt condition's raised `full`
         # budget is the one the record states — the same number api_usage
         # carries per call (#770).
-        "max_tokens_by_phase": {k: phase_max_tokens(spec, k, v) for k, v in PHASE_MAX_TOKENS.items()
-                                if not (CORE_DERIVED and (k in DERIVED_PHASES or k == "repair_core"))},
+        "max_tokens_by_phase": {**{k: phase_max_tokens(spec, k, v) for k, v in PHASE_MAX_TOKENS.items()
+                                   if not (CORE_DERIVED and (k in DERIVED_PHASES or k == "repair_core"))},
+                                **({"full_readdress": min(READDRESS_MAX_TOKENS, output_limit(settings["name"]))}
+                                   if spec.condition in RECEIPT_CONDITIONS else {})},
         # What the run sent, and what it was allowed to send. The second is
         # usually unknown, and #568 exists because that could not be told from
         # the record: AI-READI's reconcile_full ran at 249,015 tokens under a

@@ -25,6 +25,10 @@ enums:
     permissible_values:
       full:
         description: Generate the full Dataset record.
+      full_readdress:
+        description: One bounded follow-up inside the full phase, under a receipt
+          condition only, re-addressing receipt entries whose slot is not a path
+          in the record just written (#952). Absent from most runs.
       core:
         description: Generate the CoreDataset record from the full record.
       audit:

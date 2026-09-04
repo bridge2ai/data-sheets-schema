@@ -245,7 +245,7 @@ def plan_cmd(project, arm, label, condition, bundle, out_dir, as_json):
               help="flat output directory (the assistant layout)")
 @click.option("--yes", is_flag=True, help="skip the cost confirmation")
 def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
-    """Execute every phase (four model calls; the core is derived from the full) and write outputs plus a live provenance record."""
+    """Execute every phase (four model calls, plus one bounded re-addressing call under a receipt condition when a receipt entry names a slot the record does not carry, #952; the core is derived from the full) and write outputs plus a live provenance record."""
     from data_sheets_schema.api_runner import execute, plan
     spec = _spec(project, arm, label, condition, bundle, out_dir)
     _require_bundle(spec, project, bundle)
