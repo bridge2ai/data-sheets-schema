@@ -265,6 +265,51 @@ def _describe(value: Any) -> str:
     return "a value"
 
 
+#: The dispositions table the v8 report phase ends with (#929): a header row
+#: with a `disposition` column, one row per slot, the disposition one of
+#: these. `removed` rows are read by the removal check above (a table cell
+#: matching `_CELL_REMOVED`); the rest are claims of presence, which no
+#: earlier report form let the checker test (#914: AI_READI v7 rep3 claimed
+#: `extension_mechanism` was retained when neither record carried it).
+_PRESENCE_DISPOSITIONS = {"retained", "kept", "unchanged", "left as-is", "left as is",
+                          "changed", "amended", "corrected", "added"}
+_DISPOSITION = re.compile(r"^\W*(?:\*\*)?(removed|deleted|dropped|retained|kept|unchanged|"
+                          r"left as-is|left as is|changed|amended|corrected|added)\b", re.I)
+
+
+def disposition_rows(text: str) -> list[dict[str, str]]:
+    """Rows of every table whose header names a `disposition` column."""
+    rows: list[dict[str, str]] = []
+    header: dict[str, int] | None = None
+    for line in text.splitlines():
+        cells = _cells(line)
+        if cells is None:
+            if line.lstrip().startswith("|"):
+                continue                      # the separator row keeps the header
+            header = None
+            continue
+        low = [c.lower() for c in cells]
+        if "disposition" in low and header is None:
+            header = {name: i for i, name in enumerate(low)}
+            continue
+        if header is None:
+            continue
+        d = cells[header["disposition"]] if header["disposition"] < len(cells) else ""
+        m = _DISPOSITION.match(d)
+        if not m:
+            continue
+        slot_cell = cells[header.get("slot", 0)] if header.get("slot", 0) < len(cells) else cells[0]
+        names = _TICKED.findall(slot_cell) or ([slot_cell.strip()] if re.fullmatch(r"[\w.\[\]]+", slot_cell.strip()) else [])
+        record = ""
+        if "record" in header and header["record"] < len(cells):
+            record = cells[header["record"]].strip().lower()
+        for name in names:
+            rows.append({"slot": name, "disposition": m.group(1).lower(),
+                         "record": record if record in ("full", "core", "both") else "either",
+                         "line": line.strip()})
+    return rows
+
+
 def check_report(report: Path, full: dict, core: dict,
                  declared: dict[str, set[str]]) -> dict[str, Any]:
     """Findings, plus what was skipped.
@@ -414,6 +459,32 @@ def check_report(report: Path, full: dict, core: dict,
     # One claim can be stated twice — a summary table row and the prose that
     # elaborates it. Reporting it twice inflates the count a reader uses to
     # judge how bad a report is.
+    # Presence claims from the dispositions table (#929). A `removed` row
+    # is already a removal claim above (its cell matches _CELL_REMOVED); a
+    # retained/changed/added row claims the slot is there, in the record the
+    # row names, or in the core when it names none (the `_target` reading).
+    rows = disposition_rows(text)
+    for row in rows:
+        if row["disposition"] not in _PRESENCE_DISPOSITIONS:
+            continue
+        if re.search(r"\[\d+\]$", row["slot"]):
+            unnamed += 1
+            continue
+        claims += 1
+        in_full, v_full = resolve(full, row["slot"])
+        in_core, v_core = resolve(core, row["slot"])
+        present = {"core": in_core and _populated(v_core),
+                   "full": in_full and _populated(v_full),
+                   "both": (in_core and _populated(v_core)) and (in_full and _populated(v_full)),
+                   "either": in_core and _populated(v_core)}[row["record"]]
+        if not present:
+            findings.append({
+                "kind": ("retention_not_shown" if row["disposition"] in
+                         ("retained", "kept", "unchanged", "left as-is", "left as is")
+                         else "change_not_shown"),
+                "slot": row["slot"], "record": row["record"],
+                "detail": f"report says {row['disposition']}; the {row['record']} record does not carry it",
+                "claim": row["line"][:240]})
     seen, unique = set(), []
     for f in findings:
         key = (f["kind"], f.get("slot"), f.get("record"))
@@ -424,7 +495,7 @@ def check_report(report: Path, full: dict, core: dict,
     return {"checked": True, "findings": unique, "claims_checked": claims,
             # Named rather than dropped: a claim naming no slot in backticks
             # cannot be checked, and a reader should know how many there were.
-            "claims_unnamed": unnamed}
+            "claims_unnamed": unnamed, "disposition_rows": len(rows)}
 
 
 def declared_slots() -> dict[str, set[str]]:

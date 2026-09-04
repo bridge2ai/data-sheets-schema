@@ -25,6 +25,10 @@ enums:
     permissible_values:
       full:
         description: Generate the full Dataset record.
+      report_regate:
+        description: One regeneration of the reconciliation report when its
+          dispositions contradict the records, with the contradictions named (#929).
+          Absent from most runs.
       full_readdress:
         description: One bounded follow-up inside the full phase, under a receipt
           condition only, re-addressing receipt entries whose slot is not a path

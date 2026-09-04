@@ -46,7 +46,10 @@ UNMEASURABLE = "unmeasurable"
 #: even when the schema has moved — unlike anything schema-dependent (#576).
 METRICS = (
     ("pair errors", "pair", lambda b: int(b.get("errors") or 0)),
-    ("report findings", "report", lambda b: len(b.get("findings") or [])),
+    # None when the checker read no claim at all: findings 0 over
+    # claims_checked 0 is not a held floor, it is unmeasured (#684).
+    ("report findings", "report",
+     lambda b: (None if not int(b.get("claims_checked") or 0) else len(b.get("findings") or []))),
     ("ungrounded identifiers", "grounding",
      lambda b: int((b.get("distinct") or b.get("counts") or {}).get("absent") or 0)),
     # #591. Invisible to the other three: a resolver URL for a declared prefix
@@ -237,11 +240,24 @@ def verdict(checks: dict[str, Any], baseline: dict[str, int | None],
     counts = counts_from(checks)
     blind = [name for name, value in counts.items() if value is None]
     unbaselined = [name for name, value in baseline.items() if value is None]
+    # The report metric is unmeasured on 11 of 12 v7 production records
+    # (#684): their reports carried no claim the checker reads. A baseline
+    # that resolved (some metric measured) but has no report figure is a
+    # floor of 0 with its basis on the row — not a mistyped prefix, which
+    # leaves every metric None and stays fatal (#599).
+    report_floor = ("report findings" in unbaselined
+                    and any(v is not None for v in baseline.values()))
+    if report_floor:
+        unbaselined = [n for n in unbaselined if n != "report findings"]
     rows = []
     regressions = []
     for name, value in counts.items():
         bar = baseline.get(name)
         row = {"metric": name, "run": value, "baseline_worst": bar}
+        if name == "report findings" and report_floor:
+            bar = row["baseline_worst"] = 0
+            row["baseline_basis"] = ("floor 0: no baseline replicate carried a report "
+                                     "claim the checker reads (#684)")
         if value is not None and bar is not None and value > bar:
             row["regressed"] = True
             regressions.append(f"{name}: {value} against a baseline worst of {bar}")

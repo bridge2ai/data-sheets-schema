@@ -427,7 +427,10 @@ ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, "
                    "assistant turn, then the unresolved entries with their "
                    "chunk and ordinal and the re-addressing instruction — whose "
                    "answer moves the entry only to a resolving path or drops it "
-                   "(#952)")
+                   "(#952); the report phase ends with a dispositions table, "
+                   "checked against the records before the run completes, and "
+                   "a report whose claims contradict them is regenerated once "
+                   "with the contradictions named (#929)")
 
 
 def assembly_digest() -> dict[str, Any]:
@@ -702,7 +705,25 @@ PHASE_INSTRUCTIONS = {
         "declared in the schema without the schema digest supporting you: both "
         "are checked against the records afterwards, and a report that fails "
         "that check is worse than a shorter one that does not. Write it even "
-        "when nothing changed. Output only Markdown."),
+        "when nothing changed. End with a section headed `## Dispositions` "
+        "holding one Markdown table with the columns "
+        "`| slot | disposition | record | reason |`: one row per slot the "
+        "audit touched or the reconciliation changed, and one per slot the "
+        "audit questioned but you left as-is. `slot` is the backticked record "
+        "path (`funders[0].grant_id`), `disposition` exactly one of `removed`, "
+        "`changed`, `added`, `retained`, `record` one of `full`, `core`, "
+        "`both`. Every row is checked against the records afterwards: a slot "
+        "reported removed must be absent from the record named, one reported "
+        "retained, changed or added must be present there. Write the table "
+        "even when it has one row. Output only Markdown."),
+    # Sent once when the report's claims contradict the records (#929): the
+    # gate that used to read the report only after the run.
+    "report_regate": (
+        "Report re-check. The reconciliation report above makes claims the "
+        "records do not show; each is listed with the slot, the claim and what "
+        "the record actually holds. Rewrite the whole report so that every "
+        "disposition row and every statement matches the records supplied, "
+        "keeping everything that was already right. Output only Markdown."),
 }
 
 # What each phase produces, and where it lands. Writing as we go is what makes a
@@ -2598,11 +2619,16 @@ def _rate_limit_pause(exc: Exception, *, now: datetime | None = None) -> float |
 
 def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
                        usage: list[dict[str, Any]],
-                       carry: dict[str, str]) -> None:
-    """Rewrite the reconciliation report against the repaired records (#604).
+                       carry: dict[str, str], *, phase: str = "report_after_repair",
+                       contradictions: list[dict[str, Any]] | None = None) -> bool:
+    """Rewrite the reconciliation report against the records on disk (#604).
 
     Reads the records from disk rather than from `carry`: the point is that
     repair changed them, so the carried copies are precisely the stale ones.
+    With `contradictions` (#929) the request also carries the report as it
+    stands, the contradictions the checker found, and the re-check
+    instruction; `phase` names the usage entry. Returns whether a report was
+    written.
     """
     fresh = dict(carry)
     if spec.full_path.exists():
@@ -2613,8 +2639,16 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
             encoding="utf-8")
     needed = {k: fresh[k] for k in PHASE_NEEDS["report"] if k in fresh}
     if len(needed) != len(PHASE_NEEDS["report"]):
-        return                      # cannot rebuild it honestly; leave it
+        return False                # cannot rebuild it honestly; leave it
     req = build_phase(spec, "report", carry=needed)
+    if contradictions is not None:
+        listing = yaml.safe_dump([{k: v for k, v in c.items() if k in ("kind", "slot", "record", "detail", "claim")}
+                                  for c in contradictions], sort_keys=False, allow_unicode=True)
+        req.messages[0]["content"].extend([
+            {"type": "text", "text": "# Reconciliation report as written\n\n"
+             + (spec.report_path.read_text(encoding="utf-8") if spec.report_path.exists() else "")},
+            {"type": "text", "text": "# Claims the records do not show\n\n" + listing},
+            {"type": "text", "text": PHASE_INSTRUCTIONS["report_regate"]}])
     try:
         resp = _call_with_retry(
             client, model=settings["name"],
@@ -2623,10 +2657,10 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
                          if settings["temperature_applies"] else None),
             system=req.system, messages=req.messages)
     except Exception:                                          # noqa: BLE001
-        return                      # a stale report is better than none
+        return False                # a stale report is better than none
     text = "".join(getattr(b, "text", "") for b in getattr(resp, "content", [])
                    if getattr(b, "type", None) == "text")
-    usage.append({"phase": "report_after_repair", "attempt": 1,
+    usage.append({"phase": phase, "attempt": 1,
                   "input_tokens": getattr(resp.usage, "input_tokens", None),
                   "output_tokens": getattr(resp.usage, "output_tokens", None),
                   "cache_read": getattr(resp.usage,
@@ -2637,8 +2671,46 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
     try:
         body = _extract(text, "md")
     except RuntimeError:
-        return
+        return False
     spec.report_path.write_text(body, encoding="utf-8")
+    return True
+
+
+def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
+                 usage: list[dict[str, Any]], carry: dict[str, str]) -> dict[str, Any]:
+    """Check the report's claims against the records before the run completes,
+    and regenerate it once with the contradictions named (#929, v8 step E).
+
+    The check is `report_claims_block` — the same deterministic reading the
+    record carries afterwards, so what the gate saw and what the record
+    reports cannot disagree. One regeneration, never more: a report that
+    still contradicts the records after being told so is recorded as such,
+    and the gate reading (#684) counts it.
+    """
+    before = report_claims_block(spec) or {}
+    out: dict[str, Any] = {
+        "checked": bool(before.get("checked")),
+        "claims_checked_before": before.get("claims_checked"),
+        "findings_before": len(before.get("findings") or []),
+        "regenerated": False}
+    if not before.get("checked"):
+        out["reason"] = before.get("reason")
+        return out
+    if not before.get("findings"):
+        return out
+    _snapshot(spec, f"{spec.project}_report_before_regate.md",
+              spec.report_path.read_text(encoding="utf-8") if spec.report_path.exists() else "")
+    out["regenerated"] = _regenerate_report(spec, client, settings, usage, carry,
+                                            phase="report_regate",
+                                            contradictions=before["findings"])
+    after = report_claims_block(spec) or {}
+    out["claims_checked_after"] = after.get("claims_checked")
+    out["findings_after"] = len(after.get("findings") or [])
+    out["remaining"] = (after.get("findings") or [])[:20]
+    print(f"   report re-checked: {out['findings_before']} contradiction(s) before, "
+          f"{out['findings_after']} after"
+          + ("" if out["regenerated"] else " (report not regenerated)"))
+    return out
 
 
 def _dependents_of(carry_name: str, produced_by: tuple[str, ...]) -> set[str]:
@@ -3148,7 +3220,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         "max_tokens_by_phase": {**{k: phase_max_tokens(spec, k, v) for k, v in PHASE_MAX_TOKENS.items()
                                    if not (CORE_DERIVED and (k in DERIVED_PHASES or k == "repair_core"))},
                                 **({"full_readdress": min(READDRESS_MAX_TOKENS, output_limit(settings["name"]))}
-                                   if spec.condition in RECEIPT_CONDITIONS else {})},
+                                   if spec.condition in RECEIPT_CONDITIONS else {}),
+                                "report_regate": PHASE_MAX_TOKENS.get("report", settings["max_tokens"])},
         # What the run sent, and what it was allowed to send. The second is
         # usually unknown, and #568 exists because that could not be told from
         # the record: AI-READI's reconcile_full ran at 249,015 tokens under a
@@ -3247,6 +3320,10 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
                            "--no-resume to derive it"),
             }
     rec.data["pair_consistency"] = pair_consistency(spec)
+    # v8 step E (#929): the report's claims are checked before the run
+    # completes, and a contradicting report is regenerated once. Recorded
+    # beside the final `report_claims` block, which is recomputed below.
+    rec.data["report_gate"] = _gate_report(spec, client, settings, usage, carry)
     rec.data["report_claims"] = report_claims_block(spec)
     rec.data["grounding"] = grounding_block(spec)
     # Properties of the records alone, so they survive a drifted bundle (#602).
@@ -3262,6 +3339,11 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     rec.data["receipts"] = _receipts_block(spec, rec.data)
     rec.data["intermediates"] = _intermediates_block(spec)
 
+    # Hashed now, after every phase including repair and the report gate
+    # appended to the reasoning log — at record build the md5 was of a prefix
+    # (#652).
+    rec.data["companions"] = provenance.companion_facts(
+        spec.project, spec.method, spec.label, reasoning=_reasoning_path(spec))
     rec.write(spec.provenance_path)
 
     # Verify what was just written rather than assuming it. The playbook lists a

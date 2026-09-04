@@ -490,6 +490,19 @@ removes it, anything else is left as written for the gate to count. The
 receipt as the model wrote it is kept as `intermediate/{P}_coverage_receipt_as_written.yaml`,
 and the `full_readdress` entry in `api_usage` records what was unresolved
 before and after. The v8 CM4AI canary stopped on exactly one such entry.
+**Report gate (#929, v8 step E, API path only)**: the report phase ends
+with a `## Dispositions` table (`| slot | disposition | record | reason |`),
+the claim form `report_claims` reads — `removed` rows must be absent,
+`retained`/`changed`/`added` rows present (`retention_not_shown`,
+`change_not_shown`). The runner checks the report before the run completes
+and regenerates it once with the contradictions named (`report_regate`;
+the first report is kept as `intermediate/{P}_report_before_regate.md`);
+`report_gate` in the record says what was found before and after. **Gate
+reading (#684)**: a report with `claims_checked: 0` is unmeasured, not zero
+findings — `report findings` is `None`/blind for that run — and a baseline
+arm that resolved but never measured a report claim (11 of 12 v7 production
+records) is a floor of 0 with `baseline_basis` on the row, never a missing
+baseline. `companions` is hashed after the last phase (#652).
 
 **The gate** (`canary.verdict`): when `inputs.receipt_expected` is true — set
 by `d4d provenance record --receipt-expected`, which the receipt-writing
