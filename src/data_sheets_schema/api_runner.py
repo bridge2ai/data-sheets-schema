@@ -1455,8 +1455,7 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
     has already succeeded (#955).
     """
     try:
-        record = yaml.safe_load(normalise_multivalued(normalise_enum_aliases(
-            normalise_temporal(record_body))))
+        record = yaml.safe_load(normalise_record_text(record_body))
         receipt = yaml.safe_load(receipt_body)
     except yaml.YAMLError:
         return receipt_body, None
@@ -2168,6 +2167,83 @@ _SCALAR_LINE = re.compile(
     r"(?!\s*$).*?)\s*$")
 
 
+_IDENTIFIER_LINE = re.compile(r"^(?P<head>[ \t]*-?[ \t]*(?P<slot>[a-z_]+):[ \t]+)"
+                              r"(?P<q>[\"']?)(?P<value>https?://[^\s\"']+)(?P=q)[ \t]*$")
+_ITEM_LINE = re.compile(r"^(?P<head>[ \t]*-[ \t]+)(?P<q>[\"']?)(?P<value>https?://[^\s\"']+)(?P=q)[ \t]*$")
+_KEY_LINE = re.compile(r"^(?P<indent>[ \t]*)-?[ \t]*(?P<slot>[a-z_]+):[ \t]*$")
+
+
+@lru_cache(maxsize=1)
+def _identifier_form_tables() -> tuple[frozenset[str], tuple[tuple[str, str], ...]]:
+    from data_sheets_schema.grounding import declared_bases
+    from data_sheets_schema.identifiers import uriorcurie_slots
+    return frozenset(uriorcurie_slots()), tuple(declared_bases())
+
+
+def curie_form(value: str, bases: tuple[tuple[str, str], ...]) -> str | None:
+    """`prefix:local` for a resolver URL of a declared prefix, else None."""
+    low = value.lower()
+    for base, prefix in bases:
+        if low.startswith(base) and len(value) > len(base):
+            return f"{prefix}:{value[len(base):]}"
+    return None
+
+
+def normalise_identifier_form(text: str) -> str:
+    """Rewrite a resolver URL in a `uriorcurie` slot to the CURIE it names (#974).
+
+    The rule has been in every arm prompt since v5 — write `doi:…`, not the
+    doi.org resolver form — and the v8 CM4AI re-canary wrote the dataset's own
+    DOI as a URL under `id`, with 15 fragments minted on it: 16 resolver URLs
+    against 0 across the v5, v6 and v7 arms. A rule the model breaks one run in
+    two is a rule that needs a mechanism, like the enum aliases and the dates
+    before it. Text-level for the same reason as those: re-dumping the YAML
+    would drop the `#` provenance header.
+
+    Only `uriorcurie`-ranged slots (induced, from the schema) and only
+    resolver bases the schema declares (`grounding.declared_bases`, longest
+    first); fragments survive (`doi:10.1/x#collection-apms`); a `uri`-ranged
+    slot such as `download_url` keeps its URL. Scalar values on the slot's
+    line and `- ` items under a multivalued identifier slot are covered; a
+    URL inside prose is not touched.
+    """
+    slots, bases = _identifier_form_tables()
+    if not slots or not bases:
+        return text
+    out = []
+    enclosing: list[tuple[int, str]] = []          # (indent, slot) of open keys
+    for line in text.split("\n"):
+        k = _KEY_LINE.match(line)
+        if k:
+            indent = len(k.group("indent").expandtabs(2))
+            enclosing = [(i, sl) for i, sl in enclosing if i < indent] + [(indent, k.group("slot"))]
+            out.append(line)
+            continue
+        m = _IDENTIFIER_LINE.match(line)
+        if m and m.group("slot") in slots:
+            curie = curie_form(m.group("value"), bases)
+            if curie:
+                out.append(f"{m.group('head')}{m.group('q')}{curie}{m.group('q')}")
+                continue
+        m = _ITEM_LINE.match(line)
+        if m:
+            indent = len(m.group("head").expandtabs(2)) - 2
+            owner = next((sl for i, sl in reversed(enclosing) if i < indent + 1), None)
+            if owner in slots:
+                curie = curie_form(m.group("value"), bases)
+                if curie:
+                    out.append(f"{m.group('head')}{m.group('q')}{curie}{m.group('q')}")
+                    continue
+        out.append(line)
+    return "\n".join(out)
+
+
+def normalise_record_text(text: str) -> str:
+    """Every write-time normalisation, in the order the record is written."""
+    return normalise_identifier_form(normalise_multivalued(
+        normalise_enum_aliases(normalise_temporal(text))))
+
+
 def normalise_multivalued(text: str) -> str:
     """Wrap a lone scalar into a list where the slot declares multivalued.
 
@@ -2311,8 +2387,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             # re-projected rather than the core being repaired on its own,
             # which would let the pair diverge again (#694).
             from data_sheets_schema.derive_core import core_text
-            text = normalise_multivalued(normalise_enum_aliases(
-                normalise_temporal(core_text(spec.full_path, phase4_complete=True)[0])))
+            text = normalise_record_text(core_text(spec.full_path, phase4_complete=True)[0])
             spec.core_path.write_text(text, encoding="utf-8")
             errors, failure = _validator_lines(path, schema, cls)
             log.append({"phase": ph, "round": 1,
@@ -2386,8 +2461,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 log.append({"phase": ph, "round": rnd,
                             "outcome": f"unusable response: {exc}"})
                 continue
-            body = normalise_multivalued(
-                normalise_enum_aliases(normalise_temporal(body)))
+            body = normalise_record_text(body)
             path.write_text(body, encoding="utf-8")
             _snapshot(spec, f"{spec.project}_{ph}_r{rnd}.yaml", body)
             applied_from = len(errors)
@@ -3193,8 +3267,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         elif artifact:
             target.parent.mkdir(parents=True, exist_ok=True)
             if artifact in ("full", "core"):
-                body = normalise_multivalued(
-                normalise_enum_aliases(normalise_temporal(body)))
+                body = normalise_record_text(body)
             target.write_text(body, encoding="utf-8")
             # Reconcile (and later repair) overwrite the artifact in place;
             # the snapshot is the only record of what this phase produced.
@@ -3355,8 +3428,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         # record. The claim is made only when the core on disk is byte-equal
         # to a fresh derivation of the full on disk.
         from data_sheets_schema.derive_core import core_text, derivation_facts
-        fresh = normalise_multivalued(normalise_enum_aliases(
-            normalise_temporal(core_text(spec.full_path, phase4_complete=True)[0])))
+        fresh = normalise_record_text(core_text(spec.full_path, phase4_complete=True)[0])
         on_disk = spec.core_path.read_text(encoding="utf-8") if spec.core_path.exists() else None
         repaired = any(r.get("phase") == "repair_core" for r in (rec.data.get("repair") or []))
         if on_disk == fresh:
