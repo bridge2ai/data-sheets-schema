@@ -259,6 +259,12 @@ bookkeeping classes follows the v7 retained-with-basis pattern. Fill to
 4×3 only after all four pass; the five Aug-28 exploratory records stay
 excluded from every v8 comparison as they were from v7's.
 
+### Canary results
+
+| project | label | verdict | basis |
+|---|---|---|---|
+| CM4AI | `2026-09-04_claude-opus-5-api-generic-v8_rep1` | **regressed** on one metric: receipt findings 1 against a floor of 0; every other gated metric equal to or better than the v7 per-project worst (British spellings 0 vs 2). Full-phase output 31,207 of 128,000 (24%). One repair round (11 findings). Receipts: 28/28 chunks, 117/168 snippets verified (45 adjacent, 6 elsewhere), 206/342 slots with a receipt (60.2%). | Retained with basis, the v7 precedent (#906/#920): the finding is one receipt entry addressed to `subject`, a name the schema has no slot for, for a value the record holds under `keywords` — a phase-1 addressing slip with no coverage credit, not a prediction-1/2 metric. Recorded in the record's `canary` block. The batch gate stopped on it; whether VOICE runs next on this basis is the plan owner's call. First run stopped on a CBORG 403 (off-VPN) before any phase; resumed on the VPN. |
+
 ## Sequencing (PRs, in order)
 
 The first PR (#916) landed A and the #912 pack half ahead of this
