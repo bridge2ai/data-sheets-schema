@@ -25,27 +25,42 @@ class TestTheNormaliser(unittest.TestCase):
     def test_a_mailto_id_becomes_a_fragment_and_the_address_moves_to_email(self):
         out = normalise_mailto_ids("id: doi:10.1/x\nethical_reviews:\n  contact_person:\n    id: mailto:jane@ucsd.edu\n    name: Jane\n")
         self.assertEqual(yaml.safe_load(out)["ethical_reviews"]["contact_person"],
-                         {"id": "doi:10.1/x#person-jane-at-ucsd-edu", "email": "jane@ucsd.edu", "name": "Jane"})
+                         {"id": "doi:10.1/x#person-jane", "email": "jane@ucsd.edu", "name": "Jane"})
 
     def test_list_items_keep_one_email_each_and_fill_an_empty_one(self):
         out = normalise_mailto_ids("id: doi:10.1/x\ndata_governance:\n  committee_members:\n  - id: \"mailto:bob@x.org\"\n"
                                    "    email: bob@x.org\n    name: Bob\n  - id: mailto:c@d.org\n    name: C\n    email:\n"
                                    "  - email:\n    id: mailto:e@f.org\n")
         people = yaml.safe_load(out)["data_governance"]["committee_members"]
-        self.assertEqual(people[0], {"id": "doi:10.1/x#person-bob-at-x-org", "email": "bob@x.org", "name": "Bob"})
-        self.assertEqual(people[1], {"id": "doi:10.1/x#person-c-at-d-org", "name": "C", "email": "c@d.org"})
+        self.assertEqual(people[0], {"id": "doi:10.1/x#person-bob", "email": "bob@x.org", "name": "Bob"})
+        self.assertEqual(people[1], {"id": "doi:10.1/x#person-c", "name": "C", "email": "c@d.org"})
         self.assertEqual(people[2], {"email": "e@f.org", "id": "doi:10.1/x#person-e-at-f-org"})
         self.assertEqual(out.count("email:"), 3)
 
     def test_an_email_before_the_id_is_not_duplicated(self):
         out = normalise_mailto_ids("id: doi:10.1/x\nethical_reviews:\n  contact_person:\n    email: jane@ucsd.edu\n    id: mailto:jane@ucsd.edu\n")
         self.assertEqual(out.count("email:"), 1)
-        self.assertIn("#person-jane-at-ucsd-edu", out)
+        self.assertIn("#person-jane-at-ucsd-edu", out)   # no name in the mapping: the address form
 
-    def test_only_person_ranged_slots_are_touched(self):
-        """#985: an Organization has no email slot."""
+    def test_only_person_ranged_slots_are_touched_and_the_skip_is_logged(self):
+        """#985: an Organization has no email slot; #983 review: a skip is visible."""
+        from data_sheets_schema.api_runner import _REWRITE_LOG, identifier_rewrite_summary
         text = "id: doi:10.1/x\ncreators:\n- name: Org\n  affiliation:\n  - id: mailto:grants@x.org\n    name: X\n"
-        self.assertEqual(normalise_mailto_ids(text), text)
+        log = []; token = _REWRITE_LOG.set(log)
+        try:
+            self.assertEqual(normalise_mailto_ids(text, phase="full"), text)
+        finally:
+            _REWRITE_LOG.reset(token)
+        summary = identifier_rewrite_summary(log)
+        self.assertEqual(summary["mailto_ids_skipped_count"], 1)
+        self.assertIn("not a Person slot", summary["mailto_ids_skipped"][0]["reason"])
+        self.assertEqual((summary["occurrences"], summary["identifier_form"]), (0, {}))
+
+    def test_the_fragment_follows_the_name_when_the_mapping_has_one(self):
+        """R5 tells the model `#person-<name>`; the normaliser mints the same id for the same person."""
+        out = normalise_mailto_ids("id: doi:10.1/x\ndata_governance:\n  committee_members:\n  - name: Bob Lee\n    id: mailto:bob@x.org\n"
+                                   "  - id: mailto:c@d.org\n    name: \"C. Dee\"\n")
+        self.assertIn("#person-bob-lee", out); self.assertIn("#person-c-dee", out)
 
     def test_block_scalar_prose_is_never_touched(self):
         text = "id: doi:10.1/x\ndescription: |\n  id: mailto:inside@x.org\n  more\nname: n\n"
@@ -93,16 +108,18 @@ class TestTheNormaliser(unittest.TestCase):
 
 
 class TestInstrumentV3(unittest.TestCase):
-    def test_mailto_is_not_a_minted_namespace_but_invented_ones_still_are(self):
-        rec = {"id": "doi:1", "creators": [{"id": "mailto:a@b"}, {"id": "urn:cm4ai:x"}, {"id": "chorus:1"},
-                                           {"id": "ark:12345/abc"}, {"id": "urn:uuid:1"}]}
-        self.assertEqual(grounding.undeclared_prefixes(rec, {"id"}), {"urn:cm4ai": 1, "chorus": 1})
-        self.assertIn("mailto", grounding.EXCLUDED_SCHEMES)
+    def test_mailto_is_excluded_on_a_person_id_and_counted_elsewhere(self):
+        """v3: a Person's mailto id is #981's normaliser's case; anywhere else it stays a gated count."""
+        rec = {"id": "doi:1", "ethical_reviews": {"contact_person": {"id": "mailto:a@b"}},
+               "creators": [{"id": "mailto:org@b", "affiliation": [{"id": "mailto:e@f"}]},
+                            {"id": "urn:cm4ai:x"}, {"id": "chorus:1"}, {"id": "ark:12345/abc"}, {"id": "urn:uuid:1"}]}
+        self.assertEqual(grounding.undeclared_prefixes(rec, {"id"}), {"mailto": 2, "urn:cm4ai": 1, "chorus": 1})
+        self.assertNotIn("mailto", grounding.EXCLUDED_SCHEMES)
 
     def test_the_form_block_names_its_instrument(self):
         with tempfile.TemporaryDirectory() as tmp:
             full = Path(tmp) / "P_d4d.yaml"; core = Path(tmp) / "P_d4d_core.yaml"
-            full.write_text("id: doi:1\ncreators:\n- id: mailto:a@b\n"); core.write_text("id: doi:1\n")
+            full.write_text("id: doi:1\nethical_reviews:\n  contact_person:\n    id: mailto:a@b\n"); core.write_text("id: doi:1\n")
             block = grounding.form_facts(full, core)
         self.assertEqual(block["undeclared_prefix_occurrences"], 0)
         self.assertEqual(block["prefix_instrument"], grounding.PREFIX_INSTRUMENT)
@@ -131,7 +148,7 @@ class TestOnTheRunner(unittest.TestCase):
             finally:
                 api_runner._client = keep
             full = yaml.safe_load(s.full_path.read_text())
-            self.assertEqual(full["ethical_reviews"]["contact_person"]["id"], "doi:10.1/x#person-jane-at-ucsd-edu")
+            self.assertEqual(full["ethical_reviews"]["contact_person"]["id"], "doi:10.1/x#person-jane")
             self.assertEqual(full["ethical_reviews"]["contact_person"]["email"], "jane@ucsd.edu")
             d = yaml.safe_load((out / "CHORUS_provenance.yaml").read_text())
             self.assertEqual(d["form"]["undeclared_prefix_occurrences"], 0)

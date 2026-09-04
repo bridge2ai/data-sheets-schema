@@ -296,10 +296,13 @@ URN_REGISTERED_NIDS = frozenset({"uuid", "isbn", "issn", "oid", "ietf",
                                  "doi", "lex"})
 
 
-#: Schemes the undeclared-prefix metric never counts: `ark` since v2 (#671),
-#: `mailto` since v3 (#982). Registered URN NIDs are handled by NID below.
-EXCLUDED_SCHEMES = frozenset({"ark", "mailto"})
-PREFIX_INSTRUMENT = "v3 (#982): ark and mailto excluded, urn by NID"
+#: Schemes the undeclared-prefix metric never counts: `ark` since v2 (#671).
+#: `mailto` (v3, #982) is excluded only on a Person's id — the case #981's
+#: normaliser rewrites — and counted anywhere else, so a `mailto:` written
+#: where nothing rewrites it (an organisation, a root id) is still seen by a
+#: gated instrument (#983 review). Registered URN NIDs are handled by NID.
+EXCLUDED_SCHEMES = frozenset({"ark"})
+PREFIX_INSTRUMENT = "v3 (#982): ark excluded, mailto excluded on Person ids only, urn by NID"
 
 
 def undeclared_prefixes(record: dict[str, Any],
@@ -336,11 +339,12 @@ def undeclared_prefixes(record: dict[str, Any],
     canary six, and v2 counted both as invented namespaces. A `mailto:` id
     is the generation-side matter #981 handles; it is not this metric's.
     """
-    from data_sheets_schema.identifiers import (declared_prefixes,
+    from data_sheets_schema.identifiers import (declared_prefixes, person_slots,
                                                 walk_identifiers)
     declared = {p.lower() for p in declared_prefixes()}
+    persons = person_slots()
     out: dict[str, int] = {}
-    for _path, _slot, value in walk_identifiers(record, slots):
+    for path, _slot, value in walk_identifiers(record, slots):
         text = str(value)
         m = re.match(r"^([A-Za-z][\w.\-]*):(?!//)", text)
         if not m:
@@ -348,6 +352,11 @@ def undeclared_prefixes(record: dict[str, Any],
         scheme = m.group(1).lower()
         if scheme in declared or scheme in EXCLUDED_SCHEMES:
             continue
+        if scheme == "mailto":
+            parts = path.split(".")
+            parent = parts[-2].rstrip("[]") if len(parts) >= 2 else ""
+            if parent in persons:
+                continue                       # a Person's id: #981's normaliser's case
         if scheme == "urn":
             nid = (text.split(":", 2)[1].lower()
                    if text.count(":") >= 2 else "")

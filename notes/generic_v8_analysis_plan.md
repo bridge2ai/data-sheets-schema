@@ -349,7 +349,8 @@ steps need:
     fragment on the record's id for a `mailto:` identifier and keeps the
     address in `email` (`normalise_mailto_ids`, logged under
     `normalisation.mailto_ids`); (b) the undeclared-prefix counter is
-    instrument v3 — `mailto:` excluded, as its v2 docstring judged; the two
+    instrument v3 — `mailto:` excluded on a Person's id (the normaliser's
+    case) and counted anywhere else, as its v2 docstring judged; the two
     affected form blocks (v6 agentic CM4AI rep1: 2 → 0; 2026-09-04c: 6 → 0)
     are recomputed and the 2026-09-04c canary re-verdicted offline under v3
     — which settles the instrument question only. (a) and the R5 clause that
