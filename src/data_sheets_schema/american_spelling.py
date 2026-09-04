@@ -45,10 +45,16 @@ the phase, enclosing slot and both forms, and `d4d review disposition
 --amend` (#903) restores it once the reviewer has located the value (a
 text-level walker knows the enclosing key, not the full path).
 
+**Verbatim slots**: a value the schema defines as it appears in the data
+(`variable_name`: the AI_READI lab panel's `Haemoglobin`) is a fact about
+the source, not the record's prose; `VERBATIM_SLOTS` are left as written
+and logged as skipped (#1007).
+
 **Documented limits** (0 occurrences in the API corpus): keys in flow
 mappings and quoted keys are rewritten like values; a double-quoted scalar
-spanning lines is exempt only on its first line, as the instrument's own
-line-local exemption is.
+spanning lines is not exempt on any line, as the instrument's own
+exemption is line-local too; a title-case run is read across a preceding
+quoted or identifier-shaped span as if the span were not there.
 """
 
 from __future__ import annotations
@@ -61,7 +67,12 @@ from data_sheets_schema.grounding import BRITISH_PATTERNS, british_spellings
 #: Instrument note the normalisation block carries, so a reader knows which
 #: rule set rewrote a record (the instrument's own version is on the form
 #: block; this is the mechanism's).
-NORMALISER_VERSION = "v1 (#1002): one rule per BRITISH_PATTERNS v3 entry; double-quoted spans and identifier-shaped tokens exempt"
+NORMALISER_VERSION = ("v1 (#1002): one rule per BRITISH_PATTERNS v3 entry; double-quoted spans, "
+                      "identifier-shaped tokens, title-case runs, genus names and verbatim slots left as written")
+
+#: Slots whose value is the source's own token: never prose.
+VERBATIM_SLOTS = frozenset({"variable_name", "column_name", "field_name", "path", "filename",
+                            "file_name", "format", "media_type", "md5", "sha256"})
 
 
 def _swap(british: str, american: str) -> Callable[[str], str]:
@@ -149,8 +160,10 @@ _PROTECTED = re.compile(f"{_QUOTED.pattern}|{_IDENTIFIER_TOKEN.pattern}")
 #: Latin spelling in American English.
 PROPER_NOUNS = frozenset({"haemophilus"})
 _CAPITALISED = re.compile(r"^[A-Z][a-z]")
-_WORD_BEFORE = re.compile(r"([A-Za-z][\w'’-]*)[^\w\n]*$")
-_WORD_AFTER = re.compile(r"^[^\w\n]*([A-Za-z][\w'’-]*)")
+#: The neighbouring word, stopping at a sentence boundary: "Toronto. Programme
+#: staff" is not a title-case run (#1007).
+_WORD_BEFORE = re.compile(r"([A-Za-z][\w'’-]*)[^\w\n.;:!?]*$")
+_WORD_AFTER = re.compile(r"^[^\w\n.;:!?]*([A-Za-z][\w'’-]*)")
 
 #: The YAML lines this walks: a mapping key (possibly a list item), a bare
 #: list item, and a block-scalar indicator on a key line.
@@ -223,7 +236,8 @@ _TRAILING_COMMENT = re.compile(r"^(.*?\S)(\s+#)(.*)$")
 def _split_comment(segment: str) -> tuple[str, str, str]:
     """`value  # comment` → (value, "  #", " comment"); no comment → (segment, "", "")."""
     m = _TRAILING_COMMENT.match(segment)
-    if not m or '"' in m.group(3) and m.group(1).count('"') % 2:
+    # A `#` inside an open quoted span is content, not a comment.
+    if not m or m.group(1).count('"') % 2 or m.group(1).count("'") % 2:
         return segment, "", ""
     return m.group(1), m.group(2), m.group(3)
 
@@ -258,6 +272,9 @@ def normalise_british_spellings(text: str, *, phase: str | None = None,
         else:
             body, sep, comment = _split_comment(segment)
         new, pairs, skips = americanise(body)
+        if owner in VERBATIM_SLOTS and pairs:
+            skips = skips + [(src, "verbatim slot") for src, _ in pairs]
+            new, pairs = body, []
         if log is not None:
             for src, dst in pairs:
                 log.append({"phase": phase, "kind": "british_spelling", "slot": owner,

@@ -226,6 +226,20 @@ class TestTheYamlWalker(unittest.TestCase):
                          [{"phase": "full", "slot": "name", "from": "programme", "to": "program"},
                           {"phase": "full", "slot": "name", "from": "centre", "to": "center"}])
 
+    def test_verbatim_slots_sentence_boundaries_and_single_quoted_comments(self):
+        """#1007: `variable_name: Haemoglobin` is the source's token; a full stop ends a title-case run;
+        a `#` inside single quotes is content."""
+        log = []
+        out = normalise_british_spellings("variables:\n- variable_name: Haemoglobin\n  description: Haemoglobin level\n"
+                                          "notes: Data were collected in Toronto. Programme staff labelled them\n"
+                                          "c: 'x # programme'\n", log=log)
+        doc = yaml.safe_load(out)
+        self.assertEqual(doc["variables"][0], {"variable_name": "Haemoglobin", "description": "Hemoglobin level"})
+        self.assertEqual(doc["notes"], "Data were collected in Toronto. Program staff labeled them")
+        self.assertEqual(doc["c"], "x # program")
+        self.assertEqual([(e["slot"], e["from"], e.get("reason")) for e in log if e["kind"].endswith("skipped")],
+                         [("variable_name", "Haemoglobin", "verbatim slot")])
+
     def test_layout_is_preserved(self):
         out = normalise_british_spellings(RECORD)
         self.assertEqual([len(l) - len(l.lstrip()) for l in out.splitlines()],
