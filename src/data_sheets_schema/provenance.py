@@ -962,6 +962,20 @@ class ProvenanceRecord:
             self.validation_carried = True
         elif had_prior:
             self.validation_carried = False
+        # A reviewer's attestations on the prior record survive a re-record
+        # (#856/#973): `record` rewrites the file from scratch and the inline
+        # checks rebuild the blocks afterwards, which deleted
+        # `pair_consistency.semantic_review` on every re-recorded v6 record.
+        # Carried with the artifacts guard the backfill uses.
+        if path.exists():
+            try:
+                from data_sheets_schema.backfill_checks import ATTESTATIONS, carry_attestations
+                prior_rec = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+                for name in ATTESTATIONS:
+                    if isinstance(prior_rec.get(name), dict) and isinstance(data.get(name), dict):
+                        data[name] = carry_attestations(name, prior_rec[name], data[name])
+            except Exception:                                # noqa: BLE001
+                pass
         path.write_text(
             "# D4D generation provenance record\n"
             f"# record_version {RECORD_VERSION} — see src/data_sheets_schema/provenance.py\n"

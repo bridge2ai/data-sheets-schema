@@ -464,7 +464,7 @@ def run_telemetry(run_dir: Path, project: str) -> dict[str, Any] | None:
 
 
 def collect_report(label_prefix: str,
-                   method: str = "claudecode_agent",
+                   method: str | None = None,
                    root: Path | None = None,
                    findings: list[dict[str, Any]] | None = None,
                    ) -> dict[str, Any]:
@@ -473,6 +473,9 @@ def collect_report(label_prefix: str,
     Comparisons are computed mechanically across the collected runs;
     findings are authored analysis passed in, never generated here.
     """
+    if method is None:
+        from data_sheets_schema.runs import method_for_label
+        method = method_for_label(label_prefix, concat_dir=root)          # #934
     base = (root or CONCAT_DIR) / f"{method}_core"
     runs: list[dict[str, Any]] = []
     # Quarantined runs (.superseded-*, .failed-*) are evidence for closed

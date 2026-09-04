@@ -23,7 +23,7 @@ def _provenance(method: str, label: str, project: str) -> Path:
 
 
 @review.command("pack")
-@click.option("--method", default="claudecode_agent", show_default=True)
+@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--label", required=True)
 @click.option("--project", type=click.Choice(PROJECTS), required=True)
 @click.option("--instruction", "instruction_file", default=None, type=click.Path(exists=True, dir_okay=False),
@@ -36,6 +36,8 @@ def pack(method, label, project, instruction_file, receipted, receiptless):
     their cited passage, the receiptless and reshaped slots, and the
     instruction's rules as a checklist — each item with its pointer and its
     question, and a closed verdict vocabulary per kind."""
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or resolve_method(label, project)
     from data_sheets_schema.review_pack import write_pack
     prov = _provenance(method, label, project)
     if not prov.exists():
@@ -53,7 +55,7 @@ def pack(method, label, project, instruction_file, receipted, receiptless):
 
 
 @review.command("check")
-@click.option("--method", default="claudecode_agent", show_default=True)
+@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--label", required=True)
 @click.option("--project", type=click.Choice(PROJECTS), required=True)
 @click.option("--write", is_flag=True, help="write the `review` block into the provenance record")
@@ -62,6 +64,8 @@ def check(method, label, project, write, strict):
     """Check `{PROJECT}_review.yaml` against its pack: every item answered
     once with a verdict from its kind's vocabulary and evidence; counts are
     affirmative and cannot_tell is its own number."""
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or resolve_method(label, project)
     import hashlib
 
     import yaml
@@ -97,7 +101,7 @@ def check(method, label, project, write, strict):
         sys.exit(1)
 
 @review.command("disposition")
-@click.option("--method", default="claudecode_agent", show_default=True)
+@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--label", required=True)
 @click.option("--project", type=click.Choice(PROJECTS), required=True)
 @click.option("--item", required=True, help="the review item this disposes of (e.g. slot-008, rule-01)")
@@ -123,6 +127,8 @@ def disposition(method, label, project, item, disposition, note, slot_path, old,
     Evaluations that predate an amendment are not re-attributed: the entry
     names them as predating it.
     """
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or resolve_method(label, project)
     import hashlib
     from datetime import datetime, timezone
 
@@ -251,7 +257,7 @@ def disposition(method, label, project, item, disposition, note, slot_path, old,
 
 
 @review.command("agree")
-@click.option("--method", default="claudecode_agent", show_default=True)
+@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--label", required=True)
 @click.option("--project", type=click.Choice(PROJECTS), required=True)
 @click.option("--write", is_flag=True, help="write the reliability block into the provenance record's review block")
@@ -259,6 +265,8 @@ def agree_cmd(method, label, project, write):
     """Test-retest agreement between {P}_review.yaml and {P}_review_b.yaml
     against the same committed pack: percent agreement, Cohen's kappa on the
     affirmative/adverse/cannot_tell trichotomy, and every disagreement."""
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or resolve_method(label, project)
     import hashlib
 
     import yaml

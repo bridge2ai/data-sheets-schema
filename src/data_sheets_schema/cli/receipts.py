@@ -24,7 +24,7 @@ def _run_paths(method: str, label: str, project: str) -> dict[str, Path]:
 
 
 @receipts.command("check")
-@click.option("--method", default="claudecode_agent", show_default=True)
+@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--label", required=True)
 @click.option("--project", type=click.Choice(PROJECTS), required=True)
 @click.option("--write", is_flag=True,
@@ -45,6 +45,8 @@ def check(method, label, project, write, strict, bundle_opt):
     the run's procedure was to write one, which the provenance record says
     (`inputs.receipt_expected`).
     """
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or resolve_method(label, project)
     import yaml
 
     from data_sheets_schema import backfill_checks as bc
@@ -98,10 +100,20 @@ def check(method, label, project, write, strict, bundle_opt):
     # block is not a metric for it (#727). Expected-and-unchecked is.
     if strict and block.get("expected") and not block.get("checked"):
         sys.exit(1)
-    if strict and block.get("checked") and (
-            block["findings"] or block["chunks"]["reviewed"] < block["chunks"]["total"]
-            or block["snippets"]["verified"] < block["snippets"]["total"]):
+    if strict and block.get("checked") and strict_failure(block):
         sys.exit(1)
+
+
+def strict_failure(block: dict) -> bool:
+    """What `--strict` fails on: exactly the gate's receipt floors (#881).
+
+    The first version read `findings` wholesale, so a clean run with
+    wrong-chunk attributions — reported, never gated (#763) — strict-failed
+    while the canary gate passed it. One definition, `canary.receipt_floors`,
+    for both.
+    """
+    from data_sheets_schema.canary import receipt_floors
+    return any(v > 0 for v in receipt_floors(block).values())
 
 
 @receipts.command("invert")

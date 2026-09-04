@@ -392,7 +392,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
 
 @provenance.command("backfill-spec")
 @click.option("--project", required=True)
-@click.option("--method", default="claudecode_agent", show_default=True)
+@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--label", required=True)
 @click.option("--condition", required=True, help="the condition the instruction was rendered under")
 @click.option("--runtime", default="Claude Code", show_default=True)
@@ -411,6 +411,8 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     line. A spec that does not re-render to the hash is not written: that
     would assert a condition the run may not have used.
     """
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or resolve_method(label, project)
     import hashlib
     from datetime import date, timedelta
 

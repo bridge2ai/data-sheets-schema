@@ -100,6 +100,71 @@ class Run:
         return CONCAT_DIR / self.method / self.label
 
 
+_DEFAULT_CONCAT = CONCAT_DIR
+
+
+def method_for_label(label: str, project: str | None = None,
+                     concat_dir: Path | None = None) -> str:
+    """Which agent-family method directory holds `label` (#934).
+
+    Through generic_v7 both runtimes wrote under ``claudecode_agent``; from
+    v8 the API baseline writes under ``claudecode_api`` (#690). Every
+    downstream command used to default to the first, which is silently the
+    wrong directory for a v8 run. `label` is an exact label or a prefix: an
+    exact directory anywhere in the family wins over prefix matches, so
+    ``x_rep1`` under one family is not confused with ``x_rep10`` under the
+    other (#970). `project` prefers the directory holding that project's
+    provenance record, falling back to the directory that exists when no
+    record has been written yet — the receipt check runs before the record
+    (#730). Exactly one match is an answer; none or two is a LookupError
+    that names them, so a caller passes ``--method`` rather than guesses.
+    """
+    if concat_dir is None:
+        # The corpus root in effect: this module's and `provenance`'s are the
+        # same path unless a caller (a test, a tool) redirected one of them,
+        # in which case the redirected one is the corpus meant.
+        from data_sheets_schema import provenance as _pv
+        roots = [r for r in (globals()["CONCAT_DIR"], _pv.CONCAT_DIR) if r != _DEFAULT_CONCAT] or [_DEFAULT_CONCAT]
+    else:
+        roots = [concat_dir]
+    exact: dict[str, list[Path]] = {}
+    prefix: dict[str, list[Path]] = {}
+    for root in roots:
+        for method in AGENT_FAMILY:
+            core = root / f"{method}_core"
+            if not core.is_dir():
+                continue
+            if (core / label).is_dir():
+                exact.setdefault(method, []).append(core / label)
+            else:
+                dirs = [d for d in sorted(core.glob(f"{label}*")) if d.is_dir()]
+                if dirs:
+                    prefix.setdefault(method, []).extend(dirs)
+    concat_dir = roots[0]
+    candidates = exact or prefix
+    if project is not None:
+        with_record = {m: [d for d in ds if (d / f"{project}_provenance.yaml").exists()]
+                       for m, ds in candidates.items()}
+        with_record = {m: ds for m, ds in with_record.items() if ds}
+        if with_record:
+            candidates = with_record
+    hits = sorted(candidates)
+    if len(hits) == 1:
+        # The same label under a crate/healthsheet arm too (the 2026-07-31
+        # series is under four): a default that quietly picked the baseline
+        # could point a write-capable command at the wrong arm (#973).
+        others = sorted(d.parent.name[:-5] for d in concat_dir.glob(f"*_core/{label}")
+                        if d.is_dir() and d.parent.name[:-5] not in AGENT_FAMILY)
+        if others:
+            raise LookupError(f"label {label!r} also exists under {', '.join(others)}; pass --method")
+        return hits[0]
+    if not hits:
+        raise LookupError(f"no run labelled {label!r}"
+                          + (f" for {project}" if project else "")
+                          + f" under {' or '.join(m + '_core' for m in AGENT_FAMILY)}")
+    raise LookupError(f"label {label!r} exists under both {' and '.join(hits)}; pass --method")
+
+
 def discover(concat_dir: Path = CONCAT_DIR) -> list[Run]:
     """Find every run directory on disk."""
     runs: list[Run] = []
@@ -1241,10 +1306,15 @@ def _dig(record: dict, path: tuple[str, ...]):
     return cur
 
 
-def arm_facts(label_prefix: str, method: str = "claudecode_agent",
+def arm_facts(label_prefix: str, method: str | None = None,
               concat_dir: Path | None = None) -> dict[str, Any]:
     """What every record under a label prefix says about its own procedure."""
     import yaml as _yaml
+    if method is None:
+        try:
+            method = method_for_label(label_prefix, concat_dir=concat_dir)  # #934
+        except LookupError:
+            method = "claudecode_agent"          # an absent arm reads as empty facts, as before
 
     base = (concat_dir or CONCAT_DIR)
     seen: dict[str, set] = {name: set() for name, _ in ARM_PROCEDURE_FIELDS}
