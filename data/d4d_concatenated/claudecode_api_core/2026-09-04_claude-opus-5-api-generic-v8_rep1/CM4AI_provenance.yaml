@@ -1074,13 +1074,15 @@ canary:
     the gate writes no block), recomputed from this record''s own check blocks against
     the same baseline: the v7 production per-project worst across replicates, receipt
     floors at 0 (#763/#891).'
-  disposition: 'retained with basis, the v7 precedent (#906/#920): the single gated
-    finding is one receipt entry addressed to `subject`, a name the schema has no
-    slot for, for a value the record holds under `keywords` (''Medicine, Health and
-    Life Sciences'', the Dataverse subject line) — a receipt-addressing slip at phase
-    1 that carries no coverage credit (`slots.unresolved`), not a prediction-1/2 metric
-    of the v8 plan. Every other gated metric equals or beats the v7 per-project worst
-    (British spellings 0 vs 2). Full-phase output 31,207 of 128,000 (24%, #832). One
-    repair round ran (11 findings, applied; the core re-derived and validates). Whether
-    the fill proceeds on this basis is the plan owner''s call; the fill is not started.'
+  disposition: 'v8 defect (#952), decided by the plan owner on 2026-09-04: the single
+    gated finding is one receipt entry addressed to `subject`, a name the schema has
+    no slot for, for a value the record holds under `keywords` (''Medicine, Health
+    and Life Sciences'', the Dataverse subject line). The v8 receipt rule says the
+    slot is the record path the value fills, so this is a rule the model broke in
+    the same response that wrote the record — not the v7 retained-with-basis pattern
+    (#906/#920), which an earlier writing of this block applied and which is withdrawn.
+    No fill and no further canary until the defect is fixed and re-canaried. Every
+    other gated metric equals or beats the v7 per-project worst (British spellings
+    0 vs 2). Full-phase output 31,207 of 128,000 (24%, #832). One repair round (11
+    findings, applied; the core re-derived and validates).'
   recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-04
