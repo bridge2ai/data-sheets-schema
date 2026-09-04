@@ -23,38 +23,73 @@ from tests.test_download.test_api_runner import FakeMessages, FakeResponse, spec
 
 class TestTheNormaliser(unittest.TestCase):
     def test_a_mailto_id_becomes_a_fragment_and_the_address_moves_to_email(self):
-        out = normalise_mailto_ids("id: doi:10.1/x\ngovernance:\n  committee_contact:\n    id: mailto:jane@ucsd.edu\n    name: Jane\n")
-        self.assertEqual(yaml.safe_load(out)["governance"]["committee_contact"],
-                         {"id": "doi:10.1/x#person-jane", "email": "jane@ucsd.edu", "name": "Jane"})
+        out = normalise_mailto_ids("id: doi:10.1/x\nethical_reviews:\n  contact_person:\n    id: mailto:jane@ucsd.edu\n    name: Jane\n")
+        self.assertEqual(yaml.safe_load(out)["ethical_reviews"]["contact_person"],
+                         {"id": "doi:10.1/x#person-jane-at-ucsd-edu", "email": "jane@ucsd.edu", "name": "Jane"})
 
-    def test_an_existing_email_is_kept_once_and_list_items_are_covered(self):
-        out = normalise_mailto_ids("id: doi:10.1/x\ncreators:\n- name: A\n  contact_person:\n  - id: \"mailto:bob@x.org\"\n"
-                                   "    email: bob@x.org\n    name: Bob\n  - id: mailto:c@d.org\n    name: C\n")
-        people = yaml.safe_load(out)["creators"][0]["contact_person"]
-        self.assertEqual(people[0], {"id": "doi:10.1/x#person-bob", "email": "bob@x.org", "name": "Bob"})
-        self.assertEqual(people[1], {"id": "doi:10.1/x#person-c", "email": "c@d.org", "name": "C"})
-        self.assertEqual(out.count("email: bob@x.org"), 1)
+    def test_list_items_keep_one_email_each_and_fill_an_empty_one(self):
+        out = normalise_mailto_ids("id: doi:10.1/x\ndata_governance:\n  committee_members:\n  - id: \"mailto:bob@x.org\"\n"
+                                   "    email: bob@x.org\n    name: Bob\n  - id: mailto:c@d.org\n    name: C\n    email:\n"
+                                   "  - email:\n    id: mailto:e@f.org\n")
+        people = yaml.safe_load(out)["data_governance"]["committee_members"]
+        self.assertEqual(people[0], {"id": "doi:10.1/x#person-bob-at-x-org", "email": "bob@x.org", "name": "Bob"})
+        self.assertEqual(people[1], {"id": "doi:10.1/x#person-c-at-d-org", "name": "C", "email": "c@d.org"})
+        self.assertEqual(people[2], {"email": "e@f.org", "id": "doi:10.1/x#person-e-at-f-org"})
+        self.assertEqual(out.count("email:"), 3)
+
+    def test_an_email_before_the_id_is_not_duplicated(self):
+        out = normalise_mailto_ids("id: doi:10.1/x\nethical_reviews:\n  contact_person:\n    email: jane@ucsd.edu\n    id: mailto:jane@ucsd.edu\n")
+        self.assertEqual(out.count("email:"), 1)
+        self.assertIn("#person-jane-at-ucsd-edu", out)
+
+    def test_only_person_ranged_slots_are_touched(self):
+        """#985: an Organization has no email slot."""
+        text = "id: doi:10.1/x\ncreators:\n- name: Org\n  affiliation:\n  - id: mailto:grants@x.org\n    name: X\n"
+        self.assertEqual(normalise_mailto_ids(text), text)
+
+    def test_block_scalar_prose_is_never_touched(self):
+        text = "id: doi:10.1/x\ndescription: |\n  id: mailto:inside@x.org\n  more\nname: n\n"
+        self.assertEqual(normalise_mailto_ids(text), text)
+
+    def test_an_address_yaml_would_misread_is_quoted(self):
+        out = normalise_mailto_ids("id: doi:10.1/x\nethical_reviews:\n  contact_person:\n    id: \"mailto:*ops@x.org\"\n    name: O\n")
+        self.assertEqual(yaml.safe_load(out)["ethical_reviews"]["contact_person"]["email"], "*ops@x.org")
+
+    def test_the_slug_carries_local_part_and_domain(self):
+        out = normalise_mailto_ids("id: doi:10.1/x\nethical_reviews:\n  contact_person:\n    id: mailto:info@a.org\n"
+                                   "data_governance:\n  committee_contact:\n    id: mailto:info@b.org\n")
+        self.assertIn("#person-info-at-a-org", out); self.assertIn("#person-info-at-b-org", out)
 
     def test_the_root_id_and_a_record_without_one_are_untouched(self):
         self.assertEqual(normalise_mailto_ids("id: mailto:root@x.org\nname: n\n"), "id: mailto:root@x.org\nname: n\n")
-        text = "name: n\ncontact_person:\n  id: mailto:a@b.org\n"
+        text = "name: n\nethical_reviews:\n  contact_person:\n    id: mailto:a@b.org\n"
         self.assertEqual(normalise_mailto_ids(text), text)
 
-    def test_the_slug_is_safe_and_the_rewrite_is_logged(self):
+    def test_a_root_with_a_fragment_is_left_alone_and_the_skip_logged(self):
+        from data_sheets_schema.api_runner import _REWRITE_LOG
+        log = []; token = _REWRITE_LOG.set(log)
+        try:
+            text = "id: https://chorus4ai.org/#dataset\nethical_reviews:\n  contact_person:\n    id: mailto:a@b.org\n"
+            self.assertEqual(normalise_mailto_ids(text, phase="full"), text)
+        finally:
+            _REWRITE_LOG.reset(token)
+        self.assertEqual(log[0]["kind"], "mailto_id_skipped")
+
+    def test_the_rewrite_is_logged_and_summarised_apart_from_identifier_form(self):
         from data_sheets_schema.api_runner import _REWRITE_LOG, identifier_rewrite_summary
         log = []; token = _REWRITE_LOG.set(log)
         try:
-            out = normalise_mailto_ids("id: doi:10.1/x\ncontact_person:\n  id: mailto:J.Parker+lab@health.ucsd.edu\n", phase="full")
+            normalise_mailto_ids("id: doi:10.1/x\nethical_reviews:\n  contact_person:\n    id: mailto:J.Parker+lab@health.ucsd.edu\n", phase="full")
         finally:
             _REWRITE_LOG.reset(token)
-        self.assertIn("id: doi:10.1/x#person-j-parker-lab\n", out)
+        self.assertEqual(log[0]["to"], "doi:10.1/x#person-j-parker-lab-at-health-ucsd-edu")
         summary = identifier_rewrite_summary(log)
-        self.assertEqual(summary["mailto_ids"]["full"]["id"]["occurrences"], 1)
+        self.assertEqual(summary["mailto_ids"]["full"]["contact_person"]["occurrences"], 1)
         self.assertEqual(summary["identifier_form"], {})
 
     def test_it_runs_after_the_identifier_form_so_the_fragment_hangs_off_the_curie(self):
-        out = normalise_record_text("id: https://doi.org/10.1/x\ncontact_person:\n  id: mailto:a@b.org\n")
-        self.assertIn("id: doi:10.1/x#person-a\n", out)
+        out = normalise_record_text("id: https://doi.org/10.1/x\nethical_reviews:\n  contact_person:\n    id: mailto:a@b.org\n")
+        self.assertIn("id: doi:10.1/x#person-a-at-b-org\n", out)
 
 
 class TestInstrumentV3(unittest.TestCase):
@@ -96,11 +131,11 @@ class TestOnTheRunner(unittest.TestCase):
             finally:
                 api_runner._client = keep
             full = yaml.safe_load(s.full_path.read_text())
-            self.assertEqual(full["ethical_reviews"]["contact_person"]["id"], "doi:10.1/x#person-jane")
+            self.assertEqual(full["ethical_reviews"]["contact_person"]["id"], "doi:10.1/x#person-jane-at-ucsd-edu")
             self.assertEqual(full["ethical_reviews"]["contact_person"]["email"], "jane@ucsd.edu")
             d = yaml.safe_load((out / "CHORUS_provenance.yaml").read_text())
             self.assertEqual(d["form"]["undeclared_prefix_occurrences"], 0)
-            self.assertGreaterEqual(d["normalisation"]["mailto_ids"]["full"]["id"]["occurrences"], 1)
+            self.assertGreaterEqual(d["normalisation"]["mailto_ids"]["full"]["contact_person"]["occurrences"], 1)
 
 
 if __name__ == "__main__":

@@ -351,9 +351,16 @@ steps need:
     `normalisation.mailto_ids`); (b) the undeclared-prefix counter is
     instrument v3 — `mailto:` excluded, as its v2 docstring judged; the two
     affected form blocks (v6 agentic CM4AI rep1: 2 → 0; 2026-09-04c: 6 → 0)
-    are recomputed and the 2026-09-04c canary re-verdicted offline. (a) is a
-    generation-path change landing before the VOICE canary; (b) an
-    instrument revision registered here with both sides recomputed.
+    are recomputed and the 2026-09-04c canary re-verdicted offline under v3
+    — which settles the instrument question only. (a) and the R5 clause that
+    goes with it (the v8 prompt's identity rule now says what the D1 slot
+    descriptions already said: a Person's id is an ORCID or a fragment on the
+    record's id, never `mailto:`; pin rotated) are generation-path changes,
+    and the production rule invalidates every earlier record of the
+    condition: **CM4AI runs a fourth time under the final package before the
+    fill** (#984). VOICE runs next; the canary order becomes VOICE,
+    AI_READI, CHORUS, CM4AI. (b) is an instrument revision registered here
+    with both sides recomputed.
 
 Each of 2–5 and 7–10 is a generation-path change; per the production rule
 none of them may land between a v8 canary and its fill.

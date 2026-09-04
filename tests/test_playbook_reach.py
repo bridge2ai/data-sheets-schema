@@ -120,6 +120,9 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
             ("record's own computation", "record's own computation"),
         "receipts per roster entry":
             ("receipted entry by entry", "each entry carries its own receipt"),
+        # v8 R5 (#981): a Person's id is an ORCID or a fragment, never mailto.
+        "person ids":
+            ("fragment minted on this record's own id", "fragment minted on this record's own id"),
     }
 
     #: Rules the playbook carries that the condition prompts deliberately do

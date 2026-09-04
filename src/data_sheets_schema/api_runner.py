@@ -2302,60 +2302,155 @@ def normalise_identifier_form(text: str, *, phase: str | None = None) -> str:
 
 _MAILTO_ID_LINE = re.compile(r"^(?P<indent>[ \t]*)(?P<dash>-[ \t]+)?id:[ \t]+(?P<q>[\"']?)mailto:(?P<addr>[^\s\"']+)(?P=q)[ \t]*\r?$")
 _ROOT_ID_LINE = re.compile(r"^id:[ \t]+(?P<q>[\"']?)(?P<value>[^\s\"']+)(?P=q)[ \t]*\r?$", re.M)
+_EMAIL_LINE = re.compile(r"^(?P<indent>[ \t]*)email:(?:[ \t]+(?P<value>[^\r\n]*?))?[ \t]*\r?$")
+
+
+@lru_cache(maxsize=1)
+def _person_slots() -> frozenset[str]:
+    """Slots whose induced range is `Person`, from the schema: the only
+    mappings a `mailto:` id belongs to (#985 — an Organization has no `email`)."""
+    from data_sheets_schema.schema_view import shared_view
+    sv = shared_view(FULL_SCHEMA_PATH)
+    return frozenset(str(sl.name) for c in sv.all_classes()
+                     for sl in sv.class_induced_slots(c) if str(sl.range) == "Person")
+
+
+def _yaml_scalar(value: str) -> str:
+    """`value` quoted when YAML would read it as something else."""
+    if re.match(r"^[A-Za-z0-9][A-Za-z0-9._+@-]*$", value):
+        return value
+    return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
 def normalise_mailto_ids(text: str, *, phase: str | None = None) -> str:
-    """A `mailto:` written as an identifier becomes a fragment on the record's
-    own id, and the address is kept in the sibling `email` slot (#981).
+    """A `mailto:` written as a Person's identifier becomes a fragment on the
+    record's own id, and the address is kept in the sibling `email` slot
+    (#981).
 
     The third CM4AI v8 canary wrote `id: mailto:<address>` on six inlined
     contact persons — D1 forces `Person.id`, and the model had an email and
-    no ORCID. The fragment rule asks for a fragment on an identifier the
-    evidence supplies when no authority id exists, and `Person` has an
-    `email` slot for the address. Line-based like the other normalisers: the
-    mapping the `id` belongs to extends over the following lines indented
-    deeper than the id's key column; an `email:` already there is left, an
-    absent one is added right after the id. Without a top-level `id` there
-    is nothing to mint on, and the value is left for the counter to report.
+    no ORCID it used. The slot descriptions the digest renders say a Person
+    `id` is an ORCID CURIE where stated, else a fragment minted on the
+    record's own id (and R5 of the v8 prompt now says the same); `Person`
+    has an `email` slot for the address. Line-based like the other
+    normalisers, with the same care as `normalise_identifier_form`: block
+    scalars are skipped whole; the enclosing keys are tracked so only an `id`
+    inside a Person-ranged slot is touched (#985); the whole mapping is
+    scanned in both directions for `email`, an empty one is filled, a present
+    one left; the address is quoted when YAML needs it; the slug carries the
+    local part and the domain so two people never share an id; a root id
+    that already carries a fragment is left alone and the skip logged; the
+    root id itself is never rewritten; a record with no root id is left for
+    the counter.
     """
     root = _ROOT_ID_LINE.search(text)
     if not root:
         return text
     root_id = root.group("value")
+    persons = _person_slots()
     log = _REWRITE_LOG.get()
+
+    def width(ws: str) -> int:
+        return len(ws.expandtabs(2))
+
     lines = text.split("\n")
+    enclosing: list[tuple[int, str]] = []
+    block_indent: int | None = None
     out: list[str] = []
     i = 0
     while i < len(lines):
         line = lines[i]
+        bare = line.rstrip("\r")
+        if block_indent is not None:
+            if not bare.strip() or width(bare[:len(bare) - len(bare.lstrip())]) > block_indent:
+                out.append(line); i += 1; continue
+            block_indent = None
+        k = _ANY_KEY.match(line)
+        if k:
+            col = width(k.group("indent")) + (width(k.group("dash")) if k.group("dash") else 0)
+            enclosing = [(c, sl) for c, sl in enclosing if c < col]
+            value = (k.group("value") or "").strip()
+            if value.split("#", 1)[0].strip() in ("|", ">", "|-", ">-", "|+", ">+"):
+                block_indent = col
+                out.append(line); i += 1; continue
+            if not value or value.startswith("#"):
+                enclosing.append((col, k.group("slot")))
+        elif _ANY_ITEM.match(line):
+            col = width(_ANY_ITEM.match(line).group("indent"))
+            enclosing = [(c, sl) for c, sl in enclosing if c <= col]
         m = _MAILTO_ID_LINE.match(line)
-        if not m or (m.group("indent") == "" and not m.group("dash")):
-            out.append(line); i += 1; continue           # the root id itself is never rewritten
-        col = len(m.group("indent").expandtabs(2)) + (len(m.group("dash").expandtabs(2)) if m.group("dash") else 0)
+        owner = enclosing[-1][1] if enclosing else None
+        if not (m and (m.group("indent") or m.group("dash")) and owner in persons):
+            out.append(line); i += 1; continue
+        col = width(m.group("indent")) + (width(m.group("dash")) if m.group("dash") else 0)
         addr = m.group("addr")
-        slug = re.sub(r"[^a-z0-9]+", "-", addr.split("@", 1)[0].lower()).strip("-") or "contact"
-        minted = f"{root_id}#person-{slug}"
         eol = "\r" if line.endswith("\r") else ""
-        out.append(f"{m.group('indent')}{m.group('dash') or ''}id: {m.group('q')}{minted}{m.group('q')}{eol}")
-        # The mapping's other keys sit at the id's own column (a `- id:`
-        # item's siblings included); deeper lines belong to those keys; a
-        # shallower line ends the mapping.
+        if "#" in root_id:
+            if log is not None:
+                log.append({"phase": phase, "kind": "mailto_id_skipped", "slot": owner,
+                            "from": f"mailto:{addr}", "to": None,
+                            "reason": "the root id already carries a fragment"})
+            out.append(line); i += 1; continue
+        local, _, domain = addr.partition("@")
+        slug = "-at-".join(p for p in (re.sub(r"[^a-z0-9]+", "-", local.lower()).strip("-"),
+                                       re.sub(r"[^a-z0-9]+", "-", domain.lower()).strip("-")) if p) or "contact"
+        minted = f"{root_id}#person-{slug}"
+        # The mapping: siblings at the id's column (a `- id:` item's included),
+        # deeper lines belong to them; comments and blanks are neither (#985).
+        def depth(ln: str) -> int | None:
+            b = ln.rstrip("\r")
+            if not b.strip() or b.lstrip().startswith("#"):
+                return None
+            return width(b[:len(b) - len(b.lstrip())])
+        # Backwards over the mapping's already-emitted lines. A `- id:` line
+        # opens its own mapping, so there is nothing behind it; a plain `id:`
+        # line's mapping runs back to the item line that opened it, whose own
+        # key (`- email:`) is a sibling too.
+        email_at: int | None = None
+        email_future: int | None = None
+        if not m.group("dash"):
+            back = len(out) - 1
+            while back >= 0:
+                ln = out[back]
+                d = depth(ln)
+                if d is None:
+                    back -= 1; continue
+                item = _ANY_ITEM.match(ln)
+                if item and width(item.group("indent")) == col - 2:
+                    if re.match(r"^[ \t]*-[ \t]+email:", ln):
+                        email_at = back
+                    break
+                if d < col:
+                    break
+                if d == col and _EMAIL_LINE.match(ln):
+                    email_at = back
+                back -= 1
         j = i + 1
-        has_email = False
         while j < len(lines):
-            nxt = lines[j]
-            if nxt.strip() == "":
+            d = depth(lines[j])
+            if d is None:
                 j += 1; continue
-            depth = len(nxt[:len(nxt) - len(nxt.lstrip())].expandtabs(2))
-            if depth < col:
+            if d < col:
                 break
-            if depth == col and re.match(r"[ \t]*email:", nxt):
-                has_email = True
+            if d == col and _EMAIL_LINE.match(lines[j]):
+                email_future = j
             j += 1
-        if not has_email:
-            out.append(f"{' ' * col}email: {addr}{eol}")
+        out.append(f"{m.group('indent')}{m.group('dash') or ''}id: {m.group('q')}{minted}{m.group('q')}{eol}")
+        email_line = f"{' ' * col}email: {_yaml_scalar(addr)}{eol}"
+
+        def empty(ln: str) -> bool:
+            return re.sub(r"^[ \t]*(?:-[ \t]+)?email:", "", ln.rstrip("\r")).strip() in ("", "null", "~")
+        if email_at is not None:
+            if empty(out[email_at]):
+                dash_form = re.match(r"^([ \t]*-[ \t]+)email:", out[email_at])
+                out[email_at] = (f"{dash_form.group(1)}email: {_yaml_scalar(addr)}{eol}" if dash_form else email_line)
+        elif email_future is not None:
+            if empty(lines[email_future]):
+                lines[email_future] = email_line
+        else:
+            out.append(email_line)
         if log is not None:
-            log.append({"phase": phase, "kind": "mailto_id", "slot": "id", "from": f"mailto:{addr}", "to": minted})
+            log.append({"phase": phase, "kind": "mailto_id", "slot": owner, "from": f"mailto:{addr}", "to": minted})
         i += 1
     return "\n".join(out)
 

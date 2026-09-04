@@ -58,10 +58,10 @@ class TestV8IsV7PlusTheAddedBlock(unittest.TestCase):
             b = v8.split(f"--- ADDED IN {mark} ---", 1)[1].split(f"--- END ADDED IN {mark} ---", 1)[0]
             self.assertEqual(_norm(a), _norm(b), f"the {mark} block changed")
 
-    def test_the_block_carries_the_four_registered_rules(self):
+    def test_the_block_carries_the_five_registered_rules(self):
         block = _added_block(GENERIC_PROMPT_V8.read_text())
         bullets = re.findall(r"^- ", block, re.M)
-        self.assertEqual(len(bullets), 4)
+        self.assertEqual(len(bullets), 5)          # R1–R4 (#928) and R5 (#981)
         block = _norm(block)                                   # the file wraps at 78 columns
         for probe in ("(reference — a string, not an object)",      # R1: read off the digest's marking
                       "about and when",                              # R2: tense and scope

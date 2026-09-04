@@ -162,6 +162,12 @@ to every project:
   R4): each entry carries its own receipt naming the passage that states it;
   a roster receipted by one passage for one entry has receipted one entry.
 
+- **A `Person` object's `id` is the ORCID the evidence states, else a
+  fragment minted on this record's own id** (v8, R5, #981): `ORCID:` CURIE
+  where the documents list one — look for it before minting — otherwise
+  `<record id>#person-<name>`; never a `mailto:` or any other scheme as the
+  id, the address goes in `email`.
+
 The rule about there being no target slot count is the load-bearing one: it is
 what makes a slot count an observation rather than a target. Named rather than
 referred to by position, so inserting a rule cannot silently point this sentence
