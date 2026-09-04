@@ -95,11 +95,17 @@ class TestMergeCommand(unittest.TestCase):
         out = self._run("--project", "P", "--config", "2026-08-01_cfg",
                         "--execute")
         self.assertEqual(out.exit_code, 0, out.output)
-        prov = list((self.method.parent).rglob("P_provenance.yaml"))
-        if prov:
-            data = yaml.safe_load(prov[0].read_text())
-            self.assertEqual(data.get("record_mode"), "derived",
-                             "a merged record must never claim to be live")
+        # The merged label's own record, named explicitly. `rglob` order is
+        # directory order — sorted on APFS, unsorted on ext4 — and `prov[0]`
+        # was a replicate's live provenance on every Linux CI run (#941).
+        merged = [p for p in self.method.parent.rglob("P_provenance.yaml")
+                  if p.parent.name == "2026-08-01_cfg_merged"]
+        self.assertEqual(len(merged), 1, "the merged label must write one "
+                         "provenance record: found "
+                         f"{sorted(str(p) for p in merged)}")
+        data = yaml.safe_load(merged[0].read_text())
+        self.assertEqual(data.get("record_mode"), "derived",
+                         "a merged record must never claim to be live")
 
 
 class TestADerivedRecordIsExcludedAsDerived(unittest.TestCase):

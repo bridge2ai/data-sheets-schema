@@ -145,9 +145,9 @@ def uriorcurie_slots(schema_path: Path = FULL_SCHEMA) -> set[str]:
     Induced, not declared, so a `slot_usage` narrowing some other slot to
     `uriorcurie` is picked up without anyone remembering to add it here.
     """
-    from linkml_runtime import SchemaView
+    from data_sheets_schema.schema_view import shared_view
 
-    sv = SchemaView(str(schema_path))
+    sv = shared_view(schema_path)
     found: set[str] = set()
     for class_name in sv.all_classes():
         for slot_name in sv.class_slots(class_name, attributes=True):

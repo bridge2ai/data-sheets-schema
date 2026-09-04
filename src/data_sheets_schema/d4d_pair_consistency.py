@@ -18,6 +18,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 import yaml
 from linkml_runtime.linkml_model.meta import SlotDefinition
 from linkml_runtime.utils.schemaview import SchemaView
+from data_sheets_schema.schema_view import shared_view
 
 
 DEFAULT_FULL_SCHEMA = Path(
@@ -146,8 +147,8 @@ def load_pair_schema(
 ) -> PairSchema:
     """Load schemas and derive strict-identity versus projected shared slots."""
 
-    full_view = SchemaView(str(full_schema))
-    core_view = SchemaView(str(core_schema))
+    full_view = shared_view(full_schema)
+    core_view = shared_view(core_schema)
     full_slots = {
         slot.name: slot for slot in full_view.class_induced_slots(FULL_CLASS)
     }

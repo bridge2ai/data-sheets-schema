@@ -1135,8 +1135,8 @@ def _known_slots(schema_path: str = FULL_SCHEMA_PATH,
     of them, so two thirds of that vocabulary belongs to some other class and
     would wave through root keys the target class cannot hold.
     """
-    from linkml_runtime import SchemaView
-    sv = SchemaView(schema_path)
+    from data_sheets_schema.schema_view import shared_view
+    sv = shared_view(schema_path)
     return frozenset(s.name for s in sv.class_induced_slots(class_name))
 
 
@@ -1870,11 +1870,11 @@ _MULTIVALUED: set[str] | None = None
 def _multivalued_slots() -> set[str]:
     global _MULTIVALUED
     if _MULTIVALUED is None:
-        from linkml_runtime import SchemaView
+        from data_sheets_schema.schema_view import shared_view
         names: set[str] = set()
         for schema, in ((FULL_SCHEMA_PATH,), (CORE_SCHEMA_PATH,)):
             try:
-                sv = SchemaView(str(schema))
+                sv = shared_view(schema)
                 for cls in sv.all_classes():
                     for slot in sv.class_induced_slots(cls):
                         if slot.multivalued and str(slot.range) == "string":

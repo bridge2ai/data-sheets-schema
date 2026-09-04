@@ -108,8 +108,26 @@ def check_one(merged: Path, source: Path, class_name: str,
         try:
             live = schema_digest.fingerprint(
                 schema_digest.digest_text(class_name, merged))
-            fresh = schema_digest.fingerprint(
-                schema_digest.digest_text(class_name, rebuilt))
+            # Identical bytes digest identically (the digest is a function of
+            # content — `DigestIsAFunctionOfContentTest`), so the rebuilt file
+            # is digested only when it differs. Digesting it every time built
+            # a SchemaView of a fresh temp path per check, pinned for the
+            # life of the process by linkml's method caches (#926) and kept
+            # again by the digest's own path-keyed caches. When the bytes
+            # match, `fresh` is still computed *uncached* from the merged
+            # file: `live` comes from a cache keyed on path alone, so after a
+            # `make regen-all` under a running process it can describe the
+            # schema that was on disk when the process first looked, and the
+            # "matches but its digest does not" verdict below is the only
+            # thing that reports it (#942). The uncached build goes through
+            # the content-keyed shared view: no new view unless the merged
+            # file itself changed, and no digest-cache entry either way.
+            if same:
+                fresh = schema_digest.fingerprint(schema_digest.render(
+                    schema_digest._build_uncached(class_name, merged)))
+            else:
+                fresh = schema_digest.fingerprint(
+                    schema_digest.digest_text(class_name, rebuilt))
         except Exception as exc:                               # noqa: BLE001
             return {**out, "status": UNCHECKED,
                     "reason": f"digest could not be computed: {exc}"}
