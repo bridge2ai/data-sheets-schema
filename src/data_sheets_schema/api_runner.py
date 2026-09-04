@@ -3373,7 +3373,16 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
                            "edited since was carried by resume; re-run with "
                            "--no-resume to derive it"),
             }
-    rec.data["pair_consistency"] = pair_consistency(spec)
+    # A reviewer's attestation on a prior record of this run survives the
+    # recomputation (#856): the pair block is rebuilt, the review is not.
+    from data_sheets_schema.backfill_checks import carry_attestations
+    _prior_pair = None
+    if spec.provenance_path.exists():
+        try:
+            _prior_pair = (yaml.safe_load(spec.provenance_path.read_text(encoding="utf-8")) or {}).get("pair_consistency")
+        except yaml.YAMLError:
+            _prior_pair = None
+    rec.data["pair_consistency"] = carry_attestations("pair_consistency", _prior_pair, pair_consistency(spec))
     # v8 step E (#929): the report's claims are checked before the run
     # completes, and a contradicting report is regenerated once. Recorded
     # beside the final `report_claims` block, which is recomputed below.

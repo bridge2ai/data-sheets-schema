@@ -100,6 +100,43 @@ class Run:
         return CONCAT_DIR / self.method / self.label
 
 
+def method_for_label(label: str, project: str | None = None,
+                     concat_dir: Path | None = None) -> str:
+    """Which agent-family method directory holds `label` (#934).
+
+    Through generic_v7 both runtimes wrote under ``claudecode_agent``; from
+    v8 the API baseline writes under ``claudecode_api`` (#690). Every
+    downstream command used to default to the first, which is silently the
+    wrong directory for a v8 run. `label` is an exact label or a prefix; with
+    `project` the label must hold that project's provenance record. Exactly
+    one match is an answer; none or two is a LookupError that names them,
+    so a caller passes ``--method`` rather than guesses.
+    """
+    # Read at call time: tests and tools redirect `provenance.CONCAT_DIR`,
+    # and a default bound at import would search the real corpus instead.
+    if concat_dir is None:
+        from data_sheets_schema import provenance as _pv
+        concat_dir = _pv.CONCAT_DIR
+    hits: list[str] = []
+    for method in AGENT_FAMILY:
+        core = concat_dir / f"{method}_core"
+        if not core.is_dir():
+            continue
+        dirs = [core / label] if (core / label).is_dir() else sorted(core.glob(f"{label}*"))
+        dirs = [d for d in dirs if d.is_dir()]
+        if project is not None:
+            dirs = [d for d in dirs if (d / f"{project}_provenance.yaml").exists()]
+        if dirs:
+            hits.append(method)
+    if len(hits) == 1:
+        return hits[0]
+    if not hits:
+        raise LookupError(f"no run labelled {label!r}"
+                          + (f" for {project}" if project else "")
+                          + f" under {' or '.join(m + '_core' for m in AGENT_FAMILY)}")
+    raise LookupError(f"label {label!r} exists under both {' and '.join(hits)}; pass --method")
+
+
 def discover(concat_dir: Path = CONCAT_DIR) -> list[Run]:
     """Find every run directory on disk."""
     runs: list[Run] = []

@@ -575,6 +575,16 @@ under both runtimes without a runtime filter is ambiguous and refused, as
 two configurations are. The v6 agentic canonicals (2026-08-28 rep1/rep3)
 were re-marked beside the v7 API ones.
 
+**Every downstream `--method` defaults to the directory the label lives in**
+(#934, `runs.method_for_label`): `claudecode_agent` through v7, `claudecode_api`
+for the v8 API baseline. A label under both, or under neither, is refused
+with the directories named — pass `--method`. `canary.baseline_for` and
+`report_basis` read both directories when given no method. `d4d receipts
+check --strict` fails on exactly the gate's receipt floors (#881), not on
+wrong-chunk attributions, which are reported and never gated. A reviewer's
+`pair_consistency.semantic_review` survives every recomputation of the
+block (#856, `backfill_checks.carry_attestations`).
+
 ## Canonical selection with the review (#660)
 
 `d4d runs select` ranks validity → **fewest review adverse verdicts**

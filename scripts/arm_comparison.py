@@ -67,7 +67,18 @@ OUT_MD = ROOT / "notes" / "arm_comparison.md"
 OUT_FIG = ROOT / "notes" / "figures"
 
 PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE")
-METHOD = "claudecode_agent"
+METHOD = "claudecode_agent"     # the pre-v8 directory; per-label from `_method_for` (#934)
+
+
+def _method_for(label: str, project: str) -> str:
+    """The directory a run lives in: claudecode_agent through v7, claudecode_api
+    from the v8 API baseline (#690). Falls back to METHOD for a label that is
+    not on disk, so a missing run reads as missing rather than as an error."""
+    try:
+        from data_sheets_schema.runs import method_for_label
+        return method_for_label(label, project, concat_dir=CONCAT)
+    except LookupError:
+        return METHOD
 
 # (key, display, label prefix, runtime, role). Every arm is shown as mean ± SD
 # over its replicates; `role == "worst"` additionally prints the per-project
@@ -159,8 +170,9 @@ def load(path: Path) -> dict[str, Any]:
 
 
 def run_metrics(label: str, project: str) -> dict[str, Any] | None:
-    core_dir = CONCAT / f"{METHOD}_core" / label
-    full = CONCAT / METHOD / label / f"{project}_d4d.yaml"
+    method = _method_for(label, project)
+    core_dir = CONCAT / f"{method}_core" / label
+    full = CONCAT / method / label / f"{project}_d4d.yaml"
     core = core_dir / f"{project}_d4d_core.yaml"
     prov = core_dir / f"{project}_provenance.yaml"
     if not (full.exists() and core.exists() and prov.exists()):

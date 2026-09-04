@@ -203,8 +203,21 @@ def counts_from(checks: dict[str, Any],
     return out
 
 
+def _baseline_records(base: Path, method: str | None, label_prefix: str,
+                      project: str) -> list[Path]:
+    """The baseline arm's provenance records. With no method, every
+    agent-family directory (#934): the v7 arm lives under claudecode_agent,
+    a v8 arm under claudecode_api, and a gate should not have to know."""
+    from data_sheets_schema.runs import AGENT_FAMILY
+    methods = [method] if method else list(AGENT_FAMILY)
+    out: list[Path] = []
+    for m in methods:
+        out.extend(sorted(base.glob(f"{m}_core/{label_prefix}*/{project}_provenance.yaml")))
+    return out
+
+
 def baseline_for(project: str, label_prefix: str,
-                 method: str = "claudecode_agent",
+                 method: str | None = None,
                  concat_dir: Path | None = None) -> dict[str, int | None]:
     """The worst value each metric took across a baseline arm, for one project.
 
@@ -218,8 +231,7 @@ def baseline_for(project: str, label_prefix: str,
     from data_sheets_schema.provenance import CONCAT_DIR
     base = concat_dir or CONCAT_DIR
     worst: dict[str, int | None] = {name: None for name, _, _ in METRICS}
-    for path in sorted(base.glob(
-            f"{method}_core/{label_prefix}*/{project}_provenance.yaml")):
+    for path in _baseline_records(base, method, label_prefix, project):
         rec = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         counts = counts_from({"pair": rec.get("pair_consistency"),
                               "report": rec.get("report_claims"),
@@ -236,7 +248,7 @@ def baseline_for(project: str, label_prefix: str,
 
 
 def report_basis(project: str, label_prefix: str,
-                 method: str = "claudecode_agent",
+                 method: str | None = None,
                  concat_dir: Path | None = None) -> dict[str, int]:
     """How the baseline arm's replicates stand on the report metric: how many
     measured a claim, how many were vacuous (ran, read none), how many never
@@ -248,8 +260,7 @@ def report_basis(project: str, label_prefix: str,
     from data_sheets_schema.provenance import CONCAT_DIR
     base = concat_dir or CONCAT_DIR
     out = {"measured": 0, "vacuous": 0, "unchecked": 0}
-    for path in sorted(base.glob(
-            f"{method}_core/{label_prefix}*/{project}_provenance.yaml")):
+    for path in _baseline_records(base, method, label_prefix, project):
         rec = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         block = rec.get("report_claims")
         if report_vacuous(block):

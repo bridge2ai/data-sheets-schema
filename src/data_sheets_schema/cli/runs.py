@@ -15,7 +15,7 @@ def runs():
 @runs.command("telemetry")
 @click.option("--label-prefix", required=True,
               help="run label or prefix, e.g. 2026-08-05_claude-opus-5-1m-generic-v3")
-@click.option("--method", default="claudecode_agent", show_default=True)
+@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("-o", "--output", type=click.Path(), default=None,
               help="output path; defaults to data/run_telemetry/{label_prefix}.yaml")
 @click.option("--findings", "findings_path", type=click.Path(exists=True),
@@ -30,6 +30,8 @@ def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
     validation outcomes and what timing evidence exists (see the schema's
     timing_basis for how honest each figure is).
     """
+    from data_sheets_schema.runs import method_for_label
+    method = method or method_for_label(label_prefix)
     import subprocess
     import yaml as _yaml
 

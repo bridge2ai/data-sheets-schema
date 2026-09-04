@@ -236,6 +236,23 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
     return out
 
 
+#: Keys a reviewer writes into a check block that no recomputation produces
+#: (#856): `pair_consistency.semantic_review` is a supplemental pair review's
+#: verdict and evidence. Rebuilding the block from the checker dropped it.
+ATTESTATIONS = {"pair_consistency": ("semantic_review",)}
+
+
+def carry_attestations(name: str, old: Any, new: Any) -> Any:
+    """`new` with the attestation keys of `old` carried forward."""
+    if not (isinstance(old, dict) and isinstance(new, dict)):
+        return new
+    out = dict(new)
+    for key in ATTESTATIONS.get(name, ()):
+        if key in old and key not in out:
+            out[key] = old[key]
+    return out
+
+
 def apply(provenance: Path, blocks: dict[str, Any],
           overwrite: bool = False, withheld: list[str] | None = None) -> bool:
     """Write the blocks into the record. Returns whether anything changed.
@@ -281,7 +298,7 @@ def apply(provenance: Path, blocks: dict[str, Any],
             b = blocks[name] or {}
             if not (b.get("checked") or b.get("expected")):
                 continue
-        record[name] = blocks[name]
+        record[name] = carry_attestations(name, old, blocks[name])
         changed = True
     if not changed:
         return False

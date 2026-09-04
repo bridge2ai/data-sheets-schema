@@ -16,7 +16,7 @@ def evaluate():
 
 @evaluate.command("verifiable")
 @click.option("--project", default=None, help="limit to one project")
-@click.option("--method", default="claudecode_agent")
+@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--label", "labels", multiple=True, help="run label(s); default all")
 @click.option("--show", default=0, type=int,
               help="list up to N ungrounded values per record")
@@ -32,6 +32,13 @@ def verifiable_cmd(project, method, labels, show):
     nothing is trivially correct on everything it states, so the ratio alone
     would rank an empty record top.
     """
+    from data_sheets_schema.runs import method_for_label
+    # One label resolves; several must agree; none keeps the pre-v8 default.
+    if method is None:
+        found = {method_for_label(lab, project) for lab in labels}
+        if len(found) > 1:
+            raise click.ClickException(f'labels live under {sorted(found)}; pass --method')
+        method = found.pop() if found else 'claudecode_agent'
     import yaml as _yaml
     from data_sheets_schema.runs import discover, record_path
     from data_sheets_schema.verifiable import (
@@ -273,7 +280,7 @@ def related_datasets_cmd(records, project, runtime):
 
 
 @evaluate.command("spelling")
-@click.option('--method', default='claudecode_agent', show_default=True)
+@click.option('--method', default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option('--label', default=None, help='restrict to one run label')
 @click.option('--project', default=None)
 @click.option('--show-quoted', is_flag=True,
@@ -289,6 +296,8 @@ def spelling_cmd(method, label, project, show_quoted):
     Conservative in the direction of silence. A false "quoted" merely fails to
     report; a false "generated" would invite someone to edit evidence.
     """
+    from data_sheets_schema.runs import method_for_label
+    method = method or (method_for_label(label, project) if label else 'claudecode_agent')
     from pathlib import Path as _Path
 
     import yaml as _yaml
