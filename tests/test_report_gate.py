@@ -74,6 +74,15 @@ class TestPresenceClaims(unittest.TestCase):
         self.assertEqual([f["kind"] for f in out["findings"]], ["removal_not_performed"])
         self.assertEqual(out["claims_checked"], 1)
 
+    def test_both_on_a_slot_the_core_does_not_declare_reads_as_full(self):
+        """#990: `retained | both` on `citation` cannot be satisfied — CoreDataset has no such slot."""
+        out = check_report(_report(self.dir, "| `funders` | retained | both | kept |\n"), FULL, CORE, DECLARED)
+        self.assertEqual(out["findings"], [])                     # funders is not a CoreDataset slot in DECLARED
+        out = check_report(_report(self.dir, "| `keywords` | retained | both | kept |\n"), FULL, {"id": "x"}, DECLARED)
+        self.assertEqual([f["kind"] for f in out["findings"]], ["retention_not_shown"])   # declared on both, absent from core
+        out = check_report(_report(self.dir, "| `funders` | retained | core | kept |\n"), FULL, CORE, DECLARED)
+        self.assertEqual([f["kind"] for f in out["findings"]], ["retention_not_shown"])   # `core` stays literal
+
     def test_a_row_naming_no_record_is_a_finding_only_when_neither_record_carries_it(self):
         out = check_report(_report(self.dir, "| `license` | retained | | kept |\n"), FULL, CORE, DECLARED)
         self.assertEqual([f["kind"] for f in out["findings"]], ["retention_not_shown"])

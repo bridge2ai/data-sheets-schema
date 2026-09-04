@@ -277,6 +277,12 @@ _DISPOSITION = re.compile(r"^\W*(?:\*\*)?(removed|deleted|dropped|retained|kept|
                           r"left as-is|left as is|changed|amended|corrected|added)\b", re.I)
 
 
+def _core_declares(path: str, declared: dict[str, set[str]]) -> bool:
+    """Whether the core class declares the root slot of `path`."""
+    root = re.split(r"[.\[]", path, maxsplit=1)[0]
+    return root in (declared.get("CoreDataset") or set())
+
+
 def disposition_rows(text: str) -> list[dict[str, str]]:
     """Rows of every table whose header names `slot` and `disposition` columns.
 
@@ -507,10 +513,20 @@ def check_report(report: Path, full: dict, core: dict,
         claims += 1
         in_full, v_full = resolve(full, row["slot"])
         in_core, v_core = resolve(core, row["slot"])
+        where = row["record"]
+        # `both` on a slot the core class does not declare is a claim the
+        # core cannot satisfy by construction (#990): the VOICE v8 canary's
+        # five remaining contradictions were all `retained | both` on
+        # `citation`, `consent_revocations` and kin, which CoreDataset has
+        # no slot for. Read against the full record alone; `core` stays
+        # literal — a report claiming the core carries what it cannot is a
+        # false claim about the core.
+        if where == "both" and not _core_declares(row["slot"], declared):
+            where = "full"
         present = {"core": in_core and _populated(v_core),
                    "full": in_full and _populated(v_full),
                    "both": (in_core and _populated(v_core)) and (in_full and _populated(v_full)),
-                   "either": (in_core and _populated(v_core)) or (in_full and _populated(v_full))}[row["record"]]
+                   "either": (in_core and _populated(v_core)) or (in_full and _populated(v_full))}[where]
         if not present:
             findings.append({
                 "kind": ("retention_not_shown" if row["disposition"] in
