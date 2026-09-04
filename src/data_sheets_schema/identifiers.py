@@ -135,9 +135,9 @@ def classify(value: str, prefixes: set[str]) -> str:
 def uriorcurie_slots(schema_path: Path = FULL_SCHEMA) -> set[str]:
     """Every slot whose *induced* range is `uriorcurie`, from the schema.
 
-    Derived rather than hardcoded to `id`, because `id` is one of six and the
-    other five hold the worse values: `unit` is 148 for 148 unresolvable
-    (`%`, `years`), `publisher` carries bare names like `PhysioNet`,
+    Derived rather than hardcoded to `id`, because `id` is one of several and
+    the others hold the worse values (`unit`, since moved to `string` (#456),
+    was 148 for 148 unresolvable — `%`, `years`); `publisher` carries bare names like `PhysioNet`,
     `latest_version_doi` carries bare DOIs, and `data_substrate` and
     `data_topic` carry whole prose sentences. An audit that checked only `id`
     would report a clean `unit` slot that has never once held an identifier.

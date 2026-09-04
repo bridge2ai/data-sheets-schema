@@ -304,6 +304,19 @@ ENTRY_KEYS = ("id", "name", "title", "label", "variable_name", "url", "download_
               "access_url", "path", "grant_id", "grant_number")
 
 
+def _canonical_identifier(value: str) -> str:
+    """The CURIE form when `value` is a resolver URL of a declared prefix,
+    else `value` — so an entry whose `id` a phase-1 snapshot wrote as
+    `https://doi.org/x#files` and the written record carries as
+    `doi:x#files` (#974's normaliser) is the same entry."""
+    try:
+        from data_sheets_schema.api_runner import _identifier_form_tables, curie_form
+        _, bases = _identifier_form_tables()
+        return curie_form(value, bases) or value
+    except Exception:                                          # noqa: BLE001
+        return value
+
+
 def _entry_key(node: Any) -> tuple[str, str] | None:
     """What identifies a list entry: the first `ENTRY_KEYS` string it carries;
     a scalar entry is its own key. None for an entry with no such key — it
@@ -312,7 +325,7 @@ def _entry_key(node: Any) -> tuple[str, str] | None:
         for k in ENTRY_KEYS:
             v = node.get(k)
             if isinstance(v, str) and v.strip():
-                return (k, v.strip())
+                return (k, _canonical_identifier(v.strip()))
         return None
     if isinstance(node, str) and node.strip():
         return ("value", node.strip())
