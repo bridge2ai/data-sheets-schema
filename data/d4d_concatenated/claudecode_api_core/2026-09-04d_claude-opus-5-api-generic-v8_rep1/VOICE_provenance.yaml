@@ -436,53 +436,53 @@ report_claims:
   - kind: retention_not_shown
     slot: consent_revocations[0].revocation_details
     record: both
-    detail: report says retained; the both record does not carry it
+    detail: report says retained; the both record does not carry it; the core class
+      declares no `consent_revocations` slot, so the row must name `full`
     claim: '| `consent_revocations[0].revocation_details` | retained | both | Audit
       flagged the longitudinal-consent sentence; comparing the records, the value
       is unchanged and the finding was not acted on. |'
   - kind: retention_not_shown
     slot: participant_compensation[0].compensation_amount
     record: both
-    detail: report says retained; the both record does not carry it
+    detail: report says retained; the both record does not carry it; the core class
+      declares no `participant_compensation` slot, so the row must name `full`
     claim: '| `participant_compensation[0].compensation_amount` | retained | both
       | Audit noted the amount was amended twice; no caveat was added and the value
       is unchanged. |'
   - kind: retention_not_shown
     slot: citation
     record: both
-    detail: report says retained; the both record does not carry it
+    detail: report says retained; the both record does not carry it; the core class
+      declares no `citation` slot, so the row must name `full`
     claim: '| `citation` | retained | both | Audit flagged the missing acute accent;
       comparing the records, the citation is unchanged and still reads "Belisle-Pipon".
       |'
   - kind: retention_not_shown
     slot: third_party_sharing[0].is_shared
     record: both
-    detail: report says retained; the both record does not carry it
+    detail: report says retained; the both record does not carry it; the core class
+      declares no `third_party_sharing` slot, so the row must name `full`
     claim: '| `third_party_sharing[0].is_shared` | retained | both | Audit confirmed
       the tense reading is acceptable. |'
   - kind: retention_not_shown
     slot: collection_consents[0].consent_details
     record: both
-    detail: report says retained; the both record does not carry it
+    detail: report says retained; the both record does not carry it; the core class
+      declares no `collection_consents` slot, so the row must name `full`
     claim: '| `collection_consents[0].consent_details` | retained | both | Audit found
       the five consent-scope negatives substantive: they define the permission granted.
       |'
   claims_checked: 94
   claims_unnamed: 0
   disposition_rows: 94
+  claims_core_cannot_hold: 5
+  instrument: 'v2 (#990): a finding on a `both` row names when the core class declares
+    no such slot; `claims_core_cannot_hold` counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_reconciliation.md
       md5: 0619495858af561be8e4aae8fecec9e7
-    full:
-      path: data/d4d_concatenated/claudecode_api/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
-      md5: d85d3dfeb2b3423818463631195a7228
-    core:
-      path: data/d4d_concatenated/claudecode_api_core/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_d4d_core.yaml
-      md5: d97f152f4c16d20de1c568e7b76d41a8
-  schema:
-    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
-    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
+  recorded_by: backfill_checks
   dispositions_expected: true
 grounding:
   checked: true
