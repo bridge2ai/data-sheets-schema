@@ -512,7 +512,13 @@ a missing baseline (#599). A report without the table is regenerated once
 like a contradiction; a rewrite that is truncated, drops the table or
 carries more contradictions is rolled back to the report as written (#967). The expectation is
 recorded on `inputs.dispositions_expected` too, so a backfill cannot drop
-it (#961). Residual: a run whose report phase completed under the pre-E
+it (#961). A `both` row on a slot the core class does not declare
+(`citation`, `consent_revocations`, …) is read as written — the
+instruction defines `both` as present in both — and the finding names
+the cause so the regate can fix the row (`claims_core_cannot_hold` counts
+those the full record does carry, apart from substantive contradictions;
+#990/#992); the block carries
+`instrument` from v2 (#996). Residual: a run whose report phase completed under the pre-E
 runner and is resumed under this one gets no table and is blind by
 construction; no such run exists. `companions` is hashed after the last
 phase (#652).

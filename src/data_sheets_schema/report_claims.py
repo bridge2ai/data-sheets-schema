@@ -277,6 +277,34 @@ _DISPOSITION = re.compile(r"^\W*(?:\*\*)?(removed|deleted|dropped|retained|kept|
                           r"left as-is|left as is|changed|amended|corrected|added)\b", re.I)
 
 
+#: The checker's own version (#996). The block pins the report, both records
+#: and the schema by hash, but the checker moved under #914, #929, #962 and
+#: #990 with nothing recording which reading produced a block; everything
+#: before this constant is v1.
+REPORT_CLAIMS_INSTRUMENT = ("v2 (#990): a finding on a `both` row names when the core class "
+                            "declares no such slot; `claims_core_cannot_hold` counts them")
+
+
+def _core_declares(path: str, declared: dict[str, set[str]]) -> bool:
+    """Whether the core class declares the root slot of `path`.
+
+    Root-only by design: every class-ranged slot CoreDataset shares with
+    Dataset has the same range, so a nested path the core cannot carry is
+    one whose *root* it lacks. The residual is `resources` (Dataset and
+    CoreDataset differ, recursively) and a derived core that carries
+    `distributions` in place of `distribution_formats`: a finding on a
+    `both` row under either is still correct, but names no cause (#994).
+    `declared` without a `CoreDataset` entry is a broken core schema:
+    `check_report` refuses it up front, since a checker that carried on
+    would drop the cause from every such finding with no signal (#993).
+    """
+    if "CoreDataset" not in declared:
+        raise ValueError("declared slots carry no `CoreDataset` class; "
+                         "the core schema could not be read")
+    root = re.split(r"[.\[]", path, maxsplit=1)[0]
+    return root in declared["CoreDataset"]
+
+
 def disposition_rows(text: str) -> list[dict[str, str]]:
     """Rows of every table whose header names `slot` and `disposition` columns.
 
@@ -341,7 +369,13 @@ def check_report(report: Path, full: dict, core: dict,
                 "findings": []}
     text = report.read_text(encoding="utf-8", errors="replace")
     findings: list[dict[str, str]] = []
-    claims = unnamed = 0
+    claims = unnamed = core_cannot_hold = 0
+    # Refused up front, not only on the row that would consult it (#993): a
+    # report with no failing `both` row would otherwise check clean against
+    # a core schema that could not be read.
+    if "CoreDataset" not in declared:
+        raise ValueError("declared slots carry no `CoreDataset` class; "
+                         "the core schema could not be read")
 
     def removal(names: list[str], context: str, claim: str) -> None:
         nonlocal claims, unnamed
@@ -370,7 +404,12 @@ def check_report(report: Path, full: dict, core: dict,
                             or (in_full and _populated(v_full)),
                     "either": in_core and _populated(v_core)}[where]
             if live:
-                v = v_full if where == "full" else v_core
+                # Describe the value that is live. Under `both` the full
+                # record may be the only one carrying it, and describing the
+                # core's `None` as "record has a value" named the wrong
+                # record (#995).
+                v = (v_full if where == "full"
+                     else v_core if in_core and _populated(v_core) else v_full)
                 findings.append({
                     "kind": "removal_not_performed", "slot": name,
                     "record": where,
@@ -507,17 +546,37 @@ def check_report(report: Path, full: dict, core: dict,
         claims += 1
         in_full, v_full = resolve(full, row["slot"])
         in_core, v_core = resolve(core, row["slot"])
+        where = row["record"]
         present = {"core": in_core and _populated(v_core),
                    "full": in_full and _populated(v_full),
                    "both": (in_core and _populated(v_core)) and (in_full and _populated(v_full)),
-                   "either": (in_core and _populated(v_core)) or (in_full and _populated(v_full))}[row["record"]]
+                   "either": (in_core and _populated(v_core)) or (in_full and _populated(v_full))}[where]
         if not present:
+            # `both` on a slot the core class does not declare is a claim the
+            # core cannot satisfy by construction (#990): the VOICE v8
+            # canary's five remaining contradictions were all `retained |
+            # both` on `citation`, `consent_revocations` and kin. The row is
+            # read as written — the instruction defines `both` as present in
+            # both, and a report stating the core carries what it cannot is
+            # a false claim about the core (#992) — but the finding names the
+            # cause, so the regate can fix the row rather than guess, and the
+            # block counts these apart from substantive contradictions.
+            cause = ""
+            # Only where the full record does carry it: a `both` row on a
+            # slot neither record holds is a substantive contradiction, and
+            # "name `full`" would be wrong advice.
+            if (where == "both" and in_full and _populated(v_full)
+                    and not _core_declares(row["slot"], declared)):
+                core_cannot_hold += 1
+                root = re.split(r"[.\[]", row["slot"], maxsplit=1)[0]
+                cause = (f"; the core class declares no `{root}` slot, so the row "
+                         f"must name `full`")
             findings.append({
                 "kind": ("retention_not_shown" if row["disposition"] in
                          ("retained", "kept", "unchanged", "left as-is", "left as is")
                          else "change_not_shown"),
-                "slot": row["slot"], "record": row["record"],
-                "detail": f"report says {row['disposition']}; the {row['record']} record does not carry it",
+                "slot": row["slot"], "record": where,
+                "detail": f"report says {row['disposition']}; the {where} record does not carry it" + cause,
                 "claim": row["line"][:240]})
     seen, unique = set(), []
     for f in findings:
@@ -529,7 +588,12 @@ def check_report(report: Path, full: dict, core: dict,
     return {"checked": True, "findings": unique, "claims_checked": claims,
             # Named rather than dropped: a claim naming no slot in backticks
             # cannot be checked, and a reader should know how many there were.
-            "claims_unnamed": unnamed, "disposition_rows": len(rows)}
+            "claims_unnamed": unnamed, "disposition_rows": len(rows),
+            # Findings on `both` rows whose slot the core class does not
+            # declare (#990/#992): a mis-named record rather than a
+            # substantive contradiction, and a reader should see the two apart.
+            "claims_core_cannot_hold": core_cannot_hold,
+            "instrument": REPORT_CLAIMS_INSTRUMENT}
 
 
 def declared_slots() -> dict[str, set[str]]:
