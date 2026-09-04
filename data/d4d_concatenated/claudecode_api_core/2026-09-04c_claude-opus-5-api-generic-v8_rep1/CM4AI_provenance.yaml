@@ -375,13 +375,18 @@ form:
   records:
   - data/d4d_concatenated/claudecode_api/2026-09-04c_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml
   - data/d4d_concatenated/claudecode_api_core/2026-09-04c_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d_core.yaml
-  undeclared_prefixes:
-    mailto: 6
-  undeclared_prefix_occurrences: 6
+  undeclared_prefixes: {}
+  undeclared_prefix_occurrences: 0
+  prefix_instrument: 'v3 (#982): ark excluded, mailto excluded on Person ids only,
+    urn by NID'
   british_spellings: 0
   organisational_fragments: 0
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
+  recorded_by: backfill_checks
+  instrument_note: 'form recomputed 2026-09-04 by backfill-checks --overwrite, british
+    instrument v3 (#836/#859), prefix instrument v3 (#982): ark excluded, mailto excluded
+    on Person ids only, urn by NID; previous british=0, previous undeclared_prefixes=6'
 receipts:
   expected: true
   non_checks:
@@ -799,7 +804,7 @@ intermediates:
 - path: data/d4d_concatenated/claudecode_api_core/2026-09-04c_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_report_before_regate.md
   sha256: 8a6e52671106e862fd27f1a53e51f369eee77519643ebc2f024035ea2869c618
 canary:
-  status: regressed
+  status: ok
   rows:
   - metric: pair errors
     run: 0
@@ -819,9 +824,8 @@ canary:
     run: 0
     baseline_worst: 0
   - metric: undeclared prefixes
-    run: 6
+    run: 0
     baseline_worst: 0
-    regressed: true
   - metric: British spellings
     run: 0
     baseline_worst: 2
@@ -842,14 +846,15 @@ canary:
     baseline_worst: 0
   blind: []
   unbaselined: []
-  regressions:
-  - 'undeclared prefixes: 6 against a baseline worst of 0'
-  basis: 'offline write of the verdict the batch gate printed at 2026-09-04T09:0xZ
-    and stopped on, recomputed from this record''s own check blocks against the v7
-    production per-project worst with the gate''s functions, including the #684 report
-    basis (v7 CM4AI: 3 vacuous, 0 measured → floor 0).'
-  recorded_at: '2026-09-04T09:39:55+00:00'
+  regressions: []
+  recorded_at: '2026-09-04T16:58:45+00:00'
   recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-04
+  basis: 'offline re-verdict after the undeclared-prefix instrument moved to v3 (#982:
+    mailto excluded on a Person''s id), the form block recomputed under it by `backfill-checks
+    --blocks form --overwrite --execute` (6 → 0, the instrument note carries the trail),
+    against the same v7 production per-project worst the batch used, with the #684
+    report basis. The prior verdict (regressed, instrument v2) is kept below as prior_verdict,
+    the #920 pattern.'
   readings:
     note: registered v8 predictions this record measures on its own; n=1, none gated
     prediction_2_grant_number: 'populated 0 (2026-09-04 rep1: 2; 2026-09-04b: 0)'
@@ -861,6 +866,64 @@ canary:
     mechanisms: 'full_readdress: not needed (every receipt slot resolved); report_regate:
       9 claims checked, 1 contradiction before, 0 after (10 claims); normalise_identifier_form:
       0 rewrites (the model wrote CURIEs); resolver URLs 0; British spellings 0.'
-    the regression: 'undeclared prefixes 6, all `mailto:` — the `id` of inlined contact
-      persons (D1, #805 forces Person.id) written as mailto:<email> for people with
-      an email and no ORCID; no record in any earlier arm wrote one.'
+    the regression: 'undeclared prefixes 6 under instrument v2, all `mailto:` — the
+      `id` of inlined contact persons (D1, #805 forces Person.id) written as mailto:<email>;
+      the v6 agentic CM4AI rep1 wrote two the same way. 0 under v3.'
+  disposition: 'OK under instrument v3, and **not retained for the fill**: #981''s
+    mechanism and R5 (pin rotated) landed after this run, and the production rule
+    invalidates every earlier record of a changed condition (#984). This record settles
+    the instrument question and stands as evidence of the third package; CM4AI runs
+    a fourth time under the final package before the fill, after VOICE, AI_READI and
+    CHORUS.'
+  prior_verdict:
+    status: regressed
+    rows:
+    - metric: pair errors
+      run: 0
+      baseline_worst: 0
+    - metric: report findings
+      run: 0
+      baseline_worst: 0
+      baseline_basis: 'floor 0: 3 baseline replicate(s) ran the report check and read
+        no claim, none measured one (#684)'
+    - metric: ungrounded identifiers
+      run: 0
+      baseline_worst: 0
+    - metric: resolver URLs in identifier slots
+      run: 0
+      baseline_worst: 0
+    - metric: organisational fragments
+      run: 0
+      baseline_worst: 0
+    - metric: undeclared prefixes
+      run: 6
+      baseline_worst: 0
+      regressed: true
+    - metric: British spellings
+      run: 0
+      baseline_worst: 2
+    - metric: chunks unreviewed
+      run: 0
+      baseline_worst: 0
+    - metric: snippets unverified
+      run: 0
+      baseline_worst: 0
+    - metric: addressing slips over tolerance
+      run: 0
+      baseline_worst: 0
+    - metric: receipts vacuous
+      run: 0
+      baseline_worst: 0
+    - metric: receipt findings
+      run: 0
+      baseline_worst: 0
+    blind: []
+    unbaselined: []
+    regressions:
+    - 'undeclared prefixes: 6 against a baseline worst of 0'
+    basis: 'offline write of the verdict the batch gate printed at 2026-09-04T09:0xZ
+      and stopped on, recomputed from this record''s own check blocks against the
+      v7 production per-project worst with the gate''s functions, including the #684
+      report basis (v7 CM4AI: 3 vacuous, 0 measured → floor 0).'
+    recorded_at: '2026-09-04T09:39:55+00:00'
+    recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-04
