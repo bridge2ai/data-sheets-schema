@@ -985,7 +985,7 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
     from datetime import datetime, timezone
 
     from data_sheets_schema.backfill_checks import _split_header
-    from data_sheets_schema.grounding import BRITISH_INSTRUMENT
+    from data_sheets_schema.grounding import BRITISH_INSTRUMENT, PREFIX_INSTRUMENT
     for p in paths:
         withheld: list[str] = []
         try:
@@ -999,8 +999,10 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
                          .get("form") or {})
                 if prior:
                     note = (f"form recomputed {datetime.now(timezone.utc).date().isoformat()} by "
-                            f"backfill-checks --overwrite, british instrument {BRITISH_INSTRUMENT}; "
-                            f"previous british={prior.get('british_spellings')}")
+                            f"backfill-checks --overwrite, british instrument {BRITISH_INSTRUMENT}, "
+                            f"prefix instrument {PREFIX_INSTRUMENT}; "
+                            f"previous british={prior.get('british_spellings')}, "
+                            f"previous undeclared_prefixes={prior.get('undeclared_prefix_occurrences')}")
                     if prior.get("instrument_note"):
                         note = f"{prior['instrument_note']} | {note}"
                     blocks["form"]["instrument_note"] = note

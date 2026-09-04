@@ -2300,26 +2300,91 @@ def normalise_identifier_form(text: str, *, phase: str | None = None) -> str:
     return "\n".join(out)
 
 
+_MAILTO_ID_LINE = re.compile(r"^(?P<indent>[ \t]*)(?P<dash>-[ \t]+)?id:[ \t]+(?P<q>[\"']?)mailto:(?P<addr>[^\s\"']+)(?P=q)[ \t]*\r?$")
+_ROOT_ID_LINE = re.compile(r"^id:[ \t]+(?P<q>[\"']?)(?P<value>[^\s\"']+)(?P=q)[ \t]*\r?$", re.M)
+
+
+def normalise_mailto_ids(text: str, *, phase: str | None = None) -> str:
+    """A `mailto:` written as an identifier becomes a fragment on the record's
+    own id, and the address is kept in the sibling `email` slot (#981).
+
+    The third CM4AI v8 canary wrote `id: mailto:<address>` on six inlined
+    contact persons — D1 forces `Person.id`, and the model had an email and
+    no ORCID. The fragment rule asks for a fragment on an identifier the
+    evidence supplies when no authority id exists, and `Person` has an
+    `email` slot for the address. Line-based like the other normalisers: the
+    mapping the `id` belongs to extends over the following lines indented
+    deeper than the id's key column; an `email:` already there is left, an
+    absent one is added right after the id. Without a top-level `id` there
+    is nothing to mint on, and the value is left for the counter to report.
+    """
+    root = _ROOT_ID_LINE.search(text)
+    if not root:
+        return text
+    root_id = root.group("value")
+    log = _REWRITE_LOG.get()
+    lines = text.split("\n")
+    out: list[str] = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        m = _MAILTO_ID_LINE.match(line)
+        if not m or (m.group("indent") == "" and not m.group("dash")):
+            out.append(line); i += 1; continue           # the root id itself is never rewritten
+        col = len(m.group("indent").expandtabs(2)) + (len(m.group("dash").expandtabs(2)) if m.group("dash") else 0)
+        addr = m.group("addr")
+        slug = re.sub(r"[^a-z0-9]+", "-", addr.split("@", 1)[0].lower()).strip("-") or "contact"
+        minted = f"{root_id}#person-{slug}"
+        eol = "\r" if line.endswith("\r") else ""
+        out.append(f"{m.group('indent')}{m.group('dash') or ''}id: {m.group('q')}{minted}{m.group('q')}{eol}")
+        # The mapping's other keys sit at the id's own column (a `- id:`
+        # item's siblings included); deeper lines belong to those keys; a
+        # shallower line ends the mapping.
+        j = i + 1
+        has_email = False
+        while j < len(lines):
+            nxt = lines[j]
+            if nxt.strip() == "":
+                j += 1; continue
+            depth = len(nxt[:len(nxt) - len(nxt.lstrip())].expandtabs(2))
+            if depth < col:
+                break
+            if depth == col and re.match(r"[ \t]*email:", nxt):
+                has_email = True
+            j += 1
+        if not has_email:
+            out.append(f"{' ' * col}email: {addr}{eol}")
+        if log is not None:
+            log.append({"phase": phase, "kind": "mailto_id", "slot": "id", "from": f"mailto:{addr}", "to": minted})
+        i += 1
+    return "\n".join(out)
+
+
 def normalise_record_text(text: str, *, phase: str | None = None) -> str:
     """Every write-time normalisation, in the order the record is written."""
-    return normalise_identifier_form(normalise_multivalued(
-        normalise_enum_aliases(normalise_temporal(text))), phase=phase)
+    return normalise_mailto_ids(normalise_identifier_form(normalise_multivalued(
+        normalise_enum_aliases(normalise_temporal(text))), phase=phase), phase=phase)
 
 
 def identifier_rewrite_summary(log: list[dict[str, Any]] | None) -> dict[str, Any]:
     """`{phase: {slot: {occurrences, distinct}}}` plus totals, for the record."""
-    by: dict[str, dict[str, dict[str, Any]]] = {}
-    for e in log or []:
-        ph = str(e.get("phase") or "unknown")
-        cell = by.setdefault(ph, {}).setdefault(str(e["slot"]), {"occurrences": 0, "values": set()})
-        cell["occurrences"] += 1
-        cell["values"].add(e["from"])
-    out = {ph: {sl: {"occurrences": c["occurrences"], "distinct": len(c["values"]),
-                     "examples": sorted(c["values"])[:3]}
-                for sl, c in slots.items()} for ph, slots in by.items()}
-    return {"identifier_form": out,
-            "occurrences": sum(e and 1 for e in (log or [])),
-            "distinct_values": len({e["from"] for e in (log or [])})}
+    def fold(entries):
+        by: dict[str, dict[str, dict[str, Any]]] = {}
+        for e in entries:
+            ph = str(e.get("phase") or "unknown")
+            cell = by.setdefault(ph, {}).setdefault(str(e["slot"]), {"occurrences": 0, "values": set()})
+            cell["occurrences"] += 1
+            cell["values"].add(e["from"])
+        return {ph: {sl: {"occurrences": c["occurrences"], "distinct": len(c["values"]),
+                          "examples": sorted(c["values"])[:3]}
+                     for sl, c in slots.items()} for ph, slots in by.items()}
+    entries = list(log or [])
+    forms = [e for e in entries if e.get("kind") != "mailto_id"]
+    mailto = [e for e in entries if e.get("kind") == "mailto_id"]
+    return {"identifier_form": fold(forms),
+            "mailto_ids": fold(mailto),
+            "occurrences": len(entries),
+            "distinct_values": len({e["from"] for e in entries})}
 
 
 def normalise_multivalued(text: str) -> str:

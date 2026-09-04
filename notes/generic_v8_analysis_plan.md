@@ -263,6 +263,7 @@ excluded from every v8 comparison as they were from v7's.
 
 | project | label | verdict | basis |
 |---|---|---|---|
+| CM4AI | `2026-09-04c_claude-opus-5-api-generic-v8_rep1` | **regressed** on one metric under instrument v2: undeclared prefixes 6 vs 0, all `mailto:` person ids (D1 forces `Person.id`). Everything else passed: receipts clean with no re-addressing needed, resolver URLs 0 with 0 rewrites, report gate 1 → 0 among 9 claims, British 0. **Prediction 5: 1.3%** (from 28.3% and 36.0%); 6: 70.4%; 9: +94% (full output 80,319); 2: 0. | Step I (#981/#982): `mailto:` ids get a mechanism and the counter its v3; re-verdicted offline under v3 before the VOICE canary. |
 | CM4AI | `2026-09-04b_claude-opus-5-api-generic-v8_rep1` | **regressed** on one metric: resolver URLs in identifier slots 16 vs 0 (the dataset DOI as a URL under `id` plus 15 minted fragments); every receipt metric passed — the re-addressing turn dropped the one mis-addressed entry and the report gate regenerated 1 contradiction among 40 claims to 0, both firing on a live run for the first time. Coverage 288/407 (70.8%). British 2 (= v7 worst). One repair round (14). | **Deferred fix, step H (#974)**: identifier form is a rule with no mechanism; the normaliser lands before the third canary. Predictions: 2 unfavourable (0), 5 unfavourable (36.0%), 6 favourable (70.8%), 9 unfavourable (−26.7%). |
 | CM4AI | `2026-09-04_claude-opus-5-api-generic-v8_rep1` | **regressed** on one metric: receipt findings 1 against a floor of 0; every other gated metric equal to or better than the v7 per-project worst (British spellings 0 vs 2). Full-phase output 31,207 of 128,000 (24%). One repair round (11 findings). Receipts: 28/28 chunks, 117/168 snippets verified (45 adjacent, 6 elsewhere), 206/342 slots with a receipt (60.2%). | **v8 defect (#952)**, the plan owner's decision on 2026-09-04: the finding is one receipt entry addressed to `subject`, a name the schema has no slot for, for a value the record holds under `keywords` — the v8 receipt rule names the record path the value fills, so the model broke a rule it was given. Not the v7 retained-with-basis pattern. No fill and no further canary until fixed and re-canaried; fix chosen: the runner re-addressing turn (step G, #953); the re-canary runs under a new prefix, `2026-09-04b_claude-opus-5-api-generic-v8`. Recorded in the record's `canary` block (with the withdrawn retained-with-basis reading as `prior_disposition`). **Predictions this record measures (n=1):** 2 favourable (`grant_number` populated 2 of 3); 6 favourable (60.2%); **5 unfavourable** (`value_changed_after_receipt` 41/145 = 28.3% against <10%; v7 CM4AI replicates 17.0/17.4/7.9%); **9 unfavourable** (`full` output 31,207 against the v7 CM4AI mean 41,370, −24.6%, outside ±10%). First launch stopped on a CBORG 403 (off-VPN) before any phase; resumed on the VPN. |
 
@@ -342,7 +343,19 @@ steps need:
    (`2026-09-04c`), never between a canary and its fill. The 2026-09-04b
    record stays as evidence, excluded from the v8 comparison by prefix.
 
-Each of 2–5 and 7–9 is a generation-path change; per the production rule
+10. **I (#981, #982)** — after the third CM4AI canary (`2026-09-04c_…_rep1`)
+    passed every receipt metric, resolver URLs and the report gate and
+    stopped on six `mailto:` person ids: (a) a write-time normaliser mints a
+    fragment on the record's id for a `mailto:` identifier and keeps the
+    address in `email` (`normalise_mailto_ids`, logged under
+    `normalisation.mailto_ids`); (b) the undeclared-prefix counter is
+    instrument v3 — `mailto:` excluded, as its v2 docstring judged; the two
+    affected form blocks (v6 agentic CM4AI rep1: 2 → 0; 2026-09-04c: 6 → 0)
+    are recomputed and the 2026-09-04c canary re-verdicted offline. (a) is a
+    generation-path change landing before the VOICE canary; (b) an
+    instrument revision registered here with both sides recomputed.
+
+Each of 2–5 and 7–10 is a generation-path change; per the production rule
 none of them may land between a v8 canary and its fill.
 
 ## Decisions needed before step 3

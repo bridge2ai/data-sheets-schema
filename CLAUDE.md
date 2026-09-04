@@ -798,7 +798,12 @@ block scalars are skipped whole and trailing comments kept. Because the
 record as written is then clean by construction, the canary's resolver-URL
 row is an invariant for forms the normaliser does not cover, and what the
 model actually wrote is in the record's `normalisation.identifier_form`
-block (occurrences and distinct values by phase and slot).
+block (occurrences and distinct values by phase and slot). Since #981 a
+`mailto:` written as an identifier becomes a fragment on the record's own
+id (`doi:10.1/x#person-jane`) with the address kept in `email`, logged
+under `normalisation.mailto_ids`. The undeclared-prefix counter is
+instrument **v3** (#982): `ark:` and `mailto:` excluded, `urn:` by NID; the
+form block records `prefix_instrument`.
 
 ## Null/Empty Value Handling
 
