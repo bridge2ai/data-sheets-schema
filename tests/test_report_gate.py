@@ -88,6 +88,11 @@ class TestPresenceClaims(unittest.TestCase):
         self.assertEqual(f["kind"], "change_not_shown")
         self.assertIn("declares no `funders` slot", f["detail"])
         self.assertEqual(out["claims_core_cannot_hold"], 1)
+        # Neither record carries it: a substantive contradiction, and "name `full`" would be wrong.
+        out = check_report(_report(self.dir, "| `funders` | retained | both | kept |\n"), {"id": "x"}, CORE, DECLARED)
+        (f,) = out["findings"]
+        self.assertNotIn("declares no", f["detail"])
+        self.assertEqual(out["claims_core_cannot_hold"], 0)
         # A declared slot absent from the core is a substantive contradiction, not counted there.
         out = check_report(_report(self.dir, "| `keywords` | retained | both | kept |\n"), FULL, {"id": "x"}, DECLARED)
         (f,) = out["findings"]
@@ -110,14 +115,16 @@ class TestPresenceClaims(unittest.TestCase):
         with self.assertRaises(ValueError):
             check_report(_report(self.dir, "| `funders` | retained | both | kept |\n"), FULL, CORE,
                          {"Dataset": DECLARED["Dataset"]})
+        with self.assertRaises(ValueError):                       # even with no `both` row to consult it
+            check_report(_report(self.dir, "| `keywords` | retained | full | kept |\n"), FULL, CORE,
+                         {"Dataset": DECLARED["Dataset"]})
 
     def test_a_removal_finding_under_both_describes_the_live_value(self):
         """#995: `funders | removed | both` when only the full record carries it names the full value."""
         out = check_report(_report(self.dir, "| `funders` | removed | both | gone |\n"), FULL, CORE, DECLARED)
         (f,) = out["findings"]
         self.assertEqual(f["kind"], "removal_not_performed")
-        self.assertNotIn("has None", f["detail"])
-        self.assertNotIn("has an empty", f["detail"])
+        self.assertEqual(f["detail"], "report says removed; record has 1 entry")   # the full's list, not the core's None
 
     def test_a_row_naming_no_record_is_a_finding_only_when_neither_record_carries_it(self):
         out = check_report(_report(self.dir, "| `license` | retained | | kept |\n"), FULL, CORE, DECLARED)

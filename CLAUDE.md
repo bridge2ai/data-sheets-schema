@@ -516,7 +516,8 @@ it (#961). A `both` row on a slot the core class does not declare
 (`citation`, `consent_revocations`, …) is read as written — the
 instruction defines `both` as present in both — and the finding names
 the cause so the regate can fix the row (`claims_core_cannot_hold` counts
-them apart from substantive contradictions; #990/#992); the block carries
+those the full record does carry, apart from substantive contradictions;
+#990/#992); the block carries
 `instrument` from v2 (#996). Residual: a run whose report phase completed under the pre-E
 runner and is resumed under this one gets no table and is blind by
 construction; no such run exists. `companions` is hashed after the last

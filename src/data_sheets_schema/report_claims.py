@@ -370,6 +370,12 @@ def check_report(report: Path, full: dict, core: dict,
     text = report.read_text(encoding="utf-8", errors="replace")
     findings: list[dict[str, str]] = []
     claims = unnamed = core_cannot_hold = 0
+    # Refused up front, not only on the row that would consult it (#993): a
+    # report with no failing `both` row would otherwise check clean against
+    # a core schema that could not be read.
+    if "CoreDataset" not in declared:
+        raise ValueError("declared slots carry no `CoreDataset` class; "
+                         "the core schema could not be read")
 
     def removal(names: list[str], context: str, claim: str) -> None:
         nonlocal claims, unnamed
@@ -556,7 +562,11 @@ def check_report(report: Path, full: dict, core: dict,
             # cause, so the regate can fix the row rather than guess, and the
             # block counts these apart from substantive contradictions.
             cause = ""
-            if where == "both" and not _core_declares(row["slot"], declared):
+            # Only where the full record does carry it: a `both` row on a
+            # slot neither record holds is a substantive contradiction, and
+            # "name `full`" would be wrong advice.
+            if (where == "both" and in_full and _populated(v_full)
+                    and not _core_declares(row["slot"], declared)):
                 core_cannot_hold += 1
                 root = re.split(r"[.\[]", row["slot"], maxsplit=1)[0]
                 cause = (f"; the core class declares no `{root}` slot, so the row "
