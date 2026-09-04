@@ -294,9 +294,9 @@ def _core_declares(path: str, declared: dict[str, set[str]]) -> bool:
     CoreDataset differ, recursively) and a derived core that carries
     `distributions` in place of `distribution_formats`: a finding on a
     `both` row under either is still correct, but names no cause (#994).
-    `declared` without a `CoreDataset` entry is a broken core schema, and
-    a checker that carried on would call every such row a substantive
-    contradiction, or none, with no signal (#993).
+    `declared` without a `CoreDataset` entry is a broken core schema:
+    `check_report` refuses it up front, since a checker that carried on
+    would drop the cause from every such finding with no signal (#993).
     """
     if "CoreDataset" not in declared:
         raise ValueError("declared slots carry no `CoreDataset` class; "
