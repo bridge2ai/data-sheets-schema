@@ -1,0 +1,101 @@
+{
+  "findings": [
+    {
+      "severity": "major",
+      "record": "full",
+      "slot": "creators[*].affiliations[*].id, creators[*].id, data_governance.committee_contact.id",
+      "issue": "Identifiers for people and organizations outside this dataset were minted as fragments on the repository base URL (e.g. `https://dataverse.lib.virginia.edu/#organization-ucsd`, `#person-axelsson-u`, `#person-jillian-parker`, `#organization-stanford`, `#organization-kth`). These name real-world entities, so the identifier must come from the evidence or be omitted; the bundle supplies a registry identifier only for the University of Virginia (`https://ror.org/0153tk833`, correctly rendered as `ROR:0153tk833`) and ORCIDs for named authors. A fragment on a repository URL identifies neither a person nor an organization and is an invented, non-resolving identifier. Repair by omitting `id` on these Organization and Person objects and retaining only `name` (and `email`/`orcid` where the bundle states them)."
+    },
+    {
+      "severity": "major",
+      "record": "full",
+      "slot": "related_datasets[0..3].relationship_type",
+      "issue": "Relationship direction is inverted. This record is the June 2026 release; the October 2025 (10.18130/V3/K7TGEM), June 2025 (10.18130/V3/F3TD5R), March 2025 (10.18130/V3/B35XWX) and May 2024 (10.18130/V3/DXWOS5) releases are its predecessors. `is_previous_version_of` asserts that this dataset is the earlier version of each target. The permitted term for the intended sense is `is_new_version_of` (or `replaces`). The first entry's own `notes` — 'Relationship read from the June 2026 release's position as the successor release' — contradicts the term chosen, an internal inconsistency."
+    },
+    {
+      "severity": "major",
+      "record": "full",
+      "slot": "instances[*].instance_description",
+      "issue": "`instance_description` is not a key the schema digest declares on Instance (permitted: counts, data_substrate, data_topic, instance_type, label, label_description, missing_information, notes, sampling_strategies, source_caveats, id, used_software). Invented key — a validation defect. Move the prose to `notes` or `label_description` as appropriate."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "id",
+      "issue": "`id` is written as the doi.org resolver URL `https://doi.org/10.18130/V3/HIGT4C` while `version_access.latest_version_doi` renders the same DOI as the CURIE `doi:10.18130/V3/HIGT4C`. The range is `uriorcurie` and a `doi:` prefix is in use elsewhere in the record; one thing written two ways yields two identities. Render `id` as `doi:10.18130/V3/HIGT4C`. (Note the bare-string `doi` slot is correctly unprefixed and should not change.)"
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "preprocessing_strategies, labeling_strategies, machine_annotation_tools",
+      "issue": "These slots describe the MuSIC pipeline that produces computed cell maps — node2vec/HPA embedding, contrastive co-embedding, community detection, GO/Reactome alignment and LLM assembly naming. The release states plainly that 'Computed cell maps not included in this release', and the record itself records this under `known_limitations`. Pipeline steps for a product absent from this release are presented as preprocessing and annotation applied to this dataset. Either scope each entry explicitly to the toolkit rather than to this release's contents, or omit."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "machine_annotation_tools[0].tools",
+      "issue": "`tools` is populated with a single semicolon-joined prose string naming five distinct tools. Where the range is multivalued, emit one entry per tool so the list represents what it declares rather than a paragraph occupying a list slot."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "ethical_reviews[2]",
+      "issue": "The entry describes the CM4AI Ethics Module's Value-Sensitive Design methodology and states that the team 'is formulating the CM4AI Life Cycle' — a programme of work in progress from the tier-3 preprint, not an ethics review, approval or compliance determination for this dataset. It is both a plan stated in a slot asking for reviews and a value answering a neighbouring concern. Omit, or relocate the descriptive content to `notes`."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "prohibited_uses[0].prohibition_reason",
+      "issue": "The value is the prohibition itself ('These laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval'), not the reason for it. The bundle gives no separate rationale, so the field is answered with the wrong content; consider carrying the statement in `notes` and omitting `prohibition_reason`."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "discouraged_uses[0]",
+      "issue": "Commercial use is not discouraged but disallowed by the CC BY-NC-SA 4.0 terms absent a separate negotiated license; the same fact is already carried in `license_and_use_terms.license_terms` and `data_use_permission: no_commercial_use`. A licence restriction placed in `discouraged_uses` answers a neighbouring field and duplicates."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "data_collectors[2]",
+      "issue": "The entry ('PPI networks are downloaded from the Krogan Laboratory's deposition archive and IF images from the Lundberg Laboratory's deposition archive for downstream processing') describes the MuSIC pipeline's ingestion step, not a party that collected data. It duplicates `raw_sources` verbatim in substance. Omit."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "maintainers[2]",
+      "issue": "Justin Niestroy is stated in the bundle as the Dataverse Depositor, not as a maintainer; the entry's own text says 'depositor of record'. Depositor is a distinct role and answers a neighbouring concern. Also, `role: academic_institution` is applied to all three entries, which name individuals rather than institutions; no listed MaintainerRole term fits a named individual, so consider omitting `role`."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "file_collections[*].total_bytes",
+      "issue": "Seven byte figures are conversions of the repository's one-decimal KB/MB values at 1 KB = 1024 bytes. The derivation is disclosed in each entry's `notes` and in `source_caveats`, which is correct practice, but the 1024 base is an unstated assumption about the repository's units (the same string may denote decimal KB), and the source precision (±50 bytes at one decimal place) means the byte-exact values assert precision the evidence does not carry. Consider omitting `total_bytes` and retaining the repository's stated size strings in `notes`."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "language",
+      "issue": "`language: en` is not stated anywhere in the declared bundle. The dataset comprises image archives, mass-spectrometry tables and sequence data; no source asserts a language for the resource. Omit."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "`publisher: https://dataverse.lib.virginia.edu/` is a bare host URL the bundle never states as such; the bundle names the publisher as 'University of Virginia Dataverse' and shows only an API path under that host. Either use the dataset landing URL the bundle does contain or carry the publisher name."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "was_derived_from",
+      "issue": "The slot's range is a single string naming a resource this one derives from; the value names two distinct cell lines ('MDA-MB-468 breast cancer cell line and KOLF2.1J induced pluripotent stem cell line'). Two source materials collapsed into one value. Cell-line provenance is already conveyed in `description` and `subpopulations`; consider omitting or naming one resource."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "is_tabular",
+      "issue": "`false` is an inference from the ZIP/image/mass-spectrometry composition rather than a statement in the bundle. The release contains tabular mass-spectrometry and perturb-seq outputs alongside images, so the single boolean is not clearly supported either way. Omission is the safer answer."
+    }
+  ],
+  "summary": "Sixteen findings against the full record. Three are major: (1) invented identifiers for real-world people and organizations, minted as fragments on the Dataverse base URL across ~45 Creator/Organization objects and the data-governance contact, where the bundle supplies ORCIDs for authors and a ROR only for the University of Virginia; (2) inverted `relationship_type` on all four version-lineage entries in `related_datasets`, asserting that the June 2026 release is the previous version of its own predecessors, contradicted by the entry's own notes; (3) an undeclared `instance_description` key on all four Instance objects, a validation defect. The remaining thirteen are minor: a doi rendered as resolver URL in `id` while the same DOI appears as a `doi:` CURIE elsewhere; pipeline steps for cell maps the release explicitly excludes presented as this dataset's preprocessing, labeling and annotation; a five-tool prose string in a multivalued `tools` slot; an ethics-programme plan lodged in `ethical_reviews`; a prohibition statement occupying `prohibition_reason`; a licence restriction in `discouraged_uses`; a pipeline ingestion step in `data_collectors`; a depositor recorded as maintainer with an ill-fitting institutional role enum; byte figures converted from rounded repository sizes on an unstated 1024 base; and three unsupported or over-precise scalars (`language`, `publisher`, `is_tabular`, `was_derived_from`). Positively: the derived `total_file_count`, the omission of `total_size_bytes`, the exclusion of project-wide aggregate figures, the tier-1 preference of the June 2026 release over October 2025, and the segregation of the Nature U2OS map into `related_datasets` are all handled correctly and disclosed in `source_caveats`."
+}
