@@ -242,6 +242,22 @@ class TestTheYamlWalker(unittest.TestCase):
         self.assertEqual([(e["slot"], e["from"], e.get("reason")) for e in log if e["kind"].endswith("skipped")],
                          [("variable_name", "Haemoglobin", "verbatim slot")])
 
+    def test_identifier_slots_accented_names_and_block_edges(self):
+        """#1008: a bare id is verbatim; an accented name is a title-case run; `- |  `, `- &n |` and a
+        less-indented comment inside a block."""
+        log = []
+        text = ("id: research-programme\nsource_id: programme-1\nname: Centre Médical Laser Palaiseau\n"
+                "notes:\n- |  \n  programme: details\n- &n |\n  programme: more\n"
+                "caveat: |\n  programme\n # organisation comment\nnext: programme\n")
+        out = normalise_british_spellings(text, log=log)
+        self.assertEqual(out, ("id: research-programme\nsource_id: programme-1\nname: Centre Médical Laser Palaiseau\n"
+                               "notes:\n- |  \n  program: details\n- &n |\n  program: more\n"
+                               "caveat: |\n  program\n # organisation comment\nnext: program\n"))
+        self.assertEqual([(e["slot"], e["from"], e["reason"]) for e in log if e["kind"].endswith("skipped")],
+                         [("id", "programme", "verbatim slot"), ("source_id", "programme", "verbatim slot"),
+                          ("name", "Centre", "title-case run")])
+        self.assertEqual(yaml.safe_load(out)["caveat"], "program\n")
+
     def test_layout_is_preserved(self):
         out = normalise_british_spellings(RECORD)
         self.assertEqual([len(l) - len(l.lstrip()) for l in out.splitlines()],

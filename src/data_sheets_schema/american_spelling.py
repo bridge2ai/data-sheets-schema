@@ -35,9 +35,12 @@ what the American form is.
 title-case run — the word before or after it is Capitalised too ("Temerty
 Centre for …", "Programme Director", "Favour Okonkwo") — is left as
 written and logged as skipped, with the few genus names the corpus could
-carry (`PROPER_NOUNS`). The VOICE bundle names the Temerty Centre, a real
-institution; the instrument counts it either way, and a count with a
-named skip beside it is the honest split. A proper noun in lower case, or
+carry (`PROPER_NOUNS`). The VOICE bundle names the Temerty Centre for
+Artificial Intelligence Research and Education in Medicine — written
+"Center" in the bundle's own text, "Centre" by the institution, and both
+ways across the VOICE records; a name is not this module's to change in
+either direction, the instrument counts the British form the model
+chose, and a count with a named skip beside it is the honest split. A proper noun in lower case, or
 one the run does not catch ("the programme run by Wellcome"), is still
 rewritten — the prompt says titles and names keep their spelling, and
 the model did not mark this one; the record's `british_rewrites` names
@@ -70,9 +73,17 @@ from data_sheets_schema.grounding import BRITISH_PATTERNS, british_spellings
 NORMALISER_VERSION = ("v1 (#1002): one rule per BRITISH_PATTERNS v3 entry; double-quoted spans, "
                       "identifier-shaped tokens, title-case runs, genus names and verbatim slots left as written")
 
-#: Slots whose value is the source's own token: never prose.
+#: Slots whose value is the source's own token, or an identifier: never
+#: prose. A bare `id: research-programme` has no `:` or `/` for the token
+#: rule to see (#1008).
 VERBATIM_SLOTS = frozenset({"variable_name", "column_name", "field_name", "path", "filename",
-                            "file_name", "format", "media_type", "md5", "sha256"})
+                            "file_name", "format", "media_type", "md5", "sha256",
+                            "id", "identifier", "url", "uri", "iri", "email", "orcid", "doi",
+                            "homepage", "landing_page"})
+
+
+def _verbatim(owner: str | None) -> bool:
+    return bool(owner) and (owner in VERBATIM_SLOTS or owner.endswith(("_id", "_url", "_uri")))
 
 
 def _swap(british: str, american: str) -> Callable[[str], str]:
@@ -162,17 +173,24 @@ _PROTECTED = re.compile(f"{_QUOTED.pattern}|{_IDENTIFIER_TOKEN.pattern}")
 #: Names the rules would otherwise read as British: genus names keep their
 #: Latin spelling in American English.
 PROPER_NOUNS = frozenset({"haemophilus"})
-_CAPITALISED = re.compile(r"^[A-Z][a-z]")
+
+def _capitalised(word: str) -> bool:
+    """`Centre`, `Médical`: an upper-case initial and a lower-case second
+    letter, in any script (#1008: `[A-Z][a-z]` missed accented names)."""
+    return len(word) > 1 and word[0].isupper() and word[1].islower()
+
 #: The neighbouring word, stopping at a sentence boundary: "Toronto. Programme
 #: staff" is not a title-case run (#1007).
-_WORD_BEFORE = re.compile(r"([A-Za-z][\w'’-]*)[^\w\n.;:!?]*$")
-_WORD_AFTER = re.compile(r"^[^\w\n.;:!?]*([A-Za-z][\w'’-]*)")
+_WORD_BEFORE = re.compile(r"([^\W\d_][\w'’-]*)[^\w\n.;:!?]*$")
+_WORD_AFTER = re.compile(r"^[^\w\n.;:!?]*([^\W\d_][\w'’-]*)")
 
 #: The YAML lines this walks: a mapping key (possibly a list item), a bare
 #: list item, and a block-scalar indicator on a key line.
 _KEY = re.compile(r"^(?P<indent>[ \t]*)(?P<dash>-[ \t]+)?(?P<slot>[A-Za-z_][\w.-]*):(?:[ \t]+(?P<value>.*)|$)")
 _ITEM = re.compile(r"^(?P<indent>[ \t]*)-(?:[ \t]+|$)")
-_BLOCK = re.compile(r"^[|>][+-]?\d?[+-]?(?:[ \t]+#.*)?$")
+#: A block indicator, with an optional anchor or tag before it and a
+#: comment or trailing spaces after (#1008: `- |  `, `- &n |`).
+_BLOCK = re.compile(r"^(?:[&!]\S+[ \t]+)*[|>][+-]?\d?[+-]?(?:[ \t]+#.*)?[ \t]*$")
 
 def _case_like(source: str, american: str) -> str:
     if len(source) > 1 and source.isupper():
@@ -189,11 +207,11 @@ def _proper_noun(segment: str, m: "re.Match[str]") -> str | None:
     src = m.group(0)
     if src.lower() in PROPER_NOUNS:
         return "proper noun"
-    if not _CAPITALISED.match(src):
+    if not _capitalised(src):
         return None
     before = _WORD_BEFORE.search(segment[:m.start()])
     after = _WORD_AFTER.match(segment[m.end():])
-    if (before and _CAPITALISED.match(before.group(1))) or (after and _CAPITALISED.match(after.group(1))):
+    if (before and _capitalised(before.group(1))) or (after and _capitalised(after.group(1))):
         return "title-case run"
     return None
 
@@ -259,7 +277,8 @@ def normalise_british_spellings(text: str, *, phase: str | None = None,
     """
     out: list[str] = []
     enclosing: list[tuple[int, str]] = []
-    block_indent: int | None = None
+    block_indent: int | None = None      # the column of the key or item that opened the block
+    block_content: int | None = None     # the indentation of its first non-blank line
 
     def width(s: str) -> int:
         return len(s.expandtabs(8))
@@ -275,7 +294,7 @@ def normalise_british_spellings(text: str, *, phase: str | None = None,
         else:
             body, sep, comment = _split_comment(segment)
         new, pairs, skips = americanise(body)
-        if owner in VERBATIM_SLOTS and pairs:
+        if _verbatim(owner) and pairs:
             skips = skips + [(src, "verbatim slot") for src, _ in pairs]
             new, pairs = body, []
         if log is not None:
@@ -291,11 +310,17 @@ def normalise_british_spellings(text: str, *, phase: str | None = None,
         body = line.rstrip("\r\n")
         eol = line[len(body):]
         if block_indent is not None:
-            if not body.strip() or width(body[:len(body) - len(body.lstrip())]) > block_indent:
+            indent = width(body[:len(body) - len(body.lstrip())])
+            if block_content is None and body.strip() and indent > block_indent:
+                block_content = indent
+            # Content is at or beyond the block's own indentation; a
+            # less-indented line — a comment, or the next key — ends it
+            # (#1008).
+            if not body.strip() or (indent > block_indent and (block_content is None or indent >= block_content)):
                 owner = enclosing[-1][1] if enclosing else None
                 out.append(emit(body, owner, prose=True) + eol)
                 continue
-            block_indent = None
+            block_indent = block_content = None
         if body.lstrip().startswith("#") or not body.strip():
             out.append(line)
             continue
