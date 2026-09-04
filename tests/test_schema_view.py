@@ -3,7 +3,7 @@
 linkml_runtime's SchemaView caches its methods with `lru_cache(None)`, which
 keys on `self`: a view is pinned for the life of the process by its own
 caches, and `del` frees nothing. The suite's API-runner tests built ~24 views
-per `execute()` and reached 14 GB in one file — the 7 GB CI runner died of it
+per `execute()` and reached 14 GB in one file — the 16 GB CI runner died of it
 on every run and reported a runner shutdown, never a test.
 """
 
@@ -33,13 +33,28 @@ class TestSharing(unittest.TestCase):
             first = schema_view.shared_view(p)
             held = schema_view.views_held()
             p.write_text("id: https://example.org/s\nname: s\nclasses:\n  A: {}\n  B: {}\n")
-            import os, time
-            os.utime(p, ns=(time.time_ns(), time.time_ns() + 1_000_000))
             second = schema_view.shared_view(p)
             self.assertIsNot(first, second)
             self.assertIn("B", second.all_classes())
             self.assertEqual(schema_view.views_held(), held,
                              "the stale key must be dropped, not kept beside the new one")
+
+    def test_a_same_size_rewrite_in_the_same_timestamp_tick_is_still_seen(self):
+        """#943 (Codex review of #935): a key of size and mtime misses a
+        same-length rewrite whose mtime collides — a one-second-resolution
+        filesystem makes that ordinary. Content is the key."""
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "s.yaml"
+            p.write_text("id: https://example.org/s\nname: s\nclasses:\n  A: {}\n")
+            first = schema_view.shared_view(p)
+            st = p.stat()
+            p.write_text("id: https://example.org/s\nname: s\nclasses:\n  B: {}\n")
+            os.utime(p, ns=(st.st_atime_ns, st.st_mtime_ns))       # same size, same mtime
+            self.assertEqual(p.stat().st_size, st.st_size)
+            second = schema_view.shared_view(p)
+            self.assertIsNot(first, second)
+            self.assertIn("B", second.all_classes())
 
 
 class TestNoSiteBuildsItsOwn(unittest.TestCase):

@@ -256,8 +256,12 @@ test-modules:
 # pytest, not `unittest discover`: it is what the merge gate runs locally,
 # and its `--durations` output is how a slow or hanging test is found on a
 # runner that prints nothing until a line of dots completes (#926).
+# PYTEST_ARGS: CI passes -v so the log names the test that was running when
+# a runner dies — -q's dots and --durations' end-of-run table both say
+# nothing about a test that never finished (#935 review).
+PYTEST_ARGS ?= -q
 test-python:
-	$(RUN) pytest tests -q -p no:cacheprovider --durations=25
+	$(RUN) pytest tests $(PYTEST_ARGS) -p no:cacheprovider --durations=25
 
 lint:
 	$(RUN) linkml-lint $(SOURCE_SCHEMA_PATH)

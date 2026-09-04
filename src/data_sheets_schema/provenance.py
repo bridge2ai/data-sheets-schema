@@ -852,18 +852,48 @@ def check_record(data: dict[str, Any]) -> tuple[list[str], str | None]:
     must reach disk. The caller decides what an unverifiable record is worth,
     and `execute()` treats it as a failure.
     """
-    try:
-        from linkml.validator import validate
-    except Exception as exc:                                   # noqa: BLE001
-        return [], f"the linkml validator is unavailable: {exc}"
     schema = record_schema_path()
     if not schema.exists():
         return [], f"the record schema is not at {schema}"
     try:
-        report = validate(data, str(schema), "GenerationRecord")
+        validator = _record_validator(schema)
+    except Exception as exc:                                   # noqa: BLE001
+        return [], f"the linkml validator is unavailable: {exc}"
+    try:
+        report = validator.validate(data, "GenerationRecord")
     except Exception as exc:                                   # noqa: BLE001
         return [], f"the validator could not run against {schema}: {exc}"
     return [str(r.message) for r in getattr(report, "results", [])], None
+
+
+_VALIDATORS: dict[tuple[str, str], Any] = {}
+
+
+def _record_validator(schema: Path):
+    """One linkml ``Validator`` per record-schema content (#944).
+
+    ``linkml.validator.validate`` builds a ``Validator`` per call, and the
+    locked linkml builds two SchemaViews inside it — pinned for the life of
+    the process by their own method caches (#926) — so every
+    ``check_record`` cost ~1.7 MB it never gave back. Keyed like
+    ``schema_view.shared_view``: the file's bytes, so an edited record
+    schema gets a fresh validator.
+    """
+    from linkml.validator import Validator
+    from linkml.validator.plugins import JsonschemaValidationPlugin
+
+    from data_sheets_schema.schema_view import content_key
+    key = content_key(schema)
+    validator = _VALIDATORS.get(key)
+    if validator is None:
+        _VALIDATORS.clear()
+        # The same plugins `linkml.validator.validate` installs: closed
+        # JSON-schema validation, which is what enforces the record schema's
+        # mode rules — a bare `Validator(schema)` validates open and reported
+        # a live record with no `model` as clean.
+        validator = _VALIDATORS[key] = Validator(
+            str(schema), validation_plugins=[JsonschemaValidationPlugin(closed=True)])
+    return validator
 
 
 def record_conformance(data: dict[str, Any]) -> list[str]:

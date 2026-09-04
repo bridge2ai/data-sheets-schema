@@ -49,4 +49,6 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Run test suite
-        run: make test
+        # -v: the log names each test as it starts, so a runner that dies
+        # mid-suite (memory, a hang) still says which test was running.
+        run: make test PYTEST_ARGS=-v

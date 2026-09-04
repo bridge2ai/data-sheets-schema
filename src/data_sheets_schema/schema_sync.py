@@ -119,9 +119,9 @@ def check_one(merged: Path, source: Path, class_name: str,
             # `make regen-all` under a running process it can describe the
             # schema that was on disk when the process first looked, and the
             # "matches but its digest does not" verdict below is the only
-            # thing that reports it (#935 review). The uncached build goes
-            # through the mtime-keyed shared view — no new view, no new
-            # cache entry.
+            # thing that reports it (#942). The uncached build goes through
+            # the content-keyed shared view: no new view unless the merged
+            # file itself changed, and no digest-cache entry either way.
             if same:
                 fresh = schema_digest.fingerprint(schema_digest.render(
                     schema_digest._build_uncached(class_name, merged)))
