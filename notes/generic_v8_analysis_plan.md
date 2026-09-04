@@ -296,7 +296,19 @@ steps need:
 6. Register the production matrix here (as v7's plan did), then the
    four canaries, then the fill.
 
-Each of 2–5 is a generation-path change; per the production rule none
+7. **G (#952)** — after the CM4AI canary (`2026-09-04_claude-opus-5-api-generic-v8_rep1`,
+   PR #951) stopped on one `slot_not_in_record` receipt entry, decided a v8
+   defect: the API runner asks the model once, inside the `full` phase, to
+   re-address receipt entries whose slot is not a path in the record it just
+   wrote (`full_readdress`; the receipt as written is snapshotted, the usage
+   entry records before/after). The instruction joins `PHASE_INSTRUCTIONS`,
+   so the **assembly digest moves** for every condition from here — one
+   re-baseline, registered here as #352's was; the prompt pin does not move.
+   The CM4AI canary is re-run under a new label; the 2026-09-04 rep1 stays on
+   disk as the defect's evidence and is excluded from the v8 comparison like
+   the Aug-28 exploratory records.
+
+Each of 2–5 and 7 is a generation-path change; per the production rule none
 of them may land between a v8 canary and its fill.
 
 ## Decisions needed before step 3

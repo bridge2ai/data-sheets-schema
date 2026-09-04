@@ -593,6 +593,22 @@ PHASE_INSTRUCTIONS = {
         "Every snippet part (split on `...`) must be at least 8 characters "
         "after case and punctuation folding; shorter snippets fail the check "
         "(#739). No other text after the receipt."),
+    # Sent once, after `full`, only when a receipt entry names a slot the
+    # record does not carry (#952): the v8 CM4AI canary receipted the
+    # Dataverse subject line under `subject`, a name the schema has no slot
+    # for, for a value it had placed under `keywords`. The rule the model
+    # broke is the receipt rule above; this is the mechanism behind it.
+    "full_readdress": (
+        "Receipt re-addressing. The receipt entries listed above name a "
+        "`slot` that is not a path in the record you just wrote. For each, "
+        "answer with the path in that record where the snippet's value "
+        "actually sits (`new_slot`), or `drop: true` with a `reason` when the "
+        "record does not carry the value at all. Do not change the record and "
+        "do not add entries. Output only a YAML document of exactly this "
+        "shape:\n"
+        "readdress:\n"
+        "- chunk: c026\n  slot: subject\n  new_slot: keywords[12]\n"
+        "- chunk: c003\n  slot: funders[9].award\n  drop: true\n  reason: <why>"),
     "core": (
         "Phase 2. Produce the CORE D4D record for class `CoreDataset`, using "
         "the declared bundle and the completed full record supplied above. The "
@@ -1239,6 +1255,167 @@ def _extract_receipt(text: str) -> str:
             return cand + "\n"
     raise RuntimeError("the text after the receipt marker is not a receipt "
                        "(a YAML mapping with a non-empty `chunks` list)")
+
+
+#: Output budget of the re-addressing call: a short YAML list, never a record.
+READDRESS_MAX_TOKENS = 8000
+
+
+def unresolved_receipt_slots(record: Any, receipt: dict[str, Any]) -> list[dict[str, Any]]:
+    """Receipt entries whose `slot` is not a path in `record` (#952).
+
+    The same test `receipts.check` applies afterwards as `slot_not_in_record`
+    — a gated finding — computed here, before the receipt is accepted, so
+    the model can be asked once where the value actually went.
+    """
+    from data_sheets_schema.receipts import resolve
+    out: list[dict[str, Any]] = []
+    for chunk in receipt.get("chunks") or []:
+        if not isinstance(chunk, dict):
+            continue
+        for entry in chunk.get("extracted") or []:
+            if not isinstance(entry, dict):
+                continue
+            slot = str(entry.get("slot") or "")
+            if not resolve(record, slot):
+                out.append({"chunk": chunk.get("id"), "slot": slot,
+                            "snippet": entry.get("snippet")})
+    return out
+
+
+def build_readdress(req: PhaseRequest, response_text: str,
+                    unresolved: list[dict[str, Any]]) -> PhaseRequest:
+    """The follow-up turn: the full-phase exchange as it happened, then the
+    unresolved entries and the re-addressing instruction. The cached prefix
+    is the phase's own, so the bundle and digest are read from cache."""
+    listing = yaml.safe_dump(unresolved, sort_keys=False, allow_unicode=True)
+    messages = list(req.messages) + [
+        {"role": "assistant", "content": response_text},
+        {"role": "user", "content": [
+            {"type": "text",
+             "text": "# Receipt entries whose slot is not a path in the record above\n\n" + listing},
+            {"type": "text", "text": PHASE_INSTRUCTIONS["full_readdress"]}]},
+    ]
+    return PhaseRequest(phase="full_readdress", system=req.system,
+                        cached_blocks=req.cached_blocks, messages=messages)
+
+
+def _extract_readdress(text: str) -> list[dict[str, Any]]:
+    """The re-addressing answer: a YAML mapping with a `readdress` list,
+    fenced or bare. Anything else is unusable."""
+    fences = re.findall(r"```(?:ya?ml)?\s*\n(.*?)```", text, re.S | re.I)
+    bare = re.sub(r"\A\s*ya?ml\s*\n", "", text, flags=re.I)
+    for cand in fences + [bare]:
+        try:
+            parsed = yaml.safe_load(cand.strip())
+        except yaml.YAMLError:
+            continue
+        if isinstance(parsed, dict) and isinstance(parsed.get("readdress"), list):
+            return [a for a in parsed["readdress"] if isinstance(a, dict)]
+    raise RuntimeError("the re-addressing response is not a YAML mapping with a `readdress` list")
+
+
+def apply_readdress(receipt: dict[str, Any], record: Any,
+                    answers: list[dict[str, Any]]) -> dict[str, Any]:
+    """Apply the model's answers to the receipt in place; say what happened.
+
+    An answer moves an entry only to a path that resolves in the record —
+    a second wrong address is left as it was and stays a gated finding.
+    `drop` removes the entry: a receipt for a value the record does not carry
+    attests nothing. Entries the answer does not name are untouched.
+    """
+    from data_sheets_schema.receipts import resolve
+    by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    for a in answers:
+        by_key[(str(a.get("chunk")), str(a.get("slot")))] = a
+    moved: list[dict[str, str]] = []
+    dropped: list[dict[str, str]] = []
+    rejected: list[dict[str, str]] = []
+    for chunk in receipt.get("chunks") or []:
+        if not isinstance(chunk, dict) or not isinstance(chunk.get("extracted"), list):
+            continue
+        kept = []
+        for entry in chunk["extracted"]:
+            key = (str(chunk.get("id")), str((entry or {}).get("slot")))
+            a = by_key.get(key)
+            if a is None or resolve(record, key[1]):
+                kept.append(entry)
+                continue
+            if a.get("drop"):
+                dropped.append({"chunk": key[0], "slot": key[1],
+                                "reason": str(a.get("reason") or "")})
+                continue
+            new = str(a.get("new_slot") or "")
+            if new and resolve(record, new):
+                entry["slot"] = new
+                moved.append({"chunk": key[0], "slot": key[1], "new_slot": new})
+            else:
+                rejected.append({"chunk": key[0], "slot": key[1], "new_slot": new})
+            kept.append(entry)
+        chunk["extracted"] = kept
+    return {"moved": moved, "dropped": dropped, "rejected": rejected}
+
+
+def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
+                       record_body: str, receipt_body: str, client,
+                       settings: dict[str, Any], usage: list[dict[str, Any]]
+                       ) -> tuple[str, dict[str, Any] | None]:
+    """One bounded re-addressing pass over a full-phase receipt (#952).
+
+    Returns the receipt text to write and a summary for the usage entry, or
+    the receipt unchanged and None when every slot already resolves. One
+    call, never retried on its own account: a re-addressing that fails to
+    parse leaves the receipt as written, and the gate counts what remains.
+    """
+    try:
+        record = yaml.safe_load(record_body)
+        receipt = yaml.safe_load(receipt_body)
+    except yaml.YAMLError:
+        return receipt_body, None
+    if not isinstance(record, dict) or not isinstance(receipt, dict):
+        return receipt_body, None
+    unresolved = unresolved_receipt_slots(record, receipt)
+    if not unresolved:
+        return receipt_body, None
+    _snapshot(spec, f"{spec.project}_coverage_receipt_as_written.yaml", receipt_body)
+    rreq = build_readdress(req, response_text, unresolved)
+    started = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    t0 = time.monotonic()
+    resp = _call_with_retry(client, model=settings["name"],
+                            max_tokens=min(READDRESS_MAX_TOKENS, output_limit(settings["name"])),
+                            temperature=settings["temperature"],
+                            system=rreq.system, messages=rreq.messages)
+    text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
+    cap = reasoning.capture(resp)
+    reasoning.append(_reasoning_path(spec),
+                     {"phase": "full_readdress", "label": spec.label,
+                      "project": spec.project, "model": settings["name"],
+                      "attempt": 1, **cap.to_dict()})
+    summary: dict[str, Any] = {"unresolved_before": unresolved}
+    try:
+        answers = _extract_readdress(text)
+        summary.update(apply_readdress(receipt, record, answers))
+        summary["answers"] = len(answers)
+        receipt_body = yaml.safe_dump(receipt, sort_keys=False, allow_unicode=True, width=10_000)
+    except RuntimeError as exc:
+        summary.update({"moved": [], "dropped": [], "rejected": [],
+                        "unusable": str(exc)})
+    summary["still_unresolved"] = unresolved_receipt_slots(record, yaml.safe_load(receipt_body))
+    usage.append({
+        "phase": "full_readdress", "attempt": 1, "started_at": started,
+        "seconds": round(time.monotonic() - t0, 3),
+        "input_tokens": getattr(resp.usage, "input_tokens", None),
+        "output_tokens": getattr(resp.usage, "output_tokens", None),
+        "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
+        "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
+        "max_tokens": min(READDRESS_MAX_TOKENS, output_limit(settings["name"])),
+        "stop_reason": getattr(resp, "stop_reason", None),
+        "readdress": summary,
+    })
+    print(f"   receipt re-addressed: {len(summary['moved'])} moved, "
+          f"{len(summary['dropped'])} dropped, "
+          f"{len(summary['still_unresolved'])} still unresolved")
+    return receipt_body, summary
 
 
 def _extract(text: str, kind: str,
@@ -2517,6 +2694,7 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
         if not truncated:
             try:
                 receipt_text = None
+                full_text = text
                 if ph == "full" and spec.condition in RECEIPT_CONDITIONS:
                     # The receipt is the phase's second document (#710). A
                     # response without it is unusable — the record alone is
@@ -2531,6 +2709,8 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
                     *PHASE_SCHEMA.get(ph, (FULL_SCHEMA_PATH, "Dataset")))
                 if receipt_text is not None:
                     receipt_body = _extract_receipt(receipt_text)
+                    receipt_body, _ = _readdress_receipt(
+                        spec, req, full_text, body, receipt_body, client, settings, usage)
                     rp = _receipt_path(spec)
                     rp.parent.mkdir(parents=True, exist_ok=True)
                     rp.write_text(receipt_body, encoding="utf-8")
