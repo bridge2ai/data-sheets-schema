@@ -1,7 +1,8 @@
 """Write-time American spelling for the prose a record states (#1002).
 
-The prompt has asked for American English since v4 (Camille Nebeker's review:
-*no 'programme'*), the form block counts British forms under instrument v3
+The prompt has asked for American English since v4 on the agentic path and
+v5 on the API path (Camille Nebeker's review: *no 'programme'*), the form
+block counts British forms under instrument v3
 (`grounding.BRITISH_PATTERNS`, #836/#859), and the count is a canary metric
 (prediction 5 of the v5 plan). It has stayed a rule with no mechanism: the
 v6 and v7 arms sat at 0–2 by variance and the VOICE v8 canary wrote
@@ -22,11 +23,13 @@ what the American form is.
 - double-quoted spans (`"…"`), the instrument's own exemption for quoted
   source text — a title or a direct quotation keeps its source's spelling;
 - YAML keys, the `#` header, and block-scalar indicators;
-- identifier-shaped tokens: anything with `://`, a `/`, an `@`, a `:` or a
-  `.` inside the token (`https://x.org/programme/`, `programme.csv`,
-  `doi:10.1/programme`) — the instrument counts these, so a record naming
-  such a file still shows a count, which is honest: the count is a fact
-  about the text and the file name is a fact about the source.
+- identifier-shaped tokens: anything with `://`, a `/`, an `@`, a `#`, or
+  a `:` or `.` followed by a word character inside the token
+  (`https://x.org/programme/`, `programme.csv`, `doi:10.1/programme`,
+  `x#person-favour`), and YAML anchors, aliases and tags (`&a`, `*a`,
+  `!t`) — the instrument counts the former, so a record naming such a
+  file still shows a count, which is honest: the count is a fact about
+  the text and the file name is a fact about the source.
 
 **Proper nouns** (review of #1003): a Capitalised match that sits in a
 title-case run — the word before or after it is Capitalised too ("Temerty
@@ -36,8 +39,11 @@ carry (`PROPER_NOUNS`). The VOICE bundle names the Temerty Centre, a real
 institution; the instrument counts it either way, and a count with a
 named skip beside it is the honest split. A proper noun in lower case, or
 one the run does not catch ("the programme run by Wellcome"), is still
-rewritten; the log names it and `d4d review disposition --amend` (#903)
-restores it.
+rewritten — the prompt says titles and names keep their spelling, and
+the model did not mark this one; the record's `british_rewrites` names
+the phase, enclosing slot and both forms, and `d4d review disposition
+--amend` (#903) restores it once the reviewer has located the value (a
+text-level walker knows the enclosing key, not the full path).
 
 **Documented limits** (0 occurrences in the API corpus): keys in flow
 mappings and quoted keys are rewritten like values; a double-quoted scalar
@@ -136,7 +142,7 @@ RULES: tuple[tuple[re.Pattern[str], Callable[[str], str]], ...] = tuple(
 #: or bracket (`programme.'`, `programme.)`) is punctuation, and the corpus
 #: writes single-quoted sentences ending in one often (#1003 review).
 _QUOTED = re.compile(r'"[^"\n]*"')
-_IDENTIFIER_TOKEN = re.compile(r"\S*(?:://|/|@|:\w|\.\w)\S*")
+_IDENTIFIER_TOKEN = re.compile(r"\S*(?:://|/|@|#|:\w|\.\w)\S*|(?<!\S)[&*!]\S+")
 _PROTECTED = re.compile(f"{_QUOTED.pattern}|{_IDENTIFIER_TOKEN.pattern}")
 
 #: Names the rules would otherwise read as British: genus names keep their

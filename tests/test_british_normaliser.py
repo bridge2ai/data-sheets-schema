@@ -3,7 +3,8 @@
 The instrument (`grounding.BRITISH_PATTERNS`, v3) says what is British; the
 normaliser says what the American form is, one rule per pattern. The VOICE
 v8 canary wrote `programme` four times in its own prose (8 counted, v7
-worst 2) under a prompt that has asked for American English since v4.
+worst 2) under a prompt that has asked for American English since v5 on
+the API path (v4 on the agentic one).
 """
 
 import unittest
@@ -116,7 +117,11 @@ class TestTheRules(unittest.TestCase):
         for text, want in (("'the programme.'", "'the program.'"), ("(programme.)", "(program.)"),
                             ('programme."', 'program."'), ("programme...", "program..."),
                             ("e.g.programme", "e.g.programme"), ("10:30 programme", "10:30 program"),
-                            ("programme: next", "program: next")):
+                            ("programme: next", "program: next"),
+                            # #1005: a fragment on a bare id, anchors, aliases and tags are not prose
+                            ("id: x#person-favour", "id: x#person-favour"), ("&programme centre", "&programme center"),
+                            ("*programme", "*programme"), ("!programme centre", "!programme center"),
+                            ("[programme](#programme)", "[programme](#programme)")):   # one token with `#`: protected whole
             with self.subTest(text):
                 self.assertEqual(americanise(text)[0], want)
 
@@ -214,6 +219,12 @@ class TestTheYamlWalker(unittest.TestCase):
         self.assertEqual(summary["british_skipped_count"], 1)
         self.assertEqual(summary["british_skipped"][0]["value"], "Centre")
         self.assertEqual(summary["british_occurrences"], 0)
+        log = []
+        normalise_british_spellings("funders:\n- name: the programme\n- name: another centre\n", phase="full", log=log)
+        summary = identifier_rewrite_summary(log)
+        self.assertEqual(summary["british_rewrites"],
+                         [{"phase": "full", "slot": "name", "from": "programme", "to": "program"},
+                          {"phase": "full", "slot": "name", "from": "centre", "to": "center"}])
 
     def test_layout_is_preserved(self):
         out = normalise_british_spellings(RECORD)

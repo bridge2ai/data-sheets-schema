@@ -380,7 +380,7 @@ steps need:
 12. **British spellings get a mechanism (#1002, 2026-09-04, step J).**
     The VOICE canary counted 8 (`programme` ×4 in the full record's
     prose, again in the core) against a v7 worst of 2, under a prompt
-    that has asked for American English since v4. Adopted: a write-time
+    that has asked for American English since v5 on this path. Adopted: a write-time
     normaliser, one rewrite rule per pattern of the form instrument
     (v3, 38 patterns), the instrument's own double-quoted exemption plus
     identifier-shaped tokens, keys and the header untouched, every

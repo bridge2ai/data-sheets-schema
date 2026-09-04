@@ -2529,6 +2529,10 @@ def identifier_rewrite_summary(log: list[dict[str, Any]] | None) -> dict[str, An
             # count.
             "british_spellings": fold(british),
             "british_occurrences": len(british),
+            # The events themselves, first 40: the fold drops `to`, and a
+            # reviewer restoring a proper noun needs both forms and where.
+            "british_rewrites": [{"phase": e.get("phase"), "slot": e.get("slot"),
+                                  "from": e["from"], "to": e["to"]} for e in british][:40],
             "british_distinct": sorted({e["from"].lower() for e in british})[:40],
             # Left as written on purpose — a title-case run or a genus name —
             # and still counted by the form instrument: the honest split.
