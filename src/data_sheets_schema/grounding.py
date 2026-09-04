@@ -296,6 +296,15 @@ URN_REGISTERED_NIDS = frozenset({"uuid", "isbn", "issn", "oid", "ietf",
                                  "doi", "lex"})
 
 
+#: Schemes the undeclared-prefix metric never counts: `ark` since v2 (#671).
+#: `mailto` (v3, #982) is excluded only on a Person's id — the case #981's
+#: normaliser rewrites — and counted anywhere else, so a `mailto:` written
+#: where nothing rewrites it (an organisation, a root id) is still seen by a
+#: gated instrument (#983 review). Registered URN NIDs are handled by NID.
+EXCLUDED_SCHEMES = frozenset({"ark"})
+PREFIX_INSTRUMENT = "v3 (#982): ark excluded, mailto excluded on Person ids only, urn by NID"
+
+
 def undeclared_prefixes(record: dict[str, Any],
                         slots: set[str]) -> dict[str, int]:
     """`{prefix: occurrences}` for CURIE prefixes the schema does not declare.
@@ -324,21 +333,30 @@ def undeclared_prefixes(record: dict[str, Any],
     This set deliberately differs from `identifiers.NO_AUTHORITY_SCHEMES`:
     that answers "can this be resolved to an authority?", this answers "did
     someone invent a namespace?" — `mailto:` has no authority yet is not a
-    minted namespace problem, and stays out of both the exclusion here and
-    the corpus (0 identifier-slot occurrences).
+    minted namespace problem. Instrument v3 (2026-09-04, #982): it is
+    excluded, as this docstring judged in v2 when the corpus had no
+    occurrence; the v6 agentic CM4AI rep1 then wrote two and the v8 CM4AI
+    canary six, and v2 counted both as invented namespaces. A `mailto:` id
+    is the generation-side matter #981 handles; it is not this metric's.
     """
-    from data_sheets_schema.identifiers import (declared_prefixes,
+    from data_sheets_schema.identifiers import (declared_prefixes, person_slots,
                                                 walk_identifiers)
     declared = {p.lower() for p in declared_prefixes()}
+    persons = person_slots()
     out: dict[str, int] = {}
-    for _path, _slot, value in walk_identifiers(record, slots):
+    for path, _slot, value in walk_identifiers(record, slots):
         text = str(value)
         m = re.match(r"^([A-Za-z][\w.\-]*):(?!//)", text)
         if not m:
             continue
         scheme = m.group(1).lower()
-        if scheme in declared or scheme == "ark":
+        if scheme in declared or scheme in EXCLUDED_SCHEMES:
             continue
+        if scheme == "mailto":
+            parts = path.split(".")
+            parent = parts[-2].rstrip("[]") if len(parts) >= 2 else ""
+            if parent in persons:
+                continue                       # a Person's id: #981's normaliser's case
         if scheme == "urn":
             nid = (text.split(":", 2)[1].lower()
                    if text.count(":") >= 2 else "")
@@ -473,6 +491,7 @@ def form_facts(full: Path, core: Path,
     return {"checked": True, "records": present,
             "undeclared_prefixes": prefixes,
             "undeclared_prefix_occurrences": sum(prefixes.values()),
+            "prefix_instrument": PREFIX_INSTRUMENT,
             "british_spellings": british,
             "organisational_fragments": len(fragments),
             "gc_label_variants": label_variants,

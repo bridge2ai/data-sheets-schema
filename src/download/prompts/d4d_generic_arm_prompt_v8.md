@@ -3,7 +3,7 @@
 **This is v7 plus one block of four rules.** Everything else is
 byte-identical to `src/download/prompts/d4d_generic_arm_prompt_v7.md` apart
 from the version stamp; a test asserts that the only difference is the block
-marked `ADDED IN v8`. Four rules rather than one, deliberately: the v8 plan
+marked `ADDED IN v8`. Five rules rather than one, deliberately: the v8 plan
 (`notes/generic_v8_analysis_plan.md`) registers them as one configuration
 with the depth-two schema digest (#916) and the inlined Person slots (#805),
 and a v7-against-v8 comparison measures that package, not a rule.
@@ -281,6 +281,16 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   receipt naming the passage that states that entry. A roster receipted by
   one passage for one of its entries has receipted one entry; the others are
   values the record must not carry without a receipt of their own.
+- A `Person` the schema asks for as an object carries an `id`: the ORCID the
+  evidence states, as a CURIE with the prefix ORCID, where it states one;
+  otherwise a fragment minted on this record's own id (the record's id, a
+  hash sign, then person and the name), which is the one case the fragment
+  rule reaches for a person — the object exists only as this record's way of
+  naming its contact. Never a mailto address or any other scheme as the id:
+  the address belongs in `email`, beside the id, where the evidence states
+  it. Look for the ORCID before minting — a person the documents list with
+  an ORCID has one, and a fragment for that person is a second identity for
+  one referent.
 
 --- END ADDED IN v8 ---
 

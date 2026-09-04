@@ -127,7 +127,8 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                    "grounding.distinct.absent as measured against the bundle the run saw"),
     "orgfrag": ("organisational fragments", "live", True, ""),
     "undeclared": ("undeclared prefixes", "live", True,
-                   "classification v2.1 (#671): ark: and registered URN NIDs excluded"),
+                   "live instrument (grounding.PREFIX_INSTRUMENT): v3 (#982) excludes ark: and "
+                   "mailto:, urn: by registered NID; stored blocks carry prefix_instrument from v3"),
     "british": ("British spellings", "live", True,
                 "instrument v2.1 (#653). Coupled with pair errors on the API arm: a "
                 "full/core spelling split counts once per shared slot in both (#675)"),

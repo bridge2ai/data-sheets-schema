@@ -132,6 +132,16 @@ def classify(value: str, prefixes: set[str]) -> str:
     return BARE
 
 
+def person_slots(schema_path: Path = FULL_SCHEMA) -> set[str]:
+    """Slots whose induced range is `Person`, from the schema (#981/#985):
+    the mappings a `mailto:` id belongs to, and the only ones the
+    undeclared-prefix counter excludes it from (#982 v3)."""
+    from data_sheets_schema.schema_view import shared_view
+    sv = shared_view(schema_path)
+    return {str(sl.name) for c in sv.all_classes()
+            for sl in sv.class_induced_slots(c) if str(sl.range) == "Person"}
+
+
 def uriorcurie_slots(schema_path: Path = FULL_SCHEMA) -> set[str]:
     """Every slot whose *induced* range is `uriorcurie`, from the schema.
 

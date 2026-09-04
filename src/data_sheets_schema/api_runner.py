@@ -2300,26 +2300,216 @@ def normalise_identifier_form(text: str, *, phase: str | None = None) -> str:
     return "\n".join(out)
 
 
+_MAILTO_ID_LINE = re.compile(r"^(?P<indent>[ \t]*)(?P<dash>-[ \t]+)?id:[ \t]+(?P<q>[\"']?)mailto:(?P<addr>[^\s\"']+)(?P=q)[ \t]*\r?$")
+_ROOT_ID_LINE = re.compile(r"^id:[ \t]+(?P<q>[\"']?)(?P<value>[^\s\"']+)(?P=q)[ \t]*\r?$", re.M)
+_EMAIL_LINE = re.compile(r"^(?P<indent>[ \t]*)email:(?:[ \t]+(?P<value>[^\r\n]*?))?[ \t]*\r?$")
+
+
+@lru_cache(maxsize=1)
+def _person_slots() -> frozenset[str]:
+    """Slots whose induced range is `Person` (#985 — an Organization has no
+    `email`); the same set the undeclared-prefix counter uses (#982 v3)."""
+    from data_sheets_schema.identifiers import person_slots
+    return frozenset(person_slots())
+
+
+def _yaml_scalar(value: str) -> str:
+    """`value` quoted when YAML would read it as something else."""
+    if re.match(r"^[A-Za-z0-9][A-Za-z0-9._+@-]*$", value):
+        return value
+    return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
+def normalise_mailto_ids(text: str, *, phase: str | None = None) -> str:
+    """A `mailto:` written as a Person's identifier becomes a fragment on the
+    record's own id, and the address is kept in the sibling `email` slot
+    (#981).
+
+    The third CM4AI v8 canary wrote `id: mailto:<address>` on six inlined
+    contact persons — D1 forces `Person.id`, and the model had an email and
+    no ORCID it used. The slot descriptions the digest renders say a Person
+    `id` is an ORCID CURIE where stated, else a fragment minted on the
+    record's own id (and R5 of the v8 prompt now says the same); `Person`
+    has an `email` slot for the address. Line-based like the other
+    normalisers, with the same care as `normalise_identifier_form`: block
+    scalars are skipped whole; the enclosing keys are tracked so only an `id`
+    inside a Person-ranged slot is touched (#985); the whole mapping is
+    scanned in both directions for `email`, an empty one is filled, a present
+    one left; the address is quoted when YAML needs it; the slug carries the
+    local part and the domain so two people never share an id; a root id
+    that already carries a fragment is left alone and the skip logged; the
+    root id itself is never rewritten. Every `mailto:` id this pass leaves —
+    the root, a non-Person slot, a fragment root, a record with no root id —
+    is logged as `mailto_id_skipped`, and the counter (instrument v3) still
+    counts it outside a Person slot (#983 review). The fragment is derived
+    from the mapping's `name` when it has one, as R5 tells the model, else
+    from the address, so one referent gets one id whichever wrote it. A
+    model-written note that says the contacts are "identified by mailto
+    URIs" goes stale after the rewrite; the log is the record of that.
+    """
+    root = _ROOT_ID_LINE.search(text)
+    persons = _person_slots()
+    log = _REWRITE_LOG.get()
+    if not root:
+        if log is not None:
+            for ln in text.split("\n"):
+                m0 = _MAILTO_ID_LINE.match(ln)
+                if m0 and (m0.group("indent") or m0.group("dash")):
+                    log.append({"phase": phase, "kind": "mailto_id_skipped", "slot": None,
+                                "from": f"mailto:{m0.group('addr')}", "to": None, "reason": "the record has no root id"})
+        return text
+    root_id = root.group("value")
+
+    def width(ws: str) -> int:
+        return len(ws.expandtabs(2))
+
+    lines = text.split("\n")
+    enclosing: list[tuple[int, str]] = []
+    block_indent: int | None = None
+    out: list[str] = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        bare = line.rstrip("\r")
+        if block_indent is not None:
+            if not bare.strip() or width(bare[:len(bare) - len(bare.lstrip())]) > block_indent:
+                out.append(line); i += 1; continue
+            block_indent = None
+        k = _ANY_KEY.match(line)
+        if k:
+            col = width(k.group("indent")) + (width(k.group("dash")) if k.group("dash") else 0)
+            enclosing = [(c, sl) for c, sl in enclosing if c < col]
+            value = (k.group("value") or "").strip()
+            if value.split("#", 1)[0].strip() in ("|", ">", "|-", ">-", "|+", ">+"):
+                block_indent = col
+                out.append(line); i += 1; continue
+            if not value or value.startswith("#"):
+                enclosing.append((col, k.group("slot")))
+        elif _ANY_ITEM.match(line):
+            col = width(_ANY_ITEM.match(line).group("indent"))
+            enclosing = [(c, sl) for c, sl in enclosing if c <= col]
+        m = _MAILTO_ID_LINE.match(line)
+        owner = enclosing[-1][1] if enclosing else None
+        if not (m and (m.group("indent") or m.group("dash")) and owner in persons):
+            if m and log is not None:
+                log.append({"phase": phase, "kind": "mailto_id_skipped", "slot": owner,
+                            "from": f"mailto:{m.group('addr')}", "to": None,
+                            "reason": ("the root id" if not (m.group("indent") or m.group("dash"))
+                                       else f"not a Person slot ({owner})")})
+            out.append(line); i += 1; continue
+        col = width(m.group("indent")) + (width(m.group("dash")) if m.group("dash") else 0)
+        addr = m.group("addr")
+        eol = "\r" if line.endswith("\r") else ""
+        if "#" in root_id:
+            if log is not None:
+                log.append({"phase": phase, "kind": "mailto_id_skipped", "slot": owner,
+                            "from": f"mailto:{addr}", "to": None,
+                            "reason": "the root id already carries a fragment"})
+            out.append(line); i += 1; continue
+        local, _, domain = addr.partition("@")
+        addr_slug = "-at-".join(p for p in (re.sub(r"[^a-z0-9]+", "-", local.lower()).strip("-"),
+                                            re.sub(r"[^a-z0-9]+", "-", domain.lower()).strip("-")) if p) or "contact"
+        name_slug: str | None = None          # set by the mapping scan below when the mapping names the person
+        # The mapping: siblings at the id's column (a `- id:` item's included),
+        # deeper lines belong to them; comments and blanks are neither (#985).
+        def depth(ln: str) -> int | None:
+            b = ln.rstrip("\r")
+            if not b.strip() or b.lstrip().startswith("#"):
+                return None
+            return width(b[:len(b) - len(b.lstrip())])
+        # Backwards over the mapping's already-emitted lines. A `- id:` line
+        # opens its own mapping, so there is nothing behind it; a plain `id:`
+        # line's mapping runs back to the item line that opened it, whose own
+        # key (`- email:`) is a sibling too.
+        email_at: int | None = None
+        email_future: int | None = None
+        if not m.group("dash"):
+            back = len(out) - 1
+            while back >= 0:
+                ln = out[back]
+                d = depth(ln)
+                if d is None:
+                    back -= 1; continue
+                item = _ANY_ITEM.match(ln)
+                if item and width(item.group("indent")) == col - 2:
+                    if re.match(r"^[ \t]*-[ \t]+email:", ln):
+                        email_at = back
+                    nm = re.match(r"^[ \t]*-[ \t]+name:[ \t]+[\"']?(?P<n>[^\"'\r\n#]+?)[\"']?[ \t]*\r?$", ln)
+                    if nm:
+                        name_slug = re.sub(r"[^a-z0-9]+", "-", nm.group("n").lower()).strip("-") or None
+                    break
+                if d < col:
+                    break
+                if d == col and _EMAIL_LINE.match(ln):
+                    email_at = back
+                nm = re.match(r"^[ \t]*(?:-[ \t]+)?name:[ \t]+[\"']?(?P<n>[^\"'\r\n#]+?)[\"']?[ \t]*\r?$", ln)
+                if nm and d in (col, col - 2):
+                    name_slug = re.sub(r"[^a-z0-9]+", "-", nm.group("n").lower()).strip("-") or None
+                back -= 1
+        j = i + 1
+        while j < len(lines):
+            d = depth(lines[j])
+            if d is None:
+                j += 1; continue
+            if d < col:
+                break
+            if d == col and _EMAIL_LINE.match(lines[j]):
+                email_future = j
+            nm = re.match(r"^[ \t]*name:[ \t]+[\"']?(?P<n>[^\"'\r\n#]+?)[\"']?[ \t]*\r?$", lines[j])
+            if nm and d == col and name_slug is None:
+                name_slug = re.sub(r"[^a-z0-9]+", "-", nm.group("n").lower()).strip("-") or None
+            j += 1
+        minted = f"{root_id}#person-{name_slug or addr_slug}"
+        out.append(f"{m.group('indent')}{m.group('dash') or ''}id: {m.group('q')}{minted}{m.group('q')}{eol}")
+        email_line = f"{' ' * col}email: {_yaml_scalar(addr)}{eol}"
+
+        def empty(ln: str) -> bool:
+            return re.sub(r"^[ \t]*(?:-[ \t]+)?email:", "", ln.rstrip("\r")).strip() in ("", "null", "~")
+        if email_at is not None:
+            if empty(out[email_at]):
+                dash_form = re.match(r"^([ \t]*-[ \t]+)email:", out[email_at])
+                out[email_at] = (f"{dash_form.group(1)}email: {_yaml_scalar(addr)}{eol}" if dash_form else email_line)
+        elif email_future is not None:
+            if empty(lines[email_future]):
+                lines[email_future] = email_line
+        else:
+            out.append(email_line)
+        if log is not None:
+            log.append({"phase": phase, "kind": "mailto_id", "slot": owner, "from": f"mailto:{addr}", "to": minted})
+        i += 1
+    return "\n".join(out)
+
+
 def normalise_record_text(text: str, *, phase: str | None = None) -> str:
     """Every write-time normalisation, in the order the record is written."""
-    return normalise_identifier_form(normalise_multivalued(
-        normalise_enum_aliases(normalise_temporal(text))), phase=phase)
+    return normalise_mailto_ids(normalise_identifier_form(normalise_multivalued(
+        normalise_enum_aliases(normalise_temporal(text))), phase=phase), phase=phase)
 
 
 def identifier_rewrite_summary(log: list[dict[str, Any]] | None) -> dict[str, Any]:
     """`{phase: {slot: {occurrences, distinct}}}` plus totals, for the record."""
-    by: dict[str, dict[str, dict[str, Any]]] = {}
-    for e in log or []:
-        ph = str(e.get("phase") or "unknown")
-        cell = by.setdefault(ph, {}).setdefault(str(e["slot"]), {"occurrences": 0, "values": set()})
-        cell["occurrences"] += 1
-        cell["values"].add(e["from"])
-    out = {ph: {sl: {"occurrences": c["occurrences"], "distinct": len(c["values"]),
-                     "examples": sorted(c["values"])[:3]}
-                for sl, c in slots.items()} for ph, slots in by.items()}
-    return {"identifier_form": out,
-            "occurrences": sum(e and 1 for e in (log or [])),
-            "distinct_values": len({e["from"] for e in (log or [])})}
+    def fold(entries):
+        by: dict[str, dict[str, dict[str, Any]]] = {}
+        for e in entries:
+            ph = str(e.get("phase") or "unknown")
+            cell = by.setdefault(ph, {}).setdefault(str(e["slot"]), {"occurrences": 0, "values": set()})
+            cell["occurrences"] += 1
+            cell["values"].add(e["from"])
+        return {ph: {sl: {"occurrences": c["occurrences"], "distinct": len(c["values"]),
+                          "examples": sorted(c["values"])[:3]}
+                     for sl, c in slots.items()} for ph, slots in by.items()}
+    entries = list(log or [])
+    forms = [e for e in entries if e.get("kind") is None]
+    mailto = [e for e in entries if e.get("kind") == "mailto_id"]
+    skipped = [e for e in entries if e.get("kind") == "mailto_id_skipped"]
+    rewrites = forms + mailto
+    return {"identifier_form": fold(forms),
+            "mailto_ids": fold(mailto),
+            "mailto_ids_skipped": [{"phase": e.get("phase"), "slot": e.get("slot"), "value": e["from"],
+                                    "reason": e.get("reason")} for e in skipped][:20],
+            "mailto_ids_skipped_count": len(skipped),
+            "occurrences": len(rewrites),
+            "distinct_values": len({e["from"] for e in rewrites})}
 
 
 def normalise_multivalued(text: str) -> str:
