@@ -1080,9 +1080,40 @@ canary:
     and Life Sciences'', the Dataverse subject line). The v8 receipt rule says the
     slot is the record path the value fills, so this is a rule the model broke in
     the same response that wrote the record — not the v7 retained-with-basis pattern
-    (#906/#920), which an earlier writing of this block applied and which is withdrawn.
-    No fill and no further canary until the defect is fixed and re-canaried. Every
-    other gated metric equals or beats the v7 per-project worst (British spellings
-    0 vs 2). Full-phase output 31,207 of 128,000 (24%, #832). One repair round (11
-    findings, applied; the core re-derived and validates).'
+    (#906/#920), which an earlier writing of this block applied and which is withdrawn
+    (kept below as prior_disposition). No fill and no further canary until the defect
+    is fixed and re-canaried. Every other gated metric equals or beats the v7 per-project
+    worst (British spellings 0 vs 2). Full-phase output 31,207 of 128,000 (24%, #832).
+    One repair round (11 findings, applied; the core re-derived and validates).'
   recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-04
+  recorded_at: '2026-09-03T18:49:26-07:00'
+  prior_disposition:
+    disposition: 'retained with basis, the v7 precedent (#906/#920): the single gated
+      finding is one receipt entry addressed to `subject`, a name the schema has no
+      slot for, for a value the record holds under `keywords` (''Medicine, Health
+      and Life Sciences'', the Dataverse subject line) — a receipt-addressing slip
+      at phase 1 that carries no coverage credit (`slots.unresolved`), not a prediction-1/2
+      metric of the v8 plan. Every other gated metric equals or beats the v7 per-project
+      worst (British spellings 0 vs 2). Full-phase output 31,207 of 128,000 (24%,
+      #832). One repair round ran (11 findings, applied; the core re-derived and validates).
+      Whether the fill proceeds on this basis is the plan owner''s call; the fill
+      is not started.'
+    recorded_at: '2026-09-03T18:44:50-07:00'
+    commit: 48479d50
+    withdrawn: 'by the plan owner''s decision on 2026-09-04 (commit 7e7bf50b): a v8
+      defect (#952). Kept here as #920 kept its prior verdict, so the record carries
+      the history rather than git alone.'
+  readings:
+    note: registered v8 predictions this record measures on its own (plan, 'Predictions,
+      registered'); n=1, none gated
+    prediction_2_grant_number: 'populated 2 (of 3 CM4AI award numbers in the bundle;
+      v7: 0 of 12) — favourable'
+    prediction_5_value_changed_after_receipt: '41 of 145 receipt paths = 28.3%, against
+      a predicted <10%; the three v7 CM4AI replicates: 17.0%, 17.4%, 7.9% — unfavourable,
+      worse than every v7 CM4AI replicate on the metric the plan attributes to the
+      digest (step A)'
+    prediction_6_receipt_coverage: 206 of 342 receiptable slots = 60.2%, against a
+      predicted >40% arm-wide — favourable
+    prediction_9_full_output_tokens: '31,207, against the v7 CM4AI accepted-attempt
+      mean of 41,370 (26,766 / 31,044 / 66,300): -24.6%, outside the ±10% band — unfavourable
+      in the direction of less output'
