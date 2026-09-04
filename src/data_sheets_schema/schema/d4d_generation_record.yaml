@@ -238,6 +238,16 @@ classes:
         inlined: true
         range: AnyBlock
 
+      report_gate:
+        description: >-
+          What the in-process report check found before the run completed
+          (#929, v8 step E): claims checked and contradictions before, whether
+          the report was regenerated once with the contradictions named, and
+          what remained after. The final `report_claims` block is recomputed
+          from the report as it stands.
+        inlined: true
+        range: AnyBlock
+
       form:
         description: >-
           Counts that are properties of the records alone — undeclared CURIE

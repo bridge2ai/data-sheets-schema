@@ -50,7 +50,7 @@ RATE_OUTPUT = 25e-6
 _ARTIFACT_WRITERS = {
     "full": ("full", "reconcile_full", "repair_full"),
     "core": ("core", "reconcile_core", "repair_core"),
-    "report": ("report",),
+    "report": ("report", "report_after_repair", "report_regate"),
 }
 
 _STOP_REASONS = {"end_turn", "max_tokens", "stop_sequence"}

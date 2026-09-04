@@ -308,8 +308,29 @@ steps need:
    disk as the defect's evidence and is excluded from the v8 comparison like
    the Aug-28 exploratory records.
 
-Each of 2–5 and 7 is a generation-path change; per the production rule none
-of them may land between a v8 canary and its fill.
+8. **E (#929)** — landed before the re-canary, in the same re-baseline
+   window as G: the report phase ends with a dispositions table the
+   checker reads (#684's two-form limit lifted for the form v8 writes), the
+   runner checks it in-process and regenerates once with the contradictions
+   named (`report_regate`), and the gate reads a report with no finding and
+   no readable claim as unmeasured — blind for a run that was asked for the
+   table, tolerated on earlier records so their arm still satisfies its own
+   gate. **Instrument revision, registered here**: `report_claims`
+   now also checks `retained`/`changed`/`added` rows (`retention_not_shown`,
+   `change_not_shown`); the 2026-09-01 v7 arm writes no such table, so
+   recomputing its blocks changes nothing there (`claims_checked` stays 0 on
+   11 of 12) and the v7 baseline for `report findings` is a floor of 0 with
+   its basis on the row for CHORUS, CM4AI and VOICE, and a measured 0 for
+   AI_READI (rep3 read 4 claims). **Fifteen older records** (v2–v5 API and crate
+   arms) do carry disposition-column tables and would recompute differently
+   under this instrument (e.g. 2026-08-13 v4 rep1 CM4AI 6/3 → 16/12); no
+   backfill is scheduled, and `baseline_for` reads recorded blocks, so
+   nothing moves until one is run and registered. The v7-vs-v8 report metric is therefore one-sided: measured
+   on v8, unmeasured on v7 — say so wherever it is tabled. `companions` is
+   hashed after the last phase (#652).
+
+Each of 2–5, 7 and 8 is a generation-path change; per the production rule
+none of them may land between a v8 canary and its fill.
 
 ## Decisions needed before step 3
 

@@ -566,7 +566,12 @@ class FakeMessages:
         if phase == "audit":
             return FakeResponse('{"findings": [], "summary": "none"}')
         if phase == "report":
-            return FakeResponse("# Reconciliation\nNo discrepancies.\n")
+            # The dispositions table the report phase asks for since #929:
+            # one retained row on a slot the fake record carries, so the
+            # gate reads one claim, finds nothing, and makes no extra call.
+            return FakeResponse("# Reconciliation\nNo discrepancies.\n\n## Dispositions\n\n"
+                                "| slot | disposition | record | reason |\n|---|---|---|---|\n"
+                                "| `keywords` | retained | full | kept |\n")
         return FakeResponse(f"```yaml\n# {phase}\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n```")
 
     def readdress_response(self) -> str:

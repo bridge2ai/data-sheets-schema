@@ -173,6 +173,18 @@ def receipt_floors(block: dict[str, Any]) -> dict[str, int]:
     }
 
 
+def report_vacuous(block: Any) -> bool:
+    """A report check that read no claim and found nothing (#684).
+
+    `findings: []` over `claims_checked: 0` is not a held floor of zero: the
+    checker had nothing to test. Findings with no checked claim (a false
+    schema claim) are still findings, so only the empty case is vacuous.
+    """
+    if not isinstance(block, dict) or not _ran(block):
+        return False
+    return not (block.get("findings") or []) and not int(block.get("claims_checked") or 0)
+
+
 def _ran(block: Any) -> bool:
     if not isinstance(block, dict):
         return False
@@ -213,6 +225,8 @@ def baseline_for(project: str, label_prefix: str,
                               "report": rec.get("report_claims"),
                               "grounding": rec.get("grounding"),
                               "form": rec.get("form")})
+        if report_vacuous(rec.get("report_claims")):
+            counts["report findings"] = None          # unmeasured, not 0 (#684)
         for name, value in counts.items():
             if value is None:
                 continue
@@ -221,8 +235,35 @@ def baseline_for(project: str, label_prefix: str,
     return worst
 
 
+def report_basis(project: str, label_prefix: str,
+                 method: str = "claudecode_agent",
+                 concat_dir: Path | None = None) -> dict[str, int]:
+    """How the baseline arm's replicates stand on the report metric: how many
+    measured a claim, how many were vacuous (ran, read none), how many never
+    ran. `baseline_for` folds the last two into one None; the floor in
+    `verdict` needs them apart (#599 again): a baseline whose checker never
+    ran is not a baseline of zero findings.
+    """
+    import yaml
+    from data_sheets_schema.provenance import CONCAT_DIR
+    base = concat_dir or CONCAT_DIR
+    out = {"measured": 0, "vacuous": 0, "unchecked": 0}
+    for path in sorted(base.glob(
+            f"{method}_core/{label_prefix}*/{project}_provenance.yaml")):
+        rec = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        block = rec.get("report_claims")
+        if report_vacuous(block):
+            out["vacuous"] += 1
+        elif _ran(block):
+            out["measured"] += 1
+        else:
+            out["unchecked"] += 1
+    return out
+
+
 def verdict(checks: dict[str, Any], baseline: dict[str, int | None],
-            baseline_requested: bool = True) -> dict[str, Any]:
+            baseline_requested: bool = True,
+            report_basis: dict[str, int] | None = None) -> dict[str, Any]:
     """Compare one run's checks against a baseline. See module docstring.
 
     `baseline_requested` distinguishes the two ways a bar can be missing, which
@@ -235,13 +276,49 @@ def verdict(checks: dict[str, Any], baseline: dict[str, int | None],
     not "fine" — missed inside the gate built to enforce it.
     """
     counts = counts_from(checks)
-    blind = [name for name, value in counts.items() if value is None]
+    # A vacuous report row (#684) is unmeasured. Under step E (#929) the
+    # report phase is asked for a dispositions table, so a run whose block
+    # says `dispositions_expected` and still reads no claim is blind — the
+    # receipt precedent. An earlier record's vacuous row is reported as
+    # unmeasured and not gated: the arm that defined this gate wrote no
+    # readable claim, and the gate must stay satisfiable by it.
+    rb = (checks or {}).get("report")
+    report_note = None
+    report_blind_note = None
+    if report_vacuous(rb):
+        counts["report findings"] = None
+        if isinstance(rb, dict) and rb.get("dispositions_expected"):
+            report_blind_note = ("blind: the run was asked for a dispositions table and the "
+                                 "report carried no claim the checker reads (#929)")
+        else:
+            report_note = "unmeasured: the report carried no claim the checker reads (#684)"
+    blind = [name for name, value in counts.items()
+             if value is None and not (name == "report findings" and report_note)]
     unbaselined = [name for name, value in baseline.items() if value is None]
+    # The report metric is unmeasured on 11 of 12 v7 production records
+    # (#684): their reports carried no claim the checker reads. A baseline
+    # whose replicates were *vacuous* — the checker ran and read nothing —
+    # and none measured is a floor of 0 with its basis on the row. Only
+    # that: a baseline whose checker never ran, or a mistyped prefix, stays
+    # a missing baseline and fatal (#599). The caller says which it was
+    # through `report_basis`; without it there is no floor.
+    report_floor = ("report findings" in unbaselined
+                    and bool(report_basis)
+                    and report_basis.get("measured", 0) == 0
+                    and report_basis.get("vacuous", 0) > 0)
+    if report_floor:
+        unbaselined = [n for n in unbaselined if n != "report findings"]
     rows = []
     regressions = []
     for name, value in counts.items():
         bar = baseline.get(name)
         row = {"metric": name, "run": value, "baseline_worst": bar}
+        if name == "report findings" and report_floor:
+            bar = row["baseline_worst"] = 0
+            row["baseline_basis"] = (f"floor 0: {report_basis['vacuous']} baseline replicate(s) "
+                                     "ran the report check and read no claim, none measured one (#684)")
+        if name == "report findings" and (report_note or report_blind_note):
+            row["note"] = report_note or report_blind_note
         if value is not None and bar is not None and value > bar:
             row["regressed"] = True
             regressions.append(f"{name}: {value} against a baseline worst of {bar}")

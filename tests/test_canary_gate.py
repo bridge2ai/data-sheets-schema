@@ -431,11 +431,16 @@ class PredictionCoverageTest(unittest.TestCase):
                 rec = yaml.safe_load(p.read_text(encoding="utf-8"))
                 if not rec.get("form"):
                     self.skipTest("records predate the form block")
+                # As the batch invokes it (#967): the report basis says
+                # whether a missing report figure is a vacuous baseline
+                # (a floor of 0) or a checker that never ran (fatal).
+                from data_sheets_schema.canary import report_basis
                 v = verdict({"pair": rec["pair_consistency"],
                              "report": rec["report_claims"],
                              "grounding": rec["grounding"],
                              "form": rec["form"]},
-                            baseline_for(project, BASELINE))
+                            baseline_for(project, BASELINE),
+                            report_basis=report_basis(project, BASELINE))
                 checked += 1
                 with self.subTest(project=project, rep=rep):
                     self.assertEqual(v["status"], OK, v.get("regressions"))

@@ -123,7 +123,8 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
              "that reduce it differ by runtime (#689) and it is coupled with British "
              "spellings (#675)"),
     "report": ("report findings", "record", True,
-               "claims_checked counts backticked removal claims only; false-schema-claim "
+               "claims_checked counts backticked removal claims and, from v8, the "
+               "dispositions table's presence rows (#929); false-schema-claim "
                "findings come from a separate scan that counts nothing. A 0 with "
                "claims_checked 0 is therefore unmeasured on the removal form, not held "
                "(#684) — shown as 0ᵘ; any finding > 0 is measured"),

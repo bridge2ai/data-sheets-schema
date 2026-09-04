@@ -419,6 +419,8 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
             # #602. Displayed after the gated ones, never gated.
             counts.update(_canary.counts_from(res.get("checks") or {},
                                               _canary.REPORTED_ONLY))
+            if _canary.report_vacuous((res.get("checks") or {}).get("report")):
+                counts["report findings"] = "unmeasured"      # not a held 0 (#684)
             click.echo("     " + "  ".join(
                 f"{name}={'—' if v is None else v}"
                 for name, v in counts.items()))
@@ -426,7 +428,8 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
             if i == 1 and gating:
                 bar = _canary.baseline_for(s.project, canary_baseline)
                 v = _canary.verdict(res.get("checks") or {}, bar,
-                                    baseline_requested=True)
+                                    baseline_requested=True,
+                                    report_basis=_canary.report_basis(s.project, canary_baseline))
                 if v.get("unbaselined"):
                     click.echo(
                         f"     no baseline for {s.project} under "
@@ -434,9 +437,10 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
                         err=True)
                 for row in v["rows"]:
                     mark = "❌" if row.get("regressed") else "  "
+                    extra = "".join(f"  [{row[k]}]" for k in ("note", "baseline_basis") if row.get(k))
                     click.echo(f"     {mark} {row['metric']:24} "
                                f"{row['run']} vs baseline worst "
-                               f"{row['baseline_worst']}")
+                               f"{row['baseline_worst']}{extra}")
                 if v["status"] != _canary.OK:
                     for line in v["regressions"] or v["blind"]:
                         click.echo(f"     {line}", err=True)

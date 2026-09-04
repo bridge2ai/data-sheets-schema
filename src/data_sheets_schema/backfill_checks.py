@@ -169,6 +169,14 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
         block["artifacts"] = {"report": {"path": str(report),
                                          "md5": _md5(report)}}
         block["recorded_by"] = RECORDED_BY
+        # The expectation is a fact about the run, not about the report:
+        # carried on `inputs` (and on the recorded block) by the runner that
+        # asked for the table, restored here so a rebuild cannot downgrade a
+        # blind row to a tolerated one (#961). Never added to a record that
+        # does not carry it.
+        if (record.get("inputs") or {}).get("dispositions_expected") \
+                or (record.get("report_claims") or {}).get("dispositions_expected"):
+            block["dispositions_expected"] = True
         out["report_claims"] = block
 
     # --- form -------------------------------------------------------------
