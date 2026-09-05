@@ -682,3 +682,53 @@ intermediates:
   sha256: 98719bb576f7e3102ec6bbe063fd8757030b96c9c60019c31a2a706a8e7c93c7
 - path: data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/intermediate/VOICE_report_before_regate.md
   sha256: 1dea5404f9cde8023a6bd573f3e8cab852acd475c8e4d273bcdbb29cf73783dd
+canary:
+  status: ok
+  rows:
+  - metric: pair errors
+    run: 0
+    baseline_worst: 0
+  - metric: report findings
+    run: 0
+    baseline_worst: 0
+    baseline_basis: 'floor 0: 3 baseline replicate(s) ran the report check and read no claim, none measured
+      one (#684)'
+  - metric: ungrounded identifiers
+    run: 0
+    baseline_worst: 0
+  - metric: resolver URLs in identifier slots
+    run: 0
+    baseline_worst: 0
+  - metric: organisational fragments
+    run: 0
+    baseline_worst: 0
+  - metric: undeclared prefixes
+    run: 0
+    baseline_worst: 0
+  - metric: British spellings
+    run: 2
+    baseline_worst: 2
+  - metric: chunks unreviewed
+    run: 0
+    baseline_worst: 0
+  - metric: snippets unverified
+    run: 0
+    baseline_worst: 0
+  - metric: addressing slips over tolerance
+    run: 0
+    baseline_worst: 0
+  - metric: receipts vacuous
+    run: 0
+    baseline_worst: 0
+  - metric: receipt findings
+    run: 0
+    baseline_worst: 0
+  blind: []
+  unbaselined: []
+  regressions: []
+  basis: 'offline write of the verdict the batch gate printed at 2026-09-05T21:1xZ and fanned out on,
+    recomputed from this record''s own check blocks against the v7 production per-project worst with the
+    gate''s functions, including the #684 report basis (v7 VOICE: 3 vacuous, 0 measured → floor 0). The
+    batch writes no verdict block of its own (#1020).'
+  recorded_at: '2026-09-05T21:28:16+00:00'
+  recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-05
