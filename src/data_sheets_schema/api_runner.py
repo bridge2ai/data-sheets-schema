@@ -2816,7 +2816,8 @@ def _declared_error_type(exc: Exception) -> str | None:
 
 #: How many clean early closes one call tolerates before the phase fails
 #: (#1016): a retry costs a whole phase, and a connection that drops twice
-#: in a row will drop a third time.
+#: within one call will drop a third time. Per call, not consecutive: a
+#: rate limit or a watchdog abandonment between two drops does not reset it.
 INCOMPLETE_STREAM_ATTEMPTS = 2
 
 
@@ -3018,8 +3019,8 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                 transient = True
                 print(f"   attempt {attempt} abandoned by the watchdog after the wall clock; retrying")
             if isinstance(exc, IncompleteStreamError):
-                # Bounded below MAX_ATTEMPTS: two clean early closes in a
-                # row are a systemic problem, not noise, and a 15-minute
+                # Bounded below MAX_ATTEMPTS: two clean early closes in one
+                # call are a systemic problem, not noise, and a 15-minute
                 # phase must not be billed five times over on it (#1016).
                 incomplete += 1
                 transient = incomplete <= INCOMPLETE_STREAM_ATTEMPTS
