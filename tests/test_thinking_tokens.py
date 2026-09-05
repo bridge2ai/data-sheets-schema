@@ -213,9 +213,24 @@ class TestTheTranscriptMeasure(unittest.TestCase):
         self.assertNotIn("thinking_tokens", out)
         self.assertEqual(out["reasoning_tokens_estimate"], 9)
 
-    def test_annotate_observed_accepts_the_measure(self):
-        from data_sheets_schema.cli.provenance import _OBSERVED_FIELDS
-        self.assertTrue(set(reasoning.OBSERVED_REASONING_KEYS) <= _OBSERVED_FIELDS)
+    def test_annotate_observed_accepts_the_measure_at_run_level_only(self):
+        """#1012: a per-phase `observed` block must not carry `output_tokens`."""
+        from data_sheets_schema.cli.provenance import _OBSERVED_FIELDS, _RUN_OBSERVED_FIELDS
+        self.assertTrue(set(reasoning.OBSERVED_REASONING_KEYS) <= _RUN_OBSERVED_FIELDS)
+        self.assertFalse(set(reasoning.OBSERVED_REASONING_KEYS) & _OBSERVED_FIELDS)
+
+    def test_the_estimate_is_floored_per_message_like_the_api_log(self):
+        """#1012: two messages of 1 output token and 3 text chars each: 1 + 1, not 2 - 1."""
+        mod = _observer()
+        with tempfile.TemporaryDirectory() as tmp:
+            t = Path(tmp) / "agent-x.jsonl"
+            t.write_text("\n".join([
+                _line("2026-09-04T01:00:00Z", "m1", 1, [{"type": "text", "text": "abc"}]),
+                _line("2026-09-04T01:00:01Z", "m2", 1, [{"type": "text", "text": "abc"}]),
+                _line("2026-09-04T01:00:02Z", "m3", 1, [{"type": "text", "text": "x" * 40}]),
+            ]) + "\n")
+            out = mod.observe([t], None, None, None, None)
+        self.assertEqual(out["reasoning_tokens_estimate"], 2)
 
 
 if __name__ == "__main__":

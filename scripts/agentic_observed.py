@@ -62,20 +62,22 @@ def reasoning_measure(usage_by_msg: dict, blocks_by_msg: dict) -> dict:
     counted = [((u.get("output_tokens_details") or {}).get("thinking_tokens"))
                for u in usage_by_msg.values() if isinstance(u.get("output_tokens_details"), dict)]
     counted = [c for c in counted if isinstance(c, int) and not isinstance(c, bool)]
-    blocks = thinking_chars = visible = tool_input = 0
-    for parts in blocks_by_msg.values():
-        for kind, chars in parts.values():
-            if kind == "thinking":
-                blocks += 1
-                thinking_chars += chars
-            elif kind == "text":
-                visible += chars
-            elif kind == "tool_use":
-                tool_input += chars
+    blocks = thinking_chars = visible = tool_input = estimate = 0
+    for mid, u in usage_by_msg.items():
+        parts = blocks_by_msg.get(mid, {})
+        m_visible = sum(chars for kind, chars in parts.values() if kind == "text")
+        m_tool = sum(chars for kind, chars in parts.values() if kind == "tool_use")
+        blocks += sum(1 for kind, _ in parts.values() if kind == "thinking")
+        thinking_chars += sum(chars for kind, chars in parts.values() if kind == "thinking")
+        visible += m_visible
+        tool_input += m_tool
+        # Per message and floored at 0, as the API path's log does per entry
+        # (#1012), so the two subtractions are the same arithmetic.
+        estimate += max(0, (u.get("output_tokens", 0) or 0) - (m_visible + m_tool) // 4)
     out = {"assistant_turns": len(usage_by_msg), "output_tokens": output,
            "thinking_blocks": blocks, "thinking_text_chars": thinking_chars,
            "visible_text_chars": visible, "tool_input_chars": tool_input,
-           "reasoning_tokens_estimate": max(0, output - (visible + tool_input) // 4)}
+           "reasoning_tokens_estimate": estimate}
     if counted:
         out["thinking_tokens"] = sum(counted)
         out["turns_with_thinking_tokens"] = len(counted)

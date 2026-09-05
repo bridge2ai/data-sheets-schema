@@ -47,13 +47,15 @@ AGENTIC_PHASES = frozenset({"generate_full", "generate_core", "derive_core",
 # that observed them may record them.
 _OBSERVED_FIELDS = frozenset({"total_tokens", "tool_uses", "duration_ms",
                               "bundle_lines_read", "bundle_lines_total",
-                              "receipt_chunks_total", "receipt_chunks_unopened",
-                              # The transcript's reasoning measure (#1000):
-                              # see `reasoning.OBSERVED_REASONING_KEYS`.
-                              "assistant_turns", "output_tokens", "thinking_blocks",
-                              "thinking_text_chars", "visible_text_chars", "tool_input_chars",
-                              "reasoning_tokens_estimate", "thinking_tokens",
-                              "turns_with_thinking_tokens"})
+                              "receipt_chunks_total", "receipt_chunks_unopened"})
+#: Run level only (#1000/#1012): the transcript's reasoning measure is one
+#: number per run, like the rest of `run_observed`; a per-phase `observed`
+#: block must not carry `output_tokens`, which the basis says no phase can
+#: report.
+_RUN_OBSERVED_FIELDS = _OBSERVED_FIELDS | frozenset({
+    "assistant_turns", "output_tokens", "thinking_blocks", "thinking_text_chars",
+    "visible_text_chars", "tool_input_chars", "reasoning_tokens_estimate",
+    "thinking_tokens", "turns_with_thinking_tokens"})
 # receipt_chunks_total / receipt_chunks_unopened (#709): of the chunks the
 # coverage receipt marks reviewed, how many the transcript shows no file-tool
 # window over. The receipt is the agent's claim and the windows are the
@@ -508,10 +510,10 @@ def annotate_observed(project, method, label, run_observed, until):
     except json.JSONDecodeError as exc:
         raise click.BadParameter(f"--run is not valid JSON: {exc}") from exc
     if (not isinstance(observed, dict) or not observed
-            or not set(observed) <= _OBSERVED_FIELDS):
+            or not set(observed) <= _RUN_OBSERVED_FIELDS):
         raise click.BadParameter(
             f"--run must be a non-empty object with keys from "
-            f"{sorted(_OBSERVED_FIELDS)}")
+            f"{sorted(_RUN_OBSERVED_FIELDS)}")
     bad = {k: v for k, v in observed.items()
            if not isinstance(v, int) or isinstance(v, bool) or v < 0}
     if bad:

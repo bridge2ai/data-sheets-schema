@@ -753,9 +753,10 @@ d4d provenance reasoning --path some/log.jsonl
 Code subagent has no access to its own token accounting, and a log carrying
 only the effort level would look comparable with the API path's and is not.
 **Its transcript does carry a measure** (#1000, 2026-09-04): usage per turn
-(`output_tokens`), signed thinking blocks with empty text, and — in
-transcripts written by recent Claude Code versions —
-`usage.output_tokens_details.thinking_tokens`. `scripts/agentic_observed.py`
+(`output_tokens`), signed thinking blocks (empty in the sampled generation
+transcripts, text in some others — the observer records
+`thinking_text_chars` either way), and — in transcripts written by recent
+Claude Code versions — `usage.output_tokens_details.thinking_tokens`. `scripts/agentic_observed.py`
 now emits `assistant_turns`, `output_tokens`, `thinking_blocks`,
 `thinking_text_chars`, `visible_text_chars`, `tool_input_chars`,
 `reasoning_tokens_estimate` (output tokens minus a 4-chars-per-token
