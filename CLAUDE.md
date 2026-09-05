@@ -757,13 +757,17 @@ only the effort level would look comparable with the API path's and is not.
 transcripts written by recent Claude Code versions —
 `usage.output_tokens_details.thinking_tokens`. `scripts/agentic_observed.py`
 now emits `assistant_turns`, `output_tokens`, `thinking_blocks`,
-`thinking_text_chars`, `visible_text_chars`, `reasoning_tokens_estimate`
-and, where any turn carries it, `thinking_tokens` /
+`thinking_text_chars`, `visible_text_chars`, `tool_input_chars`,
+`reasoning_tokens_estimate` (output tokens minus a 4-chars-per-token
+estimate of the text *and the tool-call payloads*, which in an agentic
+transcript are most of the visible output — the datasheet itself is a
+Write; #1011) and, where any turn carries it, `thinking_tokens` /
 `turns_with_thinking_tokens`; `d4d provenance annotate-observed` records
 them under `phase_log.run_observed`, and `d4d provenance reasoning` reports
 such a run as `recovered_from_transcript`. Cache-inclusive orchestrator
-accounting, one number per run: comparable in kind with the API log, never
-averaged with `api_usage`. Existing agentic records carry the older
+accounting, one number per run: the same subtraction as the API log's
+estimate, on a runtime whose output is mostly tool payloads, so an upper
+bound rather than a like-for-like figure; never averaged with `api_usage`. Existing agentic records carry the older
 `run_observed` shape until re-annotated from their transcripts.
 
 So the command distinguishes four empty cases rather than printing one message

@@ -96,8 +96,9 @@ class ReasoningCapture:
             "visible_text_chars": self.text_chars,
             "reasoning_tokens_estimate": self.reasoning_tokens_estimate,
             # The endpoint's own count where it gave one (#999), and how far
-            # the estimate was from it — the estimate stays for records that
-            # predate the count.
+            # the estimate was from it: `estimate_error` is estimate minus
+            # observed, positive when the estimate ran high. The estimate
+            # stays for records that predate the count.
             "reasoning_tokens_observed": self.thinking_tokens,
             "stop_reason": self.stop_reason,
         }
@@ -198,9 +199,12 @@ def summarise(entries: list[dict[str, Any]]) -> dict[str, Any]:
         "reasoning_tokens_estimate_total": sum(est) or None,
         "reasoning_tokens_estimate_max": max(est) if est else None,
         # The endpoint's own count (#999): entries that carry one, their
-        # total, and the estimate's summed error over exactly those entries.
+        # total, and — over the entries that carry both a count and an
+        # estimate, which `with_estimate_error` counts — the summed error,
+        # estimate minus observed.
         "with_observed_count": len(obs),
         "reasoning_tokens_observed_total": sum(obs) if obs else None,
+        "with_estimate_error": sum(1 for e in entries if e.get("estimate_error") is not None),
         "estimate_error_total": (sum(e["estimate_error"] for e in entries
                                      if e.get("estimate_error") is not None)
                                  if obs else None),
@@ -227,7 +231,7 @@ RECOVERED = "recovered_from_transcript"
 #: The `run_observed` keys that make up that measure, written by
 #: `scripts/agentic_observed.py` and `d4d provenance annotate-observed`.
 OBSERVED_REASONING_KEYS = ("assistant_turns", "output_tokens", "thinking_blocks",
-                           "thinking_text_chars", "visible_text_chars",
+                           "thinking_text_chars", "visible_text_chars", "tool_input_chars",
                            "reasoning_tokens_estimate", "thinking_tokens",
                            "turns_with_thinking_tokens")
 

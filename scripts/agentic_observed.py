@@ -46,8 +46,11 @@ def reasoning_measure(usage_by_msg: dict, blocks_by_msg: dict) -> dict:
     """The transcript's reasoning measure (#1000), flat non-negative integers
     so `annotate-observed` can validate them like the other totals.
 
-    Comparable in kind with the API path's log: `output_tokens` per turn is
-    what the estimate subtracts the visible text from, and
+    `output_tokens` per turn is what the estimate subtracts the visible
+    output from — and in an agentic transcript the visible output is mostly
+    tool-call payloads (the Write of the datasheet itself), not text, so
+    `tool_input_chars` is subtracted with `visible_text_chars` (#1011). The
+    API path has no tool calls; there the same subtraction is text only.
     `thinking_tokens` is the runtime's own count where the transcript
     carries `usage.output_tokens_details` (recent Claude Code versions; the
     key is omitted, not zeroed, when no turn has it). Cache-inclusive
@@ -59,17 +62,43 @@ def reasoning_measure(usage_by_msg: dict, blocks_by_msg: dict) -> dict:
     counted = [((u.get("output_tokens_details") or {}).get("thinking_tokens"))
                for u in usage_by_msg.values() if isinstance(u.get("output_tokens_details"), dict)]
     counted = [c for c in counted if isinstance(c, int) and not isinstance(c, bool)]
-    blocks = sum(b[0] for b in blocks_by_msg.values())
-    thinking_chars = sum(b[1] for b in blocks_by_msg.values())
-    visible = sum(b[2] for b in blocks_by_msg.values())
+    blocks = thinking_chars = visible = tool_input = 0
+    for parts in blocks_by_msg.values():
+        for kind, chars in parts.values():
+            if kind == "thinking":
+                blocks += 1
+                thinking_chars += chars
+            elif kind == "text":
+                visible += chars
+            elif kind == "tool_use":
+                tool_input += chars
     out = {"assistant_turns": len(usage_by_msg), "output_tokens": output,
            "thinking_blocks": blocks, "thinking_text_chars": thinking_chars,
-           "visible_text_chars": visible,
-           "reasoning_tokens_estimate": max(0, output - visible // 4)}
+           "visible_text_chars": visible, "tool_input_chars": tool_input,
+           "reasoning_tokens_estimate": max(0, output - (visible + tool_input) // 4)}
     if counted:
         out["thinking_tokens"] = sum(counted)
         out["turns_with_thinking_tokens"] = len(counted)
     return out
+
+
+def _block_parts(content: list) -> dict:
+    """Each content block of a transcript line, keyed so the same block seen
+    on two lines of one message counts once and different blocks of one
+    message (the runtime writes one block per line) all count (#1011)."""
+    parts = {}
+    for c in content:
+        kind = c.get("type")
+        if kind in ("thinking", "redacted_thinking"):
+            text = c.get("thinking") or ""
+            parts[("thinking", c.get("signature") or text)] = ("thinking", len(text))
+        elif kind == "text":
+            text = c.get("text") or ""
+            parts[("text", text)] = ("text", len(text))
+        elif kind == "tool_use":
+            payload = json.dumps(c.get("input") or {}, ensure_ascii=False)
+            parts[("tool_use", c.get("id") or payload)] = ("tool_use", len(payload))
+    return parts
 
 
 def receipt_cross_check(covered: set[int], receipt: Path, manifest: Path) -> dict:
@@ -124,7 +153,7 @@ def observe(transcripts: list[Path], bundle: Path | None,
     # Per API message, deduplicated like usage (#1000): thinking blocks,
     # their text length (0 through CBORG and this runtime alike), and the
     # visible text length the estimate subtracts.
-    blocks_by_msg: dict[str, tuple[int, int, int]] = {}
+    blocks_by_msg: dict[str, dict] = {}
     tools = searches = 0
     duration_ms = 0
     read_windows: dict[str, tuple[int, int]] = {}   # tool_use_id -> window
@@ -153,12 +182,7 @@ def observe(transcripts: list[Path], bundle: Path | None,
                     if prev is None or usage.get("output_tokens", 0) >= prev.get("output_tokens", 0):
                         usage_by_msg[mid] = usage
                     content = [c for c in msg.get("content") or [] if isinstance(c, dict)]
-                    counts = (sum(1 for c in content if c.get("type") in ("thinking", "redacted_thinking")),
-                              sum(len(c.get("thinking") or "") for c in content if c.get("type") == "thinking"),
-                              sum(len(c.get("text") or "") for c in content if c.get("type") == "text"))
-                    seen = blocks_by_msg.get(mid)
-                    if seen is None or counts >= seen:
-                        blocks_by_msg[mid] = counts
+                    blocks_by_msg.setdefault(mid, {}).update(_block_parts(content))
                 for c in msg.get("content") or []:
                     if not isinstance(c, dict):
                         continue

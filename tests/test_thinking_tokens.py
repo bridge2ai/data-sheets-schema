@@ -8,11 +8,21 @@ transcripts carry usage per turn, signed empty thinking blocks and, from
 recent runtimes, the same `output_tokens_details`.
 """
 
+import importlib.util
 import json
 import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def _observer():
+    spec = importlib.util.spec_from_file_location("agentic_observed", ROOT / "scripts" / "agentic_observed.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 from data_sheets_schema import reasoning
 from data_sheets_schema.api_runner import _call_with_retry
@@ -153,9 +163,7 @@ def _line(ts, mid, output_tokens, content, details=None):
 
 class TestTheTranscriptMeasure(unittest.TestCase):
     def test_turns_blocks_and_counts_are_summed_once_per_message(self):
-        import importlib.util
-        spec = importlib.util.spec_from_file_location("agentic_observed", Path("scripts/agentic_observed.py"))
-        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        mod = _observer()
         with tempfile.TemporaryDirectory() as tmp:
             t = Path(tmp) / "agent-x.jsonl"
             think = {"type": "thinking", "thinking": "", "signature": "s"}
@@ -168,18 +176,36 @@ class TestTheTranscriptMeasure(unittest.TestCase):
             ]) + "\n")
             out = mod.observe([t], None, None, None, None)
         self.assertEqual({k: out[k] for k in ("assistant_turns", "output_tokens", "thinking_blocks",
-                                              "thinking_text_chars", "visible_text_chars",
+                                              "thinking_text_chars", "visible_text_chars", "tool_input_chars",
                                               "reasoning_tokens_estimate", "thinking_tokens",
                                               "turns_with_thinking_tokens")},
                          {"assistant_turns": 2, "output_tokens": 150, "thinking_blocks": 1,
-                          "thinking_text_chars": 0, "visible_text_chars": 48,
+                          "thinking_text_chars": 0, "visible_text_chars": 48, "tool_input_chars": 0,
                           "reasoning_tokens_estimate": 150 - 12, "thinking_tokens": 80,
                           "turns_with_thinking_tokens": 1})
 
+    def test_one_block_per_line_is_the_runtime_shape_and_tool_payloads_are_visible_output(self):
+        """#1011: Claude Code writes one content block per line under one message id, and most
+        agentic output tokens are tool-call payloads (the Write of the datasheet itself)."""
+        mod = _observer()
+        with tempfile.TemporaryDirectory() as tmp:
+            t = Path(tmp) / "agent-x.jsonl"
+            t.write_text("\n".join([
+                _line("2026-09-04T01:00:00Z", "m1", 5, [{"type": "thinking", "thinking": "", "signature": "s"}]),
+                _line("2026-09-04T01:00:01Z", "m1", 400, [{"type": "text", "text": "x" * 40}]),
+                _line("2026-09-04T01:00:02Z", "m1", 400, [{"type": "tool_use", "id": "tu1", "name": "Write",
+                                                          "input": {"file_path": "p", "content": "c" * 1200}}]),
+                _line("2026-09-04T01:00:03Z", "m1", 400, [{"type": "tool_use", "id": "tu1", "name": "Write",
+                                                          "input": {"file_path": "p", "content": "c" * 1200}}]),
+            ]) + "\n")
+            out = mod.observe([t], None, None, None, None)
+        self.assertEqual((out["assistant_turns"], out["output_tokens"], out["thinking_blocks"]), (1, 400, 1))
+        self.assertEqual(out["visible_text_chars"], 40)
+        self.assertEqual(out["tool_input_chars"], len(json.dumps({"file_path": "p", "content": "c" * 1200})))
+        self.assertEqual(out["reasoning_tokens_estimate"], max(0, 400 - (40 + out["tool_input_chars"]) // 4))
+
     def test_no_turn_with_a_count_omits_the_key_rather_than_writing_zero(self):
-        import importlib.util
-        spec = importlib.util.spec_from_file_location("agentic_observed", Path("scripts/agentic_observed.py"))
-        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        mod = _observer()
         with tempfile.TemporaryDirectory() as tmp:
             t = Path(tmp) / "agent-x.jsonl"
             t.write_text(_line("2026-09-04T01:00:00Z", "m1", 10, [{"type": "text", "text": "abcd"}]) + "\n")

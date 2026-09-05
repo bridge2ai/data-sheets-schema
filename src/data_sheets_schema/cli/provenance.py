@@ -51,7 +51,7 @@ _OBSERVED_FIELDS = frozenset({"total_tokens", "tool_uses", "duration_ms",
                               # The transcript's reasoning measure (#1000):
                               # see `reasoning.OBSERVED_REASONING_KEYS`.
                               "assistant_turns", "output_tokens", "thinking_blocks",
-                              "thinking_text_chars", "visible_text_chars",
+                              "thinking_text_chars", "visible_text_chars", "tool_input_chars",
                               "reasoning_tokens_estimate", "thinking_tokens",
                               "turns_with_thinking_tokens"})
 # receipt_chunks_total / receipt_chunks_unopened (#709): of the chunks the
@@ -566,8 +566,10 @@ def annotate_observed(project, method, label, run_observed, until):
         "lines the run never opened, or opened only in a read that errored, "
         "may have been reached by search, but nothing attests that. "
         "assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, "
-        "visible_text_chars and reasoning_tokens_estimate are the transcript's "
-        "reasoning measure (#1000), thinking_tokens and "
+        "visible_text_chars, tool_input_chars and reasoning_tokens_estimate "
+        "(output tokens minus a 4-chars-per-token estimate of the text and "
+        "tool-call payloads) are the transcript's reasoning measure (#1000), "
+        "thinking_tokens and "
         "turns_with_thinking_tokens the runtime's own count where the "
         "transcript carries usage.output_tokens_details; comparable in kind "
         "with the API path's reasoning log, never to be averaged with it."
@@ -679,20 +681,16 @@ def reasoning_cmd(method, project, label, path):
         run_label = candidate.parent.name
         base = candidate.parent.parent.name
         runtime = None
+        data: dict = {}
         rec = record_path_for(proj, base, run_label)
         if rec.exists():
             try:
                 data = _yaml.safe_load(rec.read_text(encoding="utf-8")) or {}
                 runtime = (data.get("model") or {}).get("agent_runtime")
-            except (_yaml.YAMLError, OSError, UnicodeDecodeError):
-                runtime = None
-        observed = None
-        if rec.exists():
-            try:
-                observed = ((data.get("phase_log") or {}).get("run_observed")
-                            if isinstance(data, dict) else None)
-            except AttributeError:
-                observed = None
+            except (_yaml.YAMLError, OSError, UnicodeDecodeError, AttributeError):
+                runtime, data = None, {}
+        phase_log = data.get("phase_log") if isinstance(data, dict) else None
+        observed = phase_log.get("run_observed") if isinstance(phase_log, dict) else None
         status = _r.log_status(runtime, run_label, candidate.exists(), observed)
         why[status] += 1
         if status == _r.RECOVERED:
@@ -709,11 +707,13 @@ def reasoning_cmd(method, project, label, path):
                    "(run_observed; not the runtime's own accounting):")
         for proj, run_label, obs in recovered:
             counted = obs.get("thinking_tokens")
-            click.echo(f"   {proj:<9} {run_label}  turns {obs.get('assistant_turns')}  "
-                       f"output_tokens {obs.get('output_tokens')}  thinking blocks {obs.get('thinking_blocks')}  "
-                       + (f"thinking_tokens {counted} ({obs.get('turns_with_thinking_tokens')} turn(s) counted)"
-                          if counted is not None else
-                          f"estimate {obs.get('reasoning_tokens_estimate')} (no thinking_tokens in this transcript)"))
+            parts = [f"{k} {obs[k]}" for k in ("assistant_turns", "output_tokens", "thinking_blocks")
+                     if obs.get(k) is not None]
+            if counted is not None:
+                parts.append(f"thinking_tokens {counted} ({obs.get('turns_with_thinking_tokens')} turn(s) counted)")
+            elif obs.get("reasoning_tokens_estimate") is not None:
+                parts.append(f"estimate {obs['reasoning_tokens_estimate']} (no thinking_tokens in this transcript)")
+            click.echo(f"   {proj:<9} {run_label}  " + "  ".join(parts))
     if not logs:
         if not recovered:
             click.echo("No reasoning logs found for the selection.")
