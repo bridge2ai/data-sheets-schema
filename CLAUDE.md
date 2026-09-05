@@ -811,7 +811,21 @@ address) with the address kept in `email`, for `id`s inside Person-ranged
 slots only; every `mailto:` id it leaves is logged as skipped, under
 `normalisation.mailto_ids` — the v8 prompt's R5 says the same, and a person
 whose ORCID the documents list is a review matter (rule-03), not the
-normaliser's. The undeclared-prefix counter is
+normaliser's. Since #1002 (v8 step J) British
+forms in prose are rewritten to American, one rule per pattern of the
+form block's instrument (v3), double-quoted spans and identifier-shaped
+tokens (`://`, `/`, `@`, `:x`, `.x` inside a token) left as written, keys
+and the `#` header untouched; each rewrite is logged under
+`normalisation.british_spellings` by phase and slot, so the model's own
+count is on record while the canary's British row becomes, on the API
+path only (the agentic runtime writes no normaliser), an invariant for
+what the normaliser does not cover. The form count sums full + core and
+counts a skip; `british_occurrences` logs each rewrite once — the VOICE
+canary's 8 is `british_occurrences` 4. A Capitalised match in a
+title-case run ("Temerty Centre for …", a real institution the VOICE
+bundle names) or a genus name is left as written and logged under
+`british_skipped`; a lower-case proper noun is rewritten, and `d4d
+review disposition --amend` restores it (#1004). The undeclared-prefix counter is
 instrument **v3** (#982): `ark:` excluded, `mailto:` excluded on a Person's id
 only and counted anywhere else, `urn:` by NID; the form block records
 `prefix_instrument`.
