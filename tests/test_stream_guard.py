@@ -86,6 +86,13 @@ class TestTheGuard(unittest.TestCase):
         client = _Client([cut, _Stream(_message("end_turn"))])
         self.assertEqual((_call(client).stop_reason, client.calls), ("end_turn", 2))
 
+    def test_a_framed_close_whose_message_never_stopped_is_incomplete(self):
+        """A proxy that sends a synthetic delta and message_stop after losing upstream: the
+        SDK's message still carries no stop_reason, and that is the message's own word."""
+        framed = _Stream(_message(None), COMPLETE)
+        client = _Client([framed, _Stream(_message("end_turn"))])
+        self.assertEqual((_call(client).stop_reason, client.calls, framed.asked_for_final), ("end_turn", 2, True))
+
     def test_a_zero_event_close_is_incomplete_before_the_sdk_asserts(self):
         client = _Client([_Stream(_message(None), []), _Stream(_message("end_turn"))])
         self.assertEqual((_call(client).stop_reason, client.calls), ("end_turn", 2))

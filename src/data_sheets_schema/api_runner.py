@@ -2948,6 +2948,15 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                                 f"stream ended without message_stop after {events} event(s) "
                                 f"and {time.monotonic() - t_stream:.0f}s (#1013)")
                         msg = stream.get_final_message()
+                        # And the message's own word: only `message_delta`
+                        # sets `stop_reason`, so a proxy that framed the
+                        # close with a synthetic delta and stop (a usage-only
+                        # chunk after losing upstream) still hands back a
+                        # message that says it never stopped (#1016 review).
+                        if iterable and getattr(msg, "stop_reason", None) is None:
+                            raise IncompleteStreamError(
+                                f"stream closed with no stop_reason on the final message after "
+                                f"{events} event(s) and {time.monotonic() - t_stream:.0f}s (#1013)")
                         if details is not None:
                             _attach_output_tokens_details(msg, details)
                         box["result"] = msg
