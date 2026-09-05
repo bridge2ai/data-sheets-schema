@@ -2814,6 +2814,15 @@ def _declared_error_type(exc: Exception) -> str | None:
     return None
 
 
+class IncompleteStreamError(RuntimeError):
+    """The SSE stream closed before the message was complete (#1013).
+
+    Transient by definition: the connection, not the model, ended the
+    response. Retried like a dropped connection, and said, so a resumed
+    phase is not mistaken for a slow one (#779).
+    """
+
+
 def _output_tokens_details(usage) -> dict[str, Any] | None:
     """`output_tokens_details` off a usage object, attribute or extra (#999)."""
     if usage is None:
@@ -2902,15 +2911,32 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                         # drops it (#999): read it off the events first, and
                         # hand it to the message the callers see.
                         details = None
-                        for ev in (stream if hasattr(stream, "__iter__") else ()):
+                        iterable = hasattr(stream, "__iter__")
+                        saw_delta = False
+                        for ev in (stream if iterable else ()):
                             if getattr(ev, "type", None) != "message_delta":
                                 continue
+                            saw_delta = True
                             found = _output_tokens_details(getattr(ev, "usage", None))
                             if found is not None:
                                 details = found
                         msg = stream.get_final_message()
                         if details is not None:
                             _attach_output_tokens_details(msg, details)
+                        # A stream that ended before `message_delta` arrived
+                        # returns the snapshot as it stood — usage from
+                        # `message_start`, no stop reason — and the SDK does
+                        # not raise on a clean close (#1013: the VOICE
+                        # 2026-09-04e full phase recorded output_tokens 5 for
+                        # 68k characters and a receipt cut at 7 of 22 chunks).
+                        # An incomplete body is not a response. Judged on the
+                        # events, so a stream that cannot be iterated is
+                        # taken as the SDK's word.
+                        if iterable and not saw_delta and getattr(msg, "stop_reason", None) is None:
+                            raise IncompleteStreamError(
+                                "stream ended without message_stop: no stop_reason on the "
+                                f"final message after {len(getattr(msg, 'content', []) or [])} "
+                                "content block(s) (#1013)")
                         box["result"] = msg
                 except BaseException as exc:           # noqa: BLE001 - re-raised on the caller's side
                     box["error"] = exc
@@ -2969,6 +2995,9 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             if not transient and "wall clock" in str(exc) and "#664" in str(exc):
                 transient = True
                 print(f"   attempt {attempt} abandoned by the watchdog after the wall clock; retrying")
+            if isinstance(exc, IncompleteStreamError):
+                transient = True
+                print(f"   attempt {attempt} {exc}; retrying")
             if not transient or attempt == MAX_ATTEMPTS:
                 raise
             last = exc
