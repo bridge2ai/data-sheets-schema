@@ -10,7 +10,8 @@ stopped at 7 of 22 chunks and the canary read 15 unreviewed.
 import unittest
 from types import SimpleNamespace
 
-from data_sheets_schema.api_runner import MAX_ATTEMPTS, IncompleteStreamError, _call_with_retry
+from data_sheets_schema.api_runner import (INCOMPLETE_STREAM_ATTEMPTS, MAX_ATTEMPTS, IncompleteStreamError,
+                                           _call_with_retry)
 
 
 class _Usage:
@@ -25,9 +26,19 @@ def _message(stop_reason):
                            stop_reason=stop_reason)
 
 
+COMPLETE = [SimpleNamespace(type="message_start"), SimpleNamespace(type="message_delta", usage=None),
+            SimpleNamespace(type="message_stop")]
+CUT = [SimpleNamespace(type="message_start"), SimpleNamespace(type="content_block_start")]
+
+
 class _Stream:
-    def __init__(self, final):
+    """`events` is what the SSE stream yielded before EOF; `final` is the SDK's
+    snapshot at that point."""
+
+    def __init__(self, final, events=None):
         self._final = final
+        self._events = COMPLETE if events is None else events
+        self.asked_for_final = False
 
     def __enter__(self):
         return self
@@ -36,20 +47,23 @@ class _Stream:
         return False
 
     def __iter__(self):
-        return iter([SimpleNamespace(type="message_start")])
+        return iter(self._events)
 
     def get_final_message(self):
+        self.asked_for_final = True
+        if not self._events:
+            raise AssertionError("the SDK asserts a message on a zero-event stream")
         return self._final
 
 
 class _Client:
-    def __init__(self, finals):
+    def __init__(self, streams):
         self.calls = 0
-        finals = list(finals)
+        streams = list(streams)
 
         def stream(**kw):
             self.calls += 1
-            return _Stream(finals.pop(0))
+            return streams.pop(0)
         self.messages = SimpleNamespace(stream=stream)
 
 
@@ -59,20 +73,32 @@ def _call(client):
 
 
 class TestTheGuard(unittest.TestCase):
-    def test_a_snapshot_without_a_stop_reason_is_retried_and_the_complete_one_returned(self):
-        client = _Client([_message(None), _message("end_turn")])
+    def test_a_stream_cut_before_message_stop_is_retried_and_the_complete_one_returned(self):
+        cut = _Stream(_message(None), CUT)
+        client = _Client([cut, _Stream(_message("end_turn"))])
         msg = _call(client)
-        self.assertEqual((client.calls, msg.stop_reason), (2, "end_turn"))
+        self.assertEqual((client.calls, msg.stop_reason, cut.asked_for_final), (2, "end_turn", False))
 
-    def test_every_attempt_incomplete_raises_the_incomplete_stream_error(self):
-        client = _Client([_message(None)] * MAX_ATTEMPTS)
+    def test_a_delta_without_message_stop_is_still_incomplete(self):
+        """#1016: `[message_start, message_delta, EOF]` is cut too — the contract ends with message_stop."""
+        cut = _Stream(_message(None), [SimpleNamespace(type="message_start"),
+                                       SimpleNamespace(type="message_delta", usage=None)])
+        client = _Client([cut, _Stream(_message("end_turn"))])
+        self.assertEqual((_call(client).stop_reason, client.calls), ("end_turn", 2))
+
+    def test_a_zero_event_close_is_incomplete_before_the_sdk_asserts(self):
+        client = _Client([_Stream(_message(None), []), _Stream(_message("end_turn"))])
+        self.assertEqual((_call(client).stop_reason, client.calls), ("end_turn", 2))
+
+    def test_incomplete_streams_are_bounded_below_the_attempt_ladder(self):
+        client = _Client([_Stream(_message(None), CUT)] * MAX_ATTEMPTS)
         with self.assertRaises(IncompleteStreamError) as cm:
             _call(client)
-        self.assertEqual(client.calls, MAX_ATTEMPTS)
+        self.assertEqual(client.calls, INCOMPLETE_STREAM_ATTEMPTS + 1)
         self.assertIn("#1013", str(cm.exception))
 
     def test_a_complete_stream_is_untouched(self):
-        client = _Client([_message("max_tokens")])
+        client = _Client([_Stream(_message("max_tokens"))])
         self.assertEqual((_call(client).stop_reason, client.calls), ("max_tokens", 1))
 
     def test_a_stream_that_cannot_be_iterated_is_taken_at_the_sdk_word(self):
@@ -89,14 +115,6 @@ class TestTheGuard(unittest.TestCase):
             def get_final_message(self):
                 return final
         client = SimpleNamespace(messages=SimpleNamespace(stream=lambda **kw: _Plain()))
-        self.assertIs(_call(client), final)
-
-    def test_a_delta_seen_but_no_stop_reason_is_not_the_guard_case(self):
-        class _WithDelta(_Stream):
-            def __iter__(self):
-                return iter([SimpleNamespace(type="message_start"), SimpleNamespace(type="message_delta", usage=None)])
-        final = _message(None)
-        client = SimpleNamespace(messages=SimpleNamespace(stream=lambda **kw: _WithDelta(final)))
         self.assertIs(_call(client), final)
 
 

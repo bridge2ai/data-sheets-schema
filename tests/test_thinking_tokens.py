@@ -119,13 +119,14 @@ class TestTheRunnerReadsTheDelta(unittest.TestCase):
     def test_the_delta_usage_extra_lands_on_the_final_message(self):
         final = Resp(Usage(output_tokens=31))
         delta = _Delta(Usage(output_tokens=31, extra={"output_tokens_details": {"thinking_tokens": 28}}))
-        msg = self._call(_Stream([SimpleNamespace(type="message_start"), delta], final))
+        msg = self._call(_Stream([SimpleNamespace(type="message_start"), delta,
+                                  SimpleNamespace(type="message_stop")], final))
         self.assertIs(msg, final)
         self.assertEqual(reasoning.thinking_tokens(msg), 28)
 
     def test_a_stream_without_the_breakdown_leaves_the_message_alone(self):
         final = Resp(Usage(output_tokens=31))
-        msg = self._call(_Stream([_Delta(Usage(output_tokens=31))], final))
+        msg = self._call(_Stream([_Delta(Usage(output_tokens=31)), SimpleNamespace(type="message_stop")], final))
         self.assertIsNone(reasoning.thinking_tokens(msg))
 
     def test_a_stream_that_cannot_be_iterated_still_returns_the_message(self):
