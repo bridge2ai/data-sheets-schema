@@ -1,0 +1,64 @@
+bundle_md5: 9193c3cbe60b62a2fc0f704a2c4d23a3
+chunks:
+- id: c001
+  status: nothing_relevant
+  reason: >-
+    Concatenation header, input directory listing and table of contents for the bundle itself; states no
+    facts about the dataset.
+- id: c002
+  status: extracted
+  extracted:
+  - slot: addressing_gaps[1].response
+    snippet: "comparing studies and pooling data is challenging due to a lack of existing standards in how voice and other acoustics are measured and collected"
+  - slot: purposes[2].response
+    snippet: "the Bridge2AI-Voice consortium has the goal of establishing an ethically sourced, diverse, and publicly available voice database linked to multimodal health biomarkers"
+  - slot: purposes[2].response
+    snippet: "This extensive and open-access voice database will serve as the foundation for voice AI research"
+- id: c003
+  status: nothing_relevant
+  reason: >-
+    Results and discussion of the feasibility study of the Bridge2AI-Voice data-collection application; it
+    reports app task-completion metrics and participant feedback rather than properties of the released
+    dataset, and that study states that audio data was not collected at that stage of app development.
+- id: c004
+  status: nothing_relevant
+  reason: >-
+    PubMed Central page furniture: data availability boilerplate, article actions, NCBI navigation and site
+    footer.
+- id: c005
+  status: extracted
+  extracted:
+  - slot: addressing_gaps[2].response
+    snippet: "the limited size, quality, and diversity of existing open-source datasets"
+  - slot: addressing_gaps[2].response
+    snippet: "datasets are often private, limiting the ability to audit ML"
+  - slot: purposes[3].response
+    snippet: "our primary deliverable to build a publicly available database of 30 000 human voices"
+  - slot: purposes[3].response
+    snippet: "creating benchmarks of diversity metrics and minimizing risk of algorithmic"
+- id: c006
+  status: extracted
+  extracted:
+  - slot: funders[0].grants[0].grant_number
+    snippet: "Core project number: OT2OD032720"
+  - slot: funders[0].grants[0].notes
+    snippet: "Application ID: 11376382"
+  - slot: funders[0].grants[0].notes
+    snippet: "Award amount: 4660942"
+  - slot: funders[0].grants[0].notes
+    snippet: "Project start: 2022-09-01T00:00:00"
+  - slot: funders[0].grants[0].notes
+    snippet: "Project end: 2026-11-30T00:00:00"
+  - slot: funders[0].grants[0].notes
+    snippet: "Principal investigator: BENSOUSSAN, YAEL EMILIE"
+  - slot: source_caveats
+    snippet: "Project number: 3OT2OD032720-01S3"
+- id: c007
+  status: extracted
+  extracted:
+  - slot: description
+    snippet: "Bridge2AI-Voice is a Precision Public Health grand challenge project funded by the NIH Common Fund Bridge2AI Program."
+  - slot: funders[0].notes
+    snippet: "Bridge2AI-Voice is a Precision Public Health grand challenge project funded by the NIH Common Fund Bridge2AI Program."
+  - slot: purposes[1].response
+    snippet: "we will generate a large multi-institutional, ethically sourced, and diverse voice dataset linked to multimodal health biomarkers to fuel voice AI research"

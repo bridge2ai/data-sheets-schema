@@ -1,0 +1,89 @@
+{
+  "findings": [
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "description",
+      "issue": "The description states the dataset is 'organized around five cohort categories: voice disorders, neurological and neurodegenerative disorders, mood and psychiatric disorders, respiratory disorders, and controls.' No source names controls as one of the five cohort categories. Both PhysioNet 3.1.0 and the project documentation define the five as Voice Disorders, Neurological and Neurodegenerative Disorders, Mood and Psychiatric Disorders, Respiratory disorders, and Pediatric Voice and Speech Disorders; PhysioNet 3.1.0 further says adult participants were selected for 'voice disorders, neurological disorders, mood disorders, and respiratory disorders' (four), with controls an additional recruitment group. Substituting 'controls' for the pediatric category misstates the source taxonomy."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "purposes",
+      "issue": "The fourth purpose states a target of 30,000 human voices (audiomics_white_paper, tier 3; also the IRB sample size of 30,000, tier 2), while project_documentation (tier 2) states the project 'seeks to create a flagship, standardized, and ethically sourced dataset of 10,000 voices' and gives 'Enrollment Count (Anticipated by 2027): 10,000'. The record carries only the 30,000 figure and neither states the 10,000 figure nor records the disagreement in source_caveats, as the disagreement rule requires."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "prohibited_uses",
+      "issue": "All four entries place the prohibition itself in `prohibition_reason` ('The dataset must not be used to attempt to re-identify research participants...', 'Sale of all or part of the data on any media is not permitted...'). The field asks for the reason a use is prohibited, not the prohibition statement. The bundle supplies reasons for at least two of these (protection of participants' rights and interests; keeping future use of the dataset unrestricted in alignment with Open Science principles) that are currently folded into the same sentences."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "conforms_to / conforms_to_standard",
+      "issue": "BIDS v1.9.0 conformance is asserted for the published referent, but the only passage supporting it is the project documentation's Data Pre-Processing section, whose folder listing ('b2ai-voice-audio', 'sub-<participant_id>/ses-.../audio/*.wav') describes the audio-containing dataset, not the feature-only PhysioNet release that is this record's referent. Neither the PhysioNet 3.1.0 nor 3.0.0 release page mentions BIDS. The value is attributed to an artifact other than the one described; if retained it needs a source_caveats note scoping it to the audio distribution and the shared phenotype layout."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators",
+      "issue": "The final Creator entry carries only `notes` ('Over 50 other investigators, clinicians, scholars and trainees contributed...') and names no entity in `principal_investigator` or `affiliations`. A multivalued slot takes one object per distinct entity; this is an object of the correct shape holding none of the structure the class declares. The content is residual commentary and belongs in `notes` or `source_caveats`, not as a Creator."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "regulatory_restrictions.hipaa_compliant",
+      "issue": "Set to `compliant` on the strength of the documentation's 'Does this dataset apply the HIPAA de-identification rules? Yes'. The data_transfer_use_agreement (tier 2) Attachment 2 states the opposite framing for the transferred data: 'The Data is Personally Identifiable Information, as that is defined in OMB Memorandum M-07-16, and not covered under HIPAA, FERPA, or similar laws'. The tension between the two tier-2 sources is unrecorded; either the enum choice or a source_caveats note is needed."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "cleaning_strategies / data_protection_impacts / splits",
+      "issue": "Three objects record the absence of a thing rather than answering the field: cleaning_strategies[0] 'No pre-processing for cleaning the data was performed'; data_protection_impacts[0] 'No analysis of the potential impact of the dataset and its use on data subjects has been conducted'; splits[0] 'There are no predefined recommended data splits'. cleaning_strategies[1] (the audit protocol) and the remainder of splits[0] (users create their own splits) carry substance; the bare negative statements do not."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "machine_annotation_tools",
+      "issue": "b2aiprep and SenseLab are listed as machine annotation tools. The bundle describes them as organizing/preprocessing and audio-processing toolkits ('b2aiprep: organizing and preprocessing the dataset', 'SenseLab: processing audio files for research tasks'), and both are already correctly recorded under preprocessing_strategies. This is content placed in a neighbouring field."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_dates",
+      "issue": "The release_dates list runs 1.1 through 3.1.0 and omits version 1.0, although version_access.versions_available includes '1.0 (published on the Health Data Nexus)' and project_documentation states 'The data was published and made available at the end of November, 2024.' Internal inconsistency between the two slots."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "errata[0].erratum_url",
+      "issue": "Set to https://physionet.org/content/b2ai-voice/3.1.0/, the release landing page, not an erratum document. The bundle contains no erratum URL; the corrections were transcribed from the Release Notes section of that page. The pointer answers 'where the release lives' rather than 'where the correction is documented'."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "tasks[1]",
+      "issue": "The value appends 'including pediatric voice disorders in the companion pediatric release'. The healthsheet sentence it derives from reads '...including vocal pathologies, neurological, psychiatric, respiratory, and pediatric voice disorders' with no reference to a companion release. The clause imports the sibling dataset into a slot describing the referent's own tasks; the pediatric release is already correctly recorded under related_datasets."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "file_collections[1] / file_collections[2]",
+      "issue": "The phenotype and metadata collections carry their full file inventories as prose inside `description` (per-condition diagnosis tables, validated instrument list, task tables, the metadata parquet and its dictionary) while `resources` is left empty, unlike the features collection which enumerates eleven File objects. Structure the schema declares is held as narrative."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subsets",
+      "issue": "Unpopulated although the release ships per-condition partitions as distinct diagnosis tables (airway_stenosis, laryngeal_cancer, parkinsons_disease, control, and fifteen others) and the documentation describes cohort-based recruitment. The partitioning is currently represented only as prose inside subpopulations[1].identification."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "extension_mechanism.extension_details",
+      "issue": "States that others 'may publish a derivative dataset that references the original source, made available under the same conditions'. The source sentence is platform-specific — 'it is possible for others to publish a derivative dataset on the Health Data Nexus which references the original source' — and the record generalizes away the platform without the source_caveats note it applies to the parallel case in `updates`."
+    }
+  ],
+  "summary": "Fourteen findings against the full record; none are fabrications and none require removal of a substantive claim. Four are medium: an unsupported enumeration of the five cohort categories in `description` (controls substituted for the pediatric category); an unrecorded 10,000-vs-30,000 target-size conflict between project_documentation and the white paper/IRB in `purposes`; prohibition statements occupying `prohibition_reason` across all four `prohibited_uses` entries; and BIDS conformance asserted for the feature-only PhysioNet referent on the strength of documentation describing the audio-containing distribution. The remaining ten are low: a Creator object naming no entity, an unreconciled HIPAA-coverage tension with the DUA, three objects that state an absence rather than answering their field, preprocessing tools listed as annotation tools, version 1.0 missing from `distribution_dates` while present in `version_access`, a landing-page URL in `erratum_url`, an interpolated reference to the pediatric release inside `tasks`, file inventories held as prose where `resources` is declared, `subsets` unpopulated despite per-condition tables in the release, and a platform-specific extension route generalized without a caveat. Version discipline is otherwise good: v3.1.0 counts, feature dimensions and recording counts all check against the tier-1 release page, superseded v3.0.0 was not used to settle values, the pediatric dataset is correctly confined to `related_datasets`, and the dataset-level source_caveats already records the principal name-form and figure disagreements between the PhysioNet releases and the project documentation."
+}
