@@ -42,6 +42,71 @@ def _usage_total(u: dict) -> int:
             + u.get("cache_creation_input_tokens", 0) + u.get("output_tokens", 0))
 
 
+def reasoning_measure(usage_by_msg: dict, blocks_by_msg: dict) -> dict:
+    """The transcript's reasoning measure (#1000), flat non-negative integers
+    so `annotate-observed` can validate them like the other totals.
+
+    `output_tokens` per turn is what the estimate subtracts the visible
+    output from — and in an agentic transcript the visible output is mostly
+    tool-call payloads (the Write of the datasheet itself), not text, so
+    `tool_input_chars` is subtracted with `visible_text_chars` (#1011). The
+    API path has no tool calls; there the same subtraction is text only.
+    `thinking_tokens` is the runtime's own count where the transcript
+    carries `usage.output_tokens_details` (recent Claude Code versions; the
+    key is omitted, not zeroed, when no turn has it). Cache-inclusive
+    orchestrator accounting, never to be averaged with `api_usage`.
+    """
+    if not usage_by_msg:
+        return {}
+    output = sum(u.get("output_tokens", 0) or 0 for u in usage_by_msg.values())
+    counted = [((u.get("output_tokens_details") or {}).get("thinking_tokens"))
+               for u in usage_by_msg.values() if isinstance(u.get("output_tokens_details"), dict)]
+    counted = [c for c in counted if isinstance(c, int) and not isinstance(c, bool)]
+    blocks = thinking_chars = visible = tool_input = estimate = 0
+    for mid, u in usage_by_msg.items():
+        parts = blocks_by_msg.get(mid, {})
+        m_visible = sum(chars for kind, chars in parts.values() if kind == "text")
+        m_tool = sum(chars for kind, chars in parts.values() if kind == "tool_use")
+        blocks += sum(1 for kind, _ in parts.values() if kind == "thinking")
+        thinking_chars += sum(chars for kind, chars in parts.values() if kind == "thinking")
+        visible += m_visible
+        tool_input += m_tool
+        # Per message and floored at 0, as the API path's log does per entry
+        # (#1012), so the two subtractions are the same arithmetic.
+        estimate += max(0, (u.get("output_tokens", 0) or 0) - (m_visible + m_tool) // 4)
+    out = {"assistant_turns": len(usage_by_msg), "output_tokens": output,
+           "thinking_blocks": blocks, "thinking_text_chars": thinking_chars,
+           "visible_text_chars": visible, "tool_input_chars": tool_input,
+           "reasoning_tokens_estimate": estimate}
+    if counted:
+        out["thinking_tokens"] = sum(counted)
+        out["turns_with_thinking_tokens"] = len(counted)
+    return out
+
+
+def _block_parts(content: list) -> dict:
+    """Each content block of a transcript line, keyed so the same block seen
+    on two lines of one message counts once and different blocks of one
+    message (the runtime writes one block per line) all count (#1011)."""
+    parts = {}
+    for c in content:
+        kind = c.get("type")
+        if kind in ("thinking", "redacted_thinking"):
+            # Identity: the signature, a redacted block's opaque `data`, or
+            # the text. Two identical text blocks or two id-less identical
+            # tool calls in one message would count once — not a shape this
+            # runtime writes, and a transcript line carries no block index.
+            text = c.get("thinking") or ""
+            parts[("thinking", c.get("signature") or c.get("data") or text)] = ("thinking", len(text))
+        elif kind == "text":
+            text = c.get("text") or ""
+            parts[("text", text)] = ("text", len(text))
+        elif kind == "tool_use":
+            payload = json.dumps(c.get("input") or {}, ensure_ascii=False)
+            parts[("tool_use", c.get("id") or payload)] = ("tool_use", len(payload))
+    return parts
+
+
 def receipt_cross_check(covered: set[int], receipt: Path, manifest: Path) -> dict:
     """Chunks the receipt marks reviewed whose lines the transcript never
     opened (#709). The receipt is the agent's claim; the read windows are
@@ -91,6 +156,10 @@ def observe(transcripts: list[Path], bundle: Path | None,
     agent) is not the run, and the record describes the run.
     """
     usage_by_msg: dict[str, dict] = {}
+    # Per API message, deduplicated like usage (#1000): thinking blocks,
+    # their text length (0 through CBORG and this runtime alike), and the
+    # visible text length the estimate subtracts.
+    blocks_by_msg: dict[str, dict] = {}
     tools = searches = 0
     duration_ms = 0
     read_windows: dict[str, tuple[int, int]] = {}   # tool_use_id -> window
@@ -118,6 +187,8 @@ def observe(transcripts: list[Path], bundle: Path | None,
                     prev = usage_by_msg.get(mid)
                     if prev is None or usage.get("output_tokens", 0) >= prev.get("output_tokens", 0):
                         usage_by_msg[mid] = usage
+                    content = [c for c in msg.get("content") or [] if isinstance(c, dict)]
+                    blocks_by_msg.setdefault(mid, {}).update(_block_parts(content))
                 for c in msg.get("content") or []:
                     if not isinstance(c, dict):
                         continue
@@ -141,6 +212,7 @@ def observe(transcripts: list[Path], bundle: Path | None,
             duration_ms += int((last - first).total_seconds() * 1000)
     total = sum(_usage_total(u) for u in usage_by_msg.values())
     out = {"total_tokens": total, "tool_uses": tools, "duration_ms": duration_ms}
+    out.update(reasoning_measure(usage_by_msg, blocks_by_msg))
     if bundle:
         n_lines = sum(1 for _ in bundle.open(encoding="utf-8"))
         covered = set()

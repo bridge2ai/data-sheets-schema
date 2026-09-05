@@ -25,6 +25,14 @@ record then states that a reasoning block existed, was signed, and was withheld
 — which is a different and more useful claim than silence — and the same code
 captures the real text unchanged if a run is ever pointed at the direct API.
 
+**The count is obtainable** (verified 2026-09-04, #999): CBORG now returns
+`usage.output_tokens_details.thinking_tokens` — in the non-streaming body
+and on the stream's `message_delta` usage — while still withholding the
+text. The SDK's `get_final_message()` accumulates usage without that
+field, so the runner reads it off the delta event and the capture records
+it as `reasoning_tokens_observed` beside the estimate, with the estimate's
+error where both exist. Records before this carry the estimate only.
+
 ## The token estimate
 
 `output_tokens` covers thinking *and* visible text, so when the plaintext is
@@ -58,6 +66,9 @@ class ReasoningCapture:
     text_chars: int = 0
     output_tokens: int | None = None
     stop_reason: str | None = None
+    #: `output_tokens_details.thinking_tokens` as the endpoint reported it
+    #: (#999); None where the endpoint returned no breakdown.
+    thinking_tokens: int | None = None
 
     @property
     def present(self) -> bool:
@@ -84,8 +95,15 @@ class ReasoningCapture:
             "output_tokens": self.output_tokens,
             "visible_text_chars": self.text_chars,
             "reasoning_tokens_estimate": self.reasoning_tokens_estimate,
+            # The endpoint's own count where it gave one (#999), and how far
+            # the estimate was from it: `estimate_error` is estimate minus
+            # observed, positive when the estimate ran high. The estimate
+            # stays for records that predate the count.
+            "reasoning_tokens_observed": self.thinking_tokens,
             "stop_reason": self.stop_reason,
         }
+        if self.thinking_tokens is not None and self.reasoning_tokens_estimate is not None:
+            d["estimate_error"] = self.reasoning_tokens_estimate - self.thinking_tokens
         if self.present and not self.available:
             d["withheld_note"] = (
                 "The endpoint returned a signed but empty thinking block. The "
@@ -123,7 +141,26 @@ def capture(resp) -> ReasoningCapture:
         blocks=blocks,
         text_chars=text_chars,
         output_tokens=getattr(getattr(resp, "usage", None), "output_tokens", None),
-        stop_reason=getattr(resp, "stop_reason", None))
+        stop_reason=getattr(resp, "stop_reason", None),
+        thinking_tokens=thinking_tokens(resp))
+
+
+def thinking_tokens(resp) -> int | None:
+    """`usage.output_tokens_details.thinking_tokens`, however the SDK carries
+    it (#999): a model attribute, a `model_extra` entry, or a plain dict —
+    the runner attaches the stream's delta usage as the last of these."""
+    usage = getattr(resp, "usage", None)
+    if usage is None:
+        return None
+    details = getattr(usage, "output_tokens_details", None)
+    if details is None and isinstance(getattr(usage, "model_extra", None), dict):
+        details = usage.model_extra.get("output_tokens_details")
+    if details is None and isinstance(usage, dict):
+        details = usage.get("output_tokens_details")
+    if details is None:
+        return None
+    value = details.get("thinking_tokens") if isinstance(details, dict) else getattr(details, "thinking_tokens", None)
+    return int(value) if isinstance(value, int) and not isinstance(value, bool) else None
 
 
 def append(path: Path, entry: dict[str, Any]) -> None:
@@ -151,6 +188,8 @@ def summarise(entries: list[dict[str, Any]]) -> dict[str, Any]:
         return {"entries": 0}
     est = [e.get("reasoning_tokens_estimate") for e in entries]
     est = [x for x in est if x is not None]
+    obs = [e.get("reasoning_tokens_observed") for e in entries]
+    obs = [x for x in obs if x is not None]
     return {
         "entries": len(entries),
         "with_reasoning_block": sum(1 for e in entries
@@ -159,6 +198,16 @@ def summarise(entries: list[dict[str, Any]]) -> dict[str, Any]:
                                    if e.get("reasoning_available")),
         "reasoning_tokens_estimate_total": sum(est) or None,
         "reasoning_tokens_estimate_max": max(est) if est else None,
+        # The endpoint's own count (#999): entries that carry one, their
+        # total, and — over the entries that carry both a count and an
+        # estimate, which `with_estimate_error` counts — the summed error,
+        # estimate minus observed.
+        "with_observed_count": len(obs),
+        "reasoning_tokens_observed_total": sum(obs) if obs else None,
+        "with_estimate_error": sum(1 for e in entries if e.get("estimate_error") is not None),
+        "estimate_error_total": (sum(e["estimate_error"] for e in entries
+                                     if e.get("estimate_error") is not None)
+                                 if obs else None),
         "truncated": sum(1 for e in entries
                          if e.get("stop_reason") == "max_tokens"),
     }
@@ -174,19 +223,36 @@ NO_LOG_RUNTIME = "runtime_cannot_capture"
 NO_LOG_PREDATES = "capture_postdates_run"
 NO_LOG_MISSING = "missing"
 HAS_LOG = "present"
+#: An agentic run whose record carries a transcript-derived measure (#1000):
+#: the orchestrator read the subagent's transcript, which records usage per
+#: turn and, from recent runtimes, the thinking token count.
+RECOVERED = "recovered_from_transcript"
+
+#: The `run_observed` keys that make up that measure, written by
+#: `scripts/agentic_observed.py` and `d4d provenance annotate-observed`.
+OBSERVED_REASONING_KEYS = ("assistant_turns", "output_tokens", "thinking_blocks",
+                           "thinking_text_chars", "visible_text_chars", "tool_input_chars",
+                           "reasoning_tokens_estimate", "thinking_tokens",
+                           "turns_with_thinking_tokens")
 
 
-def log_status(runtime: str | None, label: str, log_exists: bool) -> str:
+def log_status(runtime: str | None, label: str, log_exists: bool,
+               observed: dict[str, Any] | None = None) -> str:
     """Why does this run have no reasoning log? (#400)
 
     `d4d provenance reasoning` printed one message for every empty case, which
     conflated three different situations. They are not interchangeable:
 
-    - ``runtime_cannot_capture`` — a Claude Code agentic run. The subagent has
-      no access to its own token accounting, so no log can exist. Writing one
-      carrying only the effort level would be *worse* than writing none: it
-      would look comparable with the API path's and would not be, which is the
-      substitution #400 argues against.
+    - ``recovered_from_transcript`` — a Claude Code agentic run whose
+      ``run_observed`` block carries the transcript-derived measure (#1000):
+      the subagent cannot report its own accounting, but its transcript
+      records usage per turn, signed (empty) thinking blocks, and — from
+      recent runtimes — ``thinking_tokens``. Cache-inclusive runner
+      accounting, one number per run: never averaged with ``api_usage``.
+    - ``runtime_cannot_capture`` — a Claude Code agentic run with no such
+      measure recorded. Writing a log carrying only the effort level would be
+      *worse* than writing none: it would look comparable with the API
+      path's and would not be, which is the substitution #400 argues against.
     - ``capture_postdates_run`` — an API run from before ``CAPTURE_FROM``.
       Unrecoverable, and nobody's fault.
     - ``missing`` — an API run from after capture existed, with no log. That is
@@ -199,6 +265,8 @@ def log_status(runtime: str | None, label: str, log_exists: bool) -> str:
     if log_exists:
         return HAS_LOG
     if (runtime or "").strip().lower() == "claude code":
+        if isinstance(observed, dict) and observed.get("output_tokens") is not None:
+            return RECOVERED
         return NO_LOG_RUNTIME
     if label[:10] < CAPTURE_FROM:
         return NO_LOG_PREDATES

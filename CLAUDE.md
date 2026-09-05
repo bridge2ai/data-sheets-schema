@@ -749,19 +749,35 @@ d4d provenance reasoning --method claudecode_agent --label 2026-07-29_...
 d4d provenance reasoning --path some/log.jsonl
 ```
 
-⚠️ **The agentic path produces no reasoning log at all, and that is a runtime
-limit rather than a gap** (#400). A Claude Code subagent has no access to its
-own token accounting. Writing a log carrying only the effort level would be
-worse than writing none: `d4d provenance reasoning` would then report something
-that looks comparable with the API path's and is not.
+⚠️ **The agentic path writes no reasoning log of its own** (#400): a Claude
+Code subagent has no access to its own token accounting, and a log carrying
+only the effort level would look comparable with the API path's and is not.
+**Its transcript does carry a measure** (#1000, 2026-09-04): usage per turn
+(`output_tokens`), signed thinking blocks (empty in the sampled generation
+transcripts, text in some others — the observer records
+`thinking_text_chars` either way), and — in transcripts written by recent
+Claude Code versions — `usage.output_tokens_details.thinking_tokens`. `scripts/agentic_observed.py`
+now emits `assistant_turns`, `output_tokens`, `thinking_blocks`,
+`thinking_text_chars`, `visible_text_chars`, `tool_input_chars`,
+`reasoning_tokens_estimate` (output tokens minus a 4-chars-per-token
+estimate of the text *and the tool-call payloads*, which in an agentic
+transcript are most of the visible output — the datasheet itself is a
+Write; #1011) and, where any turn carries it, `thinking_tokens` /
+`turns_with_thinking_tokens`; `d4d provenance annotate-observed` records
+them under `phase_log.run_observed`, and `d4d provenance reasoning` reports
+such a run as `recovered_from_transcript`. Cache-inclusive orchestrator
+accounting, one number per run: the same subtraction as the API log's
+estimate, on a runtime whose output is mostly tool payloads, so an upper
+bound rather than a like-for-like figure; never averaged with `api_usage`. Existing agentic records carry the older
+`run_observed` shape until re-annotated from their transcripts.
 
-So the command distinguishes three empty cases rather than printing one message
-for all of them — currently **96 runs whose runtime cannot capture, 6 predating
-capture (before 2026-07-31), 0 missing**:
+So the command distinguishes four empty cases rather than printing one message
+for all of them:
 
 | status | meaning |
 |---|---|
-| `runtime_cannot_capture` | agentic run; no log can exist |
+| `recovered_from_transcript` | agentic run whose `run_observed` carries the transcript's measure |
+| `runtime_cannot_capture` | agentic run with no such measure recorded |
 | `capture_postdates_run` | API run before capture; unrecoverable |
 | `missing` | API run after capture with no log — a **defect**, not a limit |
 
@@ -770,18 +786,23 @@ no log has not spent zero reasoning; it has no measurement. Do not average the
 two, and do not read an absent figure for the agentic arm as a low one.
 
 ⚠️ **Through CBORG the reasoning text is not available.** Verified 2026-07-29 on
-`google/claude-opus-5-high`: the thinking block arrives with a valid
-`signature` and `thinking: ''`, both streaming and non-streaming, and the stream
-emits no `thinking_delta` events at all. The proxy forwards the signed envelope
-and strips the plaintext. The logs therefore record `reasoning_present: true,
-reasoning_available: false` — a deliberately different claim from "no reasoning
-happened". Runs made directly against the Anthropic API (`ANTHROPIC_API_KEY`)
-capture the text with no code change.
+`google/claude-opus-5-high` and again 2026-09-04: the thinking block arrives
+with a valid `signature` and `thinking: ''`, both streaming and non-streaming.
+The proxy forwards the signed envelope and strips the plaintext. The logs
+therefore record `reasoning_present: true, reasoning_available: false` — a
+deliberately different claim from "no reasoning happened". Runs made directly
+against the Anthropic API (`ANTHROPIC_API_KEY`) capture the text with no code
+change.
 
-Because `output_tokens` bills thinking and visible text together,
-`reasoning_tokens_estimate` (output tokens minus a 4-chars-per-token estimate of
-the visible text) is the only surviving measure of reasoning effort when the
-text is withheld. It is sound for comparison, not for cost attribution.
+**The count is available since 2026-09-04** (#999): CBORG returns
+`usage.output_tokens_details.thinking_tokens` in the non-streaming body and
+on the stream's `message_delta` usage. The SDK's `get_final_message()` drops
+it, so the runner reads it off the delta event and each log entry and
+`api_usage` entry carries `reasoning_tokens_observed` / `thinking_tokens`
+beside `reasoning_tokens_estimate` (output tokens minus a 4-chars-per-token
+estimate of the visible text), with `estimate_error` where both exist. The
+estimate stays for the records that predate the count and for comparison
+across them; it is sound for comparison, not for cost attribution.
 
 This is also why `max_tokens` must be sized for the reasoning rather than the
 answer — a call can spend its entire budget thinking and return empty text. See
