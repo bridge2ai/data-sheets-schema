@@ -1494,6 +1494,7 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
         entry.update({
             "input_tokens": getattr(resp.usage, "input_tokens", None),
             "output_tokens": getattr(resp.usage, "output_tokens", None),
+            "thinking_tokens": reasoning.thinking_tokens(resp),
             "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
             "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
             "stop_reason": getattr(resp, "stop_reason", None)})
@@ -2742,6 +2743,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 "seconds": round(time.monotonic() - attempt_t0, 3),
                 "input_tokens": getattr(resp.usage, "input_tokens", None),
                 "output_tokens": getattr(resp.usage, "output_tokens", None),
+                "thinking_tokens": reasoning.thinking_tokens(resp),
                 "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
                 "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
                 "max_tokens": PHASE_MAX_TOKENS.get(ph, DEFAULT_MAX_TOKENS),
@@ -2812,6 +2814,34 @@ def _declared_error_type(exc: Exception) -> str | None:
     return None
 
 
+def _output_tokens_details(usage) -> dict[str, Any] | None:
+    """`output_tokens_details` off a usage object, attribute or extra (#999)."""
+    if usage is None:
+        return None
+    found = getattr(usage, "output_tokens_details", None)
+    if found is None and isinstance(getattr(usage, "model_extra", None), dict):
+        found = usage.model_extra.get("output_tokens_details")
+    if found is None and isinstance(usage, dict):
+        found = usage.get("output_tokens_details")
+    if found is None:
+        return None
+    return dict(found) if isinstance(found, dict) else getattr(found, "model_dump", lambda: None)()
+
+
+def _attach_output_tokens_details(msg, details: dict[str, Any]) -> None:
+    """Put the delta's breakdown on the final message's usage, so
+    `reasoning.thinking_tokens` and the usage entries read one place."""
+    usage = getattr(msg, "usage", None)
+    if usage is None:
+        return
+    try:
+        setattr(usage, "output_tokens_details", details)
+    except (AttributeError, TypeError, ValueError):
+        extra = getattr(usage, "model_extra", None)
+        if isinstance(extra, dict):
+            extra["output_tokens_details"] = details
+
+
 def _call_with_retry(client, *, model, max_tokens, temperature, system, messages,
                      sleep=time.sleep, wall_clock: float | None = None):
     """One API call, retrying transient failures.
@@ -2867,7 +2897,21 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                 try:
                     with client.messages.stream(**kwargs) as stream:
                         holder["stream"] = stream
-                        box["result"] = stream.get_final_message()
+                        # The proxy's thinking-token count rides on the
+                        # `message_delta` usage and `get_final_message()`
+                        # drops it (#999): read it off the events first, and
+                        # hand it to the message the callers see.
+                        details = None
+                        for ev in (stream if hasattr(stream, "__iter__") else ()):
+                            if getattr(ev, "type", None) != "message_delta":
+                                continue
+                            found = _output_tokens_details(getattr(ev, "usage", None))
+                            if found is not None:
+                                details = found
+                        msg = stream.get_final_message()
+                        if details is not None:
+                            _attach_output_tokens_details(msg, details)
+                        box["result"] = msg
                 except BaseException as exc:           # noqa: BLE001 - re-raised on the caller's side
                     box["error"] = exc
 
@@ -3046,6 +3090,7 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
                   "seconds": round(time.monotonic() - t0, 3),
                   "input_tokens": getattr(resp.usage, "input_tokens", None),
                   "output_tokens": getattr(resp.usage, "output_tokens", None),
+                  "thinking_tokens": reasoning.thinking_tokens(resp),
                   "cache_read": getattr(resp.usage,
                                         "cache_read_input_tokens", None),
                   "cache_write": getattr(resp.usage,
@@ -3240,6 +3285,7 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
             "seconds": round(time.monotonic() - attempt_t0, 3),
             "input_tokens": getattr(resp.usage, "input_tokens", None),
             "output_tokens": getattr(resp.usage, "output_tokens", None),
+            "thinking_tokens": reasoning.thinking_tokens(resp),
             "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
             "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
             "max_tokens": phase_max_tokens(spec, ph, settings["max_tokens"]),

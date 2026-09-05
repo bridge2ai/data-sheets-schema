@@ -47,7 +47,13 @@ AGENTIC_PHASES = frozenset({"generate_full", "generate_core", "derive_core",
 # that observed them may record them.
 _OBSERVED_FIELDS = frozenset({"total_tokens", "tool_uses", "duration_ms",
                               "bundle_lines_read", "bundle_lines_total",
-                              "receipt_chunks_total", "receipt_chunks_unopened"})
+                              "receipt_chunks_total", "receipt_chunks_unopened",
+                              # The transcript's reasoning measure (#1000):
+                              # see `reasoning.OBSERVED_REASONING_KEYS`.
+                              "assistant_turns", "output_tokens", "thinking_blocks",
+                              "thinking_text_chars", "visible_text_chars",
+                              "reasoning_tokens_estimate", "thinking_tokens",
+                              "turns_with_thinking_tokens"})
 # receipt_chunks_total / receipt_chunks_unopened (#709): of the chunks the
 # coverage receipt marks reviewed, how many the transcript shows no file-tool
 # window over. The receipt is the agent's claim and the windows are the
@@ -558,7 +564,13 @@ def annotate_observed(project, method, label, run_observed, until):
         "run excludes the gap. bundle_lines_read is the union of the run's "
         "successful file-reading windows over the declared bundle (#700): "
         "lines the run never opened, or opened only in a read that errored, "
-        "may have been reached by search, but nothing attests that."
+        "may have been reached by search, but nothing attests that. "
+        "assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, "
+        "visible_text_chars and reasoning_tokens_estimate are the transcript's "
+        "reasoning measure (#1000), thinking_tokens and "
+        "turns_with_thinking_tokens the runtime's own count where the "
+        "transcript carries usage.output_tokens_details; comparable in kind "
+        "with the API path's reasoning log, never to be averaged with it."
         + (" Cut at run_observed_until: the agent kept acting after its run "
            "completed, and the record describes the run." if until else ""))
     rec = ProvenanceRecord(data=data)
@@ -661,6 +673,7 @@ def reasoning_cmd(method, project, label, path):
     from data_sheets_schema import reasoning as _r
     from data_sheets_schema.provenance import record_path_for
     why: _collections.Counter = _collections.Counter()
+    recovered: list = []
     for candidate in logs:
         proj = candidate.name.replace("_reasoning.jsonl", "")
         run_label = candidate.parent.name
@@ -673,17 +686,45 @@ def reasoning_cmd(method, project, label, path):
                 runtime = (data.get("model") or {}).get("agent_runtime")
             except (_yaml.YAMLError, OSError, UnicodeDecodeError):
                 runtime = None
-        why[_r.log_status(runtime, run_label, candidate.exists())] += 1
+        observed = None
+        if rec.exists():
+            try:
+                observed = ((data.get("phase_log") or {}).get("run_observed")
+                            if isinstance(data, dict) else None)
+            except AttributeError:
+                observed = None
+        status = _r.log_status(runtime, run_label, candidate.exists(), observed)
+        why[status] += 1
+        if status == _r.RECOVERED:
+            recovered.append((proj, run_label, observed))
 
     logs = [p for p in logs if p.exists()]
+    if recovered:
+        # The agentic arm's measure, read from the orchestrator's transcript
+        # observation (#1000): output tokens per run, the runtime's own
+        # thinking count where the transcript carries it, the estimate
+        # otherwise. Cache-inclusive runner accounting — reported apart from
+        # the API path's billed log, never averaged with it.
+        click.echo(f"{len(recovered)} agentic run(s) with a transcript-derived reasoning measure "
+                   "(run_observed; not the runtime's own accounting):")
+        for proj, run_label, obs in recovered:
+            counted = obs.get("thinking_tokens")
+            click.echo(f"   {proj:<9} {run_label}  turns {obs.get('assistant_turns')}  "
+                       f"output_tokens {obs.get('output_tokens')}  thinking blocks {obs.get('thinking_blocks')}  "
+                       + (f"thinking_tokens {counted} ({obs.get('turns_with_thinking_tokens')} turn(s) counted)"
+                          if counted is not None else
+                          f"estimate {obs.get('reasoning_tokens_estimate')} (no thinking_tokens in this transcript)"))
     if not logs:
-        click.echo("No reasoning logs found for the selection.")
+        if not recovered:
+            click.echo("No reasoning logs found for the selection.")
         if why[_r.NO_LOG_RUNTIME]:
-            click.echo(f"   {why[_r.NO_LOG_RUNTIME]} run(s): the Claude Code "
-                       "runtime cannot produce one — a subagent has no access "
-                       "to its own token accounting. Not a gap to fill: a log "
-                       "carrying only the effort level would look comparable "
-                       "with the API path's and would not be (#400).")
+            click.echo(f"   {why[_r.NO_LOG_RUNTIME]} run(s): a Claude Code "
+                       "run with no transcript-derived measure recorded — the "
+                       "subagent cannot report its own accounting, but its "
+                       "transcript can be read (scripts/agentic_observed.py, "
+                       "then `d4d provenance annotate-observed`; #1000). A "
+                       "log carrying only the effort level would look "
+                       "comparable with the API path's and would not be (#400).")
         if why[_r.NO_LOG_PREDATES]:
             click.echo(f"   {why[_r.NO_LOG_PREDATES]} run(s): predate reasoning "
                        f"capture ({_r.CAPTURE_FROM}). Unrecoverable rather "
@@ -693,10 +734,10 @@ def reasoning_cmd(method, project, label, path):
                        "after capture existed, with no log. That is a defect, "
                        "not a limitation.")
         return
-    if why[_r.NO_LOG_RUNTIME] or why[_r.NO_LOG_PREDATES] or why[_r.NO_LOG_MISSING]:
-        click.echo(f"{len(logs)} log(s); "
-                   f"{why[_r.NO_LOG_RUNTIME]} run(s) whose runtime cannot "
-                   f"capture, {why[_r.NO_LOG_PREDATES]} predating capture, "
+    if why[_r.NO_LOG_RUNTIME] or why[_r.NO_LOG_PREDATES] or why[_r.NO_LOG_MISSING] or recovered:
+        click.echo(f"{len(logs)} log(s); {len(recovered)} agentic run(s) recovered from "
+                   f"transcripts, {why[_r.NO_LOG_RUNTIME]} agentic with no measure, "
+                   f"{why[_r.NO_LOG_PREDATES]} predating capture, "
                    f"{why[_r.NO_LOG_MISSING]} missing.")
         click.echo("   A run with no log has not spent zero reasoning; it has "
                    "no measurement. Do not average the two (#400).\n")
