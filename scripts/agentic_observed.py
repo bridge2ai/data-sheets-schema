@@ -92,8 +92,12 @@ def _block_parts(content: list) -> dict:
     for c in content:
         kind = c.get("type")
         if kind in ("thinking", "redacted_thinking"):
+            # Identity: the signature, a redacted block's opaque `data`, or
+            # the text. Two identical text blocks or two id-less identical
+            # tool calls in one message would count once — not a shape this
+            # runtime writes, and a transcript line carries no block index.
             text = c.get("thinking") or ""
-            parts[("thinking", c.get("signature") or text)] = ("thinking", len(text))
+            parts[("thinking", c.get("signature") or c.get("data") or text)] = ("thinking", len(text))
         elif kind == "text":
             text = c.get("text") or ""
             parts[("text", text)] = ("text", len(text))

@@ -219,6 +219,18 @@ class TestTheTranscriptMeasure(unittest.TestCase):
         self.assertTrue(set(reasoning.OBSERVED_REASONING_KEYS) <= _RUN_OBSERVED_FIELDS)
         self.assertFalse(set(reasoning.OBSERVED_REASONING_KEYS) & _OBSERVED_FIELDS)
 
+    def test_redacted_thinking_blocks_are_told_apart_by_their_data(self):
+        mod = _observer()
+        with tempfile.TemporaryDirectory() as tmp:
+            t = Path(tmp) / "agent-x.jsonl"
+            t.write_text("\n".join([
+                _line("2026-09-04T01:00:00Z", "m1", 9, [{"type": "redacted_thinking", "data": "AAA"}]),
+                _line("2026-09-04T01:00:01Z", "m1", 9, [{"type": "redacted_thinking", "data": "BBB"}]),
+                _line("2026-09-04T01:00:02Z", "m1", 9, [{"type": "redacted_thinking", "data": "BBB"}]),
+            ]) + "\n")
+            out = mod.observe([t], None, None, None, None)
+        self.assertEqual(out["thinking_blocks"], 2)
+
     def test_the_estimate_is_floored_per_message_like_the_api_log(self):
         """#1012: two messages of 1 output token and 3 text chars each: 1 + 1, not 2 - 1."""
         mod = _observer()
