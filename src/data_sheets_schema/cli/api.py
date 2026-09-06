@@ -285,8 +285,9 @@ def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
         return
     res = execute(spec)
     for u in res["usage"]:
-        click.echo(f"   {u['phase']:10} in={u['input_tokens']} out={u['output_tokens']} "
-                   f"cache_read={u['cache_read']} cache_write={u['cache_write']}")
+        click.echo(f"   {u['phase']:10} in={u.get('input_tokens')} out={u.get('output_tokens')} "
+                   f"cache_read={u.get('cache_read')} cache_write={u.get('cache_write')}"
+                   + (f"  [{u['outcome']}]" if u.get("outcome") else ""))
 
     problems = res.get("validation_problems") or []
     if problems:
