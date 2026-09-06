@@ -98,6 +98,34 @@ class TestIncompleteEvidence(unittest.TestCase):
         self.assertEqual(len(info["content_sha256"]), 64)
         self.assertEqual(info["usage"]["output_tokens"], 5)
 
+    def test_a_zero_event_close_whose_snapshot_asserts_stays_transient(self):
+        """#1037 review: the SDK's `current_message_snapshot` asserts before message_start."""
+        class _Zero:
+            @property
+            def current_message_snapshot(self):
+                raise AssertionError("no message yet")
+
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+            def __iter__(self): return iter([])
+            def get_final_message(self): raise AssertionError("no message yet")
+        streams = [_Zero(), _Complete()]
+        client = SimpleNamespace(messages=SimpleNamespace(stream=lambda **kw: streams.pop(0)))
+        seen = []
+        msg = _call_with_retry(client, model="m", max_tokens=100, temperature=None, system="s",
+                               messages=[{"role": "user", "content": "q"}], sleep=lambda _: None,
+                               on_incomplete=seen.append)
+        self.assertEqual((msg.stop_reason, seen[0]["events"], seen[0]["content_chars"]), ("end_turn", 0, 0))
+
+    def test_the_usage_row_carries_the_keys_the_consumers_index(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            spec = RunSpec(project="P", arm="", method="m", bundle=Path(tmp) / "b.txt", label="L", out_dir=Path(tmp))
+            usage = []
+            _record_incomplete_stream(spec, "full", 1, "t", {"incomplete": 2, "usage": {"input_tokens": 6349, "output_tokens": 5}}, usage)
+        (row,) = usage
+        self.assertEqual((row["input_tokens"], row["output_tokens"], row["cache_read"], row["cache_write"]), (6349, 5, None, None))
+        self.assertEqual(sum(u.get("input_tokens") or 0 for u in usage), 6349)
+
     def test_a_recorder_that_raises_does_not_make_the_drop_fatal(self):
         streams = [_CutStream(), _Complete()]
         client = SimpleNamespace(messages=SimpleNamespace(stream=lambda **kw: streams.pop(0)))
@@ -144,6 +172,24 @@ class TestOfflineExecuteRecordsTheRun(unittest.TestCase):
             self.assertTrue(rows)
             self.assertEqual([u["phase"] for u in rows if u.get("max_tokens") is None], [])
             self.assertIn("dirty_paths", r["repo"])
+
+    def test_sizes_describe_the_bytes_the_hashes_do_even_when_the_regate_rewrites_the_report(self):
+        import yaml
+
+        from tests.test_download.test_api_runner import FakeClient, spec
+        real_gate = api_runner._gate_report
+
+        def gate_that_rewrites(spec_, *a, **k):
+            out = real_gate(spec_, *a, **k)
+            spec_.report_path.write_text(spec_.report_path.read_text() + "\n\nappended after the gate\n")
+            return out
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(api_runner, "_client", lambda: FakeClient()), \
+             mock.patch.object(api_runner, "_gate_report", gate_that_rewrites):
+            out = Path(tmp) / "out"
+            api_runner.execute(spec(out_dir=out))
+            r = yaml.safe_load((out / "CHORUS_provenance.yaml").read_text())
+            rep = r["outputs"]["report"]
+            self.assertEqual(rep["bytes"], Path(rep["path"]).stat().st_size)
 
 
 if __name__ == "__main__":

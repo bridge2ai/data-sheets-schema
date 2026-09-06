@@ -2867,10 +2867,12 @@ INCOMPLETE_TAIL_CHARS = 2000
 
 def _stream_evidence(stream, events: int, seconds: float) -> dict[str, Any]:
     """What an incomplete stream had delivered, from the SDK's own snapshot."""
-    snap = getattr(stream, "current_message_snapshot", None)
     text = ""
     usage = None
     try:
+        # The SDK's property asserts before `message_start` (a zero-event
+        # close), so even reading it is best effort (#1037 review).
+        snap = getattr(stream, "current_message_snapshot", None)
         if snap is not None:
             text = "".join(getattr(b, "text", "") or "" for b in (getattr(snap, "content", None) or [])
                            if getattr(b, "type", "") == "text")
@@ -3368,11 +3370,17 @@ def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: 
             f"# usage snapshot: {info.get('usage')}\n"
             f"# last {INCOMPLETE_TAIL_CHARS} characters as delivered:\n" + (info.get("tail") or ""))
     path = _snapshot(spec, f"{spec.project}_{ph}_incomplete_attempt{attempt}_{n}.txt", body)
+    snap_usage = info.get("usage") or {}
     usage.append({"phase": ph, "attempt": attempt, "transport_attempt": n, "started_at": started_at,
                   "seconds": info.get("seconds"), "outcome": "stream ended without message_stop (#1013)",
                   "events": info.get("events"), "content_chars": info.get("content_chars"),
                   "content_sha256": info.get("content_sha256"),
-                  "output_tokens": (info.get("usage") or {}).get("output_tokens"),
+                  # The accounting keys every consumer indexes, as the
+                  # snapshot had them (message_start's usage, or nothing).
+                  "input_tokens": snap_usage.get("input_tokens"),
+                  "output_tokens": snap_usage.get("output_tokens"),
+                  "cache_read": snap_usage.get("cache_read_input_tokens"),
+                  "cache_write": snap_usage.get("cache_creation_input_tokens"),
                   "snapshot": str(path)})
 
 
@@ -3907,9 +3915,6 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     else:
         rec.data["repair"] = prior_repair or None
     rec.data["validation"] = validation_block(spec, problems)
-    # Sizes re-read where the hashes are taken — after repair and the regate
-    # have rewritten the files (#1021).
-    provenance.refresh_output_sizes(rec.data)
     if CORE_DERIVED:
         # After repair, for the same reason validation is: repair rewrites the
         # full and re-derives the core, so facts computed earlier would name a
@@ -3988,6 +3993,9 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # (#652).
     rec.data["companions"] = provenance.companion_facts(
         spec.project, spec.method, spec.label, reasoning=_reasoning_path(spec))
+    # Sizes re-read at the last moment — after repair, the report regate and
+    # the companions hash, so they describe the bytes the hashes do (#1021).
+    provenance.refresh_output_sizes(rec.data)
     rec.write(spec.provenance_path)
 
     # Verify what was just written rather than assuming it. The playbook lists a

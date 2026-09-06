@@ -123,6 +123,11 @@ def _write_verdict(res: dict, v: dict, canary_baseline: str, rbasis: dict) -> No
         return
     data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     prior = data.get("canary") if isinstance(data.get("canary"), dict) else None
+    if res.get("already_complete") and prior and prior.get("recorded_by") == "d4d api batch" \
+            and prior.get("status") == v.get("status"):
+        # A re-invocation of a finished canary re-derives the same verdict;
+        # rewriting it would nest the block under itself each time.
+        return
     rec = ProvenanceRecord(data=data)
     rec.data["canary"] = _canary.verdict_block(v, label_prefix=canary_baseline, report_basis_counts=rbasis,
                                                recorded_by="d4d api batch", prior=prior)
@@ -399,9 +404,9 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
                 break
         try:
             res = execute(s)
-            spent_in += sum(u["input_tokens"] or 0 for u in res["usage"])
-            spent_out += sum(u["output_tokens"] or 0 for u in res["usage"])
-            cached = sum(u["cache_read"] or 0 for u in res["usage"])
+            spent_in += sum(u.get("input_tokens") or 0 for u in res["usage"])
+            spent_out += sum(u.get("output_tokens") or 0 for u in res["usage"])
+            cached = sum(u.get("cache_read") or 0 for u in res["usage"])
             note = f"  (resumed, skipped {len(res['skipped'])})" if res["skipped"] else ""
             vp = res.get("validation_problems") or []
             if vp:

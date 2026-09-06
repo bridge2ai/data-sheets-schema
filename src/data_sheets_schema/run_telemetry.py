@@ -352,6 +352,12 @@ def run_telemetry(run_dir: Path, project: str) -> dict[str, Any] | None:
     phases: dict[str, dict[str, Any]] = {}
     for row in rows:
         ph = row.get("phase") or "other"
+        if row.get("outcome"):
+            # An abandoned attempt (#1017) made no call the reasoning log
+            # saw; it must not take the completed call's entry.
+            phases.setdefault(ph, {"phase": ph, "attempts": []})
+            phases[ph]["attempts"].append(_attempt(row, None))
+            continue
         idx = seen_per_phase.get(ph, 0)
         seen_per_phase[ph] = idx + 1
         entries = by_phase_reasoning.get(ph, [])
