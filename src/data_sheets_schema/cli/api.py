@@ -528,7 +528,10 @@ def verdict_cmd(method, label, project, canary_baseline, baseline_method, execut
     data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     # The baseline is searched across every agent family unless named: the
     # record's own method is not the baseline arm's (#1032 review).
-    v = _canary.offline_verdict(data, project, canary_baseline, baseline_method)
+    try:
+        v = _canary.offline_verdict(data, project, canary_baseline, baseline_method)
+    except LookupError as exc:                 # a prefix spanning two families
+        raise click.ClickException(str(exc))
     prior = (data.get("canary") or {}).get("status") if isinstance(data.get("canary"), dict) else None
     click.echo(f"{project} {label}: {v['status']}" + (f" (prior {prior})" if prior else ""))
     for row in v["rows"]:

@@ -114,10 +114,6 @@ class TestTheCorpus(unittest.TestCase):
 
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class TestReviewRound(unittest.TestCase):
     """#1032: what the first cut of the instrument missed."""
 
@@ -129,6 +125,18 @@ class TestReviewRound(unittest.TestCase):
     def test_keys_collide_as_the_loader_constructs_them(self):
         self.assertEqual([d["key"] for d in find_duplicate_keys("true: a\nTrue: b\n")], ["true"])
         self.assertEqual(find_duplicate_keys("1: a\n\"1\": b\n"), [])
+        self.assertEqual([d["lines"] for d in find_duplicate_keys("true: a\n1: b\n1.0: c\n")], [[1, 2, 3]])
+        self.assertEqual(yaml.safe_load("true: a\n1: b\n1.0: c\n"), {True: "c"})
+
+    def test_unscannable_text_claims_nothing(self):
+        self.assertEqual(find_duplicate_keys("a: \0"), [])
+        self.assertEqual(find_duplicate_keys("x: " + "[" * 600 + "0" + "]" * 600), [])
+
+    def test_one_finding_per_extra_occurrence_so_a_partial_merge_is_progress(self):
+        from data_sheets_schema.duplicate_keys import findings
+        three = find_duplicate_keys("a: 1\na: 2\na: 3\n")
+        two = find_duplicate_keys("a: 1\na: 2\n")
+        self.assertEqual((len(findings(three)), len(findings(two))), (2, 1))
         self.assertEqual(find_duplicate_keys("base: &b {x: 1}\nother: &o {y: 2}\nm:\n  <<: *b\n  <<: *o\n  z: 3\n"), [])
         self.assertEqual(yaml.safe_load("m:\n  <<: [{x: 1}, {y: 2}]\n")["m"], {"x": 1, "y": 2})
 
@@ -207,5 +215,9 @@ class TestReviewRound(unittest.TestCase):
         self.assertEqual(same["rows"], v["rows"])
         self.assertEqual(wrong["status"], "unmeasurable")                    # the record's own family is not the baseline's
         self.assertEqual(v["regressions"], ["duplicate keys: 1 against a floor of 0"])
-        self.assertEqual(v["prior_verdict"]["status"], "ok")
+        self.assertEqual(v["prior_verdict"], record["canary"])                   # the whole prior block
         self.assertIn("#1020", v["basis"])
+
+
+if __name__ == "__main__":
+    unittest.main()

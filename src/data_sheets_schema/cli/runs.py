@@ -443,10 +443,12 @@ def check_cmd(method, label, project, strict):
             # carries one is not the record its readers see.
             dk = (((_prov(run.method, run.label, proj) or {}).get("validation") or {})
                   .get("duplicate_keys") or {})
-            if isinstance(dk, dict) and any(dk.values()):
+            if isinstance(dk, dict) and any(isinstance(ds, list) and ds for ds in dk.values()):
                 duplicates.append({"project": proj, "label": run.label,
-                                   "keys": [f"{art}: {d['key']} at {d['path']} (lines {', '.join(map(str, d['lines']))})"
-                                            for art, ds in dk.items() for d in (ds or [])]})
+                                   "keys": [f"{art}: {d.get('key')} at {d.get('path')} "
+                                            f"(lines {', '.join(map(str, d.get('lines') or []))})"
+                                            for art, ds in dk.items() if isinstance(ds, list)
+                                            for d in ds if isinstance(d, dict)]})
             m = prompt_condition_mismatch(run.method, run.label, proj)
             if m:
                 mismatches.append({"project": proj, "label": run.label,
@@ -509,8 +511,9 @@ def check_cmd(method, label, project, strict):
     for r in failed:
         click.echo(f"   ❌ {r['project']:9} {r['label']:44} {r['reason']}")
     click.echo(f"\n{len(rows)} run(s) checked, {len(required)} subject to the "
-               f"requirement, {len(failed)} failing")
-    if not failed:
+               f"requirement, {len(failed) + len(duplicates)} failing"
+               + (f" ({len(duplicates)} for duplicate mapping keys)" if duplicates else ""))
+    if not failed and not duplicates:
         click.echo("All runs subject to the live-provenance requirement satisfy it.")
 
     if unobserved:

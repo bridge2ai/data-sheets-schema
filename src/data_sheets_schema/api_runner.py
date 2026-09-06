@@ -2726,9 +2726,8 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             # finding the model must be told about, and one that must be
             # re-detected before a round is called a success (#1032: the
             # 04f AI_READI repair round kept all three `source_caveats`).
-            from data_sheets_schema.duplicate_keys import describe, duplicate_keys_in
-            dups = duplicate_keys_in(path)
-            errors = list(errors) + ([describe(dups)] if dups else [])
+            from data_sheets_schema.duplicate_keys import duplicate_keys_in, findings
+            errors = list(errors) + findings(duplicate_keys_in(path))
             if not errors:
                 break
 

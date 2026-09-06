@@ -165,7 +165,9 @@ def offline_verdict(record: dict[str, Any], project: str, label_prefix: str,
     v["recorded_by"] = recorded_by
     prior = record.get("canary")
     if isinstance(prior, dict):
-        v["prior_verdict"] = {k: prior.get(k) for k in ("status", "regressions", "recorded_at", "recorded_by")}
+        # The whole prior block: a re-verdict replaces a measurement and must
+        # not shorten what it replaced (#1032 second pass).
+        v["prior_verdict"] = dict(prior)
     return v
 
 

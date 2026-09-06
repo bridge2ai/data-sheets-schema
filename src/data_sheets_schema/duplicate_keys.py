@@ -33,7 +33,9 @@ def _key_identity(loader: yaml.SafeLoader, key_node: Any) -> Any:
     try:
         value = loader.construct_object(key_node, deep=True)
         hash(value)
-        return (type(value).__name__, value)
+        # The value itself, compared as a dict key compares it: `true`, `1`
+        # and `1.0` are one key to the loader, `1` and `"1"` are two.
+        return ("value", value)
     except Exception:                                          # noqa: BLE001
         return ("text", key_node.value)
 
@@ -74,15 +76,20 @@ def find_duplicate_keys(text: str) -> list[dict[str, Any]]:
     (`$` for the top level) and the 1-based lines. `count` is occurrences
     of that key; the gate counts distinct duplicated keys."""
     out: list[dict[str, Any]] = []
-    loader = yaml.SafeLoader(text)
+    # A stream the reader rejects (a NUL byte), a document the composer
+    # rejects (two documents), or one nested past the interpreter's limit
+    # is not scannable here; `safe_load` fails on the same text and the
+    # validator reports that. Nothing is claimed about its keys.
     try:
-        node = loader.get_single_node()
-    except yaml.YAMLError:
-        loader.dispose()
+        loader = yaml.SafeLoader(text)
+    except (yaml.YAMLError, RecursionError):
         return out
     try:
+        node = loader.get_single_node()
         if node is not None:
             _walk(loader, node, "", out, set())
+    except (yaml.YAMLError, RecursionError):
+        return []
     finally:
         loader.dispose()
     out.sort(key=lambda d: d["lines"][0])
@@ -91,6 +98,13 @@ def find_duplicate_keys(text: str) -> list[dict[str, Any]]:
 
 def duplicate_keys_in(path: Path) -> list[dict[str, Any]]:
     return find_duplicate_keys(Path(path).read_text(encoding="utf-8", errors="replace"))
+
+
+def findings(dups: list[dict[str, Any]]) -> list[str]:
+    """One finding per *extra* occurrence, so a repair that merges three
+    copies into two has made progress the convergence rule can see
+    (#1032 second pass)."""
+    return [describe([d]) for d in dups for _ in range(max(1, d["count"] - 1))]
 
 
 def describe(dups: list[dict[str, Any]]) -> str:
