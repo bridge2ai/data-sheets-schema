@@ -615,15 +615,45 @@ def software_facts() -> dict[str, Any]:
     }
 
 
+#: How many dirty paths a record names (#1023): enough to show what differed
+#: from the commit, bounded so a stray data directory cannot bloat a record.
+DIRTY_PATHS_MAX = 50
+
+
 def repo_facts() -> dict[str, Any]:
     dirty = _run(["git", "status", "--porcelain"])
+    lines = dirty.splitlines() if dirty else []
+    # The paths, not only their count (#1023): a record that says `dirty:
+    # true, 13 files` cannot show that the runner code equalled the commit
+    # it names; one that lists `data/.run_locks/x.json`, `aurelian` can.
+    paths = [ln[3:].strip() for ln in lines if len(ln) > 3]
     return {
         "commit": _run(["git", "rev-parse", "HEAD"]),
         "commit_short": _run(["git", "rev-parse", "--short", "HEAD"]),
         "branch": _run(["git", "rev-parse", "--abbrev-ref", "HEAD"]),
         "dirty": bool(dirty),
-        "dirty_file_count": len(dirty.splitlines()) if dirty else 0,
+        "dirty_file_count": len(lines),
+        "dirty_paths": paths[:DIRTY_PATHS_MAX],
+        **({"dirty_paths_truncated": len(paths) - DIRTY_PATHS_MAX} if len(paths) > DIRTY_PATHS_MAX else {}),
     }
+
+
+def refresh_output_sizes(data: dict[str, Any]) -> dict[str, Any]:
+    """Re-read each output artifact's size at the moment the record is
+    written (#1021). `build_record` describes the outputs when the record
+    is first assembled; repair and the report regate then rewrite the files,
+    so every API-path record carried the pre-repair sizes while the hashes
+    (taken after the last phase, #652) matched the files — a mismatch that
+    reads as tampering. Sizes describe, never assert; they should describe
+    the same bytes the hashes do."""
+    outputs = data.get("outputs") or {}
+    for entry in outputs.values():
+        if not isinstance(entry, dict) or not entry.get("path"):
+            continue
+        path = Path(entry["path"])
+        if path.exists():
+            entry["bytes"] = path.stat().st_size
+    return data
 
 
 def declared_schema_version() -> str | None:

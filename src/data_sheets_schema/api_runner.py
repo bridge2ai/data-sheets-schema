@@ -2849,8 +2849,38 @@ class IncompleteStreamError(RuntimeError):
 
     Transient by definition: the connection, not the model, ended the
     response. Retried like a dropped connection, and said, so a resumed
-    phase is not mistaken for a slow one (#779).
+    phase is not mistaken for a slow one (#779). Carries what the stream
+    had delivered (#1017) — `evidence`: events, seconds, the partial text's
+    length and sha256, a bounded tail, the usage snapshot — so a caller can
+    leave it on record.
     """
+
+    def __init__(self, message: str, evidence: dict[str, Any] | None = None) -> None:
+        super().__init__(message)
+        self.evidence = evidence or {}
+
+
+#: How much of a dropped stream's text a snapshot keeps (#1017): enough to
+#: see where it stopped, never the whole (possibly sensitive) body.
+INCOMPLETE_TAIL_CHARS = 2000
+
+
+def _stream_evidence(stream, events: int, seconds: float) -> dict[str, Any]:
+    """What an incomplete stream had delivered, from the SDK's own snapshot."""
+    snap = getattr(stream, "current_message_snapshot", None)
+    text = ""
+    usage = None
+    try:
+        if snap is not None:
+            text = "".join(getattr(b, "text", "") or "" for b in (getattr(snap, "content", None) or [])
+                           if getattr(b, "type", "") == "text")
+            u = getattr(snap, "usage", None)
+            usage = u.model_dump() if hasattr(u, "model_dump") else (dict(u) if isinstance(u, dict) else None)
+    except Exception:                                          # noqa: BLE001 - evidence is best effort
+        pass
+    return {"events": events, "seconds": round(seconds, 1), "content_chars": len(text),
+            "content_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest() if text else None,
+            "tail": text[-INCOMPLETE_TAIL_CHARS:], "usage": usage}
 
 
 def _output_tokens_details(usage) -> dict[str, Any] | None:
@@ -2881,7 +2911,7 @@ def _attach_output_tokens_details(msg, details: dict[str, Any]) -> None:
             extra["output_tokens_details"] = details
 
 
-def _call_with_retry(client, *, model, max_tokens, temperature, system, messages,
+def _call_with_retry(client, *, model, max_tokens, temperature, system, messages, on_incomplete=None,
                      sleep=time.sleep, wall_clock: float | None = None):
     """One API call, retrying transient failures.
 
@@ -2970,7 +3000,8 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                         if iterable and not saw_stop:
                             raise IncompleteStreamError(
                                 f"stream ended without message_stop after {events} event(s) "
-                                f"and {time.monotonic() - t_stream:.0f}s (#1013)")
+                                f"and {time.monotonic() - t_stream:.0f}s (#1013)",
+                                _stream_evidence(stream, events, time.monotonic() - t_stream))
                         msg = stream.get_final_message()
                         # And the message's own word: only `message_delta`
                         # sets `stop_reason`, so a proxy that framed the
@@ -2980,7 +3011,8 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                         if iterable and getattr(msg, "stop_reason", None) is None:
                             raise IncompleteStreamError(
                                 f"stream closed with no stop_reason on the final message after "
-                                f"{events} event(s) and {time.monotonic() - t_stream:.0f}s (#1013)")
+                                f"{events} event(s) and {time.monotonic() - t_stream:.0f}s (#1013)",
+                                _stream_evidence(stream, events, time.monotonic() - t_stream))
                         if details is not None:
                             _attach_output_tokens_details(msg, details)
                         box["result"] = msg
@@ -3047,6 +3079,13 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                 # phase must not be billed five times over on it (#1016).
                 incomplete += 1
                 transient = incomplete <= INCOMPLETE_STREAM_ATTEMPTS
+                if on_incomplete is not None:
+                    # The caller keeps the evidence (#1017); a failure to
+                    # record it must not turn a transient into a fatal.
+                    try:
+                        on_incomplete({"attempt": attempt, "incomplete": incomplete, **exc.evidence})
+                    except Exception as rec_exc:           # noqa: BLE001
+                        print(f"   could not record the incomplete stream: {rec_exc}")
                 print(f"   attempt {attempt} {exc}"
                       + ("; retrying" if transient and attempt < MAX_ATTEMPTS else "; giving up"))
             if not transient or attempt == MAX_ATTEMPTS:
@@ -3171,6 +3210,7 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
                   "input_tokens": getattr(resp.usage, "input_tokens", None),
                   "output_tokens": getattr(resp.usage, "output_tokens", None),
                   "thinking_tokens": reasoning.thinking_tokens(resp),
+                  "max_tokens": PHASE_MAX_TOKENS.get("report", settings["max_tokens"]),
                   "cache_read": getattr(resp.usage,
                                         "cache_read_input_tokens", None),
                   "cache_write": getattr(resp.usage,
@@ -3316,6 +3356,26 @@ def _dependents_of(carry_name: str, produced_by: tuple[str, ...]) -> set[str]:
 
 
 
+def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: str,
+                              info: dict[str, Any], usage: list[dict[str, Any]]) -> None:
+    """Leave a dropped stream on record (#1017): a bounded snapshot under
+    `intermediate/` and an `api_usage` row for the abandoned attempt, so a
+    phase that lost a connection is not indistinguishable from a slow one."""
+    n = int(info.get("incomplete") or 1)
+    body = (f"# incomplete stream — phase {ph}, attempt {attempt}, transport attempt {n} (#1017)\n"
+            f"# events: {info.get('events')}  seconds: {info.get('seconds')}  "
+            f"content_chars: {info.get('content_chars')}  content_sha256: {info.get('content_sha256')}\n"
+            f"# usage snapshot: {info.get('usage')}\n"
+            f"# last {INCOMPLETE_TAIL_CHARS} characters as delivered:\n" + (info.get("tail") or ""))
+    path = _snapshot(spec, f"{spec.project}_{ph}_incomplete_attempt{attempt}_{n}.txt", body)
+    usage.append({"phase": ph, "attempt": attempt, "transport_attempt": n, "started_at": started_at,
+                  "seconds": info.get("seconds"), "outcome": "stream ended without message_stop (#1013)",
+                  "events": info.get("events"), "content_chars": info.get("content_chars"),
+                  "content_sha256": info.get("content_sha256"),
+                  "output_tokens": (info.get("usage") or {}).get("output_tokens"),
+                  "snapshot": str(path)})
+
+
 def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
                     settings: dict[str, Any], usage: list[dict[str, Any]]) -> str:
     """One model phase: build, call with retries, capture reasoning and usage,
@@ -3344,7 +3404,9 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
             max_tokens=phase_max_tokens(spec, ph, settings["max_tokens"]),
             temperature=settings["temperature"],
             system=req.system,
-            messages=req.messages)
+            messages=req.messages,
+            on_incomplete=lambda info, _ph=ph, _at=attempt, _st=attempt_started:
+                _record_incomplete_stream(spec, _ph, _at, _st, info, usage))
 
         text = "".join(b.text for b in resp.content
                        if getattr(b, "type", "") == "text")
@@ -3845,6 +3907,9 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     else:
         rec.data["repair"] = prior_repair or None
     rec.data["validation"] = validation_block(spec, problems)
+    # Sizes re-read where the hashes are taken — after repair and the regate
+    # have rewritten the files (#1021).
+    provenance.refresh_output_sizes(rec.data)
     if CORE_DERIVED:
         # After repair, for the same reason validation is: repair rewrites the
         # full and re-derives the core, so facts computed earlier would name a
