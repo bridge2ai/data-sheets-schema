@@ -124,9 +124,11 @@ def _write_verdict(res: dict, v: dict, canary_baseline: str, rbasis: dict) -> No
     data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     prior = data.get("canary") if isinstance(data.get("canary"), dict) else None
     if res.get("already_complete") and prior and prior.get("recorded_by") == "d4d api batch" \
-            and prior.get("status") == v.get("status"):
-        # A re-invocation of a finished canary re-derives the same verdict;
-        # rewriting it would nest the block under itself each time.
+            and prior.get("status") == v.get("status") and prior.get("rows") == v.get("rows"):
+        # A re-invocation of a finished canary re-derived the same verdict,
+        # row for row; rewriting it would nest the block under itself each
+        # time. A different reading (another baseline, a revised checker)
+        # is written, with the prior kept.
         return
     rec = ProvenanceRecord(data=data)
     source = ("checks recomputed from the artifacts on disk at resume (the record's stored blocks were not rewritten)"

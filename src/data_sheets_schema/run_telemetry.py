@@ -90,6 +90,8 @@ def _attempt(row: dict[str, Any],
     stop = row.get("stop_reason")
     if stop is not None:
         a["stop_reason"] = stop if stop in _STOP_REASONS else "other"
+    if row.get("outcome"):
+        a["outcome"] = str(row["outcome"])                 # an abandoned attempt (#1017)
     if reasoning_entry:
         for src, dst in (("reasoning_tokens_estimate",
                           "reasoning_tokens_estimate"),
@@ -403,7 +405,10 @@ def run_telemetry(run_dir: Path, project: str) -> dict[str, Any] | None:
     timed = [r for r in rows if r.get("seconds") is not None]
     if timed and len(timed) == len(rows):
         basis = "recorded"
-        wall = round(sum(r["seconds"] for r in rows), 1)
+        # An abandoned attempt's seconds lie inside its completed attempt's
+        # window (the attempt timer starts before the retry ladder), so
+        # they are not added again (#1038).
+        wall = round(sum(r["seconds"] for r in rows if not r.get("outcome")), 1)
     elif any(p.get("artifact_written_at") for p in phases.values()):
         basis, wall = "file_mtime", None
     else:

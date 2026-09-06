@@ -2941,6 +2941,7 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
     last: Exception | None = None
     incomplete = 0
     for attempt in range(1, MAX_ATTEMPTS + 1):
+        t_call = time.monotonic()
         try:
             # Streamed, not because we consume tokens incrementally but because
             # the SDK refuses a non-streaming request whose max_tokens implies a
@@ -3086,13 +3087,28 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                 # phase must not be billed five times over on it (#1016).
                 incomplete += 1
                 transient = incomplete <= INCOMPLETE_STREAM_ATTEMPTS
-                if on_incomplete is not None:
-                    # The caller keeps the evidence (#1017); a failure to
-                    # record it must not turn a transient into a fatal.
-                    try:
-                        on_incomplete({"attempt": attempt, "incomplete": incomplete, **exc.evidence})
-                    except Exception as rec_exc:           # noqa: BLE001
-                        print(f"   could not record the incomplete stream: {rec_exc}")
+                evidence = {"attempt": attempt, "incomplete": incomplete,
+                            "outcome": "stream ended without message_stop (#1013)", **exc.evidence}
+            elif transient:
+                # A transport error mid-stream (`RemoteProtocolError`, a
+                # rate limit, a 5xx) abandons a billed request too (#1038
+                # second pass): whatever the stream had delivered is read
+                # off the SDK's snapshot the same way.
+                stream = holder.get("stream")
+                evidence = {"attempt": attempt, "incomplete": incomplete,
+                            "outcome": f"transport error: {type(exc).__name__} (#1017)",
+                            **(_stream_evidence(stream, -1, time.monotonic() - t_call) if stream is not None
+                               else {"events": None, "seconds": round(time.monotonic() - t_call, 1),
+                                     "content_chars": 0, "content_sha256": None, "tail": "", "usage": None})}
+            else:
+                evidence = None
+            if evidence is not None and on_incomplete is not None:
+                # The caller keeps the evidence (#1017); a failure to
+                # record it must not turn a transient into a fatal.
+                try:
+                    on_incomplete(evidence)
+                except Exception as rec_exc:               # noqa: BLE001
+                    print(f"   could not record the abandoned attempt: {rec_exc}")
                 print(f"   attempt {attempt} {exc}"
                       + ("; retrying" if transient and attempt < MAX_ATTEMPTS else "; giving up"))
             if not transient or attempt == MAX_ATTEMPTS:
@@ -3380,11 +3396,12 @@ def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: 
             f"# last {INCOMPLETE_TAIL_CHARS} characters as delivered:\n" + (info.get("tail") or ""))
     path = _snapshot(spec, f"{spec.project}_{ph}_incomplete_attempt{attempt}_{n}.txt", body)
     snap_usage = info.get("usage") or {}
-    usage.append({"phase": ph, "attempt": attempt, "transport_attempt": n,
+    row = {"phase": ph, "attempt": attempt, "transport_attempt": n,
                   # The retry ladder's own count (a rate limit before the cut
                   # advances it; the transport count does not).
                   "ladder_attempt": info.get("attempt"), "started_at": started_at,
-                  "seconds": info.get("seconds"), "outcome": "stream ended without message_stop (#1013)",
+                  "seconds": info.get("seconds"),
+                  "outcome": info.get("outcome") or "stream ended without message_stop (#1013)",
                   "max_tokens": max_tokens,
                   "events": info.get("events"), "content_chars": info.get("content_chars"),
                   "content_sha256": info.get("content_sha256"),
@@ -3394,7 +3411,39 @@ def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: 
                   "output_tokens": snap_usage.get("output_tokens"),
                   "cache_read": snap_usage.get("cache_read_input_tokens"),
                   "cache_write": snap_usage.get("cache_creation_input_tokens"),
-                  "snapshot": str(path)})
+                  "snapshot": str(path)}
+    usage.append(row)
+    # Persisted at once (#1038 second pass): a run whose every retry fails
+    # never reaches the record write, and the row would be lost with it.
+    try:
+        ledger = _abandoned_ledger(spec)
+        ledger.parent.mkdir(parents=True, exist_ok=True)
+        with ledger.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(row, ensure_ascii=False, default=str) + "\n")
+    except OSError as exc:
+        print(f"   could not persist the abandoned attempt: {exc}")
+
+
+def _abandoned_ledger(spec: RunSpec) -> Path:
+    return spec.metadata_dir / f"{spec.project}_abandoned_attempts.jsonl"
+
+
+def merge_abandoned_rows(spec: RunSpec, usage: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Rows the ledger holds that `usage` does not (an earlier invocation's
+    drops, lost with its process), keyed by their snapshot path."""
+    ledger = _abandoned_ledger(spec)
+    if not ledger.exists():
+        return usage
+    have = {u.get("snapshot") for u in usage if u.get("snapshot")}
+    for line in ledger.read_text(encoding="utf-8").splitlines():
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(row, dict) and row.get("snapshot") and row["snapshot"] not in have:
+            usage.append(row)
+            have.add(row["snapshot"])
+    return usage
 
 
 def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
@@ -3883,7 +3932,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             "value": None,
             "reason": settings["temperature_note"],
         }]
-    rec.data["api_usage"] = usage
+    rec.data["api_usage"] = merge_abandoned_rows(spec, usage)
     rec.data["phases_skipped"] = skipped or None
     rec.data["record_generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
 

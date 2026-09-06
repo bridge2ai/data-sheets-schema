@@ -208,3 +208,116 @@ class TestOfflineExecuteRecordsTheRun(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class _TransportCut:
+    """A stream whose connection drops after 40k characters (#1038 second pass)."""
+
+    def __init__(self):
+        self.current_message_snapshot = SimpleNamespace(
+            content=[SimpleNamespace(type="text", text="y" * 40000)], usage=_Usage(), stop_reason=None)
+
+    def __enter__(self): return self
+    def __exit__(self, *a): return False
+
+    def __iter__(self):
+        import httpx
+        yield SimpleNamespace(type="message_start")
+        raise httpx.RemoteProtocolError("peer closed connection without sending complete message body")
+
+    def get_final_message(self): return self.current_message_snapshot
+
+
+class TestTransportErrorEvidence(unittest.TestCase):
+    def test_a_transport_error_mid_stream_is_recorded_like_an_early_close(self):
+        streams = [_TransportCut(), _Complete()]
+        client = SimpleNamespace(messages=SimpleNamespace(stream=lambda **kw: streams.pop(0)))
+        seen = []
+        msg = _call_with_retry(client, model="m", max_tokens=100, temperature=None, system="s",
+                               messages=[{"role": "user", "content": "q"}], sleep=lambda _: None,
+                               on_incomplete=seen.append)
+        self.assertEqual(msg.stop_reason, "end_turn")
+        (info,) = seen
+        self.assertEqual((info["attempt"], info["incomplete"], info["content_chars"]), (1, 0, 40000))
+        self.assertTrue(info["outcome"].startswith("transport error: RemoteProtocolError"))
+        self.assertEqual(info["usage"]["output_tokens"], 5)
+        self.assertIsInstance(info["seconds"], float)
+
+    def test_the_row_carries_the_transport_outcome(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            spec = RunSpec(project="P", arm="", method="m", bundle=Path(tmp) / "b.txt", label="L", out_dir=Path(tmp))
+            usage = []
+            _record_incomplete_stream(spec, "core", 1, "t", {"attempt": 1, "incomplete": 0,
+                                                                "outcome": "transport error: RemoteProtocolError (#1017)"},
+                                      usage)
+        self.assertEqual(usage[0]["outcome"], "transport error: RemoteProtocolError (#1017)")
+
+
+class TestAbandonedRowsPersist(unittest.TestCase):
+    def test_rows_survive_the_process_that_recorded_them(self):
+        """The ledger holds what an earlier invocation dropped; the record write merges it once."""
+        from data_sheets_schema.api_runner import merge_abandoned_rows
+        with tempfile.TemporaryDirectory() as tmp:
+            spec = RunSpec(project="P", arm="", method="m", bundle=Path(tmp) / "b.txt", label="L", out_dir=Path(tmp))
+            first_process: list = []
+            _record_incomplete_stream(spec, "full", 1, "t", {"attempt": 1, "incomplete": 1, "usage": {"output_tokens": 5}},
+                                      first_process)
+            ledger = spec.metadata_dir / "P_abandoned_attempts.jsonl"
+            self.assertTrue(ledger.exists())
+            self.assertEqual(json.loads(ledger.read_text().splitlines()[0])["snapshot"], first_process[0]["snapshot"])
+            # A later invocation resumed the run with an empty in-memory list
+            # and completed a phase of its own.
+            usage = [{"phase": "core", "seconds": 3.0}]
+            merged = merge_abandoned_rows(spec, usage)
+            self.assertEqual([r["phase"] for r in merged], ["core", "full"])
+            self.assertEqual(merged[1]["snapshot"], first_process[0]["snapshot"])
+            # And the row already in memory is not added twice.
+            self.assertEqual(len(merge_abandoned_rows(spec, list(first_process))), 1)
+
+    def test_no_ledger_is_a_no_op(self):
+        from data_sheets_schema.api_runner import merge_abandoned_rows
+        with tempfile.TemporaryDirectory() as tmp:
+            spec = RunSpec(project="P", arm="", method="m", bundle=Path(tmp) / "b.txt", label="L", out_dir=Path(tmp))
+            self.assertEqual(merge_abandoned_rows(spec, [{"phase": "full"}]), [{"phase": "full"}])
+
+
+class TestTelemetryOfAbandonedRows(unittest.TestCase):
+    def _telemetry(self, rows):
+        import yaml
+        from data_sheets_schema.run_telemetry import run_telemetry
+        with tempfile.TemporaryDirectory() as tmp:
+            run_dir = Path(tmp) / "m_core" / "L"
+            run_dir.mkdir(parents=True)
+            (run_dir / "P_provenance.yaml").write_text(yaml.safe_dump(
+                {"run": {"method": "m"}, "model": {}, "api_usage": rows}))
+            return run_telemetry(run_dir, "P")
+
+    def test_the_wall_time_excludes_an_attempt_inside_a_completed_one(self):
+        t = self._telemetry([
+            {"phase": "full", "seconds": 1065.9, "outcome": "stream ended without message_stop (#1013)",
+             "attempt": 1, "input_tokens": 6349, "output_tokens": 5},
+            {"phase": "full", "seconds": 1400.0, "attempt": 1, "input_tokens": 6349, "output_tokens": 9000}])
+        self.assertEqual((t["wall_seconds_estimate"], t["timing_basis"]), (1400.0, "recorded"))
+        attempts = t["phases"][0]["attempts"]
+        self.assertEqual([a.get("outcome", "")[:15] for a in attempts], ["stream ended wi", ""])
+
+
+class TestVerdictRewriteSkip(unittest.TestCase):
+    def _prior(self, rows, status="passed"):
+        return {"recorded_by": "d4d api batch", "status": status, "rows": rows}
+
+    def test_only_an_identical_verdict_is_skipped(self):
+        import yaml
+        from data_sheets_schema.cli.api import _write_verdict
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "P_provenance.yaml"
+            row = {"check": "x", "current": 0, "baseline": 0, "regressed": False}
+            path.write_text(yaml.safe_dump({"canary": self._prior([row])}))
+            res = {"already_complete": True, "outputs": {"provenance": str(path)}}
+            with mock.patch("data_sheets_schema.canary.verdict_block", side_effect=AssertionError("should skip")):
+                _write_verdict(res, {"status": "passed", "rows": [row]}, "B", {})
+            other = {"check": "x", "current": 1, "baseline": 0, "regressed": False}
+            _write_verdict(res, {"status": "passed", "rows": [other]}, "B", {})
+            written = yaml.safe_load(path.read_text())["canary"]
+            self.assertEqual(written["rows"], [other])
+            self.assertEqual(written["prior_verdict"]["rows"], [row])

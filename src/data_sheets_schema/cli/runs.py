@@ -510,7 +510,7 @@ def check_cmd(method, label, project, strict):
     if stale_sizes:
         # Reported, never fatal (#1021): the size describes, the hash attests.
         click.echo(f"\nⓘ  {len(stale_sizes)} record(s) record an output size that is not the file's "
-                   "(sized before the last phase rewrote it, #1021; the hashes are taken after and attest the bytes):")
+                   "(sized before a later phase rewrote it, #1021, or reconstructed; the hashes attest the bytes):")
         for r_ in stale_sizes[:12]:
             click.echo(f"     {r_['project']:9} {r_['label']:44} "
                        + ", ".join(f"{m['artifact']} {m['recorded']}→{m['on_disk']}" for m in r_["mismatches"]))
