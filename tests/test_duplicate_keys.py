@@ -1,8 +1,9 @@
 """Duplicate mapping keys are a validation failure and a gated floor (#1029).
 
-The AI_READI 2026-09-04f full record carried a top-level `source_caveats`
-three times; `yaml.safe_load` kept the last and `validation.passed` read
-true. None of the corpus records on main had a duplicate key.
+The AI_READI 2026-09-04f full record carries a top-level `source_caveats`
+three times; `yaml.safe_load` keeps the last, and until #1030 its
+`validation.passed` read true. It is the one such record in the corpus,
+kept as declared evidence (`passed: false`, the key named) and not retained.
 """
 
 import glob
@@ -99,18 +100,41 @@ class TestValidateOutputs(unittest.TestCase):
         self.assertEqual(block["duplicate_keys"]["core"], [])
 
 
+def _declared_duplicates(artifact: Path) -> list[tuple[str, str, list[int]]]:
+    """What the record's own provenance says about this artifact's duplicate
+    keys: nothing for a record that predates the instrument, else the
+    entries under `validation.duplicate_keys.{full|core}`."""
+    label_dir = artifact.parent
+    project = artifact.name.split("_d4d")[0]
+    kind = "core" if artifact.name.endswith("_d4d_core.yaml") else "full"
+    core_dir = label_dir if label_dir.parent.name.endswith("_core") else \
+        label_dir.parent.parent / f"{label_dir.parent.name}_core" / label_dir.name
+    prov = core_dir / f"{project}_provenance.yaml"
+    if not prov.exists():
+        return []
+    v = (yaml.safe_load(prov.read_text(encoding="utf-8")) or {}).get("validation") or {}
+    if v.get("passed") is not False:
+        return []
+    return [(d["path"], d["key"], d["lines"]) for d in ((v.get("duplicate_keys") or {}).get(kind) or [])]
+
+
 class TestTheCorpus(unittest.TestCase):
-    def test_no_committed_record_has_a_duplicate_key(self):
-        """The floor of 0 is a fact about the corpus; a new record with one fails here as well as at the gate."""
+    def test_no_committed_record_hides_a_duplicate_key(self):
+        """The floor is a fact about the corpus, and a record with a duplicate
+        may sit in it only as declared evidence: its own validation block
+        says `passed: false` and names the key (#1029; the AI_READI
+        2026-09-04f record is the one). An undeclared one fails here as
+        well as at the gate."""
         records = sorted(glob.glob(str(ROOT / "data/d4d_concatenated/claudecode_a*/*/*_d4d*.yaml")))
         if not records:
             self.skipTest("no records on disk")
-        offenders = {}
+        undeclared = {}
         for f in records:
-            d = find_duplicate_keys(Path(f).read_text(encoding="utf-8", errors="replace"))
-            if d:
-                offenders[str(Path(f).relative_to(ROOT))] = [(x["path"], x["key"], x["lines"]) for x in d]
-        self.assertEqual(offenders, {}, "records with duplicate mapping keys (#1029)")
+            found = [(x["path"], x["key"], x["lines"]) for x in
+                     find_duplicate_keys(Path(f).read_text(encoding="utf-8", errors="replace"))]
+            if found and found != _declared_duplicates(Path(f)):
+                undeclared[str(Path(f).relative_to(ROOT))] = found
+        self.assertEqual(undeclared, {}, "records with duplicate mapping keys their provenance does not declare (#1029)")
 
 
 
