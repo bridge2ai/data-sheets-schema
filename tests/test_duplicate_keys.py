@@ -1,8 +1,9 @@
 """Duplicate mapping keys are a validation failure and a gated floor (#1029).
 
-The AI_READI 2026-09-04f full record carried a top-level `source_caveats`
-three times; `yaml.safe_load` kept the last and `validation.passed` read
-true. None of the corpus records on main had a duplicate key.
+The AI_READI 2026-09-04f full record carries a top-level `source_caveats`
+three times; `yaml.safe_load` keeps the last, and until #1030 its
+`validation.passed` read true. It is the one such record in the corpus,
+kept as declared evidence (`passed: false`, the key named) and not retained.
 """
 
 import glob
