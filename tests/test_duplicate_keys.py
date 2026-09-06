@@ -200,8 +200,12 @@ class TestReviewRound(unittest.TestCase):
                                                                                    "lines": [1, 2], "count": 2}],
                                                                          "core": []}},
                       "canary": {"status": "ok", "regressions": [], "recorded_at": "t", "recorded_by": "r"}}
-            v = offline_verdict(record, "P", "v7", "claudecode_agent", Path(tmp))
+            v = offline_verdict(record, "P", "v7", None, Path(tmp))          # every family searched, as the batch does
+            same = offline_verdict(record, "P", "v7", "claudecode_agent", Path(tmp))
+            wrong = offline_verdict(record, "P", "v7", "claudecode_api", Path(tmp))
         self.assertEqual(v["status"], REGRESSED)
+        self.assertEqual(same["rows"], v["rows"])
+        self.assertEqual(wrong["status"], "unmeasurable")                    # the record's own family is not the baseline's
         self.assertEqual(v["regressions"], ["duplicate keys: 1 against a floor of 0"])
         self.assertEqual(v["prior_verdict"]["status"], "ok")
         self.assertIn("#1020", v["basis"])

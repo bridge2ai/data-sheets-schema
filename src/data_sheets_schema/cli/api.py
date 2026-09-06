@@ -503,8 +503,11 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
 @click.option("--label", required=True)
 @click.option("--project", required=True)
 @click.option("--canary-baseline", required=True, help="label prefix of the baseline arm")
+@click.option("--baseline-method", default=None,
+              help="directory family of the baseline arm; by default every agent family is searched, "
+                   "as the batch does (the v7 arm lives under claudecode_agent, a v8 record under claudecode_api)")
 @click.option("--execute", is_flag=True, help="write the canary block; without it, report")
-def verdict_cmd(method, label, project, canary_baseline, execute):
+def verdict_cmd(method, label, project, canary_baseline, baseline_method, execute):
     """The canary gate's verdict for an existing record, offline (#1020/#1032).
 
     What `d4d api batch` prints for a first run, computed after the fact from
@@ -516,13 +519,16 @@ def verdict_cmd(method, label, project, canary_baseline, execute):
     import yaml as _yaml
 
     from data_sheets_schema import canary as _canary
+    from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     from data_sheets_schema.provenance import ProvenanceRecord, record_path_for
+    _require_repo_root_cwd("d4d api verdict")
     path = record_path_for(project, method, label)
     if not path.exists():
         raise click.ClickException(f"no record at {path}")
     data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    base = method[:-5] if method.endswith("_core") else method
-    v = _canary.offline_verdict(data, project, canary_baseline, base)
+    # The baseline is searched across every agent family unless named: the
+    # record's own method is not the baseline arm's (#1032 review).
+    v = _canary.offline_verdict(data, project, canary_baseline, baseline_method)
     prior = (data.get("canary") or {}).get("status") if isinstance(data.get("canary"), dict) else None
     click.echo(f"{project} {label}: {v['status']}" + (f" (prior {prior})" if prior else ""))
     for row in v["rows"]:
@@ -533,6 +539,11 @@ def verdict_cmd(method, label, project, canary_baseline, execute):
     if not execute:
         click.echo("   (report only; --execute writes the block)")
         return
+    if v["unbaselined"] or v["blind"]:
+        # A verdict that could not measure must not replace one that did.
+        raise click.ClickException("refusing to write an unmeasurable verdict: "
+                                   + ", ".join(v["unbaselined"] or v["blind"])
+                                   + " — check the baseline prefix or name --baseline-method")
     rec = ProvenanceRecord(data=data)
     rec.data["canary"] = v
     rec.write(path)
