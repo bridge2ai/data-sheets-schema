@@ -116,3 +116,92 @@ class TestTheCorpus(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestReviewRound(unittest.TestCase):
+    """#1032: what the first cut of the instrument missed."""
+
+    def test_aliases_and_cycles_are_walked_once(self):
+        self.assertEqual(find_duplicate_keys("loop: &loop {self: *loop}\n"), [])
+        shared = "a: &x {k: 1, k: 2}\nb: *x\nc: *x\n"
+        self.assertEqual([(d["path"], d["key"]) for d in find_duplicate_keys(shared)], [("a", "k")])
+
+    def test_keys_collide_as_the_loader_constructs_them(self):
+        self.assertEqual([d["key"] for d in find_duplicate_keys("true: a\nTrue: b\n")], ["true"])
+        self.assertEqual(find_duplicate_keys("1: a\n\"1\": b\n"), [])
+        self.assertEqual(find_duplicate_keys("base: &b {x: 1}\nother: &o {y: 2}\nm:\n  <<: *b\n  <<: *o\n  z: 3\n"), [])
+        self.assertEqual(yaml.safe_load("m:\n  <<: [{x: 1}, {y: 2}]\n")["m"], {"x": 1, "y": 2})
+
+    def test_the_repair_round_is_told_about_a_duplicate_and_checks_it_again(self):
+        from types import SimpleNamespace
+        from unittest import mock
+
+        from data_sheets_schema import api_runner
+        from data_sheets_schema.api_runner import RunSpec, _repair_invalid
+        prompts = []
+
+        class _Client:
+            class messages:
+                @staticmethod
+                def stream(**kw):
+                    prompts.append(kw)
+                    body = ("```yaml\n# repaired\nid: doi:10.1/x\ntitle: T\nname: n\ndescription: d\n"
+                            "keywords: [a]\nsource_caveats: a; b\n```")
+
+                    class _S:
+                        def __enter__(self): return self
+                        def __exit__(self, *a): return False
+                        def __iter__(self): return iter([SimpleNamespace(type="message_stop")])
+                        def get_final_message(self):
+                            return SimpleNamespace(content=[SimpleNamespace(type="text", text=body)],
+                                                   usage=SimpleNamespace(input_tokens=1, output_tokens=1,
+                                                                         cache_read_input_tokens=0,
+                                                                         cache_creation_input_tokens=0),
+                                                   stop_reason="end_turn")
+                    return _S()
+        with tempfile.TemporaryDirectory() as tmp:
+            spec = RunSpec(project="P", arm="", method="m", bundle=Path(tmp) / "b.txt", label="L",
+                           out_dir=Path(tmp))
+            spec.full_path.write_text("id: doi:10.1/x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+                                      "source_caveats: a\nsource_caveats: b\n")
+            spec.core_path.write_text("id: doi:10.1/x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n")
+            usage = []
+            with mock.patch.object(api_runner, "_validator_lines", lambda *a, **k: ([], None)), \
+                 mock.patch.object(api_runner, "CORE_DERIVED", False), \
+                 mock.patch.object(api_runner, "_reasoning_path", lambda s: Path(tmp) / "r.jsonl"), \
+                 mock.patch.object(api_runner, "_snapshot", lambda *a, **k: None), \
+                 mock.patch.object(api_runner.time, "sleep", lambda *_: None):
+                log = _repair_invalid(spec, _Client(), {"name": "m", "temperature": None}, usage)
+            self.assertEqual(len(prompts), 1, log)
+            sent = str(prompts[0]["messages"])
+            self.assertIn("duplicate mapping key", sent)
+            self.assertIn("`source_caveats` at $ on lines 6, 7", sent)
+            self.assertEqual(find_duplicate_keys(spec.full_path.read_text()), [])
+            self.assertTrue(any("validates" in str(e.get("outcome", "")) or e.get("findings") for e in log), log)
+
+    def test_the_method_base_strips_a_core_suffix(self):
+        from data_sheets_schema.provenance import record_path_for
+        self.assertEqual(record_path_for("P", "claudecode_api_core", "L").parts[-3:],
+                         record_path_for("P", "claudecode_api", "L").parts[-3:])
+
+    def test_the_offline_verdict_reads_the_record_and_keeps_the_prior_block(self):
+        from data_sheets_schema.canary import offline_verdict
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp) / "claudecode_agent_core" / "v7_rep1"
+            base.mkdir(parents=True)
+            (base / "P_provenance.yaml").write_text(yaml.safe_dump({
+                "pair_consistency": {"ran": True, "errors": 0},
+                "report_claims": {"checked": True, "claims_checked": 2, "findings": []},
+                "grounding": {"ran": True, "distinct": {"absent": 0}, "findings": []},
+                "form": {"ran": True, "organisational_fragments": 0, "undeclared_prefix_occurrences": 0,
+                         "british_spellings": 3}}))
+            record = {**{k: v for k, v in yaml.safe_load((base / "P_provenance.yaml").read_text()).items()},
+                      "validation": {"passed": False, "duplicate_keys": {"full": [{"path": "$", "key": "x",
+                                                                                   "lines": [1, 2], "count": 2}],
+                                                                         "core": []}},
+                      "canary": {"status": "ok", "regressions": [], "recorded_at": "t", "recorded_by": "r"}}
+            v = offline_verdict(record, "P", "v7", "claudecode_agent", Path(tmp))
+        self.assertEqual(v["status"], REGRESSED)
+        self.assertEqual(v["regressions"], ["duplicate keys: 1 against a floor of 0"])
+        self.assertEqual(v["prior_verdict"]["status"], "ok")
+        self.assertIn("#1020", v["basis"])

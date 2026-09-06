@@ -493,7 +493,15 @@ def recheck_validation(method, label, project, execute):
     if not path.exists():
         raise click.ClickException(f"no record at {path}")
     from pathlib import Path as _P
-    spec = RunSpec(project=project, arm="", method=method, bundle=_P(""), label=label)
+    # The record lives under `{method}_core`; the artifacts under `{method}`
+    # and `{method}_core`. A `_core` suffix names the record's directory,
+    # not the method (#1032).
+    base = method[:-5] if method.endswith("_core") else method
+    spec = RunSpec(project=project, arm="", method=base, bundle=_P(""), label=label)
+    missing = [str(q) for q in (spec.full_path, spec.core_path) if not q.exists()]
+    if missing and execute:
+        raise click.ClickException("refusing to write a verdict over a missing artifact: "
+                                   + ", ".join(missing))
     problems = validate_outputs(spec)
     block = validation_block(spec, problems, recorded_by="d4d provenance recheck-validation")
     data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}

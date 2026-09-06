@@ -137,6 +137,38 @@ PREDICTION_METRICS = {
 }
 
 
+def checks_from_record(record: dict[str, Any]) -> dict[str, Any]:
+    """The `checks` mapping the batch gate reads, taken from a record's own
+    blocks — the same keys the runner passes at run end."""
+    return {"pair": record.get("pair_consistency"), "validation": record.get("validation"),
+            "report": record.get("report_claims"), "grounding": record.get("grounding"),
+            "form": record.get("form"), "receipts": record.get("receipts")}
+
+
+def offline_verdict(record: dict[str, Any], project: str, label_prefix: str,
+                    method: str | None = None, concat_dir: Path | None = None,
+                    recorded_by: str = "d4d api verdict") -> dict[str, Any]:
+    """The gate's verdict for one record, computed after the fact from its own
+    check blocks with the gate's functions (#1020/#1032): what the batch
+    prints, as a block the record can carry. A prior `canary` block is kept
+    under `prior_verdict`, so a re-verdict under a revised instrument shows
+    what it replaced.
+    """
+    from datetime import datetime, timezone
+    bar = baseline_for(project, label_prefix, method, concat_dir)
+    basis = report_basis(project, label_prefix, method, concat_dir)
+    v = verdict(checks_from_record(record), bar, baseline_requested=True, report_basis=basis)
+    v["basis"] = (f"offline verdict from this record's own check blocks against the per-project worst of "
+                  f"{label_prefix!r} with the gate's functions, including the #684 report basis "
+                  f"({basis}); the batch writes no verdict block of its own (#1020)")
+    v["recorded_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    v["recorded_by"] = recorded_by
+    prior = record.get("canary")
+    if isinstance(prior, dict):
+        v["prior_verdict"] = {k: prior.get(k) for k in ("status", "regressions", "recorded_at", "recorded_by")}
+    return v
+
+
 def duplicate_key_count(validation: dict[str, Any] | None) -> int:
     """Duplicated mapping keys across the full and core records, as the
     validation block recorded them (#1029)."""

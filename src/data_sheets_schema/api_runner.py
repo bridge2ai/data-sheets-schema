@@ -1903,6 +1903,16 @@ def validate_outputs(spec: RunSpec) -> list[dict[str, str]]:
         if not path.exists():
             problems.append({"artifact": str(path), "error": "missing"})
             continue
+        # A duplicated mapping key is invisible to the loader-based
+        # validator — `safe_load` keeps the last value and validates that —
+        # and to every reader of the parsed record (#1029). Read off the
+        # text first, so a validator that could not run still leaves the
+        # duplicate on record (#1032), and a failure like any other, so the
+        # repair round is told what to merge.
+        from data_sheets_schema.duplicate_keys import describe, duplicate_keys_in
+        dups = duplicate_keys_in(path)
+        if dups:
+            problems.append({"artifact": str(path), "class": cls, "error": describe(dups)})
         lines, failure = _validator_lines(path, schema, cls)
         if failure is not None:
             problems.append({"artifact": str(path),
@@ -1911,15 +1921,6 @@ def validate_outputs(spec: RunSpec) -> list[dict[str, str]]:
         if lines:
             problems.append({"artifact": str(path), "class": cls,
                              "error": " | ".join(lines[:4])})
-        # A duplicated mapping key is invisible to the loader-based
-        # validator — `safe_load` keeps the last value and validates that —
-        # and to every reader of the parsed record (#1029). Read off the
-        # text, and a failure like any other, so the repair round is told
-        # what to merge.
-        from data_sheets_schema.duplicate_keys import describe, duplicate_keys_in
-        dups = duplicate_keys_in(path)
-        if dups:
-            problems.append({"artifact": str(path), "class": cls, "error": describe(dups)})
     return problems
 
 
@@ -2721,6 +2722,13 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 log.append({"phase": ph, "round": rnd,
                             "outcome": f"validator did not run: {failure}"})
                 break
+            # The validator reads the last-wins parse; a duplicated key is a
+            # finding the model must be told about, and one that must be
+            # re-detected before a round is called a success (#1032: the
+            # 04f AI_READI repair round kept all three `source_caveats`).
+            from data_sheets_schema.duplicate_keys import describe, duplicate_keys_in
+            dups = duplicate_keys_in(path)
+            errors = list(errors) + ([describe(dups)] if dups else [])
             if not errors:
                 break
 
