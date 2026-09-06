@@ -542,9 +542,12 @@ and gated against a floor of 0 as a count of distinct duplicated keys
 (none of the 270 full records of the model-written arms, nor their
 cores, had one); the repair round is told what to merge like any other
 validation failure, `d4d provenance recheck-validation` brings an earlier
-record under the instrument, and `d4d api verdict` re-verdicts it
+record under the instrument, `d4d api verdict` re-verdicts it
 offline with the gate's own functions, keeping the prior block under
-`prior_verdict`.
+`prior_verdict`, and `d4d runs check` reports such records without
+failing `--strict`, which gates attestation, not validity (#1035). The
+AI_READI 2026-09-04f record is the one such record in the corpus:
+declared invalid by its own block, kept as evidence, not retained.
 
 ## Receipt paths after reconciliation (#899)
 

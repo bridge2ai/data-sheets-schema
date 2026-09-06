@@ -502,8 +502,14 @@ def check_cmd(method, label, project, strict):
 
     failed = [r for r in rows if not r["ok"]]
     if duplicates:
-        click.echo(f"\n❌ {len(duplicates)} record(s) carry duplicate mapping keys (#1029) — "
-                   "a standard loader keeps only the last value:")
+        # Reported like drift and vacuity, never fatal here (#1035): `--strict`
+        # gates attestation — a record that has no provenance, no pinned
+        # prompt, no request. A duplicate key is a defect the record's own
+        # validation block already states (`passed: false`), the canary
+        # gates it, and the record stays usable evidence of the defect.
+        click.echo(f"\nⓘ  {len(duplicates)} record(s) carry duplicate mapping keys (#1029) — "
+                   "a standard loader keeps only the last value; INVALID by their own "
+                   "validation block, reported and not fatal:")
         for d in duplicates:
             for k in d["keys"]:
                 click.echo(f"     {d['project']:9} {d['label']:44} {k}")
@@ -511,9 +517,9 @@ def check_cmd(method, label, project, strict):
     for r in failed:
         click.echo(f"   ❌ {r['project']:9} {r['label']:44} {r['reason']}")
     click.echo(f"\n{len(rows)} run(s) checked, {len(required)} subject to the "
-               f"requirement, {len(failed) + len(duplicates)} failing"
-               + (f" ({len(duplicates)} for duplicate mapping keys)" if duplicates else ""))
-    if not failed and not duplicates:
+               f"requirement, {len(failed)} failing"
+               + (f"; {len(duplicates)} with duplicate mapping keys (reported)" if duplicates else ""))
+    if not failed:
         click.echo("All runs subject to the live-provenance requirement satisfy it.")
 
     if unobserved:
@@ -788,7 +794,7 @@ def check_cmd(method, label, project, strict):
             click.echo(f"   {mark} {r['project']:9} {r['label']:44} "
                        f"{r['status']}: {r['reason']}")
 
-    if strict and (failed or bad_requests or never_pinned or duplicates):
+    if strict and (failed or bad_requests or never_pinned):
         raise SystemExit(1)
 
 
