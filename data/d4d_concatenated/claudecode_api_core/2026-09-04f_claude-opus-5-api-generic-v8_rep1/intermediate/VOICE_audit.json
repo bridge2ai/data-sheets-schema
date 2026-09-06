@@ -1,0 +1,95 @@
+{
+  "findings": [
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "ethical_reviews[1].reviewing_organization",
+      "issue": "\"Bridge2AI-Voice ethics working group\" names a body the bundle never names. The documentation attests only a published memorandum on ethical justification for controlled access and that \"sensitive fields were removed ... identified by a team of ethicists\"; neither states a named reviewing organization, and neither describes an ethical review or institutional oversight event. The entry converts documentation and an unnamed team into a review by an invented body."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "at_risk_populations.at_risk_groups_included",
+      "issue": "Asserted false, which the bundle does not support and the record's own content works against: the adult cohorts include cognitive impairment, Alzheimer's/other dementia and mood/psychiatric diagnoses, and the IRB protocol lists \"Obtaining Signed Assent for Children or Adults Unable to Consent\" among the consent options and notes that mood-cohort questions \"can lead to possible discomfort and could trigger negative emotions.\" The boolean states a conclusion no source draws; the supporting text placed in special_protections concerns pediatric exclusion only."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "conforms_to / conforms_to_standard",
+      "issue": "BIDS v1.9.0 is attributed to this release, but the passage supporting it (\"The raw audio files and the questionnaire data ... were converted to be compliant with the Brain Imaging Data Structure v1.9.0\") describes the b2ai-voice-audio artifact, whose documented layout is dataset_description.json / phenotype / sub-<id>/ses-<id>/audio. The referent released at PhysioNet 3.1.0 has a features / metadata / phenotype layout, as the record's own file_collections state. A standard claimed for a differently-structured artifact, and internally inconsistent with file_collections."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "data_governance.committee_contact",
+      "issue": "A Person-ranged slot holds an office: name \"Bridge2AI-Voice Data Access Compliance Office\", with a minted id of the form <record-id>#person-daco-access-committee. The fragment asserts a person where the sources give only a committee mailbox (DACO@b2ai-voice.org), and the object's own notes concede \"The sources name an office rather than an individual.\" The mailbox belongs in a governance contact field; no individual is attested."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "ethical_reviews[0].contact_person",
+      "issue": "Yael Bensoussan is given as the contact person for the USF IRB review. The bundle attests her as principal investigator and corresponding author, not as the contact for the ethical review; the attribution is inferred."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "at_risk_populations.guardian_consent",
+      "issue": "The value opens \"Not applicable to this cohort\" — a statement that the field does not apply rather than an answer to it, followed by protocol language about pediatric participants who are excluded from this referent. Omit the key instead."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "preprocessing_strategies[7]",
+      "issue": "The BIDS-conversion step carries the same scoping defect as conforms_to: the cited passage describes preparation of the raw audio dataset, not the processing chain that produced the released features, metadata and phenotype tables. The entry's own source_caveats acknowledges the mismatch instead of resolving it."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subsets",
+      "issue": "Emitted as an empty list. An empty multivalued slot carries no information and is indistinguishable in effect from omission while reading as a populated slot; omit it."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[15].description / creators[15].source_caveats",
+      "issue": "\"the version 3.1.0 release credits roughly 120 named authors\" and \"approximately 120 names\" are counts the record obtained by enumerating the PhysioNet author list. No source states any author total. A figure the record computes must be marked as its own computation with the input named, not stated as something the release credits."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "updates.frequency",
+      "issue": "\"Semi-annual\" states a plan as a present cadence. The supporting passage is prospective — \"further versions of the dataset will be released on a semi-annual (twice a year) basis\" — and appears in documentation written against an earlier release and against the Health Data Nexus platform. The update_details field tenses it correctly; the scalar does not."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "prohibited_uses[0].prohibition_reason, prohibited_uses[1].prohibition_reason",
+      "issue": "Both values state what is forbidden (\"Attempting to re-identify research participants ... is not permitted\"; \"Any purpose that could foreseeably cause harm or stigmatization ... is not permitted\") rather than why it is forbidden. Entry [2] does supply a reason, so the slot is used two ways within one list."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "related_datasets[*].target_dataset",
+      "issue": "Identifier form varies within a single slot: bare DOI strings (\"10.13026/k81f-qr68\", \"10.13026/h995-bt35\", \"10.21437/Interspeech.2024-1926\") alongside a resolver URL (https://www.synapse.org/Synapse:syn72370534/). One naming convention should govern the slot so that targets are matchable."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_formats[2].format",
+      "issue": "The Parquet entry omits `format` and carries the format name only inside prose, while the sibling TSV and JSON entries populate `format` and `media_type`. Nothing in the schema digest constrains DistributionFormat.format to an enum, so the omission is inconsistency rather than necessity."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_protection_impacts",
+      "issue": "Omitted although the documentation answers the question directly: \"Has an analysis of the potential impact of the dataset and its use on data subjects been conducted? No.\" This is an attested governance answer rather than mere absence of evidence; if the record declines to carry a negative finding here it should be consistent with how other explicit negatives (export controls, third-party IP restrictions, confidential elements) are carried."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "last_updated_on",
+      "issue": "Set to the version 3.1.0 publication date. No source states a modification date for the release; the value duplicates `issued` by inference."
+    }
+  ],
+  "summary": "Fifteen findings against the full record, none high severity. Four medium: an invented reviewing organization in ethical_reviews; an unsupported and internally contradicted at_risk_groups_included=false; a BIDS conformance claim scoped to the raw-audio artifact rather than the released features/phenotype/metadata layout, which conflicts with the record's own file_collections; and an office placed in a Person-ranged governance contact with a minted #person- fragment. The remaining eleven are low: an inferred IRB contact person, a 'not applicable' non-answer in guardian_consent, the BIDS step repeated in preprocessing_strategies, an empty subsets list, an uncredited derived author count (~120), a plan stated as present cadence in updates.frequency, prohibition statements occupying prohibition_reason, inconsistent target_dataset identifier forms, an inconsistently populated distribution_formats entry, an omitted attested negative DPIA answer, and last_updated_on inferred from issued. Strengths worth preserving: per-feature record counts are transcribed rather than totaled, with the record explicitly declining to compute a sum; version, award-identifier and platform disagreements between the documentation and PhysioNet are recorded in source_caveats rather than silently resolved; the pediatric release and raw audio are held in related_datasets rather than folded into the referent; and enum-valued slots (bias_type, limitation_type, collection_type, maintainer role, data_use_permission) all draw on defined members."
+}
