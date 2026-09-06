@@ -1,0 +1,107 @@
+{
+  "findings": [
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "known_biases[2].mitigation_strategy",
+      "issue": "States that AI-READI 'tailored' recruitment materials and 'used' a personalized, participatory approach. The BMJ Open protocol paper attributes these to strategies that 'Researchers have identified' in the literature for encouraging Black men to participate; it does not state that AI-READI adopted them. The bundle supports only the conditional second clause ('If sample balancing on race/ethnicity emerges as a challenge, we will implement new recruitment strategies'). The first clause is an unsupported assertion of practice."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "sensitive_elements[0].sensitive_elements_present",
+      "issue": "Set to false on the healthsheet answer alone. The RO-Crate (tier 1, equal rank to the FAIRhub API that carries the healthsheet) states rai:personalSensitiveInformation as ['EHR','Wearable Monitoring','ECG','Environmental Sensor','Continuous glucose monitor','Wearable accelerometer'] for this release. Two equally ranked tier-1 sources disagree; the ranking cannot decide, so both should be represented and the disagreement recorded in source_caveats. The RO-Crate enumeration appears nowhere in the record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "prohibited_uses[0..6].prohibition_reason",
+      "issue": "Six of the seven entries place the prohibition itself in prohibition_reason ('Sharing or distributing the Data with any third-party model vendor...', 'Removing, obscuring, altering or masking the static watermarking...') rather than the reason the use is prohibited. Only entry 0 supplies a reason ('as the Data are intended solely as a research resource'). Each entry should state the rationale the license or healthsheet gives — protection of Data Subjects, security obligations, Licensor's reserved IP — with the prohibition text carried in notes."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "related_datasets[2].target_dataset",
+      "issue": "Value is the prose phrase 'AI-READI mini-subset of version 3.0.0'. target_dataset is a required scalar reference and should carry an identifier for the referent. The bundle attests the child dataset only as FAIRhub API data.child = 4 and the page note 'A smaller version is available for pipeline development'; no DOI or URL for it is stated. Either derive an identifier the bundle attests or move the description to notes and drop the relationship."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_formats[4]",
+      "issue": "An entry with neither format nor media_type populated, carrying only commentary that 'The schema's format and media_type enumerations do not include a DICOM value.' The object records no distribution format; it is meta-commentary about the schema occupying a list position. Belongs in source_caveats on the slot's parent rather than as a DistributionFormat entry."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "external_resources[4].external_resources",
+      "issue": "The Nature Metabolism title is given as 'AI-READI: rethinking AI data collection, preparation and sharing in diabetes research and beyond' (the tier-3 publication text and BMJ reference list). The RO-Crate (tier 1) gives a different title for the same DOI: 'AI-READI: rethinking data collection, preparation and sharing for propelling AI-based discoveries in diabetes research and beyond.' The higher-ranked source's form was not preferred and the disagreement is not recorded."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "maintainers[0].role",
+      "issue": "Enum value 'academic_institution' is a mapping the bundle does not support. The healthsheet states only that 'The AI-READI team will be supporting and maintaining the dataset. The dataset is hosted on FAIRhub through Microsoft Azure.' The maintaining body is a multi-institution consortium hosted on a platform run by the FAIR Data Innovations Hub / California Medical Innovations Institute. 'other' fits the evidence, or the slot should be omitted."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "regulatory_restrictions.hipaa_compliant",
+      "issue": "Enum value 'compliant' is this record's mapping from deIdentHIPAA=true and 'we checked that no identifiable data per US HIPAA were present'. No source asserts HIPAA compliance as a status. The sibling source_caveats explains the mapping for confidentiality_level only; the hipaa_compliant mapping is undeclared."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[0].affiliations[0]",
+      "issue": "ROR:01yc7t268 (Washington University in St. Louis) is recorded as an affiliation of the creator 'AI-READI Consortium'. The bundle attests WashU as FAIRhub managingOrganization, study leadSponsor and license Licensor — none of which is an affiliation of the consortium. The relationship asserted is not the one the sources state."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[0].notes; creators[0].principal_investigator.notes; data_governance.accountable_organization.notes",
+      "issue": "Entity names ('AI-READI Consortium', 'Aaron Lee, MD', 'Washington University in St. Louis') are carried as prose inside notes together with source commentary about how each source described the entity. The identity and the commentary are conflated in one field; the commentary belongs in the sibling source_caveats, leaving notes to carry the name alone."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "ip_restrictions.restrictions[0]",
+      "issue": "The entry closes with 'The healthsheet states that questions about third-party IP-based restrictions and about export controls or other regulatory restrictions are answered by reference to the license.' This points to where an answer lives rather than stating a restriction; the substantive license terms preceding it already answer the field. Move to source_caveats."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "preprocessing_strategies[7]",
+      "issue": "Static watermarking of the distributed data is a dissemination and security control, not a preprocessing step applied to the raw data. The same fact is already carried at participant_privacy.privacy_techniques and regulatory_restrictions.regulatory_restrictions, where it answers the field asked."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "intended_uses[2]",
+      "issue": "'Methodological demonstration of AI-ready clinical data preparation' with examples citing reuse of the project's blueprint, standards, Zenodo community and GitHub organization. The Nature Metabolism source describes these as outputs of the project shared for other Data Generation Projects to follow, not as uses of this dataset. The entry describes a use of the project's methodology rather than of the data."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "future_use_impacts[2].impact_details",
+      "issue": "The second half ('Multiple devices were included for one measure to enhance generalizability... and device make, model and scan modality were documented to ensure repeatability') states design mitigations already recorded under collection_mechanisms, not an anticipated impact of future use. Only the first clause answers the field."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "extension_mechanism",
+      "issue": "Omitted, although the healthsheet maintenance section answers the question directly: 'No, currently there is no mechanism for others to extend or augment the AI-READI dataset outside of those who are involved in the project.' A closed contribution model is a substantive answer to what mechanisms exist, distinguishable from an unanswered field; the omission is defensible but the evidence supports populating extension_details."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subpopulations[1].distribution; subpopulations[2].distribution",
+      "issue": "Both entries set subpopulation_elements_present to false while populating distribution with participant counts. As written the object asserts both that the subpopulation is not identified in the data and that its distribution is known. The explanatory notes resolve it, but the two structured fields read as contradictory; the aggregate counts are a documentation-level fact about the README split table rather than a distribution present in the released data."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "description; version_access.version_details",
+      "issue": "The v3 documentation page (tier 2) states 'This documentation is associated with v3.0 of the dataset, which contains data from the participants of the pilot study phase', contradicting the FAIRhub API and README (tier 1) figure of 2,280 participants collected 19 July 2023 to 1 May 2025. The record correctly follows the tier-1 sources but does not record the disagreement, though it records comparable conflicts elsewhere."
+    }
+  ],
+  "summary": "Seventeen findings against the full record: four medium, thirteen low; no high-severity defects and no evidence of prior-D4D factual reuse. The four medium findings are one unsupported attribution of practice (known_biases[2].mitigation_strategy asserts AI-READI adopted recruitment strategies the source attributes to the literature), one unrecorded tier-1 conflict (the RO-Crate's rai:personalSensitiveInformation enumeration is absent and contradicts sensitive_elements_present=false, with both sources at equal rank), one field-mismatch explicitly within scope (prohibited_uses entries carry the prohibition rather than the reason), and one shape defect (related_datasets[2].target_dataset holds prose where a scalar identifier is required). The low findings cluster around three patterns: enum and mapping values inferred rather than attested (maintainers[0].role, regulatory_restrictions.hipaa_compliant), values answering a neighbouring field or drifting from their slot's subject (preprocessing_strategies[7], intended_uses[2], future_use_impacts[2], ip_restrictions trailing pointer, the empty DistributionFormat entry), and unrecorded lower-order source disagreements (Nature Metabolism title, docs v3 'pilot study phase'). Verified sound: every quantitative value traces to the bundle — the nine file_collections file counts and byte sizes match the FAIRhub API exactly, the split table counts reconcile across train/validation/test to the stated totals, and the two derived figures (root metadata file_count of 9; the 419,614-byte residual) are correctly computed, correctly labelled as this record's own arithmetic, and carry their inputs. All identifiers (ROR:01yc7t268, ROR for NIH in prose, ORCID:0000-0002-7452-1648, the three FAIRhub DOIs, grant numbers) are attested in the bundle; none was supplied from outside it. Plans and forward-looking statements — the 4,000-participant target, the year-4 follow-up, tribal consultation, the biorepository, annual re-release — are consistently framed in the source's own tense and kept out of the dataset's current-state slots, and the record correctly declines to populate data_protection_impacts, errata, labeling_strategies and annotation_analyses where the only available answer would have been a statement of absence."
+}
