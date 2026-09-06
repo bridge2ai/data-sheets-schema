@@ -726,9 +726,11 @@ canary:
   blind: []
   unbaselined: []
   regressions: []
-  basis: 'offline write of the verdict the batch gate printed at 2026-09-05T21:1xZ and fanned out on,
-    recomputed from this record''s own check blocks against the v7 production per-project worst with the
-    gate''s functions, including the #684 report basis (v7 VOICE: 3 vacuous, 0 measured → floor 0). The
-    batch writes no verdict block of its own (#1020).'
+  basis: 'offline write of the verdict the batch gate printed after the run''s last phase (report_regate;
+    the phase timings sum to about 2026-09-05T21:24Z from the full phase''s 20:33:39Z start) and fanned
+    out on (the batch log''s line `canary ok — fanning out`), recomputed from this record''s own check
+    blocks against the v7 production per-project worst with the gate''s functions, including the #684
+    report basis (v7 VOICE: 3 vacuous, 0 measured → floor 0). The batch writes no verdict block of its
+    own (#1020).'
   recorded_at: '2026-09-05T21:28:16+00:00'
   recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-05
