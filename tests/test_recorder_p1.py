@@ -30,12 +30,12 @@ class TestOutputSizes(unittest.TestCase):
 
 class TestRepoFacts(unittest.TestCase):
     def test_dirty_paths_are_named_and_bounded(self):
-        porcelain = "\n".join([" M src/a.py", "?? data/.run_locks/x.json"] + [f"?? f{i}" for i in range(60)])
+        porcelain = "\n".join([" M src/a.py", "?? notes/scratch.md"] + [f"?? f{i}" for i in range(60)])
         with mock.patch.object(provenance, "_run", lambda args: porcelain if "status" in args else "abc"):
             facts = provenance.repo_facts()
         self.assertTrue(facts["dirty"])
         self.assertEqual(facts["dirty_file_count"], 62)
-        self.assertEqual(facts["dirty_paths"][:2], ["src/a.py", "data/.run_locks/x.json"])
+        self.assertEqual(facts["dirty_paths"][:2], ["src/a.py", "notes/scratch.md"])
         self.assertEqual(len(facts["dirty_paths"]), provenance.DIRTY_PATHS_MAX)
         self.assertEqual(facts["dirty_paths_truncated"], 12)
         with mock.patch.object(provenance, "_run", lambda args: "" if "status" in args else "abc"):
@@ -121,9 +121,12 @@ class TestIncompleteEvidence(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             spec = RunSpec(project="P", arm="", method="m", bundle=Path(tmp) / "b.txt", label="L", out_dir=Path(tmp))
             usage = []
-            _record_incomplete_stream(spec, "full", 1, "t", {"incomplete": 2, "usage": {"input_tokens": 6349, "output_tokens": 5}}, usage)
+            _record_incomplete_stream(spec, "full", 1, "t", {"attempt": 2, "incomplete": 1,
+                                                                "usage": {"input_tokens": 6349, "output_tokens": 5}},
+                                      usage, max_tokens=128000)
         (row,) = usage
         self.assertEqual((row["input_tokens"], row["output_tokens"], row["cache_read"], row["cache_write"]), (6349, 5, None, None))
+        self.assertEqual((row["max_tokens"], row["ladder_attempt"], row["transport_attempt"]), (128000, 2, 1))
         self.assertEqual(sum(u.get("input_tokens") or 0 for u in usage), 6349)
 
     def test_a_recorder_that_raises_does_not_make_the_drop_fatal(self):
@@ -153,6 +156,17 @@ class TestIncompleteEvidence(unittest.TestCase):
                          ("full", 2, 1, "stream ended without message_stop", 5))
 
 
+class TestStaleSizesReport(unittest.TestCase):
+    def test_a_size_that_is_not_the_files_is_reported_and_a_matching_one_is_not(self):
+        from data_sheets_schema.runs import stale_output_sizes
+        with tempfile.TemporaryDirectory() as tmp:
+            f = Path(tmp) / "full.yaml"; f.write_text("id: x\n")
+            rec = {"outputs": {"full": {"path": str(f), "bytes": 6}, "core": {"path": str(f), "bytes": 3},
+                               "report": {"path": str(Path(tmp) / "missing.md"), "bytes": 9}, "reasoning": None}}
+            out = stale_output_sizes(rec)
+        self.assertEqual(out, [{"artifact": "core", "recorded": 3, "on_disk": 6}])
+
+
 class TestOfflineExecuteRecordsTheRun(unittest.TestCase):
     """Through the runner's own offline path: every usage row carries its cap and
     the recorded sizes are the files' sizes at write (#1021, #1023)."""
@@ -168,9 +182,9 @@ class TestOfflineExecuteRecordsTheRun(unittest.TestCase):
             for name, entry in (r.get("outputs") or {}).items():
                 if isinstance(entry, dict) and entry.get("path"):
                     self.assertEqual(entry["bytes"], Path(entry["path"]).stat().st_size, name)
-            rows = [u for u in r["api_usage"] if "outcome" not in u]
+            rows = r["api_usage"]
             self.assertTrue(rows)
-            self.assertEqual([u["phase"] for u in rows if u.get("max_tokens") is None], [])
+            self.assertEqual([u["phase"] for u in rows if u.get("max_tokens") is None], [])   # abandoned rows too
             self.assertIn("dirty_paths", r["repo"])
 
     def test_sizes_describe_the_bytes_the_hashes_do_even_when_the_regate_rewrites_the_report(self):

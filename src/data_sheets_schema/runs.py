@@ -771,6 +771,21 @@ def check_provenance(method: str, label: str, project: str,
             "required": required, "ok": ok, "reason": reason}
 
 
+def stale_output_sizes(record: dict) -> list[dict]:
+    """Output entries whose recorded size is not the file's size (#1021):
+    every API-path record before the fix described its outputs before
+    repair and the regate rewrote them. Reported, never fatal — the hashes
+    are what attest the bytes; the size only describes them."""
+    out = []
+    for name, entry in (record.get("outputs") or {}).items():
+        if not isinstance(entry, dict) or not entry.get("path") or entry.get("bytes") is None:
+            continue
+        p = Path(entry["path"])
+        if p.exists() and p.stat().st_size != entry["bytes"]:
+            out.append({"artifact": name, "recorded": entry["bytes"], "on_disk": p.stat().st_size})
+    return out
+
+
 def _prov(method: str, label: str, project: str,
           concat_dir: Path = CONCAT_DIR) -> dict | None:
     import yaml as _yaml

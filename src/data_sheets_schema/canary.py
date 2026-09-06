@@ -165,13 +165,16 @@ def offline_verdict(record: dict[str, Any], project: str, label_prefix: str,
 
 
 def verdict_block(v: dict[str, Any], *, label_prefix: str, report_basis_counts: dict[str, int] | None,
-                  recorded_by: str, prior: dict[str, Any] | None = None) -> dict[str, Any]:
+                  recorded_by: str, prior: dict[str, Any] | None = None,
+                  checks_source: str = "this record's own check blocks") -> dict[str, Any]:
     """The verdict as a record block (#1020): what the gate acted on, with
     its basis and who wrote it. The batch writes this at the gate; the
-    offline command writes the same shape after the fact."""
+    offline command writes the same shape after the fact. `checks_source`
+    says where the checks came from — a resumed run's are recomputed from
+    the artifacts and its stored blocks are not rewritten (#1038)."""
     from datetime import datetime, timezone
     out = dict(v)
-    out["basis"] = (f"verdict from this record's own check blocks against the per-project worst of "
+    out["basis"] = (f"verdict from {checks_source} against the per-project worst of "
                     f"{label_prefix!r} with the gate's functions, including the #684 report basis "
                     f"({report_basis_counts})")
     out["recorded_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")

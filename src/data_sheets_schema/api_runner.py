@@ -1484,7 +1484,9 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
         rreq = build_readdress(req, response_text, unresolved)
         resp = _call_with_retry(client, model=settings["name"], max_tokens=cap_tokens,
                                 temperature=settings["temperature"],
-                                system=rreq.system, messages=rreq.messages)
+                                system=rreq.system, messages=rreq.messages,
+                                on_incomplete=lambda info: _record_incomplete_stream(
+                                    spec, "full_readdress", 1, started, info, usage, max_tokens=cap_tokens))
         text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
         cap = reasoning.capture(resp)
         reasoning.append(_reasoning_path(spec),
@@ -2746,7 +2748,10 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                     client, model=settings["name"],
                     max_tokens=PHASE_MAX_TOKENS.get(ph, DEFAULT_MAX_TOKENS),
                     temperature=settings["temperature"],
-                    system=req.system, messages=req.messages)
+                    system=req.system, messages=req.messages,
+                    on_incomplete=lambda info, _ph=ph, _rnd=rnd, _st=attempt_started:
+                        _record_incomplete_stream(spec, _ph, _rnd, _st, info, usage,
+                                                  max_tokens=PHASE_MAX_TOKENS.get(_ph, DEFAULT_MAX_TOKENS)))
             except Exception as exc:                   # noqa: BLE001
                 # A dead repair call must not take down a run that would
                 # otherwise report invalid-but-complete, as before repair
@@ -3198,7 +3203,10 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
             max_tokens=PHASE_MAX_TOKENS.get("report", settings["max_tokens"]),
             temperature=(settings["temperature"]
                          if settings["temperature_applies"] else None),
-            system=req.system, messages=req.messages)
+            system=req.system, messages=req.messages,
+            on_incomplete=lambda info: _record_incomplete_stream(
+                spec, phase, 1, started, info, usage,
+                max_tokens=PHASE_MAX_TOKENS.get("report", settings["max_tokens"])))
     except Exception:                                          # noqa: BLE001
         return False                # a stale report is better than none
     text = "".join(getattr(b, "text", "") for b in getattr(resp, "content", [])
@@ -3359,7 +3367,8 @@ def _dependents_of(carry_name: str, produced_by: tuple[str, ...]) -> set[str]:
 
 
 def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: str,
-                              info: dict[str, Any], usage: list[dict[str, Any]]) -> None:
+                              info: dict[str, Any], usage: list[dict[str, Any]],
+                              max_tokens: int | None = None) -> None:
     """Leave a dropped stream on record (#1017): a bounded snapshot under
     `intermediate/` and an `api_usage` row for the abandoned attempt, so a
     phase that lost a connection is not indistinguishable from a slow one."""
@@ -3371,8 +3380,12 @@ def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: 
             f"# last {INCOMPLETE_TAIL_CHARS} characters as delivered:\n" + (info.get("tail") or ""))
     path = _snapshot(spec, f"{spec.project}_{ph}_incomplete_attempt{attempt}_{n}.txt", body)
     snap_usage = info.get("usage") or {}
-    usage.append({"phase": ph, "attempt": attempt, "transport_attempt": n, "started_at": started_at,
+    usage.append({"phase": ph, "attempt": attempt, "transport_attempt": n,
+                  # The retry ladder's own count (a rate limit before the cut
+                  # advances it; the transport count does not).
+                  "ladder_attempt": info.get("attempt"), "started_at": started_at,
                   "seconds": info.get("seconds"), "outcome": "stream ended without message_stop (#1013)",
+                  "max_tokens": max_tokens,
                   "events": info.get("events"), "content_chars": info.get("content_chars"),
                   "content_sha256": info.get("content_sha256"),
                   # The accounting keys every consumer indexes, as the
@@ -3414,7 +3427,8 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
             system=req.system,
             messages=req.messages,
             on_incomplete=lambda info, _ph=ph, _at=attempt, _st=attempt_started:
-                _record_incomplete_stream(spec, _ph, _at, _st, info, usage))
+                _record_incomplete_stream(spec, _ph, _at, _st, info, usage,
+                                          max_tokens=phase_max_tokens(spec, _ph, settings["max_tokens"])))
 
         text = "".join(b.text for b in resp.content
                        if getattr(b, "type", "") == "text")

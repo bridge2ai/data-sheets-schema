@@ -129,8 +129,10 @@ def _write_verdict(res: dict, v: dict, canary_baseline: str, rbasis: dict) -> No
         # rewriting it would nest the block under itself each time.
         return
     rec = ProvenanceRecord(data=data)
+    source = ("checks recomputed from the artifacts on disk at resume (the record's stored blocks were not rewritten)"
+              if res.get("already_complete") else "this record's own check blocks")
     rec.data["canary"] = _canary.verdict_block(v, label_prefix=canary_baseline, report_basis_counts=rbasis,
-                                               recorded_by="d4d api batch", prior=prior)
+                                               recorded_by="d4d api batch", prior=prior, checks_source=source)
     rec.write(path)
 
 
