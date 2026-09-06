@@ -423,6 +423,8 @@ def check_cmd(method, label, project, strict):
     mismatches = []
     requests = []
     uncanonical = []
+    duplicates = []
+    from data_sheets_schema.runs import _prov
     for run in discover():
         if run.is_core or run.deterministic:
             continue
@@ -436,6 +438,17 @@ def check_cmd(method, label, project, strict):
             if not is_complete(run.method, run.label, proj):
                 continue
             rows.append(check_provenance(run.method, run.label, proj))
+            # Duplicate mapping keys the validation block recorded (#1029):
+            # a standard loader keeps only the last, so a record that
+            # carries one is not the record its readers see.
+            dk = (((_prov(run.method, run.label, proj) or {}).get("validation") or {})
+                  .get("duplicate_keys") or {})
+            if isinstance(dk, dict) and any(isinstance(ds, list) and ds for ds in dk.values()):
+                duplicates.append({"project": proj, "label": run.label,
+                                   "keys": [f"{art}: {d.get('key')} at {d.get('path')} "
+                                            f"(lines {', '.join(map(str, d.get('lines') or []))})"
+                                            for art, ds in dk.items() if isinstance(ds, list)
+                                            for d in ds if isinstance(d, dict)]})
             m = prompt_condition_mismatch(run.method, run.label, proj)
             if m:
                 mismatches.append({"project": proj, "label": run.label,
@@ -488,12 +501,19 @@ def check_cmd(method, label, project, strict):
             unobserved[entry.get("field") or "unnamed"] += 1
 
     failed = [r for r in rows if not r["ok"]]
+    if duplicates:
+        click.echo(f"\n❌ {len(duplicates)} record(s) carry duplicate mapping keys (#1029) — "
+                   "a standard loader keeps only the last value:")
+        for d in duplicates:
+            for k in d["keys"]:
+                click.echo(f"     {d['project']:9} {d['label']:44} {k}")
     required = [r for r in rows if r["required"]]
     for r in failed:
         click.echo(f"   ❌ {r['project']:9} {r['label']:44} {r['reason']}")
     click.echo(f"\n{len(rows)} run(s) checked, {len(required)} subject to the "
-               f"requirement, {len(failed)} failing")
-    if not failed:
+               f"requirement, {len(failed) + len(duplicates)} failing"
+               + (f" ({len(duplicates)} for duplicate mapping keys)" if duplicates else ""))
+    if not failed and not duplicates:
         click.echo("All runs subject to the live-provenance requirement satisfy it.")
 
     if unobserved:
@@ -768,7 +788,7 @@ def check_cmd(method, label, project, strict):
             click.echo(f"   {mark} {r['project']:9} {r['label']:44} "
                        f"{r['status']}: {r['reason']}")
 
-    if strict and (failed or bad_requests or never_pinned):
+    if strict and (failed or bad_requests or never_pinned or duplicates):
         raise SystemExit(1)
 
 

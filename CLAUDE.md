@@ -534,6 +534,17 @@ gated (#763; ~2% on the v7 API canaries): support holds, attribution
 precision is its own number. When false, the
 block is not a metric for that run: earlier arms and the API arm before v7
 (#710) wrote none, and "no receipt" from them is not a measurement.
+**Duplicate mapping keys** (#1029) are a validation failure read off the
+record's text — `safe_load` keeps the last value and validates that, so
+the AI_READI 2026-09-04f record's three top-level `source_caveats`
+passed as one — recorded under `validation.duplicate_keys` per artifact
+and gated against a floor of 0 as a count of distinct duplicated keys
+(none of the 270 full records of the model-written arms, nor their
+cores, had one); the repair round is told what to merge like any other
+validation failure, `d4d provenance recheck-validation` brings an earlier
+record under the instrument, and `d4d api verdict` re-verdicts it
+offline with the gate's own functions, keeping the prior block under
+`prior_verdict`.
 
 ## Receipt paths after reconciliation (#899)
 

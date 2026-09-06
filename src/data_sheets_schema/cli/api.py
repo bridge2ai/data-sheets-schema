@@ -498,6 +498,61 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
         sys.exit(1)
 
 
+@api.command("verdict")
+@click.option("--method", required=True)
+@click.option("--label", required=True)
+@click.option("--project", required=True)
+@click.option("--canary-baseline", required=True, help="label prefix of the baseline arm")
+@click.option("--baseline-method", default=None,
+              help="directory family of the baseline arm; by default every agent family is searched, "
+                   "as the batch does (the v7 arm lives under claudecode_agent, a v8 record under claudecode_api)")
+@click.option("--execute", is_flag=True, help="write the canary block; without it, report")
+def verdict_cmd(method, label, project, canary_baseline, baseline_method, execute):
+    """The canary gate's verdict for an existing record, offline (#1020/#1032).
+
+    What `d4d api batch` prints for a first run, computed after the fact from
+    the record's own check blocks with the gate's functions — to bring a run
+    under a revised instrument (re-run `recheck-validation` or
+    `backfill-checks` first) or to record a verdict the batch printed and did
+    not write. A prior block is kept under `prior_verdict`.
+    """
+    import yaml as _yaml
+
+    from data_sheets_schema import canary as _canary
+    from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+    from data_sheets_schema.provenance import ProvenanceRecord, record_path_for
+    _require_repo_root_cwd("d4d api verdict")
+    path = record_path_for(project, method, label)
+    if not path.exists():
+        raise click.ClickException(f"no record at {path}")
+    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    # The baseline is searched across every agent family unless named: the
+    # record's own method is not the baseline arm's (#1032 review).
+    try:
+        v = _canary.offline_verdict(data, project, canary_baseline, baseline_method)
+    except LookupError as exc:                 # a prefix spanning two families
+        raise click.ClickException(str(exc))
+    prior = (data.get("canary") or {}).get("status") if isinstance(data.get("canary"), dict) else None
+    click.echo(f"{project} {label}: {v['status']}" + (f" (prior {prior})" if prior else ""))
+    for row in v["rows"]:
+        mark = "❌" if row.get("regressed") else "  "
+        click.echo(f"   {mark} {row['metric']:24} {row['run']} vs baseline worst {row['baseline_worst']}")
+    for line in v["regressions"] or v["blind"] or v["unbaselined"]:
+        click.echo(f"   {line}", err=True)
+    if not execute:
+        click.echo("   (report only; --execute writes the block)")
+        return
+    if v["unbaselined"] or v["blind"]:
+        # A verdict that could not measure must not replace one that did.
+        raise click.ClickException("refusing to write an unmeasurable verdict: "
+                                   + ", ".join(v["unbaselined"] or v["blind"])
+                                   + " — check the baseline prefix or name --baseline-method")
+    rec = ProvenanceRecord(data=data)
+    rec.data["canary"] = v
+    rec.write(path)
+    click.echo(f"   wrote {path}")
+
+
 @api.command("status")
 def api_status_cmd():
     """Which sweeps are running, and under what pid (#513).

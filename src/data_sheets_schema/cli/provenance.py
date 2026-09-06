@@ -470,6 +470,56 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
         f"needs its --method too (the {{METHOD}} substitution differs).")
 
 
+@provenance.command('recheck-validation')
+@click.option('--method', required=True)
+@click.option('--label', required=True)
+@click.option('--project', required=True)
+@click.option('--execute', is_flag=True, help='write the record; without it, report')
+def recheck_validation(method, label, project, execute):
+    """Re-run validation on a record's files and rewrite its `validation` block (#1029).
+
+    Validation is bound to bytes, so re-running it is a legitimate act: the
+    block records the artifacts' md5s and the schema digests it was reached
+    against, and `recorded_by` names this command. Used to bring a record
+    under an instrument revision — duplicate-key detection — without
+    touching anything else in the record.
+    """
+    _require_repo_root_cwd("d4d provenance recheck-validation")
+    import yaml as _yaml
+
+    from data_sheets_schema.api_runner import RunSpec, validate_outputs, validation_block
+    from data_sheets_schema.provenance import record_path_for
+    path = record_path_for(project, method, label)
+    if not path.exists():
+        raise click.ClickException(f"no record at {path}")
+    from pathlib import Path as _P
+    # The record lives under `{method}_core`; the artifacts under `{method}`
+    # and `{method}_core`. A `_core` suffix names the record's directory,
+    # not the method (#1032).
+    base = method[:-5] if method.endswith("_core") else method
+    spec = RunSpec(project=project, arm="", method=base, bundle=_P(""), label=label)
+    missing = [str(q) for q in (spec.full_path, spec.core_path) if not q.exists()]
+    if missing and execute:
+        raise click.ClickException("refusing to write a verdict over a missing artifact: "
+                                   + ", ".join(missing))
+    problems = validate_outputs(spec)
+    block = validation_block(spec, problems, recorded_by="d4d provenance recheck-validation")
+    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    prior = data.get("validation") or {}
+    from data_sheets_schema.canary import duplicate_key_count
+    click.echo(f"{project} {label}: passed {prior.get('passed')} → {block['passed']}; "
+               f"duplicate keys {duplicate_key_count(prior) if 'duplicate_keys' in prior else 'unmeasured'} → "
+               f"{duplicate_key_count(block)}; problems {len(block.get('problems') or [])}")
+    if not execute:
+        click.echo("   (report only; --execute writes the block)")
+        return
+    from data_sheets_schema.provenance import ProvenanceRecord
+    rec = ProvenanceRecord(data=data)
+    rec.data["validation"] = block
+    rec.write(path)
+    click.echo(f"   wrote {path}")
+
+
 @provenance.command('annotate-observed')
 @click.option('--project', required=True)
 @click.option('--method', required=True)

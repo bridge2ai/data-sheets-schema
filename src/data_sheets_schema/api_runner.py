@@ -1851,9 +1851,16 @@ def validation_block(spec: RunSpec, problems: list[dict[str, str]],
     # would have failed it — `validation_status` re-hashed the record, found it
     # unchanged, and reported VALID for a check that no longer existed (#426).
     from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA, _sha256
+    # Duplicate mapping keys per artifact (#1029): recorded even when empty,
+    # so a record that carries the field was measured and one that lacks it
+    # predates the instrument — the canary reads the count as a floor of 0.
+    from data_sheets_schema.duplicate_keys import duplicate_keys_in
+    duplicate_keys = {name: (duplicate_keys_in(path) if path.exists() else [])
+                      for name, path in (("full", spec.full_path), ("core", spec.core_path))}
     block: dict[str, Any] = {"passed": not problems, "artifacts": artifacts,
                              "schema": {"full_sha256": _sha256(FULL_SCHEMA),
                                         "core_sha256": _sha256(CORE_SCHEMA)},
+                             "duplicate_keys": duplicate_keys,
                              "recorded_by": recorded_by}
     if problems:
         block["problems"] = problems
@@ -1896,6 +1903,16 @@ def validate_outputs(spec: RunSpec) -> list[dict[str, str]]:
         if not path.exists():
             problems.append({"artifact": str(path), "error": "missing"})
             continue
+        # A duplicated mapping key is invisible to the loader-based
+        # validator — `safe_load` keeps the last value and validates that —
+        # and to every reader of the parsed record (#1029). Read off the
+        # text first, so a validator that could not run still leaves the
+        # duplicate on record (#1032), and a failure like any other, so the
+        # repair round is told what to merge.
+        from data_sheets_schema.duplicate_keys import describe, duplicate_keys_in
+        dups = duplicate_keys_in(path)
+        if dups:
+            problems.append({"artifact": str(path), "class": cls, "error": describe(dups)})
         lines, failure = _validator_lines(path, schema, cls)
         if failure is not None:
             problems.append({"artifact": str(path),
@@ -2705,6 +2722,12 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 log.append({"phase": ph, "round": rnd,
                             "outcome": f"validator did not run: {failure}"})
                 break
+            # The validator reads the last-wins parse; a duplicated key is a
+            # finding the model must be told about, and one that must be
+            # re-detected before a round is called a success (#1032: the
+            # 04f AI_READI repair round kept all three `source_caveats`).
+            from data_sheets_schema.duplicate_keys import duplicate_keys_in, findings
+            errors = list(errors) + findings(duplicate_keys_in(path))
             if not errors:
                 break
 
@@ -3527,6 +3550,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
                     "usage": existing.get("api_usage") or [],
                     "skipped": list(PHASES), "validation_problems": problems,
                     "checks": {"pair": pair_consistency(spec),
+                               "validation": validation_block(spec, problems),
                                # A run this runner produced asked for the
                                # dispositions table (#929); its record says so.
                                "report": {**(report_claims_block(spec) or {}),
@@ -3959,6 +3983,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             # a run with 11 pair errors and 19 ungrounded identifiers as a
             # success, which is how the v4 arm swept clean.
             "checks": {"pair": rec.data.get("pair_consistency"),
+                       "validation": rec.data.get("validation"),
                        "report": rec.data.get("report_claims"),
                        "grounding": rec.data.get("grounding"),
                        "form": rec.data.get("form"),

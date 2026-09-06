@@ -408,8 +408,19 @@ steps need:
     invalidated by it; the 04e run itself is not a measurement of the
     package and VOICE runs again.
     VOICE passed as `2026-09-04f` on 2026-09-05 and is retained.
+14. **Duplicate mapping keys are validated and gated (#1029, 2026-09-06).**
+    The AI_READI canary's full record carried `source_caveats` at the
+    top level three times; every loader keeps the last, so the parsed
+    record and the core lost two caveats while validation read the
+    last-wins parse and passed. Detection off the record's text is now
+    a validation failure (`validation.duplicate_keys`, per artifact) and
+    a gated floor of 0, which 270 of 270 records on main support. On the
+    generation side nothing bespoke: a failing validation already drives
+    the repair round, which is told what to merge. A clean run's output
+    is untouched, so VOICE 04f stays retained; the AI_READI 04f record is
+    re-verdicted under the instrument (regressed) and AI_READI runs again.
 
-Each of 2–5, 7–10, 11 and 12 is a generation-path change; per the production rule
+Each of 2–5, 7–10, 11 and 12 is a generation-path change (13 and 14 are not); per the production rule
 none of them may land between a v8 canary and its fill.
 
 ## Decisions needed before step 3
