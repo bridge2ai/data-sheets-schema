@@ -137,6 +137,13 @@ PREDICTION_METRICS = {
 }
 
 
+def duplicate_key_count(validation: dict[str, Any] | None) -> int:
+    """Duplicated mapping keys across the full and core records, as the
+    validation block recorded them (#1029)."""
+    dk = (validation or {}).get("duplicate_keys") or {}
+    return sum(len(v or []) for v in dk.values()) if isinstance(dk, dict) else 0
+
+
 def receipt_floors(block: dict[str, Any]) -> dict[str, int]:
     """Defect counts read from a checked receipts block; each must be 0."""
     ch, sn = block.get("chunks") or {}, block.get("snippets") or {}
@@ -357,6 +364,20 @@ def verdict(checks: dict[str, Any], baseline: dict[str, int | None],
                     row["regressed"] = True
                     regressions.append(f"{name}: {value} against a floor of 0")
                 rows.append(row)
+
+    # Duplicate mapping keys (#1029) are gated against an absolute floor of
+    # 0 like the receipts: none of the 270 records on main had one, and a
+    # standard loader silently drops every duplicate but the last. A
+    # validation block without the field predates the instrument and is
+    # not a metric for that run.
+    vb = (checks or {}).get("validation")
+    if isinstance(vb, dict) and isinstance(vb.get("duplicate_keys"), dict):
+        n = duplicate_key_count(vb)
+        row = {"metric": "duplicate keys", "run": n, "baseline_worst": 0}
+        if n > 0:
+            row["regressed"] = True
+            regressions.append(f"duplicate keys: {n} against a floor of 0")
+        rows.append(row)
 
     if blind:
         status = UNMEASURABLE

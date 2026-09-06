@@ -1851,9 +1851,16 @@ def validation_block(spec: RunSpec, problems: list[dict[str, str]],
     # would have failed it — `validation_status` re-hashed the record, found it
     # unchanged, and reported VALID for a check that no longer existed (#426).
     from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA, _sha256
+    # Duplicate mapping keys per artifact (#1029): recorded even when empty,
+    # so a record that carries the field was measured and one that lacks it
+    # predates the instrument — the canary reads the count as a floor of 0.
+    from data_sheets_schema.duplicate_keys import duplicate_keys_in
+    duplicate_keys = {name: (duplicate_keys_in(path) if path.exists() else [])
+                      for name, path in (("full", spec.full_path), ("core", spec.core_path))}
     block: dict[str, Any] = {"passed": not problems, "artifacts": artifacts,
                              "schema": {"full_sha256": _sha256(FULL_SCHEMA),
                                         "core_sha256": _sha256(CORE_SCHEMA)},
+                             "duplicate_keys": duplicate_keys,
                              "recorded_by": recorded_by}
     if problems:
         block["problems"] = problems
@@ -1904,6 +1911,15 @@ def validate_outputs(spec: RunSpec) -> list[dict[str, str]]:
         if lines:
             problems.append({"artifact": str(path), "class": cls,
                              "error": " | ".join(lines[:4])})
+        # A duplicated mapping key is invisible to the loader-based
+        # validator — `safe_load` keeps the last value and validates that —
+        # and to every reader of the parsed record (#1029). Read off the
+        # text, and a failure like any other, so the repair round is told
+        # what to merge.
+        from data_sheets_schema.duplicate_keys import describe, duplicate_keys_in
+        dups = duplicate_keys_in(path)
+        if dups:
+            problems.append({"artifact": str(path), "class": cls, "error": describe(dups)})
     return problems
 
 
@@ -3527,6 +3543,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
                     "usage": existing.get("api_usage") or [],
                     "skipped": list(PHASES), "validation_problems": problems,
                     "checks": {"pair": pair_consistency(spec),
+                               "validation": validation_block(spec, problems),
                                # A run this runner produced asked for the
                                # dispositions table (#929); its record says so.
                                "report": {**(report_claims_block(spec) or {}),
@@ -3959,6 +3976,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             # a run with 11 pair errors and 19 ungrounded identifiers as a
             # success, which is how the v4 arm swept clean.
             "checks": {"pair": rec.data.get("pair_consistency"),
+                       "validation": rec.data.get("validation"),
                        "report": rec.data.get("report_claims"),
                        "grounding": rec.data.get("grounding"),
                        "form": rec.data.get("form"),

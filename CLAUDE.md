@@ -531,7 +531,14 @@ non-empty bundle) is a regression against a floor of 0. A snippet that is
 verbatim in the bundle but in a chunk other than the one cited is
 `adjacent`/`elsewhere` — reported as "snippets in another chunk", never
 gated (#763; ~2% on the v7 API canaries): support holds, attribution
-precision is its own number. When false, the
+precision is its own number. **Duplicate mapping keys** (#1029) are a
+validation failure read off the record's text — `safe_load` keeps the
+last value and validates that, so the AI_READI 2026-09-04f record's three
+top-level `source_caveats` passed as one — recorded under
+`validation.duplicate_keys` per artifact and gated against a floor of 0
+(none of the 270 records on main had one); the repair round is told
+what to merge like any other validation failure, and `d4d provenance
+recheck-validation` brings an earlier record under the instrument. When false, the
 block is not a metric for that run: earlier arms and the API arm before v7
 (#710) wrote none, and "no receipt" from them is not a measurement.
 
