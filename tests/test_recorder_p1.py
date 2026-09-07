@@ -29,16 +29,29 @@ class TestOutputSizes(unittest.TestCase):
 
 
 class TestRepoFacts(unittest.TestCase):
+    def test_the_first_lines_leading_status_space_is_kept(self):
+        """#1039: `aurelian` was recorded as `urelian` — the strip ate the first line's space."""
+        porcelain = " M aurelian\0?? data/x y.yaml\0R  old.py\0new.py\0"
+
+        def fake(cmd, *, strip=True):
+            if "--porcelain" in cmd:
+                return porcelain.strip() if strip else porcelain
+            return "abc"
+        with mock.patch.object(provenance, "_run", side_effect=fake):
+            facts = provenance.repo_facts()
+        self.assertEqual(facts["dirty_paths"], ["aurelian", "data/x y.yaml", "old.py"])
+        self.assertEqual(facts["dirty_file_count"], 3)
+
     def test_dirty_paths_are_named_and_bounded(self):
-        porcelain = "\n".join([" M src/a.py", "?? notes/scratch.md"] + [f"?? f{i}" for i in range(60)])
-        with mock.patch.object(provenance, "_run", lambda args: porcelain if "status" in args else "abc"):
+        porcelain = "\0".join([" M src/a.py", "?? notes/scratch.md"] + [f"?? f{i}" for i in range(60)]) + "\0"
+        with mock.patch.object(provenance, "_run", lambda args, **kw: porcelain if "status" in args else "abc"):
             facts = provenance.repo_facts()
         self.assertTrue(facts["dirty"])
         self.assertEqual(facts["dirty_file_count"], 62)
         self.assertEqual(facts["dirty_paths"][:2], ["src/a.py", "notes/scratch.md"])
         self.assertEqual(len(facts["dirty_paths"]), provenance.DIRTY_PATHS_MAX)
         self.assertEqual(facts["dirty_paths_truncated"], 12)
-        with mock.patch.object(provenance, "_run", lambda args: "" if "status" in args else "abc"):
+        with mock.patch.object(provenance, "_run", lambda args, **kw: "" if "status" in args else "abc"):
             clean = provenance.repo_facts()
         self.assertEqual((clean["dirty"], clean["dirty_paths"]), (False, []))
         self.assertNotIn("dirty_paths_truncated", clean)
@@ -240,6 +253,7 @@ class TestTransportErrorEvidence(unittest.TestCase):
         (info,) = seen
         self.assertEqual((info["attempt"], info["incomplete"], info["content_chars"]), (1, 0, 40000))
         self.assertTrue(info["outcome"].startswith("transport error: RemoteProtocolError"))
+        self.assertIsNone(info["events"])                  # held by the worker; not counted (#1040)
         self.assertEqual(info["usage"]["output_tokens"], 5)
         self.assertIsInstance(info["seconds"], float)
 
@@ -250,7 +264,9 @@ class TestTransportErrorEvidence(unittest.TestCase):
             _record_incomplete_stream(spec, "core", 1, "t", {"attempt": 1, "incomplete": 0,
                                                                 "outcome": "transport error: RemoteProtocolError (#1017)"},
                                       usage)
+            header = Path(usage[0]["snapshot"]).read_text().splitlines()[0]
         self.assertEqual(usage[0]["outcome"], "transport error: RemoteProtocolError (#1017)")
+        self.assertTrue(header.startswith("# transport error: RemoteProtocolError"), header)
 
 
 class TestAbandonedRowsPersist(unittest.TestCase):

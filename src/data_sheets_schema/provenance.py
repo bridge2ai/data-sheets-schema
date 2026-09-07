@@ -347,10 +347,11 @@ def prompt_facts(prompt_paths: list[Path] | None,
     return facts
 
 
-def _run(cmd: list[str]) -> str | None:
+def _run(cmd: list[str], *, strip: bool = True) -> str | None:
     try:
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
-        return r.stdout.strip() or None
+        out = r.stdout.strip() if strip else r.stdout
+        return out or None
     except Exception:
         return None
 
@@ -621,12 +622,26 @@ DIRTY_PATHS_MAX = 50
 
 
 def repo_facts() -> dict[str, Any]:
-    dirty = _run(["git", "status", "--porcelain"])
-    lines = dirty.splitlines() if dirty else []
+    dirty = _run(["git", "status", "--porcelain", "-z"], strip=False)
+    # NUL-separated, unstripped (#1039): `_run`'s strip took the leading
+    # status space off the first line and `aurelian` was recorded as
+    # `urelian`; a path with a space survives -z where a line split does
+    # not. Each entry is `XY path`; a rename adds a second entry for the
+    # old name, which is skipped.
+    entries = [e for e in dirty.split("\0") if e] if dirty else []
+    lines: list[str] = []
+    skip_next = False
+    for e in entries:
+        if skip_next:
+            skip_next = False
+            continue
+        lines.append(e)
+        if e[:1] in ("R", "C"):
+            skip_next = True
     # The paths, not only their count (#1023): a record that says `dirty:
     # true, 13 files` cannot show that the runner code equalled the commit
     # it names; one that lists `data/.run_locks/x.json`, `aurelian` can.
-    paths = [ln[3:].strip() for ln in lines if len(ln) > 3]
+    paths = [ln[3:] for ln in lines if len(ln) > 3]
     return {
         "commit": _run(["git", "rev-parse", "HEAD"]),
         "commit_short": _run(["git", "rev-parse", "--short", "HEAD"]),

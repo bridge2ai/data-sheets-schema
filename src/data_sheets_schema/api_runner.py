@@ -2870,7 +2870,7 @@ class IncompleteStreamError(RuntimeError):
 INCOMPLETE_TAIL_CHARS = 2000
 
 
-def _stream_evidence(stream, events: int, seconds: float) -> dict[str, Any]:
+def _stream_evidence(stream, events: int | None, seconds: float) -> dict[str, Any]:
     """What an incomplete stream had delivered, from the SDK's own snapshot."""
     text = ""
     usage = None
@@ -3097,7 +3097,7 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                 stream = holder.get("stream")
                 evidence = {"attempt": attempt, "incomplete": incomplete,
                             "outcome": f"transport error: {type(exc).__name__} (#1017)",
-                            **(_stream_evidence(stream, -1, time.monotonic() - t_call) if stream is not None
+                            **(_stream_evidence(stream, None, time.monotonic() - t_call) if stream is not None
                                else {"events": None, "seconds": round(time.monotonic() - t_call, 1),
                                      "content_chars": 0, "content_sha256": None, "tail": "", "usage": None})}
             else:
@@ -3389,7 +3389,8 @@ def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: 
     `intermediate/` and an `api_usage` row for the abandoned attempt, so a
     phase that lost a connection is not indistinguishable from a slow one."""
     n = int(info.get("incomplete") or 1)
-    body = (f"# incomplete stream — phase {ph}, attempt {attempt}, transport attempt {n} (#1017)\n"
+    outcome = info.get("outcome") or "stream ended without message_stop (#1013)"
+    body = (f"# {outcome} — phase {ph}, attempt {attempt}, transport attempt {n} (#1017)\n"
             f"# events: {info.get('events')}  seconds: {info.get('seconds')}  "
             f"content_chars: {info.get('content_chars')}  content_sha256: {info.get('content_sha256')}\n"
             f"# usage snapshot: {info.get('usage')}\n"
