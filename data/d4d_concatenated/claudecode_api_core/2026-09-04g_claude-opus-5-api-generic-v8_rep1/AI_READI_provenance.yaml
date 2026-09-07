@@ -912,3 +912,42 @@ canary:
     the #684 report basis ({''measured'': 1, ''vacuous'': 2, ''unchecked'': 0})'
   recorded_at: '2026-09-07T00:51:07+00:00'
   recorded_by: d4d api batch
+review:
+  checked: true
+  items_total: 82
+  items_answered: 82
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 2
+    slot_receipted:
+      supported: 25
+    slot_receiptless:
+      bundle_supports: 22
+      exempt_by_nature: 1
+      inferred: 2
+    slot_reshaped:
+      still_supported: 8
+    rule:
+      violated: 1
+      followed: 19
+      not_applicable: 1
+    pair_warning:
+      consistent: 1
+  adverse: 3
+  cannot_tell: 0
+  findings: []
+  summary: items 82/82 answered · 3 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5-1
+    reviewed_at: 2026-09-07 19:45:19+00:00
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_review_pack.yaml
+      sha256: 9bab2176911cc36199431ca26664801e2443a9447fe37696bf63db3309233bf0
+    review:
+      path: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_review.yaml
+      sha256: c4f9b6a8389ba89e432e529b2c7890b6c04dbde778aeb709edb295a02307cb68
+  recorded_by: d4d review check

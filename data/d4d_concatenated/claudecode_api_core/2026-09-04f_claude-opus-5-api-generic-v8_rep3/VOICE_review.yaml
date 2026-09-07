@@ -1,0 +1,258 @@
+reviewer: d4d-review-record
+model: claude-fable-5-1
+reviewed_at: 2026-09-07T19:47:23Z
+pack_sha256: 172156bf0d24a4c52ee46810b04aa7225d561a729a950f8ba37f91d0b28f5b13
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-25 are the concatenation header and table of contents naming the eleven source files; no dataset fact appears"
+- id: chunk-c003
+  verdict: missed_content
+  evidence: "line 629 places Vardit Ravitsky at 'University of Montreal' and Frank Rudzicz at 'Dalhousie University', contradicting creators[11].affiliations (The Hastings Center) and creators[13].affiliations (University of Toronto) with no caveat recording the disagreement, though the record caveats the same paper's name spellings; the chunk's funding statement (line 524, 1OT2OD032720-01) is carried in the funders caveat, so only the affiliation disagreement is missed"
+- id: chunk-c004
+  verdict: confirmed
+  evidence: "lines 826-895 are PMC boilerplate and the feasibility article's own data-availability statement (line 834), which concerns that paper's data, not this dataset"
+- id: slot-004
+  verdict: supported
+  evidence: "the healthsheet answer under the cited question at lines 2031-2032 is 'The NIH Common Fund'; line 2028 ('funded by the NIH Common Fund within the Bridge2AI Program') supplies the Bridge2AI link"
+- id: slot-005
+  verdict: supported
+  evidence: "leaf dropped by reconciliation; the statement survives at machine_annotation_tools[0].notes and line 2014 states it verbatim ('generated using off-the-shelf models that have not been audited for correctness')"
+- id: slot-006
+  verdict: supported
+  evidence: "line 2049: 'Each instance represents a person.'"
+- id: slot-007
+  verdict: supported
+  evidence: "line 5093: 'This project was funded by NIH project number 3OT2OD032720-01S1'"
+- id: slot-008
+  verdict: supported
+  evidence: "lines 1941-1952 (no non-commercial/geographic/research-type/genetic/methods restriction; registered vs controlled tiers) and line 1962 (EHR access for gold standard validation) state every element of the consent_scope value"
+- id: slot-009
+  verdict: supported
+  evidence: "lines 1107-1109 attest the multi-institutional consortium generating the datasets; the second sentence (author list of more than one hundred) is borne out by the v3.1.0 author list at lines 4559-4801 (~120 names)"
+- id: slot-010
+  verdict: supported
+  evidence: "line 2206 (no export controls), line 3093 (USF Board of Trustees as provider), lines 3154-3159 (safeguards, authorized persons), lines 3449-3453 (no contacting subjects without IRB and provider approval), lines 3441-3443 (notification within 5 business days); the two snippets cited to c014 actually sit at c013 lines 3441-3453, an attribution imprecision the validator reports, not a support failure"
+- id: slot-011
+  verdict: supported
+  evidence: "DOIs at lines 3617 (1.1), 4464 (3.0.0), 5134 (3.1.0), 5136 (latest 37yb-1t42); release notes at 3756 (MFCCs), 5083-5084 (136 added, reprocessed), 5081-5082 (authorship), 5079-5080 (391 added), 5077-5078 (3.1.0 minor update); older-version support at line 2225; Health Data Nexus cloud-compute at line 1400"
+- id: slot-012
+  verdict: supported
+  evidence: "line 4955: ppgs.parquet (n=29289), 40 phoneme categories, 40xT, 100Hz frame rate"
+- id: slot-013
+  verdict: supported
+  evidence: "line 2097 (five recording sites), line 2055 ('sample of a larger, ongoing collection... not representative'), line 2169 (USA and Canada)"
+- id: slot-014
+  verdict: supported
+  evidence: "line 231 states the passage verbatim; the value's second clause (standardized protocol-driven collection) is at lines 4912 and 200"
+- id: slot-015
+  verdict: supported
+  evidence: "line 4947: torchaudio_spectrograms.parquet (n=29278), 201xT, 25ms window, 10ms hop, 400-point FFT"
+- id: slot-016
+  verdict: supported
+  evidence: "line 5134, DOI (version 3.1.0): https://doi.org/10.13026/8xbn-nq66; the string-ranged doi slot carries the bare DOI as the rule asks"
+- id: slot-017
+  verdict: supported
+  evidence: "line 2028 attests name, co-PI role and USF Health Morsani affiliation; NIH award PI of record at line 1256, protocol PI at lines 2602-2603"
+- id: slot-018
+  verdict: supported
+  evidence: "line 2028 attests name, lead-investigator status and Vanderbilt affiliation; the voice-disorders attribution is at line 3069 (IRB Table 4: 'VUMC Maria Powell, PhD Investigator - Voice Disorders')"
+- id: slot-019
+  verdict: supported
+  evidence: "lines 1277-1279 (ethics module aims: guidance on consenting, sharing, utilization; ethical and trustworthy issues) state what the purpose value restates"
+- id: slot-020
+  verdict: supported
+  evidence: "lines 2990-2991: even with HIPAA-protected information removed 'each person's voice is unique to them... we can never full deidentify one's voice'; controlled-access rationale at line 1368"
+- id: slot-021
+  verdict: weak
+  evidence: "line 2028 attests 'Vardit Ravitsky, PhD (The Hastings Center)' and lead-investigator status, but the description's 'ethics module' attribution appears neither in the passage nor anywhere in the bundle (lines 539, 1176, 2002, 2028 name her without a module)"
+- id: slot-022
+  verdict: weak
+  evidence: "line 5170 says the project page is 'Maintained by the MIT Laboratory for Computational Physiology', which does not state a publisher; the record's own source_caveats concedes the bundle makes no explicit publisher statement, and the nearer support is the citation's journal field 'PhysioNet' at line 4817"
+- id: slot-023
+  verdict: supported
+  evidence: "the snippet sits at line 2687 (chunk c011, not the cited c007 - attribution imprecision the validator reports): controls are 'participants without the identified conditions... who can serve as controls'; the description's negative criteria at line 2898 and healthy-volunteer eligibility at lines 1972-1973"
+- id: slot-024
+  verdict: supported
+  evidence: "line 2110 lists 'Age, Gender, Sex, Ethnicity, Socioeconomic status' under the sub-population question; the questionnaire delivery clause is at line 1429 ('Detailed demographic data and surveys... collected through the smartphone application')"
+- id: slot-025
+  verdict: supported
+  evidence: "line 2089 (iPads 9th/10th gen, iPad Air 5th gen, Avid AE-36, Apple dongle) and line 2093 ('Distinct iPad devices were used at each site')"
+- id: slot-026
+  verdict: supported
+  evidence: "lines 2174-2175 (English only for v2.0.0, Spanish under development), line 1977 (exclusion: does not read or speak English), line 2904 (IRB exclusion)"
+- id: slot-027
+  verdict: supported
+  evidence: "line 1257 names the organization USF; the fuller 'USF Health Morsani College of Medicine' form is attested at lines 1037-1040 and 2028"
+- id: slot-028
+  verdict: supported
+  evidence: "line 4959 states the metadata folder content verbatim; 'Introduced in version 3.1.0' at line 5078 ('releases per audio metadata')"
+- id: slot-029
+  verdict: bundle_supports
+  evidence: "lines 1114-1123 (bioinformatics standards for voice data, benchmarks of diversity metrics) and line 1273 (new standards of acoustic data collection and analysis) state the aims the task value restates"
+- id: slot-030
+  verdict: exempt_by_nature
+  evidence: "an enum classification with no verbatim passage by its kind; the classified facts are stated at lines 1982 (non-probability sample) and 2916 (recruitment from clinics), and the bias_description beside it is receipted"
+- id: slot-031
+  verdict: bundle_supports
+  evidence: "line 1982: 'Sampling Method / Non-Probability Sample'"
+- id: slot-032
+  verdict: exempt_by_nature
+  evidence: "an enum with no verbatim passage; line 2026 states the dataset is 'intended solely for commercial and non-commercial research purposes', which the general_research_use term encodes"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "line 2028: 'Anais Rameau, MD, MPhil (Weill Cornell Medicine)'"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "lines 4806-4809 (PhysioNet project contains no raw audio; DACO@b2ai-voice.org; Synapse syn72370534) and lines 1906-1910 (DARF, DUA, DTUA signed by institutional official)"
+- id: slot-035
+  verdict: bundle_supports
+  evidence: "line 2061: 'There may be data collection irregularities that caused some information to be missing from individual instances.'"
+- id: slot-036
+  verdict: exempt_by_nature
+  evidence: "an enum role with no passage by its kind; the team it classifies is stated at line 2014 ('audited internally for missingness and consistency by the data release team'); academic_institution is a loose fit for a consortium team but the enum offers no closer term"
+- id: slot-037
+  verdict: bundle_supports
+  evidence: "line 2150: 'Clinical diagnoses were verified by clinicians reviewing audio and/or imaging data, looking at electronic health records, or medication prescriptions.'"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "line 2150: 'The data was directly observable and reported by subjects.'"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "line 2187: 'Users should consider the multivariate distribution when assessing utility for different questions.'"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "line 2161 ('Directly') answers the third-party question, and line 1412 states collection in clinic with the assistance of a trained research assistant"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "lines 5083-5084 (v2.0 reprocessed spectrograms to fix minor issues) and lines 5077-5078 (v3.1.0 'Fixed broken parquet files from previous release')"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "lines 4428-4429 state the REDCap dictionary's Zenodo archival record (zenodo.org/records/14989503)"
+- id: slot-043
+  verdict: exempt_by_nature
+  evidence: "an enum classification with no passage by its kind; the classified limitation (single clinician per label, validation varying by disorder) is stated at lines 2125-2132"
+- id: slot-044
+  verdict: bundle_supports
+  evidence: "lines 2073-2074: the confidentiality question is answered 'No'"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "line 2061: 'Yes, some questions are optional.'"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "line 2028: 'co-led by... and Olivier Elemento, PhD, from Weill Cornell Medicine, who are co-principal investigators for the project'"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "lines 2841 ('Data will be entered into a REDCap database') and 1437 (uploaded through the REDCap database); electronic data capture is what REDCap is, stated as the capture route"
+- id: slot-048
+  verdict: exempt_by_nature
+  evidence: "an enum classification with no passage by its kind; the classified scope fact (raw audio withheld, free-speech features excluded) is stated at lines 3721 and 4926"
+- id: slot-049
+  verdict: exempt_by_nature
+  evidence: "a composed label for a described distribution, with no single passage by its kind; its components are attested at lines 1359-1361 ('Featurized dataset... Available under Registered Access' via PhysioNet)"
+- id: slot-050
+  verdict: bundle_supports
+  evidence: "line 1962 (consenting participants permit EHR access for gold standard validation) and line 2957 (identifiable data and linking datasheets kept in each institution, destroyed after ten years)"
+- id: slot-051
+  verdict: exempt_by_nature
+  evidence: "an enum classification with no passage by its kind; the classified fact (single labeler per data, clinician at site or external) is stated at lines 2130-2132"
+- id: slot-052
+  verdict: bundle_supports
+  evidence: "lines 1442-1444 (dictionary, metadata and instrument PDFs at github.com/eipm/bridge2ai-redcap) and lines 1446-1447 (Zenodo)"
+- id: slot-053
+  verdict: bundle_supports
+  evidence: "line 4946: each parquet element carries participant_id, session_id, task_name, n_frames and the feature tensor, one element per recording"
+- id: slot-054
+  verdict: still_supported
+  evidence: "the removed remote Web/iOS entry survives as the source_caveats paragraph (full record lines 1369-1373), which says the modality is IRB-approved but did not occur for the released data - exactly what line 1412 states; the reshape narrows scope without contradicting the receipted passage at lines 2832/2917"
+- id: slot-055
+  verdict: still_supported
+  evidence: "the BIDS fact now sits in related_datasets[1].notes as a statement about the raw-audio distribution's layout, which is what lines 2229-2235 state (conversion of raw audio and questionnaire data, b2ai-voice-audio root)"
+- id: slot-056
+  verdict: still_supported
+  evidence: "the fact survives in source_caveats (full record lines 1395-1397): no impact analysis conducted, exactly the answer at lines 2170-2171"
+- id: slot-057
+  verdict: still_supported
+  evidence: "the Synapse URL survives verbatim at raw_data_sources[0].access_details (line 803) and related_datasets[1].notes (line 1311), matching line 4809"
+- id: slot-058
+  verdict: still_supported
+  evidence: "the controlled-access statement survives at raw_data_sources[0].access_details (lines 799-804), saying raw audio is disseminated only under controlled access, which is what line 1352 states"
+- id: slot-059
+  verdict: still_supported
+  evidence: "the statement now sits in machine_annotation_tools[0].notes (full record lines 902-905) and restates line 2014; the reshape correctly stops presenting an absence as an accuracy figure"
+- id: rule-01
+  verdict: followed
+  evidence: "confirmed omissions of use_repository and imputation_protocols (reconciliation report); the 10,000/30,000 target sizes kept out of dataset content as goals (source_caveats); the one retained inference, publisher, is flagged in its own caveat and rests on the citation's journal field at line 4817"
+- id: rule-02
+  verdict: violated
+  evidence: "creators[11].affiliations and creators[13].affiliations silently select The Hastings Center and University of Toronto over the feasibility paper's University of Montreal and Dalhousie University (bundle line 629) with no caveat, while the same sources' spelling disagreements are caveated; elsewhere the rule is well followed (funders award-identifier caveat, relationships caveat, target-size caveat)"
+- id: rule-03
+  verdict: followed
+  evidence: "source_caveats opens by declaring the referent (adult Bridge2AI-Voice 3.1.0 on PhysioNet); the reconciliation report states the choice, and the pediatric release and raw-audio distribution are held in related_datasets in both records"
+- id: rule-04
+  verdict: followed
+  evidence: "density tracks the evidence: slots the bundle answers negatively are omitted (use_repository, imputation_protocols) while the richly documented areas (file_collections, version_access) are full"
+- id: rule-05
+  verdict: followed
+  evidence: "16 creators one per person, 5 subsets one per cohort, 11 file resources one per file, 4 purposes, 4 known_biases; no collapsed multi-entity objects found"
+- id: rule-06
+  verdict: followed
+  evidence: "reconciliation removed the absence-as-answer values (data_protection_impacts, errata[0] 'no erratum', tool_accuracy, other_tasks); splits[0] records the source's own attested 'no predefined splits' statement (line 2019), which answers the field"
+- id: rule-07
+  verdict: followed
+  evidence: "the raw-audio access route was moved out of distribution_formats into raw_data_sources[0].access_details and data_governance.access_review_process; release cadence sits in updates, version facts in version_access"
+- id: rule-08
+  verdict: followed
+  evidence: "creators carry name and affiliations objects, grants carry grant_number, subsets carry id/name, principal_investigator objects carry id, name and affiliation; no prose-only shells found"
+- id: rule-09
+  verdict: followed
+  evidence: "latest_version_doi and affected_subsets are doi: CURIEs; the doi slot holds the bare DOI; access_urls and contribution_url (uri-ranged) hold URLs; doi.org resolver forms appear only inside the citation and prose, which the rule exempts"
+- id: rule-10
+  verdict: followed
+  evidence: "every external identifier checked is in the bundle: RRID:SCR_007345 (line 4816), 10.57764/qb6h-em84 (4438), 10.21437/Interspeech.2024-1926 (4427), 10.3389/fdgth.2025.1514971 (88), 10.1001/jamaoto.2023.4807 (1138), grants U24EB037545/R01EB030362 (5171), zenodo 14989503 (4429) and 13834653 (5723), Synapse syn72370534 (4809) and syn73617068 (5480), pediatric DOIs h995-bt35 (5490) and mf9s-5r03 (5655)"
+- id: rule-11
+  verdict: followed
+  evidence: "all 22 minted ids are fragments on doi:10.13026/8xbn-nq66, the record's own DOI attested at line 5134; no invented prefixes; person fragments follow the person-name scheme"
+- id: rule-12
+  verdict: followed
+  evidence: "a scan of the full record for -ise/-our/-yse/organis-/licence forms found none; standardize/organization/analyze forms used throughout (e.g. description, purposes[2])"
+- id: rule-13
+  verdict: followed
+  evidence: "name spellings prefer the higher-ranked PhysioNet forms with the caveat naming both (source_caveats); the equal-rank 10,000 vs 30,000 target-size disagreement is represented without selection; funders source_caveats names each source's award identifier"
+- id: rule-14
+  verdict: not_applicable
+  evidence: "every entry in the pack's id_slots block is minted and forced (Person, DataSubset, FileCollection, File), so the rule is not applicable to the mints; the subset fragments are in fact pointed at by known_biases[0].affected_subsets using identical fragments"
+- id: rule-15
+  verdict: followed
+  evidence: "the coverage receipt exists beside the core record with the given bundle_md5 and one entry per marker for all 22 chunks in order, statuses from the closed set (19 extracted, 3 nothing_relevant); the deterministic check verified 222 of 231 snippets"
+- id: rule-16
+  verdict: followed
+  evidence: "pack.reference_attributes is empty and every class-ranged slot holds an object (creators, grants, affiliations, principal_investigator with id/name/affiliation); reconciliation's shape repairs converted lists to strings only on string-ranged slots and reduced no object to a string"
+- id: rule-17
+  verdict: followed
+  evidence: "the reconciliation's governing change was exactly this rule: BIDS and the Synapse route re-scoped to the raw-audio related_datasets entry, remote collection removed as approved-but-unused (line 1412), pediatric facts moved to related_datasets[0], approved recruitment methods marked unattested for this release, plans stated as plans (known_biases[0].mitigation_strategy)"
+- id: rule-18
+  verdict: followed
+  evidence: "no derived figure is stated as a source figure; anomalies[1] names both stated endpoints (28,640 at line 4951, 32,522 at line 4950), and source_caveats records the 61,937 vs per-feature-count discrepancy without reconciling it"
+- id: rule-19
+  verdict: violated
+  evidence: "roster entries carried without their own receipts: creators[2] (Elemento) and creators[4] (Rameau) have no receipt entry (the coverage receipt lists creators[1] and [3], [5]-[15] but skips [2] and [4] although line 2028 states both), and variables[1], variables[3], maintainers[1] and maintainers[2] are likewise unreceipted per the provenance slots.without_receipt list"
+- id: rule-20
+  verdict: followed
+  evidence: "no ORCID appears anywhere in the bundle (grep), so the two Person ids are correctly minted as fragments on the record's own id (doi:10.13026/8xbn-nq66#person-yael-bensoussan, #person-olivier-elemento); no mailto ids; email slots are not populated with addresses posing as ids"
+- id: rule-21
+  verdict: followed
+  evidence: "scalar-ranged slots hold identifiers or names, not objects: affected_subsets hold CURIEs into subsets, ethics_review_board a name string; both records validate"
+- id: pair-01
+  verdict: consistent
+  evidence: "core distributions carries 14 entries (3 collections at $.distributions[0,12,13] plus 11 resources) whose ids, names, paths and descriptions match the full record's file_collections and nested resources verbatim, including the two 'Introduced in version 3.1.0' sentences; nothing differs beyond the flattening the projection performs"
+notes: >-
+  The two weak receipts are attribution stretches, not fabrications: creators[11]'s
+  'ethics module' clause and publisher's maintenance snippet. The validator already
+  reports the 9 adjacent/elsewhere snippets; the ones I hit (slot-023 in c011 not c007,
+  slot-010's two c014 citations sitting in c013, and the c002-cited funding statement
+  at line 524 inside c003) support their values, so attribution precision is the only
+  loss. The rule-19 gaps (creators[2], creators[4], variables[1], variables[3],
+  maintainers[1], maintainers[2]) are receipt-completeness defects for values the
+  bundle does state, not unsupported content. chunk-c003's missed content is the same
+  affiliation disagreement charged under rule-02.
