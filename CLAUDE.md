@@ -545,7 +545,15 @@ validation failure, `d4d provenance recheck-validation` brings an earlier
 record under the instrument, `d4d api verdict` re-verdicts it
 offline with the gate's own functions, keeping the prior block under
 `prior_verdict`, and `d4d runs check` reports such records without
-failing `--strict`, which gates attestation, not validity (#1035). The
+failing `--strict`, which gates attestation, not validity (#1035). Since
+#1020 the batch writes the verdict it acts on to the record at the gate
+(`canary`, `recorded_by: d4d api batch`), the same block shape the offline
+command writes; a dropped stream leaves a bounded snapshot under
+`intermediate/{P}_{phase}_incomplete_attempt{N}_{n}.txt` and an `api_usage`
+row with `outcome: stream ended without message_stop` (#1017); the
+`outputs.*.bytes` are re-read at record write, after repair and the regate
+(#1021); `repo.dirty_paths` names the paths a dirty tree differed in
+(#1023). The
 AI_READI 2026-09-04f record is the one such record in the corpus:
 declared invalid by its own block, kept as evidence, not retained.
 

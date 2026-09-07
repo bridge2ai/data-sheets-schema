@@ -240,7 +240,8 @@ class TestReviewRound(unittest.TestCase):
         self.assertEqual(wrong["status"], "unmeasurable")                    # the record's own family is not the baseline's
         self.assertEqual(v["regressions"], ["duplicate keys: 1 against a floor of 0"])
         self.assertEqual(v["prior_verdict"], record["canary"])                   # the whole prior block
-        self.assertIn("#1020", v["basis"])
+        self.assertIn("'v7'", v["basis"])
+        self.assertTrue(v["recorded_by"].endswith("(offline)"))
 
 
 if __name__ == "__main__":

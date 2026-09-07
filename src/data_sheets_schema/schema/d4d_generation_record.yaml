@@ -292,11 +292,11 @@ classes:
           A canary verdict recorded on the run: status (ok / regressed /
           unmeasurable), the metric rows against the baseline, a basis
           saying when and from what it was computed, and recorded_by naming
-          who. Written offline when a gate verdict is re-derived after a
-          checker revision (#877, #892) — a run whose gate verdict was
-          interpreted after the fact carries the interpretation here rather
-          than only in a terminal transcript. No batch code writes this
-          block; the offline act is its own definition.
+          who. Written by `d4d api batch` at the gate since #1020 (the
+          verdict it acted on, `recorded_by: d4d api batch`) and offline by
+          `d4d api verdict` when a verdict is re-derived after a checker
+          revision (#877, #892, #1030), the prior block kept whole under
+          `prior_verdict` with its own `recorded_at`/`recorded_by`.
         inlined: true
         range: AnyBlock
 

@@ -154,21 +154,34 @@ def offline_verdict(record: dict[str, Any], project: str, label_prefix: str,
     under `prior_verdict`, so a re-verdict under a revised instrument shows
     what it replaced.
     """
-    from datetime import datetime, timezone
     bar = baseline_for(project, label_prefix, method, concat_dir)
     basis = report_basis(project, label_prefix, method, concat_dir)
     v = verdict(checks_from_record(record), bar, baseline_requested=True, report_basis=basis)
-    v["basis"] = (f"offline verdict from this record's own check blocks against the per-project worst of "
-                  f"{label_prefix!r} with the gate's functions, including the #684 report basis "
-                  f"({basis}); the batch writes no verdict block of its own (#1020)")
-    v["recorded_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    v["recorded_by"] = recorded_by
+    # The whole prior block is kept: a re-verdict replaces a measurement and
+    # must not shorten what it replaced (#1032 second pass).
     prior = record.get("canary")
+    return verdict_block(v, label_prefix=label_prefix, report_basis_counts=basis,
+                         recorded_by=recorded_by + " (offline)", prior=prior if isinstance(prior, dict) else None)
+
+
+def verdict_block(v: dict[str, Any], *, label_prefix: str, report_basis_counts: dict[str, int] | None,
+                  recorded_by: str, prior: dict[str, Any] | None = None,
+                  checks_source: str = "this record's own check blocks") -> dict[str, Any]:
+    """The verdict as a record block (#1020): what the gate acted on, with
+    its basis and who wrote it. The batch writes this at the gate; the
+    offline command writes the same shape after the fact. `checks_source`
+    says where the checks came from — a resumed run's are recomputed from
+    the artifacts and its stored blocks are not rewritten (#1038)."""
+    from datetime import datetime, timezone
+    out = dict(v)
+    out["basis"] = (f"verdict from {checks_source} against the per-project worst of "
+                    f"{label_prefix!r} with the gate's functions, including the #684 report basis "
+                    f"({report_basis_counts})")
+    out["recorded_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    out["recorded_by"] = recorded_by
     if isinstance(prior, dict):
-        # The whole prior block: a re-verdict replaces a measurement and must
-        # not shorten what it replaced (#1032 second pass).
-        v["prior_verdict"] = dict(prior)
-    return v
+        out["prior_verdict"] = dict(prior)
+    return out
 
 
 def duplicate_key_count(validation: dict[str, Any] | None) -> int:

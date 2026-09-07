@@ -424,7 +424,8 @@ def check_cmd(method, label, project, strict):
     requests = []
     uncanonical = []
     duplicates = []
-    from data_sheets_schema.runs import _prov
+    stale_sizes = []
+    from data_sheets_schema.runs import _prov, stale_output_sizes
     for run in discover():
         if run.is_core or run.deterministic:
             continue
@@ -441,8 +442,11 @@ def check_cmd(method, label, project, strict):
             # Duplicate mapping keys the validation block recorded (#1029):
             # a standard loader keeps only the last, so a record that
             # carries one is not the record its readers see.
-            dk = (((_prov(run.method, run.label, proj) or {}).get("validation") or {})
-                  .get("duplicate_keys") or {})
+            prov_data = _prov(run.method, run.label, proj) or {}
+            dk = ((prov_data.get("validation") or {}).get("duplicate_keys") or {})
+            mism = stale_output_sizes(prov_data)
+            if mism:
+                stale_sizes.append({"project": proj, "label": run.label, "mismatches": mism})
             if isinstance(dk, dict) and any(isinstance(ds, list) and ds for ds in dk.values()):
                 passed = ((_prov(run.method, run.label, proj) or {}).get("validation") or {}).get("passed")
                 duplicates.append({"project": proj, "label": run.label,
@@ -503,6 +507,15 @@ def check_cmd(method, label, project, strict):
             unobserved[entry.get("field") or "unnamed"] += 1
 
     failed = [r for r in rows if not r["ok"]]
+    if stale_sizes:
+        # Reported, never fatal (#1021): the size describes, the hash attests.
+        click.echo(f"\nⓘ  {len(stale_sizes)} record(s) record an output size that is not the file's "
+                   "(sized before a later phase rewrote it, #1021, or reconstructed; the hashes attest the bytes):")
+        for r_ in stale_sizes[:12]:
+            click.echo(f"     {r_['project']:9} {r_['label']:44} "
+                       + ", ".join(f"{m['artifact']} {m['recorded']}→{m['on_disk']}" for m in r_["mismatches"]))
+        if len(stale_sizes) > 12:
+            click.echo(f"     … and {len(stale_sizes) - 12} more")
     if duplicates:
         # Reported like drift and vacuity, never fatal here (#1035): `--strict`
         # gates attestation — a record that has no provenance, no pinned

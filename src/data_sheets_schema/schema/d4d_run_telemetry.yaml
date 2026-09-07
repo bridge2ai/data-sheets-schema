@@ -382,6 +382,13 @@ classes:
       reasoning_available:
         range: boolean
         description: The thinking text itself was capturable, not just attested.
+      outcome:
+        range: string
+        description: >-
+          Why an attempt was abandoned (a stream that ended without
+          message_stop, a transport error) — present only on rows that made
+          no completed call (#1017); a sweep's dropped-stream count is the
+          number of attempts carrying one.
 
   RecordStats:
     description: >-

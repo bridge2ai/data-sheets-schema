@@ -111,6 +111,33 @@ def _canary_never_ran(spec, baseline, what_happened: str) -> str:
 
 
 
+def _write_verdict(res: dict, v: dict, canary_baseline: str, rbasis: dict) -> None:
+    """Put the gate's verdict on the run's own record (#1020)."""
+    import yaml as _yaml
+
+    from data_sheets_schema import canary as _canary
+    from data_sheets_schema.provenance import ProvenanceRecord
+    path = Path(((res.get("outputs") or {}).get("provenance")) or "")
+    if not str(path) or not path.exists():
+        click.echo("     (no provenance record to carry the verdict)", err=True)
+        return
+    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    prior = data.get("canary") if isinstance(data.get("canary"), dict) else None
+    if res.get("already_complete") and prior and prior.get("recorded_by") == "d4d api batch" \
+            and prior.get("status") == v.get("status") and prior.get("rows") == v.get("rows"):
+        # A re-invocation of a finished canary re-derived the same verdict,
+        # row for row; rewriting it would nest the block under itself each
+        # time. A different reading (another baseline, a revised checker)
+        # is written, with the prior kept.
+        return
+    rec = ProvenanceRecord(data=data)
+    source = ("checks recomputed from the artifacts on disk at resume (the record's stored blocks were not rewritten)"
+              if res.get("already_complete") else "this record's own check blocks")
+    rec.data["canary"] = _canary.verdict_block(v, label_prefix=canary_baseline, report_basis_counts=rbasis,
+                                               recorded_by="d4d api batch", prior=prior, checks_source=source)
+    rec.write(path)
+
+
 def _plan_or_refuse(spec):
     """A plan that cannot be assembled is a refusal with a reason, not a
     traceback (#742): a receipt condition on a bundle with no chunk manifest."""
@@ -262,8 +289,9 @@ def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
         return
     res = execute(spec)
     for u in res["usage"]:
-        click.echo(f"   {u['phase']:10} in={u['input_tokens']} out={u['output_tokens']} "
-                   f"cache_read={u['cache_read']} cache_write={u['cache_write']}")
+        click.echo(f"   {u['phase']:10} in={u.get('input_tokens')} out={u.get('output_tokens')} "
+                   f"cache_read={u.get('cache_read')} cache_write={u.get('cache_write')}"
+                   + (f"  [{u['outcome']}]" if u.get("outcome") else ""))
 
     problems = res.get("validation_problems") or []
     if problems:
@@ -381,9 +409,9 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
                 break
         try:
             res = execute(s)
-            spent_in += sum(u["input_tokens"] or 0 for u in res["usage"])
-            spent_out += sum(u["output_tokens"] or 0 for u in res["usage"])
-            cached = sum(u["cache_read"] or 0 for u in res["usage"])
+            spent_in += sum(u.get("input_tokens") or 0 for u in res["usage"])
+            spent_out += sum(u.get("output_tokens") or 0 for u in res["usage"])
+            cached = sum(u.get("cache_read") or 0 for u in res["usage"])
             note = f"  (resumed, skipped {len(res['skipped'])})" if res["skipped"] else ""
             vp = res.get("validation_problems") or []
             if vp:
@@ -427,9 +455,15 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
 
             if i == 1 and gating:
                 bar = _canary.baseline_for(s.project, canary_baseline)
+                rbasis = _canary.report_basis(s.project, canary_baseline)
                 v = _canary.verdict(res.get("checks") or {}, bar,
                                     baseline_requested=True,
-                                    report_basis=_canary.report_basis(s.project, canary_baseline))
+                                    report_basis=rbasis)
+                # Written on the record at the gate (#1020): a verdict the
+                # batch acts on is a measurement of the record, pass or fail.
+                # The same shape `d4d api verdict` writes offline, so the two
+                # cannot disagree; a prior block (a resumed canary) is kept.
+                _write_verdict(res, v, canary_baseline, rbasis)
                 if v.get("unbaselined"):
                     click.echo(
                         f"     no baseline for {s.project} under "
