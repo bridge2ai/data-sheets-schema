@@ -44,6 +44,13 @@ class TestRepoFacts(unittest.TestCase):
         self.assertEqual(facts["dirty_paths"], ["aurelian", "data/x y.yaml", "new.py", "w2.py", "c.py"])
         self.assertEqual(facts["dirty_file_count"], 5)
 
+    def test_an_undecodable_path_is_escaped_not_collapsed(self):
+        """#1045: bytes in, a reversible escape out; no newline translation."""
+        fake = SimpleNamespace(stdout=b" M caf\xc3\xa9\0?? caf\xe9\0?? a\rb\0", returncode=0)
+        with mock.patch.object(provenance.subprocess, "run", return_value=fake):
+            raw = provenance._run(["git", "status", "--porcelain", "-z"], strip=False)
+        self.assertEqual(raw, " M caf\u00e9\0?? caf\\xe9\0?? a\rb\0")
+
     def test_dirty_paths_are_named_and_bounded(self):
         porcelain = "\0".join([" M src/a.py", "?? notes/scratch.md"] + [f"?? f{i}" for i in range(60)]) + "\0"
         with mock.patch.object(provenance, "_run", lambda args, **kw: porcelain if "status" in args else "abc"):

@@ -349,11 +349,14 @@ def prompt_facts(prompt_paths: list[Path] | None,
 
 def _run(cmd: list[str], *, strip: bool = True) -> str | None:
     try:
-        # `errors="replace"`: a path git prints verbatim under -z that the
-        # locale cannot decode must not turn the whole status into None,
-        # which would record a dirty tree as clean.
-        r = subprocess.run(cmd, capture_output=True, text=True, errors="replace", timeout=15)
-        out = r.stdout.strip() if strip else r.stdout
+        # Bytes, decoded with a reversible escape (#1045): a path git prints
+        # verbatim under -z that is not UTF-8 must neither turn the whole
+        # status into None (a dirty tree recorded as clean) nor collapse
+        # into U+FFFD (two files recorded as one); and no newline
+        # translation, so a `\r` in a name is kept.
+        r = subprocess.run(cmd, capture_output=True, timeout=15)
+        text = r.stdout.decode("utf-8", errors="backslashreplace")
+        out = text.strip() if strip else text
         return out or None
     except Exception:
         return None
