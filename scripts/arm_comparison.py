@@ -459,7 +459,7 @@ def write_figures(data, scores) -> None:
                         ax.scatter([x], [v], s=18, facecolors="white", edgecolors="black", zorder=3)
             ax.set_xticks(range(len(ARMS)))
             ax.set_xticklabels([f"{k}\nn={ns[i]}" if i in ns else f"{k}\n–"
-                                for i, (k, *_) in enumerate(ARMS)], fontsize=8)
+                                for i, (k, *_) in enumerate(ARMS)], fontsize=7, rotation=30, ha="right")
             ax.set_title(p, fontsize=10)
             ax.spines[["top", "right"]].set_visible(False)
         # One shared y-range for the row, floored at zero (counts) and sized to
