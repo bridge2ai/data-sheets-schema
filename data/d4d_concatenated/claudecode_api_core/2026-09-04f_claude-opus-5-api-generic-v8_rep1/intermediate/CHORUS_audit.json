@@ -1,0 +1,83 @@
+{
+  "findings": [
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "distribution_formats[0].format",
+      "issue": "The value \"Controlled-access cloud enclave\" answers the access route, not the distribution format. The bundle explicitly pairs each data type with a distribution format (OMOP, OHNLP, DICOM, WFDB, EDF+ and Persyst). Move the enclave/Azure/OHDSI access description into the DistributionFormat.notes or into data_governance.access_review_process (already present), and set `format` to the actual formats."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "distribution_formats",
+      "issue": "Omission the bundle clearly supports: the webinar data-inventory table states a distinct data standard per modality (Demographics/medications/procedures/flowsheets/diagnoses = OMOP; clinical notes = OHNLP; imaging = DICOM; waveform telemetry = WFDB; EEG = EDF+ and Persyst). The multivalued slot carries a single collapsed entry, which does not represent one entity per distinct format."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "updates.frequency",
+      "issue": "The value states that the documentation is absent (\"the documents do not state a release cadence for the dataset itself\") rather than answering the field. Keep only the attested part (sites provide regular status updates) or omit `frequency` and leave the absence note in `source_caveats`."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "existing_uses[0].examples[1]",
+      "issue": "Tense/subject error: cohort 2 of the AIM-AHEAD training program is prospective in the source (CFA released 2025-09-02, notice of award 2025-11-10, program start 2025-11-17). Stating that cohort 2 \"uses the data for hands-on coursework\" presents a planned program as an existing use. Only the attested present-tense claim (\"Datasets are being used for training activities and publications\") belongs in existing_uses; the cohort-2 curriculum is a plan and should be marked as such or dropped."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[1].data_substrate",
+      "issue": "`B2AI_SUBSTRATE:37` (Relational Database) is not attested. The bundle says only that EHR data are standardized to the OMOP Common Data Model and reported as 1.6 billion rows; it never names a storage substrate. Omit the slot rather than approximate."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "status",
+      "issue": "The slot takes a short status token (draft, published, deprecated). The value is a two-sentence interpretive paragraph that also restates release-progress facts already carried in `updates` and `description`. Reduce to a short status string and leave the progress detail where it already lives."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "labeling_strategies[0].labeling_details",
+      "issue": "Trailing clause states what the documents do not report (\"do not report labels present in the current release\"). The planned-capability framing is correct; move the absence statement to `source_caveats` on the same object."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "splits[0].split_details",
+      "issue": "Same pattern: the details field ends with an absence statement (\"do not report the size or availability of the holdout partition\"). Move to `source_caveats`; retain only the attested plan, in the source's tense."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators",
+      "issue": "Internal inconsistency in modeling: Eric Rosenthal is expressed via a nested `principal_investigator` Person object with no Creator-level `name`, while the five other named leadership-team members are expressed as bare Creator `name` strings with `affiliations`. One shape should be used for the roster; the PI designation is attested only for Rosenthal (NIH RePORTER) and can be carried by `principal_investigator` on that entry alone while still giving that Creator a `name`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[*].id, acquisition_methods[*].id, collection_mechanisms[*].id, subpopulations[*].id, creators[*].id, external_resources[*].id, intended_uses[*].id, existing_uses[*].id, ethical_reviews[*].id, preprocessing_strategies[*].id, cleaning_strategies[*].id, sampling_strategies[*].id, data_collectors[*].id, maintainers[*].id, funders[*].id",
+      "issue": "Minted fragment identifiers on classes whose digest does not require `id`, and which no other value in the record points at. Per the minting rule, an identifier nothing references is noise. Retain minted ids only where the class requires them (file_collections, and the Person under creators[0].principal_investigator) or where another value references the part."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[2].missing_information[0].why_missing, instances[4].missing_information[0].why_missing",
+      "issue": "Shape risk: `why_missing` is emitted as a list. The digest does not mark MissingInfo.why_missing multivalued. Verify against the schema and collapse to a scalar string if it is single-valued."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "human_subject_research.special_populations",
+      "issue": "Shape risk: emitted as a list; the digest does not state multivalency for `special_populations` (or `regulatory_compliance`). Verify and collapse if single-valued. The content itself (PICU/NICU admissions implying minors and neonates) is supported by chorus4ai.org."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "at_risk_populations.at_risk_groups_included",
+      "issue": "The boolean is an inference: the bundle states PICU and NICU admissions but never characterizes the cohort as including at-risk or vulnerable populations, and states nothing about assent, guardian consent, or protections. The inference is defensible but should be marked in `source_caveats` on the object rather than left as an unqualified true."
+    }
+  ],
+  "summary": "Thirteen findings, none critical. The two substantive content defects are (1) `distribution_formats` carrying an access route in `format` and collapsing five bundle-attested per-modality formats into one entry, and (2) an existing_uses example that states the prospective AIM-AHEAD cohort-2 training program as a current use. Three values embed absence statements in fields that should answer the question (`updates.frequency`, `splits[0].split_details`, `labeling_strategies[0].labeling_details`). One unsupported enum value (`B2AI_SUBSTRATE:37` for OMOP rows) should be dropped. The remainder are shape and hygiene items: a long prose `status`, inconsistent Creator modeling between the PI and the other leadership-team members, gratuitous minted identifiers on optional-id objects that nothing references, two multivalency risks to verify against the schema, and one inference (at_risk_groups_included) that needs a caveat. Source-conflict handling is correct: the 50,000 vs. 45K admission figures and the 7,642-admission vs. 1000-image imaging counts are both reported with the higher-ranked source preferred and the disagreement recorded in `source_caveats`; the MIT license is correctly withheld from the dataset `license` slot as a statement about the code. No prior-D4D reuse, no external identifiers supplied beyond the bundle, and no derived figure presented as source-reported were detected."
+}
