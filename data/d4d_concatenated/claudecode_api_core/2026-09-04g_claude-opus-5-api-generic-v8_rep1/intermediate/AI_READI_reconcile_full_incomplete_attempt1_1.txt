@@ -1,0 +1,38 @@
+# incomplete stream — phase reconcile_full, attempt 1, transport attempt 1 (#1017)
+# events: -1  seconds: 83.9  content_chars: 23672  content_sha256: 3814ce9df18168be1f113ae8bd1e95806dc1c296e0c772bebb4af6dfbb8eef6a
+# usage snapshot: {'cache_creation': {'ephemeral_1h_input_tokens': 0, 'ephemeral_5m_input_tokens': 0}, 'cache_creation_input_tokens': 0, 'cache_read_input_tokens': 203662, 'input_tokens': 36221, 'output_tokens': 1, 'server_tool_use': None, 'service_tier': None}
+# last 2000 characters as delivered:
+tments; type 2 diabetes controlled by
+    oral or non-insulin injectable medications; and insulin-controlled type 2 diabetes.
+  distribution: >-
+    776 participants with no diabetes, 560 lifestyle-controlled, 686 controlled by oral or
+    non-insulin injectable medication and 258 insulin-controlled.
+- name: Age
+  identification: >-
+    Eligibility required an age of 40 years or older, with a protocol maximum of 85 years.
+  distribution: Mean age 60.8 ± 11.3 years across the 2280 participants.
+
+splits:
+- split_details: >-
+    The release includes a recommended split into training (1576 participants), validation (352)
+    and test (352) sets, assigned per participant in participants.tsv. Because sex, race and
+    ethnicity are not released with the public version, the project team prepared splits in
+    70%/15%/15% proportions in which the validation and test sets are balanced as well as possible
+    for sex, race/ethnicity and diabetes status (no diabetes, prediabetes/lifestyle controlled,
+    oral medication controlled, and insulin controlled). Mean age is 61.1 ± 11.3 years in the
+    training set, 60.3 ± 10.8 in validation and 60.5 ± 11.4 in test. The recommended split is new
+    in version 3.0.0 and is intended to reduce disparities in models developed using this dataset.
+
+anomalies:
+- anomaly_details: >-
+    In survey data, skipped questions or incomplete responses are expected.
+- anomaly_details: >-
+    In wearable data, improper use and technical failure such as battery failure or system
+    malfunction are expected. The Garmin Vivosmart 5 had to be charged every 2-3 days, so there are
+    gaps in activity data collection.
+- anomaly_details: >-
+    In imaging data, patient uncooperation, noise that may obscure the images, technical failure
+    such as system malfunction, and data transfer failures are expected.
+- anomaly_details: >-
+    Undilated handheld fundus photography with the Optomed Aurora is challenging because the pupil
+    is not dilated and the cam
