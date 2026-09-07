@@ -1,0 +1,95 @@
+{
+  "findings": [
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "preprocessing_strategies[2].preprocessing_details",
+      "issue": "States \"de-identification tooling for imaging (CTP-deid)\". The bundle lists the repository only as \"CTP-deid Public\" with no description, no modality and no stated role in the pipeline; attributing imaging de-identification to it is unsupported inference. Repair: name the repository without asserting its function, or drop the parenthetical and retain only the attested claim that data are transformed \"using approaches that limit re-identification\" and that imaging de-identification was in process."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "data_governance.committee_contact.affiliation[0].name",
+      "issue": "Affiliation \"Tufts Medicine\" is inferred from the email domain tuftsmedicine.org. The bundle names Jared Houghtaling only as a webinar lecturer under host \"Tufts\" and gives his email; it never states his organization. Repair: remove the affiliation object, or record only what the source states."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "subsets[*].conforms_to / subsets[*].description",
+      "issue": "Internal inconsistency with the record's own source_caveats. The caveat states that the webinar data-type table is interleaved \"in a way that does not permit reliable assignment\" of the metadata column to individual data types, yet the subsets assign per-modality metadata schemas by positional reconstruction of that same table (nursing flowsheets -> \"OMOP schema with extensions\", waveform telemetry -> \"PhysioNet schema extended\", EEG -> \"open source EDF+ and Persyst schema\", notes -> \"OHNLP open source schema\", imaging -> \"DICOM schema\"). Repair: either extend the caveat to cover the schema-column assignments as a record-level reconstruction, or reduce the per-subset claims to the standard column (OMOP / OHNLP / DICOM / WFDB / EDF+ and Persyst), which the table states unambiguously."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "existing_uses[1].examples",
+      "issue": "A planned program is written as a current use. The source is a 9 September 2025 informational webinar describing Cohort 2 with a 26 September 2025 application deadline, notice of award 10 November 2025 and program start 17 November 2025; at source time no trainees had been selected. The entry uses present tense (\"gives up to 30 selected trainees hands-on training ... to conduct collaborative research\"). Repair: restate in the source's tense as a planned/announced program, or move to intended_uses and leave existing_uses[0] (\"Datasets are being used for training activities and publications\") as the only attested current use."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "ethical_reviews[0].reviewing_organization",
+      "issue": "\"CHoRUS Ethics pillar (Ethical and Trustworthy AI)\" is a project workstream named in the NIH abstract, not a reviewing body; the bundle documents no IRB, ethics committee or compliance certification. The accompanying review_details describe community focus groups and legal/regulatory landscape analysis, which answer a neighbouring concern (community engagement and legal framework) rather than institutional ethics oversight. Repair: omit ethical_reviews, or retain it without a reviewing_organization and confine review_details to what the sources state as ethics activity, avoiding the implication of a review body."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "labeling_strategies[0].labeling_details",
+      "issue": "Populated with a plan rather than a labeling procedure applied to the data: \"plans a visualization and annotation environment that will label data with targets important for prediction\". No annotation protocol, annotator qualification or executed labeling is attested. The plan is correctly tensed but the slot asserts labeling methodology applied to the dataset. Repair: omit the slot; the same forward-looking statement is already carried by purposes."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "maintainers[0].maintainer_details",
+      "issue": "Two distinct entities are collapsed: the consortium and a named individual, Ciera McCrary (MGH, Program Manager, contact address as published on the project website), who is described inside another object's prose rather than given her own Maintainer entry. The same field also carries transcription commentary about an apparent typographic error in the address, which belongs in source_caveats. Repair: emit a separate Maintainer for the program manager and move the transcription note to that object's source_caveats."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "external_resources[0..2].description",
+      "issue": "The resource URLs (https://chorus4ai.org/, https://github.com/chorus-ai, www.bridge2ai.org/chorus) are embedded in free-text description while the class's own `external_resources` field is left empty, so the pointer the class exists to carry is held only as prose. Repair: place the pointer in `external_resources` and keep description for the characterization."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "status",
+      "issue": "Holds a two-clause narrative (\"Released to approved users under controlled access; data acquisition, standardization and modality expansion ongoing within the NIH project period 2022-09-01 through 2026-11-30\") in a slot whose description expects a short status term such as draft, published or deprecated. The project-period dates duplicate content already carried in funders. Repair: reduce to a status term and let description/updates hold the narrative."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "notes",
+      "issue": "Records the project website's site-wide banner about review \"in compliance with Administration directives\". This is an observation about the source page and its transcription rather than residual dataset content, which is what notes is reserved for after description and the structured slots. Repair: move to source_caveats."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[1].counts",
+      "issue": "1600000000 is a unit expansion of the website's \"1.6 Billion Rows of EHR OMOP data\", an approximate reported magnitude rendered as an exact integer without noting the rendering. Repair: note in the entry's source_caveats or description that the integer expands an approximate figure stated as \"1.6 Billion\"."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "is_deidentified.identifiable_elements_present",
+      "issue": "Supported omission. The bundle states that clinical note text remains stored locally at contributing sites (only tokens shared) and that imaging de-identification was \"in process\" for the larger cohort as of September 2025, which supports asserting that identifiable elements are present in source material and that de-identification is partial. Repair: populate identifiable_elements_present with the boolean the evidence supports, keeping the existing method/details text."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "preprocessing_strategies[4].preprocessing_details",
+      "issue": "Bridges two sources: the GitHub repository description (\"Open source code to geocode OMOP Location entities via DeGauss\") and the NIH abstract's stated aim to \"ensure that data elements feature appropriate contextual factors such as geographic distance to the nearest hospital\". The record presents the second as what the geocoding tool supports; the bundle links them only by topic. Repair: state the geocoding capability alone, and keep the contextual-factor aim in purposes where it is already attested as a project goal."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_formats[0].format, distribution_formats[1].format",
+      "issue": "\"OMOP Common Data Model tables\" and \"OHNLP tokenized clinical notes\" name a data model and a content type rather than a distribution format; the bundle states no file format, media type or packaging for these. The remaining entries (DICOM, WFDB, EDF+ and Persyst) are format names and are sound. Repair: either drop the two non-format entries, since conforms_to and conforms_to_standard already carry OMOP and OHNLP, or retain them with a caveat that the source names a standard, not a delivery format."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_governance.access_review_process",
+      "issue": "The second access-request contact stated in the GitHub README (dbold@emory.edu) appears only inside prose, while committee_contact carries the other contact as a structured Person. One of two co-equal contacts is structured and the other is not. Repair: either structure both (a second Person is not admitted by committee_contact, which is single-valued, so either use committee_members or keep both in prose symmetrically) or note the asymmetry in source_caveats."
+    }
+  ],
+  "summary": "Fifteen findings against the full record, none high severity; the record's core factual spine (14 contributing hospitals within 20 academic centers, 9 modalities under controlled access, 50,000 released admissions with the 45K webinar figure recorded as a ranked disagreement, 1.6 billion OMOP rows, 7,642 admissions with radiology, 23 Tb of waveforms, OMOP/DICOM/WFDB/EDF+/OHNLP standards, NIH award OT2OD032701 to Massachusetts General Hospital) is well supported and correctly attributed, with the tier-2 project website preferred over the tier-4 webinar and the disagreement disclosed. Five medium findings: two unsupported inferences (CTP-deid characterized as imaging de-identification tooling; an affiliation derived from an email domain), one internal inconsistency (per-modality metadata-schema assignments reconstructed from a table the record itself declares unreliably ordered), one plan-as-current-state (the Cohort 2 training program written in present tense as an existing use when the source predates selection), and one neighbouring-field placement (community engagement and legal analysis recorded as ethical_reviews under a workstream named as a reviewing organization). One further plan-as-current-state at medium/low (labeling_strategies holding a planned annotation environment). The remaining low findings concern shape and placement rather than fact: entity collapse in maintainers, resource URLs held in description instead of the class's pointer field, narrative prose in status, a source-page observation in notes, an unflagged expansion of an approximate count, a supported boolean omitted from is_deidentified, a cross-source bridge in the geocoding preprocessing entry, two distribution_formats entries naming standards rather than formats, and asymmetric structuring of the two access contacts. No enum violations, no scalar/object range violations, and no invented identifiers were found; minted fragments are all rooted on the record's own id and Person objects carry ids rather than mailto values."
+}

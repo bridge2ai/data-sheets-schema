@@ -1,0 +1,89 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "data_governance.accountable_organization_notes",
+      "issue": "Invented key with an empty (null) value. The schema digest lists DataGovernance as accepting only access_decision_timeframe, access_review_process, accountable_organization, appeal_process, committee_contact, committee_members, committee_name, notes, source_caveats and stewardship_roles. `accountable_organization_notes` is not among them, carries no content, and will fail validation. Delete the key; the caveat it appears to have been intended for is already carried in data_governance.source_caveats."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "variables[variable_name=recommended_split].categories",
+      "issue": "Three distinct category values collapsed into a single list element, \"Train; Val; Test\". `categories` is a list; each attested category is a separate entity and should be its own entry (\"Train\", \"Val\", \"Test\"), matching the README split table column headers."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "distribution_dates[0].release_dates",
+      "issue": "Scalar string \"2025-11-17\" supplied to a plural slot (`release_dates`) that the schema declares multivalued. A scalar in a multivalued slot is a shape defect; emit it as a one-item list. Content itself is supported (FAIRhub dateType Available, 2025-11-17)."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "variables[participant_id].description, variables[recommended_split].description",
+      "issue": "`description` is not among the keys the schema digest lists for VariableMetadata (categories, data_type, derivation, examples, is_identifier, is_sensitive, maximum_value, measurement_technique, minimum_value, missing_value_code, notes, precision, quality_notes, source_caveats, unit). If validation rejects it, move the text to `notes`; the content is bundle-supported in both cases (participant folders named after the study ID; participants.tsv carrying the recommended split)."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[0].affiliations",
+      "issue": "Eight organizations are asserted as affiliations of the AI-READI Consortium creator. The bundle lists these ROR-identified institutions as study collaborators (sponsorCollaboratorsModule) and study locations, not as affiliations of the consortium-as-creator; the FAIRhub creator block records only creatorName \"AI-READI Consortium\", nameType Organizational. The individual ROR values are each attested, so this is a framing inference rather than a fabricated identifier, and creators[0].source_caveats partly discloses it. Also incomplete relative to the roster it draws on: University of Utah, University of Massachusetts Lowell, Meharry Medical College and Portland State University appear in the same source and are absent."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "known_biases[bias_type=selection_bias].mitigation_strategy",
+      "issue": "Presents EHR-driven personalized recruitment and wave adjustment as a mitigation of volunteer bias. The bundle attributes wave adjustment to achieving demographic balance (BMJ: composition \"will be adjusted by under- and oversampling groups as needed\") and nowhere frames any measure as mitigating volunteer bias; the protocol states volunteer bias as an unmitigated limitation. Either drop the mitigation_strategy for this entry or restate it as the record's own inference."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "regulatory_restrictions.confidentiality_level",
+      "issue": "Set to `restricted` where the only attested statement of confidentiality level is the RO-Crate's \"HL7:2N (normal)\", repeated on every subcrate. The enum offers no HL7 mapping, and the accompanying `notes` discloses the substitution and its reasoning, so this is a documented judgment rather than an unsupported claim — but the chosen value contradicts the source term it stands in for."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_protection_impacts[0].impact_details",
+      "issue": "The slot asks for impact assessments conducted; the value states that none has been conducted (\"No, a data protection impact analysis has not been conducted\"). This answers the healthsheet question but populates a list of assessments with the absence of one. Consider omitting the slot and relocating the fact, or retain it as an explicit negative finding."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "extension_mechanism.extension_details",
+      "issue": "Same pattern as data_protection_impacts: the object records that no extension mechanism exists. Defensible because absence is the substantive answer the healthsheet gives, but it is an ExtensionMechanism object describing no mechanism."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "sampling_strategies[0].is_sample",
+      "issue": "Set to false while the sibling `strategies` field describes wave-based stratified selection from an EHR-derived contact pool, and `why_not_representative` is populated (a field that presupposes sampling). The tension is disclosed in source_caveats and traces to a genuine disagreement between the healthsheet (\"contains all possible instances\", sampling strategy \"N/A\") and the study description (samplingMethod \"Non-Probability Sample\"), both tier 1. Flagged as an internal inconsistency the reader must reconcile from the caveat."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "preprocessing_strategies[2].preprocessing_details",
+      "issue": "The entry's subject is partly earlier releases (\"version 1.0.0 was produced by custom, ad hoc processing\"), placed in a slot describing the referent's own preprocessing. The v3.0.0 clause is on-subject and the CHANGELOG table supports both halves; consider narrowing to the current release or moving the cross-version comparison to notes."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "Populated with the platform URL https://fairhub.io/ where the attested value is the publisherName string \"FAIRhub\" in the FAIRhub dataset_description. The slot range is uriorcurie so a URI is permissible, but the URI is the record's substitution for a name the source gives; note also that the RO-Crate gives publisher as \"AI-READI Consortium\", a same-tier disagreement disclosed in the top-level source_caveats but not at the slot."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "related_datasets[2].target_dataset, related_datasets[3].target_dataset",
+      "issue": "Prose names (\"AI-READI mini-subset (FAIRhub child dataset 4)\", \"AI-READI controlled-access dataset\") where the two sibling entries use DOIs. The bundle supplies no identifier for either target (the API records only \"child\": 4 for the mini-subset, and the controlled-access release is never given a DOI), so no repair is available from the evidence; recorded for consistency awareness only."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "created_by",
+      "issue": "Omitted although the bundle attests the responsible party for creating the resource in two tier-1 sources (RO-Crate author/publisher \"AI-READI Consortium\"; FAIRhub creator block, same value). A supported omission rather than an error, but the slot is fillable from the evidence."
+    }
+  ],
+  "summary": "One high-severity defect: an invented, empty key `accountable_organization_notes` under data_governance, which is both outside the DataGovernance key set in the schema digest and null-valued; it must be deleted. Two medium shape defects: three split categories collapsed into one string element under variables[recommended_split].categories, and a scalar supplied to the multivalued distribution_dates[0].release_dates. The remaining eleven findings are low severity and concern framing rather than fabrication: a possibly non-accepted `description` key on two VariableMetadata objects, a collaborator roster reused as creator affiliations, one inferred bias mitigation the sources do not frame as such, an enum value (`restricted`) substituted for the attested HL7:2N term with the substitution disclosed, two objects that record the absence of the thing the slot collects, a documented is_sample/strategies tension inherited from a genuine tier-1 source conflict, one preprocessing entry partly about earlier versions, a URI substituted for an attested publisher name, two prose target_dataset values with no identifier available in the bundle, and an omitted created_by that the evidence supports. No fabricated identifiers were found: all ROR and ORCID CURIEs, DOIs, grant numbers, device makes and models, counts and file/byte figures trace to the bundle. Arithmetic was verified and is sound — the nine data-type file counts sum to 356,334 against a stated total of 356,343, leaving the nine root metadata files, and that derived figure is correctly labeled as the record's own computation with its inputs named; split counts reconcile to 2,280 across race/ethnicity, sex and diabetes status. Source conflicts (acronym expansion, lead institution, publisher, enrollment target 4,000 vs 4,600, collection start 18 vs 19 July 2023, sensitivity of released data) are each represented rather than silently resolved. Repair priority: delete the invented key, then fix the two shape defects; the low-severity items are optional refinements."
+}

@@ -1,0 +1,119 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "instances[*].instance_details",
+      "issue": "`instance_details` is not a slot the schema digest declares for Instance (declared: counts, data_substrate, data_topic, instance_type, label, label_description, missing_information, notes, sampling_strategies, source_caveats). All three Instance objects carry it. Move the prose to `notes` (or `label_description` where it describes labels) or drop it; an undeclared key is a shape defect regardless of how well the prose reads."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "total_size_bytes",
+      "issue": "Internal arithmetic inconsistency. The record's own file_collections[].total_bytes values sum to 12,601,718,300 (249,100 + 12,600,000,000 + 265,700 + 103,500 + 1,100,000), and the ten File.bytes values sum to the same figure. The stated total_size_bytes is 12,601,604,198, a discrepancy of 114,102 bytes reachable by neither the decimal conversion the source_caveats describes nor a binary one. A derived figure must equal the inputs it names."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators[].name (Axelsson, Metallo)",
+      "issue": "Given names not present in the bundle. The bundle attests only 'Axelsson U (KTH Royal Institute of Technology)' and 'Metallo C (University of California San Diego)'; neither 'Ulrika' nor 'Christian' appears in any source. Every other expanded given name in the roster is traceable to the bioRxiv preprint author list or the governance contact line; these two are not. Reduce to the attested form."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "source_caveats",
+      "issue": "Misattributed provenance for the immunofluorescence protein count. The caveat states 'the June 2025 and June 2026 releases state 464' and that 'the higher-ranked June 2026 release value (464) is used'. The June 2026 release listing in the bundle carries no per-file descriptions and no protein count at all; 464 is attested only by the June 2025 (tier 5) and October 2025 (tier 1) releases. The preference reasoning names a source that does not state the value."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "file_collections[#collection-ifimages].description",
+      "issue": "Description of the June 2026 image archives ('464 proteins of interest', DAPI/calreticulin/tubulin channel assignments, Lundberg Lab attribution) is copied from the October 2025 and June 2025 release listings. The June 2026 IF archives carry different MD5 checksums (6c1a8652…, 6d066e6b…, df796327…) from the October 2025 ones (0d972b80…, a98affcc…, ad4e68cc…), so they are not the same files; facts about the earlier release's image set are stated as facts about these files."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "prohibited_uses[0].prohibition_reason",
+      "issue": "The field holds the prohibition itself ('These laboratory data are not to be used in clinical decision-making…') rather than the reason for it. The prohibited use belongs in the object's description; prohibition_reason should carry why the use is forbidden."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "preprocessing_strategies, labeling_strategies, machine_annotation_tools",
+      "issue": "MuSIC-pipeline stages (node2vec PPI embedding, HPA image embedding, contrastive co-embedding, multi-resolution community detection, GO/Reactome alignment, LLM assembly naming) are stated as preprocessing and annotation applied to this dataset. The release explicitly states 'Computed cell maps not included in this release'; these stages produce outputs absent from the referent. They describe project tooling and future map production, not the current state of the released data. Either omit or state them in the tense the sources use."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "machine_annotation_tools[0].tools",
+      "issue": "'DenseNet-121' is drawn from the Nature U2OS cell-map paper, which describes a different dataset. The CM4AI preprint says only 'a Human Protein Atlas deep learning model'. A method attested for another dataset is imported into this record's tooling list."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "citation; creators[].name (Bélisle-Pipon)",
+      "issue": "Diacritic stripped from a proper noun inside quoted material. The Dataverse citation and the preprint both write 'Bélisle-Pipon'; the record writes 'Belisle-Pipon' in the verbatim citation string and in the creator name. American-English orthography governs composed prose, not quoted text or proper nouns."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_governance.committee_name and .access_review_process",
+      "issue": "Two small overreaches. 'CM4AI Data Access Committee' is a constructed name — the release page labels the field 'Data Governance Committee' and the preprint refers to 'A Data Access Committee' without a formal title. The process text says the committee 'supervises', where the preprint says it 'will supervise', converting a stated plan into present practice."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "related_datasets[].target_dataset",
+      "issue": "Identifier form is inconsistent with the rest of the record. All six targets are written as doi.org resolver URLs while version_access.latest_version_doi correctly uses the CURIE form (doi:10.18130/V3/HIGT4C). The same identifier scheme should take one form throughout so the DOIs resolve to one identity."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[].affiliations[].id",
+      "issue": "Supported omission. The June 2026 release page states the ROR identifier https://ror.org/0153tk833 for the University of Virginia affiliations (Clark, Al Manir, Levinson, Niestroy, Ratcliffe). The bundle supplies it, so it may be carried as ROR:0153tk833 on those Organization objects rather than leaving them name-only."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "description",
+      "issue": "The closing sentence about RO-Crate packaging with provenance graphs via FAIRSCAPE is lifted from the March 2025 release description and the preprint's project-level account; the June 2026 release description does not contain it. Defensible as a project-wide practice, but it reads as a statement the current release makes."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "keywords",
+      "issue": "'Medicine, Health and Life Sciences' is the Dataverse Subject field value, not a keyword; it is already carried in the record's subject-bearing prose. Minor category mixing in a controlled-ish list."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "source_caveats",
+      "issue": "'Sources also disagree on the number of authors and the affiliation of one author' asserts an author-count disagreement that the caveat never substantiates or quantifies; only the Sali affiliation conflict is then described. Either state which sources list how many authors, or drop the clause."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "Value 'https://dataverse.lib.virginia.edu' is a constructed base URL. The bundle names the publisher as 'University of Virginia Dataverse' and gives dataset-level URLs; the bare host is not attested as the publisher's identifier."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "license_and_use_terms.contact_person",
+      "issue": "Trey Ideker is attested as the Dataverse Point of Contact and as the preprint's corresponding author (tideker@health.ucsd.edu), but no source names him as the licensing contact. The bundle routes commercial-license questions to the copyright-holding institutions and access questions to the governance contact."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "funders[1]",
+      "issue": "Award 5U54HG012513-02 (Bridge2AI Bridge Center) and the Frederick Thomas Fund are acknowledged in the preprint as funding that work; the Dataverse release records only 1OT2OD032742-01 as its funding. Attribution to this release rather than to the project is an inference the release listing does not make."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "errata",
+      "issue": "Supported omission. The June 2025 release states it was a revision that added RGB immunofluorescent images, made 'corrections to ro-crate metadata', and changed naming conventions — a documented correction to a prior release that Erratum is the declared home for."
+    }
+  ],
+  "summary": "Nineteen findings against the full record. Two are high: `instance_details` is not a declared Instance slot and appears on all three Instance objects, and `total_size_bytes` (12,601,604,198) contradicts the record's own file and collection byte sums (12,601,718,300) by 114,102 bytes. Six are medium, and they cluster into three kinds of boundary slippage: two given names ('Ulrika' Axelsson, 'Christian' Metallo) are supplied from outside the bundle; the 464-protein IF count and the image-collection description are attributed to the June 2026 release, whose listing carries no descriptions and whose image archives have different checksums from the October 2025 set the description actually documents; and the MuSIC pipeline stages plus their annotation tooling (including DenseNet-121, drawn from the Nature U2OS paper) are stated as preprocessing of this dataset although the release states computed cell maps are not included. Also medium: prohibition_reason holds the prohibition rather than its reason. The eleven low findings are quotation fidelity (stripped diacritic in 'Bélisle-Pipon' inside the verbatim citation), a constructed committee name with a plan rendered in the present tense, resolver URLs where the record elsewhere uses doi: CURIEs, an unused ROR the bundle supplies, minor version-attribution drift in the description, an unsubstantiated caveat clause, a constructed publisher URI, two contact/funder attributions the release listing does not make, a subject term in keywords, and one supported omission (the June 2025 metadata corrections as an Erratum). The record's overall grounding is strong — the 47-author roster, all ten files with checksums, the licence terms, the governance and ethics contacts, and the version chain are all faithfully attested, and the derived totals are correctly declared as the record's own computation even though one of them miscomputes."
+}

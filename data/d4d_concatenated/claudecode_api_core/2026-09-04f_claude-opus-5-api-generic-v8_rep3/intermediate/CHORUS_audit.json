@@ -1,0 +1,137 @@
+{
+  "findings": [
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "labeling_strategies[0].labeling_details",
+      "issue": "Stated in the present tense as an existing capability (\"A visualization and annotation environment labels data with targets important for prediction\"). The GitHub organization overview writes this in the future tense as a project aim (\"A visualization and annotation environment will label data with targets important for prediction\"). A plan presented as the dataset's current state; either restate in the source's tense or omit."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "existing_uses[0].examples[1]",
+      "issue": "The AIM-AHEAD Bridge2AI for Clinical Care Cohort 2 program is described as an existing use with trainees who \"use the data and tools\". The bundle's webinar (September 2025) gives Program Start Date November 17, 2025 and the latest bundle capture is 2025-11-14, so the cohort had not begun; poster presentations at the 2026 meetings are explicitly future. Plan/announced program stated as current use. The first example (\"Datasets are being used for training activities and publications\") is attested and should carry this slot."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "relationships[0].relationship_details",
+      "issue": "\"Modalities are linked at the level of the individual hospital admission\" is an inference the bundle does not state. The bundle reports counts in admissions and \"7,642 Admissions with Radiology Data\"; it never describes inter-instance linkage structure. Unsupported; omit the slot."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances[9].counts",
+      "issue": "counts: 7642 is attached to an instance whose instance_type is \"Radiology imaging study obtained from hospital PACS\", but the website figure counts admissions with radiology data, not imaging studies. The unit of the count contradicts the unit of the instance; the accompanying notes concede this. Either restate the instance as an admission-with-radiology unit or drop the count."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "known_biases[0]",
+      "issue": "The entry does not state a known bias in the data; bias_description records that the consortium intends to manage bias, and the object's own source_caveats says no measured biases are reported. A DatasetBias populated with an objective rather than a bias does not answer the field; the mitigation content is already carried by sampling_strategies and known_limitations. Omit the slot."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "ethical_reviews[0].reviewing_organization",
+      "issue": "\"CHoRUS consortium ethics pillar (Ethical and Trustworthy AI)\" is a body constructed by the record. The abstract names pillar \"2) Ethics (Ethical and Trustworthy AI)\" as a project pillar, not as a reviewing organization. Additionally, community-facing ethics focus groups are consultation activity, not institutional ethical review; no IRB or ethics committee is named anywhere in the bundle, as the slot's own caveat admits."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "data_governance.committee_contact",
+      "issue": "Jared Houghtaling is attested in the GitHub overview only as an access-request contact (\"Request access: dbold@emory.edu or jared.houghtaling@tuftsmedicine.org\"); no committee is named in the bundle, and the record's own caveat says so. Placing him in committee_contact asserts a governance structure the evidence does not support. The parallel contact dbold@emory.edu appears only inside access_review_process prose and is not represented as a Person."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_governance.committee_contact.affiliation[0].name",
+      "issue": "\"Tufts Medicine\" is derived from the email domain tuftsmedicine.org. The bundle's webinar curriculum table lists Jared Houghtaling under host \"Tufts\", and the leadership slide names \"Tufts University\" for Manlik Kwong; \"Tufts Medicine\" as an organization name is not stated in any source."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "acquisition_methods[0].was_validated_verified",
+      "issue": "Set true on the strength of \"Validated semantic mappings\" and a \"clinical validation SOP\". Those statements concern mapping artifacts, not verification of the acquired instances. Overreach for the boolean; the mapping validation is already recorded in preprocessing_strategies and labeling_strategies."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "cleaning_strategies[0].cleaning_details",
+      "issue": "The clause \"before data are accepted\" is not supported; the GitHub overview says only that site status updates are used \"to identify and resolve any blocking issues\" and that CHoRUSReports produces characterization reports returned to sites following submissions. It states no acceptance gate."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "preprocessing_strategies[4].preprocessing_details",
+      "issue": "Joins two sources: the UF-Geocoding repository description (\"geocode OMOP Location entities via DeGauss\") and the award abstract's contextual factor example (\"geographic distance to the nearest hospital\"). Neither source states that the geocoding tool supplies that data element in this dataset; the causal link is the record's inference."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "is_deidentified.method",
+      "issue": "\"a CTP-deid repository\" is cited as part of the de-identification method. The bundle lists CTP-deid only as a repository name with no description and no stated application to this dataset; privacy_scan_tool is described only as \"A Privacy Scan tools for medical records\". Presence of a repository in the organization is not evidence of a method applied to the released data."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "machine_annotation_tools",
+      "issue": "Omission the bundle supports: the OHNLP toolkit is stated as the automated tool used to extract and tokenize clinical notes, and privacy_scan_tool / CTP-deid / UF-Geocoding are named automated tooling in the creation pipeline. A MachineAnnotationTools entry naming the OHNLP toolkit is available and currently carried only as prose in other slots."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "license_and_use_terms.license_terms",
+      "issue": "The '.edu' email requirement and the registration/assistance narrative are access-route facts already carried, verbatim in substance, by data_governance.access_review_process. Duplicated content across a terms field and a process field; license_terms should retain only the licensing-agreement requirement."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[*].id",
+      "issue": "Six creator fragment identifiers (#creator-mgh-rosenthal etc.) are minted although no value anywhere in the record points at a creator. Under the labeling rule, an identifier nothing references is noise rather than a label; the nested Person fragments, which do name a distinct referent, are correctly formed."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[5].source_caveats",
+      "issue": "The caveat text scopes the whole roster (\"lists six people under the heading ... only Eric Rosenthal is independently attested as principal investigator\") but is attached to the Manlik Kwong entry alone. Commentary about the list belongs at the record's own source_caveats or is repeated per entry."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[1].counts",
+      "issue": "1600000000 is a numeric expansion of the website's \"1.6 Billion Rows of EHR OMOP data\". The conversion is faithful but is the record's own computation from a rounded figure; the derivation is not annotated and the value reads as a source-reported exact count."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "known_limitations[4].limitation_description",
+      "issue": "\"roughly half the anticipated final dataset\" is a ratio the record computes from 50,000 and 100,000. Both inputs are named in the same sentence, so it is traceable, but it is presented as description rather than flagged as the record's own comparison."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "description",
+      "issue": "The description states 50,000 released admissions without the source conflict recorded at instances[0].source_caveats (webinar: \"over 45K unique admissions\" as of August 2025). Internal inconsistency of disclosure: the same disputed figure is caveated in one place and stated flatly in another."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_formats[*].notes",
+      "issue": "Several notes carry access-control facts (\"held under controlled access in the cloud enclave\", \"under controlled access\") that answer the governance/regulatory fields rather than the distribution-format field; those facts are already stated in confidential_elements and regulatory_restrictions."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[*].affiliations[*].name / *.affiliation[*].name",
+      "issue": "Organization objects are populated with a `name` key. The supplied schema digest lists only `notes` and `source_caveats` (plus `id`) for Organization; if `name` is not inherited in the target schema these objects will not conform. Verify against the schema before finalizing — the organization names themselves are attested."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "related_datasets",
+      "issue": "Omitted, though the bundle states CHoRUS is \"one data generation project of four in the ... Bridge2AI consortium\" and collaborates with \"3 other data generation projects\". These are sibling projects rather than named datasets, so omission is defensible, but the relation is the only cross-dataset fact the bundle offers and is currently carried only in prose."
+    }
+  ],
+  "summary": "Audited the full CHoRUS record (98-slot Dataset class) against the four-source bundle. The record is broadly well grounded: award facts, modality table, volumes, access controls and tooling all trace to specific passages, source disagreements over admission counts and imaging units are surfaced rather than silently resolved, and clearly unsupported areas (consent, errata, retention, versions, variables, file collections) are correctly omitted. Twenty-two findings, none high severity. The recurring defects are (1) three tense/scope errors where a project plan or an unstarted training cohort is written as the dataset's present state — labeling_strategies, existing_uses, and to a lesser degree acquisition_methods.was_validated_verified; (2) two unsupported inferences, the instance-linkage claim in relationships and the geocoding-to-distance-element link in preprocessing_strategies; (3) two objects that occupy a slot without answering it, known_biases (records an intention to manage bias, not a bias) and ethical_reviews (community focus groups plus an invented reviewing body, where no IRB is named); (4) one unit inconsistency, the admissions figure 7,642 attached to an imaging-study instance; and (5) a cluster of low-severity hygiene issues — unreferenced minted creator ids, a roster-scoped caveat lodged on one entry, an email-domain-derived affiliation, duplicated access-route text across license and governance slots, and two unannotated derived figures. One shape question requires schema verification: Organization objects carry `name`, which the supplied digest does not list for that class. Recommended repairs are localized: restate or drop the three plan-as-current values, delete relationships and known_biases, re-scope ethical_reviews to what the abstract actually says, correct the imaging count unit, and add a MachineAnnotationTools entry for the OHNLP toolkit."
+}

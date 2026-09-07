@@ -1,0 +1,107 @@
+{
+  "findings": [
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "Unrecorded tier-1 disagreement. The FAIRhub API gives `publisher.publisherName = \"FAIRhub\"` while the RO-Crate (same tier) gives `\"publisher\": \"AI-READI Consortium\"`. The record silently selects FAIRhub and supplies `https://fairhub.io/` as its identifier (a URI the bundle uses as the platform URL, not as a stated publisher identifier). Where same-tier sources disagree the ranking cannot decide, so both must be represented and the conflict recorded in `source_caveats`; the top-level caveat block records five other conflicts but not this one."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "prohibited_uses[0..7].prohibition_reason",
+      "issue": "All eight entries state the prohibition itself rather than the reason for it (\"The license forbids making clinical treatment decisions based on the Data, as it is intended solely as a research resource\"; \"The license forbids sharing or distributing Data with any third party model vendor...\"). `prohibition_reason` asks why the use is forbidden; the forbidden use belongs in the entry's descriptive content. Entry [0] is the only one that carries a reason at all, and it is trailing a restatement of the clause."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "extension_mechanism.extension_details",
+      "issue": "The value states that the field's subject does not exist rather than answering the field: \"There is currently no mechanism for others to extend or augment the AI-READI dataset outside of those who are involved in the project. There are also no formal guidelines...\". A statement of absence has not populated the slot; the healthsheet's negative answer belongs in `notes` (where the record already parks its other negative healthsheet findings: no external audit, no DPIA, no use repository) and the slot should be omitted."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "sensitive_elements[1]",
+      "issue": "The entry sets `sensitive_elements_present: true` for the controlled-access tier — racial and ethnic origins, 5-digit zip code, motor vehicle accident reports, genetic sequencing data, past health records, medications — which is not the declared referent (the public v3.0.0 release, doi:10.60775/fairhub.3). Its own notes concede \"This material is not part of the public release described here.\" Facts about a distinct release belong in `related_datasets` or in the entry that describes the referent; as written the slot carries two entries with opposite booleans for one dataset."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "sampling_strategies[0].is_sample",
+      "issue": "Internal inconsistency. `is_sample: false` (drawn from the healthsheet's \"The dataset contains all possible instances\") sits beside `why_not_representative`, `source_data` (\"All patients aged 40 years or older who had a medical encounter within each health system site... between 2020 and 2025\"), and four `strategies` describing wave sampling, contact-pool screening and balanced recruitment — and beside the FAIRhub study description's registered `samplingMethod: \"Non-Probability Sample\"`. The boolean contradicts the surrounding content and a tier-1 statement; either set it true with the healthsheet reading recorded in `notes`, or record the conflict in `source_caveats`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "regulatory_restrictions.confidentiality_level",
+      "issue": "`restricted` is the record's own mapping, not a stated value: the only confidentiality level in the bundle is the RO-Crate's \"HL7:2N (normal)\". The entry's `notes` acknowledge this, but an interpretive enum value derived from the access workflow (verified-ID login, self-attestation, license acceptance) should be marked in `source_caveats` rather than only in prose. The same applies to `hipaa_compliant: compliant`, inferred from `deIdentHIPAA: true` and the absence of PHI."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "conforms_to_standard[RO_CRATE]",
+      "issue": "The slot's description scopes it to a standard the dataset's own content follows. The RO-Crate is a separate metadata package describing the release (obtained from a Google Drive download); no ro-crate-metadata.json appears in the root `metadataFileList` of the dataset structure description, whose nine files are all CDS artifacts. The `conforms_to` prose correctly calls it \"A separate RO-Crate 1.2-DRAFT metadata package\", which is a statement about a description of the dataset rather than about its layout."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_formats[4]",
+      "issue": "The entry answers a neighbouring field: it carries no `format` or `media_type` and its `notes` open \"Access method rather than file format: the dataset is distributed through the FAIRhub platform...\". The access route is already fully stated in `data_governance.access_review_process`. The two `access_urls` are legitimately typed, but the entry's substance is access conditions, and the leading self-classification is commentary rather than content."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_formats[3].format",
+      "issue": "DICOM is described only in `notes` (\"DICOM (application/dicom) is listed first among the dataset's distribution formats\") while `format` and `media_type` are left empty, although the FAIRhub `format` array states `application/dicom` explicitly and DICOM is the single largest format in the release by volume. The three sibling entries (JSON, CSV, MD) populate `format`; this one does not."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "funders[2]",
+      "issue": "The Microsoft AI for Good Lab is recorded as a `grantor`, but the bundle states only \"We thank the Microsoft AI for Good Lab for supporting the cloud services needed for the project\" — an in-kind acknowledgment, with no grant, contract or award named. It is not listed in the dataset's own `fundingReference`. The same acknowledgment paragraph also thanks Topcon, Optomed, iCare and Zeiss for loaned devices and Heidelberg, Dexcom and Garmin for discounts, none of which are recorded as funders, so the treatment is inconsistent."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "ethical_reviews[1].reviewing_organization",
+      "issue": "\"AI-READI ethics and bioethics team\" is a label the bundle does not use. The RO-Crate's `ethicalReview` field names four individuals — Camille Nebeker, Debra Mathews, Kadija Ferryman, Nicholas Evans — with no organizational name attached. A coined body name in an organization-identifying field reads as an attested entity."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "participant_compensation[0].retention_incentives",
+      "issue": "Both values are access accommodations, not retention incentives: reimbursement of parking, public transit or rideshare fees, and rideshare assistance \"offered to study participants who endorsed barriers to transporting themselves to study visits\" (recorded in the IRB protocol under accessibility, not under payment). Neither is stated as an incentive to remain in the study."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "related_datasets[0..1].target_dataset",
+      "issue": "Descriptive matter is embedded inside the target-identifying value: \"...version 2.0.0 (doi:10.60775/fairhub.2, released 8 November 2024, 1,067 participants)\" and \"AI-READI mini subset for pipeline development (FAIRhub child dataset 4 of dataset 3)\". Each entry already has a `notes` key for that content; the DOI in particular is an identifier parenthesised inside a name string. `was_derived_from` carries the same pattern (\"...(ClinicalTrials.gov NCT06002048; NIH award OT2OD032644)\")."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators",
+      "issue": "Supported omission. The FAIRhub study description lists sixteen individuals under `overallOfficialList` with role \"Study Principal Investigator\", each with a name, degree, ORCID and ROR-identified affiliation (Aaron Lee, Cecilia Lee, Amir Bahmani, Sally Baxter, Christopher Chute, Jorge Contreras, Nicholas Evans, Samantha Hurst, T. Y. Alvin Liu, Gerald McGwin, Shannon McWeeney, Cynthia Owsley, Bhavesh Patel, Michael Snyder, Sara Singer, Linda Zangwill), and a `collaboratorList` of seven ROR-identified organizations. The record carries one of the sixteen and none of the seven, without noting the others."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subpopulations[2].subpopulation_elements_present",
+      "issue": "Inconsistent with siblings. Entries [0] and [1] set the flag false because race/ethnicity and sex are withheld from the public release; entry [2] (diabetes severity group) leaves it unset, although diabetes status is released — the README split table reports it publicly and the healthsheet states only that \"sex, race, and ethnicity data are not being released with the public version\". The value the bundle supports here is true."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "funders[0].grants[0].notes",
+      "issue": "The grant note cites \"NIH RePORTER records application 10471118\" from the tier-4 project page and the README acknowledgment, but the dataset's own tier-1 funding reference gives a different award URI, `https://reporter.nih.gov/search/yatARMM-qUyKAhnQgsCTAQ/project-details/10885481`, also cited in the healthsheet. Two RePORTER project identifiers for the same core project appear in the bundle; only one is recorded and the divergence is not noted."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "raw_data_sources[0].access_details",
+      "issue": "\"Not separately accessible; the processed participant data constitute this dataset\" states that access details do not exist rather than supplying them. Same pattern as `extension_mechanism`, though milder because the clause does identify the relationship between the raw source and the release."
+    }
+  ],
+  "summary": "Audited the full record (98-slot Dataset class) against the eleven-file AI-READI bundle. No fabricated facts were found: every device, laboratory reference range, ROR, ORCID, DOI, file count and byte count spot-checked traces to an attested passage, the nine directory sizes and counts match the dataset structure description exactly, the derived root-metadata file count of 9 and the two summation discrepancies (419,614 bytes; 9 files) are correctly presented as the record's own arithmetic with inputs named, and the split arithmetic is internally consistent (1,576+352+352=2,280, with race, sex and diabetes subtotals all reconciling). Five source conflicts are already recorded in `source_caveats` (institutional attribution, acronym expansion, collection start date, enrollment target, version scope). Seventeen findings: one unrecorded tier-1 conflict (publisher: FAIRhub vs AI-READI Consortium); two neighbouring-field placements (prohibitions written into `prohibition_reason`; an access route occupying a `distribution_formats` entry); two absence-statements standing in for answers (`extension_mechanism`, `raw_data_sources[0].access_details`); one referent breach (`sensitive_elements[1]` describing the controlled-access tier); one internal inconsistency (`is_sample: false` against the record's own sampling strategies and the registered Non-Probability Sample); two interpretive enum values insufficiently caveated (`confidentiality_level`, `hipaa_compliant`); one scope question on `conforms_to_standard: RO_CRATE`; three misplacements or coinages (Microsoft in-kind support as grantor, a coined ethics-review body name, transport reimbursement as retention incentive); two commentary-in-value cases (`related_datasets[*].target_dataset`); and three supported omissions (sixteen study PIs and seven collaborator organizations, `subpopulations[2]` flag, the second RePORTER project identifier). All shape checks passed: enum values in `conforms_to_standard`, `collection_type`, `format`, `media_type`, `file_type`, `data_type`, `bias_type`, `limitation_type`, `relationship_type`, `role` and `data_use_permission` are all schema-defined; `uriorcurie` slots carry CURIEs (doi:, ORCID:, ROR:) and `uri` slots carry URLs; required keys are present on every DataSubset, FileCollection, File, Person, RawDataSource and DatasetRelationship; and object-ranged slots carry objects throughout."
+}

@@ -106,6 +106,15 @@ ARMS = (
     # under the receipt protocol - the 12-vs-12 comparison against v6 agentic.
     ("v7prod", "v7 API production (2026-09-01)",
      "2026-09-01_claude-opus-5-api-generic-v7", "Claude API via CBORG", "reps"),
+    # The v8 PRODUCTION matrix (12 records, 2026-09-05..07): two label
+    # prefixes, since the VOICE and CHORUS canaries passed under 04f and
+    # AI_READI (after #1029) and CM4AI (fourth canary) under 04g; the fill
+    # kept each project's prefix so rep1..3 sit together. The 04f AI_READI
+    # record (invalid, #1029) and the 04b..04e canaries are excluded.
+    ("v8prod", "v8 API production (2026-09-04f/g)",
+     [f"2026-09-04f_claude-opus-5-api-generic-v8_rep{r}" for r in (1, 2, 3)]
+     + [f"2026-09-04g_claude-opus-5-api-generic-v8_rep{r}" for r in (1, 2, 3)],
+     "Claude API via CBORG", "reps"),
 )
 
 
@@ -168,6 +177,9 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
 }
 
 
+EXCLUDED_INVALID: dict[tuple[str, str], None] = {}   # (label, project) skipped as invalid; ordered, deduplicated
+
+
 def load(path: Path) -> dict[str, Any]:
     return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
 
@@ -181,6 +193,13 @@ def run_metrics(label: str, project: str) -> dict[str, Any] | None:
     if not (full.exists() and core.exists() and prov.exists()):
         return None
     rec = load(prov)
+    if (rec.get("validation") or {}).get("passed") is False:
+        # A record its own validation block declares invalid is evidence,
+        # not an arm member (#1029: the AI_READI 2026-09-04f record, kept
+        # and re-verdicted, sits under the same label prefix as the
+        # retained VOICE and CHORUS canaries).
+        EXCLUDED_INVALID[(label, project)] = None
+        return None
     pc = rec.get("pair_consistency") or {}
     rc = rec.get("report_claims") or {}
     g = (rec.get("grounding") or {}).get("distinct") or {}
@@ -233,9 +252,12 @@ def rubric_scores(prefix: str, project: str, rubric: str = "rubric10") -> list[d
         return out
     for path in sorted(evals.glob(f"{project}_*_evaluation.json")):
         d = json.loads(path.read_text(encoding="utf-8"))
-        if str(d.get("label", "")) in arm_labels(prefix):
+        label = str(d.get("label", ""))
+        if label in arm_labels(prefix) and (label, project) not in EXCLUDED_INVALID:
+            # The same exclusion as the metric table (#1052): an evaluation
+            # of a record the Bases declare invalid is not an arm score.
             s = d.get("overall_score") or {}
-            out.append({"label": d["label"], "total": s.get("total_points"),
+            out.append({"label": label, "total": s.get("total_points"),
                         "max": s.get("max_points"),
                         "adjusted_max": s.get("adjusted_max_points"),
                         "pct": s.get("normalized_percentage"),
@@ -247,6 +269,7 @@ def rubric_scores(prefix: str, project: str, rubric: str = "rubric10") -> list[d
 def collect() -> dict[str, dict[str, list[dict[str, Any]]]]:
     """arm -> project -> [rep metrics]"""
     data: dict[str, dict[str, list[dict[str, Any]]]] = {}
+    EXCLUDED_INVALID.clear()
     for key, _disp, prefix, _rt, _role in ARMS:
         data[key] = {}
         for p in PROJECTS:
@@ -338,7 +361,9 @@ def write_markdown(data, scores) -> None:
              "same evaluator for every arm shown; N/A exclusions are evaluator "
              "judgements, so adjusted maxima can differ between comparable records.",
              "- spend: absent by design — `api_usage` and `run_observed` are different "
-             "quantities (#400).", "",
+             "quantities (#400).",
+             "- a record whose own `validation` block says `passed: false` is not an arm "
+             "member (#1029): " + (", ".join(f"`{l}` {p}" for l, p in EXCLUDED_INVALID) if EXCLUDED_INVALID else "none excluded this run") + ".", "",
              "Arms: " + "; ".join(f"**{d}** — " + (", ".join(f"`{l}`" for l in pfx) if isinstance(pfx, (list, tuple)) else f"`{pfx}_rep{{1,2,3}}`") + f", {rt}"
                                    + (" (also shown with its per-project worst — max for reported-only metrics — the canary-gate baseline)" if role == "worst" else "")
                                    for _k, d, pfx, rt, role in ARMS), ""]
@@ -397,7 +422,8 @@ def write_figures(data, scores) -> None:
 
     OUT_FIG.mkdir(parents=True, exist_ok=True)
     colors = {"v4": "#9e9e9e", "v5api": "#4e79a7", "v5agentic": "#f28e2b",
-              "v6agentic": "#e15759", "v7api": "#59a14f", "v7prod": "#1b7f3b"}
+              "v6agentic": "#e15759", "v7api": "#59a14f", "v7prod": "#1b7f3b",
+              "v8prod": "#7b3fa0"}
 
     # One figure per metric: 4 project panels, one bar per arm = replicate mean,
     # error bar = sample SD (n printed under the bar). Replicates are dots.
@@ -433,7 +459,7 @@ def write_figures(data, scores) -> None:
                         ax.scatter([x], [v], s=18, facecolors="white", edgecolors="black", zorder=3)
             ax.set_xticks(range(len(ARMS)))
             ax.set_xticklabels([f"{k}\nn={ns[i]}" if i in ns else f"{k}\n–"
-                                for i, (k, *_) in enumerate(ARMS)], fontsize=8)
+                                for i, (k, *_) in enumerate(ARMS)], fontsize=7, rotation=30, ha="right")
             ax.set_title(p, fontsize=10)
             ax.spines[["top", "right"]].set_visible(False)
         # One shared y-range for the row, floored at zero (counts) and sized to
@@ -441,9 +467,9 @@ def write_figures(data, scores) -> None:
         # panel is drawn, so no panel's autoscale freezes the top early.
         axes[0].set_ylim(0, max(1.0, top) * 1.12)
         handles = [plt.Rectangle((0, 0), 1, 1, color=colors[k]) for k, *_ in ARMS]
-        fig.legend(handles, [d for _k, d, *_ in ARMS], loc="lower center", fontsize=8, ncol=3, frameon=False)
+        fig.legend(handles, [d for _k, d, *_ in ARMS], loc="lower center", fontsize=8, ncol=4, frameon=False)
         fig.suptitle(f"{disp} — mean ± SD over measured replicates; dots = replicates, hollow = unmeasured", x=0.02, ha="left", fontsize=11)
-        fig.tight_layout(rect=(0, 0.07, 1, 0.92))
+        fig.tight_layout(rect=(0, 0.12, 1, 0.92))
         out = OUT_FIG / f"arm_comparison_{mk}.png"
         fig.savefig(out, dpi=150); plt.close(fig)
         print(f"wrote {out.relative_to(ROOT)}")
@@ -504,6 +530,8 @@ def main() -> int:
     missing = [(k, p) for k in data for p in PROJECTS if not data[k][p]]
     if missing:
         print(f"note: no complete runs for {missing}", file=sys.stderr)
+    if EXCLUDED_INVALID:
+        print(f"note: excluded as invalid by their own validation block: {EXCLUDED_INVALID}", file=sys.stderr)
     write_markdown(data, scores)
     if not args.no_figures:
         write_figures(data, scores)
