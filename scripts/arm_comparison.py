@@ -177,7 +177,7 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
 }
 
 
-EXCLUDED_INVALID: list[tuple[str, str]] = []   # (label, project) skipped as invalid
+EXCLUDED_INVALID: dict[tuple[str, str], None] = {}   # (label, project) skipped as invalid; ordered, deduplicated
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -198,7 +198,7 @@ def run_metrics(label: str, project: str) -> dict[str, Any] | None:
         # not an arm member (#1029: the AI_READI 2026-09-04f record, kept
         # and re-verdicted, sits under the same label prefix as the
         # retained VOICE and CHORUS canaries).
-        EXCLUDED_INVALID.append((label, project))
+        EXCLUDED_INVALID[(label, project)] = None
         return None
     pc = rec.get("pair_consistency") or {}
     rc = rec.get("report_claims") or {}
@@ -252,9 +252,12 @@ def rubric_scores(prefix: str, project: str, rubric: str = "rubric10") -> list[d
         return out
     for path in sorted(evals.glob(f"{project}_*_evaluation.json")):
         d = json.loads(path.read_text(encoding="utf-8"))
-        if str(d.get("label", "")) in arm_labels(prefix):
+        label = str(d.get("label", ""))
+        if label in arm_labels(prefix) and (label, project) not in EXCLUDED_INVALID:
+            # The same exclusion as the metric table (#1052): an evaluation
+            # of a record the Bases declare invalid is not an arm score.
             s = d.get("overall_score") or {}
-            out.append({"label": d["label"], "total": s.get("total_points"),
+            out.append({"label": label, "total": s.get("total_points"),
                         "max": s.get("max_points"),
                         "adjusted_max": s.get("adjusted_max_points"),
                         "pct": s.get("normalized_percentage"),
@@ -266,6 +269,7 @@ def rubric_scores(prefix: str, project: str, rubric: str = "rubric10") -> list[d
 def collect() -> dict[str, dict[str, list[dict[str, Any]]]]:
     """arm -> project -> [rep metrics]"""
     data: dict[str, dict[str, list[dict[str, Any]]]] = {}
+    EXCLUDED_INVALID.clear()
     for key, _disp, prefix, _rt, _role in ARMS:
         data[key] = {}
         for p in PROJECTS:
@@ -463,9 +467,9 @@ def write_figures(data, scores) -> None:
         # panel is drawn, so no panel's autoscale freezes the top early.
         axes[0].set_ylim(0, max(1.0, top) * 1.12)
         handles = [plt.Rectangle((0, 0), 1, 1, color=colors[k]) for k, *_ in ARMS]
-        fig.legend(handles, [d for _k, d, *_ in ARMS], loc="lower center", fontsize=8, ncol=3, frameon=False)
+        fig.legend(handles, [d for _k, d, *_ in ARMS], loc="lower center", fontsize=8, ncol=4, frameon=False)
         fig.suptitle(f"{disp} — mean ± SD over measured replicates; dots = replicates, hollow = unmeasured", x=0.02, ha="left", fontsize=11)
-        fig.tight_layout(rect=(0, 0.07, 1, 0.92))
+        fig.tight_layout(rect=(0, 0.12, 1, 0.92))
         out = OUT_FIG / f"arm_comparison_{mk}.png"
         fig.savefig(out, dpi=150); plt.close(fig)
         print(f"wrote {out.relative_to(ROOT)}")
