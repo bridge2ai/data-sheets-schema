@@ -31,7 +31,9 @@ class TestOutputSizes(unittest.TestCase):
 class TestRepoFacts(unittest.TestCase):
     def test_the_first_lines_leading_status_space_is_kept(self):
         """#1039: `aurelian` was recorded as `urelian` — the strip ate the first line's space."""
-        porcelain = " M aurelian\0?? data/x y.yaml\0R  old.py\0new.py\0"
+        # git -z emits the rename's NEW path first, then the old one; a
+        # work-tree rename (`git add -N`) carries the R in the Y column.
+        porcelain = " M aurelian\0?? data/x y.yaml\0R  new.py\0old.py\0 R w2.py\0w.py\0UU c.py\0"
 
         def fake(cmd, *, strip=True):
             if "--porcelain" in cmd:
@@ -39,8 +41,8 @@ class TestRepoFacts(unittest.TestCase):
             return "abc"
         with mock.patch.object(provenance, "_run", side_effect=fake):
             facts = provenance.repo_facts()
-        self.assertEqual(facts["dirty_paths"], ["aurelian", "data/x y.yaml", "old.py"])
-        self.assertEqual(facts["dirty_file_count"], 3)
+        self.assertEqual(facts["dirty_paths"], ["aurelian", "data/x y.yaml", "new.py", "w2.py", "c.py"])
+        self.assertEqual(facts["dirty_file_count"], 5)
 
     def test_dirty_paths_are_named_and_bounded(self):
         porcelain = "\0".join([" M src/a.py", "?? notes/scratch.md"] + [f"?? f{i}" for i in range(60)]) + "\0"

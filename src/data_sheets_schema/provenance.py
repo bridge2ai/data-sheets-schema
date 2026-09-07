@@ -349,7 +349,10 @@ def prompt_facts(prompt_paths: list[Path] | None,
 
 def _run(cmd: list[str], *, strip: bool = True) -> str | None:
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+        # `errors="replace"`: a path git prints verbatim under -z that the
+        # locale cannot decode must not turn the whole status into None,
+        # which would record a dirty tree as clean.
+        r = subprocess.run(cmd, capture_output=True, text=True, errors="replace", timeout=15)
         out = r.stdout.strip() if strip else r.stdout
         return out or None
     except Exception:
@@ -626,8 +629,9 @@ def repo_facts() -> dict[str, Any]:
     # NUL-separated, unstripped (#1039): `_run`'s strip took the leading
     # status space off the first line and `aurelian` was recorded as
     # `urelian`; a path with a space survives -z where a line split does
-    # not. Each entry is `XY path`; a rename adds a second entry for the
-    # old name, which is skipped.
+    # not. Each entry is `XY path`; a rename or copy — staged (X) or in
+    # the work tree (Y, `git add -N`) — adds a second entry for the old
+    # name, which is skipped; the path recorded is the new one.
     entries = [e for e in dirty.split("\0") if e] if dirty else []
     lines: list[str] = []
     skip_next = False
@@ -636,7 +640,7 @@ def repo_facts() -> dict[str, Any]:
             skip_next = False
             continue
         lines.append(e)
-        if e[:1] in ("R", "C"):
+        if "R" in e[:2] or "C" in e[:2]:
             skip_next = True
     # The paths, not only their count (#1023): a record that says `dirty:
     # true, 13 files` cannot show that the runner code equalled the commit
