@@ -1,0 +1,45 @@
+# incomplete stream — phase full, attempt 1, transport attempt 1 (#1017)
+# events: -1  seconds: 385.9  content_chars: 19748  content_sha256: eb891e7f1cf56430b6e916f624762c227342e868cb191500949e3ecab6ce6389
+# usage snapshot: {'cache_creation': {'ephemeral_1h_input_tokens': 0, 'ephemeral_5m_input_tokens': 147375}, 'cache_creation_input_tokens': 147375, 'cache_read_input_tokens': 0, 'input_tokens': 6361, 'output_tokens': 1, 'server_tool_use': None, 'service_tier': None}
+# last 2000 characters as delivered:
+ visible neural networks
+    (VNNs), which interrogate how protein assemblies in the cell affect cell-level
+    phenotype predictions.
+- response: >-
+    Interpretation of genetic variants and mutations in human genomics using cell maps as
+    a foundation for downstream applications.
+- response: >-
+    Integrative structure modeling of protein communities, annotating communities by
+    available structural information about community members and their interactions and
+    computing integrative structural models for top-ranked communities.
+
+addressing_gaps:
+- response: >-
+    Machine learning models in genomics and precision medicine are typically
+    difficult-to-interpret black boxes; the project addresses the deficiency by generating
+    matched data and tools enabling machine learning systems built directly on knowledge
+    maps of cell and tissue architecture.
+- response: >-
+    Much of cell structure remains uncharted, and cell mapping technologies have typically
+    been applied separately; integration of multiple complementary data modalities provides
+    the opportunity to incorporate biological structure robustly across physical scales.
+- response: >-
+    A need exists for ethical, AI-ready datasets of cell architecture with complete
+    provenance, characterization, and explainability, to enable transformative biomedical
+    AI research under conditions that support validation and reuse.
+
+intended_uses:
+- use_category: AI-ready research datasets
+  examples: AI-ready datasets to support research in functional genomics
+- use_category: AI model training
+  examples: AI model training
+- use_category: Cellular process analysis
+  examples: Cellular process analysis
+- use_category: Perturbation and disease-context analysis
+  examples: >-
+    Cell architectural changes and interactions in presence of specific disease processes,
+    treatment conditions, or genetic perturbations
+
+prohibited_uses:
+- prohibition_reason: >-
+    These laboratory data are not to be used
