@@ -285,9 +285,9 @@ pass `d4d runs check --strict`. Deterministic numbers below are read from
 the records by a script (`grant_number` at `funders[].grants[]`, #1049);
 the arm table `notes/arm_comparison.md` carries the v8 column.
 
-| project | rep | receipts `with/receiptable` (6) | changed after receipt (5) | minted (7) | `grant_number` (2) | report findings stored (after regate) | British form / rewritten | `full` output (Δ v7 mean) (9) | thinking on `full` | `full` s | `full` attempts / abandoned | repair findings |
+| project | rep | receipts `with/receiptable` (6) | changed after receipt (5) | minted (7) | `grant_number` (2) | report findings stored (after regate) | British form / rewritten | `full` output (Δ v7 mean) (9) | thinking on `full` | `full` s | `full` attempts / abandoned (any phase) | repair findings |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| VOICE | 1 | 65.0% 223/343 | 6.3% 12/189 | 15 | 2 | 0 | 2 / 0 | 94,936 (+24.7%) | 59,495 | 2,257 | 1 / 0 | 10 |
+| VOICE | 1 | 65.0% 223/343 | 6.3% 12/189 | 15 | 2 | 0 (0) | 2 / 0 | 94,936 (+24.7%) | 59,495 | 2,257 | 1 / 0 | 10 |
 | VOICE | 2 | 54.0% 141/261 | 12.5% 19/152 | 0 | 2 | 2 (2)ᶠ | 0 / 0 | 83,711 (+9.9%) | 47,827 | 2,091 | 2 / 1 | 9 |
 | VOICE | 3 | 57.6% 220/382 | 8.1% 14/173 | 21 | 3 | 1 (1)ᶠ | 2 / 1 | 86,279 (+13.3%) | 47,302 | 928 | 1 / 1 | 8 |
 | CHORUS | 1 | 28.5% 53/186 | 12.9% 8/62 | 0 | 1 | 0 (0) | 0 / 0 | 52,066 (+26.8%) | 34,907 | 591 | 1 / 0 | 3 |
@@ -305,7 +305,10 @@ the core schema, which the checker resolved against `Dataset` (#1046);
 the true count is 0 and both runs were regated on it. ᵘ two `full`
 responses judged unusable (no parseable object) and discarded without a
 snapshot (#1048). ᵗ the endpoint returned no thinking block on `full`,
-`reconcile_full` and `report` (#1047); the runner requests none.
+`reconcile_full`, `report` and the report re-checks (#1047); the runner
+requests none. The same two runs wrote 27 and 35 resolver URLs under
+`id` (`normalisation.identifier_form`; 0 on the other ten), rewritten
+to CURIEs at write time — the model-written count, not the arm's 0.
 Abandoned attempts (transport drops, all retried to completion): 5 across
 the arm, each with a snapshot and ledger row (#1017).
 
@@ -314,18 +317,19 @@ the arm, each with a snapshot and ledger row (#1017).
 
 | # | result | reading |
 |---|---|---|
-| 2 | **favourable** — `grant_number` populated in 12 of 12 (1–3 per record), from 0 of 12 on v7 | A did what it was for; the registered ceilings (AI_READI 2, CHORUS 1, CM4AI 3, VOICE 3) are met or exceeded, the excess being supplements and non-NIH awards (#1028) |
+| 2 | **favourable** — `grant_number` populated in 12 of 12 (1–3 per record), from 0 of 12 on v7 | A did what it was for; the registered target is ≥ 1 per record. The ceilings (AI_READI 2, CHORUS 1, CM4AI 3, VOICE 3) are met on 8 of 12 — VOICE rep1/2 and CM4AI rep2/3 populate fewer — and exceeded on AI_READI, where the excess is a supplement (#1028) |
 | 5 | **unfavourable** — 11.1% of receipt paths pooled (218/1,962) against < 10%, from 13.0%; 6 of 12 records under 10%; CM4AI rep3 alone 43.8% (70/160) | reconcile still rewrites receipted values; the fall is 2 points, not the halving predicted, and one record without thinking carries a third of the arm's rewrites |
-| 6 | **favourable** — 56.4% pooled (2,309/4,094) against > 40%, from 35.5%; 8 of 12 records above 40%, CHORUS all three below (28.5–39.4%, its v7 33.8–37.4%) | R4/D2 moved coverage everywhere but CHORUS, whose bundle is the smallest (8 chunks) |
-| 7 | **unfavourable** — max 28 (CM4AI rep3) above v7's worst 22, median 15.5 against "stays 0" (v7 median 0); 9 of 12 records mint | the digest's labels did not displace invented ids: minting rose arm-wide, reported and never gated |
-| 9 | **unfavourable** — `full` output within ±10% in 3 of 12; per-project means +16.0% VOICE, +12.5% CHORUS, +33.4% AI_READI, +12.7% CM4AI (whose rep2/3 ran without thinking at −32/−24%; rep1 alone +93.7%) | the larger digest and the receipt cost more output than the ±10% registered; AI_READI is the outlier in every replicate |
+| 6 | **favourable** — 56.4% pooled (2,309/4,094) against > 40%, from 35.4% (1,387/3,917); 8 of 12 records above 40%, CHORUS all three below (28.5–39.4%, its v7 33.8–37.4%) | R4/D2 moved coverage everywhere but CHORUS, whose bundle is the smallest (8 chunks) |
+| 7 | **unfavourable** on the median — 15.5 against "stays 0" (v7 median 0), 8 of 12 records mint; the max, 28 (CM4AI rep3), is below v7's worst, which the records put at **31** (VOICE rep3; the registered text's 22 was wrong) | the digest's labels did not displace invented ids: minting rose arm-wide, reported and never gated |
+| 9 | **unfavourable** — `full` output within ±10% in 3 of 12; per-project means +16.0% VOICE, +12.4% CHORUS, +33.4% AI_READI, +12.7% CM4AI (whose rep2/3 ran without thinking at −32/−24%; rep1 alone +93.7%) | the larger digest and the receipt cost more output than the ±10% registered; AI_READI is the outlier in every replicate |
 
 Bookkeeping rows arm-wide: British form count 4 (two `Temerty Centre`
 title-case skips counted twice) against v7's 139, the normaliser having
 rewritten 105; resolver URLs, undeclared prefixes, organisational
 fragments, GC label variants, pair errors and duplicate keys 0 on all 12;
-receipts 100% of chunks reviewed on all 12, snippets mismatched 4 across
-the arm (CHORUS rep2 2, rep3 1, AI_READI rep2 1), 6 of 12 reports regated.
+receipts 100% of chunks reviewed on all 12, snippets mismatched 5 across
+the arm (CHORUS rep2 2, rep3 1, AI_READI rep2 1, CM4AI rep3 1), 6 of 12
+reports regated.
 
 ## Sequencing (PRs, in order)
 
