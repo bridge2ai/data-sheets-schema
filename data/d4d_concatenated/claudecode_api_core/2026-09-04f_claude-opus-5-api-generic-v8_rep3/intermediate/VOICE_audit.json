@@ -1,0 +1,101 @@
+{
+  "findings": [
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "conforms_to / conforms_to_standard",
+      "issue": "BIDS v1.9.0 conformance is asserted for the referent (the PhysioNet v3.1.0 featurized release). The bundle attributes BIDS conversion only to the audio-plus-questionnaire distribution organized under a `b2ai-voice-audio` root (project documentation, tier 2). The tier-1 PhysioNet 3.1.0 description of this release states a features/metadata/phenotype layout and never mentions BIDS. The record's own `source_caveats` concedes this yet the slots still assert it. Either drop both slots or restate the BIDS fact only where it belongs (a statement about the audio distribution, e.g. in `related_datasets` notes)."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "preprocessing_strategies[6]",
+      "issue": "Same misattribution as `conforms_to`: the BIDS conversion step with per-participant/per-session WAV directories and JSON sidecars describes the raw-audio distribution, not the featurized release this record describes. Presented as a preprocessing step of the referent."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "distribution_formats[1]",
+      "issue": "'Controlled access raw audio distribution' with the Synapse access URL is a distribution route for a different resource. The record's own referent decision excludes raw waveforms (they appear correctly under `related_datasets` with `derives_from`). Listing them under this dataset's `distribution_formats` states another dataset's access route as this dataset's format."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "prohibited_uses[0..2].prohibition_reason",
+      "issue": "Each entry places the prohibited use itself in `prohibition_reason` ('Attempting to re-identify research participants ... is not permitted'), leaving the reason unstated. The field asks why the use is forbidden. The bundle supplies the reasons — protecting participants from re-identification and from harm or stigmatization, and preserving unrestricted downstream access in alignment with Open Science principles — which should occupy `prohibition_reason` while the prohibited use is stated in the entry's descriptive field."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "data_protection_impacts[0]",
+      "issue": "The single entry states that no impact analysis has been conducted. This is a value recording the absence of documentation rather than an answer to the field; the slot should be omitted, with the fact carried in `notes` if retained at all."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "errata[0]",
+      "issue": "The first entry states 'There is no erratum' and points to a changelog published elsewhere — an absence-plus-pointer occupying a list slot. The second entry carries the actual corrections and is sufficient; the first should be removed."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "at_risk_populations.at_risk_groups_included",
+      "issue": "Set to false, but the record's own `subsets` include a neurological cohort of participants with mild cognitive impairment, Alzheimer's disease and other dementias, and a mood and psychiatric cohort. The bundle nowhere states that no at-risk groups are included; the IRB protocol's vulnerable-populations section addresses children only, which is an absence of discussion rather than a negative finding. The boolean overstates what the evidence supports — omit it and retain the special_protections text and the caveat."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "collection_mechanisms[3]",
+      "issue": "The Bridge2AI Voice Web app and iOS app remote-collection mechanism is stated as a collection mechanism for this dataset. The tier-1 PhysioNet methods state collection was conducted on a tablet with a custom application; the project documentation states remote data collection did not occur for the released data. This is an approved-but-unused modality presented as current state, only partly softened by the attached caveat."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "collection_consents[0]",
+      "issue": "The entry ends with pediatric parental consent and child assent procedures. Pediatric participants are not in this dataset (minimum enrollment age 18); those procedures are facts about the separate pediatric release already recorded under `related_datasets`. Restrict the entry to the adult consent process."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "sampling_strategies[0].strategies",
+      "issue": "Recruitment flyers with QR codes, waiting-room recruitment, social media platforms and FlowTrials are IRB-protocol-approved recruitment methods (tier 2, forward-looking across four study phases), not attested as the routes by which the 833 released participants were sampled. The tier-1 methods state screening of patients presenting at specialty clinics. Presented without a plan/actual distinction."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "collection_timeframes[0].timeframe_details",
+      "issue": "Mixes three different things in one value: the twelve-month collection statement, the NIH award period (2022-09-01 to 2026-11-30, a funding fact, not a collection timeframe), and the protocol's four-phase four-year plan (an intention). The award period and the phased plan belong elsewhere or should be dropped; the caveat flags the twelve-month figure's uncertainty but not the other two."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "other_tasks[0].task_details",
+      "issue": "Does not name any additional task the dataset may support; it restates the absence of predefined splits (already carried in `splits`) plus the labeling-documentation guidance (already carried in `labeling_strategies`). The slot is populated without answering it."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "known_biases[0..2].affected_subsets",
+      "issue": "Values are prose ('All disease cohorts', 'Recordings grouped by collection site') while the record mints five `DataSubset` identifiers that nothing else points at. Where a bias affects a named subset, the affected_subsets value should reference the minted identifier so the subset labels are actually used."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[*] / distribution_formats[*] / external_resources[*] / variables[*]",
+      "issue": "These entries carry `name` and/or `description` keys, which the supplied schema digest does not list for Creator, DistributionFormat, ExternalResource or VariableMetadata (unlike FileCollection, File and DataSubset, which the digest states accept the full top-level slot listing). Verify against the schema before acting: if these slots are inherited from a base class and validation accepts them, leave the values in place — do not strip attested names to satisfy the digest's abbreviation."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "`https://physionet.org/` is supplied as publisher. The bundle names PhysioNet as the hosting platform and as the journal field of the citation, but never states a publisher explicitly; the platform is maintained by the MIT Laboratory for Computational Physiology, which the record records as a maintainer. Defensible but inferred."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "machine_annotation_tools[0].tool_accuracy",
+      "issue": "The value states that off-the-shelf models were not audited for correctness — an absence of accuracy information rather than an accuracy figure. Acceptable as a quality caveat, but it belongs in `notes` or `source_caveats` on the entry rather than in the field asking for accuracy."
+    }
+  ],
+  "summary": "16 findings against the full record; none high. No fabricated identifiers, no prior-D4D reuse, no enum violations (all bias_type, limitation_type, relationship_type, collection_type, file_type, format, media_type, hipaa_compliant, confidentiality_level, data_use_permission, conforms_to_standard and Maintainer.role values are drawn from the declared enums), correct RFC 3339 offset on `issued`, bare DOI in `doi`, CURIE form in `id`, `publisher` and `latest_version_doi`, uri form retained in `access_urls`, and B2AI_TOPIC/B2AI_SUBSTRATE CURIEs used rather than approximated prose. Per-feature record counts (29,278 / 32,522 / 28,640 / 31,855 / 31,872 / 29,289), the 833-participant total, the five release dates, the version DOIs and the v3.1.0 phenotype table inventory all check out against the tier-1 PhysioNet 3.1.0 source, including the v3.1.0 relocation of adhd_adult, ptsd_adult and psychiatric_history from diagnosis to questionnaire. The dominant defect class is scope leakage across the referent boundary: BIDS conformance, the raw-audio distribution route, remote collection apps and pediatric assent are facts about neighbouring resources or unused modalities asserted in the referent's own slots (five findings). Second is absence-as-answer: `data_protection_impacts` and the first `errata` entry populate slots with statements that documentation does not exist. Third is one field-mismatch, `prohibition_reason` holding the prohibition rather than its reason across all three entries. `at_risk_groups_included: false` is contradicted by the record's own dementia and psychiatric cohorts. Two omissions were checked and found correct rather than missing: `use_repository` (the bundle answers 'No') and `imputation_protocols` (no imputation performed). The Creator/DistributionFormat/ExternalResource/VariableMetadata name-and-description finding is conditional on schema inheritance and must not drive removal of attested content."
+}

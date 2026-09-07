@@ -1,0 +1,50 @@
+# transport error: RemoteProtocolError (#1017) — phase repair_full, attempt 1, transport attempt 1 (#1017)
+# events: None  seconds: 393.9  content_chars: 27885  content_sha256: 914b268050749bb77b7c7a23303b31d0777eceabc662b8d1591361c67e996802
+# usage snapshot: {'cache_creation': {'ephemeral_1h_input_tokens': 0, 'ephemeral_5m_input_tokens': 17419}, 'cache_creation_input_tokens': 17419, 'cache_read_input_tokens': 0, 'input_tokens': 29522, 'output_tokens': 2, 'server_tool_use': None, 'service_tier': None}
+# last 2000 characters as delivered:
+reflectance (ir) from
+    Heidelberg Spectralis, iCare Eidon, Topcon Maestro2 and Zeiss Cirrus.
+  file_count: 93921
+  total_bytes: 174381046406
+  conforms_to: Digital Imaging and Communications in Medicine (DICOM); directory layout per Clinical Dataset Structure (CDS) v0.1.1
+  conforms_to_standard:
+  - DICOM
+  - CDS
+- id: doi:10.60775/fairhub.3#collection-wearable-activity-monitor
+  name: wearable_activity_monitor
+  path: wearable_activity_monitor/
+  collection_type: processed_data
+  description: >-
+    Data from the Garmin Vivosmart 5 fitness tracker worn for ten consecutive days,
+    organized into seven modality directories - heart_rate, oxygen_saturation,
+    physical_activity, physical_activity_calorie, respiratory_rate, sleep and stress -
+    each under garmin_vivosmart5/<participant>.
+  file_count: 15245
+  total_bytes: 38313536220
+  conforms_to: Open mHealth; directory layout per Clinical Dataset Structure (CDS) v0.1.1
+  conforms_to_standard:
+  - OPEN_MHEALTH
+  - CDS
+- id: doi:10.60775/fairhub.3#collection-wearable-blood-glucose
+  name: wearable_blood_glucose
+  path: wearable_blood_glucose/
+  collection_type: processed_data
+  description: >-
+    Continuous glucose monitoring data from the Dexcom G6, organized as
+    continuous_glucose_monitoring/dexcom_g6/<participant>. Participants wore the device
+    for ten days concurrently with the activity tracker and the home environmental
+    sensor, masked to the readings during the monitoring period.
+  file_count: 2246
+  total_bytes: 4169006971
+  conforms_to: Open mHealth; directory layout per Clinical Dataset Structure (CDS) v0.1.1
+  conforms_to_standard:
+  - OPEN_MHEALTH
+  - CDS
+- id: doi:10.60775/fairhub.3#collection-root-metadata
+  name: Root metadata and documentation files
+  path: /
+  collection_type: metadata
+  description: >-
+    Nine Clinical Dataset Structure metadata and documentation files at the root of the
+    release: CHANGELOG.md, dataset_description.json, dataset_structure_description.json,
+    heal

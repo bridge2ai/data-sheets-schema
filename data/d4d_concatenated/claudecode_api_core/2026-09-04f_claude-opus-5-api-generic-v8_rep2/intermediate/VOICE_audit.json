@@ -1,0 +1,101 @@
+{
+  "findings": [
+    {
+      "severity": "major",
+      "record": "full",
+      "slot": "at_risk_populations.guardian_consent",
+      "issue": "The referent is the adult release (eligibility 18-120 years; the record itself states 'Pediatric enrollment is outside this adult dataset'). The guardian-consent provision quoted comes from the umbrella IRB protocol's pediatric arm, which governs the separately released Bridge2AI-Voice Pediatric Dataset. Populating this field asserts that guardian consent applies to this dataset's participants. Remove the field; if the protocol's pediatric provisions are worth recording at all, they belong to the pediatric dataset entry in related_datasets, not to the referent's own slots."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "at_risk_populations.special_protections",
+      "issue": "Bullet 1 ('the approved protocol provides for signed assent for children or for adults unable to consent') describes the umbrella protocol, not this dataset. Bullet 2 correctly scopes the adult release. Drop bullet 1 or restate it as a fact about the protocol rather than about this release's protections."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "at_risk_populations.at_risk_groups_included",
+      "issue": "No source classifies this dataset's participants as an at-risk population. The IRB protocol's vulnerable-populations section concerns pediatric participants only, and the healthsheet makes no such classification. The value 'true' is inferred from the presence of cognitive-impairment and psychiatric cohorts. Either drop the object or record the inference explicitly in source_caveats."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "content_warnings",
+      "issue": "content_warnings_present: true rests on the healthsheet warning about free-speech transcriptions, but the same bundle records that transcripts of free speech audio were removed at v1.1 and that spectrograms, MFCCs, Mel spectrograms, transcriptions, EMAs and PPGs from open-response prompts are excluded from the feature-only release at v3.0.0 and v3.1.0. As written the slot states an earlier release's condition as the current release's. Rescope the warning to what 3.1.0 actually distributes or drop the object; the existing source_caveats acknowledges the conflict but the boolean still asserts the superseded state."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "related_datasets[*].target_dataset",
+      "issue": "All four values are descriptive prose (title, version, DOI and, in the fourth, an access route and Synapse accession embedded in a sentence) rather than the identifier the slot asks for. Reduce each to the identifier of the target — 10.13026/h995-bt35, 10.13026/k81f-qr68, 10.13026/37yb-1t42, and the Synapse identifier for the raw audio — and move the descriptive material to the entry's notes."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "preprocessing_strategies[2]",
+      "issue": "The BIDS v1.9.0 conversion described (folder layout b2ai-voice-audio with sub-<participant_id>/ses-<...>/audio/*.wav) is the layout of the audio dataset, which is not part of this release. Presenting it as a preprocessing step of the referent attributes another artifact's structure to the feature-only release. The existing source_caveats notes PhysioNet does not restate it; either scope the entry explicitly to the audio dataset or drop it."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "ethical_reviews[1]",
+      "issue": "The Canadian research ethics board entry describes the umbrella protocol's Canadian arm and the separate genomic protocol, neither of which governs this adult PhysioNet release; the tier-1 source states only that collection and sharing was approved by the USF IRB. The entry's own text concedes the genomic work 'is not part of this release'. Rescope to the protocol or drop."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "collection_timeframes[0].timeframe_details",
+      "issue": "The twelve-month duration is taken from the healthsheet, which is written against an earlier release (its study-metadata section refers to v2.0.0 and its de-identification section to v3.0.0). Applying it unqualified to a 3.1.0 cohort assembled across releases from v1.0 (306 participants) through v3.0.0 (833) states an earlier release's fact as the current one. Add a source_caveats scoping the figure to the documentation's release, or omit."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "license_and_use_terms.license_terms",
+      "issue": "The value runs the credentialed-access policy of v3.1.0 together with the registered-access process described in the tier-2 documentation and used for v1.1 ('Only registered users who sign the specified data use agreement'), without noting that the access model changed between versions. Scope the registered-access sentences or record the change in source_caveats."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "splits[0].split_details",
+      "issue": "The value records that no recommended splits exist rather than describing a split strategy. This is the pattern of answering a field with an absence. Either drop the slot or, if retained, keep only the actionable half (researchers construct their own splits) and move the negative statement to notes."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "external_resources[0].future_guarantees",
+      "issue": "The value reports that the healthsheet 'answers \"not applicable\"' to the guarantees question rather than answering the field. Replace with the substantive position (no guarantees of persistence are offered for the listed supporting resources) or omit."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "existing_uses[0].notes",
+      "issue": "'Bridge2AI Voice Scholars program' is a name the bundle does not state; the documentation gives only the URL https://www.b2aivoicescholars.org/ under 'Training opportunities for using the dataset'. Either quote the source's phrasing with the URL or drop the coined program name."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "maintainers[1]",
+      "issue": "Two unsupported elements. The bundle names DACO as the access-review committee for raw audio; it does not say DACO curates the dataset (the curator contact in the healthsheet is redacted), so 'Curates the dataset' is an inference. Separately, role: academic_institution is a poor fit for an access-compliance office; 'other' is the closer enum value."
+    },
+    {
+      "severity": "minor",
+      "record": "full",
+      "slot": "regulatory_restrictions.confidentiality_level / regulatory_restrictions.hipaa_compliant",
+      "issue": "Both are classifications no source states in those terms. 'restricted' is inferred from the credentialed access policy, and 'compliant' from the healthsheet's 'Does this dataset apply the HIPAA de-identification rules? Yes' plus the HIPAA-compliant collection and storage described in the protocol. Retain if judged supportable, but record the derivation in source_caveats."
+    },
+    {
+      "severity": "info",
+      "record": "full",
+      "slot": "conforms_to / conforms_to_standard",
+      "issue": "BIDS v1.9.0 is named in the bundle and the released phenotype directory mirrors the BIDS phenotype layout, so a reader may expect conforms_to_standard: BIDS. The omission is defensible because the attested BIDS statement is about the audio dataset rather than this feature-only release; recording the decision in source_caveats would make the omission legible."
+    },
+    {
+      "severity": "info",
+      "record": "full",
+      "slot": "creators",
+      "issue": "The tier-1 PhysioNet record for 3.1.0 enumerates roughly 120 individual authors; the record represents authorship at institution and consortium granularity with two named principal investigators. This is a defensible reading of 'creators' and not a defect, but the granularity choice is unstated. A line in source_caveats would document it."
+    }
+  ],
+  "summary": "No unsupported hard facts were found. Every quantitative claim checked against the bundle is accurate for version 3.1.0: 833 participants, five North American sites, the nine Parquet feature files and their per-feature record counts (29,278 / 32,522 / 28,640 / 31,855 / 31,872 / 29,289), the 25 ms window, 10 ms hop and 400-point FFT, 201 frequency bins, 60 Mel bins and MFCCs, 50 Hz articulatory and 100 Hz posteriorgram rates, the exact 3.1.0 phenotype directory contents (including adhd_adult, ptsd_adult and psychiatric_history relocated to questionnaire and voice_perception/voice_problem_severity dropped from task), the release history and DOIs, compensation amounts, retention terms and AI-readiness scores. The findings are scoping and shape defects rather than fabrications. The dominant pattern is subject drift from the umbrella IRB protocol and the sibling pediatric and audio artifacts into the referent's own slots (at_risk_populations, ethical_reviews[1], preprocessing_strategies[2]), with one field — guardian_consent — actively misstating an adult-only release. A second pattern is earlier-release state presented as current (content_warnings, collection_timeframes, the registered-access half of license_terms). Three values answer with an absence or a pointer instead of the field's content (splits, future_guarantees), and related_datasets carries prose where identifiers belong. Two enum classifications and one coined program name are inferences that should either be caveated or dropped."
+}

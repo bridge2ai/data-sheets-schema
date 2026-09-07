@@ -1,0 +1,25 @@
+# transport error: RemoteProtocolError (#1017) — phase full, attempt 1, transport attempt 1 (#1017)
+# events: None  seconds: 1183.3  content_chars: 84886  content_sha256: bdae9bfc94786171d8e97a056793dc4cee925e89d6bdb81121f7bbd48ea6e1ac
+# usage snapshot: {'cache_creation': {'ephemeral_1h_input_tokens': 0, 'ephemeral_5m_input_tokens': 163047}, 'cache_creation_input_tokens': 163047, 'cache_read_input_tokens': 0, 'input_tokens': 6349, 'output_tokens': 5, 'server_tool_use': None, 'service_tier': None}
+# last 2000 characters as delivered:
+enselab"
+  - slot: labeling_strategies[0].labeling_details
+    snippet: "The process for any new labels should be described alongside any release of a model or publication. This process should include exact variables used for this determination."
+  - slot: acquisition_methods[0].acquisition_details
+    snippet: "The data was directly observable and reported by subjects. Clinical diagnoses were verified by clinicians reviewing audio and/or imaging data, looking at electronic health records, or medication prescriptions."
+  - slot: collection_mechanisms[0].mechanism_details
+    snippet: "The data were collected using an iPad app."
+  - slot: data_collectors[0].collector_details
+    snippet: "Research teams, which may include medical, graduate, or undergraduate students, coordinated with clinicians/doctors to identify appropriate participants."
+  - slot: data_collectors[1].collector_details
+    snippet: "These clinicians and doctors were listed under IRB as co-investigators, and were added to the consortium so that their names are included on consortium-level publications that emerge from the research."
+  - slot: participant_compensation[0].compensation_amount
+    snippet: "Participants currently receive $40 for a data collection session that takes less than 90 minutes, and $80 for a session that takes over 90 minutes, for no more than a total of 3 sessions and maximum compensation of $120."
+  - slot: participant_compensation[0].compensation_type
+    snippet: "Participants were compensated for their time through electronic gift cards."
+  - slot: collection_timeframes[0].timeframe_details
+    snippet: "The data was collected over a period of 12 months."
+  - slot: direct_collection[0].collection_details
+    snippet: "Did you collect the data from the individuals in question directly, or obtain it via third parties or other sources (e.g., hospitals, app company)?"
+  - slot: collection_notifications[0].notification_details
+    snippet: "Yes, participants went through an IRB-

@@ -1,0 +1,44 @@
+# transport error: RemoteProtocolError (#1017) — phase repair_full, attempt 1, transport attempt 1 (#1017)
+# events: None  seconds: 372.7  content_chars: 20270  content_sha256: 9e5d02592af018fc13a1952b28d268f459718c59c886c439a1578380fc480194
+# usage snapshot: {'cache_creation': {'ephemeral_1h_input_tokens': 0, 'ephemeral_5m_input_tokens': 0}, 'cache_creation_input_tokens': 0, 'cache_read_input_tokens': 17419, 'input_tokens': 27701, 'output_tokens': 5, 'server_tool_use': None, 'service_tier': None}
+# last 2000 characters as delivered:
+rs are eligible.
+  is_subpopulation: true
+  is_data_split: false
+
+splits:
+- split_details: >-
+    The release provides no predefined recommended data splits for training, validation
+    or testing. Researchers are encouraged to create their own splits based on their
+    specific requirements, taking the multivariate distribution across disorder
+    category, site and demographics into account.
+
+relationships:
+- relationship_details: >-
+    Sessions and recordings are nested within participants: a subset of participants
+    required multiple sessions to complete data collection, so a participant may appear
+    in more than one session and, in the phenotype tables, in more than one row, and
+    responses for the same data element may vary across rows. Records are joined across
+    the feature, metadata and phenotype files by participant identifier, session
+    identifier and task name.
+  source_caveats: >-
+    The project documentation healthsheet answers the question of whether relationships
+    between individual instances are made explicit with "No, they are unrelated",
+    treating the participant as the instance; the PhysioNet release notes describe
+    repeated sessions per participant. Both statements are recorded here.
+
+anomalies:
+- anomaly_details: >-
+    Different sites used different collection configurations, and the collection
+    protocol changed over the course of the study, so recordings are not uniform across
+    sites or over time.
+- anomaly_details: >-
+    Some audio files, whether because of length or other issues, could not generate
+    certain features and are therefore absent from the bundled feature files; this is
+    why per-feature record counts differ, ranging from 28,640 for articulatory
+    estimates to 32,522 for pitch.
+- anomaly_details: >-
+    Version 2.0 reprocessed spectrograms to fix minor issues identified in the previous
+    release, and version 3.1.0 fixed broken parquet files carried over from version
+    3.0.0.
+- anomaly_details

@@ -1,0 +1,143 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "instances[0].instance_type_notes",
+      "issue": "Invented key. The Instance class accepts only counts, data_substrate, data_topic, instance_type, label, label_description, missing_information, notes, sampling_strategies, source_caveats (plus id, used_software). `instance_type_notes` is not a declared slot and is additionally set to null, carrying no content. Remove it."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "data_governance.committee_contact.id",
+      "issue": "Second identity minted for a referent the bundle already identifies. The June 2026 release author list gives 'Parker J ... ORCID https://orcid.org/0000-0003-4535-3486', and the same Jillian Parker is named as Data Governance Committee contact. The record mints doi:10.18130/V3/HIGT4C#person-jillian-parker-governance while also carrying ORCID:0000-0003-4535-3486 for the same person under creators, producing two identities for one person. Use ORCID:0000-0003-4535-3486 as the id and keep email jillianparker@health.ucsd.edu beside it."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators[*].name",
+      "issue": "Given names supplied that no source in the bundle states. The bundle gives only surname-plus-initial for these authors: 'Axelsson U', 'Ballllosero Navarro F', 'Chinn B', 'Metallo C', 'Sigaeva A', and 'Clark T' (the preprint gives 'Timothy Clark', never 'Tim Clark'). The record writes 'Ulrika Axelsson', 'Frida Ballllosero Navarro', 'Brenton Chinn', 'Christian Metallo', 'Alina Sigaeva', 'Tim Clark'. Expanded given names are facts about people the bundle does not supply; render as the bundle states them (e.g. 'Axelsson U', 'Timothy Clark')."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "preprocessing_strategies; labeling_strategies; machine_annotation_tools",
+      "issue": "Pipeline described as applied to this release when the release states it was not. All three slots describe the MuSIC cell-map construction pipeline (node2vec PPI embedding, HPA image embedding, contrastive co-embedding, community detection, GO/Reactome alignment, LLM assembly naming) sourced from the tier-3 preprint. The June 2026 release page states under Completeness: 'Computed cell maps not included in this release' and under Limitations 'Does not contain predicted cell maps, which will be added in future releases'. These are steps that produce an artifact absent from the referent; stating them as preprocessing applied to this dataset presents a project capability as the dataset's current state. Either omit or restate explicitly as the project pipeline not applied to this release's contents."
+    },
+    {
+      "severity": "moderate",
+      "record": "full",
+      "slot": "use_repository[0]",
+      "issue": "Value answers a neighbouring field. UseRepository is for repositories or registries tracking how the dataset has been used (papers-with-code, citation indices). The entry describes the CM4AI portal's Publications page and its archive of prior data releases — a project website and a version archive, not a use-tracking resource. The version-archive content duplicates version_access.versions_available. Omit the slot."
+    },
+    {
+      "severity": "moderate",
+      "record": "full",
+      "slot": "parent_datasets[0]",
+      "issue": "Range mismatch in substance: the entry's id is https://cm4ai.org/data-releases/, a documentation web page listing releases, not a dataset. No parent dataset is attested; the release's relationship to prior releases is already carried correctly in related_datasets and version_access. Omit parent_datasets."
+    },
+    {
+      "severity": "moderate",
+      "record": "full",
+      "slot": "regulatory_restrictions.other_compliance",
+      "issue": "Value answers a neighbouring field. The text 'Prohibited use: these laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval' is a prohibited use, already carried verbatim in prohibited_uses[0]. other_compliance is for compliance requirements applying to the dataset. Remove the duplication."
+    },
+    {
+      "severity": "moderate",
+      "record": "full",
+      "slot": "instances[1].data_substrate; instances[3].data_substrate; instances[2].data_substrate",
+      "issue": "Less precise B2AI_SUBSTRATE terms chosen where exact ones exist. instances[1] is a size exclusion chromatography-mass spectrometry elution profile and the vocabulary has 59 = 'Size Exclusion Chromatography-Mass Spectrometry Data', but 58 ('Mass Spectrometry Data') was used. instances[2] is a CRISPRi perturbation profile and the vocabulary has 64 = 'Perturb-seq Data', but 63 ('Single-cell RNA Sequence Data') was used. instances[3] (AP-MS) is correctly 58."
+    },
+    {
+      "severity": "moderate",
+      "record": "full",
+      "slot": "file_collections[*].total_bytes",
+      "issue": "Derived figures presented as exact byte counts, with an unstated and inconsistent conversion. The bundle states sizes as '113.3 KB', '135.8 KB', '171.8 KB', '93.9 KB', '30.2 KB', '73.3 KB', '1.1 MB'; the record converts each at 1 KB = 1000 bytes and asserts an integer byte count (e.g. 113300, 1100000) as if measured. The notes name the input size, which partly satisfies the derivation rule, but the conversion basis is unstated and the implied precision is false. Additionally the three IF image collections (3.8 GB, 4.6 GB, 4.2 GB) receive no total_bytes at all, so the slot is populated inconsistently across sibling entries."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "sampling_strategies[0].strategies",
+      "issue": "Project objective stated as the release's sampling strategy. 'CM4AI's objective is multimodal interrogation of 100 chromatin modifiers and 100 metabolic enzymes' is an objective from the tier-3 preprint (May 2024), phrased there as a goal; the June 2026 release does not state how many targets it actually covers. Mark as the project objective rather than as the strategy realized in this release."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "citation; creators[* Bélisle-Pipon].name",
+      "issue": "Quoted material altered. The bundle's citation and author list both write 'Bélisle-Pipon JC' and 'Bélisle-Pipon, JC'; the record's citation string and creators entry write 'Belisle-Pipon' with the accent stripped. Proper nouns and quoted citations keep their source form; the American-English rule does not reach them. (The governance/ethics contact line in the bundle does write 'Belisle-Pipon' unaccented, so ethical_reviews[1].contact_person.name is defensible as-is.)"
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "related_datasets[*].target_dataset",
+      "issue": "Identifier form inconsistent with the rest of the record. All seven targets are written as doi.org resolver URLs (https://doi.org/10.18130/V3/K7TGEM etc.) while id, doi and version_access.latest_version_doi use the doi: CURIE form for the same identifier scheme. One scheme written two ways within a single record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "prohibited_uses[0].prohibition_reason; prohibited_uses[1].prohibition_reason",
+      "issue": "Both values state the prohibition rather than the reason for it. Entry 0 restates the clinical-use ban; entry 1 restates the non-commercial term. The class offers no separate field for the prohibition itself, so the placement is forced, but the reason (regulatory oversight absent; licensor's commercial reservation) is what the field asks for and is recoverable from the bundle."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "external_resources[*].archival",
+      "issue": "Boolean asserted without support. The bundle nowhere states the archival status of cm4ai.org, MassIVE, Figshare, NDEx, GitHub, fairscape.github.io or integrativemodeling.org; archival: true/false is the record's inference in all seven entries. Omit the key where the bundle is silent."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "conforms_to; conforms_to_standard",
+      "issue": "Asserted for this release from statements about earlier releases and the project generally. The June 2026 release page's description does not mention RO-Crate; the RO-Crate claim comes from the tier-3 preprint and from the March 2025 (tier-5, historical) release description, and from the presence of ro-crate-metadata.json files in the March/June 2025 releases. The June 2026 file listing shows only cm4ai_release_metadata.zip, whose internal format is not stated. Defensible at project level but should carry a caveat naming the source, or be scoped."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_formats[0].notes",
+      "issue": "Access route recorded inside a format object. 'directs users to the Data Access API for programmatic access' describes how to obtain the files, not the distribution format. The DistributionFormat class offers access_urls and download_url for access information."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "regulatory_restrictions.regulatory_restrictions[0]",
+      "issue": "A statement that no restriction applies placed in a slot for restrictions. 'The release records FDA Regulated: No' answers the field by negation; it is supported by the bundle, but reads as a restriction entry when it records the absence of one."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "language",
+      "issue": "Not stated anywhere in the bundle. 'en' is inferred from the language the sources happen to be written in. Under the omission-over-inference rule this should be dropped."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "last_updated_on",
+      "issue": "Supported omission. Three file collections (cm4ai_ifimages_MDA-MB-468_paclitaxel.zip, _untreated.zip, _vorinostat.zip) are recorded on the release page as 'Published Jul 15, 2026', after the 2026-06-17 issue date, and the record already notes this in the file_collections entries. That date supports last_updated_on: '2026-07-15T00:00:00Z'."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "ethical_reviews[*].contact_person.orcid",
+      "issue": "Declared field left empty where the bundle supplies it. Both contact_person objects carry an ORCID as id but leave the Person.orcid field unpopulated, although the bundle states ORCID https://orcid.org/0000-0002-7080-8801 for Ravitsky V and https://orcid.org/0000-0002-8965-8153 for Bélisle-Pipon JC."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "addressing_gaps[1].response",
+      "issue": "Motivation text borrowed from a passage about a different dataset. 'Much of cell structure still remains uncharted... integration of multiple complementary data modalities provides the opportunity...' is the framing of the tier-3 Nature paper describing the U2OS cell map, a distinct dataset recorded under related_datasets. The gap is echoed by CM4AI's own framing, but the wording should come from a passage about the referent."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subsets; file_collections",
+      "issue": "Two parallel id spaces for the same partitions with no cross-reference. #subset-ifimages-untreated and #files-ifimages-untreated (and the six other matching pairs) describe the same slice of the release; neither points at the other, and nothing else in the record points at either. Both ids are schema-required so neither is a minting violation, but the duplication reads as two structures where one partition exists."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "notes",
+      "issue": "Residual field carrying content that structured slots already hold or could hold. The RO-Crate/FAIRSCAPE packaging statement duplicates conforms_to; the AI-Ready criteria list and the six-module organization are project description rather than facts the description field cannot hold."
+    }
+  ],
+  "summary": "Audited the full record against the declared bundle with the June 2026 Dataverse release (doi:10.18130/V3/HIGT4C) as the tier-1 referent. Twenty-three findings: four high, five moderate, fourteen low. The four high findings are (1) an invented, null-valued key `instance_type_notes` on instances[0], which is not a declared Instance slot; (2) a minted person fragment for Jillian Parker in data_governance.committee_contact when the bundle supplies her ORCID, creating two identities for one referent; (3) six creator names given expanded first names the bundle never states (Axelsson, Ballllosero Navarro, Chinn, Metallo, Sigaeva, and 'Tim' for Timothy Clark); and (4) preprocessing_strategies, labeling_strategies and machine_annotation_tools describing the MuSIC cell-map pipeline as applied to this release, when the release itself states that computed cell maps are not included. Moderate findings concern slot misuse (use_repository holding a project publications page; parent_datasets pointing at a web page; a prohibited use duplicated into regulatory_restrictions.other_compliance), imprecise B2AI vocabulary terms where exact ones exist (SEC-MS should be substrate 59, perturb-seq 64), and derived byte counts asserted with an unstated decimal conversion and applied inconsistently across sibling file collections. Low findings cover accent-stripping in quoted citation and author names, doi.org resolver URLs in related_datasets where the record elsewhere uses doi: CURIEs, unsupported `archival` booleans, RO-Crate conformance carried forward from earlier releases and the preprint without scoping, an inferred `language`, and a supported but omitted last_updated_on of 2026-07-15. Core-record findings are none in themselves: the core is a projection and every defect above must be repaired in the full record and re-projected."
+}
