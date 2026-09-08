@@ -155,7 +155,12 @@ class TestPhaseAssembly(unittest.TestCase):
         A literal `2` broke when #596 added the source ranking — a test about
         *what* is cached failing because of *how many*. What matters is that
         each block is per-project input that does not change between phases,
-        and that all of them are marked ephemeral.
+        and that all of them sit inside the cached prefix.
+
+        Not that each carries its own `cache_control`: four breakpoints is the
+        API maximum and the optional blocks share one on the last of them
+        (#1069). A breakpoint caches the whole prefix up to it, so membership
+        of the prefix is the property, and marking is the mechanism.
         """
         for ph in PHASES:
             req = build_phase(spec(), ph, carry={})
@@ -166,8 +171,13 @@ class TestPhaseAssembly(unittest.TestCase):
                                     for t in texts))
                 # the digest block leads, and names the class it describes
                 self.assertTrue(texts[0].strip())
-                for b in req.cached_blocks:
+                marked = [b for b in req.cached_blocks if b.get("cache_control")]
+                for b in marked:
                     self.assertEqual(b["cache_control"]["type"], "ephemeral")
+                # At most four breakpoints, and the last block carries one, so
+                # every block above is inside the cached prefix (#1069).
+                self.assertLessEqual(len(marked), 4)
+                self.assertTrue(req.cached_blocks[-1].get("cache_control"))
 
     def test_core_phase_uses_the_core_class_digest(self):
         req = build_phase(spec(), "core", carry={})
@@ -679,8 +689,11 @@ class TestExecuteOffline(unittest.TestCase):
             # prefix is sent on every call, not its length.
             self.assertTrue(any("Declared input bundle" in p["text"]
                                 for p in cached))
+            # In the cached prefix, not necessarily carrying its own marker:
+            # the optional blocks share one breakpoint (#1069).
             self.assertTrue(any("Declared source ranking" in p["text"]
-                                for p in cached))
+                                for p in parts))
+            self.assertLessEqual(len(cached), 4)
             # temperature must be absent for models that reject it
             self.assertNotIn("temperature", kw)
             from data_sheets_schema.api_runner import output_limit

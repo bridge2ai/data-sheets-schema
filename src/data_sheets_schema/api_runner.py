@@ -414,7 +414,7 @@ def prompt_body(path: Path = GENERIC_PROMPT) -> str:
 # are hashed mechanically below, so wording changes cannot go unrecorded, but
 # nothing derives this ordering from the code — keep it true.
 ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, "
-                   "declared naming, arm prompt, "
+                   "declared naming, declared scope (#932), arm prompt, "
                    "carried artifacts, phase instruction; "
                    "core derived from the full record, not generated (#694); "
                    "audit and reconcile_full address the full record only, the "
@@ -431,6 +431,41 @@ ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, "
                    "checked against the records before the run completes, and "
                    "a report whose claims contradict them is regenerated once "
                    "with the contradictions named (#929)")
+
+
+def context_blocks(spec: "RunSpec") -> dict[str, Any]:
+    """Which manifest-derived blocks this run actually sent (#1069 review).
+
+    The ranking (#596), naming (#668) and scope (#932) blocks each return
+    None for a reason — the arm declares the manifest unused, or the project
+    declares nothing — and each also returns None when the manifest cannot be
+    read at all, which from a working directory other than the repository
+    root is silent. Nothing else in provenance distinguishes those cases:
+    `assembly_digest` hashes constants and `resolved_prompt_digest` hashes the
+    arm instruction, both identical across projects. So a run that sent no
+    scope block looked exactly like one that sent it.
+
+    Recorded per block: whether it was sent and how many bytes, so a run whose
+    rule refers to a declaration it never received says so in its own record.
+    """
+    out: dict[str, Any] = {}
+    for name, fn in (("source_ranking", source_ranking_block),
+                     ("declared_naming", naming_block),
+                     ("declared_scope", scope_block)):
+        try:
+            text = fn(spec.project, spec.manifest_line)
+        except Exception:                                      # noqa: BLE001
+            out[name] = {"sent": False, "basis": "renderer raised"}
+            continue
+        out[name] = ({"sent": True, "bytes": len(text.encode("utf-8"))}
+                     if text else
+                     {"sent": False,
+                      "basis": ("arm declares the manifest unused"
+                                if spec.manifest_line
+                                and "not used" in spec.manifest_line.lower()
+                                else "project declares none, or the manifest "
+                                     "was not readable")})
+    return out
 
 
 def assembly_digest() -> dict[str, Any]:
@@ -807,6 +842,90 @@ def naming_block(project: str,
         "written many ways reads as many projects.")
 
 
+def scope_block(project: str,
+                manifest_line: str | None = None) -> str | None:
+    """The declared scope for one project, as sent to the model (#932).
+
+    v8's R2 tells the model that a passage whose subject is another dataset
+    belongs in `related_datasets` and never in the referent's own slots, and
+    the uniform rules say `Dataset` admits one referent. Both refer to a
+    distinction the model was never given: the manifest's `scope:` block —
+    the referent, its identifier, and the datasets declared related but
+    distinct — was read only by `scope.py` and `d4d download scope --check`.
+    So the rule could be broken by a model that had no way to know which
+    dataset in its bundle was which, and only the checker could see it.
+
+    Rendered from the manifest, like `naming_block` (#668), so an edit there
+    reaches the next run with no code change and no prompt hardcodes a
+    project's identifier (#647). None when the arm declares the manifest
+    unused (#603), and None when the project declares no referent — the
+    block would then assert nothing.
+    """
+    if manifest_line is not None and "not used" in manifest_line.lower():
+        return None
+    try:
+        from data_sheets_schema.scope import scope_of
+        declared = scope_of(project) or {}
+    except Exception:                                          # noqa: BLE001
+        return None
+    referent = str(declared.get("referent") or "").strip()
+    if not referent:
+        return None
+    ident = str(declared.get("referent_id") or "").strip()
+    lines = ["DECLARED SCOPE — this record is about "
+             + (f"{referent} ({ident})." if ident else f"{referent}.")]
+    note = str(declared.get("referent_note") or "").strip()
+    if note:
+        lines.append(note)
+    # Only mappings (#1069 review): a bare string in the manifest used to
+    # raise out of here into `build_phase` and end the run. A malformed entry
+    # is skipped and named in the block, so the model is told the declaration
+    # is incomplete rather than silently given less than was declared.
+    raw = [e for e in (declared.get("related_but_distinct") or []) if e]
+    related = [e for e in raw if isinstance(e, dict)]
+    malformed = len(raw) - len(related)
+    if related:
+        lines.append("")
+        lines.append("The declared bundle also documents datasets that are "
+                     "NOT this one:")
+        for entry in related:
+            name = str(entry.get("name") or entry.get("id") or "").strip()
+            aka = entry.get("also_known_as") or []
+            if isinstance(aka, (str, bytes)):
+                aka = [aka]                    # a scalar is one alias, not its
+                                               # characters (#1069 review)
+            ids = [str(entry.get("id") or "").strip(),
+                   *(str(a).strip() for a in aka)]
+            ids = [i for i in ids if i]
+            head = f"- {name}" + (f" — {', '.join(ids)}" if ids else "")
+            lines.append(head)
+            why = str(entry.get("why") or "").strip()
+            if why:
+                lines.append(f"  Why distinct: {why}")
+            express = str(entry.get("express_as") or "").strip()
+            if express:
+                lines.append(f"  Facts about it belong in `{express}`, never "
+                             "in this dataset's own slots.")
+            in_bundle = entry.get("in_bundle")
+            if in_bundle:
+                names = (list(in_bundle)
+                         if isinstance(in_bundle, (list, tuple)) else [in_bundle])
+                lines.append("  Its documentation is legitimately in this "
+                             "bundle, under source "
+                             + ", ".join(str(n) for n in names) + ".")
+    if malformed:
+        lines.append("")
+        lines.append(f"({malformed} declared entr"
+                     + ("y is" if malformed == 1 else "ies are")
+                     + " malformed in the manifest and omitted here.)")
+    lines.append("")
+    lines.append("This is the declaration the rules refer to when they say a "
+                 "passage about another dataset describes that dataset. It "
+                 "names which datasets those are; it does not tell you what "
+                 "any passage says.")
+    return "\n".join(lines)
+
+
 def source_ranking_block(project: str,
                          manifest_line: str | None = None) -> str | None:
     """The declared source ranking for one project, as sent to the model.
@@ -956,18 +1075,33 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     # Cached with the bundle because it is the same kind of thing: per-project
     # input that does not change between phases. It joins to the `Source type`
     # each file already carries in its SOURCE METADATA block.
+    #
+    # Ranking, naming and scope share ONE breakpoint, set on the last of them
+    # actually present (#1069). The API allows four `cache_control` blocks per
+    # request and the digest and bundle take two; one each for these three
+    # would be five, and the request would be rejected before it was billed.
+    # A breakpoint caches the whole prefix up to it, so one at the end of the
+    # group caches all three together — fewer breakpoints, longer prefix,
+    # identical content.
     ranking = source_ranking_block(spec.project, spec.manifest_line)
     if ranking:
-        cached.append({"type": "text", "text": ranking,
-                       "cache_control": {"type": "ephemeral"}})
+        cached.append({"type": "text", "text": ranking})
     # The declared naming, for the same reason and with the same manifest-not-
     # used exemption (#668): the label standard lives in the manifest, and a
     # rule the API path never received would be one condition with two
     # behaviours.
     naming = naming_block(spec.project, spec.manifest_line)
     if naming:
-        cached.append({"type": "text", "text": naming,
-                       "cache_control": {"type": "ephemeral"}})
+        cached.append({"type": "text", "text": naming})
+    # The declared scope, same source and same exemption (#932): the rules
+    # already tell the model what to do with a passage about another dataset,
+    # and until now nothing told it which datasets those are.
+    scope = scope_block(spec.project, spec.manifest_line)
+    if scope:
+        cached.append({"type": "text", "text": scope})
+    # The group's single breakpoint. `cached[-1]` is the bundle when none of
+    # the three is present, and it already carries one.
+    cached[-1]["cache_control"] = {"type": "ephemeral"}
 
     # Carried artifacts go BEFORE the phase instruction, so the instruction is
     # the last thing in the message (#346). With the old order the message
@@ -3893,6 +4027,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # request actually sent.
     rec.data["prompts"]["resolved"] = resolved_prompt_digest(spec)
     rec.data["prompts"]["assembly"] = assembly_digest()
+    rec.data["prompts"]["context_blocks"] = context_blocks(spec)
     ident = provider_identity()
     rec.data["model"] = {
         "generation_method": ("schema-grounded API, four model phases with the "
