@@ -1,0 +1,416 @@
+{
+ "rubric10_semantic/AI_READI_2026-08-20b_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "4dc8e62f883869e7b80bed993a0446e2874e7df58a9b6dc6bd66e196d15ed99a"
+ },
+ "rubric10_semantic/AI_READI_2026-08-22c_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "0dc3a06d4fb05fefb0f06ea8036edb90d98df1ba5856eb94b0dacf779ae6db76"
+ },
+ "rubric10_semantic/AI_READI_2026-08-24agentic_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "5f9676e576e20020f2de01e6346cfa3cfdb8ac7778fba3aa91ffd32ce7b85188"
+ },
+ "rubric10_semantic/AI_READI_2026-08-28agentic_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "d099e818754945c1f7ec746505a01a5299db1d400bfd229dc72af253aa283944"
+ },
+ "rubric10_semantic/AI_READI_2026-08-28agentic_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "12c426f2ce6cb176c50133e42db819ed1f91be7954907404a405be863229fbeb"
+ },
+ "rubric10_semantic/AI_READI_2026-08-28agentic_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "d2f14258e09702838e7802ce6e0018a2fcc88e6bce55bc7e749484d0b8bfa631"
+ },
+ "rubric10_semantic/AI_READI_2026-08-28bapi_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "70bd8c7c2912e871c68ab3081c29369d6d9c8bcbce1d38c3b7b53c9e87d6d416"
+ },
+ "rubric10_semantic/AI_READI_2026-08-28capi_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "ab407f4f29b3e3ee8d135d5fbf4ff23ba77482ecd7c6798371ed5f61711b105d"
+ },
+ "rubric10_semantic/AI_READI_2026-08-28dapi_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "bf62f3893e8b7af07d71e90c7c15437d7273a842baf34059274f98514fab4dfb"
+ },
+ "rubric10_semantic/AI_READI_2026-09-01api_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "6f934900b6482a1d2f418fd7d4fd2be8cffc8e754150b30b6f6c4207abb5a5a6"
+ },
+ "rubric10_semantic/AI_READI_2026-09-01api_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "9148f723eec96327e73c8f3052a07f1413a99d889f104037c21b2d0511370eec"
+ },
+ "rubric10_semantic/AI_READI_2026-09-01api_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "62944a5bfd6eaf2ffc3c1b280a4abacd4936b3120c9c10c234b122ae5da10586"
+ },
+ "rubric10_semantic/AI_READI_2026-09-04gapi_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "fbd32cb0fe60b86ab4b16b536bd8f8074806e66dc92f10bf489b92110f47807e"
+ },
+ "rubric10_semantic/AI_READI_2026-09-04gapi_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "5bfdf1becf108b7c99a630c890851433e27fa910d43d28369eb5a88411dd9841"
+ },
+ "rubric10_semantic/AI_READI_2026-09-04gapi_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "d41df07de6b38240c085acd0f88dff7df9518bba72c8a59f2ed9943078bdf96a"
+ },
+ "rubric10_semantic/CHORUS_2026-08-20b_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "1a25c5039703568b291efe5224e92d16e6b8961aabd024533718febe076369e4"
+ },
+ "rubric10_semantic/CHORUS_2026-08-22c_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "ddda1da617cadf75cd9aaf2747bafbb85a3f1c8000e939dde1f5607db63e49f5"
+ },
+ "rubric10_semantic/CHORUS_2026-08-24agentic_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "b4c8d60e65b611093bee43af38058e22117d11ddc0ca91ee46470b8c3d3f9c18"
+ },
+ "rubric10_semantic/CHORUS_2026-08-28agentic_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "9838ef8e526870d34787e2389f8ee599f308971e80ea3c1c644b00296e1dff16"
+ },
+ "rubric10_semantic/CHORUS_2026-08-28agentic_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "9821ce3cfc0b1b1cb91284d73b943b66f88473ae90bb51333a4ab04a6c274ef5"
+ },
+ "rubric10_semantic/CHORUS_2026-08-28agentic_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "1d87b69c0b032986e0cdc53486591edf64e35e889d8e12c4d2218f294e237461"
+ },
+ "rubric10_semantic/CHORUS_2026-08-28api_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "d0ace3003e6670bf59ff0d99099bfe3ba90346254825fa0399787fa9b061031c"
+ },
+ "rubric10_semantic/CHORUS_2026-08-28bapi_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "f4b403b7ef3d86519bcf628f0b9109487b77230b7b090a5ae9b45421674281df"
+ },
+ "rubric10_semantic/CHORUS_2026-09-01api_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "ee954222c463d4ad42e884d8df8e0f35954adf0e614e9457c6799b0d9c2b7af9"
+ },
+ "rubric10_semantic/CHORUS_2026-09-01api_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "67f0c4664a6c1b957a825d139597cc66aa8ac398b8ceb8d055a0e344005608ec"
+ },
+ "rubric10_semantic/CHORUS_2026-09-01api_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "f00318f871fa63ac5a78285d48b4f269d7ff8b9f5973eb3a36b8fad785464e04"
+ },
+ "rubric10_semantic/CHORUS_2026-09-04fapi_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "14ea9fca7671f6adde017350d29f3d0e796ba4c6b911b8b92fab8847f045e3ed"
+ },
+ "rubric10_semantic/CHORUS_2026-09-04fapi_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "7f4b0a23f7d4452c86ca2d49ce4bbdec7b70be4e9d2adb53290334bfbc70394f"
+ },
+ "rubric10_semantic/CHORUS_2026-09-04fapi_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "3883bf74eff2e387aabbb4567b0cf978b4cb4fe4bd0df09743277a4b386fad2e"
+ },
+ "rubric10_semantic/CM4AI_2026-08-20b_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "af5f44a3955e5861aa36a1f1ba282ad1fd523cff68c723df40a0cf182c0d0d51"
+ },
+ "rubric10_semantic/CM4AI_2026-08-22c_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "825579b609c06174d29db13eb0e9d5a39d38c878f1d64a5959e70121f62c3534"
+ },
+ "rubric10_semantic/CM4AI_2026-08-24agentic_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "8e070409da04bb7a2f2622b651bfbf8e1f7ff3200e9a43784263ba91590db0ac"
+ },
+ "rubric10_semantic/CM4AI_2026-08-28agentic_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "fe6cf5b76b2e587e2d4d5c15116bd9f907e53dcd2f9c4cbc543b3ae5e2ad16cf"
+ },
+ "rubric10_semantic/CM4AI_2026-08-28agentic_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "59de26c96bf19ed249b29d5f6e5f5c9e43cc0c1c7f7ccd0ece93c1c110ea43e7"
+ },
+ "rubric10_semantic/CM4AI_2026-08-28agentic_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "4ba339dbbbae8b772c69342d16fd4ad03677f91ed944971d93c76377ae16db60"
+ },
+ "rubric10_semantic/CM4AI_2026-09-01api_rep1_evaluation.json": {
+  "archived": [
+   "cb236645a5408debfafcd3209eeecfaed69d9821dc821d79ed17749e23c7977f"
+  ],
+  "sha256": "f60917537e42df87b89978156059daccc92ac92128980c27bfda6d2a7317befd"
+ },
+ "rubric10_semantic/CM4AI_2026-09-01api_rep2_evaluation.json": {
+  "archived": [
+   "2859e98e36dda9a6b6ed3d24e44968d56f1ccd28001b49ee8d415c64a437fbaf"
+  ],
+  "sha256": "20fb7331016dbfa86bce0e00d332921546d35f662e2fc5c2e417f30fb83326aa"
+ },
+ "rubric10_semantic/CM4AI_2026-09-01api_rep3_evaluation.json": {
+  "archived": [
+   "fbbe4a4d0e22896164f9a6d898ebb030692bce1e680ffac0a1b038440c7089f4"
+  ],
+  "sha256": "71e979f2088770efe3950af1e07e4a712b578e6ce9281061ec98ba1892b4fb74"
+ },
+ "rubric10_semantic/CM4AI_2026-09-04gapi_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "08db0e797b7999f0b971b8631bbb1fb9ae4aebce799fff040fdbecd7fa02a756"
+ },
+ "rubric10_semantic/CM4AI_2026-09-04gapi_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "e60db9570a89421a6945f8c8d8f7eca09d4782355ee595e2d3fed9ffc8f80922"
+ },
+ "rubric10_semantic/CM4AI_2026-09-04gapi_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "7a188925636e7f428075a33ab1c008750ed8871d3ab26faf9df68b7d5d7cd6a0"
+ },
+ "rubric10_semantic/VOICE_2026-08-20b_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "d85be42044aff598d0a7de01b3abc691347385a5b0edef81a4f91fca648515a4"
+ },
+ "rubric10_semantic/VOICE_2026-08-22c_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "45fdc9c039ab31104fd4069df6de53927575e56acfaec4130d837c4ddf18a140"
+ },
+ "rubric10_semantic/VOICE_2026-08-24agentic_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "3c519a2e2ced4b9c9845dba94393fe4db577869c2601e9b791f45291e2c8a55b"
+ },
+ "rubric10_semantic/VOICE_2026-08-28agentic_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "4d0c2104cd11234106a43b0f1af675e19fd24b34878ed659dfc9661c5c12db30"
+ },
+ "rubric10_semantic/VOICE_2026-08-28agentic_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "42dd274749acba1accb87ae2ca93dc81aad750abba6f65f24db6cc701f9ac619"
+ },
+ "rubric10_semantic/VOICE_2026-08-28agentic_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "961c6cb5c089feb2bf493f1e6124bd8833ddd6324c33b12f3e686aa527379a48"
+ },
+ "rubric10_semantic/VOICE_2026-09-01api_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "4923cdd655d9441045863d152bb4ec1bb4b1927329ee0c3ac7e7a99ddaad46b1"
+ },
+ "rubric10_semantic/VOICE_2026-09-01api_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "d52f615465f49dcbd9633a7cd0e6925d5e86fe07d8c5a2b4f5a81110dd21a9d5"
+ },
+ "rubric10_semantic/VOICE_2026-09-01api_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "f059939f4aaeb45793729f439f38c1c58df8ab073e779dd20836acd8451d76ff"
+ },
+ "rubric10_semantic/VOICE_2026-09-04fapi_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "c942e28c3a5dc3e123993cf56a7f6600b317f320cf778dd993f808136a7cebde"
+ },
+ "rubric10_semantic/VOICE_2026-09-04fapi_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "77fe9e7ac5233a6d38cfa9186ef4f979a2137d14aac9d03c16d4397078f48348"
+ },
+ "rubric10_semantic/VOICE_2026-09-04fapi_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "3841d7d72d55a851f6de61181c34d04226f66513e32ec7ba91033009afdb4784"
+ },
+ "rubric20_semantic/AI_READI_2026-08-22c_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "fef43e493d679093025522cfd5495ebfd67fa39f3334c3f84a894a310be3fd40"
+ },
+ "rubric20_semantic/AI_READI_2026-08-24agentic_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "d20efa882c925c7f5b40a66515528315fb9912c7e21b7007857872da24081bcf"
+ },
+ "rubric20_semantic/AI_READI_2026-08-28agentic_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "028d627d06289d21e9c8c2303d5b0c50960abf04af0b3caa638afbb69add15c1"
+ },
+ "rubric20_semantic/AI_READI_2026-08-28agentic_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "1a237d32c5cb99dcbd71aa9625ea2ee036b7aeca122081cf16fbb0150c2b3f7a"
+ },
+ "rubric20_semantic/AI_READI_2026-08-28agentic_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "6f9d098397991c7c6ed9e1931f099df636ea2abc492161380332a6a019eb90e6"
+ },
+ "rubric20_semantic/AI_READI_2026-08-28bapi_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "1d2048c1861c7a379734bbb73eac9997c2ebe3e30d97caa8e85ff3492925fbe8"
+ },
+ "rubric20_semantic/AI_READI_2026-08-28capi_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "ad7d94aea480e23c075124882d00a98aa46f3318e6bc7cb9d3d380070f4b7a89"
+ },
+ "rubric20_semantic/AI_READI_2026-08-28dapi_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "9a8748e2b5c2f891d46af2ef31216d81627a224445b15fa6ca2804fa2d0426f2"
+ },
+ "rubric20_semantic/AI_READI_2026-09-01api_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "aca1dc11b4584fd9b9caebc21a01e390d80367c6988f0011aa011b46d756cab3"
+ },
+ "rubric20_semantic/AI_READI_2026-09-01api_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "44cf4748b660f9a662fc0ff44348c08dd985494ef2980c9684fc780b634a572f"
+ },
+ "rubric20_semantic/AI_READI_2026-09-01api_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "c2b7539d30f6c98973a8f4bb8f16084dcb11a51e71cee13f186800183b88d3bd"
+ },
+ "rubric20_semantic/AI_READI_2026-09-04gapi_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "d8bfba01ffd9efd2cdc06386df7ff0d7e6e697429e343bd149b863f3c3db9a20"
+ },
+ "rubric20_semantic/AI_READI_2026-09-04gapi_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "335179c09e0be414fb444b47054b3afd5c16deaa76dbf23c5c0335a36723f083"
+ },
+ "rubric20_semantic/AI_READI_2026-09-04gapi_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "8d2ef2ed8b2b3f99e2073df6af6ecc2550800e532d91cea6c9546cb2a2e4de31"
+ },
+ "rubric20_semantic/CHORUS_2026-08-22c_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "e5095ce5f64340e272d424b0d7e3a0093c595cd22247499e349bc40a12a9cfb9"
+ },
+ "rubric20_semantic/CHORUS_2026-08-24agentic_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "d79ed1d7200bd4d32dab854153ad1cfe5f075d32b64210f53dfa2682bbd5c739"
+ },
+ "rubric20_semantic/CHORUS_2026-08-28agentic_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "d3d81a85b678f9ef2dd4f63fb2569626a5dfa311a52e5f6315aa48114ef5fcb8"
+ },
+ "rubric20_semantic/CHORUS_2026-08-28agentic_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "f059acb15f0d1f86099f462e78e2f3968a65f8d6a1fd1f32befdd252d897b7ae"
+ },
+ "rubric20_semantic/CHORUS_2026-08-28agentic_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "811ac2d2f7091e6cd53dfae4381c738107497f93098a17c89d00eecda393d62d"
+ },
+ "rubric20_semantic/CHORUS_2026-08-28api_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "5c803542a29286478a109ec31c42f6fafdfefca6d5e9f948831c4c20d27124d6"
+ },
+ "rubric20_semantic/CHORUS_2026-08-28bapi_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "94afed54f1d0fd663e9569c80f930fa403da4fa410d05f1a8c588f5048e1b3cc"
+ },
+ "rubric20_semantic/CHORUS_2026-09-01api_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "1465e1ced6de60ab36c7b1a7c853707ac325b095842c0918653fe823c2b8bba8"
+ },
+ "rubric20_semantic/CHORUS_2026-09-01api_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "338eb4cd9c61359f21cb04802bb93bd0b106b45e2c3ffeb6b4433333d135a0d1"
+ },
+ "rubric20_semantic/CHORUS_2026-09-01api_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "48f653a3f5431482db1a52f2465c1142a3468702c917ea66b0430109ca3cab5d"
+ },
+ "rubric20_semantic/CHORUS_2026-09-04fapi_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "8cb1099e1d0c2a236ebb01c0dd93867ae5f0cac1c6830b08ccb9bd6f6d12c1c1"
+ },
+ "rubric20_semantic/CHORUS_2026-09-04fapi_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "c37fb5cee7ec4debcc87e95607bec5333de9115124ce04f6fd82cce303cdd034"
+ },
+ "rubric20_semantic/CHORUS_2026-09-04fapi_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "fa87e4969ebeba731caf93604e4a8447b5f717fc0e0f60015a585b0fdde027f9"
+ },
+ "rubric20_semantic/CM4AI_2026-08-22c_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "6ba0622041b1df9f9a9022b1469da68e44d224dda7cbf05009ef171e103b04a5"
+ },
+ "rubric20_semantic/CM4AI_2026-08-24agentic_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "130bb695f872f7c669a6b7660ec0a4f86afe7456ae85a252f5a83397a05b89db"
+ },
+ "rubric20_semantic/CM4AI_2026-08-28agentic_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "d957414ae3570f059b887d13bd5ba0887fb2938bef8e7d6b75f8c390601594b6"
+ },
+ "rubric20_semantic/CM4AI_2026-08-28agentic_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "7f10bdf9c8428269fe547a7491e412f60fef8bf1b1e89f5d69d1db8212bc9d39"
+ },
+ "rubric20_semantic/CM4AI_2026-08-28agentic_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "ed64bcb5996ab7440d3038faa924274e73d4ad985bffc209a61cb675f73c24c0"
+ },
+ "rubric20_semantic/CM4AI_2026-09-01api_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "b5ebed8d807a9b7aceb6c30d5e1ba9d57a4e94075d38d1cc0e9c2ad087bf7417"
+ },
+ "rubric20_semantic/CM4AI_2026-09-01api_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "5a75f17b6d17d99d80da3fba80013a660c18aabd839ca0fb08323f2b43987475"
+ },
+ "rubric20_semantic/CM4AI_2026-09-01api_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "602b98f0b9f03373b29d4e9f8b89fe7ba8af33e14a8d0e6f40d8b14cf6ba2342"
+ },
+ "rubric20_semantic/CM4AI_2026-09-04gapi_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "2fa9ed6944ecb5d8e8ea616359b6fcef1857643b7209cdad27104e96ca72da2e"
+ },
+ "rubric20_semantic/CM4AI_2026-09-04gapi_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "60632900cbebc6deeeb889d8de8efa2eb3f3baf2df3a287a350b6c0948eb945c"
+ },
+ "rubric20_semantic/CM4AI_2026-09-04gapi_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "065f48be834e098a9964657f1a1f42cb779c530fb5dcac63d46ebd13abf5976c"
+ },
+ "rubric20_semantic/VOICE_2026-08-22c_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "11f9337033879bdf298a1a489069a5f8dac64bdad401eb03241172c63188f7c9"
+ },
+ "rubric20_semantic/VOICE_2026-08-24agentic_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "7f1cf7ef6da06f0074916ce1235657cd498465e484b1fbb6631da46843343dda"
+ },
+ "rubric20_semantic/VOICE_2026-08-28agentic_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "09b6e3a039d85d48195240bae7f035f0b904a701077cd4faa04d07741a9f5d21"
+ },
+ "rubric20_semantic/VOICE_2026-08-28agentic_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "72af77b11031c98cc5bde7916029e148e6630a9f11a5953a104acfdd9bf5d2c7"
+ },
+ "rubric20_semantic/VOICE_2026-08-28agentic_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "dd9719bf20bcfc9c11e2ae614ca38fe36b048af99b554ebce156cd19d5f06b4d"
+ },
+ "rubric20_semantic/VOICE_2026-09-01api_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "57070eb0257e57828aa0dbcfbc660abbb77627939aee27b1ab369f642e90f00c"
+ },
+ "rubric20_semantic/VOICE_2026-09-01api_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "8e843b996bc7a411854c529c5f5b5e4ca728d039e2727207304e3fb0c9ad4189"
+ },
+ "rubric20_semantic/VOICE_2026-09-01api_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "610dcf9739b95e37eaf99fd00a24687844f14607b40cebb2ed98f4cdad5b4889"
+ },
+ "rubric20_semantic/VOICE_2026-09-04fapi_rep1_evaluation.json": {
+  "archived": [],
+  "sha256": "06154107f494d6ea8b858b2f3de29b3dfa2c48be8f71399411921b06e6c46a6d"
+ },
+ "rubric20_semantic/VOICE_2026-09-04fapi_rep2_evaluation.json": {
+  "archived": [],
+  "sha256": "95955eb6ea2584974da3e69b7ed1634b9e490128b49e7ae41fe2258bdf13357d"
+ },
+ "rubric20_semantic/VOICE_2026-09-04fapi_rep3_evaluation.json": {
+  "archived": [],
+  "sha256": "e1e957aca289d7199e7a67e1738cc2e7942484f43cf54cc7666347d4f703ac03"
+ }
+}

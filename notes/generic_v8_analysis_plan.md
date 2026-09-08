@@ -428,13 +428,17 @@ score from the same one. Nothing is retracted. The agents are now pinned
 to `claude-opus-5`.
 
 Both arms carry three replicates per project. Prediction 8 asks whether
-v8 falls **below the v7 per-project replicate minimum**.
+v8 falls **below the v7 per-project replicate minimum**, and it registers
+**three** measures: rubric10, rubric20 and populated leaves. The leaves
+measure was dropped from an earlier draft of this section (#1083); it is
+restored below, and the three are reported together because the registered
+text names all three and admits no partial credit.
 
 | project | rubric10 v7 reps | v8 reps | v7 min | v8 min | verdict |
 |---|---|---|---|---|---|
-| AI_READI | 98.0, 98.0, 98.0 | 98.0, 98.0, 100.0 | 98.0 | 98.0 | favourable |
-| CHORUS | 65.3, 59.2, 63.3 | 63.3, 63.3, 63.3 | 59.2 | 63.3 | favourable |
-| CM4AI | 91.5, 93.6, 91.5 | 89.4, 87.2, 85.1 | 91.5 | 85.1 | **unfavourable**ᵍ |
+| AI_READI | 98.0, 98.0, 98.0 | 98.0, 98.0, 98.0 | 98.0 | 98.0 | favourable |
+| CHORUS | 65.3, 59.2, 63.3 | 72.0, 63.3, 63.3 | 59.2 | 63.3 | favourable |
+| CM4AI | 91.5, 91.5, 89.4 | 85.1, 91.5, 87.2 | 89.4 | 85.1 | **unfavourable**ᵍ |
 | VOICE | 96.0, 98.0, 94.0 | 94.0, 98.0, 98.0 | 94.0 | 94.0 | favourable |
 
 | project | rubric20 v7 reps | v8 reps | v7 min | v8 min | verdict |
@@ -444,8 +448,13 @@ v8 falls **below the v7 per-project replicate minimum**.
 | CM4AI | 86.4, 85.2, 86.4 | 76.1, 79.5, 78.4 | 85.2 | 76.1 | **unfavourable** |
 | VOICE | 90.9, 90.9, 94.9ᶠ | 89.8, 86.4, 90.9 | 90.9 | 86.4 | **unfavourable** |
 
-ᵍ CM4AI's rubric10 row was rescored on 2026-09-08 under the corrected
-Element 4 gate (#1060) and **the verdict changed**: see below.
+ᵍ CM4AI's rubric10 row was rescored twice on 2026-09-08: under the
+corrected Element 4 gate (#1060), which **changed the verdict**, and again
+under the software sub-element's role rule (#1081, #1082), which took a
+point off each v7 replicate and left the verdict standing on a narrower
+gap. Replicates are listed rep1, rep2, rep3 throughout; an earlier draft
+listed CM4AI's v8 row in descending order, which read as a different
+trajectory (#1083). See below.
 
 ᶠ a half-point score on an integer-anchored rubric (#1062). AI_READI's
 96.0 **is** its v7 minimum, so that verdict is quoted off a fractional
@@ -453,12 +462,41 @@ score — it does not change the reading (the v8 minimum 89.8 is below
 96.6 either way), but the fraction is load-bearing. VOICE's 94.9 is not
 its minimum.
 
-**Prediction 8: 3 of 4 on rubric10, 1 of 4 on rubric20 — unfavourable on
-both.** The registered text — "not below the v7 per-project replicate
-minimum" — names no rubric and admits no partial credit, so a prediction
-that fails on one project fails. It was read as holding on rubric10 until
-the Element 4 gate was fixed (#1060) and CM4AI moved; the two rubrics now
-differ in how much v8 fell, not in whether it did.
+### Populated leaves, the third registered measure
+
+Per-project replicate minima, read from the comparison table's
+`populated leaves (full record)` rows:
+
+| project | v7 reps | v8 reps | v7 min | v8 min | verdict |
+|---|---|---|---|---|---|
+| AI_READI | 562, 478, 440 | 525, 525, 449 | 440 | 449 | favourable |
+| CHORUS | 199, 168, 210 | 235, 278, 251 | 168 | 235 | favourable |
+| CM4AI | 458, 480, 358 | 422, 473, 479 | 358 | 422 | favourable |
+| VOICE | 306, 375, 440 | 386, 297, 432 | 306 | 297 | **unfavourable** |
+
+Leaves are 3 of 4, and the project that fails is VOICE — not the one that
+fails on rubric10. This measure was registered and then omitted from an
+earlier draft of this section (#1083); reporting the rubrics alone made the
+result look more consistent across measures than it is.
+
+**Prediction 8: 3 of 4 on rubric10, 1 of 4 on rubric20, 3 of 4 on leaves —
+unfavourable on all three.** The registered text — "not below the v7
+per-project replicate minimum" — names no measure and admits no partial
+credit, so a prediction that fails on one project fails. Read
+conjunctively, which is how it is written, **only CHORUS passes all three
+measures**: AI_READI fails on rubric20, CM4AI on rubric10 and rubric20,
+VOICE on rubric20 and leaves. It was read as holding on rubric10 until the
+Element 4 gate was fixed (#1060) and CM4AI moved; the measures now differ
+in how much v8 fell and where, not in whether it did.
+
+**The rubric10 half of this is provisional (#1080).** The instrument's own
+test-retest movement on an unchanged record is up to 8.7 points, which is
+larger than three of the four rubric10 margins the verdicts rest on. The
+per-record observations stand; the project-level rubric10 verdicts and the
+causal reading below should be treated as indeterminate until the spread is
+established by repeats. #1080 calibrates rubric10 only — rubric20 has no
+repeatability measurement at all, so its 1 of 4 carries an unknown, not a
+small, error bar.
 
 The two rubrics disagree because they ask different questions, and the
 reasons the three rubric20 projects fell are consistent across them, in
@@ -469,9 +507,12 @@ instead, absent variable metadata, and unpinned tool versions. Rubric10
 scores none of those as deeply — its Element 8 has one software
 sub-element where rubric20 has a whole technical-documentation category
 of five questions. So rubric20 registers the thinning across three
-projects and rubric10 registers it on one, CM4AI, where it costs 6.4
+projects and rubric10 registers it on one, CM4AI, where it costs 4.3
 points; the difference between the instruments is sensitivity, not
-direction.
+direction. Read against #1080's 8.7-point test-retest movement, that 4.3
+is inside the instrument's own noise, so the sensitivity claim is a
+reading of the reviewers' reasons rather than a result the numbers
+establish on their own.
 That is the falsification test of prediction 8 answering in the
 direction the plan warned of — "a fall means the larger digest displaced
 reading" — on the instrument sensitive enough to see it, and it is a
@@ -484,10 +525,12 @@ whether Element 4 applied to a dataset with no human participants: two
 scored it out of 50, four excluded it out of 45. The gate is now stated
 per sub-element — oversight and deidentification apply, participant
 privacy, consent and compensation do not — and all six rescores land on
-one denominator, 47. Under it CM4AI reads 91.5/93.6/91.5 against
-89.4/87.2/85.1, a v7 minimum of 91.5 against a v8 minimum of 85.1, and
-the verdict is **unfavourable**. Prediction 8 on rubric10 is therefore
-3 of 4, not 4 of 4.
+one denominator, 47. Under it CM4AI read 93.6/93.6/91.5 against
+85.1/91.5/87.2, a v7 minimum of 91.5 against a v8 minimum of 85.1, and
+the verdict became **unfavourable**. Prediction 8 on rubric10 is therefore
+3 of 4, not 4 of 4. The software rule (#1082) later took a point off each
+v7 replicate, leaving 91.5/91.5/89.4 and a v7 minimum of 89.4; the verdict
+is unchanged and the gap is 4.3 points rather than 6.4.
 
 The number moved because the instrument was underspecified, not because
 the records changed: the same six records scored under three different
@@ -496,6 +539,23 @@ superseded scores are kept beside the current ones with a README, and
 both rounds of the fix are recorded there — the first edited the
 per-sub-element prose and did not hold, because an authoritative
 conditions table above it still mapped both conditions to all five.
+
+**The instrument's own variance is larger than most of these gaps
+(#1080).** Rescoring eight records under a rule that touched one
+sub-element of fifty moved their totals by up to 8.7 points. The clearest
+case is a control: CHORUS v8 rep1 scored the sub-element under test
+identically both times and still moved 63.3 → 72.0, gaining a point each
+on four unrelated elements and losing an exclusion, so its denominator
+went 49 → 50 while its two siblings stayed at 49.
+
+That bears on every rubric10 verdict above. AI_READI and VOICE are exact
+ties; CHORUS's favourable reading rests on 4.1 points and CM4AI's
+unfavourable one on 4.3, both inside the observed spread. The ordering
+has been stable across every rescore and the densest record, AI_READI,
+reproduced exactly — so this is not a reason to discard the scores. It is
+a reason to stop quoting a single evaluation as a project's score, and to
+establish the spread before any of these verdicts is cited outward. The
+proposal is on #1080.
 
 **Four instrument findings, all filed, none changing a verdict today:**
 #1059 (rubric10 Element 8's software sub-element scored 0, 0, 1 on
@@ -510,7 +570,45 @@ forbid opening any evaluation file); #1062 (the two half-point scores
 above). #1059 and #1060 were undecided thresholds in the rubric text, not
 evaluator error: both readings were defensible on what the rubric
 said, which is the defect. #1060 is now fixed and its verdict change is
-above; #1059 remains.
+above. **#1059 took four rounds and an external review to fix, and
+changed no verdict** (2026-09-08).
+
+The first three rounds each stated a threshold and each was wrong in a way
+the next round found: naming the qualifying slots let a GitHub organisation
+root earn the point; barring publisher pointers would have flipped three
+CHORUS records; writing the applicability rule as a new paragraph left two
+older gate texts standing that said the opposite, and several rescores
+recorded `match: false` and applied the launcher's quoted rule instead of
+the checked-in one. A Codex review of the pull request then found the
+deeper problem: the sub-element's only declared field, `software_and_tools`,
+**is not a slot in the D4D schema** and appears in no record, so the rule
+could never be satisfied as written and every evaluator had been
+improvising a substitute (#1081). A rubric20 test has been asserting that
+same name does not resolve for as long as rubric10 has been declaring it.
+The review also showed the threshold was not total: packaging, metadata
+production and quality-assessment software fell outside its three failure
+cases, leaving 8 of the 24 records undecidable and producing opposite
+scores on identical packaging evidence (#1082).
+
+The rule now asks one question — can a reader tell what software produced
+or transformed the data being distributed — and names five roles that do
+not answer it: capture and instrumentation, hosting and serving, packaging
+and metadata production, validation and quality assessment, and a pipeline
+the record itself says produced outputs the release excludes. All 24
+production replicates were re-adjudicated on this one sub-element, from the
+records alone, with the rule quoted verbatim to the adjudicator rather than
+read from the agent definition (#1077).
+
+**Every project is now uniform across its six replicates**: AI_READI 0,
+CM4AI 0, CHORUS 1, VOICE 1. Three v7 CM4AI evaluations moved 1 → 0 and
+were archived under `superseded_software_role/`; the other 21 were
+unchanged, and all 24 adjudications are recorded in
+`readjudication_software_role.json` whether they moved or not. CM4AI's v7
+minimum falls 91.5 → 89.4 and its verdict stays unfavourable; no other
+project's numbers move. The issue's second example was wrong for a
+different reason than the earlier draft gave: CM4AI's replicates do not
+differ on this sub-element at all.
+
 ### Canonical selection (2026-09-08)
 
 Executed under the review criterion (#660) — validity, then fewest review
@@ -540,7 +638,7 @@ deleted; each superseded record keeps its old block under
 Note what the criterion does **not** use: the rubric scores. On rubric10
 the criterion picks a project's top-scoring replicate in none of the
 four: the chosen VOICE record is its project's lowest (94.0 against 98.0
-twice), CM4AI's is its lowest (85.1 against 89.4 and 87.2, under the
+twice), CM4AI's is its lowest (85.1 against 91.5 and 87.2, under the
 corrected Element 4 gate — it was tied-lowest at 86.7 before it), AI_READI's scores 98.0 against
 rep3's 100.0, and CHORUS is a three-way tie at 63.3. The review's
 adverse count and the rubrics disagree about which replicate is best,
