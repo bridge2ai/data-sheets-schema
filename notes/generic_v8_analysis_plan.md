@@ -521,6 +521,41 @@ prediction-8 section above and
 `data/evaluation_llm/rubric10_semantic/label_aware/`); this selection
 neither reads nor depends on them.
 
+### After the arm: the first v9 boundary change (#932)
+
+The v8 arm is complete and retained, so the condition is closed and the
+next generation-path change belongs to v9. The first one landed
+2026-09-08: **the manifest's scope declaration is now rendered to the
+model** (`api_runner.scope_block`), beside the source ranking (#603) and
+the declared naming (#668), under the same manifest-not-used exemption.
+
+Why it is the first: v8's R2 already tells the model that a passage whose
+subject is another dataset belongs in `related_datasets` and never in the
+referent's own slots, and the uniform rules already say `Dataset` admits
+one referent. Both refer to a distinction the model was never given — the
+`scope:` block was read only by `scope.py` and `d4d download scope
+--check`. So the rule could be broken by a model with no way to know
+which dataset in its bundle was which, and only the checker could see it.
+That is the #913 class the v8 review pass found again (CM4AI rep2 wrote
+an earlier release's dates and errata as the referent's own).
+
+The block carries facts, not behaviour: the referent and its identifier,
+the referent note (which is where the earlier-release half of R2 lives
+for AI_READI and CM4AI), and for each declared related-but-distinct
+dataset its name, every identifier it answers to, why it is distinct, the
+slot its facts belong in, and the bundle source that legitimately carries
+its documentation. It ends by saying it names the datasets and does not
+say what any passage means, so the rules remain the only text governing
+the decision.
+
+**It re-baselines the condition.** `ASSEMBLY_LAYOUT` names the new block,
+so `assembly_digest` moves and a record made under it is distinguishable
+from the v8 arm's — which is the point of that digest (#353). No run
+carrying a v8 label may be made under this runner: the twelve retained
+records were generated without the block, and a thirteenth with it would
+be a different condition wearing the same name. The prompt files are
+unchanged, so no pin rotates (`d4d api prompts check --strict` passes).
+
 ## Sequencing (PRs, in order)
 
 The first PR (#916) landed A and the #912 pack half ahead of this

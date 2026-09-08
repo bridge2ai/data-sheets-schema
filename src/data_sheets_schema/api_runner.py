@@ -414,7 +414,7 @@ def prompt_body(path: Path = GENERIC_PROMPT) -> str:
 # are hashed mechanically below, so wording changes cannot go unrecorded, but
 # nothing derives this ordering from the code — keep it true.
 ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, "
-                   "declared naming, arm prompt, "
+                   "declared naming, declared scope (#932), arm prompt, "
                    "carried artifacts, phase instruction; "
                    "core derived from the full record, not generated (#694); "
                    "audit and reconcile_full address the full record only, the "
@@ -807,6 +807,74 @@ def naming_block(project: str,
         "written many ways reads as many projects.")
 
 
+def scope_block(project: str,
+                manifest_line: str | None = None) -> str | None:
+    """The declared scope for one project, as sent to the model (#932).
+
+    v8's R2 tells the model that a passage whose subject is another dataset
+    belongs in `related_datasets` and never in the referent's own slots, and
+    the uniform rules say `Dataset` admits one referent. Both refer to a
+    distinction the model was never given: the manifest's `scope:` block —
+    the referent, its identifier, and the datasets declared related but
+    distinct — was read only by `scope.py` and `d4d download scope --check`.
+    So the rule could be broken by a model that had no way to know which
+    dataset in its bundle was which, and only the checker could see it.
+
+    Rendered from the manifest, like `naming_block` (#668), so an edit there
+    reaches the next run with no code change and no prompt hardcodes a
+    project's identifier (#647). None when the arm declares the manifest
+    unused (#603), and None when the project declares no referent — the
+    block would then assert nothing.
+    """
+    if manifest_line is not None and "not used" in manifest_line.lower():
+        return None
+    try:
+        from data_sheets_schema.scope import scope_of
+        declared = scope_of(project) or {}
+    except Exception:                                          # noqa: BLE001
+        return None
+    referent = str(declared.get("referent") or "").strip()
+    if not referent:
+        return None
+    ident = str(declared.get("referent_id") or "").strip()
+    lines = ["DECLARED SCOPE — this record is about "
+             + (f"{referent} ({ident})." if ident else f"{referent}.")]
+    note = str(declared.get("referent_note") or "").strip()
+    if note:
+        lines.append(note)
+    related = [e for e in (declared.get("related_but_distinct") or []) if e]
+    if related:
+        lines.append("")
+        lines.append("The declared bundle also documents datasets that are "
+                     "NOT this one:")
+        for entry in related:
+            name = str(entry.get("name") or entry.get("id") or "").strip()
+            ids = [str(entry.get("id") or "").strip(),
+                   *(str(a).strip() for a in (entry.get("also_known_as") or []))]
+            ids = [i for i in ids if i]
+            head = f"- {name}" + (f" — {', '.join(ids)}" if ids else "")
+            lines.append(head)
+            why = str(entry.get("why") or "").strip()
+            if why:
+                lines.append(f"  Why distinct: {why}")
+            express = str(entry.get("express_as") or "").strip()
+            if express:
+                lines.append(f"  Facts about it belong in `{express}`, never "
+                             "in this dataset's own slots.")
+            in_bundle = entry.get("in_bundle")
+            if in_bundle:
+                names = in_bundle if isinstance(in_bundle, list) else [in_bundle]
+                lines.append("  Its documentation is legitimately in this "
+                             "bundle, under source "
+                             + ", ".join(str(n) for n in names) + ".")
+    lines.append("")
+    lines.append("This is the declaration the rules refer to when they say a "
+                 "passage about another dataset describes that dataset. It "
+                 "names which datasets those are; it does not tell you what "
+                 "any passage says.")
+    return "\n".join(lines)
+
+
 def source_ranking_block(project: str,
                          manifest_line: str | None = None) -> str | None:
     """The declared source ranking for one project, as sent to the model.
@@ -967,6 +1035,13 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     naming = naming_block(spec.project, spec.manifest_line)
     if naming:
         cached.append({"type": "text", "text": naming,
+                       "cache_control": {"type": "ephemeral"}})
+    # The declared scope, same source and same exemption (#932): the rules
+    # already tell the model what to do with a passage about another dataset,
+    # and until now nothing told it which datasets those are.
+    scope = scope_block(spec.project, spec.manifest_line)
+    if scope:
+        cached.append({"type": "text", "text": scope,
                        "cache_control": {"type": "ephemeral"}})
 
     # Carried artifacts go BEFORE the phase instruction, so the instruction is
