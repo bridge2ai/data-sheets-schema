@@ -7,11 +7,11 @@
   "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep1",
   "evaluation_timestamp": "2026-09-08T21:00:39Z",
   "model": {
-    "name": "Opus 5 (1M context) [claude-opus-5[1m]]",
-    "evaluator_model": "Opus 5 (1M context) [claude-opus-5[1m]]",
+    "name": "claude-opus-5[1m]",
+    "evaluator_model": "claude-opus-5[1m]",
     "temperature": 0.0,
     "evaluation_type": "semantic_llm_judge",
-    "model_note": "Recorded as the actual runtime identity of the evaluating session, per #1058, not the value pinned in the agent definition frontmatter (which reads claude-opus-5). The session reports itself as 'Opus 5 (1M context)', exact model ID claude-opus-5[1m]. Scores are comparable only to other scores produced by this same evaluator."
+    "model_note": "Recorded as the actual runtime identity of the evaluating session, per #1058, not the value pinned in the agent definition frontmatter (which reads claude-opus-5). The session reports itself as 'Opus 5 (1M context)', exact model ID claude-opus-5[1m]. Scores are comparable only to other scores produced by this same evaluator. [Normalised (#667): this file recorded the runtime identity in a human-readable form while the rest of the arm uses the model id. The identity is unchanged and only its spelling was made uniform, so that a query for one evaluator returns the whole arm.]"
   },
   "rule_provenance": {
     "definition_match": "PARTIAL MISMATCH. The launching message quoted two rules verbatim; my own loaded agent definition does not match one of them and matches the other only in part.",
@@ -38,56 +38,88 @@
         "type": "consistency",
         "severity": "high",
         "description": "human_subject_research.involves_human_subjects is true, but the record carries no informed_consent slot at all. The at_risk_populations source_caveats confirms the gap in prose: the sources 'describe no assent procedures, guardian consent, or special protections'. For a retrospective EHR dataset a waiver of consent is the expected route, and no waiver is documented either.",
-        "fields_involved": ["human_subject_research.involves_human_subjects", "informed_consent", "at_risk_populations.source_caveats"],
+        "fields_involved": [
+          "human_subject_research.involves_human_subjects",
+          "informed_consent",
+          "at_risk_populations.source_caveats"
+        ],
         "recommendation": "Add informed_consent recording either the consent mechanism or the IRB waiver of consent under which retrospective records were released, or state explicitly that the sources report neither."
       },
       {
         "type": "consistency",
         "severity": "high",
         "description": "involves_human_subjects is true and the data are identifiable hospital records, but no IRB or ethics committee of record, approval number, or determination is documented. ethical_reviews describes the project's ethics programme (focus groups, legal-landscape analysis) rather than a review of this dataset, and says so in its own source_caveats.",
-        "fields_involved": ["human_subject_research.involves_human_subjects", "ethical_reviews", "ethical_reviews.source_caveats"],
+        "fields_involved": [
+          "human_subject_research.involves_human_subjects",
+          "ethical_reviews",
+          "ethical_reviews.source_caveats"
+        ],
         "recommendation": "Add the IRB or reliance agreement of record for the multi-site extract, with approval identifier, or state that no such approval is reported in the sources."
       },
       {
         "type": "consistency",
         "severity": "medium",
         "description": "is_deidentified is populated with a method, but no de-identification standard is named for the structured data and no identifiers-removed list is given. The record's own source_caveats states this and also states that no residual re-identification risk assessment is reported.",
-        "fields_involved": ["is_deidentified.method", "is_deidentified.source_caveats", "participant_privacy.reidentification_risk"],
+        "fields_involved": [
+          "is_deidentified.method",
+          "is_deidentified.source_caveats",
+          "participant_privacy.reidentification_risk"
+        ],
         "recommendation": "Name the standard applied to the OMOP tables (Safe Harbor, Expert Determination, or a site-specific policy) and enumerate the identifier classes removed."
       },
       {
         "type": "correctness",
         "severity": "medium",
         "description": "No persistent identifier of any kind. The id slot holds https://chorus4ai.org/, the project homepage, which is also the value of page. A homepage URL is neither a DOI, an RRID, nor a resolvable dataset identifier distinct from the landing page. No doi and no rrid slot is present.",
-        "fields_involved": ["id", "page", "doi", "rrid"],
+        "fields_involved": [
+          "id",
+          "page",
+          "doi",
+          "rrid"
+        ],
         "recommendation": "Mint a DOI for the released cohort or register an RRID, and give id a value distinct from the landing page."
       },
       {
         "type": "correctness",
         "severity": "low",
         "description": "One external resource is given without a URL scheme ('www.bridge2ai.org/chorus'), and one maintainer email is 'cmccrary@mgh.havard.edu' with an apparently misspelled domain. Both are transcription-faithful and the record flags the second in source_caveats, so this is a fidelity note rather than a fabrication.",
-        "fields_involved": ["external_resources", "maintainers.maintainer_details", "maintainers.source_caveats"],
+        "fields_involved": [
+          "external_resources",
+          "maintainers.maintainer_details",
+          "maintainers.source_caveats"
+        ],
         "recommendation": "Keep the verbatim transcription, and add the corrected form beside it once confirmed with the site."
       },
       {
         "type": "content_accuracy",
         "severity": "low",
         "description": "license_and_use_terms opens with the controlled-access agreement and then reports that the GitHub organisation licenses its code under MIT. Placing a code licence in the dataset licence slot invites misreading as a data licence; the record's source_caveats explicitly disclaims that reading, which contains the risk.",
-        "fields_involved": ["license_and_use_terms.license_terms", "license_and_use_terms.source_caveats"],
+        "fields_involved": [
+          "license_and_use_terms.license_terms",
+          "license_and_use_terms.source_caveats"
+        ],
         "recommendation": "Move the MIT statement to a software-licence slot or external_resources and leave the dataset licence field stating only that no data licence is named in the sources."
       },
       {
         "type": "semantic_understanding",
         "severity": "low",
         "description": "The record describes itself as 'partially released' and repeatedly distinguishes 'current released dataset' from 'anticipated final dataset', yet carries no version, version_access, or errata. A dataset that is explicitly growing is precisely the case where a version handle is needed to cite what was analysed.",
-        "fields_involved": ["status", "updates.update_details", "version"],
+        "fields_involved": [
+          "status",
+          "updates.update_details",
+          "version"
+        ],
         "recommendation": "Assign a release identifier to the 50,000-admission snapshot and record how earlier snapshots can be referenced."
       },
       {
         "type": "content_accuracy",
         "severity": "low",
         "description": "Two sources disagree on cohort size (50,000 admissions on chorus4ai.org versus over 45K unique admissions as of August 2025 in the webinar) and count imaging in different units (7,642 admissions with radiology data versus 1000 images available). The record does not silently reconcile them: it records both, states the manifest precedence rule it applied, and explains that the imaging figures are different units. This is correct handling, noted here for the reader rather than as a defect.",
-        "fields_involved": ["source_caveats", "instances.counts", "file_collections"],
+        "fields_involved": [
+          "source_caveats",
+          "instances.counts",
+          "file_collections"
+        ],
         "recommendation": "No change. Retain the both-figures treatment."
       }
     ],

@@ -7,12 +7,12 @@
   "label": "2026-09-01_claude-opus-5-api-generic-v7_rep1",
   "evaluation_timestamp": "2026-09-08T21:00:14Z",
   "model": {
-    "name": "Opus 5 (1M context)",
+    "name": "claude-opus-5[1m]",
     "model_id": "claude-opus-5[1m]",
-    "evaluator_model": "Opus 5 (1M context)",
+    "evaluator_model": "claude-opus-5[1m]",
     "temperature": 0.0,
     "evaluation_type": "semantic_llm_judge",
-    "model_note": "Recorded identity is this evaluating session's actual runtime model, Opus 5 (1M context), exact model id claude-opus-5[1m]. It is NOT copied from the evaluator pin in the agent definition file. A score is comparable only to another score produced by this same evaluator."
+    "model_note": "Recorded identity is this evaluating session's actual runtime model, Opus 5 (1M context), exact model id claude-opus-5[1m]. It is NOT copied from the evaluator pin in the agent definition file. A score is comparable only to another score produced by this same evaluator. [Normalised (#667): this file recorded the runtime identity in a human-readable form while the rest of the arm uses the model id. The identity is unchanged and only its spelling was made uniform, so that a query for one evaluator returns the whole arm.]"
   },
   "rule_conformance_note": {
     "statement": "Two rules were supplied verbatim by the launching agent because agent-definition edits do not reliably reach subagents (#1077). Both were applied as quoted. My own agent definition differs from the quoted text in two places, and the quoted text governed.",
@@ -75,63 +75,99 @@
         "type": "consistency",
         "severity": "medium",
         "description": "Version numbering runs backwards across the release series. version is \"2.0\" for the June 2026 release, but version_access states the June 2025 and October 2025 releases were both at version 2.1. A later release carrying a lower version number than two of its predecessors, while related_datasets marks all of them is_new_version_of, cannot be read consistently by a machine ordering the series.",
-        "fields_involved": ["version", "version_access.versions_available", "related_datasets"],
+        "fields_involved": [
+          "version",
+          "version_access.versions_available",
+          "related_datasets"
+        ],
         "recommendation": "Reconcile against the Dataverse version history and state the release-series version explicitly; if the Dataverse major-version counter genuinely reset, record that fact in source_caveats so the ordering anomaly is attributable to the source rather than to the record."
       },
       {
         "type": "consistency",
         "severity": "medium",
         "description": "The processing narrative describes a pipeline whose outputs are not in this release. preprocessing_strategies (node2vec embedding, Human Protein Atlas image embedding, contrastive co-embedding, community detection producing 'the final cell map') and machine_annotation_tools (node2vec, DenseNet-121, GPT-4, HiDeF) all document MuSIC cell-map construction, while known_limitations and intended_uses state 'It does not contain predicted cell maps' and 'computed cell maps are not included'. A reader is told in detail how something absent was made.",
-        "fields_involved": ["preprocessing_strategies", "machine_annotation_tools", "labeling_strategies", "known_limitations", "intended_uses"],
+        "fields_involved": [
+          "preprocessing_strategies",
+          "machine_annotation_tools",
+          "labeling_strategies",
+          "known_limitations",
+          "intended_uses"
+        ],
         "recommendation": "Separate pipeline documentation that describes future or upstream cell-map products from the processing actually applied to the ten distributed files, and label each accordingly."
       },
       {
         "type": "consistency",
         "severity": "medium",
         "description": "Three file_collections entries are typed collection_type: processed_data (cm4ai_mass-spec_KOLF2, cm4ai_mass-spec_MDA-MB-468, cm4ai_perturb-seq_KOLF2_cell_atlas) but no field names the software that performed that processing. cleaning_strategies says only that CRISPR screen data 'were reported as undergoing quality control', naming no tool, and there is no software_and_tools slot.",
-        "fields_involved": ["file_collections", "cleaning_strategies", "software_and_tools"],
+        "fields_involved": [
+          "file_collections",
+          "cleaning_strategies",
+          "software_and_tools"
+        ],
         "recommendation": "Add software_and_tools naming the mass-spectrometry search and quantification software and the Perturb-seq processing stack, with versions, so processed_data files are traceable to what produced them."
       },
       {
         "type": "semantic_understanding",
         "severity": "medium",
         "description": "Only container-level formats are declared. distribution_formats gives 'ZIP Archive' with media_type application/zip and 'RO-Crate'; no field states the payload formats inside the archives (image format, mass-spectrometry format, expression-matrix format), and encoding is absent. A reuser can tell how to unpack the release but not what they will find.",
-        "fields_involved": ["distribution_formats", "format", "encoding"],
+        "fields_involved": [
+          "distribution_formats",
+          "format",
+          "encoding"
+        ],
         "recommendation": "Declare per-collection payload formats (for example OME-TIFF or PNG for the immunofluorescence archives, mzML or a search-engine output for SEC-MS/AP-MS, MTX/H5AD for the Perturb-seq atlas) alongside the ZIP container."
       },
       {
         "type": "semantic_understanding",
         "severity": "medium",
         "description": "No variable-level metadata or data dictionary is provided. The variables slot is absent; instances carry ontology CURIEs and prose notes only. is_tabular is false, which explains the absence of columns for the imaging modality but not for the mass-spectrometry elution profiles or the perturbation atlas.",
-        "fields_involved": ["variables", "instances", "is_tabular"],
+        "fields_involved": [
+          "variables",
+          "instances",
+          "is_tabular"
+        ],
         "recommendation": "Add variables entries with identifiers and descriptions for the tabular components of the release, at minimum the SEC-MS elution profile columns and the Perturb-seq atlas fields."
       },
       {
         "type": "content_accuracy",
         "severity": "low",
         "description": "No errata and no per-version change log, despite a five-release series (May 2024, March 2025, June 2025, October 2025, June 2026). updates describes cadence rather than change; version_access enumerates versions without saying what changed between them; related_datasets links prior releases without change notes.",
-        "fields_involved": ["errata", "updates", "version_access"],
+        "fields_involved": [
+          "errata",
+          "updates",
+          "version_access"
+        ],
         "recommendation": "Record what each release added, corrected or withdrew, so a user holding an earlier release can decide whether to migrate."
       },
       {
         "type": "content_accuracy",
         "severity": "low",
         "description": "created_on is 2025-02-27, which the record itself flags in source_caveats as a Dataverse 'Data Creation Date' carried unchanged across the March 2025, June 2025, October 2025 and June 2026 release records and 'unlikely to be specific to this release's content'. The value is therefore present but not informative about this release, and last_updated_on is absent.",
-        "fields_involved": ["created_on", "issued", "source_caveats"],
+        "fields_involved": [
+          "created_on",
+          "issued",
+          "source_caveats"
+        ],
         "recommendation": "The disclosure is the right handling; a release-specific creation or modification date from the source would be better still if one becomes available."
       },
       {
         "type": "content_accuracy",
         "severity": "low",
         "description": "Instance-level counts are partial. The record reports 464 proteins imaged per condition, 11,739 targeted genes and total_file_count 10, but no image count, no interaction count and no profiled-cell count. The record states explicitly that the bundle 'does not state the number of profiled cells' and that project-level aggregates (53,788 images, 1,374 interactions, 7,023 proteins) describe the project rather than this release and were deliberately not recorded as slot values.",
-        "fields_involved": ["instances", "subpopulations.distribution", "source_caveats"],
+        "fields_involved": [
+          "instances",
+          "subpopulations.distribution",
+          "source_caveats"
+        ],
         "recommendation": "None required of the record. The refusal to promote project-level aggregates into release-level counts is correct, and the gap is attributed to the source rather than concealed."
       },
       {
         "type": "correctness",
         "severity": "low",
         "description": "No conflicts-of-interest statement accompanies the ethical review. ethical_reviews documents the Ethics Module plan and names two reviewers with ORCIDs and contact emails, but the sub-element also asks for conflicts, and none are declared or declared absent.",
-        "fields_involved": ["ethical_reviews"],
+        "fields_involved": [
+          "ethical_reviews"
+        ],
         "recommendation": "Add a conflicts-of-interest declaration, including an explicit 'none declared' where that is the case."
       }
     ],
