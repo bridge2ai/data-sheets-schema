@@ -592,6 +592,16 @@ its documentation. It ends by saying it names the datasets and does not
 say what any passage means, so the rules remain the only text governing
 the decision.
 
+**The two rules that pair with it landed the same day** as
+`generic_v9` (#913, #911): R6, that a value in one of the referent's own
+slots is supported by a passage whose subject is the referent — binding
+the reconcile phase, which is where the v7 arm's leaks survived, since
+reconciling the two records against each other does not test what a value
+is about; and R7, that a list entry names exactly one entity, with the
+signature of a merged one. R6 is the obligation this block's declaration
+exists to make checkable by the model rather than only by `d4d download
+scope --check`.
+
 **It re-baselines the condition.** `ASSEMBLY_LAYOUT` names the new block,
 so `assembly_digest` moves and a record made under it is distinguishable
 from the v8 arm's — which is the point of that digest (#353). No run
