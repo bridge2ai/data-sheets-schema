@@ -7,9 +7,13 @@ description: |
     - "Run semantic analysis using rubric10-semantic"
     - "Check D4D consistency and correctness with rubric10-semantic"
     - "Perform deep semantic evaluation with rubric10-semantic"
-model: claude-fable-5
+model: claude-opus-5
 color: purple
 ---
+
+**Independence (#1061).** Do not open any file under `data/evaluation_llm/` for any purpose — not to match the output structure, not to calibrate against a sibling score. The Output Format section below fully specifies the JSON. Reading another evaluation anchors yours, and the sibling you would reach for is usually the one your score will be compared against.
+
+**Model identity (#1058).** In the output's model block, record the evaluating session's actual runtime model as both the name and the evaluator model, never the value pinned above — the pin selects the evaluator, the record states which one ran. A score is only comparable to another score from the same evaluator. Field names are spelled out here rather than written as dotted paths: a backticked dotted name in an agent file is read as a schema path that must resolve against Dataset (tests/test_evaluation/test_rubric20_fields_resolve.py).
 
 # D4D Rubric10 Semantic Evaluator
 
@@ -438,7 +442,7 @@ Return your evaluation as a **JSON object** with this EXACT structure:
   "method": "<generation_method>",
   "evaluation_timestamp": "<ISO 8601 timestamp>",
   "model": {
-    "name": "claude-fable-5",
+    "name": "<the evaluating session's actual runtime model>",
     "temperature": 0.0,
     "evaluation_type": "semantic_llm_judge"
   },
@@ -813,7 +817,7 @@ The agent will iterate through files, evaluate each one, and save results.
 **This agent provides fully reproducible evaluations:**
 - Same D4D file → Same quality score every time
 - Temperature: 0.0 (fully deterministic)
-- Model: claude-fable-5 (pinned)
+- Model: the evaluator pinned in this file's frontmatter, recorded as the session's actual runtime identity
 - Rubric: Version-controlled in `data/rubric/rubric10.txt`
 - All within Claude Code conversation
 
@@ -830,7 +834,7 @@ See `notes/RUBRIC_AGENT_USAGE.md` for comprehensive usage examples.
 ## Notes
 
 - **Temperature Setting:** This agent uses temperature=0.0 for fully deterministic, reproducible quality assessments
-- **Model:** claude-fable-5 (pinned for consistency)
+- **Model:** the evaluator pinned in this file's frontmatter, recorded as the session's actual runtime identity
 - **Complement, Not Replace:** This LLM-based evaluation complements the existing field-presence detection in `src/evaluation/evaluate_d4d.py`
 - **Cost:** ~$0.10-0.30 per file evaluation via Anthropic API
 - **Time:** ~30-60 seconds per file (slower than presence detection but provides deeper insights)

@@ -357,9 +357,15 @@ def write_markdown(data, scores) -> None:
              "a record was last backfilled. Stored `form` blocks are not read (today "
              "they agree with the recompute on all 36 records). GC variants are counted "
              "against a naming declaration decided 2026-08-22 — anachronistic for v4.",
-             "- rubric scores: `data/evaluation_llm/rubric{10,20}_semantic/label_aware/`, "
-             "same evaluator for every arm shown; N/A exclusions are evaluator "
-             "judgements, so adjusted maxima can differ between comparable records.",
+             "- rubric scores: `data/evaluation_llm/rubric{10,20}_semantic/label_aware/`. "
+             "The v7 production and v8 arms were scored by `claude-opus-5[1m]` on "
+             "2026-09-08; their superseded `claude-fable-5` scores are kept under "
+             "`label_aware/superseded_fable5/`, outside this glob. **Every other arm "
+             "shown is still Fable 5**, so a rubric row compares one evaluator "
+             "within v7/v8 and a different one across the older arms — an "
+             "evaluator is an instrument (#1058). N/A exclusions are evaluator "
+             "judgements, so adjusted maxima can differ between comparable "
+             "records, and the Element 4 gate resolved both ways on CM4AI (#1060).",
              "- spend: absent by design — `api_usage` and `run_observed` are different "
              "quantities (#400).",
              "- a record whose own `validation` block says `passed: false` is not an arm "
