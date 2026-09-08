@@ -88,11 +88,24 @@ Score **0** (absent/fail) if:
        | Condition | Satisfied when… | Gates |
        |---|---|---|
        | Human subjects | `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment — never E4's own fields | Element 4 (all 5 sub-elements) |
-       | Governance restrictions | `regulatory_restrictions` or `confidentiality_level` (from E2) indicate governance constraints — E2 fields, not E4 fields, so non-circular | Element 4 (all 5 sub-elements) |
+       | Governance restrictions | `regulatory_restrictions` or `confidentiality_level` (from E2) **state a governance constraint that applies** — E2 fields, not E4 fields, so non-circular. A block recording that no restriction applies is not a constraint: read what it says, not whether it is populated (#1060) | Element 4 **sub-elements 1–2 only** |
        | Datasets shared & available for reuse | `distribution_formats` populated OR `download_url`/`page` links to accessible data OR license explicitly permits reuse | Element 3 sub-elements 1–4, Element 6 (all), Element 8 (all), Element 10 (all) |
        | Software tools produced as dataset output | `external_resources` (from E10) references a code repository, OR `description`/`purposes` (from E1/E7) explicitly identifies software production as a dataset output — never E8's own fields | Element 8 sub-elements 3–4 |
        | Data collection identified AND datasets shared | Collection fields populated (`acquisition_methods`, `collection_mechanisms`) AND the datasets shared condition above is met | Element 8 sub-elements 1–2 |
        | Publication identified AND datasets shared | `citation` or `external_resources` includes at least one publication reference AND the datasets shared condition above is met | Element 10 sub-element 2 |
+
+     - **Element 4 is gated per sub-element, not as a block (#1060).**
+       Sub-elements 1–2 (ethics review and oversight, deidentification) can
+       apply to a dataset with no human participants — donor-derived material,
+       a data access committee, an ethics contact — so either condition opens
+       them. Sub-elements 3–5 (participant privacy, informed consent,
+       vulnerable populations and compensation) ask about participants: where
+       there are none they are `applicable: false`, and **the governance
+       condition does not reach them**. Scoring them 0 for a dataset with no
+       participants measures the dataset's subject matter rather than its
+       documentation. The ambiguity rule below applies to a condition that is
+       genuinely borderline; a human-subjects condition that plainly fails is
+       not borderline, and a governance constraint does not make it fire.
 
      - **Step 2 — Apply the N/A encoding convention:** If a condition is not met, set `applicable: false` and `score: null` for every sub-element it gates. Do not emit `0`. Subtract 1 from the denominator per excluded sub-element per the N/A Sub-Element Convention above.
      - **Ambiguity rule:** When a condition is borderline (e.g., a dataset page exists but access requires approval), default to `applicable: true` and score based on what is documented. This prevents silent N/A inflation on datasets that are partially shared.
@@ -218,6 +231,16 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
 ### Element 4: Ethical Use and Privacy Safeguards
 **Question:** Does the dataset provide clear information about consent, privacy, and ethical oversight?
 
+**Applicability is per sub-element, not per element (#1060).** Sub-elements 1
+and 2 ask about oversight and deidentification, which a dataset with no human
+participants can still have. Sub-elements 3, 4 and 5 ask about participants —
+their privacy, their consent, their compensation — and where there are none,
+there is nothing to document and nothing to score. Marking those three
+`not_applicable` is not leniency: it keeps the element measuring documentation
+quality rather than whether the dataset happens to involve people. The five
+sub-elements previously carried one copy-pasted trigger, and evaluators split
+on it, scoring the same cell-line dataset out of 50 and out of 45.
+
 **Consistency Checks (apply across all sub-elements):**
 - IF `human_subject_research.involves_human_subjects=True` → EXPECT sub-element 1 (IRB approval) AND sub-element 4 (consent) to score 1
 - IF `is_deidentified` present → EXPECT deidentification method described
@@ -230,27 +253,27 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
    - Fields: `ethical_reviews`, `human_subject_research`, `data_protection_impacts`, `regulatory_restrictions.governance_committee_contact`
    - Look for: IRB approval details, institutional oversight, ethics review boards, data protection impact assessments (DPIAs), governance committee contacts
    - **Semantic Check:** If `human_subject_research.involves_human_subjects=True`, this MUST be populated
-   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment, OR `regulatory_restrictions`/`confidentiality_level` (from E2) indicate governance constraints. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
+   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment, OR `regulatory_restrictions`/`confidentiality_level` (from E2) state a governance constraint that applies. **A record that no restriction applies is not a constraint** (#1060) — read what the block says, not whether it is populated. Ethical oversight and deidentification can apply to a dataset with no human participants — donor-derived material, a data access committee, an ethics contact — which is why these two sub-elements carry the governance disjunct and sub-elements 3 to 5 do not. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 2. **Deidentification Method Described**
    - Fields: `is_deidentified`
    - Look for: Specific deidentification method (HIPAA Safe Harbor, Expert Determination, k-anonymity)
-   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment, OR `regulatory_restrictions`/`confidentiality_level` (from E2) indicate governance constraints. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
+   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment, OR `regulatory_restrictions`/`confidentiality_level` (from E2) state a governance constraint that applies. **A record that no restriction applies is not a constraint** (#1060) — read what the block says, not whether it is populated. Ethical oversight and deidentification can apply to a dataset with no human participants — donor-derived material, a data access committee, an ethics contact — which is why these two sub-elements carry the governance disjunct and sub-elements 3 to 5 do not. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 3. **Privacy Protections and Re-identification Risk Assessment**
    - Fields: `participant_privacy`, `participant_privacy.reidentification_risk`
    - Look for: Privacy protections, anonymization procedures, explicit re-identification risk assessment and mitigation measures
-   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment, OR `regulatory_restrictions`/`confidentiality_level` (from E2) indicate governance constraints. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
+   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment. **A governance structure is not a participant signal** (#1060): a data access committee, an embargo or a governance contact over a dataset with no human participants does not make this sub-element applicable, because what it asks about does not exist. Scoring it 0 there would measure the dataset's subject matter rather than its documentation. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 4. **Informed Consent Obtained from Participants**
    - Fields: `informed_consent`
    - Look for: Consent procedures, consent type (written, verbal), withdrawal mechanisms
-   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment, OR `regulatory_restrictions`/`confidentiality_level` (from E2) indicate governance constraints. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
+   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment. **A governance structure is not a participant signal** (#1060): a data access committee, an embargo or a governance contact over a dataset with no human participants does not make this sub-element applicable, because what it asks about does not exist. Scoring it 0 there would measure the dataset's subject matter rather than its documentation. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 5. **Vulnerable Populations and Compensation Documented**
    - Fields: `at_risk_populations`, `participant_compensation`
    - Look for: Protections for at-risk populations, compensation details
-   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment, OR `regulatory_restrictions`/`confidentiality_level` (from E2) indicate governance constraints. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
+   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment. **A governance structure is not a participant signal** (#1060): a data access committee, an embargo or a governance contact over a dataset with no human participants does not make this sub-element applicable, because what it asks about does not exist. Scoring it 0 there would measure the dataset's subject matter rather than its documentation. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 ---
 
@@ -436,7 +459,7 @@ Return your evaluation as a **JSON object** with this EXACT structure:
 ```json
 {
   "rubric": "rubric10-semantic",
-  "version": "1.0",
+  "version": "1.1",
   "d4d_file": "<filename>",
   "project": "<project_name>",
   "method": "<generation_method>",

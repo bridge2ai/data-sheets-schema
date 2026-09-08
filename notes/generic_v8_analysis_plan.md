@@ -434,7 +434,7 @@ v8 falls **below the v7 per-project replicate minimum**.
 |---|---|---|---|---|---|
 | AI_READI | 98.0, 98.0, 98.0 | 98.0, 98.0, 100.0 | 98.0 | 98.0 | favourable |
 | CHORUS | 65.3, 59.2, 63.3 | 63.3, 63.3, 63.3 | 59.2 | 63.3 | favourable |
-| CM4AI | 84.0, 88.0, 88.9 | 86.7, 91.1, 86.7 | 84.0 | 86.7 | favourable |
+| CM4AI | 91.5, 93.6, 91.5 | 89.4, 87.2, 85.1 | 91.5 | 85.1 | **unfavourable**ᵍ |
 | VOICE | 96.0, 98.0, 94.0 | 94.0, 98.0, 98.0 | 94.0 | 94.0 | favourable |
 
 | project | rubric20 v7 reps | v8 reps | v7 min | v8 min | verdict |
@@ -444,13 +444,16 @@ v8 falls **below the v7 per-project replicate minimum**.
 | CM4AI | 86.4, 85.2, 86.4 | 76.1, 79.5, 78.4 | 85.2 | 76.1 | **unfavourable** |
 | VOICE | 90.9, 90.9, 94.9ᶠ | 89.8, 86.4, 90.9 | 90.9 | 86.4 | **unfavourable** |
 
+ᵍ CM4AI's rubric10 row was rescored on 2026-09-08 under the corrected
+Element 4 gate (#1060) and **the verdict changed**: see below.
+
 ᶠ a half-point score on an integer-anchored rubric (#1062). AI_READI's
 96.0 **is** its v7 minimum, so that verdict is quoted off a fractional
 score — it does not change the reading (the v8 minimum 89.8 is below
 96.6 either way), but the fraction is load-bearing. VOICE's 94.9 is not
 its minimum.
 
-**Prediction 8: favourable on rubric10 (4 of 4), unfavourable on
+**Prediction 8: favourable on rubric10 (3 of 4), unfavourable on
 rubric20 (1 of 4).** The registered text — "not below the v7 per-project
 replicate minimum" — names no rubric, so the honest reading is that it
 holds on one instrument and fails on the other, not that it passes.
@@ -470,6 +473,26 @@ direction the plan warned of — "a fall means the larger digest displaced
 reading" — on the instrument sensitive enough to see it, and it is a
 finding for v9 rather than a defect in the arm.
 
+**The Element 4 gate changed a verdict (#1060, 2026-09-08).** When this
+section was written, CM4AI's rubric10 row read 84.0/88.0/88.9 against
+86.7/91.1/86.7 and was favourable. Those six evaluations disagreed about
+whether Element 4 applied to a dataset with no human participants: two
+scored it out of 50, four excluded it out of 45. The gate is now stated
+per sub-element — oversight and deidentification apply, participant
+privacy, consent and compensation do not — and all six rescores land on
+one denominator, 47. Under it CM4AI reads 91.5/93.6/91.5 against
+89.4/87.2/85.1, a v7 minimum of 91.5 against a v8 minimum of 85.1, and
+the verdict is **unfavourable**. Prediction 8 on rubric10 is therefore
+3 of 4, not 4 of 4.
+
+The number moved because the instrument was underspecified, not because
+the records changed: the same six records scored under three different
+readings of one rule produced denominators of 45, 47 and 50. The
+superseded scores are kept beside the current ones with a README, and
+both rounds of the fix are recorded there — the first edited the
+per-sub-element prose and did not hold, because an authoritative
+conditions table above it still mapped both conditions to all five.
+
 **Four instrument findings, all filed, none changing a verdict today:**
 #1059 (rubric10 Element 8's software sub-element scored 0, 0, 1 on
 identical AI_READI evidence — one point, the whole gap between 98% and
@@ -479,9 +502,10 @@ on CM4AI, 2 scored and 4 excluded, moving the denominator between 50 and
 rescore read its v8 counterpart to calibrate; re-run independently to an
 identical 98.0%, so the anchoring cost nothing, and the agents now
 forbid opening any evaluation file); #1062 (the two half-point scores
-above). #1059 and #1060 are undecided thresholds in the rubric text, not
-evaluator error: both readings are defensible on what the rubric
-currently says, which is the defect.
+above). #1059 and #1060 were undecided thresholds in the rubric text, not
+evaluator error: both readings were defensible on what the rubric
+said, which is the defect. #1060 is now fixed and its verdict change is
+above; #1059 remains.
 ### Canonical selection (2026-09-08)
 
 Executed under the review criterion (#660) — validity, then fewest review
