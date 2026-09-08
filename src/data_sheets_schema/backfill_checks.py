@@ -172,12 +172,14 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
         # instrument revision silently dropped the pins that make its verdict
         # checkable — the same argument the pair block states above, and the
         # same one #426 makes for validation verdicts.
-        block["artifacts"] = {"report": {"path": str(report),
-                                         "md5": _md5(report)}}
-        if full.exists():
-            block["artifacts"]["full"] = {"path": str(full), "md5": _md5(full)}
-        if core.exists():
-            block["artifacts"]["core"] = {"path": str(core), "md5": _md5(core)}
+        # Unconditionally, as the runner does: a `md5: null` says the file was
+        # absent, while omitting the key would be indistinguishable from a
+        # block written before this pinned them at all.
+        block["artifacts"] = {
+            "report": {"path": str(report), "md5": _md5(report)},
+            "full": {"path": str(full), "md5": _md5(full) if full.exists() else None},
+            "core": {"path": str(core), "md5": _md5(core) if core.exists() else None},
+        }
         block["schema"] = {"full_sha256": _sha256(FULL_SCHEMA),
                            "core_sha256": _sha256(CORE_SCHEMA)}
         block["recorded_by"] = RECORDED_BY

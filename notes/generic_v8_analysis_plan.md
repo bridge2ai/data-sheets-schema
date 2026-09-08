@@ -737,9 +737,20 @@ Corpus-wide, recomputed uniformly over the same artifacts, the count goes
 **38 under v2 to 25 under v3**. The blocks as they stood before this showed
 47, but that figure spans instrument versions — some blocks were written by
 the runner, others by earlier backfills — which is why the comparable pair
-is the two recomputes rather than the recorded total. Every one of the 25
-is true: the v4 and v5 `distributions` claims that #546 exists for, which
-are false against `CoreDataset` whichever scope they name.
+is the two recomputes rather than the recorded total.
+
+Of the 25 that remain, **23 are true and 2 are false positives of a
+different, pre-existing defect** (#1089). The 23 are mostly the
+`distributions` claims that #546 exists for — 20 of them — spread over the
+2026-07-28, 2026-07-31, v3, v4 and v5 arms rather than v4 and v5 alone, plus
+one each on `conforms_to`, `md5` and `path`, all false against the class the
+claim names. The 2 are from one v5 VOICE reconciliation whose section 3.4
+reports that *the record* asserted the core schema lacked a slot and says
+the digest does not support it: the report is rejecting a claim, and the
+checker reads the quoted claim as one the report makes. Filed rather than
+fixed here, because a rule that suppresses findings on a sentence's stance
+needs its own evidence base and two instances is not one — #1087 is what
+that failure looks like when it goes wrong.
 
 The scope is read from the **clause** carrying the "not declared" phrase,
 splitting on `[;,]` — not from the sentence, and only from the words "core"
@@ -762,8 +773,9 @@ are not attested keys on any listed range class" names a class in its first
 half and ranges over all of them in its second — and a clause saying "any
 class" is unscoped whatever it names.
 
-The block was recomputed for all 282 records under one instrument, so no
-comparison spans v2 and v3. Recomputing exposed a second defect (#1085):
+The block was recomputed for every record the backfill covers — 282, of
+which 277 have a reconciliation report and so carry a checked block — under
+one instrument, so no comparison spans v2 and v3. Recomputing exposed a second defect (#1085):
 `backfill-checks --blocks report_claims` replaced the block's `artifacts`
 with the report alone, dropping the full and core record md5s and never
 writing the schema digests the runner records, so a recomputed verdict could

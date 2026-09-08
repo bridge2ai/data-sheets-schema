@@ -20,10 +20,19 @@ import yaml
 
 from data_sheets_schema.report_claims import check_report, resolve
 
-DECLARED = {"Dataset": {"file_collections", "distributions", "keywords"},
+#: Real membership, not a convenient one (#1090). `distributions` is declared
+#: on `CoreDataset` **only** — that is #546's whole premise, and a fixture
+#: putting it on `Dataset` as well makes every core-versus-full assertion
+#: below pass under either reading. It did: with `distributions` on both, the
+#: #1087 regression test caught the defect through its `scope` string alone
+#: and its finding-level assertion was vacuous.
+DECLARED = {"Dataset": {"file_collections", "keywords", "source_caveats",
+                        "notes", "conforms_to"},
             "CoreDataset": {"distributions", "source_caveats", "notes",
-                            "errata", "collection_timeframes"},
-            "CoreDistribution": {"path", "md5", "format", "media_type"}}
+                            "errata", "collection_timeframes", "keywords",
+                            "conforms_to"},
+            "CoreDistribution": {"path", "md5", "format", "media_type",
+                                 "source_caveats", "notes", "conforms_to"}}
 
 
 class Harness(unittest.TestCase):
@@ -311,18 +320,26 @@ class CorpusTest(unittest.TestCase):
 
 class ScopedSchemaClaimTest(Harness):
     """A schema claim that names its own inventory is checked against it
-    (#1022, #1046).
+    (#1022, #1046, #1087).
 
-    `keywords` is declared on Dataset and not on CoreDataset, which is the
-    shape the v8 report instruction produces sentences about: "not declared by
-    the core schema and appears only in the full record". Resolving that
-    against every class made three true sentences into findings and had two
-    VOICE reports rewritten over them.
+    The two slots below carry the whole distinction, and each is declared in
+    exactly one place, so no assertion here passes under both readings
+    (#1090):
+
+    - `file_collections` — `Dataset` only, so "not in the core schema" is
+      true and "not in the full schema" is false;
+    - `distributions` — `CoreDataset` only, which is #546's premise, so the
+      two are reversed.
+
+    The shape the v8 report instruction produces is "not declared by the core
+    schema and appears only in the full record". Resolving that against every
+    class made true sentences into findings and had two reports rewritten
+    over them.
     """
 
     def test_a_core_scoped_claim_is_checked_against_the_core_classes(self):
-        md = ("`keywords` is not declared by the core schema and appears "
-              "only in the full record.\n")
+        md = ("`file_collections` is not declared by the core schema and "
+              "appears only in the full record.\n")
         self.assertEqual(self.kinds(md), [])
 
     def test_a_core_scoped_claim_that_is_false_is_still_caught(self):
@@ -331,26 +348,29 @@ class ScopedSchemaClaimTest(Harness):
         self.assertEqual(self.kinds(md), [("false_schema_claim", "distributions")])
 
     def test_a_full_scoped_claim_is_checked_against_dataset(self):
-        """`source_caveats` is on CoreDataset only, so a claim about the full
-        schema is true and a claim about every class would be false."""
-        md = "`source_caveats` is not declared on the full schema.\n"
+        """`distributions` is on CoreDataset only, so a claim about the full
+        schema is true and a claim against every class would be false."""
+        md = "`distributions` is not declared on the full schema.\n"
         self.assertEqual(self.kinds(md), [])
 
     def test_a_full_scoped_claim_that_is_false_is_still_caught(self):
-        md = "`keywords` is not declared in the full schema.\n"
-        self.assertEqual(self.kinds(md), [("false_schema_claim", "keywords")])
+        md = "`file_collections` is not declared in the full schema.\n"
+        self.assertEqual(self.kinds(md),
+                         [("false_schema_claim", "file_collections")])
 
     def test_an_unscoped_claim_is_unchanged(self):
         """The v2 reading, kept: with no scope named, any class holding the
         slot contradicts the claim."""
-        md = "`keywords` is not a declared slot.\n"
-        self.assertEqual(self.kinds(md), [("false_schema_claim", "keywords")])
+        md = "`file_collections` is not a declared slot.\n"
+        self.assertEqual(self.kinds(md),
+                         [("false_schema_claim", "file_collections")])
 
     def test_naming_both_scopes_reads_as_the_core_one(self):
-        """The full mention is where the slot *is* — the sentence's own
+        """The full mention is where the slot *is* — the clause's own
         contrast — not a second inventory to check the claim against."""
-        md = ("`keywords` is not declared by the core schema and appears "
-              "only in the full record, which declares it on `Dataset`.\n")
+        md = ("`file_collections` is not declared by the core schema and "
+              "appears only in the full record, which declares it on "
+              "`Dataset`.\n")
         self.assertEqual(self.kinds(md), [])
 
     def test_the_scope_noun_is_not_only_the_word_schema(self):
@@ -358,7 +378,7 @@ class ScopedSchemaClaimTest(Harness):
         reports vary the noun; the qualifier is what carries the scope."""
         for noun in ("projection", "record", "inventory", "view"):
             with self.subTest(noun=noun):
-                md = f"`keywords` is not declared in the core {noun}.\n"
+                md = f"`file_collections` is not declared in the core {noun}.\n"
                 self.assertEqual(self.kinds(md), [])
 
     def test_a_claim_ranging_over_every_class_is_not_scoped_by_one_it_names(self):
@@ -392,8 +412,8 @@ class ScopedSchemaClaimTest(Harness):
 
     def test_the_scope_word_in_the_claims_own_clause_still_decides(self):
         """The clause bound must not undo the fix it guards."""
-        md = ("The audit was wrong about several things, and `keywords` is "
-              "not declared by the core schema.\n")
+        md = ("The audit was wrong about several things, and "
+              "`file_collections` is not declared by the core schema.\n")
         self.assertEqual(self.kinds(md), [])
 
     def test_the_finding_says_which_scope_it_used(self):
@@ -407,6 +427,28 @@ class ScopedSchemaClaimTest(Harness):
         self.assertTrue(REPORT_CLAIMS_INSTRUMENT.startswith("v3"),
                         REPORT_CLAIMS_INSTRUMENT)
         self.assertIn("#1046", REPORT_CLAIMS_INSTRUMENT)
+
+
+class TheFixtureMatchesTheSchemaTest(unittest.TestCase):
+    """The fixture's membership is the real one where the scope tests rely on
+    it (#1090).
+
+    A fixture that puts `distributions` on `Dataset` as well as `CoreDataset`
+    makes every core-versus-full assertion pass under either reading, which
+    is what let the #1087 regression test's finding-level assertion be
+    vacuous. This pins the two slots those tests turn on.
+    """
+
+    def test_the_two_discriminating_slots_are_declared_where_the_schema_says(self):
+        from data_sheets_schema.report_claims import declared_slots
+        real = declared_slots()
+        if "Dataset" not in real or "CoreDataset" not in real:
+            self.skipTest("the schema is not importable in this checkout")
+        for slot in ("distributions", "file_collections"):
+            with self.subTest(slot=slot):
+                self.assertEqual(
+                    sorted(c for c, s in DECLARED.items() if slot in s),
+                    sorted(c for c, s in real.items() if slot in s))
 
 
 if __name__ == "__main__":
