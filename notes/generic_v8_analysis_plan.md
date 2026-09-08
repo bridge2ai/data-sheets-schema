@@ -602,13 +602,43 @@ signature of a merged one. R6 is the obligation this block's declaration
 exists to make checkable by the model rather than only by `d4d download
 scope --check`.
 
-**It re-baselines the condition.** `ASSEMBLY_LAYOUT` names the new block,
+**#932 re-baselines the condition.** `ASSEMBLY_LAYOUT` names the new block,
 so `assembly_digest` moves and a record made under it is distinguishable
 from the v8 arm's — which is the point of that digest (#353). No run
 carrying a v8 label may be made under this runner: the twelve retained
 records were generated without the block, and a thirteenth with it would
 be a different condition wearing the same name. The prompt files are
 unchanged, so no pin rotates (`d4d api prompts check --strict` passes).
+
+### What a v9 arm can and cannot be compared against (#1072)
+
+`condition_delta("generic_v8", "generic_v9")` returns `["base"]`, and that
+is **not** a statement that a v9 arm differs from the retained v8 records by
+the two rules alone. `CONDITION_AXES` tracks which generic base a condition
+is built on and whether it is tuned; it cannot see a runner-side assembly
+change. The declared-scope block (#932) landed on 2026-09-08, after all
+twelve v8 records were generated on 2026-09-04, so a v9 run differs from
+them by **the scope block, R6 and R7 together**.
+
+Three consequences, stated before any v9 canary rather than after:
+
+- **R6 is not measurable against the v8 arm.** Its premise is a declaration
+  those records never received. A v9-versus-v8 delta on the #913 class
+  measures #932 and R6 as one package, which is a fair thing to measure and
+  a different thing from what the prompt block does.
+- **R7 is the one rule a v8 comparison can isolate**, since it depends on
+  nothing the runner changed. Its evidence base is thin — three instances
+  across two v7 records — so a null result on twelve records says little in
+  either direction.
+- **A clean v8 baseline under the current runner cannot be made**, because
+  no run carrying a v8 label may be made under it (above). Producing one
+  would mean a new label for a v8-prompt-plus-scope-block configuration, a
+  thirteenth-through-twenty-fourth record and its own canary. Whether that
+  is worth the spend is a decision for the plan owner; it is not assumed
+  here.
+
+The axes model's blindness to runner-side changes is filed as its own issue:
+the assembly digest already records them, so the two could be joined.
 
 ## Sequencing (PRs, in order)
 
