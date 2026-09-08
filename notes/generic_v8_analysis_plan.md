@@ -331,6 +331,85 @@ receipts 100% of chunks reviewed on all 12, snippets mismatched 5 across
 the arm (CHORUS rep2 2, rep3 1, AI_READI rep2 1, CM4AI rep3 1), 6 of 12
 reports regated.
 
+### Review pass (12 of 12, 2026-09-07)
+
+One `d4d-review-record` agent per record (the CHORUS rep1 review run
+first as the canary, then eleven in parallel), every check passed
+`--write --strict`, review blocks in all 12 provenance records. Same
+construction as the v7 table: `slot adv` is the non-affirmative
+verdicts (weak, misread, unsupported, inferred, not_in_bundle) on the 50
+sampled receipted + receiptless slots, `cannot_tell` listed apart;
+`rules` is violated / rules asked — **21** under v8 (rules 1–16 as v7,
+plus R1–R4 and the Person-id rule as 17–21), so the like-for-like column
+is violations among rules 1–16. The v7 rows below were recounted from
+the v7 review files with the same script and reproduce the v7 note's
+65/600 and 44/192.
+
+| record | items | slot adv | rules violated (of 21) | among 1–16 | total adverse | cannot_tell |
+|---|---|---|---|---|---|---|
+| VOICE rep1 | 83/83 | 1/50 (2%) | 1 (19) | 0 | 2 | 0 |
+| VOICE rep2 | 83/83 | 1/50 (2%) | 1 (19) | 0 | 8 | 3 |
+| VOICE rep3 | 81/81 | 2/50 (4%) | 2 (02, 19) | 1 | 5 | 0 |
+| CHORUS rep1 | 78/78 | 5/50 (10%) | 3 (01, 08, 19) | 2 | 8 | 2 |
+| CHORUS rep2 | 76/76 | 1/50 (2%) | 2 (07, 19) | 1 | 4 | 0 |
+| CHORUS rep3 | 79/79 | 5/50 (10%) | 8 (01, 03, 05, 07, 08, 15, 17, 19) | 6 | 13 | 0 |
+| AI_READI rep1 | 82/82 | 2/50 (4%) | 1 (01) | 1 | 3 | 0 |
+| AI_READI rep2 | 96/96 | 0/50 (0%) | 1 (03) | 1 | 1 | 0 |
+| AI_READI rep3 | 78/78 | 4/50 (8%) | 0 | 0 | 5 | 0 |
+| CM4AI rep1 | 88/88 | 5/50 (10%) | 3 (01, 03, 06) | 3 | 8 | 0 |
+| CM4AI rep2ᵗ | 81/81 | 10/50 (20%) | 4 (05, 07, 15, 17) | 3 | 14 | 0 |
+| CM4AI rep3ᵗ | 97/97 | 2/50 (4%) | 2 (01, 13) | 2 | 4 | 0 |
+
+ᵗ the two runs without thinking on `full` (#1047); rep2 is the arm's
+most adverse record on the slot and total columns (CHORUS rep3 leads on
+rules). VOICE rep1's and AI_READI rep3's reviews carry a placeholder
+`reviewed_at` (#1056).
+
+**v7 → v8, 12 vs 12.** Slot adverse **65/600 (10.8%) → 38/600 (6.3%)**;
+rule violations among rules 1–16 **44 (mean 3.7) → 20 (mean 1.7)**, all
+21 rules 28 (mean 2.3); total adverse 110 → 75; `unsupported` 6 → 1;
+`not_in_bundle` 0 → 0 on both (no fabrication in either arm);
+`cannot_tell` 6 → 5. Two counts rose: `changed_meaning` 1 → 8 (VOICE
+rep2's six: three are one silent removal of the whole `data_governance`
+object, #1054, three are documented removals with Dispositions rows) and `missed_content` 0 → 1 (VOICE rep3: a paper's
+affiliations for two creators contradicting the record, uncaveated).
+The new rules: rule-19 (R4, per-entry receipts for rosters) is the
+arm's most-violated rule, 6 of 12 (VOICE and CHORUS, every replicate); rule-17 (R2, tense and scope) 2 of
+12; rules 18, 20 and 21 violated nowhere.
+
+**Predictions 1, 3, 4 and the rule-15 clause of 6, as measured:**
+
+| # | result | reading |
+|---|---|---|
+| 1 | **unfavourable** — rule-08 violated in 2 of 12 (predicted 0), from 6 of 12 (the v7 six being the Person-as-string charges the v7 note's 2026-09-03 correction voided on validity) | both are CHORUS (rep1, rep3) and the same defect: `maintainers[0]` leaves the declared `name` empty with the person's name in `maintainer_details` prose; the v7 Person-as-string class is gone, as predicted, so the residual is one slot on one bundle |
+| 3 | **unfavourable** — rule-06/07 violated in 4 of 12 (predicted ≤ 2), from 7 of 12 | CHORUS rep2/rep3 (rule-07: standards in `distribution_formats`, ethics prose in `regulatory_compliance`), CM4AI rep1 (rule-06: pointers in `review_details`), CM4AI rep2 (rule-07: a URL under `publisher`); E2's audit caught some and not these |
+| 4 | **unfavourable, narrowly** — 1 tense/scope misread in the sampled receipted slots (CHORUS rep3 `acquisition_methods[0]`, a plan written as the current pipeline), from 5 on v7 (the hand classification of the prediction's own text, reproducible from the nine v7 misreads) | R2 did not reach 0; the fall from 5 to 1 is the falsification test's answer that R2 was not text alone. The arm's other misread (CM4AI rep2 `publisher`) is a wrong-entity read, not this class |
+| 6 (rule-15) | **favourable** — rule-15 violated in 2 of 12 (predicted ≤ 6), from 8 of 12 | CHORUS rep3 and CM4AI rep2 (the c019 boilerplate chunk marked `extracted` with pairs that sit in c018/c020) |
+
+**Falsification tests.** "Rules restated, mechanism absent" asked
+whether 1 would hold and 4 not; neither held strictly, and both moved in
+the predicted direction by more than sampling noise on the slot column
+(the ±2–3pp the cross-read states) — the digest and R2 each did part of
+what they were for, and the residuals are project-specific (CHORUS's
+maintainer, CHORUS/CM4AI's format-versus-standard slots). The
+per-roster receipt ratio (R4's own falsification test) was not computed
+here; rule-19's 6 of 12 says the rule is the one most often broken.
+
+**Instrument findings from the reviewers**, each verified and filed:
+#1053 (a receipt path whose entry lost its minted `id` at reconcile is
+reported `entry_dropped` though it survives at the same index — CHORUS
+rep1), #1054 (an unrecorded removal escapes the report gate: CHORUS rep2
+`regulatory_restrictions`, AI_READI rep3 `content_warnings`, VOICE rep2
+`data_governance` — a snapshot-diff check is the fix). Wrong-chunk
+attributions of the #763 class were confirmed by nine reviewers with
+support holding in every case. One factual error for a curator
+disposition: CM4AI rep3 `creators[1].notes` names "Jillian Parker" as a
+preprint author where the preprint gives "Jillian Mohan" (bundle line
+2927).
+
+Remaining for the arm: prediction 8 (rubric10/20-semantic evaluations)
+and the v8 canonical selection under the review criterion (#660).
+
 ## Sequencing (PRs, in order)
 
 The first PR (#916) landed A and the #912 pack half ahead of this

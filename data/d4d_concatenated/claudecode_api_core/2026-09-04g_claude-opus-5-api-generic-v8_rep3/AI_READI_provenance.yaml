@@ -1019,3 +1019,41 @@ intermediates:
   sha256: 01e3ef504db5ba6f21691c35fd0aa322661dd48f6d864cb38e053591b9763936
 - path: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/intermediate/AI_READI_report.md
   sha256: 26ab751b94e1a7634ccd5aa1d03b9cb1592bdc363eaddea3c84ad21b52dbfe65
+review:
+  checked: true
+  items_total: 78
+  items_answered: 78
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 2
+    slot_receipted:
+      supported: 25
+    slot_receiptless:
+      bundle_supports: 21
+      inferred: 4
+    slot_reshaped:
+      changed_meaning: 1
+      still_supported: 3
+    rule:
+      followed: 20
+      not_applicable: 1
+    pair_warning:
+      consistent: 1
+  adverse: 5
+  cannot_tell: 0
+  findings: []
+  summary: items 78/78 answered · 5 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5-1
+    reviewed_at: 2026-09-07 00:00:00+00:00
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_review_pack.yaml
+      sha256: 7e59def1fa11ffa2b7f5041ef4143334a72f9a888be4cde855828e96e38af392
+    review:
+      path: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_review.yaml
+      sha256: 19741bb50a92ea5c22c222345e23993da6e87b1bdeb86b264919ad546333731c
+  recorded_by: d4d review check

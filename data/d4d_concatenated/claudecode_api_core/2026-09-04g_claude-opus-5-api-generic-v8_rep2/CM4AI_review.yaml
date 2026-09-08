@@ -1,0 +1,265 @@
+reviewer: d4d-review-record
+model: claude-fable-5-1
+reviewed_at: '2026-09-07T19:50:31Z'
+pack_sha256: fce5631b22db0b1747226b4867b78bd422c079697d135c5097d616c0254a2708
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-24 are the concatenation banner and table of contents (input directory, file count, ten source filenames); no dataset fact belongs in any slot"
+- id: chunk-c009
+  verdict: confirmed
+  evidence: "lines 2825-2893 are the Nature site footer: journal navigation, newsletter sign-up, Springer copyright; nothing the record should carry"
+- id: slot-003
+  verdict: supported
+  evidence: "roster line 4968-4969 'Dailamy A (University of California, San Diego) - ORCID: https://orcid.org/0000-0002-6711-8260' (in c018, not the cited c019, which is Dataverse UI boilerplate); given name 'Amir Dailamy' at line 2928 (preprint author list)"
+- id: slot-004
+  verdict: supported
+  evidence: "lines 3866-3868, preprint acknowledgments: supported by '1OT2OD032742-01 ... and by the Frederick Thomas Fund of the University of Virginia' — a funder of the work, as the slot asks"
+- id: slot-005
+  verdict: supported
+  evidence: "path dropped by reconciliation but the receipt's statement survives in notes ('annotates the resulting hierarchy ... with a large language model naming approach'); lines 3336-3338 state exactly that LLM naming approach"
+- id: slot-006
+  verdict: supported
+  evidence: "lines 7231-7236: cm4ai_mass-spec_KOLF2.zip, ZIP Archive, 171.8 KB, Published Jun 17 2026, MD5 f250bf0b04f516f7462d30432441fc0e — every leaf of the entry matches"
+- id: slot-007
+  verdict: supported
+  evidence: "lines 2961-2964 state the objective verbatim except the record generalizes '100 chromatin modifiers and 100 metabolic enzymes' to 'proteins'; cm4ai.org line 4405 uses the same generalized phrasing, so the reading is faithful"
+- id: slot-008
+  verdict: supported
+  evidence: "lines 7054-7058 list perturb-seq +/- treatment, SEC-MS +/- treatment, AP-MS + treatment, and IF images +/- treatment for MDA-MB-468, which is what the subset description says"
+- id: slot-009
+  verdict: supported
+  evidence: "lines 7282-7287: cm4ai_perturb-seq_KOLF2_raw_sra.zip, ZIP, 73.3 KB, Jun 17 2026, MD5 8bb3f365f01fb8bbbd2ac6a535059305 — matches the entry"
+- id: slot-010
+  verdict: supported
+  evidence: "line 3048 'CM4AI data are ... non-clinical (from tissue cultures)', line 3186 MDA-MB-468 'available from ATCC', lines 3213-3216 KOLF2.1J from HipSci 'available for access by non-for-profit organizations via a simple MTA' — all in c010, jointly stating the value"
+- id: slot-011
+  verdict: supported
+  evidence: "March 2025 page: Version 1.4 (line 4773), Publication Date 2025-03-03 (4952-4953), contents at 4792 (perturb-seq undifferentiated KOLF2.1J, SEC-MS iPSCs and derivatives, IF images), '563 proteins of interest' per condition at 4872/4891/4910"
+- id: slot-012
+  verdict: supported
+  evidence: "lines 4961-4962 'Al Manir S (University of Virginia) - ORCID: ...4647-3877' (c018, not the cited c019); 'Sadnan Al Manir' at 2927; ROR https://ror.org/0153tk833 for Al Manir on the June 2026 page at 7342-7343"
+- id: slot-013
+  verdict: supported
+  evidence: "lines 5775-5776 (c021) 'Schaffer L (University of California San Diego) - ORCID: ...6339-9141'; 'Leah Schaffer' at 2927"
+- id: slot-014
+  verdict: supported
+  evidence: "line 3802 states https://doi.org/10.18130/V3/DXWOS5 as the May 2024 Data Release citation; the current doi: CURIE names the same identifier, rewritten per the CURIE rule"
+- id: slot-015
+  verdict: supported
+  evidence: "lines 4964-4965 'Ballllosero Navarro F (Stanford University) - ORCID: ...4180-422X' (c018); name reordered to 'F Ballllosero Navarro', same person"
+- id: slot-016
+  verdict: supported
+  evidence: "line 7202 'MD5: 6d066e6b9d762284c6aa5d0b44565568' under cm4ai_ifimages_MDA-MB-468_untreated.zip, the file at file_collections[1].resources[1]"
+- id: slot-017
+  verdict: supported
+  evidence: "line 7011 states the URL as the June 2026 release's source/landing page; page's description asks for the landing page"
+- id: slot-018
+  verdict: weak
+  evidence: "the cited passage (lines 5548-5586, June 2025 page) describes the June 2025 archives' staining; the current value describes the June 2026 archives, whose support is the c026 file listing (7180-7219) — the record's own collection caveat says the older description 'is not carried over', so this passage no longer answers this slot"
+- id: slot-019
+  verdict: supported
+  evidence: "line 7236 'MD5: f250bf0b04f516f7462d30432441fc0e' under cm4ai_mass-spec_KOLF2.zip"
+- id: slot-020
+  verdict: supported
+  evidence: "line 4972 'Fall J (KTH - Royal Institute of Technology)' with no ORCID anywhere in the bundle rosters (also 5744, 7365-7366), so the fragment id and the initial-form name are the right reading"
+- id: slot-021
+  verdict: supported
+  evidence: "lines 5433-5434 'Data Governance Committee: Jillian Parker (jillianparker@health.ucsd.edu)'; ORCID and UCSD affiliation for Parker J from the rosters at 4959-4960 and 7338-7341 — same person by name and ucsd.edu address"
+- id: slot-022
+  verdict: supported
+  evidence: "every component checks: 'Data volume 21.4 TB' 4298-4299; 563 at 4872 (March 2025, tier 5 per manifest source_priority); 464 at 5548 (June 2025, tier 5) and 6403 (October 2025, tier 1); Sali UCSD at 5031 (c018, not the cited c019) vs UCSF via superscript 3 at 2933/2936; ten files with sizes 7146-7301 and no per-file descriptions on the June 2026 listing"
+- id: slot-023
+  verdict: supported
+  evidence: "lines 5435-5436 'Ethical Review: Vardit Ravitsky (ravitskyv@thehastingscenter.org)'; ORCID from roster 5029-5030"
+- id: slot-024
+  verdict: misread
+  evidence: "the passage (7037 'University of Virginia Dataverse') names the publisher organization, but the value is the dataset landing-page URL — the entity at `page`, not 'the organization or entity responsible for making the resource available' the uriorcurie slot asks for; wrong referent for the slot"
+- id: slot-025
+  verdict: supported
+  evidence: "lines 4959-4960 'Parker J (University of California, San Diego) - ORCID: ...4535-3486' (c018); full name 'Jillian Parker' attested by the governance contact lines 5434 and 7083"
+- id: slot-026
+  verdict: supported
+  evidence: "June 2026 page lines 7103-7105: 'This is an interim release', 'Does not contain predicted cell maps, which will be added in future releases', 'most suitable for bioinformatics analysis of the individual datasets' — the value concatenates exactly these"
+- id: slot-027
+  verdict: supported
+  evidence: "line 5796 (c021) 'Mali P (University of California San Diego) https://orcid.org/0000-0002-3383-1287'; given name 'Prashant Mali' at 2932 (preprint author list)"
+- id: slot-028
+  verdict: bundle_supports
+  evidence: "line 3184: 'MDA-MB-468 (RRID:CVCL_0419) is a triple negative breast cancer cell line' — the bundle states the source is a cell line"
+- id: slot-029
+  verdict: inferred
+  evidence: "the Nourreddine atlas paper is listed under 'Related Publication' (lines 5123, 5944, 6775); no line states it references this dataset — the enum is the record's reading of that listing"
+- id: slot-030
+  verdict: bundle_supports
+  evidence: "line 7301 states '1.1 MB' for cm4ai_release_metadata.zip, the collection's only file; 1100000 is that stated figure in bytes"
+- id: slot-031
+  verdict: inferred
+  evidence: "composed from 'Ethical Review:' naming the two leads (5435-5436, 7084-7085) and the preprint's ethics-plan sentence (3624-3627, 'a plan for ethical preparation, licensing, dissemination, and Data Access supervision'); no passage states that the named leads hold or supervise these matters"
+- id: slot-032
+  verdict: bundle_supports
+  evidence: "line 7054 'protein-protein interaction (PPI)' data in this release; lines 3220-3231 state the PPI measurements (AP-MS, SEC-MS) the instance describes"
+- id: slot-033
+  verdict: inferred
+  evidence: "cm4ai.org lists the June 2026 release with the four earlier releases as 'Archive' (lines 4441-4452); no source states the June 2026 release is a new version of the March 2025 release — the version chain is the record's construction"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "line 4836: 'CRISPRi Perturbation Cell Atlas in undifferentiated KOLF2.1J human induced pluripotent stem cells (hiPSCs) mapping transcriptional and fitness phenotypes' — states what the instance type names"
+- id: slot-035
+  verdict: inferred
+  evidence: "sum of the three stated archive sizes 3.8 GB + 4.6 GB + 4.2 GB (lines 7182, 7199, 7216); no passage states the 12600000000 total, and unlike total_size_bytes no computation is declared at this path"
+- id: slot-036
+  verdict: exempt_by_nature
+  evidence: "a derived sum has no passage by its kind; source_caveats declares it 'this record's own computation' and names the ten per-file inputs (stated at 7148-7301), the form rule-18 prescribes"
+- id: slot-037
+  verdict: bundle_supports
+  evidence: "line 7058 'IF images in MDA-MB-468 breast cancer cells +/- treatment' — the instance is image data, which is what the pinned label 'Image' says"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "line 4792 'Spatial proteomics raw image data is copyright ...' — the bundle itself calls the IF image data raw data"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "lines 5035-5036 'Ideker T (University of California San Diego)' and 5039 'Ideker Trey (University of California San Diego)'"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "line 7299: the file is cm4ai_release_metadata.zip, the release metadata archive — the collection_type names what the listing states"
+- id: slot-041
+  verdict: inferred
+  evidence: "no line calls the AP-MS archives raw data; the classification follows from the preprint's 'input data streams' framing (2973-3000) and the file contents, not from a stated passage"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "line 7300 'ZIP Archive' for the collection's single file"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "lines 7181, 7198, 7215: all three IF archives are 'ZIP Archive'"
+- id: slot-044
+  verdict: bundle_supports
+  evidence: "line 292 'much of cell structure still remains uncharted' and line 321 'these cell mapping technologies have typically been applied separately, integration of multiple complementary data modalities provides the opportunity to incorporate biological structure robustly across physical scales' — both stated, though in the Nature U2OS paper's introduction (c002), field-level motivation rather than a CM4AI statement"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "line 7100 states the intended use ('Cell architectural changes and interactions in presence of specific disease processes, treatment conditions, or genetic perturbations'); the category is its condensation, and usage_notes carries the stated text"
+- id: slot-046
+  verdict: inferred
+  evidence: "one file is named raw ('cm4ai_perturb-seq_KOLF2_raw_sra.zip', 7282) but the cell-atlas file is a processed atlas (4836); raw_data for the whole collection is the record's classification, not a stated fact"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "line 7058: the instance's data are IF images; the pinned label 'Image' matches what the passage states the data are"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "line 7054 'protein-protein interaction (PPI)' — the pinned label 'Protein' matches the instance's subject"
+- id: slot-049
+  verdict: inferred
+  evidence: "the two mass-spec files are listed at 7231 and 7248; no passage states a count of 2 for this record-defined grouping"
+- id: slot-050
+  verdict: inferred
+  evidence: "sum of 30.2 KB + 73.3 KB (lines 7267, 7284); no passage states 103500 and no computation is declared at this path"
+- id: slot-051
+  verdict: exempt_by_nature
+  evidence: "a boolean the record infers from its own structure: the subpopulations entry itself describes the cell-line/condition subgroups (stated at 7054-7058); no passage states the flag"
+- id: slot-052
+  verdict: bundle_supports
+  evidence: "keywords 'single-cell RNA sequencing, scRNAseq' (7117) and the CRISPRi atlas 'mapping transcriptional and fitness phenotypes' (4836) state the instance's substrate, matching the pinned label 'Single-cell RNA Sequence Data'"
+- id: slot-053
+  verdict: still_supported
+  evidence: "instance_details renamed to instances[2].notes; the receipted passage (6403-area and 4836/4854: 'mapping transcriptional and fitness phenotypes associated with 11,739 targeted genes') is what the notes still say, with the 11,739 count dropped rather than changed"
+- id: slot-054
+  verdict: still_supported
+  evidence: "content moved to notes: 'annotates the resulting hierarchy against the Gene Ontology and Reactome' — the receipted passage 3333-3335 states GO and Reactome alignment; the added qualifier (project tooling, not processing of this release) is itself stated at 7090"
+- id: slot-055
+  verdict: still_supported
+  evidence: "content moved to notes: 'a large language model naming approach' — passage 3336-3338 states the LLM naming approach and confidence score; meaning preserved"
+- id: slot-056
+  verdict: still_supported
+  evidence: "moved to notes: 'embeds protein-protein interaction networks with node2vec' — passage 3311-3313; meaning preserved with the tooling qualifier"
+- id: slot-057
+  verdict: still_supported
+  evidence: "moved to notes: 'immunofluorescence images with a Human Protein Atlas deep learning model' — passage 3314-3316; meaning preserved"
+- id: slot-058
+  verdict: still_supported
+  evidence: "moved to notes: 'integrates the two by contrastive co-embedding' — passage 3320-3323; meaning preserved"
+- id: slot-059
+  verdict: still_supported
+  evidence: "moved to notes: 'detects protein communities at multiple resolutions' — passage 3327-3329; meaning preserved"
+- id: rule-01
+  verdict: followed
+  evidence: "the reconciled record prefers omission: unattested given names reduced to initials (creators[3], creators[20]), October 2025 image facts stripped from file_collections[1].description, MuSIC stages removed as processing claims; the few inferences the sample found are enum classifications and undeclared collection sums, recorded on the slot items"
+- id: rule-02
+  verdict: followed
+  evidence: "source_caveats represents all three disagreements with both values: 21.4 TB vs the derived release total, 563 vs 464 protein counts, Sali UCSF (preprint) vs UCSD (Dataverse); none silently selected"
+- id: rule-03
+  verdict: followed
+  evidence: "one referent, the June 2026 release doi:10.18130/V3/HIGT4C, stated in the reconciliation report and held in both records; the four earlier releases and three publications appear only in related_datasets"
+- id: rule-04
+  verdict: followed
+  evidence: "density tracks the evidence: reconciliation removed three whole slot families (preprocessing_strategies, labeling_strategies, machine_annotation_tools) rather than keeping them for coverage, and no slot family is padded beyond what the bundle states"
+- id: rule-05
+  verdict: violated
+  evidence: "maintainers[2] collapses two distinct people into one Maintainer object: 'Dataverse depositor for the release: Justin Niestroy. Point of contact for the release: Trey Ideker ...' — two entities, one entry; elsewhere the rule is followed (47 creators, 3 funders, 4 intended_uses as separate objects)"
+- id: rule-06
+  verdict: followed
+  evidence: "no value records that documentation exists elsewhere or is pending; discouraged_uses[0], known_limitations and access_review_process state their content directly"
+- id: rule-07
+  verdict: violated
+  evidence: "publisher (uriorcurie, 'the organization or entity responsible for making the resource available') carries the dataset landing-page URL — the value that answers page, which already holds it — while the attested answer 'University of Virginia Dataverse' (7037) went unused; the rest of the record places evidence in the fields it answers"
+- id: rule-08
+  verdict: followed
+  evidence: "class-ranged objects carry their declared fields: creators with id/name/affiliations, Person objects with id/name/orcid/email/affiliation, Grant.grant_number, Organization ids where attested; maintainer contact prose sits in maintainer_details, whose schema description itself asks for contact information as free text"
+- id: rule-09
+  verdict: followed
+  evidence: "all uriorcurie identifier slots carry CURIEs (ORCID:, ROR:0153tk833, doi: targets in related_datasets, latest_version_doi); doi slot holds the bare DOI 10.18130/V3/HIGT4C; uri-ranged access_urls and erratum_url keep URLs; publisher's defect is a wrong referent, not a resolver form"
+- id: rule-10
+  verdict: followed
+  evidence: "every world-facing identifier is in the bundle: all ORCIDs in the Dataverse rosters (4957-5036, 5731+, 7333+), ROR at 7335/7343, RRIDs at 3184/3213, PMCID at 5123, release DOIs at 3802/4775/5397/6200/7036; the audit's two model-knowledge given names were removed at reconciliation"
+- id: rule-11
+  verdict: followed
+  evidence: "no invented prefixes; every mint is a fragment on the record's own attested DOI (doi:10.18130/V3/HIGT4C#...); persons without registry ids get person-fragments on the record id, not fragments on an organization's identifier"
+- id: rule-12
+  verdict: followed
+  evidence: "no British forms in either record (checked organisation/characterise/analyse/behaviour/licence/centre/programme/modelling and kin); 'Bélisle-Pipon' is a proper name and keeps its diacritic per the rule's quoted-material carve-out"
+- id: rule-13
+  verdict: followed
+  evidence: "source_caveats names manifest tiers correctly (March 2025 and June 2025 pages are 'historical data release' = tier 5; October 2025 and June 2026 are 'data resource' = tier 1 per source_priority) and prefers the tier-1 value 464 while recording the superseded 563; the same-rank 21.4 TB conflict is represented, not decided"
+- id: rule-14
+  verdict: not_applicable
+  evidence: "every dataset-part mint in id_slots (5 collections, 10 files, 2 subsets) is forced by the schema, so the mint itself cannot violate the rule; the 9 unforced mints are Person fragments on creator entries, which rule-20, not this rule, governs — and recording the roster members is evidence-driven, not noise-as-structure"
+- id: rule-15
+  verdict: violated
+  evidence: "the receipt is emitted, complete (28/28 chunks) and well-formed, but its c019 entry marks a chunk of pure Dataverse UI boilerplate (lines 5141-5361) as extracted with ~25 slot/snippet pairs, none of which occur in that chunk (the roster and license passages sit in c018 and c020); the validator counts 33 of 186 snippets in another chunk, against the rule's 'verbatim phrase copied from that chunk' — support holds, attribution does not"
+- id: rule-16
+  verdict: followed
+  evidence: "reference_attributes is empty and every class-ranged slot holds an object with the digest's keys; no reconcile/repair reduction of an object to a string occurred — the orcid de-prefixing changed a field inside Person objects, not their shape"
+- id: rule-17
+  verdict: violated
+  evidence: "two referent slots carry facts about related datasets: distribution_dates[0].release_dates appends the four earlier releases' publication dates, and errata[0] records the June 2025 release's revision (erratum_url points at the F3TD5R page) as an erratum of this record's referent; elsewhere the boundary is enforced exactly (IF description reduced to June 2026 evidence, MuSIC stages qualified as tooling, U2OS facts confined to related_datasets)"
+- id: rule-18
+  verdict: followed
+  evidence: "total_file_count and total_size_bytes are declared 'this record's own computation' in source_caveats with the ten per-file inputs and conversion named, and reconciliation corrected the sum to equal the named inputs (12601604198 to 12601718300); the 21.4 TB disagreement is recorded without adjusting either figure; the undeclared collection-level sums are noted on slot-035/050"
+- id: rule-19
+  verdict: followed
+  evidence: "each creator entry, each file (with its own md5 line), each related dataset and each funder carries its own receipt naming its own passage; no roster is receipted by one entry's passage — the one slip is an index (Sali receipted at creators[43] where the record holds Ravitsky, Sali being [44]), an addressing error, not a roster collapse"
+- id: rule-20
+  verdict: followed
+  evidence: "all Person objects (principal_investigator, both ethical_reviews contact_person, committee_contact) carry ORCID CURIEs as id with emails in email; the nine creators the rosters list without ORCIDs (Axelsson, Chinn, Fall, Johannesson, Khaliq, Muralidharan, Pan, Polacco, Zhang — verified against 4957-5036) get person-fragments on the record's own id; no mailto ids"
+- id: rule-21
+  verdict: followed
+  evidence: "no object sits in a scalar slot; grantor (range string, 'name/identifier of the organization') holds names, page holds the URL, and both records validate against their schemas"
+- id: pair-01
+  verdict: consistent
+  evidence: "core distributions flatten the full record's 5 collections and 10 files into 15 entries with identical ids, names, bytes, md5s and formats; the corrected IF description and its source_caveats match the full collection verbatim (core lines 40-53 vs full 467-484); no matched value differs in meaning"
+notes: >-
+  Instrument findings, not verdicts: (1) the receipt's c019 block is a systematic
+  one-chunk misattribution — c019 (5141-5361) is Dataverse UI boilerplate, and its
+  ~25 pairs actually sit in c018/c020; the deterministic validator already reports
+  this (30 adjacent + 3 elsewhere of 186 snippets) and does not gate it, so the
+  receipt's status for c019 (extracted) is also wrong on its face, where
+  nothing_relevant or redundant_with would have been true. (2) The c019 block also
+  receipts 'Sali A' at creators[43] while the record's Sali is creators[44]
+  (Ravitsky holds [43]); the identity join is what keeps that from misreporting.
+  (3) errata[0] besides its rule-17 problem is internally garbled: 'The June 2025
+  Data Release was published as a revision of the preceding June 2025 release'.
+  (4) The pack's claims sidecar is null; receipts were judged from the coverage
+  receipt directly. (5) slot-018 and slot-024 are the two adverse receipted items:
+  one wrong-subject passage left citing a rewritten value, one wrong-referent value
+  under a correct passage — the latter introduced at reconciliation, which replaced
+  the constructed publisher base URL with the dataset page URL instead of the
+  attested organization name.

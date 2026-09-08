@@ -1,0 +1,264 @@
+reviewer: d4d-review-record
+model: claude-fable-5-1
+reviewed_at: 2026-09-07T19:45:19Z
+pack_sha256: 9bab2176911cc36199431ca26664801e2443a9447fe37696bf63db3309233bf0
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-25 are the concatenation header and table of contents (11 file names, extensions, manifest path); no dataset fact appears"
+- id: chunk-c006
+  verdict: confirmed
+  evidence: "lines 1626-1704 are the BMJ Open protocol's numbered reference list plus the running footer; reference 16 (line 1633) cites the v1.0.0 dataset, which the record already carries at related_datasets[1]; nothing else belongs in an empty slot"
+- id: slot-003
+  verdict: supported
+  evidence: "lines 2562-2571 state the NIH GDS Policy security standard, the Best Practices document and the watermarking no-removal term, and lines 2641-2644 the all-applicable-laws compliance clause; the value states these as license obligations, which is what the slot asks"
+- id: slot-004
+  verdict: supported
+  evidence: "lines 2975-2981: managingOrganization 'Washington University in St. Louis' with ROR https://ror.org/01yc7t268; ROR:01yc7t268 is the normalized CURIE of that identifier for the organization the record holds accountable"
+- id: slot-005
+  verdict: supported
+  evidence: "line 4467 states the e-consent option with electronic signature in REDCap; line 7122 the unique-code email, and line 7131 that e-consent is an additional modality to the standard paper-based consent, supporting 'or in person'"
+- id: slot-006
+  verdict: supported
+  evidence: "line 4327 (FLIO paragraph) supports Heidelberg FLIO and 'performed as the last modality of an AI READI visit'; the 'macula-centered' detail is stated at line 1291 ('Macula- centred', BMJ table in c005), not in the cited c018 — support holds, attribution of that detail is imprecise"
+- id: slot-007
+  verdict: supported
+  evidence: "line 1179 names FAIRhub (https://fairhub.io/) as the platform and lines 4533-4538 state public distribution through FAIRhub under DOI 10.60775/fairhub.3; the access-condition and onward-conveyance clauses are stated at line 4599 (README access steps) and lines 2477-2484 (license 3.A)"
+- id: slot-008
+  verdict: supported
+  evidence: "leaf dropped by phase 4; the statement survives at prohibited_uses[4].prohibition_reason, and lines 2517-2524 state exactly the five-images-per-paper limit and the supplemental-files prohibition"
+- id: slot-009
+  verdict: supported
+  evidence: "lines 4640-4641: responsiblePartyInvestigatorFirstName 'Aaron', LastName 'Lee'"
+- id: slot-010
+  verdict: supported
+  evidence: "line 4565 states 'The AI-READI team will be supporting and maintaining the dataset. The dataset is hosted on FAIRhub through Microsoft Azure'; line 4570 refers to the README for contact and the README (line 4599) gives https://aireadi.org/contact; c022 carries the docs contact URL"
+- id: slot-011
+  verdict: supported
+  evidence: "line 4457 states direct collection at the three sites and EHR screening for diabetes and prediabetes ICD-10 codes; line 4462 states this was active, not passive, collection"
+- id: slot-012
+  verdict: supported
+  evidence: "leaf dropped by phase 4; the statement survives at funders[0].source_caveats, and lines 1533-1535 state the three grants (OT2OD032644, P30DK035816, UL1TR003096) and Research to Prevent Blindness while the c022 RO-Crate names only 1OT2OD032644 — the caveat represents both"
+- id: slot-013
+  verdict: supported
+  evidence: "lines 1389-1390 state 'Custom designed, Karalis Johnson Retina Center, University of Washington'; line 4327 names the LeeLab Anura used for 10 continuous days; line 6246 states home placement in a frequently used area and the location note on return"
+- id: slot-014
+  verdict: supported
+  evidence: "line 2976: managingOrganization name 'Washington University in St. Louis', the organization this entry records"
+- id: slot-015
+  verdict: supported
+  evidence: "line 2832 '\"fileCount\": 356343' and line 4599 (README) 'The dataset contains 356,343 files'; the record carries the stated figure and discloses its divergent own sum in source_caveats"
+- id: slot-016
+  verdict: supported
+  evidence: "line 3009 '\"awardNumberValue\": \"OT2OD032644\"' in the FAIRhub fundingReference"
+- id: slot-017
+  verdict: supported
+  evidence: "line 4290 states both sentences of the first half verbatim; the folder-per-participant linkage is stated in the README CDS description (line 4599)"
+- id: slot-018
+  verdict: supported
+  evidence: "line 4196 states the first version contains 204 participants; line 4265 states it was composed of the pilot data collection phase; the May 3, 2024 date is at c014 and the README changes table (5/3/2024)"
+- id: slot-019
+  verdict: supported
+  evidence: "lines 4345-4346: healthsheet demographic question answered 'No'; line 4154 states race/ethnicity is held under controlled access; the post-receipt rewrite ('not released as a participant-level variable') still reads the passages correctly"
+- id: slot-020
+  verdict: supported
+  evidence: "line 2994 '\"publisherName\": \"FAIRhub\"' states the publisher; the URL form https://fairhub.io/ is stated at line 1179 and is the permitted uriorcurie fallback for an unprefixed name"
+- id: slot-021
+  verdict: supported
+  evidence: "the BMJ survey table at lines 390-438 states the battery (CES-D-10 at 398, PAID-5 399, diabetes score 400, dietary 409, ophthalmic 411, smoking/alcohol/vaping/marijuana 417, SDOH 423, RxNorm medications 425); line 6652 confirms CES-D-10; the cited snippet itself sits at line 431, one line past the c002/c003 boundary — attribution imprecision, not a support failure"
+- id: slot-022
+  verdict: supported
+  evidence: "line 3215 (custom-built environmental sensor), line 3262 (leelab_anura directory), and line 6246 (home placement for 10 days; PM 1.0/2.5/4/10, temperature, humidity, VOCs, NO/NO2, 11 light measurements) state everything the description says"
+- id: slot-023
+  verdict: supported
+  evidence: "lines 3244-3245 state the standard name and its description 'NASA recommended practices for formatting and describing ASCII encoded data files', which the value reproduces; the README table (c019) uses the ESDS label"
+- id: slot-024
+  verdict: supported
+  evidence: "lines 1888-1893 state the blueprint-sharing aim for future data generation projects; line 2187 aim 2 states 'Create a model for developing large scalable datasets'; the post-receipt rewrite removed the workforce clause and what remains is what these passages state"
+- id: slot-025
+  verdict: supported
+  evidence: "lines 4136-4137: metadataFileName 'study_description.json' described as a CDS-based metadata file; name, metadata_file type and JSON format follow from the stated name"
+- id: slot-026
+  verdict: supported
+  evidence: "line 1381 lists 'Volatile organic compounds' among the environmental sensor variables"
+- id: slot-027
+  verdict: supported
+  evidence: "leaf dropped by phase 4; the statement survives at prohibited_uses[3].prohibition_reason, and lines 2477-2484 state the no-conveyance-except-other-licensees term it carries"
+- id: slot-028
+  verdict: bundle_supports
+  evidence: "lines 4041, 4053, 4065 etc. state each root metadata file is 'based on the Clinical Dataset Structure (CDS)'"
+- id: slot-029
+  verdict: bundle_supports
+  evidence: "line 3019 lists application/json among the dataset formats, and the named files are stated with .json extensions at lines 4052, 4064, 4100, 4136 and 3197 (dqd_omop.json)"
+- id: slot-030
+  verdict: bundle_supports
+  evidence: "line 6431: 'rather than targeting the demographic distribution of the US population, we intentionally will recruit' — the design is stated as balanced, not representative"
+- id: slot-031
+  verdict: bundle_supports
+  evidence: "line 4645 states https://orcid.org/0000-0002-7452-1648 as the responsible-party investigator's ORCID; the CURIE is its normalized form"
+- id: slot-032
+  verdict: exempt_by_nature
+  evidence: "limitation_type is the record's enum classification of a limitation the bundle does state (line 4285, not all modalities available); no passage states a category label of this kind"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "line 3017 lists 'text/markdown' among the dataset's stated formats"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "line 5411 states '\"conditionsOfAccess\": \"https://fairhub.io/datasets/3/access\"'; the name is a plain label for that stated resource"
+- id: slot-035
+  verdict: bundle_supports
+  evidence: "line 6246 states the LeeLab Anura custom-designed sensor recorded particulate matter counts; lines 1382-1389 list PM under the custom-designed environmental sensor"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "line 1861 'Garmin Vivosmart 5 for physical activity monitoring'; stress is a garmin_vivosmart5 modality directory at line 3923"
+- id: slot-037
+  verdict: bundle_supports
+  evidence: "line 4285: 'not all modalities are available for all participants' — the value is that statement recast as the missing element"
+- id: slot-038
+  verdict: inferred
+  evidence: "respiratory rate is stated as a collected variable (lines 1849, 3903) but no passage states a data type; 'float' has zero occurrences in the bundle — the typing is the record's own inference from the variable's numeric nature"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "lines 4631-4633 state Washington University in St. Louis with https://ror.org/01yc7t268; also line 2978"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "particulate matter is stated (lines 1382-1383, 6246) with decimal PM fractions (PM 1.0, 2.5); the float typing is the same inference as slot-038 but here the stated fractional values carry it — counted with the stated lines; see notes"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "line 4327 states 'The MoCA generates a total score and six domain-specific index scores'; the BMJ text in c003 states 'The total possible score is 30' (near line 456)"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "line 1850 lists 'stress level' among Garmin-derived measures; 'stress' is a garmin_vivosmart5 modality directory at line 3923"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "line 2333 states the controlled-access list (5-digit zip code, sex, race, ethnicity, genetic sequencing data, past health records, medications, traffic and accident reports); the README (line 4599) states sex, race/ethnicity and medications were removed from this release"
+- id: slot-044
+  verdict: bundle_supports
+  evidence: "line 1381 lists volatile organic compounds under the home environmental sensor; line 6246 states VOCs were recorded in each subject's home"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "lines 4612-4614 state secondaryId NCT06002048 with the ClinicalTrials.gov link"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "line 4457: 'The data was collected directly from participants across the three recruiting sites'"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "line 3480: '\"directoryName\": \"retinal_octa\"'"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "line 1892 states https://github.com/AI-READI; the README resources list (line 4599) names the GitHub organization of the AI-READI project"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "line 455 'iPad using the MoCA Duo Application'; line 4327 states research staff perform the test on an iPad using the MoCA Duo app"
+- id: slot-050
+  verdict: bundle_supports
+  evidence: "line 2841 '\"doi\": \"10.60775/fairhub.3\"' and line 2847 the DOI identifierValue; the record's id is that DOI as a CURIE"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "line 1072 'Testing for HbA1c' and line 1826 'HbA1c, lipid panel, CRP, CMP12' state HbA1c as a measured variable"
+- id: slot-052
+  verdict: inferred
+  evidence: "physical_activity_calorie is stated as a modality directory (line 3893) but no passage states its data type; 'float' has zero occurrences in the bundle — the typing is the record's inference"
+- id: slot-053
+  verdict: still_supported
+  evidence: "funders[0].notes became funders[0].source_caveats; it still carries the three-grant publication statement (lines 1533-1535) against the tier-1 single funding reference (c022), now with the tiers and preference named — same content, more disclosure"
+- id: slot-054
+  verdict: still_supported
+  evidence: "prohibited_uses[0].description folded into prohibition_reason; lines 2531-2532 state the clinical-treatment-decision prohibition and the research-resource rationale the merged value carries"
+- id: slot-055
+  verdict: still_supported
+  evidence: "prohibited_uses[1].description folded into prohibition_reason; lines 2547-2555 state the identify/contact/extract/membership/harm clauses the merged value enumerates"
+- id: slot-056
+  verdict: still_supported
+  evidence: "prohibited_uses[2].description folded into prohibition_reason; lines 2492-2499 state the third-party-model-vendor prohibition, the BAA non-exemption and the short-term prompting exception"
+- id: slot-057
+  verdict: still_supported
+  evidence: "prohibited_uses[3].description folded into prohibition_reason; lines 2477-2484 state the no-transfer-except-other-licensees term"
+- id: slot-058
+  verdict: still_supported
+  evidence: "prohibited_uses[4].description folded into prohibition_reason; lines 2517-2524 state the five-images publication limit and the supplemental-files prohibition"
+- id: slot-059
+  verdict: still_supported
+  evidence: "prohibited_uses[5].description folded into prohibition_reason; lines 2569-2571 state the watermarking and the no-removal agreement; 'traceability of released copies' is a fair gloss of 'to identify Licensee for security purposes'"
+- id: slot-060
+  verdict: still_supported
+  evidence: "sensitive_elements[0].notes was removed in phase 4; the receipted content (line 2333, controlled-access list) survives at known_limitations[2].limitation_description and instances[0].missing_information[1].why_missing, restated as exclusions from this release — same facts, corrected referent framing"
+- id: rule-01
+  verdict: violated
+  evidence: "variables[*].data_type 'float' (e.g. variables[5], variables[7], variables[12]) is populated where no passage states a type — 'float' does not occur in the bundle and the record's own source_caveats says the data dictionary was not an input; a typing inference, small and uniform, in an otherwise well-grounded record whose omissions (errata, use_repository, data_protection_impacts) are correctly absent"
+- id: rule-02
+  verdict: followed
+  evidence: "top-level source_caveats carries the WUSTL/UW attribution conflict, the license-name conflict and the file-count divergence with both values; funders[0].source_caveats and collection_timeframes[0].source_caveats do the same for grants and dates"
+- id: rule-03
+  verdict: followed
+  evidence: "the report's Referent section names v3.0.0, DOI 10.60775/fairhub.3, 2280 participants; both records hold id doi:10.60775/fairhub.3, and prior versions and the mini-subset sit in related_datasets"
+- id: rule-04
+  verdict: followed
+  evidence: "density tracks the evidence: 20 collection_mechanisms and 20 variables where the bundle is rich, and documented omissions (report: errata, use_repository, data_protection_impacts, was_derived_from) where it is not"
+- id: rule-05
+  verdict: followed
+  evidence: "funders holds three separate grantor objects; creators[0].affiliations nine separate organizations; prohibited_uses six entries; purposes four responses — no collapsed rosters"
+- id: rule-06
+  verdict: followed
+  evidence: "maintainers[0].maintainer_details answers the field (who maintains, where hosted) rather than only pointing; no slot records that documentation exists elsewhere in place of an answer"
+- id: rule-07
+  verdict: followed
+  evidence: "informed_consent[0].withdrawal_mechanism was populated from the fact that sat in consent_revocations; distribution_formats keeps format labels in format and media types in media_type after phase 4"
+- id: rule-08
+  verdict: followed
+  evidence: "creators[0].principal_investigator carries id, name, orcid, email and a structured affiliation; funders[0].grants carries grant_number objects; organizations carry name plus ROR id"
+- id: rule-09
+  verdict: followed
+  evidence: "ROR:, ORCID: and doi: CURIEs throughout (creators, data_governance, related_datasets, id); publisher holds a URL only because FAIRhub has no declared prefix — the rule's own fallback, noted in the report"
+- id: rule-10
+  verdict: followed
+  evidence: "every registry identifier is stated in the bundle: the nine affiliation RORs at lines 4661-4714 and 2978/4633, the ORCID at 4645, zenodo DOI at 4548, NCT06002048 at 4612, the version DOIs in c014"
+- id: rule-11
+  verdict: followed
+  evidence: "all minted ids are fragments on doi:10.60775/fairhub.3, the record's own evidence-supplied id (e.g. file_collections[0].id, file_collections[9].resources[0].id); no invented prefix anywhere"
+- id: rule-12
+  verdict: followed
+  evidence: "prose uses organized, standardized, license, harmonized; the only British-shaped token is the quoted FAIRhub enum value 'ConsentSpecifiedNotElsewhereCategorised' in informed_consent[0].consent_scope, which is quoted material"
+- id: rule-13
+  verdict: followed
+  evidence: "funders[0].source_caveats names tier-1 versus tier-3, states the preferred value and why the rest are retained; collection_timeframes[0].source_caveats states both dates and that the higher-ranked 2023-07-19 was used"
+- id: rule-14
+  verdict: not_applicable
+  evidence: "all 20 minted ids in the pack's id_slots block are forced (FileCollection and File ids the schema requires); there are no unforced mints to judge"
+- id: rule-15
+  verdict: followed
+  evidence: "the coverage receipt sits beside the core record with the correct bundle_md5 and per-chunk statuses; the validator's block reports 28/28 chunks reviewed, 346/351 snippets verified, 0 mismatched, 5 in another chunk"
+- id: rule-16
+  verdict: followed
+  evidence: "the pack lists no reference attributes; every class-ranged slot holds an object with its declared keys (principal_investigator, accountable_organization, committee_contact, grants), and no phase reduced one to a string"
+- id: rule-17
+  verdict: followed
+  evidence: "v1/v2 facts sit in related_datasets, the controlled-access composition was moved out of sensitive_elements[0].notes in phase 4, future releases are stated as plans in updates.update_details, and the healthsheet's stale first-year sentence is flagged in source_caveats"
+- id: rule-18
+  verdict: followed
+  evidence: "source_caveats states the record's own sums (356,334 files; 3,815,969,360,064 bytes) with all nine inputs named beside the stated totals, resolving neither; file_collections[9].source_caveats discloses the count of 9 as the record's own enumeration"
+- id: rule-19
+  verdict: followed
+  evidence: "the receipt carries per-entry receipts: file_collections[0]..[9] each with directoryName snippets, the nine root resources individually (c018), the seven collaborator affiliations individually (c019), each prohibited_uses entry from its own license clause (c012)"
+- id: rule-20
+  verdict: followed
+  evidence: "creators[0].principal_investigator.id and data_governance.committee_contact.id are ORCID:0000-0002-7452-1648, the ORCID the bundle states at line 4645; the contact@aireadi.org address sits in email, not in id"
+- id: rule-21
+  verdict: followed
+  evidence: "validation.passed is true for both records; scalar slots hold scalars (created_by 'AI-READI Consortium', publisher a URL, doi the bare DOI)"
+- id: pair-01
+  verdict: consistent
+  evidence: "full file_collections[0..9] and core distributions[0..9] match verbatim in id, name, path, description, conforms_to and standards, with full total_bytes equal to core bytes (e.g. 302931703, 55625676514); the nine nested resources match distributions[10..18] in id, name, format and description; core drops file_count per its schema and carries the same root_metadata source_caveats"
+notes: >-
+  The pack lists no gaps; the claim sidecar is null in the pack but the provenance
+  receipts block was available. Two attribution imprecisions of the class the
+  validator already reports as adjacent/elsewhere (4 adjacent, 1 elsewhere):
+  slot-021's cited snippet sits at line 431, one line into c003 past the c002
+  boundary, and slot-006's "macula-centered" detail is stated in c005 (line 1291),
+  not the cited c018 — support holds in both. On the float data_type items: I
+  scored slot-038 and slot-052 inferred (no passage states a type and "float"
+  does not occur in the bundle) and slot-040 bundle_supports because the stated
+  fractional PM values (PM 1.0, 2.5) carry the decimal nature directly; the
+  distinction is thin, and rule-01 names the pattern once. No instrument defect
+  found: the mismatch counts, remap classes and no_value_overlap listings in the
+  provenance receipts block match what I saw in the files.
