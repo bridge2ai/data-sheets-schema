@@ -241,8 +241,13 @@ work with a migration of committed values; separate).
   separate them, and none is planned unless prediction 8 fails.
 - Against **v6 agentic**: unchanged in kind from the v7 plan's caveats;
   the agentic arm would need its own v8 (D5).
-- `comparable_conditions("generic_v7", "generic_v8")` is true by base
-  step; `CONDITION_AXES` gains `generic_v8: {base: v8, tuned: False}`.
+- `comparable_conditions("generic_v7", "generic_v8")` is true **by name**
+  — one base step — and false once the arms' own records are passed to it
+  (#1073): their assembly digests differ (`d2f01480…` against `f7006dc1…`),
+  so `condition_delta` reports `["base", "assembly"]`. The prose above
+  already said v7-vs-v8 measures the package; the function's `True` said
+  otherwise to anyone who quoted it without the prose, which is the whole
+  of #1073. `CONDITION_AXES` gains `generic_v8: {base: v8, tuned: False}`.
 
 ## Canary rule
 
@@ -713,8 +718,13 @@ unchanged, so no pin rotates (`d4d api prompts check --strict` passes).
 `condition_delta("generic_v8", "generic_v9")` returns `["base"]`, and that
 is **not** a statement that a v9 arm differs from the retained v8 records by
 the two rules alone. `CONDITION_AXES` tracks which generic base a condition
-is built on and whether it is tuned; it cannot see a runner-side assembly
-change. The declared-scope block (#932) landed on 2026-09-08, after all
+is built on and whether it is tuned; neither axis can see a runner-side
+assembly change. Since #1073 the function takes each side's records — or
+`runs.arm_assembly_digests(label_prefix)` — and adds an `assembly` axis read
+from `prompts.assembly.sha256`, so once a v9 arm exists this delta will
+report `["base", "assembly"]` from evidence rather than needing this
+paragraph. It stays prompt-only when given nothing, because the assembly of
+a run that has not happened yet is not knowable from a condition name. The declared-scope block (#932) landed on 2026-09-08, after all
 twelve v8 records were generated on 2026-09-04, so a v9 run differs from
 them by **the scope block, R6 and R7 together**.
 
@@ -735,8 +745,13 @@ Three consequences, stated before any v9 canary rather than after:
   is worth the spend is a decision for the plan owner; it is not assumed
   here.
 
-The axes model's blindness to runner-side changes is filed as its own issue:
-the assembly digest already records them, so the two could be joined.
+The axes model's blindness to runner-side changes was filed as #1073 and is
+now fixed: the assembly digest already recorded them, and the join is the
+optional records argument described above. Applied to the arms that already
+exist it says something the condition names never did — v7 and v8 production
+also differ on assembly (`d2f01480…` against `f7006dc1…`), so
+`comparable_conditions("generic_v7", "generic_v8")` is true by name and
+false on the evidence.
 
 ## Sequencing (PRs, in order)
 

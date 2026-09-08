@@ -1345,6 +1345,26 @@ def arm_facts(label_prefix: str, method: str | None = None,
             "values": {k: sorted(v) for k, v in seen.items()}}
 
 
+def arm_assembly_digests(label_prefix: str, method: str | None = None,
+                         concat_dir: Path | None = None) -> list[str]:
+    """The distinct assembly digests the records under a label prefix carry.
+
+    The label-shaped form of `api_runner.assembly_digests` (#1073), so a
+    caller holding two label prefixes can pass them to `condition_delta` and
+    get the `assembly` axis without opening records itself:
+
+        condition_delta("generic_v8", "generic_v9",
+                        arm_assembly_digests(v8_prefix),
+                        arm_assembly_digests(v9_prefix))
+
+    Empty for an arm whose records predate the digest, which is what makes
+    the axis unavailable rather than falsely equal.
+    """
+    facts = arm_facts(label_prefix, method, concat_dir)
+    return [d for d in facts["values"].get("assembly digest", [])
+            if d and d != "None"]
+
+
 def arm_confounds(a: dict[str, Any], b: dict[str, Any]) -> list[dict[str, str]]:
     """What differs between two arms, one entry per differing field (#576).
 

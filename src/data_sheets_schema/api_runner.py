@@ -119,12 +119,62 @@ CONDITION_AXES = {
 }
 
 
-def condition_delta(a: str, b: str) -> list[str]:
-    """Which axes two conditions differ on."""
+def assembly_digests(source: Any) -> frozenset[str]:
+    """The `prompts.assembly.sha256` values in whatever it is given (#1073).
+
+    Accepts a provenance record, an iterable of them, a digest string, or an
+    iterable of digest strings — the shapes a caller already has. Anything it
+    cannot read contributes nothing, so an arm whose records predate the
+    digest (#353) yields an empty set and the axis is simply unavailable
+    rather than reported as a difference.
+    """
+    if source is None:
+        return frozenset()
+    if isinstance(source, str):
+        return frozenset({source})
+    if isinstance(source, dict):
+        digest = (((source.get("prompts") or {}).get("assembly") or {})
+                  .get("sha256"))
+        return frozenset({digest}) if isinstance(digest, str) else frozenset()
+    out: set[str] = set()
+    try:
+        for item in source:
+            out |= assembly_digests(item)
+    except TypeError:
+        return frozenset()
+    return frozenset(out)
+
+
+def condition_delta(a: str, b: str, records_a: Any = None,
+                    records_b: Any = None) -> list[str]:
+    """Which axes two conditions differ on.
+
+    The two named axes are properties of the **prompt**, so a change to how
+    the runner assembles a request is invisible to them. That is not
+    hypothetical: the declared-scope block (#932) landed after every v8
+    record was generated, so a v9 run differs from the retained v8 corpus by
+    that block *and* the two prompt rules, while this function returned
+    `["base"]` and a PR body written from it claimed the comparison measured
+    the rules alone (#1073).
+
+    Pass each side's records — or its assembly digests — and an `assembly`
+    axis is added when they differ. The axis is only ever reported from
+    evidence: with nothing passed, or with an arm whose records carry no
+    digest, it is unavailable and the answer is the prompt-only one, because
+    the assembly of a run that has not happened yet is not knowable from a
+    condition name. That is why the axes were prompt-only to begin with.
+
+    An arm whose own records disagree on the digest differs from any other
+    arm here, which is correct: it was not generated under one assembly.
+    """
     ax, bx = CONDITION_AXES.get(a), CONDITION_AXES.get(b)
     if ax is None or bx is None:
         return ["unknown condition"]
-    return [k for k in ("base", "tuned") if ax[k] != bx[k]]
+    delta = [k for k in ("base", "tuned") if ax[k] != bx[k]]
+    da, db = assembly_digests(records_a), assembly_digests(records_b)
+    if da and db and da != db:
+        delta.append("assembly")
+    return delta
 
 
 #: Bases whose step added several rules at once, and how many. Both were
@@ -143,7 +193,8 @@ def _base_step(base: str) -> int:
         return -1
 
 
-def comparable_conditions(a: str, b: str) -> bool:
+def comparable_conditions(a: str, b: str, records_a: Any = None,
+                          records_b: Any = None) -> bool:
     """True when a difference between the two *prompt conditions* is one step.
 
     **This answers a question about prompt text and nothing else.** Two arms can
@@ -170,7 +221,7 @@ def comparable_conditions(a: str, b: str) -> bool:
     attributable, and v4's arrival is what made that distinction load-bearing
     (it was already latent for v1 against v3).
     """
-    delta = condition_delta(a, b)
+    delta = condition_delta(a, b, records_a, records_b)
     if len(delta) != 1:
         return False
     if delta == ["base"]:
@@ -179,15 +230,22 @@ def comparable_conditions(a: str, b: str) -> bool:
     return True
 
 
-def confounded_note(a: str, b: str) -> str | None:
+def confounded_note(a: str, b: str, records_a: Any = None,
+                    records_b: Any = None) -> str | None:
     """Why a comparison would confound two changes, when it would."""
-    delta = condition_delta(a, b)
+    delta = condition_delta(a, b, records_a, records_b)
     if len(delta) <= 1:
         return None
-    return (f"{a} and {b} differ on {' and '.join(delta)}. A difference between "
+    note = (f"{a} and {b} differ on {' and '.join(delta)}. A difference between "
             "them cannot be attributed to either alone. Compare each condition "
             "against one that differs from it on a single axis — a tuned arm "
             "needs a tuned counterpart on the same generic base.")
+    if "assembly" in delta:
+        note += (" The assembly axis is read from the records' own "
+                 "`prompts.assembly.sha256` (#353, #1073): the runner built "
+                 "the two arms' requests differently, which no condition name "
+                 "states.")
+    return note
 TUNED_PROMPT = PROMPTS / "d4d_tuned_arm_prompt.md"
 COMPONENTS = PROMPTS / "components"
 CONCAT_DIR = Path("data/d4d_concatenated")
