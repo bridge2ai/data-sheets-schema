@@ -1,115 +1,118 @@
 {
   "rubric": "rubric10-semantic",
-  "version": "1.0",
+  "version": "1.1",
   "d4d_file": "data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml",
   "project": "AI_READI",
   "method": "claudecode_api",
   "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep3",
-  "evaluation_timestamp": "2026-09-08T02:34:00Z",
-  "evaluation_timestamp_basis": "evaluation run time",
+  "evaluation_timestamp": "2026-09-08T20:19:06Z",
   "model": {
     "name": "claude-opus-5[1m]",
     "evaluator_model": "claude-opus-5[1m]",
     "temperature": 0.0,
     "evaluation_type": "semantic_llm_judge",
-    "note": "Model identity is the actual runtime model of the evaluating session, taken from the session environment (claude-opus-5[1m], Opus 5 with 1M context), not the template text of the agent definition, which names claude-fable-5."
+    "model_note": "Both the model name and the evaluator model record this evaluating session's actual runtime identity, Opus 5 (1M context), exact model id claude-opus-5[1m], per #1058. The agent definition pins a different evaluator; the pin selects the evaluator and this record states which model actually ran. Scores are comparable only to other scores produced by claude-opus-5[1m]."
+  },
+  "threshold_conformance": {
+    "element_8_sub_element_4": {
+      "instruction_source": "quoted verbatim in the launching message (#1059, #1077)",
+      "own_definition_matches_quoted_text": false,
+      "difference": "The threshold in this evaluator's own agent definition lists `external_resources` pointing at a code repository as qualifying evidence without further qualification. The quoted text adds a requirement the agent definition does not contain: 'The pointer must identify the software, not its publisher: an organisation or account root (github.com/<org>), a project homepage, or prose saying the code was released via GitHub names where to start looking and does not say what produced the release, so it scores 0. A repository, a package, an archived release or a software DOI scores 1.' The quoted text is strictly narrower.",
+      "applied": "The quoted text was applied as written. Under this record's evidence the distinction is decisive: the only code-hosting pointer in `external_resources` is the account root https://github.com/AI-READI, which the quoted text names explicitly as a 0. Under the evaluator's own looser definition this sub-element would have scored 1, so the tightening changes the outcome by one point on this file."
+    }
   },
   "semantic_analysis": {
     "issues_detected": [
       {
         "type": "consistency",
         "severity": "medium",
-        "description": "No download or access URL is carried in a distribution slot. The dedicated download_url slot is absent, and unlike the sibling 2026-09-01 replicate this record's distribution_formats entries carry no access_urls. The only access route in the record is inside prose: data_governance.access_review_process gives 'https://fairhub.io/datasets/3/access' and the access model 'PublicDownloadSelfAttestationRequired'. The access instructions are specific and actionable, so the sub-element is satisfied on substance, but a consumer reading distribution_formats alone finds formats with no retrieval path.",
-        "fields_involved": ["distribution_formats", "data_governance.access_review_process", "page"],
-        "recommendation": "Carry the FAIRhub access URL in distribution_formats[].access_urls (or a download_url slot) so retrieval is machine-findable from the distribution block rather than only from governance prose"
-      },
-      {
-        "type": "content_accuracy",
-        "severity": "medium",
-        "description": "regulatory_restrictions.confidentiality_level is set to 'restricted' while the only confidentiality value any source states is the RO-Crate's 'HL7:2N (normal)'. The record's own notes concede this: 'the value `restricted` is this record's substitution ... it does not reproduce, and on its face contradicts, the \"normal\" term the source uses.' The substitution is defensible on the access model (identity verification, use attestation, license acceptance) and is declared rather than concealed, but the slot value is the record's inference, not the source's assertion.",
-        "fields_involved": ["regulatory_restrictions.confidentiality_level", "regulatory_restrictions.notes", "confidential_elements"],
-        "recommendation": "Keep the declared substitution but consider recording the source term verbatim in a notes-adjacent slot the enum cannot hold, so a consumer reading only the enum is not left with the opposite of what the RO-Crate states"
-      },
-      {
-        "type": "consistency",
-        "severity": "medium",
-        "description": "The de-identification claim is triangulated across three mutually inconsistent sources and the record records the tension rather than resolving it: FAIRhub classifies the release as 'NoDeIdentification' (no identifiers were collected), the RO-Crate records deidentified as true, and the Nature Metabolism comment describes HIPAA Safe Harbor stripping. is_deidentified.identifiable_elements_present is set to false and method carries all three characterisations. The University of Washington IRB protocol shows the study itself collected direct identifiers linked by code, none of which reach the release. This is honest source handling, but a downstream reader cannot infer a single operative de-identification method from the record.",
-        "fields_involved": ["is_deidentified.method", "is_deidentified.source_caveats", "is_deidentified.identifiable_elements_present"],
-        "recommendation": "State which characterisation governs the released bytes (no identifiers collected) and mark Safe Harbor as a secondary-source description, so the operative method is unambiguous while the disagreement stays on record"
+        "description": "Preprocessing is described as format conversion to DICOM, Open mHealth and OMOP and as 'a combination of automated and custom processing', but no slot names the software that performed it. There is no `software_and_tools`, no `machine_annotation_tools`, and the preprocessing entries carry only prose. The only code-hosting pointer is the account root github.com/AI-READI, which identifies the publisher of the code rather than the code.",
+        "fields_involved": ["preprocessing_strategies", "software_and_tools", "external_resources"],
+        "recommendation": "Add `software_and_tools` naming the conversion and curation pipelines (for example the named AI-READI repositories that perform the .fda/.sdt to DICOM and .FIT to Open mHealth conversions) with versions and per-repository URLs, or point `external_resources` at the specific repositories and their archived releases rather than the organisation root."
       },
       {
         "type": "consistency",
         "severity": "low",
-        "description": "sampling_strategies.is_sample is false while the same entry's strategies text describes non-probability, wave-based, under- and oversampled recruitment from an EHR-derived contact pool. The record itself flags this: is_sample is scoped to enrollment completeness following the healthsheet, while the recruitment sampling from the FAIRhub study description and the BMJ Open protocol is recorded under strategies. The boolean and the prose therefore answer different questions.",
+        "description": "`third_party_sharing.is_shared` is true and five distribution formats are declared, but there is no `download_url` slot. The access route is documented only inside `data_governance.access_review_process` (https://fairhub.io/datasets/3/access) and by the `page` landing URL.",
+        "fields_involved": ["download_url", "data_governance.access_review_process", "page"],
+        "recommendation": "Populate `download_url` with the FAIRhub access endpoint so retrieval is discoverable from the distribution block rather than only from the governance block."
+      },
+      {
+        "type": "content_accuracy",
+        "severity": "medium",
+        "description": "`regulatory_restrictions.confidentiality_level` is set to `restricted` while the record's own note states that the only confidentiality level any source gives is the RO-Crate's HL7:2N (normal), and that the substituted value 'does not reproduce, and on its face contradicts' the source term. The substitution is disclosed and reasoned from the access gate, but the recorded value is not the sourced one.",
+        "fields_involved": ["regulatory_restrictions.confidentiality_level", "regulatory_restrictions.notes"],
+        "recommendation": "Retain the disclosure and, if the enum permits, carry the HL7 term verbatim in a notes-adjacent slot or propose an enum value that maps HL7 confidentiality codes, so the coded value and the source value do not diverge silently."
+      },
+      {
+        "type": "consistency",
+        "severity": "low",
+        "description": "`sensitive_elements.sensitive_elements_present` is true (RO-Crate enumeration of EHR, wearable, ECG, environmental and CGM categories) while `confidential_elements.confidential_elements_present` is false and the FAIRhub healthsheet answers that the public release contains no sensitive data. The record records both positions and states that the source ranking cannot decide between them.",
+        "fields_involved": ["sensitive_elements", "confidential_elements", "sensitive_elements.source_caveats"],
+        "recommendation": "No change required for scoring; the tension is sourced and disclosed. A downstream reader should treat the sensitivity claim as source-dependent."
+      },
+      {
+        "type": "semantic_understanding",
+        "severity": "low",
+        "description": "Deidentification is characterised three ways across sources: FAIRhub records NoDeIdentification (no identifiers collected), the RO-Crate records deidentified true, and the Nature Metabolism comment describes HIPAA Safe Harbor stripping. The record reports all three and adds that the IRB protocol shows direct identifiers were collected in the study and code-linked, none of which appear in the release.",
+        "fields_involved": ["is_deidentified.method", "is_deidentified.source_caveats"],
+        "recommendation": "No change required. The three characterisations are reconciled by the distinction between the study's own identifier handling and the released artifact; stating that distinction explicitly in `method` would remove the apparent contradiction."
+      },
+      {
+        "type": "consistency",
+        "severity": "low",
+        "description": "`sampling_strategies.is_sample` is false while `strategies` describes non-probability, wave-based stratified recruitment from an EHR-derived study base. The record flags the tension itself and scopes is_sample to enrollment completeness.",
         "fields_involved": ["sampling_strategies.is_sample", "sampling_strategies.strategies", "sampling_strategies.source_caveats"],
-        "recommendation": "Leave the caveat as written but consider whether is_sample should follow the recruitment description, since a machine consumer reading the boolean alone will conclude the cohort is a census"
+        "recommendation": "No change required; the scoping statement is explicit. Consider a boolean whose semantics separate 'all enrolled participants included' from 'the enrolled cohort is a sample of a population'."
+      },
+      {
+        "type": "consistency",
+        "severity": "low",
+        "description": "`ethical_reviews` documents the reviewing IRB, protocol number, approval date, reliance agreements and four named ethics reviewers, but no conflict-of-interest statement is recorded anywhere in the record.",
+        "fields_involved": ["ethical_reviews"],
+        "recommendation": "Add a conflicts-of-interest statement to `ethical_reviews`, or record explicitly that the sources declare none, so the absence is a documented answer rather than a gap."
       },
       {
         "type": "correctness",
         "severity": "low",
-        "description": "The publisher slot carries a platform URL ('https://fairhub.io/') rather than a publisher name, and the choice of publisher is itself disputed: FAIRhub structured metadata gives publisherName 'FAIRhub' while the RO-Crate gives 'AI-READI Consortium'. The record's top-level source_caveats declares both the disagreement and the URL-for-name substitution, which is driven by the uriorcurie range of the slot.",
-        "fields_involved": ["publisher", "source_caveats", "citation"],
-        "recommendation": "No change needed to the recorded fact; the substitution is a schema range constraint the record already names. The citation string carries 'FAIRhub' as the publisher name for any consumer that needs it."
-      },
-      {
-        "type": "semantic_understanding",
-        "severity": "low",
-        "description": "No software_and_tools slot is present. The processing and capture software is nonetheless identifiable across other slots: REDCap (capture, e-consent, recruitment), the MoCA Duo iPad application, the OMOP CDM Data Quality Dashboard via dqd_omop.json, the AI-READI GitHub organisation, and FAIRhub hosted on Microsoft Azure. No versions are given for any of them and the .fda/.sdt/.FIT conversion tooling is described only by its effect, not named.",
-        "fields_involved": ["preprocessing_strategies", "collection_mechanisms", "external_resources", "maintainers"],
-        "recommendation": "Populate software_and_tools with REDCap, MoCA Duo, the OMOP Data Quality Dashboard and the conversion pipeline, with versions and the github.com/AI-READI repository, so processing tooling is findable in one place"
-      },
-      {
-        "type": "consistency",
-        "severity": "low",
-        "description": "at_risk_populations.at_risk_groups_included is false while the cohort is a clinical population of adults aged 40 to 85 with and without type 2 diabetes. The accompanying special_protections text makes the regulatory reading explicit and correct: no minors (minimum age 40), no prisoners as a target population, pregnancy and gestational diabetes excluded, no cognitively impaired or consent-incapable adults, no tribal recruitment. The boolean is therefore about federally defined vulnerable categories rather than about clinical vulnerability, and the distinction is carried in prose rather than in the slot.",
-        "fields_involved": ["at_risk_populations.at_risk_groups_included", "at_risk_populations.special_protections"],
-        "recommendation": "No factual change needed; the enumerated protections make the intended sense of the boolean recoverable"
-      },
-      {
-        "type": "content_accuracy",
-        "severity": "low",
-        "description": "Two named-entity disputes are carried unresolved rather than decided, in both cases because the disagreeing sources share a tier-1 rank: the acronym expansion ('Equitable' in the BMJ Open protocol and Nature Metabolism comment versus 'Exploratory' in FAIRhub and NIH RePORTER, with the FAIRhub form followed) and the lead institution (Washington University in St. Louis as FAIRhub managing organisation, lead sponsor and license Licensor, versus the University of Washington as the RO-Crate's PI department and the RePORTER awardee organisation, with both recorded). The record's title avoids the acronym expansion entirely, which sidesteps rather than propagates the error.",
-        "fields_involved": ["source_caveats", "creators[0].principal_investigator.affiliation", "data_governance.accountable_organization"],
-        "recommendation": "None; recording both tier-1 positions with the rank rationale is the correct handling for an undecidable dispute"
-      },
-      {
-        "type": "semantic_understanding",
-        "severity": "low",
-        "description": "Ethical review documentation is strong (UW IRB protocol STUDY00016228 with approval date, reliance agreements, board contact address, and four named ethics reviewers from the RO-Crate) but no conflict-of-interest statement appears anywhere in the record, which is the second half of what the rubric's ethical-review sub-element asks for.",
-        "fields_involved": ["ethical_reviews", "human_subject_research.irb_approval"],
-        "recommendation": "Add a conflicts-of-interest statement to ethical_reviews if the source documents carry one, or record its absence explicitly as the record already does for the data protection impact assessment"
+        "description": "The license name is recorded from the license document's own title ('AI-READI Data License Agreement (Version 2.0)') while the FAIRhub dataset page labels it 'Health Data License' and the FAIRhub structured metadata 'AI-READI custom license v2.0'. Three names for one instrument, disclosed in the caveat.",
+        "fields_involved": ["license", "license_and_use_terms.source_caveats"],
+        "recommendation": "No change required; the document title is the defensible choice and the alternatives are recorded."
       }
     ],
     "semantic_insights": [
-      "Every participant count in the record reconciles exactly. The four subpopulation breakdowns each sum to 2,280 (race/ethnicity 380+545+519+836; sex 951+1,329; diabetes status 776+560+686+258), the three recommended splits sum to 2,280 (1,576+352+352), each split's own internal breakdowns sum to its participant count, and every per-group total reconstructs across the three splits (Hispanic 204+88+88=380, insulin-controlled 105+67+86=258, and so on for all ten groups). This is arithmetic consistency across thirty-plus reported figures.",
-      "The file-count arithmetic in the root-metadata collection's source_caveats is correct and correctly labelled as the record's own computation rather than a sourced figure: the nine data-type directory counts sum to 356,334, and the residual of 9 against total_file_count 356,343 matches the nine named CDS root files. The parallel byte figures also behave: the nine directory total_bytes values sum to 3,815,969,360,064, which is 419,614 bytes under total_size_bytes, consistent with the unsized root metadata files, and the record makes no size claim it cannot support.",
-      "Temporal ordering is coherent end to end: IRB approval 2022-12-20, collection window 2023-07-19 to 2025-05-01, release 2025-11-17, with the prior version chain at 2024-05-03 (v1.0.0) and 2024-11-08 (v2.0.0). The record also carries the one competing date honestly, noting the BMJ Open protocol's 2023-07-18 enrollment start against the FAIRhub 2023-07-19 collection start.",
-      "All three NIH grant numbers match agency patterns (OT2OD032644 as an OT2 Other Transaction through the Office of the Director, P30DK035816 as an NIDDK center grant, UL1TR003096 as an NCATS CTSA), and the record distinguishes the core project number from the RO-Crate's 1OT2OD032644 application form and reconciles two conflicting RePORTER links for the same award.",
-      "The de-identification, privacy and license blocks are mutually reinforcing rather than merely co-present: withheld attributes (sex, race, ethnicity, medications, ZIP, genetics) appear consistently in is_deidentified.identifiers_removed, known_limitations.scope_limitation, subpopulations (values withheld, aggregates published), the controlled-access related dataset, and future_use_impacts, which then names the downstream consequence that public-release users cannot audit models for disparities across those groups.",
-      "The three named privacy deterrents (watermarking, the license agreement, the dissemination system) appear identically in is_deidentified.deidentification_details and participant_privacy.privacy_techniques, and the watermarking control reappears as a prohibited use and in regulatory_restrictions.other_compliance, so a single mechanism is traceable across four slots without drift.",
-      "Bias documentation uses the schema's BiasTypeEnum values (selection_bias, sampling_bias, measurement_bias), each with a mitigation strategy, and the sampling_bias entry is specific enough to be checkable against the record's own split tables: it states the validation and test partitions are balanced at 88 per race/ethnicity group and 176 per sex while the training partition is not, which the subsets block confirms.",
-      "Device documentation is at replication grade: twenty collection_mechanisms entries name manufacturer, model, city, scan protocol, field of view, sampling interval, illumination conditions and testing order, including site-varying equipment (three blood pressure monitors, three lensometers) that the measurement_bias entry then correctly identifies as confounded with site.",
-      "The record repeatedly distinguishes an explicit negative answer from an omission, naming that distinction in the text for the data protection impact assessment ('records this as an explicit negative answer rather than an omission') and for the extension mechanism. This is the semantically correct handling of a healthsheet 'No' and is rarer than either presence or silence.",
-      "Scope is declared and enforced: the description ends by excluding banked biospecimens at UAB and the companion controlled-access release from this record, and both then reappear only as a typed related dataset and a scope_limitation rather than being absorbed into this dataset's composition."
+      "The DOI prefix 10.60775 is FAIRhub's DataCite prefix and is used consistently across `id`, `doi`, `citation` and `version_access.latest_version_doi`, and the two predecessor versions carry the sibling DOIs 10.60775/fairhub.1 and .2.",
+      "Internal arithmetic reconciles exactly: the nine data-type file collections sum to 356,334 files and, with the nine root metadata files, to the declared total of 356,343. The record states that the root count is its own subtraction rather than a reported figure.",
+      "Participant arithmetic reconciles across four independent breakdowns: the three recommended splits sum to 2,280, and the race/ethnicity (380+545+519+836), sex (951+1,329) and diabetes-status (776+560+686+258) distributions each sum to 2,280.",
+      "Grant numbers follow NIH patterns for their stated mechanisms: OT2OD032644 (Other Transaction, Office of the Director, the Bridge2AI award), P30DK035816 (NIDDK center grant) and UL1TR003096 (NCATS CTSA).",
+      "Standards conformance is expressed twice, once as prose in `conforms_to` and once as a controlled list in `conforms_to_standard`, and the two agree item for item across CDS, RO-Crate, DICOM, OMOP CDM, WFDB, Open mHealth and ESDS; each file collection repeats the standard applicable to it.",
+      "Twenty collection mechanisms are documented at instrument level with manufacturer, model, city and acquisition protocol, which is materially beyond the sub-element's requirement and supports replication.",
+      "The record repeatedly separates the study from the released artifact: banked biospecimens, the controlled-access companion and the raw device exports are each named and excluded from scope, and `description` states the exclusion in its closing sentence.",
+      "Source disagreements are handled by an explicit ranking rule rather than by silent selection: eight `source_caveats` blocks record the losing position alongside the recorded one, including the acronym expansion, the lead institution, the publisher and the collection start date.",
+      "Bias documentation uses the schema's bias-type enumeration across four categories (selection, representation, sampling, measurement) with a mitigation strategy on three of them, rather than free prose.",
+      "Deidentification is semantically appropriate to the data type: identity is protected by withholding sex, race, ethnicity, medications and ZIP code to a controlled release rather than by perturbing the imaging and physiological signals, which perturbation would destroy."
     ],
     "consistency_checks": {
       "passed": 18,
-      "failed": 0,
-      "warnings": 6
+      "failed": 2,
+      "warnings": 5
     },
     "correctness_validations": {
-      "doi_format": "valid (id doi:10.60775/fairhub.3 and doi 10.60775/fairhub.3 agree, and the same base carries the subset and file-collection fragment ids; the 10.60775 prefix is not among the rubric's example registrars but is the FAIRhub release prefix, corroborated by the landing page, the citation and the prior-version chain 10.60775/fairhub.1 and fairhub.2. Publication DOIs 10.1038/s42255-024-01165-x and 10.1136/bmjopen-2024-097449 well-formed)",
-      "grant_number_format": "valid (OT2OD032644, P30DK035816 and UL1TR003096 all match NIH activity-code/institute/serial patterns; the RO-Crate's 1OT2OD032644 application form is recorded as a source variant rather than as a second award)",
-      "rrid_format": "not_present (no RRID; ORCID:0000-0002-7452-1648, ROR:01yc7t268 and the ClinicalTrials.gov registration NCT06002048 are all well-formed)",
-      "url_validity": "all_valid (fairhub.io including the /datasets/3 and /datasets/3/access routes, docs.aireadi.org including the consent-form PDF, aireadi.org with team and contact pages, github.com/AI-READI, zenodo.org/communities/aireadi, cds-specification.readthedocs.io pinned at v0.1.1, and the two publisher DOI links; the publisher slot holds a URL where the source states a name, which is a slot-range artefact the record declares)"
+      "doi_format": "valid",
+      "grant_number_format": "valid",
+      "rrid_format": "not_present",
+      "url_validity": "all_valid",
+      "orcid_format": "valid",
+      "ror_format": "valid",
+      "temporal_consistency": "valid"
     }
   },
   "overall_score": {
-    "total_points": 50,
+    "total_points": 49,
     "max_points": 50,
     "excluded_max_points": 0,
     "adjusted_max_points": 50,
-    "normalized_percentage": 100.0,
+    "normalized_percentage": 98.0,
     "sub_elements_not_applicable": 0
   },
   "elements": [
@@ -121,32 +124,32 @@
         {
           "name": "Persistent Identifier (DOI, RRID, or URI)",
           "score": 1,
-          "evidence": "id: doi:10.60775/fairhub.3; doi: 10.60775/fairhub.3; version_access.latest_version_doi: doi:10.60775/fairhub.3 with 10.60775/fairhub.1 and fairhub.2 for prior versions; subsets and file_collections mint fragment ids on the same DOI (doi:10.60775/fairhub.3#split-train, #collection-retinal-oct)",
-          "quality_note": "Well-formed DOI used consistently as id, doi, citation target, version-chain anchor and fragment-id base. The 10.60775 prefix is outside the rubric's example registrar list but is the FAIRhub release prefix, corroborated by the landing page and the citation. The CURIE form in id is correct for a uriorcurie slot. No RRID."
+          "evidence": "id: doi:10.60775/fairhub.3; doi: 10.60775/fairhub.3",
+          "quality_note": "DOI matches 10.XXXX/... and the 10.60775 prefix is FAIRhub's registered DataCite prefix, corroborated by the two sibling version DOIs. Recorded as a CURIE in the uriorcurie-ranged id slot and as a bare DOI in `doi`."
         },
         {
           "name": "Dataset Title and Description Completeness",
           "score": 1,
-          "evidence": "title: 'Flagship Dataset of Type 2 Diabetes from the AI-READI Project'; description of roughly 1,900 characters giving version 3.0.0, 2,280 adults with and without T2DM, three named collection sites, the collection window 19 July 2023 to 1 May 2025, the visit structure (three to four hours on site plus ten days at home), fourteen named data domains, 356,343 files at approximately 3.82 TB, CDS v0.1.1 directory organisation, the hypothesis-agnostic label-free design, and an explicit scope exclusion of banked biospecimens and the controlled-access release",
-          "quality_note": "Far beyond the 200-character threshold and specific throughout: every claim is quantified or named, the modality list matches the file_collections block, and the closing scope sentence tells a reader exactly what this record does not describe."
+          "evidence": "title: Flagship Dataset of Type 2 Diabetes from the AI-READI Project; description of roughly 1,900 characters naming 2,280 adults, three sites, the collection window, thirteen modalities, 356,343 files and 3.82 TB",
+          "quality_note": "Far beyond the 200-character floor and specific throughout; closes by stating what the record is not about (biospecimens, controlled-access companion)."
         },
         {
           "name": "Keywords or Tags for Searchability",
           "score": 1,
-          "evidence": "keywords: Diabetes mellitus, Machine Learning, Artificial Intelligence, Electrocardiography, Continuous Glucose Monitoring, Retinal imaging, Eye exam",
-          "quality_note": "Seven keywords covering the condition, the intended computational use and three of the imaging and physiological modalities. Adequate for discovery, but wearable activity, environmental sensing, OMOP and the Bridge2AI program are not tagged, so several of the dataset's distinguishing modalities are findable only from the description."
+          "evidence": "keywords: [Diabetes mellitus, Machine Learning, Artificial Intelligence, Electrocardiography, Continuous Glucose Monitoring, Retinal imaging, Eye exam]",
+          "quality_note": "Seven keywords spanning condition, method and modality, meeting the five-keyword threshold."
         },
         {
-          "name": "Landing Page and Resources",
+          "name": "Landing Page and Resources (page, hierarchical resources)",
           "score": 1,
-          "evidence": "page: https://fairhub.io/datasets/3; file_collections: ten entries with fragment ids, paths, collection_type, file_count, total_bytes and per-directory conforms_to/conforms_to_standard; subsets: three recommended splits with ids, counts and composition; external_resources: docs.aireadi.org, aireadi.org, github.com/AI-READI, zenodo.org/communities/aireadi, the CDS specification",
-          "quality_note": "An accessible landing page plus a genuinely hierarchical resource structure: nine data-type directories and a root metadata collection, each sized, counted and bound to its own standard, with the tenth entry's count shown as the record's own arithmetic."
+          "evidence": "page: https://fairhub.io/datasets/3; ten `file_collections` entries each with path, collection_type, file_count, total_bytes and conformance",
+          "quality_note": "Landing page plus a genuinely hierarchical resource structure keyed on the dataset DOI with fragment identifiers."
         },
         {
           "name": "Hierarchical Structure (parent datasets, relationships)",
           "score": 1,
-          "evidence": "related_datasets: is_new_version_of doi 10.60775/fairhub.2 (v2.0.0, 1,067 participants, recorded as no longer accessible) and 10.60775/fairhub.1 (v1.0.0, 204 pilot participants); is_source_of the AI-READI mini-subset (FAIRhub child dataset 4); is_supplemented_by the controlled-access release; subsets: three data splits under the parent DOI; file_collections: ten path-addressed children",
-          "quality_note": "Four typed relationships covering the version lineage, a derived child and a companion access tier, layered over an internal subset and file-collection hierarchy. Two targets are named in prose because the sources give no identifier, and the record says so rather than inventing one."
+          "evidence": "related_datasets: four entries typed is_new_version_of (fairhub.2, fairhub.1), is_source_of (mini-subset) and is_supplemented_by (controlled-access release)",
+          "quality_note": "Typed relationships in both directions, with the two untyped-identifier targets named in prose and the reason for the missing identifier stated."
         }
       ],
       "element_score": 5,
@@ -160,32 +163,32 @@
         {
           "name": "Access Policy and IP Restrictions Defined",
           "score": 1,
-          "evidence": "license_and_use_terms.license_terms: the AI-READI Data License Agreement v2.0 issued by Washington University in St. Louis as Licensor, granting a non-exclusive non-transferable license to download, reproduce, use and create derivative works, with authorized-group scoping, derivative-data treatment, model-distribution conditions, acknowledgement obligations, automatic termination on breach and a one-dollar liability cap; data_use_permission: disease_specific_research; ip_restrictions.restrictions: title and all industrial and intellectual property rights remain with the Licensor and its suppliers, no third-party IP restrictions beyond the license, RO-Crate copyright notice recorded",
-          "quality_note": "A concrete, operative access policy with the licensor named, the grant and its limits stated, and IP ownership carried in its own slot. The three competing names the sources give the license are reconciled in source_caveats, with the document's own title used."
+          "evidence": "license_and_use_terms.license_terms describing the AI-READI Data License Agreement v2.0 grant, derivative-data treatment, model-distribution conditions and termination; ip_restrictions.restrictions on title and reserved rights",
+          "quality_note": "Both slots populated with instrument-level specificity rather than a license name alone."
         },
         {
           "name": "Regulatory Restrictions and Confidentiality Level Specified",
           "score": 1,
-          "evidence": "regulatory_restrictions.confidentiality_level: restricted; hipaa_compliant: compliant; regulatory_restrictions: NIH Genomic Data Sharing Policy security best practices for controlled-access data and applicable law for both data and derived models; other_compliance: storage limited to institution-maintained servers or HIPAA-BAA-covered cloud services, with static watermarking to identify the licensee",
-          "quality_note": "Both the classification and the named regulatory frameworks are in their dedicated slots, and the notes declare that 'restricted' is the record's own substitution for the RO-Crate's unmappable HL7:2N 'normal'. Flagged medium: a machine consumer reading the enum alone gets the opposite of the source term."
+          "evidence": "regulatory_restrictions: confidentiality_level restricted; hipaa_compliant compliant; NIH Genomic Data Sharing security best practices; other_compliance limiting storage to institutional servers or BAA-covered cloud",
+          "quality_note": "All four fields the sub-element names are populated. The `restricted` value is the record's own substitution for the source's HL7:2N and is flagged as a content-accuracy issue, but the regulatory content itself is sourced and specific."
         },
         {
           "name": "Download URL or Platform Link Available",
           "score": 1,
-          "evidence": "page: https://fairhub.io/datasets/3; data_governance.access_review_process: 'Access to the release requires logging in through a verified ID system, agreeing to use the data only for type 2 diabetes related research, and accepting the license terms ... The access route is published at https://fairhub.io/datasets/3/access ... the FAIRhub access type for this release is PublicDownloadSelfAttestationRequired'; third_party_sharing.is_sample true with distribution through FAIRhub",
-          "quality_note": "The platform link and a complete, actionable access procedure are present, including the self-attestation access model. Flagged medium: the dedicated download_url slot is absent and, unlike the sibling replicate, distribution_formats carries no access_urls, so retrieval is reachable only from governance prose."
+          "evidence": "data_governance.access_review_process: 'The access route is published at https://fairhub.io/datasets/3/access'; access is PublicDownloadSelfAttestationRequired; page: https://fairhub.io/datasets/3",
+          "quality_note": "The sub-element accepts platform access instructions, and the record gives the access endpoint plus the three concrete conditions (verified ID login, use attestation, license acceptance). Scored 1 on that basis; the absent dedicated `download_url` slot is recorded as a low-severity issue."
         },
         {
           "name": "Distribution Formats and File Types Specified",
           "score": 1,
-          "evidence": "distribution_formats: application/dicom (retinal photography, OCT, OCTA, FLIO), text/csv with media_type (OMOP-mapped clinical tables), application/json with media_type (Open mHealth wearable and CGM records plus CDS metadata files, named individually), text/markdown with media_type (README, CHANGELOG, healthsheet), text/tab-separated-values with media_type (participants.tsv and per-datatype manifest.tsv); per-collection conforms_to in file_collections gives WFDB, OMOP CDM, DICOM, Open mHealth and NASA ESDS",
-          "quality_note": "Five format entries with MIME types on four of five and the specific files each covers, consistent with file_collections and conforms_to_standard. The TSV entry declares that it is derived from file names rather than from the FAIRhub format field, which is exactly the right disclosure."
+          "evidence": "distribution_formats: application/dicom, text/csv, application/json, text/markdown, text/tab-separated-values, each with a note naming which files use it",
+          "quality_note": "MIME types with per-format scope. The TSV entry states that it is not in the FAIRhub format field and was read from file names, which is the kind of provenance the rubric rewards."
         },
         {
           "name": "Related Datasets and External Resources Linked",
           "score": 1,
-          "evidence": "related_datasets: four typed entries (two prior versions by DOI, the mini-subset, the controlled-access companion); external_resources: eight entries covering docs.aireadi.org with its CC-BY 4.0 restriction stated, aireadi.org with team and contact pages, github.com/AI-READI, the Zenodo community, the Nature Metabolism comment (10.1038/s42255-024-01165-x), the BMJ Open protocol (10.1136/bmjopen-2024-097449) with its CC BY-NC 4.0 licence, and the CDS v0.1.1 specification URL",
-          "quality_note": "Rich and resolvable: documentation, code, community, both associated publications with DOIs, and the versioned standard specification, with reuse restrictions stated for the documentation and the protocol paper."
+          "evidence": "related_datasets (4 typed entries); external_resources (8 entries: docs site, project site, GitHub org, Zenodo community, two publication DOIs, CDS specification)",
+          "quality_note": "Both slots populated with resolvable links and, for the documentation entry, its own reuse license."
         }
       ],
       "element_score": 5,
@@ -200,43 +203,43 @@
           "name": "License Terms Allow Reuse",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets shared condition met: distribution_formats populated with five format entries; page https://fairhub.io/datasets/3 and the access route https://fairhub.io/datasets/3/access; third_party_sharing.is_shared true; the license explicitly grants download, reproduction, use and derivative works",
+          "applicability_evidence": "Datasets shared condition met: `distribution_formats` lists five formats, `page` and the access endpoint resolve to a public FAIRhub release, `third_party_sharing.is_shared` is true.",
           "score": 1,
-          "evidence": "license_terms: 'grants a non-exclusive, non-transferable license to download, reproduce and use the data and to create derivative works, for research, commercial and non-commercial purposes'; data_use_permission: disease_specific_research; intended_uses[1].usage_notes: public access conditioned on type 2 diabetes related research, with a private version allowing more generic use",
-          "quality_note": "The reuse grant is explicit and its conditions are stated rather than implied: T2DM-only public use, HIPAA-BAA storage, no onward sharing outside identically bound licensees, and model distribution only under memorisation-minimisation. The record also flags the tension between the disease-specific access condition and the license's own commercial-friendly grant."
+          "evidence": "license_and_use_terms: non-exclusive licence to download, reproduce, use and create derivative works for research, commercial and non-commercial purposes; data_use_permission: disease_specific_research",
+          "quality_note": "Reuse permissions and their boundaries are both stated, and the caveat reconciles the disease-specific access condition with the broader licence grant."
         },
         {
-          "name": "Data Formats Are Standardized",
+          "name": "Data Formats Are Standardized (encoding, format)",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets shared condition met (see sub-element 1)",
+          "applicability_evidence": "Same datasets shared condition as above.",
           "score": 1,
-          "evidence": "conforms_to names DICOM for retinal photography, OCT, OCTA and FLIO; OMOP CDM for clinical data; WFDB for electrocardiography; Open mHealth for wearable activity and CGM; NASA ASCII File Format Guidelines for Earth Science Data for environmental sensing; distribution_formats gives the corresponding MIME types; each file_collection repeats its own conforms_to_standard enum",
-          "quality_note": "A community standard is named for every modality and repeated per directory, so a reuser knows the format of each subtree without opening it. Character encoding is not stated anywhere in the record."
+          "evidence": "DICOM for imaging, OMOP CDM tables as CSV, WFDB for ECG, Open mHealth JSON for wearables, TSV/Markdown/JSON metadata files",
+          "quality_note": "Every format is an open community standard and each is bound to the data it carries. No `encoding` value is given, which does not weaken the format claim."
         },
         {
           "name": "Schema or Ontology Conformance Stated",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets shared condition met (see sub-element 1)",
+          "applicability_evidence": "Same datasets shared condition as above.",
           "score": 1,
-          "evidence": "conforms_to: Clinical Dataset Structure (CDS) v0.1.1 as the dataset-level organisation plus RO-Crate 1.2 draft packaging, with the per-modality data models enumerated; conforms_to_standard: [CDS, RO_CRATE, DICOM, OMOP_CDM, WFDB, OPEN_MHEALTH, ESDS]; conforms_to_schema: https://w3id.org/bridge2ai/data-sheets-schema; conforms_to_class: Dataset",
-          "quality_note": "Versioned structure standard, machine-readable packaging profile, seven enum-valued standards and the datasheet schema itself, all consistent with the per-collection declarations."
+          "evidence": "conforms_to prose naming CDS v0.1.1, RO-Crate 1.2 draft, DICOM, OMOP CDM, WFDB, Open mHealth and the NASA ESDS guidelines; conforms_to_standard: [CDS, RO_CRATE, DICOM, OMOP_CDM, WFDB, OPEN_MHEALTH, ESDS]; conforms_to_schema: https://w3id.org/bridge2ai/data-sheets-schema",
+          "quality_note": "Prose and controlled list agree item for item, and each file collection repeats its applicable standard."
         },
         {
           "name": "Variable Metadata with Identifiers Defined",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets shared condition met (see sub-element 1)",
+          "applicability_evidence": "Same datasets shared condition as above.",
           "score": 1,
-          "evidence": "variables: twenty-one entries, each with variable_name and most with data_type, unit and measurement_technique. participant_id carries is_identifier true; recommended_split enumerates its categories Train/Val/Test; blood_glucose is float in mg/dL with the Dexcom G6 five-minute sampling protocol; moca_total_score is integer with maximum_value 30 and quality_notes giving the 26/24 interpretation cutoffs and confounders; visual_acuity_logmar and contrast_sensitivity_log_cs carry units, instruments, testing conditions and direction-of-effect notes; the environmental variables name the size fractions and species measured",
-          "quality_note": "Substantive variable-level metadata with units, types, instruments and interpretation guidance, and one explicit identifier flag. hba1c carries a source_caveat declining to assert units because the source table's column alignment could not be read, which is the right refusal. No ontology term identifiers are attached to the variables, and the list is a representative subset rather than a complete data dictionary."
+          "evidence": "variables: 18 entries with variable_name, data_type, unit, categories, measurement_technique and quality_notes; participant_id carries is_identifier: true",
+          "quality_note": "Measurement technique is given at instrument level for physiological and imaging variables, and the hba1c entry states why no unit is asserted rather than guessing one."
         },
         {
-          "name": "Use Guidance Provided",
+          "name": "Use Guidance Provided (intended, prohibited uses)",
           "score": 1,
-          "evidence": "intended_uses: two categories with examples and usage_notes (AI/ML research on T2DM trajectories and salutogenesis, stored AI-ready so no reformatting is needed; T2DM-related research as the access condition on the public version); prohibited_uses: seven license-derived entries each with a prohibition_reason (no clinical treatment decisions, no re-identification or contact, no sharing with third-party model vendors for training, no onward transfer outside identically bound licensees, publication limited to small samples in up to five figures, storage restricted to institutional or BAA-covered systems, no removal of watermarking)",
-          "quality_note": "Unusually complete and specific, with each prohibition traceable to a license clause and given a stated rationale rather than asserted bare. discouraged_uses is absent, but the prohibition list covers the ground that slot would."
+          "evidence": "intended_uses: two use categories with examples and usage notes; prohibited_uses: seven entries each with a prohibition_reason, covering clinical decisions, re-identification, third-party model vendors, onward transfer, publication volume, storage location and watermark removal",
+          "quality_note": "The most detailed use-guidance block the rubric contemplates, with a stated reason attached to each prohibition."
         }
       ],
       "element_score": 5,
@@ -251,46 +254,46 @@
           "name": "IRB or Ethics Review and Data Protection Impact",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "description (E1): '2,280 adults with and without type 2 diabetes mellitus ... a single in-person study visit ... participants wore a continuous glucose monitor'; keywords (E1) include 'Diabetes mellitus' and 'Eye exam'; regulatory_restrictions.confidentiality_level: restricted (E2); collection_mechanisms (E8) describes recruitment and testing of human participants at three clinical sites",
+          "applicability_evidence": "Human subjects condition met on external fields: `description` (E1) states '2,280 adults with and without type 2 diabetes mellitus' and 'a single in-person study visit'; `collection_mechanisms` (E8) describes REDCap e-consent recruitment and participant testing. The governance disjunct is also satisfied by `regulatory_restrictions` (E2), which states constraints that apply.",
           "score": 1,
-          "evidence": "human_subject_research.irb_approval: 'University of Washington Institutional Review Board protocol STUDY00016228. Initial approval was received on 20 December 2022, with reliance agreements covering the Institutional Review Boards of the University of Alabama at Birmingham and the University of California, San Diego'; ethics_review_board with the UW Human Subjects Division reliance team address and contact; ethical_reviews: the UW IRB entry plus four named ethics reviewers from the RO-Crate; data_protection_impacts: 'No data protection impact analysis has been conducted for this dataset; the project's own datasheet records this as an explicit negative answer rather than an omission'; data_governance.committee_contact with ORCID and email",
-          "quality_note": "Protocol number, approval date, reliance structure, board contact and named ethics reviewers, plus a governance contact. The DPIA answer is a declared negative rather than a silence, which is the semantically correct handling of a healthsheet 'No'. The record flags that the RO-Crate mislabels the board 'Washington University IRB' while giving a UW address."
+          "evidence": "human_subject_research.irb_approval: 'University of Washington Institutional Review Board protocol STUDY00016228. Initial approval was received on 20 December 2022, with reliance agreements covering ... the University of Alabama at Birmingham and the University of California, San Diego'; ethical_reviews with the reviewing organisation and four named ethics reviewers; data_protection_impacts recording that no DPIA was conducted",
+          "quality_note": "Protocol number, approval date, reliance structure, review board contact and renewal obligation are all present, and the DPIA answer is recorded as an explicit negative rather than left blank."
         },
         {
           "name": "Deidentification Method Described",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Same human-subject and governance signals as sub-element 1: E1 description of adult participants, E2 confidentiality_level restricted, E8 collection_mechanisms describing participant recruitment and testing",
+          "applicability_evidence": "Same human-subjects evidence from E1 description and E8 collection_mechanisms; governance disjunct also satisfied by E2 regulatory_restrictions.",
           "score": 1,
-          "evidence": "is_deidentified.method: FAIRhub classifies the release as NoDeIdentification with direct and HIPAA identifiers addressed because no identifiers were collected into the released data, with the release checked to confirm no HIPAA-identifiable data are present; the Nature Metabolism comment describes Safe Harbor stripping of PHI; identifiers_removed: sex, race/ethnicity, medications, 5-digit ZIP, genetic sequencing, past health records and traffic reports held under controlled access; deidentification_details: date shifting, non-arrangement and k-anonymity were not applied, with watermarking, license and dissemination controls as deterrents",
-          "quality_note": "A named method plus an explicit statement of which techniques were not applied, which is more informative than a bare method name. Flagged medium: three sources characterise the method differently (NoDeIdentification, deidentified true, Safe Harbor) and the record carries all three rather than designating one as operative."
+          "evidence": "is_deidentified.method: FAIRhub NoDeIdentification classification with HIPAA identifiers addressed, alongside the Nature Metabolism description of HIPAA Safe Harbor stripping; identifiers_removed listing sex, race/ethnicity, medications and ZIP code held under controlled access; deidentification_details stating that date shifting, non-arrangement and k-anonymity were not applied",
+          "quality_note": "A named method plus an explicit list of what was withheld and what techniques were deliberately not used. The three-source disagreement is disclosed rather than smoothed over."
         },
         {
           "name": "Privacy Protections and Re-identification Risk Assessment",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Same human-subject and governance signals as sub-element 1",
+          "applicability_evidence": "Human subjects condition met on E1 `description` (2,280 adult participants, in-person study visit, at-home monitoring) and E8 `collection_mechanisms` (participant recruitment and consent through REDCap). Applicability rests on participant evidence, not on a governance structure.",
           "score": 1,
-          "evidence": "participant_privacy.privacy_techniques: watermarking of both public and controlled sets, the license agreement, a dissemination system built to deter re-identification, take-home devices chosen so that no video, audio or GPS is captured and nothing syncs to participant-owned devices, private testing rooms, encrypted servers and locked cabinets at every site; reidentification_risk: 'A theoretical risk of future re-identification is acknowledged', with the license prohibitions on identifying, contacting or establishing group membership; data_linkage: study participant identifier only, one visit per participant, identifiers held separately under code in the study itself",
-          "quality_note": "An explicit risk assessment paired with mitigations at three levels: device design, physical and system security during collection, and contractual deterrence after release. The device-selection rationale is a genuine design fact, not boilerplate."
+          "evidence": "participant_privacy.privacy_techniques: watermarking, licence agreement, dissemination system, devices chosen without video, audio, GPS or participant-device syncing, private rooms and encrypted storage during the study; reidentification_risk: 'A theoretical risk of future re-identification is acknowledged'; data_linkage describing code-separated storage",
+          "quality_note": "All three privacy fields populated, with the risk assessed explicitly and mitigations that are specific to the modalities collected."
         },
         {
           "name": "Informed Consent Obtained from Participants",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Same human-subject and governance signals as sub-element 1",
+          "applicability_evidence": "Same participant evidence from E1 description and E8 collection_mechanisms.",
           "score": 1,
-          "evidence": "informed_consent.consent_obtained: true; consent_type: written consent by REDCap e-consent before the visit or in person at the visit, classified by FAIRhub as ConsentSpecifiedNotElsewhereCategorised with no non-commercial, geographic, research-type, genetic-only or methods restrictions; consent_documentation: the UW consent form published at docs.aireadi.org with reliance sites using the same form plus institution-specific language, and signed consents emailed to participants; consent_scope: questionnaires, biospecimen banking for future research and open-repository placement; collection_consents describes the invitation-to-enrollment path; consent_revocations: withdrawal permitted at any time with already-shared data remaining in the dataset, communicated in the consent document",
-          "quality_note": "Type, timing, documentation URL, scope, multi-site handling and the withdrawal mechanism with its honest limit are all present. The statement that no study-specific questionnaires were available before consent is a checkable procedural detail."
+          "evidence": "informed_consent: consent_obtained true; written consent via REDCap e-consent or in person; consent form published at docs.aireadi.org; consent_scope covering questionnaires, biospecimen banking and open-repository deposit; consent_revocations describing withdrawal at any time with data already shared remaining in the release",
+          "quality_note": "Consent type, documentation URL, scope and withdrawal mechanism are all present, plus the reliance-site arrangement for the shared form."
         },
         {
           "name": "Vulnerable Populations and Compensation Documented",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Same human-subject and governance signals as sub-element 1",
+          "applicability_evidence": "Same participant evidence from E1 description and E8 collection_mechanisms.",
           "score": 1,
-          "evidence": "at_risk_populations.at_risk_groups_included: false with special_protections enumerating that minors were excluded by the age-40 minimum, prisoners were not targeted and the protocol addresses subjects becoming prisoners, pregnancy and gestational diabetes were exclusion criteria, consent-incapable and cognitively impaired adults were not enrolled so no surrogate consent applied, and no tribal-organisation recruitment took place; participant_compensation.compensation_provided: true, compensation_amount '$200', paid from award OT2OD032644, plus parking, transit and rideshare costs, with the IRB-protocol payment timing (after device return, not prorated) and the $25 transport reimbursement ceiling",
-          "quality_note": "The vulnerable-population answer is enumerated category by category rather than asserted, and compensation is documented with amount, funding source, ancillary support, timing and its limits. Flagged low: the at_risk_groups_included boolean reads as false for a clinical cohort, with the regulatory sense recoverable only from the prose."
+          "evidence": "at_risk_populations.special_protections: minors, prisoners, pregnant participants, cognitively impaired adults and tribal recruitment each addressed; participant_compensation: $200 stipend paid from award OT2OD032644, plus parking, transit and rideshare costs, with the payment timing and the $25 transport cap noted",
+          "quality_note": "Each protected category is answered individually rather than by a blanket negative, and compensation is documented with amount, funding source, timing and limits."
         }
       ],
       "element_score": 5,
@@ -304,32 +307,32 @@
         {
           "name": "Cohort or Subpopulations Characteristics Described",
           "score": 1,
-          "evidence": "subpopulations: four entries with identification and distribution. Race/ethnicity 380 Hispanic, 545 Asian, 519 Black, 836 White; biological sex 951 male, 1,329 female; four diabetes status arms 776 / 560 / 686 / 258; age restricted to adults 40 to 85 with mean 60.8 (SD 11.3). Two entries carry subpopulation_elements_present false to mark that individual values are withheld and only aggregates are published; the fourth entry's notes reconcile this with the healthsheet's 'No' answer on demographic sub-populations",
-          "quality_note": "Demographics, eligibility bounds and the four study arms are all quantified, and every breakdown sums exactly to 2,280. The record distinguishes published aggregate tables from per-instance labels, which is the difference between what a reuser can see and what the study holds."
+          "evidence": "subpopulations: four entries covering race/ethnicity (380 Hispanic, 545 Asian, 519 Black, 836 White), sex (951 male, 1,329 female), diabetes status across four arms, and age (mean 60.8, SD 11.3); subpopulation_elements_present false where values are withheld",
+          "quality_note": "Distributions given as counts that reconcile to 2,280 on every axis, with an explicit statement that these are aggregate README tables and not per-instance labels in the public release."
         },
         {
           "name": "Number of Instances or Samples Reported",
           "score": 1,
-          "evidence": "instances: instance_type 'individual study participant', counts 2280; total_file_count 356343; total_size_bytes 3815969779678; subsets: three entries with is_data_split true and counts 1576, 352 and 352; file_collections give per-directory file_count and total_bytes; the enrollment target of 4,000 is recorded separately in purposes",
-          "quality_note": "Participant, file and byte counts at dataset and directory level, plus split sizes. The split counts sum to the participant total and the directory file counts reconcile to total_file_count with the nine root metadata files, so the composition block is arithmetically closed."
+          "evidence": "instances.counts: 2280; total_file_count: 356343; total_size_bytes: 3815969779678; three `subsets` with is_data_split true and counts 1576 / 352 / 352",
+          "quality_note": "Participant, file and byte counts all present, and the split counts sum exactly to the participant total."
         },
         {
           "name": "Variable-Level Metadata and Tabular Flag",
           "score": 1,
-          "evidence": "is_tabular: false; variables: twenty-one entries with variable_name, data_type, unit, categories, maximum_value, measurement_technique and quality_notes as applicable; file_collections distinguishes the tabular clinical_data directory (seven OMOP-mapped CSVs) from the imaging and waveform directories",
-          "quality_note": "The tabular flag is semantically correct for a multimodal release dominated by DICOM and waveform files, and it does not contradict the presence of tabular components, which are localised to one file collection."
+          "evidence": "variables: 18 entries; is_tabular: false",
+          "quality_note": "The tabular flag is correct for an imaging- and signal-dominated release, and the variable entries carry data types, units and measurement techniques."
         },
         {
           "name": "Data Topics or Conditions Represented",
           "score": 1,
-          "evidence": "instances[0].data_topic: B2AI_TOPIC:43; instances[0].notes: each instance is all data for one participant spanning tabular, imaging and physiological signal data with no unstructured free text; description and subpopulations give the condition coverage from no diabetes through pre-diabetes to insulin-dependent T2DM; known_limitations records that pregnancy, gestational diabetes and type 1 diabetes were excluded",
-          "quality_note": "The topic is carried as an ontology CURIE rather than free text, and the clinical range covered is stated as a severity spectrum with its exclusions, which is what a reuser needs to judge fit."
+          "evidence": "instances.data_topic: B2AI_TOPIC:43; instance_type: individual study participant; description enumerating survey, laboratory, physical, vision, cognitive, ECG, retinal imaging, CGM, wearable and environmental domains",
+          "quality_note": "A coded topic CURIE plus a full modality enumeration; the diabetes-status arms in `subpopulations` give the condition breakdown."
         },
         {
           "name": "Data Quality Issues and Anomalies Documented",
           "score": 1,
-          "evidence": "anomalies: three entries covering survey skips and incomplete responses, wearable battery and malfunction gaps with the specific two-to-three-day Garmin charging interval, and imaging problems including undilated handheld Optomed variability, operator-dependent Spectralis acquisition and FLIO's one-centimetre movement tolerance with its end-of-visit compliance effect; sampling_strategies documents non-probability wave-based recruitment; missing_data_documentation gives patterns, causes and the no-imputation handling strategy",
-          "quality_note": "Anomalies are mechanism-level rather than generic, and each is tied to the device or protocol that produces it. Missing data is separated into pattern, cause and handling, and the record states plainly that no imputation was applied."
+          "evidence": "anomalies: three entries covering survey skips, wearable battery gaps and imaging quality; sampling_strategies with why_not_representative; missing_data_documentation with patterns, causes and handling_strategy stating that no imputation was applied",
+          "quality_note": "All three named field groups are populated, with device-specific causes such as the Garmin recharge interval and FLIO motion sensitivity."
         }
       ],
       "element_score": 5,
@@ -344,46 +347,46 @@
           "name": "Dataset Version Number Provided",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets shared condition met: distribution_formats populated, page and access route published, third_party_sharing.is_shared true, license grants reuse",
+          "applicability_evidence": "Datasets shared condition met (distribution_formats, resolvable page and access endpoint, third_party_sharing.is_shared true).",
           "score": 1,
-          "evidence": "version: '3.0.0'; citation carries '(3.0.0)'; description opens with 'Version 3.0.0'; version_access.latest_version_doi: doi:10.60775/fairhub.3; distribution_dates records the 2025-11-17 release of this version",
-          "quality_note": "A semantic version quoted as a string and repeated consistently across the record, citation and version chain with no drift."
+          "evidence": "version: \"3.0.0\"",
+          "quality_note": "Semantic version, quoted, and repeated consistently in the description, citation and distribution date."
         },
         {
           "name": "Version Access Methods Documented",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets shared condition met (see sub-element 1)",
+          "applicability_evidence": "Same datasets shared condition.",
           "score": 1,
-          "evidence": "version_access.versions_available: '1.0.0 (DOI 10.60775/fairhub.1, 3 May 2024), 2.0.0 (DOI 10.60775/fairhub.2, 8 November 2024) and 3.0.0 (DOI 10.60775/fairhub.3, 17 November 2025)'; version_details: each version carries its own DOI and its own documentation set at docs.aireadi.org selectable from a version dropdown, with version 2.0.0 marked as no longer accessible",
-          "quality_note": "Per-version DOIs, release dates, documentation routes and accessibility status. The note that v2.0.0 is no longer retrievable is actionable, since it tells a reuser that a cited prior version cannot be re-obtained."
+          "evidence": "version_access.versions_available listing 1.0.0 (10.60775/fairhub.1, 3 May 2024), 2.0.0 (10.60775/fairhub.2, 8 November 2024) and 3.0.0 (17 November 2025); latest_version_doi; version_details describing per-version documentation sets and a version dropdown, and noting that 2.0.0 is no longer accessible",
+          "quality_note": "Each version is addressable by its own DOI, and the availability status of the superseded version is stated rather than assumed."
         },
         {
           "name": "Change Descriptions and Errata Provided",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets shared condition met (see sub-element 1)",
+          "applicability_evidence": "Same datasets shared condition.",
           "score": 1,
-          "evidence": "updates.update_details: 'Changes between versions are recorded in detail in the CHANGELOG file included in the dataset and mirrored at docs.aireadi.org'; preprocessing_strategies notes the CHANGELOG summary table recording that v1.0.0 used custom ad hoc processing while the year 2, year 3 and v3.0.0 releases used automated plus custom processing; known_limitations.integration_limitation records that Snellen visual acuity variables were dropped in v3.0.0 leaving only logMAR; splits records that the recommended assignment was introduced with v3.0.0; related_datasets gives per-version participant counts (204, then 1,067)",
-          "quality_note": "Concrete, version-attributed changes plus a changelog pointer, with one change (the Snellen drop) stated as a breaking one for cross-version analyses. The dedicated errata slot is unused, but the substance is distributed across four slots rather than missing."
+          "evidence": "updates.update_details: 'Changes between versions are recorded in detail in the CHANGELOG file included in the dataset and mirrored at docs.aireadi.org'; known_limitations integration_limitation: 'Snellen visual acuity variables were dropped in version 3.0.0'; splits noting the train/validation/test assignment was introduced with 3.0.0; preprocessing note that v1.0.0 was ad hoc while later releases were automated plus custom",
+          "quality_note": "Substantive change content is present at three points, not merely a pointer to a changelog. No dedicated `errata` slot, which the rubric does not require where the change record is otherwise documented."
         },
         {
           "name": "Update Schedule or Frequency Indicated",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets shared condition met (see sub-element 1)",
+          "applicability_evidence": "Same datasets shared condition.",
           "score": 1,
-          "evidence": "updates.frequency: 'approximately annually'; update_details: released as static versions, never updated in place, with new versions adding participants enrolled since the previous release and further versions expected because enrollment is ongoing; extension_mechanism records that no external contribution route exists",
-          "quality_note": "Cadence plus the versioning policy that makes the cadence meaningful, matching the observed 2024-05, 2024-11 and 2025-11 releases and consistent with the ongoing enrollment toward 4,000 participants."
+          "evidence": "updates.frequency: approximately annually; update_details: 'released as static versions and is not updated in place; instead new versions are released with additional data ... Further versions are expected because enrollment is ongoing'",
+          "quality_note": "A frequency plus the release model that explains it, and the reason further versions are expected."
         },
         {
           "name": "Provenance and Source Derivation Documented",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets shared condition met (see sub-element 1)",
+          "applicability_evidence": "Same datasets shared condition.",
           "score": 1,
-          "evidence": "raw_sources.raw_data_details: raw exports from the collection devices and from REDCap are retained and expected to be preserved for the project's duration but are not shared, because they are unmapped to standardized terminologies and may contain PHI or PII in free-text fields, with possible future inclusion in the controlled-access release; preprocessing_strategies names the device-native formats converted (.fda and .sdt to DICOM, .FIT to Open mHealth, ECG XML, MoCA CSV); direct_collection describes the EHR ICD-10 screening that identified the recruitment pool; related_datasets carries the is_new_version_of lineage",
-          "quality_note": "Raw inputs, their retention policy, the reason they are withheld, the conversions applied and the recruitment-only role of the EHR are all documented. Weaker than a per-source enumeration: was_derived_from, release_notes and a typed raw_data_sources list are unused, so the raw-to-released mapping must be assembled from three slots."
+          "evidence": "raw_sources.raw_data_details: raw device and REDCap exports retained by the project, not shared, because they are unmapped and may carry PHI in free-text fields; preprocessing_strategies describing the conversion from device-native .fda, .sdt, .FIT and XML exports; related_datasets typing the two predecessor versions",
+          "quality_note": "The derivation chain from raw device export to standardised release is traceable, and the reason the raw layer is withheld is stated. No `was_derived_from` or `release_notes` slot, which the populated `raw_data_sources` content covers."
         }
       ],
       "element_score": 5,
@@ -397,32 +400,32 @@
         {
           "name": "Motivation or Purpose for Dataset Creation",
           "score": 1,
-          "evidence": "purposes: three entries covering the creation of an ethically sourced AI-ready multimodal T2DM dataset supporting salutogenesis research, the establishment of standards and best practices as a blueprint for future data-generation projects including the Clinical Dataset Structure, and the assembly of a cohort balanced across race/ethnicity, sex and disease stage against a 4,000-participant target; addressing_gaps: three entries naming the absence of AI-ready multimodal datasets for multi-organ disease, the under-representation of racialized groups evidenced by a 2000-2020 meta-epidemiological review, and the limited downstream utility of claims and EHR data",
-          "quality_note": "Motivation is stated as three distinct goals and paired with three named gaps, one of them supported by a specific literature finding rather than an assertion. The standards-blueprint purpose explains a design choice (CDS) that appears elsewhere in the record."
+          "evidence": "purposes: three responses covering the AI-ready multimodal T2DM resource, the blueprint and standards role, and the demographically balanced cohort; addressing_gaps: three responses naming the absence of AI-ready multimodal data, under-representation of racialized groups, and the limits of claims and EHR data",
+          "quality_note": "Motivation and the research gap are documented separately, and the gap statements cite the evidence base (a 2000-2020 meta-epidemiological review)."
         },
         {
           "name": "Primary Research Objectives or Tasks",
           "score": 1,
-          "evidence": "tasks: downstream pseudotime manifold analysis to predict disease trajectories from multimodal data spanning normal to insulin-dependent T2DM, and reconstruction of a temporal atlas of type 2 diabetes development and reversal toward health from a foundational dataset agnostic to existing classification criteria",
-          "quality_note": "Two specific analytical objectives naming the method and the target inference, not generic 'machine learning research'. Both are coherent with the label-free, severity-spanning design the composition block describes."
+          "evidence": "tasks: pseudotime manifold analysis to predict disease trajectories; reconstruction of a temporal atlas of type 2 diabetes development and reversal towards health",
+          "quality_note": "Named analytical approaches rather than generic 'machine learning', and consistent with the hypothesis-agnostic, unlabelled design stated elsewhere."
         },
         {
           "name": "Funding Sources and Mechanisms Listed",
           "score": 1,
-          "evidence": "funders: National Institutes of Health with three grants, the first annotated as 'Bridge2AI: Salutogenesis Data Generation Project, awarded through the NIH Common Fund Bridge2AI program'; Research to Prevent Blindness, named from the BMJ Open protocol funding statement; participant_compensation attributes the $200 stipend to award OT2OD032644; data_collectors record that site staff effort was supported by the same award",
-          "quality_note": "Agency, funding program and mechanism are all named, and the funding is traced through to two concrete expenditures (participant stipends and site staff effort) rather than left as an acknowledgement line."
+          "evidence": "funders: National Institutes of Health (with the Common Fund Bridge2AI programme named) and Research to Prevent Blindness",
+          "quality_note": "Agency and programme are both identified, and the source of each attribution is stated."
         },
         {
           "name": "Grant IDs or Award Numbers Present",
           "score": 1,
-          "evidence": "funders[0].grants: grant_number OT2OD032644, P30DK035816 and UL1TR003096; source_caveats records that FAIRhub links OT2OD032644 to RePORTER project 10885481 while the RO-Crate and RePORTER link the same core project to application 10471118 (1OT2OD032644-01), and that the two grant-number spellings 'P30 DK035816' and 'P30DK035816' come from different publications",
-          "quality_note": "All three match NIH patterns: an OT2 Other Transaction through the Office of the Director, an NIDDK P30 center grant and an NCATS UL1 CTSA. The record distinguishes the core project number from the application-specific form rather than recording them as separate awards."
+          "evidence": "grant_number: OT2OD032644 (with the RO-Crate form 1OT2OD032644 noted), P30DK035816, UL1TR003096",
+          "quality_note": "All three follow NIH activity-code-plus-institute patterns: OT2/OD, P30/DK, UL1/TR. The record also resolves a formatting disagreement between sources over 'P30 DK035816' and reconciles two RePORTER application numbers for the same core project."
         },
         {
           "name": "Creators and Acknowledgements Documented",
           "score": 1,
-          "evidence": "creators: AI-READI Consortium with nameType Organizational, principal_investigator Aaron Lee (ORCID:0000-0002-7452-1648, contact@aireadi.org) with two affiliations and a caveat explaining why both are recorded; created_by: AI-READI Consortium; data_collectors: three named site teams with roles and the composition of site staff; maintainers: the consortium with hosting and contact details; ethical_reviews names four ethics reviewers; funders carry the acknowledgement attributions",
-          "quality_note": "Creator, PI with a resolvable ORCID, collecting teams, maintainers and named ethics reviewers. The creator entry explains why no affiliations are asserted for the consortium itself, distinguishing sponsors and collaborators from affiliations of the creator, which is a real modelling distinction rather than an omission."
+          "evidence": "creators: AI-READI Consortium with principal_investigator Aaron Lee (ORCID:0000-0002-7452-1648) and two recorded affiliations; data_collectors for the three sites; maintainers; funders with acknowledgement text",
+          "quality_note": "Creator, PI with a resolvable ORCID, site teams and maintainer are all identified, and the affiliation disagreement between two equally ranked sources is carried rather than silently resolved."
         }
       ],
       "element_score": 5,
@@ -437,49 +440,49 @@
           "name": "Collection Mechanisms and Settings Described",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Data collection identified: acquisition_methods and collection_mechanisms are populated with twenty device and procedure entries; datasets shared condition met via distribution_formats, the published access route and third_party_sharing.is_shared true",
+          "applicability_evidence": "Data collection identified (`acquisition_methods` and `collection_mechanisms` populated) and the datasets shared condition met (distribution_formats, resolvable access endpoint, third_party_sharing.is_shared true).",
           "score": 1,
-          "evidence": "collection_mechanisms: twenty entries with manufacturer, model, location and protocol, including REDCap for e-consent and coordinator entry, Optomed Aurora IQ at 50 degrees undilated in a dark room, iCare EIDON to 200 degrees in automated mode, Heidelberg Spectralis with three named scan protocols, Topcon Maestro2 at 50 kHz with three scan sizes, Topcon Triton with a 1,050 nm source, Zeiss Cirrus 5000 AngioPlex with named montages, Heidelberg FLIO performed last for comfort reasons, Philips PageWriter TC30 with the chair angle recorded, Dexcom G6 sampling every five minutes for ten days, Garmin Vivosmart 5 at five-second sampling with wrist recorded, the LeeLab Anura placement protocol, M&S EVA at four meters, Mars contrast sensitivity with luminance and illuminance ranges and a fixed eye order, site-varying lensometers and blood pressure devices, MoCA Duo on iPad, monofilament testing at three sites per foot, and CLIA laboratory logistics with quarterly dry-ice batch shipping",
-          "quality_note": "Replication-grade: devices, settings, durations, ordering, environmental conditions and specimen logistics. Where equipment varies by site the record says so, which is what makes the measurement_bias entry in Element 9 checkable."
+          "evidence": "collection_mechanisms: twenty entries, e.g. 'Heidelberg Spectralis HRA+OCT (Heidelberg Engineering, Heidelberg, Germany) ... protocols are optic nerve head radial circle high resolution, posterior pole macula 61-line high resolution, and 20x20 macular OCTA'; collection_timeframes 2023-07-19 to 2025-05-01",
+          "quality_note": "Manufacturer, model, location, acquisition protocol and room conditions are given per instrument, with the timeframe and its source disagreement recorded."
         },
         {
           "name": "Data Acquisition Methods Listed",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Same collection and sharing signals as sub-element 1",
+          "applicability_evidence": "Same condition as sub-element 1.",
           "score": 1,
-          "evidence": "acquisition_methods: two entries with typed flags. was_directly_observed true for laboratory tests, vital signs, vision testing, retinal imaging, 12-lead ECG, monofilament testing, CGM, wearable activity and home environmental sensing; was_reported_by_subjects and was_validated_verified true for REDCap survey responses, with the verification example of cross-referencing entered medications against medications physically brought in or photographed; direct_collection.is_direct true with the EHR ICD-10 screening and mailed/emailed invitation route; raw_sources names the device and REDCap exports",
-          "quality_note": "Acquisition modes are distinguished by the schema's own flags rather than described only in prose, and the validation flag is supported by a concrete verification procedure rather than asserted."
+          "evidence": "acquisition_methods: was_directly_observed true for laboratory, vital-sign, vision, imaging, ECG, monofilament, CGM, wearable and environmental data; was_reported_by_subjects with was_validated_verified true for REDCap questionnaire responses, verified by cross-referencing medications physically brought in; raw_sources describing the retained device and REDCap exports",
+          "quality_note": "Both named fields populated, with the observation/self-report split flagged structurally and a concrete verification procedure."
         },
         {
           "name": "Preprocessing, Cleaning, Labeling, and Annotation Quality",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Software-output condition met: external_resources (E10) references the code repository 'GitHub organization of the AI-READI project, https://github.com/AI-READI'; purposes (E7) additionally identify the production of standards and best practices, including the Clinical Dataset Structure, as a project output",
+          "applicability_evidence": "Borderline condition resolved to applicable under the ambiguity rule: `external_resources` (E10) carries a code-hosting pointer, https://github.com/AI-READI, and `purposes` (E7) identifies the production of standards including the Clinical Dataset Structure as a project output. Neither is unambiguous, so the default is applicable and scored.",
           "score": 1,
-          "evidence": "preprocessing_strategies: mapping to OMOP CDM, DICOM, WFDB and Open mHealth; conversion of Topcon .fda and Heidelberg .sdt to DICOM and Garmin .FIT to Open mHealth, with ECG exported as XML and MoCA as CSV; v3.0.0 produced by combined automated and custom processing, with the CHANGELOG's processing-evolution table noted. cleaning_strategies: REDCap range flags and reports reviewed by coordinators and data managers, checks for credibility, skip-pattern flow, fillable missing values and record omission or duplication, editing only under site PI approval with PI-decided removal where no correction exists, per-site data-manager responsibility before upload, and a central review confirming no PII was included. missing_data_documentation.handling_strategy: no imputation applied. instances.label_description: no labels or targets, because the dataset is hypothesis-agnostic",
-          "quality_note": "The pipeline is specific at the format level and the QC regime names who decides what at each step. Labeling and annotation slots are unused, but the record explains that absence as a design choice with its rationale rather than leaving it silent, and states plainly that no imputation was performed."
+          "evidence": "preprocessing_strategies: mapping to OMOP CDM, DICOM, WFDB and Open mHealth; conversion of .fda and .sdt exports to DICOM and .FIT exports to Open mHealth; cleaning_strategies: REDCap range flagging, skip-pattern checks, duplicate detection, editing only under site PI approval, and a site data manager responsible for QC before upload; instances.label false with label_description explaining that no labeling was performed because the dataset is hypothesis-agnostic; missing_data_documentation.handling_strategy stating no imputation",
+          "quality_note": "Preprocessing, cleaning, labeling and imputation are each answered substantively, including two explicit negatives (no labeling, no imputation) with reasons."
         },
         {
           "name": "Software and Tools Documented",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Software-output condition met: external_resources (E10) references https://github.com/AI-READI as the project code repository",
-          "score": 1,
-          "evidence": "The software_and_tools slot is absent. Tools are named across other slots: REDCap for e-consent, questionnaire capture and coordinator entry; the MoCA Duo iPad application; the OMOP CDM Data Quality Dashboard supported by the dqd_omop.json file in clinical_data; the AI-READI GitHub organisation at https://github.com/AI-READI; the Zenodo community; and FAIRhub as a curation and sharing platform running on Microsoft Azure",
-          "quality_note": "The tooling is identifiable and the code organisation is linked, so a reuser can find it. Flagged low: the dedicated slot is empty, no version is given for any tool, and the .fda/.sdt/.FIT conversion software is described only by its effect."
+          "applicability_evidence": "Same borderline condition as sub-element 3, resolved to applicable under the ambiguity rule.",
+          "score": 0,
+          "evidence": "No `software_and_tools` slot; no `machine_annotation_tools`; `preprocessing_strategies` entries carry only `preprocessing_details` prose naming target formats ('converted to DICOM', 'converted to the mHealth standard', 'a combination of automated and custom processing') and no tool; the only code-hosting pointer in `external_resources` is 'GitHub organization of the AI-READI project, https://github.com/AI-READI'",
+          "quality_note": "No tooling slot carries the evidence, which is what takes the point. Applying the quoted threshold verbatim: github.com/AI-READI is an organisation root that identifies the publisher of the code, not the software that produced the release, so it scores 0; the Zenodo community root is likewise a container rather than an archived release. The software named elsewhere is incidental to slots about other things - REDCap and the MoCA Duo application inside collection mechanisms, the OMOP Data Quality Dashboard file inside a file-collection description, FAIRhub and Microsoft Azure inside the maintainer entry - which the threshold scores 0. A reader cannot tell from this record what software produced version 3.0.0."
         },
         {
           "name": "External Standards and Resources Referenced",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets shared condition met: distribution_formats populated, access route published, third_party_sharing.is_shared true",
+          "applicability_evidence": "Datasets shared condition met.",
           "score": 1,
-          "evidence": "external_resources: eight entries including the CDS v0.1.1 specification at a version-pinned URL, both associated publications with DOIs, the documentation site with its CC-BY 4.0 licence, the project site, GitHub and Zenodo; conforms_to and conforms_to_standard name CDS, RO-Crate 1.2 draft, DICOM, OMOP CDM, WFDB, Open mHealth and NASA ESDS; human_subject_research records the ClinicalTrials.gov registration NCT06002048; regulatory_restrictions cites the NIH GDS Policy security best practices",
-          "quality_note": "Standards documents, publications, a trial registration and a policy document, all identified by resolvable URLs, DOIs or registry identifiers, and each format standard tied to the file collection it governs."
+          "evidence": "external_resources: BMJ Open protocol (10.1136/bmjopen-2024-097449), Nature Metabolism comment (10.1038/s42255-024-01165-x), CDS specification v0.1.1 at cds-specification.readthedocs.io, docs.aireadi.org; conforms_to naming seven standards",
+          "quality_note": "Two peer-reviewed publications with resolvable DOIs, the governing specification at a pinned version, and the documentation site with its own reuse licence."
         }
       ],
-      "element_score": 5,
+      "element_score": 4,
       "element_max": 5
     },
     {
@@ -490,32 +493,32 @@
         {
           "name": "Known Limitations Documented",
           "score": 1,
-          "evidence": "known_limitations: six typed entries. representativeness_limitation (predominantly urban hospital-based recruitment, no Pacific Islanders or Native Americans) with scope_impact; coverage_limitation (English-language eligibility, with the explanation that translating the consent form alone would not suffice) and a recommended_mitigation recording the project's Spanish-translation contingency; temporal_limitation (cross-sectional single visit, ten-day monitoring as the only longitudinal element, collection window part-way through a 4,000-participant program); scope_limitation (public release omits sex, race, ethnicity, medications, ZIP, genetics, health records and traffic reports; biospecimens held at UAB and out of scope) with scope_impact; methodological_limitation (no labels, no formal guidance for new labels); integration_limitation (Snellen acuity dropped in v3.0.0)",
-          "quality_note": "Six distinct limitation types, each with the mechanism behind it, and three carrying an explicit impact or mitigation. The scope and integration entries are actionable rather than descriptive: they tell a reuser what analyses are foreclosed and what breaks across versions."
+          "evidence": "known_limitations: six typed entries covering representativeness, coverage (English-language eligibility), temporal (cross-sectional, single visit), scope (withheld variables and biospecimens), methodological (no labels) and integration (Snellen variables dropped)",
+          "quality_note": "Each entry carries a limitation_type and most carry a scope_impact or recommended_mitigation, so the consequence for a reuser is stated rather than left implicit."
         },
         {
-          "name": "Biases Categorized Using Standard Taxonomy",
+          "name": "Biases Categorized Using Standard Taxonomy (RAI-aligned)",
           "score": 1,
-          "evidence": "known_biases: three entries using BiasTypeEnum values. selection_bias (volunteer cohort limiting generalizability, with the record noting the protocol describes no measure taken against it) mitigated by three-site geographic and demographic breadth; sampling_bias (interim releases may not have achieved balance) with affected_subsets naming v3.0.0 as a whole and contrasting the balanced validation and test partitions with the unbalanced training partition, mitigated by uniform protocols and site selection; measurement_bias (device make and model confounded with site for blood pressure, lensometry and retinal imaging) mitigated by documenting device and scan modality. future_use_impacts: no anticipated unfair-treatment uses but an acknowledged theoretical re-identification risk, and the downstream consequence that public-release users cannot stratify or audit across withheld demographics, mitigated by the balanced recommended split",
-          "quality_note": "Structured enum categorisation with a description, affected subsets and a mitigation strategy per bias, and a social-impact entry that names a real fairness cost of the record's own privacy design. The sampling_bias claim is verifiable against the record's own split tables."
+          "evidence": "known_biases: selection_bias, representation_bias, sampling_bias and measurement_bias, three with mitigation_strategy and one with affected_subsets; future_use_impacts: two entries including the auditability consequence of withholding sex and race",
+          "quality_note": "Uses the schema's bias-type enumeration rather than free prose, and the measurement-bias entry identifies a real confound between device model and site."
         },
         {
           "name": "Data Anomalies and Quality Issues Noted",
           "score": 1,
-          "evidence": "anomalies: survey skips and incomplete responses; wearable improper use and technical failure with the specific Garmin two-to-three-day charging requirement producing gaps; imaging uncooperation, obscuring noise, malfunction and transfer failure, with per-device detail on Optomed handheld undilated variability, operator-dependent Spectralis acquisition leading to skipped modalities, and FLIO's one-centimetre movement tolerance compounded by its end-of-visit placement; variables carry per-measure quality_notes (MoCA education and mental-health confounders, logMAR and contrast-sensitivity direction of effect); missing_data_documentation gives patterns and causes",
-          "quality_note": "Anomalies are traced to the device or protocol that causes them, which makes them usable as filtering criteria rather than as a disclaimer. The FLIO entry connects a protocol ordering decision to an expected quality consequence."
+          "evidence": "anomalies: survey skips and incomplete responses; wearable battery failure with the Garmin two-to-three-day recharge interval; imaging noise, operator dependence and FLIO's one-centimetre motion tolerance",
+          "quality_note": "Device- and modality-specific rather than generic, and consistent with the missing-data causes recorded separately."
         },
         {
           "name": "Sensitive Content and Warnings Provided",
           "score": 1,
-          "evidence": "sensitive_elements: sensitive_elements_present true, with the RO-Crate's enumerated categories (electronic health record data, wearable monitoring, ECG, environmental sensor data, CGM data, wearable accelerometer data) and a source_caveat recording that the FAIRhub healthsheet takes the opposite position, locating race/ethnicity, ZIP, genetics, health records, medications and traffic reports in the controlled-access release instead; confidential_elements: confidential_elements_present false with the RO-Crate's HL7:2N confidentiality level; prohibited_uses warns against re-identification, contact and group-membership inference",
-          "quality_note": "Sensitive categories are enumerated rather than asserted, and the direct disagreement between two tier-1 sources on whether the release contains sensitive data is recorded with both positions rather than silently resolved. No content_warnings slot, which is appropriate for a clinical measurement dataset with no free text."
+          "evidence": "sensitive_elements: sensitive_elements_present true, enumerating EHR, wearable monitoring, ECG, environmental sensor, CGM and accelerometer categories; confidential_elements: present false with the HL7:2N confidentiality level; the source_caveat recording that the healthsheet takes the opposite position",
+          "quality_note": "Both slots answered, and the disagreement between the RO-Crate and the healthsheet is carried openly rather than resolved by picking the convenient side."
         },
         {
           "name": "Ethical Review Details Including Conflicts",
           "score": 1,
-          "evidence": "ethical_reviews: reviewing_organization University of Washington Institutional Review Board with protocol STUDY00016228, initial approval 20 December 2022, the approval letter published alongside the documentation, reliance agreements for UAB and UCSD, and the IRB Reliance Team contact; a second entry names Camille Nebeker, Debra Mathews, Kadija Ferryman and Nicholas Evans as responsible for ethical review of the release and records that ELSI considerations run through every stage of the project cycle with bioethicist guidance on the standards work; source_caveats records the RO-Crate's mislabelling of the reviewing body",
-          "quality_note": "Reviewing body, protocol identifier, dates, reliance structure, published approval letter and four named ethics reviewers. Flagged low: no conflict-of-interest statement appears anywhere in the record, which is the half of this sub-element left unaddressed."
+          "evidence": "ethical_reviews: 'University of Washington Institutional Review Board ... Protocol STUDY00016228, initially approved 20 December 2022, with the initial approval letter published alongside the dataset documentation'; reliance agreements; the four named ethics reviewers Camille Nebeker, Debra Mathews, Kadija Ferryman and Nicholas Evans",
+          "quality_note": "Reviewing organisation, protocol, date, reliance structure, published approval letter and named reviewers. No conflict-of-interest statement appears anywhere in the record, which is logged as a low-severity gap; the review documentation itself is complete and specific."
         }
       ],
       "element_score": 5,
@@ -530,46 +533,46 @@
           "name": "Dataset Published on a Recognized Platform",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets shared condition met: distribution_formats populated, page https://fairhub.io/datasets/3 and the access route published, third_party_sharing.is_shared true",
+          "applicability_evidence": "Datasets shared condition met (distribution_formats, resolvable page and access endpoint, third_party_sharing.is_shared true).",
           "score": 1,
-          "evidence": "publisher: https://fairhub.io/; page: https://fairhub.io/datasets/3; citation ends '[Data set]. FAIRhub. https://doi.org/10.60775/fairhub.3'; maintainers records hosting on FAIRhub running on Microsoft Azure, developed for this project as a cloud-based data management, curation and sharing platform; data_governance gives the FAIRhub access route and access type",
-          "quality_note": "The Bridge2AI repository is asserted in the publisher slot and corroborated by the citation, landing page and hosting description. Flagged low: the slot carries a URL rather than the publisher name, a uriorcurie range artefact the record declares, and the RO-Crate's competing 'AI-READI Consortium' publisherName is recorded in source_caveats."
+          "evidence": "publisher: https://fairhub.io/; page: https://fairhub.io/datasets/3; maintainers describing FAIRhub as an Azure-hosted curation and sharing platform built for the project; external_resources naming the Zenodo community",
+          "quality_note": "FAIRhub is a recognised health-data repository and the DOI prefix corroborates it. The record notes that the RO-Crate names the AI-READI Consortium as publisher instead, and states which source it followed."
         },
         {
           "name": "Citation and DOI for Cross-referencing",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Publication identified: external_resources references the Nature Metabolism comment (10.1038/s42255-024-01165-x) and the BMJ Open protocol (10.1136/bmjopen-2024-097449); datasets shared condition met (see sub-element 1)",
+          "applicability_evidence": "Publication identified in `external_resources` (BMJ Open 2025;15:e097449 and Nature Metabolism 6:2210-2212, both with DOIs) and the datasets shared condition met.",
           "score": 1,
-          "evidence": "citation: 'AI-READI Consortium. (2025). Flagship Dataset of Type 2 Diabetes from the AI-READI Project (3.0.0) [Data set]. FAIRhub. https://doi.org/10.60775/fairhub.3'; doi: 10.60775/fairhub.3; version_access.latest_version_doi and the prior-version DOIs; the two publication DOIs in external_resources",
-          "quality_note": "A complete recommended citation carrying creator, year, title, version, repository and resolvable DOI, agreeing with the id, doi and version slots, and paired with both associated publication DOIs for cross-referencing."
+          "evidence": "citation: 'AI-READI Consortium. (2025). Flagship Dataset of Type 2 Diabetes from the AI-READI Project (3.0.0) [Data set]. FAIRhub. https://doi.org/10.60775/fairhub.3'; doi: 10.60775/fairhub.3",
+          "quality_note": "A complete DataCite-style citation with creator, year, title, version, repository and resolvable DOI."
         },
         {
           "name": "Community Standards or Schema Conformance",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets shared condition met (see sub-element 1)",
+          "applicability_evidence": "Datasets shared condition met.",
           "score": 1,
-          "evidence": "conforms_to: CDS v0.1.1 plus RO-Crate 1.2 draft packaging with the per-modality standards enumerated; conforms_to_standard: [CDS, RO_CRATE, DICOM, OMOP_CDM, WFDB, OPEN_MHEALTH, ESDS]; conforms_to_schema: https://w3id.org/bridge2ai/data-sheets-schema; conforms_to_class: Dataset; every file_collection repeats its own conforms_to and conforms_to_standard",
-          "quality_note": "Broad and internally consistent standards alignment: seven community standards at dataset level, each mirrored on the collections it governs, plus the datasheet schema and class the record itself conforms to."
+          "evidence": "conforms_to_standard: [CDS, RO_CRATE, DICOM, OMOP_CDM, WFDB, OPEN_MHEALTH, ESDS]; conforms_to prose binding each standard to the data it governs; per-collection conforms_to on all ten file collections",
+          "quality_note": "Seven community standards declared at dataset level and repeated at collection level, including OMOP and DICOM which the rubric names explicitly."
         },
         {
           "name": "Outreach Materials and Documentation Links",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets shared condition met (see sub-element 1)",
+          "applicability_evidence": "Datasets shared condition met.",
           "score": 1,
-          "evidence": "external_resources: docs.aireadi.org with the version-specific 'Dataset v3.0.0' pointer, described as the resource users need for provenance, data domains, variables, file formats, standards and example outputs, shared under CC-BY 4.0; aireadi.org with the team roster and contact pages; github.com/AI-READI; the Zenodo community; the CDS specification; page: https://fairhub.io/datasets/3; informed_consent links the published consent form PDF; maintainers points to the README and contact@aireadi.org",
-          "quality_note": "Documentation, code, community and contact routes are all linked and the documentation entry states both what it covers and its reuse licence. No webinars, tutorials or training materials are named."
+          "evidence": "external_resources: docs.aireadi.org with a note that the dataset relies on it for provenance, data domains, variables, formats and example outputs; aireadi.org with team and contact pages; the CDS specification; page and access URLs",
+          "quality_note": "A documentation site pinned to this version, a project site with contact routes, and the documentation's own CC-BY 4.0 licence stated."
         },
         {
           "name": "Related Datasets with Typed Relationships",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets shared condition met (see sub-element 1)",
+          "applicability_evidence": "Datasets shared condition met.",
           "score": 1,
-          "evidence": "related_datasets: is_new_version_of 10.60775/fairhub.2 with its participant count and accessibility status; is_new_version_of 10.60775/fairhub.1 with its pilot provenance; is_source_of the AI-READI mini-subset recorded as FAIRhub child dataset 4 and used for pipeline development; is_supplemented_by the controlled-access release with an enumeration of the attributes it holds and the data-use-agreement route to it",
-          "quality_note": "Four relationships using typed relationship_type values, two resolving to DOIs and two named in prose with the record stating explicitly that the sources give no identifier. The two associated publications are carried in external_resources rather than as typed is_described_by relations, which is a defensible but less machine-actionable placement."
+          "evidence": "related_datasets: is_new_version_of 10.60775/fairhub.2, is_new_version_of 10.60775/fairhub.1, is_source_of the AI-READI mini-subset, is_supplemented_by the controlled-access release",
+          "quality_note": "Four relationships, three distinct types, two with resolvable DOI targets; for the two without identifiers the record states that none exist in the declared sources rather than inventing one."
         }
       ],
       "element_score": 5,
@@ -578,39 +581,31 @@
   ],
   "assessment": {
     "strengths": [
-      "Arithmetic integrity across the whole composition block. The four subpopulation breakdowns each sum to 2,280, the three recommended splits sum to 2,280, each split's internal breakdowns sum to its own count, and all ten demographic and clinical groups reconstruct exactly across the three splits. The nine data-type file counts sum to 356,334 and the residual of 9 against total_file_count matches the nine named root metadata files, an arithmetic the record performs openly and labels as its own computation. The nine directory byte totals sum to 419,614 bytes under total_size_bytes, consistent with those unsized root files, and the record makes no size claim it cannot support.",
-      "Source disagreement is carried rather than smoothed over. Nine separate source_caveats record tier-1 conflicts on the acronym expansion, the lead institution, the publisher, the collection start date, the license name, the sampling design, the sensitivity of the release, the de-identification method and the reviewing IRB, each stating which position was followed and why. Where the ranking cannot decide, both positions are recorded.",
-      "Replication-grade collection documentation: twenty collection_mechanisms entries naming manufacturer, model, city, scan protocol, field of view, sampling interval, luminance and illuminance ranges, testing order and specimen shipping logistics, including the site-varying blood pressure monitors and lensometers that the measurement_bias entry then identifies as confounded with site.",
-      "Ethics and privacy documentation is complete and mutually reinforcing. IRB protocol number, approval date, reliance structure and board contact; written and electronic consent with a published consent-form URL, scope and withdrawal terms; enumerated vulnerable-population exclusions; $200 compensation with its funding source, ancillary support and payment timing; and a re-identification risk assessment whose three deterrents appear identically in four slots without drift.",
-      "Explicit negative answers are distinguished from omissions. The record states that no data protection impact analysis was conducted and that no external extension mechanism exists, in both cases noting that the project's own datasheet records this as a declared 'No' rather than a gap, which is the semantically correct handling of a healthsheet answer.",
-      "The record's privacy design and its fairness cost are both stated. Withheld attributes appear consistently across de-identification, subpopulations, limitations and the controlled-access relation, and future_use_impacts names the consequence that public-release users cannot audit models for disparities across those groups, with the balanced recommended split offered as the mitigation.",
-      "Scope is declared and enforced. The description ends by excluding the banked biospecimens and the companion controlled-access release, and both then appear only as a typed related dataset and a scope_limitation rather than being absorbed into this dataset's composition."
+      "Source disagreements are carried rather than resolved silently: eight source_caveats blocks record the losing position alongside the recorded one, covering the acronym expansion, lead institution, publisher, licence name, collection start date, deidentification characterisation, sampling claim and sensitivity claim.",
+      "Internal arithmetic reconciles exactly on three independent axes: the ten file collections sum to the declared 356,343 files, the three recommended splits sum to 2,280 participants, and the race, sex and diabetes-status distributions each sum to 2,280.",
+      "Ethics documentation is complete across all five sub-elements, with IRB protocol STUDY00016228, its approval date and reliance structure, a named ethics review panel, a published consent form, withdrawal terms, per-category vulnerable-population answers and a $200 stipend traced to the funding award.",
+      "Collection is documented at instrument level across twenty mechanisms with manufacturer, model, city and acquisition protocol, which is enough for a reader to reason about device-model confounding, and the measurement-bias entry names that confound explicitly.",
+      "Explicit negatives are recorded as answers rather than left as gaps: no labels, no imputation, no DPIA, no external extension mechanism, no retention limit, and the deidentification techniques deliberately not applied."
     ],
     "weaknesses": [
-      "No retrieval path in the distribution block. The download_url slot is absent and, unlike the sibling 2026-09-01 replicate, distribution_formats carries no access_urls; the only access route is inside data_governance prose, so a consumer reading formats alone finds no way to obtain the files.",
-      "The software_and_tools slot is empty. REDCap, MoCA Duo, the OMOP Data Quality Dashboard, the AI-READI GitHub organisation and the FAIRhub/Azure hosting are recoverable from four other slots, but no version is given for any tool and the .fda/.sdt/.FIT conversion software is described only by its effect.",
-      "Two enum values sit against their sources. regulatory_restrictions.confidentiality_level is 'restricted' where the only sourced term is the RO-Crate's HL7:2N 'normal', and sampling_strategies.is_sample is false while the same entry describes non-probability wave-based recruitment. Both are declared in notes, but a machine consumer reading either boolean or enum alone is misled.",
-      "The de-identification method is triangulated rather than decided. Three sources give three characterisations (no identifiers collected, deidentified true, HIPAA Safe Harbor) and the record carries all three, so no single operative method can be read off the block.",
-      "No conflict-of-interest statement appears anywhere in the record, despite otherwise thorough ethical review documentation with four named reviewers.",
-      "Provenance is assembled rather than enumerated: was_derived_from, release_notes and a typed raw_data_sources list are all unused, so the raw-to-released mapping must be reconstructed from raw_sources, preprocessing_strategies and direct_collection.",
-      "Keyword coverage is thin at seven terms. Wearable activity monitoring, environmental sensing, OMOP and the Bridge2AI program are not tagged, so several distinguishing modalities are discoverable only from the description text.",
-      "Variables carry no ontology term identifiers, and the twenty-one entries are a representative selection rather than a complete data dictionary; encoding is not stated for any format."
+      "No slot documents the software that produced the release. Preprocessing is described as automated plus custom processing with format conversions, but no tool, version or repository is named, and the only code pointer is the organisation root github.com/AI-READI.",
+      "No `download_url` slot; retrieval is discoverable only through the landing page and an access URL buried in the governance block.",
+      "The recorded `confidentiality_level` of `restricted` contradicts the only sourced value (HL7:2N, normal) by the record's own admission, so a machine reading the coded field gets a different answer from the source.",
+      "No conflict-of-interest statement accompanies the otherwise complete ethical review documentation.",
+      "Two related datasets, the mini-subset and the controlled-access companion, are named only in prose because no identifier exists in the sources, which limits automated cross-referencing to those releases."
     ],
     "recommendations": [
-      "Carry the FAIRhub access URL in distribution_formats[].access_urls or a download_url slot so the retrieval path is machine-findable from the distribution block, not only from data_governance prose.",
-      "Populate software_and_tools with REDCap, MoCA Duo, the OMOP CDM Data Quality Dashboard, the format-conversion pipeline and the github.com/AI-READI repository, with versions where the sources give them.",
-      "Designate one de-identification characterisation as operative for the released bytes (no identifiers collected) and mark HIPAA Safe Harbor as a secondary-source description, keeping the disagreement in source_caveats.",
-      "Reconsider the two enum values that contradict their sources: either align confidentiality_level with the RO-Crate term and carry the access-gating rationale in notes, or record the source term verbatim alongside the substitution; and decide whether is_sample should follow the recruitment description rather than enrollment completeness.",
-      "Add a conflict-of-interest statement to ethical_reviews, or record its absence explicitly as the record already does for the data protection impact assessment.",
-      "Move the two associated publications into related_datasets as typed is_described_by relations, keeping them in external_resources, so the publication links are machine-actionable rather than prose.",
-      "Enumerate raw data sources per device in a typed raw_data_sources slot and add release_notes for the v3.0.0 changes now distributed across updates, preprocessing_strategies and known_limitations.",
-      "Extend keywords to cover wearable activity monitoring, environmental sensing, OMOP, multimodal data and the Bridge2AI program, and state character encoding alongside the format declarations."
+      "Add a `software_and_tools` block naming the specific AI-READI repositories, packages or archived releases that perform the .fda and .sdt to DICOM conversion, the .FIT to Open mHealth conversion and the OMOP mapping, with versions and per-repository URLs rather than the organisation root.",
+      "Populate `download_url` with the FAIRhub access endpoint so retrieval is reachable from the distribution block.",
+      "Carry the source's HL7 confidentiality term verbatim alongside the substituted enum value, or propose an enum extension that maps HL7 confidentiality codes, so the coded and sourced values cannot diverge.",
+      "Record a conflict-of-interest statement in `ethical_reviews`, or state explicitly that the sources declare none.",
+      "Watch for identifiers for the mini-subset and the controlled-access companion in future releases and convert the two prose targets in `related_datasets` to resolvable identifiers when they appear."
     ]
   },
   "metadata": {
-    "evaluator_id": "11bb4f38-d3f4-4cce-b412-ebe9b4235591",
-    "rubric_hash": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
-    "rubric_hash_of": ".claude/agents/d4d-rubric10-semantic.md",
-    "d4d_file_hash": "01e3ef504db5ba6f21691c35fd0aa322661dd48f6d864cb38e053591b9763936"
+    "evaluator_id": "598c2076-7430-4e38-bc7c-0b450b060e28",
+    "rubric_hash": "e5f8b6beced5f62f6cc4b3dcf45f6e8cb1431d84f4649227831ef8ecfbf28ab7",
+    "d4d_file_hash": "01e3ef504db5ba6f21691c35fd0aa322661dd48f6d864cb38e053591b9763936",
+    "independence_note": "No file under data/evaluation_llm/ was opened during this evaluation, per #1061. The only inputs read were the target datasheet and data/rubric/rubric10.txt (hashed, not read for calibration)."
   }
 }
