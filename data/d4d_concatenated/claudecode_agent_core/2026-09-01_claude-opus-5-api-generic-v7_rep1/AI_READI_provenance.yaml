@@ -900,8 +900,8 @@ review:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_review.yaml
       sha256: 37de592ba181d0201f5b4e326023ad69a0cc1dbe1bb324e0257709f88971043a
   recorded_by: d4d review check
-canonical:
-  criterion: full and core both validate against the current schema, then fewest review
+canonical_history:
+- criterion: full and core both validate against the current schema, then fewest review
     adverse verdicts (differences of at most 2 a tie), then most slots, then lowest
     label
   selected_from:
@@ -929,7 +929,10 @@ canonical:
   - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1
   - 2026-08-22c_claude-opus-5-api-generic-v5_rep2
   - 2026-08-20b_claude-opus-5-api-generic-v5_rep1
-canonical_history:
+  superseded_by:
+    label: 2026-09-04g_claude-opus-5-api-generic-v8_rep2
+    at: '2026-09-08T04:40:24+00:00'
+    by: d4d runs select
 - criterion: full and core both validate against the current schema, then fewest review
     adverse verdicts (differences of at most 2 a tie), then most slots, then lowest
     label
@@ -963,3 +966,7 @@ canonical_history:
     at: '2026-09-03T03:00:57+00:00'
     by: d4d runs select
     reason: re-selected
+canonical_superseded_by:
+  label: 2026-09-04g_claude-opus-5-api-generic-v8_rep2
+  at: '2026-09-08T04:40:24+00:00'
+  by: d4d runs select
