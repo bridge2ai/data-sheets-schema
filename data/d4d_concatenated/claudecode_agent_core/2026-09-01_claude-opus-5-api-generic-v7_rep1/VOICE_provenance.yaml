@@ -655,8 +655,8 @@ review:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_review.yaml
       sha256: 9d4e216e7837d361274ac4c0218e97c2b2efdcd136d82fd99880479cd9e21a25
   recorded_by: d4d review check
-canonical:
-  criterion: full and core both validate against the current schema, then fewest review
+canonical_history:
+- criterion: full and core both validate against the current schema, then fewest review
     adverse verdicts (differences of at most 2 a tie), then most slots, then lowest
     label
   selected_from:
@@ -684,7 +684,10 @@ canonical:
   - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
   - 2026-08-22c_claude-opus-5-api-generic-v5_rep2
   - 2026-08-20b_claude-opus-5-api-generic-v5_rep1
-canonical_history:
+  superseded_by:
+    label: 2026-09-04f_claude-opus-5-api-generic-v8_rep1
+    at: '2026-09-08T04:39:50+00:00'
+    by: d4d runs select
 - criterion: full and core both validate against the current schema, then fewest review
     adverse verdicts (differences of at most 2 a tie), then most slots, then lowest
     label
@@ -718,3 +721,7 @@ canonical_history:
     at: '2026-09-03T03:01:43+00:00'
     by: d4d runs select
     reason: re-selected
+canonical_superseded_by:
+  label: 2026-09-04f_claude-opus-5-api-generic-v8_rep1
+  at: '2026-09-08T04:39:50+00:00'
+  by: d4d runs select

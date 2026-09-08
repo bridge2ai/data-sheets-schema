@@ -648,6 +648,37 @@ canonical_history:
   - 2026-08-22c_claude-opus-5-api-generic-v5_rep3
   - 2026-08-20b_claude-opus-5-api-generic-v5_rep3
   superseded_by:
+    label: 2026-09-04f_claude-opus-5-api-generic-v8_rep2
+    at: '2026-09-08T04:40:07+00:00'
+    by: d4d runs select
+- criterion: full and core both validate against the current schema, then fewest review
+    adverse verdicts (differences of at most 2 a tie), then most slots, then lowest
+    label
+  selected_from:
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+    slots: 53
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 11
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+    slots: 48
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 11
+  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+    slots: 53
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 9
+  margin_over_runner_up: 0
+  reviews_applied: true
+  review_margin: 2
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep3
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep3
+  superseded_by:
     label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
     at: '2026-09-03T03:01:12+00:00'
     by: d4d runs select
@@ -678,31 +709,7 @@ canonical_history:
     at: '2026-09-03T02:00:18+00:00'
     by: d4d runs select
     reason: re-selected
-canonical:
-  criterion: full and core both validate against the current schema, then fewest review
-    adverse verdicts (differences of at most 2 a tie), then most slots, then lowest
-    label
-  selected_from:
-  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
-    slots: 53
-    validation: valid
-    validation_recorded_at_run_time: valid
-    review_adverse: 11
-  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
-    slots: 48
-    validation: valid
-    validation_recorded_at_run_time: valid
-    review_adverse: 11
-  - label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
-    slots: 53
-    validation: valid
-    validation_recorded_at_run_time: valid
-    review_adverse: 9
-  margin_over_runner_up: 0
-  reviews_applied: true
-  review_margin: 2
-  selected_by: d4d runs select
-  supersedes:
-  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
-  - 2026-08-22c_claude-opus-5-api-generic-v5_rep3
-  - 2026-08-20b_claude-opus-5-api-generic-v5_rep3
+canonical_superseded_by:
+  label: 2026-09-04f_claude-opus-5-api-generic-v8_rep2
+  at: '2026-09-08T04:40:07+00:00'
+  by: d4d runs select

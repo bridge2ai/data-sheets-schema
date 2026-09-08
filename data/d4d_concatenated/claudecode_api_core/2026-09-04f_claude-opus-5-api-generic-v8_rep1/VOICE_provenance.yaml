@@ -827,3 +827,35 @@ review:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_review.yaml
       sha256: 09e3c92a5c0671fc7c28e351bc7c0b06cc0417c8204e4d54aa5b2020c7f34a5f
   recorded_by: d4d review check
+canonical:
+  criterion: full and core both validate against the current schema, then fewest review
+    adverse verdicts (differences of at most 2 a tie), then most slots, then lowest
+    label
+  selected_from:
+  - label: 2026-09-04f_claude-opus-5-api-generic-v8_rep1
+    slots: 80
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 2
+  - label: 2026-09-04f_claude-opus-5-api-generic-v8_rep2
+    slots: 78
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 8
+  - label: 2026-09-04f_claude-opus-5-api-generic-v8_rep3
+    slots: 80
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 5
+  margin_over_runner_up: null
+  runtime: api
+  supersedes_runtimes: api
+  reviews_applied: true
+  review_margin: 2
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-09-01_claude-opus-5-api-generic-v7_rep1
+  - 2026-09-01_claude-opus-5-api-generic-v7_rep2
+  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep2
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep1

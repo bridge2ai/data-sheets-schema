@@ -482,6 +482,44 @@ forbid opening any evaluation file); #1062 (the two half-point scores
 above). #1059 and #1060 are undecided thresholds in the rubric text, not
 evaluator error: both readings are defensible on what the rubric
 currently says, which is the defect.
+### Canonical selection (2026-09-08)
+
+Executed under the review criterion (#660) — validity, then fewest review
+adverse verdicts (a difference of at most 2 a tie), then most slots, then
+lowest label — with each project's own label prefix as the config:
+
+| project | canonical | slots | review adverse | next-lowest adverse |
+|---|---|---|---|---|
+| VOICE | `2026-09-04f…v8_rep1` | 80 | 2 | rep3 (5) |
+| CHORUS | `2026-09-04f…v8_rep2` | 55 | 4 | rep1 (8) |
+| AI_READI | `2026-09-04g…v8_rep2` | 80 | 1 | rep1 (3, a tie on adverse) |
+| CM4AI | `2026-09-04g…v8_rep3` | 59 | 4 | rep1 (8) |
+
+The last column is the second-lowest-adverse *replicate*, not the tool's
+`margin_over_runner_up`, which is null wherever only one replicate
+survived the adverse filter — three of the four.
+
+The adverse count decided every project, with two replicates out of
+contention on it in three of the four; only AI_READI came down to slots
+as well, and there by a single slot on ~80 — "no reason to prefer
+another", not "clearly best". The marks are **runtime-scoped** (#690):
+each supersedes the prior *api* canonical (the v7 production records)
+and leaves the v6 agentic canonicals standing. Nothing is moved or
+deleted; each superseded record keeps its old block under
+`canonical_history` with a `superseded_by` stamp naming its replacement.
+
+Note what the criterion does **not** use: the rubric scores. On rubric10
+the criterion picks a project's top-scoring replicate in none of the
+four: the chosen VOICE record is its project's lowest (94.0 against 98.0
+twice), CM4AI's is tied-lowest (86.7), AI_READI's scores 98.0 against
+rep3's 100.0, and CHORUS is a three-way tie at 63.3. The review's
+adverse count and the rubrics disagree about which replicate is best,
+which is the honest state of two instruments that measure different
+things — the criterion was registered before these scores existed and is
+not re-opened on them. **Those scores land in a separate change** (the
+prediction-8 section above and
+`data/evaluation_llm/rubric10_semantic/label_aware/`); this selection
+neither reads nor depends on them.
 
 ## Sequencing (PRs, in order)
 
