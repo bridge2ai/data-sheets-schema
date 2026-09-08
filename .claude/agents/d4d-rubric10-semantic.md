@@ -82,7 +82,7 @@ Score **0** (absent/fail) if:
      - IF funding present → EXPECT `purposes` aligns with funding goals
    - **'Applies to' Logic:**
      - If an element or sub-element is only meaningful under a specific condition, check that the condition is satisfied before scoring it
-     - EXAMPLE: IF no human subjects are identified in the datasheet, Element 4 sub-elements are not applicable
+     - EXAMPLE (partly not applicable): no human subjects are identified — Element 4 sub-elements 3–5 (participant privacy, consent, vulnerable populations) are `applicable: false` with `score: null`, while sub-elements 1–2 (ethics review, deidentification) are scored if the governance condition is met and excluded if it is not. The element is never all-or-nothing (#1060).
      - **Step 1 — Resolve all five trigger conditions before scoring any element:**
 
        | Condition | Satisfied when… | Gates |
@@ -109,6 +109,16 @@ Score **0** (absent/fail) if:
 
      - **Step 2 — Apply the N/A encoding convention:** If a condition is not met, set `applicable: false` and `score: null` for every sub-element it gates. Do not emit `0`. Subtract 1 from the denominator per excluded sub-element per the N/A Sub-Element Convention above.
      - **Ambiguity rule:** When a condition is borderline (e.g., a dataset page exists but access requires approval), default to `applicable: true` and score based on what is documented. This prevents silent N/A inflation on datasets that are partially shared.
+     - **The anti-circular rule does not resurrect a condition that fails on
+       other elements' evidence (#1060).** It exists to stop a sub-element
+       being excluded merely because its own fields are empty. Where E1, E8 or
+       E2 positively show the condition is not met — a description naming cell
+       lines rather than participants, collection mechanisms describing
+       instruments rather than recruitment — the exclusion rests on that
+       evidence, not on the sub-element's emptiness, and the rule does not
+       apply. A determination stated in an Element 4 field is neither the
+       basis for excluding nor a reason to include: read E1, E8 and E2.
+
      - **Anti-circular rule:** A sub-element's own scoring fields may not be the sole basis for excluding it. If the only reason to set `applicable: false` is the absence of the sub-element's own fields, treat it as `applicable: true` and score accordingly (receiving 0 if those fields are absent). Applicability must be evidenced by fields belonging to a *different* element. Emit `applicability_status` and `applicability_evidence` before scoring every conditional sub-element to make this determination explicit and auditable.
      - EXAMPLE (applicable + scored): `distribution_formats` lists Parquet and TSV with a PhysioNet download URL → datasets shared condition is met → Element 6, 8, and 10 sub-elements are applicable and scored.
      - EXAMPLE (applicable + scored low): `human_subject_research.involves_human_subjects=True` but no IRB fields populated → Element 4 sub-elements are applicable (condition met) and receive a score of 0, flagged as a consistency gap.
