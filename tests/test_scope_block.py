@@ -89,12 +89,114 @@ class TestWhatTheModelIsTold(unittest.TestCase):
         self.assertIsNotNone(scope_block("WITH_RELATED", "Source manifest: v3"))
 
 
+class TestTheRequestStaysUnderTheCacheCeiling(unittest.TestCase):
+    """Four `cache_control` blocks per request is the API maximum (#1069).
+
+    The digest and bundle take two. One breakpoint each for the source
+    ranking, the declared naming and the declared scope would be five, and
+    the request would be rejected at validation — every phase of a run
+    failing on its first call, before the canary could measure anything.
+    The three share one breakpoint on the last of them present, which caches
+    the same bytes under a longer prefix.
+    """
+
+    def _cached(self, ranking, naming, scope):
+        from data_sheets_schema import api_runner
+        blocks = [{"type": "text", "text": "digest",
+                   "cache_control": {"type": "ephemeral"}},
+                  {"type": "text", "text": "bundle",
+                   "cache_control": {"type": "ephemeral"}}]
+        for text in (ranking, naming, scope):
+            if text:
+                blocks.append({"type": "text", "text": text})
+        blocks[-1]["cache_control"] = {"type": "ephemeral"}
+        return blocks
+
+    def test_every_combination_of_the_optional_blocks_stays_at_or_under_four(self):
+        for r in (None, "ranking"):
+            for n in (None, "naming"):
+                for sc in (None, "scope"):
+                    with self.subTest(ranking=bool(r), naming=bool(n), scope=bool(sc)):
+                        blocks = self._cached(r, n, sc)
+                        marks = sum(1 for b in blocks if "cache_control" in b)
+                        self.assertLessEqual(marks, 4)
+                        self.assertEqual(marks, 2 if not (r or n or sc) else 3)
+                        self.assertIn("cache_control", blocks[-1])
+
+    def test_the_runner_marks_only_the_last_of_the_group(self):
+        """Read off the source, so a future block appended after the marker
+        without moving it fails here rather than at the provider."""
+        import inspect
+        from data_sheets_schema import api_runner
+        src = inspect.getsource(api_runner.build_phase)
+        head = src.split("Carried artifacts go BEFORE")[0]
+        self.assertEqual(head.count('"cache_control": {"type": "ephemeral"}'), 2,
+                         "only the digest and bundle carry a literal breakpoint")
+        self.assertIn('cached[-1]["cache_control"]', head)
+
+
 class TestTheAssemblyDigestMoves(unittest.TestCase):
     def test_the_layout_names_the_new_block(self):
         """A block added to the request with no change to ASSEMBLY_LAYOUT would
         leave two conditions indistinguishable by their recorded prompt
         evidence — the #353 defect the digest exists to prevent."""
         self.assertIn("declared scope", ASSEMBLY_LAYOUT)
+
+
+class TestAMalformedManifestDoesNotEndTheRun(unittest.TestCase):
+    """A declaration is data someone edits; the renderer sits in the request
+    path, so a bad edit there used to raise into `build_phase` and end the run
+    (#1069 review). It degrades and says so instead."""
+
+    def _block(self, related):
+        from data_sheets_schema import scope as scope_mod
+        with mock.patch.object(scope_mod, "scope_of",
+                               lambda p, manifest=None: {
+                                   "referent": "R", "referent_id": "i",
+                                   "related_but_distinct": related}):
+            from data_sheets_schema.api_runner import scope_block
+            return scope_block("X")
+
+    def test_a_bare_string_entry_is_skipped_and_counted(self):
+        block = self._block(["a bare string", {"id": "doi:1", "name": "N"}])
+        self.assertIn("N", block)
+        self.assertIn("1 declared entry is malformed", block)
+
+    def test_a_scalar_alias_is_one_identifier_not_its_characters(self):
+        block = self._block([{"id": "doi:1", "also_known_as": "doi:2"}])
+        self.assertIn("doi:1, doi:2", block)
+        self.assertNotIn(", d, o, i", block)
+
+    def test_a_scalar_in_bundle_is_accepted(self):
+        block = self._block([{"id": "doi:1", "in_bundle": "src1"}])
+        self.assertIn("under source src1.", block)
+
+
+class TestTheRecordSaysWhetherItWasSent(unittest.TestCase):
+    """`assembly_digest` hashes constants and `resolved_prompt_digest` hashes
+    the arm instruction, both identical across projects — so a run that sent
+    no scope block was indistinguishable from one that did (#1069 review)."""
+
+    def _spec(self, manifest_line=None):
+        from types import SimpleNamespace
+        return SimpleNamespace(project="WITH_RELATED", manifest_line=manifest_line)
+
+    def test_each_block_records_sent_and_size(self):
+        from data_sheets_schema import api_runner, scope as scope_mod
+        with mock.patch.object(scope_mod, "scope_of", _declared):
+            blocks = api_runner.context_blocks(self._spec())
+        self.assertEqual(set(blocks), {"source_ranking", "declared_naming",
+                                       "declared_scope"})
+        self.assertTrue(blocks["declared_scope"]["sent"])
+        self.assertGreater(blocks["declared_scope"]["bytes"], 0)
+
+    def test_an_unsent_block_records_why(self):
+        from data_sheets_schema import api_runner, scope as scope_mod
+        with mock.patch.object(scope_mod, "scope_of", _declared):
+            blocks = api_runner.context_blocks(
+                self._spec("Source manifest: not used"))
+        self.assertFalse(blocks["declared_scope"]["sent"])
+        self.assertIn("manifest unused", blocks["declared_scope"]["basis"])
 
 
 class TestTheRealManifest(unittest.TestCase):

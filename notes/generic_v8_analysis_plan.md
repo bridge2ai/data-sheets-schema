@@ -536,8 +536,22 @@ one referent. Both refer to a distinction the model was never given — the
 `scope:` block was read only by `scope.py` and `d4d download scope
 --check`. So the rule could be broken by a model with no way to know
 which dataset in its bundle was which, and only the checker could see it.
-That is the #913 class the v8 review pass found again (CM4AI rep2 wrote
-an earlier release's dates and errata as the referent's own).
+That is the #913 class — a related-but-distinct dataset's material
+absorbed into the referent's own slots. Its evidenced instance is VOICE
+on the v7 arm (rep2 carried a pediatric-protocol clause into an adult
+slot), and `d4d download scope --check` reports 32 records placing the
+pediatric release inside VOICE's own `resources`, `access_urls` and
+`download_url`.
+
+**What it does not fix, stated so a v9 canary is not read wrongly.** The
+v8 review pass's CM4AI rep2 rule-17 finding — earlier releases' dates in
+`distribution_dates`, a June 2025 erratum under this referent — is *not*
+of this class. CM4AI declares `related_but_distinct: []` and its referent
+note says the four Dataverse releases **are** this dataset, so the block
+gives the model no basis for excluding their dates and arguably licenses
+what rep2 did. Release-versus-referent scope is the other half of R2 and
+a separate question; scoring a CM4AI canary on rule-17 as evidence for
+this block would be measuring the wrong thing.
 
 The block carries facts, not behaviour: the referent and its identifier,
 the referent note (which is where the earlier-release half of R2 lives
