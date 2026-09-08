@@ -434,7 +434,7 @@ v8 falls **below the v7 per-project replicate minimum**.
 |---|---|---|---|---|---|
 | AI_READI | 98.0, 98.0, 98.0 | 98.0, 98.0, 100.0 | 98.0 | 98.0 | favourable |
 | CHORUS | 65.3, 59.2, 63.3 | 63.3, 63.3, 63.3 | 59.2 | 63.3 | favourable |
-| CM4AI | 84.0, 88.0, 88.9 | 86.7, 91.1, 86.7 | 84.0 | 86.7 | favourable |
+| CM4AI | 91.5, 93.6, 91.5 | 89.4, 87.2, 85.1 | 91.5 | 85.1 | **unfavourable**ᵍ |
 | VOICE | 96.0, 98.0, 94.0 | 94.0, 98.0, 98.0 | 94.0 | 94.0 | favourable |
 
 | project | rubric20 v7 reps | v8 reps | v7 min | v8 min | verdict |
@@ -444,16 +444,21 @@ v8 falls **below the v7 per-project replicate minimum**.
 | CM4AI | 86.4, 85.2, 86.4 | 76.1, 79.5, 78.4 | 85.2 | 76.1 | **unfavourable** |
 | VOICE | 90.9, 90.9, 94.9ᶠ | 89.8, 86.4, 90.9 | 90.9 | 86.4 | **unfavourable** |
 
+ᵍ CM4AI's rubric10 row was rescored on 2026-09-08 under the corrected
+Element 4 gate (#1060) and **the verdict changed**: see below.
+
 ᶠ a half-point score on an integer-anchored rubric (#1062). AI_READI's
 96.0 **is** its v7 minimum, so that verdict is quoted off a fractional
 score — it does not change the reading (the v8 minimum 89.8 is below
 96.6 either way), but the fraction is load-bearing. VOICE's 94.9 is not
 its minimum.
 
-**Prediction 8: favourable on rubric10 (4 of 4), unfavourable on
-rubric20 (1 of 4).** The registered text — "not below the v7 per-project
-replicate minimum" — names no rubric, so the honest reading is that it
-holds on one instrument and fails on the other, not that it passes.
+**Prediction 8: 3 of 4 on rubric10, 1 of 4 on rubric20 — unfavourable on
+both.** The registered text — "not below the v7 per-project replicate
+minimum" — names no rubric and admits no partial credit, so a prediction
+that fails on one project fails. It was read as holding on rubric10 until
+the Element 4 gate was fixed (#1060) and CM4AI moved; the two rubrics now
+differ in how much v8 fell, not in whether it did.
 
 The two rubrics disagree because they ask different questions, and the
 reasons the three rubric20 projects fell are consistent across them, in
@@ -463,25 +468,49 @@ replicates), empty derivation slots where lineage is documented in prose
 instead, absent variable metadata, and unpinned tool versions. Rubric10
 scores none of those as deeply — its Element 8 has one software
 sub-element where rubric20 has a whole technical-documentation category
-of five questions. The v8 records are not worse at what rubric10
-measures; they are thinner in the structured slots rubric20 counts.
+of five questions. So rubric20 registers the thinning across three
+projects and rubric10 registers it on one, CM4AI, where it costs 6.4
+points; the difference between the instruments is sensitivity, not
+direction.
 That is the falsification test of prediction 8 answering in the
 direction the plan warned of — "a fall means the larger digest displaced
 reading" — on the instrument sensitive enough to see it, and it is a
 finding for v9 rather than a defect in the arm.
+
+**The Element 4 gate changed a verdict (#1060, 2026-09-08).** When this
+section was written, CM4AI's rubric10 row read 84.0/88.0/88.9 against
+86.7/91.1/86.7 and was favourable. Those six evaluations disagreed about
+whether Element 4 applied to a dataset with no human participants: two
+scored it out of 50, four excluded it out of 45. The gate is now stated
+per sub-element — oversight and deidentification apply, participant
+privacy, consent and compensation do not — and all six rescores land on
+one denominator, 47. Under it CM4AI reads 91.5/93.6/91.5 against
+89.4/87.2/85.1, a v7 minimum of 91.5 against a v8 minimum of 85.1, and
+the verdict is **unfavourable**. Prediction 8 on rubric10 is therefore
+3 of 4, not 4 of 4.
+
+The number moved because the instrument was underspecified, not because
+the records changed: the same six records scored under three different
+readings of one rule produced denominators of 45, 47 and 50. The
+superseded scores are kept beside the current ones with a README, and
+both rounds of the fix are recorded there — the first edited the
+per-sub-element prose and did not hold, because an authoritative
+conditions table above it still mapped both conditions to all five.
 
 **Four instrument findings, all filed, none changing a verdict today:**
 #1059 (rubric10 Element 8's software sub-element scored 0, 0, 1 on
 identical AI_READI evidence — one point, the whole gap between 98% and
 100%); #1060 (rubric10 Element 4's applicability gate resolved both ways
 on CM4AI, 2 scored and 4 excluded, moving the denominator between 50 and
-45 and setting CM4AI's v7 rubric10 minimum at 84.0%); #1061 (one v7
+45; it set CM4AI's v7 rubric10 minimum at 84.0% until the gate was
+fixed and the six rescored — see above); #1061 (one v7
 rescore read its v8 counterpart to calibrate; re-run independently to an
 identical 98.0%, so the anchoring cost nothing, and the agents now
 forbid opening any evaluation file); #1062 (the two half-point scores
-above). #1059 and #1060 are undecided thresholds in the rubric text, not
-evaluator error: both readings are defensible on what the rubric
-currently says, which is the defect.
+above). #1059 and #1060 were undecided thresholds in the rubric text, not
+evaluator error: both readings were defensible on what the rubric
+said, which is the defect. #1060 is now fixed and its verdict change is
+above; #1059 remains.
 ### Canonical selection (2026-09-08)
 
 Executed under the review criterion (#660) — validity, then fewest review
@@ -511,7 +540,8 @@ deleted; each superseded record keeps its old block under
 Note what the criterion does **not** use: the rubric scores. On rubric10
 the criterion picks a project's top-scoring replicate in none of the
 four: the chosen VOICE record is its project's lowest (94.0 against 98.0
-twice), CM4AI's is tied-lowest (86.7), AI_READI's scores 98.0 against
+twice), CM4AI's is its lowest (85.1 against 89.4 and 87.2, under the
+corrected Element 4 gate — it was tied-lowest at 86.7 before it), AI_READI's scores 98.0 against
 rep3's 100.0, and CHORUS is a three-way tie at 63.3. The review's
 adverse count and the rubrics disagree about which replicate is best,
 which is the honest state of two instruments that measure different

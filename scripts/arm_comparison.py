@@ -365,7 +365,7 @@ def write_markdown(data, scores) -> None:
              "within v7/v8 and a different one across the older arms — an "
              "evaluator is an instrument (#1058). N/A exclusions are evaluator "
              "judgements, so adjusted maxima can differ between comparable "
-             "records, and the Element 4 gate resolved both ways on CM4AI (#1060).",
+             "records, The Element 4 gate resolved both ways on CM4AI until 2026-09-08; it is now stated per sub-element and those six were rescored (#1060), so the CM4AI rubric10 cells here are not comparable to any figure quoted before that date.",
              "- spend: absent by design — `api_usage` and `run_observed` are different "
              "quantities (#400).",
              "- a record whose own `validation` block says `passed: false` is not an arm "
