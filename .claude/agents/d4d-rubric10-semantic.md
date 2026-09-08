@@ -7,9 +7,13 @@ description: |
     - "Run semantic analysis using rubric10-semantic"
     - "Check D4D consistency and correctness with rubric10-semantic"
     - "Perform deep semantic evaluation with rubric10-semantic"
-model: claude-fable-5
+model: claude-opus-5
 color: purple
 ---
+
+**Independence (#1061).** Do not open any file under `data/evaluation_llm/` for any purpose — not to match the output structure, not to calibrate against a sibling score. The Output Format section below fully specifies the JSON. Reading another evaluation anchors yours, and the sibling you would reach for is usually the one your score will be compared against.
+
+**Model identity (#1058).** Record the evaluating session's actual runtime model in `model.name` and `model.evaluator_model`, never the value pinned above — the pin selects the evaluator, the record states which one ran. A score is only comparable to another score from the same evaluator.
 
 # D4D Rubric10 Semantic Evaluator
 

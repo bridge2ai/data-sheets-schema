@@ -410,6 +410,73 @@ preprint author where the preprint gives "Jillian Mohan" (bundle line
 Remaining for the arm: prediction 8 (rubric10/20-semantic evaluations)
 and the v8 canonical selection under the review criterion (#660).
 
+### Rubric evaluations, prediction 8 (48 evaluations, 2026-09-08)
+
+**The evaluator changed, and both arms were rescored.** Every rubric
+evaluation in this repository through 2026-09-07 was made by
+`claude-fable-5`, pinned in the two agent definitions; generation has
+always been Opus 5. On the plan owner's decision the evaluator is now
+Opus 5 for all evaluations, so v8 was scored (24) and v7 rescored (24)
+under `claude-opus-5[1m]`, one evaluator across all 48. The 24 Fable 5
+scores are kept as evidence under
+`label_aware/superseded_fable5/`, outside the comparison glob: an
+evaluator is an instrument, and a score is comparable only to another
+score from the same one. Nothing is retracted. The agents are now pinned
+to `claude-opus-5`.
+
+Both arms carry three replicates per project. Prediction 8 asks whether
+v8 falls **below the v7 per-project replicate minimum**.
+
+| project | rubric10 v7 reps | v8 reps | v7 min | v8 min | verdict |
+|---|---|---|---|---|---|
+| AI_READI | 98.0, 98.0, 98.0 | 98.0, 98.0, 100.0 | 98.0 | 98.0 | favourable |
+| CHORUS | 65.3, 59.2, 63.3 | 63.3, 63.3, 63.3 | 59.2 | 63.3 | favourable |
+| CM4AI | 84.0, 88.0, 88.9 | 86.7, 91.1, 86.7 | 84.0 | 86.7 | favourable |
+| VOICE | 96.0, 98.0, 94.0 | 94.0, 98.0, 98.0 | 94.0 | 94.0 | favourable |
+
+| project | rubric20 v7 reps | v8 reps | v7 min | v8 min | verdict |
+|---|---|---|---|---|---|
+| AI_READI | 96.6, 96.0ᶠ, 96.6 | 89.8, 95.5, 90.9 | 96.0 | 89.8 | **unfavourable** |
+| CHORUS | 79.5, 69.3, 76.1 | 73.9, 73.9, 75.0 | 69.3 | 73.9 | favourable |
+| CM4AI | 86.4, 85.2, 86.4 | 76.1, 79.5, 78.4 | 85.2 | 76.1 | **unfavourable** |
+| VOICE | 90.9, 90.9, 94.9ᶠ | 89.8, 86.4, 90.9 | 90.9 | 86.4 | **unfavourable** |
+
+ᶠ a half-point score on an integer-anchored rubric (#1062); neither is
+its project's minimum, so no verdict turns on it.
+
+**Prediction 8: favourable on rubric10 (4 of 4), unfavourable on
+rubric20 (1 of 4).** The registered text — "not below the v7 per-project
+replicate minimum" — names no rubric, so the honest reading is that it
+holds on one instrument and fails on the other, not that it passes.
+
+The two rubrics disagree because they ask different questions, and the
+reasons the three rubric20 projects fell are consistent across them, in
+the reviewers' own words: processing documentation that describes a
+pipeline whose outputs the release excludes (CM4AI, all three
+replicates), empty derivation slots where lineage is documented in prose
+instead, absent variable metadata, and unpinned tool versions. Rubric10
+scores none of those as deeply — its Element 8 has one software
+sub-element where rubric20 has a whole technical-documentation category
+of five questions. The v8 records are not worse at what rubric10
+measures; they are thinner in the structured slots rubric20 counts.
+That is the falsification test of prediction 8 answering in the
+direction the plan warned of — "a fall means the larger digest displaced
+reading" — on the instrument sensitive enough to see it, and it is a
+finding for v9 rather than a defect in the arm.
+
+**Four instrument findings, all filed, none changing a verdict today:**
+#1059 (rubric10 Element 8's software sub-element scored 0, 0, 1 on
+identical AI_READI evidence — one point, the whole gap between 98% and
+100%); #1060 (rubric10 Element 4's applicability gate resolved both ways
+on CM4AI, 2 scored and 4 excluded, moving the denominator between 50 and
+45 and setting CM4AI's v7 rubric10 minimum at 84.0%); #1061 (one v7
+rescore read its v8 counterpart to calibrate; re-run independently to an
+identical 98.0%, so the anchoring cost nothing, and the agents now
+forbid opening any evaluation file); #1062 (the two half-point scores
+above). #1059 and #1060 are undecided thresholds in the rubric text, not
+evaluator error: both readings are defensible on what the rubric
+currently says, which is the defect.
+
 ## Sequencing (PRs, in order)
 
 The first PR (#916) landed A and the #912 pack half ahead of this
