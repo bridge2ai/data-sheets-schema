@@ -434,7 +434,7 @@ Return your evaluation as a **JSON object** with this EXACT structure:
   "method": "<generation_method>",
   "evaluation_timestamp": "<ISO 8601 timestamp>",
   "model": {
-    "name": "claude-fable-5",
+    "name": "<the evaluating session's actual runtime model>",
     "temperature": 0.0,
     "evaluation_type": "semantic_llm_judge"
   },
@@ -855,7 +855,7 @@ The agent will iterate through files, evaluate each one, and save results.
 **This agent provides fully reproducible evaluations:**
 - Same D4D file → Same quality score every time
 - Temperature: 0.0 (fully deterministic)
-- Model: claude-fable-5 (pinned)
+- Model: the evaluator pinned in this file's frontmatter, recorded as the session's actual runtime identity
 - Rubric: Version-controlled in `data/rubric/rubric20.txt`
 - All within Claude Code conversation
 
@@ -872,7 +872,7 @@ See `notes/RUBRIC_AGENT_USAGE.md` for comprehensive usage examples.
 ## Notes
 
 - **Temperature Setting:** 0.0 for fully deterministic, reproducible quality assessments
-- **Model:** claude-fable-5 (pinned for consistency)
+- **Model:** the evaluator pinned in this file's frontmatter, recorded as the session's actual runtime identity
 - **Platform-Specific:** Some questions apply only to specific platforms (noted in "applies_to" field)
 - **Complement Rubric10:** Rubric20 provides more granular quality assessment than rubric10's hierarchical structure
 - **Cost:** ~$0.10-0.30 per file evaluation via Anthropic API

@@ -413,9 +413,12 @@ and the v8 canonical selection under the review criterion (#660).
 ### Rubric evaluations, prediction 8 (48 evaluations, 2026-09-08)
 
 **The evaluator changed, and both arms were rescored.** Every rubric
-evaluation in this repository through 2026-09-07 was made by
+evaluation under `label_aware/` through 2026-09-07 was made by
 `claude-fable-5`, pinned in the two agent definitions; generation has
-always been Opus 5. On the plan owner's decision the evaluator is now
+always been Opus 5. (Older evaluations elsewhere in
+`data/evaluation_llm/`, the `concatenated/` sets and the 2026-07
+archives, were made by Sonnet and Opus 4.8 — the Fable claim is about
+the label-aware sets the arm table reads.) On the plan owner's decision the evaluator is now
 Opus 5 for all evaluations, so v8 was scored (24) and v7 rescored (24)
 under `claude-opus-5[1m]`, one evaluator across all 48. The 24 Fable 5
 scores are kept as evidence under
@@ -441,8 +444,11 @@ v8 falls **below the v7 per-project replicate minimum**.
 | CM4AI | 86.4, 85.2, 86.4 | 76.1, 79.5, 78.4 | 85.2 | 76.1 | **unfavourable** |
 | VOICE | 90.9, 90.9, 94.9ᶠ | 89.8, 86.4, 90.9 | 90.9 | 86.4 | **unfavourable** |
 
-ᶠ a half-point score on an integer-anchored rubric (#1062); neither is
-its project's minimum, so no verdict turns on it.
+ᶠ a half-point score on an integer-anchored rubric (#1062). AI_READI's
+96.0 **is** its v7 minimum, so that verdict is quoted off a fractional
+score — it does not change the reading (the v8 minimum 89.8 is below
+96.6 either way), but the fraction is load-bearing. VOICE's 94.9 is not
+its minimum.
 
 **Prediction 8: favourable on rubric10 (4 of 4), unfavourable on
 rubric20 (1 of 4).** The registered text — "not below the v7 per-project
