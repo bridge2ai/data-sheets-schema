@@ -60,77 +60,49 @@
         "type": "consistency",
         "severity": "medium",
         "description": "The processing pipeline the record documents is the cell-map construction pipeline (node2vec PPI embedding, HPA image embedding, contrastive co-embedding, HiDeF community detection, GSAI/GPT-4 assembly naming), but the record states three separate times that computed cell maps are NOT in this release ('This is an interim release and does not contain predicted cell maps'; 'computed cell maps are not included in this release'). The software that produced the nine distributed data archives - mass-spectrometry search and quantification for AP-MS and SEC-MS, single-cell alignment and guide assignment for Perturb-seq, image processing for the IF archives - is nowhere named. A reader can reconstruct how cell maps would be built but not how the released processed_data archives were produced.",
-        "fields_involved": [
-          "preprocessing_strategies",
-          "machine_annotation_tools",
-          "known_limitations",
-          "discouraged_uses",
-          "file_collections"
-        ],
+        "fields_involved": ["preprocessing_strategies", "machine_annotation_tools", "known_limitations", "discouraged_uses", "file_collections"],
         "recommendation": "Add software_and_tools naming the acquisition-side processing software and versions for each modality (mass-spec search engine, single-cell pipeline, image processing), separately from the cell-map construction toolkit."
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "This release is version 2.0 while two chronologically EARLIER releases recorded in related_datasets carry higher version numbers: the June 2025 release (doi:10.18130/V3/F3TD5R) and the October 2025 release (doi:10.18130/V3/K7TGEM) are both given as version 2.1. The record explains the mechanism only indirectly, in version_access.version_details ('Each quarterly release is deposited as a distinct Dataverse dataset with its own persistent DOI and internal version history'), so a reader comparing version strings across the series could conclude this release is older than its predecessors.",
-        "fields_involved": [
-          "version",
-          "version_access.versions_available",
-          "related_datasets"
-        ],
+        "fields_involved": ["version", "version_access.versions_available", "related_datasets"],
         "recommendation": "State explicitly in version_details that version numbers are per-Dataverse-dataset counters and are not ordered across releases in the series; the release date is the ordering key."
       },
       {
         "type": "content_accuracy",
         "severity": "low",
         "description": "Nine of the ten distributed archives declare only their container format. format is 'ZIP archive' with media_type application/zip and per-file compression: zip, and raw_data_format for imaging is the generic 'Multi-channel confocal microscopy image files'. No interior content format (for example mzML, mzTab, MTX/H5AD, OME-TIFF, FASTQ) and no character encoding are stated for any data archive. Only the release metadata archive carries a content-level standard (conforms_to: RO-Crate, conforms_to_standard: RO_CRATE).",
-        "fields_involved": [
-          "distribution_formats",
-          "file_collections",
-          "raw_data_sources.raw_data_format"
-        ],
+        "fields_involved": ["distribution_formats", "file_collections", "raw_data_sources.raw_data_format"],
         "recommendation": "Declare the interior file formats per archive so a reuser knows what a download contains before retrieving multi-gigabyte ZIPs."
       },
       {
         "type": "semantic_understanding",
         "severity": "low",
         "description": "No download_url is present at dataset or file-collection level, although the dataset is openly distributed and the record documents the access route in prose (individual files below the repository's 1.9 GB limit downloadable directly, Dataverse Data Access API for programmatic access). file_collections.path carries bare filenames rather than resolvable URLs, so machine retrieval requires reconstructing Dataverse API calls from the persistent identifier.",
-        "fields_involved": [
-          "download_url",
-          "file_collections.path",
-          "distribution_formats.notes"
-        ],
+        "fields_involved": ["download_url", "file_collections.path", "distribution_formats.notes"],
         "recommendation": "Populate download_url with the Dataverse access API endpoint and give each file collection a resolvable per-file access URL."
       },
       {
         "type": "semantic_understanding",
         "severity": "medium",
         "description": "No variables slot and no data dictionary at any level. is_tabular: false is a semantically correct answer for image, mass-spectrometry and sequencing archives, but the processed_data archives (AP-MS, SEC-MS, Perturb-seq atlas) are tabular in substance and their columns are undescribed, so variable-level interoperability is unsupported.",
-        "fields_involved": [
-          "variables",
-          "is_tabular",
-          "file_collections"
-        ],
+        "fields_involved": ["variables", "is_tabular", "file_collections"],
         "recommendation": "Add variable-level metadata for the tabular processed_data archives, or point to the RO-Crate metadata package where those descriptions live."
       },
       {
         "type": "semantic_understanding",
         "severity": "low",
         "description": "No errata slot and no change log for this release. updates carries frequency and horizon rather than what changed. The only concrete change description in the record is about a prior release (the June 2025 revision that added RGB immunofluorescent images, corrected RO-Crate metadata and changed naming conventions), recorded as a note on a related dataset.",
-        "fields_involved": [
-          "errata",
-          "updates",
-          "related_datasets"
-        ],
+        "fields_involved": ["errata", "updates", "related_datasets"],
         "recommendation": "Record what this release adds or changes relative to the October 2025 release, and open an errata slot for post-publication corrections."
       },
       {
         "type": "content_accuracy",
         "severity": "low",
         "description": "ethical_reviews documents named review contacts and the review context but discloses no conflicts of interest, which the sub-element also asks for. No competing-interests statement appears anywhere in the record.",
-        "fields_involved": [
-          "ethical_reviews"
-        ],
+        "fields_involved": ["ethical_reviews"],
         "recommendation": "Add a competing-interests statement, or state explicitly that none were declared for the release."
       }
     ],
@@ -161,11 +133,11 @@
     }
   },
   "overall_score": {
-    "total_points": 43,
+    "total_points": 44,
     "max_points": 50,
     "excluded_max_points": 3,
     "adjusted_max_points": 47,
-    "normalized_percentage": 91.5,
+    "normalized_percentage": 93.6,
     "sub_elements_not_applicable": 3
   },
   "elements": [
@@ -521,10 +493,10 @@
           "name": "Software and Tools Documented",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets-shared condition met: `third_party_sharing: - is_shared: true` and `distribution_formats` 'All ten files in the June 2026 release are distributed as ZIP archives' from the UVA Dataverse. Processed at all: `preprocessing_strategies` carries five entries and `labeling_strategies` a full annotation protocol; the release distributes `cm4ai_perturb-seq_KOLF2_cell_atlas.zip` beside `cm4ai_perturb-seq_KOLF2_raw_sra.zip`.",
-          "score": 0,
-          "evidence": "`machine_annotation_tools` names 'GPT-4' ('used through the project's Gene Set AI (GSAI) pipeline to propose descriptive names, confidence scores, and referenced analysis essays for protein assemblies in cell maps'), 'node2vec', 'DenseNet-121' and 'HiDeF' ('Hierarchical community Decoding Framework used for pan-resolution community detection'). `preprocessing_strategies` describes the same chain: 'Protein-protein interaction networks are processed using the node2vec deep learning model ...' through 'Community detection is performed ...; the resulting hierarchy of protein communities is output as the final cell map.' `external_resources` names 'Cell Mapping Toolkit source repository at https://github.com/idekerlab/cellmaps_pipeline', 'FAIRSCAPE AI-readiness framework', 'Integrative Modeling Platform (IMP) package ... used for integrative structure modeling of cell map communities' and 'Network Data Exchange (NDEx) ... through which cell maps are shared and which can be accessed via Cytoscape, HiView, and the Python ndex2 library'.",
-          "quality_note": "Substantively the same evidence as rep1 and disposed of the same way. The four tools and the Cell Mapping Toolkit are the cell-map pipeline, and the record states its output is absent: 'computed cell maps are not included in this release' (discouraged_uses), 'This is an interim release and does not contain predicted cell maps' (known_limitations), and in `anomalies` 'computed cell maps are not included in this release' - role (e). FAIRSCAPE is role (c); NDEx, Cytoscape, HiView and ndex2 serve and visualise cell maps that are not in this release, so they are role (b) over data the release does not contain; MassIVE, Figshare and SRA are role (b). No software is named for the IF image, SEC-MS, AP-MS or perturb-seq artifacts that are distributed."
+          "applicability_evidence": "Per #1079 this sub-element is applicable to every dataset that was processed at all, established from Element 8's collection and preprocessing fields: acquisition_methods, collection_mechanisms, preprocessing_strategies and labeling_strategies are all populated and describe processing. It is not gated on a referenced repository. (Under my loaded definition's stricter gating the outcome would be the same, since external_resources does reference github.com/idekerlab/cellmaps_pipeline.)",
+          "score": 1,
+          "evidence": "Slot carrying the evidence: external_resources - 'FAIRSCAPE AI-readiness framework, documented with a tutorial and installation instructions at https://fairscape.github.io' and 'Cell Mapping Toolkit source repository at https://github.com/idekerlab/cellmaps_pipeline'. Corroborated in machine_annotation_tools (node2vec, DenseNet-121, HiDeF, GPT-4, each with tool_descriptions) and in preprocessing_strategies prose. FAIRSCAPE is independently named as the packaging software in distribution_formats.notes ('packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework') and in license_and_use_terms.notes with its MIT license.",
+          "quality_note": "Scored 1 on FAIRSCAPE named by name in external_resources, a tooling slot: it is the software that produced a component actually in this release, cm4ai_release_metadata.zip (collection_type metadata, conforms_to RO-Crate), so failure case (c) does not bite for it. Its pointer is a project homepage, which under the quoted rule is neutral - neither earning nor forfeiting the point - and the name in the tooling slot carries it. Case (c) DOES apply to the four machine_annotation_tools and the Cell Mapping Toolkit: those build cell maps, and the record states three times that computed cell maps are not in this release, so they alone would not establish what produced the release. Case (b) applies to the 10x Genomics kit, the confocal microscope and the mass spectrometers, which are capture instrumentation. Weakness recorded separately: no software_and_tools slot exists and no processing software is named for the nine data archives - mass-spectrometry search and quantification, single-cell alignment and guide assignment, image processing - so the point rests on the packaging software rather than on the modality pipelines."
         },
         {
           "name": "External Standards and Resources Referenced",
@@ -536,7 +508,7 @@
           "quality_note": "Standards, repositories, software documentation and the describing publications are all reachable, with archival flags and embargo restrictions attached where they apply."
         }
       ],
-      "element_score": 4,
+      "element_score": 5,
       "element_max": 5
     },
     {
@@ -663,19 +635,8 @@
   },
   "metadata": {
     "evaluator_id": "8b634640-006b-47d3-aa93-fb3f6d795df5",
-    "rubric_hash": "2e1340147d494786a3957e892f5992fff97e6a86c0d6ca52a4eddcc6518ec7ec",
+    "rubric_hash": "e5f8b6beced5f62f6cc4b3dcf45f6e8cb1431d84f4649227831ef8ecfbf28ab7",
     "d4d_file_hash": "af41bfae4fd0cea107b3468ad46e9a1a1599e297bfa5dd92739c48e6008f30b1",
-    "independence_note": "No file under data/evaluation_llm/ was opened for any purpose during this evaluation. Scores were derived solely from the target D4D record and the rubric text.",
-    "readjudication": {
-      "date": "2026-09-08",
-      "scope": "Element 8 sub-element 4 only",
-      "issues": [
-        "#1081",
-        "#1082"
-      ],
-      "score_before": 1,
-      "score_after": 0,
-      "superseded_copy": "superseded_software_role/CM4AI_2026-09-01api_rep2_evaluation.json"
-    }
+    "independence_note": "No file under data/evaluation_llm/ was opened for any purpose during this evaluation. Scores were derived solely from the target D4D record and the rubric text."
   }
 }

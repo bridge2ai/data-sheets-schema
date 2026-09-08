@@ -131,45 +131,96 @@ class TestTheGateIsStatedOnce(unittest.TestCase):
         self.assertIn("a governance constraint does not make it fire", self.flat)
 
 
-class TestTheSoftwareThresholdNamesItsFailureMode(unittest.TestCase):
-    """#1059, after three rounds. Round 1 named the qualifying slots and a
-    rescore awarded the point for a GitHub organisation root. Round 3 barred
-    publisher-level pointers, and the review then found that rule contradicted
-    three CHORUS scores and that the point actually turned on an applicability
-    sentence nobody had touched (#1079).
+class TestTheSoftwareSubElementIsStatedOnce(unittest.TestCase):
+    """#1059, after four rounds and a Codex review (#1081, #1082, #1084).
 
-    So the rule is now written around the question the sub-element asks — can
-    a reader tell what produced the distributed data — with the three ways to
-    fail named, and its applicability decoupled from the pointer.
+    Round 1 named the qualifying slots and a rescore awarded the point for a
+    GitHub organisation root. Round 3 barred publisher-level pointers, which
+    would have flipped three CHORUS records. Round 4 wrote the applicability
+    rule as a new paragraph and left two older gate texts standing that said
+    the opposite, so several rescores recorded `match: false` and applied the
+    launcher's quoted rule instead of the checked-in one.
+
+    The tests that guarded round 4 were whole-file substring searches. They
+    passed with the contradiction in place, and would have passed had "Score 0"
+    become "Score 1". So these read the sub-element's own block, check that no
+    other text in the file re-imposes the gate it drops, and check the
+    polarity of the failure list rather than the presence of its phrases.
     """
 
     def setUp(self):
-        self.flat = re.sub(r"\s+", " ", AGENT.read_text(encoding="utf-8"))
+        self.text = AGENT.read_text(encoding="utf-8")
+        self.flat = re.sub(r"\s+", " ", self.text)
+        start = self.text.index("4. **Software and Tools Documented**")
+        end = self.text.index("5. **External Standards and Resources Referenced**")
+        self.block = self.text[start:end]
+        self.block_flat = re.sub(r"\s+", " ", self.block)
+
+    def _row(self, condition):
+        for line in self.text.splitlines():
+            if line.strip().startswith(f"| {condition} "):
+                return line
+        self.fail(f"no conditions-table row for {condition!r}")
+
+    def test_the_table_scopes_the_software_condition_to_sub_element_three(self):
+        """The blocker in the Codex review of PR #1078: the table gated
+        sub-elements 3 and 4 together while the prose released 4."""
+        row = self._row("Software tools produced as dataset output")
+        gates = row.rsplit("|", 2)[1]
+        self.assertIn("sub-element 3", gates)
+        self.assertNotIn("3–4", gates)
+        self.assertNotIn("3-4", gates)
+
+    def test_nothing_in_the_block_re_imposes_the_repository_gate(self):
+        """The unchanged local `Applies to` restored the very gate the
+        applicability paragraph drops, three bullets above it."""
+        self.assertNotIn("only score if `external_resources`", self.block)
+        self.assertNotIn("Do not use E8's own fields as the applicability signal",
+                         self.block)
+
+    def test_the_block_declares_only_fields_the_schema_has(self):
+        """`software_and_tools` is not a slot in the D4D schema and appears in
+        no record, so a rule written against it could never be satisfied."""
+        self.assertNotIn("Fields: `software_and_tools`", self.block)
+        self.assertIn("used_software", self.block)
 
     def test_the_rule_states_the_question_not_only_the_slots(self):
-        self.assertIn("what software produced or processed **the data being "
-                      "distributed**".replace("**", ""), self.flat.replace("**", ""))
+        self.assertIn("what software **produced or transformed the data being "
+                      "distributed**", self.block_flat)
 
-    def test_all_three_ways_to_score_zero_are_named(self):
-        """A rule that lists only qualifying slots leaves every unlisted shape
-        undecided, which is how one record drew both a 0 and a 1."""
-        for probe in ("nothing names the processing software",
-                      "capture, hosting or instrumentation rather than processing",
-                      "outputs are not in this release"):
-            self.assertIn(probe, self.flat)
+    def test_the_failure_list_scores_zero_not_one(self):
+        """A polarity check: the round-4 tests searched for the case phrases
+        and would have passed had the sentence introducing them been negated."""
+        self.assertIn("Score 0 whenever no such software is named", self.block_flat)
+        self.assertNotIn("Score 1 whenever no such software is named",
+                         self.block_flat)
+
+    def test_every_role_that_does_not_answer_the_question_is_named(self):
+        """The rule has to be total over what software can have done to the
+        released data: packaging and quality assessment fell outside the three
+        cases round 4 named, and one record drew both a 0 and a 1 for the
+        same packaging evidence (#1082)."""
+        roles = re.findall(r"- \(([a-e])\) \*\*(.+?)\*\*", self.block_flat)
+        self.assertEqual([r[0] for r in roles], ["a", "b", "c", "d", "e"],
+                         f"roles found: {roles}")
+        named = " ".join(r[1] for r in roles)
+        for probe in ("capture", "hosting", "packaging", "validation"):
+            self.assertIn(probe, named)
+        self.assertIn("outputs that are not in this release", self.block_flat)
 
     def test_a_publisher_pointer_neither_earns_nor_forfeits_the_point(self):
         """Round 3 made an organisation root a hard 0, which would have
         flipped three CHORUS records whose tooling is named in prose. The
         pointer is not the evidence; the name is."""
-        self.assertIn("neither earns nor forfeits the point on its own", self.flat)
+        self.assertIn("neither earns nor forfeits the point on its own",
+                      self.block_flat)
 
     def test_applicability_does_not_depend_on_the_pointer(self):
         """Gating on a referenced repository would excuse a record that
         documents no tooling by that very silence."""
-        self.assertIn("not** gated on whether a repository is pointed at",
-                      self.flat.replace("*", "") .replace("not gated", "not** gated"))
-        self.assertIn("governs sub-element 3 only", self.flat)
+        self.assertIn("is **not** gated on whether a repository is pointed at",
+                      self.block_flat)
+        self.assertIn("governs sub-element 3 only", self.block_flat)
 
 
 if __name__ == "__main__":

@@ -200,11 +200,11 @@
     }
   },
   "overall_score": {
-    "total_points": 43,
+    "total_points": 44,
     "max_points": 50,
     "excluded_max_points": 3,
     "adjusted_max_points": 47,
-    "normalized_percentage": 91.5,
+    "normalized_percentage": 93.6,
     "sub_elements_not_applicable": 3
   },
   "elements": [
@@ -561,10 +561,10 @@
           "name": "Software and Tools Documented",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets-shared condition met: `third_party_sharing: - is_shared: true` and `distribution_formats: - format: ZIP Archive ... access_urls: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C`. Processed at all: Element 8's own fields are populated - `preprocessing_strategies` carries four entries (node2vec embedding, image embedding, contrastive co-embedding, community detection), `cleaning_strategies` says 'Single-cell CRISPR screen data from MDA-MB-468 cells and undifferentiated KOLF2.1J iPSCs were reported as undergoing quality control at the time of the CM4AI preprint', and the release itself distributes a processed artifact (`cm4ai_perturb-seq_KOLF2_cell_atlas.zip`) beside `cm4ai_perturb-seq_KOLF2_raw_sra.zip`. Not gated on a code repository (#1081), so applicable.",
-          "score": 0,
-          "evidence": "Software is named, and named prominently. `machine_annotation_tools` lists four tools with descriptions: 'node2vec' ('Deep learning model used to represent each protein as a feature vector based on its protein-protein interaction neighborhood'), 'DenseNet-121' ('Convolutional neural network pre-trained for object recognition in protein immunofluorescence confocal images'), 'GPT-4' ('Generative large language model used, via the Gene Set AI (GSAI) pipeline ... to generate descriptive names for protein assemblies'), and 'HiDeF' ('Hierarchical community Decoding Framework used for pan-resolution community detection'). `preprocessing_strategies` describes the same chain and ends 'Community detection is performed based on the all-by-all similarities of pairs of proteins in the co-embedding space. The resulting hierarchy of protein communities is output as the final cell map.' `labeling_strategies.data_annotation_platform` names 'Gene Set AI (GSAI) pipeline guiding the GPT-4 model.' `external_resources` names 'Cell Mapping Toolkit, implementing the end-to-end cell map construction pipeline as a series of Python packages, at https://github.com/idekerlab/cellmaps_pipeline', 'FAIRSCAPE AI-readiness framework' and 'Integrative Modeling Platform (IMP) package'.",
-          "quality_note": "Every named tool sits in a role the rule excludes. node2vec, DenseNet-121, GPT-4/GSAI, HiDeF and the Cell Mapping Toolkit are the stages of the cell-map pipeline, and the record states in its own text that the pipeline's output is not distributed here: 'This is an interim release. It does not contain predicted cell maps, which will be added in future releases' (known_limitations) and 'The current release is most suitable for bioinformatics analysis of the individual datasets, as computed cell maps are not included' (intended_uses). That is role (e). FAIRSCAPE is role (c) - the framework that packaged the release and produced its provenance metadata. MassIVE, Figshare, SRA and cm4ai.org are role (b). The ten distributed artifacts are IF image archives, SEC-MS and AP-MS archives, the perturb-seq atlas and raw SRA archive, and a metadata archive; no software is named for any of them - what produced the released data is still unstated."
+          "applicability_evidence": "Applied per the quoted #1079 rule: this sub-element is applicable to every dataset that was processed at all, established from Element 8's own collection and preprocessing fields (acquisition_methods, collection_mechanisms, preprocessing_strategies and cleaning_strategies are all populated, and three file_collections are typed processed_data), and is NOT gated on a referenced code repository. Under my agent definition's unquoted text this sub-element would have been gated alongside sub-element 3; the outcome is unchanged here because that gate also passes.",
+          "score": 1,
+          "evidence": "Point carried by external_resources: 'FAIRSCAPE AI-readiness framework, described with a tutorial and installation instructions at https://fairscape.github.io, available under the MIT License', corroborated by description: 'Output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework', and by file_collections entry cm4ai_release_metadata.zip: 'Release metadata, including RO-Crate metadata and provenance graphs.' Also present in tooling slots: machine_annotation_tools names node2vec, DenseNet-121, GPT-4 and HiDeF with descriptions; external_resources names the Cell Mapping Toolkit at github.com/idekerlab/cellmaps_pipeline; labeling_strategies.data_annotation_platform names the GSAI pipeline. No software_and_tools slot is present.",
+          "quality_note": "Scored 1, and the reasoning is worth stating because the record sits close to case (c). The bulk of the tooling evidence, node2vec, DenseNet-121, GPT-4, HiDeF, the Cell Mapping Toolkit repository, documents the MuSIC cell-map construction pipeline, and the record states plainly that computed cell maps are not included in this release. Taken alone that evidence is case (c): a pipeline named, its outputs absent, what produced the release still unstated. FAIRSCAPE is what carries the point. It is named by name, in external_resources, which the quoted rule lists as a qualifying slot, and again in the description; it is processing rather than capture, hosting or instrumentation, so case (b) does not apply; and its output is demonstrably in this release, since cm4ai_release_metadata.zip is one of the ten distributed files and is described as containing exactly the RO-Crate metadata and provenance graphs FAIRSCAPE produces. The rule states that a name in a qualifying slot is enough and that a version or repository strengthens but is not required; fairscape.github.io is the software's own site rather than a publisher root, so the publisher-only clause is not engaged either way. The genuine remaining gap, that no field names the mass-spectrometry search software or the Perturb-seq processing stack behind the three processed_data archives, is recorded as a separate consistency issue rather than taken as the score, since the rule does not require exhaustive per-file coverage."
         },
         {
           "name": "External Standards and Resources Referenced",
@@ -576,7 +576,7 @@
           "quality_note": "External references cover archival data depositions, software, documentation and publications, with an archival flag distinguishing the permanent depositions and a restrictions entry marking the embargoed holding. Standards conformance is asserted separately through conforms_to and conforms_to_standard. Reference resources used in the science, the Human Protein Atlas antibody collection, Gene Ontology, Reactome, the Protein Data Bank and the AlphaFold database, are named in the acquisition, labeling and other_tasks fields."
         }
       ],
-      "element_score": 4,
+      "element_score": 5,
       "element_max": 5
     },
     {
@@ -703,20 +703,9 @@
   },
   "metadata": {
     "evaluator_id": "0f08dba0-5d96-4249-82c0-ed743ac776a7",
-    "rubric_hash": "2e1340147d494786a3957e892f5992fff97e6a86c0d6ca52a4eddcc6518ec7ec",
+    "rubric_hash": "e5f8b6beced5f62f6cc4b3dcf45f6e8cb1431d84f4649227831ef8ecfbf28ab7",
     "rubric_hash_source": "sha256 of data/rubric/rubric10.txt",
     "d4d_file_hash": "4ed78cb10f8d8d5b18f601ea82e38f7ab620a1fa05bc81977d9fa944ab0d47f9",
-    "d4d_file_lines": 1155,
-    "readjudication": {
-      "date": "2026-09-08",
-      "scope": "Element 8 sub-element 4 only",
-      "issues": [
-        "#1081",
-        "#1082"
-      ],
-      "score_before": 1,
-      "score_after": 0,
-      "superseded_copy": "superseded_software_role/CM4AI_2026-09-01api_rep1_evaluation.json"
-    }
+    "d4d_file_lines": 1155
   }
 }

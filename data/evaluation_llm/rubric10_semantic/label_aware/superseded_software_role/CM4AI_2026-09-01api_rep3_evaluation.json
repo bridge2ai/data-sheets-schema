@@ -33,55 +33,35 @@
         "type": "semantic_understanding",
         "severity": "medium",
         "description": "Every preprocessing, cleaning and labeling entry describes the MuSIC / Cell Mapping Toolkit pipeline, and each carries a source caveat stating that the computed cell maps that pipeline produces are not included in this release. The record therefore documents a pipeline in detail while leaving unstated what software processed the artifacts actually distributed: the mass spectrometry search and quantification for the AP-MS and SEC-MS archives, and the alignment and demultiplexing for the perturb-seq archives.",
-        "fields_involved": [
-          "preprocessing_strategies",
-          "labeling_strategies",
-          "cleaning_strategies",
-          "file_collections"
-        ],
+        "fields_involved": ["preprocessing_strategies", "labeling_strategies", "cleaning_strategies", "file_collections"],
         "recommendation": "Add a software_and_tools block naming the per-modality processing software with versions (mass spectrometry search engine, single-cell alignment pipeline, image acquisition and processing software), distinguishing it from the downstream MuSIC pipeline."
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "The record omits publisher, and source_caveats states the omission is deliberate because the bundle names no publisher for the release. The citation the record itself supplies ends 'University of Virginia Dataverse, V2', and page, maintainers, retention_limit and data_governance all identify that repository. The platform is unambiguous everywhere except the slot designated for it.",
-        "fields_involved": [
-          "publisher",
-          "citation",
-          "page",
-          "maintainers"
-        ],
+        "fields_involved": ["publisher", "citation", "page", "maintainers"],
         "recommendation": "Record University of Virginia Dataverse (LibraData) as publisher; the record's own citation already asserts it."
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "Top-level version is 2.0 and version_access marks it current, while two superseded releases are listed at Version 2.1 and the citation renders this release as V2. A prior release carrying a higher internal version number than the current one is explainable by Dataverse per-dataset version histories, but the record does not say so at the point where the numbers collide.",
-        "fields_involved": [
-          "version",
-          "version_access.versions_available",
-          "citation"
-        ],
+        "fields_involved": ["version", "version_access.versions_available", "citation"],
         "recommendation": "Note in version_details that each quarterly release is a separate Dataverse dataset with an independent internal version counter, so version numbers are not comparable across releases."
       },
       {
         "type": "content_accuracy",
         "severity": "low",
         "description": "No errata or change-log field records what changed in this release relative to the October 2025 release. The substantive change evidence the record does hold sits in source_caveats as the generator's own observation, that the three immunofluorescence archives report identical file sizes but different MD5 checksums and were therefore regenerated, and that AP-MS archives are newly present while perturb-seq external links moved from Sequence Read Archive links to embargoed.",
-        "fields_involved": [
-          "errata",
-          "updates",
-          "source_caveats"
-        ],
+        "fields_involved": ["errata", "updates", "source_caveats"],
         "recommendation": "Add an errata or release-notes entry stating what changed at release scope: AP-MS archives added, immunofluorescence archives regenerated, perturb-seq external links embargoed."
       },
       {
         "type": "correctness",
         "severity": "low",
         "description": "The two cell-line identifiers use the Cellosaurus RRID namespace, RRID:CVCL_0419 and RRID:CVCL_B5P3, rather than the SCR_ or AB_ namespaces this rubric names. Both are well-formed registered RRIDs and correct for cell lines; the rubric's enumerated prefixes are incomplete, not the record.",
-        "fields_involved": [
-          "raw_data_sources"
-        ],
+        "fields_involved": ["raw_data_sources"],
         "recommendation": "No change required to the record."
       }
     ],
@@ -108,11 +88,11 @@
     }
   },
   "overall_score": {
-    "total_points": 42,
+    "total_points": 43,
     "max_points": 50,
     "excluded_max_points": 3,
     "adjusted_max_points": 47,
-    "normalized_percentage": 89.4,
+    "normalized_percentage": 91.5,
     "sub_elements_not_applicable": 3
   },
   "elements": [
@@ -471,10 +451,10 @@
           "name": "Software and Tools Documented",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "Datasets-shared condition met: `third_party_sharing: - is_shared: true`, 'The release is publicly downloadable from the University of Virginia Dataverse under CC BY-NC-SA 4.0', with `distribution_formats` 'ZIP archives containing RO-Crate packaged data files and metadata'. Processed at all: `preprocessing_strategies` (four entries), `cleaning_strategies` (two entries, including 'Data generated by the acquisition modules undergo quality control before release') and `labeling_strategies` are all populated.",
-          "score": 0,
-          "evidence": "`preprocessing_strategies` names 'the node2vec deep learning model' and 'a Human Protein Atlas deep learning model'; `cleaning_strategies` names 'the FAIRSCAPE client package to validate inputs and to create the output RO-Crate package for that segment'; `external_resources` names 'Cell Mapping Toolkit, an end-to-end Python pipeline for cell map construction: https://github.com/idekerlab/cellmaps_pipeline', 'FAIRSCAPE AI-readiness framework' and 'Integrative Modeling Platform (IMP) package'. This record carries no `machine_annotation_tools` slot, so DenseNet-121, GPT-4 and HiDeF are not named here by name.",
-          "quality_note": "This record makes the exclusion explicit at each entry rather than leaving it to be read across the document: every `preprocessing_strategies` entry carries a `source_caveats` of the form 'a step of the MuSIC pipeline that produces cell maps; the June 2026 release states that computed cell maps are not included in this release', and the first adds '... so this step was not applied to the artifacts distributed here'; the `labeling_strategies` caveat says the same. That is role (e) stated by the record itself. The FAIRSCAPE cleaning entry is role (d) for the input validation and role (c) for the RO-Crate package - its own caveat says 'the release itself is distributed with RO-Crate metadata and provenance produced by the same FAIRSCAPE framework', i.e. metadata production, not transformation of the data inside. The second cleaning entry ('quality control before release') names no software. Same verdict as rep1 and rep2; the difference between the records is bookkeeping - rep3 attaches the exclusion to each entry and omits `machine_annotation_tools` - not a difference in what software is disclosed as having produced the released artifacts."
+          "applicability_evidence": "Applicable under #1079 as quoted: the dataset was processed, established from Element 8's collection and preprocessing fields (collection_mechanisms, acquisition_methods, preprocessing_strategies, cleaning_strategies all populated). Independently applicable under the repository clause, since external_resources names github.com/idekerlab/cellmaps_pipeline.",
+          "score": 1,
+          "evidence": "Slot carrying the evidence: cleaning_strategies. 'Each segment of the MuSIC pipeline calls the FAIRSCAPE client package to validate inputs and to create the output RO-Crate package for that segment', with its caveat stating 'the release itself is distributed with RO-Crate metadata and provenance produced by the same FAIRSCAPE framework'. Corroborated by conforms_to ('using an extended, client-server version of the FAIRSCAPE framework') and by external_resources pointing at https://github.com/idekerlab/cellmaps_pipeline, https://cellmaps-pipeline.readthedocs.io/, https://fairscape.github.io and http://integrativemodeling.org.",
+          "quality_note": "Scored 1 on a close call. The MuSIC pipeline names in preprocessing_strategies (node2vec, the Human Protein Atlas embedding model, contrastive learning, community detection) each fall under case (c): the record names the pipeline and then says its outputs are not in this release. What rescues the point is that cleaning_strategies, a processing slot, names FAIRSCAPE as the software that produced the RO-Crate metadata and provenance shipped in this release, and the release metadata archive is one of the five distributed file collections. That is processing and packaging software for what is actually distributed, not capture, hosting or instrumentation, so cases (a) and (b) do not apply either. The weakness that remains, recorded below, is that no software_and_tools slot exists and the per-modality processing software for the mass spectrometry and single-cell archives is unstated, with no versions given anywhere."
         },
         {
           "name": "External Standards and Resources Referenced",
@@ -486,7 +466,7 @@
           "quality_note": "Publications, repositories, standards and documentation are each represented, with archival status flagged per group."
         }
       ],
-      "element_score": 4,
+      "element_score": 5,
       "element_max": 5
     },
     {
@@ -612,19 +592,8 @@
   },
   "metadata": {
     "evaluator_id": "7ba5fbde-fffb-4319-afbb-f164dc088784",
-    "rubric_hash": "2e1340147d494786a3957e892f5992fff97e6a86c0d6ca52a4eddcc6518ec7ec",
+    "rubric_hash": "e5f8b6beced5f62f6cc4b3dcf45f6e8cb1431d84f4649227831ef8ecfbf28ab7",
     "d4d_file_hash": "206c62821db4d7dc688ccff5de23020294dca149aa36de7682cafdfd9a083ad6",
-    "independence_note": "No file under data/evaluation_llm/ was opened during this evaluation. The only file read was the target record.",
-    "readjudication": {
-      "date": "2026-09-08",
-      "scope": "Element 8 sub-element 4 only",
-      "issues": [
-        "#1081",
-        "#1082"
-      ],
-      "score_before": 1,
-      "score_after": 0,
-      "superseded_copy": "superseded_software_role/CM4AI_2026-09-01api_rep3_evaluation.json"
-    }
+    "independence_note": "No file under data/evaluation_llm/ was opened during this evaluation. The only file read was the target record."
   }
 }

@@ -90,7 +90,7 @@ Score **0** (absent/fail) if:
        | Human subjects | `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment — never E4's own fields | Element 4 (all 5 sub-elements) |
        | Governance restrictions | `regulatory_restrictions` or `confidentiality_level` (from E2) **state a governance constraint that applies** — E2 fields, not E4 fields, so non-circular. A block recording that no restriction applies is not a constraint: read what it says, not whether it is populated (#1060) | Element 4 **sub-elements 1–2 only** |
        | Datasets shared & available for reuse | `distribution_formats` populated OR `download_url`/`page` links to accessible data OR license explicitly permits reuse | Element 3 sub-elements 1–4, Element 6 (all), Element 8 (all), Element 10 (all) |
-       | Software tools produced as dataset output | `external_resources` (from E10) references a code repository, OR `description`/`purposes` (from E1/E7) explicitly identifies software production as a dataset output — never E8's own fields | Element 8 sub-elements 3–4 |
+       | Software tools produced as dataset output | `external_resources` (from E10) references a code repository, OR `description`/`purposes` (from E1/E7) explicitly identifies software production as a dataset output — never E8's own fields | Element 8 **sub-element 3 only** (#1081) |
        | Data collection identified AND datasets shared | Collection fields populated (`acquisition_methods`, `collection_mechanisms`) AND the datasets shared condition above is met | Element 8 sub-elements 1–2 |
        | Publication identified AND datasets shared | `citation` or `external_resources` includes at least one publication reference AND the datasets shared condition above is met | Element 10 sub-element 2 |
 
@@ -394,36 +394,58 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
    - **Applies to:** Always report results of this sub-element, but only score if `external_resources` (from E10) references a code repository, OR `description` or `purposes` (from E1/E7) explicitly identifies software production as a dataset output. Do not use E8's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 4. **Software and Tools Documented**
-   - Fields: `software_and_tools`
+   - Fields: `used_software` (an attribute of any dataset property, range
+     `Software`) — the schema declares no `software_and_tools` slot, and the
+     name appears in no record; a rule written against it could never be
+     satisfied (#1081). Tooling named in `machine_annotation_tools`,
+     `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`,
+     `imputation_protocols` or `external_resources`, including those slots'
+     prose, is the alternative evidence, and any one of them carrying the
+     evidence satisfies the global requirement that the field exist.
    - Look for: Software names, versions, processing tools, GitHub repos
-   - **Applicability (#1079).** This sub-element is applicable to every
-     dataset that was processed at all — which the collection and
-     preprocessing fields of Element 8 establish — and is **not** gated on
-     whether a repository is pointed at. Gating it on the pointer would let a
-     record that documents no tooling be excused from the question by that
-     very silence, which is what the anti-circular rule forbids. The
-     paragraph below that gates sub-elements 3-4 on a referenced code
-     repository governs sub-element 3 only.
-   - **Threshold (#1059).** The question is whether a reader can tell what
-     software produced or processed **the data being distributed**. Score 1
-     when the record names that software — by name — in a slot that documents
-     processing or tooling: `software_and_tools`, `machine_annotation_tools`,
-     any field of `preprocessing_strategies` including its prose, or
-     `external_resources`. A name is enough; a version, a repository or a
-     software DOI strengthens the evidence and is what "Look for" asks for,
-     but the sub-element is about whether the tooling is disclosed at all.
-     Score 0 in three cases, each of which leaves the question unanswered:
-     (a) nothing names the processing software; (b) the software named is
-     capture, hosting or instrumentation rather than processing — a data-entry
-     application inside a collection mechanism, a device's vendor app, the
-     repository the data is served from; (c) the record names a pipeline and
-     then says that pipeline's outputs are not in this release, so what
-     produced the release is still unstated. A pointer that identifies only
-     the publisher — an organisation or account root, a project homepage —
-     neither earns nor forfeits the point on its own; it is the name that
-     matters. State which slot carried the evidence, and which of (a)-(c)
-     applies when scoring 0.
-   - **Applies to:** Always report results of this sub-element, but only score if `external_resources` (from E10) references a code repository, OR `description` or `purposes` (from E1/E7) explicitly identifies software production as a dataset output. Do not use E8's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
+   - **Applicability (#1079, #1081).** Within Element 8's datasets-shared
+     gate, this sub-element is applicable to every dataset that was processed
+     at all — which the collection and preprocessing fields of Element 8
+     establish — and is **not** gated on whether a repository is pointed at.
+     Gating it on the pointer would let a record that documents no tooling be
+     excused from the question by that very silence, which is what the
+     anti-circular rule forbids. The software-output condition in the
+     conditions table governs sub-element 3 only.
+   - **Threshold (#1059, #1082).** The question is whether a reader can tell
+     what software **produced or transformed the data being distributed**.
+     Score 1 when the record names such software, by name, in any of the slots
+     above: a processing, conversion, cleaning, labeling, annotation,
+     imputation or integration step the released data passed through. A name
+     is enough; a version, a repository or a software DOI strengthens the
+     evidence and is what "Look for" asks for, but the sub-element is about
+     whether the tooling is disclosed at all.
+   - **Score 0 whenever no such software is named.** Software in each of the
+     roles below leaves the question unanswered, however prominently the
+     record documents it, and naming one of them alongside the processing
+     software neither adds nor subtracts:
+     - (a) **capture and instrumentation** — a data-entry or e-consent
+       application, a device's vendor app, an acquisition console;
+     - (b) **hosting and serving** — the repository or platform the data is
+       distributed from;
+     - (c) **packaging, containerisation and metadata production** — software
+       that wrapped the release or generated its provenance metadata without
+       transforming the data inside it;
+     - (d) **validation and quality assessment** — software that checked the
+       released data without producing or transforming it;
+     - (e) **a pipeline the record itself states produced outputs that are not
+       in this release**, so what produced the release is still unstated.
+
+     The roles are about what the software did to the released data, not about
+     how important it is. A pointer that identifies only the publisher — an
+     organisation or account root, a project homepage — neither earns nor
+     forfeits the point on its own; it is the name that matters. State which
+     slot carried the evidence, and when scoring 0 either that nothing was
+     named or which of (a)-(e) applies.
+   - **Applies to:** Always report results of this sub-element. It is scored
+     for every dataset that meets Element 8's datasets-shared condition and
+     was processed at all; the software-output condition does not gate it
+     (#1081). Emit `applicability_status` and `applicability_evidence` before
+     scoring.
 
 5. **External Standards and Resources Referenced**
    - Fields: `external_resources`, `conforms_to`
@@ -496,7 +518,7 @@ Return your evaluation as a **JSON object** with this EXACT structure:
 ```json
 {
   "rubric": "rubric10-semantic",
-  "version": "1.1",
+  "version": "1.2",
   "d4d_file": "<filename>",
   "project": "<project_name>",
   "method": "<generation_method>",
