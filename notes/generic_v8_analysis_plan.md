@@ -610,6 +610,41 @@ records were generated without the block, and a thirteenth with it would
 be a different condition wearing the same name. The prompt files are
 unchanged, so no pin rotates (`d4d api prompts check --strict` passes).
 
+### report_claims instrument v3 (#1022, #1046, 2026-09-08)
+
+A schema claim that names its own inventory is now resolved against that
+inventory only. The v8 report instruction (step E) asks for exactly the
+sentence this broke on — "`splits` and `participant_privacy` are not
+declared by the core schema and appear only in the full record" — and the
+checker resolved the slot against every class, so a true sentence read as
+a `false_schema_claim`. Two VOICE reports were regenerated over findings
+of this kind and their gates recorded contradictions the model had not
+made.
+
+Across the two production arms the false findings were **19 before and 0
+after**: VOICE 04f rep1 alone carried 12, with the rest spread over VOICE
+04f rep3, v7 rep3, AI_READI 04f rep1 and CM4AI 04g rep2 and rep3. Twenty-four
+findings remain corpus-wide and all are true: the v4 and v5 `distributions`
+claims that #546 exists for, which are false against `CoreDataset` whichever
+scope they name.
+
+The scope is read only from the words "core" and "full" qualifying a
+schema, record, class, inventory, digest, projection or view. A bare class
+name is **not** a scope signal — "no such slot appears in the inventory for
+`Dataset`, and `md5` and `path` are not attested keys on any listed range
+class" names a class in its first half and ranges over all of them in its
+second — and a claim saying "any class" is unscoped whatever it names.
+
+The block was recomputed for all 282 records under one instrument, so no
+comparison spans v2 and v3. Recomputing exposed a second defect
+(#1085): `backfill-checks --blocks report_claims` replaced the block's
+`artifacts` with the report alone, dropping the full and core record md5s
+and never writing the schema digests the runner records, so a recomputed
+verdict could not be told apart from one reached against records or a
+schema that had since moved. Fixed first; the recompute was redone under
+the fix. The datasheets are untouched, and the two regenerated VOICE
+reports stand as written with the cause on record here.
+
 ### What a v9 arm can and cannot be compared against (#1072)
 
 `condition_delta("generic_v8", "generic_v9")` returns `["base"]`, and that

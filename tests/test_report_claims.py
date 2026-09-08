@@ -309,5 +309,81 @@ class CorpusTest(unittest.TestCase):
                          "every one of them reports having removed it")
 
 
+class ScopedSchemaClaimTest(Harness):
+    """A schema claim that names its own inventory is checked against it
+    (#1022, #1046).
+
+    `keywords` is declared on Dataset and not on CoreDataset, which is the
+    shape the v8 report instruction produces sentences about: "not declared by
+    the core schema and appears only in the full record". Resolving that
+    against every class made three true sentences into findings and had two
+    VOICE reports rewritten over them.
+    """
+
+    def test_a_core_scoped_claim_is_checked_against_the_core_classes(self):
+        md = ("`keywords` is not declared by the core schema and appears "
+              "only in the full record.\n")
+        self.assertEqual(self.kinds(md), [])
+
+    def test_a_core_scoped_claim_that_is_false_is_still_caught(self):
+        """`distributions` is on CoreDataset, so this one is wrong."""
+        md = "`distributions` is not declared in the core schema.\n"
+        self.assertEqual(self.kinds(md), [("false_schema_claim", "distributions")])
+
+    def test_a_full_scoped_claim_is_checked_against_dataset(self):
+        """`source_caveats` is on CoreDataset only, so a claim about the full
+        schema is true and a claim about every class would be false."""
+        md = "`source_caveats` is not declared on the full schema.\n"
+        self.assertEqual(self.kinds(md), [])
+
+    def test_a_full_scoped_claim_that_is_false_is_still_caught(self):
+        md = "`keywords` is not declared in the full schema.\n"
+        self.assertEqual(self.kinds(md), [("false_schema_claim", "keywords")])
+
+    def test_an_unscoped_claim_is_unchanged(self):
+        """The v2 reading, kept: with no scope named, any class holding the
+        slot contradicts the claim."""
+        md = "`keywords` is not a declared slot.\n"
+        self.assertEqual(self.kinds(md), [("false_schema_claim", "keywords")])
+
+    def test_naming_both_scopes_reads_as_the_core_one(self):
+        """The full mention is where the slot *is* — the sentence's own
+        contrast — not a second inventory to check the claim against."""
+        md = ("`keywords` is not declared by the core schema and appears "
+              "only in the full record, which declares it on `Dataset`.\n")
+        self.assertEqual(self.kinds(md), [])
+
+    def test_the_scope_noun_is_not_only_the_word_schema(self):
+        """VOICE 04f rep1 wrote "Not declared in the core projection." The
+        reports vary the noun; the qualifier is what carries the scope."""
+        for noun in ("projection", "record", "inventory", "view"):
+            with self.subTest(noun=noun):
+                md = f"`keywords` is not declared in the core {noun}.\n"
+                self.assertEqual(self.kinds(md), [])
+
+    def test_a_claim_ranging_over_every_class_is_not_scoped_by_one_it_names(self):
+        """CM4AI rep3's sentence names `Dataset` in its first half and then
+        claims two keys are unattested "on any listed range class"; that half
+        is about all of them."""
+        md = ("No such slot appears in the inventory for `Dataset`, and "
+              "`md5` and `path` are not attested keys on any listed range "
+              "class.\n")
+        self.assertEqual(sorted(self.kinds(md)),
+                         [("false_schema_claim", "md5"),
+                          ("false_schema_claim", "path")])
+
+    def test_the_finding_says_which_scope_it_used(self):
+        md = "`distributions` is not declared in the core schema.\n"
+        finding = self.check(md)["findings"][0]
+        self.assertEqual(finding["scope"], "core")
+        self.assertIn("scoped to the core schema", finding["detail"])
+
+    def test_the_instrument_names_the_change(self):
+        from data_sheets_schema.report_claims import REPORT_CLAIMS_INSTRUMENT
+        self.assertTrue(REPORT_CLAIMS_INSTRUMENT.startswith("v3"),
+                        REPORT_CLAIMS_INSTRUMENT)
+        self.assertIn("#1046", REPORT_CLAIMS_INSTRUMENT)
+
+
 if __name__ == "__main__":
     unittest.main()

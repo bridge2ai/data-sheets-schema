@@ -422,15 +422,32 @@ report_claims:
       in the fu
   - kind: false_schema_claim
     slot: distributions
-    detail: report says this is not a declared slot; it is declared on CoreDataset
+    scope: core
+    detail: report says this is not a declared slot; it is declared on CoreDataset;
+      the claim is scoped to the core schema
     claim: This slot is not declared on `CoreDataset`, and the key set is a hybrid
       of `FileCollection` (`path`) and `DistributionFormat` (`format`, `media_type`).
-  claims_checked: 2
+  claims_checked: 1
   claims_unnamed: 4
+  disposition_rows: 0
+  claims_core_cannot_hold: 0
+  instrument: 'v3 (#1022, #1046): a schema claim that names its own scope — the core
+    schema, the full schema, a class — is resolved against that scope only, not against
+    every class; v2 (#990): a finding on a `both` row names when the core class declares
+    no such slot; `claims_core_cannot_hold` counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_reconciliation.md
       md5: d291823125243eff2b0ef35f31a10f7b
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_d4d.yaml
+      md5: 33fa830c616b708f9311f5fbb1bd4d25
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_d4d_core.yaml
+      md5: 57d9e7f5bca22e6088f08b8f90e56eb4
+  schema:
+    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
+    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
   recorded_by: backfill_checks
 grounding:
   checked: true

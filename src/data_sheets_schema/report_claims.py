@@ -281,8 +281,57 @@ _DISPOSITION = re.compile(r"^\W*(?:\*\*)?(removed|deleted|dropped|retained|kept|
 #: and the schema by hash, but the checker moved under #914, #929, #962 and
 #: #990 with nothing recording which reading produced a block; everything
 #: before this constant is v1.
-REPORT_CLAIMS_INSTRUMENT = ("v2 (#990): a finding on a `both` row names when the core class "
-                            "declares no such slot; `claims_core_cannot_hold` counts them")
+REPORT_CLAIMS_INSTRUMENT = ("v3 (#1022, #1046): a schema claim that names its own scope — "
+                            "the core schema, the full schema, a class — is resolved against "
+                            "that scope only, not against every class; v2 (#990): a finding "
+                            "on a `both` row names when the core class declares no such slot; "
+                            "`claims_core_cannot_hold` counts them")
+
+#: A schema claim can name the inventory it is about, and the instruction the
+#: v8 report phase follows asks for exactly that sentence: "`splits` and
+#: `participant_privacy` are not declared by the core schema and appear only
+#: in the full record." Resolving the slot against every class turned three
+#: such true sentences into `false_schema_claim` findings and had two VOICE
+#: reports rewritten over them (#1046); a fourth pair did the same on the
+#: 04f gate (#1022). The scope is read from the claim's own words.
+_CORE_SCOPE = re.compile(
+    r"\bcore\s+(?:schema|record|class|inventory|digest|dataset|"
+    r"projection|view|subset)\b|"
+    r"\bCoreDataset\b|\bCoreDistribution\b", re.I)
+_FULL_SCOPE = re.compile(
+    r"\bfull\s+(?:schema|record|class|inventory|digest|dataset|"
+    r"projection|view)\b", re.I)
+#: A claim that ranges over the classes itself is not scoped to one of them,
+#: whichever class it happens to name in passing: "no such slot appears in the
+#: inventory for `Dataset`, and `md5` and `path` are not attested keys on **any
+#: listed range class**" is two claims, and the second is about all of them.
+_ANY_CLASS = re.compile(r"\bany (?:listed |declared |named )?"
+                        r"(?:range )?class(?:es)?\b|\bany of the classes\b|"
+                        r"\bno class\b|\bany schema\b", re.I)
+
+#: A bare class name is not a scope signal. "in the inventory for `Dataset`"
+#: reads as one, and the sentence it appears in is generally about several
+#: classes at once; only the words "core" and "full" qualifying a schema, a
+#: record or an inventory are taken as the claim naming its own scope.
+
+
+def _claim_scope(claim: str, classes: set[str]) -> tuple[set[str], str]:
+    """The classes a schema claim is about, and how that was decided.
+
+    A claim naming both scopes — "not declared by the core schema and appears
+    only in the full record" — is about the core one: the full mention is
+    where the slot *is*, which is the sentence's own contrast, not a second
+    inventory to check it against.
+    """
+    core = {c for c in classes if c.startswith("Core")}
+    full = classes - core
+    if _ANY_CLASS.search(claim):
+        return classes, "unscoped"
+    if core and _CORE_SCOPE.search(claim):
+        return core, "core"
+    if full and _FULL_SCOPE.search(claim):
+        return full, "full"
+    return classes, "unscoped"
 
 
 def _core_declares(path: str, declared: dict[str, set[str]]) -> bool:
@@ -511,12 +560,18 @@ def check_report(report: Path, full: dict, core: dict,
                 if re.search(r"[.\[]", name):
                     continue
                 root = name
-                holders = sorted(c for c, sl in declared.items() if root in sl)
+                scope, basis = _claim_scope(claim, classes)
+                holders = sorted(c for c, sl in declared.items()
+                                 if root in sl and c in scope)
                 if holders:
+                    where = ("; the claim is scoped to the "
+                             + basis + " schema" if basis != "unscoped" else "")
                     findings.append({
                         "kind": "false_schema_claim", "slot": root,
+                        "scope": basis,
                         "detail": ("report says this is not a declared slot; "
-                                   "it is declared on " + ", ".join(holders)),
+                                   "it is declared on " + ", ".join(holders)
+                                   + where),
                         "claim": claim.strip()[:240]})
 
     # One claim can be stated twice — a summary table row and the prose that

@@ -344,25 +344,43 @@ report_claims:
       bundle-supported and has been redirected:'
   - kind: false_schema_claim
     slot: distributions
+    scope: unscoped
     detail: report says this is not a declared slot; it is declared on CoreDataset
     claim: No such slot appears in the schema digest's 98-slot inventory for `Dataset`/`CoreDataset`,
       and `md5` and `path` are not attested keys on any listed range class.
   - kind: false_schema_claim
     slot: md5
+    scope: unscoped
     detail: report says this is not a declared slot; it is declared on CoreDistribution
     claim: No such slot appears in the schema digest's 98-slot inventory for `Dataset`/`CoreDataset`,
       and `md5` and `path` are not attested keys on any listed range class.
   - kind: false_schema_claim
     slot: path
+    scope: unscoped
     detail: report says this is not a declared slot; it is declared on CoreDistribution
     claim: No such slot appears in the schema digest's 98-slot inventory for `Dataset`/`CoreDataset`,
       and `md5` and `path` are not attested keys on any listed range class.
   claims_checked: 1
   claims_unnamed: 0
+  disposition_rows: 0
+  claims_core_cannot_hold: 0
+  instrument: 'v3 (#1022, #1046): a schema claim that names its own scope — the core
+    schema, the full schema, a class — is resolved against that scope only, not against
+    every class; v2 (#990): a finding on a `both` row names when the core class declares
+    no such slot; `claims_core_cannot_hold` counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/CM4AI_reconciliation.md
       md5: aa717775e7fac8c153adc7038d665d53
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep3/CM4AI_d4d.yaml
+      md5: 6475950323d014396b238625e3cfd9d2
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/CM4AI_d4d_core.yaml
+      md5: f673d79b0af91230392645f5fc065f54
+  schema:
+    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
+    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
   recorded_by: backfill_checks
 grounding:
   checked: true

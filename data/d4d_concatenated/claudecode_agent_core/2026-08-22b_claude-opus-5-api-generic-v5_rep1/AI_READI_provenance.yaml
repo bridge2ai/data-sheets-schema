@@ -339,12 +339,20 @@ report_claims:
   findings:
   - kind: false_schema_claim
     slot: distributions
-    detail: report says this is not a declared slot; it is declared on CoreDataset
+    scope: core
+    detail: report says this is not a declared slot; it is declared on CoreDataset;
+      the claim is scoped to the core schema
     claim: The audit's most severe finding was that `distributions` "does not exist
       in the supplied schema digest for the Dataset/CoreDataset class," and that ten
       objects carrying the entire per-datatype file inventory sit under it.
   claims_checked: 0
   claims_unnamed: 0
+  disposition_rows: 0
+  claims_core_cannot_hold: 0
+  instrument: 'v3 (#1022, #1046): a schema claim that names its own scope — the core
+    schema, the full schema, a class — is resolved against that scope only, not against
+    every class; v2 (#990): a finding on a `both` row names when the core class declares
+    no such slot; `claims_core_cannot_hold` counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
@@ -356,8 +364,9 @@ report_claims:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
       md5: 1914c2abc798732fecf1f7c2c1e3a4d8
   schema:
-    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
-    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
+    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
+  recorded_by: backfill_checks
 grounding:
   checked: true
   counts:

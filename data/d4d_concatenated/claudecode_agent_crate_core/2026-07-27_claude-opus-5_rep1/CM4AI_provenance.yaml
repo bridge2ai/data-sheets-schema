@@ -104,10 +104,25 @@ report_claims:
   findings: []
   claims_checked: 0
   claims_unnamed: 0
+  disposition_rows: 0
+  claims_core_cannot_hold: 0
+  instrument: 'v3 (#1022, #1046): a schema claim that names its own scope — the core
+    schema, the full schema, a class — is resolved against that scope only, not against
+    every class; v2 (#990): a finding on a `both` row names when the core class declares
+    no such slot; `claims_core_cannot_hold` counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep1/CM4AI_reconciliation.md
       md5: 07adc631e5b23d2c3ff4092d9f334d59
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate/2026-07-27_claude-opus-5_rep1/CM4AI_d4d.yaml
+      md5: 1b8144c4c9a17301815989e6186151a2
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep1/CM4AI_d4d_core.yaml
+      md5: d93b32124e961283f10e0092245a4ae0
+  schema:
+    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
+    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
   recorded_by: backfill_checks
 grounding:
   checked: true

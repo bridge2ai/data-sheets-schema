@@ -246,20 +246,28 @@ pair_consistency:
   recorded_by: backfill_checks
 report_claims:
   checked: true
-  findings:
-  - kind: false_schema_claim
-    slot: description
-    detail: report says this is not a declared slot; it is declared on CoreDataset,
-      CoreDistribution, Dataset
-    claim: It does not appear in any structured keyword or subject list — not in the
-      FAIRhub `subject` array, not in the `studyDescription.conditionsModule.keywordList`,
-      and not on the HTML capture's keyword panel.
+  findings: []
   claims_checked: 0
   claims_unnamed: 0
+  disposition_rows: 0
+  claims_core_cannot_hold: 0
+  instrument: 'v3 (#1022, #1046): a schema claim that names its own scope — the core
+    schema, the full schema, a class — is resolved against that scope only, not against
+    every class; v2 (#990): a finding on a `both` row names when the core class declares
+    no such slot; `claims_core_cannot_hold` counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep2/AI_READI_reconciliation.md
       md5: abd9f9dea3a3550d0100cb86181ac34a
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep2/AI_READI_d4d.yaml
+      md5: 0a5b75ebd78ef2770015ec7cf0fd7852
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep2/AI_READI_d4d_core.yaml
+      md5: 322cd16b43fb75b5870b3c43d0df2ba0
+  schema:
+    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
+    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
   recorded_by: backfill_checks
 grounding:
   checked: false
