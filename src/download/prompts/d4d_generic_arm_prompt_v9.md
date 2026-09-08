@@ -1,9 +1,10 @@
 # D4D generic-arm generation prompt — v9
 
-**This is v8 plus one block of two rules.** Everything else is
+**This is v8 plus one block of two rules.** The prompt body is
 byte-identical to `src/download/prompts/d4d_generic_arm_prompt_v8.md` apart
 from the version stamp; a test asserts that the only difference is the block
-marked `ADDED IN v9`.
+marked `ADDED IN v9`. This header is not part of the body and is not sent to
+the model.
 
 ## Why v9 exists
 
@@ -307,23 +308,30 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
 --- ADDED IN v9 ---
 
 - A value in one of the referent's own slots is supported by a passage whose
-  subject is the referent. You are given the declared scope: the referent, the
-  datasets declared related but distinct, and the bundle sources that carry
-  their documentation. A passage from a source the declaration names as
-  another dataset's documentation supports an entry in the slot that
-  declaration names — never a value in a slot describing this dataset, however
-  well the sentence would read there. This binds every phase, and the
-  reconcile phase in particular: reconciling the two records against each
-  other does not test what a value is about, so check each value you keep
-  against the subject of the passage behind it, not only against the rest of
-  the record.
+  subject is the referent. You are given a declared scope naming the referent
+  and, where the project has any, the datasets declared related but distinct —
+  with, for each and where the declaration states them, the slot its facts
+  belong in and the bundle source carrying its documentation. Where it names a
+  slot, a passage about that dataset supports an entry there; where it does
+  not, the facts still belong with that dataset and not in a slot describing
+  this one, however well the sentence would read there. A declaration listing
+  no related dataset says only that none was declared: it is not an assurance
+  that every passage in the bundle is about the referent, and the first
+  sentence still governs. This binds every phase, and the reconcile phase in
+  particular: reconciling the two records against each other does not test
+  what a value is about, so check each value you keep against the subject of
+  the passage behind it, not only against the rest of the record.
 - A list entry names exactly one entity. Where the bundle states several, emit
   one entry each or none; never one entry whose value merges them. Two signs
-  that you have merged: the value reads as a category rather than a thing — a
-  grantor of "device manufacturers", a collector of "study staff" — or it
-  joins two names with "and", a slash or a comma where the schema asks for one
-  name, one role, one grantor, one system. Read back each entry you write in a
-  multivalued slot and ask whether one entity answers to it.
+  that you have merged: the value names a class of things where the schema
+  asks for a thing — a plural or a collective noun standing where one
+  organisation, one person or one instrument belongs — or it joins what the
+  sources state as separate names with "and", a slash or a comma. The test is
+  the sources, not the punctuation: an entity whose own registered name
+  contains "and", a comma or a slash is one entity, and splitting it is the
+  same error in the other direction. Read back each entry you write in a
+  multivalued slot and ask whether exactly one thing the sources name answers
+  to it.
 
 --- END ADDED IN v9 ---
 

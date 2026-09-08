@@ -70,9 +70,20 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
         block = _norm(block)                                   # the file wraps at 78 columns
         for probe in ("subject is the referent",                    # R6: whose passage supports it
                       "reconcile phase",                             # R6: where the leaks survived
+                      "not an assurance",                            # R6: an empty declaration promises nothing (#1072)
                       "names exactly one entity",                    # R7: the rule
-                      "reads as a category"):                        # R7: the signature
+                      "names a class of things",                     # R7: the signature
+                      "is one entity, and splitting it"):            # R7: the carve-out (#1072)
             self.assertIn(probe, block)
+
+    def test_R7_names_no_value_from_a_record_it_will_be_scored_against(self):
+        """The first draft used two grantor and collector strings verbatim
+        from the AI_READI v7 violations (#1072). A canary scored on rule-05
+        against examples taken from its own arm is partly self-confirming."""
+        block = _norm(_added_block(GENERIC_PROMPT_V9.read_text())).lower()
+        for lifted in ("device manufacturers", "study staff",
+                       "phlebotomist", "laboratory assistant"):
+            self.assertNotIn(lifted, block)
 
     def test_R6_pairs_with_the_declaration_the_runner_sends(self):
         """The rule refers to the scope block (#932). If the rule shipped
@@ -81,7 +92,7 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
         rule exists to close."""
         from data_sheets_schema.api_runner import scope_block
         block = _norm(_added_block(GENERIC_PROMPT_V9.read_text()))
-        self.assertIn("You are given the declared scope", block)
+        self.assertIn("You are given a declared scope", block)
         rendered = scope_block("VOICE")
         self.assertIsNotNone(rendered)
         self.assertIn("DECLARED SCOPE", rendered)
