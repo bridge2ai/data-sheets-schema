@@ -131,5 +131,31 @@ class TestTheGateIsStatedOnce(unittest.TestCase):
         self.assertIn("a governance constraint does not make it fire", self.flat)
 
 
+class TestTheSoftwareThresholdNamesItsFailureMode(unittest.TestCase):
+    """#1059 round 3. The threshold first said a tooling slot could be
+    `external_resources` "pointing at a code repository", and a rescore
+    awarded the point for a link to a GitHub *organisation* — the very
+    evidence five sibling evaluations had scored 0 on, and which the record
+    pairs with "produced by a combination of automated and custom
+    processing". A category is not a rule until it names what falls outside
+    it."""
+
+    def setUp(self):
+        self.flat = re.sub(r"\s+", " ", AGENT.read_text(encoding="utf-8"))
+
+    def test_a_publisher_level_pointer_does_not_qualify(self):
+        self.assertIn("must identify the software, not its publisher", self.flat)
+        for probe in ("organisation or account root", "project homepage",
+                      "released via GitHub"):
+            self.assertIn(probe, self.flat)
+
+    def test_what_does_qualify_is_stated_too(self):
+        """A rule that only forbids leaves the scorer guessing at the pass
+        condition, which is how the first version produced a 0 and a 1 on one
+        record."""
+        self.assertIn("A repository, a package, an archived release or a "
+                      "software DOI scores 1", self.flat)
+
+
 if __name__ == "__main__":
     unittest.main()

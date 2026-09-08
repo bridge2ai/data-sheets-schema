@@ -510,7 +510,15 @@ forbid opening any evaluation file); #1062 (the two half-point scores
 above). #1059 and #1060 were undecided thresholds in the rubric text, not
 evaluator error: both readings were defensible on what the rubric
 said, which is the defect. #1060 is now fixed and its verdict change is
-above; #1059 remains.
+above. **#1059 is fixed and changed no verdict** (2026-09-08): the
+software sub-element's threshold is stated — tooling named in a slot whose
+purpose is tooling scores 1, software named incidentally or pointed at only
+by its publisher scores 0 — and the one dissenting evaluation was rescored
+to agree with its five siblings. AI_READI's v8 minimum stays 98.0 and its
+verdict stays favourable. The issue's second example was wrong: CM4AI
+`2026-09-04g_rep1` scores 0 where its siblings score 1 because that record
+names no repository URL, a difference in the records rather than the
+reading.
 ### Canonical selection (2026-09-08)
 
 Executed under the review criterion (#660) — validity, then fewest review

@@ -396,6 +396,24 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 4. **Software and Tools Documented**
    - Fields: `software_and_tools`
    - Look for: Software names, versions, processing tools, GitHub repos
+   - **Threshold (#1059).** Score 1 when the record names the software that
+     produced or processed the data **in a slot whose purpose is to carry
+     tooling** — `software_and_tools`, `machine_annotation_tools`, the tool
+     fields of `preprocessing_strategies`, or `external_resources` pointing at
+     a code repository. **The pointer must identify the software, not its
+     publisher**: an organisation or account root
+     (`github.com/<org>`), a project homepage, or prose saying the code was
+     "released via GitHub" names where to start looking and does not say what
+     produced the release, so it scores 0. A repository, a package, an archived
+     release or a software DOI scores 1. Score 0 when software is named only incidentally in a
+     slot about something else — a capture application inside a collection
+     mechanism, a vendor app inside an instrument description — or not at all.
+     An absent `software_and_tools` slot is **not** by itself the failure; the
+     failure is that no slot documents the tooling, so a reader cannot tell
+     what produced the release. Versions and repository links strengthen the
+     evidence and are what "Look for" asks for, but their absence does not by
+     itself take the point where a tooling slot names the software.
+     State which slot carried the evidence in the quality note.
    - **Applies to:** Always report results of this sub-element, but only score if `external_resources` (from E10) references a code repository, OR `description` or `purposes` (from E1/E7) explicitly identifies software production as a dataset output. Do not use E8's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 5. **External Standards and Resources Referenced**
