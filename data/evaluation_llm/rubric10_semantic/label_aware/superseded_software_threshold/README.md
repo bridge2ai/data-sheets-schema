@@ -23,3 +23,18 @@ correct: rep2 and rep3 name the Cell Mapping Toolkit with the repository URL
 "released via GitHub" with no URL, no version and no tooling slot. The
 difference is in the records, not in the reading, so nothing about that
 evaluation is superseded and it was restored after being briefly moved here.
+
+## Second round: the rule was restated, and CM4AI's six with it (#1079)
+
+The first statement of the threshold listed the slots that qualify. A review
+showed it contradicted three CHORUS scores — records whose tooling is named
+in `preprocessing_strategies` prose with only an organisation-root link — and
+that the point turned on an applicability sentence the fix had not touched.
+
+The rule is now written around the question the sub-element asks: can a reader
+tell what produced the distributed data. A name in a processing or tooling
+slot is enough; a publisher-level pointer neither earns nor forfeits the
+point; and three failure cases are named, the third being a record that
+documents a pipeline and then says that pipeline's outputs are not in this
+release. That third case is CM4AI's, on all six records, so all six were
+rescored. The copies here are what they scored under the previous statement.

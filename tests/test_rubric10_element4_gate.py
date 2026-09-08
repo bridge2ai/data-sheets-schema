@@ -132,29 +132,44 @@ class TestTheGateIsStatedOnce(unittest.TestCase):
 
 
 class TestTheSoftwareThresholdNamesItsFailureMode(unittest.TestCase):
-    """#1059 round 3. The threshold first said a tooling slot could be
-    `external_resources` "pointing at a code repository", and a rescore
-    awarded the point for a link to a GitHub *organisation* — the very
-    evidence five sibling evaluations had scored 0 on, and which the record
-    pairs with "produced by a combination of automated and custom
-    processing". A category is not a rule until it names what falls outside
-    it."""
+    """#1059, after three rounds. Round 1 named the qualifying slots and a
+    rescore awarded the point for a GitHub organisation root. Round 3 barred
+    publisher-level pointers, and the review then found that rule contradicted
+    three CHORUS scores and that the point actually turned on an applicability
+    sentence nobody had touched (#1079).
+
+    So the rule is now written around the question the sub-element asks — can
+    a reader tell what produced the distributed data — with the three ways to
+    fail named, and its applicability decoupled from the pointer.
+    """
 
     def setUp(self):
         self.flat = re.sub(r"\s+", " ", AGENT.read_text(encoding="utf-8"))
 
-    def test_a_publisher_level_pointer_does_not_qualify(self):
-        self.assertIn("must identify the software, not its publisher", self.flat)
-        for probe in ("organisation or account root", "project homepage",
-                      "released via GitHub"):
+    def test_the_rule_states_the_question_not_only_the_slots(self):
+        self.assertIn("what software produced or processed **the data being "
+                      "distributed**".replace("**", ""), self.flat.replace("**", ""))
+
+    def test_all_three_ways_to_score_zero_are_named(self):
+        """A rule that lists only qualifying slots leaves every unlisted shape
+        undecided, which is how one record drew both a 0 and a 1."""
+        for probe in ("nothing names the processing software",
+                      "capture, hosting or instrumentation rather than processing",
+                      "outputs are not in this release"):
             self.assertIn(probe, self.flat)
 
-    def test_what_does_qualify_is_stated_too(self):
-        """A rule that only forbids leaves the scorer guessing at the pass
-        condition, which is how the first version produced a 0 and a 1 on one
-        record."""
-        self.assertIn("A repository, a package, an archived release or a "
-                      "software DOI scores 1", self.flat)
+    def test_a_publisher_pointer_neither_earns_nor_forfeits_the_point(self):
+        """Round 3 made an organisation root a hard 0, which would have
+        flipped three CHORUS records whose tooling is named in prose. The
+        pointer is not the evidence; the name is."""
+        self.assertIn("neither earns nor forfeits the point on its own", self.flat)
+
+    def test_applicability_does_not_depend_on_the_pointer(self):
+        """Gating on a referenced repository would excuse a record that
+        documents no tooling by that very silence."""
+        self.assertIn("not** gated on whether a repository is pointed at",
+                      self.flat.replace("*", "") .replace("not gated", "not** gated"))
+        self.assertIn("governs sub-element 3 only", self.flat)
 
 
 if __name__ == "__main__":

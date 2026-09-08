@@ -433,8 +433,8 @@ v8 falls **below the v7 per-project replicate minimum**.
 | project | rubric10 v7 reps | v8 reps | v7 min | v8 min | verdict |
 |---|---|---|---|---|---|
 | AI_READI | 98.0, 98.0, 98.0 | 98.0, 98.0, 100.0 | 98.0 | 98.0 | favourable |
-| CHORUS | 65.3, 59.2, 63.3 | 63.3, 63.3, 63.3 | 59.2 | 63.3 | favourable |
-| CM4AI | 91.5, 93.6, 91.5 | 89.4, 87.2, 85.1 | 91.5 | 85.1 | **unfavourable**ᵍ |
+| CHORUS | 65.3, 59.2, 63.3 | 72.0, 63.3, 63.3 | 59.2 | 63.3 | favourable |
+| CM4AI | 93.6, 93.6, 91.5 | 91.5, 87.2, 85.1 | 91.5 | 85.1 | **unfavourable**ᵍ |
 | VOICE | 96.0, 98.0, 94.0 | 94.0, 98.0, 98.0 | 94.0 | 94.0 | favourable |
 
 | project | rubric20 v7 reps | v8 reps | v7 min | v8 min | verdict |
@@ -496,6 +496,23 @@ superseded scores are kept beside the current ones with a README, and
 both rounds of the fix are recorded there — the first edited the
 per-sub-element prose and did not hold, because an authoritative
 conditions table above it still mapped both conditions to all five.
+
+**The instrument's own variance is larger than most of these gaps
+(#1080).** Rescoring eight records under a rule that touched one
+sub-element of fifty moved their totals by up to 8.7 points. The clearest
+case is a control: CHORUS v8 rep1 scored the sub-element under test
+identically both times and still moved 63.3 → 72.0, gaining a point each
+on four unrelated elements and losing an exclusion, so its denominator
+went 49 → 50 while its two siblings stayed at 49.
+
+That bears on every rubric10 verdict above. AI_READI and VOICE are exact
+ties; CHORUS's favourable reading rests on 4.1 points and CM4AI's
+unfavourable one on 6.4, both inside the observed spread. The ordering
+has been stable across every rescore and the densest record, AI_READI,
+reproduced exactly — so this is not a reason to discard the scores. It is
+a reason to stop quoting a single evaluation as a project's score, and to
+establish the spread before any of these verdicts is cited outward. The
+proposal is on #1080.
 
 **Four instrument findings, all filed, none changing a verdict today:**
 #1059 (rubric10 Element 8's software sub-element scored 0, 0, 1 on

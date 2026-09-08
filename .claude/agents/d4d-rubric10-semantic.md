@@ -396,24 +396,33 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 4. **Software and Tools Documented**
    - Fields: `software_and_tools`
    - Look for: Software names, versions, processing tools, GitHub repos
-   - **Threshold (#1059).** Score 1 when the record names the software that
-     produced or processed the data **in a slot whose purpose is to carry
-     tooling** — `software_and_tools`, `machine_annotation_tools`, the tool
-     fields of `preprocessing_strategies`, or `external_resources` pointing at
-     a code repository. **The pointer must identify the software, not its
-     publisher**: an organisation or account root
-     (`github.com/<org>`), a project homepage, or prose saying the code was
-     "released via GitHub" names where to start looking and does not say what
-     produced the release, so it scores 0. A repository, a package, an archived
-     release or a software DOI scores 1. Score 0 when software is named only incidentally in a
-     slot about something else — a capture application inside a collection
-     mechanism, a vendor app inside an instrument description — or not at all.
-     An absent `software_and_tools` slot is **not** by itself the failure; the
-     failure is that no slot documents the tooling, so a reader cannot tell
-     what produced the release. Versions and repository links strengthen the
-     evidence and are what "Look for" asks for, but their absence does not by
-     itself take the point where a tooling slot names the software.
-     State which slot carried the evidence in the quality note.
+   - **Applicability (#1079).** This sub-element is applicable to every
+     dataset that was processed at all — which the collection and
+     preprocessing fields of Element 8 establish — and is **not** gated on
+     whether a repository is pointed at. Gating it on the pointer would let a
+     record that documents no tooling be excused from the question by that
+     very silence, which is what the anti-circular rule forbids. The
+     paragraph below that gates sub-elements 3-4 on a referenced code
+     repository governs sub-element 3 only.
+   - **Threshold (#1059).** The question is whether a reader can tell what
+     software produced or processed **the data being distributed**. Score 1
+     when the record names that software — by name — in a slot that documents
+     processing or tooling: `software_and_tools`, `machine_annotation_tools`,
+     any field of `preprocessing_strategies` including its prose, or
+     `external_resources`. A name is enough; a version, a repository or a
+     software DOI strengthens the evidence and is what "Look for" asks for,
+     but the sub-element is about whether the tooling is disclosed at all.
+     Score 0 in three cases, each of which leaves the question unanswered:
+     (a) nothing names the processing software; (b) the software named is
+     capture, hosting or instrumentation rather than processing — a data-entry
+     application inside a collection mechanism, a device's vendor app, the
+     repository the data is served from; (c) the record names a pipeline and
+     then says that pipeline's outputs are not in this release, so what
+     produced the release is still unstated. A pointer that identifies only
+     the publisher — an organisation or account root, a project homepage —
+     neither earns nor forfeits the point on its own; it is the name that
+     matters. State which slot carried the evidence, and which of (a)-(c)
+     applies when scoring 0.
    - **Applies to:** Always report results of this sub-element, but only score if `external_resources` (from E10) references a code repository, OR `description` or `purposes` (from E1/E7) explicitly identifies software production as a dataset output. Do not use E8's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 5. **External Standards and Resources Referenced**

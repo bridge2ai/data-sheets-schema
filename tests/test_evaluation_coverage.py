@@ -17,7 +17,6 @@ at the canonical path. An archive is a record of what a number used to be,
 never the only copy.
 """
 import json
-import re
 import unittest
 from collections import defaultdict
 from pathlib import Path
@@ -52,8 +51,12 @@ class TestNoEvaluationSurvivesOnlyInAnArchive(unittest.TestCase):
             for p in _label_aware(rubric).glob("*_evaluation.json"):
                 d = json.loads(p.read_text())
                 label = d.get("label", "")
-                for arm, mark in (("v7", "2026-09-01_"), ("v8", "2026-09-04")):
-                    if label.startswith(mark) and "generic-v" in label:
+                #: The production prefixes by name (#1079): "2026-09-04" also
+                #: matches the 04b-04e exploratory canaries, so evaluating one
+                #: would break the count and count a canary as production.
+                for arm, marks in (("v7", ("2026-09-01_",)),
+                                   ("v8", ("2026-09-04f_", "2026-09-04g_"))):
+                    if any(label.startswith(m) for m in marks) and "generic-v" in label:
                         found[arm].add((d.get("project"), label.rsplit("_", 1)[-1]))
             for arm in ("v7", "v8"):
                 with self.subTest(rubric=rubric, arm=arm):
@@ -62,7 +65,14 @@ class TestNoEvaluationSurvivesOnlyInAnArchive(unittest.TestCase):
 
     def test_one_evaluator_per_arm_in_the_live_set(self):
         """A mixed evaluator inside one arm is the #1058 defect; an archive is
-        where the other evaluator's scores belong."""
+        where the other evaluator's scores belong.
+
+        Bite is limited today (#1079): four rubric10 prefixes hold a single
+        file and are trivially uniform, and every pre-2026-09-01 arm is
+        uniformly claude-fable-5, so this passes for those arms rather than
+        certifying them. It has real force on the two Opus-rescored arms,
+        which are the ones a comparison is drawn from.
+        """
         for rubric in RUBRICS:
             evaluators = defaultdict(set)
             for p in _label_aware(rubric).glob("*_evaluation.json"):
