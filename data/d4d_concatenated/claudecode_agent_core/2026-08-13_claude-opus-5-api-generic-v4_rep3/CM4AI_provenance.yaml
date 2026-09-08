@@ -344,20 +344,23 @@ report_claims:
       bundle-supported and has been redirected:'
   - kind: false_schema_claim
     slot: distributions
-    scope: unscoped
-    detail: report says this is not a declared slot; it is declared on CoreDataset
+    scope: core
+    detail: report says this is not a declared slot; it is declared on CoreDataset;
+      the claim is scoped to the core schema
     claim: No such slot appears in the schema digest's 98-slot inventory for `Dataset`/`CoreDataset`,
       and `md5` and `path` are not attested keys on any listed range class.
   - kind: false_schema_claim
     slot: md5
-    scope: unscoped
-    detail: report says this is not a declared slot; it is declared on CoreDistribution
+    scope: core
+    detail: report says this is not a declared slot; it is declared on CoreDistribution;
+      the claim is scoped to the core schema
     claim: No such slot appears in the schema digest's 98-slot inventory for `Dataset`/`CoreDataset`,
       and `md5` and `path` are not attested keys on any listed range class.
   - kind: false_schema_claim
     slot: path
-    scope: unscoped
-    detail: report says this is not a declared slot; it is declared on CoreDistribution
+    scope: core
+    detail: report says this is not a declared slot; it is declared on CoreDistribution;
+      the claim is scoped to the core schema
     claim: No such slot appears in the schema digest's 98-slot inventory for `Dataset`/`CoreDataset`,
       and `md5` and `path` are not attested keys on any listed range class.
   claims_checked: 1

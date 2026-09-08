@@ -266,9 +266,8 @@ report_claims:
   findings:
   - kind: false_schema_claim
     slot: distributions
-    scope: core
-    detail: report says this is not a declared slot; it is declared on CoreDataset;
-      the claim is scoped to the core schema
+    scope: unscoped
+    detail: report says this is not a declared slot; it is declared on CoreDataset
     claim: It does not appear in the declared `Dataset` slot inventory, and no supplied
       artifact establishes that `CoreDataset` defines it; its range and required keys
       are therefore unverified.

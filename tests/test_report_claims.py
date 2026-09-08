@@ -372,6 +372,30 @@ class ScopedSchemaClaimTest(Harness):
                          [("false_schema_claim", "md5"),
                           ("false_schema_claim", "path")])
 
+    def test_a_scope_word_in_another_clause_does_not_decide_the_scope(self):
+        """#1087, the defect this rule introduced and a review caught before
+        it merged.
+
+        A reconciliation report says "the full record" constantly, and `full`
+        resolves to Dataset alone — which excludes both core classes. Read
+        over the whole sentence, the trailing clause here scoped a claim about
+        `distributions` to Dataset, where it is not declared, and silenced the
+        one finding #546 exists to make. The claim is in the first clause and
+        is about the core record.
+        """
+        md = ("It carried a `distributions` block that does not appear in the "
+              "supplied slot inventory, and stated content in five slots that "
+              "the full record did not state.\n")
+        self.assertEqual(self.kinds(md),
+                         [("false_schema_claim", "distributions")])
+        self.assertEqual(self.check(md)["findings"][0]["scope"], "unscoped")
+
+    def test_the_scope_word_in_the_claims_own_clause_still_decides(self):
+        """The clause bound must not undo the fix it guards."""
+        md = ("The audit was wrong about several things, and `keywords` is "
+              "not declared by the core schema.\n")
+        self.assertEqual(self.kinds(md), [])
+
     def test_the_finding_says_which_scope_it_used(self):
         md = "`distributions` is not declared in the core schema.\n"
         finding = self.check(md)["findings"][0]

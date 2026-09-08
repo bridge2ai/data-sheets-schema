@@ -290,10 +290,11 @@ REPORT_CLAIMS_INSTRUMENT = ("v3 (#1022, #1046): a schema claim that names its ow
 #: A schema claim can name the inventory it is about, and the instruction the
 #: v8 report phase follows asks for exactly that sentence: "`splits` and
 #: `participant_privacy` are not declared by the core schema and appear only
-#: in the full record." Resolving the slot against every class turned three
-#: such true sentences into `false_schema_claim` findings and had two VOICE
-#: reports rewritten over them (#1046); a fourth pair did the same on the
-#: 04f gate (#1022). The scope is read from the claim's own words.
+#: in the full record." Resolving the slot against every class turned true
+#: sentences of that shape into `false_schema_claim` findings, and two
+#: regates were fed them — VOICE `2026-09-04f_rep1`, whose two findings were
+#: both false, and CM4AI `2026-09-04g_rep3`, where two of four were (#1022,
+#: #1046). The scope is read from the claim's own words.
 _CORE_SCOPE = re.compile(
     r"\bcore\s+(?:schema|record|class|inventory|digest|dataset|"
     r"projection|view|subset)\b|"
@@ -315,21 +316,43 @@ _ANY_CLASS = re.compile(r"\bany (?:listed |declared |named )?"
 #: record or an inventory are taken as the claim naming its own scope.
 
 
+#: Clause boundaries. The scope word has to sit in the same clause as the
+#: "not declared" phrase, because a reconciliation report says "the full
+#: record" in passing constantly (#1087). Read over the whole sentence, one
+#: v5 VOICE report's trailing clause — "…and stated content in five slots
+#: that the full record did not state" — scoped a `distributions` claim in
+#: the *first* clause to `Dataset`, where `distributions` is not declared,
+#: and silenced the one finding #546 exists to make. `full` resolves to
+#: `Dataset` alone, so every subject of #546 — `distributions`, `path`,
+#: `md5`, `format`, `media_type`, all `CoreDataset` or `CoreDistribution` —
+#: was one stray boilerplate clause away from being unreportable.
+_CLAUSE = re.compile(r"[;,]\s+")
+
+
 def _claim_scope(claim: str, classes: set[str]) -> tuple[set[str], str]:
     """The classes a schema claim is about, and how that was decided.
 
-    A claim naming both scopes — "not declared by the core schema and appears
+    The scope is read from the clause carrying the "not declared" phrase, not
+    from the sentence: a clause elsewhere in the sentence is about something
+    else, and taking it as the scope silences true findings.
+
+    A clause naming both scopes — "not declared by the core schema and appears
     only in the full record" — is about the core one: the full mention is
-    where the slot *is*, which is the sentence's own contrast, not a second
-    inventory to check it against.
+    where the slot *is*, the clause's own contrast, not a second inventory to
+    check it against.
     """
     core = {c for c in classes if c.startswith("Core")}
     full = classes - core
-    if _ANY_CLASS.search(claim):
+    where = claim
+    for clause in _CLAUSE.split(claim):
+        if _ABSENT_FROM_SCHEMA.search(clause):
+            where = clause
+            break
+    if _ANY_CLASS.search(where):
         return classes, "unscoped"
-    if core and _CORE_SCOPE.search(claim):
+    if core and _CORE_SCOPE.search(where):
         return core, "core"
-    if full and _FULL_SCOPE.search(claim):
+    if full and _FULL_SCOPE.search(where):
         return full, "full"
     return classes, "unscoped"
 

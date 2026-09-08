@@ -302,8 +302,9 @@ report_claims:
     claim: '| `distributions` | — | — | Removed; undeclared slot |'
   - kind: false_schema_claim
     slot: distributions
-    scope: unscoped
-    detail: report says this is not a declared slot; it is declared on CoreDataset
+    scope: core
+    detail: report says this is not a declared slot; it is declared on CoreDataset;
+      the claim is scoped to the core schema
     claim: '**Not schematized.** `distributions` is not a declared slot of `CoreDataset`,
       and none of `path`, `format`, `media_type`, `bytes` is declared on any class
       in the schema.'

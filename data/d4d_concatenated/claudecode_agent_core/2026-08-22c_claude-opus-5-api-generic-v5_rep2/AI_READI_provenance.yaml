@@ -347,9 +347,8 @@ report_claims:
   findings:
   - kind: false_schema_claim
     slot: distributions
-    scope: core
-    detail: report says this is not a declared slot; it is declared on CoreDataset;
-      the claim is scoped to the core schema
+    scope: unscoped
+    detail: report says this is not a declared slot; it is declared on CoreDataset
     claim: Validation against the core schema is the arbiter; if `distributions` is
       not declared, this remains an open defect.
   claims_checked: 0

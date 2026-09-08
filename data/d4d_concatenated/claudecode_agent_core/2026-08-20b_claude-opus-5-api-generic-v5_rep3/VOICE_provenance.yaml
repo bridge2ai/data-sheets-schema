@@ -325,7 +325,14 @@ pair_consistency:
   findings_truncated: null
 report_claims:
   checked: true
-  findings: []
+  findings:
+  - kind: false_schema_claim
+    slot: distributions
+    scope: unscoped
+    detail: report says this is not a declared slot; it is declared on CoreDataset
+    claim: It carried a `distributions` block that does not appear in the supplied
+      slot inventory, relocated the disease cohorts from `subsets` to `resources`,
+      and stated content in five slots that the full record did not state.
   claims_checked: 5
   claims_unnamed: 3
   disposition_rows: 0
