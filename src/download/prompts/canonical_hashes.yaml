@@ -266,6 +266,24 @@ files:
         corrected'
       retired_on: '2026-09-04'
       sha256: 06666c4d10786d4689170acdfd68350d451f84d2f94d4b5a22be6e569d3824f1
+  src/download/prompts/d4d_generic_arm_prompt_v9.md:
+    body_sha256: 5e590c74d05c1bf688ceadb863c5ddee8c3fdea9e0bed14b4305cd466a1a91ae
+    bytes: 19016
+    pinned_at_commit: 63d22e540d8e937135dee6ed0247cd103a5a44b9
+    pinned_on: '2026-09-08'
+    reason: 'Rotated after the #1072 review: R6 promises only the fields a declaration actually
+      carries and states that an empty related list assures nothing; R7 uses generic examples
+      rather than strings lifted from the records it will be scored against, and carves out
+      an entity whose own registered name contains a conjunction.'
+    sha256: bc4914fc782d0ecdf19db8f1bdc02c70756c023135c3cd61dfa46cd86867ead1
+    superseded:
+    - pinned_on: '2026-09-08'
+      reason: "generic_v9: v8 plus R6 (a value in the referent own slots is supported by a\
+        \ passage about the referent, binding reconcile \u2014 #913) and R7 (a list entry\
+        \ names exactly one entity, with the merged-entry signature \u2014 #911). Pairs with\
+        \ the scope declaration the runner sends (#932)."
+      retired_on: '2026-09-08'
+      sha256: 6a4957605105333eeb0e68b23c64604374fa46b05c1ce06a9e3d8a7a592e6e80
   src/download/prompts/d4d_tuned_arm_prompt.md:
     bytes: 2877
     pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
