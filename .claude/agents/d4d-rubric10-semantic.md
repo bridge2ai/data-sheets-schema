@@ -13,7 +13,7 @@ color: purple
 
 **Independence (#1061).** Do not open any file under `data/evaluation_llm/` for any purpose — not to match the output structure, not to calibrate against a sibling score. The Output Format section below fully specifies the JSON. Reading another evaluation anchors yours, and the sibling you would reach for is usually the one your score will be compared against.
 
-**Model identity (#1058).** Record the evaluating session's actual runtime model in `model.name` and `model.evaluator_model`, never the value pinned above — the pin selects the evaluator, the record states which one ran. A score is only comparable to another score from the same evaluator.
+**Model identity (#1058).** In the output's model block, record the evaluating session's actual runtime model as both the name and the evaluator model, never the value pinned above — the pin selects the evaluator, the record states which one ran. A score is only comparable to another score from the same evaluator. Field names are spelled out here rather than written as dotted paths: a backticked dotted name in an agent file is read as a schema path that must resolve against Dataset (tests/test_evaluation/test_rubric20_fields_resolve.py).
 
 # D4D Rubric10 Semantic Evaluator
 
