@@ -77,11 +77,12 @@ GENERIC_PROMPT_V7 = PROMPTS / "d4d_generic_arm_prompt_v7.md"
 # figures, receipts per roster entry. Registered as one configuration with
 # the depth-two digest (#916) and the inlined Person slots (#805).
 GENERIC_PROMPT_V8 = PROMPTS / "d4d_generic_arm_prompt_v8.md"
+GENERIC_PROMPT_V9 = PROMPTS / "d4d_generic_arm_prompt_v9.md"
 #: Conditions whose `full` phase emits a coverage receipt (#710). The bundle
 #: they see carries chunk markers and the phase instruction asks for the
 #: second document, so this is a condition boundary, never a flag on an
 #: existing condition.
-RECEIPT_CONDITIONS = frozenset({"generic_v7", "generic_v8"})
+RECEIPT_CONDITIONS = frozenset({"generic_v7", "generic_v8", "generic_v9"})
 RECEIPT_MARK = "--- COVERAGE RECEIPT ---"
 CONDITION_PROMPTS = {"generic": GENERIC_PROMPT,
                      "generic_v2": GENERIC_PROMPT_V2,
@@ -91,6 +92,7 @@ CONDITION_PROMPTS = {"generic": GENERIC_PROMPT,
                      "generic_v6": GENERIC_PROMPT_V6,
                      "generic_v7": GENERIC_PROMPT_V7,
                      "generic_v8": GENERIC_PROMPT_V8,
+                     "generic_v9": GENERIC_PROMPT_V9,
                      "tuned": GENERIC_PROMPT}
 
 # Which generic base each condition is built on. The generic/tuned comparison
@@ -112,6 +114,7 @@ CONDITION_AXES = {
     "generic_v6": {"base": "v6", "tuned": False},
     "generic_v7": {"base": "v7", "tuned": False},
     "generic_v8": {"base": "v8", "tuned": False},
+    "generic_v9": {"base": "v9", "tuned": False},
     "tuned":      {"base": "v1", "tuned": True},
 }
 
