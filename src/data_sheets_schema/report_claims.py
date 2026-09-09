@@ -282,9 +282,11 @@ _DISPOSITION = re.compile(r"^\W*(?:\*\*)?(removed|deleted|dropped|retained|kept|
 #: #990 with nothing recording which reading produced a block; everything
 #: before this constant is v1.
 REPORT_CLAIMS_INSTRUMENT = ("v4 (#1122): `rows_by_record` tallies the dispositions rows by "
-                            "their record column, so a `both` row wrongly flipped to `full` — "
-                            "which the gate cannot see, a `full` row resolving against the full "
-                            "record only — is countable from the block; v3 (#1022, #1046): a "
+                            "their record column — `full`, `core`, `both`, `either` for an empty "
+                            "cell, `no_record_column` for a table with no such column, `invalid` "
+                            "for anything else — so a `both` row wrongly flipped to `full`, "
+                            "which the gate cannot see (a `full` row resolves against the full "
+                            "record only), is countable from the block; v3 (#1022, #1046): a "
                             "schema claim that names its own scope — the core schema, the full "
                             "schema, a class — is resolved against that scope only, not against "
                             "every class; v2 (#990): a finding on a `both` row names when the "
@@ -294,15 +296,18 @@ REPORT_CLAIMS_INSTRUMENT = ("v4 (#1122): `rows_by_record` tallies the dispositio
 #: The values `disposition_rows` can read off a row's `record` cell, in the
 #: order the block lists them. Fixed keys, zero-filled, so two blocks compare
 #: without a missing key standing for a zero (#1122).
-RECORD_COLUMN_VALUES = ("full", "core", "both", "either", "invalid")
+RECORD_COLUMN_VALUES = ("full", "core", "both", "either", "no_record_column", "invalid")
 
 
 def rows_by_record(rows: list[dict[str, str]]) -> dict[str, int]:
     """How many dispositions rows name each record (#1122).
 
-    `either` is an empty cell and `invalid` anything but `full`, `core` or
-    `both`, exactly as `disposition_rows` reads them; the values sum to
-    `disposition_rows`.
+    `either` is an empty (or missing) cell in a table that has a record
+    column, `no_record_column` a row of a table with no such column — a
+    report format that named no record, as every pre-v8 report did, which
+    is "not measurable" rather than "no `both` rows" (#1139 review, S2) —
+    and `invalid` anything but `full`, `core` or `both`; exactly as
+    `disposition_rows` reads them, and the values sum to `disposition_rows`.
     """
     counts = {value: 0 for value in RECORD_COLUMN_VALUES}
     for row in rows:
@@ -407,7 +412,8 @@ def disposition_rows(text: str) -> list[dict[str, str]]:
     numbered finding table whose column happens to be called Disposition
     yields nothing, #962). For `changed`/`added` rows written as
     "`old` -> `new`" the claim is about the destination. The `record` cell
-    must be exactly `full`, `core` or `both`; empty reads as `either`, and
+    must be exactly `full`, `core` or `both`; empty reads as `either`, a
+    table with no record column reads `no_record_column` (#1122), and
     anything else is `invalid`, which the checker counts as unnamed rather
     than guess at.
     """
@@ -442,9 +448,12 @@ def disposition_rows(text: str) -> list[dict[str, str]]:
         if len(names) > 1 and disposition in ("changed", "amended", "corrected", "added"):
             names = names[-1:]
         record = ""
-        if "record" in header and header["record"] < len(cells):
+        if "record" not in header:
+            record = "no_record_column"
+        elif header["record"] < len(cells):
             record = cells[header["record"]].strip().lower()
-        record = record if record in ("full", "core", "both") else ("either" if not record else "invalid")
+        if record not in ("full", "core", "both", "no_record_column"):
+            record = "either" if not record else "invalid"
         for name in names:
             rows.append({"slot": name, "disposition": disposition, "record": record,
                          "line": line.strip()})
@@ -630,7 +639,8 @@ def check_report(report: Path, full: dict, core: dict,
     # named, or in *either* record when it names none (#963): reconciliation
     # legitimately keeps a full-only slot out of the derived core.
     _CONTEXT = {"full": "from the full record", "core": "from the core record",
-                "both": "from the full record and core record", "either": "", "invalid": ""}
+                "both": "from the full record and core record", "either": "",
+                "no_record_column": "", "invalid": ""}
     for row in rows:
         if row["disposition"] in ("removed", "deleted", "dropped"):
             if row["record"] == "invalid":
@@ -646,7 +656,9 @@ def check_report(report: Path, full: dict, core: dict,
         claims += 1
         in_full, v_full = resolve(full, row["slot"])
         in_core, v_core = resolve(core, row["slot"])
-        where = row["record"]
+        # A table with no record column reads like an empty cell here —
+        # against either record — and is only counted apart (#1122).
+        where = "either" if row["record"] == "no_record_column" else row["record"]
         present = {"core": in_core and _populated(v_core),
                    "full": in_full and _populated(v_full),
                    "both": (in_core and _populated(v_core)) and (in_full and _populated(v_full)),

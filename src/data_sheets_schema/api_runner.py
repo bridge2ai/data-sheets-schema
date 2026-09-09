@@ -3708,6 +3708,11 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
         "checked": bool(before.get("checked")),
         "claims_checked_before": before.get("claims_checked"),
         "findings_before": len(before.get("findings") or []),
+        # The regate is the one within-run step that rewrites the record
+        # column — told a `both` row must name `full`, a model can flip
+        # legitimate ones too — so the tally is kept from both sides
+        # (#1139 review, S1); the record's block is the post-regate reading.
+        "rows_by_record_before": before.get("rows_by_record"),
         "regenerated": False}
     if not before.get("checked"):
         out["reason"] = before.get("reason")
@@ -3759,6 +3764,7 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
         after = before
     out["claims_checked_after"] = after.get("claims_checked")
     out["findings_after"] = len(after.get("findings") or [])
+    out["rows_by_record_after"] = after.get("rows_by_record")
     out["remaining"] = (after.get("findings") or [])[:20]
     print(f"   report re-checked: {out['findings_before']} contradiction(s) before, "
           f"{out['findings_after']} after"

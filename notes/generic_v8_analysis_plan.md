@@ -983,12 +983,19 @@ slot, and no change anywhere else — read with one caveat the review
 named: the gate resolves a `full` row against the full record only, so a
 row wrongly flipped from `both` to `full` produces no finding; the block
 therefore says the test is on the *root* of the slot path and applies to
-retained/changed/added rows, and a canary reader should compare the count
+retained/changed/added rows, and a canary reader should compare the rate
 of `both` rows with the v8 fill's rather than trust the zero alone — read
-off `report_claims.rows_by_record.both` (instrument v4, #1122): 617 of 682
-over the 18 v8 API records, 5 of them the VOICE 2026-09-04d rows on slots
-the core cannot hold (the 612 this paragraph first gave was that count
-less those five, computed by hand from the reports). The v8 labels already carry three assembly digests (2026-09-04
+off `report_claims.rows_by_record` (instrument v4, #1122). The fill as
+defined above (12 records) reads 419 `both` of 461 (90.9%); all 18
+v8-labelled API records, the fill plus the six canaries, read 617 of 682
+(90.5%), with the five rows on slots the core cannot hold all on the VOICE
+2026-09-04d canary and none in the fill. (The "612 of 682" this paragraph
+first gave was the 18-record count less those five, computed by hand from
+the reports, and called the fill; it was neither.) The recorded tally is
+the post-regate reading: on three of the ten v8 records with a pre-regate
+snapshot the regate flipped `both` rows to `full` (04f rep1 CHORUS ×2, 04g
+rep3 CM4AI ×2, 04f rep3 VOICE ×4), so `report_gate` now carries the tally
+before and after, and the comparison is post-regate against post-regate. The v8 labels already carry three assembly digests (2026-09-04
 rep1; b/c/d; e/f/g), so "one boundary" is a statement about v9, not a
 claim that v8 was one arm; and the block is unconditional, as step E was,
 so a re-run of an earlier condition would receive it too.
@@ -1191,7 +1198,6 @@ steps need:
     the repair round, which is told what to merge. A clean run's output
     is untouched, so VOICE 04f stays retained; the AI_READI 04f record is
     re-verdicted under the instrument (regressed) and AI_READI runs again.
-
 15. **The dispositions rows are tallied by record column (#1122, 2026-09-09,
     report_claims instrument v4).** The v9 canary reader was told to compare
     the count of `both` rows with the v8 fill's, and the block carried only
@@ -1199,9 +1205,12 @@ steps need:
     fixed keys, summing to `disposition_rows`) is now on every record:
     recomputed over the corpus with `backfill-checks --blocks report_claims
     --overwrite`, which moved no finding and no count — only the new key
-    and the instrument string. The v8 fill reads 617 `both` of 682.
+    and the instrument string. The 12-record fill reads 419 `both` of 461;
+    all 18 v8-labelled API records, 617 of 682. Not a generation-path
+    change: a derived key in the provenance record, no prompt, assembly or
+    datasheet touched.
 
-Each of 2–5, 7–10, 11 and 12 is a generation-path change (13 and 14 are not); per the production rule
+Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14 and 15 are not); per the production rule
 none of them may land between a v8 canary and its fill.
 
 ## Decisions needed before step 3

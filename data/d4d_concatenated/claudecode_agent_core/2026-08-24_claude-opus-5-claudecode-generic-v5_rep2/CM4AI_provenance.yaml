@@ -243,15 +243,18 @@ report_claims:
     core: 0
     both: 0
     either: 0
+    no_record_column: 0
     invalid: 0
   claims_core_cannot_hold: 0
   instrument: 'v4 (#1122): `rows_by_record` tallies the dispositions rows by their
-    record column, so a `both` row wrongly flipped to `full` — which the gate cannot
-    see, a `full` row resolving against the full record only — is countable from the
-    block; v3 (#1022, #1046): a schema claim that names its own scope — the core schema,
-    the full schema, a class — is resolved against that scope only, not against every
-    class; v2 (#990): a finding on a `both` row names when the core class declares
-    no such slot; `claims_core_cannot_hold` counts them'
+    record column — `full`, `core`, `both`, `either` for an empty cell, `no_record_column`
+    for a table with no such column, `invalid` for anything else — so a `both` row
+    wrongly flipped to `full`, which the gate cannot see (a `full` row resolves against
+    the full record only), is countable from the block; v3 (#1022, #1046): a schema
+    claim that names its own scope — the core schema, the full schema, a class — is
+    resolved against that scope only, not against every class; v2 (#990): a finding
+    on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
+    counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/CM4AI_reconciliation.md

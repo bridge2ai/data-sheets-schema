@@ -453,14 +453,27 @@ class RowsByRecordTest(Harness):
                                           "source_caveats": 1, "collection_timeframes": 1},
                            core={"notes": 1, "keywords": 1, "collection_timeframes": 1})
         self.assertEqual(block["rows_by_record"],
-                         {"full": 1, "core": 1, "both": 2, "either": 1, "invalid": 1})
+                         {"full": 1, "core": 1, "both": 2, "either": 1, "no_record_column": 0, "invalid": 1})
         self.assertEqual(sum(block["rows_by_record"].values()), block["disposition_rows"])
 
     def test_the_keys_are_fixed_and_zero_filled(self):
         block = self.check("## Dispositions\n\n| slot | disposition | record |\n|---|---|---|\n"
                            "| `notes` | retained | both |\n", full={"notes": 1}, core={"notes": 1})
-        self.assertEqual(list(block["rows_by_record"]), ["full", "core", "both", "either", "invalid"])
-        self.assertEqual(block["rows_by_record"], {"full": 0, "core": 0, "both": 1, "either": 0, "invalid": 0})
+        self.assertEqual(list(block["rows_by_record"]),
+                         ["full", "core", "both", "either", "no_record_column", "invalid"])
+        self.assertEqual(block["rows_by_record"],
+                         {"full": 0, "core": 0, "both": 1, "either": 0, "no_record_column": 0, "invalid": 0})
+
+    def test_a_table_with_no_record_column_is_counted_apart_from_an_empty_cell(self):
+        """Every `either` in the corpus came from a table with no record
+        column — a report format that named no record, not a run that left
+        a cell empty (#1139 review, S2). A reader comparing `both` counts
+        across arms must be able to tell "none" from "not measurable"."""
+        block = self.check("## Dispositions\n\n| # | Severity | Slot | Disposition |\n|---|---|---|---|\n"
+                           "| 1 | low | `notes` | retained |\n| 2 | low | `errata` | retained |\n",
+                           full={"notes": 1, "errata": 1}, core={"notes": 1})
+        self.assertEqual(block["rows_by_record"]["no_record_column"], 2)
+        self.assertEqual(block["rows_by_record"]["either"], 0)
 
     def test_a_report_without_a_table_tallies_zero(self):
         block = self.check("## Report\n\nNothing changed.\n")
