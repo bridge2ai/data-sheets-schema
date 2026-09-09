@@ -2804,10 +2804,19 @@ def header_value(field: str, settings: dict[str, Any]) -> str:
     if field == "Reasoning effort":
         # Two records' headers read `Reasoning effort: default` against a
         # record that says nothing — the value CLAUDE.md forbids (#470). The
-        # header states a configured effort or says none was set; never a
-        # guess (#1027 review, finding 6).
+        # header states the effort the request carried — configured, or
+        # named by the route the way the record derives it (#397: the
+        # `-high` suffix on `google/claude-opus-5-high`, 49 records) — or
+        # says none was set; never a guess. The first version returned a
+        # constant, which on the documented `-high` route would have
+        # overwritten a header the model got right with a false one (#1027
+        # review, round 2).
         if settings.get("effort"):
             return str(settings["effort"])
+        from data_sheets_schema.provenance import _effort_from_route
+        effort, _ = _effort_from_route(settings.get("name"))
+        if effort:
+            return str(effort)
         return "not set by the request (the provider's own choice; not recorded as a value)"
     raise KeyError(field)
 

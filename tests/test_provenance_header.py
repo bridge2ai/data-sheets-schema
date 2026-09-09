@@ -64,6 +64,14 @@ class TestHeaderStatesTheRequest(unittest.TestCase):
         self.assertNotIn("default\n", out)
         out = stamp_provenance_header("# Reasoning effort: default\nid: y\n", {**settings, "effort": "high"})
         self.assertIn("# Reasoning effort: high\n", out)
+        # the route carries the effort the record derives (#397): the stamp
+        # agrees with the record instead of overwriting a correct header
+        # (round-2 finding 1)
+        out = stamp_provenance_header("# Reasoning effort: high\nid: y\n",
+                                      {**settings, "name": "google/claude-opus-5-high"})
+        self.assertIn("# Reasoning effort: high\n", out)
+        from data_sheets_schema.runs import _same_value
+        self.assertTrue(_same_value("high", "high"))
 
     def test_header_value_refuses_unknown_fields(self):
         with self.assertRaises(KeyError):
@@ -128,6 +136,18 @@ class TestRunsCheckSeesTheDisagreement(unittest.TestCase):
         got = [g for g in header_disagreements(method, label, proj, concat_dir=root) if g["field"] == "Reasoning effort"]
         self.assertEqual(got, [])
 
+    def test_a_missing_artifact_is_a_row_only_beside_an_existing_sibling(self):
+        """Round-2 finding 4: five `claudecode_agent_merged` records predate
+        #694 and never had a core record — no header, no disagreement."""
+        from data_sheets_schema.runs import header_disagreements
+        root, method, label, proj = self._seed("not sent (x)")
+        core = root / f"{method}_core" / label / f"{proj}_d4d_core.yaml"
+        core.unlink()
+        got = header_disagreements(method, label, proj, concat_dir=root)
+        self.assertEqual([(g["artifact"], g["record"]) for g in got], [("core", "no artifact on disk")])
+        (root / method / label / f"{proj}_d4d.yaml").unlink()          # neither: nothing to say
+        self.assertEqual(header_disagreements(method, label, proj, concat_dir=root), [])
+
     def test_an_agentic_record_asserting_the_same_value_is_quiet(self):
         """135 agentic records store `temperature: '0.0'` as an asserted value.
         Header and record agree; that the agreement is unverified is #614's
@@ -168,8 +188,9 @@ class TestEveryArtifactWriteIsStamped(unittest.TestCase):
         full or core artifact (the review's ignore-independent scan found
         `:3027`, `:3111`, `:4153` and nothing else; `_snapshot` writes
         intermediates). Each write of a record body there is preceded by the
-        stamp; a missing artifact-write site would be a new function, which
-        the count guards."""
+        stamp. The count guards a *removed* write inside those two functions;
+        a new function writing an artifact elsewhere is outside it (round 2,
+        note 5) — the ignore-independent scan is the check for that."""
         import inspect
         import re as _re
         from data_sheets_schema import api_runner
@@ -192,12 +213,16 @@ class TestEveryArtifactWriteIsStamped(unittest.TestCase):
         from pathlib import Path
         from unittest import mock
         from data_sheets_schema import api_runner
+        import sys
+        if str(Path(__file__).resolve().parents[1]) not in sys.path:      # `python tests/x.py` (round-2 finding 3)
+            sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
         from tests.test_download.test_api_runner import spec
         tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
         s = spec(out_dir=Path(tmp.name) / "out")
         s.full_path.parent.mkdir(parents=True, exist_ok=True)
         s.core_path.parent.mkdir(parents=True, exist_ok=True)
         s.full_path.write_text("# Model: claude-opus-5\n# Temperature: 0.0\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n")
+        s.core_path.write_text("# Model: claude-opus-5\n# Temperature: 0.0\nid: x\n")   # so the core branch runs (round-2 finding 2)
         repaired = ("```yaml\n# Model: claude-opus-5\n# Temperature: 0.0\nid: x\ntitle: T\nname: n\n"
                     "description: d\nkeywords: [a]\n```\n")
 
@@ -224,8 +249,7 @@ class TestEveryArtifactWriteIsStamped(unittest.TestCase):
             api_runner._repair_invalid(s, object(), settings, [])
         head = s.full_path.read_text().splitlines()[1]
         self.assertTrue(head.startswith("# Temperature: not sent ("), head)
-        if s.core_path.exists():
-            self.assertIn("# Temperature: not sent (", s.core_path.read_text())
+        self.assertIn("# Temperature: not sent (", s.core_path.read_text())   # re-derived and stamped
 
 
 if __name__ == "__main__":

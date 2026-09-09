@@ -823,16 +823,19 @@ def check_cmd(method, label, project, strict):
         # One line per label and disagreement, with the count of records —
         # 142 per-record rows were a third of the report, and the 44-column
         # label cut dropped the replicate digit (#1027 review, finding 5).
-        grouped: dict[tuple[str, str, str, str, str], list[str]] = {}
+        # A disagreement present on both artifacts of a record prints once,
+        # as [full+core] (round 2, note 6).
+        grouped: dict[tuple[str, str, str, str], dict[str, set[str]]] = {}
         for h in header_mismatches:
             for ln in h["lines"]:
-                key = (h["label"], ln.get("artifact", "full"), ln["field"], ln["header"], ln["record"])
-                grouped.setdefault(key, []).append(h["project"])
-        for (label, artifact, field, header, record), projects in sorted(grouped.items()):
-            what = (f"header `{field}: {header}` · record {record}" if field
-                    else f"{record}")
-            click.echo(f"   {label}  [{artifact}] {what}  ×{len(projects)} "
-                       f"({', '.join(sorted(set(projects)))})")
+                key = (h["label"], ln["field"], ln["header"], ln["record"])
+                grouped.setdefault(key, {}).setdefault(h["project"], set()).add(ln.get("artifact", "full"))
+        for (label, field, header, record), by_project in sorted(grouped.items()):
+            arts = sorted({a for arts in by_project.values() for a in arts})
+            tag = "+".join(arts) if all(by_project[p] == set(arts) for p in by_project) else "/".join(arts)
+            what = (f"header `{field}: {header}` · record {record}" if field else f"{record}")
+            click.echo(f"   {label}  [{tag}] {what}  ×{len(by_project)} "
+                       f"({', '.join(sorted(by_project))})")
         click.echo("   Reported, not failed — the datasheet is wrong about itself, not "
                    "about the dataset. Records written or repaired since #1027 stamp "
                    "the header from the record; a run resumed past its record write "
