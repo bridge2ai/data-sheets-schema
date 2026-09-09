@@ -658,6 +658,37 @@ the form blocks of all 264 records were recomputed under it in the same
 change; v2 numbers in earlier notes are not comparable (see #906 for the
 canary consequence).
 
+## Proving which agent definition a subagent read (#1077)
+
+An edit to `.claude/agents/*.md` does not always reach a subagent spawned
+afterwards. On 2026-09-08 the #1059 threshold was written and verified on
+disk and the next evaluator reported the pre-edit criteria verbatim, while an
+earlier batch the same session did pick up its edit — intermittent, which is
+worse than consistent: a rescore can silently measure the old instrument and
+nothing in the output says so.
+
+`instrument_sha256` (#1099) does not detect this. The agent computes it by
+reading the file from disk, which is current, while the definition it was
+handed may be stale; the two agree even when the run is wrong.
+
+```bash
+d4d agents preamble --agent d4d-rubric10-semantic   # prepend to the spawn prompt
+d4d agents check-echo --agent d4d-rubric10-semantic --reply -   # exit 1 if stale
+d4d agents digest                                   # the pin each output records
+```
+
+The preamble asks the agent to quote back a sentence **the most recent change
+to the file added** — precisely the text a stale definition lacks — and to
+stop rather than proceed if it cannot find it. The challenge is drawn from
+the diff, not from the longest line: replayed against the real incident
+(`8813c8e6` against `119e3171`), a longest-line challenge appears in the
+stale text too and would have been echoed happily. `tests/test_agent_pin.py`
+pins that replay.
+
+When a definition has no recent change to draw on, `preamble` says so on
+stderr: echoing the sentence then proves the agent read *a* definition, not
+that it read this one.
+
 ## Canonical Prompt Registry
 
 Each condition's prompt files are pinned by hash in
