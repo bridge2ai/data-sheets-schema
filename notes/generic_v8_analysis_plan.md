@@ -216,6 +216,36 @@ work with a migration of committed values; separate).
 | 8 | populated leaves, rubric10/20 | A, watched | not below the v7 per-project replicate minimum; a fall means the larger digest displaced reading (the v7 markers confound, in a new form) |
 | 9 | spend | A | prompt tokens rise by ~2,900 chars of digest per call; `full` output tokens within ±10% of v7's per-project mean |
 
+**Prediction 9's baseline rule, registered (#1026, 2026-09-09).** The v7
+per-project mean is `run_telemetry.full_output_baseline` under
+`PREDICTION_9_RULE` — the accepted attempt per phase (the last `end_turn`
+`full` attempt with no abandoned-transport marker and no
+`unusable_reason`; a retried attempt excluded; `full_readdress` and
+`repair_full` are their own phases and not counted), a row the provenance
+lost — a resume past the phase, or an abandoned attempt whose completed
+retry was lost with the unseeded prior usage while the abandoned row
+survived through the ledger (a shape no corpus record has today; VOICE
+2026-09-04f rep2 keeps both rows) — recovered from the reasoning log, whose
+entries are matched by (attempt, output_tokens) against the rows the
+provenance refused, never by attempt number alone; the mean over the
+replicates that yield a row with the replicate range beside it, and the
+others named — printed by `d4d runs full-output-baseline`. The AI_READI 2026-09-04f row was read
+three ways before the rule was code: by hand from rep2's retried attempt
+(86,707, +3.2%), then over the two replicates with a provenance row alone,
+rep3 dropped (78,646, +13.8%); the rule reads +4.4% (v7 production: 79,078
+/ 78,215 / 99,870 → 85,721, rep3 recovered from its reasoning log). Under
+the same rule VOICE is 76,159 (73,375 / 74,126 / 80,976), CHORUS 41,068
+(35,025 / 40,186 / 47,994) and CM4AI 41,370 (26,766 with rep1's accepted
+attempt 2 / 31,044 / 66,300 — a 2.5× range, so a ±10% band on that mean is
+a weaker instrument than the mean suggests). The telemetry comparison
+(`d4d runs telemetry`) read the *first* `end_turn` attempt until this
+change — the one a retried phase threw away, wrong on all nine records
+whose provenance carries more than one accepted-eligible `full` attempt
+(ten phases with AI_READI 2026-09-01 rep3, whose two live only in its
+log); on the five that kept a phase-1 snapshot the accepted attempt is
+the one whose `visible_text_chars` matches the artifact — and now reads
+the accepted one.
+
 ### Falsification tests
 
 - **Rules restated, mechanism absent.** If prediction 1 holds but 4 does
