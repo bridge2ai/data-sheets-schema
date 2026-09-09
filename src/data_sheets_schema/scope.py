@@ -79,15 +79,53 @@ def aliases_of(entry: Any) -> list[str]:
     aka = entry.get("also_known_as")
     if aka is None:
         aka = []
-    elif isinstance(aka, (str, bytes, int, float)):
+    elif _is_identifier(aka):
         aka = [aka]
-    elif not isinstance(aka, (list, tuple)):
-        aka = list(aka) if hasattr(aka, "__iter__") else [aka]
+    elif isinstance(aka, (list, tuple)):
+        # Only the items that are identifiers (#1157): a nested list, a
+        # mapping, a bool or bytes inside the list is not an alias, and
+        # absorbing it made a plausible-looking one that never matches
+        # (`True`, `b'…'`, a mapping's keys). `check_manifest` reports it.
+        aka = [a for a in aka if _is_identifier(a)]
+    else:
+        aka = []
     out = []
     for ident in [entry.get("id"), *aka]:
-        text = str(ident).strip() if ident is not None else ""
+        if not _is_identifier(ident):
+            continue
+        text = str(ident).strip()
         if text and text not in out:
             out.append(text)
+    return out
+
+
+def _is_identifier(value: Any) -> bool:
+    """A value an identifier can be written as: a string or a number (a
+    manifest may write a bare accession as an int). Not a bool — `True` is
+    an int to Python and an alias to nobody — not bytes, not a container."""
+    return isinstance(value, (str, int, float)) and not isinstance(value, bool)
+
+
+def malformed_entries(project: str, manifest: Path = MANIFEST) -> list[dict]:
+    """The `related_but_distinct` entries this project's checkers skip, with
+    why (#1157): a non-mapping entry, or an `also_known_as` that is not a
+    string, a number, or a list of them. The scope block the runner sends
+    counts and names these to the model; the checker used to drop them
+    with no report, so a manifest typo left a related dataset unchecked
+    and nothing said so. `d4d download scope --check` reports them."""
+    scope = scope_of(project, manifest) or {}
+    out = []
+    for i, entry in enumerate(scope.get("related_but_distinct") or []):
+        if not isinstance(entry, dict):
+            out.append({"index": i, "problem": f"entry is a {type(entry).__name__}, not a mapping; skipped"})
+            continue
+        aka = entry.get("also_known_as")
+        bad = ([aka] if aka is not None and not _is_identifier(aka) and not isinstance(aka, (list, tuple))
+               else [a for a in aka if not _is_identifier(a)] if isinstance(aka, (list, tuple)) else [])
+        if bad:
+            out.append({"index": i, "id": entry.get("id"),
+                        "problem": (f"also_known_as carries {len(bad)} value(s) that are not an identifier "
+                                    f"({', '.join(sorted({type(b).__name__ for b in bad}))}); skipped")})
     return out
 
 
@@ -249,8 +287,16 @@ def check_manifest(manifest: Path = MANIFEST) -> list[dict]:
             problems.append({"project": project,
                              "problem": "no referent_id: the scope says what "
                                         "the record is about in prose only"})
-        ids = {e.get("id") for e in scope.get("related_but_distinct") or []}
-        for entry in scope.get("related_but_distinct") or []:
+        # A non-mapping entry, or an alias no reader can match, is reported
+        # here rather than raised on or dropped (#1157): the scope block the
+        # runner sends names such an entry to the model as omitted, and the
+        # checker that skips it must say so in the same place.
+        for row in malformed_entries(project, manifest):
+            problems.append({"project": project,
+                             "problem": f"related_but_distinct[{row['index']}]: {row['problem']}"})
+        entries = [e for e in scope.get("related_but_distinct") or [] if isinstance(e, dict)]
+        ids = {e.get("id") for e in entries}
+        for entry in entries:
             key = entry.get("manifest_key")
             if key and key not in projects:
                 problems.append({"project": project,
@@ -276,13 +322,13 @@ def check_manifest(manifest: Path = MANIFEST) -> list[dict]:
         # the asymmetry would be invisible. Only required when the other side
         # has a scope block at all — a related dataset outside this corpus
         # legitimately has no entry here.
-        for entry in scope.get("related_but_distinct") or []:
+        for entry in entries:
             other = entry.get("manifest_key")
             other_scope = (data.get("scope") or {}).get(other)
             if not other or not other_scope:
                 continue
             back = {e.get("manifest_key")
-                    for e in other_scope.get("related_but_distinct") or []}
+                    for e in other_scope.get("related_but_distinct") or [] if isinstance(e, dict)}
             if project not in back:
                 problems.append({
                     "project": project,

@@ -292,7 +292,8 @@ def scope_cmd(project, do_check, strict, manifest):
     require_repo_context("d4d download scope")
     setup_repo_imports()
     from data_sheets_schema.scope import (all_scopes, check_manifest,
-                                          check_record, related_ids)
+                                          check_record, malformed_entries,
+                                          related_ids)
 
     m = Path(manifest)
     scopes = all_scopes(m)
@@ -342,6 +343,12 @@ def scope_cmd(project, do_check, strict, manifest):
             if refs:
                 absorbed.append((rec, refs))
         click.echo(f"\n{checked} record(s) checked against the declaration")
+        # Entries the checker skipped (#1157): the scope block names them
+        # to the model as omitted; the reader of `--check` is told the same.
+        for name in (names if project else sorted(scopes)):
+            for row in malformed_entries(name, m):
+                click.echo(f"   ⚠️  {name}: related_but_distinct[{row['index']}] {row['problem']} "
+                           f"— that dataset is unchecked", err=True)
         for rec, why in bad:
             click.echo(f"   ❌ {rec}\n      {why}")
         if not bad:

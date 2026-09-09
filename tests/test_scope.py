@@ -88,6 +88,50 @@ class TestTheAliasesOfAnEntry(unittest.TestCase):
         self.assertEqual(scope.aliases_of({"id": "doi:1", "also_known_as": 12345}), ["doi:1", "12345"])
         self.assertEqual(scope.aliases_of({"id": "a", "also_known_as": ["a", "b", None, ""]}), ["a", "b"])
 
+    def test_aliases_no_reader_can_match_are_not_aliases(self):
+        """#1157: a bool, bytes, a nested list or a mapping absorbed into a
+        plausible-looking alias that never matches (`True`, `b'…'`, the
+        mapping's keys); they are skipped, and `check_manifest` reports them."""
+        self.assertEqual(scope.aliases_of({"id": "a", "also_known_as": True}), ["a"])
+        self.assertEqual(scope.aliases_of({"id": "a", "also_known_as": b"bytes"}), ["a"])
+        self.assertEqual(scope.aliases_of({"id": "a", "also_known_as": {"k": "v"}}), ["a"])
+        self.assertEqual(scope.aliases_of({"id": "a", "also_known_as": ["b", ["c"], {"d": 1}, False, 7]}), ["a", "b", "7"])
+        self.assertEqual(scope.aliases_of({"id": True}), [])
+
+    def test_a_malformed_entry_is_reported_by_the_manifest_check_and_the_cli_reader(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            manifest = Path(tmp) / "m.yaml"
+            manifest.write_text(yaml.safe_dump({"projects": {"P": [], "Q": []}, "scope": {"P": {
+                "referent_id": "https://doi.org/10.1/P",
+                "related_but_distinct": ["https://doi.org/10.1/BARE",
+                                         {"id": "https://doi.org/10.1/OTHER", "express_as": "related_datasets",
+                                          "also_known_as": ["https://doi.org/10.1/OTHER.v3", {"oops": 1}, True]},
+                                         {"id": "https://doi.org/10.1/THIRD", "express_as": "related_datasets",
+                                          "also_known_as": b"raw"}]}}}))
+            rows = scope.malformed_entries("P", manifest)
+            problems = [p["problem"] for p in scope.check_manifest(manifest) if p["project"] == "P"]
+            ids = scope.related_ids("P", manifest)
+        self.assertEqual([r["index"] for r in rows], [0, 1, 2])
+        self.assertIn("not a mapping", rows[0]["problem"])
+        self.assertIn("2 value(s)", rows[1]["problem"]); self.assertIn("bool", rows[1]["problem"]); self.assertIn("dict", rows[1]["problem"])
+        self.assertIn("bytes", rows[2]["problem"])
+        self.assertEqual([p for p in problems if "related_but_distinct[" in p], [f"related_but_distinct[{r['index']}]: {r['problem']}" for r in rows])
+        self.assertEqual(set(ids), {"https://doi.org/10.1/OTHER", "https://doi.org/10.1/OTHER.v3", "https://doi.org/10.1/THIRD"})
+
+    def test_the_block_and_the_checker_agree_on_how_many_entries_are_malformed(self):
+        """The runner's block says "N declared entries are malformed … and
+        omitted"; the checker must count the same N (#1157)."""
+        from unittest import mock
+        from data_sheets_schema.api_runner import scope_block
+        declaration = {"referent": "the P dataset", "referent_id": "https://doi.org/10.1/P",
+                       "related_but_distinct": ["bare", {"id": "https://doi.org/10.1/OTHER", "name": "Other",
+                                                         "express_as": "related_datasets"}, 7]}
+        with mock.patch.object(scope, "scope_of", lambda project, manifest=None: declaration):
+            block = scope_block("P")
+            rows = scope.malformed_entries("P")
+        self.assertIn("2 declared entries are malformed", block)
+        self.assertEqual([r["index"] for r in rows if "not a mapping" in r["problem"]], [0, 2])
+
     def test_related_ids_maps_the_scalar_alias_to_its_entry(self):
         with tempfile.TemporaryDirectory() as tmp:
             manifest = Path(tmp) / "m.yaml"
