@@ -74,7 +74,7 @@ def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
 @click.option("--label", "labels", multiple=True, help="record labels to read grant_number from; repeat for each")
 @click.option("--project", "projects", multiple=True, type=click.Choice(PROJECTS), help="default: every project")
 @click.option("--bundle-dir", default="data/preprocessed/concatenated", show_default=True,
-              help="where {PROJECT}_preprocessed.txt lives; the crate and healthsheet bundles have their own denominators")
+              help="directory holding {PROJECT}_preprocessed.txt (to run from another root); the crate and healthsheet bundles have their own denominators and this command does not read them")
 @click.option("--contexts", is_flag=True, help="print every bundle mention with its source file and context")
 def award_numbers_cmd(method, labels, projects, bundle_dir, contexts):
     """NIH award numbers per bundle, and per record under grant_number (#1028).

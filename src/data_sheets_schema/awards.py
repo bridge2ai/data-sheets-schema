@@ -4,22 +4,30 @@ The plan registered per-bundle ceilings "by the pattern `\\b[A-Z]\\d{2}[A-Z]{2}\
 and kin" and counted them by hand. The narrow form matches only an
 activity code of one letter and two digits (R01, P30, P41) with no
 application-type prefix; the bundles write `1OT2OD032742-01`,
-`5U24HG012107`, `UL1TR003096` — a leading type digit, a suffix, and
-activity codes of two letters and a digit. Counted by hand under "and
-kin", AI_READI's ceiling came out 2 where its bundle carries three awards
-in the flagship paper's funding statement.
+`5U24HG012107`, `UL1TR003096` and, in the papers' prose, `OT2 OD032742`
+and `U54 CA274502` — a leading type digit, a suffix, activity codes of
+two letters and a digit, and a space or hyphen before the institute
+code. Counted by hand under "and kin", AI_READI's ceiling came out 2
+where its bundle carries three awards in the flagship paper's funding
+statement; the first version of this module missed the spaced form and
+so undercounted CM4AI by two awards (#1161 review).
 
 `NIH_AWARD` is the pattern actually used: an optional application-type
-digit, the activity code (one or two letters, one or two digits), the
-two-letter institute code, six serial digits, an optional `-NN` suffix
-with a revision tag; the core eleven characters are the award. Every
-mention is returned with the source file it sits in and a context window,
-because the count a prediction needs is not "award-shaped tokens" but
-"awards stated as funding this dataset": a cited paper's grants, a
-platform's grants and an author's competing-interest grant are
-award-shaped and are not the dataset's funding, and only the context
-decides. The classification is the note's to register; this module makes
-the mechanical count reproducible and the reading auditable.
+digit, the activity code (one letter and two digits, or two letters and
+one digit — the two shapes NIH issues), an optional single space or
+hyphen, the two-letter institute code, six serial digits, an optional
+`-NN` suffix with a revision tag; the core eleven characters, separator
+stripped, are the award. Every mention is returned with the source file
+it sits in and a context window, because the count a prediction needs is
+not "award-shaped tokens" but "awards stated as funding this dataset":
+the plan note's rule is an award the dataset paper's funding statement
+attributes to this research or this work — not one it attributes to
+named investigators (the CM4AI Nature resource paper's acknowledgement,
+an AI_READI author's competing interest), to another named project, or
+to the platform hosting the release (PhysioNet's grants on every VOICE
+page) — and only the context decides. The classification is the note's
+to register; this module makes the mechanical count reproducible and the
+reading auditable.
 """
 from __future__ import annotations
 
@@ -41,12 +49,12 @@ from typing import Any
 #: would admit ordinary words.
 NIH_AWARD = re.compile(r"\b\d?((?:[A-Z]\d{2}|[A-Z]{2}\d)[ -]?[A-Z]{2}\d{6})(?:-\d{2}[A-Z0-9]*)?\b")
 
+#: The registered narrow form, kept so the two counts can be compared.
+NIH_AWARD_NARROW = re.compile(r"\b[A-Z]\d{2}[A-Z]{2}\d{6}\b")
+
 
 def _core(match: re.Match) -> str:
     return match.group(1).replace(" ", "").replace("-", "")
-
-#: The registered narrow form, kept so the two counts can be compared.
-NIH_AWARD_NARROW = re.compile(r"\b[A-Z]\d{2}[A-Z]{2}\d{6}\b")
 
 
 def award_numbers(text: str) -> Counter[str]:

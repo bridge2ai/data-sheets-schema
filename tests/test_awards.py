@@ -108,6 +108,11 @@ class TestTheCorpus(unittest.TestCase):
         for project, ceiling in FUNDING.items():
             self.assertIsNotNone(re.search(rf"{project} \*\*{ceiling}\*\*", row.split("stated as funding this dataset", 1)[1]),
                                  f"{project} funding ceiling {ceiling} not in the registry row")
+        # The results row repeats the four per-bundle counts (#1161 review, N8).
+        results = next(ln for ln in note.splitlines() if "recounted AI_READI" in ln)
+        stated = re.search(r"recounted ((?:[A-Z0-9_]+ \d+, )+[A-Z0-9_]+ \d+)", results).group(1)
+        self.assertEqual({k: int(v) for k, v in (pair.split() for pair in stated.split(", "))},
+                         {project: len(counts) for project, (_md5, counts) in REGISTERED.items()})
 
     def test_every_registered_bundle_count_reproduces_on_its_bytes(self):
         for project, (_md5, counts) in REGISTERED.items():
