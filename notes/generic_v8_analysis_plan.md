@@ -234,8 +234,12 @@ the same rule VOICE is 76,159 (73,375 / 74,126 / 80,976), CHORUS 41,068
 attempt 2 / 31,044 / 66,300 — a 2.5× range, so a ±10% band on that mean is
 a weaker instrument than the mean suggests). The telemetry comparison
 (`d4d runs telemetry`) read the *first* `end_turn` attempt until this
-change — the one a retried phase threw away, wrong on all five
-multi-attempt records — and now reads the accepted one.
+change — the one a retried phase threw away, wrong on all nine records
+whose provenance carries more than one accepted-eligible `full` attempt
+(ten phases with AI_READI 2026-09-01 rep3, whose two live only in its
+log); on the five that kept a phase-1 snapshot the accepted attempt is
+the one whose `visible_text_chars` matches the artifact — and now reads
+the accepted one.
 
 ### Falsification tests
 

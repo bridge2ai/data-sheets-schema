@@ -75,18 +75,22 @@ def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
 @click.option("--project", "projects", multiple=True, type=click.Choice(PROJECTS), help="default: every project")
 @click.option("--json", "as_json", is_flag=True)
 def full_output_baseline_cmd(method, labels, projects, as_json):
-    """Per-project `full` output baseline under prediction 9's registered rule (#1026).
-
-    Accepted attempt per phase — the last `end_turn` full attempt with no
-    abandoned-transport marker, a retried attempt excluded; a resumed run's
-    row recovered from its reasoning log; the mean over the replicates that
-    yield a row, the others named. No row is computed by hand again.
+    """Per-project `full` output baseline under `PREDICTION_9_RULE` (#1026),
+    printed with the result so the two cannot disagree. No row is computed
+    by hand again. Labels must live under one method directory; a set that
+    spans `claudecode_agent` and `claudecode_api` is refused, as `runs merge`
+    refuses it (#934) — a wrong directory reads as "no record", not as an
+    error.
     """
     import json as _json
 
     from data_sheets_schema.cli.method import resolve_method
     from data_sheets_schema.run_telemetry import PREDICTION_9_RULE, full_output_baseline
-    method = method or resolve_method(labels[0])
+    if not method:
+        found = {resolve_method(label) for label in labels}
+        if len(found) > 1:
+            raise click.ClickException(f"labels live under {sorted(found)}; pass --method")
+        method = found.pop()
     base = full_output_baseline(method, list(labels), list(projects) or list(PROJECTS))
     if as_json:
         click.echo(_json.dumps(base, indent=2))

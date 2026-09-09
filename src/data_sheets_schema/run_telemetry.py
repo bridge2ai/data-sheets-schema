@@ -244,19 +244,27 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
     rows = [r for r in (prov.get("api_usage") or []) if isinstance(r, dict) and r.get("phase") == "full"]
     source = "api_usage"
     acc = _accepted(rows)
+    logged: list[dict[str, Any]] = []
     if acc is None:
         # No *accepted* row — not merely no row (#1155 review, S3): a record
         # whose only `full` row is an abandoned attempt must still consult
         # the log, which holds the completed call the ledger seeding lost.
-        logged = [e for e in _reasoning_entries(run_dir / f"{project}_reasoning.jsonl") if e.get("phase") == "full"]
-        if _accepted(logged) is not None:
-            rows, source, acc = logged, "reasoning_log", _accepted(logged)
-        elif not rows and not logged:
-            source = None
+        # The log is a recovery source for rows the provenance *lost*, never
+        # an override of what the provenance says about the same attempt
+        # (round 2, M1): the log carries no `unusable_reason`, so a log entry
+        # whose attempt the provenance recorded as refused or abandoned is
+        # dropped before the log is read.
+        refused = {r.get("attempt") for r in rows if r.get("unusable_reason") or r.get("outcome")}
+        logged = [e for e in _reasoning_entries(run_dir / f"{project}_reasoning.jsonl")
+                  if e.get("phase") == "full" and e.get("attempt") not in refused]
+        acc = _accepted(logged)
+        if acc is not None:
+            rows, source = logged, "reasoning_log"
     out["attempts_seen"] = len(rows)
     if acc is None:
-        out["reason"] = ("no full row in the provenance and none in the reasoning log" if source is None
-                         else f"no accepted full attempt among {len(rows)} in the {source}")
+        seen = (f"{len(rows)} full row(s) in the provenance" if rows else "no full row in the provenance")
+        seen += (f", {len(logged)} in the reasoning log" if logged else ", none in the reasoning log")
+        out["reason"] = f"no accepted full attempt: {seen}"
         return out
     out.update({"output_tokens": int(acc["output_tokens"]), "attempt": acc.get("attempt"), "source": source,
                 "retried": sum(1 for r in rows if r is not acc and r.get("stop_reason") == "end_turn"

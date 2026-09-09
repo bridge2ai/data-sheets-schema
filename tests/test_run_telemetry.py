@@ -331,13 +331,38 @@ class TestPrediction9Rule(unittest.TestCase):
         completed call the ledger seeding lost."""
         from data_sheets_schema.run_telemetry import accepted_full_output
         with tempfile.TemporaryDirectory() as tmp:
+            # an abandoned attempt writes no log entry (the callback fires
+            # inside the retry loop); only the completed call is logged
             d = self._run(tmp, [{"phase": "full", "attempt": 1, "output_tokens": 999, "stop_reason": "end_turn",
                                  "outcome": "stream ended without message_stop"}],
-                          reasoning=[{"phase": "full", "attempt": 1, "output_tokens": 999, "stop_reason": "end_turn",
-                                      "outcome": "stream ended without message_stop"},
-                                     {"phase": "full", "attempt": 2, "output_tokens": 88000, "stop_reason": "end_turn"}])
+                          reasoning=[{"phase": "full", "attempt": 2, "output_tokens": 88000, "stop_reason": "end_turn"}])
             r = accepted_full_output(d, "P")
         self.assertEqual((r["output_tokens"], r["source"]), (88000, "reasoning_log"))
+
+    def test_the_log_never_launders_an_attempt_the_provenance_refused(self):
+        """#1155 round 2, M1: the log carries no unusable_reason, so a refused
+        attempt has a clean-looking entry there; the log recovers rows the
+        provenance lost and never overrides what it says about an attempt."""
+        from data_sheets_schema.run_telemetry import accepted_full_output
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._run(tmp, [{"phase": "full", "attempt": 1, "output_tokens": 500, "stop_reason": "end_turn",
+                                 "unusable_reason": "no YAML document"}],
+                          reasoning=[{"phase": "full", "attempt": 1, "output_tokens": 500, "stop_reason": "end_turn"}])
+            r = accepted_full_output(d, "P")
+        self.assertIsNone(r["output_tokens"])
+        self.assertEqual(r["reason"], "no accepted full attempt: 1 full row(s) in the provenance, none in the reasoning log")
+
+    def test_a_mixed_method_label_set_is_refused_not_half_read(self):
+        """#1155 round 2, S2: resolving the method from the first label reads
+        the other family's replicates as "no provenance record"."""
+        import click.testing
+        from unittest import mock
+        from data_sheets_schema.cli.runs import runs as runs_cli
+        with mock.patch("data_sheets_schema.cli.method.resolve_method",
+                        side_effect=lambda label: "claudecode_api" if "v8" in label else "claudecode_agent"):
+            r = click.testing.CliRunner().invoke(runs_cli, ["full-output-baseline", "--label", "x-v7_rep1",
+                                                            "--label", "x-v8_rep1", "--project", "CHORUS"])
+        self.assertNotEqual(r.exit_code, 0); self.assertIn("pass --method", r.output)
 
     def test_a_reply_the_runner_refused_is_not_the_accepted_one(self):
         """#1155 review, S4: `unusable_reason` marks a billed end_turn reply
