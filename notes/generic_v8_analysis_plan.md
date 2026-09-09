@@ -216,6 +216,36 @@ work with a migration of committed values; separate).
 | 8 | populated leaves, rubric10/20 | A, watched | not below the v7 per-project replicate minimum; a fall means the larger digest displaced reading (the v7 markers confound, in a new form) |
 | 9 | spend | A | prompt tokens rise by ~2,900 chars of digest per call; `full` output tokens within ±10% of v7's per-project mean |
 
+**Prediction 9's baseline rule, registered (#1026, 2026-09-09).** The v7
+per-project mean is `run_telemetry.full_output_baseline` under
+`PREDICTION_9_RULE` — the accepted attempt per phase (the last `end_turn`
+`full` attempt with no abandoned-transport marker and no
+`unusable_reason`; a retried attempt excluded; `full_readdress` and
+`repair_full` are their own phases and not counted), a row the provenance
+lost — a resume past the phase, or an abandoned attempt whose completed
+retry was lost with the unseeded prior usage while the abandoned row
+survived through the ledger (a shape no corpus record has today; VOICE
+2026-09-04f rep2 keeps both rows) — recovered from the reasoning log, whose
+entries are matched by (attempt, output_tokens) against the rows the
+provenance refused, never by attempt number alone; the mean over the
+replicates that yield a row with the replicate range beside it, and the
+others named — printed by `d4d runs full-output-baseline`. The AI_READI 2026-09-04f row was read
+three ways before the rule was code: by hand from rep2's retried attempt
+(86,707, +3.2%), then over the two replicates with a provenance row alone,
+rep3 dropped (78,646, +13.8%); the rule reads +4.4% (v7 production: 79,078
+/ 78,215 / 99,870 → 85,721, rep3 recovered from its reasoning log). Under
+the same rule VOICE is 76,159 (73,375 / 74,126 / 80,976), CHORUS 41,068
+(35,025 / 40,186 / 47,994) and CM4AI 41,370 (26,766 with rep1's accepted
+attempt 2 / 31,044 / 66,300 — a 2.5× range, so a ±10% band on that mean is
+a weaker instrument than the mean suggests). The telemetry comparison
+(`d4d runs telemetry`) read the *first* `end_turn` attempt until this
+change — the one a retried phase threw away, wrong on all nine records
+whose provenance carries more than one accepted-eligible `full` attempt
+(ten phases with AI_READI 2026-09-01 rep3, whose two live only in its
+log); on the five that kept a phase-1 snapshot the accepted attempt is
+the one whose `visible_text_chars` matches the artifact — and now reads
+the accepted one.
+
 ### Falsification tests
 
 - **Rules restated, mechanism absent.** If prediction 1 holds but 4 does
@@ -983,9 +1013,23 @@ slot, and no change anywhere else — read with one caveat the review
 named: the gate resolves a `full` row against the full record only, so a
 row wrongly flipped from `both` to `full` produces no finding; the block
 therefore says the test is on the *root* of the slot path and applies to
-retained/changed/added rows, and a canary reader should compare the count
-of `both` rows with the v8 fill's (612 of 682) rather than trust the zero
-alone. The v8 labels already carry three assembly digests (2026-09-04
+retained/changed/added rows, and a canary reader should compare the rate
+of `both` rows with the v8 fill's rather than trust the zero alone — read
+off `report_claims.rows_by_record` (instrument v4, #1122). The fill as
+defined above (12 records) reads 419 `both` of 461 (90.9%); all 18
+v8-labelled API records, the fill plus the six canaries, read 617 of 682
+(90.5%), with the five rows on slots the core cannot hold all on the VOICE
+2026-09-04d canary and none in the fill. (The "612 of 682" this paragraph
+first gave was the 18-record count less those five, computed by hand from
+the reports, and called the fill; it was neither.) The recorded tally is
+the post-regate reading: the tally moved on nine of the ten v8 records
+with a pre-regate snapshot (only 04b rep1 CM4AI is unchanged); on five
+the `both` count fell while `full` rose, three of them with the row
+total unchanged — the unambiguous flip of `both` to `full` (04e rep1
+VOICE ×1, 04f rep1 CHORUS ×2, 04g rep3 CM4AI ×2); 04f rep3 VOICE gained
+four `full` and lost three `both` while a row was added. So `report_gate` now carries
+the tally before and after, and the comparison is post-regate against
+post-regate. The v8 labels already carry three assembly digests (2026-09-04
 rep1; b/c/d; e/f/g), so "one boundary" is a statement about v9, not a
 claim that v8 was one arm; and the block is unconditional, as step E was,
 so a re-run of an earlier condition would receive it too.
@@ -1029,6 +1073,38 @@ list that passed on "neighbouring" (#1143). The audit-phase instruction the
 runner sends says "neighbouring" too and is filed as #1138, because
 `PHASE_INSTRUCTIONS` is in the assembly digest and moving it is a
 condition-boundary change.
+
+### The schema digest moved with #1114 (2026-09-09)
+
+The `doi` slot's description carried a real Nature DOI as its example,
+and the schema digest — sent ahead of the arm prompt on every request —
+renders slot descriptions, so a real identifier sat in model-facing text
+on every run (#1114, found by the #647 guard once it scanned the digest).
+The example is now a form (the docExample
+`10.xxxxx/example.1234`; the description states the shape without an
+instance). `schema_digest`'s
+`Dataset` fingerprint moved from `ffe03dd469feb388e0a4149e4f5ccb6f` to
+`a91bad8b8eaf7c34b147ff5970474342` (CoreDataset `386a470d…` → `dfb9f93c…`) and
+`schema.core_sha256` with it (the inventory ledger gained the new digest; no
+slot was added or removed). The operative sentence of the `doi`
+description — the bare DOI only — stays inside the digest's 300-character
+window; the first draft pushed it out, which would have been a rule
+removal presented as an identifier removal (#1126 review). The docExample
+annotations and `latest_version_doi`'s description lost their real and
+corpus identifiers too: they reach the agentic runtime through the merged
+schema file, not the digest.
+No v9 record exists, so the condition still has one boundary; a v9 run
+differs from the v8 fill by the scope block, R6–R14, the report-phase
+inventory (#998) and this digest together, and no comparison against the
+fill can attribute a difference to any one of them. The organization
+docExample pair is form-only (`https://ror.org/0xxxxxxxx`, "Example
+University", #1115), because docExample is model-facing on the agentic
+path. The review of round 2 found two more real-identifier docExamples
+(a registered trial in `D4D_Human.yaml`, a DOI that does not exist in
+`D4D_Uses.yaml`) and the review of round 3 an ORCID placeholder whose
+ISO 7064 check digit was valid (`0000-0001-2345-6789`, assignable to a
+person); all three are form-only now — the ORCID ends in a digit its
+checksum forbids — and none moved the digest.
 
 ### The audit-phase instruction writes American English (#1138, 2026-09-09)
 
@@ -1253,8 +1329,49 @@ steps need:
     is untouched, so VOICE 04f stays retained; the AI_READI 04f record is
     re-verdicted under the instrument (regressed) and AI_READI runs again.
 
-Each of 2–5, 7–10, 11 and 12 is a generation-path change (13 and 14 are not); per the production rule
-none of them may land between a v8 canary and its fill.
+15. **A label minted on an identifier the record carries is exempt from the
+    receipt denominator (#1123, 2026-09-09, receipts instrument v2).** v1
+    exempted only a fragment on the record's own id byte for byte; the v5
+    rule licenses one on any identifier the evidence supplies, so a record
+    that labelled its file collections on the landing page (AI_READI
+    2026-09-01 rep1, withheld below) or wrote its own id as a fragment on
+    its page (CHORUS) was counted as uncovered for them. v2 exempts a
+    fragment on the record's `id` in either form, its `doi` or its `page`,
+    names its instrument in the block, and counts the difference
+    (`slots.exempt_on_carried_identifier`: 4 leaves, all CHORUS API v7, all
+    the record's own top-level `id`; one had a receipt, three had none).
+    Recomputed with `backfill-checks --blocks receipts --overwrite`: 29
+    records; no *gated* number moved (findings, snippet verdicts and chunk
+    counts identical). Reported-only values that had never been recomputed
+    under later revisions did: three 2026-08-28 CHORUS agentic blocks gained
+    the #840/#891/#899 keys and their `recorded_by` moved from `d4d receipts
+    check` to `backfill_checks`; `entry_single_leaf_sample[*].leaves` fell
+    by one on two CM4AI records (6→5, 7→6: the #842 minted-id filter, own-id
+    fragments, not v2); `remapped_by_identity[*].basis` read `by_id` for
+    `by_overlap` on CM4AI 2026-09-04b (the #899 remap, not v2); 18 v8 blocks
+    gained `recorded_by`. The 18 receipted records whose bundle drifted are
+    withheld by the #907 guard and stay under v1 — #1140 is the recompute
+    from the git blob. v9 R8's "needs a receipt like any other value" clause
+    states the cost v2 removes; #1147 rotates it (no v9 record exists).
+
+16. **The dispositions rows are tallied by record column (#1122, 2026-09-09,
+    report_claims instrument v4).** The v9 canary reader was told to compare
+    the count of `both` rows with the v8 fill's, and the block carried only
+    the total. `rows_by_record` (`full`/`core`/`both`/`either`/
+    `no_record_column`/`invalid`, fixed keys, summing to `disposition_rows`)
+    is now on every record: recomputed over the corpus with
+    `backfill-checks --blocks report_claims --overwrite`, which moved no
+    finding and no count into or out of the block — only the new key and
+    the instrument string, and 12 rows on two pre-v8 records from `either`
+    to `no_record_column` when the two were split. The 12-record fill reads 419 `both` of 461;
+    all 18 v8-labelled API records, 617 of 682. Not a generation-path
+    change: a derived key in the provenance record, no prompt, assembly or
+    datasheet touched.
+
+Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14 and 16
+are not; 15 is classified with 17, the receipts instrument's next revision,
+#1053); per the production rule none of them may land between a v8 canary
+and its fill.
 
 ## Decisions needed before step 3
 

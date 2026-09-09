@@ -37,8 +37,8 @@ prefixes:
   # prefix *is* declared. See `src/data_sheets_schema/b2ai_registry_prefixes.yaml`
   # for the pin and how to refresh it.
   # Identifier namespaces the corpus already uses as URLs. Declared so those
-  # values can be written as CURIEs instead: `ROR:01an7q238` expands to exactly
-  # the IRI `https://ror.org/01an7q238`, so this is a change of representation
+  # values can be written as CURIEs instead: `ROR:0xxxxxxxx` expands to exactly
+  # the IRI `https://ror.org/0xxxxxxxx`, so this is a change of representation
   # and not of meaning.
   #
   # Undeclared, the conversion would have been a regression — a CURIE on an

@@ -341,11 +341,23 @@ report_claims:
   claims_checked: 10
   claims_unnamed: 0
   disposition_rows: 10
+  rows_by_record:
+    full: 2
+    core: 1
+    both: 7
+    either: 0
+    no_record_column: 0
+    invalid: 0
   claims_core_cannot_hold: 0
-  instrument: 'v3 (#1022, #1046): a schema claim that names its own scope — the core
-    schema, the full schema, a class — is resolved against that scope only, not against
-    every class; v2 (#990): a finding on a `both` row names when the core class declares
-    no such slot; `claims_core_cannot_hold` counts them'
+  instrument: 'v4 (#1122): `rows_by_record` tallies the dispositions rows by their
+    record column — `full`, `core`, `both`, `either` for an empty cell, `no_record_column`
+    for a table with no such column, `invalid` for anything else — so a `both` row
+    wrongly flipped to `full`, which the gate cannot see (a `full` row resolves against
+    the full record only), is countable from the block; v3 (#1022, #1046): a schema
+    claim that names its own scope — the core schema, the full schema, a class — is
+    resolved against that scope only, not against every class; v2 (#990): a finding
+    on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
+    counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04c_claude-opus-5-api-generic-v8_rep1/CM4AI_reconciliation.md
@@ -401,6 +413,11 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v2 (#1123): a fragment minted on an identifier the record carries for
+    the dataset at its top level — its id in CURIE or resolver form, its doi, its
+    page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 28
     reviewed: 28
@@ -435,6 +452,7 @@ receipts:
   slots:
     populated: 470
     exempt: 55
+    exempt_on_carried_identifier: 0
     receiptable: 415
     with_receipt: 292
     without_receipt:
@@ -792,6 +810,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/CM4AI_chunks.yaml
       sha256: 3d2d86bac4e9f89d2c6cfb6b5f5361c237995d899ecb6ae41382f82359aedde4
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_api_core/2026-09-04c_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_audit.json
   sha256: 0f77a8dd0824fe4c07df5d244af0e0fafb40c6e6c80b48b88971123651459281

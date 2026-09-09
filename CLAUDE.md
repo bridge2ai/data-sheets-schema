@@ -470,7 +470,29 @@ stripping (the chunk is the source bytes), and a snippet part shorter than
 (`funders[0]`) covers its leaves — that is how a boolean or enum gets one —
 but a receipt on a *list* (`funders`) covers only itself (#721). The slot
 denominator excludes `conforms_to_schema`/`conforms_to_class`, `notes` and
-`source_caveats` at any depth, and ids minted on the record's own id (#722).
+`source_caveats` at any depth, and ids minted on the record's own id (#722)
+or — receipts instrument **v2**, #1123 — on any identifier the record
+carries for the dataset at its top level: its `id` in CURIE or resolver
+form, its bare `doi`, its landing `page` (trailing slash and DOI case
+aside). The v5 rule licenses a label "on an identifier the evidence *does*
+supply", and a record taking the landing-page option must not lose
+coverage for it. A fragment on any other base — a component dataset's DOI
+under `resources`, a project homepage the record does not carry as its
+page — is a claim about that identifier and stays receiptable. The block
+names its `instrument`, and `slots.exempt_on_carried_identifier` counts
+what v2 exempts that v1's byte-for-byte own-id test did not: 4 leaves in
+the corpus, all CHORUS API v7 records, and every one of them the record's
+own top-level `id` (`https://chorus4ai.org/#chorus-dataset` on `page:
+https://chorus4ai.org/`) — so the exemption reaches the record's own
+identity slot, and a bare site root declared as `page` exempts every
+fragment on that root under the same scheme. One of the four had a receipt
+(coverage 59/170 → 58/169); three had none (never-receipted fell by one,
+coverage rose). The file-collections case the issue names exists only in
+the withheld AI_READI 2026-09-01 rep1 record. The recompute reached 29
+records; the 18 receipted records whose bundle has drifted are withheld by
+the #907 guard and stay under v1 (#1140). v9 R8 still tells the model a
+landing-page label "needs a receipt like any other value" — the cost v2
+removes; #1147 rotates that sentence.
 Named non-checks: that `nothing_relevant` was true, and that a real snippet
 supports its value. `backfill-checks` writes a `receipts` block only where a
 receipt exists or the record claims one (#726). Every bundle kind a run may declare has a manifest (#725), so
@@ -531,7 +553,20 @@ instruction defines `both` as present in both — and the finding names
 the cause so the regate can fix the row (`claims_core_cannot_hold` counts
 those the full record does carry, apart from substantive contradictions;
 #990/#992); the block carries
-`instrument` from v2 (#996). Since #998 the report phase carries the core
+`instrument` from v2 (#996) and, from v4 (#1122), `rows_by_record` — the
+dispositions rows tallied by their record column (`full`, `core`, `both`,
+`either` for an empty cell, `no_record_column` for a table that has none —
+a report format that names no record, "not measurable" rather than "no
+`both` rows"; two v2 reports do name one — `invalid` for anything else),
+because a `both` row wrongly flipped to
+`full` resolves against the full record only and raises nothing, so the
+count, or the rate over the row total, is what a reader compares. Over the
+18 v8-labelled API records — the 12-record fill plus six canaries — it is
+617 `both` of 682 (90.5%); the fill alone is 419 of 461 (90.9%); the five
+rows on slots the core cannot hold are all on the VOICE 2026-09-04d canary.
+The recorded tally is the post-regate reading, and the regate is the step
+that flips rows — `report_gate` carries `rows_by_record_before`/`_after` on
+runs made since #1122. Since #998 the report phase carries the core
 class's top-level slot inventory (`core_inventory_block`) before its
 instruction, so the model can see which slots the core declares rather
 than infer it from the carried core record, where an empty slot and an
@@ -645,7 +680,15 @@ and a reviewer's `review.reliability` survive every recomputation of
 their block — backfill, the runner's record write, `provenance record`
 re-recording and `review check --write` (#856/#973,
 `backfill_checks.carry_attestations`) — marked `stale` with the artifacts
-they attested when the pair or the pack has since changed (#969).
+they attested when the pair or the pack has since changed (#969). A `reviewed_at` that is a date with no time, one at exactly midnight
+(indistinguishable from a date, reported as that), one that does not
+parse, or none at all is **reported, never failed** by `d4d review check`
+and `d4d review agree` (#1057): the judgements are attested by hash, and
+only when they were made is unrecoverable. 15 of the 47 reviews on disk
+carry one (14 a datetime at exactly midnight, one no value) — on the v6
+and v7 reviews and their second ratings (7 of 17 and 6 of 18) and two of
+the twelve v8 ones; every review is made by the same agentic subagent
+whichever runtime generated the record.
 
 ## Canonical selection with the review (#660)
 
@@ -730,11 +773,17 @@ d4d agents check-echo --agent d4d-rubric10-semantic --reply -   # exit 1 if stal
 d4d agents digest                                   # the pin each output records
 ```
 
-The preamble names a **section** of the definition and asks the agent to
-quote its longest sentence. The sentence itself is withheld: the first
-version printed it, so `preamble | check-echo` returned a tick and a stale
-agent that copied the prompt passed the check it exists to fail (#1102). The
-expected text lives only in the verifier.
+The preamble names a **section** of the definition and the **opening
+words** of one sentence in it, and asks the agent to quote that sentence in
+full. The sentence itself is withheld: the first version printed it, so
+`preamble | check-echo` returned a tick and a stale agent that copied the
+prompt passed the check it exists to fail (#1102). The expected text lives
+only in the verifier. The second version asked for the section's *longest*
+sentence while the verifier held the longest fresh *line*; on the
+review-record definition the sentence carrying that line ranked 2nd of 38,
+so an agent that answered exactly as asked was told to stop (#1145). The
+question and the answer are now the same unit, and a fenced block is never
+prose.
 
 That text is chosen by being **verifiably absent from the previous version**
 of the file — not by being long (replayed against the real incident,
@@ -742,9 +791,10 @@ of the file — not by being long (replayed against the real incident,
 share) and not by appearing in a diff (a reformat "changes" a shared line).
 `tests/test_agent_pin.py` pins both the replay and the reformat case.
 
-Where a definition carries nothing its predecessor lacked, `preamble` and
-`check-echo` **exit non-zero** rather than issue a question that cannot fail;
-`digest` marks those definitions. A check that cannot fail is worse than no
+Where a definition carries nothing its predecessor lacked — or nothing that
+can be named by its opening words without handing over more than half the
+sentence (#1145) — `preamble` and `check-echo` **exit non-zero** rather than
+issue a question that cannot fail; `digest` marks those definitions. A check that cannot fail is worse than no
 check, because it is reported as a pass.
 
 **What a pass does and does not prove.** A refusal is strong evidence: the
@@ -852,7 +902,17 @@ label, and `compare-arms` reads the same field. Labels that name no
 registered condition (the 2026-07-27 series — the one `runs.py` calls the
 tuned arm, whose records hash no prompt and so cannot attest it — and the
 crate/healthsheet arms) still read `None` unless their records hash a
-condition prompt.
+condition prompt. The `full` phase's output cap is a procedure field too
+(`full max_tokens`, #771): three of the five v7 canaries ran at 96k and
+two at 128k with nothing reading it, so `compare-arms` now reports a cap
+that is not constant within an arm and `arm_confounds` one that differs
+between arms — read from the `full` rows of `api_usage` (every distinct
+cap they carry: the rows are what each call sent, and a resumed run keeps
+its earlier rows), else from `model.max_tokens_by_phase`, which is
+recomputed at record write; an agentic record carries no per-phase cap
+(54 carry `shared_config.max_tokens: 16000`, a config assertion like the
+`temperature` beside it, not the runtime's cap) and is skipped like an
+absent reviewer.
 
 ## Model Reasoning Capture
 

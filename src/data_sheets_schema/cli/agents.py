@@ -25,7 +25,8 @@ def preamble(agent):
     An agent-definition edit does not always reach a subagent spawned
     afterwards, and when it does not the run silently applies the old rules.
     The preamble names a *section* of the definition and asks the agent to
-    quote its longest sentence; the sentence itself is withheld, so copying
+    quote the sentence beginning with the words it names, in full; the rest
+    of the sentence is withheld, so copying
     the prompt does not pass (#1102). Exits non-zero when the definition
     carries nothing the previous version lacked, rather than issuing a
     question that cannot fail.

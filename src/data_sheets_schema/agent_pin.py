@@ -36,6 +36,13 @@ either — a reformat "changes" a line that both versions carry. So a challenge
 is built only where the chosen text is **verifiably absent from the
 pre-image**, and `discriminates()` reports whether that holds rather than
 whether a diff was non-empty (#1102).
+
+**The question and the answer are the same unit.** The second version asked
+for the section's longest *sentence* and verified the longest fresh *line*
+(#1145): on the review-record definition the sentence carrying that line
+ranked 2nd of 38 by length, so an agent that did exactly as asked was told
+to stop. The challenge is now a sentence, and the preamble names it by its
+opening words — enough to find it in its section, never enough to answer.
 """
 from __future__ import annotations
 
@@ -54,6 +61,36 @@ MIN_CHALLENGE = 60
 #: A line that is boilerplate rather than instrument: present in every
 #: version, so useless as a discriminator.
 _SKIP = re.compile(r"^\s*(?:[-*+]\s|\d+\.\s|#|\||```|>)")
+
+#: Where one sentence ends and the next begins, in prose joined across the
+#: wrapped lines of a paragraph: a terminator, optionally a closing bracket
+#: or quote, whitespace, then an opening capital, quote, backtick or bracket
+#: (#1149 review, S2: `.)` and `.”` used to merge two sentences into one).
+_SENTENCE_END = re.compile(r"(?:(?<=[.!?])|(?<=[.!?][)\]\u201d\"'`]))\s+(?=[A-Z\u201c\"'`(])")
+
+#: Abbreviations a sentence does not end at (S3): protected before the split,
+#: in either case. `etc.` is not among them — it ends a clause as often as
+#: not ("… and so on, etc. The next rule …"), and a split there costs a
+#: candidate at worst where a protection would merge two sentences.
+_ABBREVIATIONS = tuple(dict.fromkeys(a for base in (
+    "e.g.", "i.e.", "cf.", "vs.", "et al.", "fig.", "no.", "dr.", "mr.", "ms.", "approx.",
+    "sec.", "ref.", "eq.", "u.s.", "ca.") for a in (base, base.capitalize(), base.upper())))
+
+#: A named sentence reveals at most this share of its words in the prefix
+#: (#1149 round 2, S1): a sibling sharing a long opening would otherwise
+#: leave one word hidden, and "not the whole sentence" is not "not the
+#: answer".
+MAX_PREFIX_SHARE = 0.5
+
+#: A sentence starts with a capital, a quote, a backtick, a bracket or a
+#: digit. A fragment that starts lower-case — text after a bullet list broke
+#: a paragraph, or after an unlisted abbreviation — is not something an
+#: agent can be asked for (S3).
+_SENTENCE_START = re.compile(r"^[A-Z0-9\u201c\"'`(\[]")
+
+#: The fewest opening words of the expected sentence the preamble reveals.
+#: Enough to point at one sentence in its section; never the sentence.
+MIN_PREFIX_WORDS = 3
 
 
 class StaleAgentDefinition(RuntimeError):
@@ -91,10 +128,19 @@ def _usable(lines):
     """Prose lines long enough that echoing one cannot be luck.
 
     Headings and list markers recur across versions, so they discriminate
-    nothing; short lines are echoed by chance.
+    nothing; short lines are echoed by chance; a fenced block is a template
+    every version carries. Kept as the line-level form the replay test of
+    the first rule uses; the challenge itself is built from sentences.
     """
-    return [ln.strip() for ln in lines
-            if len(ln.strip()) >= MIN_CHALLENGE and not _SKIP.match(ln.strip())]
+    out, fenced = [], False
+    for ln in lines:
+        stripped = ln.strip()
+        if stripped.startswith("```"):
+            fenced = not fenced
+            continue
+        if not fenced and len(stripped) >= MIN_CHALLENGE and not _SKIP.match(stripped):
+            out.append(stripped)
+    return out
 
 
 def _git(*args) -> str:
@@ -127,16 +173,80 @@ def _previous_text(name: str) -> str | None:
     return _git("show", f"{parent}:{rel}") or None
 
 
-def _heading_for(body: str, line: str) -> str | None:
-    """The nearest markdown heading above `line`, as a locator."""
-    seen = None
+def sentences_by_section(body: str) -> list[tuple[str | None, str]]:
+    """(heading, sentence) for every prose sentence of the definition, in
+    order: wrapped lines of a paragraph joined, then split at sentence ends.
+    Bulleted, numbered, quoted, tabular and fenced lines are left out, as
+    `_usable` leaves them out of the line form — they recur across versions.
+    """
+    out: list[tuple[str | None, str]] = []
+    heading: str | None = None
+    para: list[str] = []
+    fenced = False
+
+    def flush() -> None:
+        if para:
+            text = re.sub(r"\s+", " ", " ".join(para)).replace("*", "").strip()
+            for abbr in _ABBREVIATIONS:
+                text = text.replace(abbr + " ", abbr + "\x00")
+            for sent in _SENTENCE_END.split(text):
+                sent = sent.replace("\x00", " ").strip()
+                if sent:
+                    out.append((heading, sent))
+            para.clear()
+
     for raw in body.splitlines():
         stripped = raw.strip()
+        if stripped.startswith("```"):
+            fenced = not fenced                  # a code block is a template, not prose
+            flush()
+            continue
+        if fenced:
+            continue
+        if not stripped:
+            flush()
+            continue
         if stripped.startswith("#"):
-            seen = stripped.lstrip("# ").strip()
-        if stripped == line.strip():
-            return seen
+            flush()
+            heading = stripped.lstrip("# ").strip()
+            continue
+        if _SKIP.match(stripped):
+            flush()
+            continue
+        para.append(stripped)
+    flush()
+    return out
+
+
+def _prefix_for(expected: str, siblings: list[str]) -> str | None:
+    """The fewest opening words (at least `MIN_PREFIX_WORDS`) that begin
+    `expected` and no other sentence of its section — what the preamble
+    reveals so an agent can find the sentence without being handed it.
+    None when no prefix strictly shorter than the sentence is unique: a
+    sibling that shares every word but the last would otherwise make the
+    prefix the answer, and the check could no longer fail (#1149 review,
+    M1 — the #1102 property, re-created silently)."""
+    words = expected.split()
+    others = [_normalise(sib) for sib in siblings if sib != expected]
+    for n in range(MIN_PREFIX_WORDS, max(MIN_PREFIX_WORDS, int(len(words) * MAX_PREFIX_SHARE)) + 1):
+        if n >= len(words):
+            break
+        prefix = " ".join(words[:n])
+        if not any(o.startswith(_normalise(prefix)) for o in others):
+            return prefix
     return None
+
+
+def _one_sentence(text: str) -> bool:
+    """Whether `text` is one sentence and not two the split failed to part
+    (#1149 round 2, S2): no terminator followed by whitespace inside it,
+    the protected abbreviations aside. Form-independent, so a lower-case or
+    digit-led continuation, or an abbreviation that really ended a
+    sentence, is caught without enumerating the form."""
+    inner = text
+    for abbr in _ABBREVIATIONS:
+        inner = inner.replace(abbr + " ", abbr + "\x00")
+    return re.search(r"[.!?][)\]\u201d\"'`]*\s", inner) is None
 
 
 def challenge_between(body: str, previous: str) -> dict[str, str] | None:
@@ -145,17 +255,34 @@ def challenge_between(body: str, previous: str) -> dict[str, str] | None:
     Separated from the git plumbing so the decisive property — that the
     expected text is absent from the version a stale agent would hold — can be
     replayed against any two texts, including the real #1077 commits.
+
+    The unit is a **sentence**, and the preamble names it by its opening
+    words (#1145): the first version asked the agent for the section's
+    longest sentence while holding the longest fresh *line*, and on a long
+    section an agent that answered exactly as asked was told it was stale
+    (the sentence carrying the fresh line ranked 2nd of 38). What the
+    preamble asks for and what the verifier holds are now the same thing,
+    and the opening words point at it without reproducing it.
     """
     old = _normalise(previous)
-    fresh = [ln for ln in _usable(body.splitlines())
-             if _normalise(ln) not in old]
-    if not fresh:
-        return None
-    expected = max(fresh, key=len)
-    heading = _heading_for(body, expected)
-    return {"expected": expected,
-            "locator": (f"the section headed \u201c{heading}\u201d" if heading
-                        else "your scoring instructions")}
+    sents = sentences_by_section(body)
+    fresh = [(h, sent) for h, sent in sents
+             if len(sent) >= MIN_CHALLENGE and _SENTENCE_START.match(sent)
+             and _normalise(sent) not in old]
+    # Longest first; the first fresh sentence that can be named by a prefix
+    # shorter than itself is the challenge. A sentence that cannot be is
+    # skipped rather than revealed (M1).
+    for heading, expected in sorted(fresh, key=lambda hs: -len(hs[1])):
+        if not _one_sentence(expected):
+            continue                             # two sentences the split did not part
+        siblings = [sent for h, sent in sents if h == heading]
+        prefix = _prefix_for(expected, siblings)
+        if prefix is None:
+            continue
+        return {"expected": expected, "prefix": prefix,
+                "locator": (f"the section headed \u201c{heading}\u201d" if heading
+                            else "your scoring instructions")}
+    return None
 
 
 def challenge(name: str) -> dict[str, str] | None:
@@ -177,7 +304,17 @@ def discriminates(name: str) -> bool:
     return challenge(name) is not None
 
 
+_FOLD = str.maketrans({"\u201c": '"', "\u201d": '"', "\u2018": "'", "\u2019": "'",
+                       "\u2014": "-", "\u2013": "-", "*": "", "`": ""})
+
+
 def _normalise(text: str) -> str:
+    """Whitespace, case, emphasis markers, backticks and the typographic
+    forms of quotes and dashes do not decide a match: an agent quoting half
+    a kilobyte verbatim may straighten a quote or retype an em dash, and a
+    stale definition is a different claim from a dropped backtick (#1149
+    review, S4)."""
+    text = text.translate(_FOLD).replace("--", "-")
     return re.sub(r"\s+", " ", text).strip().lower()
 
 
@@ -200,9 +337,10 @@ def spawn_preamble(name: str) -> str:
         "An agent-definition edit does not always reach a subagent spawned "
         "afterwards (#1077), and when it does not, nothing in the output says "
         "so — the run silently applies the old rules. So, first, find "
-        f"{ask['locator']} in your own instructions and quote its longest "
-        "sentence back **verbatim**. The sentence is deliberately not "
-        "reproduced here: if it were, copying this prompt would pass the "
+        f"{ask['locator']} in your own instructions, and quote back "
+        f"**verbatim and in full** the sentence there that begins "
+        f"\u201c{ask['prefix']}\u201d. The rest of the sentence is deliberately "
+        "not reproduced here: if it were, copying this prompt would pass the "
         "check and prove nothing.\n\n"
         "If you cannot find that section, or it reads differently from what "
         "you would expect of the current rules, say so plainly and **stop "
@@ -221,7 +359,8 @@ def verify_echo(name: str, reply: str) -> None:
             "one, so this reply cannot be verified either way (#1102).")
     if _normalise(ask["expected"]) not in _normalise(reply):
         raise StaleAgentDefinition(
-            f"{name}: the reply does not quote the text under {ask['locator']} "
+            f"{name}: the reply does not quote the sentence beginning "
+            f"\u201c{ask['prefix']}\u201d under {ask['locator']} "
             f"from the definition on disk (sha256 {agent_digest(name)[:12]}…). "
             "Either the subagent received a stale definition (#1077) or it did "
             "not follow the preamble; in both cases the result cannot be read "
