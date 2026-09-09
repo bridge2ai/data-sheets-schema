@@ -1784,7 +1784,12 @@ def bundle_blob_history(bundle_path: str) -> tuple[dict[str, str], ...]:
                              capture_output=True, text=True, check=False, cwd=_REPO_ROOT)
     if shallow.returncode != 0:
         raise GitUnavailable(shallow.stderr.strip() or "git rev-parse failed")
-    if shallow.stdout.strip() == "true":
+    answer = shallow.stdout.strip()
+    if answer not in ("true", "false"):
+        # A git older than 2.15 echoes an option it does not know and exits 0
+        # (#1132 round 4): a probe that cannot fail must not read as "not shallow".
+        raise GitUnavailable(f"git rev-parse --is-shallow-repository answered {answer!r}, not true/false")
+    if answer == "true":
         raise GitUnavailable("shallow clone: the history is truncated, so a version that does "
                              "not match is not evidence that none exists (unshallow first)")
     log = subprocess.run(["git", "log", "--full-history", "--format=%H %ad",
@@ -1798,7 +1803,13 @@ def bundle_blob_history(bundle_path: str) -> tuple[dict[str, str], ...]:
         blob = subprocess.run(["git", "show", f"{commit}:{bundle_path}"], capture_output=True,
                               check=False, cwd=_REPO_ROOT)
         if blob.returncode != 0:
-            continue                                  # not this path at that commit
+            err = blob.stderr.decode("utf-8", "replace")
+            if "does not exist in" in err or "exists on disk, but not in" in err:
+                continue                              # not this path at that commit
+            # Anything else — an object a partial clone never fetched, a
+            # corrupt store — is a tool failure, not a version that does not
+            # match (#1132 round 4).
+            raise GitUnavailable(f"git show {commit[:12]}:{bundle_path}: {err.strip() or 'failed'}")
         out.append({"commit": commit, "date": date,
                     "sha256": hashlib.sha256(blob.stdout).hexdigest(),
                     "md5": hashlib.md5(blob.stdout).hexdigest()})

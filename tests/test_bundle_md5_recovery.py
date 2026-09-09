@@ -106,6 +106,48 @@ class Resolve(unittest.TestCase):
         self.assertFalse(any(a[:2] == ["git", "log"] for a in calls))   # refused before searching
         pv.bundle_blob_history.cache_clear()
 
+    def test_a_git_that_does_not_know_the_probe_is_refused_too(self):
+        """`git rev-parse` echoes an option it does not know and exits 0
+        (#1132 round 4): anything but true/false is a failed probe."""
+        real = pv.subprocess.run
+
+        def fake(args, **kw):
+            if args[:2] == ["git", "rev-parse"]:
+                return subprocess.CompletedProcess(args, 0, stdout="--is-shallow-repository\n", stderr="")
+            return real(args, **kw)
+        pv.bundle_blob_history.cache_clear()
+        with mock.patch.object(pv.subprocess, "run", fake):
+            with self.assertRaises(pv.GitUnavailable) as ctx:
+                pv.bundle_blob_history("data/preprocessed/concatenated/CHORUS_preprocessed.txt")
+        self.assertIn("not true/false", str(ctx.exception))
+        pv.bundle_blob_history.cache_clear()
+
+    def test_an_unreadable_blob_is_a_tool_failure_not_a_missing_version(self):
+        """A partial clone is not shallow, and `git show` on a blob it never
+        fetched fails differently from a path absent at that commit; only
+        the latter is a version to skip."""
+        real = pv.subprocess.run
+
+        def fake(args, **kw):
+            if args[:2] == ["git", "rev-parse"]:
+                return subprocess.CompletedProcess(args, 0, stdout="false\n", stderr="")
+            if args[:2] == ["git", "log"]:
+                return subprocess.CompletedProcess(args, 0, stdout="abc123 2026-01-01\n", stderr="")
+            if args[:2] == ["git", "show"]:
+                return subprocess.CompletedProcess(args, 128, stdout=b"", stderr=b"fatal: unable to read abc123\n")
+            return real(args, **kw)
+        pv.bundle_blob_history.cache_clear()
+        with mock.patch.object(pv.subprocess, "run", fake):
+            with self.assertRaises(pv.GitUnavailable) as ctx:
+                pv.bundle_blob_history("data/preprocessed/concatenated/X.txt")
+        self.assertIn("unable to read", str(ctx.exception))
+        pv.bundle_blob_history.cache_clear()
+        fake_absent = lambda args, **kw: (subprocess.CompletedProcess(args, 128, stdout=b"", stderr=b"fatal: path 'x' does not exist in 'abc123'\n")  # noqa: E731
+                                          if args[:2] == ["git", "show"] else fake(args, **kw))
+        with mock.patch.object(pv.subprocess, "run", fake_absent):
+            self.assertEqual(pv.bundle_blob_history("data/preprocessed/concatenated/X.txt"), ())
+        pv.bundle_blob_history.cache_clear()
+
     def test_the_other_outcomes_say_why(self):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(pv.resolve_bundle_md5(_record(tmp, {"bundle_path": "x", "bundle_sha256": SHA, "bundle_md5": MD5}),
