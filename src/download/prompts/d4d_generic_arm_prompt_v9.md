@@ -401,7 +401,8 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   record's own id is itself such a root, it is still the base to prefer:
   it is the identifier this record carries, and the label must stay
   stable; where the id is already a fragment on such a root, the part is
-  labeled on that same root (one `#` in an identifier, never two). A
+  labeled on that same root (one fragment marker in an identifier, never
+  two). A
   fragment appended to another entity's
   identifier — an organization's, another dataset's — labels a part of that
   entity, not of this one.
