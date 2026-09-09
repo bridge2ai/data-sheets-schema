@@ -820,14 +820,23 @@ def check_cmd(method, label, project, strict):
     if header_mismatches:
         click.echo(f"\n⚠️  {len(header_mismatches)} record(s) whose `#` header states a "
                    "setting the request did not carry (#1027):")
+        # One line per label and disagreement, with the count of records —
+        # 142 per-record rows were a third of the report, and the 44-column
+        # label cut dropped the replicate digit (#1027 review, finding 5).
+        grouped: dict[tuple[str, str, str, str, str], list[str]] = {}
         for h in header_mismatches:
             for ln in h["lines"]:
-                click.echo(f"   {h['project']:9} {h['label'][:44]:44} header "
-                           f"`{ln['field']}: {ln['header']}` · record {ln['record']}"
-                           + (f" ({ln['basis']})" if ln['basis'] else ""))
+                key = (h["label"], ln.get("artifact", "full"), ln["field"], ln["header"], ln["record"])
+                grouped.setdefault(key, []).append(h["project"])
+        for (label, artifact, field, header, record), projects in sorted(grouped.items()):
+            what = (f"header `{field}: {header}` · record {record}" if field
+                    else f"{record}")
+            click.echo(f"   {label}  [{artifact}] {what}  ×{len(projects)} "
+                       f"({', '.join(sorted(set(projects)))})")
         click.echo("   Reported, not failed — the datasheet is wrong about itself, not "
-                   "about the dataset. Records written since #1027 stamp the header "
-                   "from the record.")
+                   "about the dataset. Records written or repaired since #1027 stamp "
+                   "the header from the record; a run resumed past its record write "
+                   "keeps the header it had.")
 
     if strict and (failed or bad_requests or never_pinned):
         raise SystemExit(1)

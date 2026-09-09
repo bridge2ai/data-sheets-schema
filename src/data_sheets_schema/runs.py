@@ -1332,13 +1332,35 @@ def _dig(record: dict, path: tuple[str, ...]):
 #: `#` header lines the prompt has the model write, and the record field each
 #: restates (#1027). The header is what a reader sees first; the record is
 #: what the request carried. Where they disagree the header is the error.
-HEADER_FIELDS = {"Temperature": "temperature"}
+HEADER_FIELDS = {"Temperature": "temperature", "Model": "model",
+                 "Reasoning effort": "reasoning_effort"}
+
+#: A header value that agrees with a null or absent record value: it states
+#: that the setting was not sent or not set, rather than asserting one.
+_NOT_ASSERTED = ("not sent", "not set", "not requested", "not applicable")
 
 
 def full_record_path(method: str, label: str, project: str,
                      concat_dir: Path = CONCAT_DIR) -> Path:
     """`{concat_dir}/{method}/{label}/{project}_d4d.yaml`."""
     return concat_dir / method / label / f"{project}_d4d.yaml"
+
+
+def core_record_path(method: str, label: str, project: str,
+                     concat_dir: Path = CONCAT_DIR) -> Path:
+    """`{concat_dir}/{method}_core/{label}/{project}_d4d_core.yaml`."""
+    return concat_dir / f"{method}_core" / label / f"{project}_d4d_core.yaml"
+
+
+def _same_value(said: str, recorded: Any) -> bool:
+    """Textual agreement, or numeric where both sides parse as numbers —
+    `0` against `0.0` is not a disagreement (#1027 review, note)."""
+    if said == str(recorded):
+        return True
+    try:
+        return float(said) == float(recorded)
+    except (TypeError, ValueError):
+        return False
 
 
 def header_disagreements(method: str, label: str, project: str,
@@ -1355,37 +1377,48 @@ def header_disagreements(method: str, label: str, project: str,
     """
     prov = _prov(method, label, project, concat_dir) or {}
     model = prov.get("model") or {}
-    full = full_record_path(method, label, project, concat_dir)
-    if not full.exists():
-        return []
     out = []
-    for raw in full.read_text(encoding="utf-8", errors="replace").splitlines():
-        if not raw.startswith("#"):
-            break
-        m = re.match(r"^\s*#\s*([A-Za-z][A-Za-z ]*?)\s*:\s*(.*)$", raw)
-        if not m or m.group(1).strip() not in HEADER_FIELDS:
+    # Both artifacts: the writer stamps full and core alike, and 278 core
+    # records carried the same copied line (#1027 review, finding 3). An
+    # artifact that is not on disk is reported as that, never as silence.
+    for artifact, path in (("full", full_record_path(method, label, project, concat_dir)),
+                           ("core", core_record_path(method, label, project, concat_dir))):
+        if not path.exists():
+            out.append({"artifact": artifact, "field": "", "header": "",
+                        "record": "no artifact on disk", "basis": ""})
             continue
-        field, said = m.group(1).strip(), m.group(2).strip()
-        key = HEADER_FIELDS[field]
-        if key not in model:
-            # Never recorded is not "recorded as not sent". Four records carry
-            # no `temperature` key at all; a header line cannot contradict a
-            # record that says nothing, so this is a gap in the record, not a
-            # false header, and is reported as that.
-            out.append({"field": field, "header": said, "record": "not recorded",
-                        "basis": ""})
-            continue
-        recorded = model.get(key)
-        if recorded is None:
-            # The request carried none. A header stating a number asserts a
-            # setting the record contradicts; a header saying "not sent"
-            # agrees with it.
-            if said and not said.lower().startswith("not sent"):
-                out.append({"field": field, "header": said, "record": "null",
+        for raw in path.read_text(encoding="utf-8", errors="replace").splitlines():
+            if not raw.startswith("#"):
+                break
+            m = re.match(r"^\s*#\s*([A-Za-z][A-Za-z ]*?)\s*:\s*(.*)$", raw)
+            if not m or m.group(1).strip() not in HEADER_FIELDS:
+                continue
+            field, said = m.group(1).strip(), m.group(2).strip()
+            key = HEADER_FIELDS[field]
+            row = {"artifact": artifact, "field": field, "header": said}
+            not_asserted = said.lower().startswith(_NOT_ASSERTED)
+            if key not in model:
+                # Never recorded is not "recorded as not sent". Four records
+                # carry no `temperature` key at all; a header line cannot
+                # contradict a record that says nothing, so this is a gap in
+                # the record, not a false header, and is reported as that —
+                # unless the header itself asserts nothing (a stamped
+                # `Reasoning effort: not set by the request` against a record
+                # with no such key is agreement).
+                if said and not not_asserted:
+                    out.append({**row, "record": "not recorded", "basis": ""})
+                continue
+            recorded = model.get(key)
+            if recorded is None:
+                # The request carried none. A header stating a value asserts
+                # a setting the record contradicts; a header saying "not
+                # sent" agrees with it.
+                if said and not not_asserted:
+                    out.append({**row, "record": "null",
+                                "basis": str(model.get(f"{key}_basis") or "")})
+            elif not _same_value(said, recorded):
+                out.append({**row, "record": str(recorded),
                             "basis": str(model.get(f"{key}_basis") or "")})
-        elif said != str(recorded):
-            out.append({"field": field, "header": said, "record": str(recorded),
-                        "basis": str(model.get(f"{key}_basis") or "")})
     return out
 
 

@@ -2780,6 +2780,8 @@ def normalise_mailto_ids(text: str, *, phase: str | None = None) -> str:
 #: and the header is rewritten from it at write time (#1027).
 _HEADER_FROM_RECORD = {
     "Temperature": "temperature",
+    "Model": "model",
+    "Reasoning effort": "reasoning_effort",
 }
 
 
@@ -2797,6 +2799,16 @@ def header_value(field: str, settings: dict[str, Any]) -> str:
             return str(settings["temperature"])
         return (f"not sent ({settings.get('name', 'this model')} rejects the "
                 "parameter; the config's value did not reach the request)")
+    if field == "Model":
+        return str(settings.get("name", ""))
+    if field == "Reasoning effort":
+        # Two records' headers read `Reasoning effort: default` against a
+        # record that says nothing — the value CLAUDE.md forbids (#470). The
+        # header states a configured effort or says none was set; never a
+        # guess (#1027 review, finding 6).
+        if settings.get("effort"):
+            return str(settings["effort"])
+        return "not set by the request (the provider's own choice; not recorded as a value)"
     raise KeyError(field)
 
 
@@ -2815,9 +2827,10 @@ def stamp_provenance_header(text: str, settings: dict[str, Any]) -> str:
         if in_header and not ln.startswith("#"):
             in_header = False
         if in_header:
-            m = re.match(r"^(\s*#\s*)([A-Za-z][A-Za-z ]*?)(\s*:\s*)(.*)$", ln)
+            m = re.match(r"^(#\s*)([A-Za-z][A-Za-z ]*?)(\s*:\s*)(.*?)(\r?)$", ln)
             if m and m.group(2).strip() in _HEADER_FROM_RECORD:
-                ln = f"{m.group(1)}{m.group(2)}{m.group(3)}{header_value(m.group(2).strip(), settings)}"
+                ln = (f"{m.group(1)}{m.group(2)}{m.group(3)}"
+                      f"{header_value(m.group(2).strip(), settings)}{m.group(5)}")
         out.append(ln)
     return "\n".join(out)
 
@@ -3024,6 +3037,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             # which would let the pair diverge again (#694).
             from data_sheets_schema.derive_core import core_text
             text = normalise_record_text(core_text(spec.full_path, phase4_complete=True)[0], phase="repair_core")
+            text = stamp_provenance_header(text, settings)      # the same sequence as the phase write (#1027 review)
             spec.core_path.write_text(text, encoding="utf-8")
             errors, failure = _validator_lines(path, schema, cls)
             log.append({"phase": ph, "round": 1,
@@ -3108,6 +3122,12 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                             "outcome": f"unusable response: {exc}"})
                 continue
             body = normalise_record_text(body, phase=ph)
+            # The repair instruction asks for the whole record and the model
+            # re-emits the prompt's header with it: 112 of 114 repair
+            # snapshots on disk carry `# Temperature: 0.0` verbatim, and
+            # repair applied on 87 API records (61%). Unstamped here, the
+            # false header came back on the majority of runs (#1027 review).
+            body = stamp_provenance_header(body, settings)
             path.write_text(body, encoding="utf-8")
             _snapshot(spec, f"{spec.project}_{ph}_r{rnd}.yaml", body)
             applied_from = len(errors)
