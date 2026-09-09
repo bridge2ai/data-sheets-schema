@@ -81,16 +81,25 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
                       "names a class of things",                     # R7: the signature
                       "is one entity, and splitting it",             # R7: the carve-out (#1072)
                       "does not reach an id the schema forces",      # R8: the carve-out (#803)
-                      "core derivation reads to match",              # R8: the projector sentence (#803)
+                      "software tool under `used_software`",         # R8: the Software hole (review finding 4)
+                      "ORCID the evidence states first",             # R8 defers to the person rule (finding 5)
+                      "matched to the core by id",                   # R8: the projector, both facts (finding 9)
                       "a claim about that identifier, not a label",  # R8: the referent test (#901)
-                      "labels a part of that thing, not of this one",  # R8: a fragment on another's identifier (#901)
+                      "is a role this record asserts",               # R8: creators/maintainers (finding 13)
+                      "refines the rule above without replacing it",  # R8 vs v5 minting base (finding 6)
+                      "labels a part of that entity, not of this one",  # R8: a fragment on another's identifier (#901)
                       "passage that states the category",            # R9: enumeration slots (#830 a)
+                      "except where the schema requires the slot",   # R9: relationship_type (finding 1)
+                      "read from the file the bundle names",         # R9: format/media_type/encoding/compression (finding 3)
                       "before any processing this dataset applied",  # R10: raw_data_format (#830 b)
+                      "raw form and the released form are the same",  # R10: coincidence (finding 15)
                       "designate with that title",                   # R11: the source's own designation (#830 c)
                       "at the passage's own reach",                  # R12: consequence composed beyond the fact
-                      "a line of bare terms is not one",             # R12: keyword lines (adjudication)
+                      "`keywords` is the one slot whose subject",    # R12: the keywords carve-out (finding 2)
                       "is a member of that list",                    # R13: pointer entries
-                      "An absence is not an entry, and a route is not a format"):  # R14: rule-06/07 traps
+                      "the `resources` of a file collection",        # R13: which resources (finding 7)
+                      "An absence is not an entry, and a route is not a format",  # R14: rule-06/07 traps
+                      "the `format` of a distribution"):             # R14: which format (finding 17)
             self.assertIn(probe, block)
 
     def test_R8_resolves_every_referent_it_names(self):
@@ -101,16 +110,51 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
 
         from data_sheets_schema.constants.schemas import SCHEMA_PATH
         sv = SchemaView(str(SCHEMA_PATH))
-        for cls in ("File", "FileCollection", "DataSubset"):
-            slot = sv.induced_slot("id", cls)
-            self.assertTrue(slot.identifier or slot.required, cls)
-        self.assertTrue(sv.induced_slot("id", "Person").identifier)
-        for cls in ("Organization", "Grant"):                  # "where the schema does not require an id"
+        # every class with a forced id that some slot reachable from Dataset
+        # ranges to must be named in R8, by its phrase (review finding 18:
+        # the first version asserted the named classes only, and missed
+        # Software, reachable from every object through used_software)
+        phrases = {"File": "a file,", "FileCollection": "a file collection",
+                   "DataSubset": "a data subset", "Person": "a person given as an object",
+                   "Software": "software tool under `used_software`"}
+        reachable, todo = set(), ["Dataset"]
+        while todo:
+            cls = todo.pop()
+            if cls in reachable or not sv.get_class(cls, strict=False):
+                continue
+            reachable.add(cls)
+            for sn in sv.class_slots(cls):
+                rng = sv.induced_slot(sn, cls).range
+                if rng and sv.get_class(rng, strict=False):
+                    todo.append(rng)
+        forced = set()
+        for cls in reachable:
+            if cls == "Dataset":
+                continue
+            try:
+                slot = sv.induced_slot("id", cls)
+            except Exception:                                 # noqa: BLE001
+                continue
+            if slot.identifier or slot.required:
+                forced.add(cls)
+        self.assertEqual(forced, set(phrases), "R8 must name every reachable forced-id class")
+        block = _norm(_added_block(GENERIC_PROMPT_V9.read_text()))
+        for cls, phrase in phrases.items():
+            self.assertIn(phrase, block, cls)
+        for cls in ("Organization", "Grant", "Creator"):      # "where the schema does not require an id"
             slot = sv.induced_slot("id", cls)
             self.assertFalse(slot.identifier or slot.required, cls)
+        # R9's required-enum exemption has a referent: relationship_type is required
+        self.assertTrue(sv.induced_slot("relationship_type", "DatasetRelationship").required)
         from data_sheets_schema import derive_core
         import inspect
         self.assertIn('r.get("id")', inspect.getsource(derive_core._add_distributions))
+        # collection and file ids are copied into the core's distributions:
+        # `id` is in both shared slot sets (review finding 9)
+        from data_sheets_schema.d4d_pair_consistency import load_pair_schema
+        from data_sheets_schema.derive_core import _distribution_slots
+        slots = _distribution_slots(load_pair_schema())
+        self.assertIn("id", slots["collection"]); self.assertIn("id", slots["file"])
 
     def test_R9_to_R14_name_slots_the_digest_declares(self):
         from data_sheets_schema import schema_digest
@@ -118,9 +162,11 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
         known = {s.name for s in digest.slots} | {n.name for n in digest.nested}
         for n in digest.nested:
             known |= set(n.required) | set(n.optional)
-        for slot in ("data_type", "collection_type", "relationship_type", "raw_data_format",
+        for slot in ("data_type", "collection_type", "raw_data_format", "used_software",
                      "principal_investigator", "scope_impact", "variables", "funders", "resources",
-                     "source_caveats", "errata", "future_guarantees", "format", "prohibition_reason"):
+                     "source_caveats", "errata", "future_guarantees", "format", "prohibition_reason",
+                     "keywords", "media_type", "encoding", "compression", "description",
+                     "creators", "maintainers", "file_collections"):
             self.assertIn(slot, known, slot)
 
     def test_the_rules_name_no_value_from_a_record_they_will_be_scored_against(self):

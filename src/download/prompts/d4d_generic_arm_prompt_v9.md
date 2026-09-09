@@ -35,13 +35,24 @@ adverse verdicts that recurred in three or more independent reviews across
 the v6–v8 arms (#830, with the adjudication findings of 2026-09-01).
 
 R8 answers the fragment conflict. The v6 rule says to mint a fragment only
-where a value points at the part, but `File`, `FileCollection` and
-`DataSubset` ids are schema identifiers the record cannot omit, and the
-core derivation matches resources by id — so six v6 reviews charged the
-record with the schema. The other half is the unforced mint on a referent
-outside the record: fragments for grants, awards and organisations on the
-dataset's own DOI, and labels built on another thing's identifier. R8
-states the carve-out and the referent test in one place.
+where a value points at the part, but `File`, `FileCollection`,
+`DataSubset`, `Person` and `Software` ids are schema identifiers the record
+cannot omit (every forced-id class reachable from `Dataset`; a test holds
+the list), and the core derivation copies collection and file ids into its
+distributions and matches top-level resources by id — so five of the six
+v6 rule-14 charges charged the record with the schema (the sixth, CHORUS
+rep2's 68 fragments on splits, purposes and limitations, was a correct
+charge R8 does not excuse). The other half is the unforced mint on a
+referent outside the record: fragments for grants, awards and
+organisations on the dataset's own DOI, and labels built on another
+thing's identifier; a creator or maintainer entry is a role, whose id is
+the person's or organisation's own. R8 states the carve-out, the
+ORCID-first person rule it defers to, and the referent test in one place,
+and says how it refines the v5 minting base rather than silently narrowing
+it. R9 exempts a required enum (`relationship_type`: the entry itself is
+what the evidence must support) and the file enums the schema reads from
+the file's name; R12 carves out `keywords`, the one slot whose subject is
+that a term appears.
 
 R9 (enumeration slots), R10 (`raw_data_format`), R11
 (`principal_investigator`), R12 (consequence and keyword lines), R13 (a
@@ -358,66 +369,81 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
 - The rule that a fragment is minted only where a value points at the part
   does not reach an id the schema forces. Where a class declares `id` as its
   identifier or requires it — a file, a file collection, a data subset, a
-  person given as an object — the id exists because the object does, and
-  leaving it out is a validation failure, not a fragment saved: mint it on
-  this record's own id, keep it stable, and do not read that rule as a reason
-  to omit the object. The id of each entry under `resources` is also what the
-  core derivation reads to match a resource to its files, so it is used
-  whether or not the text points at it. For every other fragment the test
-  stays the referent: an organization, a grant, an award, a program has a
-  referent outside this record, so a fragment for it on this dataset's
-  identifier is a claim about that identifier, not a label. Take the
-  identifier the evidence states; where it states none and the schema does
-  not require an id, leave `id` empty and carry the name in `name`. A
-  fragment appended to an identifier the evidence states for something else
-  — a landing page, a repository entry, another dataset — labels a part of
-  that thing, not of this one; a label this record owns is minted on this
-  record's own id.
+  software tool under `used_software`, a person given as an object — the id
+  exists because the object does, and leaving it out is a validation failure,
+  not a fragment saved: mint it, keep it stable, and do not read that rule as
+  a reason to omit the object; a person's id follows the rule above — the
+  ORCID the evidence states first, a fragment only where it states none. The
+  ids of `file_collections` and of the files under them are copied into the
+  core record's distributions, and top-level `resources` are matched to the
+  core by id, so those ids are used whether or not the text points at them.
+  For every other fragment the test stays the referent: an organization, a
+  grant, an award, a program has a referent outside this record, so a
+  fragment for it on this dataset's identifier is a claim about that
+  identifier, not a label; and an entry under `creators` or `maintainers` is
+  a role this record asserts about a person or an organization, whose id is
+  that person's or organization's own identifier where the evidence states
+  one. Take the identifier the evidence states; where it states none and the
+  schema does not require an id, leave `id` empty and carry the name in
+  `name`. A label this record mints sits on an identifier the evidence
+  supplies for this dataset — its own id, or its landing page — which refines
+  the rule above without replacing it; a fragment appended to another
+  entity's identifier — an organization's, another dataset's — labels a part
+  of that entity, not of this one.
 - A slot whose declared range is an enumeration is populated only from a
   passage that states the category, in the source's own words or a plain
-  restatement of them — never from what a value's name, unit, extension or
-  position suggests. A variable's `data_type`, a collection's
-  `collection_type`, a related dataset's `relationship_type` are claims about
-  how a thing is classified, and a passage that names the thing without
-  classifying it supports the name and not the class. Where no passage
-  states the category the slot stays empty: an empty enumeration slot is a
-  gap the reader can see, a guessed one an error the reader cannot.
+  restatement of them — never from what a value's name, unit or position
+  suggests. A variable's `data_type` and a collection's `collection_type`
+  are claims about how a thing is classified, and a passage that names the
+  thing without classifying it supports the name and not the class. Where no
+  passage states the category the slot stays empty — an empty enumeration
+  slot is a gap the reader can see, a guessed one an error the reader cannot
+  — except where the schema requires the slot, in which case the entry
+  itself is what the evidence must support: a related dataset is recorded
+  only where a passage states what the relation is. A file's `format`,
+  `media_type`, `encoding` and `compression` are read from the file the
+  bundle names — its name and extension are the passage for them — and this
+  rule does not reach those.
 - `raw_data_format` names the form the data took before any processing this
   dataset applied, and only where a passage states that form. The standard
   the release conforms to, the extension the distributed files carry and the
   format a pipeline wrote are facts about the released data and belong in
-  the slots that describe the release; where the documents describe the
-  release and say nothing of what preceded it, the slot stays empty.
+  the slots that describe the release; where a passage states that the raw
+  form and the released form are the same, record it in both; where the
+  documents describe the release and say nothing of what preceded it, the
+  slot stays empty.
 - `principal_investigator` names a person the documents designate with that
   title, or its usual abbreviation, for this dataset or the study that
   produced it. A lead, a director, a corresponding author, a contact, a
   first author, the head of the group that hosts the data — each is a role
-  the documents state, recorded as the role they state, in the slot for it
-  or in prose, and never promoted to principal investigator because the
-  record has a slot for one. Where the documents designate more than one,
-  record each; where they designate none, the slot stays empty.
+  the documents state, recorded as the role they state, in prose or in a
+  slot for that role where the schema has one, and never promoted to
+  principal investigator because the record has a slot for one. Where the
+  documents designate more than one, record each; where they designate none,
+  the slot stays empty.
 - A value states what a passage states, at the passage's own reach. A
   consequence — what a limitation means for a use, what a gap does to a
   conclusion — goes in `scope_impact` or anywhere else only where a passage
   draws it; a limitation the documents state without its consequence is
   recorded as the limitation alone. A term taken from a keyword line, a tag
   list, a table header or a navigation menu attests that the term appears,
-  not what it is about: a value needs a sentence behind it, and a line of
-  bare terms is not one.
+  not what it is about: `keywords` is the one slot whose subject is that the
+  term appears, and a keyword line fills it and nothing else; any other
+  value needs a sentence behind it.
 - Every entry in a list is a member of that list: a variable under
-  `variables`, a funder under `funders`, a file under `resources`. A remark
-  about the list — that what is shown is a sample, that the list continues
-  elsewhere, that one column flags something — is not a member and does not
-  become an entry; it goes in the prose slot that describes the list, or in
+  `variables`, a funder under `funders`, a file under the `resources` of a
+  file collection. A remark about the list — that what is shown is a sample,
+  that the list continues elsewhere, that one column flags something — is
+  not a member and does not become an entry; it goes in `description`, or in
   `source_caveats`, or is omitted.
 - An absence is not an entry, and a route is not a format. That no
   correction has been published is not an erratum and does not fill
   `errata`; that access is by request through a portal is a route and fills
-  neither `future_guarantees` nor `format`; the reason a use is prohibited is
-  its `prohibition_reason`, and the prohibition itself is the entry that
-  reason explains, not the reason. Where the documents state that a thing is
-  absent, the slot for the thing stays empty and the statement, where it is
-  worth keeping, goes in `source_caveats`.
+  neither `future_guarantees` nor the `format` of a distribution; the reason
+  a use is prohibited is its `prohibition_reason`, and the prohibition
+  itself is the entry that reason explains, not the reason. Where the
+  documents state that a thing is absent, the slot for the thing stays empty
+  and the statement, where it is worth keeping, goes in `source_caveats`.
 
 --- END ADDED IN v9 ---
 
