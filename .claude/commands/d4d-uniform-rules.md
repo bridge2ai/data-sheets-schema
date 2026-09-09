@@ -222,8 +222,9 @@ to every project:
   which refines the rule that mints a label on an identifier the evidence
   supplies, without replacing it — and this record's own id is the base to
   prefer: a label on the dataset's landing page or DOI is licensed too,
-  and a reader who follows this record's `id` finds its parts under it,
-  which a label on another base does not give (#1123, #1147). A fragment
+  and this record's own id is the one base every consumer already holds —
+  the core projector and the `resources` match join on it, where `page`
+  and `doi` are slots a reader may not have (#1123, #1147). A fragment
   appended to another entity's identifier — an organization's,
   another dataset's — labels a part of that entity, not of this one.
 

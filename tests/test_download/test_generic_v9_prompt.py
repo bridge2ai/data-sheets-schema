@@ -144,7 +144,7 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
                       "software tool under `used_software`",         # R8: the Software hole (review finding 4)
                       "ORCID the evidence states first",             # R8 defers to the person rule (finding 5)
                       "the base to prefer",                          # R8: own id first (round 2, finding 4)
-                      "finds its parts under it",                    # R8: the traceability reason, not a receipt cost (#1147)
+                      "the one base every consumer already holds",   # R8: the join reason, not a receipt cost (#1147)
                       "component dataset under `resources`",        # R8: a nested Dataset id is forced (round 2, finding 3)
                       "matched to the core by id",                   # R8: the projector, both facts (finding 9)
                       "a claim about that identifier, not a label",  # R8: the referent test (#901)
