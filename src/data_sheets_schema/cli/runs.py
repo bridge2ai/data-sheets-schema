@@ -454,8 +454,9 @@ def check_cmd(method, label, project, strict):
             # read off the recorded path string: a path recorded absolute, or a
             # check run elsewhere, would report a false `missing` (#1124
             # review, N5; the #713 argument).
+            from data_sheets_schema.provenance import record_path_for
             from data_sheets_schema.review_pack import pack_pin_state
-            state = pack_pin_state(core_record_path(run.method, run.label, proj).with_name(f"{proj}_provenance.yaml"))
+            state = pack_pin_state(record_path_for(proj, run.method, run.label))
             if state:
                 pack_pin_drift.append({"project": proj, "label": run.label, "state": state})
             dk = ((prov_data.get("validation") or {}).get("duplicate_keys") or {})
