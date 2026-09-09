@@ -992,10 +992,13 @@ v8-labelled API records, the fill plus the six canaries, read 617 of 682
 2026-09-04d canary and none in the fill. (The "612 of 682" this paragraph
 first gave was the 18-record count less those five, computed by hand from
 the reports, and called the fill; it was neither.) The recorded tally is
-the post-regate reading: on three of the ten v8 records with a pre-regate
-snapshot the regate flipped `both` rows to `full` (04f rep1 CHORUS ×2, 04g
-rep3 CM4AI ×2, 04f rep3 VOICE ×4), so `report_gate` now carries the tally
-before and after, and the comparison is post-regate against post-regate. The v8 labels already carry three assembly digests (2026-09-04
+the post-regate reading: the tally moved on six of the ten v8 records
+with a pre-regate snapshot, and on three of them with the row total
+unchanged — the unambiguous flip of `both` to `full` (04e rep1 VOICE ×1,
+04f rep1 CHORUS ×2, 04g rep3 CM4AI ×2); 04f rep3 VOICE gained four `full`
+and lost three `both` while a row was added. So `report_gate` now carries
+the tally before and after, and the comparison is post-regate against
+post-regate. The v8 labels already carry three assembly digests (2026-09-04
 rep1; b/c/d; e/f/g), so "one boundary" is a statement about v9, not a
 claim that v8 was one arm; and the block is unconditional, as step E was,
 so a re-run of an earlier condition would receive it too.
@@ -1201,11 +1204,13 @@ steps need:
 15. **The dispositions rows are tallied by record column (#1122, 2026-09-09,
     report_claims instrument v4).** The v9 canary reader was told to compare
     the count of `both` rows with the v8 fill's, and the block carried only
-    the total. `rows_by_record` (`full`/`core`/`both`/`either`/`invalid`,
-    fixed keys, summing to `disposition_rows`) is now on every record:
-    recomputed over the corpus with `backfill-checks --blocks report_claims
-    --overwrite`, which moved no finding and no count — only the new key
-    and the instrument string. The 12-record fill reads 419 `both` of 461;
+    the total. `rows_by_record` (`full`/`core`/`both`/`either`/
+    `no_record_column`/`invalid`, fixed keys, summing to `disposition_rows`)
+    is now on every record: recomputed over the corpus with
+    `backfill-checks --blocks report_claims --overwrite`, which moved no
+    finding and no count into or out of the block — only the new key and
+    the instrument string, and 12 rows on two pre-v8 records from `either`
+    to `no_record_column` when the two were split. The 12-record fill reads 419 `both` of 461;
     all 18 v8-labelled API records, 617 of 682. Not a generation-path
     change: a derived key in the provenance record, no prompt, assembly or
     datasheet touched.

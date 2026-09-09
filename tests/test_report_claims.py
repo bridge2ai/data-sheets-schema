@@ -475,6 +475,16 @@ class RowsByRecordTest(Harness):
         self.assertEqual(block["rows_by_record"]["no_record_column"], 2)
         self.assertEqual(block["rows_by_record"]["either"], 0)
 
+    def test_a_cell_that_spells_the_sentinel_is_invalid_not_a_missing_column(self):
+        """#1139 review, R1: the column's presence must not be forgeable
+        from a cell, or the two states S2 separated collapse again."""
+        block = self.check("## Dispositions\n\n| slot | disposition | record |\n|---|---|---|\n"
+                           "| `notes` | retained | no_record_column |\n| `errata` | retained | No_Record_Column |\n",
+                           full={"notes": 1, "errata": 1}, core={"notes": 1})
+        self.assertEqual(block["rows_by_record"]["invalid"], 2)
+        self.assertEqual(block["rows_by_record"]["no_record_column"], 0)
+        self.assertEqual(block["claims_unnamed"], 2)
+
     def test_a_report_without_a_table_tallies_zero(self):
         block = self.check("## Report\n\nNothing changed.\n")
         self.assertEqual(block["disposition_rows"], 0)

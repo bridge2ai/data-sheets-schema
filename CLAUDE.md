@@ -521,8 +521,8 @@ those the full record does carry, apart from substantive contradictions;
 `instrument` from v2 (#996) and, from v4 (#1122), `rows_by_record` — the
 dispositions rows tallied by their record column (`full`, `core`, `both`,
 `either` for an empty cell, `no_record_column` for a table that has none —
-every pre-v8 report, "not measurable" rather than "no `both` rows" —
-`invalid` for anything else), because a `both` row wrongly flipped to
+a report format that names no record, "not measurable" rather than "no
+`both` rows"; two v2 reports do name one — `invalid` for anything else), because a `both` row wrongly flipped to
 `full` resolves against the full record only and raises nothing, so the
 count, or the rate over the row total, is what a reader compares. Over the
 18 v8-labelled API records — the 12-record fill plus six canaries — it is

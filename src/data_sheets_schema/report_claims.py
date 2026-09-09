@@ -304,8 +304,9 @@ def rows_by_record(rows: list[dict[str, str]]) -> dict[str, int]:
 
     `either` is an empty (or missing) cell in a table that has a record
     column, `no_record_column` a row of a table with no such column — a
-    report format that named no record, as every pre-v8 report did, which
-    is "not measurable" rather than "no `both` rows" (#1139 review, S2) —
+    report format that names no record (two v2 reports name one; the two
+    non-v8 reports whose rows fall here are a v4 and a bare-condition one),
+    which is "not measurable" rather than "no `both` rows" (#1139 review, S2) —
     and `invalid` anything but `full`, `core` or `both`; exactly as
     `disposition_rows` reads them, and the values sum to `disposition_rows`.
     """
@@ -447,13 +448,13 @@ def disposition_rows(text: str) -> list[dict[str, str]]:
         disposition = m.group(1).lower()
         if len(names) > 1 and disposition in ("changed", "amended", "corrected", "added"):
             names = names[-1:]
-        record = ""
-        if "record" not in header:
-            record = "no_record_column"
-        elif header["record"] < len(cells):
-            record = cells[header["record"]].strip().lower()
-        if record not in ("full", "core", "both", "no_record_column"):
-            record = "either" if not record else "invalid"
+        # The column's presence is kept out of the value (#1139 review, R1):
+        # a cell that literally reads `no_record_column` is a value the
+        # checker will not guess at, like any other, and stays `invalid`.
+        has_col = "record" in header
+        record = cells[header["record"]].strip().lower() if has_col and header["record"] < len(cells) else ""
+        if record not in ("full", "core", "both"):
+            record = "no_record_column" if not has_col else ("either" if not record else "invalid")
         for name in names:
             rows.append({"slot": name, "disposition": disposition, "record": record,
                          "line": line.strip()})
