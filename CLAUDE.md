@@ -677,17 +677,30 @@ d4d agents check-echo --agent d4d-rubric10-semantic --reply -   # exit 1 if stal
 d4d agents digest                                   # the pin each output records
 ```
 
-The preamble asks the agent to quote back a sentence **the most recent change
-to the file added** — precisely the text a stale definition lacks — and to
-stop rather than proceed if it cannot find it. The challenge is drawn from
-the diff, not from the longest line: replayed against the real incident
-(`8813c8e6` against `119e3171`), a longest-line challenge appears in the
-stale text too and would have been echoed happily. `tests/test_agent_pin.py`
-pins that replay.
+The preamble names a **section** of the definition and asks the agent to
+quote its longest sentence. The sentence itself is withheld: the first
+version printed it, so `preamble | check-echo` returned a tick and a stale
+agent that copied the prompt passed the check it exists to fail (#1102). The
+expected text lives only in the verifier.
 
-When a definition has no recent change to draw on, `preamble` says so on
-stderr: echoing the sentence then proves the agent read *a* definition, not
-that it read this one.
+That text is chosen by being **verifiably absent from the previous version**
+of the file — not by being long (replayed against the real incident,
+`8813c8e6` against `119e3171`, the longest line is a paragraph both versions
+share) and not by appearing in a diff (a reformat "changes" a shared line).
+`tests/test_agent_pin.py` pins both the replay and the reformat case.
+
+Where a definition carries nothing its predecessor lacked, `preamble` and
+`check-echo` **exit non-zero** rather than issue a question that cannot fail;
+`digest` marks those definitions. A check that cannot fail is worse than no
+check, because it is reported as a pass.
+
+**What a pass does and does not prove.** A refusal is strong evidence: the
+agent could not produce text that is in the definition on disk. A pass is
+weaker — it shows the reply contains that text, which an agent with the
+current definition can do and a stale one cannot, but it does not
+independently establish which file the runtime loaded. Do not describe a pass
+as having verified the subagent's definition; describe it as the subagent
+having quoted the current text.
 
 ## Canonical Prompt Registry
 
