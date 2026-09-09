@@ -212,6 +212,49 @@ class Validator(unittest.TestCase):
         self.assertNotIn("external_resources[0].id", ex)       # a real anchor elsewhere
         self.assertNotIn("conforms_to", ex)
 
+    def test_a_fragment_on_an_identifier_the_record_carries_for_the_dataset_is_exempt(self):
+        """#1123: the v5 rule licenses a fragment on an identifier the
+        evidence supplies — the landing page, the DOI in its other form —
+        and a record taking that option must not lose receipt coverage
+        for it. A fragment on a component dataset's DOI under `resources`,
+        or on a homepage the record does not carry as its page, is a claim
+        about that identifier and stays receiptable."""
+        full = {"id": "https://doi.org/10.1/ABC", "doi": "10.1/abc",
+                "page": "https://example.org/dataset/",
+                "file_collections": [{"id": "https://example.org/dataset#fc-1", "name": "raw"},
+                                     {"id": "doi:10.1/ABC#fc-2", "name": "derived"},
+                                     {"id": "DOI:10.1/abc#fc-3", "name": "case"}],
+                "resources": [{"id": "doi:10.1/COMPONENT#release-dates", "name": "part"}],
+                "funders": [{"id": "https://project.org/#funder-1", "name": "NIH"}]}
+        carried = rc.dataset_identifier_forms(full)
+        leaves = dict(rc.populated_leaves(full))
+        ex = {p for p, v in leaves.items() if rc.exempt(p, v, full["id"], carried)}
+        self.assertIn("file_collections[0].id", ex)            # the page, trailing slash aside
+        self.assertIn("file_collections[1].id", ex)            # the id in CURIE form
+        self.assertIn("file_collections[2].id", ex)            # DOIs are case-insensitive
+        self.assertNotIn("resources[0].id", ex)                # another dataset's DOI
+        self.assertNotIn("funders[0].id", ex)                  # a homepage the record does not carry
+        # Under v1 those three were receiptable; the block counts the change.
+        v1 = {p for p, v in leaves.items() if rc.exempt(p, v, full["id"])}
+        self.assertEqual(ex - v1, {"file_collections[0].id", "file_collections[1].id", "file_collections[2].id"})
+        self.assertEqual(sum(rc.exempt_on_carried_identifier(p, v, full["id"], carried)
+                             for p, v in leaves.items()), 3)
+
+    def test_a_record_carrying_no_doi_or_page_exempts_own_id_fragments_only(self):
+        full = {"id": "urn:uuid:1", "funders": [{"id": "https://x/ds#f", "name": "n"}]}
+        self.assertEqual(rc.dataset_identifier_forms(full), frozenset({"urn:uuid:1"}))
+        self.assertFalse(rc.exempt("funders[0].id", "https://x/ds#f", full["id"],
+                                   rc.dataset_identifier_forms(full)))
+        self.assertEqual(rc.dataset_identifier_forms(None), frozenset())
+        self.assertEqual(rc.dataset_identifier_forms({"id": 7, "doi": ""}), frozenset())
+
+    def test_the_block_names_its_instrument_and_counts_the_new_exemptions(self):
+        r = _receipt(self.md5)
+        b = rc.check(r, self.manifest, self.texts, FULL, self.md5)
+        self.assertTrue(b["instrument"].startswith("v2 (#1123)"), b["instrument"])
+        self.assertIn("v1 (#720", b["instrument"])
+        self.assertEqual(b["slots"]["exempt_on_carried_identifier"], 0)
+
     def test_malformed_entries_are_findings_not_tracebacks(self):
         r = _receipt(self.md5)
         r["chunks"][1]["extracted"] = "Grant OT2OD032644"

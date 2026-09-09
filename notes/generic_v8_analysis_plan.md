@@ -1189,6 +1189,23 @@ steps need:
     is untouched, so VOICE 04f stays retained; the AI_READI 04f record is
     re-verdicted under the instrument (regressed) and AI_READI runs again.
 
+15. **A label minted on an identifier the record carries is exempt from the
+    receipt denominator (#1123, 2026-09-09, receipts instrument v2).** v1
+    exempted only a fragment on the record's own id byte for byte; the v5
+    rule licenses one on any identifier the evidence supplies, so a record
+    that labelled its file collections on the landing page or on the DOI's
+    other form was counted as uncovered for them. v2 exempts a fragment on
+    the record's `id` in either form, its `doi` or its `page`, names its
+    instrument in the block, and counts the difference
+    (`slots.exempt_on_carried_identifier`: 4 leaves, all CHORUS API v7).
+    Recomputed with `backfill-checks --blocks receipts --overwrite`: 29
+    records; no gated number moved (findings, snippet verdicts and chunk
+    counts identical; three 2026-08-28 CHORUS agentic blocks and two CM4AI
+    samples caught up with revisions #840/#842/#891/#899 they had never
+    been recomputed under, and 18 v8 blocks gained `recorded_by`). The 18
+    receipted records whose bundle drifted are withheld by the #907 guard
+    and stay under v1 — #1140 is the recompute from the git blob.
+
 Each of 2–5, 7–10, 11 and 12 is a generation-path change (13 and 14 are not); per the production rule
 none of them may land between a v8 canary and its fill.
 

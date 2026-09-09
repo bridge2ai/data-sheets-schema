@@ -645,6 +645,11 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v2 (#1123): a fragment minted on an identifier the record carries for
+    the dataset at its top level — its id in CURIE or resolver form, its doi, its
+    page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 28
     reviewed: 28
@@ -714,6 +719,7 @@ receipts:
   slots:
     populated: 455
     exempt: 48
+    exempt_on_carried_identifier: 0
     receiptable: 407
     with_receipt: 288
     without_receipt:
@@ -779,16 +785,16 @@ receipts:
     remapped_by_identity:
     - path: creators[10]
       resolved_path: creators[7]
-      basis: by_overlap
+      basis: by_id
     - path: creators[11]
       resolved_path: creators[8]
-      basis: by_overlap
+      basis: by_id
     - path: creators[12]
       resolved_path: creators[9]
-      basis: by_overlap
+      basis: by_id
     - path: creators[13]
       resolved_path: creators[10]
-      basis: by_overlap
+      basis: by_id
     - path: creators[14]
       resolved_path: creators[41]
       basis: by_overlap
@@ -797,31 +803,31 @@ receipts:
       basis: by_overlap
     - path: creators[16]
       resolved_path: creators[11]
-      basis: by_overlap
+      basis: by_id
     - path: creators[17]
       resolved_path: creators[12]
-      basis: by_overlap
+      basis: by_id
     - path: creators[18]
       resolved_path: creators[13]
-      basis: by_overlap
+      basis: by_id
     - path: creators[19]
       resolved_path: creators[14]
-      basis: by_overlap
+      basis: by_id
     - path: creators[20]
       resolved_path: creators[15]
-      basis: by_overlap
+      basis: by_id
     - path: creators[21]
       resolved_path: creators[43]
       basis: by_overlap
     - path: creators[22]
       resolved_path: creators[16]
-      basis: by_overlap
+      basis: by_id
     - path: creators[23]
       resolved_path: creators[17]
-      basis: by_overlap
+      basis: by_id
     - path: creators[24]
       resolved_path: creators[18]
-      basis: by_overlap
+      basis: by_id
     - path: creators[25]
       resolved_path: creators[44]
       basis: by_overlap
@@ -830,13 +836,13 @@ receipts:
       basis: by_overlap
     - path: creators[27]
       resolved_path: creators[19]
-      basis: by_overlap
+      basis: by_id
     - path: creators[28]
       resolved_path: creators[20]
-      basis: by_overlap
+      basis: by_id
     - path: creators[29]
       resolved_path: creators[21]
-      basis: by_overlap
+      basis: by_id
     remapped_by_identity_count: 46
     value_changed_after_receipt:
     - path: creators[0].id
@@ -1225,6 +1231,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/CM4AI_chunks.yaml
       sha256: 3d2d86bac4e9f89d2c6cfb6b5f5361c237995d899ecb6ae41382f82359aedde4
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_audit.json
   sha256: 97acf6ff2c6a18902ee84f5603ee3c7d576b908cd15a73c1f784bb751e9ed842

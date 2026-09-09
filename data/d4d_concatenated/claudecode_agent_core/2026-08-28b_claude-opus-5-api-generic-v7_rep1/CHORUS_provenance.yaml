@@ -414,6 +414,11 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v2 (#1123): a fragment minted on an identifier the record carries for
+    the dataset at its top level — its id in CURIE or resolver form, its doi, its
+    page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 8
     reviewed: 8
@@ -451,11 +456,11 @@ receipts:
     entry_single_leaf_sample: []
   slots:
     populated: 195
-    exempt: 28
-    receiptable: 167
+    exempt: 29
+    exempt_on_carried_identifier: 1
+    receiptable: 166
     with_receipt: 54
     without_receipt:
-    - id
     - name
     - status
     - is_tabular
@@ -505,8 +510,9 @@ receipts:
     - acquisition_methods[3].was_inferred_derived
     - acquisition_methods[4].acquisition_details
     - acquisition_methods[4].was_validated_verified
-    without_receipt_truncated: 63
-    never_receipted: 113
+    - collection_mechanisms[3].mechanism_details
+    without_receipt_truncated: 62
+    never_receipted: 112
     added_after_receipt: 0
     receipt_paths: 80
     unresolved: []
@@ -574,8 +580,8 @@ receipts:
   findings_truncated: null
   findings_gated: 0
   summary: chunks 8/8 reviewed · snippets 96/98 verified (2 in an adjacent chunk)
-    (3 bearing on no token of their value) · slots 54/167 with a receipt (113 never
-    receipted, 0 added after the receipt) (28 exempt) · 14 receipt path(s) reshaped
+    (3 bearing on no token of their value) · slots 54/166 with a receipt (112 never
+    receipted, 0 added after the receipt) (29 exempt) · 14 receipt path(s) reshaped
     by reconcile · 2 receipt path(s) followed by identity · 7 value(s) changed after
     the receipt
   artifacts:

@@ -457,7 +457,21 @@ stripping (the chunk is the source bytes), and a snippet part shorter than
 (`funders[0]`) covers its leaves — that is how a boolean or enum gets one —
 but a receipt on a *list* (`funders`) covers only itself (#721). The slot
 denominator excludes `conforms_to_schema`/`conforms_to_class`, `notes` and
-`source_caveats` at any depth, and ids minted on the record's own id (#722).
+`source_caveats` at any depth, and ids minted on the record's own id (#722)
+or — receipts instrument **v2**, #1123 — on any identifier the record
+carries for the dataset at its top level: its `id` in CURIE or resolver
+form, its bare `doi`, its landing `page` (trailing slash and DOI case
+aside). The v5 rule licenses a label "on an identifier the evidence *does*
+supply", and a record taking the landing-page option must not lose
+coverage for it. A fragment on any other base — a component dataset's DOI
+under `resources`, a project homepage the record does not carry as its
+page — is a claim about that identifier and stays receiptable. The block
+names its `instrument`, and `slots.exempt_on_carried_identifier` counts
+what v2 exempts that v1's byte-for-byte own-id test did not: 4 leaves in
+the corpus, all CHORUS API v7 records. The corpus recompute reached 29
+records; the 18 receipted records whose bundle has drifted are withheld by
+the #907 guard and stay under v1 (#1140), among them the AI_READI
+2026-09-01 rep1 record #1123 was filed about.
 Named non-checks: that `nothing_relevant` was true, and that a real snippet
 supports its value. `backfill-checks` writes a `receipts` block only where a
 receipt exists or the record claims one (#726). Every bundle kind a run may declare has a manifest (#725), so
