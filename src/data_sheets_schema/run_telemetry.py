@@ -201,22 +201,28 @@ def _record_stats(artifact: str, path: Path) -> dict[str, Any] | None:
 
 
 #: The rule prediction 9 is read under (#1026). Registered here, in one
-#: place, after the AI_READI 2026-09-04f row was first computed by hand
-#: from rep2's retried attempt and read +13.8% where the rule reads +4.4%.
+#: place, after the AI_READI 2026-09-04f row was read three ways: by hand
+#: from rep2's retried attempt (86,707, +3.2%), then over the two replicates
+#: with a provenance row alone, rep3 dropped (78,646, +13.8%); the rule
+#: reads +4.4% (85,721, rep3 recovered from its reasoning log).
 PREDICTION_9_RULE = (
-    "accepted attempt per phase: the last `full` attempt that ended with `end_turn` and "
-    "carries no `outcome` marker (an abandoned transport attempt, #1017) — a retried "
-    "attempt is excluded; where the provenance carries no `full` row (a run resumed past "
-    "that phase) the accepted attempt is recovered from the reasoning log under the same "
-    "selection; the per-project baseline is the mean over every replicate that yields one, "
-    "and a replicate that yields none is named, not skipped silently")
+    "accepted attempt per phase: the last `full` attempt that ended with `end_turn`, carries "
+    "no `outcome` marker (an abandoned transport attempt, #1017) and no `unusable_reason` "
+    "(a billed reply the runner refused, #1048) and reports `output_tokens` — a retried "
+    "attempt is excluded; the phase is `full` alone (`full_readdress` and `repair_full` are "
+    "their own phases and are not counted); where the provenance yields no accepted `full` "
+    "attempt (a run resumed past that phase) it is recovered from the reasoning log under the "
+    "same selection; the per-project baseline is the mean over every replicate that yields "
+    "one, reported with the replicate range, and a replicate that yields none is named, not "
+    "skipped silently")
 
 
 def _accepted(attempts: list[dict[str, Any]]) -> dict[str, Any] | None:
     """The accepted attempt of a phase under `PREDICTION_9_RULE`: the last
-    `end_turn` attempt that is not an abandoned transport attempt."""
+    `end_turn` attempt that is neither an abandoned transport attempt nor a
+    reply the runner refused as unusable, and that reports its tokens."""
     ended = [a for a in attempts if a.get("stop_reason") == "end_turn" and not a.get("outcome")
-             and a.get("output_tokens") is not None]
+             and not a.get("unusable_reason") and a.get("output_tokens") is not None]
     return ended[-1] if ended else None
 
 
@@ -235,12 +241,18 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
         out["reason"] = "no provenance record"
         return out
     prov = yaml.safe_load(prov_path.read_text(encoding="utf-8")) or {}
-    rows = [r for r in (prov.get("api_usage") or []) if r.get("phase") == "full"]
+    rows = [r for r in (prov.get("api_usage") or []) if isinstance(r, dict) and r.get("phase") == "full"]
     source = "api_usage"
-    if not rows:
-        rows = [e for e in _reasoning_entries(run_dir / f"{project}_reasoning.jsonl") if e.get("phase") == "full"]
-        source = "reasoning_log" if rows else None
     acc = _accepted(rows)
+    if acc is None:
+        # No *accepted* row — not merely no row (#1155 review, S3): a record
+        # whose only `full` row is an abandoned attempt must still consult
+        # the log, which holds the completed call the ledger seeding lost.
+        logged = [e for e in _reasoning_entries(run_dir / f"{project}_reasoning.jsonl") if e.get("phase") == "full"]
+        if _accepted(logged) is not None:
+            rows, source, acc = logged, "reasoning_log", _accepted(logged)
+        elif not rows and not logged:
+            source = None
     out["attempts_seen"] = len(rows)
     if acc is None:
         out["reason"] = ("no full row in the provenance and none in the reasoning log" if source is None
@@ -253,16 +265,21 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
 
 
 def full_output_baseline(method: str, labels: list[str], projects: list[str],
-                         concat_dir: Path = CONCAT_DIR) -> dict[str, dict[str, Any]]:
+                         concat_dir: Path | None = None) -> dict[str, dict[str, Any]]:
     """Per-project `full` output baseline over `labels` under
     `PREDICTION_9_RULE`: the replicates read, their accepted rows, the mean
     over those that yield one, and the ones that yield none by name."""
+    concat_dir = concat_dir or CONCAT_DIR                 # resolved at call time, so a test can point it elsewhere
     out: dict[str, dict[str, Any]] = {}
     for project in projects:
         reps = [accepted_full_output(concat_dir / f"{method}_core" / label, project) for label in labels]
         values = [r["output_tokens"] for r in reps if r["output_tokens"] is not None]
         out[project] = {"rule": PREDICTION_9_RULE, "replicates": reps,
                         "mean": round(sum(values) / len(values)) if values else None,
+                        # The spread beside the mean (#1155 review, S5): CM4AI's v7
+                        # replicates span 26,766–66,300 around a mean of 41,370, and a
+                        # ±10% band on that mean is weaker than the mean alone suggests.
+                        "min": min(values) if values else None, "max": max(values) if values else None,
                         "n": len(values), "without_a_row": [r["label"] for r in reps if r["output_tokens"] is None]}
     return out
 

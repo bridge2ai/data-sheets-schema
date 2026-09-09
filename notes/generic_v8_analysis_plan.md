@@ -219,16 +219,23 @@ work with a migration of committed values; separate).
 **Prediction 9's baseline rule, registered (#1026, 2026-09-09).** The v7
 per-project mean is `run_telemetry.full_output_baseline` under
 `PREDICTION_9_RULE` — the accepted attempt per phase (the last `end_turn`
-`full` attempt with no abandoned-transport marker; a retried attempt
-excluded), a resumed run's row recovered from its reasoning log, the mean
-over the replicates that yield a row and the others named — printed by
-`d4d runs full-output-baseline`. The AI_READI 2026-09-04f row was first
-computed by hand from rep2's retried attempt and read +13.8% where the
-rule reads +4.4% (v7 production: 79,078 / 78,215 / 99,870 → 85,721);
-under the same rule VOICE is 76,159 (73,375 / 74,126 / 80,976), CHORUS
-41,068 and CM4AI 41,370 (rep1's accepted attempt 2, 26,766). The
-telemetry comparison (`d4d runs telemetry`) read the *first* `end_turn`
-attempt until this change and now reads the accepted one.
+`full` attempt with no abandoned-transport marker and no
+`unusable_reason`; a retried attempt excluded; `full_readdress` and
+`repair_full` are their own phases and not counted), a resumed run's row
+recovered from its reasoning log, the mean over the replicates that yield
+a row with the replicate range beside it, and the others named — printed
+by `d4d runs full-output-baseline`. The AI_READI 2026-09-04f row was read
+three ways before the rule was code: by hand from rep2's retried attempt
+(86,707, +3.2%), then over the two replicates with a provenance row alone,
+rep3 dropped (78,646, +13.8%); the rule reads +4.4% (v7 production: 79,078
+/ 78,215 / 99,870 → 85,721, rep3 recovered from its reasoning log). Under
+the same rule VOICE is 76,159 (73,375 / 74,126 / 80,976), CHORUS 41,068
+(35,025 / 40,186 / 47,994) and CM4AI 41,370 (26,766 with rep1's accepted
+attempt 2 / 31,044 / 66,300 — a 2.5× range, so a ±10% band on that mean is
+a weaker instrument than the mean suggests). The telemetry comparison
+(`d4d runs telemetry`) read the *first* `end_turn` attempt until this
+change — the one a retried phase threw away, wrong on all five
+multi-attempt records — and now reads the accepted one.
 
 ### Falsification tests
 

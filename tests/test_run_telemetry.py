@@ -286,8 +286,9 @@ if __name__ == "__main__":
 
 class TestPrediction9Rule(unittest.TestCase):
     """The v7 full-output baseline is one function under one registered
-    rule (#1026): the AI_READI 04f row was first computed by hand from
-    rep2's retried attempt and read +13.8% where the rule reads +4.4%."""
+    rule (#1026): the AI_READI 04f row was read three ways — by hand from
+    rep2's retried attempt (+3.2%), over the two replicates with a
+    provenance row alone (+13.8%), and under the rule (+4.4%)."""
 
     def _run(self, tmp, rows, reasoning=None):
         import json as _json
@@ -324,6 +325,50 @@ class TestPrediction9Rule(unittest.TestCase):
             r = accepted_full_output(d, "P")
         self.assertEqual((r["output_tokens"], r["attempt"], r["source"], r["retried"]), (99870, 2, "reasoning_log", 1))
 
+    def test_an_abandoned_only_provenance_still_consults_the_log(self):
+        """#1155 review, S3: a record whose only full row is an abandoned
+        transport attempt has rows but no accepted one; the log holds the
+        completed call the ledger seeding lost."""
+        from data_sheets_schema.run_telemetry import accepted_full_output
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._run(tmp, [{"phase": "full", "attempt": 1, "output_tokens": 999, "stop_reason": "end_turn",
+                                 "outcome": "stream ended without message_stop"}],
+                          reasoning=[{"phase": "full", "attempt": 1, "output_tokens": 999, "stop_reason": "end_turn",
+                                      "outcome": "stream ended without message_stop"},
+                                     {"phase": "full", "attempt": 2, "output_tokens": 88000, "stop_reason": "end_turn"}])
+            r = accepted_full_output(d, "P")
+        self.assertEqual((r["output_tokens"], r["source"]), (88000, "reasoning_log"))
+
+    def test_a_reply_the_runner_refused_is_not_the_accepted_one(self):
+        """#1155 review, S4: `unusable_reason` marks a billed end_turn reply
+        the runner rejected on the same budget; position alone would take it."""
+        from data_sheets_schema.run_telemetry import accepted_full_output
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._run(tmp, [{"phase": "full", "attempt": 1, "output_tokens": 70000, "stop_reason": "end_turn"},
+                                {"phase": "full", "attempt": 2, "output_tokens": 500, "stop_reason": "end_turn",
+                                 "unusable_reason": "no YAML document"}])
+            r = accepted_full_output(d, "P")
+        self.assertEqual((r["output_tokens"], r["attempt"]), (70000, 1))
+
+    def test_the_cli_prints_the_rule_the_range_and_the_named_gap(self):
+        import click.testing
+        from data_sheets_schema.cli.runs import runs as runs_cli
+        with tempfile.TemporaryDirectory() as tmp:
+            for label, tokens in (("L", 40000), ("M", 60000)):          # --project is a Choice, so a real name
+                d = Path(tmp) / "claudecode_agent_core" / label; d.mkdir(parents=True)
+                (d / "AI_READI_provenance.yaml").write_text(yaml.safe_dump(
+                    {"api_usage": [{"phase": "full", "attempt": 1, "output_tokens": tokens, "stop_reason": "end_turn"}]}))
+            from unittest import mock
+            from data_sheets_schema import run_telemetry
+            with mock.patch.object(run_telemetry, "CONCAT_DIR", Path(tmp)):
+                r = click.testing.CliRunner().invoke(runs_cli, ["full-output-baseline", "--method", "claudecode_agent",
+                                                                "--label", "L", "--label", "M", "--label", "GONE",
+                                                                "--project", "AI_READI"])
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertIn("rule: accepted attempt per phase", r.output)
+        self.assertIn("mean 50000 over 2 replicate(s), range 40000–60000; no row: GONE", r.output)
+        self.assertIn("GONE: — (no provenance record)", r.output)
+
     def test_a_replicate_with_no_row_is_named_not_skipped(self):
         from data_sheets_schema.run_telemetry import accepted_full_output, full_output_baseline
         with tempfile.TemporaryDirectory() as tmp:
@@ -350,6 +395,7 @@ class TestPrediction9Rule(unittest.TestCase):
         base = full_output_baseline("claudecode_agent", labels, ["AI_READI", "VOICE", "CHORUS", "CM4AI"])
         self.assertEqual({p: b["mean"] for p, b in base.items()},
                          {"AI_READI": 85721, "VOICE": 76159, "CHORUS": 41068, "CM4AI": 41370})
+        self.assertEqual((base["CM4AI"]["min"], base["CM4AI"]["max"]), (26766, 66300))
         ai = base["AI_READI"]["replicates"]
         self.assertEqual([r["output_tokens"] for r in ai], [79078, 78215, 99870])
         self.assertEqual([r["source"] for r in ai], ["api_usage", "api_usage", "reasoning_log"])

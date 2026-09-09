@@ -5,6 +5,8 @@ from pathlib import Path
 
 import click
 
+from data_sheets_schema.constants import PROJECTS
+
 
 @click.group()
 def runs():
@@ -68,9 +70,9 @@ def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
 
 
 @runs.command("full-output-baseline")
-@click.option("--method", required=True, help="run directory family, e.g. claudecode_agent")
+@click.option("--method", default=None, help="run directory family; defaults to the one the first label lives in (#934)")
 @click.option("--label", "labels", multiple=True, required=True, help="a replicate label; repeat for each")
-@click.option("--project", "projects", multiple=True, help="default: every project")
+@click.option("--project", "projects", multiple=True, type=click.Choice(PROJECTS), help="default: every project")
 @click.option("--json", "as_json", is_flag=True)
 def full_output_baseline_cmd(method, labels, projects, as_json):
     """Per-project `full` output baseline under prediction 9's registered rule (#1026).
@@ -82,8 +84,9 @@ def full_output_baseline_cmd(method, labels, projects, as_json):
     """
     import json as _json
 
-    from data_sheets_schema.constants import PROJECTS
+    from data_sheets_schema.cli.method import resolve_method
     from data_sheets_schema.run_telemetry import PREDICTION_9_RULE, full_output_baseline
+    method = method or resolve_method(labels[0])
     base = full_output_baseline(method, list(labels), list(projects) or list(PROJECTS))
     if as_json:
         click.echo(_json.dumps(base, indent=2))
@@ -91,6 +94,7 @@ def full_output_baseline_cmd(method, labels, projects, as_json):
     click.echo(f"rule: {PREDICTION_9_RULE}")
     for project, b in base.items():
         click.echo(f"{project}: mean {b['mean']} over {b['n']} replicate(s)"
+                   + (f", range {b['min']}–{b['max']}" if b["n"] > 1 else "")
                    + (f"; no row: {', '.join(b['without_a_row'])}" if b["without_a_row"] else ""))
         for r in b["replicates"]:
             if r["output_tokens"] is None:
