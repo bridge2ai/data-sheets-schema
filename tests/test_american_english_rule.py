@@ -105,6 +105,28 @@ class TestTheRunnerSendsWhatItAsksFor(unittest.TestCase):
         self.assertEqual(api_runner.BUNDLE_HEAD.format(bundle="b.txt") + "\n", "# Declared input bundle — b.txt\n\n")
         self.assertEqual(api_runner.BUNDLE_MD5_LINE.format(md5="x"), "# bundle_md5: x\n")
 
+    def test_the_bundle_head_is_composed_as_main_sent_it(self):
+        """The constants are pinned above; this pins the two places that join
+        them (#1151 review, R3-S2), through `build_phase` — the request as
+        sent, not the test's own reconstruction."""
+        import hashlib
+        from data_sheets_schema.api_runner import RunSpec, build_phase, chunk_marked_bundle
+        from tests.test_download.test_api_runner import BUNDLE
+        plain = build_phase(RunSpec(project="CHORUS", arm="BASELINE (input documents only)", method="claudecode_agent",
+                                    bundle=BUNDLE, label="2026-07-29_claude-opus-5-api-generic_rep1"),
+                            "full", carry={})
+        text = plain.cached_blocks[1]["text"]
+        self.assertTrue(text.startswith(f"# Declared input bundle — {BUNDLE}\n\n"), text[:120])
+        self.assertEqual(text[len(f"# Declared input bundle — {BUNDLE}\n\n"):], BUNDLE.read_text(encoding="utf-8", errors="ignore"))
+        marked, md5 = chunk_marked_bundle(BUNDLE)
+        receipted = build_phase(RunSpec(project="CHORUS", arm="BASELINE (input documents only)", method="claudecode_agent",
+                                        bundle=BUNDLE, label="L_rep1", condition="generic_v7"),
+                                "full", carry={})
+        head = (f"# Declared input bundle — {BUNDLE}\n# bundle_md5: {md5}\n"
+                "# Chunk markers: a line of the form [cNNN] opens each chunk; the markers are not "
+                "part of the bundle's text.\n\n")
+        self.assertEqual(receipted.cached_blocks[1]["text"], head + marked)
+
 
 class TestItDidNotRedefineACondition(unittest.TestCase):
     """The reason it is in the playbook rather than the prompts."""

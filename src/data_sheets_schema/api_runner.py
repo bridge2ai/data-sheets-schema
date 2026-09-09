@@ -2533,6 +2533,9 @@ REPAIR_INSTRUCTION = (
 # decrease is the real convergence test — a round that leaves the count equal
 # or higher IS non-convergence and stops immediately — and the ceiling bounds
 # what a stubborn record can bill.
+REPAIR_ROUNDS = 4
+
+
 def sent_text_surfaces() -> dict[str, str]:
     """The prose the runner itself authors into a request, by name: the phase
     instructions and the layout the assembly digest hashes, and the surfaces
@@ -2557,8 +2560,6 @@ def sent_text_surfaces() -> dict[str, str]:
                 "bundle_head": BUNDLE_HEAD.format(bundle="") + BUNDLE_MD5_LINE.format(md5="")})
     return out
 
-
-REPAIR_ROUNDS = 4
 
 
 #: Slots whose declared range is multivalued, from the schema rather than a
