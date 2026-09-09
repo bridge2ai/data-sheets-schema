@@ -1758,7 +1758,8 @@ def compare_arms(prefix_a, prefix_b, method):
     # meets it: the function has no other caller, and the ergonomic form —
     # two condition names — is exactly the form that answers `["base"]` and
     # gets quoted in a pull request body as though the prompt were all that
-    # moved. It is one field of the five above, never a replacement for them.
+    # moved. It is one field of the `ARM_PROCEDURE_FIELDS` above, never a
+    # replacement for them.
     from data_sheets_schema.api_runner import (condition_delta,
                                                confounded_note)
     # From the records (#1094): `arm_facts` reads `run.condition`, else the
