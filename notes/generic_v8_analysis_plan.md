@@ -1030,6 +1030,22 @@ runner sends says "neighbouring" too and is filed as #1138, because
 `PHASE_INSTRUCTIONS` is in the assembly digest and moving it is a
 condition-boundary change.
 
+### R8 no longer charges a landing-page label a receipt (#1147, 2026-09-09)
+
+The fifth v9 pin. R8's own-id preference was argued from cost: "a label on
+the dataset's landing page … names an identifier the evidence must supply,
+so it needs a receipt like any other value, where a label on this record's
+own id does not" (#1109, round 2). Receipts instrument v2 (#1123, amendment
+15) removed that cost — a fragment on any identifier the record carries
+for the dataset at its top level is exempt from the denominator — so the
+sentence told the model to trade coverage away for a charge the instrument
+no longer makes. The preference stands on the reason that was always
+underneath it: a reader who follows the record's `id` finds its parts
+under it, which a label on another base does not give. The sentence is
+rewritten in the prompt and in the playbook's mirror; the probe moves with
+it. No rule changes, the assembly digest does not move, no v9 record
+exists, so nothing is re-baselined.
+
 ### What a v9 arm can and cannot be compared against (#1072)
 
 `condition_delta("generic_v8", "generic_v9")` returns `["base"]`, and that

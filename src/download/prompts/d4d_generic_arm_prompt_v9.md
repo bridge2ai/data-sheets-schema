@@ -393,9 +393,9 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   supplies for this dataset — which refines the rule that mints a label on
   an identifier the evidence supplies, without replacing it — and this
   record's own id is the base to prefer: a label on the dataset's landing
-  page is licensed too, but it names an identifier the evidence must
-  supply, so it needs a receipt like any other value, where a label on this
-  record's own id does not. A fragment appended to another entity's
+  page or DOI is licensed too, and a reader who follows this record's `id`
+  finds its parts under it, which a label on another base does not give.
+  A fragment appended to another entity's
   identifier — an organization's, another dataset's — labels a part of that
   entity, not of this one.
 - A slot whose declared range is an enumeration is populated only from a
