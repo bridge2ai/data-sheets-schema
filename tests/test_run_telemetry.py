@@ -331,13 +331,14 @@ class TestPrediction9Rule(unittest.TestCase):
         completed call the ledger seeding lost."""
         from data_sheets_schema.run_telemetry import accepted_full_output
         with tempfile.TemporaryDirectory() as tmp:
-            # an abandoned attempt writes no log entry (the callback fires
-            # inside the retry loop); only the completed call is logged
-            d = self._run(tmp, [{"phase": "full", "attempt": 1, "output_tokens": 999, "stop_reason": "end_turn",
-                                 "outcome": "stream ended without message_stop"}],
-                          reasoning=[{"phase": "full", "attempt": 2, "output_tokens": 88000, "stop_reason": "end_turn"}])
+            # the corpus shape (VOICE 2026-09-04f rep2, CM4AI 2026-09-04g rep1):
+            # the abandoned attempt and its completed retry share attempt 1;
+            # the abandoned one writes no log entry, the completed one does
+            d = self._run(tmp, [{"phase": "full", "attempt": 1, "output_tokens": 5, "stop_reason": None,
+                                 "outcome": "transport error: RemoteProtocolError (#1017)"}],
+                          reasoning=[{"phase": "full", "attempt": 1, "output_tokens": 83711, "stop_reason": "end_turn"}])
             r = accepted_full_output(d, "P")
-        self.assertEqual((r["output_tokens"], r["source"]), (88000, "reasoning_log"))
+        self.assertEqual((r["output_tokens"], r["source"]), (83711, "reasoning_log"))
 
     def test_the_log_never_launders_an_attempt_the_provenance_refused(self):
         """#1155 round 2, M1: the log carries no unusable_reason, so a refused
@@ -350,7 +351,44 @@ class TestPrediction9Rule(unittest.TestCase):
                           reasoning=[{"phase": "full", "attempt": 1, "output_tokens": 500, "stop_reason": "end_turn"}])
             r = accepted_full_output(d, "P")
         self.assertIsNone(r["output_tokens"])
-        self.assertEqual(r["reason"], "no accepted full attempt: 1 full row(s) in the provenance, none in the reasoning log")
+        self.assertEqual(r["reason"], "no accepted full attempt: 1 full row(s) in the provenance, "
+                                      "1 in the reasoning log (1 of them the provenance recorded as refused)")
+
+    def test_a_refused_attempt_and_a_later_invocations_accepted_one_can_share_a_number(self):
+        """#1155 round 3, M1(b): attempt restarts at 1 per invocation, so the
+        refused first-invocation attempt and the accepted second-invocation
+        one are both attempt 1 in the log; only the refused (attempt, tokens)
+        pair is dropped."""
+        from data_sheets_schema.run_telemetry import accepted_full_output
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._run(tmp, [{"phase": "full", "attempt": 1, "output_tokens": 500, "stop_reason": "end_turn",
+                                 "unusable_reason": "no YAML document"},
+                                {"phase": "repair_full", "attempt": 1, "output_tokens": 9, "stop_reason": "end_turn"}],
+                          reasoning=[{"phase": "full", "attempt": 1, "output_tokens": 500, "stop_reason": "end_turn"},
+                                     {"phase": "full", "attempt": 1, "output_tokens": 77000, "stop_reason": "end_turn"}])
+            r = accepted_full_output(d, "P")
+        self.assertEqual((r["output_tokens"], r["source"]), (77000, "reasoning_log"))
+
+    def test_an_unresolvable_label_is_named_not_fatal(self):
+        import click
+        import click.testing
+        from unittest import mock
+        from data_sheets_schema.cli.runs import runs as runs_cli
+        def resolve(label):
+            if "GONE" in label:
+                raise click.ClickException(f"no run labelled {label!r}")
+            return "claudecode_agent"
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp) / "claudecode_agent_core" / "L"; d.mkdir(parents=True)
+            (d / "AI_READI_provenance.yaml").write_text(yaml.safe_dump(
+                {"api_usage": [{"phase": "full", "attempt": 1, "output_tokens": 40000, "stop_reason": "end_turn"}]}))
+            from data_sheets_schema import run_telemetry
+            with mock.patch("data_sheets_schema.cli.method.resolve_method", side_effect=resolve), \
+                 mock.patch.object(run_telemetry, "CONCAT_DIR", Path(tmp)):
+                r = click.testing.CliRunner().invoke(runs_cli, ["full-output-baseline", "--label", "L",
+                                                                "--label", "GONE_rep9", "--project", "AI_READI"])
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertIn("mean 40000 over 1 replicate(s); no row: GONE_rep9", r.output)
 
     def test_a_mixed_method_label_set_is_refused_not_half_read(self):
         """#1155 round 2, S2: resolving the method from the first label reads

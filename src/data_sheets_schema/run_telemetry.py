@@ -208,7 +208,8 @@ def _record_stats(artifact: str, path: Path) -> dict[str, Any] | None:
 PREDICTION_9_RULE = (
     "accepted attempt per phase: the last `full` attempt that ended with `end_turn`, carries "
     "no `outcome` marker (an abandoned transport attempt, #1017) and no `unusable_reason` "
-    "(a billed reply the runner refused, #1048) and reports `output_tokens` — a retried "
+    "(a billed reply the runner refused, #1048; a log entry with that attempt's number and "
+    "output tokens is refused with it) and reports `output_tokens` — a retried "
     "attempt is excluded; the phase is `full` alone (`full_readdress` and `repair_full` are "
     "their own phases and are not counted); where the provenance yields no accepted `full` "
     "attempt (a run resumed past that phase) it is recovered from the reasoning log under the "
@@ -252,18 +253,24 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
         # The log is a recovery source for rows the provenance *lost*, never
         # an override of what the provenance says about the same attempt
         # (round 2, M1): the log carries no `unusable_reason`, so a log entry
-        # whose attempt the provenance recorded as refused or abandoned is
-        # dropped before the log is read.
-        refused = {r.get("attempt") for r in rows if r.get("unusable_reason") or r.get("outcome")}
-        logged = [e for e in _reasoning_entries(run_dir / f"{project}_reasoning.jsonl")
-                  if e.get("phase") == "full" and e.get("attempt") not in refused]
+        # the provenance recorded as refused is dropped before the log is
+        # read. The match is (attempt, output_tokens), the same response in
+        # two files — never the attempt number alone, which the runner
+        # restarts at 1 on every invocation and shares between an abandoned
+        # attempt and its own completed retry (round 3, M1). An abandoned
+        # attempt writes no log entry, so `outcome` rows guard nothing here.
+        refused = {(r.get("attempt"), r.get("output_tokens")) for r in rows if r.get("unusable_reason")}
+        in_log = [e for e in _reasoning_entries(run_dir / f"{project}_reasoning.jsonl") if e.get("phase") == "full"]
+        logged = [e for e in in_log if (e.get("attempt"), e.get("output_tokens")) not in refused]
         acc = _accepted(logged)
         if acc is not None:
             rows, source = logged, "reasoning_log"
     out["attempts_seen"] = len(rows)
     if acc is None:
         seen = (f"{len(rows)} full row(s) in the provenance" if rows else "no full row in the provenance")
-        seen += (f", {len(logged)} in the reasoning log" if logged else ", none in the reasoning log")
+        seen += (f", {len(in_log)} in the reasoning log" if in_log else ", none in the reasoning log")
+        if in_log and len(logged) < len(in_log):
+            seen += f" ({len(in_log) - len(logged)} of them the provenance recorded as refused)"
         out["reason"] = f"no accepted full attempt: {seen}"
         return out
     out.update({"output_tokens": int(acc["output_tokens"]), "attempt": acc.get("attempt"), "source": source,

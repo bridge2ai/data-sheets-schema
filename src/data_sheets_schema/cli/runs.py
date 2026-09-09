@@ -87,10 +87,21 @@ def full_output_baseline_cmd(method, labels, projects, as_json):
     from data_sheets_schema.cli.method import resolve_method
     from data_sheets_schema.run_telemetry import PREDICTION_9_RULE, full_output_baseline
     if not method:
-        found = {resolve_method(label) for label in labels}
-        if len(found) > 1:
-            raise click.ClickException(f"labels live under {sorted(found)}; pass --method")
-        method = found.pop()
+        # Resolve what resolves; a label under neither directory is named by
+        # the rule's "no row" line rather than aborting the baseline (round
+        # 3, S1). Refuse only a resolved set that spans two families.
+        found = {}
+        for label in labels:
+            try:
+                found[label] = resolve_method(label)
+            except click.ClickException:
+                continue
+        families = set(found.values())
+        if len(families) > 1:
+            raise click.ClickException(f"labels live under {sorted(families)}; pass --method")
+        if not families:
+            raise click.ClickException("none of the labels lives under claudecode_agent_core or claudecode_api_core; pass --method")
+        method = families.pop()
     base = full_output_baseline(method, list(labels), list(projects) or list(PROJECTS))
     if as_json:
         click.echo(_json.dumps(base, indent=2))
