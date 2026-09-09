@@ -92,6 +92,11 @@ def _attempt(row: dict[str, Any],
         a["stop_reason"] = stop if stop in _STOP_REASONS else "other"
     if row.get("outcome"):
         a["outcome"] = str(row["outcome"])                 # an abandoned attempt (#1017)
+    if row.get("unusable_reason"):
+        # Display only — no branch reads it (#1048): a billed attempt whose
+        # body the parser refused, otherwise indistinguishable from the one
+        # accepted. Wall time and the reasoning join are unaffected.
+        a["unusable_reason"] = str(row["unusable_reason"])
     if reasoning_entry:
         for src, dst in (("reasoning_tokens_estimate",
                           "reasoning_tokens_estimate"),

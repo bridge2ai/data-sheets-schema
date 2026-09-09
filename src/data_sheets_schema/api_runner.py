@@ -3686,15 +3686,30 @@ def _record_unusable_response(spec: RunSpec, ph: str, attempt: int,
     """
     if not text:
         return None
-    receipted = RECEIPT_MARK in text
+    # The parser's own predicate, line-anchored (#740): a record value that
+    # echoes the marker inline is not a receipt, and the snapshot must not
+    # send the reader to a tail that is not one (#1104 round 3, finding 1).
+    marker = _RECEIPT_MARK_LINE.search(text)
+    receipted = marker is not None and split_receipt(text)[1] is not None
     if receipted and len(text) > UNUSABLE_HEAD_CHARS + UNUSABLE_TAIL_CHARS:
-        elided = len(text) - UNUSABLE_HEAD_CHARS - UNUSABLE_TAIL_CHARS
+        # The window starts at the marker, not at the end: every real receipt
+        # in the corpus is longer than the tail bound (min 3,107 chars, median
+        # 26,249), and the signal for a receipt-parse failure — prose instead
+        # of YAML, a fence, no `chunks:` — is at the receipt's opening, so the
+        # last 3,000 characters would be the least diagnostic slice (finding 2).
+        start = max(UNUSABLE_HEAD_CHARS, marker.start())
+        window = text[start:start + UNUSABLE_TAIL_CHARS]
+        between = start - UNUSABLE_HEAD_CHARS
+        after = len(text) - (start + len(window))
         kept = (text[:UNUSABLE_HEAD_CHARS]
-                + f"\n# … {elided} characters elided …\n"
-                + text[-UNUSABLE_TAIL_CHARS:])
-        extent = (f"# first {UNUSABLE_HEAD_CHARS} and last {UNUSABLE_TAIL_CHARS} "
-                  f"characters as delivered ({elided} elided between; the receipt "
-                  "is the last document, so the tail is where a receipt failure is):\n")
+                + (f"\n# … {between} characters elided …\n" if between else "\n")
+                + window
+                + (f"\n# … {after} characters elided after the window …\n" if after else ""))
+        extent = (f"# first {UNUSABLE_HEAD_CHARS} characters as delivered, then "
+                  f"{len(window)} characters from the receipt marker on"
+                  f"{f' ({between} elided between' if between else ' (nothing elided between'}"
+                  f"{f', {after} after)' if after else ')'}; a receipt failure shows at "
+                  "the receipt's opening, so the window starts at the marker:\n")
     else:
         kept = text[:UNUSABLE_HEAD_CHARS]
         extent = (f"# first {UNUSABLE_HEAD_CHARS} characters as delivered"
@@ -3878,10 +3893,13 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
         # Before the retry, and before the last-attempt raise: the final
         # attempt's body is evidence too, and raising without it loses the
         # one that actually ended the run (#1048).
-        kept = _record_unusable_response(
-            spec, ph, attempt, problem, response_text,
-            usage[-1] if usage and usage[-1].get("attempt") == attempt else None)
-        if kept is not None and usage and usage[-1].get("attempt") == attempt:
+        # Both the phase and the attempt: `_readdress_receipt` appends a
+        # `full_readdress` row with attempt 1, which an attempt-only guard
+        # would stamp on loop attempt 1 (round-3 finding 3).
+        own_row = (usage[-1] if usage and usage[-1].get("attempt") == attempt
+                   and usage[-1].get("phase") == ph else None)
+        kept = _record_unusable_response(spec, ph, attempt, problem, response_text, own_row)
+        if kept is not None and own_row is not None:
             # A distinct key, never `outcome` (#1048 review). `outcome` is
             # #1017's marker for an *abandoned* attempt, and run_telemetry
             # branches on its presence: it drops such rows from wall time
@@ -3890,9 +3908,14 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
             # attempt is neither — its seconds are disjoint and it wrote a
             # reasoning entry — so marking it `outcome` halved CHORUS 04f
             # rep2's wall time and handed the accepted attempt the first
-            # attempt's reasoning estimate.
-            usage[-1]["unusable_reason"] = problem.splitlines()[0][:120]
-            usage[-1]["unusable_snapshot"] = kept.name
+            # attempt's reasoning estimate. The basename, not #1017's
+            # `str(path)` under `snapshot`: `merge_abandoned_rows` dedups on
+            # `snapshot`, and these rows are not abandoned attempts to merge
+            # from the ledger. The snapshot file itself is written at once, so
+            # on the MAX_ATTEMPTS raise — no record written, this row lost with
+            # it — the file and its self-describing header survive.
+            own_row["unusable_reason"] = (problem.splitlines() or [""])[0][:120]
+            own_row["unusable_snapshot"] = kept.name
         if attempt == MAX_ATTEMPTS:
             raise RuntimeError(
                 f"phase {ph!r} produced no usable output in "

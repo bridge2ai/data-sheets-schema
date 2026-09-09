@@ -137,7 +137,34 @@ class UnusableSnapshotTest(unittest.TestCase):
         body = self.written["CHORUS_full_unusable_attempt1.txt"]
         self.assertIn(after, body)
         self.assertIn("characters elided", body)
-        self.assertIn("the tail is where a receipt failure is", body)
+        self.assertIn("the window starts at the marker", body)
+
+    def test_a_marker_echoed_inline_in_prose_is_not_a_receipt(self):
+        """Round-3 finding 1: `split_receipt` is line-anchored (#740), so a
+        record whose prose quotes the marker has no receipt document; the
+        snapshot must not elide the record's middle and point at a tail."""
+        from data_sheets_schema.api_runner import RECEIPT_MARK
+        whole = ("```yaml\nid: x\ndescription: the response must end with "
+                 + RECEIPT_MARK + " then the receipt\n" + ("k: v\n" * 5000) + "```\n")
+        self._write(whole, problem="response contained no parseable yaml object")
+        body = self.written["CHORUS_full_unusable_attempt1.txt"]
+        self.assertNotIn("characters elided", body)
+        self.assertIn("(truncated here)", body)
+
+    def test_the_window_starts_at_the_marker_so_the_receipts_opening_is_shown(self):
+        """Round-3 finding 2: every real receipt is longer than the tail
+        bound, and a receipt-parse failure shows at the opening (prose, a
+        fence, no `chunks:`), not in the last chunk entries."""
+        from data_sheets_schema.api_runner import RECEIPT_MARK
+        record = "```yaml\nid: x\n" + ("k: v\n" * 3000) + "```\n"
+        opening = "OPENING-OF-THE-RECEIPT: prose where a mapping should be\n"
+        whole = f"{record}{RECEIPT_MARK}\n{opening}" + ("- id: c999\n  status: extracted\n" * 2000) + "LAST-LINE\n"
+        self._write(whole, problem="the text after the receipt marker is not a receipt")
+        body = self.written["CHORUS_full_unusable_attempt1.txt"]
+        self.assertIn(RECEIPT_MARK + "\n" + opening, body)          # marker and opening, contiguous
+        self.assertNotIn("LAST-LINE", body)                          # the end is what is elided
+        self.assertIn("elided after the window", body)
+        self.assertIn("from the receipt marker on", body)
 
     def test_a_long_record_only_response_still_keeps_only_the_head(self):
         """No marker, no tail: a record failure's question is its shape."""
@@ -154,6 +181,20 @@ class UnusableSnapshotTest(unittest.TestCase):
         body = self.written["CHORUS_full_unusable_attempt1.txt"]
         self.assertIn("short prose", body)
         self.assertNotIn("characters elided", body)
+
+    def test_a_readdress_row_of_the_same_attempt_number_is_not_stamped(self):
+        """Round-3 finding 3: `_readdress_receipt` appends a `full_readdress`
+        row with attempt 1; the guard must check the phase, not only the
+        attempt number, or that row is overwritten."""
+        from data_sheets_schema.api_runner import _record_unusable_response
+        own = {"phase": "full", "attempt": 1, "output_tokens": 7}
+        foreign = {"phase": "full_readdress", "attempt": 1, "output_tokens": 9}
+        # the call-site guard, reproduced: the row is passed only when phase and attempt match
+        for row, expect in ((own, "output_tokens: 7"), (foreign, "output_tokens: None")):
+            self.written.clear()
+            usage_row = row if row.get("attempt") == 1 and row.get("phase") == "full" else None
+            _record_unusable_response(self.spec, "full", 1, "p", "some text", usage_row)
+            self.assertIn(expect, self.written["CHORUS_full_unusable_attempt1.txt"])
 
     def test_an_empty_response_writes_nothing(self):
         """There is no evidence in an empty body, and a file full of header
@@ -207,10 +248,10 @@ class ThroughThePhaseLoop(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
         s = spec(out_dir=Path(tmp.name) / "out", condition="generic_v8")
         usage = []
-        real_sleep = api_runner.time.sleep
-        api_runner.time.sleep = lambda *_: None
-        self.addCleanup(lambda: setattr(api_runner.time, "sleep", real_sleep))
-        with self.assertRaises(RuntimeError):
+        from unittest import mock
+        # 0 ** attempt == 0 for every attempt >= 1: zero sleep with no reach
+        # into the stdlib module (round-3 finding 8).
+        with mock.patch.object(api_runner, "BACKOFF_BASE_SECONDS", 0), self.assertRaises(RuntimeError):
             _generate_phase(s, "full", {}, _Client(), _model_settings(), usage)
 
         files = sorted(glob.glob(str(Path(tmp.name) / "**" / "*_full_unusable_attempt*.txt"),
