@@ -1926,7 +1926,11 @@ def condition_contradiction(record: dict[str, Any], label: str) -> dict[str, Any
         disagree["label"] = by_label
     if not disagree:
         return None
-    return {"record": stated, "disagrees_with": disagree,
+    # A declared label mismatch (--allow-condition-mismatch) is reported, not
+    # failed: the label is the weakest source and the runner said so on
+    # purpose. A hashed-prompt or registry disagreement stays fatal.
+    declared = bool(run.get("condition_mismatch_allowed")) and set(disagree) == {"label"}
+    return {"record": stated, "disagrees_with": disagree, "declared": declared,
             "prompt_condition": by_prompt, "label_condition": by_label,
             "basis": str(run.get("condition_basis") or "")}
 

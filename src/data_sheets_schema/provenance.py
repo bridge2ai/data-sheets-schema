@@ -1249,7 +1249,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                  extra_notes: list[str] | None = None,
                  receipt_expected: bool = False,
                  condition: str | None = None,
-                 condition_source_paths: list[str] | None = None) -> ProvenanceRecord:
+                 condition_source_paths: list[str] | None = None,
+                 condition_mismatch_allowed: bool = False) -> ProvenanceRecord:
     """Assemble a provenance record for one project-run.
 
     ``mode`` is ``live`` or ``reconstructed``. ``input_verified`` must be True
@@ -1507,7 +1508,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                 # read off the label otherwise, and the basis says which.
                 **_condition_claim(label, condition,
                                    condition_source_paths if condition_source_paths is not None
-                                   else [str(p) for p in (prompt_paths or [])])},
+                                   else [str(p) for p in (prompt_paths or [])]),
+                **({"condition_mismatch_allowed": True} if condition_mismatch_allowed else {})},
         "model": model or None,
         "prompts": prompt_facts(prompt_paths, prompt_request,
                                 prompt_request_spec),

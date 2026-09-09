@@ -70,12 +70,15 @@ def _refuse_condition_mismatch(spec, allow: bool) -> None:
     spend (#1094 review, S4)."""
     from data_sheets_schema.runs import condition_from_label
     named = condition_from_label(spec.label)
-    if named and named != spec.condition and not allow:
-        raise click.ClickException(
-            f"label {spec.label!r} names condition {named!r} but the run would use "
-            f"{spec.condition!r}{'' if spec.condition_stated else ' (the default; no --condition given)'}; "
-            "pass --condition to match the label, relabel, or --allow-condition-mismatch "
-            "to record the mismatch deliberately (runs check will report it)")
+    if named and named != spec.condition:
+        if not allow:
+            raise click.ClickException(
+                f"label {spec.label!r} names condition {named!r} but the run would use "
+                f"{spec.condition!r}{'' if spec.condition_stated else ' (the default; no --condition given)'}; "
+                "pass --condition to match the label, relabel, or --allow-condition-mismatch "
+                "to record the mismatch as declared (runs check reports a declared label "
+                "mismatch and does not fail it; a hashed-prompt or registry mismatch still fails)")
+        spec.condition_mismatch_allowed = True      # recorded on the record (#1130 round 2)
 
 
 def _require_canonical_prompts(spec):
@@ -175,8 +178,8 @@ def api():
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
 @click.option("--label", required=True, help="run label")
-@click.option("--condition", type=click.Choice(_CONDITIONS), default="generic",
-              show_default=True)
+@click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
+              help="prompt condition; omitted, `generic` applies without being called a choice (#1094)")
 @click.option("--bundle", type=click.Path(), default=None,
               help="explicit input bundle; required for datasets outside PROJECTS")
 @click.option("--runtime", default="Claude Code", show_default=True,
@@ -184,7 +187,9 @@ def api():
 @click.option("--provider", default="Anthropic", show_default=True)
 @click.option("--out", type=click.Path(), default=None,
               help="write the instruction here as well as printing its digest")
-def render_prompt_cmd(project, arm, label, condition, bundle, runtime,
+@click.option("--allow-condition-mismatch", is_flag=True,
+              help="render even though the label names a different condition (#1094)")
+def render_prompt_cmd(project, arm, label, condition, bundle, runtime, allow_condition_mismatch,
                       provider, out):
     """Render the exact instruction a run should receive, for any runtime.
 
@@ -209,6 +214,7 @@ def render_prompt_cmd(project, arm, label, condition, bundle, runtime,
 
     spec = _spec(project, arm, label, condition, bundle,
                  runtime=runtime, provider=provider)
+    _refuse_condition_mismatch(spec, allow_condition_mismatch)   # the agentic path's launch instrument (#1130 round 2)
     _require_bundle(spec, project, bundle)
 
     # Warned, not refused. Rendering is free and reading the text of a draft
@@ -243,8 +249,8 @@ def render_prompt_cmd(project, arm, label, condition, bundle, runtime,
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
 @click.option("--label", required=True, help="run label, e.g. 2026-07-29_claude-opus-5-api-generic_rep1")
-@click.option("--condition", type=click.Choice(_CONDITIONS),
-              default="generic", show_default=True)
+@click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
+              help="prompt condition; omitted, `generic` applies without being called a choice (#1094)")
 @click.option("--bundle", type=click.Path(), default=None,
               help="explicit input bundle; required for datasets outside PROJECTS")
 @click.option("--out-dir", type=click.Path(), default=None,

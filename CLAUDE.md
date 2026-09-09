@@ -826,13 +826,20 @@ it). `d4d runs check` fails under `--strict` on a record whose stated
 condition the hashed prompt, the label, or the registry contradicts, and
 reports one that nothing can check. `d4d api run|batch` refuse before
 any spend when the label names a condition the run would not use
-(`--allow-condition-mismatch` to record a deliberate one). Before this
+(`--allow-condition-mismatch` records the mismatch as declared — the label
+is the weakest source, so `runs check` reports a declared label
+disagreement and does not fail it; a hashed-prompt or registry
+disagreement always fails). A label names a condition only as a
+delimited registered token: `generic-v99` before v99 is registered, or a
+label naming two conditions, names none. Before this
 the field `arm_confounds` compared was a top-level key no record had, so
 it compared "None" with "None" and never reported a condition difference;
 `arm_facts` now reads `run.condition`, else the hashed prompt, else the
 label, and `compare-arms` reads the same field. Labels that name no
-registered condition (the 2026-07-27 series, crate/healthsheet arms) still
-read `None` unless their records hash a condition prompt.
+registered condition (the 2026-07-27 series — the one `runs.py` calls the
+tuned arm, whose records hash no prompt and so cannot attest it — and the
+crate/healthsheet arms) still read `None` unless their records hash a
+condition prompt.
 
 ## Model Reasoning Capture
 

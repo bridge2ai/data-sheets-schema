@@ -128,6 +128,13 @@ def _inline_checks(path: Path) -> None:
     click.echo("  " + bc.summarise(blocks))
 
 
+def _CONDITIONS_FOR_RECORD() -> list[str]:
+    """The registry's names, so a typo (`generic-v9`) is refused at the
+    keystroke rather than recorded and failed by `runs check` (#1130 round 2)."""
+    from data_sheets_schema.api_runner import CONDITION_PROMPTS
+    return list(CONDITION_PROMPTS)
+
+
 def _require_repo_root_cwd(command: str) -> None:
     """Refuse to record from anywhere but the repository root (#672 review).
 
@@ -258,7 +265,7 @@ def _parse_phases(specs) -> list[dict]:
                    '`d4d api render-prompt --out`. Hashed as prompts.request. '
                    'The file is what an instruction was built from; this is '
                    'what it became.')
-@click.option('--condition', default=None,
+@click.option('--condition', default=None, type=click.Choice(sorted(_CONDITIONS_FOR_RECORD())),
               help='Condition the instruction was rendered under. With --arm '
                    'and --runtime this reconstructs the render spec, so the '
                    'render gate can re-render and compare instead of reporting '

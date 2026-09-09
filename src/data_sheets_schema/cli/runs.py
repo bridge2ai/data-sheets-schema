@@ -427,6 +427,7 @@ def check_cmd(method, label, project, strict):
     uncanonical = []
     condition_contradictions = []                              # #1094
     condition_unchecked = []                                   # stated, and nothing to check it against
+    condition_declared = []                                    # label mismatch the launcher declared
     duplicates = []
     stale_sizes = []
     from data_sheets_schema.runs import _prov, header_disagreements, stale_output_sizes
@@ -452,7 +453,9 @@ def check_cmd(method, label, project, strict):
             # the `uncanonical` shape for the condition claim, fatal under
             # --strict for the same reason. Records before #1094 state none.
             cc = condition_contradiction(prov_data, run.label)
-            if cc:
+            if cc and cc.get("declared"):
+                condition_declared.append({"project": proj, "label": run.label, **cc})
+            elif cc:
                 condition_contradictions.append({"project": proj, "label": run.label, **cc})
             elif condition_unfalsifiable(prov_data, run.label):
                 condition_unchecked.append({"project": proj, "label": run.label,
@@ -828,6 +831,11 @@ def check_cmd(method, label, project, strict):
             who = "; ".join(f"{k}: {v}" for k, v in r["disagrees_with"].items())
             click.echo(f"   {r['project']:9} {r['label']:44} record {r['record']} · {who}"
                        + (f" ({r['basis']})" if r.get('basis') else ""))
+    if condition_declared:
+        click.echo(f"\n⚠️  {len(condition_declared)} record(s) whose label names another condition, declared "
+                   "at launch with --allow-condition-mismatch (#1094) — reported, not failed:")
+        for r in condition_declared:
+            click.echo(f"   {r['project']:9} {r['label']:44} record {r['record']} · label {r['label_condition']}")
     if condition_unchecked:
         click.echo(f"\n⚠️  {len(condition_unchecked)} record(s) state a condition that neither the prompt "
                    "they hashed nor their label can check (#1094) — reported, not failed:")

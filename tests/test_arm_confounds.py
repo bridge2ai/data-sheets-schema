@@ -230,6 +230,19 @@ class ConditionIsAFieldThatCanFire(unittest.TestCase):
             api_cli._refuse_condition_mismatch(spec, allow=False)
         self.assertIn("the default; no --condition given", str(cm.exception))
         api_cli._refuse_condition_mismatch(spec, allow=True)                                   # deliberate
+        self.assertTrue(spec.condition_mismatch_allowed)                                        # and recorded
+        from data_sheets_schema.runs import condition_contradiction
+        declared = {"run": {"condition": "generic_v5", "condition_mismatch_allowed": True},
+                    "prompts": {"files": [{"path": "src/download/prompts/d4d_generic_arm_prompt_v5.md"}]}}
+        cc = condition_contradiction(declared, "2026-09-10_x-api-generic-v8_rep1")
+        self.assertTrue(cc["declared"])                                                          # label only: reported
+        undeclared = {"run": {"condition": "generic_v5"}, "prompts": declared["prompts"]}
+        self.assertFalse(condition_contradiction(undeclared, "2026-09-10_x-api-generic-v8_rep1")["declared"])
+        wrong_prompt = {"run": {"condition": "generic_v5", "condition_mismatch_allowed": True},
+                        "prompts": {"files": [{"path": "src/download/prompts/d4d_generic_arm_prompt.md"}]}}
+        self.assertFalse(condition_contradiction(wrong_prompt, "2026-09-10_x-api-generic-v8_rep1")["declared"])  # prompt: fatal
+        self.assertIn("_refuse_condition_mismatch(spec, allow_condition_mismatch)",
+                      inspect.getsource(api_cli.render_prompt_cmd.callback))                   # the agentic launch instrument
         api_cli._refuse_condition_mismatch(RunSpec(project="CHORUS", arm="baseline", method="claudecode_api",
                                                    bundle=Path("x"), label="2026-09-10_x-api-generic-v9_rep1",
                                                    condition="generic_v9"), allow=False)      # agrees

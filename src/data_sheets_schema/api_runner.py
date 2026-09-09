@@ -430,6 +430,10 @@ class RunSpec:
     # never recording a dataclass default as "stated by the runner" (#1094
     # review, S3 — the effort recorder's own rule, #470).
     condition_stated: bool = True
+    # True when the launcher passed --allow-condition-mismatch: the label
+    # names another condition and the runner's statement wins; recorded so
+    # `runs check` reports the label disagreement instead of failing it.
+    condition_mismatch_allowed: bool = False
     manifest_line: str = "# Source manifest: data/preprocessed/source_manifest.yaml"
     # Frozen when the run is specified, not read from the clock on each use.
     # A six-phase run takes tens of minutes and this study's sweep genuinely
@@ -4427,6 +4431,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     rec = build_record(
         spec.project, spec.method, spec.label, mode="live",
         condition=spec.condition if spec.condition_stated else None,   # the run's own claim, or none (#1094)
+        condition_mismatch_allowed=spec.condition_mismatch_allowed,
         input_bundle=spec.bundle, input_verified=True,
         prompt_paths=spec.prompt_files,
         # The API path builds its instruction with `resolve_prompt`, so it can
