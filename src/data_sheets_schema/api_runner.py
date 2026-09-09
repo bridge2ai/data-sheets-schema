@@ -566,7 +566,12 @@ ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, "
                    "(#952); the report phase ends with a dispositions table, "
                    "checked against the records before the run completes, and "
                    "a report whose claims contradict them is regenerated once "
-                   "with the contradictions named (#929)")
+                   "with the contradictions named (#929); the report phase "
+                   "carries the core class's top-level slot inventory before "
+                   "its instruction, so the model can see which slots the core "
+                   "declares — the gate still judges presence in the two "
+                   "records, and the inventory decides only whether a finding "
+                   "carries the 'core class declares no such slot' cause (#998)")
 
 
 def context_blocks(spec: "RunSpec") -> dict[str, Any]:
@@ -885,8 +890,9 @@ PHASE_INSTRUCTIONS = {
         "`changed`, `added`, `retained`, `record` one of `full`, `core`, "
         "`both`. For a slot reported retained, changed or added, name `both` "
         "only where the core record carries it: the core schema declares "
-        "fewer slots than the full one, and a slot it does not declare "
-        "(`citation`, `consent_revocations`, …) is `full`. "
+        "fewer slots than the full one — its top-level inventory is the "
+        "`# Core schema inventory` block above — and a slot it does not "
+        "declare (`citation`, `consent_revocations`, …) is `full`. "
         "Every row is checked against the records afterwards: a slot "
         "reported removed must be absent from the record named, one reported "
         "retained, changed or added must be present there. Write the table "
@@ -1170,6 +1176,34 @@ def _receipts_block(spec: RunSpec, record: dict[str, Any]) -> dict[str, Any]:
                      spec.condition in RECEIPT_CONDITIONS)
 
 
+def core_inventory_block() -> str:
+    """The core class's top-level slot names, for the report phase (#998).
+
+    The report phase is assembled with the `Dataset` digest, and its
+    instruction says `both` is only for a slot the core record carries. The
+    model's only view of the core inventory was the completed core record in
+    the carry, where a slot the derivation left empty is indistinguishable
+    from one the core class cannot declare. The list is the inventory itself
+    — names only, the same set `report_claims.declared_slots` reads from the
+    same merged core schema (a test holds the two equal) — so the
+    distinction is visible rather than inferred. The gate is unchanged: it
+    judges presence in the two records, and the declaration decides only
+    whether a finding carries the "core class declares no such slot" cause.
+    Every report finding on the v8 fill was of that class — five
+    `retention_not_shown` on `both` rows over full-only slots, on one
+    record — so the most this can remove is those five; nothing else moves.
+    """
+    names = schema_digest.slot_names("CoreDataset")
+    return ("# Core schema inventory\n\n"
+            "`CoreDataset` declares exactly these top-level slots. The test is on "
+            "the *root* of a dispositions row's slot path — `funders[0].grant_id` "
+            "is judged by `funders` — and applies to rows reported retained, "
+            "changed or added: such a row whose root is not in this list is `full`, "
+            "never `both` or `core`. (A `removed` row may name any record the "
+            "slot is absent from.)\n\n"
+            + ", ".join(f"`{n}`" for n in names) + "\n")
+
+
 def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseRequest:
     """Assemble one phase's request.
 
@@ -1250,6 +1284,10 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     for name, text in carry.items():
         parts.append({"type": "text",
                       "text": f"# {name}\n\n{text}"})
+    if phase == "report":
+        # The core inventory the instruction's `both` rule refers to (#998);
+        # before the instruction so the instruction stays last (#346).
+        parts.append({"type": "text", "text": core_inventory_block()})
     instruction = PHASE_INSTRUCTIONS[phase]
     if receipted and phase == "full":
         instruction += PHASE_INSTRUCTIONS["full_receipt"]

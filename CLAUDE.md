@@ -518,7 +518,17 @@ instruction defines `both` as present in both — and the finding names
 the cause so the regate can fix the row (`claims_core_cannot_hold` counts
 those the full record does carry, apart from substantive contradictions;
 #990/#992); the block carries
-`instrument` from v2 (#996). Residual: a run whose report phase completed under the pre-E
+`instrument` from v2 (#996). Since #998 the report phase carries the core
+class's top-level slot inventory (`core_inventory_block`) before its
+instruction, so the model can see which slots the core declares rather
+than infer it from the carried core record, where an empty slot and an
+undeclared one look the same; the gate is unchanged — it judges presence
+in the two records, and the declaration decides only whether a finding
+carries the "core class declares no such slot" cause (every report
+finding on the v8 fill was of that class). `ASSEMBLY_LAYOUT` names it, so
+the assembly digest moves; no v9 record predates it, and the v8 labels
+already carry three assembly digests (2026-09-04 rep1; b/c/d; e/f/g), so
+a v8 run was not comparable with the fill before this either. Residual: a run whose report phase completed under the pre-E
 runner and is resumed under this one gets no table and is blind by
 construction; no such run exists. `companions` is hashed after the last
 phase (#652).
