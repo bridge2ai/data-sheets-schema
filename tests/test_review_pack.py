@@ -617,7 +617,7 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
             rp.write_pack(prov, instr, self.SMALLER, force=True)                       # moved away from the pin
             self.assertEqual(rp.pack_pins(prov)[0], [])
             base = ["pack", "--method", "claudecode_agent", "--label", "L", "--project", "VOICE", "--force",
-                    "--instruction-file", str(instr)]
+                    "--instruction", str(instr)]
             with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
                 r = click.testing.CliRunner().invoke(review_cli, base)                  # default sample: the pinned bytes
             self.assertEqual(r.exit_code, 0, r.output)
