@@ -20,13 +20,20 @@ its instruction gave it.
 
 ## Inputs — from the pack, never from memory
 
-Run, in the repository root:
+Read `data/d4d_concatenated/{METHOD}_core/{LABEL}/{PROJECT}_review_pack.yaml`.
+**If it exists, read it as it is — never regenerate it** (#1095): the pack
+is the artifact your review and the provenance record pin by sha256, and
+`d4d review agree` compares two reviews of the same committed pack; a
+review that rewrites its own pack moves the file underneath that pin and
+is not comparable with the review it was meant to be paired with. Only
+when there is no pack at all, run, in the repository root:
 
 ```bash
 poetry run d4d review pack --label {LABEL} --project {PROJECT} [--method {METHOD}] [--instruction {FILE}]
 ```
 
-and read `data/d4d_concatenated/{METHOD}_core/{LABEL}/{PROJECT}_review_pack.yaml`.
+(the command refuses to rewrite a pinned pack without `--force`, which is
+not yours to pass). The pack
 It names the provenance record, the instruction — written beside the pack
 as `{PROJECT}_review_instruction.md` (re-rendered from the record's spec,
 or the launcher's file; the pack's `instruction.basis` says which and

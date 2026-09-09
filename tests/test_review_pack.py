@@ -467,3 +467,70 @@ class ReferenceAttributes(unittest.TestCase):
             # future reference attribute is named to the reviewer
             self.assertEqual(entries, [])
             self.assertIn("not inlined", p["reference_attributes"]["note"])
+
+
+class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
+    """#1095: a review run regenerated the pack it was reviewing, moving the
+    committed file underneath the sha256 its own record attests."""
+
+    def _pinned(self, tmp, by):
+        prov, instr = Pack()._run(tmp)
+        out, _ = rp.write_pack(prov, instr)
+        sha = hashlib.sha256(out.read_bytes()).hexdigest()
+        if by == "review":
+            (out.parent / "P_review.yaml").write_text(yaml.safe_dump({"pack_sha256": sha, "items": []}))
+        else:
+            text = prov.read_text(); head, body = text.split("\n", 1)
+            d = yaml.safe_load(body); d["review"] = {"artifacts": {"pack": {"sha256": sha}}}
+            prov.write_text(head + "\n" + yaml.safe_dump(d))
+        return prov, instr, out, sha
+
+    def test_a_pack_a_review_pins_is_refused_and_force_rewrites_it(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            self.assertEqual([p["by"] for p in rp.pack_pins(prov)[0]], ["review"])
+            with self.assertRaises(rp.PackAttested) as cm:
+                rp.write_pack(prov, instr)
+            self.assertIn("review_of_another_pack", str(cm.exception))
+            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)     # untouched
+            rp.write_pack(prov, instr, force=True)                                    # deliberate
+
+    def test_a_pack_the_record_pins_is_refused(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "record")
+            self.assertEqual([p["by"] for p in rp.pack_pins(prov)[0]], ["provenance record"])
+            with self.assertRaises(rp.PackAttested):
+                rp.write_pack(prov, instr)
+
+    def test_a_stale_pin_does_not_block_and_is_named(self):
+        """A review that pins a hash the file no longer has: the pack already
+        moved once; rewriting it is allowed, and the stale pin is reported."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            (out.parent / "P_review.yaml").write_text(yaml.safe_dump({"pack_sha256": "0" * 64, "items": []}))
+            current, stale = rp.pack_pins(prov)
+            self.assertEqual(current, []); self.assertEqual([p["by"] for p in stale], ["review"])
+            rp.write_pack(prov, instr)
+
+    def test_no_pack_means_no_pins_and_a_free_write(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = Pack()._run(tmp)
+            self.assertEqual(rp.pack_pins(prov), ([], []))
+            rp.write_pack(prov, instr)
+
+    def test_the_cli_refuses_without_force(self):
+        import click.testing
+        from data_sheets_schema.cli.review import review as review_cli
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            from unittest import mock
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                r = click.testing.CliRunner().invoke(review_cli, ["pack", "--method", "claudecode_agent", "--label", "L", "--project", "VOICE"])
+                self.assertNotEqual(r.exit_code, 0); self.assertIn("pinned by hash", r.output)
+                r = click.testing.CliRunner().invoke(review_cli, ["pack", "--method", "claudecode_agent", "--label", "L", "--project", "VOICE", "--force"])
+                self.assertEqual(r.exit_code, 0, r.output); self.assertIn("redo that review", r.output)
+
+    def test_the_agent_is_told_never_to_regenerate(self):
+        text = (Path(__file__).resolve().parents[1] / ".claude" / "agents" / "d4d-review-record.md").read_text()
+        self.assertIn("never regenerate it", text)
+        self.assertIn("Only\nwhen there is no pack at all", text)

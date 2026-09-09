@@ -651,8 +651,64 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     return pack
 
 
+class PackAttested(RuntimeError):
+    """The pack on disk is pinned by hash and a rewrite would move it
+    underneath that pin (#1095)."""
+
+    def __init__(self, path: Path, pins: list[dict[str, str]]):
+        self.path, self.pins = path, pins
+        who = "; ".join(f"{p['by']} {p['path']}" for p in pins)
+        super().__init__(f"{path} is pinned by hash by {who}; regenerating it would "
+                         "invalidate that pin. Pass force=True (`--force`) only as a "
+                         "deliberate act, and redo the attesting review afterwards — "
+                         "`d4d review check` reports review_of_another_pack until it is.")
+
+
+def pack_pins(provenance: Path) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
+    """(current, stale): who pins the pack on disk by sha256 — the provenance
+    record's `review.artifacts.pack.sha256`, and every `{P}_review*.yaml`
+    beside it whose `pack_sha256` names a pack. `current` pins hash to the
+    file as it is; `stale` pins name a pack the file no longer is (it moved
+    once already, #1095). No pack on disk: both empty."""
+    from data_sheets_schema.backfill_checks import _split_header
+    paths = record_paths(provenance)
+    pack = paths["pack"]
+    if not pack.exists():
+        return [], []
+    on_disk = hashlib.sha256(pack.read_bytes()).hexdigest()
+    current, stale = [], []
+    try:
+        record = yaml.safe_load(_split_header(provenance.read_text(encoding="utf-8"))[1]) or {}
+    except Exception:                                         # noqa: BLE001
+        record = {}
+    rec_sha = (((record.get("review") or {}).get("artifacts") or {}).get("pack") or {}).get("sha256")
+    if rec_sha:
+        (current if rec_sha == on_disk else stale).append(
+            {"by": "provenance record", "path": str(provenance), "sha256": rec_sha})
+    project = paths["project"]
+    for f in sorted(pack.parent.glob(f"{project}_review*.yaml")):
+        if f == pack:
+            continue
+        try:
+            sha = (yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get("pack_sha256")
+        except Exception:                                     # noqa: BLE001
+            continue
+        if sha:
+            (current if sha == on_disk else stale).append({"by": "review", "path": str(f), "sha256": sha})
+    return current, stale
+
+
 def write_pack(provenance: Path, instruction_file: Path | None = None,
-               sample: dict[str, int] | None = None) -> tuple[Path, dict[str, Any]]:
+               sample: dict[str, int] | None = None, *, force: bool = False) -> tuple[Path, dict[str, Any]]:
+    """Write the pack beside the record — refusing, unless forced, to rewrite
+    a pack that a review or the record pins by hash (#1095): a
+    `d4d-review-record` run regenerated the pack it was reviewing, moving
+    the committed `pack_version: 3` file to 4 underneath the sha256 its own
+    record attests and breaking the pairing `d4d review agree` depends on.
+    Regenerating a pack is a deliberate act, like rotating a prompt pin."""
+    current, _ = pack_pins(provenance)
+    if current and not force:
+        raise PackAttested(record_paths(provenance)["pack"], current)
     pack = build_pack(provenance, instruction_file, sample)
     out = record_paths(provenance)["pack"]
     from data_sheets_schema.provenance import _NoAliasDumper

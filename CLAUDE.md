@@ -634,6 +634,17 @@ re-recording and `review check --write` (#856/#973,
 `backfill_checks.carry_attestations`) — marked `stale` with the artifacts
 they attested when the pair or the pack has since changed (#969).
 
+**A review never writes its pack** (#1095). A `d4d-review-record` run
+regenerated the pack it was reviewing — `pack_version` 3 → 4 on the
+committed CHORUS 2026-09-01 rep1 pack — underneath the sha256 its own
+record attests, which is the pairing `d4d review agree` depends on. The
+agent reads an existing pack and runs `d4d review pack` only when none
+exists; the command refuses to rewrite a pack that the record's
+`review.artifacts.pack.sha256` or any `{P}_review*.yaml` beside it pins
+(`review_pack.pack_pins`) unless `--force`, and then says which review
+must be redone. `d4d review check` reports `review_of_another_pack`
+after the fact.
+
 ## Canonical selection with the review (#660)
 
 `d4d runs select` ranks validity → **fewest review adverse verdicts**

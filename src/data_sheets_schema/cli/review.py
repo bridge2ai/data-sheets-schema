@@ -30,7 +30,9 @@ def _provenance(method: str, label: str, project: str) -> Path:
               help="the instruction file the launcher sent; otherwise re-rendered from the record's spec")
 @click.option("--receipted", default=25, show_default=True, help="receipted slots to sample")
 @click.option("--receiptless", default=25, show_default=True, help="receiptless slots to sample")
-def pack(method, label, project, instruction_file, receipted, receiptless):
+@click.option("--force", is_flag=True,
+              help="rewrite a pack that a review or the record pins by hash (#1095); the attesting review must then be redone")
+def pack(method, label, project, instruction_file, receipted, receiptless, force):
     """Write `{PROJECT}_review_pack.yaml` beside the record: every chunk the
     receipt marked nothing_relevant, a seeded sample of receipted slots with
     their cited passage, the receiptless and reshaped slots, and the
@@ -38,12 +40,21 @@ def pack(method, label, project, instruction_file, receipted, receiptless):
     question, and a closed verdict vocabulary per kind."""
     from data_sheets_schema.cli.method import resolve_method
     method = method or resolve_method(label, project)
-    from data_sheets_schema.review_pack import write_pack
+    from data_sheets_schema.review_pack import PackAttested, pack_pins, write_pack
     prov = _provenance(method, label, project)
     if not prov.exists():
         raise click.ClickException(f"no provenance record at {prov}")
-    out, p = write_pack(prov, Path(instruction_file) if instruction_file else None,
-                        {"receipted_slots": receipted, "receiptless_slots": receiptless})
+    current, stale = pack_pins(prov)
+    try:
+        out, p = write_pack(prov, Path(instruction_file) if instruction_file else None,
+                            {"receipted_slots": receipted, "receiptless_slots": receiptless}, force=force)
+    except PackAttested as exc:
+        raise click.ClickException(str(exc)) from exc
+    for pin in current:                                       # forced past a live pin: say so
+        click.echo(f"   ⚠️  rewrote a pack pinned by {pin['by']} {pin['path']} (--force); redo that review")
+    for pin in stale:
+        click.echo(f"   ⚠️  {pin['by']} {pin['path']} pins {pin['sha256'][:12]}…, a pack this file was not "
+                   "before this rewrite either — the pack had already moved under it")
     kinds: dict[str, int] = {}
     for i in p["items"]:
         kinds[i["kind"]] = kinds.get(i["kind"], 0) + 1
