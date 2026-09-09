@@ -103,11 +103,96 @@ class UnusableSnapshotTest(unittest.TestCase):
         self.assertIn(f"response_chars: {len(text)}",
                       self.written["CHORUS_full_unusable_attempt1.txt"])
 
+    def test_on_a_receipt_condition_the_whole_response_is_kept(self):
+        """The review's finding (#1048): `split_receipt` rebinds the loop's
+        `text` to the pre-marker half, and the first version snapshotted that.
+        On exactly the failure the file exists for — "the text after the
+        receipt marker is not a receipt" — it dropped the text after the
+        marker, reported a length that was never delivered, and hashed a
+        string that never existed. The function is given the response as
+        delivered; this holds it to that."""
+        import hashlib
+        from data_sheets_schema.api_runner import RECEIPT_MARK
+        record = "```yaml\nid: x\n```\n"
+        after = "This is prose where a receipt document should be, so it is unusable."
+        whole = f"{record}{RECEIPT_MARK}\n{after}\n"
+        self._write(whole, problem="the text after the receipt marker is not a receipt")
+        body = self.written["CHORUS_full_unusable_attempt1.txt"]
+        self.assertIn(after, body, "the text after the marker is the evidence")
+        self.assertIn(f"response_chars: {len(whole)}", body)
+        self.assertIn(hashlib.sha256(whole.encode()).hexdigest(), body)
+
     def test_an_empty_response_writes_nothing(self):
         """There is no evidence in an empty body, and a file full of header
         would imply there was."""
         self.assertIsNone(self._write(""))
         self.assertEqual(self.written, {})
+
+
+class ThroughThePhaseLoop(unittest.TestCase):
+    """Unmocked `_generate_phase` on a client whose every response is
+    unusable, on a receipt condition: the snapshot is written to the run
+    directory with the whole response, and the usage row carries the distinct
+    key rather than #1017's `outcome`."""
+
+    def test_the_snapshot_lands_whole_and_the_row_is_marked_not_abandoned(self):
+        import glob
+        import hashlib
+        import tempfile
+        from pathlib import Path
+        from data_sheets_schema import api_runner
+        from data_sheets_schema.api_runner import (MAX_ATTEMPTS, RECEIPT_MARK,
+                                                   _generate_phase, _model_settings)
+        from tests.test_download.test_api_runner import spec
+
+        after = "prose where a receipt should be, so this is unusable"
+        body = f"```yaml\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n```\n{RECEIPT_MARK}\n{after}\n"
+
+        class _Block:
+            type = "text"
+            text = body
+
+        class _Usage:
+            input_tokens = 10; output_tokens = 20
+            cache_read_input_tokens = cache_creation_input_tokens = 0
+
+        class _Resp:
+            content = [_Block()]; usage = _Usage(); stop_reason = "end_turn"
+
+        class _Stream:
+            def __init__(self, **kw): pass
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+            def get_final_message(self): return _Resp()
+
+        class _Messages:
+            stream = staticmethod(lambda **kw: _Stream(**kw))
+
+        class _Client:
+            messages = _Messages()
+
+        tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
+        s = spec(out_dir=Path(tmp.name) / "out", condition="generic_v8")
+        usage = []
+        real_sleep = api_runner.time.sleep
+        api_runner.time.sleep = lambda *_: None
+        self.addCleanup(lambda: setattr(api_runner.time, "sleep", real_sleep))
+        with self.assertRaises(RuntimeError):
+            _generate_phase(s, "full", {}, _Client(), _model_settings(), usage)
+
+        files = sorted(glob.glob(str(Path(tmp.name) / "**" / "*_full_unusable_attempt*.txt"),
+                                 recursive=True))
+        self.assertEqual(len(files), MAX_ATTEMPTS, files)
+        snap = Path(files[0]).read_text()
+        self.assertIn(after, snap)
+        self.assertIn(f"response_chars: {len(body)}", snap)
+        self.assertIn(hashlib.sha256(body.encode()).hexdigest(), snap)
+
+        self.assertEqual(len(usage), MAX_ATTEMPTS)
+        for row in usage:
+            self.assertIn("unusable_reason", row)
+            self.assertIn("unusable_snapshot", row)
+            self.assertNotIn("outcome", row, "a billed attempt is not an abandoned one")
 
 
 if __name__ == "__main__":

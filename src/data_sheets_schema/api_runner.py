@@ -3671,6 +3671,10 @@ def _record_unusable_response(spec: RunSpec, ph: str, attempt: int,
     only evidence of what shape the model produced instead of the expected
     one — which is the question a reader asks after a retry.
 
+    `text` must be the response as delivered — captured before a receipt
+    condition's `split_receipt` rebinds the loop variable — so the header's
+    length and hash describe a string that actually arrived.
+
     The accepted attempt is still what the record describes; this is
     recorder-only.
     """
@@ -3790,6 +3794,13 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
 
         text = "".join(b.text for b in resp.content
                        if getattr(b, "type", "") == "text")
+        # The response as delivered, held before `split_receipt` rebinds
+        # `text` to the pre-marker half on a receipt condition (#1048 review):
+        # the unusable snapshot must carry the whole body, or on exactly the
+        # failure it exists for — "the text after the receipt marker is not a
+        # receipt" — it would drop the text after the marker and hash a
+        # string that was never delivered.
+        response_text = text
 
         # Written before the checks below, so a phase that dies of
         # max_tokens still leaves the record showing where its budget went —
@@ -3852,10 +3863,19 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
         # attempt's body is evidence too, and raising without it loses the
         # one that actually ended the run (#1048).
         kept = _record_unusable_response(
-            spec, ph, attempt, problem, text,
+            spec, ph, attempt, problem, response_text,
             usage[-1] if usage and usage[-1].get("attempt") == attempt else None)
         if kept is not None and usage and usage[-1].get("attempt") == attempt:
-            usage[-1]["outcome"] = f"unusable: {problem.splitlines()[0][:120]}"
+            # A distinct key, never `outcome` (#1048 review). `outcome` is
+            # #1017's marker for an *abandoned* attempt, and run_telemetry
+            # branches on its presence: it drops such rows from wall time
+            # (their seconds nest inside a completed attempt's) and skips
+            # them in the positional reasoning-log join. A completed, billed
+            # attempt is neither — its seconds are disjoint and it wrote a
+            # reasoning entry — so marking it `outcome` halved CHORUS 04f
+            # rep2's wall time and handed the accepted attempt the first
+            # attempt's reasoning estimate.
+            usage[-1]["unusable_reason"] = problem.splitlines()[0][:120]
             usage[-1]["unusable_snapshot"] = kept.name
         if attempt == MAX_ATTEMPTS:
             raise RuntimeError(
