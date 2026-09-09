@@ -1108,12 +1108,14 @@ checksum forbids — and none moved the digest.
 
 ### R8 no longer charges a landing-page label a receipt (#1147, 2026-09-09)
 
-The twelfth v9 pin — the registry's `superseded` list holds eleven: three
-registrations and corrections on 2026-09-08, the two #1120 rounds, the two
-#1134 spellings rounds, and this issue's own four earlier rounds, each
-retired by the next (the third wrote `labelled` into the sentence and the
-file sweep of #1134 caught it after the pin was taken; the fourth's premise
-was false for the 35 CHORUS records whose own id is the site root). R8's own-id
+The thirteenth v9 pin — the registry's `superseded` list holds twelve:
+three registrations and corrections on 2026-09-08, the two #1120 rounds,
+the two #1134 spellings rounds, and this issue's own five earlier rounds,
+each retired by the next (the third wrote `labelled` into the sentence and
+the file sweep of #1134 caught it after the pin was taken; the fourth's
+premise was false for the 35 CHORUS records whose own id is the site root;
+the fifth told the 9 CHORUS records whose id is already a fragment on the
+root to mint a second `#`, which RFC 3986 forbids). R8's own-id
 preference was argued from cost: "a label on
 the dataset's landing page … names an identifier the evidence must supply,
 so it needs a receipt like any other value, where a label on this record's
@@ -1130,9 +1132,12 @@ labeled on a shared root cannot be told apart
 from a sibling's by its id alone; and `id` is the `Dataset` identifier
 every record carries, where `page` and `doi` are optional slots. Where the
 record's own id is itself such a root — 35 CHORUS records carry
-`https://chorus4ai.org/` as their `id`, 9 a fragment on it — the sentence
-says it is still the base to prefer, so a model does not read its own
-record as contradicting the premise and mint elsewhere (#1166 round 3).
+`https://chorus4ai.org/` as their `id` — the sentence says it is still the
+base to prefer, so a model does not read its own record as contradicting
+the premise and mint elsewhere (#1166 round 3); where the id is already a
+fragment on the root (9 CHORUS records), the part is labeled on the root
+itself, since a second `#` is not a URI (#1166 round 4; no record carries
+two today).
 Two earlier rewrites were retired by review (#1166): "a reader who follows this
 record's `id` finds its parts under it, which a label on another base does
 not give" either contradicted the licence granted two clauses earlier or
