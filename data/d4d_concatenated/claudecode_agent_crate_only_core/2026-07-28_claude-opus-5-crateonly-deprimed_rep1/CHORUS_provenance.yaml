@@ -55,6 +55,10 @@ inputs:
     path: data/preprocessed/source_manifest.yaml
     md5: e633ee3827eb151efca663f14d0b2f5c
   bundle_sha256: 4de5dfda961363be1a4f109933668f4abe9936514f5e990402858177660681dc
+  bundle_md5: 06ad867c85e1d1ba0818c34e5bbaec29
+  bundle_md5_basis: 'recovered (#1121): the md5 of the bundle at commit fa90b4ec036f
+    (2026-07-28), whose sha256 equals this record''s bundle_sha256 — the bytes the
+    run read, not the file today'
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep1/CHORUS_d4d.yaml

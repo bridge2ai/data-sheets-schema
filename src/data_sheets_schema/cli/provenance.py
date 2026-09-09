@@ -128,6 +128,13 @@ def _inline_checks(path: Path) -> None:
     click.echo("  " + bc.summarise(blocks))
 
 
+def _CONDITIONS_FOR_RECORD() -> list[str]:
+    """The registry's names, so a typo (`generic-v9`) is refused at the
+    keystroke rather than recorded and failed by `runs check` (#1130 round 2)."""
+    from data_sheets_schema.api_runner import CONDITION_PROMPTS
+    return list(CONDITION_PROMPTS)
+
+
 def _require_repo_root_cwd(command: str) -> None:
     """Refuse to record from anywhere but the repository root (#672 review).
 
@@ -258,7 +265,7 @@ def _parse_phases(specs) -> list[dict]:
                    '`d4d api render-prompt --out`. Hashed as prompts.request. '
                    'The file is what an instruction was built from; this is '
                    'what it became.')
-@click.option('--condition', default=None,
+@click.option('--condition', default=None, type=click.Choice(sorted(_CONDITIONS_FOR_RECORD())),
               help='Condition the instruction was rendered under. With --arm '
                    'and --runtime this reconstructs the render spec, so the '
                    'render gate can re-render and compare instead of reporting '
@@ -360,7 +367,8 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                        schema_digest_md5=digest,
                        reasoning_effort=reasoning_effort,
                        phases=_parse_phases(phase_specs),
-                       receipt_expected=receipt_expected)
+                       receipt_expected=receipt_expected,
+                       condition=condition)                  # the launcher's own claim (#1094)
     if phases_skipped:
         known = _known_phases()
         bad = [n for n in phases_skipped if n not in known]
@@ -663,8 +671,22 @@ def backfill(verified, dry_run):
             continue
         for project in run.projects:
             is_verified = run.label in verified
+            # The condition claim of a reconstructed record comes from the
+            # prompt file the existing record hashed, never from a label a
+            # reconstruction cannot check (#1094 review, N2).
+            existing = record_path_for(project, run.method, run.label)
+            source_paths: list[str] = []
+            if existing.exists():
+                import yaml as _yaml
+                try:
+                    prompts = (_yaml.safe_load(existing.read_text(encoding="utf-8")) or {}).get("prompts") or {}
+                    source_paths = [f.get("path", "") if isinstance(f, dict) else str(f)
+                                    for f in (prompts.get("files") or prompts.get("paths") or [])]
+                except Exception:                              # noqa: BLE001
+                    source_paths = []
             rec = build_record(project, run.method, run.label,
-                               mode="reconstructed", input_verified=is_verified)
+                               mode="reconstructed", input_verified=is_verified,
+                               condition_source_paths=source_paths)
             target = record_path_for(project, run.method, run.label)
             n_unrec = len(rec.data.get("unrecoverable") or [])
             if dry_run:
@@ -1020,6 +1042,65 @@ def backfill_prompts(execute, label):
     n = sum(1 for proj, method, lab, _ in recoverable
             if apply_historical_prompt(proj, method, lab) is not None)
     click.echo(f"{n} record(s) updated, each naming the commit its hash is of.")
+
+
+@provenance.command("backfill-bundle-md5")
+@click.option('--execute', is_flag=True,
+              help='write the records; without it this reports and changes nothing')
+@click.option('--label', default=None, help='restrict to one run label')
+def backfill_bundle_md5(execute, label):
+    """Recover `inputs.bundle_md5` for records that predate md5 recording (#1121).
+
+    By proof, not by commit: each such record carries `inputs.bundle_sha256`
+    of the bytes it consumed, and the md5 is taken from the committed version
+    of the bundle whose sha256 equals it. `repo.commit` is not used — those
+    runs read bundles regenerated in a dirty tree, and the bytes at the
+    recorded commit are an older version the run never read.
+
+    \b
+      recovered                            a committed version matches the sha256
+      already_recorded                     left alone
+      no_bundle_path / no_bundle_sha256    nothing to prove against
+      no_blob_matches_the_recorded_sha256  the bytes are in no reachable commit
+      git_unavailable / record_unreadable  the tool could not look, which is
+                                           not a finding about the corpus
+    Archived records under data/ATTIC are outside CONCAT_DIR and not visited.
+    """
+    _require_repo_root_cwd("d4d provenance backfill-bundle-md5")   # CONCAT_DIR is repo-relative
+    from data_sheets_schema.provenance import (
+        BUNDLE_MD5_RECOVERED, CONCAT_DIR, _REPO_ROOT, apply_bundle_md5, resolve_bundle_md5,
+    )
+    # One root for the whole operation: records are read from the cwd and
+    # git history from the package's own checkout; a `d4d` resolving to a
+    # worktree's src while run from another checkout would prove one tree's
+    # md5 against another's history (#1132 round 2).
+    if Path.cwd().resolve() != _REPO_ROOT.resolve():
+        raise click.ClickException(
+            f"the package is installed from {_REPO_ROOT} but the cwd is {Path.cwd()}; "
+            "run this from the checkout the package resolves to")
+    # Every provenance record on disk, not `discover()`'s view of it: a core
+    # record whose full counterpart is absent is invisible to discover()
+    # (#1129 review, finding 6 — one such record exists today).
+    outcomes: dict[str, list] = {}
+    for path in sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml")):
+        if label and path.parent.name != label:
+            continue
+        r = resolve_bundle_md5(path)
+        outcomes.setdefault(r["status"], []).append((path, r))
+    verb = "recovering" if execute else "would recover"
+    for status, items in sorted(outcomes.items()):
+        click.echo(f"   {status:40} {len(items):4}")
+    recoverable = outcomes.get(BUNDLE_MD5_RECOVERED, [])
+    if not recoverable:
+        click.echo("\nNothing to recover.")
+        return
+    dates = sorted({r["date"] for _, r in recoverable})
+    click.echo(f"\n{len(recoverable)} record(s) {verb}, from bundle versions committed on {', '.join(dates)}")
+    if not execute:
+        click.echo("Nothing written. Re-run with --execute to apply.")
+        return
+    n = sum(1 for path, _ in recoverable if apply_bundle_md5(path) is not None)
+    click.echo(f"{n} record(s) updated, each naming the commit its md5 is of and the sha256 that proves it.")
 
 
 @provenance.command("backfill-checks")

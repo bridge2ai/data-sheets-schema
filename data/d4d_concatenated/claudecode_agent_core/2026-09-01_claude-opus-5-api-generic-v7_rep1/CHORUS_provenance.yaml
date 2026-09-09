@@ -411,6 +411,11 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v2 (#1123): a fragment minted on an identifier the record carries for
+    the dataset at its top level — its id in CURIE or resolver form, its doi, its
+    page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 8
     reviewed: 8
@@ -446,9 +451,10 @@ receipts:
       overlapping: 1
   slots:
     populated: 199
-    exempt: 29
-    receiptable: 170
-    with_receipt: 59
+    exempt: 30
+    exempt_on_carried_identifier: 1
+    receiptable: 169
+    with_receipt: 58
     without_receipt:
     - name
     - status
@@ -573,8 +579,8 @@ receipts:
   findings_gated: 0
   summary: chunks 8/8 reviewed · snippets 80/81 verified (1 in an adjacent chunk)
     (1 bearing on no token of their value) (1 entry receipt(s) overlapping one leaf)
-    · slots 59/170 with a receipt (95 never receipted, 16 added after the receipt)
-    (29 exempt) · 3 receipt path(s) reshaped by reconcile · 23 value(s) changed after
+    · slots 58/169 with a receipt (95 never receipted, 16 added after the receipt)
+    (30 exempt) · 3 receipt path(s) reshaped by reconcile · 23 value(s) changed after
     the receipt
   artifacts:
     receipt:

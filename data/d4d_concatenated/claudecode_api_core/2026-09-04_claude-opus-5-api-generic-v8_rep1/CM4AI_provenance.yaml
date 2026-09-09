@@ -406,6 +406,11 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v2 (#1123): a fragment minted on an identifier the record carries for
+    the dataset at its top level — its id in CURIE or resolver form, its doi, its
+    page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 28
     reviewed: 28
@@ -434,47 +439,48 @@ receipts:
     entry_single_leaf_sample:
     - chunk: c026
       slot: file_collections[0]
-      leaves: 7
+      leaves: 6
       overlapping: 1
     - chunk: c026
       slot: file_collections[1]
-      leaves: 7
+      leaves: 6
       overlapping: 0
     - chunk: c026
       slot: file_collections[2]
-      leaves: 7
+      leaves: 6
       overlapping: 1
     - chunk: c026
       slot: file_collections[3]
-      leaves: 7
+      leaves: 6
       overlapping: 0
     - chunk: c026
       slot: file_collections[4]
-      leaves: 7
+      leaves: 6
       overlapping: 0
     - chunk: c026
       slot: file_collections[5]
-      leaves: 7
+      leaves: 6
       overlapping: 0
     - chunk: c026
       slot: file_collections[6]
-      leaves: 7
+      leaves: 6
       overlapping: 0
     - chunk: c026
       slot: file_collections[7]
-      leaves: 7
+      leaves: 6
       overlapping: 0
     - chunk: c026
       slot: file_collections[8]
-      leaves: 7
+      leaves: 6
       overlapping: 1
     - chunk: c026
       slot: file_collections[9]
-      leaves: 7
+      leaves: 6
       overlapping: 0
   slots:
     populated: 384
     exempt: 42
+    exempt_on_carried_identifier: 0
     receiptable: 342
     with_receipt: 206
     without_receipt:
@@ -1027,6 +1033,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/CM4AI_chunks.yaml
       sha256: 3d2d86bac4e9f89d2c6cfb6b5f5361c237995d899ecb6ae41382f82359aedde4
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_api_core/2026-09-04_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_audit.json
   sha256: 7aff37d83afc9fafcda16d5037e628be052208b78a7009ca8c4a731bc5661fd6

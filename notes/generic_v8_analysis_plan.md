@@ -1004,6 +1004,46 @@ rep1; b/c/d; e/f/g), so "one boundary" is a statement about v9, not a
 claim that v8 was one arm; and the block is unconditional, as step E was,
 so a re-run of an earlier condition would receive it too.
 
+### The agentic playbook carries R6–R14 (#1119, 2026-09-09)
+
+`.claude/commands/d4d-uniform-rules.md` — the one copy of the decision
+rules the agentic runtime reads (#563) — stopped at v8 R5, so an agentic
+run under the v9 condition would have received none of R6–R14 (#1119,
+from the #1109 review). The nine are mirrored in the playbook's own
+style, `test_playbook_reach` points at the v9 prompt with a row per rule,
+and the playbook hash every agentic record carries moves with it: an
+agentic boundary at the same point as the API one, with no agentic v9
+record on either side of it.
+
+The nine are the prompt's text with the playbook's tags — clause for
+clause, held by a per-clause probe table, after the first mirror kept
+each rule's statement and dropped its procedure (#1131). The same change
+edits `d4d-full-core.md`'s stale condition list, a second hashed
+playbook: 47 records pinned its previous hash and read as drifted (12
+agentic v6 records among them, the re-marked v6 canonicals included);
+the edited line is a conditions catalogue, not a decision rule, so no
+rule those records ran under moved — reported, never fatal, and named
+here so the drift is attributable.
+
+### The v9 body writes American English (#1134, 2026-09-09)
+
+The fourth v9 pin in two days, and the first that changes no rule. Under
+the declared instrument the whole file carried twelve British forms: the
+body eight "organisation" (inherited from v8's v5 block, and one in R7),
+one "recognise" (v5 block) and one "neighbouring" (v2 block), and the
+rationale two more, one of them the plural — while the body's own v5 rule
+says "Write American English throughout" and the runner rewrites British
+forms out of every record (#1002). All twelve are American now. v8 and earlier keep theirs:
+their records were generated under those bytes. No v9 record existed, so
+nothing is re-baselined; the assembly digest does not move (the prompt
+file is covered by its pin, not the assembly); `condition_delta` stays
+`["base"]`. The guard is the declared instrument, `grounding.BRITISH_PATTERNS`
+(v3), swept over the whole file — the first version was a hand-written
+list that passed on "neighbouring" (#1143). The audit-phase instruction the
+runner sends says "neighbouring" too and is filed as #1138, because
+`PHASE_INSTRUCTIONS` is in the assembly digest and moving it is a
+condition-boundary change.
+
 ### What a v9 arm can and cannot be compared against (#1072)
 
 `condition_delta("generic_v8", "generic_v9")` returns `["base"]`, and that
@@ -1202,7 +1242,32 @@ steps need:
     the repair round, which is told what to merge. A clean run's output
     is untouched, so VOICE 04f stays retained; the AI_READI 04f record is
     re-verdicted under the instrument (regressed) and AI_READI runs again.
-15. **The dispositions rows are tallied by record column (#1122, 2026-09-09,
+15. **A label minted on an identifier the record carries is exempt from the
+    receipt denominator (#1123, 2026-09-09, receipts instrument v2).** v1
+    exempted only a fragment on the record's own id byte for byte; the v5
+    rule licenses one on any identifier the evidence supplies, so a record
+    that labelled its file collections on the landing page (AI_READI
+    2026-09-01 rep1, withheld below) or wrote its own id as a fragment on
+    its page (CHORUS) was counted as uncovered for them. v2 exempts a
+    fragment on the record's `id` in either form, its `doi` or its `page`,
+    names its instrument in the block, and counts the difference
+    (`slots.exempt_on_carried_identifier`: 4 leaves, all CHORUS API v7, all
+    the record's own top-level `id`; one had a receipt, three had none).
+    Recomputed with `backfill-checks --blocks receipts --overwrite`: 29
+    records; no *gated* number moved (findings, snippet verdicts and chunk
+    counts identical). Reported-only values that had never been recomputed
+    under later revisions did: three 2026-08-28 CHORUS agentic blocks gained
+    the #840/#891/#899 keys and their `recorded_by` moved from `d4d receipts
+    check` to `backfill_checks`; `entry_single_leaf_sample[*].leaves` fell
+    by one on two CM4AI records (6→5, 7→6: the #842 minted-id filter, own-id
+    fragments, not v2); `remapped_by_identity[*].basis` read `by_id` for
+    `by_overlap` on CM4AI 2026-09-04b (the #899 remap, not v2); 18 v8 blocks
+    gained `recorded_by`. The 18 receipted records whose bundle drifted are
+    withheld by the #907 guard and stay under v1 — #1140 is the recompute
+    from the git blob. v9 R8's "needs a receipt like any other value" clause
+    states the cost v2 removes; #1147 rotates it (no v9 record exists).
+
+16. **The dispositions rows are tallied by record column (#1122, 2026-09-09,
     report_claims instrument v4).** The v9 canary reader was told to compare
     the count of `both` rows with the v8 fill's, and the block carried only
     the total. `rows_by_record` (`full`/`core`/`both`/`either`/
@@ -1216,8 +1281,7 @@ steps need:
     change: a derived key in the provenance record, no prompt, assembly or
     datasheet touched.
 
-Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14 and 15
-are not); per the production rule
+Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15 and 16 are not); per the production rule
 none of them may land between a v8 canary and its fill.
 
 ## Decisions needed before step 3

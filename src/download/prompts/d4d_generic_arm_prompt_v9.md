@@ -46,9 +46,9 @@ on splits, purposes, limitations and software, was a correct charge for
 the 57 on classes the schema does not force; the 11 on `used_software`
 are the Software case R8 excuses). The other half is the unforced mint on a
 referent outside the record: fragments for grants, awards and
-organisations on the dataset's own DOI, and labels built on another
+organizations on the dataset's own DOI, and labels built on another
 thing's identifier; a creator or maintainer entry is a role, whose id is
-the person's or organisation's own. R8 states the carve-out, the
+the person's or organization's own. R8 states the carve-out, the
 ORCID-first person rule it defers to, and the referent test in one place,
 and says how it refines the v5 minting base rather than silently narrowing
 it. R9 exempts a required enum (`relationship_type`: the entry itself is
@@ -183,7 +183,7 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   absent. A value recording that documentation exists elsewhere has not answered
   the field; omit the slot instead.
 - Read the slot's description before populating it. Where the evidence answers a
-  neighbouring field — the access route rather than the distribution formats,
+  neighboring field — the access route rather than the distribution formats,
   the release cadence rather than the future-use impacts — put it in the field it
   answers, or omit it.
 
@@ -220,14 +220,14 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   exactly as written; and a slot whose declared range is `string` follows its
   own description and pattern even when it holds an identifier — the `doi`
   slot takes the bare DOI, neither prefixed nor resolved.
-- An identifier that names something outside this dataset — an organisation, a
+- An identifier that names something outside this dataset — an organization, a
   person, a publication, another dataset — is a fact about the world, subject to
   the same rule as any other fact: take it from the evidence or omit it. Do not
-  supply one you recognise but the input documents do not state. A correct
+  supply one you recognize but the input documents do not state. A correct
   identifier the evidence does not contain is still an unsupported claim, and to
   every reader who was not present it is indistinguishable from an incorrect
-  one. Naming an organisation the documents name is grounded; adding that
-  organisation's registry identifier from your own knowledge is not.
+  one. Naming an organization the documents name is grounded; adding that
+  organization's registry identifier from your own knowledge is not.
 - An identifier that names a part of this dataset, and exists nowhere outside
   this record, is a label rather than a claim about the world — so no evidence
   can supply it and the rule above does not reach it. Mint it as a fragment on
@@ -238,9 +238,9 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   omit it. Never invent a prefix — one the schema does not declare resolves to
   nothing, and where no fragment is possible either, a resolvable URL is the
   better answer. A person is identified by a personal-identifier registry entry
-  and an organisation by an organisation registry entry; a fragment appended to
-  an organisation's identifier does not identify a person, it makes a false
-  claim about that organisation.
+  and an organization by an organization registry entry; a fragment appended to
+  an organization's identifier does not identify a person, it makes a false
+  claim about that organization.
 - Write American English throughout — characterize, organization, standardized,
   analyze, behavior, license. This governs the prose the record states, not
   quoted material: a title, a name or a direct quotation keeps the spelling its
@@ -361,7 +361,7 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   one entry each or none; never one entry whose value merges them. Two signs
   that you have merged: the value names a class of things where the schema
   asks for a thing — a plural or a collective noun standing where one
-  organisation, one person or one instrument belongs — or it joins what the
+  organization, one person or one instrument belongs — or it joins what the
   sources state as separate names with "and", a slash or a comma. The test is
   the sources, not the punctuation: an entity whose own registered name
   contains "and", a comma or a slash is one entity, and splitting it is the

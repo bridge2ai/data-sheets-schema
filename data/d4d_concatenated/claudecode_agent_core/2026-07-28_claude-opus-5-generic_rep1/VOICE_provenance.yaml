@@ -55,6 +55,10 @@ inputs:
     path: data/preprocessed/source_manifest.yaml
     sha256: 0690e3e03cb2a4e555ec24ceb41e84315fc7376f952dadf7c00ac530ab6ab005
   bundle_sha256: 580122afbf50190d235c91dfad2de6db36ae3af1c3b86ed58e827fe8fcc762d3
+  bundle_md5: e637eb752ee8cab5f9f7a52782250469
+  bundle_md5_basis: 'recovered (#1121): the md5 of the bundle at commit fa90b4ec036f
+    (2026-07-28), whose sha256 equals this record''s bundle_sha256 — the bytes the
+    run read, not the file today'
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep1/VOICE_d4d.yaml

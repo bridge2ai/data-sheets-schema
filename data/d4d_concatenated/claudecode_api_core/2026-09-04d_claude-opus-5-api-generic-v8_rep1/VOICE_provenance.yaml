@@ -545,6 +545,11 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v2 (#1123): a fragment minted on an identifier the record carries for
+    the dataset at its top level — its id in CURIE or resolver form, its doi, its
+    page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 22
     reviewed: 22
@@ -601,6 +606,7 @@ receipts:
   slots:
     populated: 398
     exempt: 55
+    exempt_on_carried_identifier: 0
     receiptable: 343
     with_receipt: 187
     without_receipt:
@@ -868,6 +874,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/VOICE_chunks.yaml
       sha256: f55de43646d5c4a6d61d6339f4d6f6adb3e50cef86d5dad1cb46a43a91fb38bc
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_api_core/2026-09-04d_claude-opus-5-api-generic-v8_rep1/intermediate/VOICE_audit.json
   sha256: 0cd6a5fe4b7d80ddee6d395ba2a9d9aca3ff2a0855de989004a653da1329ca94
