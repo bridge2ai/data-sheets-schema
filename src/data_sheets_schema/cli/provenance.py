@@ -1022,6 +1022,59 @@ def backfill_prompts(execute, label):
     click.echo(f"{n} record(s) updated, each naming the commit its hash is of.")
 
 
+@provenance.command("backfill-bundle-md5")
+@click.option('--execute', is_flag=True,
+              help='write the records; without it this reports and changes nothing')
+@click.option('--label', default=None, help='restrict to one run label')
+def backfill_bundle_md5(execute, label):
+    """Recover `inputs.bundle_md5` for records that predate md5 recording (#1121).
+
+    By proof, not by commit: each such record carries `inputs.bundle_sha256`
+    of the bytes it consumed, and the md5 is taken from the committed version
+    of the bundle whose sha256 equals it. `repo.commit` is not used — those
+    runs read bundles regenerated in a dirty tree, and the bytes at the
+    recorded commit are an older version the run never read.
+
+    \b
+      recovered                            a committed version matches the sha256
+      already_recorded                     left alone
+      no_bundle_path / no_bundle_sha256    nothing to prove against
+      no_blob_matches_the_recorded_sha256  the bytes are in no commit
+    """
+    from data_sheets_schema.provenance import (
+        BUNDLE_MD5_RECOVERED, apply_bundle_md5, record_path_for, resolve_bundle_md5,
+    )
+    from data_sheets_schema.runs import discover
+    outcomes: dict[str, list] = {}
+    seen = set()
+    for run in discover():
+        if run.is_core or run.deterministic:
+            continue
+        if label and run.label != label:
+            continue
+        for proj in run.projects:
+            path = record_path_for(proj, run.method, run.label)
+            if path in seen or not path.exists():
+                continue
+            seen.add(path)
+            r = resolve_bundle_md5(path)
+            outcomes.setdefault(r["status"], []).append((path, r))
+    verb = "recovering" if execute else "would recover"
+    for status, items in sorted(outcomes.items()):
+        click.echo(f"   {status:40} {len(items):4}")
+    recoverable = outcomes.get(BUNDLE_MD5_RECOVERED, [])
+    if not recoverable:
+        click.echo("\nNothing to recover.")
+        return
+    dates = sorted({r["date"] for _, r in recoverable})
+    click.echo(f"\n{len(recoverable)} record(s) {verb}, from bundle versions committed on {', '.join(dates)}")
+    if not execute:
+        click.echo("Nothing written. Re-run with --execute to apply.")
+        return
+    n = sum(1 for path, _ in recoverable if apply_bundle_md5(path) is not None)
+    click.echo(f"{n} record(s) updated, each naming the commit its md5 is of and the sha256 that proves it.")
+
+
 @provenance.command("backfill-checks")
 @click.option('--execute', is_flag=True,
               help='write the records; without it this reports and changes nothing')

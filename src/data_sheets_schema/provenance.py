@@ -1745,6 +1745,84 @@ def apply_historical_prompt(project: str, method: str, label: str,
     return resolved
 
 
+BUNDLE_MD5_RECOVERED = "recovered"
+BUNDLE_MD5_ALREADY = "already_recorded"
+BUNDLE_MD5_NO_PATH = "no_bundle_path"
+BUNDLE_MD5_NO_SHA256 = "no_bundle_sha256"
+BUNDLE_MD5_NO_BLOB = "no_blob_matches_the_recorded_sha256"
+
+
+def bundle_blob_history(bundle_path: str) -> list[dict[str, str]]:
+    """Every committed version of a bundle, newest first: commit, date, and
+    the sha256 and md5 of the bytes at that commit."""
+    out = []
+    log = subprocess.run(["git", "log", "--format=%H %ad", "--date=short", "--", bundle_path],
+                         capture_output=True, text=True, check=False).stdout
+    for line in log.splitlines():
+        commit, date = line.split()
+        blob = subprocess.run(["git", "show", f"{commit}:{bundle_path}"], capture_output=True, check=False)
+        if blob.returncode != 0:
+            continue
+        out.append({"commit": commit, "date": date,
+                    "sha256": hashlib.sha256(blob.stdout).hexdigest(),
+                    "md5": hashlib.md5(blob.stdout).hexdigest()})
+    return out
+
+
+def resolve_bundle_md5(record_path: Path,
+                       history=bundle_blob_history) -> dict[str, Any]:
+    """Recover `inputs.bundle_md5` for a record that predates md5 recording
+    (#1121), by proof rather than by guess: the 82 such records carry
+    `inputs.bundle_sha256` of the bytes they consumed, and the md5 is taken
+    from the committed version of the bundle whose sha256 equals it.
+
+    Not from `repo.commit`: those runs read bundles regenerated in a dirty
+    tree (`repo.dirty: true`), and the bytes at the recorded commit are an
+    older version — recovering by commit would have written a hash the run
+    never read for 27 of the 82. The sha256 match is the evidence.
+    """
+    try:
+        text = record_path.read_text(encoding="utf-8")
+        data = yaml.safe_load(text) or {}
+    except (OSError, yaml.YAMLError, UnicodeDecodeError):
+        return {"status": BUNDLE_MD5_NO_PATH, "note": "record unreadable"}
+    inputs = data.get("inputs") or {}
+    if inputs.get("bundle_md5"):
+        return {"status": BUNDLE_MD5_ALREADY}
+    if not inputs.get("bundle_path"):
+        return {"status": BUNDLE_MD5_NO_PATH, "note": "the record names no bundle"}
+    sha = inputs.get("bundle_sha256")
+    if not sha:
+        return {"status": BUNDLE_MD5_NO_SHA256,
+                "note": "the record carries no sha256 of the bytes it read, so nothing can prove a recovered md5"}
+    for blob in history(inputs["bundle_path"]):
+        if blob["sha256"] == sha:
+            return {"status": BUNDLE_MD5_RECOVERED, "md5": blob["md5"], "commit": blob["commit"],
+                    "date": blob["date"], "path": inputs["bundle_path"]}
+    return {"status": BUNDLE_MD5_NO_BLOB, "path": inputs["bundle_path"],
+            "note": "no committed version of the bundle hashes to the record's bundle_sha256"}
+
+
+def apply_bundle_md5(record_path: Path, history=bundle_blob_history) -> dict[str, Any] | None:
+    """Write the recovered md5 and its basis, keeping the `#` header (#1121)."""
+    resolved = resolve_bundle_md5(record_path, history)
+    if resolved.get("status") != BUNDLE_MD5_RECOVERED:
+        return None
+    text = record_path.read_text(encoding="utf-8")
+    preamble = "".join(itertools.takewhile(lambda ln: ln.startswith("#"),
+                                           text.splitlines(keepends=True)))
+    data = yaml.safe_load(text) or {}
+    data["inputs"]["bundle_md5"] = resolved["md5"]
+    data["inputs"]["bundle_md5_basis"] = (
+        f"recovered (#1121): the md5 of the bundle at commit {resolved['commit'][:12]} "
+        f"({resolved['date']}), whose sha256 equals this record's bundle_sha256 — "
+        "the bytes the run read, not the file today")
+    new = record_path.with_suffix(record_path.suffix + ".tmp")
+    new.write_text(preamble + yaml.safe_dump(data, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    new.replace(record_path)
+    return resolved
+
+
 _PLAYBOOK_REF = re.compile(r"\.claude/[A-Za-z0-9_/.-]*\.md")
 
 #: Where the reference chain starts. The launch instruction's first lines name
