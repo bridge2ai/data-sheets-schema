@@ -395,6 +395,11 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     from data_sheets_schema.chunking import chunk_texts, load_manifest
     from data_sheets_schema.receipts import claim_receipts, load_receipt
 
+    if not write_instruction and instruction_out is None:
+        # The third state — neither written nor returned — would hand back a
+        # pack pinning an instruction file nobody wrote (#1124 round 4).
+        raise ValueError("build_pack: with write_instruction=False the instruction text goes to "
+                         "instruction_out, which was not given")
     sample = {**DEFAULT_SAMPLE, **(sample or {})}
     record = yaml.safe_load(_split_header(provenance.read_text(encoding="utf-8"))[1]) or {}
     paths = record_paths(provenance)

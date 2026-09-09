@@ -562,6 +562,25 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
             rp.write_pack(prov, other, self.SMALLER, force=True)
             self.assertIn("TAMPERED", ipath.read_text())                               # written with the pack
 
+    def test_build_pack_refuses_the_state_that_writes_nothing_and_returns_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = Pack()._run(tmp)
+            with self.assertRaises(ValueError):
+                rp.build_pack(prov, instr, write_instruction=False)
+
+    def test_the_cli_names_the_record_that_would_not_parse(self):
+        import click.testing
+        from unittest import mock
+        from data_sheets_schema.cli.review import review as review_cli
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            prov.write_text("# header\nreview: [unclosed")
+            base = ["pack", "--method", "claudecode_agent", "--label", "L", "--project", "VOICE", "--force",
+                    "--instruction", str(instr)]
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                r = click.testing.CliRunner().invoke(review_cli, base)
+            self.assertNotEqual(r.exit_code, 0); self.assertIn(str(prov), r.output); self.assertNotIn("<unicode string>", r.output)
+
     def test_an_unparsable_provenance_record_is_a_named_refusal(self):
         """#1124 review, SF-R2: `build_pack` re-parsed the record before the
         guard and raised a bare ParserError."""
@@ -671,7 +690,10 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
                 self.assertIn("pins a pack that is not the one on disk", r.output); self.assertIn("rewritten", r.output)
                 pack.unlink()
                 r = click.testing.CliRunner().invoke(runs_cli, ["check"])
-                self.assertIn("missing", r.output)
+                self.assertEqual(r.exit_code, 0, r.output)
+                self.assertIn("pins a pack that is not the one on disk", r.output)
+                self.assertRegex(r.output, r"missing")
+                self.assertNotIn("rewritten", r.output.split("pins a pack that is not the one on disk", 1)[1])
             finally:
                 os.chdir(here)
 
