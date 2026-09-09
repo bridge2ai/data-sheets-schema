@@ -8,7 +8,9 @@ names a tree older than the regenerated bundles they read.
 
 import hashlib
 import tempfile
+import subprocess
 import unittest
+from unittest import mock
 from pathlib import Path
 
 import yaml
@@ -74,10 +76,35 @@ class Resolve(unittest.TestCase):
         try:
             os.chdir(tempfile.gettempdir())
             pv.bundle_blob_history.cache_clear()
-            versions = pv.bundle_blob_history(bp)
+            try:
+                versions = pv.bundle_blob_history(bp)
+            except pv.GitUnavailable as exc:
+                if "shallow" in str(exc):
+                    self.skipTest("shallow clone; the real history is not here")   # CI checks out one commit
+                raise
         finally:
             os.chdir(here)
         self.assertGreaterEqual(len(versions), 2)
+
+    def test_a_shallow_clone_is_refused_not_searched(self):
+        """A one-commit history would report every record whose bytes an
+        earlier commit holds as unrecoverable — which is what the CI clone
+        did on this branch's first run."""
+        calls = []
+        real = pv.subprocess.run
+
+        def fake(args, **kw):
+            calls.append(args)
+            if args[:2] == ["git", "rev-parse"]:
+                return subprocess.CompletedProcess(args, 0, stdout="true\n", stderr="")
+            return real(args, **kw)
+        pv.bundle_blob_history.cache_clear()
+        with mock.patch.object(pv.subprocess, "run", fake):
+            with self.assertRaises(pv.GitUnavailable) as ctx:
+                pv.bundle_blob_history("data/preprocessed/concatenated/CHORUS_preprocessed.txt")
+        self.assertIn("shallow", str(ctx.exception))
+        self.assertFalse(any(a[:2] == ["git", "log"] for a in calls))   # refused before searching
+        pv.bundle_blob_history.cache_clear()
 
     def test_the_other_outcomes_say_why(self):
         with tempfile.TemporaryDirectory() as tmp:

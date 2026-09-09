@@ -371,7 +371,9 @@ committed bundle version whose sha256 equals it — all 82 the 2026-07-28
 version — writing `inputs.bundle_md5_basis` to say so. Not from
 `repo.commit`: those runs read bundles regenerated in a dirty tree, and
 the bytes at the recorded commit are an older version the run never
-read. The test
+read. The search refuses a shallow clone (`git rev-parse
+--is-shallow-repository`): CI checks out one commit, and a one-commit
+history would report every earlier version's record as unrecoverable. The test
 that guards this no longer pins the count (#910): every drifted record must
 pin a hash some `bundle_hash_history` event in the source manifest names as
 its `before`, and every bundle the history names must still hash to its last

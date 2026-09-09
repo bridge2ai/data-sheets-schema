@@ -1775,8 +1775,18 @@ def bundle_blob_history(bundle_path: str) -> tuple[dict[str, str], ...]:
     the pre-rename blob lives under a name this function does not read
     (#1132 round 2). Memoised per path: the backfill asks once per record
     and 82 records name 11 paths. Read-only result — the cached dicts are
-    shared. Raises `GitUnavailable` when the log call fails, rather than
-    returning an empty history that reads as "no version matches"."""
+    shared. Raises `GitUnavailable` when the log call fails, or when the
+    repository is a shallow clone — CI checks out one commit, and a
+    one-commit history reads as "no version matches" for every record
+    whose bytes an earlier commit holds — rather than returning an empty
+    or truncated history."""
+    shallow = subprocess.run(["git", "rev-parse", "--is-shallow-repository"],
+                             capture_output=True, text=True, check=False, cwd=_REPO_ROOT)
+    if shallow.returncode != 0:
+        raise GitUnavailable(shallow.stderr.strip() or "git rev-parse failed")
+    if shallow.stdout.strip() == "true":
+        raise GitUnavailable("shallow clone: the history is truncated, so a version that does "
+                             "not match is not evidence that none exists (unshallow first)")
     log = subprocess.run(["git", "log", "--full-history", "--format=%H %ad",
                           "--date=short", "--", bundle_path],
                          capture_output=True, text=True, check=False, cwd=_REPO_ROOT)
