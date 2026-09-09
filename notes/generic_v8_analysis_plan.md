@@ -1032,7 +1032,9 @@ condition-boundary change.
 
 ### R8 no longer charges a landing-page label a receipt (#1147, 2026-09-09)
 
-The fifth v9 pin. R8's own-id preference was argued from cost: "a label on
+The eighth v9 pin (three registrations and corrections on 2026-09-08,
+two #1120 corrections and two #1134 spellings rounds on 2026-09-09 before
+it). R8's own-id preference was argued from cost: "a label on
 the dataset's landing page … names an identifier the evidence must supply,
 so it needs a receipt like any other value, where a label on this record's
 own id does not" (#1109, round 2). Receipts instrument v2 (#1123, amendment
@@ -1040,10 +1042,17 @@ own id does not" (#1109, round 2). Receipts instrument v2 (#1123, amendment
 for the dataset at its top level is exempt from the denominator — so the
 sentence told the model to trade coverage away for a charge the instrument
 no longer makes. The preference stands on the reason that was always
-underneath it: a reader who follows the record's `id` finds its parts
-under it, which a label on another base does not give. The sentence is
-rewritten in the prompt and in the playbook's mirror; the probe moves with
-it. No rule changes, the assembly digest does not move, no v9 record
+underneath it: the record's own id is the one base every consumer already
+holds — the core projector copies `file_collections` ids into the core's
+distributions and top-level `resources` are matched to the core by id,
+where `page` and `doi` are optional slots a reader may not have. The first
+rewrite said "a reader who follows this record's `id` finds its parts under
+it, which a label on another base does not give", which either contradicts
+the licence granted two clauses earlier or reduces to preferring the id
+because it is the id (#1166 review); a CURIE with a fragment is namespacing,
+not a dereference. The sentence is rewritten in the prompt and in the
+playbook's mirror; the probe moves with it and the shared-clause guard now
+holds both texts to it. No rule changes, the assembly digest does not move, no v9 record
 exists, so nothing is re-baselined.
 
 ### What a v9 arm can and cannot be compared against (#1072)
@@ -1268,7 +1277,7 @@ steps need:
     gained `recorded_by`. The 18 receipted records whose bundle drifted are
     withheld by the #907 guard and stay under v1 — #1140 is the recompute
     from the git blob. v9 R8's "needs a receipt like any other value" clause
-    states the cost v2 removes; #1147 rotates it (no v9 record exists).
+    stated the cost v2 removes; #1147 rotated it (no v9 record exists).
 
 Each of 2–5, 7–10, 11 and 12 is a generation-path change (13 and 14 are not); per the production rule
 none of them may land between a v8 canary and its fill.

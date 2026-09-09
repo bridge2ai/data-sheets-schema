@@ -490,9 +490,10 @@ fragment on that root under the same scheme. One of the four had a receipt
 coverage rose). The file-collections case the issue names exists only in
 the withheld AI_READI 2026-09-01 rep1 record. The recompute reached 29
 records; the 18 receipted records whose bundle has drifted are withheld by
-the #907 guard and stay under v1 (#1140). v9 R8 still tells the model a
+the #907 guard and stay under v1 (#1140). v9 R8 told the model a
 landing-page label "needs a receipt like any other value" — the cost v2
-removes; #1147 rotates that sentence.
+removes; #1147 rotated that sentence (the own-id preference now rests on
+the join every consumer can make).
 Named non-checks: that `nothing_relevant` was true, and that a real snippet
 supports its value. `backfill-checks` writes a `receipts` block only where a
 receipt exists or the record claims one (#726). Every bundle kind a run may declare has a manifest (#725), so
