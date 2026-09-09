@@ -13,6 +13,7 @@ exercised through `make` itself, with the schema path overridden on the
 command line, so the test reads the Makefile the operator runs rather than
 a restatement of it. A check that cannot fail is not a check.
 """
+import re
 import shutil
 import subprocess
 import tempfile
@@ -71,7 +72,7 @@ class TestValidateCore(unittest.TestCase):
             result = _make("validate-core", f"D4D_CORE_SCHEMA={_broken_copy(tmp, edit)}")
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("12345", result.stdout + result.stderr)   # the planted sentinel, echoed by the linter
-        self.assertIn(CORE.name, result.stdout)                  # named as the file that failed
+        self.assertRegex(result.stdout, r"✖ .*" + re.escape(CORE.name))   # attributed to the wrapper, not merely echoed
 
     def test_a_metamodel_break_in_the_module_fails_the_recipe(self):
         """The linter does not follow imports, so the recipe lints each
@@ -86,7 +87,7 @@ class TestValidateCore(unittest.TestCase):
             result = _make("validate-core", f"D4D_CORE_SCHEMA={_broken_copy(tmp, edit)}")
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("999", result.stdout + result.stderr)
-        self.assertIn("D4D_Core.yaml", result.stdout)
+        self.assertRegex(result.stdout, r"✖ .*D4D_Core\.yaml")
 
 
 if __name__ == "__main__":

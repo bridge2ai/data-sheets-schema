@@ -22,6 +22,10 @@ def main(paths: list[str]) -> int:
     failed = 0
     for raw in paths:
         path = Path(raw)
+        if not path.is_file():
+            failed += 1
+            print(f"✖ {path}: not found")
+            continue
         problems = list(linter.lint(str(path), validate_only=True))
         if problems:
             failed += 1
