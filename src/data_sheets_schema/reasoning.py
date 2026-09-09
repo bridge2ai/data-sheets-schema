@@ -210,6 +210,24 @@ def summarise(entries: list[dict[str, Any]]) -> dict[str, Any]:
                                  if obs else None),
         "truncated": sum(1 for e in entries
                          if e.get("stop_reason") == "max_tokens"),
+        # A run whose phases disagree on whether thinking happened is one
+        # generation regime for some phases and another for the rest (#1047):
+        # CM4AI 04g rep2 had it on audit and repair and not on full,
+        # reconcile_full or report. Named so the analysis does not average
+        # such a run in silently.
+        "phases_without_reasoning": sorted(
+            str(e.get("phase")) for e in entries
+            if e.get("reasoning_present") is False),
+        "phases_disagree_on_presence": (
+            0 < sum(1 for e in entries if e.get("reasoning_present")) < len(entries)),
+        # The estimate is output tokens minus a text estimate, so where the
+        # endpoint's own count says 0 the estimate is measuring text-length
+        # error, not reasoning: 11,590 on rep2's full phase against an
+        # observed 0. Those entries are named rather than summed.
+        "estimate_unsound_entries": sorted(
+            str(e.get("phase")) for e in entries
+            if e.get("reasoning_tokens_observed") == 0
+            and (e.get("reasoning_tokens_estimate") or 0) > 0),
     }
 
 

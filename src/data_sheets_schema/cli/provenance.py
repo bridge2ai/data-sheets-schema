@@ -810,6 +810,14 @@ def reasoning_cmd(method, project, label, path):
         if s['truncated']:
             click.echo(f"  ⚠️  {s['truncated']} response(s) stopped at "
                        f"max_tokens")
+        if s.get('phases_disagree_on_presence'):
+            click.echo("  ⚠️  phases disagree on whether thinking happened "
+                       f"(none on: {', '.join(s['phases_without_reasoning'])}) — "
+                       "two generation regimes in one run; do not average it "
+                       "in silently (#1047)")
+        if s.get('estimate_unsound_entries'):
+            click.echo("  ⚠️  estimate unsound where the endpoint counted 0 "
+                       f"thinking tokens: {', '.join(s['estimate_unsound_entries'])}")
 
     if len(logs) > 1:
         s = _reasoning.summarise(total)

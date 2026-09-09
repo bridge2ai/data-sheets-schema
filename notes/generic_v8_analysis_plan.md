@@ -310,8 +310,15 @@ the core schema, which the checker resolved against `Dataset` (#1046);
 the true count is 0 and both runs were regated on it. ᵘ two `full`
 responses judged unusable (no parseable object) and discarded without a
 snapshot (#1048). ᵗ the endpoint returned no thinking block on `full`,
-`reconcile_full`, `report` and the report re-checks (#1047); the runner
-requests none. The same two runs wrote 27 and 35 resolver URLs under
+`reconcile_full`, `report` and the report re-checks (#1047). The runner
+sent no `thinking` parameter, but on this model family omitting it runs
+adaptive thinking — the other ten records got it on identical requests —
+so these two are a **different generation regime, not a run that was not
+asked**, and their rows on predictions 8 and 9 are marked rather than
+averaged in. From this change the request states adaptive thinking
+explicitly and the record carries it as `model.thinking_requested`, so a
+recurrence reads as a provider deviation from a stated request rather than
+an unknown. The same two runs wrote 27 and 35 resolver URLs under
 `id` (`normalisation.identifier_form`; 0 on the other ten), rewritten
 to CURIEs at write time — the model-written count, not the arm's 0.
 Abandoned attempts (transport drops, all retried to completion): 5 across

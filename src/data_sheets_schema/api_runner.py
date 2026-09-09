@@ -703,6 +703,20 @@ def _model_settings() -> dict[str, Any]:
         "config_path": str(DETERMINISTIC_CONFIG),
         "temperature_applies": accepts_temperature(name),
     }
+    # What the request says about thinking (#1047). On claude-opus-5 thinking
+    # is on by default — omitting the parameter runs adaptive — so the two
+    # CM4AI runs with no thinking block on `full` were not "not asked"; the
+    # proxy returned none for a request identical to ten that got it. Sending
+    # the request explicitly does not change what the model does. It changes
+    # what the record can *say*: a run whose request stated adaptive thinking
+    # and whose response carried none is a provider deviation, and a run whose
+    # request stated nothing is simply unknown. `budget_tokens` is never sent
+    # — it returns 400 on this model family — so the issue's own proposed
+    # shape is refused here, and a test holds that line.
+    settings["thinking"] = {"type": "adaptive"}
+    effort = (m.get("thinking") or {}).get("effort") if isinstance(m.get("thinking"), dict) else None
+    if effort:
+        settings["effort"] = str(effort)
     if not settings["temperature_applies"]:
         # The config declares temperature 0.0 and this model refuses the
         # parameter, so the declared value is inert. Recording that here means
@@ -1752,7 +1766,7 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
                              "max_tokens": cap_tokens}
     try:
         rreq = build_readdress(req, response_text, unresolved)
-        resp = _call_with_retry(client, model=settings["name"], max_tokens=cap_tokens,
+        resp = _call_with_retry(client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"), max_tokens=cap_tokens,
                                 temperature=settings["temperature"],
                                 system=rreq.system, messages=rreq.messages,
                                 on_incomplete=lambda info: _record_incomplete_stream(
@@ -3015,7 +3029,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             attempt_t0 = time.monotonic()
             try:
                 resp = _call_with_retry(
-                    client, model=settings["name"],
+                    client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
                     max_tokens=PHASE_MAX_TOKENS.get(ph, DEFAULT_MAX_TOKENS),
                     temperature=settings["temperature"],
                     system=req.system, messages=req.messages,
@@ -3189,7 +3203,8 @@ def _attach_output_tokens_details(msg, details: dict[str, Any]) -> None:
 
 
 def _call_with_retry(client, *, model, max_tokens, temperature, system, messages, on_incomplete=None,
-                     sleep=time.sleep, wall_clock: float | None = None):
+                     sleep=time.sleep, wall_clock: float | None = None,
+                     thinking: dict[str, Any] | None = None, effort: str | None = None):
     """One API call, retrying transient failures.
 
     Retries rate limits, connection errors and 5xx. Does not retry 4xx other
@@ -3207,6 +3222,14 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                               "system": system, "messages": messages}
     if temperature is not None and accepts_temperature(model):
         kwargs["temperature"] = temperature
+    # Stated, not defaulted (#1047). Adaptive is what this family runs when
+    # the parameter is omitted, so this is a request that can be compared to
+    # its response rather than a change in behaviour. `budget_tokens` is a
+    # 400 on this family and is never sent.
+    if thinking is not None:
+        kwargs["thinking"] = dict(thinking)
+    if effort is not None:
+        kwargs["output_config"] = {"effort": effort}
 
     last: Exception | None = None
     incomplete = 0
@@ -3485,7 +3508,7 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
             {"type": "text", "text": PHASE_INSTRUCTIONS["report_regate"]}])
     try:
         resp = _call_with_retry(
-            client, model=settings["name"],
+            client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
             max_tokens=PHASE_MAX_TOKENS.get("report", settings["max_tokens"]),
             temperature=(settings["temperature"]
                          if settings["temperature_applies"] else None),
@@ -3741,7 +3764,7 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
         attempt_t0 = time.monotonic()
         resp = _call_with_retry(
             client,
-            model=settings["name"],
+            model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
             max_tokens=phase_max_tokens(spec, ph, settings["max_tokens"]),
             temperature=settings["temperature"],
             system=req.system,
@@ -4187,6 +4210,21 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         # name suggesting far less.
         "context": context_facts(settings["name"], usage),
     }
+    # The thinking request, recorded as a request (#1047). Before this the
+    # `model` block could not say whether thinking had been asked for, so
+    # two CM4AI 04g runs whose `full` phase came back without a thinking
+    # block were indistinguishable from runs that never asked. The observed
+    # side stays where it is — per phase, in the reasoning log — and the
+    # comparison of the two is `d4d provenance reasoning`'s job.
+    rec.data["model"]["thinking_requested"] = dict(settings.get("thinking") or {})
+    rec.data["model"]["thinking_basis"] = (
+        "set on every API request; on this model family adaptive thinking is "
+        "also the default when the parameter is omitted, so the request states "
+        "the regime rather than changing it")
+    if settings.get("effort"):
+        rec.data["model"]["reasoning_effort"] = settings["effort"]
+        rec.data["model"]["reasoning_effort_basis"] = (
+            "set on the API request as output_config.effort")
     if settings["temperature_applies"]:
         rec.data["model"]["temperature"] = settings["temperature"]
         rec.data["model"]["temperature_basis"] = (
