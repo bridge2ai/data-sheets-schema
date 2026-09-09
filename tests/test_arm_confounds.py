@@ -272,6 +272,21 @@ class TestTheFullPhaseCapIsAProcedureField(unittest.TestCase):
             facts = arm_facts("L", method="claudecode_agent", concat_dir=base)
         self.assertEqual(facts["values"]["full max_tokens"], ["128000", "96000", "None"])
 
+    def test_the_rows_outrank_the_block_and_a_two_cap_record_is_not_constant(self):
+        """#1164 review S1: the block is recomputed at record write, the rows
+        are what each call sent; a run whose `full` phase completed under one
+        cap and was resumed under another carries both, and reads as both."""
+        from data_sheets_schema.runs import arm_facts
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            d = base / "claudecode_agent_core" / "L_rep1"; d.mkdir(parents=True)
+            (d / "P_provenance.yaml").write_text(yaml.safe_dump(
+                {"model": {"max_tokens_by_phase": {"full": 128000}},
+                 "api_usage": [{"phase": "full", "max_tokens": 96000, "stop_reason": "max_tokens"},
+                               {"phase": "full", "max_tokens": 128000}]}))
+            facts = arm_facts("L", method="claudecode_agent", concat_dir=base)
+        self.assertEqual(facts["values"]["full max_tokens"], ["128000", "96000"])
+
     def test_the_v7_canaries_straddle_the_cap_and_the_production_arm_does_not(self):
         from data_sheets_schema.runs import CONCAT_DIR, arm_confounds, arm_facts
         if not (CONCAT_DIR / "claudecode_agent_core" / "2026-08-28_claude-opus-5-api-generic-v7_rep1").exists():
@@ -283,5 +298,6 @@ class TestTheFullPhaseCapIsAProcedureField(unittest.TestCase):
         self.assertEqual([c["field"] for c in arm_confounds(canaries, production) if c["field"] == "full max_tokens"],
                          ["full max_tokens"])
         v8 = arm_facts("2026-09-04f_claude-opus-5-api-generic-v8", method="claudecode_api")
+        self.assertEqual(v8["values"]["full max_tokens"], ["128000"])       # measured, not absent (#1164 review, S2)
         self.assertEqual([c for c in arm_confounds(production, v8) if c["field"] == "full max_tokens"], [])
 

@@ -183,8 +183,8 @@ class ComparableConditionsTest(unittest.TestCase):
         self.assertIn("more than one", note)
         self.assertIn("compare-arms", note)
 
-    def test_the_docstring_says_the_axis_is_one_field_of_five(self):
-        """#1092: `runs.arm_confounds` reads five procedure fields and is the
+    def test_the_docstring_says_the_axis_is_one_procedure_field(self):
+        """#1092: `runs.arm_confounds` reads the `ARM_PROCEDURE_FIELDS` and is the
         record-based answer. On the v7-against-v8 pair the records also differ
         on the schema digest, so this delta under-reports the evidence — which
         it must say rather than look record-based and be narrower."""

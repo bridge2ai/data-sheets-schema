@@ -885,9 +885,13 @@ condition prompt. The `full` phase's output cap is a procedure field too
 (`full max_tokens`, #771): three of the five v7 canaries ran at 96k and
 two at 128k with nothing reading it, so `compare-arms` now reports a cap
 that is not constant within an arm and `arm_confounds` one that differs
-between arms — read from `model.max_tokens_by_phase`, else the `full`
-row of `api_usage`; an agentic record carries none and is skipped like
-an absent reviewer.
+between arms — read from the `full` rows of `api_usage` (every distinct
+cap they carry: the rows are what each call sent, and a resumed run keeps
+its earlier rows), else from `model.max_tokens_by_phase`, which is
+recomputed at record write; an agentic record carries no per-phase cap
+(54 carry `shared_config.max_tokens: 16000`, a config assertion like the
+`temperature` beside it, not the runtime's cap) and is skipped like an
+absent reviewer.
 
 ## Model Reasoning Capture
 
