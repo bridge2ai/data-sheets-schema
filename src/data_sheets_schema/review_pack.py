@@ -381,7 +381,13 @@ def _id_slots(full: Any, root_class: str | None = None,
 
 
 def build_pack(provenance: Path, instruction_file: Path | None = None,
-               sample: dict[str, int] | None = None) -> dict[str, Any]:
+               sample: dict[str, int] | None = None, *, write_instruction: bool = True) -> dict[str, Any]:
+    """The pack as a dict. With `write_instruction` (the default) the rendered
+    instruction is written beside the record as a side effect; `write_pack`
+    passes False and writes it only on the path that also writes the pack,
+    so a refused rewrite leaves both files as it found them (#1124 review,
+    MF-R1). The text is returned under `_instruction_text` in that case,
+    for the caller to write, and is not part of the pack."""
     from data_sheets_schema.backfill_checks import _split_header
     from data_sheets_schema.chunking import chunk_texts, load_manifest
     from data_sheets_schema.receipts import claim_receipts, load_receipt
@@ -413,8 +419,10 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
 
     text, basis = instruction_text(record, instruction_file)
     ipath = paths["instruction"]
-    if text:
+    if text and write_instruction:
         ipath.write_text(text, encoding="utf-8")            # the reviewer reads the instruction, not its hash (#791)
+    elif text:
+        pack["_instruction_text"] = text
     pack["instruction"] = {"basis": basis, "path": str(ipath) if text else None,
                            "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest() if text else None,
                            "chars": len(text) if text else 0}
@@ -655,15 +663,46 @@ class PackAttested(RuntimeError):
     """The pack on disk is pinned by hash and a rewrite would move it
     underneath that pin (#1095)."""
 
-    def __init__(self, path: Path, pins: list[dict[str, str]]):
-        self.path, self.pins = path, pins
-        who = "; ".join(f"{p['by']} {p['path']}"
-                        + (f" ({p['sha256']})" if str(p.get("sha256", "")).startswith("unreadable") else "")
-                        for p in pins)
-        super().__init__(f"{path} is pinned by hash by {who}; regenerating it would "
-                         "move the file under that pin. Pass force=True (`--force`) only as a "
-                         "deliberate act, and redo the attesting review afterwards — "
-                         "`d4d review check` reports review_of_another_pack until it is.")
+    def __init__(self, path: Path, pins: list[dict[str, str]], force_hint: str = "force=True"):
+        self.path, self.pins, self.force_hint = path, pins, force_hint
+        super().__init__(self.describe(force_hint))
+
+    def describe(self, force_hint: str) -> str:
+        """The refusal, naming each pin's class (#1124 review, N9): a pin the
+        write would move, one whose pack is not on disk, one that could not
+        be read — and the override in the caller's own vocabulary (N8)."""
+        who = []
+        for p in self.pins:
+            sha = str(p.get("sha256", ""))
+            if sha.startswith("unreadable"):
+                who.append(f"{p['by']} {p['path']} (unreadable {sha[len('unreadable '):]}: nothing is known about what would move)")
+            elif p.get("pack_on_disk") is False:
+                who.append(f"{p['by']} {p['path']} (its pack is not on disk; this write would not reproduce it)")
+            else:
+                who.append(f"{p['by']} {p['path']} (this write would move the file under it)")
+        return (f"{self.path} is pinned by hash by " + "; ".join(who) + f". Pass {force_hint} only as a "
+                "deliberate act, and redo the attesting review afterwards — "
+                "`d4d review check` reports review_of_another_pack until it is.")
+
+
+def pack_pin_state(provenance: Path) -> str | None:
+    """What `d4d runs check` reports for a record's pack pin (#1095; #1124
+    review, SF2): None when the record pins no pack or the pack on disk is
+    the one it pins; `missing` when the pack is gone; `rewritten` when the
+    file hashes to something else. The pack path is derived from the
+    record's own location, never read off the recorded string (N5)."""
+    from data_sheets_schema.backfill_checks import _split_header
+    try:
+        record = yaml.safe_load(_split_header(provenance.read_text(encoding="utf-8"))[1]) or {}
+    except Exception:                                         # noqa: BLE001
+        return None
+    rec_sha = (((record.get("review") or {}).get("artifacts") or {}).get("pack") or {}).get("sha256")
+    if not rec_sha:
+        return None
+    pack = record_paths(provenance)["pack"]
+    if not pack.exists():
+        return "missing"
+    return None if hashlib.sha256(pack.read_bytes()).hexdigest() == rec_sha else "rewritten"
 
 
 def pack_pins(provenance: Path) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
@@ -674,10 +713,13 @@ def pack_pins(provenance: Path) -> tuple[list[dict[str, str]], list[dict[str, st
     already, or it is gone (#1095; #1124 review, MF1: a deleted pack must
     not remove the guard, since the agent is told to run `d4d review pack`
     exactly then). Files that do not parse are returned under `unreadable`
-    in the third position of `pack_pins_report`; here they are counted as
-    stale-by-unreadable so the guard fails closed, not open (SF3)."""
-    current, stale, _ = pack_pins_report(provenance)
-    return current, stale
+    in the third position of `pack_pins_report`; here they are folded into
+    `stale` with `sha256: "unreadable (<error>)"`, so a caller of the
+    2-tuple that treats "no pin" as permission fails closed, not open (SF3;
+    #1124 review, SF-R1: the first version dropped them)."""
+    current, stale, unreadable = pack_pins_report(provenance)
+    return current, stale + [{"by": u["by"], "path": u["path"], "sha256": f"unreadable ({u['error']})",
+                              "pack_on_disk": None} for u in unreadable]
 
 
 def pack_pins_report(provenance: Path) -> tuple[list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
@@ -712,7 +754,8 @@ def pack_pins_report(provenance: Path) -> tuple[list[dict[str, str]], list[dict[
 
 
 def write_pack(provenance: Path, instruction_file: Path | None = None,
-               sample: dict[str, int] | None = None, *, force: bool = False) -> tuple[Path, dict[str, Any]]:
+               sample: dict[str, int] | None = None, *, force: bool = False,
+               force_hint: str = "force=True") -> tuple[Path, dict[str, Any]]:
     """Write the pack beside the record — refusing, unless forced, to rewrite
     a pack that a review or the record pins by hash (#1095): a
     `d4d-review-record` run regenerated the pack it was reviewing, moving
@@ -721,7 +764,14 @@ def write_pack(provenance: Path, instruction_file: Path | None = None,
     Regenerating a pack is a deliberate act, like rotating a prompt pin."""
     current, stale, unreadable = pack_pins_report(provenance)
     out = record_paths(provenance)["pack"]
-    pack = build_pack(provenance, instruction_file, sample)
+    blind = [{"by": u["by"], "path": u["path"], "sha256": f"unreadable ({u['error']})"} for u in unreadable]
+    if blind and not force:
+        # Before building: a provenance record that will not parse would
+        # raise inside `build_pack` as a bare ParserError rather than as the
+        # named refusal this guard exists to give (#1124 review, SF-R2).
+        raise PackAttested(out, blind, force_hint)
+    pack = build_pack(provenance, instruction_file, sample, write_instruction=False)
+    instruction = pack.pop("_instruction_text", None)
     from data_sheets_schema.provenance import _NoAliasDumper
     text = yaml.dump(pack, Dumper=_NoAliasDumper, sort_keys=False, allow_unicode=True, width=10_000)
     new_sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
@@ -734,9 +784,10 @@ def write_pack(provenance: Path, instruction_file: Path | None = None,
     if not force:
         would_move = [p for p in current if p["sha256"] != new_sha]
         orphaned = [p for p in stale if not p.get("pack_on_disk") and p["sha256"] != new_sha]
-        blind = [{"by": u["by"], "path": u["path"], "sha256": f"unreadable ({u['error']})"} for u in unreadable]
-        if would_move or orphaned or blind:
-            raise PackAttested(out, would_move + orphaned + blind)
+        if would_move or orphaned:
+            raise PackAttested(out, would_move + orphaned, force_hint)
+    if instruction:
+        Path(pack["instruction"]["path"]).write_text(instruction, encoding="utf-8")
     out.write_text(text, encoding="utf-8")
     return out, pack
 

@@ -545,6 +545,85 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
                 rp.write_pack(prov, instr, self.SMALLER)
             self.assertIn("unreadable", str(cm.exception))
 
+    def test_a_refusal_leaves_the_instruction_file_as_it_found_it(self):
+        """#1124 review, MF-R1: building before the guard had `build_pack`
+        rewrite `{P}_review_instruction.md` on a refused call, so the
+        reviewer read an instruction the pack does not attest."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            ipath = rp.record_paths(prov)["instruction"]
+            before = ipath.read_text()
+            other = Path(tmp) / "other_instruction.md"
+            other.write_text(before + "\nTAMPERED\n")
+            with self.assertRaises(rp.PackAttested):
+                rp.write_pack(prov, other, self.SMALLER)
+            self.assertEqual(ipath.read_text(), before)                                # untouched
+            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)
+            rp.write_pack(prov, other, self.SMALLER, force=True)
+            self.assertIn("TAMPERED", ipath.read_text())                               # written with the pack
+
+    def test_an_unparsable_provenance_record_is_a_named_refusal(self):
+        """#1124 review, SF-R2: `build_pack` re-parsed the record before the
+        guard and raised a bare ParserError."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            prov.write_text("# header\nreview: [unclosed")
+            with self.assertRaises(rp.PackAttested) as cm:
+                rp.write_pack(prov, instr, self.SMALLER)
+            self.assertIn("provenance record", str(cm.exception)); self.assertIn("unreadable", str(cm.exception))
+
+    def test_pack_pins_folds_unreadable_into_stale(self):
+        """SF-R1: the 2-tuple's docstring promised this and the first
+        version dropped them."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            (out.parent / "P_review_b.yaml").write_text("pack_sha256: [unclosed")
+            current, stale = rp.pack_pins(prov)
+            self.assertEqual([p["by"] for p in current], ["review"])
+            self.assertEqual([(p["by"], p["sha256"]) for p in stale], [("review", "unreadable (ParserError)")])
+
+    def test_the_refusal_names_each_pins_class_and_the_callers_override(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            out.unlink()
+            with self.assertRaises(rp.PackAttested) as cm:
+                rp.write_pack(prov, instr, self.SMALLER, force_hint="`--force`")
+            self.assertIn("its pack is not on disk", str(cm.exception)); self.assertIn("Pass `--force`", str(cm.exception))
+            self.assertNotIn("force=True", str(cm.exception))
+
+    def test_runs_check_reads_the_pin_state_from_the_records_location(self):
+        """The `d4d runs check` drift branch (SF2), through the function it
+        calls: no drift while the pack is the pinned one, `missing` when it
+        is gone, `rewritten` after a forced rewrite."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "record")
+            self.assertIsNone(rp.pack_pin_state(prov))
+            rp.write_pack(prov, instr, self.SMALLER, force=True)
+            self.assertEqual(rp.pack_pin_state(prov), "rewritten")
+            out.unlink()
+            self.assertEqual(rp.pack_pin_state(prov), "missing")
+            prov.write_text("# header\nrun: {}\n")
+            self.assertIsNone(rp.pack_pin_state(prov))                                 # no pin, no drift
+
+    def test_the_cli_says_when_a_rewrite_restored_a_stale_pins_pack(self):
+        """SF-R3: regenerating a pack back to the bytes a stale review pins
+        is the repair case, and used to be reported as the pack having
+        moved under that pin."""
+        import click.testing
+        from unittest import mock
+        from data_sheets_schema.cli.review import review as review_cli
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            rp.write_pack(prov, instr, self.SMALLER, force=True)                       # moved away from the pin
+            self.assertEqual(rp.pack_pins(prov)[0], [])
+            base = ["pack", "--method", "claudecode_agent", "--label", "L", "--project", "VOICE", "--force",
+                    "--instruction-file", str(instr)]
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                r = click.testing.CliRunner().invoke(review_cli, base)                  # default sample: the pinned bytes
+            self.assertEqual(r.exit_code, 0, r.output)
+            self.assertIn("restored the pack", r.output); self.assertNotIn("had already moved", r.output)
+            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)
+
     def test_the_b_review_and_the_pack_itself(self):
         """The `_b` glob case the six three-pin records exercise; the pack
         file never reads as a pin on itself."""

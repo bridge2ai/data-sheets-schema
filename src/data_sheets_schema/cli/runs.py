@@ -450,13 +450,14 @@ def check_cmd(method, label, project, strict):
             # underneath it (a forced `d4d review pack`) leaves `review.adverse`
             # ranking canonicals on a review of a pack that no longer exists
             # (#1095; #1124 review, SF2). Reported like bundle drift, never fatal.
-            rv_pack = (((prov_data.get("review") or {}).get("artifacts") or {}).get("pack") or {})
-            if rv_pack.get("sha256"):
-                pk = Path(rv_pack.get("path") or "")
-                on_disk = hashlib.sha256(pk.read_bytes()).hexdigest() if pk.exists() else None
-                if on_disk != rv_pack["sha256"]:
-                    pack_pin_drift.append({"project": proj, "label": run.label,
-                                           "state": "missing" if on_disk is None else "rewritten"})
+            # Derived from the record's own location, as `pack_pins` does, not
+            # read off the recorded path string: a path recorded absolute, or a
+            # check run elsewhere, would report a false `missing` (#1124
+            # review, N5; the #713 argument).
+            from data_sheets_schema.review_pack import pack_pin_state
+            state = pack_pin_state(core_record_path(run.method, run.label, proj).with_name(f"{proj}_provenance.yaml"))
+            if state:
+                pack_pin_drift.append({"project": proj, "label": run.label, "state": state})
             dk = ((prov_data.get("validation") or {}).get("duplicate_keys") or {})
             mism = stale_output_sizes(prov_data)
             if mism:

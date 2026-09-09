@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 import click
+import yaml
 
 from data_sheets_schema.constants import PROJECTS
 
@@ -49,9 +50,12 @@ def pack(method, label, project, instruction_file, receipted, receiptless, force
     current, stale, unreadable = pack_pins_report(prov)
     try:
         out, p = write_pack(prov, Path(instruction_file) if instruction_file else None,
-                            {"receipted_slots": receipted, "receiptless_slots": receiptless}, force=force)
+                            {"receipted_slots": receipted, "receiptless_slots": receiptless},
+                            force=force, force_hint="`--force`")
     except PackAttested as exc:
-        raise click.ClickException(str(exc).replace("Pass force=True (`--force`)", "Pass `--force`")) from exc
+        raise click.ClickException(str(exc)) from exc
+    except yaml.YAMLError as exc:
+        raise click.ClickException(f"a file beside the record could not be read as YAML: {exc}") from exc
     written = _hashlib.sha256(out.read_bytes()).hexdigest()
     kinds: dict[str, int] = {}
     for i in p["items"]:
@@ -70,6 +74,8 @@ def pack(method, label, project, instruction_file, receipted, receiptless, force
         if not pin.get("pack_on_disk") and pin["sha256"] != written:
             click.echo(f"   ⚠️  {pin['by']} {pin['path']} pinned a pack that was not on disk and is not this "
                        "one (--force); redo that review")
+        elif pin.get("pack_on_disk") and pin["sha256"] == written:
+            click.echo(f"   ✓ this rewrite restored the pack {pin['by']} {pin['path']} pins")
         elif pin.get("pack_on_disk"):
             click.echo(f"   ⚠️  {pin['by']} {pin['path']} pins {pin['sha256'][:12]}…, a pack this file was not "
                        "before this rewrite either — the pack had already moved under it")
