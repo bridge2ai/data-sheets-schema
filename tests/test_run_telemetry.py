@@ -8,6 +8,8 @@ from pathlib import Path
 
 import yaml
 
+from data_sheets_schema.api_runner import CONCAT_DIR
+
 from data_sheets_schema.run_telemetry import (
     SCHEMA_PATH,
     SCHEMA_VERSION,
@@ -280,3 +282,75 @@ class TestRunTelemetry(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPrediction9Rule(unittest.TestCase):
+    """The v7 full-output baseline is one function under one registered
+    rule (#1026): the AI_READI 04f row was first computed by hand from
+    rep2's retried attempt and read +13.8% where the rule reads +4.4%."""
+
+    def _run(self, tmp, rows, reasoning=None):
+        import json as _json
+        d = Path(tmp) / "claudecode_agent_core" / "L"; d.mkdir(parents=True)
+        (d / "P_provenance.yaml").write_text(yaml.safe_dump({"api_usage": rows}))
+        if reasoning is not None:
+            (d / "P_reasoning.jsonl").write_text("\n".join(_json.dumps(r) for r in reasoning) + "\n")
+        return d
+
+    def test_the_accepted_attempt_is_the_last_end_turn_not_the_first(self):
+        from data_sheets_schema.run_telemetry import accepted_full_output
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._run(tmp, [{"phase": "full", "attempt": 1, "output_tokens": 94336, "stop_reason": "end_turn"},
+                                {"phase": "full", "attempt": 2, "output_tokens": 78215, "stop_reason": "end_turn"},
+                                {"phase": "core", "attempt": 1, "output_tokens": 10, "stop_reason": "end_turn"}])
+            r = accepted_full_output(d, "P")
+        self.assertEqual((r["output_tokens"], r["attempt"], r["source"], r["retried"]), (78215, 2, "api_usage", 1))
+
+    def test_an_abandoned_transport_attempt_is_never_the_accepted_one(self):
+        from data_sheets_schema.run_telemetry import accepted_full_output
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._run(tmp, [{"phase": "full", "attempt": 1, "output_tokens": 50000, "stop_reason": "end_turn"},
+                                {"phase": "full", "attempt": 2, "output_tokens": 999, "stop_reason": "end_turn",
+                                 "outcome": "stream ended without message_stop"}])
+            r = accepted_full_output(d, "P")
+        self.assertEqual((r["output_tokens"], r["attempt"], r["retried"]), (50000, 1, 0))
+
+    def test_a_resumed_run_recovers_its_row_from_the_reasoning_log(self):
+        from data_sheets_schema.run_telemetry import accepted_full_output
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._run(tmp, [{"phase": "repair_full", "attempt": 1, "output_tokens": 5, "stop_reason": "end_turn"}],
+                          reasoning=[{"phase": "full", "attempt": 1, "output_tokens": 93696, "stop_reason": "end_turn"},
+                                     {"phase": "full", "attempt": 2, "output_tokens": 99870, "stop_reason": "end_turn"}])
+            r = accepted_full_output(d, "P")
+        self.assertEqual((r["output_tokens"], r["attempt"], r["source"], r["retried"]), (99870, 2, "reasoning_log", 1))
+
+    def test_a_replicate_with_no_row_is_named_not_skipped(self):
+        from data_sheets_schema.run_telemetry import accepted_full_output, full_output_baseline
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._run(tmp, [{"phase": "core", "attempt": 1, "output_tokens": 5, "stop_reason": "end_turn"}])
+            r = accepted_full_output(d, "P")
+            self.assertIsNone(r["output_tokens"]); self.assertIn("none in the reasoning log", r["reason"])
+            base = full_output_baseline("claudecode_agent", ["L", "MISSING"], ["P"], concat_dir=Path(tmp))
+        self.assertIsNone(base["P"]["mean"]); self.assertEqual(base["P"]["without_a_row"], ["L", "MISSING"])
+
+    def test_the_comparison_metric_reads_the_accepted_attempt(self):
+        from data_sheets_schema.run_telemetry import _COMPARISON_METRICS
+        get = dict((m, g) for m, _u, g in _COMPARISON_METRICS)["full_phase_output_tokens"]
+        run = {"phases": [{"phase": "full", "attempts": [{"stop_reason": "end_turn", "output_tokens": 94336},
+                                                          {"stop_reason": "end_turn", "output_tokens": 78215}]}]}
+        self.assertEqual(get(run), 78215)                              # the first version returned 94336
+
+    def test_the_v7_production_arm_under_the_rule(self):
+        """The corpus: the numbers the plan note registers, from the function
+        rather than by hand — AI_READI's rep3 from its reasoning log."""
+        from data_sheets_schema.run_telemetry import full_output_baseline
+        labels = [f"2026-09-01_claude-opus-5-api-generic-v7_rep{i}" for i in (1, 2, 3)]
+        if not (CONCAT_DIR / "claudecode_agent_core" / labels[0] / "AI_READI_provenance.yaml").exists():
+            self.skipTest("the v7 production arm is not in this checkout")
+        base = full_output_baseline("claudecode_agent", labels, ["AI_READI", "VOICE", "CHORUS", "CM4AI"])
+        self.assertEqual({p: b["mean"] for p, b in base.items()},
+                         {"AI_READI": 85721, "VOICE": 76159, "CHORUS": 41068, "CM4AI": 41370})
+        ai = base["AI_READI"]["replicates"]
+        self.assertEqual([r["output_tokens"] for r in ai], [79078, 78215, 99870])
+        self.assertEqual([r["source"] for r in ai], ["api_usage", "api_usage", "reasoning_log"])
+        self.assertEqual(base["CM4AI"]["replicates"][0]["attempt"], 2)

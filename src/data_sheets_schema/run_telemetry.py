@@ -200,18 +200,84 @@ def _record_stats(artifact: str, path: Path) -> dict[str, Any] | None:
     return out
 
 
+#: The rule prediction 9 is read under (#1026). Registered here, in one
+#: place, after the AI_READI 2026-09-04f row was first computed by hand
+#: from rep2's retried attempt and read +13.8% where the rule reads +4.4%.
+PREDICTION_9_RULE = (
+    "accepted attempt per phase: the last `full` attempt that ended with `end_turn` and "
+    "carries no `outcome` marker (an abandoned transport attempt, #1017) — a retried "
+    "attempt is excluded; where the provenance carries no `full` row (a run resumed past "
+    "that phase) the accepted attempt is recovered from the reasoning log under the same "
+    "selection; the per-project baseline is the mean over every replicate that yields one, "
+    "and a replicate that yields none is named, not skipped silently")
+
+
+def _accepted(attempts: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """The accepted attempt of a phase under `PREDICTION_9_RULE`: the last
+    `end_turn` attempt that is not an abandoned transport attempt."""
+    ended = [a for a in attempts if a.get("stop_reason") == "end_turn" and not a.get("outcome")
+             and a.get("output_tokens") is not None]
+    return ended[-1] if ended else None
+
+
+def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
+    """One replicate's accepted `full` output under `PREDICTION_9_RULE`.
+
+    `source` says which log the row came from: `api_usage` (the provenance
+    record) or `reasoning_log` (the record carried no `full` row — a resume
+    past that phase, like AI_READI 2026-09-01 rep3), or None with the reason
+    when neither yields an accepted attempt.
+    """
+    prov_path = run_dir / f"{project}_provenance.yaml"
+    out: dict[str, Any] = {"project": project, "label": run_dir.name, "output_tokens": None,
+                           "attempt": None, "source": None, "attempts_seen": 0, "retried": 0}
+    if not prov_path.exists():
+        out["reason"] = "no provenance record"
+        return out
+    prov = yaml.safe_load(prov_path.read_text(encoding="utf-8")) or {}
+    rows = [r for r in (prov.get("api_usage") or []) if r.get("phase") == "full"]
+    source = "api_usage"
+    if not rows:
+        rows = [e for e in _reasoning_entries(run_dir / f"{project}_reasoning.jsonl") if e.get("phase") == "full"]
+        source = "reasoning_log" if rows else None
+    acc = _accepted(rows)
+    out["attempts_seen"] = len(rows)
+    if acc is None:
+        out["reason"] = ("no full row in the provenance and none in the reasoning log" if source is None
+                         else f"no accepted full attempt among {len(rows)} in the {source}")
+        return out
+    out.update({"output_tokens": int(acc["output_tokens"]), "attempt": acc.get("attempt"), "source": source,
+                "retried": sum(1 for r in rows if r is not acc and r.get("stop_reason") == "end_turn"
+                               and not r.get("outcome"))})
+    return out
+
+
+def full_output_baseline(method: str, labels: list[str], projects: list[str],
+                         concat_dir: Path = CONCAT_DIR) -> dict[str, dict[str, Any]]:
+    """Per-project `full` output baseline over `labels` under
+    `PREDICTION_9_RULE`: the replicates read, their accepted rows, the mean
+    over those that yield one, and the ones that yield none by name."""
+    out: dict[str, dict[str, Any]] = {}
+    for project in projects:
+        reps = [accepted_full_output(concat_dir / f"{method}_core" / label, project) for label in labels]
+        values = [r["output_tokens"] for r in reps if r["output_tokens"] is not None]
+        out[project] = {"rule": PREDICTION_9_RULE, "replicates": reps,
+                        "mean": round(sum(values) / len(values)) if values else None,
+                        "n": len(values), "without_a_row": [r["label"] for r in reps if r["output_tokens"] is None]}
+    return out
+
+
 # Metrics compared across runs. Each entry: (metric name, unit, extractor).
+# The `full` figures are the accepted attempt under `PREDICTION_9_RULE`
+# (#1026): the first version took the first `end_turn` attempt, which on a
+# retried phase is the attempt the run threw away.
 _COMPARISON_METRICS = (
     ("full_phase_output_tokens", "tokens",
-     lambda r: next((a.get("output_tokens")
-                     for p in r["phases"] if p["phase"] == "full"
-                     for a in p["attempts"]
-                     if a.get("stop_reason") == "end_turn"), None)),
+     lambda r: next(((_accepted(p["attempts"]) or {}).get("output_tokens")
+                     for p in r["phases"] if p["phase"] == "full"), None)),
     ("full_phase_reasoning_tokens_estimate", "tokens",
-     lambda r: next((a.get("reasoning_tokens_estimate")
-                     for p in r["phases"] if p["phase"] == "full"
-                     for a in p["attempts"]
-                     if a.get("stop_reason") == "end_turn"), None)),
+     lambda r: next(((_accepted(p["attempts"]) or {}).get("reasoning_tokens_estimate")
+                     for p in r["phases"] if p["phase"] == "full"), None)),
     ("total_output_tokens", "tokens",
      lambda r: r.get("total_output_tokens")),
     ("approx_cost_usd", "USD", lambda r: r.get("approx_cost_usd")),

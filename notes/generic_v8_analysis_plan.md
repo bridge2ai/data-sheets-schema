@@ -216,6 +216,20 @@ work with a migration of committed values; separate).
 | 8 | populated leaves, rubric10/20 | A, watched | not below the v7 per-project replicate minimum; a fall means the larger digest displaced reading (the v7 markers confound, in a new form) |
 | 9 | spend | A | prompt tokens rise by ~2,900 chars of digest per call; `full` output tokens within ±10% of v7's per-project mean |
 
+**Prediction 9's baseline rule, registered (#1026, 2026-09-09).** The v7
+per-project mean is `run_telemetry.full_output_baseline` under
+`PREDICTION_9_RULE` — the accepted attempt per phase (the last `end_turn`
+`full` attempt with no abandoned-transport marker; a retried attempt
+excluded), a resumed run's row recovered from its reasoning log, the mean
+over the replicates that yield a row and the others named — printed by
+`d4d runs full-output-baseline`. The AI_READI 2026-09-04f row was first
+computed by hand from rep2's retried attempt and read +13.8% where the
+rule reads +4.4% (v7 production: 79,078 / 78,215 / 99,870 → 85,721);
+under the same rule VOICE is 76,159 (73,375 / 74,126 / 80,976), CHORUS
+41,068 and CM4AI 41,370 (rep1's accepted attempt 2, 26,766). The
+telemetry comparison (`d4d runs telemetry`) read the *first* `end_turn`
+attempt until this change and now reads the accepted one.
+
 ### Falsification tests
 
 - **Rules restated, mechanism absent.** If prediction 1 holds but 4 does

@@ -67,6 +67,39 @@ def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
         click.echo("✓ report validates against d4d_run_telemetry.yaml")
 
 
+@runs.command("full-output-baseline")
+@click.option("--method", required=True, help="run directory family, e.g. claudecode_agent")
+@click.option("--label", "labels", multiple=True, required=True, help="a replicate label; repeat for each")
+@click.option("--project", "projects", multiple=True, help="default: every project")
+@click.option("--json", "as_json", is_flag=True)
+def full_output_baseline_cmd(method, labels, projects, as_json):
+    """Per-project `full` output baseline under prediction 9's registered rule (#1026).
+
+    Accepted attempt per phase — the last `end_turn` full attempt with no
+    abandoned-transport marker, a retried attempt excluded; a resumed run's
+    row recovered from its reasoning log; the mean over the replicates that
+    yield a row, the others named. No row is computed by hand again.
+    """
+    import json as _json
+
+    from data_sheets_schema.constants import PROJECTS
+    from data_sheets_schema.run_telemetry import PREDICTION_9_RULE, full_output_baseline
+    base = full_output_baseline(method, list(labels), list(projects) or list(PROJECTS))
+    if as_json:
+        click.echo(_json.dumps(base, indent=2))
+        return
+    click.echo(f"rule: {PREDICTION_9_RULE}")
+    for project, b in base.items():
+        click.echo(f"{project}: mean {b['mean']} over {b['n']} replicate(s)"
+                   + (f"; no row: {', '.join(b['without_a_row'])}" if b["without_a_row"] else ""))
+        for r in b["replicates"]:
+            if r["output_tokens"] is None:
+                click.echo(f"   {r['label']}: — ({r.get('reason')})")
+            else:
+                click.echo(f"   {r['label']}: {r['output_tokens']} (attempt {r['attempt']}, {r['source']}"
+                           + (f", {r['retried']} retried attempt(s) excluded" if r["retried"] else "") + ")")
+
+
 @runs.command("identifiers")
 @click.option("--label", default=None, help="limit to one run label")
 @click.option("--method", default=None, help="limit to one method directory")
