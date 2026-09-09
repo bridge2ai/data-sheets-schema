@@ -82,10 +82,32 @@ def is_shallow():
 
 
 def _writing_commit(path):
-    """The commit that last wrote this file's bytes."""
+    """The last commit that touched this path, or None if git knows none.
+
+    Not "the commit that wrote these bytes": for a file modified but not yet
+    committed it names the previous commit, which is why `_dirty` is checked
+    before this is trusted (#1100).
+    """
     out = subprocess.run(["git", "log", "-1", "--format=%H", "--", str(path)],
                          capture_output=True, text=True, cwd=ROOT).stdout.strip()
     return out or None
+
+
+def _what(digest, by_text):
+    """What the evaluation's own hash field turned out to name."""
+    if digest is None:
+        return "nothing — this evaluation predates the field"
+    if digest in by_text:
+        return "the rubric text, which does not identify the scoring rules"
+    return f"an unrecognised value ({digest[:12]}…)"
+
+
+def _dirty(path):
+    """Whether the file differs from HEAD, or is untracked."""
+    rel = Path(path).resolve().relative_to(ROOT)
+    out = subprocess.run(["git", "status", "--porcelain", "-z", "--", str(rel)],
+                         capture_output=True, text=True, cwd=ROOT).stdout
+    return bool(out.strip("\x00").strip())
 
 
 def _agent_at(commit, agent_path):
@@ -103,8 +125,16 @@ def resolve(rubric):
     by_agent = {v["sha256"]: v for v in agents}
     by_text = {v["sha256"]: v for v in texts}
     out = {}
-    base = ROOT / "data" / "evaluation_llm" / rubric / "label_aware"
-    for path in sorted(glob.glob(str(base / "*_evaluation.json"))):
+    # Every semantic evaluation under the rubric, not only the live
+    # label-aware ones (#1100). The `superseded_*` archives are the direct
+    # evidence of the instrument changes this exists to make legible — the
+    # scorings #1059, #1060 and #1082 displaced — and were the first thing
+    # out of scope. `concatenated/` predates label-aware runs and is included
+    # for the same reason: an archived score whose rules cannot be named is
+    # exactly the gap.
+    base = ROOT / "data" / "evaluation_llm" / rubric
+    for path in sorted(glob.glob(str(base / "**" / "*_evaluation.json"),
+                                 recursive=True)):
         doc = json.loads(Path(path).read_text())
         meta = doc.get("metadata") or {}
         # The new contract's key first (#1100). Reading only `rubric_hash`
@@ -112,25 +142,41 @@ def resolve(rubric):
         # its instrument outright — was still resolved from its writing
         # commit, so following the fix downgraded the evidence it produced.
         digest = meta.get("instrument_sha256") or meta.get("rubric_hash")
-        name = Path(path).name
+        name = str(Path(path).resolve().relative_to(base))
         if digest in by_agent:
             v = by_agent[digest]
             out[name] = {"basis": "recorded", "instrument_sha256": digest,
                          "instrument_commit": v["commit"]}
-        elif digest in by_text:
+        elif _dirty(path):
+            # Written but not yet committed (#1100). `d4d evaluate llm` leaves
+            # exactly this state, and resolving it from the previous commit
+            # would name an instrument that did not produce it. The agent on
+            # disk is what scored it, and saying so beats calling the corpus
+            # unidentifiable the moment an evaluation is produced.
+            live = hashlib.sha256((ROOT / agent_path).read_bytes()).hexdigest()
+            out[name] = {
+                "basis": "working_tree",
+                "recorded_hash_is": _what(digest, by_text),
+                "recovered_from": "the agent file on disk; this evaluation is "
+                                  "not committed",
+                "instrument_sha256": live,
+                "instrument_commit": (by_agent[live]["commit"]
+                                      if live in by_agent else None),
+            }
+        else:
+            # A rubric-text hash, or none at all: the pre-contract evaluations
+            # under `concatenated/` record no `rubric_hash`. Either way the
+            # commit that carries the bytes is the evidence (#1100).
             commit = _writing_commit(path)
             at = _agent_at(commit, agent_path) if commit else None
             out[name] = {
                 "basis": "recovered_from_commit" if at else "unresolved",
-                "recorded_hash_is": "the rubric text, which does not identify "
-                                    "the scoring rules",
+                "recorded_hash_is": _what(digest, by_text),
                 "recovered_from": commit[:8] if commit else None,
                 "instrument_sha256": at,
                 "instrument_commit": (by_agent[at]["commit"]
                                       if at in by_agent else None),
             }
-        else:
-            out[name] = {"basis": "unresolved", "recorded": digest}
     return {"agent_versions": agents, "evaluations": out}
 
 

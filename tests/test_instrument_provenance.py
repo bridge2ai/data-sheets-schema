@@ -62,8 +62,9 @@ class InstrumentManifest(unittest.TestCase):
         self.doc = json.loads(MANIFEST.read_text())
 
     def _live(self, rubric):
-        base = ROOT / "data" / "evaluation_llm" / rubric / "label_aware"
-        return sorted(p.name for p in base.glob("*_evaluation.json")) \
+        base = ROOT / "data" / "evaluation_llm" / rubric
+        return sorted(str(p.relative_to(base))
+                      for p in base.rglob("*_evaluation.json")) \
             if base.exists() else []
 
 
@@ -97,6 +98,30 @@ class TestEveryEvaluationNamesItsInstrument(InstrumentManifest):
                                     "a recovered instrument must name the "
                                     "commit it was recovered from")
 
+    def test_an_uncommitted_evaluation_resolves_to_the_agent_on_disk(self):
+        """#1100: `d4d evaluate llm` leaves an untracked evaluation, and
+        resolving it from the previous commit would name an instrument that
+        did not produce it — so the state immediately after producing a score
+        failed the suite, saying the corpus was unidentifiable when the honest
+        answer is "not committed yet; the instrument is the file on disk"."""
+        if not SCRIPT.exists():
+            self.skipTest("resolver not in this checkout")
+        source = SCRIPT.read_text()
+        self.assertIn('"basis": "working_tree"', source)
+        self.assertIn("def _dirty(", source)
+
+    def test_the_archived_scorings_are_in_scope(self):
+        """The `superseded_*` directories hold the scorings #1059, #1060 and
+        #1082 displaced — the direct evidence of the instrument changes this
+        exists to make legible, and the first thing the glob left out."""
+        names = set(self.doc["rubrics"]["rubric10_semantic"]["evaluations"])
+        self.assertTrue(any(n.startswith("label_aware/superseded_") for n in names),
+                        "no archived scoring is covered")
+        for marker in ("superseded_software_threshold", "superseded_gate_v1",
+                       "superseded_fable5"):
+            with self.subTest(archive=marker):
+                self.assertTrue(any(marker in n for n in names))
+
     def test_no_entry_is_resolved_by_timestamp(self):
         """#1100. A time lookup returns the version the run's own commit
         replaced — off by one towards the instrument the revision corrected,
@@ -115,7 +140,7 @@ class TestEveryEvaluationNamesItsInstrument(InstrumentManifest):
         if _shallow():
             self.skipTest("shallow clone: no history to resolve against")
         for rubric, agent in AGENT_PATHS.items():
-            base = ROOT / "data" / "evaluation_llm" / rubric / "label_aware"
+            base = ROOT / "data" / "evaluation_llm" / rubric
             for name, entry in self.doc["rubrics"][rubric]["evaluations"].items():
                 if entry["basis"] != "recovered_from_commit":
                     continue

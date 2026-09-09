@@ -246,12 +246,27 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
                 f"Failed to parse LLM response. Response saved to {error_file}"
             ) from e
 
-        # Add metadata
-        evaluation["metadata"] = {
-            "evaluator_id": str(uuid.uuid4()),
-            "rubric_hash": self._calculate_file_hash(self.config.rubric_dir / f"{rubric_name}.txt"),
-            "d4d_file_hash": d4d_file_hash
-        }
+        # Add metadata. Merged, not replaced (#1100): assigning wholesale
+        # deleted whatever the model emitted, including the
+        # `instrument_sha256` the agents' contract now asks for — so the one
+        # field that identifies the rules a score was reached under was
+        # discarded by the path that produces scores.
+        metadata = dict(evaluation.get("metadata") or {})
+        metadata.update({
+            "evaluator_id": metadata.get("evaluator_id") or str(uuid.uuid4()),
+            "rubric_hash": self._calculate_file_hash(
+                self.config.rubric_dir / f"{rubric_name}.txt"),
+            "d4d_file_hash": d4d_file_hash,
+        })
+        #: The scoring rules, where this runner can name them. `rubric_hash`
+        #: is the rubric *text*, which did not change across the revisions
+        #: that moved scores (#1099), so it cannot identify an instrument.
+        agent = (Path(__file__).resolve().parents[2] / ".claude" / "agents"
+                 / f"d4d-{rubric_name}-semantic.md")
+        if agent.exists():
+            metadata.setdefault("instrument_sha256",
+                                self._calculate_file_hash(agent))
+        evaluation["metadata"] = metadata
 
         return evaluation
 
