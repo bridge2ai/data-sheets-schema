@@ -579,7 +579,8 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
                     "--instruction", str(instr)]
             with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
                 r = click.testing.CliRunner().invoke(review_cli, base)
-            self.assertNotEqual(r.exit_code, 0); self.assertIn(str(prov), r.output); self.assertNotIn("<unicode string>", r.output)
+            self.assertNotEqual(r.exit_code, 0)
+            self.assertTrue(r.output.startswith(f"Error: {prov} could not be read as YAML"), r.output)   # the record, not PyYAML's mark
 
     def test_an_unparsable_provenance_record_is_a_named_refusal(self):
         """#1124 review, SF-R2: `build_pack` re-parsed the record before the
