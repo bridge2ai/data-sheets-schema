@@ -810,6 +810,19 @@ def reasoning_cmd(method, project, label, path):
         if s['truncated']:
             click.echo(f"  ⚠️  {s['truncated']} response(s) stopped at "
                        f"max_tokens")
+        if s.get('phases_without_reasoning'):
+            click.echo(f"  no thinking block on: {', '.join(s['phases_without_reasoning'])}")
+        if s.get('full_phase_without_reasoning'):
+            click.echo("  ⚠️  the full phase returned no thinking block — a legal "
+                       "adaptive outcome, and a different generation regime from "
+                       "a full phase that thought; mark the row, do not average it "
+                       "in silently (#1047)")
+        if s.get('estimate_over_observed_zero'):
+            click.echo("  ⚠️  estimate over an observed 0 on: "
+                       f"{', '.join(s['estimate_over_observed_zero'])} — text-length "
+                       "error, not reasoning"
+                       + (f"; median |estimate_error| where the count is above 0: "
+                          f"{s['estimate_error_median']:,}" if s.get('estimate_error_median') else ""))
 
     if len(logs) > 1:
         s = _reasoning.summarise(total)
