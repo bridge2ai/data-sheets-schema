@@ -201,7 +201,8 @@ they are derived from — read it rather than trusting a list written here, whic
 is how this section came to claim only two conditions existed long after
 `generic_v2` through `generic_v5` were registered (#603).
 
-- **generic**, currently `generic` (v1) through `generic_v7`. Every project and
+- **generic**, `generic` (v1) and every `generic_vN` the registry names
+  (`CONDITION_PROMPTS`; read the registry, not this line). Every project and
   every arm receives *the exact text of that version*; only mechanical fields
   are substituted (project, arm, method, bundle, label, runtime, provider,
   model). Nothing in any of them is specific to a project, dataset, or input
