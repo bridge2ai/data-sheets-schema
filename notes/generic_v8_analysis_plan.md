@@ -998,8 +998,15 @@ renders slot descriptions, so a real identifier sat in model-facing text
 on every run (#1114, found by the #647 guard once it scanned the digest).
 The example is now a form (`10.xxxxx/abcd.1234`). `schema_digest`'s
 `Dataset` fingerprint moved from `ffe03dd469feb388e0a4149e4f5ccb6f` to
-`4553bf3f109ea7d74efbb72171318e54` and `schema.core_sha256` with it (the
-inventory ledger gained the new digest; no slot was added or removed).
+`a91bad8b8eaf7c34b147ff5970474342` (CoreDataset `386a470d…` → `dfb9f93c…`) and
+`schema.core_sha256` with it (the inventory ledger gained the new digest; no
+slot was added or removed). The operative sentence of the `doi`
+description — the bare DOI only — stays inside the digest's 300-character
+window; the first draft pushed it out, which would have been a rule
+removal presented as an identifier removal (#1126 review). The docExample
+annotations and `latest_version_doi`'s description lost their real and
+corpus identifiers too: they reach the agentic runtime through the merged
+schema file, not the digest.
 No v9 record exists, so the condition still has one boundary; a v9 run
 differs from the v8 fill by the scope block, R6–R14, the report-phase
 inventory (#998) and this digest together, and no comparison against the

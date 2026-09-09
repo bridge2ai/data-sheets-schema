@@ -1544,7 +1544,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification \u2014 the registrant prefix, a slash, the suffix, as in '10.xxxxx/abcd.1234' (a form, not a real DOI: this description is sent to the model in the schema digest, and a real identifier there is a candidate for copy-through, #1114). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx \u2014 a registrant prefix, a slash, a suffix \u2014 providing persistent identification. The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
                     "pattern": "^10\\.\\d{4,}\\/.+$",
                     "type": [
                         "string",
@@ -2503,7 +2503,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification \u2014 the registrant prefix, a slash, the suffix, as in '10.xxxxx/abcd.1234' (a form, not a real DOI: this description is sent to the model in the schema digest, and a real identifier there is a candidate for copy-through, #1114). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx \u2014 a registrant prefix, a slash, a suffix \u2014 providing persistent identification. The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
                     "pattern": "^10\\.\\d{4,}\\/.+$",
                     "type": [
                         "string",
@@ -3281,7 +3281,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification \u2014 the registrant prefix, a slash, the suffix, as in '10.xxxxx/abcd.1234' (a form, not a real DOI: this description is sent to the model in the schema digest, and a real identifier there is a candidate for copy-through, #1114). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx \u2014 a registrant prefix, a slash, a suffix \u2014 providing persistent identification. The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
                     "pattern": "^10\\.\\d{4,}\\/.+$",
                     "type": [
                         "string",
@@ -4604,7 +4604,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification \u2014 the registrant prefix, a slash, the suffix, as in '10.xxxxx/abcd.1234' (a form, not a real DOI: this description is sent to the model in the schema digest, and a real identifier there is a candidate for copy-through, #1114). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx \u2014 a registrant prefix, a slash, a suffix \u2014 providing persistent identification. The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
                     "pattern": "^10\\.\\d{4,}\\/.+$",
                     "type": [
                         "string",
@@ -4849,7 +4849,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification \u2014 the registrant prefix, a slash, the suffix, as in '10.xxxxx/abcd.1234' (a form, not a real DOI: this description is sent to the model in the schema digest, and a real identifier there is a candidate for copy-through, #1114). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx \u2014 a registrant prefix, a slash, a suffix \u2014 providing persistent identification. The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
                     "pattern": "^10\\.\\d{4,}\\/.+$",
                     "type": [
                         "string",
@@ -5756,7 +5756,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification \u2014 the registrant prefix, a slash, the suffix, as in '10.xxxxx/abcd.1234' (a form, not a real DOI: this description is sent to the model in the schema digest, and a real identifier there is a candidate for copy-through, #1114). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx \u2014 a registrant prefix, a slash, a suffix \u2014 providing persistent identification. The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
                     "pattern": "^10\\.\\d{4,}\\/.+$",
                     "type": [
                         "string",
@@ -8336,7 +8336,7 @@
                     ]
                 },
                 "latest_version_doi": {
-                    "description": "DOI or URL identifying the latest version of this dataset (e.g., '10.5281/zenodo.1234567' for a DOI or 'https://doi.org/10.5281/zenodo.1234567' for a full URL). Use CURIE format for DOIs (e.g., 'doi:10.5281/zenodo.1234567').",
+                    "description": "DOI or URL identifying the latest version of this dataset. Use CURIE format for a DOI \u2014 doi:10.xxxx/xxxxx \u2014 not the doi.org resolver URL. (Form only: a real DOI here would be model-facing text, #1126.)",
                     "type": [
                         "string",
                         "null"
@@ -8469,7 +8469,7 @@
             ]
         },
         "doi": {
-            "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification \u2014 the registrant prefix, a slash, the suffix, as in '10.xxxxx/abcd.1234' (a form, not a real DOI: this description is sent to the model in the schema digest, and a real identifier there is a candidate for copy-through, #1114). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+            "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx \u2014 a registrant prefix, a slash, a suffix \u2014 providing persistent identification. The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
             "pattern": "^10\\.\\d{4,}\\/.+$",
             "type": [
                 "string",

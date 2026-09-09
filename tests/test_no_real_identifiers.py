@@ -94,6 +94,31 @@ ALLOWED: dict[tuple[str, str], dict[str, str]] = {
 }
 
 
+def allowlist_findings(allowed: dict, surfaces: list[tuple[str, str, str]]) -> list[str]:
+    """Both directions of the allowlist, as strings a test can assert on:
+    a scanned token not allowlisted; an entry whose token is gone; an entry
+    whose token has left the line that justified it. Factored out so the
+    machinery is exercised even while the real allowlist is empty (#1126
+    review, S5)."""
+    out = []
+    by_name = {(n, s): t for n, s, t in surfaces}
+    for name, surface, text in surfaces:
+        for shape, tok in real_identifiers(text):
+            if (name, tok) not in allowed:
+                out.append(f"unlisted: {name} [{surface}] {shape} {tok!r}")
+    for (name, tok), entry in allowed.items():
+        text = by_name.get((name, entry["surface"]))
+        if text is None:
+            out.append(f"no surface: {name} [{entry['surface']}]"); continue
+        lines = [ln for ln in text.splitlines() if tok in ln]
+        if not lines:
+            out.append(f"gone: {name} {tok!r}"); continue
+        for ln in lines:
+            if entry["line_contains"] not in ln:
+                out.append(f"moved: {name} {tok!r} off a line containing {entry['line_contains']!r}")
+    return out
+
+
 def real_identifiers(text: str) -> list[tuple[str, str]]:
     """Every (shape, token) in `text` that looks like a real identifier."""
     hits = []
@@ -131,6 +156,29 @@ class TestTheScannerSeesEachShape(unittest.TestCase):
                  "<suffix> in format 10.xxxx/xxxxx. An ORCID is a CURIE of the form "
                  "orcid:XXXX-XXXX-XXXX-XXXX. Do not invent a PMID, an NCT number or an RRID.")
         self.assertEqual(real_identifiers(clean), [])
+
+
+class TestTheAllowlistMachinery(unittest.TestCase):
+    """The real allowlist is empty since #1114; the checks it relies on are
+    driven here over a synthetic one so they cannot rot unexercised."""
+
+    SURFACES = [("t", "digest", "a line with ROR:01an7q238 (e.g. context)\nanother line\n")]
+
+    def test_an_entry_on_its_line_passes(self):
+        allowed = {("t", "ROR:01an7q238"): {"surface": "digest", "line_contains": "e.g.", "reason": "x"}}
+        self.assertEqual(allowlist_findings(allowed, self.SURFACES), [])
+
+    def test_an_unlisted_token_is_a_finding(self):
+        self.assertEqual(allowlist_findings({}, self.SURFACES), ["unlisted: t [digest] ROR CURIE 'ROR:01an7q238'"])
+
+    def test_a_token_that_left_its_line_is_a_finding(self):
+        allowed = {("t", "ROR:01an7q238"): {"surface": "digest", "line_contains": "nowhere", "reason": "x"}}
+        self.assertEqual([f.split(":")[0] for f in allowlist_findings(allowed, self.SURFACES)], ["moved"])
+
+    def test_an_entry_whose_token_is_gone_is_a_finding(self):
+        allowed = {("t", "ROR:09zzzzzzz"): {"surface": "digest", "line_contains": "e.g.", "reason": "x"}}
+        found = allowlist_findings(allowed, self.SURFACES)
+        self.assertTrue(any(f.startswith("gone:") for f in found), found)
 
 
 class TestNoRealIdentifierOnAnyModelFacingSurface(unittest.TestCase):
