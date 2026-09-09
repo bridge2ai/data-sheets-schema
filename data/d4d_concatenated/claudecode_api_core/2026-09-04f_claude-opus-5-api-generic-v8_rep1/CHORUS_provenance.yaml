@@ -650,7 +650,8 @@ receipts:
   findings_gated: 0
   summary: chunks 8/8 reviewed · snippets 79/79 verified · slots 54/186 with a receipt
     (127 never receipted, 5 added after the receipt) (49 exempt) · 3 receipt path(s)
-    reshaped by reconcile · 9 value(s) changed after the receipt
+    reshaped by reconcile · 9 value(s) changed after the receipt · 31 entry(ies) located
+    after a stripped key
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_coverage_receipt.yaml

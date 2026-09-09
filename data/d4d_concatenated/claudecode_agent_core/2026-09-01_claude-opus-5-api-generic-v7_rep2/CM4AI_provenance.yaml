@@ -878,8 +878,8 @@ receipts:
     (5 in another chunk) (1 bearing on no token of their value) (10 entry receipt(s)
     overlapping one leaf) · slots 153/413 with a receipt (247 never receipted, 13
     added after the receipt) (67 exempt) · 6 receipt path(s) reshaped by reconcile
-    · 1 addressing slip(s) · 21 value(s) changed after the receipt · 1 receipt path(s)
-    not in the snapshot
+    · 1 addressing slip(s) · 21 value(s) changed after the receipt · 1 entry(ies)
+    located after a stripped key · 1 receipt path(s) not in the snapshot
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_coverage_receipt.yaml

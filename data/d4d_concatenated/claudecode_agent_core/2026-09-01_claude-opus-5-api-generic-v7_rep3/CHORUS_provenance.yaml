@@ -560,7 +560,7 @@ receipts:
     (2 bearing on no token of their value) · slots 67/178 with a receipt (109 never
     receipted, 2 added after the receipt) (32 exempt) · 11 receipt path(s) reshaped
     by reconcile · 4 value(s) changed after the receipt · 2 receipt index(es) reused
-    by another entry
+    by another entry · 2 entry(ies) located after a stripped key
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_coverage_receipt.yaml

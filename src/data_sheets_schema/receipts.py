@@ -1218,6 +1218,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                         + (f" · {len(remapped)} receipt path(s) followed by identity" if remapped else "")
                         + (f" · {len(value_changed)} value(s) changed after the receipt" if value_changed else "")
                         + (f" · {len(index_reused)} receipt index(es) reused by another entry" if index_reused else "")
+                        + (f" · {len(located_stripped)} entry(ies) located after a stripped key" if located_stripped else "")
                         + (f" · {len(not_in_snapshot)} receipt path(s) not in the snapshot" if not_in_snapshot else "")),
             "non_checks": list(NON_CHECKS)}
 

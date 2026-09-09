@@ -870,7 +870,7 @@ receipts:
     value) · slots 187/343 with a receipt (128 never receipted, 28 added after the
     receipt) (55 exempt) · 23 receipt path(s) reshaped by reconcile · 1 receipt path(s)
     followed by identity · 54 value(s) changed after the receipt · 2 receipt index(es)
-    reused by another entry
+    reused by another entry · 5 entry(ies) located after a stripped key
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_coverage_receipt.yaml

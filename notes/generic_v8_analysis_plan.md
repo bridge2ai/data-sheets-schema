@@ -1280,7 +1280,7 @@ steps need:
     `labeling_strategies[0].labeling_details`) to none and 53 → 54 slots
     with a receipt, 8 → 9 values changed after the receipt; rep3 reads as
     on main; no finding, snippet verdict or chunk count moved anywhere.
-    52 paths corpus-wide carry the basis, 51 of them resolved by overlap
+    52 paths corpus-wide carry the basis, 50 of them resolved by overlap
     before and after — so `claim_receipts` puts a new `resolution` on those
     items and a regenerated review pack differs from its committed copy
     (its sha moves and the attestation reads stale, #969); the committed
