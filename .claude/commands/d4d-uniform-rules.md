@@ -224,7 +224,7 @@ to every project:
   prefer: a label on the dataset's landing page or DOI is licensed too,
   but this record's own id names this dataset and nothing else, where a
   landing page is often a site or project root shared with sibling
-  releases, so a part labelled there cannot be told apart from a sibling's
+  releases, so a part labeled there cannot be told apart from a sibling's
   by its id alone; `id` is also the one identifier every record carries,
   where `page` and `doi` are optional (#1123, #1147). A fragment appended
   to another entity's identifier — an organization's,

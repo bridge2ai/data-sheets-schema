@@ -1032,10 +1032,12 @@ condition-boundary change.
 
 ### R8 no longer charges a landing-page label a receipt (#1147, 2026-09-09)
 
-The tenth v9 pin — the registry's `superseded` list holds nine: three
+The eleventh v9 pin — the registry's `superseded` list holds ten: three
 registrations and corrections on 2026-09-08, the two #1120 rounds, the two
-#1134 spellings rounds, and this issue's own two earlier rounds, each
-retired by the next. R8's own-id preference was argued from cost: "a label on
+#1134 spellings rounds, and this issue's own three earlier rounds, each
+retired by the next (the third wrote `labelled` into the sentence and the
+file sweep of #1134 caught it after the pin was taken). R8's own-id
+preference was argued from cost: "a label on
 the dataset's landing page … names an identifier the evidence must supply,
 so it needs a receipt like any other value, where a label on this record's
 own id does not" (#1109, round 2). Receipts instrument v2 (#1123, amendment

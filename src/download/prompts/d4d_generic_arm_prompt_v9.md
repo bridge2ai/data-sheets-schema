@@ -395,7 +395,7 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   record's own id is the base to prefer: a label on the dataset's landing
   page or DOI is licensed too, but this record's own id names this dataset
   and nothing else, where a landing page is often a site or project root
-  shared with sibling releases, so a part labelled there cannot be told
+  shared with sibling releases, so a part labeled there cannot be told
   apart from a sibling's by its id alone; `id` is also the one identifier
   every record carries, where `page` and `doi` are optional. A fragment
   appended to another entity's
