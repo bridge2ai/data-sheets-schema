@@ -640,14 +640,16 @@ rep1.
 
 The pack's `id_slots` block lists every populated `…id` leaf with `forced`
 (the schema declares that class's id an identifier or required — `File`,
-`FileCollection`, `DataSubset`, `Person`) and `minted` (a urn, or a
-fragment on the record's own id); the `d4d-review-record` agent judges the
-fragment rule on mints only and a forced mint never violates it. From
-`pack_version` 5 each entry carries `origin`: `minted`, `stated` (a
-reference used as written — DOI, ROR, URL), or `constructed` — a fragment
-on a base the record did not mint, with `base` and `base_in_bundle`
-(verbatim presence of the base in the bundle; null when the bundle is not
-on disk). The two-way flag filed the AI_READI 2026-09-01 rep1
+`FileCollection`, `DataSubset`, `Person`, `Software`) and, from
+`pack_version` 5, `origin`: `minted` (a urn, or a fragment on the record's
+own id in any form), `stated` (a reference used as written — DOI, ROR,
+URL), or `constructed` — a fragment on a base the record did not mint,
+with `base` and `base_in_bundle` (the base in the bytes the record read,
+as itself and in written or alias form; null on a drift or a missing
+md5, with `bundle_state` naming why); the block also carries the
+record's own `record_id`. The `d4d-review-record` agent judges the
+fragment rule on mints and constructed ids, a forced one never violates
+it, and `stated` entries are the evidence rules' business. The two-way flag filed the AI_READI 2026-09-01 rep1
 `file_collections[*].id` (`https://fairhub.io/datasets/3#cardiac_ecg`, the
 attested fairhub page plus a label) with the DOIs. Corpus-wide the
 classifier finds 953 constructed ids in 57 of 281 records — 800 of them

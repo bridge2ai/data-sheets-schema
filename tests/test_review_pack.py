@@ -162,6 +162,8 @@ class Pack(unittest.TestCase):
             p = rp.build_pack(prov, instr)
             by = {e["path"]: e for e in p["id_slots"]["entries"]}
             self.assertEqual(p["id_slots"]["bundle_state"], "current")
+            self.assertEqual(p["id_slots"]["record_id"], "https://x/ds")
+            self.assertTrue(p["bundle"]["resolved_path"].endswith("P_preprocessed.txt"))
             self.assertTrue(by["file_collections[1].id"]["base_in_bundle"])
             self.assertFalse(by["file_collections[2].id"]["base_in_bundle"])
             self.assertFalse(any("base_in_bundle" in g for g in p["gaps"]))
@@ -175,8 +177,8 @@ class Pack(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:                        # not on disk
             prov, instr = self._run(tmp, full=self._constructed_full(), drop_bundle=True)
             p = rp.build_pack(prov, instr)
-            self.assertEqual(p["id_slots"]["bundle_state"], "bundle not on disk")
-            self.assertIn("id_slots.base_in_bundle unavailable: bundle not on disk", p["gaps"])
+            self.assertTrue(p["id_slots"]["bundle_state"].startswith("bundle not on disk ("))
+            self.assertTrue(any(g.startswith("id_slots.base_in_bundle unavailable: bundle not on disk") for g in p["gaps"]))
 
     def test_a_prefix_of_a_longer_url_is_not_attestation_and_an_alias_form_is(self):
         """#1108 review, finding 5: of the 11 occurrences of the fairhub page
@@ -186,6 +188,12 @@ class Pack(unittest.TestCase):
         self.assertFalse(rp._base_in("https://fairhub.io/datasets/3", "see https://fairhub.io/datasets/30 and https://fairhub.io/datasets/3/access"))
         self.assertTrue(rp._base_in("https://fairhub.io/datasets/3", "Source URL: https://fairhub.io/datasets/3\n"))
         self.assertTrue(rp._base_in("https://fairhub.io/datasets/3", "(https://fairhub.io/datasets/3)"))
+        # a URL ending a sentence is the URL (round 2): `.` continues only when what follows does
+        self.assertTrue(rp._base_in("http://integrativemodeling.org", "see http://integrativemodeling.org.\n\nNext"))
+        self.assertTrue(rp._base_in("https://datascience.nih.gov/strides", "at https://datascience.nih.gov/strides.\nT"))
+        self.assertFalse(rp._base_in("https://a.org/v", "https://a.org/v.1/x"))
+        self.assertFalse(rp._base_in("https://a.org/v", "https://a.org/v-2"))
+        self.assertFalse(rp._base_in("https://chorus4ai.org/dataset", "https://chorus4ai.org/dataset/"))   # a trailing slash is another resource
         self.assertTrue(rp._base_in("doi:10.18130/V3/HIGT4C", "at https://doi.org/10.18130/V3/HIGT4C today"))
         self.assertTrue(rp._base_in("https://doi.org/10.18130/V3/HIGT4C", "cite doi:10.18130/V3/HIGT4C"))
 
@@ -198,6 +206,9 @@ class Pack(unittest.TestCase):
         self.assertEqual(rp._id_origin("https://doi.org/10.60775/fairhub.3#a", "doi:10.60775/fairhub.3"), ("minted", None))
         self.assertEqual(rp._id_origin("doi:10.60775/fairhub.3#a", "https://doi.org/10.60775/fairhub.3"), ("minted", None))
         self.assertEqual(rp._id_origin(["doi:10.1/a#b"], "doi:z"), ("stated", None))
+        # paths are case-sensitive; only scheme and host fold (round 2, note 5)
+        self.assertEqual(rp._id_origin("https://example.org/Dataset/A#part", "https://example.org/dataset/a")[0], "constructed")
+        self.assertEqual(rp._id_origin("HTTPS://EXAMPLE.org/dataset/a#part", "https://example.org/dataset/a")[0], "minted")
 
     def test_the_pack_is_complete_and_deterministic(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -218,7 +218,13 @@ ID_ORIGINS = ("minted", "constructed", "stated")
 #: What may follow a base inside the bundle for the match to be the base
 #: itself and not a prefix of a longer URL (`…/datasets/3` inside
 #: `…/datasets/30` or `…/datasets/3/access`; #1108 review, finding 5).
-_URL_CONTINUATION = re.compile(r"[A-Za-z0-9/_.\-#?=&%~]")
+_URL_CONTINUATION = re.compile(r"[A-Za-z0-9/_#?=&%~]")
+#: `.` and `-` continue a URL only when what follows them does too
+#: (`…/4.0/`, `…/2024.05.21/`); a URL ending a sentence — the commonest
+#: way one appears in prose, thirteen in the AI_READI bundle alone — is the
+#: URL itself (#1117 round 2). A trailing `/` is deliberately a
+#: continuation: `…/dataset` and `…/dataset/` are different resources.
+_URL_JOINER = re.compile(r"[.\-]")
 
 
 def _canonical_identifier(value: str) -> str:
@@ -229,12 +235,20 @@ def _canonical_identifier(value: str) -> str:
     as a label on someone else's identifier (#1108 review, finding 8). 0 of
     the corpus's 953 constructed ids are this case today; the guard is for
     the shape the normaliser creates."""
+    value = value.strip()
     try:
         from data_sheets_schema.api_runner import _identifier_form_tables, curie_form
         _, bases = _identifier_form_tables()
-        return (curie_form(value, bases) or value).strip().lower()
+        value = curie_form(value, bases) or value
     except Exception:                                         # noqa: BLE001
-        return value.strip().lower()
+        pass
+    # Scheme and host fold; the path compares exactly — URL paths are
+    # case-sensitive, as `api_runner._split_base` says (#1117 round 2).
+    m = re.match(r"^(https?://[^/]+/?)(.*)$", value, re.I)
+    if m:
+        return m.group(1).lower() + m.group(2)
+    prefix, sep, local = value.partition(":")
+    return (prefix.lower() + sep + local) if sep else value.lower()
 
 
 def _id_origin(value: Any, record_id: str | None) -> tuple[str, str | None]:
@@ -284,7 +298,11 @@ def _base_in(base: str, bundle_text: str) -> bool:
             if i < 0:
                 break
             nxt = bundle_text[i + len(form):i + len(form) + 1]
-            if not nxt or not _URL_CONTINUATION.match(nxt):
+            nxt2 = bundle_text[i + len(form) + 1:i + len(form) + 2]
+            continues = bool(nxt) and (bool(_URL_CONTINUATION.match(nxt))
+                                       or (bool(_URL_JOINER.match(nxt)) and bool(nxt2)
+                                           and bool(_URL_CONTINUATION.match(nxt2))))
+            if not continues:
                 return True
             start = i + 1
     return False
@@ -428,8 +446,9 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     bundle_text, bundle_state = None, "no bundle_path recorded"
     if bundle:
         bpath = bundle if bundle.is_absolute() else Path(__file__).resolve().parents[2] / bundle
+        pack["bundle"]["resolved_path"] = str(bpath)          # which root the bytes came from (round 2, note 6)
         if not bpath.exists():
-            bundle_state = "bundle not on disk"
+            bundle_state = f"bundle not on disk ({bpath})"
         else:
             raw = bpath.read_bytes()
             on_disk = hashlib.md5(raw).hexdigest()
@@ -437,13 +456,17 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
             if not recorded:
                 bundle_state = f"no bundle_md5 recorded (on disk {on_disk})"
             elif on_disk != recorded:
-                bundle_state = f"bundle drifted (recorded {recorded}, on disk {on_disk})"
+                bundle_state = f"bundle drifted (recorded {recorded}, on disk {on_disk} at {bpath})"
             else:
                 bundle_text, bundle_state = raw.decode("utf-8", errors="replace"), "current"
     id_entries, id_gap = (_id_slots(full_record, bundle_text=bundle_text) if full_record
                           else ([], "id slot flags unavailable: no full record"))
     pack["id_slots"] = {"entries": id_entries,
                         "bundle_state": bundle_state,
+                        # the record's own id, so the licensed-form call (a second
+                        # identifier for this dataset vs a third party's) can be
+                        # made from the pack (round 2, note 7)
+                        "record_id": full_record.get("id") if isinstance(full_record, dict) else None,
                         "note": "forced: the schema declares this class's id as an identifier or required, "
                                 "so the record could not omit the id given the object — it settles the id's "
                                 "presence, not the object's. origin (#901): minted is a urn or a fragment on "

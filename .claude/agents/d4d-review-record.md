@@ -123,17 +123,24 @@ the only source of dataset facts.
   dataset's — is the false claim the identifier rule itself names, whatever
   `base_in_bundle` says. One whose base is not in the bundle is an
   unsupported reference under the evidence rules, and its fragment
-  inherits that; `null` is `cannot_tell` on the base, and the fragment is
-  judged as above. Among the mints and the licensed constructed ids,
-  `forced: true`
+  inherits that; `null` is `cannot_tell` on the base (the block's
+  `bundle_state` says why), and the fragment is judged as above. The
+  block's `record_id` is this record's own id, so "a second identifier
+  for this dataset" is a comparison you can make from the pack. Among
+  the mints and the licensed constructed ids, `forced: true`
   (the schema declares that class's id an identifier or required — `File`,
   `FileCollection`, `DataSubset`, and also `Person`) means the record could
-  not omit the id *given the object*, so the mint itself never violates
+  not omit the id *given the object*, so the id itself never violates
   the rule; but forced settles the id's presence, not the object's — the
   rule's remedy for an unpointed-at part is prose instead of the object,
   and whether recording the object at all was noise-as-structure stays
-  yours to judge in the evidence. If every mint is forced, the rule is
-  `not_applicable` for the mints, judged normally for anything else.
+  yours to judge in the evidence. If every mint and licensed constructed
+  id is forced, the rule is `not_applicable` for those, judged as above
+  for the rest. One verdict for the rule: `violated` if any entry
+  violates it; else `cannot_tell` if the decidable entries are clean and
+  at least one is `null`-based and unforced (most packs, since the bundle
+  bytes are on disk for few records — say how many were undecidable);
+  else `followed` or `not_applicable`.
 
 Every verdict carries **evidence**: a bundle line number or quoted passage,
 a slot path, or the reason it cannot be told. A verdict without evidence
