@@ -1488,7 +1488,7 @@ def arm_facts(label_prefix: str, method: str | None = None,
                 if caps:
                     # A record whose own rows disagree is non-constant and
                     # says so; the block is read only where no row exists.
-                    seen[name].update(str(c) for c in sorted(caps))
+                    seen[name].update(str(c) for c in caps)
                     continue
             seen[name].add(str(value))
     return {"prefix": label_prefix, "labels": sorted(labels),
