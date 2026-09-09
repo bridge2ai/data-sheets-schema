@@ -22,21 +22,17 @@ import unittest
 from collections import defaultdict
 from pathlib import Path
 
+from tests.arm_labels import arm_of
+
 ROOT = Path(__file__).resolve().parents[1]
 RUBRICS = ("rubric10_semantic", "rubric20_semantic")
 PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE")
 
-#: The v8 arm was launched under two label prefixes on one day; they are one
-#: condition and one arm (#1084).
-_ARM_ALIASES = {"2026-09-04f": "2026-09-04v8", "2026-09-04g": "2026-09-04v8"}
-
-
-def _arm_key(label):
-    prefix = label.rsplit("_rep", 1)[0] if "_rep" in label else label
-    for mark, arm in _ARM_ALIASES.items():
-        if prefix.startswith(mark):
-            return arm + prefix[len(mark):]
-    return prefix
+#: One definition of which prefixes are one arm, shared with
+#: `test_reviewer_basis` (#1097). This file and that one carried
+#: byte-identical copies, which is one copy nobody updates — and the copied
+#: shape let an undeclared same-day suffix form its own arm silently.
+_arm_key = arm_of
 
 
 MANIFEST = ROOT / "tests" / "data" / "evaluation_manifest.json"

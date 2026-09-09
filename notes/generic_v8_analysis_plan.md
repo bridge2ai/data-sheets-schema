@@ -341,10 +341,25 @@ reports regated.
 **Reviewer basis (#1058).** The v8 reviews were made by `claude-fable-5-1`
 and the v7 reviews by `claude-fable-5`; the agent definition pinned
 `claude-fable-5` and the reviewers write their own runtime identity, which
-in September is the point release. So the v7-versus-v8 review numbers below
-— and the ones merged in #1055 — compare a Fable-5-reviewed arm against a
+**changed between 2026-09-03 and 2026-09-07** — the twelve v7 reviews ran
+2026-09-01 to 09-03 and all report Fable 5, the twelve v8 reviews ran
+2026-09-07 and all report 5.1. So the v7-versus-v8 review numbers below —
+and the ones merged in #1055 — compare a Fable-5-reviewed arm against a
 Fable-5.1-reviewed arm, and the difference between them is the package
-**plus the reviewer version**. A point release of the judge is a smaller
+**plus the reviewer version**. Since #1097 that difference is also machine-
+visible: `reviewer` is one of `ARM_PROCEDURE_FIELDS`, so `d4d runs
+compare-arms --a <v7> --b <v8>` lists it beside the schema and assembly
+digests instead of leaving it to this paragraph.
+
+**The reviewer's identity is self-reported.** The agent is told to write "the
+model you are"; nothing verifies it, and the review block records
+`model_basis: self-reported by the reviewing agent` to say so. The rubric
+records do better — they carry a `model.note` stating the identity comes from
+the session environment — and until the review agent does the same, "the v8
+reviews were made by `claude-fable-5-1`" and "the reviewer changed its
+self-reporting convention" are not distinguishable from the artifacts. This
+is CLAUDE.md's observed-versus-asserted rule for reasoning effort, applied to
+the judge. A point release of the judge is a smaller
 change than a different model family, but it is not nothing, and this
 repository's rule is that an instrument change is declared. It is declared
 here. The reviewer is recorded per record in `review.reviewer.model`, and
@@ -367,10 +382,24 @@ model, compared against that band, would settle whether the version
 difference is distinguishable from noise. That is the outstanding
 work on #1058; it was set up and deliberately not run.
 
-The agent is now pinned to `claude-opus-5`, so any *future* review is a
-third instrument and not comparable with either recorded arm without a
-paired pass. Nothing recorded was re-reviewed: the 24 review files stand as
-made, and the canonical selection below rests on them.
+The agent is now pinned to `claude-opus-5` on the plan owner's instruction
+that Opus 5 is the evaluator for all evaluations, which the two rubric agents
+already follow. **That gives up judge independence, and the loss should be
+stated rather than folded into "a third instrument" (#1097).** Every record
+in both arms was *generated* by `claude-opus-5`; they were reviewed by a
+different family, so the review was an outside reading. A future review under
+`claude-opus-5` is a same-model self-review — a larger instrument change than
+the point release this paragraph exists to declare, and one whose direction
+of bias is unknown rather than merely unmeasured. Two defensible positions:
+keep the pin for consistency with the rubric agents, since the corpus already
+scores Opus-5 output with an Opus-5 judge; or return the reviewer to
+`claude-fable-5-1`, which continues the v8 instrument and keeps the judge off
+the generator's family. The first is what is pinned; the second is the
+stronger instrument. It is a decision for the plan owner, recorded here
+rather than made silently.
+
+Nothing recorded was re-reviewed: the 24 review files stand as made, and the
+canonical selection below rests on them.
 
 One `d4d-review-record` agent per record (the CHORUS rep1 review run
 first as the canary, then eleven in parallel), every check passed

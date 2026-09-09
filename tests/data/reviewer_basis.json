@@ -1,0 +1,52 @@
+{
+ "_note": "Which model made each arm's reviews, declared rather than inferred (#1058, #1097). A new arm is invisible to the corpus until it is written down here, which is the recurrence the first version of the test did not prevent: #1058's drift was uniform within each arm and different between them. Pass 'a' is {P}_review.yaml, pass 'b' is {P}_review_b.yaml; a 'b' under a different model is the point of a paired pass, not a violation.",
+ "arms": {
+  "2026-08-28_claude-opus-5-api-generic-v7": {
+   "a": [
+    "claude-fable-5"
+   ],
+   "b": [
+    "claude-fable-5"
+   ]
+  },
+  "2026-08-28_claude-opus-5-claudecode-generic-v6": {
+   "a": [
+    "claude-fable-5"
+   ],
+   "b": [
+    "claude-fable-5"
+   ]
+  },
+  "2026-08-28b_claude-opus-5-api-generic-v7": {
+   "a": [
+    "claude-fable-5"
+   ]
+  },
+  "2026-08-28c_claude-opus-5-api-generic-v7": {
+   "a": [
+    "claude-fable-5"
+   ]
+  },
+  "2026-08-28d_claude-opus-5-api-generic-v7": {
+   "a": [
+    "claude-fable-5"
+   ]
+  },
+  "2026-09-01_claude-opus-5-api-generic-v7": {
+   "a": [
+    "claude-fable-5"
+   ]
+  },
+  "2026-09-04v8_claude-opus-5-api-generic-v8": {
+   "a": [
+    "claude-fable-5-1"
+   ]
+  }
+ },
+ "undated_reviews": {
+  "_note": "Reviews with no reviewed_at. The claim #1058 rests on is that the reviewer changed over time, so a review with no time cannot support it and must be listed rather than tolerated silently. The time is recoverable from git \u2014 the file was committed in 26e44caf on 2026-08-31 \u2014 but a recovered time is a different claim from a recorded one and would need its basis stated the way backfilled prompt hashes do (#399), so it is left absent.",
+  "paths": [
+   "data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-api-generic-v7_rep1/CHORUS_review_b.yaml"
+  ]
+ }
+}

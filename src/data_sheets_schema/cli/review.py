@@ -90,7 +90,20 @@ def check(method, label, project, write, strict):
     for f in block["findings"][:20]:
         click.echo("   ❌ " + ", ".join(f"{k}={v}" for k, v in f.items()))
     if write:
-        block["reviewer"] = {k: rev.get(k) for k in ("reviewer", "model", "reviewed_at") if rev.get(k)}
+        # Keys kept even when absent (#1097): dropping `reviewed_at` when the
+        # review omitted it made the provenance block show no gap, and one
+        # review_b on disk has no time at all. A reviewer version is argued
+        # from *when* a review ran, so a review with no time is a hole in the
+        # axis being argued and must be visible as null rather than missing.
+        block["reviewer"] = {k: rev.get(k) for k in
+                             ("reviewer", "model", "reviewed_at")}
+        #: Self-reported (#1097). The agent is told to write "the model you
+        #: are"; nothing verifies it. The rubric records carry a `model.note`
+        #: saying the identity comes from the session environment; until the
+        #: review agent does the same, this is the reviewer's own assertion,
+        #: recorded as such — CLAUDE.md's observed-vs-asserted rule for
+        #: reasoning effort is the same distinction.
+        block["reviewer"]["model_basis"] = "self-reported by the reviewing agent"
         block["artifacts"] = {"pack": {"path": str(paths["pack"]), "sha256": pack["_sha256"]},
                               "review": {"path": str(paths["review"]),
                                          "sha256": hashlib.sha256(paths["review"].read_bytes()).hexdigest()}}
