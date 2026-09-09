@@ -425,7 +425,8 @@ def check_cmd(method, label, project, strict):
     uncanonical = []
     duplicates = []
     stale_sizes = []
-    from data_sheets_schema.runs import _prov, stale_output_sizes
+    from data_sheets_schema.runs import _prov, header_disagreements, stale_output_sizes
+    header_mismatches = []
     for run in discover():
         if run.is_core or run.deterministic:
             continue
@@ -447,6 +448,12 @@ def check_cmd(method, label, project, strict):
             mism = stale_output_sizes(prov_data)
             if mism:
                 stale_sizes.append({"project": proj, "label": run.label, "mismatches": mism})
+            # The `#` header restating a setting the request never carried
+            # (#1027). Reported, never fatal: the record is right about the
+            # dataset and wrong about itself.
+            hd = header_disagreements(run.method, run.label, proj)
+            if hd:
+                header_mismatches.append({"project": proj, "label": run.label, "lines": hd})
             if isinstance(dk, dict) and any(isinstance(ds, list) and ds for ds in dk.values()):
                 passed = ((_prov(run.method, run.label, proj) or {}).get("validation") or {}).get("passed")
                 duplicates.append({"project": proj, "label": run.label,
@@ -809,6 +816,18 @@ def check_cmd(method, label, project, strict):
                     else "⚠️ ")
             click.echo(f"   {mark} {r['project']:9} {r['label']:44} "
                        f"{r['status']}: {r['reason']}")
+
+    if header_mismatches:
+        click.echo(f"\n⚠️  {len(header_mismatches)} record(s) whose `#` header states a "
+                   "setting the request did not carry (#1027):")
+        for h in header_mismatches:
+            for ln in h["lines"]:
+                click.echo(f"   {h['project']:9} {h['label'][:44]:44} header "
+                           f"`{ln['field']}: {ln['header']}` · record {ln['record']}"
+                           + (f" ({ln['basis']})" if ln['basis'] else ""))
+        click.echo("   Reported, not failed — the datasheet is wrong about itself, not "
+                   "about the dataset. Records written since #1027 stamp the header "
+                   "from the record.")
 
     if strict and (failed or bad_requests or never_pinned):
         raise SystemExit(1)

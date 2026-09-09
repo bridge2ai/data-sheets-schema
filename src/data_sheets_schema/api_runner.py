@@ -2774,6 +2774,54 @@ def normalise_mailto_ids(text: str, *, phase: str | None = None) -> str:
     return "\n".join(out)
 
 
+#: Header lines the prompt tells the model to write, and the record field
+#: each one restates. The model copies the prompt's example value; the record
+#: stores what the request carried. Where they can disagree, the record wins
+#: and the header is rewritten from it at write time (#1027).
+_HEADER_FROM_RECORD = {
+    "Temperature": "temperature",
+}
+
+
+def header_value(field: str, settings: dict[str, Any]) -> str:
+    """What the `#` header should say for `field`, from the run's settings.
+
+    `Temperature` is the case that filed #1027: every v8 full record's header
+    read `Temperature: 0.0`, copied from the prompt's example, while the
+    request carried no temperature at all — claude-opus-5 rejects the
+    parameter and the runner omits it. A header stating a setting the request
+    did not carry is an assertion the record contradicts. It now says so.
+    """
+    if field == "Temperature":
+        if settings.get("temperature_applies", True) and settings.get("temperature") is not None:
+            return str(settings["temperature"])
+        return (f"not sent ({settings.get('name', 'this model')} rejects the "
+                "parameter; the config's value did not reach the request)")
+    raise KeyError(field)
+
+
+def stamp_provenance_header(text: str, settings: dict[str, Any]) -> str:
+    """Rewrite the `#` provenance header's asserted settings from the record.
+
+    Touches only header lines of the form `# <Field>: …` for fields in
+    `_HEADER_FROM_RECORD`, only within the leading comment block, and leaves
+    every other byte alone — the header is the first thing a reader sees and
+    the normalisers are written to preserve it (#1002).
+    """
+    lines = text.split("\n")
+    out = []
+    in_header = True
+    for ln in lines:
+        if in_header and not ln.startswith("#"):
+            in_header = False
+        if in_header:
+            m = re.match(r"^(\s*#\s*)([A-Za-z][A-Za-z ]*?)(\s*:\s*)(.*)$", ln)
+            if m and m.group(2).strip() in _HEADER_FROM_RECORD:
+                ln = f"{m.group(1)}{m.group(2)}{m.group(3)}{header_value(m.group(2).strip(), settings)}"
+        out.append(ln)
+    return "\n".join(out)
+
+
 def normalise_record_text(text: str, *, phase: str | None = None) -> str:
     """Every write-time normalisation, in the order the record is written.
 
@@ -4099,6 +4147,9 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             target.parent.mkdir(parents=True, exist_ok=True)
             if artifact in ("full", "core"):
                 body = normalise_record_text(body, phase=ph)
+                # After normalisation, from the same settings the record's
+                # `model` block is written from (#1027).
+                body = stamp_provenance_header(body, settings)
             target.write_text(body, encoding="utf-8")
             # Reconcile (and later repair) overwrite the artifact in place;
             # the snapshot is the only record of what this phase produced.

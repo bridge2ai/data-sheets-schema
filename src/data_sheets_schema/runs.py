@@ -1329,6 +1329,66 @@ def _dig(record: dict, path: tuple[str, ...]):
     return cur
 
 
+#: `#` header lines the prompt has the model write, and the record field each
+#: restates (#1027). The header is what a reader sees first; the record is
+#: what the request carried. Where they disagree the header is the error.
+HEADER_FIELDS = {"Temperature": "temperature"}
+
+
+def full_record_path(method: str, label: str, project: str,
+                     concat_dir: Path = CONCAT_DIR) -> Path:
+    """`{concat_dir}/{method}/{label}/{project}_d4d.yaml`."""
+    return concat_dir / method / label / f"{project}_d4d.yaml"
+
+
+def header_disagreements(method: str, label: str, project: str,
+                         concat_dir: Path = CONCAT_DIR) -> list[dict[str, str]]:
+    """Header lines of the full artifact that contradict the provenance record.
+
+    Every v8 full record's header read `Temperature: 0.0`, copied from the
+    prompt's example line, while `model.temperature` was null because the
+    runner omits a parameter claude-opus-5 rejects. The writer now stamps the
+    header from the record (`api_runner.stamp_provenance_header`); this is the
+    reader-side check that the two agree, for records written before that and
+    for any later drift. Reported, never fatal: the datasheet is not wrong
+    about the dataset, it is wrong about itself.
+    """
+    prov = _prov(method, label, project, concat_dir) or {}
+    model = prov.get("model") or {}
+    full = full_record_path(method, label, project, concat_dir)
+    if not full.exists():
+        return []
+    out = []
+    for raw in full.read_text(encoding="utf-8", errors="replace").splitlines():
+        if not raw.startswith("#"):
+            break
+        m = re.match(r"^\s*#\s*([A-Za-z][A-Za-z ]*?)\s*:\s*(.*)$", raw)
+        if not m or m.group(1).strip() not in HEADER_FIELDS:
+            continue
+        field, said = m.group(1).strip(), m.group(2).strip()
+        key = HEADER_FIELDS[field]
+        if key not in model:
+            # Never recorded is not "recorded as not sent". Four records carry
+            # no `temperature` key at all; a header line cannot contradict a
+            # record that says nothing, so this is a gap in the record, not a
+            # false header, and is reported as that.
+            out.append({"field": field, "header": said, "record": "not recorded",
+                        "basis": ""})
+            continue
+        recorded = model.get(key)
+        if recorded is None:
+            # The request carried none. A header stating a number asserts a
+            # setting the record contradicts; a header saying "not sent"
+            # agrees with it.
+            if said and not said.lower().startswith("not sent"):
+                out.append({"field": field, "header": said, "record": "null",
+                            "basis": str(model.get(f"{key}_basis") or "")})
+        elif said != str(recorded):
+            out.append({"field": field, "header": said, "record": str(recorded),
+                        "basis": str(model.get(f"{key}_basis") or "")})
+    return out
+
+
 def arm_facts(label_prefix: str, method: str | None = None,
               concat_dir: Path | None = None) -> dict[str, Any]:
     """What every record under a label prefix says about its own procedure."""
