@@ -205,7 +205,7 @@ BRITISH_FORMS = ("licence", "analyse", "organisation", "enrolment", "programme",
 #: an AI_READI record was invisible to the old instrument while American
 #: "analyses" counted against it.
 #: Named so a recompute's audit note says which instrument counted (#907).
-BRITISH_INSTRUMENT = "v3 (#836/#859)"
+BRITISH_INSTRUMENT = "v4 (#1006; v3 #836/#859)"
 BRITISH_PATTERNS = tuple(re.compile(rx) for rx in (
     # v2.1 (#670 review): the organise verb family — 76 occurrences in the v4
     # arm — had escaped both instruments; bare enrol/enrols, the licenced/
@@ -227,7 +227,7 @@ BRITISH_PATTERNS = tuple(re.compile(rx) for rx in (
     r"\bbehaviours?(?:al(?:ly)?)?\b",
     r"\bcolour(?:s|ed|ings?|ful)?\b",
     r"\b(?:un)?favour(?:s|ed|ing|abl[ye]|ites?)?\b",
-    r"\bhonour(?:s|ed|ing|able)?\b",
+    r"\bhonour(?:s|ed|ing|abl[ye])?\b",
     # v3 (#836, #859): the review pass found tumour/oedema/metres/travelling
     # in a record the instrument scored 0, and the v7 reviewers listed
     # personalised, centimetre, colour, generalisability, artefacts,
@@ -236,11 +236,11 @@ BRITISH_PATTERNS = tuple(re.compile(rx) for rx in (
     # Forms with an American homograph (practice, license, specialist,
     # emphasis, cancellation, judgement, program) are excluded or require
     # a suffix that only the British form takes.
-    r"\b(?:centi|milli|kilo)?metres?\b",
+    r"\b(?:centi|milli|kilo|micro|nano)?metres?\b",
     r"\btumours?\b",
     r"\boedema(?:tous)?\b",
-    r"\bpaediatrics?\b",
-    r"\bhaem(?:o\w*|atolog\w*|orrhag\w*)\b",
+    r"\bpaediatric(?:s|ians?)?\b",
+    r"\bhaem(?:o\w*|ato\w*|orrhag\w*)\b",
     r"\banaemi[ac]\b",
     r"\bageing\b",
     r"\btravell(?:ing|ed|ers?)\b",
@@ -250,20 +250,26 @@ BRITISH_PATTERNS = tuple(re.compile(rx) for rx in (
     r"\btotall(?:ing|ed)\b",
     r"\bartefacts?\b",
     r"\bfibres?\b",
-    r"\blitres?\b",
+    r"\b(?:milli|micro|deci|centi)?litres?\b",
     r"\b(?:neighbour|labour|harbour|humour|vapour|flavour|rumour|armour|endeavour)"
-    r"(?:s|ed|ing|hoods?|ous|able)?\b",
+    r"(?:s|ed|ing|hoods?|ous|able|ers?)?\b",
     r"\b(?:defence|offence|pretence)s?\b",
     r"\bfulfil(?:s|ment)?\b",
     r"\bpractis(?:e|ed|es|ing)\b",
     r"\bsceptic(?:al|ism|s)?\b",
-    r"\bsulphur\w*\b",
+    r"\bsulph\w*\b",
     r"\b(?:minimis|maximis|optimis|personalis|generalis|prioritis|characteris|harmonis|"
     r"normalis|anonymis|pseudonymis|visualis|randomis|customis|centralis|finalis|"
     r"stabilis|sterilis|immunis|sensitis|categoris|capitalis|mobilis|realis|specialis|"
     r"emphasis|hypothesis|synthesis|digitis|authoris|criticis|italicis|localis|"
     r"marginalis|neutralis|operationalis|popularis|scrutinis|serialis|symbolis|"
     r"tokenis|vaporis|vocalis|westernis)(?:e|ed|es|ing|ations?|ability|ers?)\b",
+    # v4 (#1006, Codex review of #1003): labourers, honourably, millilitres,
+    # micrometres, paediatricians, haematopoietic and sulphide widen the
+    # patterns above; `grey` is new. A surname Grey is counted like the
+    # Temerty Centre is — the count is a fact about the text, and the
+    # normaliser's title-case skip leaves the name as written.
+    r"\bgrey(?:s|er|est|ish|ing|scale)?\b",
 ))
 _QUOTED = re.compile(r'"[^"\n]*"')
 
@@ -492,6 +498,7 @@ def form_facts(full: Path, core: Path,
             "undeclared_prefixes": prefixes,
             "undeclared_prefix_occurrences": sum(prefixes.values()),
             "prefix_instrument": PREFIX_INSTRUMENT,
+            "british_instrument": BRITISH_INSTRUMENT,
             "british_spellings": british,
             "organisational_fragments": len(fragments),
             "gc_label_variants": label_variants,

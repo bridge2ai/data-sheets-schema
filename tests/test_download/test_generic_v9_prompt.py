@@ -105,7 +105,7 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
         Swept with the declared instrument, so the guard moves with it."""
         from data_sheets_schema import grounding
         text = GENERIC_PROMPT_V9.read_text()
-        self.assertTrue(grounding.BRITISH_INSTRUMENT.startswith("v3"))
+        self.assertTrue(grounding.BRITISH_INSTRUMENT.startswith("v4"))
         found = british_forms(text)
         self.assertEqual(found, [], f"British forms in the v9 prompt file: {found}")
         self.assertEqual(grounding.british_spellings(prompt_body(GENERIC_PROMPT_V9)), 0)

@@ -2,8 +2,8 @@
 
 The prompt has asked for American English since v4 on the agentic path and
 v5 on the API path (Camille Nebeker's review: *no 'programme'*), the form
-block counts British forms under instrument v3
-(`grounding.BRITISH_PATTERNS`, #836/#859), and the count is a canary metric
+block counts British forms under instrument v4
+(`grounding.BRITISH_PATTERNS`, #1006; v3 #836/#859), and the count is a canary metric
 (prediction 5 of the v5 plan). It has stayed a rule with no mechanism: the
 v6 and v7 arms sat at 0–2 by variance and the VOICE v8 canary wrote
 `programme` four times in its own prose (8 counted, against a v7 worst of
@@ -70,7 +70,7 @@ from data_sheets_schema.grounding import BRITISH_PATTERNS, british_spellings
 #: Instrument note the normalisation block carries, so a reader knows which
 #: rule set rewrote a record (the instrument's own version is on the form
 #: block; this is the mechanism's).
-NORMALISER_VERSION = ("v1 (#1002): one rule per BRITISH_PATTERNS v3 entry; double-quoted spans, "
+NORMALISER_VERSION = ("v2 (#1006): one rule per BRITISH_PATTERNS v4 entry; v1 (#1002) mirrored v3; double-quoted spans, "
                       "identifier-shaped tokens, title-case runs, genus names and verbatim slots left as written")
 
 #: Slots whose value is the source's own token, or an identifier: never
@@ -123,12 +123,12 @@ _RULE_TABLE: tuple[tuple[str, Callable[[str], str]], ...] = (
     (r"\bbehaviours?(?:al(?:ly)?)?\b", _swap("behaviour", "behavior")),
     (r"\bcolour(?:s|ed|ings?|ful)?\b", _swap("colour", "color")),
     (r"\b(?:un)?favour(?:s|ed|ing|abl[ye]|ites?)?\b", _swap("favour", "favor")),
-    (r"\bhonour(?:s|ed|ing|able)?\b", _swap("honour", "honor")),
-    (r"\b(?:centi|milli|kilo)?metres?\b", _swap("metre", "meter")),
+    (r"\bhonour(?:s|ed|ing|abl[ye])?\b", _swap("honour", "honor")),
+    (r"\b(?:centi|milli|kilo|micro|nano)?metres?\b", _swap("metre", "meter")),
     (r"\btumours?\b", _swap("tumour", "tumor")),
     (r"\boedema(?:tous)?\b", _swap("oedema", "edema")),
-    (r"\bpaediatrics?\b", _swap("paediatric", "pediatric")),
-    (r"\bhaem(?:o\w*|atolog\w*|orrhag\w*)\b", _swap("haem", "hem")),
+    (r"\bpaediatric(?:s|ians?)?\b", _swap("paediatric", "pediatric")),
+    (r"\bhaem(?:o\w*|ato\w*|orrhag\w*)\b", _swap("haem", "hem")),
     (r"\banaemi[ac]\b", _swap("anaemi", "anemi")),
     (r"\bageing\b", _swap("ageing", "aging")),
     (r"\btravell(?:ing|ed|ers?)\b", _swap("travell", "travel")),
@@ -138,20 +138,21 @@ _RULE_TABLE: tuple[tuple[str, Callable[[str], str]], ...] = (
     (r"\btotall(?:ing|ed)\b", _swap("totall", "total")),
     (r"\bartefacts?\b", _swap("artefact", "artifact")),
     (r"\bfibres?\b", _swap("fibre", "fiber")),
-    (r"\blitres?\b", _swap("litre", "liter")),
+    (r"\b(?:milli|micro|deci|centi)?litres?\b", _swap("litre", "liter")),
     (r"\b(?:neighbour|labour|harbour|humour|vapour|flavour|rumour|armour|endeavour)"
-     r"(?:s|ed|ing|hoods?|ous|able)?\b", _swap("our", "or")),
+     r"(?:s|ed|ing|hoods?|ous|able|ers?)?\b", _swap("our", "or")),
     (r"\b(?:defence|offence|pretence)s?\b", _swap("nce", "nse")),
     (r"\bfulfil(?:s|ment)?\b", _swap("fulfil", "fulfill")),
     (r"\bpractis(?:e|ed|es|ing)\b", _swap("practis", "practic")),
     (r"\bsceptic(?:al|ism|s)?\b", _swap("sceptic", "skeptic")),
-    (r"\bsulphur\w*\b", _swap("sulphur", "sulfur")),
+    (r"\bsulph\w*\b", _swap("sulph", "sulf")),
     (r"\b(?:minimis|maximis|optimis|personalis|generalis|prioritis|characteris|harmonis|"
      r"normalis|anonymis|pseudonymis|visualis|randomis|customis|centralis|finalis|"
      r"stabilis|sterilis|immunis|sensitis|categoris|capitalis|mobilis|realis|specialis|"
      r"emphasis|hypothesis|synthesis|digitis|authoris|criticis|italicis|localis|"
      r"marginalis|neutralis|operationalis|popularis|scrutinis|serialis|symbolis|"
      r"tokenis|vaporis|vocalis|westernis)(?:e|ed|es|ing|ations?|ability|ers?)\b", _ise),
+    (r"\bgrey(?:s|er|est|ish|ing|scale)?\b", _swap("grey", "gray")),
 )
 
 RULES: tuple[tuple[re.Pattern[str], Callable[[str], str]], ...] = tuple(
