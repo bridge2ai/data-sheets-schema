@@ -1376,6 +1376,8 @@ def header_disagreements(method: str, label: str, project: str,
     about the dataset, it is wrong about itself.
     """
     prov = _prov(method, label, project, concat_dir) or {}
+    if not prov:
+        return []                       # nothing to disagree with: no record at all
     model = prov.get("model") or {}
     out = []
     # Both artifacts: the writer stamps full and core alike, and 278 core
