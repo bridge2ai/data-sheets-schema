@@ -201,7 +201,8 @@ receipt, CM4AI rep3's archive-channel sentence. Rubric evaluations of the
 two amended records predate the amendments and are listed as such.
 
 **British spellings, instrument v3 (#836/#859).** Every form block was
-recomputed: v6 arm 47, v7 production 139 (AI_READI 45/38/52 — the
+recomputed: v6 arm 47 (49 under v4, #1006: one `nanometres` in CM4AI
+rep3, counted in the full and the core), v7 production 139 (AI_READI 45/38/52 — the
 reviewers' ~24 lines were real), v5 baseline 88. Under v3 the AI_READI
 rep1 canary reads *regressed* on the British row (45 vs the baseline's
 worst 43): decision D4 (#906, adopted 2026-09-03, PR #920) re-derived its

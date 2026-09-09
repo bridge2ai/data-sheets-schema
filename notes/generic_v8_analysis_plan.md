@@ -1344,10 +1344,37 @@ steps need:
     change: a derived key in the provenance record, no prompt, assembly or
     datasheet touched.
 
+18. **British spellings instrument v4 (#1006, 2026-09-09).** The Codex
+    review of #1003 found eight forms v3 could not see — `labourers`,
+    `honourably`, `millilitres`, `micrometres`, `paediatricians`,
+    `haematopoietic`, `sulphide`, `grey` — which the normaliser, mirroring
+    the instrument rule for rule, let through while `residual_count` read
+    0. v4 widens seven patterns (the `-our` family takes `ers`, `honour`
+    takes `ably`, `metre` and `litre` take the `micro`/`nano`/`milli`/
+    `deci` prefixes, `paediatric` takes `ians`, `haem` takes any `ato…`
+    stem, `sulph` any suffix) and adds `grey`; the normaliser is v2, one
+    rule per v4 pattern, and its coverage test holds the mirror. The form
+    block now names `british_instrument`. Recomputed with
+    `backfill-checks --blocks form --overwrite` over all 282 records: 18
+    moved, all in the 2026-07 and early-2026-08 arms except the v5 rep1
+    AI_READI record (9 → 10, `haematocrit`), the v6 rep3 CM4AI record
+    (0 → 2, `nanometres`) and the 2026-08-28d v7 AI_READI canary (44 →
+    45), none of which carries a canary block; the v7 production arm (139)
+    and the 2026-08-22c baseline (88) are unchanged, so no gate row and no
+    canary verdict moves. A surname `Grey` would be counted, as the Temerty
+    Centre is, and left as written by the normaliser's title-case skip. An
+    instrument change lands at a condition boundary: the v8 fill is
+    complete and no v9 record exists. Not a generation-path change on its
+    own — but the normaliser is on the generation path, and its v2 rule
+    table rewrites eight more forms in any run made after it, so a v9 arm
+    is compared with v8 across this line as it is across step J.
+    (Numbered 18 with #1162's 17 still open.)
+
 Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14 and 16
 are not; 15 is classified with 17, the receipts instrument's next revision,
-#1053); per the production rule none of them may land between a v8 canary
-and its fill.
+#1053; 18 changes the normaliser's rule table and is a generation-path
+change by that half); per the production rule none of them may land
+between a v8 canary and its fill.
 
 ## Decisions needed before step 3
 
