@@ -63,8 +63,19 @@ MIN_CHALLENGE = 60
 _SKIP = re.compile(r"^\s*(?:[-*+]\s|\d+\.\s|#|\||```|>)")
 
 #: Where one sentence ends and the next begins, in prose joined across the
-#: wrapped lines of a paragraph.
-_SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z\u201c\"'`(*])")
+#: wrapped lines of a paragraph: a terminator, optionally a closing bracket
+#: or quote, whitespace, then an opening capital, quote, backtick or bracket
+#: (#1149 review, S2: `.)` and `.”` used to merge two sentences into one).
+_SENTENCE_END = re.compile(r"(?:(?<=[.!?])|(?<=[.!?][)\]\u201d\"'`]))\s+(?=[A-Z\u201c\"'`(])")
+
+#: Abbreviations a sentence does not end at (S3): protected before the split.
+_ABBREVIATIONS = ("e.g.", "i.e.", "cf.", "vs.", "etc.", "Fig.", "No.", "Dr.", "Mr.", "Ms.", "approx.")
+
+#: A sentence starts with a capital, a quote, a backtick, a bracket or a
+#: digit. A fragment that starts lower-case — text after a bullet list broke
+#: a paragraph, or after an unlisted abbreviation — is not something an
+#: agent can be asked for (S3).
+_SENTENCE_START = re.compile(r"^[A-Z0-9\u201c\"'`(\[]")
 
 #: The fewest opening words of the expected sentence the preamble reveals.
 #: Enough to point at one sentence in its section; never the sentence.
@@ -151,17 +162,6 @@ def _previous_text(name: str) -> str | None:
     return _git("show", f"{parent}:{rel}") or None
 
 
-def _heading_for(body: str, line: str) -> str | None:
-    """The nearest markdown heading above `line`, as a locator."""
-    seen = None
-    for raw in body.splitlines():
-        stripped = raw.strip()
-        if stripped.startswith("#"):
-            seen = stripped.lstrip("# ").strip()
-        if stripped == line.strip():
-            return seen
-    return None
-
 
 def sentences_by_section(body: str) -> list[tuple[str | None, str]]:
     """(heading, sentence) for every prose sentence of the definition, in
@@ -177,7 +177,12 @@ def sentences_by_section(body: str) -> list[tuple[str | None, str]]:
     def flush() -> None:
         if para:
             text = re.sub(r"\s+", " ", " ".join(para)).replace("*", "").strip()
-            out.extend((heading, sent.strip()) for sent in _SENTENCE_END.split(text) if sent.strip())
+            for abbr in _ABBREVIATIONS:
+                text = text.replace(abbr + " ", abbr + "\x00")
+            for sent in _SENTENCE_END.split(text):
+                sent = sent.replace("\x00", " ").strip()
+                if sent:
+                    out.append((heading, sent))
             para.clear()
 
     for raw in body.splitlines():
@@ -203,17 +208,21 @@ def sentences_by_section(body: str) -> list[tuple[str | None, str]]:
     return out
 
 
-def _prefix_for(expected: str, siblings: list[str]) -> str:
+def _prefix_for(expected: str, siblings: list[str]) -> str | None:
     """The fewest opening words (at least `MIN_PREFIX_WORDS`) that begin
     `expected` and no other sentence of its section — what the preamble
-    reveals so an agent can find the sentence without being handed it."""
+    reveals so an agent can find the sentence without being handed it.
+    None when no prefix strictly shorter than the sentence is unique: a
+    sibling that shares every word but the last would otherwise make the
+    prefix the answer, and the check could no longer fail (#1149 review,
+    M1 — the #1102 property, re-created silently)."""
     words = expected.split()
     others = [_normalise(sib) for sib in siblings if sib != expected]
-    for n in range(MIN_PREFIX_WORDS, len(words) + 1):
+    for n in range(MIN_PREFIX_WORDS, len(words)):
         prefix = " ".join(words[:n])
         if not any(o.startswith(_normalise(prefix)) for o in others):
             return prefix
-    return expected
+    return None
 
 
 def challenge_between(body: str, previous: str) -> dict[str, str] | None:
@@ -234,15 +243,20 @@ def challenge_between(body: str, previous: str) -> dict[str, str] | None:
     old = _normalise(previous)
     sents = sentences_by_section(body)
     fresh = [(h, sent) for h, sent in sents
-             if len(sent) >= MIN_CHALLENGE and _normalise(sent) not in old]
-    if not fresh:
-        return None
-    heading, expected = max(fresh, key=lambda hs: len(hs[1]))
-    siblings = [sent for h, sent in sents if h == heading]
-    return {"expected": expected,
-            "prefix": _prefix_for(expected, siblings),
-            "locator": (f"the section headed \u201c{heading}\u201d" if heading
-                        else "your scoring instructions")}
+             if len(sent) >= MIN_CHALLENGE and _SENTENCE_START.match(sent)
+             and _normalise(sent) not in old]
+    # Longest first; the first fresh sentence that can be named by a prefix
+    # shorter than itself is the challenge. A sentence that cannot be is
+    # skipped rather than revealed (M1).
+    for heading, expected in sorted(fresh, key=lambda hs: -len(hs[1])):
+        siblings = [sent for h, sent in sents if h == heading]
+        prefix = _prefix_for(expected, siblings)
+        if prefix is None:
+            continue
+        return {"expected": expected, "prefix": prefix,
+                "locator": (f"the section headed \u201c{heading}\u201d" if heading
+                            else "your scoring instructions")}
+    return None
 
 
 def challenge(name: str) -> dict[str, str] | None:
@@ -264,10 +278,18 @@ def discriminates(name: str) -> bool:
     return challenge(name) is not None
 
 
+_FOLD = str.maketrans({"\u201c": '"', "\u201d": '"', "\u2018": "'", "\u2019": "'",
+                       "\u2014": "-", "\u2013": "-", "*": "", "`": ""})
+
+
 def _normalise(text: str) -> str:
-    """Whitespace, case and emphasis markers do not decide a match: an agent
-    quoting a bold lead-in may or may not reproduce the asterisks."""
-    return re.sub(r"\s+", " ", text.replace("*", "")).strip().lower()
+    """Whitespace, case, emphasis markers, backticks and the typographic
+    forms of quotes and dashes do not decide a match: an agent quoting half
+    a kilobyte verbatim may straighten a quote or retype an em dash, and a
+    stale definition is a different claim from a dropped backtick (#1149
+    review, S4)."""
+    text = text.translate(_FOLD).replace("--", "-")
+    return re.sub(r"\s+", " ", text).strip().lower()
 
 
 def spawn_preamble(name: str) -> str:
