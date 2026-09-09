@@ -83,10 +83,12 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
                       "does not reach an id the schema forces",      # R8: the carve-out (#803)
                       "software tool under `used_software`",         # R8: the Software hole (review finding 4)
                       "ORCID the evidence states first",             # R8 defers to the person rule (finding 5)
+                      "the base to prefer",                          # R8: own id first; a landing-page label needs a receipt (round 2, finding 4)
+                      "component dataset under `resources`",        # R8: a nested Dataset id is forced (round 2, finding 3)
                       "matched to the core by id",                   # R8: the projector, both facts (finding 9)
                       "a claim about that identifier, not a label",  # R8: the referent test (#901)
                       "is a role this record asserts",               # R8: creators/maintainers (finding 13)
-                      "refines the rule above without replacing it",  # R8 vs v5 minting base (finding 6)
+                      "refines the rule that mints a label on an identifier the evidence supplies",  # R8 vs v5 (finding 6)
                       "labels a part of that entity, not of this one",  # R8: a fragment on another's identifier (#901)
                       "passage that states the category",            # R9: enumeration slots (#830 a)
                       "except where the schema requires the slot",   # R9: relationship_type (finding 1)
@@ -116,7 +118,8 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
         # Software, reachable from every object through used_software)
         phrases = {"File": "a file,", "FileCollection": "a file collection",
                    "DataSubset": "a data subset", "Person": "a person given as an object",
-                   "Software": "software tool under `used_software`"}
+                   "Software": "software tool under `used_software`",
+                   "Dataset": "component dataset under `resources`"}   # a nested Dataset (resources, parent_datasets) is forced too
         reachable, todo = set(), ["Dataset"]
         while todo:
             cls = todo.pop()
@@ -128,9 +131,7 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
                 if rng and sv.get_class(rng, strict=False):
                     todo.append(rng)
         forced = set()
-        for cls in reachable:
-            if cls == "Dataset":
-                continue
+        for cls in reachable:                                  # Dataset included: it is reachable as a nested object
             try:
                 slot = sv.induced_slot("id", cls)
             except Exception:                                 # noqa: BLE001

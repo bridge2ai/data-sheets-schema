@@ -36,13 +36,15 @@ the v6–v8 arms (#830, with the adjudication findings of 2026-09-01).
 
 R8 answers the fragment conflict. The v6 rule says to mint a fragment only
 where a value points at the part, but `File`, `FileCollection`,
-`DataSubset`, `Person` and `Software` ids are schema identifiers the record
-cannot omit (every forced-id class reachable from `Dataset`; a test holds
-the list), and the core derivation copies collection and file ids into its
-distributions and matches top-level resources by id — so five of the six
-v6 rule-14 charges charged the record with the schema (the sixth, CHORUS
-rep2's 68 fragments on splits, purposes and limitations, was a correct
-charge R8 does not excuse). The other half is the unforced mint on a
+`DataSubset`, `Person`, `Software` and a component `Dataset` under
+`resources` are schema identifiers the record cannot omit (every forced-id
+class reachable from `Dataset`; a test holds the list), and the core
+derivation copies collection and file ids into its distributions and
+matches top-level resources by id — so five of the six v6 rule-14 charges
+charged the record with the schema (the sixth, CHORUS rep2's 68 fragments
+on splits, purposes, limitations and software, was a correct charge for
+the 57 on classes the schema does not force; the 11 on `used_software`
+are the Software case R8 excuses). The other half is the unforced mint on a
 referent outside the record: fragments for grants, awards and
 organisations on the dataset's own DOI, and labels built on another
 thing's identifier; a creator or maintainer entry is a role, whose id is
@@ -369,11 +371,13 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
 - The rule that a fragment is minted only where a value points at the part
   does not reach an id the schema forces. Where a class declares `id` as its
   identifier or requires it — a file, a file collection, a data subset, a
-  software tool under `used_software`, a person given as an object — the id
-  exists because the object does, and leaving it out is a validation failure,
-  not a fragment saved: mint it, keep it stable, and do not read that rule as
-  a reason to omit the object; a person's id follows the rule above — the
-  ORCID the evidence states first, a fragment only where it states none. The
+  component dataset under `resources`, a software tool under
+  `used_software`, a person given as an object — the id exists because the
+  object does, and leaving it out is a validation failure, not a fragment
+  saved: mint it on this record's own id, keep it stable, and do not read
+  that rule as a reason to omit the object; a person's id follows the rule
+  for a person given as an object — the ORCID the evidence states first, a
+  fragment only where it states none. The
   ids of `file_collections` and of the files under them are copied into the
   core record's distributions, and top-level `resources` are matched to the
   core by id, so those ids are used whether or not the text points at them.
@@ -386,10 +390,14 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   one. Take the identifier the evidence states; where it states none and the
   schema does not require an id, leave `id` empty and carry the name in
   `name`. A label this record mints sits on an identifier the evidence
-  supplies for this dataset — its own id, or its landing page — which refines
-  the rule above without replacing it; a fragment appended to another
-  entity's identifier — an organization's, another dataset's — labels a part
-  of that entity, not of this one.
+  supplies for this dataset — which refines the rule that mints a label on
+  an identifier the evidence supplies, without replacing it — and this
+  record's own id is the base to prefer: a label on the dataset's landing
+  page is licensed too, but it names an identifier the evidence must
+  supply, so it needs a receipt like any other value, where a label on this
+  record's own id does not. A fragment appended to another entity's
+  identifier — an organization's, another dataset's — labels a part of that
+  entity, not of this one.
 - A slot whose declared range is an enumeration is populated only from a
   passage that states the category, in the source's own words or a plain
   restatement of them — never from what a value's name, unit or position
@@ -401,9 +409,9 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   — except where the schema requires the slot, in which case the entry
   itself is what the evidence must support: a related dataset is recorded
   only where a passage states what the relation is. A file's `format`,
-  `media_type`, `encoding` and `compression` are read from the file the
-  bundle names — its name and extension are the passage for them — and this
-  rule does not reach those.
+  `file_type`, `media_type` and `encoding`, and a file's or collection's
+  `compression`, are read from the file the bundle names — its name and
+  extension are the passage for them — and this rule does not reach those.
 - `raw_data_format` names the form the data took before any processing this
   dataset applied, and only where a passage states that form. The standard
   the release conforms to, the extension the distributed files carry and the

@@ -890,9 +890,16 @@ prompt-file hash and `resolved_prompt_digest` do.
   copied into the core's distributions, top-level `resources` matched by
   id; the pack-side half (#821 `forced`, #1108 `origin`) let the reviewer
   excuse those, and R8 tells the model the same. Five of the six v6
-  rule-14 charges were of this kind; CHORUS rep2's 68 fragments on splits,
-  purposes and limitations (none forced) were a correct charge R8 leaves
-  standing. Its second
+  rule-14 charges were of this kind; of CHORUS rep2's 68 fragments, the 57
+  on splits, purposes and limitations (none forced) were a correct charge
+  R8 leaves standing and the 11 on `used_software` are the Software case
+  it excuses. A nested `Dataset` (under `resources`, `parent_datasets`) is
+  forced too, and R8 names it. R8 prefers the record's own id as the base:
+  a label on the dataset's landing page is licensed by the v5 rule and
+  #1108's reading, but `receipts._minted` exempts only own-id fragments
+  and urns from needing a receipt, so a landing-page label costs receipt
+  coverage a own-id label does not — stated in the rule, and filed for the
+  receipt instrument to consider at its next revision. Its second
   half is the referent test for every other mint: an organisation, grant,
   award or program has a referent outside the record, so a fragment for it
   on the dataset's DOI is a claim about that DOI (CM4AI rep3's twelve and
