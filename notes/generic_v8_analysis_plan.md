@@ -310,8 +310,22 @@ the core schema, which the checker resolved against `Dataset` (#1046);
 the true count is 0 and both runs were regated on it. ᵘ two `full`
 responses judged unusable (no parseable object) and discarded without a
 snapshot (#1048). ᵗ the endpoint returned no thinking block on `full`,
-`reconcile_full`, `report` and the report re-checks (#1047); the runner
-requests none. The same two runs wrote 27 and 35 resolver URLs under
+`reconcile_full`, `report` and the report re-checks (#1047). The runner
+sent no `thinking` parameter, but on this model family omitting it runs
+adaptive thinking, so these two are a **different generation regime, not a
+run that was not asked**, and their rows on predictions 8 and 9 are marked
+rather than averaged in. "The other ten got it on identical requests" is
+true of the parameters, not the inputs: a `full` phase with no thinking
+block is on 11 of the corpus's 152 reasoning logs — 8 of CM4AI's 33 logs
+(9 of its 35 full-phase entries), across four CM4AI labels and two prompt
+versions, plus VOICE twice and AI_READI once — so it is an
+input-correlated adaptive outcome, not a proxy fault. From this change the
+request states adaptive thinking explicitly and the record carries it as
+`model.thinking_requested`; that puts the request on record and does not
+make a recurrence a deviation — under adaptive the model decides per
+request, and no block is a legal answer. `d4d provenance reasoning` names
+the `full` phase without a block (`full_phase_without_reasoning`) rather
+than any phase, since audit, report and core skip it routinely. The same two runs wrote 27 and 35 resolver URLs under
 `id` (`normalisation.identifier_form`; 0 on the other ten), rewritten
 to CURIEs at write time — the model-written count, not the arm's 0.
 Abandoned attempts (transport drops, all retried to completion): 5 across
@@ -947,6 +961,34 @@ seventeen to twenty-nine reviews), so a null on twelve records says little,
 as #1072 said of R7. The prompt-side lifted-string guard (`test_the_rules_
 name_no_value_from_a_record_they_will_be_scored_against`) keeps the
 verdict strings the rules were drafted from out of the text.
+### The report phase sees the core inventory (#998, 2026-09-09)
+
+The report instruction's `both` rule referred to "the core schema" while
+the phase was assembled with the `Dataset` digest; the model's only view
+of the core inventory was the carried core record, where a slot the
+derivation left empty and one the core class cannot declare look the
+same. The phase now carries `CoreDataset`'s top-level slot names before
+its instruction (`core_inventory_block`, names only, ~1.3 KB). Runner-side,
+so `ASSEMBLY_LAYOUT` names it and the assembly digest moves; no v9 record
+exists, so the condition still has one boundary. On the v8 fill
+`claims_core_cannot_hold` was 0 on seventeen of eighteen records and 5 on
+one — and every report finding on the v8 fill is of that class: five
+`retention_not_shown` on `both` rows over full-only slots (`citation`,
+`consent_revocations`, `collection_consents[0].consent_details`,
+`participant_compensation[0].compensation_amount`,
+`third_party_sharing[0].is_shared`), on that one record, and no `both` row
+on a core-declared slot has ever failed presence. So the prediction for
+the canary is narrow: that count at 0 with no `both` row on an undeclared
+slot, and no change anywhere else — read with one caveat the review
+named: the gate resolves a `full` row against the full record only, so a
+row wrongly flipped from `both` to `full` produces no finding; the block
+therefore says the test is on the *root* of the slot path and applies to
+retained/changed/added rows, and a canary reader should compare the count
+of `both` rows with the v8 fill's (612 of 682) rather than trust the zero
+alone. The v8 labels already carry three assembly digests (2026-09-04
+rep1; b/c/d; e/f/g), so "one boundary" is a statement about v9, not a
+claim that v8 was one arm; and the block is unconditional, as step E was,
+so a re-run of an earlier condition would receive it too.
 
 ### What a v9 arm can and cannot be compared against (#1072)
 

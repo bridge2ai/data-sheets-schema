@@ -566,7 +566,12 @@ ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, "
                    "(#952); the report phase ends with a dispositions table, "
                    "checked against the records before the run completes, and "
                    "a report whose claims contradict them is regenerated once "
-                   "with the contradictions named (#929)")
+                   "with the contradictions named (#929); the report phase "
+                   "carries the core class's top-level slot inventory before "
+                   "its instruction, so the model can see which slots the core "
+                   "declares — the gate still judges presence in the two "
+                   "records, and the inventory decides only whether a finding "
+                   "carries the 'core class declares no such slot' cause (#998)")
 
 
 def context_blocks(spec: "RunSpec") -> dict[str, Any]:
@@ -703,6 +708,30 @@ def _model_settings() -> dict[str, Any]:
         "config_path": str(DETERMINISTIC_CONFIG),
         "temperature_applies": accepts_temperature(name),
     }
+    # What the request says about thinking (#1047). On claude-opus-5 thinking
+    # is on by default — omitting the parameter runs adaptive — so a run with
+    # no thinking block on `full` was not "not asked". Stating the parameter
+    # changes nothing the model does; it puts the request on record, so the
+    # log's "no thinking block" can be read against what was asked. It does
+    # not make an absent block a provider fault: under adaptive the model
+    # decides per request, and a `full` phase with no block is a legal
+    # outcome — the corpus has it on 11 of 152 logs (CM4AI 8 of its 33,
+    # VOICE 2, AI_READI 1; 14 full-phase entries, 9 of them CM4AI's), across
+    # four CM4AI labels and two prompt versions (#1047 review). `budget_tokens`
+    # is never sent — it returns 400 on this family — so the issue's own
+    # proposed shape is refused here, and a test holds that line. A model that
+    # predates adaptive thinking gets no parameter and a note, mirroring the
+    # temperature gate.
+    if accepts_adaptive_thinking(name):
+        settings["thinking"] = {"type": "adaptive"}
+    else:
+        settings["thinking_note"] = (
+            f"not requested: {name} is not on the list of families known to "
+            "accept adaptive thinking (ADAPTIVE_THINKING_MODELS), and this "
+            "runner never sends budget_tokens")     # the observable fact, not a cause (#1112 round 2)
+    effort = (m.get("thinking") or {}).get("effort") if isinstance(m.get("thinking"), dict) else None
+    if effort:
+        settings["effort"] = str(effort)
     if not settings["temperature_applies"]:
         # The config declares temperature 0.0 and this model refuses the
         # parameter, so the declared value is inert. Recording that here means
@@ -885,8 +914,9 @@ PHASE_INSTRUCTIONS = {
         "`changed`, `added`, `retained`, `record` one of `full`, `core`, "
         "`both`. For a slot reported retained, changed or added, name `both` "
         "only where the core record carries it: the core schema declares "
-        "fewer slots than the full one, and a slot it does not declare "
-        "(`citation`, `consent_revocations`, …) is `full`. "
+        "fewer slots than the full one — its top-level inventory is the "
+        "`# Core schema inventory` block above — and a slot it does not "
+        "declare (`citation`, `consent_revocations`, …) is `full`. "
         "Every row is checked against the records afterwards: a slot "
         "reported removed must be absent from the record named, one reported "
         "retained, changed or added must be present there. Write the table "
@@ -1170,6 +1200,34 @@ def _receipts_block(spec: RunSpec, record: dict[str, Any]) -> dict[str, Any]:
                      spec.condition in RECEIPT_CONDITIONS)
 
 
+def core_inventory_block() -> str:
+    """The core class's top-level slot names, for the report phase (#998).
+
+    The report phase is assembled with the `Dataset` digest, and its
+    instruction says `both` is only for a slot the core record carries. The
+    model's only view of the core inventory was the completed core record in
+    the carry, where a slot the derivation left empty is indistinguishable
+    from one the core class cannot declare. The list is the inventory itself
+    — names only, the same set `report_claims.declared_slots` reads from the
+    same merged core schema (a test holds the two equal) — so the
+    distinction is visible rather than inferred. The gate is unchanged: it
+    judges presence in the two records, and the declaration decides only
+    whether a finding carries the "core class declares no such slot" cause.
+    Every report finding on the v8 fill was of that class — five
+    `retention_not_shown` on `both` rows over full-only slots, on one
+    record — so the most this can remove is those five; nothing else moves.
+    """
+    names = schema_digest.slot_names("CoreDataset")
+    return ("# Core schema inventory\n\n"
+            "`CoreDataset` declares exactly these top-level slots. The test is on "
+            "the *root* of a dispositions row's slot path — `funders[0].grant_id` "
+            "is judged by `funders` — and applies to rows reported retained, "
+            "changed or added: such a row whose root is not in this list is `full`, "
+            "never `both` or `core`. (A `removed` row may name any record the "
+            "slot is absent from.)\n\n"
+            + ", ".join(f"`{n}`" for n in names) + "\n")
+
+
 def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseRequest:
     """Assemble one phase's request.
 
@@ -1250,6 +1308,10 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     for name, text in carry.items():
         parts.append({"type": "text",
                       "text": f"# {name}\n\n{text}"})
+    if phase == "report":
+        # The core inventory the instruction's `both` rule refers to (#998);
+        # before the instruction so the instruction stays last (#346).
+        parts.append({"type": "text", "text": core_inventory_block()})
     instruction = PHASE_INSTRUCTIONS[phase]
     if receipted and phase == "full":
         instruction += PHASE_INSTRUCTIONS["full_receipt"]
@@ -1402,6 +1464,22 @@ def accepts_temperature(model: str) -> bool:
     """Whether this model will accept a `temperature` parameter."""
     base = model.split("/")[-1]
     return not any(base.startswith(m) for m in NO_TEMPERATURE_MODELS)
+
+
+#: Families on which `thinking: {type: adaptive}` is accepted (4.6 and later;
+#: `budget_tokens` is deprecated there and a 400 from 4.7 on). Earlier models
+#: — Haiku 4.5, Sonnet 4.5 — still take `{type: enabled, budget_tokens: N}`,
+#: which this runner never sends, so on them the parameter is left out and
+#: the record says so (#1047 review, finding 5).
+ADAPTIVE_THINKING_MODELS = ("claude-opus-5", "claude-sonnet-5", "claude-fable-5",
+                            "claude-opus-4-8", "claude-opus-4-7", "claude-opus-4-6",
+                            "claude-sonnet-4-6")
+
+
+def accepts_adaptive_thinking(model: str) -> bool:
+    """Whether this model accepts `thinking: {type: adaptive}`."""
+    base = model.split("/")[-1]
+    return any(base.startswith(m) for m in ADAPTIVE_THINKING_MODELS)
 
 
 def _client():
@@ -1752,7 +1830,7 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
                              "max_tokens": cap_tokens}
     try:
         rreq = build_readdress(req, response_text, unresolved)
-        resp = _call_with_retry(client, model=settings["name"], max_tokens=cap_tokens,
+        resp = _call_with_retry(client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"), max_tokens=cap_tokens,
                                 temperature=settings["temperature"],
                                 system=rreq.system, messages=rreq.messages,
                                 on_incomplete=lambda info: _record_incomplete_stream(
@@ -2774,6 +2852,76 @@ def normalise_mailto_ids(text: str, *, phase: str | None = None) -> str:
     return "\n".join(out)
 
 
+#: Header lines the prompt tells the model to write, and the record field
+#: each one restates. The model copies the prompt's example value; the record
+#: stores what the request carried. Where they can disagree, the record wins
+#: and the header is rewritten from it at write time (#1027).
+_HEADER_FROM_RECORD = {
+    "Temperature": "temperature",
+    "Model": "model",
+    "Reasoning effort": "reasoning_effort",
+}
+
+
+def header_value(field: str, settings: dict[str, Any]) -> str:
+    """What the `#` header should say for `field`, from the run's settings.
+
+    `Temperature` is the case that filed #1027: every v8 full record's header
+    read `Temperature: 0.0`, copied from the prompt's example, while the
+    request carried no temperature at all — claude-opus-5 rejects the
+    parameter and the runner omits it. A header stating a setting the request
+    did not carry is an assertion the record contradicts. It now says so.
+    """
+    if field == "Temperature":
+        if settings.get("temperature_applies", True) and settings.get("temperature") is not None:
+            return str(settings["temperature"])
+        return (f"not sent ({settings.get('name', 'this model')} rejects the "
+                "parameter; the config's value did not reach the request)")
+    if field == "Model":
+        return str(settings.get("name", ""))
+    if field == "Reasoning effort":
+        # Two records' headers read `Reasoning effort: default` against a
+        # record that says nothing — the value CLAUDE.md forbids (#470). The
+        # header states the effort the request carried — configured, or
+        # named by the route the way the record derives it (#397: the
+        # `-high` suffix on `google/claude-opus-5-high`, 49 records) — or
+        # says none was set; never a guess. The first version returned a
+        # constant, which on the documented `-high` route would have
+        # overwritten a header the model got right with a false one (#1027
+        # review, round 2).
+        if settings.get("effort"):
+            return str(settings["effort"])
+        from data_sheets_schema.provenance import _effort_from_route
+        effort, _ = _effort_from_route(settings.get("name"))
+        if effort:
+            return str(effort)
+        return "not set by the request (the provider's own choice; not recorded as a value)"
+    raise KeyError(field)
+
+
+def stamp_provenance_header(text: str, settings: dict[str, Any]) -> str:
+    """Rewrite the `#` provenance header's asserted settings from the record.
+
+    Touches only header lines of the form `# <Field>: …` for fields in
+    `_HEADER_FROM_RECORD`, only within the leading comment block, and leaves
+    every other byte alone — the header is the first thing a reader sees and
+    the normalisers are written to preserve it (#1002).
+    """
+    lines = text.split("\n")
+    out = []
+    in_header = True
+    for ln in lines:
+        if in_header and not ln.startswith("#"):
+            in_header = False
+        if in_header:
+            m = re.match(r"^(#\s*)([A-Za-z][A-Za-z ]*?)(\s*:\s*)(.*?)(\r?)$", ln)
+            if m and m.group(2).strip() in _HEADER_FROM_RECORD:
+                ln = (f"{m.group(1)}{m.group(2)}{m.group(3)}"
+                      f"{header_value(m.group(2).strip(), settings)}{m.group(5)}")
+        out.append(ln)
+    return "\n".join(out)
+
+
 def normalise_record_text(text: str, *, phase: str | None = None) -> str:
     """Every write-time normalisation, in the order the record is written.
 
@@ -2976,6 +3124,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             # which would let the pair diverge again (#694).
             from data_sheets_schema.derive_core import core_text
             text = normalise_record_text(core_text(spec.full_path, phase4_complete=True)[0], phase="repair_core")
+            text = stamp_provenance_header(text, settings)      # the same sequence as the phase write (#1027 review)
             spec.core_path.write_text(text, encoding="utf-8")
             errors, failure = _validator_lines(path, schema, cls)
             log.append({"phase": ph, "round": 1,
@@ -3015,7 +3164,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             attempt_t0 = time.monotonic()
             try:
                 resp = _call_with_retry(
-                    client, model=settings["name"],
+                    client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
                     max_tokens=PHASE_MAX_TOKENS.get(ph, DEFAULT_MAX_TOKENS),
                     temperature=settings["temperature"],
                     system=req.system, messages=req.messages,
@@ -3060,6 +3209,12 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                             "outcome": f"unusable response: {exc}"})
                 continue
             body = normalise_record_text(body, phase=ph)
+            # The repair instruction asks for the whole record and the model
+            # re-emits the prompt's header with it: 112 of 114 repair
+            # snapshots on disk carry `# Temperature: 0.0` verbatim, and
+            # repair applied on 87 API records (61%). Unstamped here, the
+            # false header came back on the majority of runs (#1027 review).
+            body = stamp_provenance_header(body, settings)
             path.write_text(body, encoding="utf-8")
             _snapshot(spec, f"{spec.project}_{ph}_r{rnd}.yaml", body)
             applied_from = len(errors)
@@ -3189,7 +3344,8 @@ def _attach_output_tokens_details(msg, details: dict[str, Any]) -> None:
 
 
 def _call_with_retry(client, *, model, max_tokens, temperature, system, messages, on_incomplete=None,
-                     sleep=time.sleep, wall_clock: float | None = None):
+                     sleep=time.sleep, wall_clock: float | None = None,
+                     thinking: dict[str, Any] | None = None, effort: str | None = None):
     """One API call, retrying transient failures.
 
     Retries rate limits, connection errors and 5xx. Does not retry 4xx other
@@ -3207,6 +3363,20 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                               "system": system, "messages": messages}
     if temperature is not None and accepts_temperature(model):
         kwargs["temperature"] = temperature
+    # Stated, not defaulted (#1047). Adaptive is what this family runs when
+    # the parameter is omitted, so this is a request that can be compared to
+    # its response rather than a change in behaviour. `budget_tokens` is a
+    # 400 on this family and is never sent.
+    if thinking is not None:
+        kwargs["thinking"] = dict(thinking)
+    if effort is not None:
+        # The pinned SDK (anthropic 0.72.0) has no `output_config` keyword on
+        # `messages.stream()` and no `**kwargs`; a named kwarg is a TypeError
+        # before the call. `extra_body` is the SDK's route for a body key it
+        # does not model, and it lands as `output_config` on the wire (#1047
+        # review, finding 1 — verified against the installed SDK with a mock
+        # transport). A test binds every kwarg here to the real signature.
+        kwargs["extra_body"] = {"output_config": {"effort": effort}}
 
     last: Exception | None = None
     incomplete = 0
@@ -3485,7 +3655,7 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
             {"type": "text", "text": PHASE_INSTRUCTIONS["report_regate"]}])
     try:
         resp = _call_with_retry(
-            client, model=settings["name"],
+            client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
             max_tokens=PHASE_MAX_TOKENS.get("report", settings["max_tokens"]),
             temperature=(settings["temperature"]
                          if settings["temperature_applies"] else None),
@@ -3652,6 +3822,91 @@ def _dependents_of(carry_name: str, produced_by: tuple[str, ...]) -> set[str]:
 
 
 
+#: How much of an unusable body to keep. The dropped-stream snapshot keeps a
+#: tail because the head was already delivered; an unusable body is whole and
+#: its *shape* is the question, so the head is what a reader needs — enough to
+#: see what the model produced instead of the expected object.
+UNUSABLE_HEAD_CHARS = 6000
+#: On a receipt condition the receipt is the response's *last* document, so a
+#: receipt-parse failure lives in the tail and a head-only snapshot shows a
+#: reader none of the text that failed (#1104 review). When the marker is
+#: present the snapshot keeps head and tail with the elision counted between
+#: them; a record failure keeps the head, whose shape is the question.
+UNUSABLE_TAIL_CHARS = 3000
+
+
+def _record_unusable_response(spec: RunSpec, ph: str, attempt: int,
+                              problem: str, text: str,
+                              usage_row: dict[str, Any] | None) -> Path | None:
+    """Leave a billed but rejected response on record (#1048).
+
+    A dropped stream leaves `…_incomplete_attempt{N}_{n}.txt` (#1017); a
+    *complete* response the parser refused left nothing at all, so CHORUS
+    `2026-09-04f rep2` lost two full attempts of 40,093 and 54,886 output
+    tokens whose text is simply gone. Both cost real money and both are the
+    only evidence of what shape the model produced instead of the expected
+    one — which is the question a reader asks after a retry.
+
+    `text` must be the response as delivered — captured before a receipt
+    condition's `split_receipt` rebinds the loop variable — so the header's
+    length and hash describe a string that actually arrived.
+
+    The accepted attempt is still what the record describes; this is
+    recorder-only.
+    """
+    if not text:
+        return None
+    # The parser's own predicate, line-anchored (#740): a record value that
+    # echoes the marker inline is not a receipt, and the snapshot must not
+    # send the reader to a tail that is not one (#1104 round 3, finding 1).
+    # The LAST marker line, as `split_receipt` takes it (#740): a marker
+    # quoted on its own line inside a block scalar precedes the real one, and
+    # a window anchored at the first would show the record's middle and
+    # elide the whole receipt (#1111 round 4, finding 1).
+    _hits = list(_RECEIPT_MARK_LINE.finditer(text))
+    marker = _hits[-1] if _hits else None
+    receipted = marker is not None and split_receipt(text)[1] is not None
+    if receipted and len(text) > UNUSABLE_HEAD_CHARS + UNUSABLE_TAIL_CHARS:
+        # The window starts at the marker, not at the end: every real receipt
+        # in the corpus is longer than the tail bound (min 3,107 chars, median
+        # 26,249), and the signal for a receipt-parse failure — prose instead
+        # of YAML, a fence, no `chunks:` — is at the receipt's opening, so the
+        # last 3,000 characters would be the least diagnostic slice (finding 2).
+        start = max(UNUSABLE_HEAD_CHARS, marker.start())
+        window = text[start:start + UNUSABLE_TAIL_CHARS]
+        between = start - UNUSABLE_HEAD_CHARS
+        after = len(text) - (start + len(window))
+        at_marker = marker.start() >= UNUSABLE_HEAD_CHARS
+        # Every seam is a `#` comment naming what it is, so no line break the
+        # response did not contain is mistaken for content (finding 2).
+        kept = (text[:UNUSABLE_HEAD_CHARS]
+                + (f"\n# … {between} characters elided …\n" if between
+                   else "\n# … (head and window are contiguous; the marker is inside the head) …\n")
+                + window
+                + (f"\n# … {after} characters elided after the window …\n" if after else ""))
+        extent = (f"# first {UNUSABLE_HEAD_CHARS} characters as delivered, then "
+                  f"{len(window)} characters "
+                  + ("from the receipt marker on" if at_marker
+                     else "continuing from the head (the marker is inside the head)")
+                  + f"{f' ({between} elided between' if between else ' (nothing elided between'}"
+                  f"{f', {after} after)' if after else ')'}; a receipt failure shows at "
+                  "the receipt's opening, so the window "
+                  + ("starts at the marker:\n" if at_marker else "keeps the text after the head:\n"))
+    else:
+        kept = text[:UNUSABLE_HEAD_CHARS]
+        extent = (f"# first {UNUSABLE_HEAD_CHARS} characters as delivered"
+                  f"{' (truncated here)' if len(text) > UNUSABLE_HEAD_CHARS else ''}:\n")
+    body = (f"# unusable response — phase {ph}, attempt {attempt} (#1048)\n"
+            f"# reason: {problem}\n"
+            f"# response_chars: {len(text)}  "
+            f"response_sha256: {hashlib.sha256(text.encode()).hexdigest()}\n"
+            f"# output_tokens: {(usage_row or {}).get('output_tokens')}  "
+            f"stop_reason: {(usage_row or {}).get('stop_reason')}\n"
+            + extent + kept)
+    return _snapshot(spec, f"{spec.project}_{ph}_unusable_attempt{attempt}.txt",
+                     body)
+
+
 def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: str,
                               info: dict[str, Any], usage: list[dict[str, Any]],
                               max_tokens: int | None = None) -> None:
@@ -3741,7 +3996,7 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
         attempt_t0 = time.monotonic()
         resp = _call_with_retry(
             client,
-            model=settings["name"],
+            model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
             max_tokens=phase_max_tokens(spec, ph, settings["max_tokens"]),
             temperature=settings["temperature"],
             system=req.system,
@@ -3752,6 +4007,13 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
 
         text = "".join(b.text for b in resp.content
                        if getattr(b, "type", "") == "text")
+        # The response as delivered, held before `split_receipt` rebinds
+        # `text` to the pre-marker half on a receipt condition (#1048 review):
+        # the unusable snapshot must carry the whole body, or on exactly the
+        # failure it exists for — "the text after the receipt marker is not a
+        # receipt" — it would drop the text after the marker and hash a
+        # string that was never delivered.
+        response_text = text
 
         # Written before the checks below, so a phase that dies of
         # max_tokens still leaves the record showing where its budget went —
@@ -3810,12 +4072,39 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
                 break
             except RuntimeError as exc:
                 problem = str(exc)
+        # Before the retry, and before the last-attempt raise: the final
+        # attempt's body is evidence too, and raising without it loses the
+        # one that actually ended the run (#1048).
+        # Both the phase and the attempt: `_readdress_receipt` appends a
+        # `full_readdress` row with attempt 1, which an attempt-only guard
+        # would stamp on loop attempt 1 (round-3 finding 3).
+        own_row = (usage[-1] if usage and usage[-1].get("attempt") == attempt
+                   and usage[-1].get("phase") == ph else None)
+        kept = _record_unusable_response(spec, ph, attempt, problem, response_text, own_row)
+        if kept is not None and own_row is not None:
+            # A distinct key, never `outcome` (#1048 review). `outcome` is
+            # #1017's marker for an *abandoned* attempt, and run_telemetry
+            # branches on its presence: it drops such rows from wall time
+            # (their seconds nest inside a completed attempt's) and skips
+            # them in the positional reasoning-log join. A completed, billed
+            # attempt is neither — its seconds are disjoint and it wrote a
+            # reasoning entry — so marking it `outcome` halved CHORUS 04f
+            # rep2's wall time and handed the accepted attempt the first
+            # attempt's reasoning estimate. The basename, not #1017's
+            # `str(path)` under `snapshot`: `merge_abandoned_rows` dedups on
+            # `snapshot`, and these rows are not abandoned attempts to merge
+            # from the ledger. The snapshot file itself is written at once, so
+            # on the MAX_ATTEMPTS raise — no record written, this row lost with
+            # it — the file and its self-describing header survive.
+            own_row["unusable_reason"] = (problem.splitlines() or [""])[0][:120]
+            own_row["unusable_snapshot"] = kept.name
         if attempt == MAX_ATTEMPTS:
             raise RuntimeError(
                 f"phase {ph!r} produced no usable output in "
                 f"{MAX_ATTEMPTS} attempts. Last problem: {problem}")
         print(f"   phase {ph} attempt {attempt} unusable "
-              f"({problem.splitlines()[0][:70]}); retrying")
+              f"({problem.splitlines()[0][:70]}); retrying"
+              + (f" · kept {kept.name}" if kept else ""))
         time.sleep(BACKOFF_BASE_SECONDS ** attempt)
     return body
 
@@ -4099,6 +4388,9 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             target.parent.mkdir(parents=True, exist_ok=True)
             if artifact in ("full", "core"):
                 body = normalise_record_text(body, phase=ph)
+                # After normalisation, from the same settings the record's
+                # `model` block is written from (#1027).
+                body = stamp_provenance_header(body, settings)
             target.write_text(body, encoding="utf-8")
             # Reconcile (and later repair) overwrite the artifact in place;
             # the snapshot is the only record of what this phase produced.
@@ -4187,6 +4479,27 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         # name suggesting far less.
         "context": context_facts(settings["name"], usage),
     }
+    # The thinking request, recorded as a request (#1047). Before this the
+    # `model` block could not say whether thinking had been asked for, so
+    # two CM4AI 04g runs whose `full` phase came back without a thinking
+    # block were indistinguishable from runs that never asked. The observed
+    # side stays where it is — per phase, in the reasoning log — and the
+    # comparison of the two is `d4d provenance reasoning`'s job.
+    rec.data["model"]["thinking_requested"] = dict(settings.get("thinking") or {})
+    rec.data["model"]["thinking_basis"] = (
+        ("set on every generation-phase request (full, audit, reconcile, "
+         "report, repair, regate, readdress); on this model family adaptive "
+         "thinking is also the default when the parameter is omitted, so the "
+         "request states the regime rather than changing it, and a phase "
+         "returning no thinking block is a legal adaptive outcome, not a "
+         "deviation. The judging paths (merge, agreement, evidence_score, "
+         "form_defects) send no parameter and are not covered by this line")
+        if settings.get("thinking") else
+        settings.get("thinking_note", "not requested"))
+    if settings.get("effort"):
+        rec.data["model"]["reasoning_effort"] = settings["effort"]
+        rec.data["model"]["reasoning_effort_basis"] = (
+            "set on the API request as output_config.effort")
     if settings["temperature_applies"]:
         rec.data["model"]["temperature"] = settings["temperature"]
         rec.data["model"]["temperature_basis"] = (

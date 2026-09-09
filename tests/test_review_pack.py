@@ -75,12 +75,49 @@ class IdSlots(unittest.TestCase):
         # an unknown root class and an empty record are named gaps (#827)
         self.assertIn("not in the schema", rp._id_slots({"a": 1}, root_class="NoSuchClass")[1])
 
+    def test_a_fragment_on_another_base_is_constructed_not_stated(self):
+        """#901: the AI_READI v7 rep1 file_collections ids are fragments on
+        the attested fairhub page URL. `minted: false` filed them with the
+        DOIs; `origin` tells a label the record built from a reference it
+        copied, and `base_in_bundle` whether the base is attested."""
+        full = {"conforms_to_class": "Dataset", "id": "doi:10.60775/fairhub.3",
+                "file_collections": [{"id": "https://fairhub.io/datasets/3#cardiac_ecg",
+                                      "resources": [{"id": "doi:10.999/external"}]},
+                                     {"id": "doi:10.60775/fairhub.3#own"},
+                                     {"id": "urn:aireadi:thing"}],
+                "creators": [{"id": "https://orcid.org/0000-0002-1825-0097"},
+                             {"id": "https://example.org/people#alice"}]}
+        bundle = "Dataset page: https://fairhub.io/datasets/3 (v2.0.0)\n"
+        by = {e["path"]: e for e in rp._id_slots(full, bundle_text=bundle)[0]}
+        fc = by["file_collections[0].id"]
+        self.assertEqual(fc["origin"], "constructed")
+        self.assertFalse(fc["minted"])                                  # unchanged boolean
+        self.assertEqual(fc["base"], "https://fairhub.io/datasets/3")
+        self.assertTrue(fc["base_in_bundle"])
+        self.assertEqual(by["file_collections[1].id"]["origin"], "minted")
+        self.assertEqual(by["file_collections[2].id"]["origin"], "minted")   # a urn
+        self.assertEqual(by["file_collections[0].resources[0].id"]["origin"], "stated")
+        self.assertNotIn("base", by["file_collections[0].resources[0].id"])
+        self.assertEqual(by["creators[0].id"]["origin"], "stated")
+        alice = by["creators[1].id"]
+        self.assertEqual(alice["origin"], "constructed")
+        self.assertFalse(alice["base_in_bundle"])                       # invented base
+        # without the bundle the attestation is unknown, never guessed
+        self.assertIsNone({e["path"]: e for e in rp._id_slots(full)[0]}["file_collections[0].id"]["base_in_bundle"])
+        # a bare "#x" has no base: it is not constructed on anything
+        self.assertEqual(rp._id_origin("#x", "doi:y"), ("stated", None))
+        self.assertEqual(set(rp.ID_ORIGINS), {e["origin"] for e in rp._id_slots(full)[0]})
+
 
 class Pack(unittest.TestCase):
-    def _run(self, tmp):
-        """A minimal run: bundle, manifest, receipt, records, provenance."""
+    def _run(self, tmp, full=None, bundle_extra="", drift_after=False, drop_bundle=False):
+        """A minimal run: bundle, manifest, receipt, records, provenance.
+        `full` replaces the record; `bundle_extra` is appended to the bundle
+        before its md5 is recorded; `drift_after` rewrites the bundle after
+        the record pinned it; `drop_bundle` removes the file."""
         from data_sheets_schema.chunking import build_manifest, dump_manifest
-        from tests.test_receipts import BUNDLE, FULL, _receipt
+        from tests.test_receipts import BUNDLE as _B, FULL as _F, _receipt
+        BUNDLE = _B + bundle_extra; FULL = full or _F
         tmp = Path(tmp)
         bundle = tmp / "P_preprocessed.txt"; bundle.write_text(BUNDLE, encoding="utf-8")
         manifest = tmp / "P_chunks.yaml"; manifest.write_text(dump_manifest(build_manifest(bundle)))
@@ -101,7 +138,77 @@ class Pack(unittest.TestCase):
                        "chunks": {"path": str(manifest), "chunk_count": 3}},
             "receipts": {"checked": True, "slots": {"without_receipt": ["keywords", "title"],
                                                      "reshaped_by_reconcile": ["funders[0].name"]}}}))
+        if drift_after:
+            bundle.write_text(BUNDLE + "\nrewritten after the record pinned it\n", encoding="utf-8")
+        if drop_bundle:
+            bundle.unlink()
         return prov, instr
+
+    def _constructed_full(self):
+        from tests.test_receipts import FULL
+        full = yaml.safe_load(yaml.safe_dump(FULL))
+        full["file_collections"] = list(full.get("file_collections") or []) + [
+            {"id": "https://example.org/landing/7#attested-label", "name": "attested"},
+            {"id": "https://nowhere.example/x#invented-label", "name": "invented"}]
+        return full
+
+    def test_base_in_bundle_travels_through_build_pack_against_the_bytes_the_record_read(self):
+        """#1108 review, findings 4 and 6: the first version's only
+        constructed-id test called `_id_slots` directly, and `build_pack`
+        read whatever file sat at `bundle_path` with no md5 check."""
+        extra = "\nLanding page: https://example.org/landing/7\nSee https://example.org/landing/70 too\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = self._run(tmp, full=self._constructed_full(), bundle_extra=extra)
+            p = rp.build_pack(prov, instr)
+            by = {e["path"]: e for e in p["id_slots"]["entries"]}
+            self.assertEqual(p["id_slots"]["bundle_state"], "current")
+            self.assertEqual(p["id_slots"]["record_id"], "https://x/ds")
+            self.assertTrue(p["bundle"]["resolved_path"].endswith("P_preprocessed.txt"))
+            self.assertTrue(by["file_collections[1].id"]["base_in_bundle"])
+            self.assertFalse(by["file_collections[2].id"]["base_in_bundle"])
+            self.assertFalse(any("base_in_bundle" in g for g in p["gaps"]))
+        with tempfile.TemporaryDirectory() as tmp:                        # drifted: null, and a gap
+            prov, instr = self._run(tmp, full=self._constructed_full(), bundle_extra=extra, drift_after=True)
+            p = rp.build_pack(prov, instr)
+            self.assertTrue(p["id_slots"]["bundle_state"].startswith("bundle drifted (recorded "))
+            self.assertTrue(all(e["base_in_bundle"] is None for e in p["id_slots"]["entries"]
+                                if e.get("origin") == "constructed"))
+            self.assertTrue(any(g.startswith("id_slots.base_in_bundle unavailable: bundle drifted") for g in p["gaps"]))
+        with tempfile.TemporaryDirectory() as tmp:                        # not on disk
+            prov, instr = self._run(tmp, full=self._constructed_full(), drop_bundle=True)
+            p = rp.build_pack(prov, instr)
+            self.assertTrue(p["id_slots"]["bundle_state"].startswith("bundle not on disk ("))
+            self.assertTrue(any(g.startswith("id_slots.base_in_bundle unavailable: bundle not on disk") for g in p["gaps"]))
+
+    def test_a_prefix_of_a_longer_url_is_not_attestation_and_an_alias_form_is(self):
+        """#1108 review, finding 5: of the 11 occurrences of the fairhub page
+        in the AI_READI bundle, 10 are inside `…/3/access`; one bare line
+        carried the whole claim. And a CURIE base is attested by its
+        resolver form (#974 writes the CURIE, a bundle states the URL)."""
+        self.assertFalse(rp._base_in("https://fairhub.io/datasets/3", "see https://fairhub.io/datasets/30 and https://fairhub.io/datasets/3/access"))
+        self.assertTrue(rp._base_in("https://fairhub.io/datasets/3", "Source URL: https://fairhub.io/datasets/3\n"))
+        self.assertTrue(rp._base_in("https://fairhub.io/datasets/3", "(https://fairhub.io/datasets/3)"))
+        # a URL ending a sentence is the URL (round 2): `.` continues only when what follows does
+        self.assertTrue(rp._base_in("http://integrativemodeling.org", "see http://integrativemodeling.org.\n\nNext"))
+        self.assertTrue(rp._base_in("https://datascience.nih.gov/strides", "at https://datascience.nih.gov/strides.\nT"))
+        self.assertFalse(rp._base_in("https://a.org/v", "https://a.org/v.1/x"))
+        self.assertFalse(rp._base_in("https://a.org/v", "https://a.org/v-2"))
+        self.assertFalse(rp._base_in("https://chorus4ai.org/dataset", "https://chorus4ai.org/dataset/"))   # a trailing slash is another resource
+        self.assertTrue(rp._base_in("doi:10.18130/V3/HIGT4C", "at https://doi.org/10.18130/V3/HIGT4C today"))
+        self.assertTrue(rp._base_in("https://doi.org/10.18130/V3/HIGT4C", "cite doi:10.18130/V3/HIGT4C"))
+
+    def test_origin_edge_cases_from_the_review(self):
+        """#1108 review, finding 8."""
+        self.assertEqual(rp._id_origin("https://example.org/#", "doi:10.1/rec"), ("stated", None))   # empty fragment
+        self.assertEqual(rp._id_origin("#x", "doi:y"), ("stated", None))
+        self.assertEqual(rp._id_origin("  https://a.org#b  ", "doi:z"), ("constructed", "https://a.org"))
+        # the record's own id in resolver form is a mint, not a label on someone else's identifier
+        self.assertEqual(rp._id_origin("https://doi.org/10.60775/fairhub.3#a", "doi:10.60775/fairhub.3"), ("minted", None))
+        self.assertEqual(rp._id_origin("doi:10.60775/fairhub.3#a", "https://doi.org/10.60775/fairhub.3"), ("minted", None))
+        self.assertEqual(rp._id_origin(["doi:10.1/a#b"], "doi:z"), ("stated", None))
+        # paths are case-sensitive; only scheme and host fold (round 2, note 5)
+        self.assertEqual(rp._id_origin("https://example.org/Dataset/A#part", "https://example.org/dataset/a")[0], "constructed")
+        self.assertEqual(rp._id_origin("HTTPS://EXAMPLE.org/dataset/a#part", "https://example.org/dataset/a")[0], "minted")
 
     def test_the_pack_is_complete_and_deterministic(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -290,7 +397,7 @@ class IdentityJoin(unittest.TestCase):
             full_p.write_text(yaml.safe_dump(moved))
             p = rp.build_pack(prov, instr, {"receipted_slots": 50})
             self.assertEqual(p["receipt_join"]["basis"], "identity"); self.assertEqual(p["gaps"], [])
-            self.assertEqual(p["pack_version"], 4)
+            self.assertEqual(p["pack_version"], 5)
             grant = next(i for i in p["items"] if i.get("slot") == "funders[0].grant_id")
             self.assertEqual(grant["resolved_path"], "funders[1].grant_id")
             self.assertEqual(grant["resolution"], "by_id"); self.assertEqual(grant["value"], "OT2OD032644")

@@ -1329,6 +1329,115 @@ def _dig(record: dict, path: tuple[str, ...]):
     return cur
 
 
+#: `#` header lines the prompt has the model write, and the record field each
+#: restates (#1027). The header is what a reader sees first; the record is
+#: what the request carried. Where they disagree the header is the error.
+HEADER_FIELDS = {"Temperature": "temperature", "Model": "model",
+                 "Reasoning effort": "reasoning_effort"}
+
+#: A header value that agrees with a null or absent record value: it states
+#: that the setting was not sent or not set, rather than asserting one.
+_NOT_ASSERTED = ("not sent", "not set", "not requested", "not applicable")
+
+
+def full_record_path(method: str, label: str, project: str,
+                     concat_dir: Path = CONCAT_DIR) -> Path:
+    """`{concat_dir}/{method}/{label}/{project}_d4d.yaml`."""
+    return concat_dir / method / label / f"{project}_d4d.yaml"
+
+
+def core_record_path(method: str, label: str, project: str,
+                     concat_dir: Path = CONCAT_DIR) -> Path:
+    """`{concat_dir}/{method}_core/{label}/{project}_d4d_core.yaml`."""
+    return concat_dir / f"{method}_core" / label / f"{project}_d4d_core.yaml"
+
+
+def _same_value(said: str, recorded: Any) -> bool:
+    """Textual agreement, or numeric where both sides parse as numbers —
+    `0` against `0.0` is not a disagreement (#1027 review, note)."""
+    if said == str(recorded):
+        return True
+    try:
+        return float(said) == float(recorded)
+    except (TypeError, ValueError):
+        return False
+
+
+def header_disagreements(method: str, label: str, project: str,
+                         concat_dir: Path = CONCAT_DIR) -> list[dict[str, str]]:
+    """Header lines of the full artifact that contradict the provenance record.
+
+    Every v8 full record's header read `Temperature: 0.0`, copied from the
+    prompt's example line, while `model.temperature` was null because the
+    runner omits a parameter claude-opus-5 rejects. The writer now stamps the
+    header from the record (`api_runner.stamp_provenance_header`); this is the
+    reader-side check that the two agree, for records written before that and
+    for any later drift. Reported, never fatal: the datasheet is not wrong
+    about the dataset, it is wrong about itself.
+    """
+    # `discover()` lists the `_core` directories as methods of their own; the
+    # artifacts of such a "method" live under its non-core name, so a direct
+    # call with one produced two missing-artifact rows per record (278 each
+    # on the corpus, round 3). The record is keyed by the run's method.
+    if method.endswith("_core"):
+        method = method[:-len("_core")]
+    prov = _prov(method, label, project, concat_dir) or {}
+    if not prov:
+        return []                       # nothing to disagree with: no record at all
+    model = prov.get("model") or {}
+    out = []
+    # Both artifacts: the writer stamps full and core alike, and 278 core
+    # records carried the same copied line (#1027 review, finding 3). An
+    # artifact the record's own `outputs` names and that is not on disk is
+    # reported as that, never as silence; one the record never wrote — the
+    # five `claudecode_agent_merged` records (`record_mode: derived`,
+    # `outputs: [full]`) predate #694 and never had a core — has no header
+    # to disagree, and is not a row (round 3, the round-2 guard tested the
+    # sibling, which is exactly the merged shape).
+    declared = set((prov.get("outputs") or {}).keys()) or {"full", "core"}
+    paths = {"full": full_record_path(method, label, project, concat_dir),
+             "core": core_record_path(method, label, project, concat_dir)}
+    for artifact, path in paths.items():
+        if not path.exists():
+            if artifact in declared:
+                out.append({"artifact": artifact, "field": "", "header": "",
+                            "record": "no artifact on disk", "basis": ""})
+            continue
+        for raw in path.read_text(encoding="utf-8", errors="replace").splitlines():
+            if not raw.startswith("#"):
+                break
+            m = re.match(r"^\s*#\s*([A-Za-z][A-Za-z ]*?)\s*:\s*(.*)$", raw)
+            if not m or m.group(1).strip() not in HEADER_FIELDS:
+                continue
+            field, said = m.group(1).strip(), m.group(2).strip()
+            key = HEADER_FIELDS[field]
+            row = {"artifact": artifact, "field": field, "header": said}
+            not_asserted = said.lower().startswith(_NOT_ASSERTED)
+            if key not in model:
+                # Never recorded is not "recorded as not sent". Four records
+                # carry no `temperature` key at all; a header line cannot
+                # contradict a record that says nothing, so this is a gap in
+                # the record, not a false header, and is reported as that —
+                # unless the header itself asserts nothing (a stamped
+                # `Reasoning effort: not set by the request` against a record
+                # with no such key is agreement).
+                if said and not not_asserted:
+                    out.append({**row, "record": "not recorded", "basis": ""})
+                continue
+            recorded = model.get(key)
+            if recorded is None:
+                # The request carried none. A header stating a value asserts
+                # a setting the record contradicts; a header saying "not
+                # sent" agrees with it.
+                if said and not not_asserted:
+                    out.append({**row, "record": "null",
+                                "basis": str(model.get(f"{key}_basis") or "")})
+            elif not _same_value(said, recorded):
+                out.append({**row, "record": str(recorded),
+                            "basis": str(model.get(f"{key}_basis") or "")})
+    return out
+
+
 def arm_facts(label_prefix: str, method: str | None = None,
               concat_dir: Path | None = None) -> dict[str, Any]:
     """What every record under a label prefix says about its own procedure."""

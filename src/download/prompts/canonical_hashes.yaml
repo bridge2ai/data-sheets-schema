@@ -122,12 +122,14 @@ files:
       sha256: a47e61b52c05a0aa81c2a8629be551942ab2e6e24a39d11dc75ba96ef5b3482a
   src/download/prompts/d4d_generic_arm_prompt_v5.md:
     body_sha256: bdc18672ba485dbc15a4b1f1321e61dbda0e292fde502b8b2cc568053dafef98
-    bytes: 13909
-    pinned_at_commit: 1f54bd791495038e3a8d8c8fbca3cb925502b3c3
-    pinned_on: '2026-08-20'
-    reason: 'Round-3 fix: the exemption paragraph said "Two things" while listing three, a
-      stale literal count in the paragraph #644 proved is read literally.'
-    sha256: c4bbcc41eb4f0b83704228a0bf040294dedd6edf5afbf06035c2fd9d7587ebbb
+    bytes: 13934
+    pinned_at_commit: e94cfde09488987e5a2593dd0aeb2ff14b2f6bf5
+    pinned_on: '2026-09-09'
+    reason: 'Rationale-only rotation (#647): the real ROR cited as the example of an identifier
+      supplied from memory is replaced by the institution''s name. The prompt body is byte-identical
+      to the previous pin; only rationale prose, which prompt_body does not send, changed
+      (#560).'
+    sha256: 21d625c6277972ff015281f49ae1f8a6312ff9e43f55c7962162c7655821942a
     superseded:
     - pinned_on: '2026-08-14'
       reason: "initial pin for the generic-v5 condition (#547, #531, #545): v4 plus one marked\
@@ -215,6 +217,11 @@ files:
         fix.'
       retired_on: '2026-08-20'
       sha256: d22c9084436458e67600ea0e54cd936b8705105a554d50479655123b9708fbe5
+    - pinned_on: '2026-08-20'
+      reason: 'Round-3 fix: the exemption paragraph said "Two things" while listing three,
+        a stale literal count in the paragraph #644 proved is read literally.'
+      retired_on: '2026-09-09'
+      sha256: c4bbcc41eb4f0b83704228a0bf040294dedd6edf5afbf06035c2fd9d7587ebbb
   src/download/prompts/d4d_generic_arm_prompt_v6.md:
     body_sha256: 44f97c64723c778640f3e2afc10287937626c7112e48fedfb932ac95d1a3bf45
     bytes: 13827

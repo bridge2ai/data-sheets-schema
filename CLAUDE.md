@@ -518,7 +518,17 @@ instruction defines `both` as present in both — and the finding names
 the cause so the regate can fix the row (`claims_core_cannot_hold` counts
 those the full record does carry, apart from substantive contradictions;
 #990/#992); the block carries
-`instrument` from v2 (#996). Residual: a run whose report phase completed under the pre-E
+`instrument` from v2 (#996). Since #998 the report phase carries the core
+class's top-level slot inventory (`core_inventory_block`) before its
+instruction, so the model can see which slots the core declares rather
+than infer it from the carried core record, where an empty slot and an
+undeclared one look the same; the gate is unchanged — it judges presence
+in the two records, and the declaration decides only whether a finding
+carries the "core class declares no such slot" cause (every report
+finding on the v8 fill was of that class). `ASSEMBLY_LAYOUT` names it, so
+the assembly digest moves; no v9 record predates it, and the v8 labels
+already carry three assembly digests (2026-09-04 rep1; b/c/d; e/f/g), so
+a v8 run was not comparable with the fill before this either. Residual: a run whose report phase completed under the pre-E
 runner and is resumed under this one gets no table and is blind by
 construction; no such run exists. `companions` is hashed after the last
 phase (#652).
@@ -635,6 +645,36 @@ applies only when every eligible replicate carries a checked `review` block
 text. Under the coverage-only criterion the v7 arm picked the most-adverse
 replicate in 3 of 4 projects; under this one AI_READI and VOICE moved to
 rep1.
+
+## Id slots in the review pack (#803, #901)
+
+The pack's `id_slots` block lists every populated `…id` leaf with `forced`
+(the schema declares that class's id an identifier or required — `File`,
+`FileCollection`, `DataSubset`, `Person`, `Software`) and, from
+`pack_version` 5, `origin`: `minted` (a urn, or a fragment on the record's
+own id in any form), `stated` (a reference used as written — DOI, ROR,
+URL), or `constructed` — a fragment on a base the record did not mint,
+with `base` and `base_in_bundle` (the base in the bytes the record read,
+as itself and in written or alias form; null on a drift or a missing
+md5, with `bundle_state` naming why); the block also carries the
+record's own `record_id`. The `d4d-review-record` agent judges the
+fragment rule on mints and constructed ids, a forced one never violates
+it, and `stated` entries are the evidence rules' business. The two-way flag filed the AI_READI 2026-09-01 rep1
+`file_collections[*].id` (`https://fairhub.io/datasets/3#cardiac_ecg`, the
+attested fairhub page plus a label) with the DOIs. Corpus-wide the
+classifier finds 953 constructed ids in 57 of 281 records — 800 of them
+schema-forced (`File`, `FileCollection`, `DataSubset`, `Person`, `Software`), most on
+the dataset's own DOI or landing page — so the reading matters: the rule
+licenses a fragment on an identifier the evidence supplies, and a
+constructed id on the dataset's own attested identifier is judged exactly
+as a mint (forced never violates; unforced must be pointed at), one on
+another entity's identifier is the false claim the identifier rule names,
+one whose base is not in the bundle is an unsupported reference.
+`base_in_bundle` is attested only against the bytes the record read: the
+pack checks the on-disk bundle's md5 against `inputs.bundle_md5` and on a
+drift — 35 of those 57 records, the AI_READI rep1 record among them —
+reports `null` with `bundle_state` naming it. The match is the base as
+itself, not as the prefix of a longer URL, in written or alias form.
 
 ## Review dispositions (#903)
 
