@@ -3652,6 +3652,44 @@ def _dependents_of(carry_name: str, produced_by: tuple[str, ...]) -> set[str]:
 
 
 
+#: How much of an unusable body to keep. The dropped-stream snapshot keeps a
+#: tail because the head was already delivered; an unusable body is whole and
+#: its *shape* is the question, so the head is what a reader needs — enough to
+#: see what the model produced instead of the expected object.
+UNUSABLE_HEAD_CHARS = 6000
+
+
+def _record_unusable_response(spec: RunSpec, ph: str, attempt: int,
+                              problem: str, text: str,
+                              usage_row: dict[str, Any] | None) -> Path | None:
+    """Leave a billed but rejected response on record (#1048).
+
+    A dropped stream leaves `…_incomplete_attempt{N}_{n}.txt` (#1017); a
+    *complete* response the parser refused left nothing at all, so CHORUS
+    `2026-09-04f rep2` lost two full attempts of 40,093 and 54,886 output
+    tokens whose text is simply gone. Both cost real money and both are the
+    only evidence of what shape the model produced instead of the expected
+    one — which is the question a reader asks after a retry.
+
+    The accepted attempt is still what the record describes; this is
+    recorder-only.
+    """
+    if not text:
+        return None
+    head = text[:UNUSABLE_HEAD_CHARS]
+    body = (f"# unusable response — phase {ph}, attempt {attempt} (#1048)\n"
+            f"# reason: {problem}\n"
+            f"# response_chars: {len(text)}  "
+            f"response_sha256: {hashlib.sha256(text.encode()).hexdigest()}\n"
+            f"# output_tokens: {(usage_row or {}).get('output_tokens')}  "
+            f"stop_reason: {(usage_row or {}).get('stop_reason')}\n"
+            f"# first {UNUSABLE_HEAD_CHARS} characters as delivered"
+            f"{' (truncated here)' if len(text) > UNUSABLE_HEAD_CHARS else ''}:\n"
+            + head)
+    return _snapshot(spec, f"{spec.project}_{ph}_unusable_attempt{attempt}.txt",
+                     body)
+
+
 def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: str,
                               info: dict[str, Any], usage: list[dict[str, Any]],
                               max_tokens: int | None = None) -> None:
@@ -3810,12 +3848,22 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
                 break
             except RuntimeError as exc:
                 problem = str(exc)
+        # Before the retry, and before the last-attempt raise: the final
+        # attempt's body is evidence too, and raising without it loses the
+        # one that actually ended the run (#1048).
+        kept = _record_unusable_response(
+            spec, ph, attempt, problem, text,
+            usage[-1] if usage and usage[-1].get("attempt") == attempt else None)
+        if kept is not None and usage and usage[-1].get("attempt") == attempt:
+            usage[-1]["outcome"] = f"unusable: {problem.splitlines()[0][:120]}"
+            usage[-1]["unusable_snapshot"] = kept.name
         if attempt == MAX_ATTEMPTS:
             raise RuntimeError(
                 f"phase {ph!r} produced no usable output in "
                 f"{MAX_ATTEMPTS} attempts. Last problem: {problem}")
         print(f"   phase {ph} attempt {attempt} unusable "
-              f"({problem.splitlines()[0][:70]}); retrying")
+              f"({problem.splitlines()[0][:70]}); retrying"
+              + (f" · kept {kept.name}" if kept else ""))
         time.sleep(BACKOFF_BASE_SECONDS ** attempt)
     return body
 
