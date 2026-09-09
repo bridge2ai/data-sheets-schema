@@ -657,45 +657,58 @@ class PackAttested(RuntimeError):
 
     def __init__(self, path: Path, pins: list[dict[str, str]]):
         self.path, self.pins = path, pins
-        who = "; ".join(f"{p['by']} {p['path']}" for p in pins)
+        who = "; ".join(f"{p['by']} {p['path']}"
+                        + (f" ({p['sha256']})" if str(p.get("sha256", "")).startswith("unreadable") else "")
+                        for p in pins)
         super().__init__(f"{path} is pinned by hash by {who}; regenerating it would "
-                         "invalidate that pin. Pass force=True (`--force`) only as a "
+                         "move the file under that pin. Pass force=True (`--force`) only as a "
                          "deliberate act, and redo the attesting review afterwards — "
                          "`d4d review check` reports review_of_another_pack until it is.")
 
 
 def pack_pins(provenance: Path) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
-    """(current, stale): who pins the pack on disk by sha256 — the provenance
-    record's `review.artifacts.pack.sha256`, and every `{P}_review*.yaml`
-    beside it whose `pack_sha256` names a pack. `current` pins hash to the
-    file as it is; `stale` pins name a pack the file no longer is (it moved
-    once already, #1095). No pack on disk: both empty."""
+    """(current, stale): who pins the pack by sha256 — the provenance record's
+    `review.artifacts.pack.sha256`, and every `{P}_review*.yaml` beside it
+    whose `pack_sha256` names a pack. `current` pins hash to the file as it
+    is; `stale` pins name a pack the file no longer is — it moved once
+    already, or it is gone (#1095; #1124 review, MF1: a deleted pack must
+    not remove the guard, since the agent is told to run `d4d review pack`
+    exactly then). Files that do not parse are returned under `unreadable`
+    in the third position of `pack_pins_report`; here they are counted as
+    stale-by-unreadable so the guard fails closed, not open (SF3)."""
+    current, stale, _ = pack_pins_report(provenance)
+    return current, stale
+
+
+def pack_pins_report(provenance: Path) -> tuple[list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
     from data_sheets_schema.backfill_checks import _split_header
     paths = record_paths(provenance)
     pack = paths["pack"]
-    if not pack.exists():
-        return [], []
-    on_disk = hashlib.sha256(pack.read_bytes()).hexdigest()
-    current, stale = [], []
+    on_disk = hashlib.sha256(pack.read_bytes()).hexdigest() if pack.exists() else None
+    current, stale, unreadable = [], [], []
     try:
         record = yaml.safe_load(_split_header(provenance.read_text(encoding="utf-8"))[1]) or {}
-    except Exception:                                         # noqa: BLE001
+    except Exception as exc:                                  # noqa: BLE001
         record = {}
+        unreadable.append({"by": "provenance record", "path": str(provenance), "error": type(exc).__name__})
     rec_sha = (((record.get("review") or {}).get("artifacts") or {}).get("pack") or {}).get("sha256")
     if rec_sha:
         (current if rec_sha == on_disk else stale).append(
-            {"by": "provenance record", "path": str(provenance), "sha256": rec_sha})
+            {"by": "provenance record", "path": str(provenance), "sha256": rec_sha,
+             "pack_on_disk": on_disk is not None})
     project = paths["project"]
     for f in sorted(pack.parent.glob(f"{project}_review*.yaml")):
         if f == pack:
             continue
         try:
             sha = (yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get("pack_sha256")
-        except Exception:                                     # noqa: BLE001
+        except Exception as exc:                              # noqa: BLE001
+            unreadable.append({"by": "review", "path": str(f), "error": type(exc).__name__})
             continue
         if sha:
-            (current if sha == on_disk else stale).append({"by": "review", "path": str(f), "sha256": sha})
-    return current, stale
+            (current if sha == on_disk else stale).append(
+                {"by": "review", "path": str(f), "sha256": sha, "pack_on_disk": on_disk is not None})
+    return current, stale, unreadable
 
 
 def write_pack(provenance: Path, instruction_file: Path | None = None,
@@ -706,16 +719,25 @@ def write_pack(provenance: Path, instruction_file: Path | None = None,
     the committed `pack_version: 3` file to 4 underneath the sha256 its own
     record attests and breaking the pairing `d4d review agree` depends on.
     Regenerating a pack is a deliberate act, like rotating a prompt pin."""
-    current, _ = pack_pins(provenance)
-    if current and not force:
-        raise PackAttested(record_paths(provenance)["pack"], current)
-    pack = build_pack(provenance, instruction_file, sample)
+    current, stale, unreadable = pack_pins_report(provenance)
     out = record_paths(provenance)["pack"]
+    pack = build_pack(provenance, instruction_file, sample)
     from data_sheets_schema.provenance import _NoAliasDumper
-    # chunk line spans are shared between `bundle.chunks` and the items; an
-    # alias dumper would write the second as `*id001`
-    out.write_text(yaml.dump(pack, Dumper=_NoAliasDumper, sort_keys=False, allow_unicode=True, width=10_000),
-                   encoding="utf-8")
+    text = yaml.dump(pack, Dumper=_NoAliasDumper, sort_keys=False, allow_unicode=True, width=10_000)
+    new_sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    # The guard is on the effect, not the act (#1124 review, SF1): build
+    # first, and refuse only when the bytes would move under a live pin —
+    # a byte-identical rewrite (the pack is deterministic, seeded by the
+    # record's request hash) is not a rewrite. A pin whose file is gone
+    # (MF1) is a live pin the write would orphan; an unreadable pin file
+    # is treated as live (SF3), so the guard fails closed.
+    if not force:
+        would_move = [p for p in current if p["sha256"] != new_sha]
+        orphaned = [p for p in stale if not p.get("pack_on_disk") and p["sha256"] != new_sha]
+        blind = [{"by": u["by"], "path": u["path"], "sha256": f"unreadable ({u['error']})"} for u in unreadable]
+        if would_move or orphaned or blind:
+            raise PackAttested(out, would_move + orphaned + blind)
+    out.write_text(text, encoding="utf-8")
     return out, pack
 
 

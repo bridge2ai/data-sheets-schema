@@ -471,36 +471,87 @@ class ReferenceAttributes(unittest.TestCase):
 
 class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
     """#1095: a review run regenerated the pack it was reviewing, moving the
-    committed file underneath the sha256 its own record attests."""
+    committed file underneath the sha256 its own record attests. The guard
+    is on the bytes (#1124 review, SF1): a rewrite that would leave the
+    file as it is passes; one that would move it under a live pin — or
+    orphan a pin whose pack is gone (MF1), or that cannot read a pin file
+    (SF3) — is refused unless forced."""
 
-    def _pinned(self, tmp, by):
+    SMALLER = {"receipted_slots": 3, "receiptless_slots": 3}   # a different sample: different bytes
+
+    def _pinned(self, tmp, by, name="P_review.yaml"):
         prov, instr = Pack()._run(tmp)
         out, _ = rp.write_pack(prov, instr)
         sha = hashlib.sha256(out.read_bytes()).hexdigest()
         if by == "review":
-            (out.parent / "P_review.yaml").write_text(yaml.safe_dump({"pack_sha256": sha, "items": []}))
+            (out.parent / name).write_text(yaml.safe_dump({"pack_sha256": sha, "items": []}))
         else:
             text = prov.read_text(); head, body = text.split("\n", 1)
             d = yaml.safe_load(body); d["review"] = {"artifacts": {"pack": {"sha256": sha}}}
             prov.write_text(head + "\n" + yaml.safe_dump(d))
         return prov, instr, out, sha
 
-    def test_a_pack_a_review_pins_is_refused_and_force_rewrites_it(self):
+    def test_a_rewrite_that_would_move_a_pinned_pack_is_refused_and_force_moves_it(self):
         with tempfile.TemporaryDirectory() as tmp:
             prov, instr, out, sha = self._pinned(tmp, "review")
             self.assertEqual([p["by"] for p in rp.pack_pins(prov)[0]], ["review"])
             with self.assertRaises(rp.PackAttested) as cm:
-                rp.write_pack(prov, instr)
+                rp.write_pack(prov, instr, self.SMALLER)
             self.assertIn("review_of_another_pack", str(cm.exception))
             self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)     # untouched
-            rp.write_pack(prov, instr, force=True)                                    # deliberate
+            rp.write_pack(prov, instr, self.SMALLER, force=True)                       # deliberate
+            self.assertNotEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)
+
+    def test_a_byte_identical_rewrite_is_not_a_rewrite(self):
+        """The pack is deterministic; regenerating it with the same inputs
+        leaves every pin holding, so nothing is refused and nothing is
+        warned about (#1124 review, SF1)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            rp.write_pack(prov, instr)                                                  # no force needed
+            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)
 
     def test_a_pack_the_record_pins_is_refused(self):
         with tempfile.TemporaryDirectory() as tmp:
             prov, instr, out, sha = self._pinned(tmp, "record")
             self.assertEqual([p["by"] for p in rp.pack_pins(prov)[0]], ["provenance record"])
             with self.assertRaises(rp.PackAttested):
-                rp.write_pack(prov, instr)
+                rp.write_pack(prov, instr, self.SMALLER)
+
+    def test_a_deleted_pack_does_not_delete_the_guard(self):
+        """#1124 review, MF1: the agent is told to run `d4d review pack`
+        exactly when no pack exists — and every committed pack is behind
+        the code, so removing one to get a current one would orphan the
+        review beside it silently."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            out.unlink()
+            current, stale = rp.pack_pins(prov)
+            self.assertEqual(current, []); self.assertEqual([(p["by"], p["pack_on_disk"]) for p in stale], [("review", False)])
+            with self.assertRaises(rp.PackAttested):
+                rp.write_pack(prov, instr, self.SMALLER)           # would orphan the review's pin
+            rp.write_pack(prov, instr)                              # reproduces the pinned bytes: allowed
+            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)
+
+    def test_an_unreadable_pin_file_fails_closed(self):
+        """#1124 review, SF3: a review file that does not parse used to lose
+        its pin silently, leaving the pack freely rewritable."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            (out.parent / "P_review_b.yaml").write_text("pack_sha256: [unclosed")
+            _, _, unreadable = rp.pack_pins_report(prov)
+            self.assertEqual([u["by"] for u in unreadable], ["review"])
+            with self.assertRaises(rp.PackAttested) as cm:
+                rp.write_pack(prov, instr, self.SMALLER)
+            self.assertIn("unreadable", str(cm.exception))
+
+    def test_the_b_review_and_the_pack_itself(self):
+        """The `_b` glob case the six three-pin records exercise; the pack
+        file never reads as a pin on itself."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review", name="P_review_b.yaml")
+            current, _ = rp.pack_pins(prov)
+            self.assertEqual([p["path"].split("/")[-1] for p in current], ["P_review_b.yaml"])
 
     def test_a_stale_pin_does_not_block_and_is_named(self):
         """A review that pins a hash the file no longer has: the pack already
@@ -510,7 +561,7 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
             (out.parent / "P_review.yaml").write_text(yaml.safe_dump({"pack_sha256": "0" * 64, "items": []}))
             current, stale = rp.pack_pins(prov)
             self.assertEqual(current, []); self.assertEqual([p["by"] for p in stale], ["review"])
-            rp.write_pack(prov, instr)
+            rp.write_pack(prov, instr, self.SMALLER)
 
     def test_no_pack_means_no_pins_and_a_free_write(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -518,19 +569,26 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
             self.assertEqual(rp.pack_pins(prov), ([], []))
             rp.write_pack(prov, instr)
 
-    def test_the_cli_refuses_without_force(self):
+    def test_the_cli_refuses_without_force_and_names_what_moved(self):
         import click.testing
         from data_sheets_schema.cli.review import review as review_cli
         with tempfile.TemporaryDirectory() as tmp:
             prov, instr, out, sha = self._pinned(tmp, "review")
             from unittest import mock
+            base = ["pack", "--method", "claudecode_agent", "--label", "L", "--project", "VOICE", "--receipted", "3", "--receiptless", "3"]
             with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
-                r = click.testing.CliRunner().invoke(review_cli, ["pack", "--method", "claudecode_agent", "--label", "L", "--project", "VOICE"])
+                r = click.testing.CliRunner().invoke(review_cli, base)
                 self.assertNotEqual(r.exit_code, 0); self.assertIn("pinned by hash", r.output)
-                r = click.testing.CliRunner().invoke(review_cli, ["pack", "--method", "claudecode_agent", "--label", "L", "--project", "VOICE", "--force"])
+                r = click.testing.CliRunner().invoke(review_cli, base + ["--force"])
                 self.assertEqual(r.exit_code, 0, r.output); self.assertIn("redo that review", r.output)
+                self.assertLess(r.output.index("✓"), r.output.index("redo that review"))   # warnings after the tick
+                r = click.testing.CliRunner().invoke(review_cli, base + ["--force"])         # byte-identical now
+                self.assertEqual(r.exit_code, 0, r.output); self.assertNotIn("redo that review", r.output)
 
     def test_the_agent_is_told_never_to_regenerate(self):
         text = (Path(__file__).resolve().parents[1] / ".claude" / "agents" / "d4d-review-record.md").read_text()
         self.assertIn("never regenerate it", text)
         self.assertIn("Only\nwhen there is no pack at all", text)
+        self.assertNotIn("not yours to pass). The pack\nIt names", text)              # the dangling sentence (#1124 MF2)
+        for key in ("receipt_join", "reference_attributes"):                           # version-conditioned (SF4)
+            i = text.index(key); self.assertIn("pack_version", text[i - 400:i + 400], key)

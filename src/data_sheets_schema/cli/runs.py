@@ -1,5 +1,6 @@
 """Run-tracking commands for the D4D CLI."""
 
+import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -427,6 +428,7 @@ def check_cmd(method, label, project, strict):
     stale_sizes = []
     from data_sheets_schema.runs import _prov, header_disagreements, stale_output_sizes
     header_mismatches = []
+    pack_pin_drift = []                                        # a record's review pins a pack no longer on disk (#1095)
     for run in discover():
         if run.is_core or run.deterministic:
             continue
@@ -444,6 +446,17 @@ def check_cmd(method, label, project, strict):
             # a standard loader keeps only the last, so a record that
             # carries one is not the record its readers see.
             prov_data = _prov(run.method, run.label, proj) or {}
+            # The record's review block pins the pack by sha256; a pack rewritten
+            # underneath it (a forced `d4d review pack`) leaves `review.adverse`
+            # ranking canonicals on a review of a pack that no longer exists
+            # (#1095; #1124 review, SF2). Reported like bundle drift, never fatal.
+            rv_pack = (((prov_data.get("review") or {}).get("artifacts") or {}).get("pack") or {})
+            if rv_pack.get("sha256"):
+                pk = Path(rv_pack.get("path") or "")
+                on_disk = hashlib.sha256(pk.read_bytes()).hexdigest() if pk.exists() else None
+                if on_disk != rv_pack["sha256"]:
+                    pack_pin_drift.append({"project": proj, "label": run.label,
+                                           "state": "missing" if on_disk is None else "rewritten"})
             dk = ((prov_data.get("validation") or {}).get("duplicate_keys") or {})
             mism = stale_output_sizes(prov_data)
             if mism:
@@ -817,6 +830,12 @@ def check_cmd(method, label, project, strict):
             click.echo(f"   {mark} {r['project']:9} {r['label']:44} "
                        f"{r['status']}: {r['reason']}")
 
+    if pack_pin_drift:
+        click.echo(f"\n⚠️  {len(pack_pin_drift)} record(s) whose review pins a pack that is not the one on disk "
+                   "(#1095) — the review block and `runs select`'s review rank describe a pack that no "
+                   "longer exists; redo the review or restore the pack:")
+        for r in pack_pin_drift:
+            click.echo(f"   {r['project']:9} {r['label']:44} pack {r['state']}")
     if header_mismatches:
         click.echo(f"\n⚠️  {len(header_mismatches)} record(s) whose `#` header states a "
                    "setting the request did not carry (#1027):")

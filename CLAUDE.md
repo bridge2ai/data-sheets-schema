@@ -641,9 +641,14 @@ record attests, which is the pairing `d4d review agree` depends on. The
 agent reads an existing pack and runs `d4d review pack` only when none
 exists; the command refuses to rewrite a pack that the record's
 `review.artifacts.pack.sha256` or any `{P}_review*.yaml` beside it pins
-(`review_pack.pack_pins`) unless `--force`, and then says which review
-must be redone. `d4d review check` reports `review_of_another_pack`
-after the fact.
+(`review_pack.pack_pins`) unless `--force` — a guard on the bytes, not
+the act: the pack is deterministic, so a regeneration that reproduces
+the pinned bytes is not refused; a pin whose pack is gone, or a pin file
+that cannot be read, is treated as live — and then says which review
+must be redone. A pin that names a hash the file already stopped being
+is stale: reported, not blocking. `d4d review check` reports
+`review_of_another_pack` and `d4d runs check` reports a record whose
+review pins a pack not on disk, both after the fact.
 
 ## Canonical selection with the review (#660)
 

@@ -44,17 +44,15 @@ def pack(method, label, project, instruction_file, receipted, receiptless, force
     prov = _provenance(method, label, project)
     if not prov.exists():
         raise click.ClickException(f"no provenance record at {prov}")
-    current, stale = pack_pins(prov)
+    from data_sheets_schema.review_pack import pack_pins_report
+    import hashlib as _hashlib
+    current, stale, unreadable = pack_pins_report(prov)
     try:
         out, p = write_pack(prov, Path(instruction_file) if instruction_file else None,
                             {"receipted_slots": receipted, "receiptless_slots": receiptless}, force=force)
     except PackAttested as exc:
-        raise click.ClickException(str(exc)) from exc
-    for pin in current:                                       # forced past a live pin: say so
-        click.echo(f"   ⚠️  rewrote a pack pinned by {pin['by']} {pin['path']} (--force); redo that review")
-    for pin in stale:
-        click.echo(f"   ⚠️  {pin['by']} {pin['path']} pins {pin['sha256'][:12]}…, a pack this file was not "
-                   "before this rewrite either — the pack had already moved under it")
+        raise click.ClickException(str(exc).replace("Pass force=True (`--force`)", "Pass `--force`")) from exc
+    written = _hashlib.sha256(out.read_bytes()).hexdigest()
     kinds: dict[str, int] = {}
     for i in p["items"]:
         kinds[i["kind"]] = kinds.get(i["kind"], 0) + 1
@@ -63,6 +61,20 @@ def pack(method, label, project, instruction_file, receipted, receiptless, force
     click.echo(f"   instruction: {p['instruction']['basis']}")
     for g in p["gaps"]:
         click.echo(f"   ⚠️  {g}")
+    # Warnings after the tick, like the gaps, and only about what actually
+    # moved: a forced rewrite whose bytes equal the pinned bytes moved nothing.
+    for pin in current:
+        if pin["sha256"] != written:
+            click.echo(f"   ⚠️  rewrote a pack pinned by {pin['by']} {pin['path']} (--force); redo that review")
+    for pin in stale:
+        if not pin.get("pack_on_disk") and pin["sha256"] != written:
+            click.echo(f"   ⚠️  {pin['by']} {pin['path']} pinned a pack that was not on disk and is not this "
+                       "one (--force); redo that review")
+        elif pin.get("pack_on_disk"):
+            click.echo(f"   ⚠️  {pin['by']} {pin['path']} pins {pin['sha256'][:12]}…, a pack this file was not "
+                       "before this rewrite either — the pack had already moved under it")
+    for u in unreadable:
+        click.echo(f"   ⚠️  {u['by']} {u['path']} could not be read ({u['error']}); its pin, if any, was not checked")
 
 
 @review.command("check")
