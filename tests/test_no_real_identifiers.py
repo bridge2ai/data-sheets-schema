@@ -20,8 +20,8 @@ next version is drafted from it, which is how the v5 rationale's real ROR
 would have travelled; it is scanned too. The two **playbooks** drive the
 agentic runtime. The **rendered schema digest** (`Dataset`, `CoreDataset`)
 is sent ahead of the arm prompt on every API request (`ASSEMBLY_LAYOUT`),
-so a slot description is as model-facing as a rule — that is where the one
-real identifier left in the scanned surface sits today (#1114).
+so a slot description is as model-facing as a rule — that is where the last
+real identifier in the scanned surface sat until #1114 removed it.
 
 The allowlist is checked in both directions and each entry is held to the
 line it claims to be on; an entry cannot outlive its token, and a token
@@ -88,22 +88,37 @@ def texts() -> list[tuple[str, str, str]]:
 #: {reason, surface, line_contains}. `surface` is the only surface the token
 #: may sit on and `line_contains` a phrase the token's line must carry, so
 #: the entry holds the token to the context that justifies it.
-ALLOWED = {
-    ("schema digest (Dataset)", "10.1038/s41586-020-2649-2',"): {
-        "surface": "digest", "line_contains": "in format 10.xxxx/xxxxx",
-        "reason": f"the `doi` slot's description gives a real Nature DOI as its "
-                  f"example; a form-only placeholder needs a schema edit and "
-                  f"`make gen-project`, which moves the schema digest every run "
-                  f"records — scheduled at the next condition boundary (#1114)"},
-    ("schema digest (Dataset)", "10.5281/zenodo.1234567')."): {
-        "surface": "digest", "line_contains": "in format 10.xxxx/xxxxx",
-        "reason": f"same line as the Nature DOI; a Zenodo record number of the "
-                  f"placeholder shape, allowlisted with it until #1114"},
-    ("schema digest (CoreDataset)", "10.1038/s41586-020-2649-2',"): {
-        "surface": "digest", "line_contains": "in format 10.xxxx/xxxxx", "reason": f"as for Dataset (#1114)"},
-    ("schema digest (CoreDataset)", "10.5281/zenodo.1234567')."): {
-        "surface": "digest", "line_contains": "in format 10.xxxx/xxxxx", "reason": f"as for Dataset (#1114)"},
+ALLOWED: dict[tuple[str, str], dict[str, str]] = {
+    # Empty since #1114 removed the doi description's real Nature DOI. An
+    # entry, when one is needed again, is {surface, line_contains, reason}.
 }
+
+
+def allowlist_findings(allowed: dict, surfaces: list[tuple[str, str, str]]) -> list[str]:
+    """Both directions of the allowlist, as strings a test can assert on:
+    a scanned token not allowlisted; an entry whose token is gone; an entry
+    whose token has left the line that justified it. Factored out so the
+    machinery is exercised even while the real allowlist is empty (#1126
+    review, S5)."""
+    out = []
+    by_name = {(n, s): t for n, s, t in surfaces}
+    for name, surface, text in surfaces:
+        for shape, tok in real_identifiers(text):
+            if (name, tok) not in allowed:
+                out.append(f"unlisted: {name} [{surface}] {shape} {tok!r}")
+    for (name, tok), entry in allowed.items():
+        if not str(entry.get("reason", "")).strip():
+            out.append(f"no reason: {name} {tok!r}")
+        text = by_name.get((name, entry["surface"]))
+        if text is None:
+            out.append(f"no surface: {name} [{entry['surface']}]"); continue
+        lines = [ln for ln in text.splitlines() if tok in ln]
+        if not lines:
+            out.append(f"gone: {name} {tok!r}"); continue
+        for ln in lines:
+            if entry["line_contains"] not in ln:
+                out.append(f"moved: {name} {tok!r} off a line containing {entry['line_contains']!r}")
+    return out
 
 
 def real_identifiers(text: str) -> list[tuple[str, str]]:
@@ -145,6 +160,36 @@ class TestTheScannerSeesEachShape(unittest.TestCase):
         self.assertEqual(real_identifiers(clean), [])
 
 
+class TestTheAllowlistMachinery(unittest.TestCase):
+    """The real allowlist is empty since #1114; the checks it relies on are
+    driven here over a synthetic one so they cannot rot unexercised."""
+    def test_an_entry_without_a_reason_is_a_finding(self):
+        surfaces = [("f", "body", "see doi:10.1234/abcd here")]
+        allowed = {("f", "doi:10.1234/abcd"): {"surface": "body", "line_contains": "see", "reason": "  "}}
+        self.assertIn("no reason: f 'doi:10.1234/abcd'", allowlist_findings(allowed, surfaces))
+        allowed[("f", "doi:10.1234/abcd")]["reason"] = "#647"
+        self.assertNotIn("no reason: f 'doi:10.1234/abcd'", allowlist_findings(allowed, surfaces))
+
+
+    SURFACES = [("t", "digest", "a line with ROR:01an7q238 (e.g. context)\nanother line\n")]
+
+    def test_an_entry_on_its_line_passes(self):
+        allowed = {("t", "ROR:01an7q238"): {"surface": "digest", "line_contains": "e.g.", "reason": "x"}}
+        self.assertEqual(allowlist_findings(allowed, self.SURFACES), [])
+
+    def test_an_unlisted_token_is_a_finding(self):
+        self.assertEqual(allowlist_findings({}, self.SURFACES), ["unlisted: t [digest] ROR CURIE 'ROR:01an7q238'"])
+
+    def test_a_token_that_left_its_line_is_a_finding(self):
+        allowed = {("t", "ROR:01an7q238"): {"surface": "digest", "line_contains": "nowhere", "reason": "x"}}
+        self.assertEqual([f.split(":")[0] for f in allowlist_findings(allowed, self.SURFACES)], ["moved"])
+
+    def test_an_entry_whose_token_is_gone_is_a_finding(self):
+        allowed = {("t", "ROR:09zzzzzzz"): {"surface": "digest", "line_contains": "e.g.", "reason": "x"}}
+        found = allowlist_findings(allowed, self.SURFACES)
+        self.assertTrue(any(f.startswith("gone:") for f in found), found)
+
+
 class TestNoRealIdentifierOnAnyModelFacingSurface(unittest.TestCase):
     def test_every_surface_is_present(self):
         names = {(n, s) for n, s, _ in texts()}
@@ -153,11 +198,10 @@ class TestNoRealIdentifierOnAnyModelFacingSurface(unittest.TestCase):
         self.assertIn((".claude/commands/d4d-full-core.md", "playbook"), names)
 
     def test_no_unlisted_real_identifier(self):
-        offenders = []
-        for name, surface, text in texts():
-            for shape, tok in real_identifiers(text):
-                if (name, tok) not in ALLOWED:
-                    offenders.append(f"{name} [{surface}]: {shape} {tok!r}")
+        """Delegates to `allowlist_findings`, the machinery the synthetic
+        tests exercise, so the check that gates the repository is the one
+        that is tested (#1126 review, R1)."""
+        offenders = [f for f in allowlist_findings(ALLOWED, texts()) if f.startswith("unlisted:")]
         self.assertEqual(offenders, [],
                          "a real identifier on a model-facing surface is a candidate "
                          "for copy-through into a record where it grounds against "
@@ -178,17 +222,8 @@ class TestNoRealIdentifierOnAnyModelFacingSurface(unittest.TestCase):
         """An entry for a token that is gone is a claim that has stopped being
         true; an entry whose token has left the line that justified it is one
         that has stopped applying. Both come out when the token moves."""
-        by_name = {(n, s): t for n, s, t in texts()}
-        for (name, tok), entry in ALLOWED.items():
-            with self.subTest(entry=f"{name}: {tok}"):
-                self.assertTrue(entry["reason"].strip(), "an allowlist entry needs a reason")
-                text = by_name.get((name, entry["surface"]))
-                self.assertIsNotNone(text, f"no surface {entry['surface']!r} named {name!r}")
-                lines = [ln for ln in text.splitlines() if tok in ln]
-                self.assertTrue(lines, "the token is gone; drop the entry")
-                for ln in lines:
-                    self.assertIn(entry["line_contains"], ln,
-                                  "the token has left the line that justified the entry")
+        stale = [f for f in allowlist_findings(ALLOWED, texts()) if not f.startswith("unlisted:")]
+        self.assertEqual(stale, [], "\n".join(stale))
 
     def test_the_removed_v5_ror_stays_out(self):
         """The first version allowlisted USF's ROR in the v5 rationale as

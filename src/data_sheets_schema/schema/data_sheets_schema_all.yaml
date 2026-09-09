@@ -2105,15 +2105,14 @@ slots:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: 10.5281/zenodo.10642459
-    description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
-      persistent identification (e.g., ''10.1038/s41586-020-2649-2'', ''10.5281/zenodo.1234567'').
-      The bare DOI only — not the doi: CURIE and not the doi.org resolver URL. The
-      pattern is anchored (#646): unanchored, JSON Schema''s search semantics accepted
-      all three surface forms, and one v5 record carried the same DOI three ways.
-      The 2026-08-20b arm already writes the bare form; records written before the
-      anchor keep the validation verdicts they were pinned with (#426) and are not
-      rewritten (#520).'
+        value: 10.xxxxx/example.1234
+    description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx — a registrant
+      prefix, a slash, a suffix — providing persistent identification. The bare DOI
+      only — not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored
+      (#646): unanchored, JSON Schema''s search semantics accepted all three surface
+      forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm
+      already writes the bare form; records written before the anchor keep the validation
+      verdicts they were pinned with (#426) and are not rewritten (#520).'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
     - schema:identifier
@@ -2358,9 +2357,9 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 10.5281/zenodo.10642459
-        description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
-          persistent identification (e.g., ''10.1038/s41586-020-2649-2'', ''10.5281/zenodo.1234567'').
+            value: 10.xxxxx/example.1234
+        description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx — a
+          registrant prefix, a slash, a suffix — providing persistent identification.
           The bare DOI only — not the doi: CURIE and not the doi.org resolver URL.
           The pattern is anchored (#646): unanchored, JSON Schema''s search semantics
           accepted all three surface forms, and one v5 record carried the same DOI
@@ -4347,9 +4346,9 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 10.5281/zenodo.10642459
-        description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
-          persistent identification (e.g., ''10.1038/s41586-020-2649-2'', ''10.5281/zenodo.1234567'').
+            value: 10.xxxxx/example.1234
+        description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx — a
+          registrant prefix, a slash, a suffix — providing persistent identification.
           The bare DOI only — not the doi: CURIE and not the doi.org resolver URL.
           The pattern is anchored (#646): unanchored, JSON Schema''s search semantics
           accepted all three surface forms, and one v5 record carried the same DOI
@@ -6275,9 +6274,9 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 10.5281/zenodo.10642459
-        description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
-          persistent identification (e.g., ''10.1038/s41586-020-2649-2'', ''10.5281/zenodo.1234567'').
+            value: 10.xxxxx/example.1234
+        description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx — a
+          registrant prefix, a slash, a suffix — providing persistent identification.
           The bare DOI only — not the doi: CURIE and not the doi.org resolver URL.
           The pattern is anchored (#646): unanchored, JSON Schema''s search semantics
           accepted all three surface forms, and one v5 record carried the same DOI
@@ -7472,7 +7471,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: https://ror.org/01yc7t268
+            value: https://ror.org/0xxxxxxxx
         description: An identifier for the organization (for example a ROR), when
           the source material supplies one. A name alone is a valid organization.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
@@ -7502,7 +7501,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: University of Washington
+            value: Example University
         description: A human-readable name for the organization.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -8673,7 +8672,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 0000-0001-2345-6789
+            value: 0000-0001-2345-6780
         description: 'ORCID (Open Researcher and Contributor ID) - a persistent digital
           identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups
           of 4). Use this for stable cross-dataset identification.'
@@ -9332,9 +9331,9 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 10.5281/zenodo.10642459
-        description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
-          persistent identification (e.g., ''10.1038/s41586-020-2649-2'', ''10.5281/zenodo.1234567'').
+            value: 10.xxxxx/example.1234
+        description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx — a
+          registrant prefix, a slash, a suffix — providing persistent identification.
           The bare DOI only — not the doi: CURIE and not the doi.org resolver URL.
           The pattern is anchored (#646): unanchored, JSON Schema''s search semantics
           accepted all three surface forms, and one v5 record carried the same DOI
@@ -12846,7 +12845,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: https://ror.org/01yc7t268
+            value: https://ror.org/0xxxxxxxx
         description: An identifier for the organization (for example a ROR), when
           the source material supplies one. A name alone is a valid organization.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
@@ -12876,7 +12875,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: University of Washington
+            value: Example University
         description: A human-readable name for the organization.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -29530,7 +29529,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 'Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.1056/NEJMoa2404007)'
+            value: 'Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.xxxx/xxxxx)'
         description: List of examples of known/previous uses of the dataset.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
         slot_uri: schema:example
@@ -34983,7 +34982,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: AI-READI Data Coordinating Center, University of Washington
+            value: Example Data Coordinating Center, Example University
         description: 'Free-text description of the organization, team, or individual
           responsible for maintaining the dataset, including contact information and
           hosting arrangements.
@@ -37172,9 +37171,9 @@ classes:
     attributes:
       latest_version_doi:
         name: latest_version_doi
-        description: DOI or URL identifying the latest version of this dataset (e.g.,
-          '10.5281/zenodo.1234567' for a DOI or 'https://doi.org/10.5281/zenodo.1234567'
-          for a full URL). Use CURIE format for DOIs (e.g., 'doi:10.5281/zenodo.1234567').
+        description: 'DOI or URL identifying the latest version of this dataset. Use
+          CURIE format for a DOI — doi:10.xxxx/xxxxx — not the doi.org resolver URL.
+          (Form only: a real DOI here would be model-facing text, #1126.)'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
         slot_uri: dcterms:hasVersion
         alias: latest_version_doi
@@ -41028,7 +41027,7 @@ classes:
           d4d:docExample:
             tag: d4d:docExample
             value: All participants provided written informed consent; study registered
-              at ClinicalTrials.gov NCT05395169
+              at ClinicalTrials.gov NCTXXXXXXXX
         description: 'Was Institutional Review Board (IRB) approval obtained? Include
           approval number and institution if applicable.
 
@@ -47408,9 +47407,9 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 10.5281/zenodo.10642459
-        description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
-          persistent identification (e.g., ''10.1038/s41586-020-2649-2'', ''10.5281/zenodo.1234567'').
+            value: 10.xxxxx/example.1234
+        description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx — a
+          registrant prefix, a slash, a suffix — providing persistent identification.
           The bare DOI only — not the doi: CURIE and not the doi.org resolver URL.
           The pattern is anchored (#646): unanchored, JSON Schema''s search semantics
           accepted all three surface forms, and one v5 record carried the same DOI
@@ -48443,9 +48442,9 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 10.5281/zenodo.10642459
-        description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
-          persistent identification (e.g., ''10.1038/s41586-020-2649-2'', ''10.5281/zenodo.1234567'').
+            value: 10.xxxxx/example.1234
+        description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx — a
+          registrant prefix, a slash, a suffix — providing persistent identification.
           The bare DOI only — not the doi: CURIE and not the doi.org resolver URL.
           The pattern is anchored (#646): unanchored, JSON Schema''s search semantics
           accepted all three surface forms, and one v5 record carried the same DOI

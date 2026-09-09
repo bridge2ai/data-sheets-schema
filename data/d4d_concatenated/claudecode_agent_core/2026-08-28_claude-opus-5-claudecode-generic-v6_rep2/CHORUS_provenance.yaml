@@ -239,11 +239,23 @@ report_claims:
   claims_checked: 0
   claims_unnamed: 0
   disposition_rows: 0
+  rows_by_record:
+    full: 0
+    core: 0
+    both: 0
+    either: 0
+    no_record_column: 0
+    invalid: 0
   claims_core_cannot_hold: 0
-  instrument: 'v3 (#1022, #1046): a schema claim that names its own scope — the core
-    schema, the full schema, a class — is resolved against that scope only, not against
-    every class; v2 (#990): a finding on a `both` row names when the core class declares
-    no such slot; `claims_core_cannot_hold` counts them'
+  instrument: 'v4 (#1122): `rows_by_record` tallies the dispositions rows by their
+    record column — `full`, `core`, `both`, `either` for an empty cell, `no_record_column`
+    for a table with no such column, `invalid` for anything else — so a `both` row
+    wrongly flipped to `full`, which the gate cannot see (a `full` row resolves against
+    the full record only), is countable from the block; v3 (#1022, #1046): a schema
+    claim that names its own scope — the core schema, the full schema, a class — is
+    resolved against that scope only, not against every class; v2 (#990): a finding
+    on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
+    counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CHORUS_reconciliation.md
@@ -296,6 +308,11 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v2 (#1123): a fragment minted on an identifier the record carries for
+    the dataset at its top level — its id in CURIE or resolver form, its doi, its
+    page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 8
     reviewed: 8
@@ -308,13 +325,53 @@ receipts:
   snippets:
     total: 109
     verified: 109
+    linewrap_joined: 0
     adjacent: 0
     elsewhere: 0
+    spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
     mismatched: 0
     unchecked: 0
+    no_value_overlap: 3
+    no_value_overlap_sample:
+    - chunk: c007
+      slot: distribution_formats[3].used_software[0].name
+      snippet: chorus_waveform
+    - chunk: c007
+      slot: extension_mechanism.used_software[0].name
+      snippet: Chorus_SOP
+    - chunk: c007
+      slot: extension_mechanism.used_software[1].name
+      snippet: data_acq_SOP
+    entry_single_leaf: 5
+    entry_single_leaf_sample:
+    - chunk: c003
+      slot: creators[1]
+      leaves: 3
+      overlapping: 1
+    - chunk: c003
+      slot: creators[2]
+      leaves: 3
+      overlapping: 1
+    - chunk: c003
+      slot: creators[3]
+      leaves: 3
+      overlapping: 1
+    - chunk: c003
+      slot: creators[4]
+      leaves: 3
+      overlapping: 1
+    - chunk: c003
+      slot: creators[5]
+      leaves: 3
+      overlapping: 1
   slots:
     populated: 281
     exempt: 87
+    exempt_on_carried_identifier: 0
     receiptable: 194
     with_receipt: 136
     without_receipt:
@@ -369,13 +426,30 @@ receipts:
     - distribution_formats[3].name
     - distribution_formats[5].name
     without_receipt_truncated: 8
+    never_receipted: null
+    added_after_receipt: null
     receipt_paths: 94
     unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt: []
+    value_changed_after_receipt_count: null
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: null
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: null
     reshaped_by_reconcile: []
+    receipts_to_removed_values: 0
   findings: []
   findings_truncated: null
-  summary: chunks 8/8 reviewed · snippets 109/109 verified · slots 136/194 with a
-    receipt (87 exempt)
+  findings_gated: 0
+  summary: chunks 8/8 reviewed · snippets 109/109 verified (3 bearing on no token
+    of their value) (5 entry receipt(s) overlapping one leaf) · slots 136/194 with
+    a receipt (87 exempt)
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CHORUS_coverage_receipt.yaml
@@ -383,7 +457,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/CHORUS_chunks.yaml
       sha256: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
-  recorded_by: d4d receipts check
+  recorded_by: backfill_checks
 validation:
   passed: true
   artifacts:

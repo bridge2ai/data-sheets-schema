@@ -94,12 +94,25 @@ class DigestIsAFunctionOfContentTest(unittest.TestCase):
         verdicts they were pinned with (#426) and re-validate as invalid
         under this schema — the #646 precedent. The CoreDataset digest
         moves with it (`10d60d20` → `386a470d`).
+
+        `ffe03dd4` → the pinned value below, on 2026-09-09 (#1114, #1115,
+        #1126): description-only. The `doi` description gave a real Nature
+        DOI as its example and the digest renders descriptions ahead of the
+        arm prompt on every request; the example is now a form and the
+        operative sentence (the bare DOI only) sits inside the digest's
+        300-character window, where the first draft of this change had
+        pushed it out. docExample annotations and the `latest_version_doi`
+        description lost their real and corpus identifiers too — they reach
+        the agentic runtime through the merged schema file, not the digest.
+        No slot added or removed: the inventory under the new digest is the
+        old one (98 Dataset, 84 CoreDataset), no record's validity moves,
+        and the CoreDataset digest moves with it (`386a470d…` → `dfb9f93c…`). No v9 record exists.
         """
         if not self.SCHEMA.exists():
             self.skipTest("merged schema not present in this checkout")
         self.assertEqual(
             schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
-            "ffe03dd469feb388e0a4149e4f5ccb6f")
+            "a91bad8b8eaf7c34b147ff5970474342")
 
 
 class SyncCheckTest(unittest.TestCase):

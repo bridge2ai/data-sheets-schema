@@ -149,13 +149,16 @@ classes:
           An identifier for the organization (for example a ROR), when the
           source material supplies one. A name alone is a valid organization.
         annotations:
-          "d4d:docExample": "https://ror.org/01yc7t268"
+          # Form-only (#1115): docExample reaches the agentic runtime through
+          # the merged schema file, so a real ROR beside a real name is a
+          # copyable pair.
+          "d4d:docExample": "https://ror.org/0xxxxxxxx"
       name:
         slot_uri: schema:name
         description: A human-readable name for the organization.
         range: string
         annotations:
-          "d4d:docExample": "University of Washington"
+          "d4d:docExample": "Example University"
       description:
         slot_uri: schema:description
         description: A human-readable description for the organization.
@@ -282,7 +285,7 @@ classes:
         pattern: "^\\d{4}-\\d{4}-\\d{4}-\\d{3}[0-9X]$"
         slot_uri: d4d:orcidIdentifier
         annotations:
-          "d4d:docExample": "0000-0001-2345-6789"
+          "d4d:docExample": "0000-0001-2345-6780"
         broad_mappings:
           - schema:identifier
 
@@ -607,9 +610,15 @@ slots:
       "d4d:docExample": "https://fairhub.io/datasets/2/versions/1"
 
   doi:
+    # Form-only example on purpose: this description is rendered into the
+    # schema digest sent ahead of the arm prompt on every request, truncated
+    # at 300 characters, and a real identifier there is a candidate for
+    # copy-through (#1114). The operative sentence — the bare DOI only —
+    # must stay inside that window (#1126 review); the rationale lives here,
+    # which `schema_digest.render` does not emit.
     description: >-
-      Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification
-      (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567'). The bare
+      Digital Object Identifier (DOI) in format 10.xxxx/xxxxx — a registrant
+      prefix, a slash, a suffix — providing persistent identification. The bare
       DOI only — not the doi: CURIE and not the doi.org resolver URL. The
       pattern is anchored (#646): unanchored, JSON Schema's search semantics
       accepted all three surface forms, and one v5 record carried the same DOI
@@ -623,7 +632,11 @@ slots:
     exact_mappings:
       - schema:identifier
     annotations:
-      "d4d:docExample": "10.5281/zenodo.10642459"
+      # Form-only: docExample annotations reach the agentic runtime, which
+      # reads the merged schema file (d4d-full-core.md warns it off them),
+      # and the previous value was a real DOI of an AI-READI licence record
+      # — a corpus fact whose copy-through would ground (#1126 review, S4).
+      "d4d:docExample": "10.xxxxx/example.1234"
 
   external_resources:
     description: >-

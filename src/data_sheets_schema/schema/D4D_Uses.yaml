@@ -49,7 +49,7 @@ classes:
         range: string
         multivalued: true
         annotations:
-          "d4d:docExample": "Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.1056/NEJMoa2404007)"
+          "d4d:docExample": "Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.xxxx/xxxxx)"
 
 
   UseRepository:

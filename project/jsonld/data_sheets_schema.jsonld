@@ -2708,11 +2708,11 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "10.5281/zenodo.10642459",
+          "value": "10.xxxxx/example.1234",
           "@type": "Annotation"
         }
       ],
-      "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567'). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+      "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx \u2014 a registrant prefix, a slash, a suffix \u2014 providing persistent identification. The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/doiIdentifier"
@@ -4223,7 +4223,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "https://ror.org/01yc7t268",
+          "value": "https://ror.org/0xxxxxxxx",
           "@type": "Annotation"
         }
       ],
@@ -4247,7 +4247,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "University of Washington",
+          "value": "Example University",
           "@type": "Annotation"
         }
       ],
@@ -4534,7 +4534,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "0000-0001-2345-6789",
+          "value": "0000-0001-2345-6780",
           "@type": "Annotation"
         }
       ],
@@ -6752,7 +6752,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.1056/NEJMoa2404007)",
+          "value": "Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.xxxx/xxxxx)",
           "@type": "Annotation"
         }
       ],
@@ -7112,7 +7112,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "AI-READI Data Coordinating Center, University of Washington",
+          "value": "Example Data Coordinating Center, Example University",
           "@type": "Annotation"
         }
       ],
@@ -7270,7 +7270,7 @@
     },
     {
       "name": "versionAccess__latest_version_doi",
-      "description": "DOI or URL identifying the latest version of this dataset (e.g., '10.5281/zenodo.1234567' for a DOI or 'https://doi.org/10.5281/zenodo.1234567' for a full URL). Use CURIE format for DOIs (e.g., 'doi:10.5281/zenodo.1234567').",
+      "description": "DOI or URL identifying the latest version of this dataset. Use CURIE format for a DOI \u2014 doi:10.xxxx/xxxxx \u2014 not the doi.org resolver URL. (Form only: a real DOI here would be model-facing text, #1126.)",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
         "http://purl.org/dc/terms/hasVersion"
@@ -7552,7 +7552,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "All participants provided written informed consent; study registered at ClinicalTrials.gov NCT05395169",
+          "value": "All participants provided written informed consent; study registered at ClinicalTrials.gov NCTXXXXXXXX",
           "@type": "Annotation"
         }
       ],
@@ -9970,7 +9970,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "https://ror.org/01yc7t268",
+              "value": "https://ror.org/0xxxxxxxx",
               "@type": "Annotation"
             }
           ],
@@ -9985,7 +9985,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "University of Washington",
+              "value": "Example University",
               "@type": "Annotation"
             }
           ],
@@ -10207,7 +10207,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "0000-0001-2345-6789",
+              "value": "0000-0001-2345-6780",
               "@type": "Annotation"
             }
           ],
@@ -12378,7 +12378,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.1056/NEJMoa2404007)",
+              "value": "Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.xxxx/xxxxx)",
               "@type": "Annotation"
             }
           ],
@@ -12806,7 +12806,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "AI-READI Data Coordinating Center, University of Washington",
+              "value": "Example Data Coordinating Center, Example University",
               "@type": "Annotation"
             }
           ],
@@ -12993,7 +12993,7 @@
       "attributes": [
         {
           "name": "latest_version_doi",
-          "description": "DOI or URL identifying the latest version of this dataset (e.g., '10.5281/zenodo.1234567' for a DOI or 'https://doi.org/10.5281/zenodo.1234567' for a full URL). Use CURIE format for DOIs (e.g., 'doi:10.5281/zenodo.1234567').",
+          "description": "DOI or URL identifying the latest version of this dataset. Use CURIE format for a DOI \u2014 doi:10.xxxx/xxxxx \u2014 not the doi.org resolver URL. (Form only: a real DOI here would be model-facing text, #1126.)",
           "slot_uri": "dcterms:hasVersion",
           "range": "uriorcurie",
           "@type": "SlotDefinition"
@@ -13312,7 +13312,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "All participants provided written informed consent; study registered at ClinicalTrials.gov NCT05395169",
+              "value": "All participants provided written informed consent; study registered at ClinicalTrials.gov NCTXXXXXXXX",
               "@type": "Annotation"
             }
           ],
@@ -14336,9 +14336,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-08-14T16:22:27",
+  "source_file_date": "2026-09-09T11:21:04",
   "source_file_size": 34754,
-  "generation_date": "2026-09-03T12:16:19",
+  "generation_date": "2026-09-09T11:47:52",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
