@@ -49,7 +49,7 @@ The full crosswalk lives in the [Semantic Exchange Layer](semantic_exchange.md).
 
 - **FAIR interop**: every core slot has a documented SKOS mapping to one of schema.org / RO-Crate / FAIRSCAPE EVI / DCAT / Croissant RAI.
 - **Smaller surface area**: ~95 fields is tractable for hand-authoring and AI-assisted authoring; the full schema (~284 attributes) is for full-coverage research datasheets.
-- **Validation-friendly**: `make validate-core` runs in seconds against typical Bridge2AI inputs.
+- **Validation-friendly**: `make validate-core` validates the schema itself in seconds; data is validated with `d4d schema validate`.
 - **RO-Crate round-trip**: core ↔ RO-Crate JSON-LD is the supported lossless conversion path; full-schema ↔ RO-Crate may require attribute drops or extension contexts.
 
 See [Semantic Exchange](semantic_exchange.md) for the mapping artifacts and the `/d4d-add-mapping` workflow.
