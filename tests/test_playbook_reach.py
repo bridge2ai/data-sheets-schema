@@ -192,10 +192,11 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
         "raw data format": ("raw form and the released form are the same",
                             "say nothing of what preceded it"),
         "principal investigator": ("or its usual abbreviation",
-                                   "for this dataset or the study that produced it"),
+                                   "for this dataset or the study that produced it",
+                                   "never promoted to principal investigator"),      # the body, not the headline
         "passage's own reach": ("recorded as the limitation alone",
                                 "any other value needs a sentence behind it"),
-        "list membership": ("a funder under funders",),
+        "list membership": ("is not a member and does not become an entry",),   # the body, not the examples
         "absence and route": ("does not fill errata", "not the reason"),
     }
 
@@ -242,8 +243,12 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
         self.assertEqual(missing, [])
 
     def test_every_operative_clause_reaches_both(self):
-        """Fidelity, not arrival (#1128 review, N8)."""
+        """Fidelity, not arrival (#1128 review, N8). Every v9 row of
+        SHARED_RULES has a clause entry — the pre-v9 rows predate the
+        table and are exempt by their age, not by choice."""
         playbook, prompt = self._texts()
+        v9_rows = list(self.SHARED_RULES)[list(self.SHARED_RULES).index("referent's own slots"):]
+        self.assertEqual(set(v9_rows), set(self.SHARED_CLAUSES))
         missing = []
         for name, clauses in self.SHARED_CLAUSES.items():
             self.assertIn(name, self.SHARED_RULES, name)
@@ -256,8 +261,13 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
 
     def test_the_playbook_writes_american_english(self):
         """The file teaches house style by example and carries the rule (#1128 review, N7)."""
-        text = re.sub(r"`[^`]*`", "", PLAYBOOK.read_text(encoding="utf-8")).lower()   # backticked tokens quote sources
-        for british in ("organisation", "characterise", "standardise", "analyse", "behaviour", "licence"):
+        # Backticked tokens and double-quoted spans quote sources and proper
+        # nouns (the carve-out examples "Wellcome Trust Sanger Centre",
+        # "Medical Research Council Programme Grant"); the rule is about the
+        # prose the file composes.
+        text = re.sub(r'"[^"\n]*"', "", re.sub(r"`[^`]*`", "", PLAYBOOK.read_text(encoding="utf-8"))).lower()
+        for british in ("organisation", "characterise", "standardise", "analyse", "behaviour", "licence",
+                        "recognise", "programme", "centre"):
             self.assertNotIn(british, text, british)
 
     def test_the_playbook_has_no_rule_this_table_does_not_know(self):

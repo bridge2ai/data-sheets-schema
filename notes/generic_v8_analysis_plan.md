@@ -1001,6 +1001,16 @@ and the playbook hash every agentic record carries moves with it: an
 agentic boundary at the same point as the API one, with no agentic v9
 record on either side of it.
 
+The nine are the prompt's text with the playbook's tags — clause for
+clause, held by a per-clause probe table, after the first mirror kept
+each rule's statement and dropped its procedure (#1131). The same change
+edits `d4d-full-core.md`'s stale condition list, a second hashed
+playbook: 47 records pinned its previous hash and read as drifted (12
+agentic v6 records among them, the re-marked v6 canonicals included);
+the edited line is a conditions catalogue, not a decision rule, so no
+rule those records ran under moved — reported, never fatal, and named
+here so the drift is attributable.
+
 ### What a v9 arm can and cannot be compared against (#1072)
 
 `condition_delta("generic_v8", "generic_v9")` returns `["base"]`, and that

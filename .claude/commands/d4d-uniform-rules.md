@@ -75,7 +75,7 @@ to every project:
   better answer. Check the schema's `prefixes:` block rather than guessing.
 
 - **An identifier that names something outside this dataset is a fact, and comes from the evidence.** Take it from the
-  declared bundle or omit it; do not supply an identifier you recognise but the
+  declared bundle or omit it; do not supply an identifier you recognize but the
   bundle does not state. A correct identifier the evidence does not contain is
   still an unsupported claim, and to a reader who was not present it is
   indistinguishable from a wrong one. Naming an organization the bundle names is
