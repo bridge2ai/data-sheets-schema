@@ -1254,7 +1254,25 @@ steps need:
     from the git blob. v9 R8's "needs a receipt like any other value" clause
     states the cost v2 removes; #1147 rotates it (no v9 record exists).
 
-Each of 2–5, 7–10, 11 and 12 is a generation-path change (13 and 14 are not); per the production rule
+17. **An entry whose stripped identity key matched nobody is not dropped
+    (#1053, 2026-09-09, receipts instrument v3).** The identity join (#899)
+    keyed on `id` first; when reconciliation removed a minted id and
+    rewrote the entry in place, the id matched no final entry and the
+    entry read as `entry_dropped` / `index_reused_by_another_entry`, so
+    the pack showed `<path does not resolve>` and the receipt lost its
+    credit for a value sitting at the receipted path (CHORUS 2026-09-04f
+    rep1, `labeling_strategies[0]`). v3 locates an entry whose key the
+    final list carries nowhere as a keyless one — overlap, then position
+    for the same shape, basis `same_key_stripped`; a keyed entry whose key
+    other final entries still carry is gone as before. Recomputed with
+    `backfill-checks --blocks receipts --overwrite`: 29 records under v3
+    (the 18 drifted stay under v2, #1140); two CHORUS records moved — v7
+    2026-09-01 rep1 and v8 2026-09-04f rep1, each two index-reused paths
+    to none and one more slot with a receipt; no finding, snippet verdict
+    or chunk count moved. Not a generation-path change. (Numbered 17 with
+    #1139's 16 still open; whichever lands second renumbers.)
+
+Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15 and 17 are not); per the production rule
 none of them may land between a v8 canary and its fill.
 
 ## Decisions needed before step 3

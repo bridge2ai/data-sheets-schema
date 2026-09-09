@@ -628,7 +628,15 @@ resolved as written even when another entry now sits at that index; those
 are reported as `index_reused_by_another_entry` / `path_not_in_snapshot`
 and carry no coverage credit; the gone-entry classes also count under
 `reshaped_by_reconcile` (they resolved in the snapshot), a never-present
-path does not.
+path does not. An entry whose identity key the final list no longer
+carries *anywhere* is not gone: reconciliation stripped the key (a minted
+`id` under rule 11/14, the usual case), which says nothing about which
+entry it is, so it is located as a keyless entry — by overlap, then by
+position for the same shape, basis `same_key_stripped` (receipts
+instrument **v3**, #1053); a keyed entry whose key other final entries
+still carry is gone as before. Before v3 the CHORUS 2026-09-04f rep1 and
+2026-09-01 rep1 records each read two such entries as dropped and lost
+the receipt credit on values sitting at the receipted path.
 Keyless entries whose only leaves are lists still join by position (#908).
 
 ## Method directories and runtime-scoped canonicals (#690, v8 D6)
