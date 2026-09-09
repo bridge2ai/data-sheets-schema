@@ -316,8 +316,9 @@ adaptive thinking, so these two are a **different generation regime, not a
 run that was not asked**, and their rows on predictions 8 and 9 are marked
 rather than averaged in. "The other ten got it on identical requests" is
 true of the parameters, not the inputs: a `full` phase with no thinking
-block is on 11 of the corpus's 152 reasoning logs — 9 of CM4AI's 35, across
-four CM4AI labels and two prompt versions, plus VOICE twice — so it is an
+block is on 11 of the corpus's 152 reasoning logs — 8 of CM4AI's 33 logs
+(9 of its 35 full-phase entries), across four CM4AI labels and two prompt
+versions, plus VOICE twice and AI_READI once — so it is an
 input-correlated adaptive outcome, not a proxy fault. From this change the
 request states adaptive thinking explicitly and the record carries it as
 `model.thinking_requested`; that puts the request on record and does not

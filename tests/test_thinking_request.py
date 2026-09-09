@@ -7,7 +7,7 @@ the parameter *runs adaptive thinking* — so these were not runs that were
 not asked, and the record could not say so because it recorded nothing
 about the request. Stating the request fixes that and nothing more: under
 adaptive a phase with no thinking block is a legal outcome (11 of 152 logs
-have one on `full`, 9 of them CM4AI), so the record gains "we asked", not
+have one on `full`, 8 of them CM4AI's), so the record gains "we asked", not
 the power to call a recurrence a deviation (review of #1105).
 
 Held here: the request states `{"type": "adaptive"}` on models that accept
@@ -115,19 +115,27 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         with mock.patch.object(api_runner, "accepts_adaptive_thinking", lambda name: False):
             older = _model_settings()
         self.assertNotIn("thinking", older)
-        self.assertIn("predates adaptive thinking", older["thinking_note"])
+        self.assertIn("not on the list of families known to accept adaptive thinking", older["thinking_note"])
+        self.assertNotIn("predates", older["thinking_note"])   # a cause the gate cannot know (round 2)
         self.assertEqual(settings["thinking"], {"type": "adaptive"})
 
-    def test_every_threaded_call_site_passes_the_thinking_settings(self):
+    def test_every_call_site_in_the_runner_passes_the_thinking_settings(self):
         """Only `_generate_phase` runs on the offline fixture (review finding
-        6); the readdress, repair and regate sites are held at the source."""
+        6). Derived, not enumerated (round 2, note 4): every
+        `_call_with_retry(` occurrence in the module — the definition
+        excluded — must carry both kwargs, so a fifth site or a second call
+        inside a listed function cannot slip through."""
         import inspect
+        import re
         from data_sheets_schema import api_runner
-        for fn in (api_runner._readdress_receipt, api_runner._repair_invalid,
-                   api_runner._regenerate_report, api_runner._generate_phase):
-            src = inspect.getsource(fn)
-            self.assertIn('thinking=settings.get("thinking")', src, fn.__name__)
-            self.assertIn('effort=settings.get("effort")', src, fn.__name__)
+        src = inspect.getsource(api_runner)
+        calls = [m for m in re.finditer(r"_call_with_retry\(", src)
+                 if not src[max(0, m.start() - 4):m.start()].endswith("def ")]
+        self.assertGreaterEqual(len(calls), 4)
+        for m in calls:
+            window = src[m.start():m.start() + 400]
+            self.assertIn('thinking=settings.get("thinking")', window, src[m.start() - 80:m.start() + 80])
+            self.assertIn('effort=settings.get("effort")', window)
 
     def test_no_effort_means_no_output_config(self):
         """The config says effort is the provider default. Recording a

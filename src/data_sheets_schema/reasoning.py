@@ -215,7 +215,8 @@ def summarise(entries: list[dict[str, Any]]) -> dict[str, Any]:
         # thinking under adaptive (audit 115, report 98, core 97 of the
         # corpus's 1,185 entries), so "some phase lacked it" is true of 146 of
         # 152 logs and discriminates nothing. The load-bearing signal is the
-        # `full` phase without one: 14 entries in 11 logs, 9 of them CM4AI.
+        # `full` phase without one: 14 entries in 11 logs (8 of the logs and 9
+        # of the entries CM4AI's).
         "phases_without_reasoning": sorted({
             str(e.get("phase")) for e in entries
             if e.get("reasoning_present") is False}),

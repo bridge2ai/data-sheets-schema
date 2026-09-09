@@ -821,7 +821,7 @@ def reasoning_cmd(method, project, label, path):
             click.echo("  ⚠️  estimate over an observed 0 on: "
                        f"{', '.join(s['estimate_over_observed_zero'])} — text-length "
                        "error, not reasoning"
-                       + (f"; median |estimate_error| where a count exists: "
+                       + (f"; median |estimate_error| where the count is above 0: "
                           f"{s['estimate_error_median']:,}" if s.get('estimate_error_median') else ""))
 
     if len(logs) > 1:

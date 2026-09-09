@@ -710,7 +710,8 @@ def _model_settings() -> dict[str, Any]:
     # log's "no thinking block" can be read against what was asked. It does
     # not make an absent block a provider fault: under adaptive the model
     # decides per request, and a `full` phase with no block is a legal
-    # outcome — the corpus has it on 11 of 152 logs, 9 of CM4AI's 35, across
+    # outcome — the corpus has it on 11 of 152 logs (CM4AI 8 of its 33,
+    # VOICE 2, AI_READI 1; 14 full-phase entries, 9 of them CM4AI's), across
     # four CM4AI labels and two prompt versions (#1047 review). `budget_tokens`
     # is never sent — it returns 400 on this family — so the issue's own
     # proposed shape is refused here, and a test holds that line. A model that
@@ -720,8 +721,9 @@ def _model_settings() -> dict[str, Any]:
         settings["thinking"] = {"type": "adaptive"}
     else:
         settings["thinking_note"] = (
-            f"not requested: {name} predates adaptive thinking and this runner "
-            "never sends budget_tokens")
+            f"not requested: {name} is not on the list of families known to "
+            "accept adaptive thinking (ADAPTIVE_THINKING_MODELS), and this "
+            "runner never sends budget_tokens")     # the observable fact, not a cause (#1112 round 2)
     effort = (m.get("thinking") or {}).get("effort") if isinstance(m.get("thinking"), dict) else None
     if effort:
         settings["effort"] = str(effort)
