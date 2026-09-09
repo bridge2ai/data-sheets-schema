@@ -20,8 +20,8 @@ next version is drafted from it, which is how the v5 rationale's real ROR
 would have travelled; it is scanned too. The two **playbooks** drive the
 agentic runtime. The **rendered schema digest** (`Dataset`, `CoreDataset`)
 is sent ahead of the arm prompt on every API request (`ASSEMBLY_LAYOUT`),
-so a slot description is as model-facing as a rule — that is where the one
-real identifier left in the scanned surface sits today (#1114).
+so a slot description is as model-facing as a rule — that is where the last
+real identifier in the scanned surface sat until #1114 removed it.
 
 The allowlist is checked in both directions and each entry is held to the
 line it claims to be on; an entry cannot outlive its token, and a token
@@ -88,21 +88,9 @@ def texts() -> list[tuple[str, str, str]]:
 #: {reason, surface, line_contains}. `surface` is the only surface the token
 #: may sit on and `line_contains` a phrase the token's line must carry, so
 #: the entry holds the token to the context that justifies it.
-ALLOWED = {
-    ("schema digest (Dataset)", "10.1038/s41586-020-2649-2',"): {
-        "surface": "digest", "line_contains": "in format 10.xxxx/xxxxx",
-        "reason": f"the `doi` slot's description gives a real Nature DOI as its "
-                  f"example; a form-only placeholder needs a schema edit and "
-                  f"`make gen-project`, which moves the schema digest every run "
-                  f"records — scheduled at the next condition boundary (#1114)"},
-    ("schema digest (Dataset)", "10.5281/zenodo.1234567')."): {
-        "surface": "digest", "line_contains": "in format 10.xxxx/xxxxx",
-        "reason": f"same line as the Nature DOI; a Zenodo record number of the "
-                  f"placeholder shape, allowlisted with it until #1114"},
-    ("schema digest (CoreDataset)", "10.1038/s41586-020-2649-2',"): {
-        "surface": "digest", "line_contains": "in format 10.xxxx/xxxxx", "reason": f"as for Dataset (#1114)"},
-    ("schema digest (CoreDataset)", "10.5281/zenodo.1234567')."): {
-        "surface": "digest", "line_contains": "in format 10.xxxx/xxxxx", "reason": f"as for Dataset (#1114)"},
+ALLOWED: dict[tuple[str, str], dict[str, str]] = {
+    # Empty since #1114 removed the doi description's real Nature DOI. An
+    # entry, when one is needed again, is {surface, line_contains, reason}.
 }
 
 

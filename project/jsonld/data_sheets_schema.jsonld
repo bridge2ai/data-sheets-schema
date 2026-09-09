@@ -2712,7 +2712,7 @@
           "@type": "Annotation"
         }
       ],
-      "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567'). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+      "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification \u2014 the registrant prefix, a slash, the suffix, as in '10.xxxxx/abcd.1234' (a form, not a real DOI: this description is sent to the model in the schema digest, and a real identifier there is a candidate for copy-through, #1114). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/doiIdentifier"
@@ -4247,7 +4247,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "University of Washington",
+          "value": "Washington University in St. Louis",
           "@type": "Annotation"
         }
       ],
@@ -9985,7 +9985,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "University of Washington",
+              "value": "Washington University in St. Louis",
               "@type": "Annotation"
             }
           ],
@@ -14336,9 +14336,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-08-14T16:22:27",
+  "source_file_date": "2026-09-09T09:44:43",
   "source_file_size": 34754,
-  "generation_date": "2026-09-03T12:16:19",
+  "generation_date": "2026-09-09T09:45:26",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
