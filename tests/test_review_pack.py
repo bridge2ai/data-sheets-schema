@@ -318,6 +318,56 @@ class Agree(unittest.TestCase):
         r = rp.agree(self.PACK, a, a)
         self.assertEqual(r["percent_class_agreement"], 100.0); self.assertIsNone(r["kappa_class"])
 
+    def test_a_placeholder_reviewed_at_is_reported_never_failed(self):
+        """#1057: two v8 reviews carried 2026-09-07T00:00:00Z and passed
+        --strict. The judgements are attested by hash; only when they were
+        made is in doubt, so the checker reports it and does not fail."""
+        from datetime import date, datetime, timezone
+        good = self._rev(("supported", "weak", "inferred", "followed"))
+        for value, kind in (("2026-09-07T00:00:00Z", "reviewed_at_midnight"),
+                            (datetime(2026, 9, 7, tzinfo=timezone.utc), "reviewed_at_midnight"),   # YAML-native, unquoted
+                            (datetime(2026, 9, 7), "reviewed_at_midnight"),                        # naive
+                            ("2026-09-07", "reviewed_at_date_only"),                                # certain, not inferred
+                            (date(2026, 9, 7), "reviewed_at_date_only"),                            # YAML date
+                            ("not a time", "reviewed_at_unparsable"),
+                            (None, "reviewed_at_missing")):
+            with self.subTest(value=value):
+                b = rp.check_review(self.PACK, {**good, "reviewed_at": value})
+                self.assertEqual([f["kind"] for f in b["reported"]], [kind])
+                self.assertFalse([f for f in b["findings"] if str(f.get("kind", "")).startswith("reviewed_at")])   # never a finding
+                self.assertIn("1 reported", b["summary"])
+        b = rp.check_review(self.PACK, {**good, "reviewed_at": "2026-09-07T19:47:23Z"})
+        self.assertEqual(b["reported"], []); self.assertNotIn("reported", b["summary"])
+        self.assertEqual(rp.reviewed_at_reports("2026-09-07T00:00:00+00:00")[0]["kind"], "reviewed_at_midnight")
+        self.assertEqual(rp.reviewed_at_reports("2026-09-07T00:00:01Z"), [])
+        self.assertIn("indistinguishable", rp.reviewed_at_reports("2026-09-07T00:00:00Z")[0]["detail"])
+
+    def test_the_cli_reports_a_placeholder_and_still_exits_zero_under_strict(self):
+        """#1154 review, S4: the invariant the change is named after, pinned
+        where it can break — the strict predicate in the CLI."""
+        import click.testing
+        from unittest import mock
+        from data_sheets_schema.cli.review import review as review_cli
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = Pack()._run(tmp)
+            out, pack = rp.write_pack(prov, instr)
+            answers = [{"id": i["id"], "verdict": (rp.VERDICTS[i["kind"]][0]), "evidence": "seen"} for i in pack["items"]]
+            rev = {"pack_sha256": hashlib.sha256(out.read_bytes()).hexdigest(), "reviewer": "test", "model": "m",
+                   "reviewed_at": "2026-09-07T00:00:00Z", "items": answers}
+            (out.parent / "P_review.yaml").write_text(yaml.safe_dump(rev))
+            base = ["check", "--method", "claudecode_agent", "--label", "L", "--project", "VOICE", "--strict"]
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                r = click.testing.CliRunner().invoke(review_cli, base)
+            self.assertEqual(r.exit_code, 0, r.output)
+            self.assertIn("reviewed_at_midnight", r.output); self.assertIn("1 reported", r.output)
+            # the other half of "--strict is unaffected": a real finding still exits 1
+            rev["items"][0]["verdict"] = "not-a-verdict"
+            (out.parent / "P_review.yaml").write_text(yaml.safe_dump(rev))
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                r = click.testing.CliRunner().invoke(review_cli, base)
+            self.assertEqual(r.exit_code, 1); self.assertIn("verdict_not_in_vocabulary", r.output)
+        self.assertEqual(rp.reviewed_at_reports(20260907), [{"kind": "reviewed_at_unparsable", "value": "20260907"}])
+
     def test_reviews_of_different_packs_refuse_to_pair(self):
         with self.assertRaises(ValueError):
             rp.agree(self.PACK, {"pack_sha256": "zzz", "items": []}, self._rev(("supported",) * 4))
