@@ -1767,14 +1767,17 @@ class GitUnavailable(RuntimeError):
 
 @functools.lru_cache(maxsize=None)
 def bundle_blob_history(bundle_path: str) -> tuple[dict[str, str], ...]:
-    """Every committed version of a bundle reachable from HEAD, under this
-    name or an earlier one (`--follow`) and on every merged side
-    (`--full-history`), newest first: commit, date, and the sha256 and md5
-    of the bytes at that commit. Memoised per path: the backfill asks once
-    per record and 82 records name 11 paths. Raises `GitUnavailable` when
-    the log call fails, rather than returning an empty history that reads
-    as "no version matches"."""
-    log = subprocess.run(["git", "log", "--follow", "--full-history", "--format=%H %ad",
+    """Every committed version of a bundle reachable from HEAD under this
+    name, on every merged side (`--full-history`; 17 versions of the
+    AI_READI bundle against 10 under default simplification), newest
+    first: commit, date, and the sha256 and md5 of the bytes at that
+    commit. Not across a rename: `--follow` cancels `--full-history` and
+    the pre-rename blob lives under a name this function does not read
+    (#1132 round 2). Memoised per path: the backfill asks once per record
+    and 82 records name 11 paths. Read-only result — the cached dicts are
+    shared. Raises `GitUnavailable` when the log call fails, rather than
+    returning an empty history that reads as "no version matches"."""
+    log = subprocess.run(["git", "log", "--full-history", "--format=%H %ad",
                           "--date=short", "--", bundle_path],
                          capture_output=True, text=True, check=False, cwd=_REPO_ROOT)
     if log.returncode != 0:
@@ -1785,7 +1788,7 @@ def bundle_blob_history(bundle_path: str) -> tuple[dict[str, str], ...]:
         blob = subprocess.run(["git", "show", f"{commit}:{bundle_path}"], capture_output=True,
                               check=False, cwd=_REPO_ROOT)
         if blob.returncode != 0:
-            continue                                  # a rename's old name: not this path at that commit
+            continue                                  # not this path at that commit
         out.append({"commit": commit, "date": date,
                     "sha256": hashlib.sha256(blob.stdout).hexdigest(),
                     "md5": hashlib.md5(blob.stdout).hexdigest()})
@@ -1827,7 +1830,9 @@ def resolve_bundle_md5(record_path: Path,
         # The OLDEST matching commit — when the bytes entered history — not
         # the newest: identical content re-committed (merge sides under
         # --full-history) would otherwise name an arbitrary later commit.
-        blob = matches[-1]
+        # By date, with list position (git's reverse-chronological order)
+        # as the tie-break, so the intent does not rest on that order.
+        blob = min(reversed(matches), key=lambda b: b["date"])
         return {"status": BUNDLE_MD5_RECOVERED, "md5": blob["md5"], "commit": blob["commit"],
                 "date": blob["date"], "path": inputs["bundle_path"], "matches": len(matches)}
     return {"status": BUNDLE_MD5_NO_BLOB, "path": inputs["bundle_path"],

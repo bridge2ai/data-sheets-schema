@@ -1046,8 +1046,16 @@ def backfill_bundle_md5(execute, label):
     """
     _require_repo_root_cwd("d4d provenance backfill-bundle-md5")   # CONCAT_DIR is repo-relative
     from data_sheets_schema.provenance import (
-        BUNDLE_MD5_RECOVERED, CONCAT_DIR, apply_bundle_md5, resolve_bundle_md5,
+        BUNDLE_MD5_RECOVERED, CONCAT_DIR, _REPO_ROOT, apply_bundle_md5, resolve_bundle_md5,
     )
+    # One root for the whole operation: records are read from the cwd and
+    # git history from the package's own checkout; a `d4d` resolving to a
+    # worktree's src while run from another checkout would prove one tree's
+    # md5 against another's history (#1132 round 2).
+    if Path.cwd().resolve() != _REPO_ROOT.resolve():
+        raise click.ClickException(
+            f"the package is installed from {_REPO_ROOT} but the cwd is {Path.cwd()}; "
+            "run this from the checkout the package resolves to")
     # Every provenance record on disk, not `discover()`'s view of it: a core
     # record whose full counterpart is absent is invisible to discover()
     # (#1129 review, finding 6 — one such record exists today).

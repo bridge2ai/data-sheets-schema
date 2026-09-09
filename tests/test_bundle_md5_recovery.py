@@ -48,6 +48,9 @@ class Resolve(unittest.TestCase):
             dup = [{"commit": "c" * 40, "date": "2026-09-01", "sha256": SHA, "md5": MD5}] + HISTORY
             r = pv.resolve_bundle_md5(p, history=lambda bp: dup)
             self.assertEqual((r["commit"][:4], r["matches"]), ("aaaa", 2))
+            # oldest by date even if the list is not in git's order; position breaks a tie
+            shuffled = [HISTORY[1], dup[0], {"commit": "d" * 40, "date": "2026-07-28", "sha256": SHA, "md5": MD5}]
+            self.assertEqual(pv.resolve_bundle_md5(p, history=lambda bp: shuffled)["commit"][:4], "dddd")
 
     def test_a_tool_failure_is_not_a_finding_about_the_corpus(self):
         """`git log` failing used to read as "the bytes are in no commit"
@@ -122,7 +125,7 @@ class OnTheCorpus(unittest.TestCase):
         from tests.test_cli.test_bundle_drift import _history_befores
         befores = _history_befores()
         recovered, bad = 0, []
-        for path in sorted(glob.glob(str(pv.CONCAT_DIR / "*_core" / "*" / "*_provenance.yaml"))):
+        for path in sorted(glob.glob(str(pv._REPO_ROOT / pv.CONCAT_DIR / "*_core" / "*" / "*_provenance.yaml"))):
             d = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
             inp = d.get("inputs") or {}
             if not str(inp.get("bundle_md5_basis") or "").startswith("recovered (#1121)"):
@@ -133,7 +136,7 @@ class OnTheCorpus(unittest.TestCase):
             current = hashlib.md5(bundle.read_bytes()).hexdigest() if bundle.exists() else None
             if not (md5 == current or md5 in befores):
                 bad.append((path, md5))
-        if not list((pv.CONCAT_DIR).glob("*_core/*/*_provenance.yaml")):
+        if not list((pv._REPO_ROOT / pv.CONCAT_DIR).glob("*_core/*/*_provenance.yaml")):
             self.skipTest("no provenance records in this checkout")
         self.assertGreater(recovered, 0, "the recovered records are gone, or their basis field was dropped")
         self.assertEqual(bad, [])

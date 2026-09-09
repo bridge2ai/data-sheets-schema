@@ -359,8 +359,9 @@ baseline arm no longer saw, for a day, with nothing to detect it.
 a record's `inputs.bundle_path` still hash to the `bundle_md5` that record
 pinned? As of 2026-09-09: **191 records drifted, 86 current, 0 with no hash
 recorded in the live corpus** (64/12/82 when #452 was filed; 136/41/82 on
-2026-09-03; 19 archived records under `data/ATTIC/` still lack one and are
-recoverable by the same proof — outside `CONCAT_DIR`, not visited; the
+2026-09-03; 19 archived records under `data/ATTIC/` record `bundle_md5:
+null` with no `bundle_sha256`, so this proof cannot reach them — outside
+`CONCAT_DIR`, not visited, not a backlog; the
 mojibake repair #874 rewrote the AI_READI and CM4AI bundles and the
 docx/accent fixes #921 the AI_READI, VOICE and VOICE_PEDIATRIC ones;
 CHORUS has not changed since #421). The 82 records that predated md5
