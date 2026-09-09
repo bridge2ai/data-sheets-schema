@@ -636,6 +636,24 @@ text. Under the coverage-only criterion the v7 arm picked the most-adverse
 replicate in 3 of 4 projects; under this one AI_READI and VOICE moved to
 rep1.
 
+## Id slots in the review pack (#803, #901)
+
+The pack's `id_slots` block lists every populated `…id` leaf with `forced`
+(the schema declares that class's id an identifier or required — `File`,
+`FileCollection`, `DataSubset`, `Person`) and `minted` (a urn, or a
+fragment on the record's own id); the `d4d-review-record` agent judges the
+fragment rule on mints only and a forced mint never violates it. From
+`pack_version` 5 each entry carries `origin`: `minted`, `stated` (a
+reference used as written — DOI, ROR, URL), or `constructed` — a fragment
+on a base the record did not mint, with `base` and `base_in_bundle`
+(verbatim presence of the base in the bundle; null when the bundle is not
+on disk). The two-way flag filed the AI_READI 2026-09-01 rep1
+`file_collections[*].id` (`https://fairhub.io/datasets/3#cardiac_ecg`, the
+attested fairhub page plus a label) with the DOIs; those ten are the only
+constructed ids across the 24 packs that carry the block. A constructed id
+is judged under the evidence rules for its base and under the fragment
+rule as a mint not on the record's own id.
+
 ## Review dispositions (#903)
 
 `d4d review disposition --item slot-008 --disposition retain|amend --note …

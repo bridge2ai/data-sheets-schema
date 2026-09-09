@@ -75,6 +75,39 @@ class IdSlots(unittest.TestCase):
         # an unknown root class and an empty record are named gaps (#827)
         self.assertIn("not in the schema", rp._id_slots({"a": 1}, root_class="NoSuchClass")[1])
 
+    def test_a_fragment_on_another_base_is_constructed_not_stated(self):
+        """#901: the AI_READI v7 rep1 file_collections ids are fragments on
+        the attested fairhub page URL. `minted: false` filed them with the
+        DOIs; `origin` tells a label the record built from a reference it
+        copied, and `base_in_bundle` whether the base is attested."""
+        full = {"conforms_to_class": "Dataset", "id": "doi:10.60775/fairhub.3",
+                "file_collections": [{"id": "https://fairhub.io/datasets/3#cardiac_ecg",
+                                      "resources": [{"id": "doi:10.999/external"}]},
+                                     {"id": "doi:10.60775/fairhub.3#own"},
+                                     {"id": "urn:aireadi:thing"}],
+                "creators": [{"id": "https://orcid.org/0000-0002-1825-0097"},
+                             {"id": "https://example.org/people#alice"}]}
+        bundle = "Dataset page: https://fairhub.io/datasets/3 (v2.0.0)\n"
+        by = {e["path"]: e for e in rp._id_slots(full, bundle_text=bundle)[0]}
+        fc = by["file_collections[0].id"]
+        self.assertEqual(fc["origin"], "constructed")
+        self.assertFalse(fc["minted"])                                  # unchanged boolean
+        self.assertEqual(fc["base"], "https://fairhub.io/datasets/3")
+        self.assertTrue(fc["base_in_bundle"])
+        self.assertEqual(by["file_collections[1].id"]["origin"], "minted")
+        self.assertEqual(by["file_collections[2].id"]["origin"], "minted")   # a urn
+        self.assertEqual(by["file_collections[0].resources[0].id"]["origin"], "stated")
+        self.assertNotIn("base", by["file_collections[0].resources[0].id"])
+        self.assertEqual(by["creators[0].id"]["origin"], "stated")
+        alice = by["creators[1].id"]
+        self.assertEqual(alice["origin"], "constructed")
+        self.assertFalse(alice["base_in_bundle"])                       # invented base
+        # without the bundle the attestation is unknown, never guessed
+        self.assertIsNone(rp._id_slots(full)[0][0]["base_in_bundle"])
+        # a bare "#x" has no base: it is not constructed on anything
+        self.assertEqual(rp._id_origin("#x", "doi:y"), ("stated", None))
+        self.assertEqual(set(rp.ID_ORIGINS), {e["origin"] for e in rp._id_slots(full)[0]})
+
 
 class Pack(unittest.TestCase):
     def _run(self, tmp):
@@ -290,7 +323,7 @@ class IdentityJoin(unittest.TestCase):
             full_p.write_text(yaml.safe_dump(moved))
             p = rp.build_pack(prov, instr, {"receipted_slots": 50})
             self.assertEqual(p["receipt_join"]["basis"], "identity"); self.assertEqual(p["gaps"], [])
-            self.assertEqual(p["pack_version"], 4)
+            self.assertEqual(p["pack_version"], 5)
             grant = next(i for i in p["items"] if i.get("slot") == "funders[0].grant_id")
             self.assertEqual(grant["resolved_path"], "funders[1].grant_id")
             self.assertEqual(grant["resolution"], "by_id"); self.assertEqual(grant["value"], "OT2OD032644")

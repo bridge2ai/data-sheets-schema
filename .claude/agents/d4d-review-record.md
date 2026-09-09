@@ -108,7 +108,15 @@ the only source of dataset facts.
   rule only on entries with `minted: true` (a urn or a fragment on the
   record's own id): an entry with `minted: false` is a world-facing
   reference — a DOI, ROR, URL — whose truth is the *evidence* rules'
-  business, never excused by `forced`. Among the mints, `forced: true`
+  business, never excused by `forced`. From `pack_version` 5 each entry
+  also carries `origin` (#901): `stated` is that reference as written;
+  `constructed` is a fragment the record built on a base it did not mint
+  (`base` names it, `base_in_bundle` says whether the bundle states that
+  base verbatim) — judge the *base* under the evidence rules and the
+  fragment under this rule as a mint that is not on the record's own id,
+  which the rule's own-id form does not license; a constructed id whose
+  base is not in the bundle is both an unsupported reference and an
+  unlicensed mint. Among the mints, `forced: true`
   (the schema declares that class's id an identifier or required — `File`,
   `FileCollection`, `DataSubset`, and also `Person`) means the record could
   not omit the id *given the object*, so the mint itself never violates
