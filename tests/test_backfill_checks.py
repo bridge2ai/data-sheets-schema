@@ -174,6 +174,32 @@ class CorpusTest(unittest.TestCase):
             self.skipTest("no records in this checkout")
         self.assertEqual(thin, [])
 
+    def test_every_checked_report_block_in_the_corpus_is_under_one_instrument(self):
+        """A half-finished backfill at the next revision would leave the
+        corpus straddling two instruments with every other test green, and
+        a sum over `rows_by_record` would silently mix two readings (#1139
+        review, S3). Every checked block carries the current instrument and
+        the tally with its fixed keys, summing to `disposition_rows`."""
+        from data_sheets_schema.report_claims import RECORD_COLUMN_VALUES, REPORT_CLAIMS_INSTRUMENT
+        off = []
+        seen = 0
+        for p in sorted(self.BASE.rglob("*_provenance.yaml")):
+            rec = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+            block = rec.get("report_claims") or {}
+            if not block.get("checked"):
+                continue
+            seen += 1
+            rows = block.get("rows_by_record")
+            if block.get("instrument") != REPORT_CLAIMS_INSTRUMENT:
+                off.append(f"{p}: instrument {str(block.get('instrument'))[:40]!r}")
+            elif not isinstance(rows, dict) or tuple(rows) != RECORD_COLUMN_VALUES:
+                off.append(f"{p}: rows_by_record keys {list(rows) if isinstance(rows, dict) else rows}")
+            elif sum(rows.values()) != block.get("disposition_rows"):
+                off.append(f"{p}: rows_by_record sums to {sum(rows.values())}, disposition_rows {block.get('disposition_rows')}")
+        if not seen:
+            self.skipTest("no checked report_claims blocks in this checkout")
+        self.assertEqual(off, [])
+
     def test_the_agentic_arm_is_clean_once_the_guard_is_applied(self):
         """Reverses what this test asserted when it was first written (#550).
 

@@ -207,9 +207,9 @@ def condition_delta(a: str, b: str, records_a: Any = None,
     a difference would have `confounded_note` assert that the runner built
     the two arms differently when in fact it built one arm two ways.
 
-    **This is one field of the five `runs.ARM_PROCEDURE_FIELDS` names**, and
+    **This is one field of the `runs.ARM_PROCEDURE_FIELDS` names**, and
     a delta carrying it is not the record-based answer: `runs.arm_confounds`
-    reads all five and is what governs interpretation. On the v7-against-v8
+    reads every field and is what governs interpretation. On the v7-against-v8
     pair this axis reports `assembly` while the records also differ on the
     schema digest, so the delta still under-reports the evidence — it is a
     narrower instrument that no longer *claims* the prompt is all that moved.
@@ -3712,6 +3712,11 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
         "checked": bool(before.get("checked")),
         "claims_checked_before": before.get("claims_checked"),
         "findings_before": len(before.get("findings") or []),
+        # The regate is the one within-run step that rewrites the record
+        # column — told a `both` row must name `full`, a model can flip
+        # legitimate ones too — so the tally is kept from both sides
+        # (#1139 review, S1); the record's block is the post-regate reading.
+        "rows_by_record_before": before.get("rows_by_record"),
         "regenerated": False}
     if not before.get("checked"):
         out["reason"] = before.get("reason")
@@ -3763,6 +3768,7 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
         after = before
     out["claims_checked_after"] = after.get("claims_checked")
     out["findings_after"] = len(after.get("findings") or [])
+    out["rows_by_record_after"] = after.get("rows_by_record")
     out["remaining"] = (after.get("findings") or [])[:20]
     print(f"   report re-checked: {out['findings_before']} contradiction(s) before, "
           f"{out['findings_after']} after"
