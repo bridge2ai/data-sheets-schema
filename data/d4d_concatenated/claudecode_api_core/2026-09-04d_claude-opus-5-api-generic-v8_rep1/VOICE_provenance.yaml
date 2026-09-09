@@ -545,9 +545,13 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
-  instrument: 'v2 (#1123): a fragment minted on an identifier the record carries for
-    the dataset at its top level — its id in CURIE or resolver form, its doi, its
-    page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+  instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
+    anywhere (a minted id reconciliation stripped) is located as a keyless entry —
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
+    of declared dropped; v2 (#1123): a fragment minted on an identifier the record
+    carries for the dataset at its top level — its id in CURIE or resolver form, its
+    doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
     counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
     commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
@@ -722,6 +726,18 @@ receipts:
     - path: external_resources[9]
       basis: entry_dropped
     index_reused_by_another_entry_count: 2
+    located_after_key_stripped:
+    - path: external_resources[0]
+      resolved_path: external_resources[0]
+    - path: external_resources[6]
+      resolved_path: external_resources[6]
+    - path: external_resources[7]
+      resolved_path: external_resources[7]
+    - path: maintainers[0].maintainer_details
+      resolved_path: maintainers[0].maintainer_details
+    - path: maintainers[1].maintainer_details
+      resolved_path: maintainers[1].maintainer_details
+    located_after_key_stripped_count: 5
     path_not_in_snapshot: []
     path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
@@ -866,7 +882,7 @@ receipts:
     value) · slots 187/343 with a receipt (128 never receipted, 28 added after the
     receipt) (55 exempt) · 23 receipt path(s) reshaped by reconcile · 1 receipt path(s)
     followed by identity · 54 value(s) changed after the receipt · 2 receipt index(es)
-    reused by another entry
+    reused by another entry · 5 entry(ies) located after a stripped key
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_coverage_receipt.yaml
