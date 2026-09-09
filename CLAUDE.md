@@ -553,7 +553,7 @@ instruction defines `both` as present in both — and the finding names
 the cause so the regate can fix the row (`claims_core_cannot_hold` counts
 those the full record does carry, apart from substantive contradictions;
 #990/#992); the block carries
-`instrument` from v2 (#996) and, from v4 (#1122), `rows_by_record` — the
+`instrument` from v2 (#996), from v4 (#1122) `rows_by_record` — the
 dispositions rows tallied by their record column (`full`, `core`, `both`,
 `either` for an empty cell, `no_record_column` for a table that has none —
 a report format that names no record, "not measurable" rather than "no
@@ -566,7 +566,19 @@ count, or the rate over the row total, is what a reader compares. Over the
 rows on slots the core cannot hold are all on the VOICE 2026-09-04d canary.
 The recorded tally is the post-regate reading, and the regate is the step
 that flips rows — `report_gate` carries `rows_by_record_before`/`_after` on
-runs made since #1122. Since #998 the report phase carries the core
+runs made since #1122. From v5 (#1054) the checker reads two more things: with the phase-1
+snapshot (`intermediate/{P}_full.yaml`) a populated top-level slot the
+final full record lacks, with no `removed` row and no removal statement
+naming it, is `removal_not_recorded` — listed under
+`removals_unrecorded` and, where the report carries the table the row
+belongs to, a finding (three of nine v8 reviews had found one: CHORUS
+04f rep2 `regulatory_restrictions`, AI_READI 04g rep3 `content_warnings`,
+VOICE 04f rep2 `data_governance`); on a report that predates the table
+the removals are listed, not findings (`snapshot_basis`); and a prose
+sentence saying a value "remains in" / "stays in" / "is kept in" a
+backticked path is a retention claim, satisfied at that path or by a
+populated key of the leaf's name anywhere in either record. The v7
+production arm reads 0 on all twelve either way. Since #998 the report phase carries the core
 class's top-level slot inventory (`core_inventory_block`) before its
 instruction, so the model can see which slots the core declares rather
 than infer it from the carried core record, where an empty slot and an

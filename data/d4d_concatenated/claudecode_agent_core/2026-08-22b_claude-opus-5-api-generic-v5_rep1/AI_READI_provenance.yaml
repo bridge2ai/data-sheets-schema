@@ -345,7 +345,7 @@ report_claims:
     claim: The audit's most severe finding was that `distributions` "does not exist
       in the supplied schema digest for the Dataset/CoreDataset class," and that ten
       objects carrying the entire per-datatype file inventory sit under it.
-  claims_checked: 0
+  claims_checked: 2
   claims_unnamed: 0
   disposition_rows: 0
   rows_by_record:
@@ -356,14 +356,23 @@ report_claims:
     no_record_column: 0
     invalid: 0
   claims_core_cannot_hold: 0
-  instrument: 'v4 (#1122): `rows_by_record` tallies the dispositions rows by their
-    record column — `full`, `core`, `both`, `either` for an empty cell, `no_record_column`
-    for a table with no such column, `invalid` for anything else — so a `both` row
-    wrongly flipped to `full`, which the gate cannot see (a `full` row resolves against
-    the full record only), is countable from the block; v3 (#1022, #1046): a schema
-    claim that names its own scope — the core schema, the full schema, a class — is
-    resolved against that scope only, not against every class; v2 (#990): a finding
-    on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
+  snapshot_checked: true
+  snapshot_basis: 'no dispositions table: unrecorded removals listed, not findings'
+  prose_retention_claims: 2
+  removals_unrecorded: []
+  removals_unrecorded_count: 0
+  instrument: 'v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
+    snapshot carried that the final full record does not, with no `removed` row or
+    removal sentence naming it, is `removal_not_recorded`; a prose retention claim
+    (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is
+    read like a retained row; v4 (#1122): `rows_by_record` tallies the dispositions
+    rows by their record column — `full`, `core`, `both`, `either` for an empty cell,
+    `no_record_column` for a table with no such column, `invalid` for anything else
+    — so a `both` row wrongly flipped to `full`, which the gate cannot see (a `full`
+    row resolves against the full record only), is countable from the block; v3 (#1022,
+    #1046): a schema claim that names its own scope — the core schema, the full schema,
+    a class — is resolved against that scope only, not against every class; v2 (#990):
+    a finding on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
     counts them'
   artifacts:
     report:
@@ -376,8 +385,8 @@ report_claims:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
       md5: 1914c2abc798732fecf1f7c2c1e3a4d8
   schema:
-    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
-    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
+    full_sha256: 4138914fe8255024ee8d0679b4a38ff4dd7f7c4e23b2caf77c6bc7ca47de3e47
+    core_sha256: c13c83b4e8c7b2d4f9869c379606ecb03a17a8c5bfd834b316a3b4099114024d
   recorded_by: backfill_checks
 grounding:
   checked: true

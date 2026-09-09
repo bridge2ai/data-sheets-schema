@@ -425,7 +425,7 @@ class ScopedSchemaClaimTest(Harness):
 
     def test_the_instrument_names_the_change(self):
         from data_sheets_schema.report_claims import REPORT_CLAIMS_INSTRUMENT
-        self.assertTrue(REPORT_CLAIMS_INSTRUMENT.startswith("v4"),
+        self.assertTrue(REPORT_CLAIMS_INSTRUMENT.startswith("v5"),
                         REPORT_CLAIMS_INSTRUMENT)
         self.assertIn("#1122", REPORT_CLAIMS_INSTRUMENT)
         self.assertIn("#1046", REPORT_CLAIMS_INSTRUMENT)
@@ -523,3 +523,112 @@ class TheFixtureMatchesTheSchemaTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class UnrecordedRemovalTest(Harness):
+    """#1054 (instrument v5): the phase-1 snapshot makes an unrecorded
+    removal deterministic, and a retention claim in prose is a claim."""
+
+    TABLE = ("## Dispositions\n\n| slot | disposition | record | reason |\n|---|---|---|---|\n"
+             "| `keywords` | retained | both | fine |\n")
+
+    def check_with(self, markdown, snapshot, full=None, core=None):
+        import tempfile
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        path = Path(tmp.name) / "r.md"
+        path.write_text(markdown, encoding="utf-8")
+        return check_report(path, full or {}, core or {}, DECLARED, snapshot=snapshot)
+
+    def test_a_slot_the_snapshot_carried_and_the_record_dropped_with_no_row_is_a_finding(self):
+        snap = {"keywords": ["a"], "regulatory_restrictions": {"regulatory_restrictions": "a legal framework"}}
+        full = {"keywords": ["a"]}
+        b = self.check_with(self.TABLE, snap, full=full, core=full)
+        self.assertEqual([(f["kind"], f["slot"], f["record"]) for f in b["findings"]],
+                         [("removal_not_recorded", "regulatory_restrictions", "full")])
+        self.assertTrue(b["snapshot_checked"])
+        self.assertEqual(b["removals_unrecorded"], ["regulatory_restrictions"])
+        self.assertEqual(b["removals_unrecorded_count"], 1)
+        self.assertIn("add a `removed` row or restore the value", b["findings"][0]["detail"])
+
+    def test_a_removed_row_or_a_removal_sentence_records_it(self):
+        snap = {"keywords": ["a"], "data_governance": {"accountable_organization": "USF"}, "content_warnings": {"content_warnings_present": False}}
+        full = {"keywords": ["a"]}
+        md = (self.TABLE + "| `data_governance` | removed | both | out of scope |\n\n"
+              "**Action:** the `content_warnings` object was removed from the record.\n")
+        b = self.check_with(md, snap, full=full, core=full)
+        self.assertEqual([f["kind"] for f in b["findings"] if f["kind"] == "removal_not_recorded"], [])
+        self.assertEqual(b["removals_unrecorded"], [])
+
+    def test_a_whole_object_counts_and_so_does_a_leaf_at_the_root(self):
+        snap = {"keywords": ["a"], "data_governance": {"stewards": [{"name": "x"}]}, "id": "doi:10.1/x"}
+        b = self.check_with(self.TABLE, snap, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual(sorted(f["slot"] for f in b["findings"]), ["data_governance", "id"])
+
+    def test_commentary_and_class_declarations_and_empty_values_are_not_removals(self):
+        snap = {"keywords": ["a"], "notes": "phase-1 note", "source_caveats": ["x"], "conforms_to_schema": "s",
+                "conforms_to_class": "c", "errata": [], "funders": None}
+        b = self.check_with(self.TABLE, snap, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual(b["findings"], [])
+
+    def test_a_value_that_survives_is_not_a_removal_and_an_emptied_one_is(self):
+        snap = {"keywords": ["a"], "funders": [{"name": "NIH"}]}
+        self.assertEqual(self.check_with(self.TABLE, snap, full={"keywords": ["a"], "funders": [{"name": "NIH"}]},
+                                         core={"keywords": ["a"]})["findings"], [])
+        b = self.check_with(self.TABLE, snap, full={"keywords": ["a"], "funders": []}, core={"keywords": ["a"]})
+        self.assertEqual([f["slot"] for f in b["findings"]], ["funders"])
+
+    def test_no_snapshot_is_reported_as_not_checked_never_as_clean(self):
+        b = self.check(self.TABLE, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertFalse(b["snapshot_checked"])
+        self.assertIsNone(b["removals_unrecorded_count"])
+        self.assertEqual(b["removals_unrecorded"], [])
+
+    def test_a_prose_claim_names_a_leaf_or_a_record_and_is_satisfied_anywhere(self):
+        md = (self.TABLE + "\nThe four named reviewers stay in `review_details`; the caveat remains in "
+              "`core.notes`; the split rationale remains in `splits.split_details`.\n")
+        full = {"keywords": ["a"], "ethical_reviews": [{"review_details": "four reviewers"}],
+                "splits": [{"split_details": "70/15/15"}]}
+        core = {"keywords": ["a"], "notes": "the caveat"}
+        b = self.check(md, full=full, core=core)
+        self.assertEqual(b["findings"], [])
+        self.assertEqual(b["prose_retention_claims"], 3)
+        # `core.notes` is the core's notes, not the full record's
+        b = self.check(md, full={**full, "notes": "the caveat"}, core={"keywords": ["a"]})
+        self.assertEqual([f["slot"] for f in b["findings"]], ["core.notes"])
+
+    def test_a_snapshot_diff_without_a_table_lists_and_does_not_find(self):
+        snap = {"keywords": ["a"], "publisher": "NIH"}
+        b = self.check_with("## Changes\n\nProse only, no table.\n", snap, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual(b["findings"], [])
+        self.assertEqual(b["removals_unrecorded"], ["publisher"])
+        self.assertEqual(b["removals_unrecorded_count"], 1)
+        self.assertIn("no dispositions table", b["snapshot_basis"])
+        b = self.check_with(self.TABLE, snap, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual([f["slot"] for f in b["findings"]], ["publisher"])
+        self.assertEqual(b["snapshot_basis"], "unrecorded removals are findings")
+
+    def test_a_prose_retention_claim_is_checked(self):
+        md = (self.TABLE + "\nThe legal analysis remains in `regulatory_restrictions.regulatory_restrictions` "
+              "and the roles stay in `data_governance.stewards`.\n")
+        full = {"keywords": ["a"], "data_governance": {"stewards": [{"name": "x"}]}}
+        b = self.check(md, full=full, core={"keywords": ["a"]})
+        self.assertEqual([(f["kind"], f["slot"], f["record"]) for f in b["findings"]],
+                         [("retention_not_shown", "regulatory_restrictions.regulatory_restrictions", "either")])
+        self.assertEqual(b["prose_retention_claims"], 2)
+        # present in the core alone satisfies it, as an unnamed record column does
+        b = self.check(md, full={"keywords": ["a"]}, core={"keywords": ["a"], "regulatory_restrictions": {"regulatory_restrictions": "x"},
+                                                           "data_governance": {"stewards": [{"name": "x"}]}})
+        self.assertEqual(b["findings"], [])
+
+    def test_a_negated_or_tabled_retention_is_not_a_prose_claim(self):
+        md = (self.TABLE + "| `errata` | retained | both | it remains in `errata` |\n\n"
+              "The caveat no longer remains in `source_caveats`; it was not kept in `notes`.\n")
+        b = self.check(md, full={"keywords": ["a"], "errata": [{"x": 1}]}, core={"keywords": ["a"], "errata": [{"x": 1}]})
+        self.assertEqual(b["prose_retention_claims"], 0)
+        self.assertEqual(b["findings"], [])
+
+    def test_the_instrument_is_v5(self):
+        b = self.check(self.TABLE, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertTrue(b["instrument"].startswith("v5 (#1054)"))
+        self.assertIn("v4 (#1122)", b["instrument"])

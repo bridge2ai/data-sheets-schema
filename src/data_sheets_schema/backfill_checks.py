@@ -161,11 +161,13 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
                                 "reason": "no reconciliation report",
                                 "recorded_by": RECORDED_BY}
     else:
+        from data_sheets_schema.report_claims import phase1_snapshot_for
         block = check_report(
             report,
             yaml.safe_load(full.read_text(encoding="utf-8")) if full.exists() else {},
             yaml.safe_load(core.read_text(encoding="utf-8")) if core.exists() else {},
-            declared if declared is not None else declared_slots())
+            declared if declared is not None else declared_slots(),
+            snapshot=phase1_snapshot_for(core))
         # The report, and the two records it makes claims about, and the
         # schema those claims are resolved against (#1085). The runner writes
         # all four; this wrote only the report, so recomputing a block for an

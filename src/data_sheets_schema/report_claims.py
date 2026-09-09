@@ -276,12 +276,34 @@ _PRESENCE_DISPOSITIONS = {"retained", "kept", "unchanged", "left as-is", "left a
 _DISPOSITION = re.compile(r"^\W*(?:\*\*)?(removed|deleted|dropped|retained|kept|unchanged|"
                           r"left as-is|left as is|changed|amended|corrected|added)\b", re.I)
 
+#: A retention claim in prose (#1054): "the legal analysis remains in
+#: `regulatory_restrictions.regulatory_restrictions`" is the table's
+#: `retained` row said in a sentence, and the first four instrument versions
+#: read only the table and the removal verbs. The path is the backticked one
+#: right after the verb phrase; a negated clause ("no longer remains in") is
+#: not a retention.
+_PROSE_RETAINED = re.compile(
+    r"(?<!\bno longer )(?<!\bnot )\b(?:remains?|stays?|is (?:kept|retained|left|preserved)|"
+    r"are (?:kept|retained|left|preserved)|(?:was|were) (?:kept|retained|left|preserved))\s+"
+    r"(?:in|under|at|on)\s+`([A-Za-z_][\w]*(?:\[(?:\d+|\*)\])?(?:\.[A-Za-z_][\w]*(?:\[(?:\d+|\*)\])?)*)`",
+    re.I)
+
+#: Top-level keys a snapshot diff does not report (#1054): the class
+#: declarations and the commentary slots the receipt denominator also
+#: excludes (#722), which reconciliation rewrites freely.
+_SNAPSHOT_EXEMPT = frozenset({"conforms_to_schema", "conforms_to_class", "notes", "source_caveats"})
+
 
 #: The checker's own version (#996). The block pins the report, both records
 #: and the schema by hash, but the checker moved under #914, #929, #962 and
 #: #990 with nothing recording which reading produced a block; everything
 #: before this constant is v1.
-REPORT_CLAIMS_INSTRUMENT = ("v4 (#1122): `rows_by_record` tallies the dispositions rows by "
+REPORT_CLAIMS_INSTRUMENT = ("v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the "
+                            "snapshot carried that the final full record does not, with no `removed` "
+                            "row or removal sentence naming it, is `removal_not_recorded`; a prose "
+                            "retention claim (`remains in`, `stays in`, `is kept in`, `is retained "
+                            "in` a backticked path) is read like a retained row; "
+                            "v4 (#1122): `rows_by_record` tallies the dispositions rows by "
                             "their record column — `full`, `core`, `both`, `either` for an empty "
                             "cell, `no_record_column` for a table with no such column, `invalid` "
                             "for anything else — so a `both` row wrongly flipped to `full`, "
@@ -462,11 +484,18 @@ def disposition_rows(text: str) -> list[dict[str, str]]:
 
 
 def check_report(report: Path, full: dict, core: dict,
-                 declared: dict[str, set[str]]) -> dict[str, Any]:
+                 declared: dict[str, set[str]],
+                 snapshot: dict | None = None) -> dict[str, Any]:
     """Findings, plus what was skipped.
 
     `declared` maps a class name to its induced slot names — passed in so a
-    caller checking twelve reports builds the SchemaView once.
+    caller checking twelve reports builds the SchemaView once. `snapshot` is
+    the phase-1 record (`intermediate/{P}_full.yaml`, #758) where the runner
+    kept one: with it, a top-level slot the snapshot carried and the final
+    record does not, with no row or sentence recording the removal, is a
+    deterministic finding that needs no claim parsing (#1054, instrument
+    v5). Without it — the agentic path, a run before #758 — that check is
+    reported as not made (`snapshot_checked: false`), never as clean.
     """
     if not report.exists():
         return {"checked": False, "reason": f"no report at {report}",
@@ -481,8 +510,11 @@ def check_report(report: Path, full: dict, core: dict,
         raise ValueError("declared slots carry no `CoreDataset` class; "
                          "the core schema could not be read")
 
+    removal_named: set[str] = set()
+
     def removal(names: list[str], context: str, claim: str) -> None:
         nonlocal claims, unnamed
+        removal_named.update(re.split(r"[.\[]", n, maxsplit=1)[0] for n in names)
         if not names:
             unnamed += 1
             return
@@ -691,6 +723,70 @@ def check_report(report: Path, full: dict, core: dict,
                 "slot": row["slot"], "record": where,
                 "detail": f"report says {row['disposition']}; the {where} record does not carry it" + cause,
                 "claim": row["line"][:240]})
+    # Prose retention claims (#1054): read like a `retained` row that names no
+    # record — present in either record satisfies it — so a sentence saying a
+    # value "remains in `X`" when nothing is at `X` is a finding, not silence.
+    # Table lines are skipped: their cells are read above.
+    prose_retained = 0
+    for line in text.splitlines():
+        if line.lstrip().startswith("|") or _cells(line) or line.strip() in disposition_lines:
+            continue
+        for m in _PROSE_RETAINED.finditer(line):
+            path = m.group(1)
+            claims += 1
+            prose_retained += 1
+            # "remains in `core.notes`" names the record, not a slot called
+            # `core`: the prefix picks the record the claim is about.
+            targets = {"full": full, "core": core}
+            written = path
+            head, _, rest = path.partition(".")
+            if head in targets and rest:
+                targets, path = {head: targets[head]}, rest
+            if any(resolve(rec, path)[0] and _populated(resolve(rec, path)[1]) for rec in targets.values()):
+                continue
+            # Prose names a leaf, not a path: "the four named reviewers stay
+            # in `review_details`" means `ethical_reviews[0].review_details`.
+            # A populated key of that name anywhere in either record
+            # satisfies the claim; only a name found nowhere is a finding.
+            leaf = re.split(r"[.\[]", path)[-1] if not path.endswith("]") else re.split(r"[.\[]", path)[-2]
+            if any(_has_populated_key(rec, leaf) for rec in targets.values()):
+                continue
+            findings.append({
+                "kind": "retention_not_shown", "slot": written, "record": "either",
+                "detail": "report says the value remains there; neither record carries it, "
+                          "at that path or under that name anywhere",
+                "claim": line.strip()[:240]})
+    # The snapshot diff (#1054): deterministic, no claim parsing. A top-level
+    # slot the phase-1 record populated and the final full record does not,
+    # with no `removed` row and no removal sentence naming its root, is a
+    # removal the report did not record — the CHORUS 04f rep2
+    # `regulatory_restrictions` case, the AI_READI 04g rep3 `content_warnings`
+    # case, the VOICE 04f rep2 `data_governance` object (five receipted
+    # leaves). Objects and leaves alike: the test is the root key.
+    # A finding only where the report carries the table the row belongs to:
+    # a report written before the table was asked for (#929) has no row for
+    # anything, and every removal in it would read as unrecorded. Those are
+    # listed under `removals_unrecorded` and not counted as findings, the
+    # #684 precedent — a check the instruction never asked for is not a
+    # floor of 0.
+    unrecorded: list[dict[str, str]] = []
+    if isinstance(snapshot, dict):
+        for key, before in snapshot.items():
+            if key in _SNAPSHOT_EXEMPT or not _populated(before):
+                continue
+            if key in full and _populated(full.get(key)):
+                continue
+            if key in removal_named:
+                continue
+            unrecorded.append({"slot": key})
+            if not rows:
+                continue
+            findings.append({
+                "kind": "removal_not_recorded", "slot": key, "record": "full",
+                "detail": (f"the phase-1 record carried `{key}` ({_describe(before)}); the final "
+                           f"record does not, and no Dispositions row and no removal statement the "
+                           f"checker reads names it — add a `removed` row or restore the value"),
+                "claim": ""})
     seen, unique = set(), []
     for f in findings:
         key = (f["kind"], f.get("slot"), f.get("record"))
@@ -710,7 +806,37 @@ def check_report(report: Path, full: dict, core: dict,
             # declare (#990/#992): a mis-named record rather than a
             # substantive contradiction, and a reader should see the two apart.
             "claims_core_cannot_hold": core_cannot_hold,
+            # The snapshot diff (#1054): made or not, and what it found. A
+            # record with no snapshot reads `false` here, not zero findings.
+            "snapshot_checked": isinstance(snapshot, dict),
+            "snapshot_basis": (None if not isinstance(snapshot, dict)
+                               else "unrecorded removals are findings" if rows
+                               else "no dispositions table: unrecorded removals listed, not findings"),
+            "prose_retention_claims": prose_retained,
+            "removals_unrecorded": [u["slot"] for u in unrecorded],
+            "removals_unrecorded_count": len(unrecorded) if isinstance(snapshot, dict) else None,
             "instrument": REPORT_CLAIMS_INSTRUMENT}
+
+
+def _has_populated_key(node: Any, name: str) -> bool:
+    """A populated mapping key of this name anywhere in the structure."""
+    if isinstance(node, dict):
+        if name in node and _populated(node[name]):
+            return True
+        return any(_has_populated_key(v, name) for v in node.values())
+    if isinstance(node, list):
+        return any(_has_populated_key(v, name) for v in node)
+    return False
+
+
+def phase1_snapshot_for(core_path: Path) -> dict | None:
+    """The phase-1 snapshot beside a core record, by the same rule the
+    receipts join uses (`receipts.phase1_snapshot`, #758/#761): the
+    highest-numbered `intermediate/{P}_full*.yaml`. None where the runner
+    kept none."""
+    from data_sheets_schema.receipts import phase1_snapshot
+    receipt = core_path.parent / core_path.name.replace("_d4d_core.yaml", "_coverage_receipt.yaml")
+    return phase1_snapshot(receipt)
 
 
 def declared_slots() -> dict[str, set[str]]:

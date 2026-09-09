@@ -1344,6 +1344,45 @@ steps need:
     change: a derived key in the provenance record, no prompt, assembly or
     datasheet touched.
 
+19. **An unrecorded removal is a finding, and a prose retention claim is a
+    claim (#1054, 2026-09-09, report_claims instrument v5).** Three of nine
+    v8 reviews found a top-level slot the phase-1 record carried, receipted,
+    that both final records lack with no Dispositions row and no audit
+    finding — CHORUS 04f rep2 `regulatory_restrictions` (the report's prose
+    says the analysis "remains in" it), AI_READI 04g rep3 `content_warnings`
+    (a receipted "No"), VOICE 04f rep2 the whole `data_governance` object
+    (five receipted leaves) — and the checker read 31, 10 and 94 claims
+    and found nothing. v5 adds two readings. With the phase-1 snapshot
+    (`intermediate/{P}_full.yaml`, 86 records) a populated top-level slot
+    the final full record does not carry, with no `removed` row and no
+    removal statement the checker reads naming its root, is
+    `removal_not_recorded` — deterministic, no claim parsing, objects and
+    leaves alike; `conforms_to_schema`/`conforms_to_class`, `notes` and
+    `source_caveats` are exempt as they are from the receipt denominator.
+    The finding needs the table the row belongs to: on the 68 snapshot
+    records whose report predates the table (#929) the removals are listed
+    under `removals_unrecorded` and are not findings (`snapshot_basis` says
+    which; the #684 precedent). A sentence saying a value "remains in",
+    "stays in", "is kept in" a backticked path is read like a `retained`
+    row that names no record — satisfied at that path in either record, or
+    by a populated key of the leaf's name anywhere in either (prose names
+    the leaf: "the four named reviewers stay in `review_details`"), a
+    `core.`/`full.` prefix picking the record; 162 such claims corpus-wide.
+    Recomputed with `backfill-checks --blocks report_claims --overwrite`
+    over the 277 checked records: 5 moved — the three instances above, the
+    VOICE 04d canary (5 → 6, `conforms_to_standard`; already regressed and
+    not retained, its stored canary block predates v5) and the 2026-08-13
+    v4 CM4AI rep2 record (`created_on`); the 2026-09-01 v7 arm reads 0 on
+    all twelve before and after, so no baseline and no retained verdict
+    moves. 93 removals are listed corpus-wide under the no-table basis. The
+    first cut of v5 counted an unrecorded removal on every snapshot record
+    and read a leaf-named prose claim as a full path: 48 records moved,
+    most of them reports that were never asked for a row; both readings
+    were narrowed before the recompute was kept. The regate sees the new
+    class through the same contradictions list (add a `removed` row or
+    restore the value). Not a generation-path change. (Numbered 19 with
+    #1162's 17 and #1173's 18 still open.)
+
 Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14 and 16
 are not; 15 is classified with 17, the receipts instrument's next revision,
 #1053); per the production rule none of them may land between a v8 canary
