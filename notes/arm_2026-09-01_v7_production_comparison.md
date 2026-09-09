@@ -210,6 +210,23 @@ verdict offline under v3, with the prior v2-basis verdict kept under
 retention now sits under a regressed-on-British v3 verdict, and every
 other row is unchanged.
 
+**CM4AI rep1's canary block, re-derived (2026-09-09, #922).** The block
+the #876 re-verdict wrote carried the v2 British baseline (0 vs 0) and
+predated the addressing-slips row (#891); under #907 the v2 numbers no
+longer exist in the corpus, so its basis — "recomputes against the same
+2026-08-22c baseline the batch used" — named rows that could not be
+reproduced. Re-derived offline with `d4d api verdict` under today's
+instrument, the prior block kept under `prior_verdict`: status `ok`
+either way; British reads 0 vs a baseline worst of 4 (v3), the
+addressing-slips row is present at 0 vs 0, and the report-findings row
+reads unmeasured rather than 0 vs 2 — the record's own report block read
+no claim (`claims_checked` 0, #684: an earlier record's vacuous row is
+shown as unmeasured and not gated) and the baseline's worst is now 1
+over the one 2026-08-22c replicate that measured (two were vacuous).
+CHORUS and VOICE rep1 still carry no block: the batch of 2026-09-01
+wrote none for a passed canary (#1020 changed that for later runs), and
+a verdict they never carried is not re-derived here.
+
 **Correction (2026-09-03, #805/#916):** the rule-08 verdicts on the
 Person-ranged slots — `principal_investigator`, `contact_person`,
 `committee_contact` — in six records (CM4AI rep1/2/3, VOICE rep1, CHORUS
