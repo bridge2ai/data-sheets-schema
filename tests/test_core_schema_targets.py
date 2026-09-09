@@ -5,9 +5,10 @@ linkml-validate no longer accepts, so it exited 2 on main and nothing in CI
 noticed because nothing in CI called it. The recipe now has two halves —
 the linter's metamodel validation on every file, and gen-python's
 resolution of every slot, range and import — and each half is pinned by a
-break only it catches: a wrapper whose `title` is a number passes gen-python
-and fails the linter; a module with an unknown key passes plain
-`linkml-lint` (and `make lint-core`) and fails gen-python. The recipe is
+break only it catches: a `title` that is a number passes gen-python and
+fails the linter (in the wrapper and in a module, since the linter reads
+one file); a range no schema declares passes the linter on every file and
+fails gen-python. The recipe is
 exercised through `make` itself, with the schema path overridden on the
 command line, so the test reads the Makefile the operator runs rather than
 a restatement of it. A check that cannot fail is not a check.
@@ -41,16 +42,22 @@ class TestValidateCore(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("Core schema validates", result.stdout)
 
-    def test_an_unknown_key_in_the_module_fails_the_recipe(self):
-        """Plain `linkml-lint` reports no problem for this (verified in the
-        #1136 review); gen-python names it."""
+    def test_an_unknown_range_in_the_module_fails_the_recipe(self):
+        """The break the linter cannot see (#1136 review, round 2, M1): the
+        metamodel check reads one file's raw YAML, so a range no schema
+        declares passes it — every linted file reports no problem — and only
+        gen-python's cross-file resolution names it. This case pins the
+        gen-python line; delete it and this test fails."""
         def edit(d):
             m = d / "D4D_Core.yaml"
-            m.write_text(m.read_text().replace("\nclasses:", "\ndescriptionnn: not a metamodel key\nclasses:", 1))
+            text = m.read_text()
+            self.assertIn("\n        range: CoreDataset\n", text)
+            m.write_text(text.replace("\n        range: CoreDataset\n", "\n        range: NoSuchClassXYZ\n", 1))
         with tempfile.TemporaryDirectory() as tmp:
             result = _make("validate-core", f"D4D_CORE_SCHEMA={_broken_copy(tmp, edit)}")
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("descriptionnn", result.stdout + result.stderr)
+        self.assertIn("NoSuchClassXYZ", result.stdout + result.stderr)
+        self.assertNotIn("✖", result.stdout)                     # the linter passed every file
 
     def test_a_metamodel_break_in_the_wrapper_fails_the_recipe(self):
         """gen-python coerces a numeric title and passes; only the linter's
@@ -63,7 +70,8 @@ class TestValidateCore(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             result = _make("validate-core", f"D4D_CORE_SCHEMA={_broken_copy(tmp, edit)}")
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("title", result.stdout + result.stderr)
+        self.assertIn("12345", result.stdout + result.stderr)   # the planted sentinel, echoed by the linter
+        self.assertIn(CORE.name, result.stdout)                  # named as the file that failed
 
     def test_a_metamodel_break_in_the_module_fails_the_recipe(self):
         """The linter does not follow imports, so the recipe lints each
@@ -77,7 +85,8 @@ class TestValidateCore(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             result = _make("validate-core", f"D4D_CORE_SCHEMA={_broken_copy(tmp, edit)}")
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("title", result.stdout + result.stderr)
+        self.assertIn("999", result.stdout + result.stderr)
+        self.assertIn("D4D_Core.yaml", result.stdout)
 
 
 if __name__ == "__main__":

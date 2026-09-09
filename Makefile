@@ -410,14 +410,13 @@ $(D4D_CORE_SCHEMA_ALL): $(D4D_CORE_SCHEMA) $(SOURCE_SCHEMA_DIR)D4D_Core.yaml $(C
 
 validate-core: ## Validate the core exchange schema (metamodel shape of every file, then every range and slot resolved)
 	@# linkml-validate lost its schema-validation flag (#1127). Two checks stand in for it: the linter's
-	@# metamodel validation, run on the wrapper and on each imported module because the linter does
-	@# not follow imports; and gen-python, which resolves every slot, range and import and fails on
-	@# an unrecognized range, an unknown key or an unknown parent where the linter reports no problem.
-	@# The modules are taken from the wrapper's own directory, so an override of
-	@# D4D_CORE_SCHEMA (the test's broken copy) lints that copy's modules, not the repo's.
-	@for f in $(D4D_CORE_SCHEMA) $(addprefix $(dir $(D4D_CORE_SCHEMA)),$(notdir $(SOURCE_SCHEMA_DIR)D4D_Core.yaml $(CORE_SCHEMA_IMPORTS))); do \
-		$(RUN) linkml-lint --validate-only $$f || exit 1; \
-	done
+	@# metamodel validation, run on the wrapper and on each imported module in one interpreter
+	@# (scripts/lint_schema_files.py) because the linter reads one file and does not follow imports;
+	@# and gen-python, which resolves every slot, range and import across files and fails on an
+	@# unrecognized range, an unknown is_a parent or a duplicate key where the linter reports no problem.
+	@# The module names are the repo's import list, resolved in the wrapper's own directory, so an
+	@# override of D4D_CORE_SCHEMA (the test's broken copy) lints that copy's modules, not the repo's.
+	$(RUN) python scripts/lint_schema_files.py $(D4D_CORE_SCHEMA) $(addprefix $(dir $(D4D_CORE_SCHEMA)),$(notdir $(SOURCE_SCHEMA_DIR)D4D_Core.yaml $(CORE_SCHEMA_IMPORTS)))
 	$(RUN) gen-python $(D4D_CORE_SCHEMA) > /dev/null
 	@echo "✓ Core schema validates: $(D4D_CORE_SCHEMA)"
 
