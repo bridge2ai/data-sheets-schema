@@ -65,6 +65,42 @@ class TestTheDeclarationItself(unittest.TestCase):
         self.assertIn("https://doi.org/10.13026/mf9s-5r03", ids)
 
 
+class TestTheAliasesOfAnEntry(unittest.TestCase):
+    """#1070: `related_ids` iterated a scalar `also_known_as` character by
+    character, so the identifier map held single characters instead of the
+    alias and a record naming that alias passed the check. The renderer half
+    was #1068; this is the checker's, and both read one definition now."""
+
+    def test_a_scalar_alias_is_one_identifier_not_its_characters(self):
+        entry = {"id": "https://doi.org/10.1/PROJ", "also_known_as": "https://doi.org/10.1/PROJ.v2"}
+        self.assertEqual(scope.aliases_of(entry), ["https://doi.org/10.1/PROJ", "https://doi.org/10.1/PROJ.v2"])
+
+    def test_a_list_and_no_alias_at_all(self):
+        self.assertEqual(scope.aliases_of({"id": "a", "also_known_as": ["b", " c "]}), ["a", "b", "c"])
+        self.assertEqual(scope.aliases_of({"id": "a"}), ["a"])
+        self.assertEqual(scope.aliases_of({"id": "a", "also_known_as": None}), ["a"])
+        self.assertEqual(scope.aliases_of("not an entry"), [])
+
+    def test_related_ids_maps_the_scalar_alias_to_its_entry(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            manifest = Path(tmp) / "m.yaml"
+            manifest.write_text(yaml.safe_dump({"scope": {"P": {
+                "referent_id": "https://doi.org/10.1/P",
+                "related_but_distinct": [{"id": "https://doi.org/10.1/OTHER",
+                                          "also_known_as": "https://doi.org/10.1/OTHER.v3",
+                                          "express_as": "related_datasets"}]}}}))
+            ids = scope.related_ids("P", manifest)
+        self.assertIn("https://doi.org/10.1/OTHER.v3", ids)
+        self.assertNotIn("h", ids)                                     # the first character of the alias
+        self.assertEqual(set(ids), {"https://doi.org/10.1/OTHER", "https://doi.org/10.1/OTHER.v3"})
+
+    def test_the_scope_block_and_the_checker_read_one_definition(self):
+        import inspect
+        from data_sheets_schema import api_runner
+        self.assertIn("aliases_of", inspect.getsource(api_runner.scope_block)
+                      if hasattr(api_runner, "scope_block") else inspect.getsource(api_runner))
+
+
 class TestCheckingARecord(unittest.TestCase):
     def test_a_record_about_the_companion_cohort_is_caught(self):
         status, why = scope.check_record(
