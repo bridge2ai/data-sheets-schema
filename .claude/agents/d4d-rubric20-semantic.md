@@ -578,11 +578,21 @@ Return your evaluation as a **JSON object** with this EXACT structure:
   },
   "metadata": {
     "evaluator_id": "<uuid>",
-    "rubric_hash": "<sha256 of rubric20.txt>",
+    "instrument_sha256": "<sha256 of .claude/agents/d4d-rubric20-semantic.md, this file>",
+    "rubric_hash": "<sha256 of data/rubric/rubric20.txt>",
     "d4d_file_hash": "<sha256 of D4D file>"
   }
 }
 ```
+
+**Why two hashes (#1077).** `rubric_hash` names the rubric *text*; the rules
+that decide a score live in this file, and the text did not change across the
+Element 4 gate fix (#1060), the software threshold (#1059) or its
+re-adjudication (#1082) — three revisions that moved scores. So a rubric-text
+hash cannot tell two instruments apart, and the evaluations that followed the
+old contract exactly are the ones whose instrument their own artifact cannot
+name. Record both: `instrument_sha256` identifies the scoring rules,
+`rubric_hash` the text they read.
 
 ## Batch Evaluation Summary Output
 

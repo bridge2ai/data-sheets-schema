@@ -1,0 +1,1389 @@
+{
+ "_note": "Resolve which instrument version scored each semantic rubric evaluation (#1077).",
+ "rubrics": {
+  "rubric10_semantic": {
+   "agent_versions": [
+    {
+     "sha256": "3f0a1403f65823eb4245c08b8e1a19745fa7b9485ac87805150208d57f20341a",
+     "first_seen": "2025-12-08T23:53:57-08:00",
+     "commit": "9e6cc422"
+    },
+    {
+     "sha256": "4865d9661e6d1908e1eae1714d506de5a793973af2fd3d6712fb57c20b17014b",
+     "first_seen": "2025-12-09T00:21:49-08:00",
+     "commit": "dc660ee3"
+    },
+    {
+     "sha256": "cf02ff790e99d30efbd82a305739d532149a46c314d0a514da1eaa93f211a421",
+     "first_seen": "2025-12-20T21:46:56-08:00",
+     "commit": "34ca200d"
+    },
+    {
+     "sha256": "2424ed59533ff9bce70ca81ebab88ad5edf333678a3092cd321b5d6058af2b96",
+     "first_seen": "2026-07-22T15:46:06-07:00",
+     "commit": "0e19e85f"
+    },
+    {
+     "sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "first_seen": "2026-07-28T18:11:40-07:00",
+     "commit": "fa90b4ec"
+    },
+    {
+     "sha256": "563b6ecfe4921b699b2d1a59002a597c567ed166976a0c32f73edbb8e30d5d0f",
+     "first_seen": "2026-09-07T21:08:34-07:00",
+     "commit": "5c891e23"
+    },
+    {
+     "sha256": "293efed52f0d54d1a3d187b539860b7e0202a79ffed6edcb9e8d1b2e16930d16",
+     "first_seen": "2026-09-07T21:14:41-07:00",
+     "commit": "6d8b25d0"
+    },
+    {
+     "sha256": "f7c436bf01c535f9f91afd8ad9d5e2b0a3cfd53f800f1f53364b842967283157",
+     "first_seen": "2026-09-07T22:11:49-07:00",
+     "commit": "1715b5a3"
+    },
+    {
+     "sha256": "5e25e82459a73e6cef3914aecceb659cc2d9f6209d2ca483709112b8a3c5ca6b",
+     "first_seen": "2026-09-08T10:34:45-07:00",
+     "commit": "8813c8e6"
+    },
+    {
+     "sha256": "4dd2536f7e131b5f1238cbd1713c6d60d123a6a3ffbe609e17775869c27ca4ac",
+     "first_seen": "2026-09-08T10:46:57-07:00",
+     "commit": "10db82f4"
+    },
+    {
+     "sha256": "0055f0369347ccf9a68bf65a256cd217f7e496fac5afd56356024d101918d0dd",
+     "first_seen": "2026-09-08T13:23:41-07:00",
+     "commit": "119e3171"
+    },
+    {
+     "sha256": "f46bb6ad765f556f97dd9bf1d57078598fd4969f07306e246507548a741dbd89",
+     "first_seen": "2026-09-08T14:11:45-07:00",
+     "commit": "7b343e70"
+    },
+    {
+     "sha256": "2e1340147d494786a3957e892f5992fff97e6a86c0d6ca52a4eddcc6518ec7ec",
+     "first_seen": "2026-09-08T15:13:22-07:00",
+     "commit": "8f6d4e23"
+    },
+    {
+     "sha256": "be1ce3ed6784184d70eb04e00e467e2646a9cbb4dcddc6004d0efa58bc0a5550",
+     "first_seen": "2026-09-08T19:05:08-07:00",
+     "commit": "76ccc4ea"
+    }
+   ],
+   "evaluations": {
+    "concatenated/2026-07-22_opus-4.8/AI_READI_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/2026-07-22_opus-4.8/AI_READI_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (sha256-place\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/2026-07-22_opus-4.8/CHORUS_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (sha256-rubri\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/2026-07-22_opus-4.8/CHORUS_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (sha256:rubri\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/2026-07-22_opus-4.8/CM4AI_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (sha256-place\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/2026-07-22_opus-4.8/CM4AI_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (sha256-rubri\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/2026-07-22_opus-4.8/VOICE_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (e3b0c44298fc\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/2026-07-22_opus-4.8/VOICE_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (sha256:place\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/AI_READI_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (rubric10-sem\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/AI_READI_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (not_computed\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/AI_READI_claudecode_assistant_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "cb0a9596",
+     "instrument_sha256": "cf02ff790e99d30efbd82a305739d532149a46c314d0a514da1eaa93f211a421",
+     "instrument_commit": "34ca200d"
+    },
+    "concatenated/AI_READI_claudecode_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "cb0a9596",
+     "instrument_sha256": "cf02ff790e99d30efbd82a305739d532149a46c314d0a514da1eaa93f211a421",
+     "instrument_commit": "34ca200d"
+    },
+    "concatenated/AI_READI_gpt5_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "cb0a9596",
+     "instrument_sha256": "cf02ff790e99d30efbd82a305739d532149a46c314d0a514da1eaa93f211a421",
+     "instrument_commit": "34ca200d"
+    },
+    "concatenated/CHORUS_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (rubric10-sem\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/CHORUS_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/CHORUS_claudecode_assistant_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "cb0a9596",
+     "instrument_sha256": "cf02ff790e99d30efbd82a305739d532149a46c314d0a514da1eaa93f211a421",
+     "instrument_commit": "34ca200d"
+    },
+    "concatenated/CHORUS_claudecode_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "cb0a9596",
+     "instrument_sha256": "cf02ff790e99d30efbd82a305739d532149a46c314d0a514da1eaa93f211a421",
+     "instrument_commit": "34ca200d"
+    },
+    "concatenated/CHORUS_gpt5_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "cb0a9596",
+     "instrument_sha256": "cf02ff790e99d30efbd82a305739d532149a46c314d0a514da1eaa93f211a421",
+     "instrument_commit": "34ca200d"
+    },
+    "concatenated/CM4AI_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/CM4AI_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/CM4AI_claudecode_assistant_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "cb0a9596",
+     "instrument_sha256": "cf02ff790e99d30efbd82a305739d532149a46c314d0a514da1eaa93f211a421",
+     "instrument_commit": "34ca200d"
+    },
+    "concatenated/CM4AI_claudecode_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "cb0a9596",
+     "instrument_sha256": "cf02ff790e99d30efbd82a305739d532149a46c314d0a514da1eaa93f211a421",
+     "instrument_commit": "34ca200d"
+    },
+    "concatenated/CM4AI_gpt5_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "cb0a9596",
+     "instrument_sha256": "cf02ff790e99d30efbd82a305739d532149a46c314d0a514da1eaa93f211a421",
+     "instrument_commit": "34ca200d"
+    },
+    "concatenated/VOICE_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (not_computed\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/VOICE_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (rubric10-sem\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/VOICE_claudecode_assistant_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "cb0a9596",
+     "instrument_sha256": "cf02ff790e99d30efbd82a305739d532149a46c314d0a514da1eaa93f211a421",
+     "instrument_commit": "34ca200d"
+    },
+    "concatenated/VOICE_claudecode_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "cb0a9596",
+     "instrument_sha256": "cf02ff790e99d30efbd82a305739d532149a46c314d0a514da1eaa93f211a421",
+     "instrument_commit": "34ca200d"
+    },
+    "concatenated/VOICE_gpt5_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "cb0a9596",
+     "instrument_sha256": "cf02ff790e99d30efbd82a305739d532149a46c314d0a514da1eaa93f211a421",
+     "instrument_commit": "34ca200d"
+    },
+    "concatenated/_archive_2026-07-22/AI_READI_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/_archive_2026-07-22/AI_READI_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/_archive_2026-07-22/CHORUS_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/_archive_2026-07-22/CHORUS_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/_archive_2026-07-22/CM4AI_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/_archive_2026-07-22/CM4AI_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/_archive_2026-07-22/VOICE_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/_archive_2026-07-22/VOICE_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/AI_READI_2026-08-20b_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "672ab6c8",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/AI_READI_2026-08-22c_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/AI_READI_2026-08-24agentic_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/AI_READI_2026-08-28agentic_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/AI_READI_2026-08-28agentic_rep2_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/AI_READI_2026-08-28agentic_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/AI_READI_2026-08-28bapi_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/AI_READI_2026-08-28capi_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/AI_READI_2026-08-28dapi_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/AI_READI_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "563b6ecfe4921b699b2d1a59002a597c567ed166976a0c32f73edbb8e30d5d0f",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/AI_READI_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/AI_READI_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "563b6ecfe4921b699b2d1a59002a597c567ed166976a0c32f73edbb8e30d5d0f",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/AI_READI_2026-09-04gapi_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "7b343e70",
+     "instrument_sha256": "f46bb6ad765f556f97dd9bf1d57078598fd4969f07306e246507548a741dbd89",
+     "instrument_commit": "7b343e70"
+    },
+    "label_aware/AI_READI_2026-09-04gapi_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/AI_READI_2026-09-04gapi_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "119e3171",
+     "instrument_sha256": "0055f0369347ccf9a68bf65a256cd217f7e496fac5afd56356024d101918d0dd",
+     "instrument_commit": "119e3171"
+    },
+    "label_aware/CHORUS_2026-08-20b_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "672ab6c8",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CHORUS_2026-08-22c_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CHORUS_2026-08-24agentic_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CHORUS_2026-08-28agentic_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CHORUS_2026-08-28agentic_rep2_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CHORUS_2026-08-28agentic_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CHORUS_2026-08-28api_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CHORUS_2026-08-28bapi_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CHORUS_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CHORUS_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CHORUS_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CHORUS_2026-09-04fapi_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "9a859cd1",
+     "instrument_sha256": "f46bb6ad765f556f97dd9bf1d57078598fd4969f07306e246507548a741dbd89",
+     "instrument_commit": "7b343e70"
+    },
+    "label_aware/CHORUS_2026-09-04fapi_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CHORUS_2026-09-04fapi_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CM4AI_2026-08-20b_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "672ab6c8",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CM4AI_2026-08-22c_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CM4AI_2026-08-24agentic_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CM4AI_2026-08-28agentic_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CM4AI_2026-08-28agentic_rep2_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CM4AI_2026-08-28agentic_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/CM4AI_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "2e1340147d494786a3957e892f5992fff97e6a86c0d6ca52a4eddcc6518ec7ec",
+     "instrument_commit": "8f6d4e23"
+    },
+    "label_aware/CM4AI_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "2e1340147d494786a3957e892f5992fff97e6a86c0d6ca52a4eddcc6518ec7ec",
+     "instrument_commit": "8f6d4e23"
+    },
+    "label_aware/CM4AI_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "2e1340147d494786a3957e892f5992fff97e6a86c0d6ca52a4eddcc6518ec7ec",
+     "instrument_commit": "8f6d4e23"
+    },
+    "label_aware/CM4AI_2026-09-04gapi_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "7b343e70",
+     "instrument_sha256": "f46bb6ad765f556f97dd9bf1d57078598fd4969f07306e246507548a741dbd89",
+     "instrument_commit": "7b343e70"
+    },
+    "label_aware/CM4AI_2026-09-04gapi_rep2_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "7b343e70",
+     "instrument_sha256": "f46bb6ad765f556f97dd9bf1d57078598fd4969f07306e246507548a741dbd89",
+     "instrument_commit": "7b343e70"
+    },
+    "label_aware/CM4AI_2026-09-04gapi_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "7b343e70",
+     "instrument_sha256": "f46bb6ad765f556f97dd9bf1d57078598fd4969f07306e246507548a741dbd89",
+     "instrument_commit": "7b343e70"
+    },
+    "label_aware/VOICE_2026-08-20b_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "672ab6c8",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/VOICE_2026-08-22c_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/VOICE_2026-08-24agentic_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/VOICE_2026-08-28agentic_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/VOICE_2026-08-28agentic_rep2_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/VOICE_2026-08-28agentic_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/VOICE_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/VOICE_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/VOICE_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/VOICE_2026-09-04fapi_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/VOICE_2026-09-04fapi_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/VOICE_2026-09-04fapi_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/superseded_fable5/AI_READI_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/superseded_fable5/AI_READI_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/superseded_fable5/AI_READI_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "563b6ecfe4921b699b2d1a59002a597c567ed166976a0c32f73edbb8e30d5d0f",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/superseded_fable5/CHORUS_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/superseded_fable5/CHORUS_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "563b6ecfe4921b699b2d1a59002a597c567ed166976a0c32f73edbb8e30d5d0f",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/superseded_fable5/CHORUS_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/superseded_fable5/CM4AI_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "563b6ecfe4921b699b2d1a59002a597c567ed166976a0c32f73edbb8e30d5d0f",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/superseded_fable5/CM4AI_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/superseded_fable5/CM4AI_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/superseded_fable5/VOICE_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/superseded_fable5/VOICE_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "563b6ecfe4921b699b2d1a59002a597c567ed166976a0c32f73edbb8e30d5d0f",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/superseded_fable5/VOICE_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/superseded_gate_v1/CM4AI_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/superseded_gate_v1/CM4AI_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/superseded_gate_v1/CM4AI_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/superseded_gate_v1/CM4AI_2026-09-04gapi_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/superseded_gate_v1/CM4AI_2026-09-04gapi_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/superseded_gate_v1/CM4AI_2026-09-04gapi_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/superseded_software_role/CM4AI_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "8f6d4e23",
+     "instrument_sha256": "2e1340147d494786a3957e892f5992fff97e6a86c0d6ca52a4eddcc6518ec7ec",
+     "instrument_commit": "8f6d4e23"
+    },
+    "label_aware/superseded_software_role/CM4AI_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "8f6d4e23",
+     "instrument_sha256": "2e1340147d494786a3957e892f5992fff97e6a86c0d6ca52a4eddcc6518ec7ec",
+     "instrument_commit": "8f6d4e23"
+    },
+    "label_aware/superseded_software_role/CM4AI_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "8f6d4e23",
+     "instrument_sha256": "2e1340147d494786a3957e892f5992fff97e6a86c0d6ca52a4eddcc6518ec7ec",
+     "instrument_commit": "8f6d4e23"
+    },
+    "label_aware/superseded_software_threshold/AI_READI_2026-09-04gapi_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/superseded_software_threshold/CM4AI_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "7b343e70",
+     "instrument_sha256": "f46bb6ad765f556f97dd9bf1d57078598fd4969f07306e246507548a741dbd89",
+     "instrument_commit": "7b343e70"
+    },
+    "label_aware/superseded_software_threshold/CM4AI_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "7b343e70",
+     "instrument_sha256": "f46bb6ad765f556f97dd9bf1d57078598fd4969f07306e246507548a741dbd89",
+     "instrument_commit": "7b343e70"
+    },
+    "label_aware/superseded_software_threshold/CM4AI_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "7b343e70",
+     "instrument_sha256": "f46bb6ad765f556f97dd9bf1d57078598fd4969f07306e246507548a741dbd89",
+     "instrument_commit": "7b343e70"
+    },
+    "label_aware/superseded_software_threshold/CM4AI_2026-09-04gapi_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "7b343e70",
+     "instrument_sha256": "f46bb6ad765f556f97dd9bf1d57078598fd4969f07306e246507548a741dbd89",
+     "instrument_commit": "7b343e70"
+    },
+    "label_aware/superseded_software_threshold/CM4AI_2026-09-04gapi_rep2_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "7b343e70",
+     "instrument_sha256": "f46bb6ad765f556f97dd9bf1d57078598fd4969f07306e246507548a741dbd89",
+     "instrument_commit": "7b343e70"
+    },
+    "label_aware/superseded_software_threshold/CM4AI_2026-09-04gapi_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "7b343e70",
+     "instrument_sha256": "f46bb6ad765f556f97dd9bf1d57078598fd4969f07306e246507548a741dbd89",
+     "instrument_commit": "7b343e70"
+    }
+   }
+  },
+  "rubric20_semantic": {
+   "agent_versions": [
+    {
+     "sha256": "ecb2ee697e43e56e907b8292401c783e4eac81558052363d45a499eda83be908",
+     "first_seen": "2025-12-08T23:53:57-08:00",
+     "commit": "9e6cc422"
+    },
+    {
+     "sha256": "a5a63130c9d2b9523f93ebb0d1d117abba12d890840648f15bb97bb77ea5a000",
+     "first_seen": "2025-12-09T00:21:49-08:00",
+     "commit": "dc660ee3"
+    },
+    {
+     "sha256": "58923398176651e98bc8eadd89c62303960b9049738eed6d39860761adbf92be",
+     "first_seen": "2025-12-20T21:46:56-08:00",
+     "commit": "34ca200d"
+    },
+    {
+     "sha256": "54526b05044108abd2e330d87db5b6a3d9dea9e322d670ab04c754907eea09ec",
+     "first_seen": "2026-07-22T15:46:06-07:00",
+     "commit": "0e19e85f"
+    },
+    {
+     "sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "first_seen": "2026-07-28T18:11:40-07:00",
+     "commit": "fa90b4ec"
+    },
+    {
+     "sha256": "73718ae2a9fc376f17465b44aedc80727bdecf94804eccc1af5c56190ea5cc5c",
+     "first_seen": "2026-08-04T19:31:03-07:00",
+     "commit": "5f9600fa"
+    },
+    {
+     "sha256": "9ef05ec1995a5ba809f8d102f07dbef8e8da9cdf67f1e8cafaa2e6963244f3ac",
+     "first_seen": "2026-08-04T19:45:07-07:00",
+     "commit": "07bf158d"
+    },
+    {
+     "sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "first_seen": "2026-08-26T15:18:55-07:00",
+     "commit": "5163e862"
+    },
+    {
+     "sha256": "edf503ca00ecbfff4d3862f771c386445477e853ad1eb16af939691f6c4e87c7",
+     "first_seen": "2026-09-07T21:08:34-07:00",
+     "commit": "5c891e23"
+    },
+    {
+     "sha256": "e3e8e8233719681f683478d1a9d9d7486f5dbd5378c450e854828965bbf36596",
+     "first_seen": "2026-09-07T21:14:41-07:00",
+     "commit": "6d8b25d0"
+    },
+    {
+     "sha256": "2602ec105973f1ee77963a1ad1c7614fc53110c07361bbaf9250b522198150af",
+     "first_seen": "2026-09-07T22:11:49-07:00",
+     "commit": "1715b5a3"
+    },
+    {
+     "sha256": "46a77d682087747fe424bc5fc28c9af12a9107b2b2ee72a89b43d8d3b490389e",
+     "first_seen": "2026-09-08T19:05:08-07:00",
+     "commit": "76ccc4ea"
+    }
+   ],
+   "evaluations": {
+    "concatenated/2026-07-22_opus-4.8/AI_READI_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/2026-07-22_opus-4.8/AI_READI_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (sha256-rubri\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/2026-07-22_opus-4.8/CHORUS_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (sha256-rubri\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/2026-07-22_opus-4.8/CHORUS_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (sha256-rubri\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/2026-07-22_opus-4.8/CM4AI_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/2026-07-22_opus-4.8/CM4AI_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (sha256:rubri\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/2026-07-22_opus-4.8/VOICE_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (sha256-rubri\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/2026-07-22_opus-4.8/VOICE_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/AI_READI_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/AI_READI_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/CHORUS_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/CHORUS_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/CM4AI_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/CM4AI_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/VOICE_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/VOICE_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/_archive_2026-07-22/AI_READI_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (rubric20_sem\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/_archive_2026-07-22/AI_READI_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (sha256-rubri\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/_archive_2026-07-22/CHORUS_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (rubric20-sem\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/_archive_2026-07-22/CHORUS_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (sha256-rubri\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/_archive_2026-07-22/CM4AI_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (rubric20_sem\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/_archive_2026-07-22/CM4AI_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (rubric20-sem\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/_archive_2026-07-22/VOICE_claudecode_agent_core_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (rubric20_sem\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "concatenated/_archive_2026-07-22/VOICE_claudecode_agent_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "an unrecognised value (rubric20-sem\u2026)",
+     "recovered_from": "fa90b4ec",
+     "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+     "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/AI_READI_2026-08-22c_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/AI_READI_2026-08-24agentic_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/AI_READI_2026-08-28agentic_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/AI_READI_2026-08-28agentic_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/AI_READI_2026-08-28agentic_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/AI_READI_2026-08-28bapi_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/AI_READI_2026-08-28capi_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/AI_READI_2026-08-28dapi_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/AI_READI_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "edf503ca00ecbfff4d3862f771c386445477e853ad1eb16af939691f6c4e87c7",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/AI_READI_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "edf503ca00ecbfff4d3862f771c386445477e853ad1eb16af939691f6c4e87c7",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/AI_READI_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "edf503ca00ecbfff4d3862f771c386445477e853ad1eb16af939691f6c4e87c7",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/AI_READI_2026-09-04gapi_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/AI_READI_2026-09-04gapi_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/AI_READI_2026-09-04gapi_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CHORUS_2026-08-22c_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CHORUS_2026-08-24agentic_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CHORUS_2026-08-28agentic_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CHORUS_2026-08-28agentic_rep2_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CHORUS_2026-08-28agentic_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "dde4d383",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CHORUS_2026-08-28api_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CHORUS_2026-08-28bapi_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CHORUS_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "edf503ca00ecbfff4d3862f771c386445477e853ad1eb16af939691f6c4e87c7",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/CHORUS_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "edf503ca00ecbfff4d3862f771c386445477e853ad1eb16af939691f6c4e87c7",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/CHORUS_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "edf503ca00ecbfff4d3862f771c386445477e853ad1eb16af939691f6c4e87c7",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/CHORUS_2026-09-04fapi_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CHORUS_2026-09-04fapi_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CHORUS_2026-09-04fapi_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CM4AI_2026-08-22c_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CM4AI_2026-08-24agentic_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CM4AI_2026-08-28agentic_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CM4AI_2026-08-28agentic_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CM4AI_2026-08-28agentic_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CM4AI_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "edf503ca00ecbfff4d3862f771c386445477e853ad1eb16af939691f6c4e87c7",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/CM4AI_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "edf503ca00ecbfff4d3862f771c386445477e853ad1eb16af939691f6c4e87c7",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/CM4AI_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "edf503ca00ecbfff4d3862f771c386445477e853ad1eb16af939691f6c4e87c7",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/CM4AI_2026-09-04gapi_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CM4AI_2026-09-04gapi_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/CM4AI_2026-09-04gapi_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/VOICE_2026-08-22c_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/VOICE_2026-08-24agentic_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/VOICE_2026-08-28agentic_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/VOICE_2026-08-28agentic_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/VOICE_2026-08-28agentic_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/VOICE_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "edf503ca00ecbfff4d3862f771c386445477e853ad1eb16af939691f6c4e87c7",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/VOICE_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/VOICE_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recovered_from_commit",
+     "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+     "recovered_from": "5c891e23",
+     "instrument_sha256": "edf503ca00ecbfff4d3862f771c386445477e853ad1eb16af939691f6c4e87c7",
+     "instrument_commit": "5c891e23"
+    },
+    "label_aware/VOICE_2026-09-04fapi_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/VOICE_2026-09-04fapi_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/VOICE_2026-09-04fapi_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/superseded_fable5/AI_READI_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/superseded_fable5/AI_READI_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/superseded_fable5/AI_READI_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/superseded_fable5/CHORUS_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/superseded_fable5/CHORUS_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/superseded_fable5/CHORUS_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/superseded_fable5/CM4AI_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/superseded_fable5/CM4AI_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/superseded_fable5/CM4AI_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/superseded_fable5/VOICE_2026-09-01api_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/superseded_fable5/VOICE_2026-09-01api_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    },
+    "label_aware/superseded_fable5/VOICE_2026-09-01api_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
+     "instrument_commit": "5163e862"
+    }
+   }
+  }
+ }
+}

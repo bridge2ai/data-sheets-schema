@@ -256,6 +256,10 @@ class TestTheAgentsProse(unittest.TestCase):
         "questions_not_applicable", "average_adjusted_max_points",
         "average_excluded_max_points", "average_normalized_percentage",
         "applicability_status", "applicability_evidence",
+        #: #1077: the metadata key naming the agent version that scored the
+        #: evaluation. An output key like the rest, and like the rest it is
+        #: not in the declared output schema.
+        "instrument_sha256",
     }
 
     @classmethod
