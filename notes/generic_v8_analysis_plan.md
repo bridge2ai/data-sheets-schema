@@ -724,7 +724,9 @@ assembly change. Since #1073 the function takes each side's records — or
 from `prompts.assembly.sha256`, so once a v9 arm exists this delta will
 report `["base", "assembly"]` from evidence rather than needing this
 paragraph. It stays prompt-only when given nothing, because the assembly of
-a run that has not happened yet is not knowable from a condition name. The declared-scope block (#932) landed on 2026-09-08, after all
+a run that has not happened yet is not knowable from a condition name; when
+records **are** passed and cannot be read, the axis comes back as
+`assembly unmeasured` rather than silently vanishing (#1092). The declared-scope block (#932) landed on 2026-09-08, after all
 twelve v8 records were generated on 2026-09-04, so a v9 run differs from
 them by **the scope block, R6 and R7 together**.
 

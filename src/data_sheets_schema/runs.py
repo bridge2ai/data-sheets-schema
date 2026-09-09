@@ -1361,6 +1361,16 @@ def arm_assembly_digests(label_prefix: str, method: str | None = None,
     the axis unavailable rather than falsely equal.
     """
     facts = arm_facts(label_prefix, method, concat_dir)
+    if not facts["labels"]:
+        # Loudly, because the failure is silent everywhere else (#1092).
+        # `arm_facts` swallows the LookupError from `method_for_label` and
+        # falls back to a default directory, so a mistyped prefix yields
+        # empty facts rather than an error — and an empty side used to make
+        # `condition_delta` return exactly the prompt-only answer #1073 was
+        # filed against. One capital letter was enough.
+        raise LookupError(
+            f"no records under label prefix {label_prefix!r}"
+            + (f" in method {method!r}" if method else ""))
     return [d for d in facts["values"].get("assembly digest", [])
             if d and d != "None"]
 

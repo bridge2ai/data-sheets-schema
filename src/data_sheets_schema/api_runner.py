@@ -119,29 +119,65 @@ CONDITION_AXES = {
 }
 
 
+#: A sha256 as the provenance records write it. Checked rather than assumed
+#: because every other shape reaching this function is a caller mistake worth
+#: seeing: a path passed where a digest was meant used to become a digest of
+#: its own, and two different paths reported two arms as differing on
+#: assembly (#1092).
+_DIGEST = re.compile(r"\A[0-9a-f]{64}\Z")
+
+
+def _dig(record: Any, *keys: str) -> Any:
+    """`record[k1][k2]…`, or None the moment it is not a mapping.
+
+    The same walk as `runs._dig`, and for the same reason: a record whose
+    `prompts` is a list or whose `assembly` is a string is malformed, and
+    reading it must contribute nothing rather than raise (#1092).
+    """
+    cur = record
+    for key in keys:
+        if not isinstance(cur, dict):
+            return None
+        cur = cur.get(key)
+    return cur
+
+
 def assembly_digests(source: Any) -> frozenset[str]:
     """The `prompts.assembly.sha256` values in whatever it is given (#1073).
 
-    Accepts a provenance record, an iterable of them, a digest string, or an
-    iterable of digest strings — the shapes a caller already has. Anything it
-    cannot read contributes nothing, so an arm whose records predate the
-    digest (#353) yields an empty set and the axis is simply unavailable
-    rather than reported as a difference.
+    Accepts a provenance record, an iterable of them, a mapping of them by
+    project, a digest string, or an iterable of digest strings — the shapes a
+    caller already has. Anything it cannot read as a digest contributes
+    nothing, which `condition_delta` reports as *unmeasured* rather than as
+    agreement: an arm whose records predate the digest (#353) and an arm
+    whose records were never found must not look like an arm that matched.
     """
     if source is None:
         return frozenset()
     if isinstance(source, str):
-        return frozenset({source})
+        return frozenset({source}) if _DIGEST.match(source) else frozenset()
     if isinstance(source, dict):
-        digest = (((source.get("prompts") or {}).get("assembly") or {})
-                  .get("sha256"))
-        return frozenset({digest}) if isinstance(digest, str) else frozenset()
+        # A `prompts` key is what makes it a record. Without one it is a
+        # mapping of records — keyed by project or by label, the natural
+        # in-memory shape here. With one, a malformed record contributes
+        # nothing rather than being re-read as a mapping.
+        if "prompts" in source:
+            digest = _dig(source, "prompts", "assembly", "sha256")
+            if not isinstance(digest, str) or not _DIGEST.match(digest):
+                return frozenset()
+            return frozenset({digest})
+        source = source.values()
+    if isinstance(source, (bytes, bytearray)):
+        return frozenset()
     out: set[str] = set()
     try:
         for item in source:
             out |= assembly_digests(item)
     except TypeError:
-        return frozenset()
+        # Not iterable at all, or a lazy sequence that failed partway. What
+        # was read before the failure is still evidence; discarding it would
+        # put a half-read arm in the same bucket as an unread one.
+        pass
     return frozenset(out)
 
 
@@ -164,15 +200,43 @@ def condition_delta(a: str, b: str, records_a: Any = None,
     the assembly of a run that has not happened yet is not knowable from a
     condition name. That is why the axes were prompt-only to begin with.
 
-    An arm whose own records disagree on the digest differs from any other
-    arm here, which is correct: it was not generated under one assembly.
+    An arm whose own records disagree on the digest has **no value** on this
+    axis rather than a differing one, and is reported as
+    `assembly not constant` (#1092). `d4d runs compare-arms` has always said
+    this separately — "is not constant within this arm" — and folding it into
+    a difference would have `confounded_note` assert that the runner built
+    the two arms differently when in fact it built one arm two ways.
+
+    **This is one field of the five `runs.ARM_PROCEDURE_FIELDS` names**, and
+    a delta carrying it is not the record-based answer: `runs.arm_confounds`
+    reads all five and is what governs interpretation. On the v7-against-v8
+    pair this axis reports `assembly` while the records also differ on the
+    schema digest, so the delta still under-reports the evidence — it is a
+    narrower instrument that no longer *claims* the prompt is all that moved.
     """
     ax, bx = CONDITION_AXES.get(a), CONDITION_AXES.get(b)
     if ax is None or bx is None:
         return ["unknown condition"]
     delta = [k for k in ("base", "tuned") if ax[k] != bx[k]]
+    if records_a is None and records_b is None:
+        return delta
+    # Asked and could not answer is a third state, not agreement (#1092).
+    # Gating the axis on `if da and db` made an empty side — an arm whose
+    # records predate the digest, a mistyped label prefix, a shape the
+    # extractor could not read — return exactly the prompt-only answer that
+    # #1073 was filed against, with nothing saying so. The repository's own
+    # precedent is that an absent measurement is its own answer:
+    # `pre_registry` beside `uncanonical`, `runtime_cannot_capture` beside
+    # `missing`, UNMEASURABLE beside a held floor.
     da, db = assembly_digests(records_a), assembly_digests(records_b)
-    if da and db and da != db:
+    if not da or not db:
+        delta.append("assembly unmeasured")
+    elif len(da) > 1 or len(db) > 1:
+        # Not a difference: an arm built two ways has no value here. Set
+        # equality would have called two equally inconsistent arms a match
+        # (#1092).
+        delta.append("assembly not constant")
+    elif da != db:
         delta.append("assembly")
     return delta
 
@@ -245,6 +309,17 @@ def confounded_note(a: str, b: str, records_a: Any = None,
                  "`prompts.assembly.sha256` (#353, #1073): the runner built "
                  "the two arms' requests differently, which no condition name "
                  "states.")
+    if "assembly not constant" in delta:
+        note += (" At least one arm's own records carry more than one "
+                 "assembly digest (#1092), so it has no value on that axis: "
+                 "it was not generated under one assembly. `d4d runs "
+                 "compare-arms` names which.")
+    if "assembly unmeasured" in delta:
+        note += (" The assembly axis was asked for and could not be read on at "
+                 "least one side — records that predate the digest, or a "
+                 "source this could not read (#1092). That is not agreement: "
+                 "whether the runner built the two arms' requests the same way "
+                 "is unknown.")
     return note
 TUNED_PROMPT = PROMPTS / "d4d_tuned_arm_prompt.md"
 COMPONENTS = PROMPTS / "components"
