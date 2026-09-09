@@ -45,6 +45,35 @@ def _norm(text):
     return re.sub(r"\s+", " ", text).strip()
 
 
+# v9 corrected the spelling of the text it inherits (#1134): "organisation" and
+# "recognise" stood in the v5 block and R7 while the same body says "Write
+# American English throughout" and the runner rewrites British forms out of
+# every record (#1002). v8 keeps them because its records were generated under
+# those bytes and its pin is theirs; v9 had no record when it was corrected.
+# The inheritance tests apply this to the v8 side only, so any other difference
+# between the two still fails them.
+SPELLING_CORRECTED_IN_V9 = {"organisation": "organization", "recognise": "recognize"}
+
+
+def _as_v9_spells(text):
+    for british, american in SPELLING_CORRECTED_IN_V9.items():
+        text = text.replace(british, american)
+    return text
+
+
+# British forms a composed rule must not carry (#1134). Backticked spans name
+# schema vocabulary and double-quoted spans quote a source, so both are
+# stripped before the sweep; "license" and "licensed" are already American.
+BRITISH_FORMS = re.compile(
+    r"\b(organis(?:e|ed|es|ing|ation|ations)|recognis(?:e|ed|es|ing)|characteris(?:e|ed|es|ing|ation)|"
+    r"standardis(?:e|ed|es|ing|ation)|analys(?:e|ed|es|ing)|behaviours?|licence|programmes?|centres?|"
+    r"normalis(?:e|ed|es|ing|ation)|summaris(?:e|ed|es|ing)|prioritis(?:e|ed|es|ing)|categoris(?:e|ed|es|ing)|"
+    r"minimis(?:e|ed|es|ing)|optimis(?:e|ed|es|ing)|labelled|colour|catalogue|judgement|artefact)\b",
+    re.I,
+)
+QUOTED_SPANS = re.compile(r"`[^`]*`|\"[^\"]*\"")
+
+
 class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
     VERSION_STAMP = re.compile(r"#\s*(?:Mode|Prompt):[^\n]*")
 
@@ -53,7 +82,7 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
         v9 = prompt_body(GENERIC_PROMPT_V9)
         stripped = (v9.split(MARK_START, 1)[0] + v9.split(MARK_END, 1)[1]).strip()
         scrub = lambda t: _norm(self.VERSION_STAMP.sub("", t))  # noqa: E731
-        self.assertEqual(scrub(stripped), scrub(v8))
+        self.assertEqual(scrub(stripped), scrub(_as_v9_spells(v8)))
 
     def test_the_version_stamp_names_v9(self):
         v9 = prompt_body(GENERIC_PROMPT_V9)
@@ -67,7 +96,26 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
         for mark in ("v2", "v3", "v4", "v5", "v6", "v8"):
             a = v8.split(f"--- ADDED IN {mark} ---", 1)[1].split(f"--- END ADDED IN {mark} ---", 1)[0]
             b = v9.split(f"--- ADDED IN {mark} ---", 1)[1].split(f"--- END ADDED IN {mark} ---", 1)[0]
-            self.assertEqual(_norm(a), _norm(b), f"the {mark} block changed")
+            self.assertEqual(_norm(_as_v9_spells(a)), _norm(b), f"the {mark} block changed")
+
+    def test_the_body_writes_american_english(self):
+        """The prompt's own prose is the example the model copies (#1134).
+        The rule and the normaliser (#1002) both say American; the v9 body
+        said "organisation" ten times while saying so."""
+        body = QUOTED_SPANS.sub("", prompt_body(GENERIC_PROMPT_V9))
+        found = sorted({m.group(0).lower() for m in BRITISH_FORMS.finditer(body)})
+        self.assertEqual(found, [], f"British forms in the v9 body: {found}")
+
+    def test_the_corrected_spellings_are_the_only_ones_the_v8_side_needs(self):
+        """Every entry of the correction table is a word v8 actually carries
+        and v9 does not — a table entry nothing uses would let a future
+        drift hide under it."""
+        v8 = GENERIC_PROMPT_V8.read_text()
+        v9 = GENERIC_PROMPT_V9.read_text()
+        for british, american in SPELLING_CORRECTED_IN_V9.items():
+            self.assertIn(british, v8)
+            self.assertNotIn(british, v9)
+            self.assertIn(american, v9)
 
     def test_the_block_carries_the_nine_registered_rules(self):
         block = _added_block(GENERIC_PROMPT_V9.read_text())
