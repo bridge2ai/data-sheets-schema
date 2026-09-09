@@ -68,8 +68,19 @@ _SKIP = re.compile(r"^\s*(?:[-*+]\s|\d+\.\s|#|\||```|>)")
 #: (#1149 review, S2: `.)` and `.”` used to merge two sentences into one).
 _SENTENCE_END = re.compile(r"(?:(?<=[.!?])|(?<=[.!?][)\]\u201d\"'`]))\s+(?=[A-Z\u201c\"'`(])")
 
-#: Abbreviations a sentence does not end at (S3): protected before the split.
-_ABBREVIATIONS = ("e.g.", "i.e.", "cf.", "vs.", "etc.", "Fig.", "No.", "Dr.", "Mr.", "Ms.", "approx.")
+#: Abbreviations a sentence does not end at (S3): protected before the split,
+#: in either case. `etc.` is not among them — it ends a clause as often as
+#: not ("… and so on, etc. The next rule …"), and a split there costs a
+#: candidate at worst where a protection would merge two sentences.
+_ABBREVIATIONS = tuple(dict.fromkeys(a for base in (
+    "e.g.", "i.e.", "cf.", "vs.", "et al.", "fig.", "no.", "dr.", "mr.", "ms.", "approx.",
+    "sec.", "ref.", "eq.", "u.s.", "ca.") for a in (base, base.capitalize(), base.upper())))
+
+#: A named sentence reveals at most this share of its words in the prefix
+#: (#1149 round 2, S1): a sibling sharing a long opening would otherwise
+#: leave one word hidden, and "not the whole sentence" is not "not the
+#: answer".
+MAX_PREFIX_SHARE = 0.5
 
 #: A sentence starts with a capital, a quote, a backtick, a bracket or a
 #: digit. A fragment that starts lower-case — text after a bullet list broke
@@ -162,7 +173,6 @@ def _previous_text(name: str) -> str | None:
     return _git("show", f"{parent}:{rel}") or None
 
 
-
 def sentences_by_section(body: str) -> list[tuple[str | None, str]]:
     """(heading, sentence) for every prose sentence of the definition, in
     order: wrapped lines of a paragraph joined, then split at sentence ends.
@@ -218,11 +228,25 @@ def _prefix_for(expected: str, siblings: list[str]) -> str | None:
     M1 — the #1102 property, re-created silently)."""
     words = expected.split()
     others = [_normalise(sib) for sib in siblings if sib != expected]
-    for n in range(MIN_PREFIX_WORDS, len(words)):
+    for n in range(MIN_PREFIX_WORDS, max(MIN_PREFIX_WORDS, int(len(words) * MAX_PREFIX_SHARE)) + 1):
+        if n >= len(words):
+            break
         prefix = " ".join(words[:n])
         if not any(o.startswith(_normalise(prefix)) for o in others):
             return prefix
     return None
+
+
+def _one_sentence(text: str) -> bool:
+    """Whether `text` is one sentence and not two the split failed to part
+    (#1149 round 2, S2): no terminator followed by whitespace inside it,
+    the protected abbreviations aside. Form-independent, so a lower-case or
+    digit-led continuation, or an abbreviation that really ended a
+    sentence, is caught without enumerating the form."""
+    inner = text
+    for abbr in _ABBREVIATIONS:
+        inner = inner.replace(abbr + " ", abbr + "\x00")
+    return re.search(r"[.!?][)\]\u201d\"'`]*\s", inner) is None
 
 
 def challenge_between(body: str, previous: str) -> dict[str, str] | None:
@@ -249,6 +273,8 @@ def challenge_between(body: str, previous: str) -> dict[str, str] | None:
     # shorter than itself is the challenge. A sentence that cannot be is
     # skipped rather than revealed (M1).
     for heading, expected in sorted(fresh, key=lambda hs: -len(hs[1])):
+        if not _one_sentence(expected):
+            continue                             # two sentences the split did not part
         siblings = [sent for h, sent in sents if h == heading]
         prefix = _prefix_for(expected, siblings)
         if prefix is None:

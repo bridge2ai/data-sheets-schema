@@ -24,7 +24,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
-from data_sheets_schema.agent_pin import (MIN_CHALLENGE,
+from data_sheets_schema.agent_pin import (AGENT_DIR, MIN_CHALLENGE,
                                           NoDiscriminatingChallenge,
                                           StaleAgentDefinition, _normalise,
                                           _usable, agent_digest, challenge,
@@ -128,8 +128,39 @@ class TestTheQuestionAndTheAnswerAreOneUnit(unittest.TestCase):
         self.assertTrue(ask["expected"].startswith("Elsewhere in the record"))
         self.assertLess(len(ask["prefix"]), len(ask["expected"]))
 
+    def test_a_prefix_reveals_at_most_half_the_sentence(self):
+        """#1149 round 2, S1: a sibling sharing a long opening would have
+        left one word hidden — "not the whole sentence" is not "not the
+        answer". Such a sentence is skipped like an unnameable one."""
+        opening = "Among the mints, judge a fragment on another entity's identifier by its referent and never by"
+        near = f"{opening} its base, which decides nothing."; other = f"{opening} its host, which decides nothing."
+        new = f"## Procedure\n\n{self.SHARED} {near} {other}\n"
+        old = f"---\n---\n## Procedure\n\n{self.SHARED} {other}\n"
+        self.assertIsNone(challenge_between(new, old))
+        from data_sheets_schema.agent_pin import MAX_PREFIX_SHARE
+        for path in sorted(AGENT_DIR.glob("*.md")):
+            ask = challenge(path.stem)
+            if ask is not None:
+                self.assertLessEqual(len(ask["prefix"].split()), max(3, int(len(ask["expected"].split()) * MAX_PREFIX_SHARE)), path.stem)
+
+    def test_a_candidate_that_is_two_sentences_is_never_asked_for(self):
+        """#1149 round 2, S2: a lower-case or digit-led continuation, or an
+        abbreviation that really ended a sentence, left `expected` spanning
+        two sentences and the honest one-sentence quote refused. The
+        post-condition is form-independent."""
+        from data_sheets_schema.agent_pin import _one_sentence
+        self.assertFalse(_one_sentence("It stands on its own account. forced settles the presence of the rest."))
+        self.assertFalse(_one_sentence("Count them in the records it read. 953 of them are schema-forced ids."))
+        self.assertFalse(_one_sentence("List them, and so on, etc. The next rule is about identifiers."))
+        self.assertTrue(_one_sentence("Take the identifier, e.g. DOI or ROR, exactly as written (never today's file)."))
+        self.assertTrue(_one_sentence("Cite Smith et al. and Fig. 3 in the U.S. edition."))
+        body = ("## H\n\nIt stands on its own account. forced settles the presence of every remaining "
+                "value in the section and nothing else does.\nA second fresh sentence that is one sentence "
+                "and long enough to be asked for on its own.\n")
+        ask = challenge_between(body, "---\n---\n## H\n\nnothing\n")
+        self.assertTrue(ask["expected"].startswith("A second fresh sentence"))
+
     def test_every_live_prefix_is_shorter_than_its_sentence(self):
-        from data_sheets_schema.agent_pin import AGENT_DIR
         for path in sorted(AGENT_DIR.glob("*.md")):
             ask = challenge(path.stem)
             if ask is not None:
@@ -160,7 +191,8 @@ class TestTheQuestionAndTheAnswerAreOneUnit(unittest.TestCase):
         self.assertTrue(any(s.startswith("Take the identifier") and "e.g. DOI" in s for s in sents))
         ask = challenge_between(body, old)
         self.assertTrue(ask["expected"].startswith("Take the identifier"))
-        self.assertFalse(any(s.lower().startswith("and to constructed") and s == ask["expected"] for s in sents))
+        self.assertIn("and to constructed identifiers", " ".join(sents).lower())   # the fragment exists in the section …
+        self.assertFalse(ask["expected"].lower().startswith("and to constructed"))  # … and is never the one asked for
 
     def test_quotes_dashes_and_backticks_do_not_decide_a_match(self):
         """#1149 review, S4: half a kilobyte quoted verbatim may straighten a

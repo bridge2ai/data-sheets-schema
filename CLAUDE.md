@@ -735,9 +735,10 @@ of the file — not by being long (replayed against the real incident,
 share) and not by appearing in a diff (a reformat "changes" a shared line).
 `tests/test_agent_pin.py` pins both the replay and the reformat case.
 
-Where a definition carries nothing its predecessor lacked, `preamble` and
-`check-echo` **exit non-zero** rather than issue a question that cannot fail;
-`digest` marks those definitions. A check that cannot fail is worse than no
+Where a definition carries nothing its predecessor lacked — or nothing that
+can be named by its opening words without handing over more than half the
+sentence (#1145) — `preamble` and `check-echo` **exit non-zero** rather than
+issue a question that cannot fail; `digest` marks those definitions. A check that cannot fail is worse than no
 check, because it is reported as a pass.
 
 **What a pass does and does not prove.** A refusal is strong evidence: the
