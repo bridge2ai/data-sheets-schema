@@ -7,7 +7,7 @@ description: |
     - "Score dataset completeness using rubric10"
     - "Run rubric10 quality assessment"
     - "Assess metadata quality with rubric10"
-model: claude-fable-5
+model: claude-opus-5
 color: purple
 ---
 

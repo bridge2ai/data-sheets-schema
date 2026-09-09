@@ -1309,6 +1309,14 @@ ARM_PROCEDURE_FIELDS = (
     ("condition", ("condition",)),
     ("model", ("model", "model")),
     ("runtime", ("model", "agent_runtime")),
+    # The judge is part of the procedure (#1097). v7 was reviewed by
+    # `claude-fable-5` and v8 by `claude-fable-5-1`, and a reader running this
+    # tool on exactly the comparison that difference affects got a report that
+    # omitted it — the confound lived in prose only. Reviews are not written
+    # by the run, so an arm with none reads `None`; `arm_confounds` skips a
+    # field either side leaves empty, which keeps "not reviewed" out of the
+    # difference list rather than reporting an absence as a change.
+    ("reviewer", ("review", "reviewer", "model")),
 )
 
 
@@ -1375,6 +1383,23 @@ def arm_assembly_digests(label_prefix: str, method: str | None = None,
             if d and d != "None"]
 
 
+def _short(value: str) -> str:
+    """A digest abbreviated, anything else whole (#1097).
+
+    Truncating every value to 12 characters is right for a sha256 and wrong
+    for a model name: `claude-fable-5` and `claude-fable-5-1` both render as
+    `claude-fable`, so the reviewer row hid the difference it exists to show.
+    """
+    body = value[:-1] if value.endswith("\u2026") else value
+    is_digest = len(body) >= 32 and all(c in "0123456789abcdef" for c in body)
+    return (body[:12] + "\u2026") if is_digest else value
+
+
+def _measured(values: list[str]) -> list[str]:
+    """The values that are actual readings, not a stringified absence."""
+    return [v for v in values if v not in ("None", "")]
+
+
 def arm_confounds(a: dict[str, Any], b: dict[str, Any]) -> list[dict[str, str]]:
     """What differs between two arms, one entry per differing field (#576).
 
@@ -1389,11 +1414,16 @@ def arm_confounds(a: dict[str, Any], b: dict[str, Any]) -> list[dict[str, str]]:
     """
     out = []
     for name, _ in ARM_PROCEDURE_FIELDS:
-        va, vb = a["values"].get(name, []), b["values"].get(name, [])
+        # `arm_facts` stringifies, so a field no record carries arrives as
+        # ["None"] rather than empty. Reporting that against an arm that does
+        # carry it would call an absence a difference (#1097) — which is the
+        # error this function exists to avoid making about conditions.
+        va, vb = (_measured(a["values"].get(name, [])),
+                  _measured(b["values"].get(name, [])))
         if va and vb and va != vb:
             out.append({"field": name,
-                        a["prefix"]: ", ".join(x[:12] for x in va),
-                        b["prefix"]: ", ".join(x[:12] for x in vb)})
+                        a["prefix"]: ", ".join(_short(x) for x in va),
+                        b["prefix"]: ", ".join(_short(x) for x in vb)})
     return out
 
 

@@ -6,7 +6,7 @@ description: |
     - "Review the CHORUS record of label 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1"
     - "Run d4d-review-record on AI_READI 2026-08-28c_claude-opus-5-api-generic-v7_rep1"
     - "Did this run follow its instruction's rules, and are its receipts real support?"
-model: claude-fable-5
+model: claude-opus-5
 color: yellow
 ---
 

@@ -1613,7 +1613,7 @@ def compare_arms(prefix_a, prefix_b, method):
     # `--method` still forces both when given.
     method_a = method or resolve_method(prefix_a)
     method_b = method or resolve_method(prefix_b)
-    from data_sheets_schema.runs import arm_confounds, arm_facts
+    from data_sheets_schema.runs import _short, arm_confounds, arm_facts
 
     a, b = arm_facts(prefix_a, method_a), arm_facts(prefix_b, method_b)
     for arm in (a, b):
@@ -1622,7 +1622,7 @@ def compare_arms(prefix_a, prefix_b, method):
         for name, values in arm["values"].items():
             if len(values) > 1:
                 click.echo(f"   ⚠️  {name} is not constant within this arm: "
-                           + ", ".join(v[:12] for v in values))
+                           + ", ".join(_short(v) for v in values))
 
     confounds = arm_confounds(a, b)
     if not confounds:

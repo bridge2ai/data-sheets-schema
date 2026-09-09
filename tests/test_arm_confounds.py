@@ -92,5 +92,39 @@ class ConditionComparabilityIsNotEnoughTest(unittest.TestCase):
         self.assertNotIn(today, a["values"]["schema digest"])
 
 
+class TestTheReviewerIsAConfound(unittest.TestCase):
+    """#1097: the judge is part of the procedure.
+
+    v7 was reviewed by `claude-fable-5` and v8 by `claude-fable-5-1`, and a
+    reader running this tool on exactly the comparison that difference affects
+    got a report that omitted it. The confound lived in the plan note's prose
+    only, which is the failure `arm_confounds` exists to prevent.
+    """
+
+    def test_the_production_arms_differ_on_reviewer(self):
+        from data_sheets_schema.runs import arm_confounds, arm_facts
+        v7 = arm_facts("2026-09-01_claude-opus-5-api-generic-v7")
+        v8 = arm_facts("2026-09-04g_claude-opus-5-api-generic-v8")
+        if not (v7["labels"] and v8["labels"]):
+            self.skipTest("the production records are not in this checkout")
+        fields = [c["field"] for c in arm_confounds(v7, v8)]
+        self.assertIn("reviewer", fields)
+
+    def test_an_unreviewed_arm_is_not_reported_as_differing(self):
+        """A stringified absence is not a reading. `arm_facts` turns a missing
+        field into ["None"], and reporting that against an arm that has one
+        would call an absence a difference — the error this whole function
+        exists to avoid making about conditions."""
+        from data_sheets_schema.runs import arm_confounds, arm_facts
+        v4 = arm_facts("2026-08-13_claude-opus-5-api-generic-v4")
+        v7 = arm_facts("2026-09-01_claude-opus-5-api-generic-v7")
+        if not (v4["labels"] and v7["labels"]):
+            self.skipTest("those arms are not in this checkout")
+        self.assertEqual(v4["values"].get("reviewer"), ["None"],
+                         "precondition: the v4 arm carries no review block")
+        self.assertNotIn("reviewer",
+                         [c["field"] for c in arm_confounds(v4, v7)])
+
+
 if __name__ == "__main__":
     unittest.main()

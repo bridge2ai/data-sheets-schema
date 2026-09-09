@@ -338,6 +338,87 @@ reports regated.
 
 ### Review pass (12 of 12, 2026-09-07)
 
+**Reviewer basis (#1058).** The v8 reviews were made by `claude-fable-5-1`
+and the v7 reviews by `claude-fable-5`; the agent definition pinned
+`claude-fable-5` and the reviewers write their own runtime identity, which
+**changed between 2026-09-03 and 2026-09-07** — the twelve v7 reviews ran
+2026-09-01 to 09-03 and all report Fable 5, the twelve v8 reviews ran
+2026-09-07 and all report 5.1. So the v7-versus-v8 review numbers below —
+and the ones merged in #1055 — compare a Fable-5-reviewed arm against a
+Fable-5.1-reviewed arm, and the difference between them is the package
+**plus the reviewer version**. Since #1097 that difference is also machine-
+visible: `reviewer` is one of `ARM_PROCEDURE_FIELDS`, so `d4d runs
+compare-arms --a <v7> --b <v8>` lists it beside the schema and assembly
+digests instead of leaving it to this paragraph.
+
+**The reviewer's identity is self-reported.** The agent is told to write "the
+model you are"; nothing verifies it, and the review block records
+`model_basis: self-reported by the reviewing agent` to say so. The rubric
+records do better — they carry a `model.note` stating the identity comes from
+the session environment — and until the review agent does the same, "the v8
+reviews were made by `claude-fable-5-1`" and "the reviewer changed its
+self-reporting convention" are not distinguishable from the artifacts. This
+is CLAUDE.md's observed-versus-asserted rule for reasoning effort, applied to
+the judge. A point release of the judge is a smaller
+change than a different model family, but it is not nothing, and this
+repository's rule is that an instrument change is declared. It is declared
+here. The reviewer is recorded per record in `review.reviewer.model`, and
+the 17 earlier reviews (the 2026-08-28 arms) are `claude-fable-5`.
+
+How large that effect is has **not** been measured, and the honest place to
+say so is next to the numbers rather than in an issue. The instrument for
+measuring it exists: `{P}_review_b.yaml` plus `d4d review agree`, which
+reports percent agreement and Cohen's kappa against **the same pack the
+reviews pin** — enforced on bytes: `review_pack.agree` raises when either
+review's `pack_sha256` differs from the pack on disk, which is why #1095's
+regenerated pack breaks pairing loudly rather than silently. Nothing consults
+git, so "committed" would be the wrong word (#1097).
+Six such pairs exist, all from the 2026-08-28 arms and all same-model
+retests. Their class agreement is **82.4, 84.8, 87.9, 91.2, 92.4, 95.6**
+(exact 80.9 to 89.7) — but the chance-corrected figure is the one to read,
+and `kappa_class` on those same six is **0.357, 0.494, 0.502, 0.549, 0.629,
+0.654**. Fair to substantial, not good: on the trichotomy the reviewer
+agrees with itself about as often as two people asked to sort borderline
+cases would. That is the band for ordinary reviewer noise, and it is wide
+enough that a modest v7-to-v8 difference in adverse counts is not
+separable from it without a paired pass. A second pass under a different
+model, compared against that band, would settle whether the version
+difference is distinguishable from noise. That is the outstanding
+work on #1058; it was set up and deliberately not run.
+
+The agent is now pinned to `claude-opus-5` on the plan owner's instruction
+that Opus 5 is the evaluator for all evaluations, which the two rubric agents
+already follow. **That gives up judge independence, and the loss should be
+stated rather than folded into "a third instrument" (#1097).** Every record
+in both arms was *generated* by `claude-opus-5`; they were reviewed by a
+different family, so the review was an outside reading. A future review under
+`claude-opus-5` is a same-model self-review — a larger instrument change than
+the point release this paragraph exists to declare, and one whose direction
+of bias is unknown rather than merely unmeasured. Two defensible positions:
+keep the pin for consistency with the rubric agents, since the corpus already
+scores Opus-5 output with an Opus-5 judge; or return the reviewer to
+`claude-fable-5-1`, which continues the v8 instrument and keeps the judge off
+the generator's family. The first is what is pinned; the second is the
+stronger instrument. It is a decision for the plan owner, recorded here
+rather than made silently, and two facts belong with it. First, **after this
+change no non-Opus judge remains in the corpus**: the reviews were the only
+judgement instrument off the generator's family, since all 24 v7 and all 24
+v8 rubric evaluations already record `evaluator_model: claude-opus-5[1m]`.
+That is a corpus-level property, and the review's questions — were the rules
+followed, is this snippet real support — sit closer to self-assessment than a
+rubric score does. Second, measuring the Fable-5-to-5.1 confound with an
+*Opus* paired pass is one-sided: inside the 0.357–0.654 kappa band the
+point-release effect is bounded a fortiori, but outside it the pass says
+nothing about the point release and the confound stays unbounded.
+
+The same directive is now applied to the two non-semantic rubric agents,
+which still pinned `claude-fable-5` (#1097). Nothing recorded is affected —
+every arm evaluation came from the `-semantic` pair — but leaving them was
+undeclared drift against the directive, of exactly the kind #1058 is about.
+
+Nothing recorded was re-reviewed: the 24 review files stand as made, and the
+canonical selection below rests on them.
+
 One `d4d-review-record` agent per record (the CHORUS rep1 review run
 first as the canary, then eleven in parallel), every check passed
 `--write --strict`, review blocks in all 12 provenance records. Same
