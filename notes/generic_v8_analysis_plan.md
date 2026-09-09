@@ -354,12 +354,18 @@ How large that effect is has **not** been measured, and the honest place to
 say so is next to the numbers rather than in an issue. The instrument for
 measuring it exists: `{P}_review_b.yaml` plus `d4d review agree`, which
 reports percent agreement and Cohen's kappa against the same committed pack.
-Six such pairs exist from the 2026-08-28 arms, all same-model retests, and
-they sit at **82–96% class agreement** — the band for ordinary reviewer
-noise. A second pass under a different model, compared against that band,
-would settle whether the version difference is distinguishable from noise.
-That is the outstanding work on #1058; it was set up and deliberately not
-run.
+Six such pairs exist, all from the 2026-08-28 arms and all same-model
+retests. Their class agreement is **82.4, 84.8, 87.9, 91.2, 92.4, 95.6**
+(exact 80.9 to 89.7) — but the chance-corrected figure is the one to read,
+and `kappa_class` on those same six is **0.357, 0.494, 0.502, 0.549, 0.629,
+0.654**. Fair to substantial, not good: on the trichotomy the reviewer
+agrees with itself about as often as two people asked to sort borderline
+cases would. That is the band for ordinary reviewer noise, and it is wide
+enough that a modest v7-to-v8 difference in adverse counts is not
+separable from it without a paired pass. A second pass under a different
+model, compared against that band, would settle whether the version
+difference is distinguishable from noise. That is the outstanding
+work on #1058; it was set up and deliberately not run.
 
 The agent is now pinned to `claude-opus-5`, so any *future* review is a
 third instrument and not comparable with either recorded arm without a
