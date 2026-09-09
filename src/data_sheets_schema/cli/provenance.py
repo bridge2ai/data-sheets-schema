@@ -1044,6 +1044,65 @@ def backfill_prompts(execute, label):
     click.echo(f"{n} record(s) updated, each naming the commit its hash is of.")
 
 
+@provenance.command("backfill-bundle-md5")
+@click.option('--execute', is_flag=True,
+              help='write the records; without it this reports and changes nothing')
+@click.option('--label', default=None, help='restrict to one run label')
+def backfill_bundle_md5(execute, label):
+    """Recover `inputs.bundle_md5` for records that predate md5 recording (#1121).
+
+    By proof, not by commit: each such record carries `inputs.bundle_sha256`
+    of the bytes it consumed, and the md5 is taken from the committed version
+    of the bundle whose sha256 equals it. `repo.commit` is not used — those
+    runs read bundles regenerated in a dirty tree, and the bytes at the
+    recorded commit are an older version the run never read.
+
+    \b
+      recovered                            a committed version matches the sha256
+      already_recorded                     left alone
+      no_bundle_path / no_bundle_sha256    nothing to prove against
+      no_blob_matches_the_recorded_sha256  the bytes are in no reachable commit
+      git_unavailable / record_unreadable  the tool could not look, which is
+                                           not a finding about the corpus
+    Archived records under data/ATTIC are outside CONCAT_DIR and not visited.
+    """
+    _require_repo_root_cwd("d4d provenance backfill-bundle-md5")   # CONCAT_DIR is repo-relative
+    from data_sheets_schema.provenance import (
+        BUNDLE_MD5_RECOVERED, CONCAT_DIR, _REPO_ROOT, apply_bundle_md5, resolve_bundle_md5,
+    )
+    # One root for the whole operation: records are read from the cwd and
+    # git history from the package's own checkout; a `d4d` resolving to a
+    # worktree's src while run from another checkout would prove one tree's
+    # md5 against another's history (#1132 round 2).
+    if Path.cwd().resolve() != _REPO_ROOT.resolve():
+        raise click.ClickException(
+            f"the package is installed from {_REPO_ROOT} but the cwd is {Path.cwd()}; "
+            "run this from the checkout the package resolves to")
+    # Every provenance record on disk, not `discover()`'s view of it: a core
+    # record whose full counterpart is absent is invisible to discover()
+    # (#1129 review, finding 6 — one such record exists today).
+    outcomes: dict[str, list] = {}
+    for path in sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml")):
+        if label and path.parent.name != label:
+            continue
+        r = resolve_bundle_md5(path)
+        outcomes.setdefault(r["status"], []).append((path, r))
+    verb = "recovering" if execute else "would recover"
+    for status, items in sorted(outcomes.items()):
+        click.echo(f"   {status:40} {len(items):4}")
+    recoverable = outcomes.get(BUNDLE_MD5_RECOVERED, [])
+    if not recoverable:
+        click.echo("\nNothing to recover.")
+        return
+    dates = sorted({r["date"] for _, r in recoverable})
+    click.echo(f"\n{len(recoverable)} record(s) {verb}, from bundle versions committed on {', '.join(dates)}")
+    if not execute:
+        click.echo("Nothing written. Re-run with --execute to apply.")
+        return
+    n = sum(1 for path, _ in recoverable if apply_bundle_md5(path) is not None)
+    click.echo(f"{n} record(s) updated, each naming the commit its md5 is of and the sha256 that proves it.")
+
+
 @provenance.command("backfill-checks")
 @click.option('--execute', is_flag=True,
               help='write the records; without it this reports and changes nothing')
