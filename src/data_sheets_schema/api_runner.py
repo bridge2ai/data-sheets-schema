@@ -2852,6 +2852,76 @@ def normalise_mailto_ids(text: str, *, phase: str | None = None) -> str:
     return "\n".join(out)
 
 
+#: Header lines the prompt tells the model to write, and the record field
+#: each one restates. The model copies the prompt's example value; the record
+#: stores what the request carried. Where they can disagree, the record wins
+#: and the header is rewritten from it at write time (#1027).
+_HEADER_FROM_RECORD = {
+    "Temperature": "temperature",
+    "Model": "model",
+    "Reasoning effort": "reasoning_effort",
+}
+
+
+def header_value(field: str, settings: dict[str, Any]) -> str:
+    """What the `#` header should say for `field`, from the run's settings.
+
+    `Temperature` is the case that filed #1027: every v8 full record's header
+    read `Temperature: 0.0`, copied from the prompt's example, while the
+    request carried no temperature at all — claude-opus-5 rejects the
+    parameter and the runner omits it. A header stating a setting the request
+    did not carry is an assertion the record contradicts. It now says so.
+    """
+    if field == "Temperature":
+        if settings.get("temperature_applies", True) and settings.get("temperature") is not None:
+            return str(settings["temperature"])
+        return (f"not sent ({settings.get('name', 'this model')} rejects the "
+                "parameter; the config's value did not reach the request)")
+    if field == "Model":
+        return str(settings.get("name", ""))
+    if field == "Reasoning effort":
+        # Two records' headers read `Reasoning effort: default` against a
+        # record that says nothing — the value CLAUDE.md forbids (#470). The
+        # header states the effort the request carried — configured, or
+        # named by the route the way the record derives it (#397: the
+        # `-high` suffix on `google/claude-opus-5-high`, 49 records) — or
+        # says none was set; never a guess. The first version returned a
+        # constant, which on the documented `-high` route would have
+        # overwritten a header the model got right with a false one (#1027
+        # review, round 2).
+        if settings.get("effort"):
+            return str(settings["effort"])
+        from data_sheets_schema.provenance import _effort_from_route
+        effort, _ = _effort_from_route(settings.get("name"))
+        if effort:
+            return str(effort)
+        return "not set by the request (the provider's own choice; not recorded as a value)"
+    raise KeyError(field)
+
+
+def stamp_provenance_header(text: str, settings: dict[str, Any]) -> str:
+    """Rewrite the `#` provenance header's asserted settings from the record.
+
+    Touches only header lines of the form `# <Field>: …` for fields in
+    `_HEADER_FROM_RECORD`, only within the leading comment block, and leaves
+    every other byte alone — the header is the first thing a reader sees and
+    the normalisers are written to preserve it (#1002).
+    """
+    lines = text.split("\n")
+    out = []
+    in_header = True
+    for ln in lines:
+        if in_header and not ln.startswith("#"):
+            in_header = False
+        if in_header:
+            m = re.match(r"^(#\s*)([A-Za-z][A-Za-z ]*?)(\s*:\s*)(.*?)(\r?)$", ln)
+            if m and m.group(2).strip() in _HEADER_FROM_RECORD:
+                ln = (f"{m.group(1)}{m.group(2)}{m.group(3)}"
+                      f"{header_value(m.group(2).strip(), settings)}{m.group(5)}")
+        out.append(ln)
+    return "\n".join(out)
+
+
 def normalise_record_text(text: str, *, phase: str | None = None) -> str:
     """Every write-time normalisation, in the order the record is written.
 
@@ -3054,6 +3124,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             # which would let the pair diverge again (#694).
             from data_sheets_schema.derive_core import core_text
             text = normalise_record_text(core_text(spec.full_path, phase4_complete=True)[0], phase="repair_core")
+            text = stamp_provenance_header(text, settings)      # the same sequence as the phase write (#1027 review)
             spec.core_path.write_text(text, encoding="utf-8")
             errors, failure = _validator_lines(path, schema, cls)
             log.append({"phase": ph, "round": 1,
@@ -3138,6 +3209,12 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                             "outcome": f"unusable response: {exc}"})
                 continue
             body = normalise_record_text(body, phase=ph)
+            # The repair instruction asks for the whole record and the model
+            # re-emits the prompt's header with it: 112 of 114 repair
+            # snapshots on disk carry `# Temperature: 0.0` verbatim, and
+            # repair applied on 87 API records (61%). Unstamped here, the
+            # false header came back on the majority of runs (#1027 review).
+            body = stamp_provenance_header(body, settings)
             path.write_text(body, encoding="utf-8")
             _snapshot(spec, f"{spec.project}_{ph}_r{rnd}.yaml", body)
             applied_from = len(errors)
@@ -4311,6 +4388,9 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             target.parent.mkdir(parents=True, exist_ok=True)
             if artifact in ("full", "core"):
                 body = normalise_record_text(body, phase=ph)
+                # After normalisation, from the same settings the record's
+                # `model` block is written from (#1027).
+                body = stamp_provenance_header(body, settings)
             target.write_text(body, encoding="utf-8")
             # Reconcile (and later repair) overwrite the artifact in place;
             # the snapshot is the only record of what this phase produced.

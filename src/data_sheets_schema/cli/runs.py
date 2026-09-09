@@ -425,7 +425,8 @@ def check_cmd(method, label, project, strict):
     uncanonical = []
     duplicates = []
     stale_sizes = []
-    from data_sheets_schema.runs import _prov, stale_output_sizes
+    from data_sheets_schema.runs import _prov, header_disagreements, stale_output_sizes
+    header_mismatches = []
     for run in discover():
         if run.is_core or run.deterministic:
             continue
@@ -447,6 +448,12 @@ def check_cmd(method, label, project, strict):
             mism = stale_output_sizes(prov_data)
             if mism:
                 stale_sizes.append({"project": proj, "label": run.label, "mismatches": mism})
+            # The `#` header restating a setting the request never carried
+            # (#1027). Reported, never fatal: the record is right about the
+            # dataset and wrong about itself.
+            hd = header_disagreements(run.method, run.label, proj)
+            if hd:
+                header_mismatches.append({"project": proj, "label": run.label, "lines": hd})
             if isinstance(dk, dict) and any(isinstance(ds, list) and ds for ds in dk.values()):
                 passed = ((_prov(run.method, run.label, proj) or {}).get("validation") or {}).get("passed")
                 duplicates.append({"project": proj, "label": run.label,
@@ -809,6 +816,30 @@ def check_cmd(method, label, project, strict):
                     else "⚠️ ")
             click.echo(f"   {mark} {r['project']:9} {r['label']:44} "
                        f"{r['status']}: {r['reason']}")
+
+    if header_mismatches:
+        click.echo(f"\n⚠️  {len(header_mismatches)} record(s) whose `#` header states a "
+                   "setting the request did not carry (#1027):")
+        # One line per label and disagreement, with the count of records —
+        # 142 per-record rows were a third of the report, and the 44-column
+        # label cut dropped the replicate digit (#1027 review, finding 5).
+        # A disagreement present on both artifacts of a record prints once,
+        # as [full+core] (round 2, note 6).
+        grouped: dict[tuple[str, str, str, str], dict[str, set[str]]] = {}
+        for h in header_mismatches:
+            for ln in h["lines"]:
+                key = (h["label"], ln["field"], ln["header"], ln["record"])
+                grouped.setdefault(key, {}).setdefault(h["project"], set()).add(ln.get("artifact", "full"))
+        for (label, field, header, record), by_project in sorted(grouped.items()):
+            arts = sorted({a for arts in by_project.values() for a in arts})
+            tag = "+".join(arts) if all(by_project[p] == set(arts) for p in by_project) else "/".join(arts)
+            what = (f"header `{field}: {header}` · record {record}" if field else f"{record}")
+            click.echo(f"   {label}  [{tag}] {what}  ×{len(by_project)} "
+                       f"({', '.join(sorted(by_project))})")
+        click.echo("   Reported, not failed — the datasheet is wrong about itself, not "
+                   "about the dataset. Records written or repaired since #1027 stamp "
+                   "the header from the record; a run resumed past its record write "
+                   "keeps the header it had.")
 
     if strict and (failed or bad_requests or never_pinned):
         raise SystemExit(1)
