@@ -1108,14 +1108,15 @@ checksum forbids — and none moved the digest.
 
 ### R8 no longer charges a landing-page label a receipt (#1147, 2026-09-09)
 
-The thirteenth v9 pin — the registry's `superseded` list holds twelve:
+The fourteenth v9 pin — the registry's `superseded` list holds thirteen:
 three registrations and corrections on 2026-09-08, the two #1120 rounds,
-the two #1134 spellings rounds, and this issue's own five earlier rounds,
+the two #1134 spellings rounds, and this issue's own six earlier rounds,
 each retired by the next (the third wrote `labelled` into the sentence and
 the file sweep of #1134 caught it after the pin was taken; the fourth's
 premise was false for the 35 CHORUS records whose own id is the site root;
 the fifth told the 9 CHORUS records whose id is already a fragment on the
-root to mint a second `#`, which RFC 3986 forbids). R8's own-id
+root to mint a second `#`, which RFC 3986 forbids; the sixth wrote that
+marker in backticks, which the block test reserves for digest vocabulary). R8's own-id
 preference was argued from cost: "a label on
 the dataset's landing page … names an identifier the evidence must supply,
 so it needs a receipt like any other value, where a label on this record's
