@@ -229,14 +229,104 @@ def _populated(value: Any) -> bool:
     return value not in (None, [], {}, "")
 
 
-def _minted(value: Any, record_id: str | None = None) -> bool:
-    """A urn, or a fragment on the record's own id — the form the rules allow
-    minting in. A `#` on some other base is a real anchor, not a minting."""
+#: Slots of the record's top level that carry an identifier *for the dataset
+#: itself* (#1123): its `id`, its bare `doi`, its landing `page`. A fragment
+#: minted on any of these is a label on this dataset, which the v5 rule
+#: licenses ("on an identifier the evidence *does* supply"). v9 R8 prefers
+#: the record's own id and says a landing-page label "needs a receipt like
+#: any other value, where a label on this record's own id does not" — the
+#: cost this revision removes; the prompt sentence is #1147's to rotate.
+#: The exemption reaches the record's own top-level `id` when it is itself
+#: a fragment on the page (CHORUS: `https://chorus4ai.org/#chorus-dataset`
+#: on `page: https://chorus4ai.org/`), which is the whole observed effect on
+#: the recomputed corpus. A fragment on any other base — a component
+#: dataset's DOI under `resources`, a project homepage the record does not
+#: carry as its page — is a claim about that identifier and stays
+#: receiptable; a `page` that is a bare site root exempts every fragment on
+#: that root under the same scheme, which is the exposure of trusting the
+#: slot without a shape check.
+DATASET_IDENTIFIER_SLOTS = ("id", "doi", "page")
+
+#: What this validator's numbers mean, revision by revision. Written into
+#: the block so a reader can tell which revision produced it; nothing pools
+#: blocks across revisions today, and #1140's recompute is what would bring
+#: the records a drifted bundle withholds under one.
+RECEIPTS_INSTRUMENT = ("v2 (#1123): a fragment minted on an identifier the record carries "
+                       "for the dataset at its top level — its id in CURIE or resolver form, "
+                       "its doi, its page — is exempt like one on its own id; "
+                       "`slots.exempt_on_carried_identifier` counts them; v1 (#720, #721, "
+                       "#722, #891): snippet floors, entry-not-list coverage, commentary and "
+                       "own-id fragments exempt, unattesting snippets counted apart")
+
+
+_DOI_RESOLVERS = ("https://doi.org/", "http://doi.org/", "https://dx.doi.org/", "http://dx.doi.org/")
+_BARE_DOI = re.compile(r"^10\.\d{4,}/\S+$")
+
+
+def _doi_forms(doi: str) -> set[str]:
+    return {f"doi:{doi}", *(f"{base}{doi}" for base in _DOI_RESOLVERS)}
+
+
+def dataset_identifier_forms(record: dict[str, Any] | None) -> frozenset[str]:
+    """Every form of an identifier the record carries for the dataset at its
+    top level (#1123): the `id` and, when it is a DOI in CURIE or resolver
+    form, the other forms of it; the bare `doi` in CURIE and resolver forms;
+    the landing `page`. Trailing slashes are dropped and DOI forms are
+    lower-cased, as `_minted` compares them."""
+    forms: set[str] = set()
+    if not isinstance(record, dict):
+        return frozenset()
+    for slot in DATASET_IDENTIFIER_SLOTS:
+        value = record.get(slot)
+        if not isinstance(value, str) or not value.strip():
+            continue
+        value = value.strip()
+        forms.add(value)
+        low = value.lower()
+        if slot == "doi":
+            forms |= _doi_forms(value)
+        elif low.startswith("doi:"):
+            forms |= _doi_forms(value[4:])
+        else:
+            for base in _DOI_RESOLVERS:
+                if low.startswith(base):
+                    forms |= _doi_forms(value[len(base):])
+    return frozenset(_base_key(f) for f in forms)
+
+
+def _base_key(base: str) -> str:
+    """The comparison form of a fragment's base: no trailing slash, and a DOI
+    (bare, CURIE or resolver URL) lower-cased, since DOIs are
+    case-insensitive. No scheme or host folding for anything else — a page
+    written `http://` does not match a fragment on `https://`, which errs
+    conservative. `review_pack._canonical_identifier` folds scheme and host
+    because it classifies a label's *origin* (own, constructed, stated);
+    this key decides whether a leaf needs a receipt, and the two are kept
+    apart on purpose (#1141 review, S6)."""
+    base = base.strip().rstrip("/")
+    low = base.lower()
+    if low.startswith(("doi:", *_DOI_RESOLVERS)) or _BARE_DOI.match(base):
+        return low
+    return base
+
+
+def _minted(value: Any, record_id: str | None = None,
+            carried: frozenset[str] | None = None) -> bool:
+    """A urn, or a fragment on the record's own id or on another identifier
+    the record carries for the dataset (`carried`, from
+    `dataset_identifier_forms`, #1123) — the forms the rules allow minting in.
+    A `#` on some other base is a real anchor or a claim about that
+    identifier, not a minting."""
     if not isinstance(value, str):
         return False
     if value.startswith("urn:"):
         return True
-    return bool(record_id) and "#" in value and value.split("#", 1)[0] == str(record_id)
+    if "#" not in value:
+        return False
+    base = _base_key(value.split("#", 1)[0])
+    if record_id and base == _base_key(str(record_id)):
+        return True
+    return bool(carried) and base in carried
 
 
 def populated_leaves(record: dict[str, Any]) -> list[tuple[str, Any]]:
@@ -260,14 +350,37 @@ def populated_leaves(record: dict[str, Any]) -> list[tuple[str, Any]]:
     return out
 
 
-def exempt(path: str, value: Any, record_id: str | None = None) -> bool:
+def exempt(path: str, value: Any, record_id: str | None = None,
+           carried: frozenset[str] | None = None) -> bool:
     top = re.split(r"[.\[]", path, maxsplit=1)[0]
     leaf = path.rsplit(".", 1)[-1]
     if top in EXEMPT_SLOTS or leaf in EXEMPT_LEAVES:
         return True
-    if leaf == "id" and _minted(value, record_id):
+    if leaf == "id" and _minted(value, record_id, carried):
         return True                      # a minted fragment or urn has no source
     return False
+
+
+def _minted_v1(value: Any, record_id: str | None) -> bool:
+    """The exemption as instrument v1 read it (#722): a urn, or a fragment
+    whose base is the record's id byte for byte. Kept so the v2 block can
+    count what v2 exempts that v1 did not."""
+    if not isinstance(value, str):
+        return False
+    if value.startswith("urn:"):
+        return True
+    return bool(record_id) and "#" in value and value.split("#", 1)[0] == str(record_id)
+
+
+def exempt_on_carried_identifier(path: str, value: Any, record_id: str | None,
+                                 carried: frozenset[str] | None) -> bool:
+    """Exempt under v2 (#1123) and not under v1: an `id` leaf minted on an
+    identifier the record carries for the dataset — its doi, its page, or
+    its own id in another form (CURIE for resolver URL, a trailing slash, a
+    DOI's case) — that v1's byte-for-byte own-id test did not reach."""
+    leaf = path.rsplit(".", 1)[-1]
+    return (leaf == "id" and _minted(value, record_id, carried)
+            and not _minted_v1(value, record_id) and not exempt(path, value, None))
 
 
 def resolve(record: Any, path: str) -> bool:
@@ -716,6 +829,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # `adjacent` (the chunk before or after), `elsewhere` (any other) — and
     # reported, never gated; the floor of 0 is for text found nowhere.
     record_id_flag = full.get("id") if isinstance(full.get("id"), str) else None
+    carried_ids = dataset_identifier_forms(full)                        # #1123
     snippets = {"total": 0, "verified": 0, "linewrap_joined": 0, "adjacent": 0, "elsewhere": 0,
                 "spans_boundary": 0, "split_at_linebreaks": 0, "artifact_elided": 0,
                 # #891: a snippet below the #720 floors attests nothing - it is
@@ -778,7 +892,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                 # outside the denominator — neither is screened. A boolean
                 # or numeric leaf is attested by a sentence whose tokens
                 # never equal the value (#841): the screen is text vs text.
-                if (resolved and spath != "id" and not exempt(spath, value, record_id_flag)
+                if (resolved and spath != "id" and not exempt(spath, value, record_id_flag, carried_ids)
                         and not isinstance(value, (bool, int, float))):
                     stoks = {t for t in normalise(snippet).split() if len(t) >= 4}
                     if isinstance(value, dict):
@@ -789,7 +903,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                         kids = [(k, v) for k, v in value.items()
                                 if _is_leaf(v) and _populated(v)
                                 and not isinstance(v, (bool, int, float))
-                                and not (k == "id" and _minted(v, record_id_flag))]
+                                and not (k == "id" and _minted(v, record_id_flag, carried_ids))]
                         if len(kids) >= 3 and stoks:
                             hit = sum(1 for _k, v in kids if stoks & _value_tokens(v))
                             if hit <= 1:
@@ -976,7 +1090,11 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
         findings.append({"kind": "slot_not_in_record" if p else "slot_empty", "slot": p})
     leaves = populated_leaves(full)
     record_id = full.get("id") if isinstance(full.get("id"), str) else None
-    receiptable = [(p, v) for p, v in leaves if not exempt(p, v, record_id)]
+    carried = carried_ids                                               # one set, computed once above
+    receiptable = [(p, v) for p, v in leaves if not exempt(p, v, record_id, carried)]
+    # #1123: how many `id` leaves this revision exempts that v1 receipted —
+    # a label minted on the dataset's doi or page rather than its own id.
+    exempt_on_carried = sum(1 for p, v in leaves if exempt_on_carried_identifier(p, v, record_id, carried))
     attesting_at = {effective.get(r, r) for r in attesting}
     without = [p for p, _v in receiptable if not any(_covers(r, p) for r in attesting_at)]
     # #807: `without_receipt` is a mixture on the API path. Split against the
@@ -993,6 +1111,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
         never_receipted = sum(1 for p in without if resolve(original, p))
         added_after_receipt = len(without) - never_receipted
     slots = {"populated": len(leaves), "exempt": len(leaves) - len(receiptable),
+             "exempt_on_carried_identifier": exempt_on_carried,
              "receiptable": len(receiptable), "with_receipt": len(receiptable) - len(without),
              "without_receipt": without[:50],
              "without_receipt_truncated": max(0, len(without) - 50) or None,
@@ -1024,7 +1143,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     reported_kinds = {"snippet_mismatch", "snippet_empty", "snippet_adjacent_chunk",
                       "snippet_elsewhere_chunk", "snippet_spans_boundary"}
     findings_gated = sum(1 for f in findings if f.get("kind") not in reported_kinds)
-    return {"checked": True,
+    return {"checked": True, "instrument": RECEIPTS_INSTRUMENT,
             "chunks": chunks, "snippets": snippets, "slots": slots,
             "findings": findings[:100], "findings_truncated": max(0, len(findings) - 100) or None,
             "findings_gated": findings_gated,

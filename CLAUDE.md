@@ -357,10 +357,23 @@ baseline arm no longer saw, for a day, with nothing to detect it.
 
 **One layer up, `d4d runs check` reports bundle drift** (#452): does the file at
 a record's `inputs.bundle_path` still hash to the `bundle_md5` that record
-pinned? As of 2026-09-03: **136 records drifted, 41 current, 82 with no hash
-recorded** (64/12/82 when #452 was filed; the mojibake repair #874 rewrote
-the AI_READI and CM4AI bundles and the docx/accent fixes #921 the AI_READI,
-VOICE and VOICE_PEDIATRIC ones; CHORUS has not changed since #421). The test
+pinned? As of 2026-09-09: **191 records drifted, 86 current, 0 with no hash
+recorded in the live corpus** (64/12/82 when #452 was filed; 136/41/82 on
+2026-09-03; 19 archived records under `data/ATTIC/` record `bundle_md5:
+null` with no `bundle_sha256`, so this proof cannot reach them — outside
+`CONCAT_DIR`, not visited, not a backlog; the
+mojibake repair #874 rewrote the AI_READI and CM4AI bundles and the
+docx/accent fixes #921 the AI_READI, VOICE and VOICE_PEDIATRIC ones;
+CHORUS has not changed since #421). The 82 records that predated md5
+recording carried `inputs.bundle_sha256` of the bytes they read, and
+`d4d provenance backfill-bundle-md5` (#1121) recovered each md5 from the
+committed bundle version whose sha256 equals it — all 82 the 2026-07-28
+version — writing `inputs.bundle_md5_basis` to say so. Not from
+`repo.commit`: those runs read bundles regenerated in a dirty tree, and
+the bytes at the recorded commit are an older version the run never
+read. The search refuses a shallow clone (`git rev-parse
+--is-shallow-repository`): CI checks out one commit, and a one-commit
+history would report every earlier version's record as unrecoverable. The test
 that guards this no longer pins the count (#910): every drifted record must
 pin a hash some `bundle_hash_history` event in the source manifest names as
 its `before`, and every bundle the history names must still hash to its last
@@ -457,7 +470,29 @@ stripping (the chunk is the source bytes), and a snippet part shorter than
 (`funders[0]`) covers its leaves — that is how a boolean or enum gets one —
 but a receipt on a *list* (`funders`) covers only itself (#721). The slot
 denominator excludes `conforms_to_schema`/`conforms_to_class`, `notes` and
-`source_caveats` at any depth, and ids minted on the record's own id (#722).
+`source_caveats` at any depth, and ids minted on the record's own id (#722)
+or — receipts instrument **v2**, #1123 — on any identifier the record
+carries for the dataset at its top level: its `id` in CURIE or resolver
+form, its bare `doi`, its landing `page` (trailing slash and DOI case
+aside). The v5 rule licenses a label "on an identifier the evidence *does*
+supply", and a record taking the landing-page option must not lose
+coverage for it. A fragment on any other base — a component dataset's DOI
+under `resources`, a project homepage the record does not carry as its
+page — is a claim about that identifier and stays receiptable. The block
+names its `instrument`, and `slots.exempt_on_carried_identifier` counts
+what v2 exempts that v1's byte-for-byte own-id test did not: 4 leaves in
+the corpus, all CHORUS API v7 records, and every one of them the record's
+own top-level `id` (`https://chorus4ai.org/#chorus-dataset` on `page:
+https://chorus4ai.org/`) — so the exemption reaches the record's own
+identity slot, and a bare site root declared as `page` exempts every
+fragment on that root under the same scheme. One of the four had a receipt
+(coverage 59/170 → 58/169); three had none (never-receipted fell by one,
+coverage rose). The file-collections case the issue names exists only in
+the withheld AI_READI 2026-09-01 rep1 record. The recompute reached 29
+records; the 18 receipted records whose bundle has drifted are withheld by
+the #907 guard and stay under v1 (#1140). v9 R8 still tells the model a
+landing-page label "needs a receipt like any other value" — the cost v2
+removes; #1147 rotates that sentence.
 Named non-checks: that `nothing_relevant` was true, and that a real snippet
 supports its value. `backfill-checks` writes a `receipts` block only where a
 receipt exists or the record claims one (#726). Every bundle kind a run may declare has a manifest (#725), so

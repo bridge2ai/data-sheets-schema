@@ -1011,6 +1011,25 @@ the edited line is a conditions catalogue, not a decision rule, so no
 rule those records ran under moved — reported, never fatal, and named
 here so the drift is attributable.
 
+### The v9 body writes American English (#1134, 2026-09-09)
+
+The fourth v9 pin in two days, and the first that changes no rule. Under
+the declared instrument the whole file carried twelve British forms: the
+body eight "organisation" (inherited from v8's v5 block, and one in R7),
+one "recognise" (v5 block) and one "neighbouring" (v2 block), and the
+rationale two more, one of them the plural — while the body's own v5 rule
+says "Write American English throughout" and the runner rewrites British
+forms out of every record (#1002). All twelve are American now. v8 and earlier keep theirs:
+their records were generated under those bytes. No v9 record existed, so
+nothing is re-baselined; the assembly digest does not move (the prompt
+file is covered by its pin, not the assembly); `condition_delta` stays
+`["base"]`. The guard is the declared instrument, `grounding.BRITISH_PATTERNS`
+(v3), swept over the whole file — the first version was a hand-written
+list that passed on "neighbouring" (#1143). The audit-phase instruction the
+runner sends says "neighbouring" too and is filed as #1138, because
+`PHASE_INSTRUCTIONS` is in the assembly digest and moving it is a
+condition-boundary change.
+
 ### The schema digest moved with #1114 (2026-09-09)
 
 The `doi` slot's description carried a real Nature DOI as its example,
@@ -1241,6 +1260,31 @@ steps need:
     the repair round, which is told what to merge. A clean run's output
     is untouched, so VOICE 04f stays retained; the AI_READI 04f record is
     re-verdicted under the instrument (regressed) and AI_READI runs again.
+
+15. **A label minted on an identifier the record carries is exempt from the
+    receipt denominator (#1123, 2026-09-09, receipts instrument v2).** v1
+    exempted only a fragment on the record's own id byte for byte; the v5
+    rule licenses one on any identifier the evidence supplies, so a record
+    that labelled its file collections on the landing page (AI_READI
+    2026-09-01 rep1, withheld below) or wrote its own id as a fragment on
+    its page (CHORUS) was counted as uncovered for them. v2 exempts a
+    fragment on the record's `id` in either form, its `doi` or its `page`,
+    names its instrument in the block, and counts the difference
+    (`slots.exempt_on_carried_identifier`: 4 leaves, all CHORUS API v7, all
+    the record's own top-level `id`; one had a receipt, three had none).
+    Recomputed with `backfill-checks --blocks receipts --overwrite`: 29
+    records; no *gated* number moved (findings, snippet verdicts and chunk
+    counts identical). Reported-only values that had never been recomputed
+    under later revisions did: three 2026-08-28 CHORUS agentic blocks gained
+    the #840/#891/#899 keys and their `recorded_by` moved from `d4d receipts
+    check` to `backfill_checks`; `entry_single_leaf_sample[*].leaves` fell
+    by one on two CM4AI records (6→5, 7→6: the #842 minted-id filter, own-id
+    fragments, not v2); `remapped_by_identity[*].basis` read `by_id` for
+    `by_overlap` on CM4AI 2026-09-04b (the #899 remap, not v2); 18 v8 blocks
+    gained `recorded_by`. The 18 receipted records whose bundle drifted are
+    withheld by the #907 guard and stay under v1 — #1140 is the recompute
+    from the git blob. v9 R8's "needs a receipt like any other value" clause
+    states the cost v2 removes; #1147 rotates it (no v9 record exists).
 
 Each of 2–5, 7–10, 11 and 12 is a generation-path change (13 and 14 are not); per the production rule
 none of them may land between a v8 canary and its fill.
