@@ -338,6 +338,34 @@ reports regated.
 
 ### Review pass (12 of 12, 2026-09-07)
 
+**Reviewer basis (#1058).** The v8 reviews were made by `claude-fable-5-1`
+and the v7 reviews by `claude-fable-5`; the agent definition pinned
+`claude-fable-5` and the reviewers write their own runtime identity, which
+in September is the point release. So the v7-versus-v8 review numbers below
+— and the ones merged in #1055 — compare a Fable-5-reviewed arm against a
+Fable-5.1-reviewed arm, and the difference between them is the package
+**plus the reviewer version**. A point release of the judge is a smaller
+change than a different model family, but it is not nothing, and this
+repository's rule is that an instrument change is declared. It is declared
+here. The reviewer is recorded per record in `review.reviewer.model`, and
+the 17 earlier reviews (the 2026-08-28 arms) are `claude-fable-5`.
+
+How large that effect is has **not** been measured, and the honest place to
+say so is next to the numbers rather than in an issue. The instrument for
+measuring it exists: `{P}_review_b.yaml` plus `d4d review agree`, which
+reports percent agreement and Cohen's kappa against the same committed pack.
+Six such pairs exist from the 2026-08-28 arms, all same-model retests, and
+they sit at **82–96% class agreement** — the band for ordinary reviewer
+noise. A second pass under a different model, compared against that band,
+would settle whether the version difference is distinguishable from noise.
+That is the outstanding work on #1058; it was set up and deliberately not
+run.
+
+The agent is now pinned to `claude-opus-5`, so any *future* review is a
+third instrument and not comparable with either recorded arm without a
+paired pass. Nothing recorded was re-reviewed: the 24 review files stand as
+made, and the canonical selection below rests on them.
+
 One `d4d-review-record` agent per record (the CHORUS rep1 review run
 first as the canary, then eleven in parallel), every check passed
 `--write --strict`, review blocks in all 12 provenance records. Same
