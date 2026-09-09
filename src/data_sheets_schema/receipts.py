@@ -232,14 +232,25 @@ def _populated(value: Any) -> bool:
 #: Slots of the record's top level that carry an identifier *for the dataset
 #: itself* (#1123): its `id`, its bare `doi`, its landing `page`. A fragment
 #: minted on any of these is a label on this dataset, which the v5 rule
-#: licenses ("on an identifier the evidence *does* supply") and v9 R8 prefers
-#: on the record's own id. A fragment on any other base — a component
+#: licenses ("on an identifier the evidence *does* supply"). v9 R8 prefers
+#: the record's own id and says a landing-page label "needs a receipt like
+#: any other value, where a label on this record's own id does not" — the
+#: cost this revision removes; the prompt sentence is #1147's to rotate.
+#: The exemption reaches the record's own top-level `id` when it is itself
+#: a fragment on the page (CHORUS: `https://chorus4ai.org/#chorus-dataset`
+#: on `page: https://chorus4ai.org/`), which is the whole observed effect on
+#: the recomputed corpus. A fragment on any other base — a component
 #: dataset's DOI under `resources`, a project homepage the record does not
-#: carry as its page — is a claim about that identifier and stays receiptable.
+#: carry as its page — is a claim about that identifier and stays
+#: receiptable; a `page` that is a bare site root exempts every fragment on
+#: that root under the same scheme, which is the exposure of trusting the
+#: slot without a shape check.
 DATASET_IDENTIFIER_SLOTS = ("id", "doi", "page")
 
 #: What this validator's numbers mean, revision by revision. Written into
-#: the block so two blocks are compared under one instrument or not at all.
+#: the block so a reader can tell which revision produced it; nothing pools
+#: blocks across revisions today, and #1140's recompute is what would bring
+#: the records a drifted bundle withholds under one.
 RECEIPTS_INSTRUMENT = ("v2 (#1123): a fragment minted on an identifier the record carries "
                        "for the dataset at its top level — its id in CURIE or resolver form, "
                        "its doi, its page — is exempt like one on its own id; "
@@ -248,8 +259,12 @@ RECEIPTS_INSTRUMENT = ("v2 (#1123): a fragment minted on an identifier the recor
                        "own-id fragments exempt, unattesting snippets counted apart")
 
 
+_DOI_RESOLVERS = ("https://doi.org/", "http://doi.org/", "https://dx.doi.org/", "http://dx.doi.org/")
+_BARE_DOI = re.compile(r"^10\.\d{4,}/\S+$")
+
+
 def _doi_forms(doi: str) -> set[str]:
-    return {f"doi:{doi}", f"https://doi.org/{doi}", f"http://doi.org/{doi}", f"http://dx.doi.org/{doi}"}
+    return {f"doi:{doi}", *(f"{base}{doi}" for base in _DOI_RESOLVERS)}
 
 
 def dataset_identifier_forms(record: dict[str, Any] | None) -> frozenset[str]:
@@ -273,7 +288,7 @@ def dataset_identifier_forms(record: dict[str, Any] | None) -> frozenset[str]:
         elif low.startswith("doi:"):
             forms |= _doi_forms(value[4:])
         else:
-            for base in ("https://doi.org/", "http://doi.org/", "http://dx.doi.org/"):
+            for base in _DOI_RESOLVERS:
                 if low.startswith(base):
                     forms |= _doi_forms(value[len(base):])
     return frozenset(_base_key(f) for f in forms)
@@ -281,10 +296,16 @@ def dataset_identifier_forms(record: dict[str, Any] | None) -> frozenset[str]:
 
 def _base_key(base: str) -> str:
     """The comparison form of a fragment's base: no trailing slash, and a DOI
-    (CURIE or resolver URL) lower-cased, since DOIs are case-insensitive."""
+    (bare, CURIE or resolver URL) lower-cased, since DOIs are
+    case-insensitive. No scheme or host folding for anything else — a page
+    written `http://` does not match a fragment on `https://`, which errs
+    conservative. `review_pack._canonical_identifier` folds scheme and host
+    because it classifies a label's *origin* (own, constructed, stated);
+    this key decides whether a leaf needs a receipt, and the two are kept
+    apart on purpose (#1141 review, S6)."""
     base = base.strip().rstrip("/")
     low = base.lower()
-    if low.startswith(("doi:", "https://doi.org/", "http://doi.org/", "http://dx.doi.org/")):
+    if low.startswith(("doi:", *_DOI_RESOLVERS)) or _BARE_DOI.match(base):
         return low
     return base
 
@@ -1069,7 +1090,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
         findings.append({"kind": "slot_not_in_record" if p else "slot_empty", "slot": p})
     leaves = populated_leaves(full)
     record_id = full.get("id") if isinstance(full.get("id"), str) else None
-    carried = dataset_identifier_forms(full)
+    carried = carried_ids                                               # one set, computed once above
     receiptable = [(p, v) for p, v in leaves if not exempt(p, v, record_id, carried)]
     # #1123: how many `id` leaves this revision exempts that v1 receipted —
     # a label minted on the dataset's doi or page rather than its own id.

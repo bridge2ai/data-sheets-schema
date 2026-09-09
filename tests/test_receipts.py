@@ -240,6 +240,13 @@ class Validator(unittest.TestCase):
         self.assertEqual(sum(rc.exempt_on_carried_identifier(p, v, full["id"], carried)
                              for p, v in leaves.items()), 3)
 
+    def test_doi_forms_cover_every_resolver_and_the_bare_doi_case_folds(self):
+        full = {"id": "urn:uuid:1", "doi": "10.1234/ABC"}
+        carried = rc.dataset_identifier_forms(full)
+        for base in ("https://dx.doi.org/10.1234/abc#p", "http://dx.doi.org/10.1234/ABC#p", "doi:10.1234/abc#p", "10.1234/abc#p"):
+            self.assertTrue(rc.exempt("parts[0].id", base, full["id"], carried), base)
+        self.assertFalse(rc.exempt("parts[0].id", "https://doi.org/10.1234/ABD#p", full["id"], carried))
+
     def test_a_record_carrying_no_doi_or_page_exempts_own_id_fragments_only(self):
         full = {"id": "urn:uuid:1", "funders": [{"id": "https://x/ds#f", "name": "n"}]}
         self.assertEqual(rc.dataset_identifier_forms(full), frozenset({"urn:uuid:1"}))

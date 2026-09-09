@@ -384,7 +384,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                sample: dict[str, int] | None = None) -> dict[str, Any]:
     from data_sheets_schema.backfill_checks import _split_header
     from data_sheets_schema.chunking import chunk_texts, load_manifest
-    from data_sheets_schema.receipts import claim_receipts, load_receipt
+    from data_sheets_schema.receipts import claim_receipts, dataset_identifier_forms, load_receipt
 
     sample = {**DEFAULT_SAMPLE, **(sample or {})}
     record = yaml.safe_load(_split_header(provenance.read_text(encoding="utf-8"))[1]) or {}
@@ -585,7 +585,8 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         covering = {(c["resolved_path"] if original is not None else s)
                     for s, c in claims["slots"].items()} - {None}
         without = sorted(p for p, v in populated_leaves(full)
-                         if not exempt(p, v, record_id) and not any(_covers(r, p) for r in covering))
+                         if not exempt(p, v, record_id, dataset_identifier_forms(full))   # the block's instrument (#1141 review, M4)
+                         and not any(_covers(r, p) for r in covering))
         rng.shuffle(without)
         for slot in without[: sample["receiptless_slots"]]:
             item = {"id": f"slot-{len(items) + 1:03d}", "kind": "slot_receiptless", "slot": slot,

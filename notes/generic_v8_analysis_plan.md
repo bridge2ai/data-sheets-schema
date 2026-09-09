@@ -1193,18 +1193,26 @@ steps need:
     receipt denominator (#1123, 2026-09-09, receipts instrument v2).** v1
     exempted only a fragment on the record's own id byte for byte; the v5
     rule licenses one on any identifier the evidence supplies, so a record
-    that labelled its file collections on the landing page or on the DOI's
-    other form was counted as uncovered for them. v2 exempts a fragment on
-    the record's `id` in either form, its `doi` or its `page`, names its
-    instrument in the block, and counts the difference
-    (`slots.exempt_on_carried_identifier`: 4 leaves, all CHORUS API v7).
+    that labelled its file collections on the landing page (AI_READI
+    2026-09-01 rep1, withheld below) or wrote its own id as a fragment on
+    its page (CHORUS) was counted as uncovered for them. v2 exempts a
+    fragment on the record's `id` in either form, its `doi` or its `page`,
+    names its instrument in the block, and counts the difference
+    (`slots.exempt_on_carried_identifier`: 4 leaves, all CHORUS API v7, all
+    the record's own top-level `id`; one had a receipt, three had none).
     Recomputed with `backfill-checks --blocks receipts --overwrite`: 29
-    records; no gated number moved (findings, snippet verdicts and chunk
-    counts identical; three 2026-08-28 CHORUS agentic blocks and two CM4AI
-    samples caught up with revisions #840/#842/#891/#899 they had never
-    been recomputed under, and 18 v8 blocks gained `recorded_by`). The 18
-    receipted records whose bundle drifted are withheld by the #907 guard
-    and stay under v1 — #1140 is the recompute from the git blob.
+    records; no *gated* number moved (findings, snippet verdicts and chunk
+    counts identical). Reported-only values that had never been recomputed
+    under later revisions did: three 2026-08-28 CHORUS agentic blocks gained
+    the #840/#891/#899 keys and their `recorded_by` moved from `d4d receipts
+    check` to `backfill_checks`; `entry_single_leaf_sample[*].leaves` fell
+    by one on two CM4AI records (6→5, 7→6: the #842 minted-id filter, own-id
+    fragments, not v2); `remapped_by_identity[*].basis` read `by_id` for
+    `by_overlap` on CM4AI 2026-09-04b (the #899 remap, not v2); 18 v8 blocks
+    gained `recorded_by`. The 18 receipted records whose bundle drifted are
+    withheld by the #907 guard and stay under v1 — #1140 is the recompute
+    from the git blob. v9 R8's "needs a receipt like any other value" clause
+    states the cost v2 removes; #1147 rotates it (no v9 record exists).
 
 Each of 2–5, 7–10, 11 and 12 is a generation-path change (13 and 14 are not); per the production rule
 none of them may land between a v8 canary and its fill.
