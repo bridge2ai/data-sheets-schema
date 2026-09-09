@@ -100,7 +100,8 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
         """The prompt's own prose is the example the model copies (#1134),
         and the rationale is what the next prompt is written from. The rule
         and the normaliser (#1002) both say American; the v9 body said
-        "organisation" nine times and "neighbouring" once while saying so.
+        "organisation" eight times, "recognise" once and "neighbouring" once
+        while saying so, and the rationale two more (one the plural).
         Swept with the declared instrument, so the guard moves with it."""
         from data_sheets_schema import grounding
         text = GENERIC_PROMPT_V9.read_text()

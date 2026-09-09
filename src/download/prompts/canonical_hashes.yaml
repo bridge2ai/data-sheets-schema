@@ -280,7 +280,7 @@ files:
     pinned_on: '2026-09-09'
     reason: 'American spellings (#1134, round 2): "neighbouring" -> "neighboring" in the inherited
       v2 block of the body, after organisation/recognise in the v5 block, R7 and the rationale
-      (the rationale is not sent); one byte longer; no v9 record exists, so no record is superseded'
+      (the rationale is not sent); one byte shorter (the dropped u); no v9 record exists, so no record is superseded'
     sha256: 6ef7c881faea87008fdc2eba74e9d4ce54b283a2a28faab470ce5f41f5e71484
     superseded:
     - pinned_on: '2026-09-08'

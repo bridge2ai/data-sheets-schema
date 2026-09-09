@@ -992,12 +992,13 @@ so a re-run of an earlier condition would receive it too.
 
 ### The v9 body writes American English (#1134, 2026-09-09)
 
-The fourth v9 pin in two days, and the first that changes no rule. The
-body carried "organisation" nine times and "neighbouring" and "recognise"
-once each — inherited from v8's v2 and v5 blocks and one in R7 — while its
-own v5 rule says "Write American English throughout" and the runner
-rewrites British forms out of every record (#1002). All are American now;
-the rationale's two were corrected with them. v8 and earlier keep theirs:
+The fourth v9 pin in two days, and the first that changes no rule. Under
+the declared instrument the whole file carried twelve British forms: the
+body eight "organisation" (inherited from v8's v5 block, and one in R7),
+one "recognise" (v5 block) and one "neighbouring" (v2 block), and the
+rationale two more, one of them the plural — while the body's own v5 rule
+says "Write American English throughout" and the runner rewrites British
+forms out of every record (#1002). All twelve are American now. v8 and earlier keep theirs:
 their records were generated under those bytes. No v9 record existed, so
 nothing is re-baselined; the assembly digest does not move (the prompt
 file is covered by its pin, not the assembly); `condition_delta` stays
