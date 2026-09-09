@@ -267,8 +267,9 @@ BRITISH_PATTERNS = tuple(re.compile(rx) for rx in (
     # v4 (#1006, Codex review of #1003): labourers, honourably, millilitres,
     # micrometres, paediatricians, haematopoietic and sulphide widen the
     # patterns above; `grey` is new. A surname Grey is counted like the
-    # Temerty Centre is — the count is a fact about the text, and the
-    # normaliser's title-case skip leaves the name as written.
+    # Temerty Centre is — the count is a fact about the text — and the
+    # normaliser leaves it as written only inside a title-case run ("Jane
+    # Grey"); a bare `family_name: Grey` is rewritten, logged, restorable.
     r"\bgrey(?:s|ed|er|est|ish|ing|scale)?\b",
 ))
 _QUOTED = re.compile(r'"[^"\n]*"')
