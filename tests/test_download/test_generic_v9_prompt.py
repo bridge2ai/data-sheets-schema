@@ -1,10 +1,16 @@
 """generic-v9 must stay generic, and must be v8 plus its block.
 
-Mirrors `test_generic_v8_prompt.py`. v9 adds **one block of two rules** and
+Mirrors `test_generic_v8_prompt.py`. v9 adds **one block of nine rules** and
 nothing else changes but the version stamp: R6, that a value in the
 referent's own slots is supported by a passage about the referent, binding
-the reconcile phase (#913); and R7, that a list entry names exactly one
-entity, with the signature of a merged one (#911).
+the reconcile phase (#913); R7, that a list entry names exactly one
+entity, with the signature of a merged one (#911); and, added before the
+first v9 run, R8 (the fragment rule's carve-out for schema-forced ids and
+the referent test for every other mint — #803, #901) and R9–R14, one per
+slot-level trap that recurred in three or more independent reviews across
+the v6–v8 arms (#830): enumeration slots, `raw_data_format`,
+`principal_investigator`, consequence and keyword lines, list membership,
+absence and route.
 
 The runner-side half of v9 is the scope declaration itself (#932), rendered
 by `api_runner.scope_block` and tested in `tests/test_scope_block.py`. R6
@@ -63,18 +69,67 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
             b = v9.split(f"--- ADDED IN {mark} ---", 1)[1].split(f"--- END ADDED IN {mark} ---", 1)[0]
             self.assertEqual(_norm(a), _norm(b), f"the {mark} block changed")
 
-    def test_the_block_carries_the_two_registered_rules(self):
+    def test_the_block_carries_the_nine_registered_rules(self):
         block = _added_block(GENERIC_PROMPT_V9.read_text())
         bullets = re.findall(r"^- ", block, re.M)
-        self.assertEqual(len(bullets), 2)                      # R6 (#913), R7 (#911)
+        self.assertEqual(len(bullets), 9)                      # R6 (#913), R7 (#911), R8 (#803/#901), R9–R14 (#830)
         block = _norm(block)                                   # the file wraps at 78 columns
         for probe in ("subject is the referent",                    # R6: whose passage supports it
                       "reconcile phase",                             # R6: where the leaks survived
                       "not an assurance",                            # R6: an empty declaration promises nothing (#1072)
                       "names exactly one entity",                    # R7: the rule
                       "names a class of things",                     # R7: the signature
-                      "is one entity, and splitting it"):            # R7: the carve-out (#1072)
+                      "is one entity, and splitting it",             # R7: the carve-out (#1072)
+                      "does not reach an id the schema forces",      # R8: the carve-out (#803)
+                      "core derivation reads to match",              # R8: the projector sentence (#803)
+                      "a claim about that identifier, not a label",  # R8: the referent test (#901)
+                      "labels a part of that thing, not of this one",  # R8: a fragment on another's identifier (#901)
+                      "passage that states the category",            # R9: enumeration slots (#830 a)
+                      "before any processing this dataset applied",  # R10: raw_data_format (#830 b)
+                      "designate with that title",                   # R11: the source's own designation (#830 c)
+                      "at the passage's own reach",                  # R12: consequence composed beyond the fact
+                      "a line of bare terms is not one",             # R12: keyword lines (adjudication)
+                      "is a member of that list",                    # R13: pointer entries
+                      "An absence is not an entry, and a route is not a format"):  # R14: rule-06/07 traps
             self.assertIn(probe, block)
+
+    def test_R8_resolves_every_referent_it_names(self):
+        """#1059's lesson: a rule cannot converge while it points at
+        nothing. R8 says which classes force an id; the schema must agree,
+        and the projector it cites must match by id."""
+        from linkml_runtime import SchemaView
+
+        from data_sheets_schema.constants.schemas import SCHEMA_PATH
+        sv = SchemaView(str(SCHEMA_PATH))
+        for cls in ("File", "FileCollection", "DataSubset"):
+            slot = sv.induced_slot("id", cls)
+            self.assertTrue(slot.identifier or slot.required, cls)
+        self.assertTrue(sv.induced_slot("id", "Person").identifier)
+        for cls in ("Organization", "Grant"):                  # "where the schema does not require an id"
+            slot = sv.induced_slot("id", cls)
+            self.assertFalse(slot.identifier or slot.required, cls)
+        from data_sheets_schema import derive_core
+        import inspect
+        self.assertIn('r.get("id")', inspect.getsource(derive_core._add_distributions))
+
+    def test_R9_to_R14_name_slots_the_digest_declares(self):
+        from data_sheets_schema import schema_digest
+        digest = schema_digest.build("Dataset")
+        known = {s.name for s in digest.slots} | {n.name for n in digest.nested}
+        for n in digest.nested:
+            known |= set(n.required) | set(n.optional)
+        for slot in ("data_type", "collection_type", "relationship_type", "raw_data_format",
+                     "principal_investigator", "scope_impact", "variables", "funders", "resources",
+                     "source_caveats", "errata", "future_guarantees", "format", "prohibition_reason"):
+            self.assertIn(slot, known, slot)
+
+    def test_the_rules_name_no_value_from_a_record_they_will_be_scored_against(self):
+        """R12–R14 were drafted from named verdicts (#830); the strings those
+        verdicts quote must not appear, for the reason #1072 gave R7."""
+        block = _norm(_added_block(GENERIC_PROMPT_V9.read_text())).lower()
+        for lifted in ("representative subset marker", "deterioration", "no formal erratum",
+                       "temerty", "co-principal", "lead investigators"):
+            self.assertNotIn(lifted, block)
 
     def test_R7_names_no_value_from_a_record_it_will_be_scored_against(self):
         """The first draft used two grantor and collector strings verbatim
@@ -114,11 +169,12 @@ class TestV9IsRegistered(unittest.TestCase):
 
 
 class TestTheBlockStaysGeneric(unittest.TestCase):
-    """v8's guards, carried forward. The v9 block names no slot at all: R6
+    """v8's guards, carried forward. R6 and R7 name no slot at all: R6
     speaks of "the slot that declaration names" because the declaration
     supplies the slot per project, and R7 of "one name, one role, one
-    grantor, one system" because the shape is what recurs, not the slot. So
-    the v5–v8 convention (#742) holds here with nothing to record."""
+    grantor, one system" because the shape is what recurs, not the slot.
+    R8–R14 name slots, because each is keyed to where a trap recurred, and
+    every backticked name must be one the digest renders (#742)."""
 
     def setUp(self):
         self.block = _added_block(GENERIC_PROMPT_V9.read_text())

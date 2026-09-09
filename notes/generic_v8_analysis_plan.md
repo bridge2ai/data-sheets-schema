@@ -870,6 +870,55 @@ since moved. Fixed first; the recompute was redone under the fix. The
 datasheets are untouched, and the two regenerated reports stand as written
 with the cause on record here.
 
+### v9 R8–R14, added before the first v9 run (#803, #901, #830; 2026-09-09)
+
+Seven rules joined the v9 block while no v9 record existed, so the
+condition has one boundary, not two, and the pin rotated once more with the
+reason naming them. Nothing here changes the runner: `assembly_digest`
+moves only through the prompt hash.
+
+- **R8** closes the prompt half of #803 and point 1 of #901. The v6
+  fragment rule ("mint only where a value points at the part") was read
+  against `File`, `FileCollection` and `DataSubset` ids that the schema
+  forces (`identifier` or `required` — asserted by the v9 prompt test
+  against `SchemaView`) and against `resources[*].id`, which `derive_core`
+  matches by id; the pack-side half (#821 `forced`, #1108 `origin`) let
+  the reviewer excuse those, and R8 tells the model the same. Its second
+  half is the referent test for every other mint: an organisation, grant,
+  award or program has a referent outside the record, so a fragment for it
+  on the dataset's DOI is a claim about that DOI (CM4AI rep3's twelve and
+  VOICE rep3's twenty-two on the 2026-09-01 arm), and a fragment on another
+  thing's identifier labels that thing (AI_READI rep1's ten
+  `file_collections[*].id` on the fairhub page). `Organization` and `Grant`
+  ids are neither identifier nor required, so "leave `id` empty and carry
+  the name" validates.
+- **R9–R14** are #830's candidates, each present in three or more
+  independent reviews: enumeration slots inferred from names (`data_type`,
+  `collection_type`: six verdicts on those two leaves); `raw_data_format`
+  naming the released standard (five, recurring on the production pass);
+  `principal_investigator` inflation (seven adjudicated items, with the
+  VOICE bundle's own "co-principal investigators" versus "lead
+  investigators" as the anchor — R11 asks for the source's designation
+  rather than quoting it); `scope_impact` composed beyond the stated fact
+  and the keyword-line substitution the adjudication ruled closer to
+  fabrication; a pointer entry sitting in `variables`; absence statements
+  and access routes under `errata`, `future_guarantees`, `format`,
+  `prohibition_reason` (seven records on the production pass).
+- **Not added**: plan-as-done (the v8 tense rule already says it) and
+  entity merging (R7). Person-as-string was struck from #830 as reconcile's
+  own flattening (#900, #805), not model behaviour.
+
+**What a v9 canary can measure.** R8's first half predicts fewer rule-14
+verdicts on `forced: true` mints and no change in the mints themselves;
+its second half predicts fewer `origin: minted, forced: false` entries on
+`affiliations`, `funders[*].grants` and `accountable_organization`, and no
+`origin: constructed` entries. R9–R14 predict fewer adverse verdicts on the
+named slots; each has a small base (three to seven verdicts across
+seventeen to twenty-nine reviews), so a null on twelve records says little,
+as #1072 said of R7. The prompt-side lifted-string guard (`test_the_rules_
+name_no_value_from_a_record_they_will_be_scored_against`) keeps the
+verdict strings the rules were drafted from out of the text.
+
 ### What a v9 arm can and cannot be compared against (#1072)
 
 `condition_delta("generic_v8", "generic_v9")` returns `["base"]`, and that

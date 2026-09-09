@@ -1,6 +1,6 @@
 # D4D generic-arm generation prompt — v9
 
-**This is v8 plus one block of two rules.** The prompt body is
+**This is v8 plus one block of nine rules.** The prompt body is
 byte-identical to `src/download/prompts/d4d_generic_arm_prompt_v8.md` apart
 from the version stamp; a test asserts that the only difference is the block
 marked `ADDED IN v9`. This header is not part of the body and is not sent to
@@ -29,8 +29,31 @@ conjunction where the schema asks for one entity. R7 names the signature, so
 the check is something the model can run on a value it has just written
 rather than a principle to hold in mind.
 
-Neither rule is a new prohibition. The evidence for each is in the plan note,
-not here, because this file is read by a generating model.
+R8 through R14 were added before the first v9 run, from two sources: the
+open half of the fragment-rule conflict (#803, #901) and the slot-level
+adverse verdicts that recurred in three or more independent reviews across
+the v6–v8 arms (#830, with the adjudication findings of 2026-09-01).
+
+R8 answers the fragment conflict. The v6 rule says to mint a fragment only
+where a value points at the part, but `File`, `FileCollection` and
+`DataSubset` ids are schema identifiers the record cannot omit, and the
+core derivation matches resources by id — so six v6 reviews charged the
+record with the schema. The other half is the unforced mint on a referent
+outside the record: fragments for grants, awards and organisations on the
+dataset's own DOI, and labels built on another thing's identifier. R8
+states the carve-out and the referent test in one place.
+
+R9 (enumeration slots), R10 (`raw_data_format`), R11
+(`principal_investigator`), R12 (consequence and keyword lines), R13 (a
+list entry is a member) and R14 (an absence is not an entry, a route is not
+a format) each name a trap the general rules already forbid and the model
+produced anyway. Each is keyed to the slot or shape where it recurred, so
+the check is something the model can run on the value it has just written.
+Plan-as-done and entity merging recur too and are not repeated: the v8
+tense rule and R7 already say them.
+
+None of these is a new prohibition. The evidence for each is in the plan
+note, not here, because this file is read by a generating model.
 
 ## Prompt body
 
@@ -332,6 +355,69 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   same error in the other direction. Read back each entry you write in a
   multivalued slot and ask whether exactly one thing the sources name answers
   to it.
+- The rule that a fragment is minted only where a value points at the part
+  does not reach an id the schema forces. Where a class declares `id` as its
+  identifier or requires it — a file, a file collection, a data subset, a
+  person given as an object — the id exists because the object does, and
+  leaving it out is a validation failure, not a fragment saved: mint it on
+  this record's own id, keep it stable, and do not read that rule as a reason
+  to omit the object. The id of each entry under `resources` is also what the
+  core derivation reads to match a resource to its files, so it is used
+  whether or not the text points at it. For every other fragment the test
+  stays the referent: an organization, a grant, an award, a program has a
+  referent outside this record, so a fragment for it on this dataset's
+  identifier is a claim about that identifier, not a label. Take the
+  identifier the evidence states; where it states none and the schema does
+  not require an id, leave `id` empty and carry the name in `name`. A
+  fragment appended to an identifier the evidence states for something else
+  — a landing page, a repository entry, another dataset — labels a part of
+  that thing, not of this one; a label this record owns is minted on this
+  record's own id.
+- A slot whose declared range is an enumeration is populated only from a
+  passage that states the category, in the source's own words or a plain
+  restatement of them — never from what a value's name, unit, extension or
+  position suggests. A variable's `data_type`, a collection's
+  `collection_type`, a related dataset's `relationship_type` are claims about
+  how a thing is classified, and a passage that names the thing without
+  classifying it supports the name and not the class. Where no passage
+  states the category the slot stays empty: an empty enumeration slot is a
+  gap the reader can see, a guessed one an error the reader cannot.
+- `raw_data_format` names the form the data took before any processing this
+  dataset applied, and only where a passage states that form. The standard
+  the release conforms to, the extension the distributed files carry and the
+  format a pipeline wrote are facts about the released data and belong in
+  the slots that describe the release; where the documents describe the
+  release and say nothing of what preceded it, the slot stays empty.
+- `principal_investigator` names a person the documents designate with that
+  title, or its usual abbreviation, for this dataset or the study that
+  produced it. A lead, a director, a corresponding author, a contact, a
+  first author, the head of the group that hosts the data — each is a role
+  the documents state, recorded as the role they state, in the slot for it
+  or in prose, and never promoted to principal investigator because the
+  record has a slot for one. Where the documents designate more than one,
+  record each; where they designate none, the slot stays empty.
+- A value states what a passage states, at the passage's own reach. A
+  consequence — what a limitation means for a use, what a gap does to a
+  conclusion — goes in `scope_impact` or anywhere else only where a passage
+  draws it; a limitation the documents state without its consequence is
+  recorded as the limitation alone. A term taken from a keyword line, a tag
+  list, a table header or a navigation menu attests that the term appears,
+  not what it is about: a value needs a sentence behind it, and a line of
+  bare terms is not one.
+- Every entry in a list is a member of that list: a variable under
+  `variables`, a funder under `funders`, a file under `resources`. A remark
+  about the list — that what is shown is a sample, that the list continues
+  elsewhere, that one column flags something — is not a member and does not
+  become an entry; it goes in the prose slot that describes the list, or in
+  `source_caveats`, or is omitted.
+- An absence is not an entry, and a route is not a format. That no
+  correction has been published is not an erratum and does not fill
+  `errata`; that access is by request through a portal is a route and fills
+  neither `future_guarantees` nor `format`; the reason a use is prohibited is
+  its `prohibition_reason`, and the prohibition itself is the entry that
+  reason explains, not the reason. Where the documents state that a thing is
+  absent, the slot for the thing stays empty and the statement, where it is
+  worth keeping, goes in `source_caveats`.
 
 --- END ADDED IN v9 ---
 
