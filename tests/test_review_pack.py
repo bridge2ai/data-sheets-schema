@@ -624,6 +624,57 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
             self.assertIn("restored the pack", r.output); self.assertNotIn("had already moved", r.output)
             self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)
 
+    def test_build_pack_returns_only_the_pack(self):
+        """SF-R3a: the instruction travels out of band, never as a key."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = Pack()._run(tmp)
+            out: list[str] = []
+            pack = rp.build_pack(prov, instr, write_instruction=False, instruction_out=out)
+            self.assertNotIn("_instruction_text", pack)
+            self.assertEqual(len(out), 1); self.assertIn("rule", out[0].lower())
+            self.assertEqual(pack, rp.build_pack(prov, instr))                        # identical mapping either way
+
+    def test_runs_check_reports_a_moved_pack_through_the_cli(self):
+        """SF-R3c: the `d4d runs check` drift branch, end to end — the
+        wiring MF-R3 broke and the wording a reader sees."""
+        import os
+        import click.testing
+        from data_sheets_schema import provenance
+        from data_sheets_schema.cli.runs import runs as runs_cli
+        from tests.test_provenance_reasoning_effort import header                # the fixture's record header
+        here = os.getcwd()
+        with tempfile.TemporaryDirectory() as tmp:
+            try:
+                os.chdir(tmp)
+                label, method = "2026-08-09_test_rep1", "claudecode_agent"
+                concat = Path("data/d4d_concatenated")
+                full = concat / method / label; core = concat / f"{method}_core" / label
+                full.mkdir(parents=True); core.mkdir(parents=True)
+                Path("src/data_sheets_schema").mkdir(parents=True)               # the repo-root marker (#672)
+                body = yaml.safe_dump({"id": "https://example.org/x", "name": "x"})
+                head = header("claude-opus-5", "Claude Code")
+                (full / "P_d4d.yaml").write_text(head + body); (core / "P_d4d_core.yaml").write_text(head + body)
+                (core / "P_reconciliation.md").write_text("# r\n"); Path("b.txt").write_text("docs\n")
+                rec = provenance.build_record("P", method, label, mode="live", input_bundle=Path("b.txt"),
+                                              input_verified=True, concat_dir=concat)
+                prov = provenance.record_path_for("P", method, label, concat)
+                rec.write(prov)
+                pack = core / "P_review_pack.yaml"; pack.write_text("pack_version: 5\nitems: []\n")
+                text = prov.read_text(); hdr, rest = text.split("\n", 1)
+                d = yaml.safe_load(rest); d["review"] = {"artifacts": {"pack": {"sha256": hashlib.sha256(pack.read_bytes()).hexdigest()}}}
+                prov.write_text(hdr + "\n" + yaml.safe_dump(d))
+                r = click.testing.CliRunner().invoke(runs_cli, ["check"])
+                self.assertEqual(r.exit_code, 0, r.output); self.assertNotIn("pins a pack", r.output)
+                pack.write_text("pack_version: 5\nitems: [moved]\n")
+                r = click.testing.CliRunner().invoke(runs_cli, ["check"])
+                self.assertEqual(r.exit_code, 0, r.output)
+                self.assertIn("pins a pack that is not the one on disk", r.output); self.assertIn("rewritten", r.output)
+                pack.unlink()
+                r = click.testing.CliRunner().invoke(runs_cli, ["check"])
+                self.assertIn("missing", r.output)
+            finally:
+                os.chdir(here)
+
     def test_the_b_review_and_the_pack_itself(self):
         """The `_b` glob case the six three-pin records exercise; the pack
         file never reads as a pin on itself."""

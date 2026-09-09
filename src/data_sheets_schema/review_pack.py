@@ -381,13 +381,16 @@ def _id_slots(full: Any, root_class: str | None = None,
 
 
 def build_pack(provenance: Path, instruction_file: Path | None = None,
-               sample: dict[str, int] | None = None, *, write_instruction: bool = True) -> dict[str, Any]:
-    """The pack as a dict. With `write_instruction` (the default) the rendered
-    instruction is written beside the record as a side effect; `write_pack`
-    passes False and writes it only on the path that also writes the pack,
-    so a refused rewrite leaves both files as it found them (#1124 review,
-    MF-R1). The text is returned under `_instruction_text` in that case,
-    for the caller to write, and is not part of the pack."""
+               sample: dict[str, int] | None = None, *, write_instruction: bool = True,
+               instruction_out: list[str] | None = None) -> dict[str, Any]:
+    """The pack as a dict — always the pack, nothing else in it. With
+    `write_instruction` (the default) the rendered instruction is written
+    beside the record as a side effect; `write_pack` passes False and writes
+    it only on the path that also writes the pack, so a refused rewrite
+    leaves both files as it found them (#1124 review, MF-R1). The text then
+    travels out of band, appended to `instruction_out`, never as a key of
+    the returned mapping (round 3, SF-R3a: a caller that dumped the mapping
+    would have written a pack with an extra key and a different sha256)."""
     from data_sheets_schema.backfill_checks import _split_header
     from data_sheets_schema.chunking import chunk_texts, load_manifest
     from data_sheets_schema.receipts import claim_receipts, load_receipt
@@ -421,8 +424,8 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     ipath = paths["instruction"]
     if text and write_instruction:
         ipath.write_text(text, encoding="utf-8")            # the reviewer reads the instruction, not its hash (#791)
-    elif text:
-        pack["_instruction_text"] = text
+    elif text and instruction_out is not None:
+        instruction_out.append(text)
     pack["instruction"] = {"basis": basis, "path": str(ipath) if text else None,
                            "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest() if text else None,
                            "chars": len(text) if text else 0}
@@ -675,7 +678,8 @@ class PackAttested(RuntimeError):
         for p in self.pins:
             sha = str(p.get("sha256", ""))
             if sha.startswith("unreadable"):
-                who.append(f"{p['by']} {p['path']} (unreadable {sha[len('unreadable '):]}: nothing is known about what would move)")
+                who.append(f"{p['by']} {p['path']} (unreadable {sha[len('unreadable '):]}: nothing is known about "
+                           "what would move; fix that file — forcing cannot read it either)")
             elif p.get("pack_on_disk") is False:
                 who.append(f"{p['by']} {p['path']} (its pack is not on disk; this write would not reproduce it)")
             else:
@@ -770,8 +774,9 @@ def write_pack(provenance: Path, instruction_file: Path | None = None,
         # raise inside `build_pack` as a bare ParserError rather than as the
         # named refusal this guard exists to give (#1124 review, SF-R2).
         raise PackAttested(out, blind, force_hint)
-    pack = build_pack(provenance, instruction_file, sample, write_instruction=False)
-    instruction = pack.pop("_instruction_text", None)
+    instruction_out: list[str] = []
+    pack = build_pack(provenance, instruction_file, sample, write_instruction=False,
+                      instruction_out=instruction_out)
     from data_sheets_schema.provenance import _NoAliasDumper
     text = yaml.dump(pack, Dumper=_NoAliasDumper, sort_keys=False, allow_unicode=True, width=10_000)
     new_sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
@@ -786,9 +791,9 @@ def write_pack(provenance: Path, instruction_file: Path | None = None,
         orphaned = [p for p in stale if not p.get("pack_on_disk") and p["sha256"] != new_sha]
         if would_move or orphaned:
             raise PackAttested(out, would_move + orphaned, force_hint)
-    if instruction:
-        Path(pack["instruction"]["path"]).write_text(instruction, encoding="utf-8")
-    out.write_text(text, encoding="utf-8")
+    out.write_text(text, encoding="utf-8")                  # the pinned artifact first
+    if instruction_out:
+        Path(pack["instruction"]["path"]).write_text(instruction_out[0], encoding="utf-8")
     return out, pack
 
 

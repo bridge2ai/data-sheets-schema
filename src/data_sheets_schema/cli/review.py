@@ -55,7 +55,8 @@ def pack(method, label, project, instruction_file, receipted, receiptless, force
     except PackAttested as exc:
         raise click.ClickException(str(exc)) from exc
     except yaml.YAMLError as exc:
-        raise click.ClickException(f"a file beside the record could not be read as YAML: {exc}") from exc
+        where = getattr(getattr(exc, "problem_mark", None), "name", None) or str(prov)
+        raise click.ClickException(f"{where} could not be read as YAML: {exc}") from exc
     written = _hashlib.sha256(out.read_bytes()).hexdigest()
     kinds: dict[str, int] = {}
     for i in p["items"]:

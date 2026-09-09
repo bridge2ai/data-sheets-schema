@@ -1,6 +1,5 @@
 """Run-tracking commands for the D4D CLI."""
 
-import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 
