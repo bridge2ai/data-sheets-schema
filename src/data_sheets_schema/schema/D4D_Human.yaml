@@ -55,7 +55,7 @@ classes:
         range: string
         multivalued: true
         annotations:
-          "d4d:docExample": "All participants provided written informed consent; study registered at ClinicalTrials.gov NCT05395169"
+          "d4d:docExample": "All participants provided written informed consent; study registered at ClinicalTrials.gov NCTXXXXXXXX"
       ethics_review_board:
         description: >
           What ethics review board(s) reviewed this research?

@@ -65,6 +65,57 @@ class TestTheDeclarationItself(unittest.TestCase):
         self.assertIn("https://doi.org/10.13026/mf9s-5r03", ids)
 
 
+class TestTheAliasesOfAnEntry(unittest.TestCase):
+    """#1070: `related_ids` iterated a scalar `also_known_as` character by
+    character, so the identifier map held single characters instead of the
+    alias and a record naming that alias passed the check. The renderer half
+    was #1068; this is the checker's, and both read one definition now."""
+
+    def test_a_scalar_alias_is_one_identifier_not_its_characters(self):
+        entry = {"id": "https://doi.org/10.1/PROJ", "also_known_as": "https://doi.org/10.1/PROJ.v2"}
+        self.assertEqual(scope.aliases_of(entry), ["https://doi.org/10.1/PROJ", "https://doi.org/10.1/PROJ.v2"])
+
+    def test_a_list_and_no_alias_at_all(self):
+        self.assertEqual(scope.aliases_of({"id": "a", "also_known_as": ["b", " c "]}), ["a", "b", "c"])
+        self.assertEqual(scope.aliases_of({"id": "a"}), ["a"])
+        self.assertEqual(scope.aliases_of({"id": "a", "also_known_as": None}), ["a"])
+        self.assertEqual(scope.aliases_of("not an entry"), [])
+
+    def test_a_numeric_alias_and_a_repeated_id(self):
+        """A numeric scalar raised TypeError out of the scope block on main —
+        a run-ending crash, not a wrong map (#1153 review, N4); an id repeated
+        among its aliases is listed once."""
+        self.assertEqual(scope.aliases_of({"id": "doi:1", "also_known_as": 12345}), ["doi:1", "12345"])
+        self.assertEqual(scope.aliases_of({"id": "a", "also_known_as": ["a", "b", None, ""]}), ["a", "b"])
+
+    def test_related_ids_maps_the_scalar_alias_to_its_entry(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            manifest = Path(tmp) / "m.yaml"
+            manifest.write_text(yaml.safe_dump({"scope": {"P": {
+                "referent_id": "https://doi.org/10.1/P",
+                "related_but_distinct": [{"id": "https://doi.org/10.1/OTHER",
+                                          "also_known_as": "https://doi.org/10.1/OTHER.v3",
+                                          "express_as": "related_datasets"}]}}}))
+            ids = scope.related_ids("P", manifest)
+        self.assertIn("https://doi.org/10.1/OTHER.v3", ids)
+        self.assertNotIn("h", ids)                                     # the first character of the alias
+        self.assertEqual(set(ids), {"https://doi.org/10.1/OTHER", "https://doi.org/10.1/OTHER.v3"})
+
+    def test_the_scope_block_and_the_checker_read_one_definition(self):
+        """Proved by wiring, not by grepping the source (#1153 review, S1):
+        a sentinel patched onto `scope.aliases_of` reaches the rendered
+        block, so the block cannot carry a coercion of its own."""
+        from unittest import mock
+        from data_sheets_schema.api_runner import scope_block
+        declaration = {"referent": "the P dataset", "referent_id": "https://doi.org/10.1/P",
+                       "related_but_distinct": [{"id": "https://doi.org/10.1/OTHER", "name": "Other",
+                                                 "express_as": "related_datasets"}]}
+        with mock.patch.object(scope, "scope_of", lambda project, manifest=None: declaration), \
+             mock.patch.object(scope, "aliases_of", lambda entry: ["SENTINEL-42"]):
+            block = scope_block("P")
+        self.assertIn("SENTINEL-42", block)
+
+
 class TestCheckingARecord(unittest.TestCase):
     def test_a_record_about_the_companion_cohort_is_caught(self):
         status, why = scope.check_record(

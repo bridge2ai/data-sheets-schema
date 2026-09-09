@@ -699,12 +699,64 @@ def check_review(pack: dict[str, Any], review: dict[str, Any]) -> dict[str, Any]
         d[str(a.get("verdict"))] = d.get(str(a.get("verdict")), 0) + 1
     adverse = sum(v for k, d in by_kind.items() for verdict, v in d.items() if verdict in ADVERSE.get(k, ()))
     cannot = sum(d.get(CANNOT_TELL, 0) for d in by_kind.values())
+    reported = reviewed_at_reports(review.get("reviewed_at"))
     return {"checked": True, "items_total": len(by_id), "items_answered": len(answered),
             "unanswered": unanswered[:50], "unanswered_truncated": max(0, len(unanswered) - 50) or None,
             "by_kind": by_kind, "adverse": adverse, "cannot_tell": cannot,
             "findings": findings,
+            # Reported and never gated (#1057): the judgements are attested by
+            # hash; only *when* they were made is in doubt, and a placeholder
+            # time must be visible without failing a review that is otherwise
+            # answered.
+            "reported": reported,
             "summary": (f"items {len(answered)}/{len(by_id)} answered · {adverse} adverse · {cannot} cannot_tell"
-                        + (f" · {len(findings)} finding(s)" if findings else ""))}
+                        + (f" · {len(findings)} finding(s)" if findings else "")
+                        + (f" · {len(reported)} reported" if reported else ""))}
+
+
+def reviewed_at_reports(value: Any) -> list[dict[str, Any]]:
+    """What a review's `reviewed_at` cannot attest (#1057), reported and never
+    failed — kept out of `findings` by name as well as by design. The agent
+    definition asks for the ISO-8601 UTC time of the review and the checker
+    accepted any well-formed timestamp; 15 of the 47 reviews on disk carry
+    one of these reports — 14 a datetime at exactly midnight, one no value
+    at all — on the v6 and v7 reviews and their second ratings (7 of 17 and
+    6 of 18) and two of the twelve v8 ones. Two cases are told apart (#1154 review, M1): a date
+    with no time at all (`2026-09-07`, or a YAML date) is *certain*; a
+    datetime at exactly midnight is *indistinguishable* from one, and is
+    reported as that, since a review made at 00:00:00 UTC would read the
+    same. A value that does not parse, or none at all, is reported as such
+    (a missing value is also kept as null in the reviewer block, #1097).
+    The two forms accepted beyond `fromisoformat`'s are a trailing `Z` and
+    a bare date; the agents write seconds-precision `…Z`, and the CI matrix
+    (3.10–3.12) parses both alike — do not widen the rewrite."""
+    from datetime import date, datetime
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return [{"kind": "reviewed_at_missing"}]
+    if not isinstance(value, (str, date)):
+        # A bare int (`20260907`) or anything else YAML made of the value is
+        # not a timestamp of any kind (#1154 round 2, N5).
+        return [{"kind": "reviewed_at_unparsable", "value": str(value)}]
+    if isinstance(value, date) and not isinstance(value, datetime):
+        return [{"kind": "reviewed_at_date_only", "value": value.isoformat(),
+                 "detail": "a date with no time, so when the review was made is unrecoverable"}]
+    text = value.isoformat() if isinstance(value, datetime) else str(value).strip()
+    if isinstance(value, str) and len(text) == 10:
+        try:
+            date.fromisoformat(text)
+        except ValueError:
+            return [{"kind": "reviewed_at_unparsable", "value": text}]
+        return [{"kind": "reviewed_at_date_only", "value": text,
+                 "detail": "a date with no time, so when the review was made is unrecoverable"}]
+    try:
+        when = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return [{"kind": "reviewed_at_unparsable", "value": text}]
+    if (when.hour, when.minute, when.second, when.microsecond) == (0, 0, 0, 0):
+        return [{"kind": "reviewed_at_midnight", "value": text,
+                 "detail": "exactly midnight: indistinguishable from a date written with no time; "
+                           "when the review was made is not established by this value"}]
+    return []
 
 
 # ---------------------------------------------------------------- reliability

@@ -1322,6 +1322,17 @@ ARM_PROCEDURE_FIELDS = (
     # field either side leaves empty, which keeps "not reviewed" out of the
     # difference list rather than reporting an absence as a change.
     ("reviewer", ("review", "reviewer", "model")),
+    # The output cap of the `full` phase (#771): three of the five v7
+    # canaries ran at 96k and two at 128k, and nothing read it — a raised
+    # cap within a condition is a silent instrument change. Read from the
+    # `full` rows of `api_usage` — every distinct cap they carry, since the
+    # rows are what each call sent and a resumed run keeps its earlier
+    # rows (#1164 review) — else from `model.max_tokens_by_phase`, which
+    # is recomputed at record write; an agentic record carries no
+    # per-phase cap (`shared_config.max_tokens` is a config assertion, not
+    # the runtime's cap) and reads `None`, which `arm_confounds` skips
+    # like an absent reviewer.
+    ("full max_tokens", ("model", "max_tokens_by_phase", "full")),
 )
 
 
@@ -1471,6 +1482,14 @@ def arm_facts(label_prefix: str, method: str | None = None,
                 value = (condition_from_prompt_paths(f.get("path", "") if isinstance(f, dict) else str(f)
                                                      for f in files)
                          or condition_from_label(path.parts[-2]))
+            if field == ("model", "max_tokens_by_phase", "full"):
+                caps = {r.get("max_tokens") for r in (rec.get("api_usage") or [])
+                        if isinstance(r, dict) and r.get("phase") == "full" and r.get("max_tokens")}
+                if caps:
+                    # A record whose own rows disagree is non-constant and
+                    # says so; the block is read only where no row exists.
+                    seen[name].update(str(c) for c in caps)
+                    continue
             seen[name].add(str(value))
     return {"prefix": label_prefix, "labels": sorted(labels),
             "projects": sorted(projects), "records": len(projects) * len(labels),

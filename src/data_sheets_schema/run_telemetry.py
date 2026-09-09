@@ -200,18 +200,126 @@ def _record_stats(artifact: str, path: Path) -> dict[str, Any] | None:
     return out
 
 
+#: The rule prediction 9 is read under (#1026). Registered here, in one
+#: place, after the AI_READI 2026-09-04f row was read three ways: by hand
+#: from rep2's retried attempt (86,707, +3.2%), then over the two replicates
+#: with a provenance row alone, rep3 dropped (78,646, +13.8%); the rule
+#: reads +4.4% (85,721, rep3 recovered from its reasoning log).
+PREDICTION_9_RULE = (
+    "accepted attempt per phase: the last `full` attempt that ended with `end_turn`, carries "
+    "no `outcome` marker (an abandoned transport attempt, #1017) and no `unusable_reason` "
+    "(a billed reply the runner refused, #1048; a log entry with that attempt's number and "
+    "output tokens is refused with it) and reports `output_tokens` — a retried "
+    "attempt is excluded; the phase is `full` alone (`full_readdress` and `repair_full` are "
+    "their own phases and are not counted); where the provenance yields no accepted `full` "
+    "attempt (a run resumed past that phase, or one whose only `full` row is an abandoned attempt) it is recovered from the reasoning log under the "
+    "same selection; the per-project baseline is the mean over every replicate that yields "
+    "one, reported with the replicate range, and a replicate that yields none is named, not "
+    "skipped silently")
+
+
+def _accepted(attempts: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """The accepted attempt of a phase under `PREDICTION_9_RULE`: the last
+    `end_turn` attempt that is neither an abandoned transport attempt nor a
+    reply the runner refused as unusable, and that reports its tokens."""
+    ended = [a for a in attempts if a.get("stop_reason") == "end_turn" and not a.get("outcome")
+             and not a.get("unusable_reason") and a.get("output_tokens") is not None]
+    return ended[-1] if ended else None
+
+
+def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
+    """One replicate's accepted `full` output under `PREDICTION_9_RULE`.
+
+    `source` says which log the row came from: `api_usage` (the provenance
+    record) or `reasoning_log` (the provenance holds no *accepted* `full`
+    attempt — no `full` row at all after a resume past that phase, like
+    AI_READI 2026-09-01 rep3, or only an abandoned one whose completed
+    retry was lost with the unseeded prior usage while the abandoned row
+    survived through the ledger — the shape of VOICE 2026-09-04f rep2,
+    whose own record keeps both rows; no corpus record takes this branch
+    today — and the
+    log's entry is matched by (attempt, output_tokens) against the rows
+    the provenance refused; `PREDICTION_9_RULE` states the rule), or None
+    with the reason when neither yields an accepted attempt.
+    """
+    prov_path = run_dir / f"{project}_provenance.yaml"
+    out: dict[str, Any] = {"project": project, "label": run_dir.name, "output_tokens": None,
+                           "attempt": None, "source": None, "attempts_seen": 0, "retried": 0}
+    if not prov_path.exists():
+        out["reason"] = "no provenance record"
+        return out
+    prov = yaml.safe_load(prov_path.read_text(encoding="utf-8")) or {}
+    rows = [r for r in (prov.get("api_usage") or []) if isinstance(r, dict) and r.get("phase") == "full"]
+    source = "api_usage"
+    acc = _accepted(rows)
+    logged: list[dict[str, Any]] = []
+    in_log: list[dict[str, Any]] = []
+    if acc is None:
+        # No *accepted* row — not merely no row (#1155 review, S3): a record
+        # whose only `full` row is an abandoned attempt must still consult
+        # the log, which holds the completed call the record lost (prior
+        # usage is seeded only when the record and the progress file both
+        # exist; the abandoned row survives through the ledger regardless).
+        # The log is a recovery source for rows the provenance *lost*, never
+        # an override of what the provenance says about the same attempt
+        # (round 2, M1): the log carries no `unusable_reason`, so a log entry
+        # the provenance recorded as refused is dropped before the log is
+        # read. The match is (attempt, output_tokens), the same response in
+        # two files — never the attempt number alone, which the runner
+        # restarts at 1 on every invocation and shares between an abandoned
+        # attempt and its own completed retry (round 3, M1). An abandoned
+        # attempt writes no log entry, so `outcome` rows guard nothing here.
+        refused = {(r.get("attempt"), r.get("output_tokens")) for r in rows if r.get("unusable_reason")}
+        in_log = [e for e in _reasoning_entries(run_dir / f"{project}_reasoning.jsonl") if e.get("phase") == "full"]
+        logged = [e for e in in_log if (e.get("attempt"), e.get("output_tokens")) not in refused]
+        acc = _accepted(logged)
+        if acc is not None:
+            rows, source = logged, "reasoning_log"
+    out["attempts_seen"] = len(rows)
+    if acc is None:
+        seen = (f"{len(rows)} full row(s) in the provenance" if rows else "no full row in the provenance")
+        seen += (f", {len(in_log)} in the reasoning log" if in_log else ", none in the reasoning log")
+        if in_log and len(logged) < len(in_log):
+            seen += f" ({len(in_log) - len(logged)} of them the provenance recorded as refused)"
+        out["reason"] = f"no accepted full attempt: {seen}"
+        return out
+    out.update({"output_tokens": int(acc["output_tokens"]), "attempt": acc.get("attempt"), "source": source,
+                "retried": sum(1 for r in rows if r is not acc and r.get("stop_reason") == "end_turn"
+                               and not r.get("outcome"))})
+    return out
+
+
+def full_output_baseline(method: str, labels: list[str], projects: list[str],
+                         concat_dir: Path | None = None) -> dict[str, dict[str, Any]]:
+    """Per-project `full` output baseline over `labels` under
+    `PREDICTION_9_RULE`: the replicates read, their accepted rows, the mean
+    over those that yield one, and the ones that yield none by name."""
+    concat_dir = concat_dir or CONCAT_DIR                 # resolved at call time, so a test can point it elsewhere
+    out: dict[str, dict[str, Any]] = {}
+    for project in projects:
+        reps = [accepted_full_output(concat_dir / f"{method}_core" / label, project) for label in labels]
+        values = [r["output_tokens"] for r in reps if r["output_tokens"] is not None]
+        out[project] = {"rule": PREDICTION_9_RULE, "replicates": reps,
+                        "mean": round(sum(values) / len(values)) if values else None,
+                        # The spread beside the mean (#1155 review, S5): CM4AI's v7
+                        # replicates span 26,766–66,300 around a mean of 41,370, and a
+                        # ±10% band on that mean is weaker than the mean alone suggests.
+                        "min": min(values) if values else None, "max": max(values) if values else None,
+                        "n": len(values), "without_a_row": [r["label"] for r in reps if r["output_tokens"] is None]}
+    return out
+
+
 # Metrics compared across runs. Each entry: (metric name, unit, extractor).
+# The `full` figures are the accepted attempt under `PREDICTION_9_RULE`
+# (#1026): the first version took the first `end_turn` attempt, which on a
+# retried phase is the attempt the run threw away.
 _COMPARISON_METRICS = (
     ("full_phase_output_tokens", "tokens",
-     lambda r: next((a.get("output_tokens")
-                     for p in r["phases"] if p["phase"] == "full"
-                     for a in p["attempts"]
-                     if a.get("stop_reason") == "end_turn"), None)),
+     lambda r: next(((_accepted(p["attempts"]) or {}).get("output_tokens")
+                     for p in r["phases"] if p["phase"] == "full"), None)),
     ("full_phase_reasoning_tokens_estimate", "tokens",
-     lambda r: next((a.get("reasoning_tokens_estimate")
-                     for p in r["phases"] if p["phase"] == "full"
-                     for a in p["attempts"]
-                     if a.get("stop_reason") == "end_turn"), None)),
+     lambda r: next(((_accepted(p["attempts"]) or {}).get("reasoning_tokens_estimate")
+                     for p in r["phases"] if p["phase"] == "full"), None)),
     ("total_output_tokens", "tokens",
      lambda r: r.get("total_output_tokens")),
     ("approx_cost_usd", "USD", lambda r: r.get("approx_cost_usd")),
