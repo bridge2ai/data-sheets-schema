@@ -713,9 +713,10 @@ def reviewed_at_reports(value: Any) -> list[dict[str, Any]]:
     """What a review's `reviewed_at` cannot attest (#1057), reported and never
     failed — kept out of `findings` by name as well as by design. The agent
     definition asks for the ISO-8601 UTC time of the review and the checker
-    accepted any well-formed timestamp; 15 of the 47 reviews on disk carry a
-    date with a placeholder time, endemic on the v6/v7 agentic reviews and
-    two of the v8 ones. Two cases are told apart (#1154 review, M1): a date
+    accepted any well-formed timestamp; 15 of the 47 reviews on disk carry
+    one of these reports — 14 a datetime at exactly midnight, one no value
+    at all — on the v6 and v7 reviews and their second ratings (7 of 17 and
+    6 of 18) and two of the twelve v8 ones. Two cases are told apart (#1154 review, M1): a date
     with no time at all (`2026-09-07`, or a YAML date) is *certain*; a
     datetime at exactly midnight is *indistinguishable* from one, and is
     reported as that, since a review made at 00:00:00 UTC would read the
@@ -727,6 +728,10 @@ def reviewed_at_reports(value: Any) -> list[dict[str, Any]]:
     from datetime import date, datetime
     if value is None or (isinstance(value, str) and not value.strip()):
         return [{"kind": "reviewed_at_missing"}]
+    if not isinstance(value, (str, date)):
+        # A bare int (`20260907`) or anything else YAML made of the value is
+        # not a timestamp of any kind (#1154 round 2, N5).
+        return [{"kind": "reviewed_at_unparsable", "value": str(value)}]
     if isinstance(value, date) and not isinstance(value, datetime):
         return [{"kind": "reviewed_at_date_only", "value": value.isoformat(),
                  "detail": "a date with no time, so when the review was made is unrecoverable"}]

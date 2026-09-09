@@ -650,8 +650,10 @@ they attested when the pair or the pack has since changed (#969). A `reviewed_at
 parse, or none at all is **reported, never failed** by `d4d review check`
 and `d4d review agree` (#1057): the judgements are attested by hash, and
 only when they were made is unrecoverable. 15 of the 47 reviews on disk
-carry one — endemic on the v6/v7 agentic reviews and their second
-ratings, and two of the twelve v8 reviews.
+carry one (14 a datetime at exactly midnight, one no value) — on the v6
+and v7 reviews and their second ratings (7 of 17 and 6 of 18) and two of
+the twelve v8 ones; every review is made by the same agentic subagent
+whichever runtime generated the record.
 
 ## Canonical selection with the review (#660)
 

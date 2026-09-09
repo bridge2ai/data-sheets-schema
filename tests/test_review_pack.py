@@ -360,6 +360,13 @@ class Agree(unittest.TestCase):
                 r = click.testing.CliRunner().invoke(review_cli, base)
         self.assertEqual(r.exit_code, 0, r.output)
         self.assertIn("reviewed_at_midnight", r.output); self.assertIn("1 reported", r.output)
+        # the other half of "--strict is unaffected": a real finding still exits 1
+        rev["items"][0]["verdict"] = "not-a-verdict"
+        (out.parent / "P_review.yaml").write_text(yaml.safe_dump(rev))
+        with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+            r = click.testing.CliRunner().invoke(review_cli, base)
+        self.assertEqual(r.exit_code, 1); self.assertIn("verdict_not_in_vocabulary", r.output)
+        self.assertEqual(rp.reviewed_at_reports(20260907), [{"kind": "reviewed_at_unparsable", "value": "20260907"}])
 
     def test_reviews_of_different_packs_refuse_to_pair(self):
         with self.assertRaises(ValueError):
