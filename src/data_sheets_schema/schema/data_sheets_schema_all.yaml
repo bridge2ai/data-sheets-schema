@@ -8672,7 +8672,7 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: 0000-0001-2345-6789
+            value: 0000-0001-2345-6780
         description: 'ORCID (Open Researcher and Contributor ID) - a persistent digital
           identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups
           of 4). Use this for stable cross-dataset identification.'

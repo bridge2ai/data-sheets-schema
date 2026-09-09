@@ -285,7 +285,7 @@ classes:
         pattern: "^\\d{4}-\\d{4}-\\d{4}-\\d{3}[0-9X]$"
         slot_uri: d4d:orcidIdentifier
         annotations:
-          "d4d:docExample": "0000-0001-2345-6789"
+          "d4d:docExample": "0000-0001-2345-6780"
         broad_mappings:
           - schema:identifier
 
