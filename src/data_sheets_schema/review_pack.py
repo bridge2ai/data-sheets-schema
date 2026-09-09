@@ -397,7 +397,10 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     pack: dict[str, Any] = {
         # 4: receipted items carry resolved_path/resolution (#899)
         # 5: id_slots entries carry origin minted|constructed|stated, with
-        #    base_in_bundle attested only against the bytes the record read (#901)
+        #    base_in_bundle attested only against the bytes the record read (#901);
+        #    slot_receiptless is sampled under receipts instrument v2 (#1123): a
+        #    fragment on an identifier the record carries for the dataset is not
+        #    asked about (no committed pack was at 5 under v1, so no bump)
         "pack_version": 5,
         "run": {"label": run.get("label"), "project": run.get("project"), "method": run.get("method"),
                 "condition": (((record.get("prompts") or {}).get("request") or {}).get("spec") or {}).get("condition")},
@@ -584,8 +587,9 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         # index (#907 review).
         covering = {(c["resolved_path"] if original is not None else s)
                     for s, c in claims["slots"].items()} - {None}
+        carried = dataset_identifier_forms(full)            # the block's instrument (#1141 review, M4), built once
         without = sorted(p for p, v in populated_leaves(full)
-                         if not exempt(p, v, record_id, dataset_identifier_forms(full))   # the block's instrument (#1141 review, M4)
+                         if not exempt(p, v, record_id, carried)
                          and not any(_covers(r, p) for r in covering))
         rng.shuffle(without)
         for slot in without[: sample["receiptless_slots"]]:
