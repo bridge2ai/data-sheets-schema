@@ -14,10 +14,20 @@ evaluation to the agent version that scored it, by one of two bases:
 
 - `recorded` — the hash is some version of the agent definition, so the
   artifact names its own instrument;
-- `recovered_by_time` — the hash is a version of the rubric text, and the
-  agent version current at `evaluation_timestamp` is named instead. That is a
-  weaker claim than a recorded one and is labelled as such, the way #399's
-  prompt hashes recovered from git are.
+- `recovered_from_commit` — the hash is a version of the rubric text, so the
+  agent file **as it stood in the commit that last wrote this evaluation's
+  bytes** is named instead. Weaker than a recorded claim and labelled as
+  such, the way #399's prompt hashes recovered from git are.
+
+Resolution is deliberately **not** by timestamp (#1100). The workflow here is
+revise the agent, re-adjudicate, commit both together, so an evaluation's
+`evaluation_timestamp` precedes the commit date of the very version that
+produced it, and a time-based lookup returns the version being replaced —
+off by one, always towards the instrument the revision corrected. It was
+wrong on 19 of 43 recovered attributions. `evaluation_timestamp` is also
+model-written and demonstrably stale in places: three CM4AI 09-01 files
+record a time four hours before the commit of the agent text they hash. The
+commit that carries the bytes is the fact; the timestamp is a claim.
 
     python scripts/instrument_provenance.py            # report
     python scripts/instrument_provenance.py --write    # rewrite the manifest
@@ -27,7 +37,6 @@ import glob
 import hashlib
 import json
 import subprocess
-from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -60,15 +69,32 @@ def versions(path):
     return out
 
 
-def _at(when, history):
-    """The last version of a file that existed at `when`."""
-    try:
-        moment = datetime.fromisoformat(str(when).replace("Z", "+00:00"))
-    except (TypeError, ValueError):
+def is_shallow():
+    """A shallow clone cannot answer any of this (#1100).
+
+    CI checks out at depth 1, so `git log --all` sees one commit and every
+    evaluation resolves to nothing. Callers skip rather than write a manifest
+    that declares the corpus unidentifiable.
+    """
+    out = subprocess.run(["git", "rev-parse", "--is-shallow-repository"],
+                         capture_output=True, text=True, cwd=ROOT).stdout
+    return out.strip() == "true"
+
+
+def _writing_commit(path):
+    """The commit that last wrote this file's bytes."""
+    out = subprocess.run(["git", "log", "-1", "--format=%H", "--", str(path)],
+                         capture_output=True, text=True, cwd=ROOT).stdout.strip()
+    return out or None
+
+
+def _agent_at(commit, agent_path):
+    """The sha256 of the agent definition as of `commit`."""
+    blob = subprocess.run(["git", "show", f"{commit}:{agent_path}"],
+                          capture_output=True, cwd=ROOT)
+    if blob.returncode:
         return None
-    current = [v for v in history
-               if datetime.fromisoformat(v["first_seen"]) <= moment]
-    return current[-1] if current else None
+    return hashlib.sha256(blob.stdout).hexdigest()
 
 
 def resolve(rubric):
@@ -87,14 +113,16 @@ def resolve(rubric):
             out[name] = {"basis": "recorded", "instrument_sha256": digest,
                          "instrument_commit": v["commit"]}
         elif digest in by_text:
-            v = _at(doc.get("evaluation_timestamp"), agents)
+            commit = _writing_commit(path)
+            at = _agent_at(commit, agent_path) if commit else None
             out[name] = {
-                "basis": "recovered_by_time",
+                "basis": "recovered_from_commit" if at else "unresolved",
                 "recorded_hash_is": "the rubric text, which does not identify "
                                     "the scoring rules",
-                "evaluated_at": doc.get("evaluation_timestamp"),
-                "instrument_sha256": v["sha256"] if v else None,
-                "instrument_commit": v["commit"] if v else None,
+                "recovered_from": commit[:8] if commit else None,
+                "instrument_sha256": at,
+                "instrument_commit": (by_agent[at]["commit"]
+                                      if at in by_agent else None),
             }
         else:
             out[name] = {"basis": "unresolved", "recorded": digest}

@@ -15,15 +15,20 @@ resolves every evaluation to an agent version by one of two bases, and the
 manifest it writes is what this checks:
 
 - `recorded` — the artifact names its own instrument;
-- `recovered_by_time` — the hash is a rubric-text version, so the agent
-  version current at `evaluation_timestamp` is named instead. That is a
-  weaker claim and is labelled as one, the way #399's prompt hashes recovered
-  from git are.
+- `recovered_from_commit` — the hash is a rubric-text version, so the agent
+  file as it stood in the commit that last wrote this evaluation's bytes is
+  named instead. Weaker than a recorded claim, and labelled as one.
+
+Not by timestamp (#1100): the workflow is revise, re-adjudicate, commit
+together, so an evaluation's timestamp precedes the commit of the version
+that produced it and a time lookup returns the version being replaced. It was
+wrong on 19 of 43. The timestamp is also model-written and stale in places.
 
 The test is that **no evaluation is unresolved**. A new evaluation whose
 instrument cannot be placed either way fails here rather than joining the
 corpus unidentifiable.
 """
+import hashlib
 import json
 import subprocess
 import sys
@@ -34,6 +39,20 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "tests" / "data" / "evaluation_instruments.json"
 SCRIPT = ROOT / "scripts" / "instrument_provenance.py"
 RUBRICS = ("rubric10_semantic", "rubric20_semantic")
+AGENT_PATHS = {
+    "rubric10_semantic": ".claude/agents/d4d-rubric10-semantic.md",
+    "rubric20_semantic": ".claude/agents/d4d-rubric20-semantic.md",
+}
+
+
+def _shallow():
+    """CI checks out at depth 1 (#1100), where `git log --all` sees one
+    commit and every evaluation resolves to nothing. Tests that need history
+    skip; the ones that check the checked-in manifest against the artifacts
+    do not need it and still run."""
+    out = subprocess.run(["git", "rev-parse", "--is-shallow-repository"],
+                         capture_output=True, text=True, cwd=ROOT).stdout
+    return out.strip() == "true"
 
 
 class InstrumentManifest(unittest.TestCase):
@@ -70,13 +89,46 @@ class TestEveryEvaluationNamesItsInstrument(InstrumentManifest):
         """A recovered claim must not read like a recorded one (#399)."""
         for rubric in RUBRICS:
             for name, entry in self.doc["rubrics"][rubric]["evaluations"].items():
-                if entry["basis"] != "recovered_by_time":
+                if entry["basis"] != "recovered_from_commit":
                     continue
                 with self.subTest(rubric=rubric, evaluation=name):
                     self.assertIn("recorded_hash_is", entry)
-                    self.assertTrue(entry.get("evaluated_at"),
-                                    "a time-recovered instrument needs the "
-                                    "time it was recovered from")
+                    self.assertTrue(entry.get("recovered_from"),
+                                    "a recovered instrument must name the "
+                                    "commit it was recovered from")
+
+    def test_no_entry_is_resolved_by_timestamp(self):
+        """#1100. A time lookup returns the version the run's own commit
+        replaced — off by one towards the instrument the revision corrected,
+        wrong on 19 of 43 — because the agent and its rescores are committed
+        together. `evaluation_timestamp` is model-written besides, and three
+        CM4AI files record a time hours before the commit of the text they
+        hash. The basis must be the commit that carries the bytes."""
+        for rubric in RUBRICS:
+            for name, entry in self.doc["rubrics"][rubric]["evaluations"].items():
+                with self.subTest(rubric=rubric, evaluation=name):
+                    self.assertNotEqual(entry["basis"], "recovered_by_time")
+                    self.assertNotIn("evaluated_at", entry)
+
+    def test_a_recovered_instrument_is_the_agent_at_its_writing_commit(self):
+        """The property itself, recomputed from git rather than trusted."""
+        if _shallow():
+            self.skipTest("shallow clone: no history to resolve against")
+        for rubric, agent in AGENT_PATHS.items():
+            base = ROOT / "data" / "evaluation_llm" / rubric / "label_aware"
+            for name, entry in self.doc["rubrics"][rubric]["evaluations"].items():
+                if entry["basis"] != "recovered_from_commit":
+                    continue
+                with self.subTest(rubric=rubric, evaluation=name):
+                    commit = subprocess.run(
+                        ["git", "log", "-1", "--format=%H", "--", str(base / name)],
+                        capture_output=True, text=True, cwd=ROOT).stdout.strip()
+                    self.assertTrue(commit.startswith(entry["recovered_from"]))
+                    blob = subprocess.run(["git", "show", f"{commit}:{agent}"],
+                                          capture_output=True, cwd=ROOT)
+                    self.assertEqual(
+                        hashlib.sha256(blob.stdout).hexdigest(),
+                        entry["instrument_sha256"])
 
     def test_every_named_instrument_is_a_real_agent_version(self):
         for rubric in RUBRICS:
@@ -111,22 +163,27 @@ class TestTheContractAsksForTheScoringRules(unittest.TestCase):
 
 class TestTheResolverIsReproducible(InstrumentManifest):
     def test_regenerating_the_manifest_changes_nothing(self):
-        """The manifest is a pure function of git history and the artifacts,
-        so a stale one is a defect rather than a matter of taste."""
+        """Content, not counts (#1100).
+
+        The first version compared the summary line, so a manifest whose
+        entries had all moved to different — but equally distributed —
+        instruments would have passed. It rebuilds and compares the mapping.
+        """
         if not SCRIPT.exists():
             self.skipTest("resolver not in this checkout")
-        proc = subprocess.run([sys.executable, str(SCRIPT)],
-                              capture_output=True, text=True, cwd=ROOT)
-        self.assertEqual(proc.returncode, 0, proc.stderr)
+        if _shallow():
+            self.skipTest("shallow clone: git history is not available")
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("_ip", SCRIPT)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
         for rubric in RUBRICS:
-            counts = {}
-            for entry in self.doc["rubrics"][rubric]["evaluations"].values():
-                counts[entry["basis"]] = counts.get(entry["basis"], 0) + 1
-            summary = ", ".join(f"{v} {k}" for k, v in sorted(counts.items()))
             with self.subTest(rubric=rubric):
-                self.assertIn(summary, proc.stdout,
-                              "the manifest disagrees with a fresh resolve; "
-                              "run scripts/instrument_provenance.py --write")
+                self.assertEqual(
+                    module.resolve(rubric)["evaluations"],
+                    self.doc["rubrics"][rubric]["evaluations"],
+                    "the manifest disagrees with a fresh resolve; run "
+                    "scripts/instrument_provenance.py --write")
 
 
 if __name__ == "__main__":
