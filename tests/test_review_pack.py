@@ -582,6 +582,27 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
             self.assertNotEqual(r.exit_code, 0)
             self.assertTrue(r.output.startswith(f"Error: {prov} could not be read as YAML"), r.output)   # the record, not PyYAML's mark
 
+    def test_the_cli_names_whichever_file_would_not_parse(self):
+        """The pack reads several YAML files; the message names the one that
+        failed, not the record by default (#1124 round 5)."""
+        import click.testing
+        from unittest import mock
+        from data_sheets_schema.cli.review import review as review_cli
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            paths = rp.record_paths(prov)
+            for broken in ("full", "receipt"):
+                path = paths[broken]
+                keep = path.read_text()
+                path.write_text("bad: [unclosed")
+                base = ["pack", "--method", "claudecode_agent", "--label", "L", "--project", "VOICE", "--force",
+                        "--instruction", str(instr)]
+                with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                    r = click.testing.CliRunner().invoke(review_cli, base)
+                path.write_text(keep)
+                self.assertNotEqual(r.exit_code, 0, broken)
+                self.assertTrue(r.output.startswith(f"Error: {path} could not be read as YAML"), (broken, r.output))
+
     def test_an_unparsable_provenance_record_is_a_named_refusal(self):
         """#1124 review, SF-R2: `build_pack` re-parsed the record before the
         guard and raised a bare ParserError."""

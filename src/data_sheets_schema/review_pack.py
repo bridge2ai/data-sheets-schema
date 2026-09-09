@@ -28,6 +28,24 @@ from typing import Any
 import yaml
 from data_sheets_schema.schema_view import shared_view
 
+
+class UnreadableYAML(yaml.YAMLError):
+    """A file the pack reads would not parse — named, because the pack
+    reads several (the record, the full record, the receipt, the manifest)
+    and PyYAML's mark names the string it was handed, not the file (#1124
+    round 5)."""
+
+    def __init__(self, path: Path, exc: yaml.YAMLError):
+        super().__init__(f"{path} could not be read as YAML: {exc}")
+        self.path = path
+
+
+def _load_yaml(path: Path, text: str | None = None) -> Any:
+    try:
+        return yaml.safe_load(path.read_text(encoding="utf-8") if text is None else text) or {}
+    except yaml.YAMLError as exc:
+        raise UnreadableYAML(path, exc) from exc
+
 #: The closed verdict vocabulary a review must use, per item kind.
 VERDICTS = {
     "chunk_nothing_relevant": ("confirmed", "missed_content", "cannot_tell"),
@@ -401,7 +419,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         raise ValueError("build_pack: with write_instruction=False the instruction text goes to "
                          "instruction_out, which was not given")
     sample = {**DEFAULT_SAMPLE, **(sample or {})}
-    record = yaml.safe_load(_split_header(provenance.read_text(encoding="utf-8"))[1]) or {}
+    record = _load_yaml(provenance, _split_header(provenance.read_text(encoding="utf-8"))[1])
     paths = record_paths(provenance)
     run = record.get("run") or {}
     inputs = record.get("inputs") or {}
@@ -451,7 +469,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     # --- every minted id, with whether the schema forced it (#803): the
     # instruction's fragment rule cannot be judged without this — a rule-14
     # verdict on an identifier slot charges the record with the schema.
-    full_record = yaml.safe_load(paths["full"].read_text(encoding="utf-8")) or {} if paths["full"].exists() else {}
+    full_record = _load_yaml(paths["full"]) if paths["full"].exists() else {}
     # The bytes `base_in_bundle` is attested against are the bytes the
     # record read, or nothing: 136 records are drifted (CLAUDE.md, #452), and
     # the AI_READI 2026-09-01 rep1 record that motivated #901 is one of them.
@@ -527,8 +545,14 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     # --- chunks marked nothing_relevant: every one, with its lines
     items: list[dict[str, Any]] = []
     if paths["receipt"].exists() and manifest_path and manifest_path.exists():
-        receipt = load_receipt(paths["receipt"])
-        manifest = load_manifest(manifest_path)
+        try:
+            receipt = load_receipt(paths["receipt"])
+        except yaml.YAMLError as exc:
+            raise UnreadableYAML(paths["receipt"], exc) from exc
+        try:
+            manifest = load_manifest(manifest_path)
+        except yaml.YAMLError as exc:
+            raise UnreadableYAML(manifest_path, exc) from exc
         span = {c["id"]: c for c in manifest["chunks"]}
         pack["bundle"]["lines"] = manifest.get("bundle_lines")
         pack["bundle"]["chunks"] = [{"id": c["id"], "lines": c["lines"], "source": c["source"]} for c in manifest["chunks"]]
@@ -640,8 +664,8 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         full_p, core_p = Path(pack["records"]["full"]), Path(pack["records"]["core"])
         if full_p.exists() and core_p.exists():
             rep = validate_pair_data(
-                yaml.safe_load(full_p.read_text(encoding="utf-8")) or {},
-                yaml.safe_load(core_p.read_text(encoding="utf-8")) or {},
+                _load_yaml(full_p),
+                _load_yaml(core_p),
                 load_pair_schema(*(_anchored(Path(x)) for x in PAIR_SCHEMAS)),
                 schema_moved=pair_predates_current_schema(core_p),
                 run_digest=(record.get("schema") or {}).get("digest_md5"))
@@ -702,7 +726,7 @@ def pack_pin_state(provenance: Path) -> str | None:
     record's own location, never read off the recorded string (N5)."""
     from data_sheets_schema.backfill_checks import _split_header
     try:
-        record = yaml.safe_load(_split_header(provenance.read_text(encoding="utf-8"))[1]) or {}
+        record = _load_yaml(provenance, _split_header(provenance.read_text(encoding="utf-8"))[1])
     except Exception:                                         # noqa: BLE001
         return None
     rec_sha = (((record.get("review") or {}).get("artifacts") or {}).get("pack") or {}).get("sha256")
@@ -738,10 +762,10 @@ def pack_pins_report(provenance: Path) -> tuple[list[dict[str, str]], list[dict[
     on_disk = hashlib.sha256(pack.read_bytes()).hexdigest() if pack.exists() else None
     current, stale, unreadable = [], [], []
     try:
-        record = yaml.safe_load(_split_header(provenance.read_text(encoding="utf-8"))[1]) or {}
+        record = _load_yaml(provenance, _split_header(provenance.read_text(encoding="utf-8"))[1])
     except Exception as exc:                                  # noqa: BLE001
         record = {}
-        unreadable.append({"by": "provenance record", "path": str(provenance), "error": type(exc).__name__})
+        unreadable.append({"by": "provenance record", "path": str(provenance), "error": type(exc.__cause__ or exc).__name__})
     rec_sha = (((record.get("review") or {}).get("artifacts") or {}).get("pack") or {}).get("sha256")
     if rec_sha:
         (current if rec_sha == on_disk else stale).append(
@@ -752,9 +776,9 @@ def pack_pins_report(provenance: Path) -> tuple[list[dict[str, str]], list[dict[
         if f == pack:
             continue
         try:
-            sha = (yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get("pack_sha256")
+            sha = _load_yaml(f).get("pack_sha256")
         except Exception as exc:                              # noqa: BLE001
-            unreadable.append({"by": "review", "path": str(f), "error": type(exc).__name__})
+            unreadable.append({"by": "review", "path": str(f), "error": type(exc.__cause__ or exc).__name__})
             continue
         if sha:
             (current if sha == on_disk else stale).append(

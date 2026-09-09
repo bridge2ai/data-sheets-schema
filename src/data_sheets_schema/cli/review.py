@@ -55,10 +55,11 @@ def pack(method, label, project, instruction_file, receipted, receiptless, force
     except PackAttested as exc:
         raise click.ClickException(str(exc)) from exc
     except yaml.YAMLError as exc:
-        # Both parse sites hand safe_load a string, so the mark's name is the
-        # literal "<unicode string>" (#1124 round 4): name the record, which
-        # is the file the forced path re-parses.
-        raise click.ClickException(f"{prov} could not be read as YAML: {exc}") from exc
+        # `review_pack._load_yaml` names the file that failed — the pack
+        # reads the record, the full record, the receipt and the manifest,
+        # and PyYAML's own mark names the string it was handed (#1124
+        # rounds 4 and 5).
+        raise click.ClickException(str(exc)) from exc
     written = _hashlib.sha256(out.read_bytes()).hexdigest()
     kinds: dict[str, int] = {}
     for i in p["items"]:
