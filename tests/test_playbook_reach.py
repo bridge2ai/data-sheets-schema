@@ -123,6 +123,28 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
         # v8 R5 (#981): a Person's id is an ORCID or a fragment, never mailto.
         "person ids":
             ("fragment minted on this record's own id", "fragment minted on this record's own id"),
+        # v9 R6–R7 (#913, #911) and R8–R14 (#803, #901, #830; PR #1109).
+        # Mirrored into the playbook by #1119: the agentic runtime had none
+        # of the nine while this table still pointed at v8.
+        "referent's own slots":
+            ("subject is the referent", "subject is the referent"),
+        "one entity per entry":
+            ("names exactly one entity", "names exactly one entity"),
+        "forced ids":
+            ("does not reach an id the schema forces", "does not reach an id the schema forces"),
+        "enum from a stated category":
+            ("passage that states the category", "passage that states the category"),
+        "raw data format":
+            ("before any processing this dataset applied", "before any processing this dataset applied"),
+        "principal investigator":
+            ("designate with that title", "designate with that title"),
+        "passage's own reach":
+            ("at the passage's own reach", "at the passage's own reach"),
+        "list membership":
+            ("is a member of that list", "is a member of that list"),
+        "absence and route":
+            ("an absence is not an entry, and a route is not a format",
+             "an absence is not an entry, and a route is not a format"),
     }
 
     #: Rules the playbook carries that the condition prompts deliberately do
@@ -146,7 +168,37 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
             "`test_the_naming_rule_reaches_the_api_path` guards the render."),
     }
 
-    CURRENT_PROMPT = "d4d_generic_arm_prompt_v8.md"
+    CURRENT_PROMPT = "d4d_generic_arm_prompt_v9.md"
+
+    #: rule → clauses that must survive in BOTH texts. `SHARED_RULES` proves a
+    #: rule *arrived*; a probe that is the copied headline passes when the
+    #: rest of the bullet is hollowed out (#1128 review: the first mirror of
+    #: R6–R14 kept each rule's statement and dropped its procedure — the
+    #: read-back directive, the projector sentence, a collection's
+    #: `compression`, "or its usual abbreviation"). These are the operative
+    #: clauses, one probe each, so a rewrite that loses one fails here.
+    SHARED_CLAUSES = {
+        "referent's own slots": ("check each value you keep against the subject of the passage behind it",),
+        "one entity per entry": ("read back each entry you write in a multivalued slot",
+                                 "the test is the sources, not the punctuation"),
+        "forced ids": ("leaving it out is a validation failure, not a fragment saved",
+                       "do not read that rule as a reason to omit the object",
+                       "copied into the core record's distributions",
+                       "and the schema does not require an id",
+                       "labels a part of that entity, not of this one"),
+        "enum from a stated category": ("in the source's own words or a plain restatement of them",
+                                        "supports the name and not the class",
+                                        "or collection's compression"),
+        "raw data format": ("raw form and the released form are the same",
+                            "say nothing of what preceded it"),
+        "principal investigator": ("or its usual abbreviation",
+                                   "for this dataset or the study that produced it",
+                                   "never promoted to principal investigator"),      # the body, not the headline
+        "passage's own reach": ("recorded as the limitation alone",
+                                "any other value needs a sentence behind it"),
+        "list membership": ("is not a member and does not become an entry",),   # the body, not the examples
+        "absence and route": ("does not fill errata", "not the reason"),
+    }
 
     def test_the_naming_rule_reaches_the_api_path(self):
         """The render is the API path's copy of the rule; guard its substance.
@@ -189,6 +241,34 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
             if in_prompt.lower() not in prompt:
                 missing.append(f"{name}: absent from {self.CURRENT_PROMPT}")
         self.assertEqual(missing, [])
+
+    def test_every_operative_clause_reaches_both(self):
+        """Fidelity, not arrival (#1128 review, N8). Every v9 row of
+        SHARED_RULES has a clause entry — the pre-v9 rows predate the
+        table and are exempt by their age, not by choice."""
+        playbook, prompt = self._texts()
+        v9_rows = list(self.SHARED_RULES)[list(self.SHARED_RULES).index("referent's own slots"):]
+        self.assertEqual(set(v9_rows), set(self.SHARED_CLAUSES))
+        missing = []
+        for name, clauses in self.SHARED_CLAUSES.items():
+            self.assertIn(name, self.SHARED_RULES, name)
+            for clause in clauses:
+                if clause.lower() not in playbook:
+                    missing.append(f"{name}: {clause!r} absent from the playbook")
+                if clause.lower() not in prompt:
+                    missing.append(f"{name}: {clause!r} absent from {self.CURRENT_PROMPT}")
+        self.assertEqual(missing, [])
+
+    def test_the_playbook_writes_american_english(self):
+        """The file teaches house style by example and carries the rule (#1128 review, N7)."""
+        # Backticked tokens and double-quoted spans quote sources and proper
+        # nouns (the carve-out examples "Wellcome Trust Sanger Centre",
+        # "Medical Research Council Programme Grant"); the rule is about the
+        # prose the file composes.
+        text = re.sub(r'"[^"\n]*"', "", re.sub(r"`[^`]*`", "", PLAYBOOK.read_text(encoding="utf-8"))).lower()
+        for british in ("organisation", "characterise", "standardise", "analyse", "behaviour", "licence",
+                        "recognise", "programme", "centre"):
+            self.assertNotIn(british, text, british)
 
     def test_the_playbook_has_no_rule_this_table_does_not_know(self):
         """A rule added to the playbook and to no prompt is the original defect.

@@ -413,7 +413,9 @@ def check_cmd(method, label, project, strict):
     rather than being noticed later.
     """
     from data_sheets_schema.runs import (canonical_prompt_status,
-                                         check_provenance, discover,
+                                         check_provenance,
+                                         condition_contradiction,
+                                         condition_unfalsifiable, discover,
                                          is_complete,
                                          prompt_condition_mismatch,
                                          requires_request,
@@ -423,6 +425,9 @@ def check_cmd(method, label, project, strict):
     mismatches = []
     requests = []
     uncanonical = []
+    condition_contradictions = []                              # #1094
+    condition_unchecked = []                                   # stated, and nothing to check it against
+    condition_declared = []                                    # label mismatch the launcher declared
     duplicates = []
     stale_sizes = []
     from data_sheets_schema.runs import _prov, header_disagreements, stale_output_sizes
@@ -444,6 +449,17 @@ def check_cmd(method, label, project, strict):
             # a standard loader keeps only the last, so a record that
             # carries one is not the record its readers see.
             prov_data = _prov(run.method, run.label, proj) or {}
+            # A record whose stated condition its label contradicts (#1094):
+            # the `uncanonical` shape for the condition claim, fatal under
+            # --strict for the same reason. Records before #1094 state none.
+            cc = condition_contradiction(prov_data, run.label)
+            if cc and cc.get("declared"):
+                condition_declared.append({"project": proj, "label": run.label, **cc})
+            elif cc:
+                condition_contradictions.append({"project": proj, "label": run.label, **cc})
+            elif condition_unfalsifiable(prov_data, run.label):
+                condition_unchecked.append({"project": proj, "label": run.label,
+                                            "record": (prov_data.get("run") or {}).get("condition")})
             dk = ((prov_data.get("validation") or {}).get("duplicate_keys") or {})
             mism = stale_output_sizes(prov_data)
             if mism:
@@ -808,6 +824,23 @@ def check_cmd(method, label, project, strict):
     # both are worth seeing and neither is a defect in the run.
     never_pinned = [r for r in uncanonical
                     if r["status"] in ("uncanonical", "missing")]
+    if condition_contradictions:
+        click.echo(f"\n❌ {len(condition_contradictions)} record(s) whose `run.condition` is contradicted "
+                   "by the prompt they hashed, their label, or the registry (#1094):")
+        for r in condition_contradictions:
+            who = "; ".join(f"{k}: {v}" for k, v in r["disagrees_with"].items())
+            click.echo(f"   {r['project']:9} {r['label']:44} record {r['record']} · {who}"
+                       + (f" ({r['basis']})" if r.get('basis') else ""))
+    if condition_declared:
+        click.echo(f"\n⚠️  {len(condition_declared)} record(s) whose label names another condition, declared "
+                   "at launch with --allow-condition-mismatch (#1094) — reported, not failed:")
+        for r in condition_declared:
+            click.echo(f"   {r['project']:9} {r['label']:44} record {r['record']} · label {r['label_condition']}")
+    if condition_unchecked:
+        click.echo(f"\n⚠️  {len(condition_unchecked)} record(s) state a condition that neither the prompt "
+                   "they hashed nor their label can check (#1094) — reported, not failed:")
+        for r in condition_unchecked:
+            click.echo(f"   {r['project']:9} {r['label']:44} record {r['record']}")
     if uncanonical:
         click.echo(f"\n{len(uncanonical)} run(s) whose prompt files are not the "
                    "current canonical text of their condition (#432):")
@@ -841,7 +874,7 @@ def check_cmd(method, label, project, strict):
                    "the header from the record; a run resumed past its record write "
                    "keeps the header it had.")
 
-    if strict and (failed or bad_requests or never_pinned):
+    if strict and (failed or bad_requests or never_pinned or condition_contradictions):
         raise SystemExit(1)
 
 
@@ -1676,11 +1709,10 @@ def compare_arms(prefix_a, prefix_b, method):
     # moved. It is one field of the five above, never a replacement for them.
     from data_sheets_schema.api_runner import (condition_delta,
                                                confounded_note)
-    from data_sheets_schema.runs import condition_from_label
-    # From the label, not from `values["condition"]`: no record in the corpus
-    # carries a top-level `condition`, so that field reads "None" for every
-    # arm and `arm_confounds` has never reported a condition difference.
-    conditions = [{condition_from_label(l) for l in arm["labels"]} - {None}
+    # From the records (#1094): `arm_facts` reads `run.condition`, else the
+    # prompt each record hashed, else its label — the workaround that read
+    # the label here is retired with the field it worked around.
+    conditions = [set(arm["values"].get("condition", [])) - {"None", None}
                   for arm in (a, b)]
     if all(len(c) == 1 for c in conditions):
         ca, cb = conditions[0].pop(), conditions[1].pop()
