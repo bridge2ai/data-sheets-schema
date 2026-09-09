@@ -281,11 +281,33 @@ _DISPOSITION = re.compile(r"^\W*(?:\*\*)?(removed|deleted|dropped|retained|kept|
 #: and the schema by hash, but the checker moved under #914, #929, #962 and
 #: #990 with nothing recording which reading produced a block; everything
 #: before this constant is v1.
-REPORT_CLAIMS_INSTRUMENT = ("v3 (#1022, #1046): a schema claim that names its own scope — "
-                            "the core schema, the full schema, a class — is resolved against "
-                            "that scope only, not against every class; v2 (#990): a finding "
-                            "on a `both` row names when the core class declares no such slot; "
-                            "`claims_core_cannot_hold` counts them")
+REPORT_CLAIMS_INSTRUMENT = ("v4 (#1122): `rows_by_record` tallies the dispositions rows by "
+                            "their record column, so a `both` row wrongly flipped to `full` — "
+                            "which the gate cannot see, a `full` row resolving against the full "
+                            "record only — is countable from the block; v3 (#1022, #1046): a "
+                            "schema claim that names its own scope — the core schema, the full "
+                            "schema, a class — is resolved against that scope only, not against "
+                            "every class; v2 (#990): a finding on a `both` row names when the "
+                            "core class declares no such slot; `claims_core_cannot_hold` counts "
+                            "them")
+
+#: The values `disposition_rows` can read off a row's `record` cell, in the
+#: order the block lists them. Fixed keys, zero-filled, so two blocks compare
+#: without a missing key standing for a zero (#1122).
+RECORD_COLUMN_VALUES = ("full", "core", "both", "either", "invalid")
+
+
+def rows_by_record(rows: list[dict[str, str]]) -> dict[str, int]:
+    """How many dispositions rows name each record (#1122).
+
+    `either` is an empty cell and `invalid` anything but `full`, `core` or
+    `both`, exactly as `disposition_rows` reads them; the values sum to
+    `disposition_rows`.
+    """
+    counts = {value: 0 for value in RECORD_COLUMN_VALUES}
+    for row in rows:
+        counts[row["record"]] += 1
+    return counts
 
 #: A schema claim can name the inventory it is about, and the instruction the
 #: v8 report phase follows asks for exactly that sentence: "`splits` and
@@ -667,6 +689,10 @@ def check_report(report: Path, full: dict, core: dict,
             # Named rather than dropped: a claim naming no slot in backticks
             # cannot be checked, and a reader should know how many there were.
             "claims_unnamed": unnamed, "disposition_rows": len(rows),
+            # By record column (#1122): the v9 canary reader compares the
+            # `both` count with the v8 fill's, because a `both` row flipped to
+            # `full` resolves against the full record only and raises nothing.
+            "rows_by_record": rows_by_record(rows),
             # Findings on `both` rows whose slot the core class does not
             # declare (#990/#992): a mis-named record rather than a
             # substantive contradiction, and a reader should see the two apart.

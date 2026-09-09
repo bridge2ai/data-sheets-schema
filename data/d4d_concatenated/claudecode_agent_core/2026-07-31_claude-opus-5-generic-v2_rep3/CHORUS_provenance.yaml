@@ -199,10 +199,19 @@ report_claims:
   claims_checked: 0
   claims_unnamed: 0
   disposition_rows: 0
+  rows_by_record:
+    full: 0
+    core: 0
+    both: 0
+    either: 0
+    invalid: 0
   claims_core_cannot_hold: 0
-  instrument: 'v3 (#1022, #1046): a schema claim that names its own scope — the core
-    schema, the full schema, a class — is resolved against that scope only, not against
-    every class; v2 (#990): a finding on a `both` row names when the core class declares
+  instrument: 'v4 (#1122): `rows_by_record` tallies the dispositions rows by their
+    record column, so a `both` row wrongly flipped to `full` — which the gate cannot
+    see, a `full` row resolving against the full record only — is countable from the
+    block; v3 (#1022, #1046): a schema claim that names its own scope — the core schema,
+    the full schema, a class — is resolved against that scope only, not against every
+    class; v2 (#990): a finding on a `both` row names when the core class declares
     no such slot; `claims_core_cannot_hold` counts them'
   artifacts:
     report:

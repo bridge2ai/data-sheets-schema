@@ -518,7 +518,13 @@ instruction defines `both` as present in both — and the finding names
 the cause so the regate can fix the row (`claims_core_cannot_hold` counts
 those the full record does carry, apart from substantive contradictions;
 #990/#992); the block carries
-`instrument` from v2 (#996). Since #998 the report phase carries the core
+`instrument` from v2 (#996) and, from v4 (#1122), `rows_by_record` — the
+dispositions rows tallied by their record column (`full`, `core`, `both`,
+`either` for an empty cell, `invalid` for anything else), because a `both`
+row wrongly flipped to `full` resolves against the full record only and
+raises nothing, so the count is the only thing a reader can compare; the
+v8 fill's 18 API records carry 617 `both` rows of 682, 5 of them on slots
+the core cannot hold. Since #998 the report phase carries the core
 class's top-level slot inventory (`core_inventory_block`) before its
 instruction, so the model can see which slots the core declares rather
 than infer it from the carried core record, where an empty slot and an
