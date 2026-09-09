@@ -274,15 +274,14 @@ files:
       retired_on: '2026-09-04'
       sha256: 06666c4d10786d4689170acdfd68350d451f84d2f94d4b5a22be6e569d3824f1
   src/download/prompts/d4d_generic_arm_prompt_v9.md:
-    body_sha256: 9c8760ba6a0e483afcd1bcfd1abab60a6dda057847bfad438451f748f618799c
-    bytes: 27224
-    pinned_at_commit: 0cd3b200433afcd11769e5e4e4798a618cf8e068
+    body_sha256: f630ee05db1c686c38b99158b6082be3e63e79bdab84e4884341053e4520cb70
+    bytes: 27298
+    pinned_at_commit: bad3e92f68e3c672fa637cea2d4dc552b1125ccf
     pinned_on: '2026-09-09'
-    reason: "R8 (#1147): the own-id preference argued from traceability, the \"needs a receipt\
-      \ like any other value\" clause dropped \u2014 receipts instrument v2 (#1123) exempts\
-      \ a fragment on any identifier the record carries for the dataset; no v9 record exists,\
-      \ so no record is superseded"
-    sha256: 898f428b221322dae767a4ebc18ee0f174fd49b48d9af0408226d3823b4552d2
+    reason: 'R8 (#1147, round 2): the own-id preference argued from the join every consumer
+      already holds (the core projector and the resources match), replacing a contrast clause
+      that contradicted the landing-page licence; no v9 record exists, so no record is superseded'
+    sha256: 0c49ccae8ccdbd5ba53058db80577a0a9128e8d19eeadbfd1b4c9f2571a71c0c
     superseded:
     - pinned_on: '2026-09-08'
       reason: "generic_v9: v8 plus R6 (a value in the referent own slots is supported by a\
@@ -334,6 +333,13 @@ files:
         record exists, so no record is superseded'
       retired_on: '2026-09-09'
       sha256: 6ef7c881faea87008fdc2eba74e9d4ce54b283a2a28faab470ce5f41f5e71484
+    - pinned_on: '2026-09-09'
+      reason: "R8 (#1147): the own-id preference argued from traceability, the \"needs a receipt\
+        \ like any other value\" clause dropped \u2014 receipts instrument v2 (#1123) exempts\
+        \ a fragment on any identifier the record carries for the dataset; no v9 record exists,\
+        \ so no record is superseded"
+      retired_on: '2026-09-09'
+      sha256: 898f428b221322dae767a4ebc18ee0f174fd49b48d9af0408226d3823b4552d2
   src/download/prompts/d4d_tuned_arm_prompt.md:
     bytes: 2877
     pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
