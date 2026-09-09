@@ -645,10 +645,13 @@ and a reviewer's `review.reliability` survive every recomputation of
 their block — backfill, the runner's record write, `provenance record`
 re-recording and `review check --write` (#856/#973,
 `backfill_checks.carry_attestations`) — marked `stale` with the artifacts
-they attested when the pair or the pack has since changed (#969). A `reviewed_at` at exactly midnight, one that does not parse, or none
-at all is **reported, never failed** by `d4d review check` (#1057): the
-judgements are attested by hash, and only when they were made is
-unrecoverable — two v8 reviews carry `2026-09-07T00:00:00Z`.
+they attested when the pair or the pack has since changed (#969). A `reviewed_at` that is a date with no time, one at exactly midnight
+(indistinguishable from a date, reported as that), one that does not
+parse, or none at all is **reported, never failed** by `d4d review check`
+and `d4d review agree` (#1057): the judgements are attested by hash, and
+only when they were made is unrecoverable. 15 of the 47 reviews on disk
+carry one — endemic on the v6/v7 agentic reviews and their second
+ratings, and two of the twelve v8 reviews.
 
 ## Canonical selection with the review (#660)
 
