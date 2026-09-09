@@ -360,7 +360,8 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                        schema_digest_md5=digest,
                        reasoning_effort=reasoning_effort,
                        phases=_parse_phases(phase_specs),
-                       receipt_expected=receipt_expected)
+                       receipt_expected=receipt_expected,
+                       condition=condition)                  # the launcher's own claim (#1094)
     if phases_skipped:
         known = _known_phases()
         bad = [n for n in phases_skipped if n not in known]
@@ -663,8 +664,22 @@ def backfill(verified, dry_run):
             continue
         for project in run.projects:
             is_verified = run.label in verified
+            # The condition claim of a reconstructed record comes from the
+            # prompt file the existing record hashed, never from a label a
+            # reconstruction cannot check (#1094 review, N2).
+            existing = record_path_for(project, run.method, run.label)
+            source_paths: list[str] = []
+            if existing.exists():
+                import yaml as _yaml
+                try:
+                    prompts = (_yaml.safe_load(existing.read_text(encoding="utf-8")) or {}).get("prompts") or {}
+                    source_paths = [f.get("path", "") if isinstance(f, dict) else str(f)
+                                    for f in (prompts.get("files") or prompts.get("paths") or [])]
+                except Exception:                              # noqa: BLE001
+                    source_paths = []
             rec = build_record(project, run.method, run.label,
-                               mode="reconstructed", input_verified=is_verified)
+                               mode="reconstructed", input_verified=is_verified,
+                               condition_source_paths=source_paths)
             target = record_path_for(project, run.method, run.label)
             n_unrec = len(rec.data.get("unrecoverable") or [])
             if dry_run:

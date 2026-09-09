@@ -1462,8 +1462,15 @@ def arm_facts(label_prefix: str, method: str | None = None,
         projects.add(path.name[: -len("_provenance.yaml")])
         for name, field in ARM_PROCEDURE_FIELDS:
             value = _dig(rec, field)
-            if name == "condition" and value is None:
-                value = condition_from_label(path.parts[-2])   # records before #1094
+            if field == ("run", "condition") and value is None:
+                # Records before #1094: the prompt the record hashed first
+                # (the bytes it consumed — 15 #420 records are labelled v3
+                # and hashed v1), the label only where no prompt is recorded.
+                files = ((rec.get("prompts") or {}).get("files")
+                         or (rec.get("prompts") or {}).get("paths") or [])
+                value = (condition_from_prompt_paths(f.get("path", "") if isinstance(f, dict) else str(f)
+                                                     for f in files)
+                         or condition_from_label(path.parts[-2]))
             seen[name].add(str(value))
     return {"prefix": label_prefix, "labels": sorted(labels),
             "projects": sorted(projects), "records": len(projects) * len(labels),
@@ -1876,27 +1883,65 @@ def condition_from_label(label: str) -> str | None:
     from data_sheets_schema.api_runner import CONDITION_PROMPTS
 
     hay = label.replace("_", "-").lower()
-    # Longest first: `generic` is a prefix of `generic-v3`, so a shortest-first
-    # scan would answer `generic` for every versioned label — which is exactly
-    # the mismatch this function exists to detect, reported as agreement.
-    for cond in sorted(CONDITION_PROMPTS, key=len, reverse=True):
-        if cond.replace("_", "-") in hay:
-            return cond
-    return None
-
-
-def condition_contradiction(record: dict[str, Any], label: str) -> dict[str, str] | None:
-    """A record whose `run.condition` names a condition its label does not
-    (#1094) — the `uncanonical` shape for the condition claim. None where the
-    record states no condition (records before #1094) or the two agree."""
-    stated = ((record.get("run") or {}).get("condition")) if isinstance(record, dict) else None
-    if not stated:
+    # A condition is a delimited token, not a substring (#1094 review, N8):
+    # `someone-untuned-thing` is not `tuned`, and a label naming a version
+    # the registry does not know yet (`generic-v10` before it is registered)
+    # names no registered condition rather than its prefix. Two registered
+    # conditions both present as tokens is an ambiguous label, also None.
+    hits = [cond for cond in CONDITION_PROMPTS
+            if re.search(r"(?<![a-z0-9])" + re.escape(cond.replace("_", "-")) + r"(?![a-z0-9])", hay)]
+    versioned = re.search(r"(?<![a-z0-9])generic-v\d+(?![a-z0-9])", hay)
+    if versioned and versioned.group(0).replace("-", "_") not in CONDITION_PROMPTS:
         return None
-    claimed = condition_from_label(label)
-    if claimed and claimed != stated:
-        return {"record": str(stated), "label_condition": claimed,
-                "basis": str((record.get("run") or {}).get("condition_basis") or "")}
-    return None
+    # `generic` sits inside every `generic-vN`; the versioned token wins.
+    if len(hits) > 1 and "generic" in hits and versioned:
+        hits.remove("generic")
+    return hits[0] if len(hits) == 1 else None
+
+
+def condition_contradiction(record: dict[str, Any], label: str) -> dict[str, Any] | None:
+    """A record whose `run.condition` is contradicted by the evidence the
+    record itself carries (#1094): the prompt file it hashed (the bytes it
+    consumed — the strong comparison, the one #420 is about) or its label
+    (the weak one), or a condition the registry does not know. None where
+    the record states no condition (records before #1094) or nothing
+    disagrees. The finding names which source disagreed."""
+    run = record.get("run") if isinstance(record, dict) else None
+    if not isinstance(run, dict):
+        return None
+    stated = run.get("condition")
+    if not isinstance(stated, str) or not stated.strip():
+        return None
+    from data_sheets_schema.api_runner import CONDITION_PROMPTS
+    files = ((record.get("prompts") or {}).get("files") or (record.get("prompts") or {}).get("paths") or []) \
+        if isinstance(record.get("prompts"), dict) else []
+    by_prompt = condition_from_prompt_paths(f.get("path", "") if isinstance(f, dict) else str(f) for f in files)
+    by_label = condition_from_label(label)
+    disagree = {}
+    if stated not in CONDITION_PROMPTS:
+        disagree["registry"] = "not a registered condition"
+    if by_prompt and by_prompt != stated:
+        disagree["hashed prompt"] = by_prompt
+    if by_label and by_label != stated:
+        disagree["label"] = by_label
+    if not disagree:
+        return None
+    return {"record": stated, "disagrees_with": disagree,
+            "prompt_condition": by_prompt, "label_condition": by_label,
+            "basis": str(run.get("condition_basis") or "")}
+
+
+def condition_unfalsifiable(record: dict[str, Any], label: str) -> bool:
+    """A stated condition that neither the hashed prompt nor the label can
+    check (#1094 review, S5): reported, never failed — visible rather than
+    silently unfalsifiable."""
+    run = record.get("run") if isinstance(record, dict) else None
+    if not isinstance(run, dict) or not run.get("condition"):
+        return False
+    files = ((record.get("prompts") or {}).get("files") or (record.get("prompts") or {}).get("paths") or []) \
+        if isinstance(record.get("prompts"), dict) else []
+    by_prompt = condition_from_prompt_paths(f.get("path", "") if isinstance(f, dict) else str(f) for f in files)
+    return by_prompt is None and condition_from_label(label) is None
 
 
 def prompt_condition_mismatch(method: str, label: str, project: str,
@@ -1938,9 +1983,16 @@ def condition_of(method: str, label: str, project: str,
     # Stringifying the mapping happens to contain the path, which is why the
     # previous version worked, but it also drags every other value into the
     # match. Read the field.
-    joined = " ".join(x.get("path", "") if isinstance(x, dict) else str(x)
-                      for x in paths)
+    return condition_from_prompt_paths(x.get("path", "") if isinstance(x, dict) else str(x)
+                                       for x in paths)
 
+
+def condition_from_prompt_paths(paths) -> str | None:
+    """The condition whose prompt file is among `paths` — the bytes a run
+    hashed, which is stronger evidence than its label (#420, #1094)."""
+    joined = " ".join(str(x) for x in paths)
+    if not joined.strip():
+        return None
     # Derived from the registry rather than restated. A hardcoded chain knew
     # only v1, v2 and tuned, so every v3 and v4 run fell through it and returned
     # None — silently, and on the rerun path (#340). `cli/api.py` carries the

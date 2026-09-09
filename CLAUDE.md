@@ -816,13 +816,23 @@ yet exist.
 This is not tamper-proofing. Whoever can edit a prompt can rotate its pin.
 
 **A record states its condition** (#1094): `run.condition` is what the run
-claims (the runner states it; a record made without one reads it from
-its label, and `run.condition_basis` says which), and `d4d runs check`
-fails under `--strict` on a record whose stated condition its label does
-not name — the `uncanonical` shape for the condition claim. Before this
+claims, from the strongest source available and `run.condition_basis`
+says which — stated by the runner (`d4d api run --condition`, `d4d
+provenance record --condition`; a `d4d api` run given no `--condition`
+uses `generic` and does *not* call that a statement), else the prompt
+file the record hashes (the bytes the run consumed — 15 #420 records are
+labelled v3 and hashed v1), else the label (an assertion by whoever typed
+it). `d4d runs check` fails under `--strict` on a record whose stated
+condition the hashed prompt, the label, or the registry contradicts, and
+reports one that nothing can check. `d4d api run|batch` refuse before
+any spend when the label names a condition the run would not use
+(`--allow-condition-mismatch` to record a deliberate one). Before this
 the field `arm_confounds` compared was a top-level key no record had, so
 it compared "None" with "None" and never reported a condition difference;
-`arm_facts` now reads `run.condition` and falls back to the label.
+`arm_facts` now reads `run.condition`, else the hashed prompt, else the
+label, and `compare-arms` reads the same field. Labels that name no
+registered condition (the 2026-07-27 series, crate/healthsheet arms) still
+read `None` unless their records hash a condition prompt.
 
 ## Model Reasoning Capture
 

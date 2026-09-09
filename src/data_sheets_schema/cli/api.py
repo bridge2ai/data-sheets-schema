@@ -55,10 +55,27 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
         kw["runtime"] = runtime
     if provider:
         kw["provider"] = provider
+    if condition is None:                      # not chosen: the default applies and the record says so (#1094)
+        condition, kw["condition_stated"] = "generic", False
     return RunSpec(project=project, arm=display, method=method,
                    bundle=resolved, label=label, condition=condition,
                    manifest_line=manifest,
                    out_dir=Path(out_dir) if out_dir else None, **kw)
+
+
+def _refuse_condition_mismatch(spec, allow: bool) -> None:
+    """Before the first token is billed: a label that names a condition the
+    run was not given is the #420 shape (`generic-v3` labels over the v1
+    prompt), and the post-hoc `runs check` gate would catch it only after the
+    spend (#1094 review, S4)."""
+    from data_sheets_schema.runs import condition_from_label
+    named = condition_from_label(spec.label)
+    if named and named != spec.condition and not allow:
+        raise click.ClickException(
+            f"label {spec.label!r} names condition {named!r} but the run would use "
+            f"{spec.condition!r}{'' if spec.condition_stated else ' (the default; no --condition given)'}; "
+            "pass --condition to match the label, relabel, or --allow-condition-mismatch "
+            "to record the mismatch deliberately (runs check will report it)")
 
 
 def _require_canonical_prompts(spec):
@@ -264,19 +281,23 @@ def plan_cmd(project, arm, label, condition, bundle, out_dir, as_json):
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
 @click.option("--label", required=True)
-@click.option("--condition", type=click.Choice(_CONDITIONS),
-              default="generic", show_default=True)
+@click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
+              help="prompt condition; omitted, `generic` applies and the record derives its "
+                   "condition from the prompt it hashes rather than calling the default a choice (#1094)")
+@click.option("--allow-condition-mismatch", is_flag=True,
+              help="run even though the label names a different condition (#1094)")
 @click.option("--bundle", type=click.Path(), default=None,
               help="explicit input bundle; required for datasets outside PROJECTS")
 @click.option("--out-dir", type=click.Path(), default=None,
               help="flat output directory (the assistant layout)")
 @click.option("--yes", is_flag=True, help="skip the cost confirmation")
-def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
+def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, out_dir, yes):
     """Execute every phase (four model calls, plus one bounded re-addressing call under a receipt condition when a receipt entry names a slot the record does not carry, #952; the core is derived from the full) and write outputs plus a live provenance record."""
     from data_sheets_schema.api_runner import execute, plan
     spec = _spec(project, arm, label, condition, bundle, out_dir)
     _require_bundle(spec, project, bundle)
     _require_canonical_prompts(spec)
+    _refuse_condition_mismatch(spec, allow_condition_mismatch)
     if spec.full_path.exists():
         raise click.ClickException(
             f"{spec.full_path} already exists; a run label is never reused")
@@ -317,8 +338,11 @@ def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
               help="comma-separated")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
-@click.option("--condition", type=click.Choice(_CONDITIONS),
-              default="generic", show_default=True)
+@click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
+              help="prompt condition; omitted, `generic` applies and each record derives its "
+                   "condition from the prompt it hashes rather than calling the default a choice (#1094)")
+@click.option("--allow-condition-mismatch", is_flag=True,
+              help="run even though the label prefix names a different condition (#1094)")
 @click.option("--replicates", type=int, default=3, show_default=True)
 @click.option("--label-prefix", required=True,
               help="e.g. 2026-07-29_claude-opus-5-api-generic; _rep{N} is appended")
@@ -335,7 +359,7 @@ def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
               help="fan out even if the first run regresses against the "
                    "baseline; the comparison is still printed")
 @click.option("--yes", is_flag=True)
-def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
+def batch_cmd(projects, arm, condition, allow_condition_mismatch, replicates, label_prefix, dry_run,
               continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard):
     """Run a sweep of projects x replicates, reporting cumulative cost.
 
@@ -353,6 +377,7 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
                 raise click.ClickException(
                     f"bundle not found for {p}: {s.bundle}")
             _require_canonical_prompts(s)
+            _refuse_condition_mismatch(s, allow_condition_mismatch)   # before any spend (#1094)
             specs.append(s)
 
     plans = [_plan_or_refuse(s) for s in specs]

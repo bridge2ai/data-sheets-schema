@@ -425,6 +425,11 @@ class RunSpec:
     bundle: Path
     label: str
     condition: str = "generic"          # generic | tuned
+    # False when the launcher chose nothing and the default above applies:
+    # the record then derives its condition from the prompt file it hashes,
+    # never recording a dataclass default as "stated by the runner" (#1094
+    # review, S3 — the effort recorder's own rule, #470).
+    condition_stated: bool = True
     manifest_line: str = "# Source manifest: data/preprocessed/source_manifest.yaml"
     # Frozen when the run is specified, not read from the clock on each use.
     # A six-phase run takes tens of minutes and this study's sweep genuinely
@@ -4421,7 +4426,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
 
     rec = build_record(
         spec.project, spec.method, spec.label, mode="live",
-        condition=spec.condition,                     # the run's own claim (#1094)
+        condition=spec.condition if spec.condition_stated else None,   # the run's own claim, or none (#1094)
         input_bundle=spec.bundle, input_verified=True,
         prompt_paths=spec.prompt_files,
         # The API path builds its instruction with `resolve_prompt`, so it can
