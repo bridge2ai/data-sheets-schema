@@ -566,7 +566,10 @@ ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, "
                    "(#952); the report phase ends with a dispositions table, "
                    "checked against the records before the run completes, and "
                    "a report whose claims contradict them is regenerated once "
-                   "with the contradictions named (#929)")
+                   "with the contradictions named (#929); the report phase "
+                   "carries the core class's top-level slot inventory before "
+                   "its instruction, so `both` is judged against a list the "
+                   "model can see (#998)")
 
 
 def context_blocks(spec: "RunSpec") -> dict[str, Any]:
@@ -885,8 +888,9 @@ PHASE_INSTRUCTIONS = {
         "`changed`, `added`, `retained`, `record` one of `full`, `core`, "
         "`both`. For a slot reported retained, changed or added, name `both` "
         "only where the core record carries it: the core schema declares "
-        "fewer slots than the full one, and a slot it does not declare "
-        "(`citation`, `consent_revocations`, …) is `full`. "
+        "fewer slots than the full one — its top-level inventory is the "
+        "`# Core schema inventory` block above — and a slot it does not "
+        "declare (`citation`, `consent_revocations`, …) is `full`. "
         "Every row is checked against the records afterwards: a slot "
         "reported removed must be absent from the record named, one reported "
         "retained, changed or added must be present there. Write the table "
@@ -1170,6 +1174,26 @@ def _receipts_block(spec: RunSpec, record: dict[str, Any]) -> dict[str, Any]:
                      spec.condition in RECEIPT_CONDITIONS)
 
 
+def core_inventory_block() -> str:
+    """The core class's top-level slot names, for the report phase (#998).
+
+    The report phase is assembled with the `Dataset` digest, and its
+    instruction says `both` is only for a slot the core record carries. The
+    model's only view of the core inventory was the completed core record in
+    the carry, where a slot the derivation left empty is indistinguishable
+    from one the core class cannot declare. The list is the inventory itself
+    — names only, from the same digest `record_inventory` ledgers — so the
+    distinction is visible rather than inferred. On the v8 fill the gate's
+    `claims_core_cannot_hold` was 0 on seventeen of eighteen records and 5
+    on one; this is the reader's view of that count, not a new gate.
+    """
+    names = schema_digest.slot_names("CoreDataset")
+    return ("# Core schema inventory\n\n"
+            "`CoreDataset` declares exactly these top-level slots; a dispositions "
+            "row on any other slot is `full`, never `both` or `core`:\n\n"
+            + ", ".join(f"`{n}`" for n in names) + "\n")
+
+
 def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseRequest:
     """Assemble one phase's request.
 
@@ -1250,6 +1274,10 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     for name, text in carry.items():
         parts.append({"type": "text",
                       "text": f"# {name}\n\n{text}"})
+    if phase == "report":
+        # The core inventory the instruction's `both` rule refers to (#998);
+        # before the instruction so the instruction stays last (#346).
+        parts.append({"type": "text", "text": core_inventory_block()})
     instruction = PHASE_INSTRUCTIONS[phase]
     if receipted and phase == "full":
         instruction += PHASE_INSTRUCTIONS["full_receipt"]

@@ -870,6 +870,20 @@ since moved. Fixed first; the recompute was redone under the fix. The
 datasheets are untouched, and the two regenerated reports stand as written
 with the cause on record here.
 
+### The report phase sees the core inventory (#998, 2026-09-09)
+
+The report instruction's `both` rule referred to "the core schema" while
+the phase was assembled with the `Dataset` digest; the model's only view
+of the core inventory was the carried core record, where a slot the
+derivation left empty and one the core class cannot declare look the
+same. The phase now carries `CoreDataset`'s top-level slot names before
+its instruction (`core_inventory_block`, names only, ~1.3 KB). Runner-side,
+so `ASSEMBLY_LAYOUT` names it and the assembly digest moves; no v9 record
+exists, so the condition still has one boundary. On the v8 fill
+`claims_core_cannot_hold` was 0 on seventeen of eighteen records and 5 on
+one, so the prediction for the canary is narrow: that count at 0 with no
+`both` row on an undeclared slot, and no change anywhere else.
+
 ### What a v9 arm can and cannot be compared against (#1072)
 
 `condition_delta("generic_v8", "generic_v9")` returns `["base"]`, and that
