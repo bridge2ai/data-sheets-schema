@@ -1,0 +1,162 @@
+"""A subagent's reply is evidence of which definition it was given (#1077).
+
+The incident: the Element 8 software threshold was written into
+`d4d-rubric10-semantic.md`, verified on disk, and a subagent spawned
+afterwards reported the pre-edit criteria verbatim. Intermittent, so worse
+than consistent — a rescore can silently measure the old instrument.
+
+`instrument_sha256` (#1099) does not detect it: the agent computes that by
+reading the file from disk, which is current, while the definition it was
+handed may be stale.
+
+Two properties carry the whole mechanism, and the first version of it had
+neither (#1102):
+
+1. **The answer is not in the question.** The first version printed the
+   challenge sentence in the preamble, so echoing the preamble passed —
+   including for the stale agent the check exists to catch.
+2. **The expected text is absent from the previous version.** The first
+   version asked only whether a diff was non-empty, which a reformat
+   satisfies, and its diff query was one commit wide so it went blind for
+   all twelve definitions the moment anything else was committed.
+"""
+import subprocess
+import unittest
+from pathlib import Path
+
+from data_sheets_schema.agent_pin import (MIN_CHALLENGE,
+                                          NoDiscriminatingChallenge,
+                                          StaleAgentDefinition, _normalise,
+                                          _usable, agent_digest, challenge,
+                                          challenge_between, discriminates,
+                                          echoed, spawn_preamble, verify_echo)
+
+REPO = Path(__file__).resolve().parents[1]
+AGENT = "d4d-rubric10-semantic"
+AGENT_REL = f".claude/agents/{AGENT}.md"
+
+
+def _at(commit):
+    got = subprocess.run(["git", "show", f"{commit}:{AGENT_REL}"],
+                         capture_output=True, cwd=REPO)
+    return None if got.returncode else got.stdout.decode("utf-8", "replace")
+
+
+class TestTheAnswerIsNotInTheQuestion(unittest.TestCase):
+    """#1102's first finding, demonstrated end to end by the reviewer:
+    `preamble | check-echo` returned a tick."""
+
+    def setUp(self):
+        if not discriminates(AGENT):
+            self.skipTest(f"{AGENT} has no discriminating challenge here")
+
+    def test_echoing_the_preamble_does_not_pass(self):
+        self.assertFalse(echoed(AGENT, spawn_preamble(AGENT)))
+
+    def test_the_expected_text_is_absent_from_the_preamble(self):
+        self.assertNotIn(_normalise(challenge(AGENT)["expected"]),
+                         _normalise(spawn_preamble(AGENT)))
+
+    def test_the_preamble_carries_the_locator_instead(self):
+        ask = challenge(AGENT)
+        self.assertIn(ask["locator"], spawn_preamble(AGENT))
+
+    def test_the_preamble_says_why_the_sentence_is_withheld(self):
+        self.assertIn("deliberately not", spawn_preamble(AGENT))
+
+    def test_a_genuine_quote_passes(self):
+        self.assertTrue(echoed(AGENT, "Quoting: " + challenge(AGENT)["expected"]))
+
+
+class TestTheChallengeDiscriminates(unittest.TestCase):
+    def test_it_catches_the_incident_that_filed_the_issue(self):
+        """`8813c8e6` is the text the stale subagent held; `119e3171` added
+        the #1059 threshold."""
+        pre, post = _at("8813c8e6"), _at("119e3171")
+        if pre is None or post is None:
+            self.skipTest("that history is not in this checkout")
+        ask = challenge_between(post.split("---", 2)[2], pre)
+        self.assertIsNotNone(ask)
+        self.assertNotIn(_normalise(ask["expected"]), _normalise(pre))
+
+    def test_the_longest_line_rule_would_not_have(self):
+        """Why the rule is what it is: the first version took the longest
+        line, which both versions shared."""
+        pre = _at("8813c8e6")
+        if pre is None:
+            self.skipTest("that history is not in this checkout")
+        longest = max(_usable(pre.split("---", 2)[2].splitlines()), key=len)
+        self.assertIn(_normalise(longest), _normalise(pre))
+
+    def test_identical_versions_yield_no_challenge(self):
+        """A reformat, or no change at all, must not produce a challenge that
+        cannot fail — the check would then be reported as a pass."""
+        body = "## H\n\n" + "x" * (MIN_CHALLENGE + 10) + "\n"
+        self.assertIsNone(challenge_between(body, "---\n---\n" + body))
+
+    def test_whitespace_only_changes_yield_no_challenge(self):
+        line = "y" * (MIN_CHALLENGE + 10)
+        self.assertIsNone(challenge_between(f"## H\n\n   {line}   \n",
+                                            f"---\n---\n## H\n\n{line}\n"))
+
+    def test_a_challenge_is_long_enough_that_echoing_it_is_not_luck(self):
+        if not discriminates(AGENT):
+            self.skipTest("no challenge here")
+        self.assertGreaterEqual(len(challenge(AGENT)["expected"]), MIN_CHALLENGE)
+
+
+class TestItRefusesRatherThanWeakens(unittest.TestCase):
+    """A check that cannot fail is worse than no check, because it is
+    reported as a pass."""
+
+    def _undiscriminating(self):
+        for name in ("d4d-mapper", "d4d-rocrate", "schema-stats"):
+            if not discriminates(name):
+                return name
+        return None
+
+    def test_no_challenge_means_no_preamble(self):
+        name = self._undiscriminating()
+        if name is None:
+            self.skipTest("every definition discriminates in this checkout")
+        with self.assertRaises(NoDiscriminatingChallenge):
+            spawn_preamble(name)
+
+    def test_no_challenge_means_no_verification_either_way(self):
+        name = self._undiscriminating()
+        if name is None:
+            self.skipTest("every definition discriminates in this checkout")
+        with self.assertRaises(NoDiscriminatingChallenge):
+            verify_echo(name, "anything at all")
+        self.assertFalse(echoed(name, "anything at all"),
+                         "cannot-be-verified is not verified")
+
+
+class TestVerification(unittest.TestCase):
+    def setUp(self):
+        if not discriminates(AGENT):
+            self.skipTest("no challenge here")
+
+    def test_a_reply_without_the_text_is_refused(self):
+        with self.assertRaises(StaleAgentDefinition):
+            verify_echo(AGENT, "I applied the rubric as given.")
+
+    def test_whitespace_and_case_do_not_decide_it(self):
+        noisy = "  ".join(challenge(AGENT)["expected"].upper().split())
+        self.assertTrue(echoed(AGENT, f"> {noisy}\n"))
+
+    def test_the_refusal_says_what_it_means(self):
+        with self.assertRaises(StaleAgentDefinition) as caught:
+            verify_echo(AGENT, "nothing relevant")
+        self.assertIn("#1077", str(caught.exception))
+        self.assertIn("stale", str(caught.exception))
+
+    def test_the_preamble_carries_the_digest_and_the_stop_instruction(self):
+        text = spawn_preamble(AGENT)
+        self.assertIn(agent_digest(AGENT), text)
+        self.assertIn("instrument_sha256", text)
+        self.assertIn("stop rather than proceeding", text)
+
+
+if __name__ == "__main__":
+    unittest.main()

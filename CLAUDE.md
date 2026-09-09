@@ -658,6 +658,50 @@ the form blocks of all 264 records were recomputed under it in the same
 change; v2 numbers in earlier notes are not comparable (see #906 for the
 canary consequence).
 
+## Proving which agent definition a subagent read (#1077)
+
+An edit to `.claude/agents/*.md` does not always reach a subagent spawned
+afterwards. On 2026-09-08 the #1059 threshold was written and verified on
+disk and the next evaluator reported the pre-edit criteria verbatim, while an
+earlier batch the same session did pick up its edit — intermittent, which is
+worse than consistent: a rescore can silently measure the old instrument and
+nothing in the output says so.
+
+`instrument_sha256` (#1099) does not detect this. The agent computes it by
+reading the file from disk, which is current, while the definition it was
+handed may be stale; the two agree even when the run is wrong.
+
+```bash
+d4d agents preamble --agent d4d-rubric10-semantic   # prepend to the spawn prompt
+d4d agents check-echo --agent d4d-rubric10-semantic --reply -   # exit 1 if stale
+d4d agents digest                                   # the pin each output records
+```
+
+The preamble names a **section** of the definition and asks the agent to
+quote its longest sentence. The sentence itself is withheld: the first
+version printed it, so `preamble | check-echo` returned a tick and a stale
+agent that copied the prompt passed the check it exists to fail (#1102). The
+expected text lives only in the verifier.
+
+That text is chosen by being **verifiably absent from the previous version**
+of the file — not by being long (replayed against the real incident,
+`8813c8e6` against `119e3171`, the longest line is a paragraph both versions
+share) and not by appearing in a diff (a reformat "changes" a shared line).
+`tests/test_agent_pin.py` pins both the replay and the reformat case.
+
+Where a definition carries nothing its predecessor lacked, `preamble` and
+`check-echo` **exit non-zero** rather than issue a question that cannot fail;
+`digest` marks those definitions. A check that cannot fail is worse than no
+check, because it is reported as a pass.
+
+**What a pass does and does not prove.** A refusal is strong evidence: the
+agent could not produce text that is in the definition on disk. A pass is
+weaker — it shows the reply contains that text, which an agent with the
+current definition can do and a stale one cannot, but it does not
+independently establish which file the runtime loaded. Do not describe a pass
+as having verified the subagent's definition; describe it as the subagent
+having quoted the current text.
+
 ## Canonical Prompt Registry
 
 Each condition's prompt files are pinned by hash in
