@@ -83,7 +83,8 @@ class TestPresenceClaims(unittest.TestCase):
         self.assertEqual(out["claims_core_cannot_hold"], 1)
         #: The version moves; what this test owns is that its own clause
         #: survives every later revision (#1046 added v3 in front of it).
-        self.assertTrue(out["instrument"].startswith("v3 ("), out["instrument"])
+        self.assertTrue(out["instrument"].startswith("v4 ("), out["instrument"])  # #1122
+        self.assertIn("v3 (#1022, #1046)", out["instrument"])
         self.assertIn("v2 (#990)", out["instrument"])
         # Indexed and dotted paths reduce to their root; `changed` counts like `retained`.
         out = check_report(_report(self.dir, "| `funders[0].name` | changed | both | fixed |\n"), FULL, CORE, DECLARED)
