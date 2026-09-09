@@ -36,6 +36,13 @@ either — a reformat "changes" a line that both versions carry. So a challenge
 is built only where the chosen text is **verifiably absent from the
 pre-image**, and `discriminates()` reports whether that holds rather than
 whether a diff was non-empty (#1102).
+
+**The question and the answer are the same unit.** The second version asked
+for the section's longest *sentence* and verified the longest fresh *line*
+(#1145): on the review-record definition the sentence carrying that line
+ranked 2nd of 38 by length, so an agent that did exactly as asked was told
+to stop. The challenge is now a sentence, and the preamble names it by its
+opening words — enough to find it in its section, never enough to answer.
 """
 from __future__ import annotations
 
@@ -54,6 +61,14 @@ MIN_CHALLENGE = 60
 #: A line that is boilerplate rather than instrument: present in every
 #: version, so useless as a discriminator.
 _SKIP = re.compile(r"^\s*(?:[-*+]\s|\d+\.\s|#|\||```|>)")
+
+#: Where one sentence ends and the next begins, in prose joined across the
+#: wrapped lines of a paragraph.
+_SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z\u201c\"'`(*])")
+
+#: The fewest opening words of the expected sentence the preamble reveals.
+#: Enough to point at one sentence in its section; never the sentence.
+MIN_PREFIX_WORDS = 3
 
 
 class StaleAgentDefinition(RuntimeError):
@@ -91,10 +106,19 @@ def _usable(lines):
     """Prose lines long enough that echoing one cannot be luck.
 
     Headings and list markers recur across versions, so they discriminate
-    nothing; short lines are echoed by chance.
+    nothing; short lines are echoed by chance; a fenced block is a template
+    every version carries. Kept as the line-level form the replay test of
+    the first rule uses; the challenge itself is built from sentences.
     """
-    return [ln.strip() for ln in lines
-            if len(ln.strip()) >= MIN_CHALLENGE and not _SKIP.match(ln.strip())]
+    out, fenced = [], False
+    for ln in lines:
+        stripped = ln.strip()
+        if stripped.startswith("```"):
+            fenced = not fenced
+            continue
+        if not fenced and len(stripped) >= MIN_CHALLENGE and not _SKIP.match(stripped):
+            out.append(stripped)
+    return out
 
 
 def _git(*args) -> str:
@@ -139,21 +163,84 @@ def _heading_for(body: str, line: str) -> str | None:
     return None
 
 
+def sentences_by_section(body: str) -> list[tuple[str | None, str]]:
+    """(heading, sentence) for every prose sentence of the definition, in
+    order: wrapped lines of a paragraph joined, then split at sentence ends.
+    Bulleted, numbered, quoted, tabular and fenced lines are left out, as
+    `_usable` leaves them out of the line form — they recur across versions.
+    """
+    out: list[tuple[str | None, str]] = []
+    heading: str | None = None
+    para: list[str] = []
+    fenced = False
+
+    def flush() -> None:
+        if para:
+            text = re.sub(r"\s+", " ", " ".join(para)).replace("*", "").strip()
+            out.extend((heading, sent.strip()) for sent in _SENTENCE_END.split(text) if sent.strip())
+            para.clear()
+
+    for raw in body.splitlines():
+        stripped = raw.strip()
+        if stripped.startswith("```"):
+            fenced = not fenced                  # a code block is a template, not prose
+            flush()
+            continue
+        if fenced:
+            continue
+        if not stripped:
+            flush()
+            continue
+        if stripped.startswith("#"):
+            flush()
+            heading = stripped.lstrip("# ").strip()
+            continue
+        if _SKIP.match(stripped):
+            flush()
+            continue
+        para.append(stripped)
+    flush()
+    return out
+
+
+def _prefix_for(expected: str, siblings: list[str]) -> str:
+    """The fewest opening words (at least `MIN_PREFIX_WORDS`) that begin
+    `expected` and no other sentence of its section — what the preamble
+    reveals so an agent can find the sentence without being handed it."""
+    words = expected.split()
+    others = [_normalise(sib) for sib in siblings if sib != expected]
+    for n in range(MIN_PREFIX_WORDS, len(words) + 1):
+        prefix = " ".join(words[:n])
+        if not any(o.startswith(_normalise(prefix)) for o in others):
+            return prefix
+    return expected
+
+
 def challenge_between(body: str, previous: str) -> dict[str, str] | None:
     """The challenge a given pair of versions supports, as a pure function.
 
     Separated from the git plumbing so the decisive property — that the
     expected text is absent from the version a stale agent would hold — can be
     replayed against any two texts, including the real #1077 commits.
+
+    The unit is a **sentence**, and the preamble names it by its opening
+    words (#1145): the first version asked the agent for the section's
+    longest sentence while holding the longest fresh *line*, and on a long
+    section an agent that answered exactly as asked was told it was stale
+    (the sentence carrying the fresh line ranked 2nd of 38). What the
+    preamble asks for and what the verifier holds are now the same thing,
+    and the opening words point at it without reproducing it.
     """
     old = _normalise(previous)
-    fresh = [ln for ln in _usable(body.splitlines())
-             if _normalise(ln) not in old]
+    sents = sentences_by_section(body)
+    fresh = [(h, sent) for h, sent in sents
+             if len(sent) >= MIN_CHALLENGE and _normalise(sent) not in old]
     if not fresh:
         return None
-    expected = max(fresh, key=len)
-    heading = _heading_for(body, expected)
+    heading, expected = max(fresh, key=lambda hs: len(hs[1]))
+    siblings = [sent for h, sent in sents if h == heading]
     return {"expected": expected,
+            "prefix": _prefix_for(expected, siblings),
             "locator": (f"the section headed \u201c{heading}\u201d" if heading
                         else "your scoring instructions")}
 
@@ -178,7 +265,9 @@ def discriminates(name: str) -> bool:
 
 
 def _normalise(text: str) -> str:
-    return re.sub(r"\s+", " ", text).strip().lower()
+    """Whitespace, case and emphasis markers do not decide a match: an agent
+    quoting a bold lead-in may or may not reproduce the asterisks."""
+    return re.sub(r"\s+", " ", text.replace("*", "")).strip().lower()
 
 
 def spawn_preamble(name: str) -> str:
@@ -200,9 +289,10 @@ def spawn_preamble(name: str) -> str:
         "An agent-definition edit does not always reach a subagent spawned "
         "afterwards (#1077), and when it does not, nothing in the output says "
         "so — the run silently applies the old rules. So, first, find "
-        f"{ask['locator']} in your own instructions and quote its longest "
-        "sentence back **verbatim**. The sentence is deliberately not "
-        "reproduced here: if it were, copying this prompt would pass the "
+        f"{ask['locator']} in your own instructions, and quote back "
+        f"**verbatim and in full** the sentence there that begins "
+        f"\u201c{ask['prefix']}\u201d. The rest of the sentence is deliberately "
+        "not reproduced here: if it were, copying this prompt would pass the "
         "check and prove nothing.\n\n"
         "If you cannot find that section, or it reads differently from what "
         "you would expect of the current rules, say so plainly and **stop "
@@ -221,7 +311,8 @@ def verify_echo(name: str, reply: str) -> None:
             "one, so this reply cannot be verified either way (#1102).")
     if _normalise(ask["expected"]) not in _normalise(reply):
         raise StaleAgentDefinition(
-            f"{name}: the reply does not quote the text under {ask['locator']} "
+            f"{name}: the reply does not quote the sentence beginning "
+            f"\u201c{ask['prefix']}\u201d under {ask['locator']} "
             f"from the definition on disk (sha256 {agent_digest(name)[:12]}…). "
             "Either the subagent received a stale definition (#1077) or it did "
             "not follow the preamble; in both cases the result cannot be read "

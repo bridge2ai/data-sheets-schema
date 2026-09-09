@@ -29,7 +29,8 @@ from data_sheets_schema.agent_pin import (MIN_CHALLENGE,
                                           StaleAgentDefinition, _normalise,
                                           _usable, agent_digest, challenge,
                                           challenge_between, discriminates,
-                                          echoed, spawn_preamble, verify_echo)
+                                          echoed, sentences_by_section, spawn_preamble,
+                                          verify_echo)
 
 REPO = Path(__file__).resolve().parents[1]
 AGENT = "d4d-rubric10-semantic"
@@ -66,6 +67,69 @@ class TestTheAnswerIsNotInTheQuestion(unittest.TestCase):
 
     def test_a_genuine_quote_passes(self):
         self.assertTrue(echoed(AGENT, "Quoting: " + challenge(AGENT)["expected"]))
+
+
+class TestTheQuestionAndTheAnswerAreOneUnit(unittest.TestCase):
+    """#1145: the preamble asked for the section's longest sentence while
+    the verifier held the longest fresh line. On the review-record
+    definition the sentence carrying that line ranked 2nd of 38, so an
+    agent that did exactly as asked was told it was stale."""
+
+    SHARED = ("This long sentence about model identity is present in every version of the definition and "
+              "is the longest one in its section by a wide margin, as the shared paragraph was.")
+    FRESH = "Among the mints, judge a fragment on another entity's identifier by its referent, not its base."
+    OLD = f"---\n---\n## Procedure\n\n{SHARED}\n\nSome other sentence that is short.\n"
+    NEW = f"## Procedure\n\n{SHARED} {FRESH}\n"
+
+    def test_the_expected_sentence_is_the_fresh_one_not_the_longest(self):
+        ask = challenge_between(self.NEW, self.OLD)
+        self.assertEqual(ask["expected"], self.FRESH)
+        self.assertNotEqual(ask["expected"], self.SHARED)
+
+    def test_the_preamble_points_at_it_by_its_opening_words(self):
+        ask = challenge_between(self.NEW, self.OLD)
+        self.assertEqual(ask["prefix"], "Among the mints,")
+        self.assertTrue(self.FRESH.startswith(ask["prefix"]))
+        self.assertNotIn(self.FRESH, ask["prefix"])                     # the prefix is not the answer
+
+    def test_an_agent_that_does_as_asked_passes_and_the_old_rule_would_have_failed_it(self):
+        """The honest reply: find the section, quote the sentence that begins
+        with the prefix. Under the previous rule the honest reply to
+        "quote the longest sentence" was SHARED, which the verifier would
+        have refused."""
+        ask = challenge_between(self.NEW, self.OLD)
+        section = [sent for h, sent in sentences_by_section(self.NEW) if h == "Procedure"]
+        honest = next(sent for sent in section if sent.startswith(ask["prefix"]))
+        self.assertIn(_normalise(ask["expected"]), _normalise("Quoting: " + honest))
+        longest = max(section, key=len)
+        self.assertNotIn(_normalise(ask["expected"]), _normalise("Quoting: " + longest))
+
+    def test_the_prefix_is_unique_within_the_section(self):
+        twin = "Among the mints, a second sentence with the same opening words but a different ending here."
+        new = f"## Procedure\n\n{self.SHARED} {twin} {self.FRESH}\n"
+        ask = challenge_between(new, self.OLD)
+        self.assertEqual(ask["expected"], twin if len(twin) > len(self.FRESH) else self.FRESH)
+        others = [sent for h, sent in sentences_by_section(new) if h == "Procedure" and sent != ask["expected"]]
+        self.assertFalse(any(_normalise(o).startswith(_normalise(ask["prefix"])) for o in others))
+        self.assertGreater(len(ask["prefix"].split()), 3)
+
+    def test_a_fenced_block_is_not_prose(self):
+        """The rubric agents' Output Format sections are JSON templates; a
+        "sentence" cut from one is not something an agent can be asked for."""
+        fence = "```json\n{\n  \"scores\": \"(repeat for all ten elements, each with evidence quotes and a verdict line)\"\n}\n```\n"
+        new = f"## Output Format\n\n{fence}\n## Rules\n\n{self.FRESH}\n"
+        ask = challenge_between(new, "---\n---\n## Rules\n\nnothing here\n")
+        self.assertEqual(ask["expected"], self.FRESH)
+        self.assertEqual([h for h, _ in sentences_by_section(new)], ["Rules"])
+
+    def test_the_preamble_asks_for_the_sentence_that_begins_with_the_prefix(self):
+        if not discriminates(AGENT):
+            self.skipTest(f"{AGENT} has no discriminating challenge here")
+        ask = challenge(AGENT)
+        text = spawn_preamble(AGENT)
+        self.assertIn(ask["prefix"], text)
+        self.assertNotIn(ask["expected"], text)
+        self.assertIn("begins", text)
 
 
 class TestTheChallengeDiscriminates(unittest.TestCase):
