@@ -251,7 +251,11 @@ DATASET_IDENTIFIER_SLOTS = ("id", "doi", "page")
 #: the block so a reader can tell which revision produced it; nothing pools
 #: blocks across revisions today, and #1140's recompute is what would bring
 #: the records a drifted bundle withholds under one.
-RECEIPTS_INSTRUMENT = ("v2 (#1123): a fragment minted on an identifier the record carries "
+RECEIPTS_INSTRUMENT = ("v3 (#1053): an entry whose identity key the final list no longer carries "
+                       "anywhere (a minted id reconciliation stripped) is located as a keyless "
+                       "entry — by overlap, then by position for the same shape (`same_key_stripped`) "
+                       "— instead of declared dropped; "
+                       "v2 (#1123): a fragment minted on an identifier the record carries "
                        "for the dataset at its top level — its id in CURIE or resolver form, "
                        "its doi, its page — is exempt like one on its own id; "
                        "`slots.exempt_on_carried_identifier` counts them; v1 (#720, #721, "
@@ -463,12 +467,21 @@ def _locate(entry: Any, i: int, candidates: list[Any]) -> tuple[int | None, str]
     scalar pairs, sharing at least one), or None — the same index is never
     assumed when identity says otherwise (#899)."""
     key = _entry_key(entry)
+    stripped = False
     if key is not None:
         hits = [k for k, e in enumerate(candidates) if _entry_key(e) == key]
         if hits:
             return (i, "same") if i in hits else (hits[0], f"by_{key[0]}")
         if key[0] == "value":
             return None, "entry_dropped"
+        if not any(isinstance(e, dict) and key[0] in e for e in candidates):
+            # The key the snapshot entry carried is on no entry of the final
+            # list: reconciliation stripped it (a minted `id` under rule
+            # 11/14 is the usual case, #1053), which says nothing about
+            # which entry this is. Located as a keyless entry from here —
+            # by overlap, then by position for the same shape — rather than
+            # declared gone because a key nobody carries matched nobody.
+            key, stripped = None, True
     pairs = _scalar_pairs(entry)
     scored = [(len(pairs & _scalar_pairs(e)), k) for k, e in enumerate(candidates)]
     best = max((s for s, _k in scored), default=0)
@@ -483,12 +496,16 @@ def _locate(entry: Any, i: int, candidates: list[Any]) -> tuple[int | None, str]
         same_shape = (key is None and i < len(candidates) and isinstance(entry, dict)
                       and isinstance(candidates[i], dict)
                       and bool(set(entry) & set(candidates[i])))
-        return (i, "same") if same_shape else (None, "entry_dropped")
+        if same_shape:
+            return (i, "same_key_stripped" if stripped else "same")
+        return (None, "entry_dropped")
     winners = [k for s, k in scored if s == best]
     if len(winners) > 1 and i not in winners:
         return None, "ambiguous"
     j = i if i in winners else winners[0]
-    return (j, "same" if j == i else "by_overlap")
+    if j == i:
+        return (i, "same_key_stripped" if stripped else "same")
+    return (j, "by_overlap")
 
 
 def remap_path(path: str, original: dict[str, Any] | None, full: dict[str, Any]) -> dict[str, Any]:
@@ -506,6 +523,8 @@ def remap_path(path: str, original: dict[str, Any] | None, full: dict[str, Any])
 
     Returns `{path, basis}`: `path` is the resolved path in `full` (None when
     the entry or leaf is gone) and `basis` says how — `same` (unchanged),
+    `same_key_stripped` (same index; the key the snapshot entry carried is on
+    no final entry, #1053),
     `by_<key>` (the entry moved; found by that key), `by_overlap` (moved; no
     key, found by its scalar pairs), `not_in_snapshot` (the written path did
     not resolve in the snapshot, so identity could not be read — resolved as
