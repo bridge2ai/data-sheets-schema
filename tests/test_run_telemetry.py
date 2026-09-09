@@ -104,6 +104,50 @@ class TestRunTelemetry(unittest.TestCase):
         self.assertIs(full["attempts"][0]["reasoning_present"], True)
         self.assertIs(full["attempts"][0]["reasoning_available"], False)
 
+    def _mark_audit_attempt_1(self, **fields):
+        """Rewrite the seeded record so audit attempt 1 carries `fields`."""
+        path = self.run_dir / "CHORUS_provenance.yaml"
+        prov = yaml.safe_load(path.read_text())
+        for r in prov["api_usage"]:
+            if r["phase"] == "audit" and r["attempt"] == 1:
+                r.update(fields)
+        path.write_text(yaml.safe_dump(prov))
+
+    def test_a_billed_unusable_attempt_is_not_an_abandoned_one(self):
+        """#1048 review, finding 1. The first version marked a completed,
+        billed attempt the parser refused with `outcome`, which is #1017's
+        marker for an *abandoned* transport attempt. Two branches here key on
+        that presence: an abandoned attempt's seconds nest inside its
+        completed attempt's window so are not re-added, and it wrote no
+        reasoning entry so is skipped in the positional join. A completed
+        attempt is neither — on the real CHORUS 04f rep2 record, marking two
+        such rows halved the wall time (2068.6 → 1033.1) and handed the
+        accepted attempt the first attempt's reasoning estimate.
+
+        `unusable_reason` is the distinct key; this holds that it is inert
+        for both branches, and that `outcome` would not have been."""
+        self._mark_audit_attempt_1(unusable_reason="no parseable object",
+                                   unusable_snapshot="CHORUS_audit_unusable_attempt1.txt")
+        t = run_telemetry(self.run_dir, "CHORUS")
+        self.assertEqual(t["wall_seconds_estimate"], 60.0,
+                         "a billed attempt's seconds are disjoint and count")
+        audit = next(p for p in t["phases"] if p["phase"] == "audit")
+        self.assertEqual([a["reasoning_tokens_estimate"] for a in audit["attempts"]],
+                         [5, 6], "the positional join must not shift")
+
+    def test_outcome_on_the_same_row_would_have_broken_both(self):
+        """The inverse, so a later "simplification" back to `outcome` fails
+        loudly rather than quietly re-breaking telemetry."""
+        self._mark_audit_attempt_1(outcome="unusable: no parseable object")
+        t = run_telemetry(self.run_dir, "CHORUS")
+        self.assertEqual(t["wall_seconds_estimate"], 50.0)
+        audit = next(p for p in t["phases"] if p["phase"] == "audit")
+        # An abandoned row's attempt carries no estimate key at all; the
+        # completed attempt then inherits the *first* attempt's entry — the
+        # shift the review demonstrated on the real record.
+        self.assertEqual([a.get("reasoning_tokens_estimate") for a in audit["attempts"]],
+                         [None, 5])
+
     def test_totals_repair_and_validation_state(self):
         t = run_telemetry(self.run_dir, "CHORUS")
         self.assertEqual(t["validation_state"], "valid")

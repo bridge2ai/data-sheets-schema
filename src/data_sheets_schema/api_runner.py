@@ -3745,6 +3745,91 @@ def _dependents_of(carry_name: str, produced_by: tuple[str, ...]) -> set[str]:
 
 
 
+#: How much of an unusable body to keep. The dropped-stream snapshot keeps a
+#: tail because the head was already delivered; an unusable body is whole and
+#: its *shape* is the question, so the head is what a reader needs — enough to
+#: see what the model produced instead of the expected object.
+UNUSABLE_HEAD_CHARS = 6000
+#: On a receipt condition the receipt is the response's *last* document, so a
+#: receipt-parse failure lives in the tail and a head-only snapshot shows a
+#: reader none of the text that failed (#1104 review). When the marker is
+#: present the snapshot keeps head and tail with the elision counted between
+#: them; a record failure keeps the head, whose shape is the question.
+UNUSABLE_TAIL_CHARS = 3000
+
+
+def _record_unusable_response(spec: RunSpec, ph: str, attempt: int,
+                              problem: str, text: str,
+                              usage_row: dict[str, Any] | None) -> Path | None:
+    """Leave a billed but rejected response on record (#1048).
+
+    A dropped stream leaves `…_incomplete_attempt{N}_{n}.txt` (#1017); a
+    *complete* response the parser refused left nothing at all, so CHORUS
+    `2026-09-04f rep2` lost two full attempts of 40,093 and 54,886 output
+    tokens whose text is simply gone. Both cost real money and both are the
+    only evidence of what shape the model produced instead of the expected
+    one — which is the question a reader asks after a retry.
+
+    `text` must be the response as delivered — captured before a receipt
+    condition's `split_receipt` rebinds the loop variable — so the header's
+    length and hash describe a string that actually arrived.
+
+    The accepted attempt is still what the record describes; this is
+    recorder-only.
+    """
+    if not text:
+        return None
+    # The parser's own predicate, line-anchored (#740): a record value that
+    # echoes the marker inline is not a receipt, and the snapshot must not
+    # send the reader to a tail that is not one (#1104 round 3, finding 1).
+    # The LAST marker line, as `split_receipt` takes it (#740): a marker
+    # quoted on its own line inside a block scalar precedes the real one, and
+    # a window anchored at the first would show the record's middle and
+    # elide the whole receipt (#1111 round 4, finding 1).
+    _hits = list(_RECEIPT_MARK_LINE.finditer(text))
+    marker = _hits[-1] if _hits else None
+    receipted = marker is not None and split_receipt(text)[1] is not None
+    if receipted and len(text) > UNUSABLE_HEAD_CHARS + UNUSABLE_TAIL_CHARS:
+        # The window starts at the marker, not at the end: every real receipt
+        # in the corpus is longer than the tail bound (min 3,107 chars, median
+        # 26,249), and the signal for a receipt-parse failure — prose instead
+        # of YAML, a fence, no `chunks:` — is at the receipt's opening, so the
+        # last 3,000 characters would be the least diagnostic slice (finding 2).
+        start = max(UNUSABLE_HEAD_CHARS, marker.start())
+        window = text[start:start + UNUSABLE_TAIL_CHARS]
+        between = start - UNUSABLE_HEAD_CHARS
+        after = len(text) - (start + len(window))
+        at_marker = marker.start() >= UNUSABLE_HEAD_CHARS
+        # Every seam is a `#` comment naming what it is, so no line break the
+        # response did not contain is mistaken for content (finding 2).
+        kept = (text[:UNUSABLE_HEAD_CHARS]
+                + (f"\n# … {between} characters elided …\n" if between
+                   else "\n# … (head and window are contiguous; the marker is inside the head) …\n")
+                + window
+                + (f"\n# … {after} characters elided after the window …\n" if after else ""))
+        extent = (f"# first {UNUSABLE_HEAD_CHARS} characters as delivered, then "
+                  f"{len(window)} characters "
+                  + ("from the receipt marker on" if at_marker
+                     else "continuing from the head (the marker is inside the head)")
+                  + f"{f' ({between} elided between' if between else ' (nothing elided between'}"
+                  f"{f', {after} after)' if after else ')'}; a receipt failure shows at "
+                  "the receipt's opening, so the window "
+                  + ("starts at the marker:\n" if at_marker else "keeps the text after the head:\n"))
+    else:
+        kept = text[:UNUSABLE_HEAD_CHARS]
+        extent = (f"# first {UNUSABLE_HEAD_CHARS} characters as delivered"
+                  f"{' (truncated here)' if len(text) > UNUSABLE_HEAD_CHARS else ''}:\n")
+    body = (f"# unusable response — phase {ph}, attempt {attempt} (#1048)\n"
+            f"# reason: {problem}\n"
+            f"# response_chars: {len(text)}  "
+            f"response_sha256: {hashlib.sha256(text.encode()).hexdigest()}\n"
+            f"# output_tokens: {(usage_row or {}).get('output_tokens')}  "
+            f"stop_reason: {(usage_row or {}).get('stop_reason')}\n"
+            + extent + kept)
+    return _snapshot(spec, f"{spec.project}_{ph}_unusable_attempt{attempt}.txt",
+                     body)
+
+
 def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: str,
                               info: dict[str, Any], usage: list[dict[str, Any]],
                               max_tokens: int | None = None) -> None:
@@ -3845,6 +3930,13 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
 
         text = "".join(b.text for b in resp.content
                        if getattr(b, "type", "") == "text")
+        # The response as delivered, held before `split_receipt` rebinds
+        # `text` to the pre-marker half on a receipt condition (#1048 review):
+        # the unusable snapshot must carry the whole body, or on exactly the
+        # failure it exists for — "the text after the receipt marker is not a
+        # receipt" — it would drop the text after the marker and hash a
+        # string that was never delivered.
+        response_text = text
 
         # Written before the checks below, so a phase that dies of
         # max_tokens still leaves the record showing where its budget went —
@@ -3903,12 +3995,39 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
                 break
             except RuntimeError as exc:
                 problem = str(exc)
+        # Before the retry, and before the last-attempt raise: the final
+        # attempt's body is evidence too, and raising without it loses the
+        # one that actually ended the run (#1048).
+        # Both the phase and the attempt: `_readdress_receipt` appends a
+        # `full_readdress` row with attempt 1, which an attempt-only guard
+        # would stamp on loop attempt 1 (round-3 finding 3).
+        own_row = (usage[-1] if usage and usage[-1].get("attempt") == attempt
+                   and usage[-1].get("phase") == ph else None)
+        kept = _record_unusable_response(spec, ph, attempt, problem, response_text, own_row)
+        if kept is not None and own_row is not None:
+            # A distinct key, never `outcome` (#1048 review). `outcome` is
+            # #1017's marker for an *abandoned* attempt, and run_telemetry
+            # branches on its presence: it drops such rows from wall time
+            # (their seconds nest inside a completed attempt's) and skips
+            # them in the positional reasoning-log join. A completed, billed
+            # attempt is neither — its seconds are disjoint and it wrote a
+            # reasoning entry — so marking it `outcome` halved CHORUS 04f
+            # rep2's wall time and handed the accepted attempt the first
+            # attempt's reasoning estimate. The basename, not #1017's
+            # `str(path)` under `snapshot`: `merge_abandoned_rows` dedups on
+            # `snapshot`, and these rows are not abandoned attempts to merge
+            # from the ledger. The snapshot file itself is written at once, so
+            # on the MAX_ATTEMPTS raise — no record written, this row lost with
+            # it — the file and its self-describing header survive.
+            own_row["unusable_reason"] = (problem.splitlines() or [""])[0][:120]
+            own_row["unusable_snapshot"] = kept.name
         if attempt == MAX_ATTEMPTS:
             raise RuntimeError(
                 f"phase {ph!r} produced no usable output in "
                 f"{MAX_ATTEMPTS} attempts. Last problem: {problem}")
         print(f"   phase {ph} attempt {attempt} unusable "
-              f"({problem.splitlines()[0][:70]}); retrying")
+              f"({problem.splitlines()[0][:70]}); retrying"
+              + (f" · kept {kept.name}" if kept else ""))
         time.sleep(BACKOFF_BASE_SECONDS ** attempt)
     return body
 
