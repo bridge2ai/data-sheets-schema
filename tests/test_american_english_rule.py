@@ -51,6 +51,27 @@ class TestTheRuleIsStated(unittest.TestCase):
         self.assertIn("no target slot count is the load-bearing", self.text)
 
 
+class TestTheRunnerSendsWhatItAsksFor(unittest.TestCase):
+    """The runner's own sent text — every phase instruction and the assembly
+    layout — writes the American English the rule asks for and the
+    normaliser enforces (#1138): the audit phase said "neighbouring field"
+    on every API run while #1002 rewrote the same word out of every record.
+    Swept with the declared instrument, so the guard moves with it."""
+
+    def test_no_phase_instruction_carries_a_british_form(self):
+        from data_sheets_schema import api_runner, grounding
+        for phase, text in api_runner.PHASE_INSTRUCTIONS.items():
+            prose = grounding._QUOTED.sub("", text)
+            found = sorted({m.group(0) for rx in grounding.BRITISH_PATTERNS for m in rx.finditer(prose)})
+            with self.subTest(phase=phase):
+                self.assertEqual(found, [], f"British forms in the {phase} instruction: {found}")
+
+    def test_the_assembly_layout_carries_none_either(self):
+        from data_sheets_schema import api_runner, grounding
+        text = grounding._QUOTED.sub("", str(api_runner.ASSEMBLY_LAYOUT))
+        self.assertEqual(sorted({m.group(0) for rx in grounding.BRITISH_PATTERNS for m in rx.finditer(text)}), [])
+
+
 class TestItDidNotRedefineACondition(unittest.TestCase):
     """The reason it is in the playbook rather than the prompts."""
 

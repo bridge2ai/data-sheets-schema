@@ -855,7 +855,7 @@ PHASE_INSTRUCTIONS = {
         "embedded inside a name, identifier or affiliation value. Also flag: "
         "a value that states documentation is absent, pending or held "
         "elsewhere instead of answering the field; a value answering a "
-        "neighbouring field (an access route in `future_guarantees` or "
+        "neighboring field (an access route in `future_guarantees` or "
         "`format`, a prohibition statement in `prohibition_reason`); a plan, "
         "proposal or earlier release stated as the dataset's current state; "
         "and a figure computed from other figures presented as one a source "

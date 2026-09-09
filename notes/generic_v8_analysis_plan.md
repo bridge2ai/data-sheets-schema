@@ -1011,6 +1011,21 @@ the edited line is a conditions catalogue, not a decision rule, so no
 rule those records ran under moved — reported, never fatal, and named
 here so the drift is attributable.
 
+### The audit-phase instruction writes American English (#1138, 2026-09-09)
+
+The audit phase's instruction — sent on every API run, under every
+condition — said "a value answering a neighbouring field" while the
+same runner rewrites that word out of every record it writes (#1002, v8
+step J). It says "neighboring" now. `PHASE_INSTRUCTIONS` is hashed into
+the assembly digest, so the digest moves for every condition from here:
+`a0c34202…` → `a78228e9…`, one re-baseline registered here as #352's,
+G's and E's were. No v9 record exists, so v9 still has one boundary; the
+v8 fill's records carry the digests they ran under and are compared
+among themselves as before. The prompt pins do not move. A test sweeps
+every phase instruction and the assembly layout with the declared
+instrument (`grounding.BRITISH_PATTERNS`, v3), so the runner's sent text
+is guarded the way the v9 prompt file is (#1134).
+
 ### What a v9 arm can and cannot be compared against (#1072)
 
 `condition_delta("generic_v8", "generic_v9")` returns `["base"]`, and that

@@ -280,7 +280,7 @@ class TestTheConditionIsWiredComparably(unittest.TestCase):
 
     def test_the_audit_phase_carries_the_e2_flags(self):
         audit = PHASE_INSTRUCTIONS["audit"]
-        for probe in ("absent, pending or held elsewhere", "neighbouring field", "`prohibition_reason`",
+        for probe in ("absent, pending or held elsewhere", "neighboring field", "`prohibition_reason`",
                       "earlier release stated as the dataset's current state",
                       "computed from other figures"):
             self.assertIn(probe, audit)
