@@ -78,8 +78,8 @@ to every project:
   declared bundle or omit it; do not supply an identifier you recognise but the
   bundle does not state. A correct identifier the evidence does not contain is
   still an unsupported claim, and to a reader who was not present it is
-  indistinguishable from a wrong one. Naming an organisation the bundle names is
-  grounded; adding that organisation's ROR from your own knowledge is not — the
+  indistinguishable from a wrong one. Naming an organization the bundle names is
+  grounded; adding that organization's ROR from your own knowledge is not — the
   2026-08-13 arm did exactly this, supplying RORs for institutions the bundle
   names only in prose (#547). `grounding.absent` in the provenance record counts
   them.
@@ -90,9 +90,9 @@ to every project:
   named has a referent outside this record. Where it does not, hang the label
   off one the bundle does supply — a fragment on the identifier of the thing
   it is part of, `<the dataset's own DOI CURIE>#split-train`, rather than a new
-  namespace (#531). A person is identified by an ORCID and an organisation by a
-  ROR; **a fragment appended to an organisation's ROR does not identify a
-  person**, it asserts something false about that organisation.
+  namespace (#531). A person is identified by an ORCID and an organization by a
+  ROR; **a fragment appended to an organization's ROR does not identify a
+  person**, it asserts something false about that organization.
 
 - **Within the rule above, mint a fragment only where another value in the
   record must point at that part** (v6, #685) — a split a task names, a
@@ -169,71 +169,124 @@ to every project:
   id, the address goes in `email`.
 
 - **A value in one of the referent's own slots is supported by a passage
-  whose subject is the referent** (v9, R6, #913): the declared scope names
-  the referent and the datasets declared related but distinct, with the
-  slot their facts belong in where it states one; a passage about another
-  dataset supports an entry there and nothing in a slot describing this
-  one. An empty declaration is not an assurance that every passage is about
-  the referent. Binds every phase, the reconcile phase in particular —
+  whose subject is the referent** (v9, R6, #913). You are given a declared
+  scope naming the referent and, where the project has any, the datasets
+  declared related but distinct — with, for each and where the declaration
+  states them, the slot its facts belong in and the bundle source carrying
+  its documentation. Where it names a slot, a passage about that dataset
+  supports an entry there; where it does not, the facts still belong with
+  that dataset and not in a slot describing this one, however well the
+  sentence would read there. A declaration listing no related dataset says
+  only that none was declared: it is not an assurance that every passage in
+  the bundle is about the referent, and the first sentence still governs.
+  This binds every phase, and the reconcile phase in particular:
   reconciling the two records against each other does not test what a
-  value is about.
+  value is about, so check each value you keep against the subject of the
+  passage behind it, not only against the rest of the record.
 
-- **A list entry names exactly one entity** (v9, R7, #911): where the bundle
-  states several, one entry each or none; a value that names a class of
-  things where the schema asks for a thing, or joins separate names with
-  "and", a slash or a comma, is a merge — unless the entity's own registered
-  name contains the conjunction, in which case splitting it is the same
-  error the other way.
+- **A list entry names exactly one entity** (v9, R7, #911). Where the bundle
+  states several, emit one entry each or none; never one entry whose value
+  merges them. Two signs that you have merged: the value names a class of
+  things where the schema asks for a thing — a plural or a collective noun
+  standing where one organization, one person or one instrument belongs —
+  or it joins what the sources state as separate names with "and", a slash
+  or a comma. The test is the sources, not the punctuation: an entity whose
+  own registered name contains "and", a comma or a slash is one entity, and
+  splitting it is the same error in the other direction. Read back each
+  entry you write in a multivalued slot and ask whether exactly one thing
+  the sources name answers to it.
 
-- **The fragment rule does not reach an id the schema forces** (v9, R8,
-  #803, #901): a file, a file collection, a data subset, a component
-  dataset under `resources`, a software tool under `used_software`, a
-  person given as an object — mint it on this record's own id and keep it
-  stable; a person's id is the ORCID first (R5). For every other fragment
-  the test stays the referent: an organisation, grant, award or program has
-  one outside the record, so a fragment for it on the dataset's identifier
-  is a claim, not a label — take the stated identifier, else leave `id`
-  empty and carry the name; a creator or maintainer entry is a role whose
-  id is the person's or organisation's own. A label this record mints sits
-  on an identifier the evidence supplies for this dataset, its own id to
-  prefer (a landing-page label needs a receipt, an own-id label does not,
-  #1123); a fragment on another entity's identifier labels that entity.
+- **The rule that a fragment is minted only where a value points at the
+  part (v6, #685) does not reach an id the schema forces** (v9, R8, #803,
+  #901). Where a class declares `id` as its identifier or requires it — a
+  file, a file collection, a data subset, a component dataset under
+  `resources`, a software tool under `used_software`, a person given as an
+  object — the id exists because the object does, and leaving it out is a
+  validation failure, not a fragment saved: mint it on this record's own
+  id, keep it stable, and do not read that rule as a reason to omit the
+  object; a person's id follows the rule for a person given as an object
+  (R5) — the ORCID the evidence states first, a fragment only where it
+  states none. The ids of `file_collections` and of the files under them
+  are copied into the core record's distributions, and top-level
+  `resources` are matched to the core by id, so those ids are used whether
+  or not the text points at them. For every other fragment the test stays
+  the referent: an organization, a grant, an award, a program has a
+  referent outside this record, so a fragment for it on this dataset's
+  identifier is a claim about that identifier, not a label; and an entry
+  under `creators` or `maintainers` is a role this record asserts about a
+  person or an organization, whose id is that person's or organization's
+  own identifier where the evidence states one. Take the identifier the
+  evidence states; where it states none and the schema does not require an
+  id, leave `id` empty and carry the name in `name`. A label this record
+  mints sits on an identifier the evidence supplies for this dataset —
+  which refines the rule that mints a label on an identifier the evidence
+  supplies, without replacing it — and this record's own id is the base to
+  prefer: a label on the dataset's landing page is licensed too, but it
+  names an identifier the evidence must supply, so it needs a receipt like
+  any other value, where a label on this record's own id does not (#1123).
+  A fragment appended to another entity's identifier — an organization's,
+  another dataset's — labels a part of that entity, not of this one.
 
-- **An enumeration slot is filled only from a passage that states the
-  category** (v9, R9, #830): never from a name, unit or position; `data_type`
-  and `collection_type` are claims about how a thing is classified. Empty
-  where no passage states it — except a required enum (`relationship_type`),
-  where the entry itself is what the evidence must support — and the file
-  enums `format`, `file_type`, `media_type`, `encoding` and `compression`,
-  which the file's name and extension are the passage for.
+- **A slot whose declared range is an enumeration is populated only from a
+  passage that states the category** (v9, R9, #830), in the source's own
+  words or a plain restatement of them — never from what a value's name,
+  unit or position suggests. A variable's `data_type` and a collection's
+  `collection_type` are claims about how a thing is classified, and a
+  passage that names the thing without classifying it supports the name
+  and not the class. Where no passage states the category the slot stays
+  empty — an empty enumeration slot is a gap the reader can see, a guessed
+  one an error the reader cannot — except where the schema requires the
+  slot, in which case the entry itself is what the evidence must support: a
+  related dataset (`relationship_type`) is recorded only where a passage
+  states what the relation is. A file's `format`, `file_type`, `media_type`
+  and `encoding`, and a file's or collection's `compression`, are read from
+  the file the bundle names — its name and extension are the passage for
+  them — and this rule does not reach those.
 
 - **`raw_data_format` names the form the data took before any processing
-  this dataset applied, only where a passage states it** (v9, R10, #830):
-  the release's standard, extension or pipeline format describes the
-  release; where a passage says raw and released coincide, record both.
+  this dataset applied, and only where a passage states that form** (v9,
+  R10, #830). The standard the release conforms to, the extension the
+  distributed files carry and the format a pipeline wrote are facts about
+  the released data and belong in the slots that describe the release;
+  where a passage states that the raw form and the released form are the
+  same, record it in both; where the documents describe the release and
+  say nothing of what preceded it, the slot stays empty.
 
 - **`principal_investigator` names a person the documents designate with
-  that title** (v9, R11, #830): a lead, director, corresponding author,
-  contact or first author is recorded as the role stated, in prose or in a
-  slot for that role where one exists, never promoted; more than one, record
-  each; none, empty.
+  that title, or its usual abbreviation, for this dataset or the study that
+  produced it** (v9, R11, #830). A lead, a director, a corresponding
+  author, a contact, a first author, the head of the group that hosts the
+  data — each is a role the documents state, recorded as the role they
+  state, in prose or in a slot for that role where the schema has one, and
+  never promoted to principal investigator because the record has a slot
+  for one. Where the documents designate more than one, record each; where
+  they designate none, the slot stays empty.
 
 - **A value states what a passage states, at the passage's own reach** (v9,
-  R12, #830): a consequence (`scope_impact`) only where a passage draws it;
-  a term from a keyword line, tag list, table header or menu attests that it
-  appears — `keywords` is the one slot whose subject is that, and a keyword
-  line fills it and nothing else.
+  R12, #830). A consequence — what a limitation means for a use, what a gap
+  does to a conclusion — goes in `scope_impact` or anywhere else only where
+  a passage draws it; a limitation the documents state without its
+  consequence is recorded as the limitation alone. A term taken from a
+  keyword line, a tag list, a table header or a navigation menu attests
+  that the term appears, not what it is about: `keywords` is the one slot
+  whose subject is that the term appears, and a keyword line fills it and
+  nothing else; any other value needs a sentence behind it.
 
 - **Every entry in a list is a member of that list** (v9, R13, #830): a
-  remark about the list — a sample marker, a continuation note, a column
-  flag — is not a member; it goes in `description`, `source_caveats`, or
-  nowhere.
+  variable under `variables`, a funder under `funders`, a file under the
+  `resources` of a file collection. A remark about the list — that what is
+  shown is a sample, that the list continues elsewhere, that one column
+  flags something — is not a member and does not become an entry; it goes
+  in `description`, or in `source_caveats`, or is omitted.
 
 - **An absence is not an entry, and a route is not a format** (v9, R14,
-  #830): no correction published is not an erratum; access by request is a
-  route and fills neither `future_guarantees` nor a distribution's `format`;
-  the prohibition is the entry its `prohibition_reason` explains. A stated
-  absence leaves the slot empty and, where worth keeping, goes in
+  #830). That no correction has been published is not an erratum and does
+  not fill `errata`; that access is by request through a portal is a route
+  and fills neither `future_guarantees` nor the `format` of a distribution;
+  the reason a use is prohibited is its `prohibition_reason`, and the
+  prohibition itself is the entry that reason explains, not the reason.
+  Where the documents state that a thing is absent, the slot for the thing
+  stays empty and the statement, where it is worth keeping, goes in
   `source_caveats`.
 
 The rule about there being no target slot count is the load-bearing one: it is

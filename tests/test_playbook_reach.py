@@ -170,6 +170,35 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
 
     CURRENT_PROMPT = "d4d_generic_arm_prompt_v9.md"
 
+    #: rule → clauses that must survive in BOTH texts. `SHARED_RULES` proves a
+    #: rule *arrived*; a probe that is the copied headline passes when the
+    #: rest of the bullet is hollowed out (#1128 review: the first mirror of
+    #: R6–R14 kept each rule's statement and dropped its procedure — the
+    #: read-back directive, the projector sentence, a collection's
+    #: `compression`, "or its usual abbreviation"). These are the operative
+    #: clauses, one probe each, so a rewrite that loses one fails here.
+    SHARED_CLAUSES = {
+        "referent's own slots": ("check each value you keep against the subject of the passage behind it",),
+        "one entity per entry": ("read back each entry you write in a multivalued slot",
+                                 "the test is the sources, not the punctuation"),
+        "forced ids": ("leaving it out is a validation failure, not a fragment saved",
+                       "do not read that rule as a reason to omit the object",
+                       "copied into the core record's distributions",
+                       "and the schema does not require an id",
+                       "labels a part of that entity, not of this one"),
+        "enum from a stated category": ("in the source's own words or a plain restatement of them",
+                                        "supports the name and not the class",
+                                        "or collection's compression"),
+        "raw data format": ("raw form and the released form are the same",
+                            "say nothing of what preceded it"),
+        "principal investigator": ("or its usual abbreviation",
+                                   "for this dataset or the study that produced it"),
+        "passage's own reach": ("recorded as the limitation alone",
+                                "any other value needs a sentence behind it"),
+        "list membership": ("a funder under funders",),
+        "absence and route": ("does not fill errata", "not the reason"),
+    }
+
     def test_the_naming_rule_reaches_the_api_path(self):
         """The render is the API path's copy of the rule; guard its substance.
 
@@ -211,6 +240,25 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
             if in_prompt.lower() not in prompt:
                 missing.append(f"{name}: absent from {self.CURRENT_PROMPT}")
         self.assertEqual(missing, [])
+
+    def test_every_operative_clause_reaches_both(self):
+        """Fidelity, not arrival (#1128 review, N8)."""
+        playbook, prompt = self._texts()
+        missing = []
+        for name, clauses in self.SHARED_CLAUSES.items():
+            self.assertIn(name, self.SHARED_RULES, name)
+            for clause in clauses:
+                if clause.lower() not in playbook:
+                    missing.append(f"{name}: {clause!r} absent from the playbook")
+                if clause.lower() not in prompt:
+                    missing.append(f"{name}: {clause!r} absent from {self.CURRENT_PROMPT}")
+        self.assertEqual(missing, [])
+
+    def test_the_playbook_writes_american_english(self):
+        """The file teaches house style by example and carries the rule (#1128 review, N7)."""
+        text = re.sub(r"`[^`]*`", "", PLAYBOOK.read_text(encoding="utf-8")).lower()   # backticked tokens quote sources
+        for british in ("organisation", "characterise", "standardise", "analyse", "behaviour", "licence"):
+            self.assertNotIn(british, text, british)
 
     def test_the_playbook_has_no_rule_this_table_does_not_know(self):
         """A rule added to the playbook and to no prompt is the original defect.
