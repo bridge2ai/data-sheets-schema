@@ -52,24 +52,44 @@ class TestTheRuleIsStated(unittest.TestCase):
 
 
 class TestTheRunnerSendsWhatItAsksFor(unittest.TestCase):
-    """The runner's own sent text — every phase instruction and the assembly
-    layout — writes the American English the rule asks for and the
-    normaliser enforces (#1138): the audit phase said "neighbouring field"
-    on every API run while #1002 rewrote the same word out of every record.
-    Swept with the declared instrument, so the guard moves with it."""
+    """Every piece of prose the runner writes into a request — the phase
+    instructions and layout the assembly digest hashes, and the system
+    prompt, repair prompts, core inventory block and headers it does not —
+    writes the American English the rule asks for and the normaliser
+    enforces (#1138): the audit phase said "neighbouring field" on every API
+    run while #1002 rewrote the same word out of every record. Swept with
+    the declared instrument as the instrument applies it — lower-cased, and
+    with no quotation exemption, since text the repository authors quotes no
+    source and an example the model is told to copy is the surface that
+    matters (#1151 review, M1/S1/S2)."""
 
-    def test_no_phase_instruction_carries_a_british_form(self):
-        from data_sheets_schema import api_runner, grounding
-        for phase, text in api_runner.PHASE_INSTRUCTIONS.items():
-            prose = grounding._QUOTED.sub("", text)
-            found = sorted({m.group(0) for rx in grounding.BRITISH_PATTERNS for m in rx.finditer(prose)})
-            with self.subTest(phase=phase):
-                self.assertEqual(found, [], f"British forms in the {phase} instruction: {found}")
+    def test_no_sent_surface_carries_a_british_form(self):
+        from data_sheets_schema import api_runner
+        from tests.british_sweep import british_forms
+        surfaces = api_runner.sent_text_surfaces()
+        self.assertGreaterEqual(len(surfaces), 16)                     # nine phases + layout + six others
+        for name, text in surfaces.items():
+            with self.subTest(surface=name):
+                found = british_forms(text, exempt_quotes=False)
+                self.assertEqual(found, [], f"British forms in {name}: {found}")
 
-    def test_the_assembly_layout_carries_none_either(self):
-        from data_sheets_schema import api_runner, grounding
-        text = grounding._QUOTED.sub("", str(api_runner.ASSEMBLY_LAYOUT))
-        self.assertEqual(sorted({m.group(0) for rx in grounding.BRITISH_PATTERNS for m in rx.finditer(text)}), [])
+    def test_the_sweep_sees_a_capitalised_form_and_a_quoted_example(self):
+        """What the first version missed: the patterns are case-sensitive and
+        the instrument lower-cases; a double-quoted example is authored."""
+        from tests.british_sweep import british_forms
+        self.assertEqual(british_forms("Neighbouring fields are read together."), ["neighbouring"])
+        self.assertEqual(british_forms('write it exactly as "the programme centre"', exempt_quotes=False),
+                         ["centre", "programme"])
+        self.assertEqual(british_forms('write it exactly as "the programme centre"'), [])
+
+    def test_the_sent_surfaces_are_the_request_text(self):
+        """Lifting the literals into constants must not change a byte of
+        what is sent: the system prompt and headers read as before."""
+        from data_sheets_schema import api_runner
+        self.assertTrue(api_runner.PHASE_SYSTEM.startswith("You generate Datasheets-for-Datasets records."))
+        self.assertIn("[cNNN]", api_runner.CHUNK_MARKER_NOTE)
+        self.assertTrue(api_runner.READDRESS_HEADER.startswith("# Receipt entries whose slot is not a path"))
+        self.assertEqual(api_runner.REGATE_HEADERS[0], "# Reconciliation report as written\n\n")
 
 
 class TestItDidNotRedefineACondition(unittest.TestCase):

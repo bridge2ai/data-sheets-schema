@@ -1257,8 +1257,7 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
         bundle_text, bundle_md5 = chunk_marked_bundle(spec.bundle)
         bundle_head = (f"# Declared input bundle — {spec.bundle}\n"
                        f"# bundle_md5: {bundle_md5}\n"
-                       "# Chunk markers: a line of the form [cNNN] opens each chunk; "
-                       "the markers are not part of the bundle's text.\n\n")
+                       + CHUNK_MARKER_NOTE)
     else:
         bundle_text = spec.bundle.read_text(encoding="utf-8", errors="ignore")
         bundle_head = f"# Declared input bundle — {spec.bundle}\n\n"
@@ -1328,10 +1327,7 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
 
     return PhaseRequest(
         phase=phase,
-        system=("You generate Datasheets-for-Datasets records. The declared "
-                "input bundle is your only source of dataset facts. The schema "
-                "digest defines structure, never content. Never consult a "
-                "previously generated D4D record."),
+        system=PHASE_SYSTEM,
         cached_blocks=cached,
         messages=[{"role": "user", "content": parts}],
     )
@@ -1698,7 +1694,7 @@ def build_readdress(req: PhaseRequest, response_text: str,
         {"role": "assistant", "content": response_text},
         {"role": "user", "content": [
             {"type": "text",
-             "text": "# Receipt entries whose slot is not a path in the record above\n\n" + listing},
+             "text": READDRESS_HEADER + listing},
             {"type": "text", "text": PHASE_INSTRUCTIONS["full_readdress"]}]},
     ]
     return PhaseRequest(phase="full_readdress", system=req.system,
@@ -2490,6 +2486,40 @@ def grounding_block(spec: RunSpec) -> dict[str, Any] | None:
         from data_sheets_schema.provenance import _md5
         out["artifacts"] = {"bundle": {"path": str(spec.bundle),
                                        "md5": _md5(spec.bundle)}}
+    return out
+
+
+#: The system prompt every phase is sent (#1138 review, S2: sent on all six
+#: phases and never in the assembly digest, so it is swept as sent text).
+PHASE_SYSTEM = ("You generate Datasheets-for-Datasets records. The declared "
+                "input bundle is your only source of dataset facts. The schema "
+                "digest defines structure, never content. Never consult a "
+                "previously generated D4D record.")
+
+#: Runner-written headers that precede sent material (the chunk-marker note
+#: under a receipt condition, the re-address listing, the regate's two
+#: parts). Constants so the sweep of authored sent text reaches them.
+CHUNK_MARKER_NOTE = ("# Chunk markers: a line of the form [cNNN] opens each chunk; "
+                     "the markers are not part of the bundle's text.\n\n")
+READDRESS_HEADER = "# Receipt entries whose slot is not a path in the record above\n\n"
+REGATE_HEADERS = ("# Reconciliation report as written\n\n", "# Claims the records do not show\n\n")
+
+
+def sent_text_surfaces() -> dict[str, str]:
+    """Every piece of prose the runner itself writes into a request, by
+    name: the phase instructions and the layout that the assembly digest
+    hashes, and the surfaces it does not — the system prompt, the repair
+    system prompt and instruction, the core inventory block, the chunk
+    marker note and the re-address and regate headers (#1138 review, S2).
+    A British form in any of them is sent on every run and, outside the
+    digest, unrecorded; the sweep in tests/test_american_english_rule.py
+    reads this map so a new surface is added here to be guarded."""
+    out = {f"phase:{k}": v for k, v in PHASE_INSTRUCTIONS.items()}
+    out.update({"assembly_layout": str(ASSEMBLY_LAYOUT), "system": PHASE_SYSTEM,
+                "repair_system": REPAIR_SYSTEM, "repair_instruction": REPAIR_INSTRUCTION,
+                "core_inventory_block": core_inventory_block(),
+                "chunk_marker_note": CHUNK_MARKER_NOTE, "readdress_header": READDRESS_HEADER,
+                "regate_headers": "".join(REGATE_HEADERS)})
     return out
 
 
@@ -3658,9 +3688,9 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
         listing = yaml.safe_dump([{k: v for k, v in c.items() if k in ("kind", "slot", "record", "detail", "claim")}
                                   for c in contradictions], sort_keys=False, allow_unicode=True)
         req.messages[0]["content"].extend([
-            {"type": "text", "text": "# Reconciliation report as written\n\n"
+            {"type": "text", "text": REGATE_HEADERS[0]
              + (spec.report_path.read_text(encoding="utf-8") if spec.report_path.exists() else "")},
-            {"type": "text", "text": "# Claims the records do not show\n\n" + listing},
+            {"type": "text", "text": REGATE_HEADERS[1] + listing},
             {"type": "text", "text": PHASE_INSTRUCTIONS["report_regate"]}])
     try:
         resp = _call_with_retry(

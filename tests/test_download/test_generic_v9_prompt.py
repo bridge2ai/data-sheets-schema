@@ -67,9 +67,8 @@ def _as_v9_spells(text):
 # the normaliser rewrites (#1002), under its declared version — not a second
 # hand-written list, which omitted the v3 half and re-admitted `analyses`.
 def british_forms(text):
-    from data_sheets_schema import grounding
-    text = grounding._QUOTED.sub("", text)
-    return sorted({m.group(0).lower() for rx in grounding.BRITISH_PATTERNS for m in rx.finditer(text)})
+    from tests.british_sweep import british_forms as _sweep               # one wrapper for every guard (#1151 review, S3)
+    return _sweep(text, exempt_quotes=True)                                # a prompt quotes sources
 
 
 class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
