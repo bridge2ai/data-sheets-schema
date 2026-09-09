@@ -1375,6 +1375,12 @@ def header_disagreements(method: str, label: str, project: str,
     for any later drift. Reported, never fatal: the datasheet is not wrong
     about the dataset, it is wrong about itself.
     """
+    # `discover()` lists the `_core` directories as methods of their own; the
+    # artifacts of such a "method" live under its non-core name, so a direct
+    # call with one produced two missing-artifact rows per record (278 each
+    # on the corpus, round 3). The record is keyed by the run's method.
+    if method.endswith("_core"):
+        method = method[:-len("_core")]
     prov = _prov(method, label, project, concat_dir) or {}
     if not prov:
         return []                       # nothing to disagree with: no record at all
