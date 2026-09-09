@@ -65,8 +65,13 @@ def _prompt_texts() -> list[tuple[str, str, str]]:
 
 
 def _digest_texts() -> list[tuple[str, str, str]]:
+    """Anchored to this checkout, like every other surface: `digest_text`'s
+    default schema path is cwd-relative (`resolve_schema`, #659), so a test
+    run with the cwd at another checkout would scan that checkout's schema
+    and pass for the wrong tree (#1107 review, round 2)."""
     from data_sheets_schema import schema_digest
-    return [(f"schema digest ({cls})", "digest", schema_digest.digest_text(cls))
+    return [(f"schema digest ({cls})", "digest",
+             schema_digest.digest_text(cls, REPO / str(schema_digest.CLASS_SCHEMA[cls])))
             for cls in ("Dataset", "CoreDataset")]
 
 
@@ -85,19 +90,19 @@ def texts() -> list[tuple[str, str, str]]:
 #: the entry holds the token to the context that justifies it.
 ALLOWED = {
     ("schema digest (Dataset)", "10.1038/s41586-020-2649-2',"): {
-        "surface": "digest", "line_contains": "e.g.",
+        "surface": "digest", "line_contains": "in format 10.xxxx/xxxxx",
         "reason": f"the `doi` slot's description gives a real Nature DOI as its "
                   f"example; a form-only placeholder needs a schema edit and "
                   f"`make gen-project`, which moves the schema digest every run "
                   f"records — scheduled at the next condition boundary (#1114)"},
     ("schema digest (Dataset)", "10.5281/zenodo.1234567')."): {
-        "surface": "digest", "line_contains": "e.g.",
+        "surface": "digest", "line_contains": "in format 10.xxxx/xxxxx",
         "reason": f"same line as the Nature DOI; a Zenodo record number of the "
                   f"placeholder shape, allowlisted with it until #1114"},
     ("schema digest (CoreDataset)", "10.1038/s41586-020-2649-2',"): {
-        "surface": "digest", "line_contains": "e.g.", "reason": f"as for Dataset (#1114)"},
+        "surface": "digest", "line_contains": "in format 10.xxxx/xxxxx", "reason": f"as for Dataset (#1114)"},
     ("schema digest (CoreDataset)", "10.5281/zenodo.1234567')."): {
-        "surface": "digest", "line_contains": "e.g.", "reason": f"as for Dataset (#1114)"},
+        "surface": "digest", "line_contains": "in format 10.xxxx/xxxxx", "reason": f"as for Dataset (#1114)"},
 }
 
 
@@ -143,7 +148,7 @@ class TestTheScannerSeesEachShape(unittest.TestCase):
 class TestNoRealIdentifierOnAnyModelFacingSurface(unittest.TestCase):
     def test_every_surface_is_present(self):
         names = {(n, s) for n, s, _ in texts()}
-        self.assertEqual(len([1 for n, s in names if s == "body"]), 9)      # v1 + v2–v9
+        self.assertGreaterEqual(len([1 for n, s in names if s == "body"]), 9)   # v1 + v2–v9; a v10 adds one
         self.assertIn(("schema digest (Dataset)", "digest"), names)
         self.assertIn((".claude/commands/d4d-full-core.md", "playbook"), names)
 
