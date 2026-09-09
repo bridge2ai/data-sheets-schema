@@ -136,16 +136,22 @@ class TestRunsCheckSeesTheDisagreement(unittest.TestCase):
         got = [g for g in header_disagreements(method, label, proj, concat_dir=root) if g["field"] == "Reasoning effort"]
         self.assertEqual(got, [])
 
-    def test_a_missing_artifact_is_a_row_only_beside_an_existing_sibling(self):
-        """Round-2 finding 4: five `claudecode_agent_merged` records predate
-        #694 and never had a core record — no header, no disagreement."""
+    def test_a_missing_artifact_is_a_row_only_when_the_record_declares_it(self):
+        """Round-2 finding 4 (round 3: the sibling guard tested the wrong
+        thing — the five `claudecode_agent_merged` records have a full and
+        never had a core). The record's own `outputs` says which artifacts
+        it wrote; a missing one it names is a row, one it never wrote is
+        not."""
+        import yaml
         from data_sheets_schema.runs import header_disagreements
         root, method, label, proj = self._seed("not sent (x)")
         core = root / f"{method}_core" / label / f"{proj}_d4d_core.yaml"
+        prov = root / f"{method}_core" / label / f"{proj}_provenance.yaml"
         core.unlink()
+        d = yaml.safe_load(prov.read_text()); d["outputs"] = {"full": {}, "core": {}}; prov.write_text(yaml.safe_dump(d))
         got = header_disagreements(method, label, proj, concat_dir=root)
         self.assertEqual([(g["artifact"], g["record"]) for g in got], [("core", "no artifact on disk")])
-        (root / method / label / f"{proj}_d4d.yaml").unlink()          # neither: nothing to say
+        d["outputs"] = {"full": {}}; d["record_mode"] = "derived"; prov.write_text(yaml.safe_dump(d))   # the merged shape
         self.assertEqual(header_disagreements(method, label, proj, concat_dir=root), [])
 
     def test_an_agentic_record_asserting_the_same_value_is_quiet(self):

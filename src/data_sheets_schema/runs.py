@@ -1380,15 +1380,18 @@ def header_disagreements(method: str, label: str, project: str,
     out = []
     # Both artifacts: the writer stamps full and core alike, and 278 core
     # records carried the same copied line (#1027 review, finding 3). An
-    # artifact that is missing while its sibling exists is reported as
-    # that, never as silence; an arm that never had a core record (the five
-    # `claudecode_agent_merged` records predating #694) has no header to
-    # disagree, and is not a row (round 2, finding 4).
+    # artifact the record's own `outputs` names and that is not on disk is
+    # reported as that, never as silence; one the record never wrote — the
+    # five `claudecode_agent_merged` records (`record_mode: derived`,
+    # `outputs: [full]`) predate #694 and never had a core — has no header
+    # to disagree, and is not a row (round 3, the round-2 guard tested the
+    # sibling, which is exactly the merged shape).
+    declared = set((prov.get("outputs") or {}).keys()) or {"full", "core"}
     paths = {"full": full_record_path(method, label, project, concat_dir),
              "core": core_record_path(method, label, project, concat_dir)}
     for artifact, path in paths.items():
         if not path.exists():
-            if paths["core" if artifact == "full" else "full"].exists():
+            if artifact in declared:
                 out.append({"artifact": artifact, "field": "", "header": "",
                             "record": "no artifact on disk", "basis": ""})
             continue
