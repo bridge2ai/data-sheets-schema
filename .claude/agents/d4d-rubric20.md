@@ -7,7 +7,7 @@ description: |
     - "Score FAIR compliance using rubric20"
     - "Run rubric20 quality assessment"
     - "Assess data quality with rubric20"
-model: claude-fable-5
+model: claude-opus-5
 color: purple
 ---
 

@@ -52,7 +52,13 @@ def _reviews():
         try:
             doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         except yaml.YAMLError as exc:
+            #: Fail, never skip (#1097). In a check whose purpose is "every
+            #: review says what made it", a review that cannot be read is the
+            #: strongest possible instance, and swallowing it made it vanish
+            #: from all three tests instead of failing one.
             raise AssertionError(f"{path} is not parseable YAML: {exc}")
+        if not isinstance(doc, dict):
+            raise AssertionError(f"{path} is not a mapping: {type(doc).__name__}")
         kind = "b" if path.name.endswith("_review_b.yaml") else "a"
         out[arm_of(path.parent.name)][kind][str(path)] = doc
     return out
@@ -125,8 +131,13 @@ class TestTheReviewerOfEachArmIsDeclared(ReviewCorpus):
                     if arm.startswith(mark)
                     for models_ in passes.values() for m in models_}
         v7, v8 = models("2026-09-01"), models("2026-09-04v8")
-        if not (v7 and v8):
-            self.skipTest("the production reviews are not in this checkout")
+        #: Fail rather than skip (#1097). Once the arm-to-reviewer map is a
+        #: checked-in manifest, the manifest is the assertion that those arms
+        #: exist, so a declared arm with no reviews is a defect and not an
+        #: absent checkout. This is the one test the plan note leans on.
+        self.assertTrue(v7 and v8,
+                        "the manifest declares both production arms; their "
+                        "reviews are missing from the corpus")
         self.assertEqual(v7, {"claude-fable-5"})
         self.assertEqual(v8, {"claude-fable-5-1"})
 

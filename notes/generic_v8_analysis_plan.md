@@ -368,7 +368,11 @@ the 17 earlier reviews (the 2026-08-28 arms) are `claude-fable-5`.
 How large that effect is has **not** been measured, and the honest place to
 say so is next to the numbers rather than in an issue. The instrument for
 measuring it exists: `{P}_review_b.yaml` plus `d4d review agree`, which
-reports percent agreement and Cohen's kappa against the same committed pack.
+reports percent agreement and Cohen's kappa against **the same pack the
+reviews pin** — enforced on bytes: `review_pack.agree` raises when either
+review's `pack_sha256` differs from the pack on disk, which is why #1095's
+regenerated pack breaks pairing loudly rather than silently. Nothing consults
+git, so "committed" would be the wrong word (#1097).
 Six such pairs exist, all from the 2026-08-28 arms and all same-model
 retests. Their class agreement is **82.4, 84.8, 87.9, 91.2, 92.4, 95.6**
 (exact 80.9 to 89.7) — but the chance-corrected figure is the one to read,
@@ -396,7 +400,21 @@ scores Opus-5 output with an Opus-5 judge; or return the reviewer to
 `claude-fable-5-1`, which continues the v8 instrument and keeps the judge off
 the generator's family. The first is what is pinned; the second is the
 stronger instrument. It is a decision for the plan owner, recorded here
-rather than made silently.
+rather than made silently, and two facts belong with it. First, **after this
+change no non-Opus judge remains in the corpus**: the reviews were the only
+judgement instrument off the generator's family, since all 24 v7 and all 24
+v8 rubric evaluations already record `evaluator_model: claude-opus-5[1m]`.
+That is a corpus-level property, and the review's questions — were the rules
+followed, is this snippet real support — sit closer to self-assessment than a
+rubric score does. Second, measuring the Fable-5-to-5.1 confound with an
+*Opus* paired pass is one-sided: inside the 0.357–0.654 kappa band the
+point-release effect is bounded a fortiori, but outside it the pass says
+nothing about the point release and the confound stays unbounded.
+
+The same directive is now applied to the two non-semantic rubric agents,
+which still pinned `claude-fable-5` (#1097). Nothing recorded is affected —
+every arm evaluation came from the `-semantic` pair — but leaving them was
+undeclared drift against the directive, of exactly the kind #1058 is about.
 
 Nothing recorded was re-reviewed: the 24 review files stand as made, and the
 canonical selection below rests on them.
