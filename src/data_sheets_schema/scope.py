@@ -68,7 +68,7 @@ def scope_of(project: str, manifest: Path = MANIFEST) -> dict | None:
     return all_scopes(manifest).get(project)
 
 
-def aliases_of(entry: dict) -> list[str]:
+def aliases_of(entry: Any) -> list[str]:
     """The identifiers a `related_but_distinct` entry answers to: its `id`
     and every `also_known_as`, each as a stripped string. A scalar
     `also_known_as` is one alias, not its characters (#1070; the renderer

@@ -1063,9 +1063,9 @@ def scope_block(project: str,
         lines.append("")
         lines.append("The declared bundle also documents datasets that are "
                      "NOT this one:")
+        from data_sheets_schema.scope import aliases_of   # function-local, so a test can patch the scope module
         for entry in related:
             name = str(entry.get("name") or entry.get("id") or "").strip()
-            from data_sheets_schema.scope import aliases_of
             ids = aliases_of(entry)            # one definition with the checker (#1070; #1069 review)
             head = f"- {name}" + (f" — {', '.join(ids)}" if ids else "")
             lines.append(head)

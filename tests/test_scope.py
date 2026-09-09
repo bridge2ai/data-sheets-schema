@@ -81,6 +81,13 @@ class TestTheAliasesOfAnEntry(unittest.TestCase):
         self.assertEqual(scope.aliases_of({"id": "a", "also_known_as": None}), ["a"])
         self.assertEqual(scope.aliases_of("not an entry"), [])
 
+    def test_a_numeric_alias_and_a_repeated_id(self):
+        """A numeric scalar raised TypeError out of the scope block on main —
+        a run-ending crash, not a wrong map (#1153 review, N4); an id repeated
+        among its aliases is listed once."""
+        self.assertEqual(scope.aliases_of({"id": "doi:1", "also_known_as": 12345}), ["doi:1", "12345"])
+        self.assertEqual(scope.aliases_of({"id": "a", "also_known_as": ["a", "b", None, ""]}), ["a", "b"])
+
     def test_related_ids_maps_the_scalar_alias_to_its_entry(self):
         with tempfile.TemporaryDirectory() as tmp:
             manifest = Path(tmp) / "m.yaml"
@@ -95,10 +102,18 @@ class TestTheAliasesOfAnEntry(unittest.TestCase):
         self.assertEqual(set(ids), {"https://doi.org/10.1/OTHER", "https://doi.org/10.1/OTHER.v3"})
 
     def test_the_scope_block_and_the_checker_read_one_definition(self):
-        import inspect
-        from data_sheets_schema import api_runner
-        self.assertIn("aliases_of", inspect.getsource(api_runner.scope_block)
-                      if hasattr(api_runner, "scope_block") else inspect.getsource(api_runner))
+        """Proved by wiring, not by grepping the source (#1153 review, S1):
+        a sentinel patched onto `scope.aliases_of` reaches the rendered
+        block, so the block cannot carry a coercion of its own."""
+        from unittest import mock
+        from data_sheets_schema.api_runner import scope_block
+        declaration = {"referent": "the P dataset", "referent_id": "https://doi.org/10.1/P",
+                       "related_but_distinct": [{"id": "https://doi.org/10.1/OTHER", "name": "Other",
+                                                 "express_as": "related_datasets"}]}
+        with mock.patch.object(scope, "scope_of", lambda project, manifest=None: declaration), \
+             mock.patch.object(scope, "aliases_of", lambda entry: ["SENTINEL-42"]):
+            block = scope_block("P")
+        self.assertIn("SENTINEL-42", block)
 
 
 class TestCheckingARecord(unittest.TestCase):
