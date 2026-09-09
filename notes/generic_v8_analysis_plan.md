@@ -1242,6 +1242,7 @@ steps need:
     the repair round, which is told what to merge. A clean run's output
     is untouched, so VOICE 04f stays retained; the AI_READI 04f record is
     re-verdicted under the instrument (regressed) and AI_READI runs again.
+
 15. **A label minted on an identifier the record carries is exempt from the
     receipt denominator (#1123, 2026-09-09, receipts instrument v2).** v1
     exempted only a fragment on the record's own id byte for byte; the v5
@@ -1281,8 +1282,10 @@ steps need:
     change: a derived key in the provenance record, no prompt, assembly or
     datasheet touched.
 
-Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15 and 16 are not); per the production rule
-none of them may land between a v8 canary and its fill.
+Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14 and 16
+are not; 15 is classified with 17, the receipts instrument's next revision,
+#1053); per the production rule none of them may land between a v8 canary
+and its fill.
 
 ## Decisions needed before step 3
 
