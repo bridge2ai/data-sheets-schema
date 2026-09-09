@@ -166,6 +166,32 @@ class UnusableSnapshotTest(unittest.TestCase):
         self.assertIn("elided after the window", body)
         self.assertIn("from the receipt marker on", body)
 
+    def test_the_window_anchors_on_the_last_marker_line_like_the_parser(self):
+        """#1111 round 4: a marker quoted on its own line inside a block
+        scalar precedes the real one; `split_receipt` splits at the last
+        (#740), and so must the window, or the whole receipt is elided."""
+        from data_sheets_schema.api_runner import RECEIPT_MARK
+        record = ("```yaml\nid: x\nnotes: |\n  the instruction says end with\n  " + RECEIPT_MARK + "\n"
+                  + ("k: v\n" * 5000) + "```\n")
+        opening = "THIS-IS-PROSE where a mapping should be\n"
+        whole = f"{record}{RECEIPT_MARK}\n{opening}" + ("- id: c\n" * 3000)
+        self._write(whole, problem="the text after the receipt marker is not a receipt")
+        body = self.written["CHORUS_full_unusable_attempt1.txt"]
+        self.assertIn(opening, body)
+        self.assertIn("characters elided …", body)
+
+    def test_a_marker_inside_the_head_is_described_as_such(self):
+        """Finding 2: the header must not claim the window starts at the
+        marker when the marker fell inside the head and the start was
+        clamped; and the seam between head and window is a named comment."""
+        from data_sheets_schema.api_runner import RECEIPT_MARK
+        whole = f"```yaml\nid: x\n```\n{RECEIPT_MARK}\nprose\n" + ("- id: c\n" * 3000)
+        self._write(whole, problem="not a receipt")
+        body = self.written["CHORUS_full_unusable_attempt1.txt"]
+        self.assertIn("continuing from the head (the marker is inside the head)", body)
+        self.assertNotIn("starts at the marker", body)
+        self.assertIn("# … (head and window are contiguous", body)
+
     def test_a_long_record_only_response_still_keeps_only_the_head(self):
         """No marker, no tail: a record failure's question is its shape."""
         whole = "```yaml\n" + ("k: v\n" * 5000) + "```\nEND-MARKER\n"

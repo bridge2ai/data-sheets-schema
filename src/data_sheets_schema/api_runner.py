@@ -3689,7 +3689,12 @@ def _record_unusable_response(spec: RunSpec, ph: str, attempt: int,
     # The parser's own predicate, line-anchored (#740): a record value that
     # echoes the marker inline is not a receipt, and the snapshot must not
     # send the reader to a tail that is not one (#1104 round 3, finding 1).
-    marker = _RECEIPT_MARK_LINE.search(text)
+    # The LAST marker line, as `split_receipt` takes it (#740): a marker
+    # quoted on its own line inside a block scalar precedes the real one, and
+    # a window anchored at the first would show the record's middle and
+    # elide the whole receipt (#1111 round 4, finding 1).
+    _hits = list(_RECEIPT_MARK_LINE.finditer(text))
+    marker = _hits[-1] if _hits else None
     receipted = marker is not None and split_receipt(text)[1] is not None
     if receipted and len(text) > UNUSABLE_HEAD_CHARS + UNUSABLE_TAIL_CHARS:
         # The window starts at the marker, not at the end: every real receipt
@@ -3701,15 +3706,22 @@ def _record_unusable_response(spec: RunSpec, ph: str, attempt: int,
         window = text[start:start + UNUSABLE_TAIL_CHARS]
         between = start - UNUSABLE_HEAD_CHARS
         after = len(text) - (start + len(window))
+        at_marker = marker.start() >= UNUSABLE_HEAD_CHARS
+        # Every seam is a `#` comment naming what it is, so no line break the
+        # response did not contain is mistaken for content (finding 2).
         kept = (text[:UNUSABLE_HEAD_CHARS]
-                + (f"\n# … {between} characters elided …\n" if between else "\n")
+                + (f"\n# … {between} characters elided …\n" if between
+                   else "\n# … (head and window are contiguous; the marker is inside the head) …\n")
                 + window
                 + (f"\n# … {after} characters elided after the window …\n" if after else ""))
         extent = (f"# first {UNUSABLE_HEAD_CHARS} characters as delivered, then "
-                  f"{len(window)} characters from the receipt marker on"
-                  f"{f' ({between} elided between' if between else ' (nothing elided between'}"
+                  f"{len(window)} characters "
+                  + ("from the receipt marker on" if at_marker
+                     else "continuing from the head (the marker is inside the head)")
+                  + f"{f' ({between} elided between' if between else ' (nothing elided between'}"
                   f"{f', {after} after)' if after else ')'}; a receipt failure shows at "
-                  "the receipt's opening, so the window starts at the marker:\n")
+                  "the receipt's opening, so the window "
+                  + ("starts at the marker:\n" if at_marker else "keeps the text after the head:\n"))
     else:
         kept = text[:UNUSABLE_HEAD_CHARS]
         extent = (f"# first {UNUSABLE_HEAD_CHARS} characters as delivered"
