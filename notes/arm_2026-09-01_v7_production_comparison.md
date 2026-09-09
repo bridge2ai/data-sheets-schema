@@ -221,11 +221,17 @@ either way; British reads 0 vs a baseline worst of 4 (v3), the
 addressing-slips row is present at 0 vs 0, and the report-findings row
 reads unmeasured rather than 0 vs 2 — the record's own report block read
 no claim (`claims_checked` 0, #684: an earlier record's vacuous row is
-shown as unmeasured and not gated) and the baseline's worst is now 1
-over the one 2026-08-22c replicate that measured (two were vacuous).
+shown as unmeasured and not gated), and the baseline's worst fell from 2
+to 1 under `report_claims` instrument v3 (#1022/#1046), which
+reclassified one of 2026-08-22c rep1's two findings — the one replicate
+that measured (two were vacuous). Four instruments moved this block, not
+the two #922 named: British v3, the slips row (#891), the #684 vacuity
+reading and report_claims v3. AI_READI rep1's D4 block, one paragraph
+up, now reads its report row the same way (unmeasured, status unchanged
+at `regressed`) and was not re-derived here; #1170 is that re-verdict.
 CHORUS and VOICE rep1 still carry no block: the batch of 2026-09-01
-wrote none for a passed canary (#1020 changed that for later runs), and
-a verdict they never carried is not re-derived here.
+wrote no canary block at all — #1020 added that on 2026-09-06 — and a
+verdict they never carried is not re-derived here.
 
 **Correction (2026-09-03, #805/#916):** the rule-08 verdicts on the
 Person-ranged slots — `principal_investigator`, `contact_person`,
