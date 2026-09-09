@@ -391,7 +391,7 @@
 
 
 <h1 id="slot-doi">Slot: doi</h1>
-<p><em>Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567'). The bare DOI only — not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).</em></p>
+<p><em>Digital Object Identifier (DOI) in format 10.xxxx/xxxxx — a registrant prefix, a slash, a suffix — providing persistent identification. The bare DOI only — not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/doiIdentifier">d4d:doiIdentifier</a>
 Alias: doi</p>
 <!-- no inheritance hierarchy -->
@@ -412,18 +412,8 @@ Alias: doi</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-<tr>
 <td><a href="../DatasetCollection/">DatasetCollection</a></td>
 <td>A collection of related datasets, likely containing multiple files of multipl...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 <tr>
@@ -434,6 +424,16 @@ Alias: doi</p>
 <tr>
 <td><a href="../File/">File</a></td>
 <td>A single file within a dataset or file collection</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -459,7 +459,7 @@ Alias: doi</p>
 <tbody>
 <tr>
 <td>d4d:docExample</td>
-<td>10.5281/zenodo.10642459</td>
+<td>10.xxxxx/example.1234</td>
 </tr>
 </tbody>
 </table>
@@ -501,14 +501,14 @@ Alias: doi</p>
 annotations:
   d4d:docExample:
     tag: d4d:docExample
-    value: 10.5281/zenodo.10642459
-description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent
-  identification (e.g., ''10.1038/s41586-020-2649-2'', ''10.5281/zenodo.1234567'').
-  The bare DOI only — not the doi: CURIE and not the doi.org resolver URL. The pattern
-  is anchored (#646): unanchored, JSON Schema''s search semantics accepted all three
-  surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b
-  arm already writes the bare form; records written before the anchor keep the validation
-  verdicts they were pinned with (#426) and are not rewritten (#520).'
+    value: 10.xxxxx/example.1234
+description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx — a registrant
+  prefix, a slash, a suffix — providing persistent identification. The bare DOI only
+  — not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646):
+  unanchored, JSON Schema''s search semantics accepted all three surface forms, and
+  one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes
+  the bare form; records written before the anchor keep the validation verdicts they
+  were pinned with (#426) and are not rewritten (#520).'
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 exact_mappings:
 - schema:identifier
