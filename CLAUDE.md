@@ -649,10 +649,20 @@ on a base the record did not mint, with `base` and `base_in_bundle`
 (verbatim presence of the base in the bundle; null when the bundle is not
 on disk). The two-way flag filed the AI_READI 2026-09-01 rep1
 `file_collections[*].id` (`https://fairhub.io/datasets/3#cardiac_ecg`, the
-attested fairhub page plus a label) with the DOIs; those ten are the only
-constructed ids across the 24 packs that carry the block. A constructed id
-is judged under the evidence rules for its base and under the fragment
-rule as a mint not on the record's own id.
+attested fairhub page plus a label) with the DOIs. Corpus-wide the
+classifier finds 953 constructed ids in 57 of 281 records — 800 of them
+schema-forced (`File`, `FileCollection`, `DataSubset`, `Person`), most on
+the dataset's own DOI or landing page — so the reading matters: the rule
+licenses a fragment on an identifier the evidence supplies, and a
+constructed id on the dataset's own attested identifier is judged exactly
+as a mint (forced never violates; unforced must be pointed at), one on
+another entity's identifier is the false claim the identifier rule names,
+one whose base is not in the bundle is an unsupported reference.
+`base_in_bundle` is attested only against the bytes the record read: the
+pack checks the on-disk bundle's md5 against `inputs.bundle_md5` and on a
+drift — 35 of those 57 records, the AI_READI rep1 record among them —
+reports `null` with `bundle_state` naming it. The match is the base as
+itself, not as the prefix of a longer URL, in written or alias form.
 
 ## Review dispositions (#903)
 

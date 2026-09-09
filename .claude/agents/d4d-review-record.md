@@ -105,18 +105,27 @@ the only source of dataset facts.
   For the fragment-minting rule, read the pack's `id_slots` block first
   (#803; packs at `pack_version` ≤ 2 predate it — there, consult the
   schema's `induced_slot("id", class)` yourself before ruling). Judge the
-  rule only on entries with `minted: true` (a urn or a fragment on the
-  record's own id): an entry with `minted: false` is a world-facing
-  reference — a DOI, ROR, URL — whose truth is the *evidence* rules'
-  business, never excused by `forced`. From `pack_version` 5 each entry
-  also carries `origin` (#901): `stated` is that reference as written;
-  `constructed` is a fragment the record built on a base it did not mint
-  (`base` names it, `base_in_bundle` says whether the bundle states that
-  base verbatim) — judge the *base* under the evidence rules and the
-  fragment under this rule as a mint that is not on the record's own id,
-  which the rule's own-id form does not license; a constructed id whose
-  base is not in the bundle is both an unsupported reference and an
-  unlicensed mint. Among the mints, `forced: true`
+  rule on entries whose `origin` is `minted` (a urn, or a fragment on the
+  record's own id in any form) or, from `pack_version` 5, `constructed`
+  (#901: a fragment the record built on an identifier it did not mint —
+  `base` names it, `base_in_bundle` says whether that base is in the bytes
+  the record read, `null` with `bundle_state` naming why when those bytes
+  are not on disk). An entry whose `origin` is `stated` — a DOI, ROR, URL
+  used as written — is a world-facing reference whose truth is the
+  *evidence* rules' business, never excused by `forced`. On packs before
+  version 5, `minted: false` covers both `stated` and `constructed`; tell
+  them apart by the `#`. The rule licenses a fragment "on an identifier
+  the evidence *does* supply", so a constructed id whose base is this
+  dataset's own attested identifier — its DOI, its landing page — is the
+  rule's licensed form and is judged exactly as a mint: `forced` settles
+  its presence, an unforced one must be pointed at. A constructed id on
+  another entity's identifier — an organisation's, a person's, another
+  dataset's — is the false claim the identifier rule itself names, whatever
+  `base_in_bundle` says. One whose base is not in the bundle is an
+  unsupported reference under the evidence rules, and its fragment
+  inherits that; `null` is `cannot_tell` on the base, and the fragment is
+  judged as above. Among the mints and the licensed constructed ids,
+  `forced: true`
   (the schema declares that class's id an identifier or required — `File`,
   `FileCollection`, `DataSubset`, and also `Person`) means the record could
   not omit the id *given the object*, so the mint itself never violates
