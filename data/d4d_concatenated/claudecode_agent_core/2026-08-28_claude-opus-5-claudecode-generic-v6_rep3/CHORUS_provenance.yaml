@@ -310,6 +310,11 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v2 (#1123): a fragment minted on an identifier the record carries for
+    the dataset at its top level — its id in CURIE or resolver form, its doi, its
+    page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 8
     reviewed: 8
@@ -322,13 +327,24 @@ receipts:
   snippets:
     total: 108
     verified: 108
+    linewrap_joined: 0
     adjacent: 0
     elsewhere: 0
+    spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
     mismatched: 0
     unchecked: 0
+    no_value_overlap: 0
+    no_value_overlap_sample: []
+    entry_single_leaf: 0
+    entry_single_leaf_sample: []
   slots:
     populated: 205
     exempt: 23
+    exempt_on_carried_identifier: 0
     receiptable: 182
     with_receipt: 96
     without_receipt:
@@ -383,11 +399,27 @@ receipts:
     - at_risk_populations.at_risk_groups_included
     - at_risk_populations.description
     without_receipt_truncated: 36
+    never_receipted: null
+    added_after_receipt: null
     receipt_paths: 70
     unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt: []
+    value_changed_after_receipt_count: null
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: null
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: null
     reshaped_by_reconcile: []
+    receipts_to_removed_values: 0
   findings: []
   findings_truncated: null
+  findings_gated: 0
   summary: chunks 8/8 reviewed · snippets 108/108 verified · slots 96/182 with a receipt
     (23 exempt)
   artifacts:
@@ -397,7 +429,7 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/CHORUS_chunks.yaml
       sha256: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
-  recorded_by: d4d receipts check
+  recorded_by: backfill_checks
 review:
   checked: true
   items_total: 66
