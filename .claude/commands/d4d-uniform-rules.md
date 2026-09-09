@@ -168,6 +168,74 @@ to every project:
   `<record id>#person-<name>`; never a `mailto:` or any other scheme as the
   id, the address goes in `email`.
 
+- **A value in one of the referent's own slots is supported by a passage
+  whose subject is the referent** (v9, R6, #913): the declared scope names
+  the referent and the datasets declared related but distinct, with the
+  slot their facts belong in where it states one; a passage about another
+  dataset supports an entry there and nothing in a slot describing this
+  one. An empty declaration is not an assurance that every passage is about
+  the referent. Binds every phase, the reconcile phase in particular —
+  reconciling the two records against each other does not test what a
+  value is about.
+
+- **A list entry names exactly one entity** (v9, R7, #911): where the bundle
+  states several, one entry each or none; a value that names a class of
+  things where the schema asks for a thing, or joins separate names with
+  "and", a slash or a comma, is a merge — unless the entity's own registered
+  name contains the conjunction, in which case splitting it is the same
+  error the other way.
+
+- **The fragment rule does not reach an id the schema forces** (v9, R8,
+  #803, #901): a file, a file collection, a data subset, a component
+  dataset under `resources`, a software tool under `used_software`, a
+  person given as an object — mint it on this record's own id and keep it
+  stable; a person's id is the ORCID first (R5). For every other fragment
+  the test stays the referent: an organisation, grant, award or program has
+  one outside the record, so a fragment for it on the dataset's identifier
+  is a claim, not a label — take the stated identifier, else leave `id`
+  empty and carry the name; a creator or maintainer entry is a role whose
+  id is the person's or organisation's own. A label this record mints sits
+  on an identifier the evidence supplies for this dataset, its own id to
+  prefer (a landing-page label needs a receipt, an own-id label does not,
+  #1123); a fragment on another entity's identifier labels that entity.
+
+- **An enumeration slot is filled only from a passage that states the
+  category** (v9, R9, #830): never from a name, unit or position; `data_type`
+  and `collection_type` are claims about how a thing is classified. Empty
+  where no passage states it — except a required enum (`relationship_type`),
+  where the entry itself is what the evidence must support — and the file
+  enums `format`, `file_type`, `media_type`, `encoding` and `compression`,
+  which the file's name and extension are the passage for.
+
+- **`raw_data_format` names the form the data took before any processing
+  this dataset applied, only where a passage states it** (v9, R10, #830):
+  the release's standard, extension or pipeline format describes the
+  release; where a passage says raw and released coincide, record both.
+
+- **`principal_investigator` names a person the documents designate with
+  that title** (v9, R11, #830): a lead, director, corresponding author,
+  contact or first author is recorded as the role stated, in prose or in a
+  slot for that role where one exists, never promoted; more than one, record
+  each; none, empty.
+
+- **A value states what a passage states, at the passage's own reach** (v9,
+  R12, #830): a consequence (`scope_impact`) only where a passage draws it;
+  a term from a keyword line, tag list, table header or menu attests that it
+  appears — `keywords` is the one slot whose subject is that, and a keyword
+  line fills it and nothing else.
+
+- **Every entry in a list is a member of that list** (v9, R13, #830): a
+  remark about the list — a sample marker, a continuation note, a column
+  flag — is not a member; it goes in `description`, `source_caveats`, or
+  nowhere.
+
+- **An absence is not an entry, and a route is not a format** (v9, R14,
+  #830): no correction published is not an erratum; access by request is a
+  route and fills neither `future_guarantees` nor a distribution's `format`;
+  the prohibition is the entry its `prohibition_reason` explains. A stated
+  absence leaves the slot empty and, where worth keeping, goes in
+  `source_caveats`.
+
 The rule about there being no target slot count is the load-bearing one: it is
 what makes a slot count an observation rather than a target. Named rather than
 referred to by position, so inserting a rule cannot silently point this sentence
