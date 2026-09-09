@@ -67,7 +67,10 @@ class TestTheRunnerSendsWhatItAsksFor(unittest.TestCase):
         from data_sheets_schema import api_runner
         from tests.british_sweep import british_forms
         surfaces = api_runner.sent_text_surfaces()
-        self.assertGreaterEqual(len(surfaces), 16)                     # nine phases + layout + six others
+        # Exact, not a floor (#1151 round 2, S1): deleting a surface from the
+        # map is the regression this guard exists to catch. Nine phase
+        # instructions, the layout, and ten authored surfaces.
+        self.assertEqual(len(surfaces), 20, sorted(surfaces))
         for name, text in surfaces.items():
             with self.subTest(surface=name):
                 found = british_forms(text, exempt_quotes=False)
@@ -84,12 +87,23 @@ class TestTheRunnerSendsWhatItAsksFor(unittest.TestCase):
 
     def test_the_sent_surfaces_are_the_request_text(self):
         """Lifting the literals into constants must not change a byte of
-        what is sent: the system prompt and headers read as before."""
+        what is sent — pinned exactly, trailing newlines included, since
+        these constants are now the only definition (#1151 round 2, S2)."""
         from data_sheets_schema import api_runner
-        self.assertTrue(api_runner.PHASE_SYSTEM.startswith("You generate Datasheets-for-Datasets records."))
-        self.assertIn("[cNNN]", api_runner.CHUNK_MARKER_NOTE)
-        self.assertTrue(api_runner.READDRESS_HEADER.startswith("# Receipt entries whose slot is not a path"))
-        self.assertEqual(api_runner.REGATE_HEADERS[0], "# Reconciliation report as written\n\n")
+        self.assertEqual(api_runner.PHASE_SYSTEM,
+                         "You generate Datasheets-for-Datasets records. The declared input bundle is your "
+                         "only source of dataset facts. The schema digest defines structure, never content. "
+                         "Never consult a previously generated D4D record.")
+        self.assertEqual(api_runner.CHUNK_MARKER_NOTE,
+                         "# Chunk markers: a line of the form [cNNN] opens each chunk; the markers are not "
+                         "part of the bundle's text.\n\n")
+        self.assertEqual(api_runner.READDRESS_HEADER, "# Receipt entries whose slot is not a path in the record above\n\n")
+        self.assertEqual(api_runner.REGATE_HEADERS, ("# Reconciliation report as written\n\n",
+                                                     "# Claims the records do not show\n\n"))
+        self.assertEqual(api_runner.REPAIR_HEADERS, ("# Record that failed validation\n\n", "# Validator findings\n\n"))
+        self.assertEqual(api_runner.CARRY_LABEL.format(name="Audit findings"), "# Audit findings\n\n")
+        self.assertEqual(api_runner.BUNDLE_HEAD.format(bundle="b.txt") + "\n", "# Declared input bundle — b.txt\n\n")
+        self.assertEqual(api_runner.BUNDLE_MD5_LINE.format(md5="x"), "# bundle_md5: x\n")
 
 
 class TestItDidNotRedefineACondition(unittest.TestCase):

@@ -1049,8 +1049,10 @@ runner writes into a request (`api_runner.sent_text_surfaces`: the phase
 instructions and layout the digest hashes, and the system prompt, repair
 prompts, core inventory block and headers it does not) with the declared
 instrument as the instrument applies it — lower-cased, no quotation
-exemption — so the runner's sent text is guarded the way the v9 prompt
-file is (#1134).
+exemption — so the runner's sent text is guarded with the same wrapper
+as the v9 prompt file (#1134), which exempts quotations because a prompt
+quotes sources; the manifest-derived blocks (scope, naming, source
+ranking) are left out on purpose, their content being a source's.
 
 ### What a v9 arm can and cannot be compared against (#1072)
 
