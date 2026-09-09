@@ -5,6 +5,8 @@ from pathlib import Path
 
 import click
 
+from data_sheets_schema.constants import PROJECTS
+
 
 @click.group()
 def runs():
@@ -65,6 +67,46 @@ def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
                 f"telemetry report failed schema validation:\n"
                 f"{(res.stdout + res.stderr).strip()[:800]}")
         click.echo("✓ report validates against d4d_run_telemetry.yaml")
+
+
+@runs.command("award-numbers")
+@click.option("--method", default=None, help="run directory family; defaults to the one the first label lives in (#934)")
+@click.option("--label", "labels", multiple=True, help="record labels to read grant_number from; repeat for each")
+@click.option("--project", "projects", multiple=True, type=click.Choice(PROJECTS), help="default: every project")
+@click.option("--contexts", is_flag=True, help="print every bundle mention with its source file and context")
+def award_numbers_cmd(method, labels, projects, contexts):
+    """NIH award numbers per bundle, and per record under grant_number (#1028).
+
+    The bundle count is mechanical and pinned to the bundle's md5; which of
+    those awards fund *this* dataset is a reading the plan note registers,
+    and --contexts prints what that reading rests on.
+    """
+    from data_sheets_schema.awards import bundle_awards, record_award_numbers
+    from data_sheets_schema.cli.method import resolve_method
+    from data_sheets_schema.runs import full_record_path
+    import yaml as _yaml
+    projects = list(projects) or [p for p in PROJECTS if p != "VOICE_PEDIATRIC"]
+    method = method or (resolve_method(labels[0]) if labels else None)
+    for project in projects:
+        bundle = Path("data/preprocessed/concatenated") / f"{project}_preprocessed.txt"
+        if not bundle.exists():
+            click.echo(f"{project}: no bundle at {bundle}")
+            continue
+        b = bundle_awards(bundle)
+        click.echo(f"{project} (bundle md5 {b['bundle_md5'][:12]}): "
+                   + ", ".join(f"{a} ×{n}" for a, n in sorted(b["awards"].items(), key=lambda kv: -kv[1]))
+                   + f"  [narrow pattern: {len(b['narrow'])}]")
+        if contexts:
+            for m in b["mentions"]:
+                click.echo(f"   {m['award']} <{m['as_written']}> in {m['source']}\n      …{m['context']}…")
+        for label in labels:
+            path = full_record_path(method, label, project)
+            if not path.exists():
+                continue
+            rec = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+            got = record_award_numbers(rec)
+            click.echo(f"   {label}: grant_number → {', '.join(got) if got else '—'}"
+                       f" ({sum(1 for g in got if g in b['awards'])} of the bundle's {len(b['awards'])})")
 
 
 @runs.command("identifiers")
