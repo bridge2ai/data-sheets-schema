@@ -653,7 +653,7 @@ it, and `stated` entries are the evidence rules' business. The two-way flag file
 `file_collections[*].id` (`https://fairhub.io/datasets/3#cardiac_ecg`, the
 attested fairhub page plus a label) with the DOIs. Corpus-wide the
 classifier finds 953 constructed ids in 57 of 281 records — 800 of them
-schema-forced (`File`, `FileCollection`, `DataSubset`, `Person`), most on
+schema-forced (`File`, `FileCollection`, `DataSubset`, `Person`, `Software`), most on
 the dataset's own DOI or landing page — so the reading matters: the rule
 licenses a fragment on an identifier the evidence supplies, and a
 constructed id on the dataset's own attested identifier is judged exactly

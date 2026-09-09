@@ -129,7 +129,7 @@ the only source of dataset facts.
   for this dataset" is a comparison you can make from the pack. Among
   the mints and the licensed constructed ids, `forced: true`
   (the schema declares that class's id an identifier or required — `File`,
-  `FileCollection`, `DataSubset`, and also `Person`) means the record could
+  `FileCollection`, `DataSubset`, `Software`, and also `Person`) means the record could
   not omit the id *given the object*, so the id itself never violates
   the rule; but forced settles the id's presence, not the object's — the
   rule's remedy for an unpointed-at part is prose instead of the object,
