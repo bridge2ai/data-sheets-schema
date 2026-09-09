@@ -408,8 +408,13 @@ $(D4D_CORE_SCHEMA_ALL): $(D4D_CORE_SCHEMA) $(SOURCE_SCHEMA_DIR)D4D_Core.yaml $(C
 	$(RUN) gen-linkml -o $(D4D_CORE_SCHEMA_ALL) -f yaml $(D4D_CORE_SCHEMA)
 	@echo "✓ Core schema: $(D4D_CORE_SCHEMA_ALL)"
 
-validate-core: ## Validate the core exchange schema with linkml-validate
-	$(RUN) linkml-validate -s $(D4D_CORE_SCHEMA) --validate-schema
+validate-core: ## Validate the core exchange schema (metamodel shape, then every range and slot resolved)
+	@# linkml-validate lost its schema-validation flag (#1127). Two checks stand in for it: the linter's
+	@# metamodel validation, and gen-python, which resolves every slot, range and import and
+	@# fails on an unrecognized range or an unknown key where the linter reports no problem.
+	$(RUN) linkml-lint --validate-only $(D4D_CORE_SCHEMA)
+	$(RUN) gen-python $(D4D_CORE_SCHEMA) > /dev/null
+	@echo "✓ Core schema validates: $(D4D_CORE_SCHEMA)"
 
 lint-core: ## Lint the core exchange schema files
 	$(RUN) linkml-lint src/data_sheets_schema/schema/D4D_Core.yaml
