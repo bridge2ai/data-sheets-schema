@@ -1322,6 +1322,13 @@ ARM_PROCEDURE_FIELDS = (
     # field either side leaves empty, which keeps "not reviewed" out of the
     # difference list rather than reporting an absence as a change.
     ("reviewer", ("review", "reviewer", "model")),
+    # The output cap of the `full` phase (#771): three of the five v7
+    # canaries ran at 96k and two at 128k, and nothing read it — a raised
+    # cap within a condition is a silent instrument change. Read from
+    # `model.max_tokens_by_phase`, else from the `full` row of `api_usage`
+    # for a record that predates that block; an agentic record carries none
+    # and reads `None`, which `arm_confounds` skips like an absent reviewer.
+    ("full max_tokens", ("model", "max_tokens_by_phase", "full")),
 )
 
 
@@ -1471,6 +1478,9 @@ def arm_facts(label_prefix: str, method: str | None = None,
                 value = (condition_from_prompt_paths(f.get("path", "") if isinstance(f, dict) else str(f)
                                                      for f in files)
                          or condition_from_label(path.parts[-2]))
+            if field == ("model", "max_tokens_by_phase", "full") and value is None:
+                value = next((r.get("max_tokens") for r in (rec.get("api_usage") or [])
+                              if isinstance(r, dict) and r.get("phase") == "full" and r.get("max_tokens")), None)
             seen[name].add(str(value))
     return {"prefix": label_prefix, "labels": sorted(labels),
             "projects": sorted(projects), "records": len(projects) * len(labels),

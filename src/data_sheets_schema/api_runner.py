@@ -207,9 +207,9 @@ def condition_delta(a: str, b: str, records_a: Any = None,
     a difference would have `confounded_note` assert that the runner built
     the two arms differently when in fact it built one arm two ways.
 
-    **This is one field of the five `runs.ARM_PROCEDURE_FIELDS` names**, and
+    **This is one field of the `runs.ARM_PROCEDURE_FIELDS` names**, and
     a delta carrying it is not the record-based answer: `runs.arm_confounds`
-    reads all five and is what governs interpretation. On the v7-against-v8
+    reads every field and is what governs interpretation. On the v7-against-v8
     pair this axis reports `assembly` while the records also differ on the
     schema digest, so the delta still under-reports the evidence — it is a
     narrower instrument that no longer *claims* the prompt is all that moved.

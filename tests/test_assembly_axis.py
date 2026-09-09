@@ -188,7 +188,7 @@ class ComparableConditionsTest(unittest.TestCase):
         record-based answer. On the v7-against-v8 pair the records also differ
         on the schema digest, so this delta under-reports the evidence — which
         it must say rather than look record-based and be narrower."""
-        self.assertIn("one field of the five", condition_delta.__doc__)
+        self.assertIn("one field of the `runs.ARM_PROCEDURE_FIELDS` names", condition_delta.__doc__)
         self.assertIn("arm_confounds", condition_delta.__doc__)
 
     def test_no_note_when_only_the_base_moved(self):

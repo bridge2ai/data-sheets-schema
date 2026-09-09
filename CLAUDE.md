@@ -881,7 +881,13 @@ label, and `compare-arms` reads the same field. Labels that name no
 registered condition (the 2026-07-27 series — the one `runs.py` calls the
 tuned arm, whose records hash no prompt and so cannot attest it — and the
 crate/healthsheet arms) still read `None` unless their records hash a
-condition prompt.
+condition prompt. The `full` phase's output cap is a procedure field too
+(`full max_tokens`, #771): three of the five v7 canaries ran at 96k and
+two at 128k with nothing reading it, so `compare-arms` now reports a cap
+that is not constant within an arm and `arm_confounds` one that differs
+between arms — read from `model.max_tokens_by_phase`, else the `full`
+row of `api_usage`; an agentic record carries none and is skipped like
+an absent reviewer.
 
 ## Model Reasoning Capture
 
