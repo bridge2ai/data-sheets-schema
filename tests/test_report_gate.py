@@ -81,7 +81,10 @@ class TestPresenceClaims(unittest.TestCase):
         self.assertEqual((f["kind"], f["record"]), ("retention_not_shown", "both"))
         self.assertIn("declares no `funders` slot, so the row must name `full`", f["detail"])
         self.assertEqual(out["claims_core_cannot_hold"], 1)
-        self.assertTrue(out["instrument"].startswith("v2 (#990)"))
+        #: The version moves; what this test owns is that its own clause
+        #: survives every later revision (#1046 added v3 in front of it).
+        self.assertTrue(out["instrument"].startswith("v3 ("), out["instrument"])
+        self.assertIn("v2 (#990)", out["instrument"])
         # Indexed and dotted paths reduce to their root; `changed` counts like `retained`.
         out = check_report(_report(self.dir, "| `funders[0].name` | changed | both | fixed |\n"), FULL, CORE, DECLARED)
         (f,) = out["findings"]

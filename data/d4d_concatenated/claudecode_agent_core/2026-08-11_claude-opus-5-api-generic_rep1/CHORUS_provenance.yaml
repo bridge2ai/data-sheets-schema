@@ -348,19 +348,28 @@ pair_consistency:
   recorded_by: backfill_checks
 report_claims:
   checked: true
-  findings:
-  - kind: false_schema_claim
-    slot: splits
-    detail: report says this is not a declared slot; it is declared on Dataset
-    claim: The bundle describes an unrealised plan ("will also provision", "sequestering").
-      Recording it as a split asserts a partition that does not exist. Finding 12/13,
-      medium. Also resolves the cross-record divergence.
+  findings: []
   claims_checked: 4
   claims_unnamed: 3
+  disposition_rows: 0
+  claims_core_cannot_hold: 0
+  instrument: 'v3 (#1022, #1046): a schema claim that names its own scope — the core
+    schema, the full schema, a class — is resolved against that scope only, not against
+    every class; v2 (#990): a finding on a `both` row names when the core class declares
+    no such slot; `claims_core_cannot_hold` counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/CHORUS_reconciliation.md
       md5: 092f82abea8b78ddf714451e27b805f7
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-11_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml
+      md5: 203e1ea304068551b53f934459caed97
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/CHORUS_d4d_core.yaml
+      md5: 57d52aa67e15baf249e791cd1ce32481
+  schema:
+    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
+    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
   recorded_by: backfill_checks
 grounding:
   checked: true

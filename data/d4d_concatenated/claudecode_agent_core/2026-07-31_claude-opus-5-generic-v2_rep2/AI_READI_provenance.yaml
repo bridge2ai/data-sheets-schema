@@ -200,13 +200,64 @@ pair_consistency:
   recorded_by: backfill_checks
 report_claims:
   checked: true
-  findings: []
-  claims_checked: 0
+  findings:
+  - kind: change_not_shown
+    slot: variables
+    record: both
+    detail: report says changed; the both record does not carry it; the core class
+      declares no `variables` slot, so the row must name `full`
+    claim: '| 6 | med | both | `variables` | Changed |'
+  - kind: retention_not_shown
+    slot: citation
+    record: full
+    detail: report says left as-is; the full record does not carry it
+    claim: '| 12 | low | full | `citation` | Left as-is |'
+  - kind: change_not_shown
+    slot: related_datasets
+    record: both
+    detail: report says changed; the both record does not carry it
+    claim: '| 13 | low | both | `related_datasets` | Changed |'
+  - kind: change_not_shown
+    slot: labeling_strategies
+    record: core
+    detail: report says changed; the core record does not carry it
+    claim: '| 14 | low | core | `labeling_strategies` (splits) | Changed |'
+  - kind: change_not_shown
+    slot: participant_compensation
+    record: core
+    detail: report says changed; the core record does not carry it
+    claim: '| 15 | low | core | `participant_compensation` | Changed |'
+  - kind: change_not_shown
+    slot: participant_privacy
+    record: core
+    detail: report says changed; the core record does not carry it
+    claim: '| 16 | low | core | `participant_privacy` | Changed |'
+  - kind: retention_not_shown
+    slot: publisher
+    record: full
+    detail: report says left as-is; the full record does not carry it
+    claim: '| 18 | low | full | `publisher` | Left as-is |'
+  claims_checked: 18
   claims_unnamed: 0
+  disposition_rows: 18
+  claims_core_cannot_hold: 1
+  instrument: 'v3 (#1022, #1046): a schema claim that names its own scope — the core
+    schema, the full schema, a class — is resolved against that scope only, not against
+    every class; v2 (#990): a finding on a `both` row names when the core class declares
+    no such slot; `claims_core_cannot_hold` counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_reconciliation.md
       md5: 856c08e7013681dd7e4641ea71b6e361
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml
+      md5: 9978cab5d41dc70fc18011c614af7eaa
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d_core.yaml
+      md5: 22dad1269afd0467e0e2a0c2e9c35b72
+  schema:
+    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
+    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
   recorded_by: backfill_checks
 grounding:
   checked: false

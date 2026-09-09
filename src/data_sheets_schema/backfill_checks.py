@@ -166,8 +166,22 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
             yaml.safe_load(full.read_text(encoding="utf-8")) if full.exists() else {},
             yaml.safe_load(core.read_text(encoding="utf-8")) if core.exists() else {},
             declared if declared is not None else declared_slots())
-        block["artifacts"] = {"report": {"path": str(report),
-                                         "md5": _md5(report)}}
+        # The report, and the two records it makes claims about, and the
+        # schema those claims are resolved against (#1085). The runner writes
+        # all four; this wrote only the report, so recomputing a block for an
+        # instrument revision silently dropped the pins that make its verdict
+        # checkable — the same argument the pair block states above, and the
+        # same one #426 makes for validation verdicts.
+        # Unconditionally, as the runner does: a `md5: null` says the file was
+        # absent, while omitting the key would be indistinguishable from a
+        # block written before this pinned them at all.
+        block["artifacts"] = {
+            "report": {"path": str(report), "md5": _md5(report)},
+            "full": {"path": str(full), "md5": _md5(full) if full.exists() else None},
+            "core": {"path": str(core), "md5": _md5(core) if core.exists() else None},
+        }
+        block["schema"] = {"full_sha256": _sha256(FULL_SCHEMA),
+                           "core_sha256": _sha256(CORE_SCHEMA)}
         block["recorded_by"] = RECORDED_BY
         # The expectation is a fact about the run, not about the report:
         # carried on `inputs` (and on the recorded block) by the runner that

@@ -113,6 +113,67 @@ class CorpusTest(unittest.TestCase):
         self.assertEqual(set(rec["pair_consistency"]["schema"]),
                          {"full_sha256", "core_sha256"})
 
+    def test_the_computation_itself_pins_all_three(self):
+        """The code, not the records it already wrote.
+
+        The two tests below read blocks off disk, so they would keep passing
+        if the fix were reverted — the records would still carry the pins.
+        This recomputes one and fails on the code.
+        """
+        from data_sheets_schema.backfill_checks import compute
+        p = (self.BASE / "claudecode_api_core"
+             / "2026-09-04f_claude-opus-5-api-generic-v8_rep2"
+             / "VOICE_provenance.yaml")
+        if not p.exists():
+            self.skipTest(f"{p} not present in this checkout")
+        block = compute(p, only={"report_claims"})["report_claims"]
+        self.assertEqual(set(block["artifacts"]), {"report", "full", "core"})
+        self.assertEqual(set(block["schema"]), {"full_sha256", "core_sha256"})
+        self.assertTrue(block["artifacts"]["full"]["md5"])
+        self.assertTrue(block["artifacts"]["core"]["md5"])
+
+    def test_a_backfilled_report_verdict_pins_what_it_read(self):
+        """The same lesson as the pair verdict above, learned twice (#1085).
+
+        A schema claim is resolved against the schema and is about the two
+        records, so a recomputed `report_claims` block that pins only the
+        report cannot be told apart from one reached against records or a
+        schema that have since moved. The backfill wrote exactly that until
+        the v3 recompute made it visible: 282 records would have lost the
+        full and core md5s and the schema digests the runner records.
+
+        Written against the corpus rather than a fixture because the defect
+        was invisible in the code and obvious in the diff.
+        """
+        rec = self._record("2026-09-01_claude-opus-5-api-generic-v7_rep1",
+                           "VOICE")
+        block = rec["report_claims"]
+        if block.get("recorded_by") != RECORDED_BY:
+            self.skipTest("this record's block was not written by the backfill")
+        self.assertEqual(set(block["schema"]), {"full_sha256", "core_sha256"})
+        self.assertEqual(set(block["artifacts"]), {"report", "full", "core"})
+        for name in ("report", "full", "core"):
+            with self.subTest(artifact=name):
+                self.assertIn("md5", block["artifacts"][name])
+                self.assertIn("path", block["artifacts"][name])
+
+    def test_every_backfilled_report_block_in_the_corpus_pins_all_three(self):
+        """Not one record: the whole recompute. An `md5: null` is allowed and
+        says the file was absent; a missing key is the defect."""
+        thin = []
+        for p in sorted(self.BASE.rglob("*_provenance.yaml")):
+            rec = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+            block = rec.get("report_claims") or {}
+            if block.get("recorded_by") != RECORDED_BY or not block.get("checked"):
+                continue
+            if (set(block.get("artifacts") or {}) != {"report", "full", "core"}
+                    or set(block.get("schema") or {}) != {"full_sha256",
+                                                          "core_sha256"}):
+                thin.append(str(p))
+        if not thin and not list(self.BASE.rglob("*_provenance.yaml")):
+            self.skipTest("no records in this checkout")
+        self.assertEqual(thin, [])
+
     def test_the_agentic_arm_is_clean_once_the_guard_is_applied(self):
         """Reverses what this test asserted when it was first written (#550).
 

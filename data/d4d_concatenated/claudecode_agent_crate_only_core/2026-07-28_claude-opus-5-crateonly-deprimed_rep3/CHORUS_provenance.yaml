@@ -102,18 +102,28 @@ pair_consistency:
   recorded_by: backfill_checks
 report_claims:
   checked: true
-  findings:
-  - kind: false_schema_claim
-    slot: total_size_bytes
-    detail: report says this is not a declared slot; it is declared on Dataset
-    claim: '`total_size_bytes` are not declared on `CoreDataset`, so they are legitimately
-      full-only.'
+  findings: []
   claims_checked: 0
   claims_unnamed: 0
+  disposition_rows: 0
+  claims_core_cannot_hold: 0
+  instrument: 'v3 (#1022, #1046): a schema claim that names its own scope — the core
+    schema, the full schema, a class — is resolved against that scope only, not against
+    every class; v2 (#990): a finding on a `both` row names when the core class declares
+    no such slot; `claims_core_cannot_hold` counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep3/CHORUS_reconciliation.md
       md5: 38be8b5ae26230763d25a68ffabcb0cc
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep3/CHORUS_d4d.yaml
+      md5: 353f0ac3bbcc98d965290fb03ac96826
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep3/CHORUS_d4d_core.yaml
+      md5: a8e11e9a9dbc2f08c3ef8756dc2c57c5
+  schema:
+    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
+    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
   recorded_by: backfill_checks
 grounding:
   checked: true

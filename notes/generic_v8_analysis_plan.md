@@ -713,6 +713,82 @@ records were generated without the block, and a thirteenth with it would
 be a different condition wearing the same name. The prompt files are
 unchanged, so no pin rotates (`d4d api prompts check --strict` passes).
 
+### report_claims instrument v3 (#1022, #1046, #1087, 2026-09-08)
+
+A schema claim that names its own inventory is now resolved against that
+inventory only. The v8 report instruction (step E) asks for exactly the
+sentence this broke on — "`splits` and `participant_privacy` are not
+declared by the core schema and appear only in the full record" — and the
+checker resolved the slot against every class, so a true sentence read as
+a `false_schema_claim`.
+
+**Two regates were fed false schema claims**, and one of them was driven
+entirely by them: VOICE `2026-09-04f_rep1`, whose two findings before the
+regate were both false, and CM4AI `2026-09-04g_rep3`, where two of four
+were. Those two reports were regenerated over contradictions the model had
+not made.
+
+Counted on the **model-written report** (`intermediate/{P}_report.md`), the
+false findings across the two production arms were **19 before and 0
+after**: VOICE 04f rep1 alone carried 12, with the rest on VOICE 04f rep3,
+VOICE v7 rep3, AI_READI 04g rep1, CM4AI 04g rep2 and CM4AI 04g rep3.
+Counted on the **artifact the block records** (`{P}_reconciliation.md`, the
+path in `report_claims.artifacts.report`), the same arms go **3 before and 0
+after** — VOICE 04f rep2 twice and 04f rep3 once. The two artifacts are
+different documents and the numbers are not interchangeable; the recorded
+blocks moved by the second figure.
+
+Corpus-wide, recomputed uniformly over the same artifacts, the count goes
+**38 under v2 to 25 under v3**. The blocks as they stood before this showed
+47, but that figure spans instrument versions — some blocks were written by
+the runner, others by earlier backfills — which is why the comparable pair
+is the two recomputes rather than the recorded total.
+
+Of the 25 that remain, **23 are true and 2 are false positives of a
+different, pre-existing defect** (#1089). The 23 are mostly the
+`distributions` claims that #546 exists for — 20 of them — spread over the
+2026-07-28, 2026-07-31, v3, v4 and v5 arms rather than v4 and v5 alone, plus
+one each on `conforms_to`, `md5` and `path`, all false against the class the
+claim names. The 2 are from one v5 VOICE reconciliation whose section 3.4
+reports that *the record* asserted the core schema lacked a slot and says
+the digest does not support it: the report is rejecting a claim, and the
+checker reads the quoted claim as one the report makes. Filed rather than
+fixed here, because a rule that suppresses findings on a sentence's stance
+needs its own evidence base and two instances is not one — #1087 is what
+that failure looks like when it goes wrong.
+
+The scope is read from the **clause** carrying the "not declared" phrase,
+splitting on `[;,]` — not from the sentence, and only from the words "core"
+and "full" qualifying a schema, record, class, inventory, digest, projection
+or view. Both bounds were put there by a defect the first version had, and
+the second is the sharper lesson (#1087). Read over the whole sentence, a
+v5 VOICE report's trailing clause — "and stated content in five slots that
+**the full record** did not state" — scoped a `distributions` claim in the
+first clause to `Dataset`, where `distributions` is not declared, and
+silenced it. `full` resolves to `Dataset` alone, so every subject of #546 —
+`distributions`, `path`, `md5`, `format`, `media_type` — was one line of
+boilerplate away from being unreportable, and the whole-sentence reading was
+wrong on 100% of the corpus sentences it fired on (55 core, 1 full, 32
+unscoped; the one `full` was that sentence). A qualifier qualifies what it
+is adjacent to.
+
+Two further non-signals, each with a test: a bare class name is not a scope
+— "no such slot appears in the inventory for `Dataset`, and `md5` and `path`
+are not attested keys on any listed range class" names a class in its first
+half and ranges over all of them in its second — and a clause saying "any
+class" is unscoped whatever it names.
+
+The block was recomputed for every record the backfill covers — 282, of
+which 277 have a reconciliation report and so carry a checked block — under
+one instrument, so no comparison spans v2 and v3. Recomputing exposed a second defect (#1085):
+`backfill-checks --blocks report_claims` replaced the block's `artifacts`
+with the report alone, dropping the full and core record md5s and never
+writing the schema digests the runner records, so a recomputed verdict could
+not be told apart from one reached against records or a schema that had
+since moved. Fixed first; the recompute was redone under the fix. The
+datasheets are untouched, and the two regenerated reports stand as written
+with the cause on record here.
+
 ### What a v9 arm can and cannot be compared against (#1072)
 
 `condition_delta("generic_v8", "generic_v9")` returns `["base"]`, and that

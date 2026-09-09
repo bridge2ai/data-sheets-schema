@@ -20,10 +20,20 @@ import yaml
 
 from data_sheets_schema.report_claims import check_report, resolve
 
-DECLARED = {"Dataset": {"file_collections", "distributions", "keywords"},
+#: Real membership, not a convenient one (#1090). `distributions` is declared
+#: on `CoreDataset` **only** — that is #546's whole premise, and a fixture
+#: putting it on `Dataset` as well makes every core-versus-full assertion
+#: below pass under either reading. It did: with `distributions` on both, the
+#: #1087 regression test caught the defect through its `scope` string alone
+#: and its finding-level assertion was vacuous.
+DECLARED = {"Dataset": {"file_collections", "keywords", "source_caveats",
+                        "notes", "conforms_to", "errata",
+                        "collection_timeframes"},
             "CoreDataset": {"distributions", "source_caveats", "notes",
-                            "errata", "collection_timeframes"},
-            "CoreDistribution": {"path", "md5", "format", "media_type"}}
+                            "errata", "collection_timeframes", "keywords",
+                            "conforms_to"},
+            "CoreDistribution": {"path", "md5", "format", "media_type",
+                                 "source_caveats", "notes", "conforms_to"}}
 
 
 class Harness(unittest.TestCase):
@@ -307,6 +317,147 @@ class CorpusTest(unittest.TestCase):
                          "9 of the 12 v4 records emitted a distributions block")
         self.assertEqual(sorted(claimed), sorted(retained),
                          "every one of them reports having removed it")
+
+
+class ScopedSchemaClaimTest(Harness):
+    """A schema claim that names its own inventory is checked against it
+    (#1022, #1046, #1087).
+
+    The two slots below carry the whole distinction, and each is declared in
+    exactly one place, so no assertion here passes under both readings
+    (#1090):
+
+    - `file_collections` — `Dataset` only, so "not in the core schema" is
+      true and "not in the full schema" is false;
+    - `distributions` — `CoreDataset` only, which is #546's premise, so the
+      two are reversed.
+
+    The shape the v8 report instruction produces is "not declared by the core
+    schema and appears only in the full record". Resolving that against every
+    class made true sentences into findings and had two reports rewritten
+    over them.
+    """
+
+    def test_a_core_scoped_claim_is_checked_against_the_core_classes(self):
+        md = ("`file_collections` is not declared by the core schema and "
+              "appears only in the full record.\n")
+        self.assertEqual(self.kinds(md), [])
+
+    def test_a_core_scoped_claim_that_is_false_is_still_caught(self):
+        """`distributions` is on CoreDataset, so this one is wrong."""
+        md = "`distributions` is not declared in the core schema.\n"
+        self.assertEqual(self.kinds(md), [("false_schema_claim", "distributions")])
+
+    def test_a_full_scoped_claim_is_checked_against_dataset(self):
+        """`distributions` is on CoreDataset only, so a claim about the full
+        schema is true and a claim against every class would be false."""
+        md = "`distributions` is not declared on the full schema.\n"
+        self.assertEqual(self.kinds(md), [])
+
+    def test_a_full_scoped_claim_that_is_false_is_still_caught(self):
+        md = "`file_collections` is not declared in the full schema.\n"
+        self.assertEqual(self.kinds(md),
+                         [("false_schema_claim", "file_collections")])
+
+    def test_an_unscoped_claim_is_unchanged(self):
+        """The v2 reading, kept: with no scope named, any class holding the
+        slot contradicts the claim."""
+        md = "`file_collections` is not a declared slot.\n"
+        self.assertEqual(self.kinds(md),
+                         [("false_schema_claim", "file_collections")])
+
+    def test_naming_both_scopes_reads_as_the_core_one(self):
+        """The full mention is where the slot *is* — the clause's own
+        contrast — not a second inventory to check the claim against."""
+        md = ("`file_collections` is not declared by the core schema and "
+              "appears only in the full record, which declares it on "
+              "`Dataset`.\n")
+        self.assertEqual(self.kinds(md), [])
+
+    def test_the_scope_noun_is_not_only_the_word_schema(self):
+        """VOICE 04f rep1 wrote "Not declared in the core projection." The
+        reports vary the noun; the qualifier is what carries the scope."""
+        for noun in ("projection", "record", "inventory", "view"):
+            with self.subTest(noun=noun):
+                md = f"`file_collections` is not declared in the core {noun}.\n"
+                self.assertEqual(self.kinds(md), [])
+
+    def test_a_claim_ranging_over_every_class_is_not_scoped_by_one_it_names(self):
+        """CM4AI rep3's sentence names `Dataset` in its first half and then
+        claims two keys are unattested "on any listed range class"; that half
+        is about all of them."""
+        md = ("No such slot appears in the inventory for `Dataset`, and "
+              "`md5` and `path` are not attested keys on any listed range "
+              "class.\n")
+        self.assertEqual(sorted(self.kinds(md)),
+                         [("false_schema_claim", "md5"),
+                          ("false_schema_claim", "path")])
+
+    def test_a_scope_word_in_another_clause_does_not_decide_the_scope(self):
+        """#1087, the defect this rule introduced and a review caught before
+        it merged.
+
+        A reconciliation report says "the full record" constantly, and `full`
+        resolves to Dataset alone — which excludes both core classes. Read
+        over the whole sentence, the trailing clause here scoped a claim about
+        `distributions` to Dataset, where it is not declared, and silenced the
+        one finding #546 exists to make. The claim is in the first clause and
+        is about the core record.
+        """
+        md = ("It carried a `distributions` block that does not appear in the "
+              "supplied slot inventory, and stated content in five slots that "
+              "the full record did not state.\n")
+        self.assertEqual(self.kinds(md),
+                         [("false_schema_claim", "distributions")])
+        self.assertEqual(self.check(md)["findings"][0]["scope"], "unscoped")
+
+    def test_the_scope_word_in_the_claims_own_clause_still_decides(self):
+        """The clause bound must not undo the fix it guards."""
+        md = ("The audit was wrong about several things, and "
+              "`file_collections` is not declared by the core schema.\n")
+        self.assertEqual(self.kinds(md), [])
+
+    def test_the_finding_says_which_scope_it_used(self):
+        md = "`distributions` is not declared in the core schema.\n"
+        finding = self.check(md)["findings"][0]
+        self.assertEqual(finding["scope"], "core")
+        self.assertIn("scoped to the core schema", finding["detail"])
+
+    def test_the_instrument_names_the_change(self):
+        from data_sheets_schema.report_claims import REPORT_CLAIMS_INSTRUMENT
+        self.assertTrue(REPORT_CLAIMS_INSTRUMENT.startswith("v3"),
+                        REPORT_CLAIMS_INSTRUMENT)
+        self.assertIn("#1046", REPORT_CLAIMS_INSTRUMENT)
+
+
+class TheFixtureMatchesTheSchemaTest(unittest.TestCase):
+    """The fixture's membership is the real one where the scope tests rely on
+    it (#1090).
+
+    A fixture that puts `distributions` on `Dataset` as well as `CoreDataset`
+    makes every core-versus-full assertion pass under either reading, which
+    is what let the #1087 regression test's finding-level assertion be
+    vacuous. This pins the two slots those tests turn on.
+    """
+
+    def test_every_slot_in_the_fixture_is_declared_where_the_schema_says(self):
+        """Every slot, not only the two the scope tests turn on.
+
+        Pinning two left `errata` and `collection_timeframes` diverging one
+        slot away from the trap the pin was written for. They are used only by
+        removal tests today, which never consult the class inventory — which
+        is exactly what was true of `distributions` until a scope rule started
+        reading it.
+        """
+        from data_sheets_schema.report_claims import declared_slots
+        real = declared_slots()
+        if "Dataset" not in real or "CoreDataset" not in real:
+            self.skipTest("the schema is not importable in this checkout")
+        for slot in sorted({s for names in DECLARED.values() for s in names}):
+            with self.subTest(slot=slot):
+                self.assertEqual(
+                    sorted(c for c, s in DECLARED.items() if slot in s),
+                    sorted(c for c, s in real.items() if slot in s))
 
 
 if __name__ == "__main__":
