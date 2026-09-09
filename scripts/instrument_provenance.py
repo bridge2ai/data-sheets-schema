@@ -106,7 +106,12 @@ def resolve(rubric):
     base = ROOT / "data" / "evaluation_llm" / rubric / "label_aware"
     for path in sorted(glob.glob(str(base / "*_evaluation.json"))):
         doc = json.loads(Path(path).read_text())
-        digest = (doc.get("metadata") or {}).get("rubric_hash")
+        meta = doc.get("metadata") or {}
+        # The new contract's key first (#1100). Reading only `rubric_hash`
+        # meant an evaluation that *obeyed* the revised contract — recording
+        # its instrument outright — was still resolved from its writing
+        # commit, so following the fix downgraded the evidence it produced.
+        digest = meta.get("instrument_sha256") or meta.get("rubric_hash")
         name = Path(path).name
         if digest in by_agent:
             v = by_agent[digest]

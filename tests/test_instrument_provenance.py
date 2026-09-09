@@ -131,11 +131,38 @@ class TestEveryEvaluationNamesItsInstrument(InstrumentManifest):
                         entry["instrument_sha256"])
 
     def test_every_named_instrument_is_a_real_agent_version(self):
-        for rubric in RUBRICS:
-            known = {v["sha256"] for v in self.doc["rubrics"][rubric]["agent_versions"]}
+        """Against git, not against the manifest's own list (#1100).
+
+        Checking `instrument_sha256` against the manifest's `agent_versions`
+        was an internal-consistency check: a fabricated hash passed as long as
+        it was also appended to that block. These are hashes of real blobs or
+        they are nothing.
+        """
+        if _shallow():
+            self.skipTest("shallow clone: no history to hash against")
+        for rubric, agent in AGENT_PATHS.items():
+            real = set()
+            for commit in subprocess.run(
+                    ["git", "log", "--all", "--format=%H", "--", agent],
+                    capture_output=True, text=True, cwd=ROOT).stdout.split():
+                blob = subprocess.run(["git", "show", f"{commit}:{agent}"],
+                                      capture_output=True, cwd=ROOT)
+                if not blob.returncode:
+                    real.add(hashlib.sha256(blob.stdout).hexdigest())
             for name, entry in self.doc["rubrics"][rubric]["evaluations"].items():
                 with self.subTest(rubric=rubric, evaluation=name):
-                    self.assertIn(entry["instrument_sha256"], known)
+                    self.assertIn(entry["instrument_sha256"], real)
+
+    def test_a_recorded_instrument_is_read_from_the_new_key_when_present(self):
+        """#1100: the resolver read only `rubric_hash`, so an evaluation that
+        obeyed the revised contract and recorded its instrument outright was
+        still resolved from its writing commit. Following the fix downgraded
+        the evidence it produced."""
+        if not SCRIPT.exists():
+            self.skipTest("resolver not in this checkout")
+        source = SCRIPT.read_text()
+        self.assertIn('meta.get("instrument_sha256") or meta.get("rubric_hash")',
+                      source)
 
 
 class TestTheContractAsksForTheScoringRules(unittest.TestCase):
@@ -179,11 +206,15 @@ class TestTheResolverIsReproducible(InstrumentManifest):
         spec.loader.exec_module(module)
         for rubric in RUBRICS:
             with self.subTest(rubric=rubric):
-                self.assertEqual(
-                    module.resolve(rubric)["evaluations"],
-                    self.doc["rubrics"][rubric]["evaluations"],
-                    "the manifest disagrees with a fresh resolve; run "
-                    "scripts/instrument_provenance.py --write")
+                #: The whole block, not only the attributions (#1100). Every
+                #: agent revision adds a version the committed manifest lacks
+                #: while attributions and counts stay identical — which is how
+                #: the first manifest shipped stale — so `agent_versions` has
+                #: to be compared too.
+                self.assertEqual(module.resolve(rubric),
+                                 self.doc["rubrics"][rubric],
+                                 "the manifest disagrees with a fresh resolve; "
+                                 "run scripts/instrument_provenance.py --write")
 
 
 if __name__ == "__main__":
