@@ -67,7 +67,7 @@ class TestHeaderStatesTheRequest(unittest.TestCase):
 
     def test_header_value_refuses_unknown_fields(self):
         with self.assertRaises(KeyError):
-            header_value("Model", {})
+            header_value("Source", {})
 
 
 class TestRunsCheckSeesTheDisagreement(unittest.TestCase):
