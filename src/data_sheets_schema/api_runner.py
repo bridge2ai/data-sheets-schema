@@ -4421,6 +4421,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
 
     rec = build_record(
         spec.project, spec.method, spec.label, mode="live",
+        condition=spec.condition,                     # the run's own claim (#1094)
         input_bundle=spec.bundle, input_verified=True,
         prompt_paths=spec.prompt_files,
         # The API path builds its instruction with `resolve_prompt`, so it can

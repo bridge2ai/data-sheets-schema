@@ -815,6 +815,15 @@ yet exist.
 
 This is not tamper-proofing. Whoever can edit a prompt can rotate its pin.
 
+**A record states its condition** (#1094): `run.condition` is what the run
+claims (the runner states it; a record made without one reads it from
+its label, and `run.condition_basis` says which), and `d4d runs check`
+fails under `--strict` on a record whose stated condition its label does
+not name — the `uncanonical` shape for the condition claim. Before this
+the field `arm_confounds` compared was a top-level key no record had, so
+it compared "None" with "None" and never reported a condition difference;
+`arm_facts` now reads `run.condition` and falls back to the label.
+
 ## Model Reasoning Capture
 
 **Reasoning effort** is established by the provenance recorder, not by the

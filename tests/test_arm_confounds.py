@@ -128,3 +128,40 @@ class TestTheReviewerIsAConfound(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ConditionIsAFieldThatCanFire(unittest.TestCase):
+    """#1094: the tuple read a top-level `condition` key no record has, so
+    `arm_confounds` compared "None" with "None" and never reported a
+    condition difference — the one field a reader of confounds would take
+    as coverage of the thing the comparison is about."""
+
+    def test_the_field_reads_run_condition_and_falls_back_to_the_label(self):
+        self.assertIn(("condition", ("run", "condition")), ARM_PROCEDURE_FIELDS)
+        a = arm_facts(V4)
+        if not a["labels"]:
+            self.skipTest("v4 arm not present in this checkout")
+        self.assertEqual(a["values"]["condition"], ["generic_v4"])      # from the label: records predate #1094
+
+    def test_two_arms_differ_on_condition(self):
+        a, b = arm_facts(V4), arm_facts("2026-08-20b_claude-opus-5-api-generic-v5")
+        if not (a["labels"] and b["labels"]):
+            self.skipTest("v4 or v5 arm not present in this checkout")
+        fields = {c["field"] for c in arm_confounds(a, b)}
+        self.assertIn("condition", fields)
+
+    def test_a_record_that_contradicts_its_label_is_named(self):
+        from data_sheets_schema.runs import condition_contradiction
+        label = "2026-08-13_claude-opus-5-api-generic-v4_rep1"
+        self.assertIsNone(condition_contradiction({"run": {}}, label))                # states none (pre-#1094)
+        self.assertIsNone(condition_contradiction({"run": {"condition": "generic_v4"}}, label))
+        got = condition_contradiction({"run": {"condition": "generic_v5", "condition_basis": "stated by the runner"}}, label)
+        self.assertEqual((got["record"], got["label_condition"]), ("generic_v5", "generic_v4"))
+
+    def test_the_record_claims_its_condition_with_a_basis(self):
+        from data_sheets_schema.provenance import _condition_claim
+        self.assertEqual(_condition_claim("2026-08-13_x-api-generic-v4_rep1", "generic_v4"),
+                         {"condition": "generic_v4", "condition_basis": "stated by the runner"})
+        self.assertEqual(_condition_claim("2026-08-13_x-api-generic-v4_rep1", None)["condition_basis"],
+                         "read from the label; no runner stated it")
+        self.assertIsNone(_condition_claim("2026-07-27_claude-opus-5_rep1", None)["condition"])

@@ -1213,6 +1213,16 @@ def companion_facts(project: str, method: str, label: str,
     return out
 
 
+def _condition_claim(label: str, stated: str | None) -> dict[str, Any]:
+    from data_sheets_schema.runs import condition_from_label    # lazy: runs imports this module
+    if stated:
+        return {"condition": stated, "condition_basis": "stated by the runner"}
+    derived = condition_from_label(label)
+    if derived:
+        return {"condition": derived, "condition_basis": "read from the label; no runner stated it"}
+    return {"condition": None, "condition_basis": "the label names no registered condition"}
+
+
 def build_record(project: str, method: str, label: str, *, mode: str,
                  input_bundle: Path | None = None,
                  input_verified: bool = False,
@@ -1225,7 +1235,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                  phases: list[dict[str, Any]] | None = None,
                  outputs: dict[str, Path] | None = None,
                  extra_notes: list[str] | None = None,
-                 receipt_expected: bool = False) -> ProvenanceRecord:
+                 receipt_expected: bool = False,
+                 condition: str | None = None) -> ProvenanceRecord:
     """Assemble a provenance record for one project-run.
 
     ``mode`` is ``live`` or ``reconstructed``. ``input_verified`` must be True
@@ -1476,7 +1487,12 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         "record_generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "run": {"label": label, "project": project, "method": method,
                 "arm": _arm_for(base),
-                "replicate": _replicate_for(label)},
+                "replicate": _replicate_for(label),
+                # The condition the run claims, so a record can be
+                # contradicted by its label the way `uncanonical` contradicts
+                # a prompt (#1094): stated by the runner where it knows it,
+                # read off the label otherwise, and the basis says which.
+                **_condition_claim(label, condition)},
         "model": model or None,
         "prompts": prompt_facts(prompt_paths, prompt_request,
                                 prompt_request_spec),

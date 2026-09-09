@@ -1306,7 +1306,12 @@ def bundle_drift_detail(method: str, label: str, project: str,
 ARM_PROCEDURE_FIELDS = (
     ("schema digest", ("schema", "digest_md5")),
     ("assembly digest", ("prompts", "assembly", "sha256")),
-    ("condition", ("condition",)),
+    # `run.condition` since #1094; a record that predates it reads its label
+    # (`arm_facts` falls back to `condition_from_label`), which is where the
+    # value always lived — the old tuple read a top-level key no record had,
+    # so `arm_confounds` compared "None" with "None" and never reported a
+    # condition difference.
+    ("condition", ("run", "condition")),
     ("model", ("model", "model")),
     ("runtime", ("model", "agent_runtime")),
     # The judge is part of the procedure (#1097). v7 was reviewed by
@@ -1456,7 +1461,10 @@ def arm_facts(label_prefix: str, method: str | None = None,
         labels.add(path.parts[-2])
         projects.add(path.name[: -len("_provenance.yaml")])
         for name, field in ARM_PROCEDURE_FIELDS:
-            seen[name].add(str(_dig(rec, field)))
+            value = _dig(rec, field)
+            if name == "condition" and value is None:
+                value = condition_from_label(path.parts[-2])   # records before #1094
+            seen[name].add(str(value))
     return {"prefix": label_prefix, "labels": sorted(labels),
             "projects": sorted(projects), "records": len(projects) * len(labels),
             "values": {k: sorted(v) for k, v in seen.items()}}
@@ -1874,6 +1882,20 @@ def condition_from_label(label: str) -> str | None:
     for cond in sorted(CONDITION_PROMPTS, key=len, reverse=True):
         if cond.replace("_", "-") in hay:
             return cond
+    return None
+
+
+def condition_contradiction(record: dict[str, Any], label: str) -> dict[str, str] | None:
+    """A record whose `run.condition` names a condition its label does not
+    (#1094) — the `uncanonical` shape for the condition claim. None where the
+    record states no condition (records before #1094) or the two agree."""
+    stated = ((record.get("run") or {}).get("condition")) if isinstance(record, dict) else None
+    if not stated:
+        return None
+    claimed = condition_from_label(label)
+    if claimed and claimed != stated:
+        return {"record": str(stated), "label_condition": claimed,
+                "basis": str((record.get("run") or {}).get("condition_basis") or "")}
     return None
 
 

@@ -500,6 +500,15 @@ classes:
           Which replicate of the series, or absent for a record that is not one
           of a series — five records carry it as null rather than omitting it.
         range: integer
+      condition:
+        description: >-
+          The prompt condition the run claims (`generic_v9`, `tuned`, …), so a
+          record can be contradicted by its label the way `uncanonical`
+          contradicts a prompt (#1094). Stated by the runner where it knows
+          it, read from the label otherwise; `condition_basis` says which.
+          Records before #1094 carry neither and are read from their label.
+      condition_basis:
+        description: Where `condition` came from — the runner, or the label.
 
   SchemaFacts:
     description: The schema a run generated against.
