@@ -25,8 +25,9 @@ from.
 
 - **An identifier is a fact and must come from the evidence.** VOICE rep1
   supplied 19 RORs that appear nowhere in its bundle and CM4AI rep3 another ten
-  (#547). Every one is correct — `ror.org/032db5x82` really is the University
-  of South Florida, whose name the bundle states 16 times. The run learned the
+  (#547). Every one is correct — the ROR the run gave for the University of
+  South Florida really is that university's, whose name the bundle states 16
+  times. The run learned the
   institution from the evidence and the identifier from memory. The uniform
   rules already say to prefer omission over inference for facts; nothing said
   that an identifier is one.
