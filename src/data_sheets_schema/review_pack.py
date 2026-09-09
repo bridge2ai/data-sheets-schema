@@ -213,7 +213,103 @@ def _registry_label(value: Any) -> str | None:
     return None
 
 
-def _id_slots(full: Any, root_class: str | None = None) -> tuple[list[dict[str, Any]], str | None]:
+ID_ORIGINS = ("minted", "constructed", "stated")
+
+#: What may follow a base inside the bundle for the match to be the base
+#: itself and not a prefix of a longer URL (`…/datasets/3` inside
+#: `…/datasets/30` or `…/datasets/3/access`; #1108 review, finding 5).
+_URL_CONTINUATION = re.compile(r"[A-Za-z0-9/_#?=&%~]")
+#: `.` and `-` continue a URL only when what follows them does too
+#: (`…/4.0/`, `…/2024.05.21/`); a URL ending a sentence — the commonest
+#: way one appears in prose, thirteen in the AI_READI bundle alone — is the
+#: URL itself (#1117 round 2). A trailing `/` is deliberately a
+#: continuation: `…/dataset` and `…/dataset/` are different resources.
+_URL_JOINER = re.compile(r"[.\-]")
+
+
+def _canonical_identifier(value: str) -> str:
+    """A resolver URL of a declared prefix as its CURIE, lower-cased; else the
+    value as written, lower-cased. The record's own id and a fragment's base
+    can be the same identifier in two forms — #974's normaliser writes the
+    CURIE, an agentic run may write the URL — and a self-mint must not read
+    as a label on someone else's identifier (#1108 review, finding 8). 0 of
+    the corpus's 953 constructed ids are this case today; the guard is for
+    the shape the normaliser creates."""
+    value = value.strip()
+    try:
+        from data_sheets_schema.api_runner import _identifier_form_tables, curie_form
+        _, bases = _identifier_form_tables()
+        value = curie_form(value, bases) or value
+    except Exception:                                         # noqa: BLE001
+        pass
+    # Scheme and host fold; the path compares exactly — URL paths are
+    # case-sensitive, as `api_runner._split_base` says (#1117 round 2).
+    m = re.match(r"^(https?://[^/]+/?)(.*)$", value, re.I)
+    if m:
+        return m.group(1).lower() + m.group(2)
+    prefix, sep, local = value.partition(":")
+    return (prefix.lower() + sep + local) if sep else value.lower()
+
+
+def _id_origin(value: Any, record_id: str | None) -> tuple[str, str | None]:
+    """(origin, base). `minted`: a urn or a fragment on the record's own id
+    (`receipts._minted`, or the same id in resolver/CURIE alias form).
+    `constructed`: a fragment on some *other* base — the record built a
+    label on an identifier it did not mint (#901: the AI_READI v7 rep1
+    `file_collections[*].id` are `https://fairhub.io/datasets/3#cardiac_ecg`
+    on the attested fairhub page, and the two-way minted flag filed them
+    with the DOIs). `stated`: no fragment, or an empty one; the value is
+    used as a world-facing reference as written."""
+    from data_sheets_schema.receipts import _minted
+    if not isinstance(value, str):
+        return "stated", None
+    value = value.strip()
+    if _minted(value, record_id):
+        return "minted", None
+    base, sep, fragment = value.partition("#")
+    if not sep or not base or not fragment:
+        return "stated", None                                 # no fragment, or nothing constructed
+    if record_id and _canonical_identifier(base) == _canonical_identifier(str(record_id)):
+        return "minted", None                                 # the record's own id in another form
+    return "constructed", base
+
+
+def _base_in(base: str, bundle_text: str) -> bool:
+    """The base appears in the bundle as itself — not as the prefix of a
+    longer URL — in either its written form or its resolver/CURIE alias."""
+    forms = {base}
+    try:
+        from data_sheets_schema.api_runner import _identifier_form_tables, curie_form
+        _, bases = _identifier_form_tables()
+        curie = curie_form(base, bases)
+        if curie:
+            forms.add(curie)
+        else:
+            prefix, _, local = base.partition(":")
+            for b, pfx in bases:
+                if pfx == prefix and local:
+                    forms.add(b + local)
+    except Exception:                                         # noqa: BLE001
+        pass
+    for form in forms:
+        start = 0
+        while True:
+            i = bundle_text.find(form, start)
+            if i < 0:
+                break
+            nxt = bundle_text[i + len(form):i + len(form) + 1]
+            nxt2 = bundle_text[i + len(form) + 1:i + len(form) + 2]
+            continues = bool(nxt) and (bool(_URL_CONTINUATION.match(nxt))
+                                       or (bool(_URL_JOINER.match(nxt)) and bool(nxt2)
+                                           and bool(_URL_CONTINUATION.match(nxt2))))
+            if not continues:
+                return True
+            start = i + 1
+    return False
+
+
+def _id_slots(full: Any, root_class: str | None = None,
+              bundle_text: str | None = None) -> tuple[list[dict[str, Any]], str | None]:
     """Every populated `…id` leaf of the record with whether the schema
     *forces* the id (#803) and whether the value is a *mint* (#823): `File`,
     `FileCollection`, `DataSubset` — and `Person` — ids are LinkML
@@ -223,11 +319,24 @@ def _id_slots(full: Any, root_class: str | None = None) -> tuple[list[dict[str, 
     what separates a labelled part from a world-facing reference, whose
     truth the evidence rules judge, not the fragment rule.
 
+    `origin` (#901) is the three-way form of that flag: `minted`,
+    `constructed` (a fragment on a base the record did not mint — carries
+    `base`, and `base_in_bundle` when the bundle text is given: whether
+    the base appears in it as itself — not as the prefix of a longer URL —
+    in its written or alias form, so the reviewer can tell a label on an
+    attested page from a label on an invented one), `stated`. The caller
+    is responsible for passing the bytes the record read: `build_pack`
+    checks the bundle's md5 against the record's and passes nothing on a
+    drift, naming the gap. `minted`
+    stays as the boolean it was; `constructed` entries are `minted: false`
+    as before, now told apart from the DOIs they were filed with.
+
     Returns (entries, gap): entries carry {path, class, identifier, required,
-    forced, minted}; a path whose class the walk cannot resolve is listed
-    with resolvable: false rather than guessed. gap names why the flags are
-    unavailable (no schema, no SchemaView, unknown root class) — named,
-    not filled; exception class only, so pack bytes stay machine-neutral."""
+    forced, minted, origin[, base, base_in_bundle]}; a path whose class the
+    walk cannot resolve is listed with resolvable: false rather than
+    guessed. gap names why the flags are unavailable (no schema, no
+    SchemaView, unknown root class) — named, not filled; exception class
+    only, so pack bytes stay machine-neutral."""
     try:
         from linkml_runtime import SchemaView
 
@@ -259,8 +368,13 @@ def _id_slots(full: Any, root_class: str | None = None) -> tuple[list[dict[str, 
                 continue
             slot = sv.induced_slot("id", cls)
             ident, req = bool(slot.identifier), bool(slot.required)
-            out.append({"path": path, "class": cls, "identifier": ident, "required": req,
-                        "forced": ident or req, "minted": _minted(value, record_id)})
+            origin, base = _id_origin(value, record_id)
+            entry = {"path": path, "class": cls, "identifier": ident, "required": req,
+                     "forced": ident or req, "minted": origin == "minted", "origin": origin}
+            if origin == "constructed":
+                entry["base"] = base
+                entry["base_in_bundle"] = _base_in(base, bundle_text) if bundle_text is not None else None
+            out.append(entry)
         except Exception:                                     # noqa: BLE001
             out.append({"path": path, "resolvable": False})
     return out, None
@@ -282,7 +396,9 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
 
     pack: dict[str, Any] = {
         # 4: receipted items carry resolved_path/resolution (#899)
-        "pack_version": 4,
+        # 5: id_slots entries carry origin minted|constructed|stated, with
+        #    base_in_bundle attested only against the bytes the record read (#901)
+        "pack_version": 5,
         "run": {"label": run.get("label"), "project": run.get("project"), "method": run.get("method"),
                 "condition": (((record.get("prompts") or {}).get("request") or {}).get("spec") or {}).get("condition")},
         # The path only: `review check --write` adds a block to this record,
@@ -320,17 +436,60 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     # instruction's fragment rule cannot be judged without this — a rule-14
     # verdict on an identifier slot charges the record with the schema.
     full_record = yaml.safe_load(paths["full"].read_text(encoding="utf-8")) or {} if paths["full"].exists() else {}
-    id_entries, id_gap = _id_slots(full_record) if full_record else ([], "id slot flags unavailable: no full record")
+    # The bytes `base_in_bundle` is attested against are the bytes the
+    # record read, or nothing: 136 records are drifted (CLAUDE.md, #452), and
+    # the AI_READI 2026-09-01 rep1 record that motivated #901 is one of them.
+    # A pack that checked today's file and printed the recorded md5 beside
+    # the result would attest against bytes the record never saw (#1108
+    # review, finding 4). Relative paths resolve against the repo root, as
+    # the schema does (#822).
+    bundle_text, bundle_state = None, "no bundle_path recorded"
+    if bundle:
+        bpath = bundle if bundle.is_absolute() else Path(__file__).resolve().parents[2] / bundle
+        pack["bundle"]["resolved_path"] = str(bpath)          # which root the bytes came from (round 2, note 6)
+        if not bpath.exists():
+            bundle_state = f"bundle not on disk ({bpath})"
+        else:
+            raw = bpath.read_bytes()
+            on_disk = hashlib.md5(raw).hexdigest()
+            recorded = inputs.get("bundle_md5")
+            if not recorded:
+                bundle_state = f"no bundle_md5 recorded (on disk {on_disk})"
+            elif on_disk != recorded:
+                bundle_state = f"bundle drifted (recorded {recorded}, on disk {on_disk} at {bpath})"
+            else:
+                bundle_text, bundle_state = raw.decode("utf-8", errors="replace"), "current"
+    id_entries, id_gap = (_id_slots(full_record, bundle_text=bundle_text) if full_record
+                          else ([], "id slot flags unavailable: no full record"))
     pack["id_slots"] = {"entries": id_entries,
+                        "bundle_state": bundle_state,
+                        # the record's own id, so the licensed-form call (a second
+                        # identifier for this dataset vs a third party's) can be
+                        # made from the pack (round 2, note 7)
+                        "record_id": full_record.get("id") if isinstance(full_record, dict) else None,
                         "note": "forced: the schema declares this class's id as an identifier or required, "
                                 "so the record could not omit the id given the object — it settles the id's "
-                                "presence, not the object's. minted: a urn or a fragment on the record's own "
-                                "id; false means a world-facing reference (a DOI, ROR, URL) whose truth the "
-                                "evidence rules judge, not the fragment rule. The fragment rule is judged on "
-                                "minted ids only, and a forced mint never violates it; resources[*].id is "
+                                "presence, not the object's. origin (#901): minted is a urn or a fragment on "
+                                "the record's own id (in any form); constructed is a fragment on an "
+                                "identifier the record did not mint (base named; base_in_bundle says whether "
+                                "that base appears in the bytes the record read, as itself and not as the "
+                                "prefix of a longer URL, in its written or alias form; null when those bytes "
+                                "are not on disk — see bundle_state); stated is a reference used as written. "
+                                "The fragment rule is judged on minted AND constructed entries: the rule "
+                                "licenses a fragment on an identifier the evidence supplies, so a constructed "
+                                "id on this dataset's own attested identifier (its DOI, its landing page) is "
+                                "the licensed form and is judged exactly as a mint — a forced one never "
+                                "violates, an unforced one must be pointed at; one built on another entity's "
+                                "identifier (an organisation, a person, another dataset) is the false claim "
+                                "the identifier rule names; one whose base is not in the bundle is an "
+                                "unsupported reference under the evidence rules, and its fragment inherits "
+                                "that. stated entries are the evidence rules' business only. minted (boolean) "
+                                "is kept for packs that read it: it is origin == minted. resources[*].id is "
                                 "also consumed by `d4d derive core`'s projection."}
     if id_gap:
         pack["gaps"].append(id_gap)
+    if full_record and bundle_state != "current" and any(e.get("origin") == "constructed" for e in id_entries):
+        pack["gaps"].append(f"id_slots.base_in_bundle unavailable: {bundle_state}")
 
     # --- class-ranged attributes that are references (#805, #916): a string
     # is the only form that validates there, so a rule that asks for the

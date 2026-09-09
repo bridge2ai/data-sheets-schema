@@ -646,6 +646,36 @@ text. Under the coverage-only criterion the v7 arm picked the most-adverse
 replicate in 3 of 4 projects; under this one AI_READI and VOICE moved to
 rep1.
 
+## Id slots in the review pack (#803, #901)
+
+The pack's `id_slots` block lists every populated `…id` leaf with `forced`
+(the schema declares that class's id an identifier or required — `File`,
+`FileCollection`, `DataSubset`, `Person`, `Software`) and, from
+`pack_version` 5, `origin`: `minted` (a urn, or a fragment on the record's
+own id in any form), `stated` (a reference used as written — DOI, ROR,
+URL), or `constructed` — a fragment on a base the record did not mint,
+with `base` and `base_in_bundle` (the base in the bytes the record read,
+as itself and in written or alias form; null on a drift or a missing
+md5, with `bundle_state` naming why); the block also carries the
+record's own `record_id`. The `d4d-review-record` agent judges the
+fragment rule on mints and constructed ids, a forced one never violates
+it, and `stated` entries are the evidence rules' business. The two-way flag filed the AI_READI 2026-09-01 rep1
+`file_collections[*].id` (`https://fairhub.io/datasets/3#cardiac_ecg`, the
+attested fairhub page plus a label) with the DOIs. Corpus-wide the
+classifier finds 953 constructed ids in 57 of 281 records — 800 of them
+schema-forced (`File`, `FileCollection`, `DataSubset`, `Person`, `Software`), most on
+the dataset's own DOI or landing page — so the reading matters: the rule
+licenses a fragment on an identifier the evidence supplies, and a
+constructed id on the dataset's own attested identifier is judged exactly
+as a mint (forced never violates; unforced must be pointed at), one on
+another entity's identifier is the false claim the identifier rule names,
+one whose base is not in the bundle is an unsupported reference.
+`base_in_bundle` is attested only against the bytes the record read: the
+pack checks the on-disk bundle's md5 against `inputs.bundle_md5` and on a
+drift — 35 of those 57 records, the AI_READI rep1 record among them —
+reports `null` with `bundle_state` naming it. The match is the base as
+itself, not as the prefix of a longer URL, in written or alias form.
+
 ## Review dispositions (#903)
 
 `d4d review disposition --item slot-008 --disposition retain|amend --note …
