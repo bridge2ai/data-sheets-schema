@@ -318,6 +318,25 @@ class Agree(unittest.TestCase):
         r = rp.agree(self.PACK, a, a)
         self.assertEqual(r["percent_class_agreement"], 100.0); self.assertIsNone(r["kappa_class"])
 
+    def test_a_placeholder_reviewed_at_is_reported_never_failed(self):
+        """#1057: two v8 reviews carried 2026-09-07T00:00:00Z and passed
+        --strict. The judgements are attested by hash; only when they were
+        made is in doubt, so the checker reports it and does not fail."""
+        good = self._rev(("supported", "weak", "inferred", "followed"))
+        for value, kind in (("2026-09-07T00:00:00Z", "reviewed_at_placeholder"),
+                            ("2026-09-07", "reviewed_at_placeholder"),
+                            ("not a time", "reviewed_at_unparsable"),
+                            (None, "reviewed_at_missing")):
+            with self.subTest(value=value):
+                b = rp.check_review(self.PACK, {**good, "reviewed_at": value})
+                self.assertEqual([f["kind"] for f in b["reported"]], [kind])
+                self.assertFalse([f for f in b["findings"] if str(f.get("kind", "")).startswith("reviewed_at")])   # never a finding
+                self.assertIn("1 reported", b["summary"])
+        b = rp.check_review(self.PACK, {**good, "reviewed_at": "2026-09-07T19:47:23Z"})
+        self.assertEqual(b["reported"], []); self.assertNotIn("reported", b["summary"])
+        self.assertEqual(rp.reviewed_at_findings("2026-09-07T00:00:00+00:00")[0]["kind"], "reviewed_at_placeholder")
+        self.assertEqual(rp.reviewed_at_findings("2026-09-07T00:00:01Z"), [])
+
     def test_reviews_of_different_packs_refuse_to_pair(self):
         with self.assertRaises(ValueError):
             rp.agree(self.PACK, {"pack_sha256": "zzz", "items": []}, self._rev(("supported",) * 4))

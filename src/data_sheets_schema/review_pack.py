@@ -694,12 +694,42 @@ def check_review(pack: dict[str, Any], review: dict[str, Any]) -> dict[str, Any]
         d[str(a.get("verdict"))] = d.get(str(a.get("verdict")), 0) + 1
     adverse = sum(v for k, d in by_kind.items() for verdict, v in d.items() if verdict in ADVERSE.get(k, ()))
     cannot = sum(d.get(CANNOT_TELL, 0) for d in by_kind.values())
+    reported = reviewed_at_findings(review.get("reviewed_at"))
     return {"checked": True, "items_total": len(by_id), "items_answered": len(answered),
             "unanswered": unanswered[:50], "unanswered_truncated": max(0, len(unanswered) - 50) or None,
             "by_kind": by_kind, "adverse": adverse, "cannot_tell": cannot,
             "findings": findings,
+            # Reported and never gated (#1057): the judgements are attested by
+            # hash; only *when* they were made is in doubt, and a placeholder
+            # time must be visible without failing a review that is otherwise
+            # answered.
+            "reported": reported,
             "summary": (f"items {len(answered)}/{len(by_id)} answered · {adverse} adverse · {cannot} cannot_tell"
-                        + (f" · {len(findings)} finding(s)" if findings else ""))}
+                        + (f" · {len(findings)} finding(s)" if findings else "")
+                        + (f" · {len(reported)} reported" if reported else ""))}
+
+
+def reviewed_at_findings(value: Any) -> list[dict[str, Any]]:
+    """What a review's `reviewed_at` cannot attest (#1057), reported and never
+    failed. The agent definition asks for the ISO-8601 UTC time of the review
+    and the checker accepted any well-formed timestamp, so two v8 reviews
+    passed `--strict` with `2026-09-07T00:00:00Z` — a date with a placeholder
+    time, the same class as the placeholder `recorded_at` on two canary
+    records. Exactly midnight is reported as a placeholder; a value that does
+    not parse, or none at all, is reported as such (a missing value is also
+    kept as null in the reviewer block, #1097)."""
+    from datetime import datetime
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return [{"kind": "reviewed_at_missing"}]
+    text = value.isoformat() if isinstance(value, datetime) else str(value).strip()
+    try:
+        when = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return [{"kind": "reviewed_at_unparsable", "value": text}]
+    if (when.hour, when.minute, when.second, when.microsecond) == (0, 0, 0, 0):
+        return [{"kind": "reviewed_at_placeholder", "value": text,
+                 "detail": "exactly midnight: a date with no time, so when the review was made is unrecoverable"}]
+    return []
 
 
 # ---------------------------------------------------------------- reliability

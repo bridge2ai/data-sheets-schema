@@ -89,6 +89,8 @@ def check(method, label, project, write, strict):
         click.echo(f"   {k}: " + ", ".join(f"{v} {n}" for v, n in sorted(d.items())))
     for f in block["findings"][:20]:
         click.echo("   ❌ " + ", ".join(f"{k}={v}" for k, v in f.items()))
+    for f in block.get("reported") or []:                       # never gated (#1057)
+        click.echo("   ⚠️  " + ", ".join(f"{k}={v}" for k, v in f.items()))
     if write:
         # Keys kept even when absent (#1097): dropping `reviewed_at` when the
         # review omitted it made the provenance block show no gap, and one
