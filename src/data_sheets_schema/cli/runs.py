@@ -73,22 +73,24 @@ def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
 @click.option("--method", default=None, help="run directory family; defaults to the one the first label lives in (#934)")
 @click.option("--label", "labels", multiple=True, help="record labels to read grant_number from; repeat for each")
 @click.option("--project", "projects", multiple=True, type=click.Choice(PROJECTS), help="default: every project")
+@click.option("--bundle-dir", default="data/preprocessed/concatenated", show_default=True,
+              help="where {PROJECT}_preprocessed.txt lives; the crate and healthsheet bundles have their own denominators")
 @click.option("--contexts", is_flag=True, help="print every bundle mention with its source file and context")
-def award_numbers_cmd(method, labels, projects, contexts):
+def award_numbers_cmd(method, labels, projects, bundle_dir, contexts):
     """NIH award numbers per bundle, and per record under grant_number (#1028).
 
     The bundle count is mechanical and pinned to the bundle's md5; which of
     those awards fund *this* dataset is a reading the plan note registers,
     and --contexts prints what that reading rests on.
     """
-    from data_sheets_schema.awards import bundle_awards, record_award_numbers
+    from data_sheets_schema.awards import NIH_AWARD, bundle_awards, record_award_numbers
     from data_sheets_schema.cli.method import resolve_method
     from data_sheets_schema.runs import full_record_path
     import yaml as _yaml
-    projects = list(projects) or [p for p in PROJECTS if p != "VOICE_PEDIATRIC"]
+    projects = list(projects) or list(PROJECTS)
     method = method or (resolve_method(labels[0]) if labels else None)
     for project in projects:
-        bundle = Path("data/preprocessed/concatenated") / f"{project}_preprocessed.txt"
+        bundle = Path(bundle_dir) / f"{project}_preprocessed.txt"
         if not bundle.exists():
             click.echo(f"{project}: no bundle at {bundle}")
             continue
@@ -105,8 +107,12 @@ def award_numbers_cmd(method, labels, projects, contexts):
                 continue
             rec = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
             got = record_award_numbers(rec)
+            shaped = [g for g in got if NIH_AWARD.fullmatch(g)]
+            grounded = [g for g in shaped if g in b["awards"]]
+            ungrounded = [g for g in shaped if g not in b["awards"]]
             click.echo(f"   {label}: grant_number → {', '.join(got) if got else '—'}"
-                       f" ({sum(1 for g in got if g in b['awards'])} of the bundle's {len(b['awards'])})")
+                       f" ({len(shaped)} award-shaped; {len(grounded)} of the bundle's {len(b['awards'])}"
+                       + (f"; NOT in the bundle: {', '.join(ungrounded)}" if ungrounded else "") + ")")
 
 
 @runs.command("identifiers")

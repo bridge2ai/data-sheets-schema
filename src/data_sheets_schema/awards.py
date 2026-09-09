@@ -28,8 +28,22 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-#: An NIH award number "and kin" (#1028), as the bundles write it.
-NIH_AWARD = re.compile(r"\b\d?([A-Z]{1,2}\d{1,2}[A-Z]{2}\d{6})(?:-\d{2}[A-Z0-9]*)?\b")
+#: An NIH award number "and kin" (#1028), as the bundles write it: an
+#: optional application-type digit; an activity code of one letter and two
+#: digits (R01, P30, U54, T32) or two letters and one digit (OT2, UL1, DP2);
+#: an optional space or hyphen before the institute code, the rendering NIH
+#: itself uses in prose and the flagship papers use (`OT2 OD032742`,
+#: `U54 CA274502`) — the form the first pattern missed, the way the
+#: registered narrow one missed the type digit; the two-letter institute
+#: code; six serial digits; an optional `-NN` suffix with a revision tag.
+#: The core is normalised to its eleven characters. Case-sensitive: no
+#: lower-case award appears in any bundle (#1161 review), and lower-casing
+#: would admit ordinary words.
+NIH_AWARD = re.compile(r"\b\d?((?:[A-Z]\d{2}|[A-Z]{2}\d)[ -]?[A-Z]{2}\d{6})(?:-\d{2}[A-Z0-9]*)?\b")
+
+
+def _core(match: re.Match) -> str:
+    return match.group(1).replace(" ", "").replace("-", "")
 
 #: The registered narrow form, kept so the two counts can be compared.
 NIH_AWARD_NARROW = re.compile(r"\b[A-Z]\d{2}[A-Z]{2}\d{6}\b")
@@ -37,7 +51,7 @@ NIH_AWARD_NARROW = re.compile(r"\b[A-Z]\d{2}[A-Z]{2}\d{6}\b")
 
 def award_numbers(text: str) -> Counter[str]:
     """Distinct award numbers in `text` (core form) with their mention counts."""
-    return Counter(m.group(1) for m in NIH_AWARD.finditer(text))
+    return Counter(_core(m) for m in NIH_AWARD.finditer(text))
 
 
 def award_mentions(text: str, window: int = 160) -> list[dict[str, Any]]:
@@ -49,7 +63,7 @@ def award_mentions(text: str, window: int = 160) -> list[dict[str, Any]]:
         head = text.rfind("FILE:", 0, m.start())
         source = text[head:text.find("\n", head)].strip() if head >= 0 else None
         s, e = max(0, m.start() - window), min(len(text), m.end() + window // 2)
-        out.append({"award": m.group(1), "as_written": m.group(0), "source": source,
+        out.append({"award": _core(m), "as_written": m.group(0), "source": source,
                     "context": re.sub(r"\s+", " ", text[s:e]).strip()})
     return out
 
@@ -69,7 +83,7 @@ def record_award_numbers(record: Any) -> list[str]:
                         if v is None:
                             continue
                         m = NIH_AWARD.search(str(v))
-                        text = m.group(1) if m else str(v).strip()
+                        text = _core(m) if m else str(v).strip()
                         if text and text not in out:
                             out.append(text)
                 walk(value)
