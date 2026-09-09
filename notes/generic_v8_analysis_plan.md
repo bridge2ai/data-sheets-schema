@@ -221,10 +221,13 @@ per-project mean is `run_telemetry.full_output_baseline` under
 `PREDICTION_9_RULE` — the accepted attempt per phase (the last `end_turn`
 `full` attempt with no abandoned-transport marker and no
 `unusable_reason`; a retried attempt excluded; `full_readdress` and
-`repair_full` are their own phases and not counted), a resumed run's row
-recovered from its reasoning log, the mean over the replicates that yield
-a row with the replicate range beside it, and the others named — printed
-by `d4d runs full-output-baseline`. The AI_READI 2026-09-04f row was read
+`repair_full` are their own phases and not counted), a row the provenance
+lost — a resume past the phase, or an abandoned attempt whose completed
+retry the ledger seeding dropped — recovered from the reasoning log, whose
+entries are matched by (attempt, output_tokens) against the rows the
+provenance refused, never by attempt number alone; the mean over the
+replicates that yield a row with the replicate range beside it, and the
+others named — printed by `d4d runs full-output-baseline`. The AI_READI 2026-09-04f row was read
 three ways before the rule was code: by hand from rep2's retried attempt
 (86,707, +3.2%), then over the two replicates with a provenance row alone,
 rep3 dropped (78,646, +13.8%); the rule reads +4.4% (v7 production: 79,078

@@ -231,9 +231,13 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
     """One replicate's accepted `full` output under `PREDICTION_9_RULE`.
 
     `source` says which log the row came from: `api_usage` (the provenance
-    record) or `reasoning_log` (the record carried no `full` row — a resume
-    past that phase, like AI_READI 2026-09-01 rep3), or None with the reason
-    when neither yields an accepted attempt.
+    record) or `reasoning_log` (the provenance holds no *accepted* `full`
+    attempt — no `full` row at all after a resume past that phase, like
+    AI_READI 2026-09-01 rep3, or only an abandoned one whose completed
+    retry the ledger seeding lost, like VOICE 2026-09-04f rep2 — and the
+    log's entry is matched by (attempt, output_tokens) against the rows
+    the provenance refused; `PREDICTION_9_RULE` states the rule), or None
+    with the reason when neither yields an accepted attempt.
     """
     prov_path = run_dir / f"{project}_provenance.yaml"
     out: dict[str, Any] = {"project": project, "label": run_dir.name, "output_tokens": None,
@@ -246,6 +250,7 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
     source = "api_usage"
     acc = _accepted(rows)
     logged: list[dict[str, Any]] = []
+    in_log: list[dict[str, Any]] = []
     if acc is None:
         # No *accepted* row — not merely no row (#1155 review, S3): a record
         # whose only `full` row is an abandoned attempt must still consult
