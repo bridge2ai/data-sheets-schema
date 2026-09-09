@@ -274,15 +274,14 @@ files:
       retired_on: '2026-09-04'
       sha256: 06666c4d10786d4689170acdfd68350d451f84d2f94d4b5a22be6e569d3824f1
   src/download/prompts/d4d_generic_arm_prompt_v9.md:
-    body_sha256: 02d6dee54ca8c47c1ba3a362aee62b47b1bf8703dba60c1832dc014440ff7f53
+    body_sha256: 99661f728c1224fa7d053801ddd734c1d916240f9becea9aff37f93372fd099a
     bytes: 27248
-    pinned_at_commit: 9bff8cdf126aff176d8fb3d5d08436c1b7eec7d6
+    pinned_at_commit: 999bfaa8a940e8185dff60a85f1a103af9797e14
     pinned_on: '2026-09-09'
-    reason: 'R8/R9 corrected after round 2 of the #1109 review (#1120): R8 names a component
-      dataset under resources, restates each rule it refers to, prefers the record''s own
-      id and states the receipt cost of a landing-page label; R9''s file-enum carve-out adds
-      file_type and a collection''s compression. No v9 record exists.'
-    sha256: 96ff7f47e933d62d6883cc2772383c742c51a7f251d0d7bcfbf869bfff77d424
+    reason: 'American spellings in the body (#1134): organisation -> organization, recognise
+      -> recognize, in the inherited v5 block and R7; no v9 record exists, so no record is
+      superseded'
+    sha256: df3e6e7946467ce35f672e389b8ee18284b0afc36e6ab4a6c081aaffae41b5a2
     superseded:
     - pinned_on: '2026-09-08'
       reason: "generic_v9: v8 plus R6 (a value in the referent own slots is supported by a\
@@ -314,6 +313,13 @@ files:
         \ condition keeps one boundary."
       retired_on: '2026-09-09'
       sha256: 84e86dc364f1f054dd2c75734345a23d9f7e24bdb2675c046241803337ac74cc
+    - pinned_on: '2026-09-09'
+      reason: 'R8/R9 corrected after round 2 of the #1109 review (#1120): R8 names a component
+        dataset under resources, restates each rule it refers to, prefers the record''s own
+        id and states the receipt cost of a landing-page label; R9''s file-enum carve-out
+        adds file_type and a collection''s compression. No v9 record exists.'
+      retired_on: '2026-09-09'
+      sha256: 96ff7f47e933d62d6883cc2772383c742c51a7f251d0d7bcfbf869bfff77d424
   src/download/prompts/d4d_tuned_arm_prompt.md:
     bytes: 2877
     pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
