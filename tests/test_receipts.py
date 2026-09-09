@@ -772,8 +772,37 @@ class IdentityRemap(unittest.TestCase):
         final2 = {"funders": [{"name": "NSF", "grant_id": "DBI"}, {"name": "NIH", "grant_id": "OT2"}]}
         self.assertEqual(rc.remap_path("funders[0].grant_id", original2, final2),
                          {"path": "funders[1].grant_id", "basis": "by_overlap"})
+        # nothing overlaps and the list kept its length: position is the only
+        # evidence and it is taken (the #908 same-shape rule; the rewrite is
+        # reported under value_changed_after_receipt) — but only then
         final3 = {"funders": [{"name": "X", "grant_id": "Y"}, {"name": "Z", "grant_id": "W"}]}
         self.assertEqual(rc.remap_path("funders[0].grant_id", original2, final3)["basis"], "same_key_stripped")
+        final4 = {"funders": [{"name": "Z", "grant_id": "W"}]}
+        self.assertEqual(rc.remap_path("funders[0].grant_id", original2, final4)["basis"], "entry_dropped")
+        final5 = {"funders": [{"name": "Z", "grant_id": "W"}, {"name": "X", "grant_id": "Y"}, {"name": "Q", "grant_id": "R"}]}
+        self.assertEqual(rc.remap_path("funders[0].grant_id", original2, final5)["basis"], "entry_dropped")
+
+    def test_a_stripped_entry_in_a_list_that_shrank_is_not_the_one_at_its_index(self):
+        """#1162 review M1: CHORUS 2026-09-01 rep3 — seven keyed creators in
+        the snapshot, two keyless in the final record, and the Consortium
+        entry (snapshot [6]) now sits at [1] where Azra Bihorac's was. The
+        first v3 credited the Bihorac receipt to it; a shrunken list carries
+        no positional evidence, so the entry is gone and the block says so."""
+        original = {"creators": [{"id": "https://x/ds#creator-team", "name": "Leadership Team"}]
+                    + [{"id": f"https://x/ds#creator-{n}", "name": n,
+                        "affiliations": [{"name": f"University of {n}"}]}
+                       for n in ("bihorac", "c2", "c3", "c4", "c5")]
+                    + [{"id": "https://x/ds#creator-consortium", "name": "CHoRUS Consortium",
+                        "affiliations": [{"name": "CHoRUS Consortium"}]}]}
+        final = {"creators": [{"name": "Leadership Team"},
+                              {"name": "CHoRUS Consortium", "affiliations": [{"name": "CHoRUS Consortium"}]}]}
+        self.assertEqual(rc.remap_path("creators[1].affiliations[0].name", original, final)["basis"], "entry_dropped")
+        self.assertEqual(rc.remap_path("creators[0].name", original, final)["basis"], "same_key_stripped")
+        manifest, texts = _manifest_and_texts()
+        md5 = manifest["bundle_md5"]
+        b = rc.check(_receipt(md5), manifest, texts, {**FULL, **final}, md5, original={**FULL, **original})
+        self.assertEqual(b["slots"]["located_after_key_stripped_count"], 0)
+        self.assertNotIn("creators[1].affiliations[0].name", b["slots"].get("remapped_by_identity", []))
 
     def test_a_stripped_id_keeps_the_receipts_coverage_credit(self):
         manifest, texts = _manifest_and_texts()
@@ -786,6 +815,9 @@ class IdentityRemap(unittest.TestCase):
         b = rc.check(rec, manifest, texts, final, md5, original=original)
         self.assertNotIn("funders[0].grant_id", b["slots"]["without_receipt"])
         self.assertEqual(b["slots"]["index_reused_by_another_entry"], [])
+        self.assertEqual(sorted(d["path"] for d in b["slots"]["located_after_key_stripped"]),
+                         ["funders[0].grant_id", "funders[0].name"])
+        self.assertEqual(b["slots"]["located_after_key_stripped_count"], 2)
         self.assertTrue(b["instrument"].startswith("v3 (#1053)"))
         self.assertIn("v2 (#1123)", b["instrument"]); self.assertIn("v1 (#720", b["instrument"])
 

@@ -496,7 +496,8 @@ receipts:
   checked: true
   instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
     anywhere (a minted id reconciliation stripped) is located as a keyless entry —
-    by overlap, then by position for the same shape (`same_key_stripped`) — instead
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
     of declared dropped; v2 (#1123): a fragment minted on an identifier the record
     carries for the dataset at its top level — its id in CURIE or resolver form, its
     doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
@@ -634,6 +635,34 @@ receipts:
     value_changed_after_receipt_count: 14
     index_reused_by_another_entry: []
     index_reused_by_another_entry_count: 0
+    located_after_key_stripped:
+    - path: creators[0]
+      resolved_path: creators[0]
+    - path: creators[0].affiliations[0].name
+      resolved_path: creators[0].affiliations[0].name
+    - path: creators[0].notes
+      resolved_path: creators[0].notes
+    - path: creators[0].principal_investigator.name
+      resolved_path: creators[0].principal_investigator.name
+    - path: creators[1].affiliations[0].name
+      resolved_path: creators[1].affiliations[0].name
+    - path: creators[1].principal_investigator.name
+      resolved_path: creators[1].principal_investigator.name
+    - path: creators[2].affiliations[0].name
+      resolved_path: creators[2].affiliations[0].name
+    - path: creators[2].principal_investigator.name
+      resolved_path: creators[2].principal_investigator.name
+    - path: creators[3].principal_investigator.name
+      resolved_path: creators[3].principal_investigator.name
+    - path: creators[4].principal_investigator.name
+      resolved_path: creators[4].principal_investigator.name
+    - path: creators[5].affiliations[0].name
+      resolved_path: creators[5].affiliations[0].name
+    - path: creators[5].notes
+      resolved_path: creators[5].notes
+    - path: creators[5].principal_investigator.name
+      resolved_path: creators[5].principal_investigator.name
+    located_after_key_stripped_count: 13
     path_not_in_snapshot: []
     path_not_in_snapshot_count: 0
     reshaped_by_reconcile:

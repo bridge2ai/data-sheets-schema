@@ -631,11 +631,15 @@ and carry no coverage credit; the gone-entry classes also count under
 path does not. An entry whose identity key the final list no longer
 carries *anywhere* is not gone: reconciliation stripped the key (a minted
 `id` under rule 11/14, the usual case), which says nothing about which
-entry it is, so it is located as a keyless entry — by overlap, then by
-position for the same shape, basis `same_key_stripped` (receipts
-instrument **v3**, #1053); a keyed entry whose key other final entries
-still carry is gone as before. Before v3 the CHORUS 2026-09-04f rep1 and
-2026-09-01 rep1 records each read two such entries as dropped and lost
+entry it is, so it is located as a keyless entry — by overlap, else by
+position for the same shape when the list kept its length, basis
+`same_key_stripped`, listed under `slots.located_after_key_stripped`
+(receipts instrument **v3**, #1053); a keyed entry whose key other final
+entries still carry is gone as before, and so is a stripped entry in a
+list that shrank — position is no evidence there, and the first v3
+credited CHORUS 2026-09-01 rep3's Bihorac receipt to the Consortium
+entry a 7 → 2 reconcile left at its index (#1162 review). Before v3 the
+CHORUS 2026-09-04f rep1 record read two such entries as dropped and lost
 the receipt credit on values sitting at the receipted path.
 Keyless entries whose only leaves are lists still join by position (#908).
 

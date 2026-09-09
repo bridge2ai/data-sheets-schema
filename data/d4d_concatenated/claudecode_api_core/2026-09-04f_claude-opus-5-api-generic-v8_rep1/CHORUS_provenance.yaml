@@ -473,7 +473,8 @@ receipts:
   checked: true
   instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
     anywhere (a minted id reconciliation stripped) is located as a keyless entry —
-    by overlap, then by position for the same shape (`same_key_stripped`) — instead
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
     of declared dropped; v2 (#1123): a fragment minted on an identifier the record
     carries for the dataset at its top level — its id in CURIE or resolver form, its
     doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
@@ -595,6 +596,48 @@ receipts:
     value_changed_after_receipt_count: 9
     index_reused_by_another_entry: []
     index_reused_by_another_entry_count: 0
+    located_after_key_stripped:
+    - path: acquisition_methods[0].acquisition_details
+      resolved_path: acquisition_methods[0].acquisition_details
+    - path: cleaning_strategies[0].cleaning_details
+      resolved_path: cleaning_strategies[0].cleaning_details
+    - path: collection_mechanisms[0].mechanism_details
+      resolved_path: collection_mechanisms[0].mechanism_details
+    - path: collection_mechanisms[1].mechanism_details
+      resolved_path: collection_mechanisms[1].mechanism_details
+    - path: collection_mechanisms[2].mechanism_details
+      resolved_path: collection_mechanisms[2].mechanism_details
+    - path: collection_mechanisms[3].mechanism_details
+      resolved_path: collection_mechanisms[3].mechanism_details
+    - path: creators[0].affiliations[0].name
+      resolved_path: creators[0].affiliations[0].name
+    - path: creators[0].principal_investigator
+      resolved_path: creators[0].principal_investigator
+    - path: creators[1]
+      resolved_path: creators[1]
+    - path: creators[2]
+      resolved_path: creators[2]
+    - path: creators[3]
+      resolved_path: creators[3]
+    - path: creators[4]
+      resolved_path: creators[4]
+    - path: creators[5]
+      resolved_path: creators[5]
+    - path: creators[6].notes
+      resolved_path: creators[6].notes
+    - path: data_collectors[0].collector_details
+      resolved_path: data_collectors[0].collector_details
+    - path: ethical_reviews[0].review_details
+      resolved_path: ethical_reviews[0].review_details
+    - path: existing_uses[0].examples[0]
+      resolved_path: existing_uses[0].examples[0]
+    - path: external_resources[0].external_resources[0]
+      resolved_path: external_resources[0].external_resources[0]
+    - path: funders[0].grants[0].grant_number
+      resolved_path: funders[0].grants[0].grant_number
+    - path: funders[0].grants[0].notes
+      resolved_path: funders[0].grants[0].notes
+    located_after_key_stripped_count: 31
     path_not_in_snapshot: []
     path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
