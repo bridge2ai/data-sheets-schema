@@ -992,11 +992,12 @@ v8-labelled API records, the fill plus the six canaries, read 617 of 682
 2026-09-04d canary and none in the fill. (The "612 of 682" this paragraph
 first gave was the 18-record count less those five, computed by hand from
 the reports, and called the fill; it was neither.) The recorded tally is
-the post-regate reading: the tally moved on six of the ten v8 records
-with a pre-regate snapshot, and on three of them with the row total
-unchanged — the unambiguous flip of `both` to `full` (04e rep1 VOICE ×1,
-04f rep1 CHORUS ×2, 04g rep3 CM4AI ×2); 04f rep3 VOICE gained four `full`
-and lost three `both` while a row was added. So `report_gate` now carries
+the post-regate reading: the tally moved on nine of the ten v8 records
+with a pre-regate snapshot (only 04b rep1 CM4AI is unchanged); on five
+the `both` count fell while `full` rose, three of them with the row
+total unchanged — the unambiguous flip of `both` to `full` (04e rep1
+VOICE ×1, 04f rep1 CHORUS ×2, 04g rep3 CM4AI ×2); 04f rep3 VOICE gained
+four `full` and lost three `both` while a row was added. So `report_gate` now carries
 the tally before and after, and the comparison is post-regate against
 post-regate. The v8 labels already carry three assembly digests (2026-09-04
 rep1; b/c/d; e/f/g), so "one boundary" is a statement about v9, not a
@@ -1215,7 +1216,8 @@ steps need:
     change: a derived key in the provenance record, no prompt, assembly or
     datasheet touched.
 
-Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14 and 15 are not); per the production rule
+Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14 and 15
+are not); per the production rule
 none of them may land between a v8 canary and its fill.
 
 ## Decisions needed before step 3
