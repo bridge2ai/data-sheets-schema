@@ -831,6 +831,32 @@ yet exist.
 
 This is not tamper-proofing. Whoever can edit a prompt can rotate its pin.
 
+**A record states its condition** (#1094): `run.condition` is what the run
+claims, from the strongest source available and `run.condition_basis`
+says which — stated by the runner (`d4d api run --condition`, `d4d
+provenance record --condition`; a `d4d api` run given no `--condition`
+uses `generic` and does *not* call that a statement), else the prompt
+file the record hashes (the bytes the run consumed — 15 #420 records are
+labelled v3 and hashed v1), else the label (an assertion by whoever typed
+it). `d4d runs check` fails under `--strict` on a record whose stated
+condition the hashed prompt, the label, or the registry contradicts, and
+reports one that nothing can check. `d4d api run|batch` refuse before
+any spend when the label names a condition the run would not use
+(`--allow-condition-mismatch` records the mismatch as declared — the label
+is the weakest source, so `runs check` reports a declared label
+disagreement and does not fail it; a hashed-prompt or registry
+disagreement always fails). A label names a condition only as a
+delimited registered token: `generic-v99` before v99 is registered, or a
+label naming two conditions, names none. Before this
+the field `arm_confounds` compared was a top-level key no record had, so
+it compared "None" with "None" and never reported a condition difference;
+`arm_facts` now reads `run.condition`, else the hashed prompt, else the
+label, and `compare-arms` reads the same field. Labels that name no
+registered condition (the 2026-07-27 series — the one `runs.py` calls the
+tuned arm, whose records hash no prompt and so cannot attest it — and the
+crate/healthsheet arms) still read `None` unless their records hash a
+condition prompt.
+
 ## Model Reasoning Capture
 
 **Reasoning effort** is established by the provenance recorder, not by the

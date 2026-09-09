@@ -990,6 +990,27 @@ rep1; b/c/d; e/f/g), so "one boundary" is a statement about v9, not a
 claim that v8 was one arm; and the block is unconditional, as step E was,
 so a re-run of an earlier condition would receive it too.
 
+### The agentic playbook carries R6–R14 (#1119, 2026-09-09)
+
+`.claude/commands/d4d-uniform-rules.md` — the one copy of the decision
+rules the agentic runtime reads (#563) — stopped at v8 R5, so an agentic
+run under the v9 condition would have received none of R6–R14 (#1119,
+from the #1109 review). The nine are mirrored in the playbook's own
+style, `test_playbook_reach` points at the v9 prompt with a row per rule,
+and the playbook hash every agentic record carries moves with it: an
+agentic boundary at the same point as the API one, with no agentic v9
+record on either side of it.
+
+The nine are the prompt's text with the playbook's tags — clause for
+clause, held by a per-clause probe table, after the first mirror kept
+each rule's statement and dropped its procedure (#1131). The same change
+edits `d4d-full-core.md`'s stale condition list, a second hashed
+playbook: 47 records pinned its previous hash and read as drifted (12
+agentic v6 records among them, the re-marked v6 canonicals included);
+the edited line is a conditions catalogue, not a decision rule, so no
+rule those records ran under moved — reported, never fatal, and named
+here so the drift is attributable.
+
 ### What a v9 arm can and cannot be compared against (#1072)
 
 `condition_delta("generic_v8", "generic_v9")` returns `["base"]`, and that
