@@ -210,24 +210,35 @@ def summarise(entries: list[dict[str, Any]]) -> dict[str, Any]:
                                  if obs else None),
         "truncated": sum(1 for e in entries
                          if e.get("stop_reason") == "max_tokens"),
-        # A run whose phases disagree on whether thinking happened is one
-        # generation regime for some phases and another for the rest (#1047):
-        # CM4AI 04g rep2 had it on audit and repair and not on full,
-        # reconcile_full or report. Named so the analysis does not average
-        # such a run in silently.
-        "phases_without_reasoning": sorted(
+        # Which phases returned no thinking block — a per-phase fact, never a
+        # per-run alarm (#1047 review, finding 3): short phases routinely skip
+        # thinking under adaptive (audit 115, report 98, core 97 of the
+        # corpus's 1,185 entries), so "some phase lacked it" is true of 146 of
+        # 152 logs and discriminates nothing. The load-bearing signal is the
+        # `full` phase without one: 14 entries in 11 logs, 9 of them CM4AI.
+        "phases_without_reasoning": sorted({
             str(e.get("phase")) for e in entries
-            if e.get("reasoning_present") is False),
-        "phases_disagree_on_presence": (
-            0 < sum(1 for e in entries if e.get("reasoning_present")) < len(entries)),
-        # The estimate is output tokens minus a text estimate, so where the
-        # endpoint's own count says 0 the estimate is measuring text-length
-        # error, not reasoning: 11,590 on rep2's full phase against an
-        # observed 0. Those entries are named rather than summed.
-        "estimate_unsound_entries": sorted(
+            if e.get("reasoning_present") is False}),
+        "full_phase_without_reasoning": any(
+            e.get("phase") == "full" and e.get("reasoning_present") is False
+            for e in entries),
+        # The estimate is output tokens minus a text-length estimate, so it
+        # carries text-length error everywhere — median 5,022 tokens where the
+        # endpoint's count exists (n=47), not smaller than where the count is
+        # 0 (median 1,618, n=46). Where the count is 0 the estimate measures
+        # *only* that error and is not reasoning at all; those entries are
+        # named. That does not certify the rest: the median error is reported
+        # beside them so no reader sums the estimate as a count.
+        "estimate_over_observed_zero": sorted({
             str(e.get("phase")) for e in entries
             if e.get("reasoning_tokens_observed") == 0
-            and (e.get("reasoning_tokens_estimate") or 0) > 0),
+            and (e.get("reasoning_tokens_estimate") or 0) > 0}),
+        "estimate_error_median": (sorted(abs(e["estimate_error"]) for e in entries
+                                         if e.get("estimate_error") is not None
+                                         and (e.get("reasoning_tokens_observed") or 0) > 0)
+                                  or [None])[len([e for e in entries
+                                                  if e.get("estimate_error") is not None
+                                                  and (e.get("reasoning_tokens_observed") or 0) > 0]) // 2],
     }
 
 

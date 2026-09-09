@@ -2,16 +2,19 @@
 
 Two CM4AI 04g runs came back with no thinking block on `full`,
 `reconcile_full` and `report` while `audit` and `repair` in the same runs
-had it, and every other fill run had it on `full`. The runner sent no
-`thinking` parameter. But on `claude-opus-5` omitting the parameter *runs
-adaptive thinking* — so these were not runs that were not asked. They were a
-provider deviation on a request identical to ten that got thinking, and the
-record could not say so, because it recorded nothing about the request.
+had it. The runner sent no `thinking` parameter. On `claude-opus-5` omitting
+the parameter *runs adaptive thinking* — so these were not runs that were
+not asked, and the record could not say so because it recorded nothing
+about the request. Stating the request fixes that and nothing more: under
+adaptive a phase with no thinking block is a legal outcome (11 of 152 logs
+have one on `full`, 9 of them CM4AI), so the record gains "we asked", not
+the power to call a recurrence a deviation (review of #1105).
 
-Two things are held here. The request states `{"type": "adaptive"}` — which
-changes nothing the model does and everything the record can say — and it
-never sends `budget_tokens`, which the issue proposed and which is a 400 on
-this model family.
+Held here: the request states `{"type": "adaptive"}` on models that accept
+it and nothing on models that predate it; it never sends `budget_tokens`,
+which the issue proposed and which is a 400 on this family; every kwarg
+the runner passes binds to the pinned SDK's real `stream()` signature —
+`output_config` is not one of them and travels as `extra_body`.
 """
 import unittest
 
@@ -79,12 +82,52 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         self.assertNotIn("budget_tokens", settings["thinking"])
         self.assertEqual(settings["thinking"], {"type": "adaptive"})
 
-    def test_effort_travels_as_output_config(self):
+    def test_effort_travels_as_extra_body_and_every_kwarg_binds_to_the_real_sdk(self):
+        """The first version passed `output_config=` as a named kwarg, and a
+        fake client that accepted anything let the test pass; the pinned SDK
+        (0.72.0) has no such keyword and no **kwargs, so the run would have
+        died with a TypeError on the first phase (review finding 1). The
+        kwargs are bound to the real signature here."""
+        import inspect
+        import anthropic
         client, calls = _capturing_client()
         _call_with_retry(client, model="claude-opus-5", max_tokens=100,
                          temperature=None, system="s", messages=[],
                          thinking={"type": "adaptive"}, effort="high")
-        self.assertEqual(calls[0]["output_config"], {"effort": "high"})
+        kw = calls[0]
+        self.assertEqual(kw["extra_body"], {"output_config": {"effort": "high"}})
+        self.assertNotIn("output_config", kw)
+        sig = inspect.signature(anthropic.resources.messages.Messages.stream)
+        sig.bind(None, **kw)                                  # raises TypeError on an unknown kwarg
+        self.assertFalse(any(p.kind is inspect.Parameter.VAR_KEYWORD
+                             for p in sig.parameters.values()),
+                         "the SDK grew **kwargs; the binding check no longer proves anything")
+
+    def test_a_model_that_predates_adaptive_thinking_gets_no_parameter(self):
+        from unittest import mock
+        from data_sheets_schema import api_runner
+        self.assertTrue(api_runner.accepts_adaptive_thinking("claude-opus-5"))
+        self.assertTrue(api_runner.accepts_adaptive_thinking("google/claude-opus-5-high"))
+        self.assertFalse(api_runner.accepts_adaptive_thinking("claude-haiku-4-5-20251001"))
+        self.assertFalse(api_runner.accepts_adaptive_thinking("claude-sonnet-4-5-20250929"))
+        settings = dict(_model_settings())
+        # the settings builder consults the gate: simulate the older model
+        with mock.patch.object(api_runner, "accepts_adaptive_thinking", lambda name: False):
+            older = _model_settings()
+        self.assertNotIn("thinking", older)
+        self.assertIn("predates adaptive thinking", older["thinking_note"])
+        self.assertEqual(settings["thinking"], {"type": "adaptive"})
+
+    def test_every_threaded_call_site_passes_the_thinking_settings(self):
+        """Only `_generate_phase` runs on the offline fixture (review finding
+        6); the readdress, repair and regate sites are held at the source."""
+        import inspect
+        from data_sheets_schema import api_runner
+        for fn in (api_runner._readdress_receipt, api_runner._repair_invalid,
+                   api_runner._regenerate_report, api_runner._generate_phase):
+            src = inspect.getsource(fn)
+            self.assertIn('thinking=settings.get("thinking")', src, fn.__name__)
+            self.assertIn('effort=settings.get("effort")', src, fn.__name__)
 
     def test_no_effort_means_no_output_config(self):
         """The config says effort is the provider default. Recording a
@@ -95,6 +138,7 @@ class TestTheRequestStatesThinking(unittest.TestCase):
                          temperature=None, system="s", messages=[],
                          thinking={"type": "adaptive"})
         self.assertNotIn("output_config", calls[0])
+        self.assertNotIn("extra_body", calls[0])
         self.assertNotIn("effort", _model_settings())
 
 
@@ -136,6 +180,8 @@ class TestEveryPhaseAndTheRecordStateIt(unittest.TestCase):
         self.assertEqual(d["model"]["thinking_requested"], {"type": "adaptive"})
         self.assertIn("default when the parameter is omitted",
                       d["model"]["thinking_basis"])
+        self.assertIn("legal adaptive outcome", d["model"]["thinking_basis"])
+        self.assertIn("judging paths", d["model"]["thinking_basis"])   # scoped, not universal
         # No configured effort: nothing invented (CLAUDE.md, "never write
         # default or a guess").
         self.assertNotIn("reasoning_effort", d["model"])
@@ -157,31 +203,41 @@ class TestSummariseNamesTheRegime(unittest.TestCase):
          "reasoning_tokens_observed": 0, "reasoning_tokens_estimate": 1809},
     ]
 
-    def test_phases_that_disagree_are_flagged_and_named(self):
-        s = reasoning.summarise(self.LOG)
-        self.assertTrue(s["phases_disagree_on_presence"])
-        self.assertEqual(s["phases_without_reasoning"],
-                         ["full", "reconcile_full", "report"])
+    def test_the_full_phase_without_a_block_is_named_and_phases_are_deduplicated(self):
+        s = reasoning.summarise(self.LOG + [dict(self.LOG[0])])   # a retried full phase
+        self.assertTrue(s["full_phase_without_reasoning"])
+        self.assertEqual(s["phases_without_reasoning"], ["full", "reconcile_full", "report"])
+        self.assertNotIn("phases_disagree_on_presence", s)      # the per-run alarm is gone
 
-    def test_an_estimate_over_an_observed_zero_is_named_unsound(self):
+    def test_an_estimate_over_an_observed_zero_is_named_with_the_error_median(self):
         """11,590 estimated on a phase the endpoint counted at 0 is not
-        reasoning; it is text-length error. Named, not summed."""
-        s = reasoning.summarise(self.LOG)
-        self.assertEqual(s["estimate_unsound_entries"],
-                         ["full", "reconcile_full", "report"])
+        reasoning; it is text-length error. Named, not summed — and the
+        median error where a count exists is beside it, because the error
+        is not smaller there (review finding 4)."""
+        s = reasoning.summarise([dict(e, estimate_error=(e["reasoning_tokens_estimate"]
+                                                          - e["reasoning_tokens_observed"]))
+                                 for e in self.LOG])
+        self.assertEqual(s["estimate_over_observed_zero"], ["full", "reconcile_full", "report"])
+        self.assertEqual(s["estimate_error_median"], 1055)      # median of |27|, |1055| over observed > 0
+        self.assertNotIn("estimate_unsound_entries", s)
 
     def test_a_uniform_run_is_not_flagged(self):
         uniform = [dict(e, reasoning_present=True, reasoning_tokens_observed=10)
                    for e in self.LOG]
         s = reasoning.summarise(uniform)
-        self.assertFalse(s["phases_disagree_on_presence"])
-        self.assertEqual(s["estimate_unsound_entries"], [])
+        self.assertFalse(s["full_phase_without_reasoning"])
+        self.assertEqual(s["estimate_over_observed_zero"], [])
 
-    def test_a_run_with_no_thinking_anywhere_is_uniform_not_disagreeing(self):
-        """Uniformly absent is a regime too, but not a *split* one."""
-        none = [dict(e, reasoning_present=False, reasoning_tokens_observed=0)
-                for e in self.LOG]
-        self.assertFalse(reasoning.summarise(none)["phases_disagree_on_presence"])
+    def test_short_phases_without_thinking_do_not_raise_the_full_phase_flag(self):
+        """Audit, report and core skip thinking routinely under adaptive —
+        146 of 152 logs have some phase without a block. That is not the
+        signal; the full phase without one is."""
+        short = [dict(e, reasoning_present=(e["phase"] == "full"),
+                      reasoning_tokens_observed=(10 if e["phase"] == "full" else 0))
+                 for e in self.LOG]
+        s = reasoning.summarise(short)
+        self.assertFalse(s["full_phase_without_reasoning"])
+        self.assertEqual(s["phases_without_reasoning"], ["audit", "full_readdress", "reconcile_full", "report"])
 
 
 if __name__ == "__main__":

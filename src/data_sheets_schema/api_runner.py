@@ -704,16 +704,24 @@ def _model_settings() -> dict[str, Any]:
         "temperature_applies": accepts_temperature(name),
     }
     # What the request says about thinking (#1047). On claude-opus-5 thinking
-    # is on by default — omitting the parameter runs adaptive — so the two
-    # CM4AI runs with no thinking block on `full` were not "not asked"; the
-    # proxy returned none for a request identical to ten that got it. Sending
-    # the request explicitly does not change what the model does. It changes
-    # what the record can *say*: a run whose request stated adaptive thinking
-    # and whose response carried none is a provider deviation, and a run whose
-    # request stated nothing is simply unknown. `budget_tokens` is never sent
-    # — it returns 400 on this model family — so the issue's own proposed
-    # shape is refused here, and a test holds that line.
-    settings["thinking"] = {"type": "adaptive"}
+    # is on by default — omitting the parameter runs adaptive — so a run with
+    # no thinking block on `full` was not "not asked". Stating the parameter
+    # changes nothing the model does; it puts the request on record, so the
+    # log's "no thinking block" can be read against what was asked. It does
+    # not make an absent block a provider fault: under adaptive the model
+    # decides per request, and a `full` phase with no block is a legal
+    # outcome — the corpus has it on 11 of 152 logs, 9 of CM4AI's 35, across
+    # four CM4AI labels and two prompt versions (#1047 review). `budget_tokens`
+    # is never sent — it returns 400 on this family — so the issue's own
+    # proposed shape is refused here, and a test holds that line. A model that
+    # predates adaptive thinking gets no parameter and a note, mirroring the
+    # temperature gate.
+    if accepts_adaptive_thinking(name):
+        settings["thinking"] = {"type": "adaptive"}
+    else:
+        settings["thinking_note"] = (
+            f"not requested: {name} predates adaptive thinking and this runner "
+            "never sends budget_tokens")
     effort = (m.get("thinking") or {}).get("effort") if isinstance(m.get("thinking"), dict) else None
     if effort:
         settings["effort"] = str(effort)
@@ -1416,6 +1424,22 @@ def accepts_temperature(model: str) -> bool:
     """Whether this model will accept a `temperature` parameter."""
     base = model.split("/")[-1]
     return not any(base.startswith(m) for m in NO_TEMPERATURE_MODELS)
+
+
+#: Families on which `thinking: {type: adaptive}` is accepted (4.6 and later;
+#: `budget_tokens` is deprecated there and a 400 from 4.7 on). Earlier models
+#: — Haiku 4.5, Sonnet 4.5 — still take `{type: enabled, budget_tokens: N}`,
+#: which this runner never sends, so on them the parameter is left out and
+#: the record says so (#1047 review, finding 5).
+ADAPTIVE_THINKING_MODELS = ("claude-opus-5", "claude-sonnet-5", "claude-fable-5",
+                            "claude-opus-4-8", "claude-opus-4-7", "claude-opus-4-6",
+                            "claude-sonnet-4-6")
+
+
+def accepts_adaptive_thinking(model: str) -> bool:
+    """Whether this model accepts `thinking: {type: adaptive}`."""
+    base = model.split("/")[-1]
+    return any(base.startswith(m) for m in ADAPTIVE_THINKING_MODELS)
 
 
 def _client():
@@ -3229,7 +3253,13 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
     if thinking is not None:
         kwargs["thinking"] = dict(thinking)
     if effort is not None:
-        kwargs["output_config"] = {"effort": effort}
+        # The pinned SDK (anthropic 0.72.0) has no `output_config` keyword on
+        # `messages.stream()` and no `**kwargs`; a named kwarg is a TypeError
+        # before the call. `extra_body` is the SDK's route for a body key it
+        # does not model, and it lands as `output_config` on the wire (#1047
+        # review, finding 1 — verified against the installed SDK with a mock
+        # transport). A test binds every kwarg here to the real signature.
+        kwargs["extra_body"] = {"output_config": {"effort": effort}}
 
     last: Exception | None = None
     incomplete = 0
@@ -4218,9 +4248,15 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # comparison of the two is `d4d provenance reasoning`'s job.
     rec.data["model"]["thinking_requested"] = dict(settings.get("thinking") or {})
     rec.data["model"]["thinking_basis"] = (
-        "set on every API request; on this model family adaptive thinking is "
-        "also the default when the parameter is omitted, so the request states "
-        "the regime rather than changing it")
+        ("set on every generation-phase request (full, audit, reconcile, "
+         "report, repair, regate, readdress); on this model family adaptive "
+         "thinking is also the default when the parameter is omitted, so the "
+         "request states the regime rather than changing it, and a phase "
+         "returning no thinking block is a legal adaptive outcome, not a "
+         "deviation. The judging paths (merge, agreement, evidence_score, "
+         "form_defects) send no parameter and are not covered by this line")
+        if settings.get("thinking") else
+        settings.get("thinking_note", "not requested"))
     if settings.get("effort"):
         rec.data["model"]["reasoning_effort"] = settings["effort"]
         rec.data["model"]["reasoning_effort_basis"] = (
