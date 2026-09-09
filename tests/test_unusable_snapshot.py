@@ -122,6 +122,39 @@ class UnusableSnapshotTest(unittest.TestCase):
         self.assertIn(f"response_chars: {len(whole)}", body)
         self.assertIn(hashlib.sha256(whole.encode()).hexdigest(), body)
 
+    def test_a_long_receipt_response_keeps_the_tail_where_the_receipt_is(self):
+        """#1104 review: the receipt is the response's last document, so a
+        receipt-parse failure lives in the tail and a head-only snapshot
+        showed a reader none of the text that failed — the header was true
+        and the body still omitted the evidence."""
+        from data_sheets_schema.api_runner import (RECEIPT_MARK,
+                                                   UNUSABLE_TAIL_CHARS)
+        record = "```yaml\nid: x\n" + ("k: v\n" * 3000) + "```\n"
+        after = "PROSE-WHERE-A-RECEIPT-SHOULD-BE and it is not a mapping"
+        whole = f"{record}{RECEIPT_MARK}\n{after}\n"
+        self.assertGreater(len(whole), UNUSABLE_HEAD_CHARS + UNUSABLE_TAIL_CHARS)
+        self._write(whole, problem="the text after the receipt marker is not a receipt")
+        body = self.written["CHORUS_full_unusable_attempt1.txt"]
+        self.assertIn(after, body)
+        self.assertIn("characters elided", body)
+        self.assertIn("the tail is where a receipt failure is", body)
+
+    def test_a_long_record_only_response_still_keeps_only_the_head(self):
+        """No marker, no tail: a record failure's question is its shape."""
+        whole = "```yaml\n" + ("k: v\n" * 5000) + "```\nEND-MARKER\n"
+        self._write(whole)
+        body = self.written["CHORUS_full_unusable_attempt1.txt"]
+        self.assertNotIn("END-MARKER", body)
+        self.assertNotIn("characters elided", body)
+
+    def test_a_short_receipt_response_is_kept_whole_without_an_elision(self):
+        from data_sheets_schema.api_runner import RECEIPT_MARK
+        whole = f"```yaml\nid: x\n```\n{RECEIPT_MARK}\nshort prose\n"
+        self._write(whole)
+        body = self.written["CHORUS_full_unusable_attempt1.txt"]
+        self.assertIn("short prose", body)
+        self.assertNotIn("characters elided", body)
+
     def test_an_empty_response_writes_nothing(self):
         """There is no evidence in an empty body, and a file full of header
         would imply there was."""

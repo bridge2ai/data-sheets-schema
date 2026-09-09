@@ -3657,6 +3657,12 @@ def _dependents_of(carry_name: str, produced_by: tuple[str, ...]) -> set[str]:
 #: its *shape* is the question, so the head is what a reader needs — enough to
 #: see what the model produced instead of the expected object.
 UNUSABLE_HEAD_CHARS = 6000
+#: On a receipt condition the receipt is the response's *last* document, so a
+#: receipt-parse failure lives in the tail and a head-only snapshot shows a
+#: reader none of the text that failed (#1104 review). When the marker is
+#: present the snapshot keeps head and tail with the elision counted between
+#: them; a record failure keeps the head, whose shape is the question.
+UNUSABLE_TAIL_CHARS = 3000
 
 
 def _record_unusable_response(spec: RunSpec, ph: str, attempt: int,
@@ -3680,16 +3686,26 @@ def _record_unusable_response(spec: RunSpec, ph: str, attempt: int,
     """
     if not text:
         return None
-    head = text[:UNUSABLE_HEAD_CHARS]
+    receipted = RECEIPT_MARK in text
+    if receipted and len(text) > UNUSABLE_HEAD_CHARS + UNUSABLE_TAIL_CHARS:
+        elided = len(text) - UNUSABLE_HEAD_CHARS - UNUSABLE_TAIL_CHARS
+        kept = (text[:UNUSABLE_HEAD_CHARS]
+                + f"\n# … {elided} characters elided …\n"
+                + text[-UNUSABLE_TAIL_CHARS:])
+        extent = (f"# first {UNUSABLE_HEAD_CHARS} and last {UNUSABLE_TAIL_CHARS} "
+                  f"characters as delivered ({elided} elided between; the receipt "
+                  "is the last document, so the tail is where a receipt failure is):\n")
+    else:
+        kept = text[:UNUSABLE_HEAD_CHARS]
+        extent = (f"# first {UNUSABLE_HEAD_CHARS} characters as delivered"
+                  f"{' (truncated here)' if len(text) > UNUSABLE_HEAD_CHARS else ''}:\n")
     body = (f"# unusable response — phase {ph}, attempt {attempt} (#1048)\n"
             f"# reason: {problem}\n"
             f"# response_chars: {len(text)}  "
             f"response_sha256: {hashlib.sha256(text.encode()).hexdigest()}\n"
             f"# output_tokens: {(usage_row or {}).get('output_tokens')}  "
             f"stop_reason: {(usage_row or {}).get('stop_reason')}\n"
-            f"# first {UNUSABLE_HEAD_CHARS} characters as delivered"
-            f"{' (truncated here)' if len(text) > UNUSABLE_HEAD_CHARS else ''}:\n"
-            + head)
+            + extent + kept)
     return _snapshot(spec, f"{spec.project}_{ph}_unusable_attempt{attempt}.txt",
                      body)
 
