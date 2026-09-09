@@ -212,7 +212,7 @@ PREDICTION_9_RULE = (
     "output tokens is refused with it) and reports `output_tokens` — a retried "
     "attempt is excluded; the phase is `full` alone (`full_readdress` and `repair_full` are "
     "their own phases and are not counted); where the provenance yields no accepted `full` "
-    "attempt (a run resumed past that phase) it is recovered from the reasoning log under the "
+    "attempt (a run resumed past that phase, or one whose only `full` row is an abandoned attempt) it is recovered from the reasoning log under the "
     "same selection; the per-project baseline is the mean over every replicate that yields "
     "one, reported with the replicate range, and a replicate that yields none is named, not "
     "skipped silently")
@@ -234,7 +234,10 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
     record) or `reasoning_log` (the provenance holds no *accepted* `full`
     attempt — no `full` row at all after a resume past that phase, like
     AI_READI 2026-09-01 rep3, or only an abandoned one whose completed
-    retry the ledger seeding lost, like VOICE 2026-09-04f rep2 — and the
+    retry was lost with the unseeded prior usage while the abandoned row
+    survived through the ledger — the shape of VOICE 2026-09-04f rep2,
+    whose own record keeps both rows; no corpus record takes this branch
+    today — and the
     log's entry is matched by (attempt, output_tokens) against the rows
     the provenance refused; `PREDICTION_9_RULE` states the rule), or None
     with the reason when neither yields an accepted attempt.
@@ -254,7 +257,9 @@ def accepted_full_output(run_dir: Path, project: str) -> dict[str, Any]:
     if acc is None:
         # No *accepted* row — not merely no row (#1155 review, S3): a record
         # whose only `full` row is an abandoned attempt must still consult
-        # the log, which holds the completed call the ledger seeding lost.
+        # the log, which holds the completed call the record lost (prior
+        # usage is seeded only when the record and the progress file both
+        # exist; the abandoned row survives through the ledger regardless).
         # The log is a recovery source for rows the provenance *lost*, never
         # an override of what the provenance says about the same attempt
         # (round 2, M1): the log carries no `unusable_reason`, so a log entry

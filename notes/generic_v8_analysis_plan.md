@@ -223,7 +223,9 @@ per-project mean is `run_telemetry.full_output_baseline` under
 `unusable_reason`; a retried attempt excluded; `full_readdress` and
 `repair_full` are their own phases and not counted), a row the provenance
 lost — a resume past the phase, or an abandoned attempt whose completed
-retry the ledger seeding dropped — recovered from the reasoning log, whose
+retry was lost with the unseeded prior usage while the abandoned row
+survived through the ledger (a shape no corpus record has today; VOICE
+2026-09-04f rep2 keeps both rows) — recovered from the reasoning log, whose
 entries are matched by (attempt, output_tokens) against the rows the
 provenance refused, never by attempt number alone; the mean over the
 replicates that yield a row with the replicate range beside it, and the
