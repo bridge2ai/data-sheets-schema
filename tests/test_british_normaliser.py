@@ -1,6 +1,6 @@
 """The write-time American-spelling normaliser (#1002, v8 step J).
 
-The instrument (`grounding.BRITISH_PATTERNS`, v3) says what is British; the
+The instrument (`grounding.BRITISH_PATTERNS`, v4 since #1006) says what is British; the
 normaliser says what the American form is, one rule per pattern. The VOICE
 v8 canary wrote `programme` four times in its own prose (8 counted, v7
 worst 2) under a prompt that has asked for American English since v5 on
@@ -69,7 +69,7 @@ SAMPLES = {
     "millilitres": "milliliters", "microlitre": "microliter", "micrometres": "micrometers",
     "nanometre": "nanometer", "paediatrician": "pediatrician", "paediatricians": "pediatricians",
     "haematopoietic": "hematopoietic", "haematocrit": "hematocrit", "sulphide": "sulfide",
-    "sulphate": "sulfate", "grey": "gray", "greyscale": "grayscale", "greyish": "grayish",
+    "sulphate": "sulfate", "grey": "gray", "greyscale": "grayscale", "greyish": "grayish", "greyed": "grayed",
 }
 
 #: American words the instrument deliberately leaves alone (homographs).

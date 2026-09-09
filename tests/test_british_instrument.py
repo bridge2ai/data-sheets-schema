@@ -59,6 +59,7 @@ class Battery(unittest.TestCase):
         ("labourers were honourably paid in millilitres and micrometres", 4),
         ("the paediatrician measured haematopoietic sulphide in grey vials", 4),
         ("greyscale and greyish, sulphate and haematocrit", 4),
+        ("greyed out and greying", 2),
         ("laborers honorably measured milliliters and micrometers", 0),
         ("the pediatrician saw hematopoietic sulfide in gray, and a greyhound", 0),
     )

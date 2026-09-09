@@ -152,7 +152,7 @@ _RULE_TABLE: tuple[tuple[str, Callable[[str], str]], ...] = (
      r"emphasis|hypothesis|synthesis|digitis|authoris|criticis|italicis|localis|"
      r"marginalis|neutralis|operationalis|popularis|scrutinis|serialis|symbolis|"
      r"tokenis|vaporis|vocalis|westernis)(?:e|ed|es|ing|ations?|ability|ers?)\b", _ise),
-    (r"\bgrey(?:s|er|est|ish|ing|scale)?\b", _swap("grey", "gray")),
+    (r"\bgrey(?:s|ed|er|est|ish|ing|scale)?\b", _swap("grey", "gray")),
 )
 
 RULES: tuple[tuple[re.Pattern[str], Callable[[str], str]], ...] = tuple(

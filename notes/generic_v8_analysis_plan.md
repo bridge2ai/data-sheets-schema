@@ -1361,8 +1361,12 @@ steps need:
     (0 → 2, `nanometres`) and the 2026-08-28d v7 AI_READI canary (44 →
     45), none of which carries a canary block; the v7 production arm (139)
     and the 2026-08-22c baseline (88) are unchanged, so no gate row and no
-    canary verdict moves. A surname `Grey` would be counted, as the Temerty
-    Centre is, and left as written by the normaliser's title-case skip. An
+    canary verdict moves; none of the eight forms occurs in any record, and
+    the 52 new occurrences are the widened patterns' (`haematocrit` 19,
+    `microlitre` 15, `micrometres` 12, `nanometres` 6). A surname `Grey`
+    would be counted, as the Temerty Centre is, and the normaliser leaves it
+    as written only inside a title-case run — a bare `family_name: Grey` is
+    rewritten and logged, and the disposition command restores it. An
     instrument change lands at a condition boundary: the v8 fill is
     complete and no v9 record exists. Not a generation-path change on its
     own — but the normaliser is on the generation path, and its v2 rule

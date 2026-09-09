@@ -269,7 +269,7 @@ BRITISH_PATTERNS = tuple(re.compile(rx) for rx in (
     # patterns above; `grey` is new. A surname Grey is counted like the
     # Temerty Centre is — the count is a fact about the text, and the
     # normaliser's title-case skip leaves the name as written.
-    r"\bgrey(?:s|er|est|ish|ing|scale)?\b",
+    r"\bgrey(?:s|ed|er|est|ish|ing|scale)?\b",
 ))
 _QUOTED = re.compile(r'"[^"\n]*"')
 
@@ -291,6 +291,13 @@ def british_spellings(text: str) -> int:
     (tumour, oedema, metre, paediatric, haem-) and the -ise verb family the
     reviews kept finding at 0. Recomputed corpus-wide in the same change,
     by the same discipline: `d4d provenance backfill-checks --blocks form`.
+
+    Instrument v4 (#1006): the forms the Codex review of #1003 found v3
+    could not see — labourers, honourably, millilitres, micrometres,
+    paediatricians, haematopoietic, sulphide, grey — by widening seven
+    patterns (`-our` + ers, honour + ably, the metre/litre prefixes, the
+    haemato- stem, any sulph- suffix) and adding grey. Recomputed over all
+    282 form blocks in the same change; the block names `british_instrument`.
     """
     prose = _QUOTED.sub(" ", text).lower()
     return sum(len(p.findall(prose)) for p in BRITISH_PATTERNS)
