@@ -752,11 +752,17 @@ d4d agents check-echo --agent d4d-rubric10-semantic --reply -   # exit 1 if stal
 d4d agents digest                                   # the pin each output records
 ```
 
-The preamble names a **section** of the definition and asks the agent to
-quote its longest sentence. The sentence itself is withheld: the first
-version printed it, so `preamble | check-echo` returned a tick and a stale
-agent that copied the prompt passed the check it exists to fail (#1102). The
-expected text lives only in the verifier.
+The preamble names a **section** of the definition and the **opening
+words** of one sentence in it, and asks the agent to quote that sentence in
+full. The sentence itself is withheld: the first version printed it, so
+`preamble | check-echo` returned a tick and a stale agent that copied the
+prompt passed the check it exists to fail (#1102). The expected text lives
+only in the verifier. The second version asked for the section's *longest*
+sentence while the verifier held the longest fresh *line*; on the
+review-record definition the sentence carrying that line ranked 2nd of 38,
+so an agent that answered exactly as asked was told to stop (#1145). The
+question and the answer are now the same unit, and a fenced block is never
+prose.
 
 That text is chosen by being **verifiably absent from the previous version**
 of the file — not by being long (replayed against the real incident,
@@ -764,9 +770,10 @@ of the file — not by being long (replayed against the real incident,
 share) and not by appearing in a diff (a reformat "changes" a shared line).
 `tests/test_agent_pin.py` pins both the replay and the reformat case.
 
-Where a definition carries nothing its predecessor lacked, `preamble` and
-`check-echo` **exit non-zero** rather than issue a question that cannot fail;
-`digest` marks those definitions. A check that cannot fail is worse than no
+Where a definition carries nothing its predecessor lacked — or nothing that
+can be named by its opening words without handing over more than half the
+sentence (#1145) — `preamble` and `check-echo` **exit non-zero** rather than
+issue a question that cannot fail; `digest` marks those definitions. A check that cannot fail is worse than no
 check, because it is reported as a pass.
 
 **What a pass does and does not prove.** A refusal is strong evidence: the
