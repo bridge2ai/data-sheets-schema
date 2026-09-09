@@ -553,7 +553,20 @@ instruction defines `both` as present in both — and the finding names
 the cause so the regate can fix the row (`claims_core_cannot_hold` counts
 those the full record does carry, apart from substantive contradictions;
 #990/#992); the block carries
-`instrument` from v2 (#996). Since #998 the report phase carries the core
+`instrument` from v2 (#996) and, from v4 (#1122), `rows_by_record` — the
+dispositions rows tallied by their record column (`full`, `core`, `both`,
+`either` for an empty cell, `no_record_column` for a table that has none —
+a report format that names no record, "not measurable" rather than "no
+`both` rows"; two v2 reports do name one — `invalid` for anything else),
+because a `both` row wrongly flipped to
+`full` resolves against the full record only and raises nothing, so the
+count, or the rate over the row total, is what a reader compares. Over the
+18 v8-labelled API records — the 12-record fill plus six canaries — it is
+617 `both` of 682 (90.5%); the fill alone is 419 of 461 (90.9%); the five
+rows on slots the core cannot hold are all on the VOICE 2026-09-04d canary.
+The recorded tally is the post-regate reading, and the regate is the step
+that flips rows — `report_gate` carries `rows_by_record_before`/`_after` on
+runs made since #1122. Since #998 the report phase carries the core
 class's top-level slot inventory (`core_inventory_block`) before its
 instruction, so the model can see which slots the core declares rather
 than infer it from the carried core record, where an empty slot and an
@@ -889,7 +902,17 @@ label, and `compare-arms` reads the same field. Labels that name no
 registered condition (the 2026-07-27 series — the one `runs.py` calls the
 tuned arm, whose records hash no prompt and so cannot attest it — and the
 crate/healthsheet arms) still read `None` unless their records hash a
-condition prompt.
+condition prompt. The `full` phase's output cap is a procedure field too
+(`full max_tokens`, #771): three of the five v7 canaries ran at 96k and
+two at 128k with nothing reading it, so `compare-arms` now reports a cap
+that is not constant within an arm and `arm_confounds` one that differs
+between arms — read from the `full` rows of `api_usage` (every distinct
+cap they carry: the rows are what each call sent, and a resumed run keeps
+its earlier rows), else from `model.max_tokens_by_phase`, which is
+recomputed at record write; an agentic record carries no per-phase cap
+(54 carry `shared_config.max_tokens: 16000`, a config assertion like the
+`temperature` beside it, not the runtime's cap) and is skipped like an
+absent reviewer.
 
 ## Model Reasoning Capture
 

@@ -216,6 +216,36 @@ work with a migration of committed values; separate).
 | 8 | populated leaves, rubric10/20 | A, watched | not below the v7 per-project replicate minimum; a fall means the larger digest displaced reading (the v7 markers confound, in a new form) |
 | 9 | spend | A | prompt tokens rise by ~2,900 chars of digest per call; `full` output tokens within ±10% of v7's per-project mean |
 
+**Prediction 9's baseline rule, registered (#1026, 2026-09-09).** The v7
+per-project mean is `run_telemetry.full_output_baseline` under
+`PREDICTION_9_RULE` — the accepted attempt per phase (the last `end_turn`
+`full` attempt with no abandoned-transport marker and no
+`unusable_reason`; a retried attempt excluded; `full_readdress` and
+`repair_full` are their own phases and not counted), a row the provenance
+lost — a resume past the phase, or an abandoned attempt whose completed
+retry was lost with the unseeded prior usage while the abandoned row
+survived through the ledger (a shape no corpus record has today; VOICE
+2026-09-04f rep2 keeps both rows) — recovered from the reasoning log, whose
+entries are matched by (attempt, output_tokens) against the rows the
+provenance refused, never by attempt number alone; the mean over the
+replicates that yield a row with the replicate range beside it, and the
+others named — printed by `d4d runs full-output-baseline`. The AI_READI 2026-09-04f row was read
+three ways before the rule was code: by hand from rep2's retried attempt
+(86,707, +3.2%), then over the two replicates with a provenance row alone,
+rep3 dropped (78,646, +13.8%); the rule reads +4.4% (v7 production: 79,078
+/ 78,215 / 99,870 → 85,721, rep3 recovered from its reasoning log). Under
+the same rule VOICE is 76,159 (73,375 / 74,126 / 80,976), CHORUS 41,068
+(35,025 / 40,186 / 47,994) and CM4AI 41,370 (26,766 with rep1's accepted
+attempt 2 / 31,044 / 66,300 — a 2.5× range, so a ±10% band on that mean is
+a weaker instrument than the mean suggests). The telemetry comparison
+(`d4d runs telemetry`) read the *first* `end_turn` attempt until this
+change — the one a retried phase threw away, wrong on all nine records
+whose provenance carries more than one accepted-eligible `full` attempt
+(ten phases with AI_READI 2026-09-01 rep3, whose two live only in its
+log); on the five that kept a phase-1 snapshot the accepted attempt is
+the one whose `visible_text_chars` matches the artifact — and now reads
+the accepted one.
+
 ### Falsification tests
 
 - **Rules restated, mechanism absent.** If prediction 1 holds but 4 does
@@ -983,9 +1013,23 @@ slot, and no change anywhere else — read with one caveat the review
 named: the gate resolves a `full` row against the full record only, so a
 row wrongly flipped from `both` to `full` produces no finding; the block
 therefore says the test is on the *root* of the slot path and applies to
-retained/changed/added rows, and a canary reader should compare the count
-of `both` rows with the v8 fill's (612 of 682) rather than trust the zero
-alone. The v8 labels already carry three assembly digests (2026-09-04
+retained/changed/added rows, and a canary reader should compare the rate
+of `both` rows with the v8 fill's rather than trust the zero alone — read
+off `report_claims.rows_by_record` (instrument v4, #1122). The fill as
+defined above (12 records) reads 419 `both` of 461 (90.9%); all 18
+v8-labelled API records, the fill plus the six canaries, read 617 of 682
+(90.5%), with the five rows on slots the core cannot hold all on the VOICE
+2026-09-04d canary and none in the fill. (The "612 of 682" this paragraph
+first gave was the 18-record count less those five, computed by hand from
+the reports, and called the fill; it was neither.) The recorded tally is
+the post-regate reading: the tally moved on nine of the ten v8 records
+with a pre-regate snapshot (only 04b rep1 CM4AI is unchanged); on five
+the `both` count fell while `full` rose, three of them with the row
+total unchanged — the unambiguous flip of `both` to `full` (04e rep1
+VOICE ×1, 04f rep1 CHORUS ×2, 04g rep3 CM4AI ×2); 04f rep3 VOICE gained
+four `full` and lost three `both` while a row was added. So `report_gate` now carries
+the tally before and after, and the comparison is post-regate against
+post-regate. The v8 labels already carry three assembly digests (2026-09-04
 rep1; b/c/d; e/f/g), so "one boundary" is a statement about v9, not a
 claim that v8 was one arm; and the block is unconditional, as step E was,
 so a re-run of an earlier condition would receive it too.
@@ -1286,8 +1330,24 @@ steps need:
     from the git blob. v9 R8's "needs a receipt like any other value" clause
     states the cost v2 removes; #1147 rotates it (no v9 record exists).
 
-Each of 2–5, 7–10, 11 and 12 is a generation-path change (13 and 14 are not); per the production rule
-none of them may land between a v8 canary and its fill.
+16. **The dispositions rows are tallied by record column (#1122, 2026-09-09,
+    report_claims instrument v4).** The v9 canary reader was told to compare
+    the count of `both` rows with the v8 fill's, and the block carried only
+    the total. `rows_by_record` (`full`/`core`/`both`/`either`/
+    `no_record_column`/`invalid`, fixed keys, summing to `disposition_rows`)
+    is now on every record: recomputed over the corpus with
+    `backfill-checks --blocks report_claims --overwrite`, which moved no
+    finding and no count into or out of the block — only the new key and
+    the instrument string, and 12 rows on two pre-v8 records from `either`
+    to `no_record_column` when the two were split. The 12-record fill reads 419 `both` of 461;
+    all 18 v8-labelled API records, 617 of 682. Not a generation-path
+    change: a derived key in the provenance record, no prompt, assembly or
+    datasheet touched.
+
+Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14 and 16
+are not; 15 is classified with 17, the receipts instrument's next revision,
+#1053); per the production rule none of them may land between a v8 canary
+and its fill.
 
 ## Decisions needed before step 3
 
