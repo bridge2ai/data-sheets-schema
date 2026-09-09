@@ -1030,6 +1030,38 @@ runner sends says "neighbouring" too and is filed as #1138, because
 `PHASE_INSTRUCTIONS` is in the assembly digest and moving it is a
 condition-boundary change.
 
+### The schema digest moved with #1114 (2026-09-09)
+
+The `doi` slot's description carried a real Nature DOI as its example,
+and the schema digest — sent ahead of the arm prompt on every request —
+renders slot descriptions, so a real identifier sat in model-facing text
+on every run (#1114, found by the #647 guard once it scanned the digest).
+The example is now a form (the docExample
+`10.xxxxx/example.1234`; the description states the shape without an
+instance). `schema_digest`'s
+`Dataset` fingerprint moved from `ffe03dd469feb388e0a4149e4f5ccb6f` to
+`a91bad8b8eaf7c34b147ff5970474342` (CoreDataset `386a470d…` → `dfb9f93c…`) and
+`schema.core_sha256` with it (the inventory ledger gained the new digest; no
+slot was added or removed). The operative sentence of the `doi`
+description — the bare DOI only — stays inside the digest's 300-character
+window; the first draft pushed it out, which would have been a rule
+removal presented as an identifier removal (#1126 review). The docExample
+annotations and `latest_version_doi`'s description lost their real and
+corpus identifiers too: they reach the agentic runtime through the merged
+schema file, not the digest.
+No v9 record exists, so the condition still has one boundary; a v9 run
+differs from the v8 fill by the scope block, R6–R14, the report-phase
+inventory (#998) and this digest together, and no comparison against the
+fill can attribute a difference to any one of them. The organization
+docExample pair is form-only (`https://ror.org/0xxxxxxxx`, "Example
+University", #1115), because docExample is model-facing on the agentic
+path. The review of round 2 found two more real-identifier docExamples
+(a registered trial in `D4D_Human.yaml`, a DOI that does not exist in
+`D4D_Uses.yaml`) and the review of round 3 an ORCID placeholder whose
+ISO 7064 check digit was valid (`0000-0001-2345-6789`, assignable to a
+person); all three are form-only now — the ORCID ends in a digit its
+checksum forbids — and none moved the digest.
+
 ### What a v9 arm can and cannot be compared against (#1072)
 
 `condition_delta("generic_v8", "generic_v9")` returns `["base"]`, and that
