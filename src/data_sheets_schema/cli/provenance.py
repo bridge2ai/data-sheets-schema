@@ -1039,26 +1039,24 @@ def backfill_bundle_md5(execute, label):
       recovered                            a committed version matches the sha256
       already_recorded                     left alone
       no_bundle_path / no_bundle_sha256    nothing to prove against
-      no_blob_matches_the_recorded_sha256  the bytes are in no commit
+      no_blob_matches_the_recorded_sha256  the bytes are in no reachable commit
+      git_unavailable / record_unreadable  the tool could not look, which is
+                                           not a finding about the corpus
+    Archived records under data/ATTIC are outside CONCAT_DIR and not visited.
     """
+    _require_repo_root_cwd("d4d provenance backfill-bundle-md5")   # CONCAT_DIR is repo-relative
     from data_sheets_schema.provenance import (
-        BUNDLE_MD5_RECOVERED, apply_bundle_md5, record_path_for, resolve_bundle_md5,
+        BUNDLE_MD5_RECOVERED, CONCAT_DIR, apply_bundle_md5, resolve_bundle_md5,
     )
-    from data_sheets_schema.runs import discover
+    # Every provenance record on disk, not `discover()`'s view of it: a core
+    # record whose full counterpart is absent is invisible to discover()
+    # (#1129 review, finding 6 — one such record exists today).
     outcomes: dict[str, list] = {}
-    seen = set()
-    for run in discover():
-        if run.is_core or run.deterministic:
+    for path in sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml")):
+        if label and path.parent.name != label:
             continue
-        if label and run.label != label:
-            continue
-        for proj in run.projects:
-            path = record_path_for(proj, run.method, run.label)
-            if path in seen or not path.exists():
-                continue
-            seen.add(path)
-            r = resolve_bundle_md5(path)
-            outcomes.setdefault(r["status"], []).append((path, r))
+        r = resolve_bundle_md5(path)
+        outcomes.setdefault(r["status"], []).append((path, r))
     verb = "recovering" if execute else "would recover"
     for status, items in sorted(outcomes.items()):
         click.echo(f"   {status:40} {len(items):4}")

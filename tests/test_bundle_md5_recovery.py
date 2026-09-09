@@ -40,6 +40,42 @@ class Resolve(unittest.TestCase):
             self.assertEqual((r["status"], r["md5"], r["commit"][:4], r["date"]),
                              (pv.BUNDLE_MD5_RECOVERED, MD5, "aaaa", "2026-07-28"))
 
+    def test_the_oldest_matching_commit_is_named(self):
+        """Identical bytes re-committed (merge sides under --full-history)
+        must not name an arbitrary later commit (#1129 review)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            p = _record(tmp, {"bundle_path": "data/x.txt", "bundle_sha256": SHA})
+            dup = [{"commit": "c" * 40, "date": "2026-09-01", "sha256": SHA, "md5": MD5}] + HISTORY
+            r = pv.resolve_bundle_md5(p, history=lambda bp: dup)
+            self.assertEqual((r["commit"][:4], r["matches"]), ("aaaa", 2))
+
+    def test_a_tool_failure_is_not_a_finding_about_the_corpus(self):
+        """`git log` failing used to read as "the bytes are in no commit"
+        (#1129 review, finding 3)."""
+        def broken(bp):
+            raise pv.GitUnavailable("fatal: not a git repository")
+        with tempfile.TemporaryDirectory() as tmp:
+            p = _record(tmp, {"bundle_path": "data/x.txt", "bundle_sha256": SHA})
+            r = pv.resolve_bundle_md5(p, history=broken)
+            self.assertEqual(r["status"], pv.BUNDLE_MD5_GIT_UNAVAILABLE)
+            self.assertIsNone(pv.apply_bundle_md5(p, history=broken))
+            bad = Path(tmp) / "bad_provenance.yaml"; bad.write_text("inputs: [unclosed")
+            self.assertEqual(pv.resolve_bundle_md5(bad)["status"], pv.BUNDLE_MD5_UNREADABLE)
+
+    def test_the_real_history_resolves_from_any_cwd(self):
+        import os
+        bp = "data/preprocessed/concatenated/CHORUS_preprocessed.txt"
+        if not (pv._REPO_ROOT / bp).exists():
+            self.skipTest("bundle not in this checkout")
+        here = os.getcwd()
+        try:
+            os.chdir(tempfile.gettempdir())
+            pv.bundle_blob_history.cache_clear()
+            versions = pv.bundle_blob_history(bp)
+        finally:
+            os.chdir(here)
+        self.assertGreaterEqual(len(versions), 2)
+
     def test_the_other_outcomes_say_why(self):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(pv.resolve_bundle_md5(_record(tmp, {"bundle_path": "x", "bundle_sha256": SHA, "bundle_md5": MD5}),
@@ -75,30 +111,32 @@ class Apply(unittest.TestCase):
 
 
 class OnTheCorpus(unittest.TestCase):
-    def test_every_recovered_md5_is_current_or_a_history_before(self):
+    def test_every_recovered_md5_on_disk_is_current_or_a_history_before(self):
         """The drift test's rule (#910): a drifted record must pin a hash some
-        history event names as its `before`. Every md5 this recovers is
-        either the bundle as it is or such a before — so the backfill adds
-        no hash the history cannot explain. Read-only."""
-        from data_sheets_schema.runs import discover
+        history event names as its `before`. Asserted on the md5 as WRITTEN
+        to every record whose `bundle_md5_basis` says it was recovered —
+        not on a re-resolution, which after the backfill returns
+        `already_recorded` for all of them and made the first version of
+        this test a permanent skip (#1129 review, must-fix 1). Read-only."""
+        import glob
         from tests.test_cli.test_bundle_drift import _history_befores
         befores = _history_befores()
-        checked = 0
-        for run in discover():
-            if run.is_core or run.deterministic:
+        recovered, bad = 0, []
+        for path in sorted(glob.glob(str(pv.CONCAT_DIR / "*_core" / "*" / "*_provenance.yaml"))):
+            d = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+            inp = d.get("inputs") or {}
+            if not str(inp.get("bundle_md5_basis") or "").startswith("recovered (#1121)"):
                 continue
-            for proj in run.projects:
-                path = pv.record_path_for(proj, run.method, run.label)
-                if not path.exists():
-                    continue
-                r = pv.resolve_bundle_md5(path)
-                if r["status"] != pv.BUNDLE_MD5_RECOVERED:
-                    continue
-                checked += 1
-                current = hashlib.md5(Path(r["path"]).read_bytes()).hexdigest() if Path(r["path"]).exists() else None
-                self.assertTrue(r["md5"] == current or r["md5"] in befores, (path, r["md5"]))
-        if checked == 0:
-            self.skipTest("no record left to recover in this checkout")
+            recovered += 1
+            md5 = inp.get("bundle_md5")
+            bundle = pv._REPO_ROOT / inp["bundle_path"]
+            current = hashlib.md5(bundle.read_bytes()).hexdigest() if bundle.exists() else None
+            if not (md5 == current or md5 in befores):
+                bad.append((path, md5))
+        if not list((pv.CONCAT_DIR).glob("*_core/*/*_provenance.yaml")):
+            self.skipTest("no provenance records in this checkout")
+        self.assertGreater(recovered, 0, "the recovered records are gone, or their basis field was dropped")
+        self.assertEqual(bad, [])
 
 
 if __name__ == "__main__":
