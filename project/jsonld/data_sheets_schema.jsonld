@@ -6752,7 +6752,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.1056/NEJMoa2404007)",
+          "value": "Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.xxxx/xxxxx)",
           "@type": "Annotation"
         }
       ],
@@ -7552,7 +7552,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "All participants provided written informed consent; study registered at ClinicalTrials.gov NCT05395169",
+          "value": "All participants provided written informed consent; study registered at ClinicalTrials.gov NCTXXXXXXXX",
           "@type": "Annotation"
         }
       ],
@@ -12378,7 +12378,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.1056/NEJMoa2404007)",
+              "value": "Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.xxxx/xxxxx)",
               "@type": "Annotation"
             }
           ],
@@ -13312,7 +13312,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "All participants provided written informed consent; study registered at ClinicalTrials.gov NCT05395169",
+              "value": "All participants provided written informed consent; study registered at ClinicalTrials.gov NCTXXXXXXXX",
               "@type": "Annotation"
             }
           ],
@@ -14336,9 +14336,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-09-09T09:44:43",
+  "source_file_date": "2026-09-09T11:21:04",
   "source_file_size": 34754,
-  "generation_date": "2026-09-09T10:34:25",
+  "generation_date": "2026-09-09T11:21:10",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

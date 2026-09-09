@@ -107,6 +107,8 @@ def allowlist_findings(allowed: dict, surfaces: list[tuple[str, str, str]]) -> l
             if (name, tok) not in allowed:
                 out.append(f"unlisted: {name} [{surface}] {shape} {tok!r}")
     for (name, tok), entry in allowed.items():
+        if not str(entry.get("reason", "")).strip():
+            out.append(f"no reason: {name} {tok!r}")
         text = by_name.get((name, entry["surface"]))
         if text is None:
             out.append(f"no surface: {name} [{entry['surface']}]"); continue
@@ -161,6 +163,13 @@ class TestTheScannerSeesEachShape(unittest.TestCase):
 class TestTheAllowlistMachinery(unittest.TestCase):
     """The real allowlist is empty since #1114; the checks it relies on are
     driven here over a synthetic one so they cannot rot unexercised."""
+    def test_an_entry_without_a_reason_is_a_finding(self):
+        surfaces = [("f", "body", "see doi:10.1234/abcd here")]
+        allowed = {("f", "doi:10.1234/abcd"): {"surface": "body", "line_contains": "see", "reason": "  "}}
+        self.assertIn("no reason: f 'doi:10.1234/abcd'", allowlist_findings(allowed, surfaces))
+        allowed[("f", "doi:10.1234/abcd")]["reason"] = "#647"
+        self.assertNotIn("no reason: f 'doi:10.1234/abcd'", allowlist_findings(allowed, surfaces))
+
 
     SURFACES = [("t", "digest", "a line with ROR:01an7q238 (e.g. context)\nanother line\n")]
 
@@ -189,11 +198,10 @@ class TestNoRealIdentifierOnAnyModelFacingSurface(unittest.TestCase):
         self.assertIn((".claude/commands/d4d-full-core.md", "playbook"), names)
 
     def test_no_unlisted_real_identifier(self):
-        offenders = []
-        for name, surface, text in texts():
-            for shape, tok in real_identifiers(text):
-                if (name, tok) not in ALLOWED:
-                    offenders.append(f"{name} [{surface}]: {shape} {tok!r}")
+        """Delegates to `allowlist_findings`, the machinery the synthetic
+        tests exercise, so the check that gates the repository is the one
+        that is tested (#1126 review, R1)."""
+        offenders = [f for f in allowlist_findings(ALLOWED, texts()) if f.startswith("unlisted:")]
         self.assertEqual(offenders, [],
                          "a real identifier on a model-facing surface is a candidate "
                          "for copy-through into a record where it grounds against "
@@ -214,17 +222,8 @@ class TestNoRealIdentifierOnAnyModelFacingSurface(unittest.TestCase):
         """An entry for a token that is gone is a claim that has stopped being
         true; an entry whose token has left the line that justified it is one
         that has stopped applying. Both come out when the token moves."""
-        by_name = {(n, s): t for n, s, t in texts()}
-        for (name, tok), entry in ALLOWED.items():
-            with self.subTest(entry=f"{name}: {tok}"):
-                self.assertTrue(entry["reason"].strip(), "an allowlist entry needs a reason")
-                text = by_name.get((name, entry["surface"]))
-                self.assertIsNotNone(text, f"no surface {entry['surface']!r} named {name!r}")
-                lines = [ln for ln in text.splitlines() if tok in ln]
-                self.assertTrue(lines, "the token is gone; drop the entry")
-                for ln in lines:
-                    self.assertIn(entry["line_contains"], ln,
-                                  "the token has left the line that justified the entry")
+        stale = [f for f in allowlist_findings(ALLOWED, texts()) if not f.startswith("unlisted:")]
+        self.assertEqual(stale, [], "\n".join(stale))
 
     def test_the_removed_v5_ror_stays_out(self):
         """The first version allowlisted USF's ROR in the v5 rationale as

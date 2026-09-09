@@ -106,7 +106,7 @@ class DigestIsAFunctionOfContentTest(unittest.TestCase):
         the agentic runtime through the merged schema file, not the digest.
         No slot added or removed: the inventory under the new digest is the
         old one (98 Dataset, 84 CoreDataset), no record's validity moves,
-        and the CoreDataset digest moves with it. No v9 record exists.
+        and the CoreDataset digest moves with it (`386a470d…` → `dfb9f93c…`). No v9 record exists.
         """
         if not self.SCHEMA.exists():
             self.skipTest("merged schema not present in this checkout")

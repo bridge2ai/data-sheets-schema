@@ -996,7 +996,7 @@ The `doi` slot's description carried a real Nature DOI as its example,
 and the schema digest — sent ahead of the arm prompt on every request —
 renders slot descriptions, so a real identifier sat in model-facing text
 on every run (#1114, found by the #647 guard once it scanned the digest).
-The example is now a form (`10.xxxxx/abcd.1234`). `schema_digest`'s
+The example is now a form (the docExample `10.xxxxx/example.1234`; the description states the shape without an instance). `schema_digest`'s
 `Dataset` fingerprint moved from `ffe03dd469feb388e0a4149e4f5ccb6f` to
 `a91bad8b8eaf7c34b147ff5970474342` (CoreDataset `386a470d…` → `dfb9f93c…`) and
 `schema.core_sha256` with it (the inventory ledger gained the new digest; no
@@ -1011,7 +1011,7 @@ No v9 record exists, so the condition still has one boundary; a v9 run
 differs from the v8 fill by the scope block, R6–R14, the report-phase
 inventory (#998) and this digest together, and no comparison against the
 fill can attribute a difference to any one of them. The organization
-docExample pair now names one institution (#1115; not model-facing).
+docExample pair is form-only (`https://ror.org/0xxxxxxxx`, "Example University", #1115), because docExample is model-facing on the agentic path; the round-3 review found two more real-identifier docExamples (a registered trial in `D4D_Human.yaml`, a DOI that does not exist in `D4D_Uses.yaml`), made form-only without moving the digest.
 
 ### What a v9 arm can and cannot be compared against (#1072)
 
