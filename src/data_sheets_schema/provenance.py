@@ -1213,6 +1213,28 @@ def companion_facts(project: str, method: str, label: str,
     return out
 
 
+def _condition_claim(label: str, stated: str | None,
+                     prompt_paths=None) -> dict[str, Any]:
+    """Three sources, strongest first (#1094 review, M2): the runner's own
+    statement; the prompt file the record hashes (the bytes the run
+    consumed — 15 #420 records are labelled v3 and hashed v1); the label,
+    which is an assertion by whoever typed it. The basis says which."""
+    from data_sheets_schema.runs import (condition_from_label,        # lazy: runs imports this module
+                                         condition_from_prompt_paths)
+    if isinstance(stated, str) and stated.strip():
+        return {"condition": stated.strip(), "condition_basis": "stated by the runner"}
+    by_prompt = condition_from_prompt_paths(str(p) for p in (prompt_paths or []))
+    if by_prompt:
+        return {"condition": by_prompt,
+                "condition_basis": "read from the prompt file the record hashes; no runner stated it"}
+    derived = condition_from_label(label)
+    if derived:
+        return {"condition": derived,
+                "condition_basis": "read from the label; no runner stated it and no prompt file names one"}
+    return {"condition": None,
+            "condition_basis": "no runner stated it, no prompt file names one, and the label names no registered condition"}
+
+
 def build_record(project: str, method: str, label: str, *, mode: str,
                  input_bundle: Path | None = None,
                  input_verified: bool = False,
@@ -1225,7 +1247,10 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                  phases: list[dict[str, Any]] | None = None,
                  outputs: dict[str, Path] | None = None,
                  extra_notes: list[str] | None = None,
-                 receipt_expected: bool = False) -> ProvenanceRecord:
+                 receipt_expected: bool = False,
+                 condition: str | None = None,
+                 condition_source_paths: list[str] | None = None,
+                 condition_mismatch_allowed: bool = False) -> ProvenanceRecord:
     """Assemble a provenance record for one project-run.
 
     ``mode`` is ``live`` or ``reconstructed``. ``input_verified`` must be True
@@ -1476,7 +1501,15 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         "record_generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "run": {"label": label, "project": project, "method": method,
                 "arm": _arm_for(base),
-                "replicate": _replicate_for(label)},
+                "replicate": _replicate_for(label),
+                # The condition the run claims, so a record can be
+                # contradicted by its label the way `uncanonical` contradicts
+                # a prompt (#1094): stated by the runner where it knows it,
+                # read off the label otherwise, and the basis says which.
+                **_condition_claim(label, condition,
+                                   condition_source_paths if condition_source_paths is not None
+                                   else [str(p) for p in (prompt_paths or [])]),
+                **({"condition_mismatch_allowed": True} if condition_mismatch_allowed else {})},
         "model": model or None,
         "prompts": prompt_facts(prompt_paths, prompt_request,
                                 prompt_request_spec),
