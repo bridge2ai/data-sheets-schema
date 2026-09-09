@@ -185,7 +185,7 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
                        "do not read that rule as a reason to omit the object",
                        "copied into the core record's distributions",
                        "and the schema does not require an id",
-                       "the one base every consumer already holds",
+                       "names this dataset and nothing else",
                        "labels a part of that entity, not of this one"),
         "enum from a stated category": ("in the source's own words or a plain restatement of them",
                                         "supports the name and not the class",

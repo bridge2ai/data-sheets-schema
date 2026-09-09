@@ -222,10 +222,12 @@ to every project:
   which refines the rule that mints a label on an identifier the evidence
   supplies, without replacing it — and this record's own id is the base to
   prefer: a label on the dataset's landing page or DOI is licensed too,
-  and this record's own id is the one base every consumer already holds —
-  the core projector and the `resources` match join on it, where `page`
-  and `doi` are slots a reader may not have (#1123, #1147). A fragment
-  appended to another entity's identifier — an organization's,
+  but this record's own id names this dataset and nothing else, where a
+  landing page is often a site or project root shared with sibling
+  releases, so a part labelled there cannot be told apart from a sibling's
+  by its id alone; `id` is also the one identifier every record carries,
+  where `page` and `doi` are optional (#1123, #1147). A fragment appended
+  to another entity's identifier — an organization's,
   another dataset's — labels a part of that entity, not of this one.
 
 - **A slot whose declared range is an enumeration is populated only from a

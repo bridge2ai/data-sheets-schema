@@ -1032,9 +1032,10 @@ condition-boundary change.
 
 ### R8 no longer charges a landing-page label a receipt (#1147, 2026-09-09)
 
-The eighth v9 pin (three registrations and corrections on 2026-09-08,
-two #1120 corrections and two #1134 spellings rounds on 2026-09-09 before
-it). R8's own-id preference was argued from cost: "a label on
+The tenth v9 pin — the registry's `superseded` list holds nine: three
+registrations and corrections on 2026-09-08, the two #1120 rounds, the two
+#1134 spellings rounds, and this issue's own two earlier rounds, each
+retired by the next. R8's own-id preference was argued from cost: "a label on
 the dataset's landing page … names an identifier the evidence must supply,
 so it needs a receipt like any other value, where a label on this record's
 own id does not" (#1109, round 2). Receipts instrument v2 (#1123, amendment
@@ -1042,17 +1043,21 @@ own id does not" (#1109, round 2). Receipts instrument v2 (#1123, amendment
 for the dataset at its top level is exempt from the denominator — so the
 sentence told the model to trade coverage away for a charge the instrument
 no longer makes. The preference stands on the reason that was always
-underneath it: the record's own id is the one base every consumer already
-holds — the core projector copies `file_collections` ids into the core's
-distributions and top-level `resources` are matched to the core by id,
-where `page` and `doi` are optional slots a reader may not have. The first
-rewrite said "a reader who follows this record's `id` finds its parts under
-it, which a label on another base does not give", which either contradicts
-the licence granted two clauses earlier or reduces to preferring the id
-because it is the id (#1166 review); a CURIE with a fragment is namespacing,
-not a dereference. The sentence is rewritten in the prompt and in the
-playbook's mirror; the probe moves with it and the shared-clause guard now
-holds both texts to it. No rule changes, the assembly digest does not move, no v9 record
+underneath it: the record's own id names this dataset and nothing else,
+where `page` is often a site or project root shared with sibling releases
+(`https://cm4ai.org/` on CM4AI 04g rep3, `https://chorus4ai.org/` on every
+CHORUS record), so a part labelled on a shared root cannot be told apart
+from a sibling's by its id alone; and `id` is the `Dataset` identifier
+every record carries, where `page` and `doi` are optional slots. Two
+earlier rewrites were retired by review (#1166): "a reader who follows this
+record's `id` finds its parts under it, which a label on another base does
+not give" either contradicted the licence granted two clauses earlier or
+reduced to preferring the id because it is the id (a CURIE with a fragment
+is namespacing, not a dereference); "the one base every consumer already
+holds — the core projector and the `resources` match join on it" cited a
+join that is on the part id, not the record's, and works under any base.
+The sentence is rewritten in the prompt and in the playbook's mirror; the
+probe moves with it and the shared-clause guard holds both texts to it. No rule changes, the assembly digest does not move, no v9 record
 exists, so nothing is re-baselined.
 
 ### What a v9 arm can and cannot be compared against (#1072)
