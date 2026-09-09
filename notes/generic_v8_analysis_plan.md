@@ -1032,11 +1032,12 @@ condition-boundary change.
 
 ### R8 no longer charges a landing-page label a receipt (#1147, 2026-09-09)
 
-The eleventh v9 pin — the registry's `superseded` list holds ten: three
+The twelfth v9 pin — the registry's `superseded` list holds eleven: three
 registrations and corrections on 2026-09-08, the two #1120 rounds, the two
-#1134 spellings rounds, and this issue's own three earlier rounds, each
+#1134 spellings rounds, and this issue's own four earlier rounds, each
 retired by the next (the third wrote `labelled` into the sentence and the
-file sweep of #1134 caught it after the pin was taken). R8's own-id
+file sweep of #1134 caught it after the pin was taken; the fourth's premise
+was false for the 35 CHORUS records whose own id is the site root). R8's own-id
 preference was argued from cost: "a label on
 the dataset's landing page … names an identifier the evidence must supply,
 so it needs a receipt like any other value, where a label on this record's
@@ -1047,11 +1048,16 @@ sentence told the model to trade coverage away for a charge the instrument
 no longer makes. The preference stands on the reason that was always
 underneath it: the record's own id names this dataset and nothing else,
 where `page` is often a site or project root shared with sibling releases
-(`https://cm4ai.org/` on CM4AI 04g rep3, `https://chorus4ai.org/` on every
-CHORUS record), so a part labelled on a shared root cannot be told apart
+(`https://cm4ai.org/` on CM4AI 04g rep3; `https://chorus4ai.org/` on 62 of
+the 79 CHORUS records, a `/dataset` path on 12, none on 4), so a part
+labeled on a shared root cannot be told apart
 from a sibling's by its id alone; and `id` is the `Dataset` identifier
-every record carries, where `page` and `doi` are optional slots. Two
-earlier rewrites were retired by review (#1166): "a reader who follows this
+every record carries, where `page` and `doi` are optional slots. Where the
+record's own id is itself such a root — 35 CHORUS records carry
+`https://chorus4ai.org/` as their `id`, 9 a fragment on it — the sentence
+says it is still the base to prefer, so a model does not read its own
+record as contradicting the premise and mint elsewhere (#1166 round 3).
+Two earlier rewrites were retired by review (#1166): "a reader who follows this
 record's `id` finds its parts under it, which a label on another base does
 not give" either contradicted the licence granted two clauses earlier or
 reduced to preferring the id because it is the id (a CURIE with a fragment

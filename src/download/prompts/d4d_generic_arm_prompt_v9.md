@@ -397,8 +397,10 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   and nothing else, where a landing page is often a site or project root
   shared with sibling releases, so a part labeled there cannot be told
   apart from a sibling's by its id alone; `id` is also the one identifier
-  every record carries, where `page` and `doi` are optional. A fragment
-  appended to another entity's
+  every record carries, where `page` and `doi` are optional. Where this
+  record's own id is itself such a root, or already a fragment on one, it
+  is still the base to prefer: it is the identifier this record carries,
+  and the label must stay stable. A fragment appended to another entity's
   identifier — an organization's, another dataset's — labels a part of that
   entity, not of this one.
 - A slot whose declared range is an enumeration is populated only from a

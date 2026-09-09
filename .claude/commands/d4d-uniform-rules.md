@@ -226,8 +226,11 @@ to every project:
   landing page is often a site or project root shared with sibling
   releases, so a part labeled there cannot be told apart from a sibling's
   by its id alone; `id` is also the one identifier every record carries,
-  where `page` and `doi` are optional (#1123, #1147). A fragment appended
-  to another entity's identifier — an organization's,
+  where `page` and `doi` are optional. Where this record's own id is
+  itself such a root, or already a fragment on one, it is still the base
+  to prefer: it is the identifier this record carries, and the label must
+  stay stable (#1123, #1147). A fragment appended to another entity's
+  identifier — an organization's,
   another dataset's — labels a part of that entity, not of this one.
 
 - **A slot whose declared range is an enumeration is populated only from a
