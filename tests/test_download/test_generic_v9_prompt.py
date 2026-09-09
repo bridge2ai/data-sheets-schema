@@ -52,7 +52,8 @@ def _norm(text):
 # those bytes and its pin is theirs; v9 had no record when it was corrected.
 # The inheritance tests apply this to the v8 side only, so any other difference
 # between the two still fails them.
-SPELLING_CORRECTED_IN_V9 = {"organisation": "organization", "recognise": "recognize"}
+SPELLING_CORRECTED_IN_V9 = {"organisation": "organization", "recognise": "recognize",
+                            "neighbouring": "neighboring"}          # #1137 review, M1
 
 
 def _as_v9_spells(text):
@@ -61,17 +62,14 @@ def _as_v9_spells(text):
     return text
 
 
-# British forms a composed rule must not carry (#1134). Backticked spans name
-# schema vocabulary and double-quoted spans quote a source, so both are
-# stripped before the sweep; "license" and "licensed" are already American.
-BRITISH_FORMS = re.compile(
-    r"\b(organis(?:e|ed|es|ing|ation|ations)|recognis(?:e|ed|es|ing)|characteris(?:e|ed|es|ing|ation)|"
-    r"standardis(?:e|ed|es|ing|ation)|analys(?:e|ed|es|ing)|behaviours?|licence|programmes?|centres?|"
-    r"normalis(?:e|ed|es|ing|ation)|summaris(?:e|ed|es|ing)|prioritis(?:e|ed|es|ing)|categoris(?:e|ed|es|ing)|"
-    r"minimis(?:e|ed|es|ing)|optimis(?:e|ed|es|ing)|labelled|colour|catalogue|judgement|artefact)\b",
-    re.I,
-)
-QUOTED_SPANS = re.compile(r"`[^`]*`|\"[^\"]*\"")
+# The sweep is the repository's own instrument (#1137 review, M2): the
+# patterns `grounding.british_spellings` counts, the canary metric reads and
+# the normaliser rewrites (#1002), under its declared version — not a second
+# hand-written list, which omitted the v3 half and re-admitted `analyses`.
+def british_forms(text):
+    from data_sheets_schema import grounding
+    text = grounding._QUOTED.sub("", text)
+    return sorted({m.group(0).lower() for rx in grounding.BRITISH_PATTERNS for m in rx.finditer(text)})
 
 
 class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
@@ -98,13 +96,26 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
             b = v9.split(f"--- ADDED IN {mark} ---", 1)[1].split(f"--- END ADDED IN {mark} ---", 1)[0]
             self.assertEqual(_norm(_as_v9_spells(a)), _norm(b), f"the {mark} block changed")
 
-    def test_the_body_writes_american_english(self):
-        """The prompt's own prose is the example the model copies (#1134).
-        The rule and the normaliser (#1002) both say American; the v9 body
-        said "organisation" ten times while saying so."""
-        body = QUOTED_SPANS.sub("", prompt_body(GENERIC_PROMPT_V9))
-        found = sorted({m.group(0).lower() for m in BRITISH_FORMS.finditer(body)})
-        self.assertEqual(found, [], f"British forms in the v9 body: {found}")
+    def test_the_whole_file_writes_american_english(self):
+        """The prompt's own prose is the example the model copies (#1134),
+        and the rationale is what the next prompt is written from. The rule
+        and the normaliser (#1002) both say American; the v9 body said
+        "organisation" nine times and "neighbouring" once while saying so.
+        Swept with the declared instrument, so the guard moves with it."""
+        from data_sheets_schema import grounding
+        text = GENERIC_PROMPT_V9.read_text()
+        self.assertTrue(grounding.BRITISH_INSTRUMENT.startswith("v3"))
+        found = british_forms(text)
+        self.assertEqual(found, [], f"British forms in the v9 prompt file: {found}")
+        self.assertEqual(grounding.british_spellings(prompt_body(GENERIC_PROMPT_V9)), 0)
+
+    def test_the_sweep_sees_what_the_first_version_missed(self):
+        """The first sweep was a hand-written list that passed on
+        "neighbouring" (#1137 review, M1) and would have flagged the
+        American plural "analyses" (M2)."""
+        self.assertEqual(british_forms("a neighbouring field"), ["neighbouring"])
+        self.assertEqual(british_forms("two analyses were run; the judgement stands"), [])
+        self.assertEqual(british_forms('the "organisation" quoted from a source'), [])
 
     def test_the_corrected_spellings_are_the_only_ones_the_v8_side_needs(self):
         """Every entry of the correction table is a word v8 actually carries

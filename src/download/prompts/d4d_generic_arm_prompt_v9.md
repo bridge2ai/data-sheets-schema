@@ -183,7 +183,7 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   absent. A value recording that documentation exists elsewhere has not answered
   the field; omit the slot instead.
 - Read the slot's description before populating it. Where the evidence answers a
-  neighbouring field — the access route rather than the distribution formats,
+  neighboring field — the access route rather than the distribution formats,
   the release cadence rather than the future-use impacts — put it in the field it
   answers, or omit it.
 

@@ -990,6 +990,24 @@ rep1; b/c/d; e/f/g), so "one boundary" is a statement about v9, not a
 claim that v8 was one arm; and the block is unconditional, as step E was,
 so a re-run of an earlier condition would receive it too.
 
+### The v9 body writes American English (#1134, 2026-09-09)
+
+The fourth v9 pin in two days, and the first that changes no rule. The
+body carried "organisation" nine times and "neighbouring" and "recognise"
+once each — inherited from v8's v2 and v5 blocks and one in R7 — while its
+own v5 rule says "Write American English throughout" and the runner
+rewrites British forms out of every record (#1002). All are American now;
+the rationale's two were corrected with them. v8 and earlier keep theirs:
+their records were generated under those bytes. No v9 record existed, so
+nothing is re-baselined; the assembly digest does not move (the prompt
+file is covered by its pin, not the assembly); `condition_delta` stays
+`["base"]`. The guard is the declared instrument, `grounding.BRITISH_PATTERNS`
+(v3), swept over the whole file — the first version was a hand-written
+list that passed on "neighbouring" (#1143). The audit-phase instruction the
+runner sends says "neighbouring" too and is filed as #1138, because
+`PHASE_INSTRUCTIONS` is in the assembly digest and moving it is a
+condition-boundary change.
+
 ### What a v9 arm can and cannot be compared against (#1072)
 
 `condition_delta("generic_v8", "generic_v9")` returns `["base"]`, and that
