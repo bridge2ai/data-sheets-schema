@@ -1636,3 +1636,28 @@ def compare_arms(prefix_a, prefix_b, method):
                 click.echo(f"     {key[:46]:46} {value}")
     click.echo("\nA difference between these arms measures the sum of the "
                "above. Report it that way, or hold them constant and re-run.")
+
+    # The condition delta, computed from these records rather than from the
+    # two names (#1073, #1092). Printed here because that is where a reader
+    # meets it: the function has no other caller, and the ergonomic form —
+    # two condition names — is exactly the form that answers `["base"]` and
+    # gets quoted in a pull request body as though the prompt were all that
+    # moved. It is one field of the five above, never a replacement for them.
+    from data_sheets_schema.api_runner import (condition_delta,
+                                               confounded_note)
+    from data_sheets_schema.runs import condition_from_label
+    # From the label, not from `values["condition"]`: no record in the corpus
+    # carries a top-level `condition`, so that field reads "None" for every
+    # arm and `arm_confounds` has never reported a condition difference.
+    conditions = [{condition_from_label(l) for l in arm["labels"]} - {None}
+                  for arm in (a, b)]
+    if all(len(c) == 1 for c in conditions):
+        ca, cb = conditions[0].pop(), conditions[1].pop()
+        digests = [[d for d in arm["values"].get("assembly digest", [])
+                    if d and d != "None"] for arm in (a, b)]
+        delta = condition_delta(ca, cb, digests[0], digests[1])
+        click.echo(f"\ncondition_delta({ca!r}, {cb!r}) with these records: "
+                   + (", ".join(delta) if delta else "no axis differs"))
+        note = confounded_note(ca, cb, digests[0], digests[1])
+        if note:
+            click.echo("   " + note)
