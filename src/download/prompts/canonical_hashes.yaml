@@ -267,16 +267,16 @@ files:
       retired_on: '2026-09-04'
       sha256: 06666c4d10786d4689170acdfd68350d451f84d2f94d4b5a22be6e569d3824f1
   src/download/prompts/d4d_generic_arm_prompt_v9.md:
-    body_sha256: dd77b1dbe84e446bb78f03beb10d60055d7589fa0f9da613b9b942385fa5addb
-    bytes: 24877
-    pinned_at_commit: b47a8492f57522cf7189535a526ff1ba703ab714
-    pinned_on: '2026-09-08'
-    reason: "R8\u2013R14 added before the first v9 run (#803, #901, #830): the fragment rule's\
-      \ carve-out for schema-forced ids with the projector sentence and the referent test\
-      \ for every other mint; one rule each for enumeration slots, raw_data_format, principal_investigator,\
-      \ consequence and keyword lines, list membership, and absence-is-not-an-entry. No v9\
-      \ record exists, so the condition keeps one boundary."
-    sha256: cde27e6303eeff3e194767ca4cfae272536c3935540724286d359748c8237b32
+    body_sha256: 64570727646c2d95bba9d758c037f5a779cce1d01f9a03c3aeb3d7282649c8f4
+    bytes: 26700
+    pinned_at_commit: 4672962d4b6d22bfb57faa31b35b22c88080573b
+    pinned_on: '2026-09-09'
+    reason: "R8\u2013R14 corrected after the #1109 review (#1120): R9 exempts a required enum\
+      \ and the file enums read from a file's name; R12 carves out keywords; R8 names Software,\
+      \ defers to the ORCID-first person rule, treats creator/maintainer entries as roles,\
+      \ and states how it refines the v5 minting base. No v9 record exists; the condition\
+      \ keeps one boundary."
+    sha256: 84e86dc364f1f054dd2c75734345a23d9f7e24bdb2675c046241803337ac74cc
     superseded:
     - pinned_on: '2026-09-08'
       reason: "generic_v9: v8 plus R6 (a value in the referent own slots is supported by a\
@@ -292,6 +292,14 @@ files:
         out an entity whose own registered name contains a conjunction.'
       retired_on: '2026-09-08'
       sha256: bc4914fc782d0ecdf19db8f1bdc02c70756c023135c3cd61dfa46cd86867ead1
+    - pinned_on: '2026-09-08'
+      reason: "R8\u2013R14 added before the first v9 run (#803, #901, #830): the fragment\
+        \ rule's carve-out for schema-forced ids with the projector sentence and the referent\
+        \ test for every other mint; one rule each for enumeration slots, raw_data_format,\
+        \ principal_investigator, consequence and keyword lines, list membership, and absence-is-not-an-entry.\
+        \ No v9 record exists, so the condition keeps one boundary."
+      retired_on: '2026-09-09'
+      sha256: cde27e6303eeff3e194767ca4cfae272536c3935540724286d359748c8237b32
   src/download/prompts/d4d_tuned_arm_prompt.md:
     bytes: 2877
     pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
