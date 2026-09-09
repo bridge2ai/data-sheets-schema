@@ -27,7 +27,8 @@ from data_sheets_schema.report_claims import check_report, resolve
 #: #1087 regression test caught the defect through its `scope` string alone
 #: and its finding-level assertion was vacuous.
 DECLARED = {"Dataset": {"file_collections", "keywords", "source_caveats",
-                        "notes", "conforms_to"},
+                        "notes", "conforms_to", "errata",
+                        "collection_timeframes"},
             "CoreDataset": {"distributions", "source_caveats", "notes",
                             "errata", "collection_timeframes", "keywords",
                             "conforms_to"},
@@ -439,12 +440,20 @@ class TheFixtureMatchesTheSchemaTest(unittest.TestCase):
     vacuous. This pins the two slots those tests turn on.
     """
 
-    def test_the_two_discriminating_slots_are_declared_where_the_schema_says(self):
+    def test_every_slot_in_the_fixture_is_declared_where_the_schema_says(self):
+        """Every slot, not only the two the scope tests turn on.
+
+        Pinning two left `errata` and `collection_timeframes` diverging one
+        slot away from the trap the pin was written for. They are used only by
+        removal tests today, which never consult the class inventory — which
+        is exactly what was true of `distributions` until a scope rule started
+        reading it.
+        """
         from data_sheets_schema.report_claims import declared_slots
         real = declared_slots()
         if "Dataset" not in real or "CoreDataset" not in real:
             self.skipTest("the schema is not importable in this checkout")
-        for slot in ("distributions", "file_collections"):
+        for slot in sorted({s for names in DECLARED.values() for s in names}):
             with self.subTest(slot=slot):
                 self.assertEqual(
                     sorted(c for c, s in DECLARED.items() if slot in s),
