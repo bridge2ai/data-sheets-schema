@@ -881,8 +881,23 @@ its instruction (`core_inventory_block`, names only, ~1.3 KB). Runner-side,
 so `ASSEMBLY_LAYOUT` names it and the assembly digest moves; no v9 record
 exists, so the condition still has one boundary. On the v8 fill
 `claims_core_cannot_hold` was 0 on seventeen of eighteen records and 5 on
-one, so the prediction for the canary is narrow: that count at 0 with no
-`both` row on an undeclared slot, and no change anywhere else.
+one — and every report finding on the v8 fill is of that class: five
+`retention_not_shown` on `both` rows over full-only slots (`citation`,
+`consent_revocations`, `collection_consents[0].consent_details`,
+`participant_compensation[0].compensation_amount`,
+`third_party_sharing[0].is_shared`), on that one record, and no `both` row
+on a core-declared slot has ever failed presence. So the prediction for
+the canary is narrow: that count at 0 with no `both` row on an undeclared
+slot, and no change anywhere else — read with one caveat the review
+named: the gate resolves a `full` row against the full record only, so a
+row wrongly flipped from `both` to `full` produces no finding; the block
+therefore says the test is on the *root* of the slot path and applies to
+retained/changed/added rows, and a canary reader should compare the count
+of `both` rows with the v8 fill's (612 of 682) rather than trust the zero
+alone. The v8 labels already carry three assembly digests (2026-09-04
+rep1; b/c/d; e/f/g), so "one boundary" is a statement about v9, not a
+claim that v8 was one arm; and the block is unconditional, as step E was,
+so a re-run of an earlier condition would receive it too.
 
 ### What a v9 arm can and cannot be compared against (#1072)
 

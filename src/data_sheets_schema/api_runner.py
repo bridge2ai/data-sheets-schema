@@ -568,8 +568,10 @@ ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, "
                    "a report whose claims contradict them is regenerated once "
                    "with the contradictions named (#929); the report phase "
                    "carries the core class's top-level slot inventory before "
-                   "its instruction, so `both` is judged against a list the "
-                   "model can see (#998)")
+                   "its instruction, so the model can see which slots the core "
+                   "declares — the gate still judges presence in the two "
+                   "records, and the inventory decides only whether a finding "
+                   "carries the 'core class declares no such slot' cause (#998)")
 
 
 def context_blocks(spec: "RunSpec") -> dict[str, Any]:
@@ -1182,15 +1184,23 @@ def core_inventory_block() -> str:
     model's only view of the core inventory was the completed core record in
     the carry, where a slot the derivation left empty is indistinguishable
     from one the core class cannot declare. The list is the inventory itself
-    — names only, from the same digest `record_inventory` ledgers — so the
-    distinction is visible rather than inferred. On the v8 fill the gate's
-    `claims_core_cannot_hold` was 0 on seventeen of eighteen records and 5
-    on one; this is the reader's view of that count, not a new gate.
+    — names only, the same set `report_claims.declared_slots` reads from the
+    same merged core schema (a test holds the two equal) — so the
+    distinction is visible rather than inferred. The gate is unchanged: it
+    judges presence in the two records, and the declaration decides only
+    whether a finding carries the "core class declares no such slot" cause.
+    Every report finding on the v8 fill was of that class — five
+    `retention_not_shown` on `both` rows over full-only slots, on one
+    record — so the most this can remove is those five; nothing else moves.
     """
     names = schema_digest.slot_names("CoreDataset")
     return ("# Core schema inventory\n\n"
-            "`CoreDataset` declares exactly these top-level slots; a dispositions "
-            "row on any other slot is `full`, never `both` or `core`:\n\n"
+            "`CoreDataset` declares exactly these top-level slots. The test is on "
+            "the *root* of a dispositions row's slot path — `funders[0].grant_id` "
+            "is judged by `funders` — and applies to rows reported retained, "
+            "changed or added: such a row whose root is not in this list is `full`, "
+            "never `both` or `core`. (A `removed` row may name any record the "
+            "slot is absent from.)\n\n"
             + ", ".join(f"`{n}`" for n in names) + "\n")
 
 
