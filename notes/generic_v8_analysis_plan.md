@@ -1011,6 +1011,25 @@ the edited line is a conditions catalogue, not a decision rule, so no
 rule those records ran under moved — reported, never fatal, and named
 here so the drift is attributable.
 
+### The v9 body writes American English (#1134, 2026-09-09)
+
+The fourth v9 pin in two days, and the first that changes no rule. Under
+the declared instrument the whole file carried twelve British forms: the
+body eight "organisation" (inherited from v8's v5 block, and one in R7),
+one "recognise" (v5 block) and one "neighbouring" (v2 block), and the
+rationale two more, one of them the plural — while the body's own v5 rule
+says "Write American English throughout" and the runner rewrites British
+forms out of every record (#1002). All twelve are American now. v8 and earlier keep theirs:
+their records were generated under those bytes. No v9 record existed, so
+nothing is re-baselined; the assembly digest does not move (the prompt
+file is covered by its pin, not the assembly); `condition_delta` stays
+`["base"]`. The guard is the declared instrument, `grounding.BRITISH_PATTERNS`
+(v3), swept over the whole file — the first version was a hand-written
+list that passed on "neighbouring" (#1143). The audit-phase instruction the
+runner sends says "neighbouring" too and is filed as #1138, because
+`PHASE_INSTRUCTIONS` is in the assembly digest and moving it is a
+condition-boundary change.
+
 ### The audit-phase instruction writes American English (#1138, 2026-09-09)
 
 The audit phase's instruction — sent on every API run, under every
