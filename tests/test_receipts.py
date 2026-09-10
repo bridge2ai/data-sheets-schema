@@ -664,6 +664,121 @@ class OnDisk(unittest.TestCase):
         self.assertFalse(unhashed_absent["checked"]); self.assertEqual(unhashed_absent["reason"], "the record's bundle is absent; chunk texts cannot be loaded")
         self.assertFalse(undecodable["checked"]); self.assertIn("not UTF-8", undecodable["reason"])
 
+    def test_the_bytes_on_disk_are_used_when_only_the_manifest_is_not_the_records(self):
+        """#1187 round 3, SF3: a bundle whose bytes hash to the record's md5
+        with a missing, stale or unreadable manifest is chunked in memory
+        under the record's rule, not refused and not asked of git."""
+        from unittest import mock
+        from data_sheets_schema.chunking import DEFAULT_RULE, build_manifest, dump_manifest, manifest_from_bytes
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            bundle = tmp / "P_preprocessed.txt"; bundle.write_text(BUNDLE, encoding="utf-8")
+            md5 = hashlib.md5(BUNDLE.encode()).hexdigest()
+            full = tmp / "P_d4d.yaml"; full.write_text(yaml.safe_dump(FULL), encoding="utf-8")
+            receipt = tmp / "P_coverage_receipt.yaml"; receipt.write_text(yaml.safe_dump(_receipt(md5)), encoding="utf-8")
+            five = {**DEFAULT_RULE, "max_lines": 5}
+            with mock.patch("data_sheets_schema.provenance.bundle_bytes_for", side_effect=AssertionError("git was asked")):
+                missing = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=tmp / "none.yaml",
+                                       bundle_rel_path="x", record_chunks={"rule": five, "chunk_count": 5})
+                stale = tmp / "stale.yaml"; stale.write_text(dump_manifest(manifest_from_bytes(b"other", "P_preprocessed.txt")), encoding="utf-8")
+                stale_b = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=stale,
+                                       bundle_rel_path="x", record_chunks={"rule": five, "chunk_count": 5})
+                bad = tmp / "bad.yaml"; bad.write_text("- not a manifest\n", encoding="utf-8")
+                bad_b = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=bad,
+                                     bundle_rel_path="x", record_chunks={"rule": five, "chunk_count": 5})
+                # no rule from either side: refused by name, git still not asked
+                ruleless = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=tmp / "none.yaml", bundle_rel_path="x")
+                # the manifest on disk is the record's: used as before
+                manifest = tmp / "P_chunks.yaml"; manifest.write_text(dump_manifest(build_manifest(bundle)), encoding="utf-8")
+                plain = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest)
+        for name, b in (("missing", missing), ("stale", stale_b), ("unreadable", bad_b)):
+            self.assertTrue(b["checked"], (name, b.get("reason")))
+            self.assertEqual(b["bundle_basis"]["source"], "bundle on disk", name)
+            self.assertIn("chunked in memory", b["bundle_basis"]["manifest"], name)
+            # the persisted basis is a statement about the bytes, never an
+            # imperative (#1187 round 5, SF1) — asserted on a route-2 block,
+            # which is the one that carries a `manifest` key at all (round 6, SF2)
+            self.assertNotIn("d4d bundle chunk", str(b["bundle_basis"]), name)
+            self.assertEqual(b["artifacts"]["manifest"]["chunk_count"], 5, name); self.assertIsNone(b["artifacts"]["manifest"]["path"])
+        # ... and the refusal that route composes does carry it (round 6, SF1)
+        self.assertIn("d4d bundle chunk", ruleless["reason"])
+        self.assertFalse(ruleless["checked"]); self.assertIn("which chunking rule", ruleless["reason"])
+        self.assertTrue(plain["checked"]); self.assertEqual(plain["artifacts"]["manifest"]["path"], str(manifest))
+
+    def test_non_utf8_bytes_on_disk_are_a_named_refusal_and_a_manifest_that_lies_about_its_sha_is_not_a_third_state(self):
+        """#1187 round 4, SF1/SF2."""
+        from unittest import mock
+        from data_sheets_schema.chunking import DEFAULT_RULE, build_manifest, dump_manifest
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            raw = b"\xff\xfe not utf-8 at all\n"
+            bundle = tmp / "P_preprocessed.txt"; bundle.write_bytes(raw)
+            md5 = hashlib.md5(raw).hexdigest()
+            full = tmp / "P_d4d.yaml"; full.write_text(yaml.safe_dump(FULL), encoding="utf-8")
+            receipt = tmp / "P_coverage_receipt.yaml"; receipt.write_text(yaml.safe_dump(_receipt(md5)), encoding="utf-8")
+            with mock.patch("data_sheets_schema.provenance.bundle_bytes_for", side_effect=AssertionError("git was asked")):
+                b = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=tmp / "none.yaml",
+                                 bundle_rel_path="x", record_chunks={"rule": DEFAULT_RULE, "chunk_count": 1})
+            self.assertFalse(b["checked"]); self.assertIn("not UTF-8", b["reason"]); self.assertIn("no chunk manifest", b["reason"])
+            self.assertIn("d4d bundle chunk", b["reason"])                      # the advice is on the refusal (round 5, SF1)
+            # a manifest that chunked the bytes on disk but carries a wrong sha256 line, record carrying both hashes
+            bundle.write_text(BUNDLE, encoding="utf-8"); md5 = hashlib.md5(BUNDLE.encode()).hexdigest(); sha = hashlib.sha256(BUNDLE.encode()).hexdigest()
+            receipt.write_text(yaml.safe_dump(_receipt(md5)), encoding="utf-8")
+            m = build_manifest(bundle); m["bundle_sha256"] = "0" * 64
+            manifest = tmp / "P_chunks.yaml"; manifest.write_text(dump_manifest(m), encoding="utf-8")
+            with mock.patch("data_sheets_schema.provenance.bundle_bytes_for", side_effect=AssertionError("git was asked")):
+                b = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest, bundle_rel_path="x", record_bundle_sha256=sha)
+            self.assertTrue(b["checked"]); self.assertEqual(b["artifacts"]["manifest"]["path"], str(manifest))
+            self.assertNotIn("None", b["bundle_basis"].get("manifest", ""))
+
+    def test_a_record_carrying_only_a_sha256_is_recovered_on_a_drift(self):
+        """#1187 round 3, SF4: the drift test keyed on the md5 alone, so a
+        sha256-only record was checked against today's bytes."""
+        from unittest import mock
+        from data_sheets_schema.chunking import build_manifest, dump_manifest
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            bundle = tmp / "P_preprocessed.txt"
+            drifted = BUNDLE.replace("multimodal study", "multimodal STUDY (edited after the run)")
+            bundle.write_text(drifted, encoding="utf-8")
+            manifest = tmp / "P_chunks.yaml"; manifest.write_text(dump_manifest(build_manifest(bundle)), encoding="utf-8")
+            full = tmp / "P_d4d.yaml"; full.write_text(yaml.safe_dump(FULL), encoding="utf-8")
+            md5 = hashlib.md5(BUNDLE.encode()).hexdigest(); sha = hashlib.sha256(BUNDLE.encode()).hexdigest()
+            receipt = tmp / "P_coverage_receipt.yaml"; receipt.write_text(yaml.safe_dump(_receipt(md5)), encoding="utf-8")
+            entry = {"commit": "d" * 40, "date": "2026-09-01", "md5": md5, "sha256": sha, "matched_on": ["sha256"]}
+            with mock.patch("data_sheets_schema.provenance.bundle_bytes_for",
+                            lambda path, md5=None, sha256=None: (BUNDLE.encode(), entry) if sha256 == sha else None):
+                b = rc.block_for(full, receipt, bundle, None, expected=True, manifest=manifest, bundle_rel_path="x",
+                                 record_bundle_sha256=sha, record_chunks={"rule": build_manifest(bundle)["rule"], "chunk_count": 3})
+                none = rc.block_for(full, receipt, bundle, None, expected=True, manifest=manifest, bundle_rel_path="x",
+                                    record_bundle_sha256="1" * 64)
+        self.assertTrue(b["checked"]); self.assertEqual(b["bundle_basis"]["source"], "git blob")
+        self.assertFalse(none["checked"]); self.assertIn("record's sha256", none["reason"]); self.assertIn("drifted", none["reason"])
+
+    def test_a_reason_names_the_outcome_first_and_never_contradicts_it(self):
+        """#1187 round 3, SF5: "chunk texts cannot be loaded" beside "was
+        recovered from" was one message; the outcome leads and the disk
+        state is context."""
+        from unittest import mock
+        from data_sheets_schema.chunking import manifest_from_bytes, dump_manifest
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            full = tmp / "P_d4d.yaml"; full.write_text(yaml.safe_dump(FULL), encoding="utf-8")
+            md5 = hashlib.md5(BUNDLE.encode()).hexdigest()
+            receipt = tmp / "P_coverage_receipt.yaml"; receipt.write_text(yaml.safe_dump(_receipt(md5)), encoding="utf-8")
+            entry = {"commit": "c" * 40, "date": "2026-09-01", "md5": md5, "sha256": "s"}
+            stale = tmp / "stale.yaml"; stale.write_text(dump_manifest(manifest_from_bytes(b"other", "P_preprocessed.txt")), encoding="utf-8")
+            other = tmp / "P_preprocessed.txt"; other.write_bytes(b"other, rewritten after the manifest")
+            with mock.patch("data_sheets_schema.provenance.bundle_bytes_for", lambda path, md5=None, sha256=None: (BUNDLE.encode(), entry)):
+                absent = rc.block_for(full, receipt, tmp / "gone.txt", md5, expected=True, bundle_rel_path="x")
+                stale_b = rc.block_for(full, receipt, other, md5, expected=True, manifest=stale, bundle_rel_path="x")
+        for b in (absent, stale_b):
+            self.assertFalse(b["checked"])
+            self.assertTrue(b["reason"].startswith("the version the record hashed was recovered from cccccccccccc"), b["reason"])
+            self.assertNotIn("cannot be loaded", b["reason"])
+        self.assertIn("the record's bundle is absent", absent["reason"])
+        self.assertIn("did not chunk the bytes on disk", stale_b["reason"])
+
     def test_bundle_bytes_for_reads_the_matching_version_and_none_otherwise(self):
         from unittest import mock
         from data_sheets_schema import provenance as pv

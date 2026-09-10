@@ -28,6 +28,50 @@ from typing import Any
 import yaml
 from data_sheets_schema.schema_view import shared_view
 
+
+class UnreadableYAML(yaml.YAMLError):
+    """A file the pack reads would not parse — named, because the pack
+    reads several (the record, the full record, the receipt, the manifest)
+    and PyYAML's mark names the string it was handed, not the file (#1124
+    round 5)."""
+
+    def __init__(self, path: Path, exc: BaseException):
+        super().__init__(f"{path} could not be read as YAML: {exc}")
+        self.path = path
+
+
+def _load_yaml(path: Path, text: str | None = None, *, raw: bytes | None = None) -> Any:
+    """`safe_load` of the file (or of `text` / `raw` already read from it),
+    naming the file on every way a read fails — a parse error, bytes that
+    are not UTF-8 (#874 repaired exactly such files), a file that cannot be
+    opened (#1124 Codex review, SF1). `raw` lets a caller hash the same
+    bytes it parsed (M6, the single-read half)."""
+    try:
+        if raw is not None:
+            text = raw.decode("utf-8")
+        elif text is None:
+            text = path.read_text(encoding="utf-8")
+        return yaml.safe_load(text) or {}
+    except (yaml.YAMLError, UnicodeDecodeError, OSError) as exc:
+        raise UnreadableYAML(path, exc) from exc
+
+
+def _load_mapping(path: Path, text: str | None = None, *, raw: bytes | None = None) -> dict[str, Any]:
+    """`_load_yaml`, refusing a document that is not a mapping: a list or a
+    scalar where a record is expected used to reach `.get` and raise an
+    unnamed AttributeError (#1124 Codex review, M3)."""
+    doc = _load_yaml(path, text, raw=raw)
+    if not isinstance(doc, dict):
+        why = ValueError(f"the document is a {type(doc).__name__}, not a mapping")
+        raise UnreadableYAML(path, why) from why
+    return doc
+
+
+def _read_error(exc: BaseException) -> str:
+    """The short name a pin report carries for an unreadable file."""
+    cause = getattr(exc, "__cause__", None) or exc
+    return "not a mapping" if isinstance(cause, ValueError) else type(cause).__name__
+
 #: The closed verdict vocabulary a review must use, per item kind.
 VERDICTS = {
     "chunk_nothing_relevant": ("confirmed", "missed_content", "cannot_tell"),
@@ -381,13 +425,27 @@ def _id_slots(full: Any, root_class: str | None = None,
 
 
 def build_pack(provenance: Path, instruction_file: Path | None = None,
-               sample: dict[str, int] | None = None) -> dict[str, Any]:
+               sample: dict[str, int] | None = None, *, write_instruction: bool = True,
+               instruction_out: list[str] | None = None) -> dict[str, Any]:
+    """The pack as a dict — always the pack, nothing else in it. With
+    `write_instruction` (the default) the rendered instruction is written
+    beside the record as a side effect; `write_pack` passes False and writes
+    it only on the path that also writes the pack, so a refused rewrite
+    leaves both files as it found them (#1124 review, MF-R1). The text then
+    travels out of band, appended to `instruction_out`, never as a key of
+    the returned mapping (round 3, SF-R3a: a caller that dumped the mapping
+    would have written a pack with an extra key and a different sha256)."""
     from data_sheets_schema.backfill_checks import _split_header
     from data_sheets_schema.chunking import chunk_texts, load_manifest
     from data_sheets_schema.receipts import claim_receipts, dataset_identifier_forms, load_receipt
 
+    if not write_instruction and instruction_out is None:
+        # The third state — neither written nor returned — would hand back a
+        # pack pinning an instruction file nobody wrote (#1124 round 4).
+        raise ValueError("build_pack: with write_instruction=False the instruction text goes to "
+                         "instruction_out, which was not given")
     sample = {**DEFAULT_SAMPLE, **(sample or {})}
-    record = yaml.safe_load(_split_header(provenance.read_text(encoding="utf-8"))[1]) or {}
+    record = _load_mapping(provenance, _split_header(provenance.read_text(encoding="utf-8"))[1])
     paths = record_paths(provenance)
     run = record.get("run") or {}
     inputs = record.get("inputs") or {}
@@ -416,8 +474,10 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
 
     text, basis = instruction_text(record, instruction_file)
     ipath = paths["instruction"]
-    if text:
+    if text and write_instruction:
         ipath.write_text(text, encoding="utf-8")            # the reviewer reads the instruction, not its hash (#791)
+    elif text and instruction_out is not None:
+        instruction_out.append(text)
     pack["instruction"] = {"basis": basis, "path": str(ipath) if text else None,
                            "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest() if text else None,
                            "chars": len(text) if text else 0}
@@ -438,7 +498,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     # --- every minted id, with whether the schema forced it (#803): the
     # instruction's fragment rule cannot be judged without this — a rule-14
     # verdict on an identifier slot charges the record with the schema.
-    full_record = yaml.safe_load(paths["full"].read_text(encoding="utf-8")) or {} if paths["full"].exists() else {}
+    full_record = _load_yaml(paths["full"]) if paths["full"].exists() else {}
     # The bytes `base_in_bundle` is attested against are the bytes the
     # record read, or nothing: 136 records are drifted (CLAUDE.md, #452), and
     # the AI_READI 2026-09-01 rep1 record that motivated #901 is one of them.
@@ -514,8 +574,14 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     # --- chunks marked nothing_relevant: every one, with its lines
     items: list[dict[str, Any]] = []
     if paths["receipt"].exists() and manifest_path and manifest_path.exists():
-        receipt = load_receipt(paths["receipt"])
-        manifest = load_manifest(manifest_path)
+        try:
+            receipt = load_receipt(paths["receipt"])
+        except yaml.YAMLError as exc:
+            raise UnreadableYAML(paths["receipt"], exc) from exc
+        try:
+            manifest = load_manifest(manifest_path)
+        except yaml.YAMLError as exc:
+            raise UnreadableYAML(manifest_path, exc) from exc
         span = {c["id"]: c for c in manifest["chunks"]}
         pack["bundle"]["lines"] = manifest.get("bundle_lines")
         pack["bundle"]["chunks"] = [{"id": c["id"], "lines": c["lines"], "source": c["source"]} for c in manifest["chunks"]]
@@ -534,15 +600,28 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         # reorders otherwise shift a receipt onto a neighbouring entry and
         # the reviewer scores a bundle-attested value `unsupported`. The
         # item carries the path as written and where it resolves.
-        from data_sheets_schema.receipts import phase1_snapshot
-        original = phase1_snapshot(paths["receipt"])
+        from data_sheets_schema.receipts import phase1_snapshot_state
+        snap_state, snapshot_file, original, snap_why = phase1_snapshot_state(paths["receipt"])
         # Not a gap: the agentic path writes no snapshot by design (its
         # Phase 3 re-receipts what it changes), so an index join there is
-        # the instrument, not a defect in this pack.
-        pack["receipt_join"] = ({"basis": "identity", "snapshot": "intermediate/ phase-1 full record"}
-                                if original is not None else
-                                {"basis": "index", "reason": "no phase-1 snapshot under intermediate/; "
-                                                             "receipt paths joined by index, not entry identity (#899)"})
+        # the instrument, not a defect in this pack. A snapshot that exists
+        # and will not parse IS a gap (#1124 round 6): the join falls back
+        # to index, and the pack must not say there was no snapshot — the
+        # reviewer reads `basis` to decide whether an index shift may be
+        # scored unsupported.
+        if snap_state == "usable":
+            pack["receipt_join"] = {"basis": "identity", "snapshot": "intermediate/ phase-1 full record"}
+        elif snap_state == "unusable":
+            # "unreadable" was a false claim for a file that parsed to
+            # nothing (Codex review, SF2); the reason says which it is.
+            pack["receipt_join"] = {"basis": "index",
+                                    "reason": f"the phase-1 snapshot {snapshot_file.name} is present but not "
+                                              f"usable ({snap_why}); receipt paths joined by index, not entry "
+                                              "identity (#899)"}
+            pack["gaps"].append(f"phase-1 snapshot not usable ({snap_why}): {snapshot_file}")
+        else:
+            pack["receipt_join"] = {"basis": "index", "reason": "no phase-1 snapshot under intermediate/; "
+                                                                "receipt paths joined by index, not entry identity (#899)"}
         claims = claim_receipts(receipt, full, original)
         rc = record.get("receipts") or {}
         receipted = sorted(claims["slots"])
@@ -629,8 +708,8 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         full_p, core_p = Path(pack["records"]["full"]), Path(pack["records"]["core"])
         if full_p.exists() and core_p.exists():
             rep = validate_pair_data(
-                yaml.safe_load(full_p.read_text(encoding="utf-8")) or {},
-                yaml.safe_load(core_p.read_text(encoding="utf-8")) or {},
+                _load_yaml(full_p),
+                _load_yaml(core_p),
                 load_pair_schema(*(_anchored(Path(x)) for x in PAIR_SCHEMAS)),
                 schema_moved=pair_predates_current_schema(core_p),
                 run_digest=(record.get("schema") or {}).get("digest_md5"))
@@ -649,23 +728,271 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         else:
             pack["gaps"].append("pair warnings: full or core record missing; the checker did not run")
     except Exception as e:                                    # noqa: BLE001
-        pack["gaps"].append(f"pair warnings unavailable: {type(e).__name__}")
+        # The class alone says nothing once `_load_yaml` wraps the parse
+        # (#1124 round 6): name the file where the loader named it.
+        # One line: the file and the verb; PyYAML's mark and caret point into
+        # a string the reviewer cannot see (#1124 round 7).
+        pack["gaps"].append("pair warnings unavailable: "
+                            + (str(e).splitlines()[0] if isinstance(e, UnreadableYAML) else type(e).__name__))
 
     pack["items"] = items
     pack["verdicts"] = {k: list(v) for k, v in VERDICTS.items()}
     return pack
 
 
+class PackAttested(RuntimeError):
+    """The pack on disk is pinned by hash and a rewrite would move it
+    underneath that pin (#1095)."""
+
+    def __init__(self, path: Path, pins: list[dict[str, str]], force_hint: str = "force=True"):
+        self.path, self.pins, self.force_hint = path, pins, force_hint
+        super().__init__(self.describe(force_hint))
+
+    def describe(self, force_hint: str) -> str:
+        """The refusal, naming each pin's class (#1124 review, N9): a pin the
+        write would move, one whose pack is not on disk, one that could not
+        be read — and the override in the caller's own vocabulary (N8)."""
+        who = []
+        for p in self.pins:
+            sha = str(p.get("sha256", ""))
+            if sha.startswith("unreadable"):
+                who.append(f"{p['by']} {p['path']} (unreadable {sha[len('unreadable '):]}: nothing is known about "
+                           "what would move; fix that file — forcing cannot read it either)")
+            elif p.get("pack_on_disk") is False:
+                who.append(f"{p['by']} {p['path']} (its pack is not on disk; this write would not reproduce it)")
+            else:
+                who.append(f"{p['by']} {p['path']} (this write would move the file under it)")
+        return (f"{self.path} is pinned by hash by " + "; ".join(who) + f". Pass {force_hint} only as a "
+                "deliberate act, and redo the attesting review afterwards — "
+                "`d4d review check` reports review_of_another_pack until it is.")
+
+
+def pack_pin_state(provenance: Path) -> str | None:
+    """What `d4d runs check` reports for a record's pack pins (#1095; #1124
+    review, SF2) — read from the same `pack_pins_report` the write guard
+    enforces, so the two cannot disagree (#1124 Codex review, M3: the first
+    version read only the record's own pin, so a sidecar review pinning a
+    pack that had moved reported nothing, and a record that parsed to a
+    list raised out of `runs check`). None when nothing pins the pack or
+    every pin holds; `missing` when a pin names a pack that is gone;
+    `rewritten` when one names bytes the file no longer is; `unreadable`
+    when a pin file could not be read — nothing is known about what it
+    pins. The pack path is derived from the record's own location, never
+    read off the recorded string (N5)."""
+    if not provenance.exists():
+        return None
+    current, stale, unreadable = pack_pins_report(provenance)
+    if unreadable:
+        return "unreadable"
+    if any(not p.get("pack_on_disk") for p in stale):
+        return "missing"
+    if stale:
+        return "rewritten"
+    return None
+
+
+def pack_pins(provenance: Path) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
+    """(current, stale): who pins the pack by sha256 — the provenance record's
+    `review.artifacts.pack.sha256`, and every `{P}_review*.yaml` beside it
+    whose `pack_sha256` names a pack. `current` pins hash to the file as it
+    is; `stale` pins name a pack the file no longer is — it moved once
+    already, or it is gone (#1095; #1124 review, MF1: a deleted pack must
+    not remove the guard, since the agent is told to run `d4d review pack`
+    exactly then). Files that do not parse are returned under `unreadable`
+    in the third position of `pack_pins_report`; here they are folded into
+    `stale` with `sha256: "unreadable (<error>)"`, so a caller of the
+    2-tuple that treats "no pin" as permission fails closed, not open (SF3;
+    #1124 review, SF-R1: the first version dropped them)."""
+    current, stale, unreadable = pack_pins_report(provenance)
+    return current, stale + [{"by": u["by"], "path": u["path"], "sha256": f"unreadable ({u['error']})",
+                              "pack_on_disk": None} for u in unreadable]
+
+
+def pack_pins_report(provenance: Path) -> tuple[list[dict[str, str]], list[dict[str, str]], list[dict[str, str]]]:
+    from data_sheets_schema.backfill_checks import _split_header
+    paths = record_paths(provenance)
+    pack = paths["pack"]
+    on_disk = hashlib.sha256(pack.read_bytes()).hexdigest() if pack.exists() else None
+    current, stale, unreadable = [], [], []
+    try:
+        record = _load_mapping(provenance, _split_header(provenance.read_text(encoding="utf-8"))[1])
+    except Exception as exc:                                  # noqa: BLE001
+        record = {}
+        unreadable.append({"by": "provenance record", "path": str(provenance), "error": _read_error(exc)})
+    rec_sha = (((record.get("review") or {}).get("artifacts") or {}).get("pack") or {}).get("sha256")
+    if rec_sha:
+        (current if rec_sha == on_disk else stale).append(
+            {"by": "provenance record", "path": str(provenance), "sha256": rec_sha,
+             "pack_on_disk": on_disk is not None})
+    project = paths["project"]
+    for f in sorted(pack.parent.glob(f"{project}_review*.yaml")):
+        if f == pack:
+            continue
+        try:
+            sha = _load_mapping(f).get("pack_sha256")
+        except Exception as exc:                              # noqa: BLE001
+            unreadable.append({"by": "review", "path": str(f), "error": _read_error(exc)})
+            continue
+        if sha:
+            (current if sha == on_disk else stale).append(
+                {"by": "review", "path": str(f), "sha256": sha, "pack_on_disk": on_disk is not None})
+    return current, stale, unreadable
+
+
 def write_pack(provenance: Path, instruction_file: Path | None = None,
-               sample: dict[str, int] | None = None) -> tuple[Path, dict[str, Any]]:
-    pack = build_pack(provenance, instruction_file, sample)
+               sample: dict[str, int] | None = None, *, force: bool = False,
+               force_hint: str = "force=True") -> tuple[Path, dict[str, Any]]:
+    """Write the pack beside the record — refusing, unless forced, to rewrite
+    a pack that a review or the record pins by hash (#1095): a
+    `d4d-review-record` run regenerated the pack it was reviewing, moving
+    the committed `pack_version: 3` file to 4 underneath the sha256 its own
+    record attests and breaking the pairing `d4d review agree` depends on.
+    Regenerating a pack is a deliberate act, like rotating a prompt pin."""
+    current, stale, unreadable = pack_pins_report(provenance)
     out = record_paths(provenance)["pack"]
+    blind = [{"by": u["by"], "path": u["path"], "sha256": f"unreadable ({u['error']})"} for u in unreadable]
+    if any(u["by"] == "provenance record" for u in unreadable) and not force:
+        # Before building: a provenance record that will not parse would
+        # raise inside `build_pack` as a bare ParserError rather than as the
+        # named refusal this guard exists to give (#1124 review, SF-R2). A
+        # sidecar that will not parse is judged after the build, on the
+        # bytes (Codex review, M4): it cannot be read, but a regeneration
+        # that reproduces the pack on disk moves nothing under it.
+        raise PackAttested(out, blind, force_hint)
+    instruction_out: list[str] = []
+    pack = build_pack(provenance, instruction_file, sample, write_instruction=False,
+                      instruction_out=instruction_out)
     from data_sheets_schema.provenance import _NoAliasDumper
-    # chunk line spans are shared between `bundle.chunks` and the items; an
-    # alias dumper would write the second as `*id001`
-    out.write_text(yaml.dump(pack, Dumper=_NoAliasDumper, sort_keys=False, allow_unicode=True, width=10_000),
-                   encoding="utf-8")
+    text = yaml.dump(pack, Dumper=_NoAliasDumper, sort_keys=False, allow_unicode=True, width=10_000)
+    new_sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    on_disk = hashlib.sha256(out.read_bytes()).hexdigest() if out.exists() else None
+    # The guard is on the effect, not the act (#1124 review, SF1): build
+    # first, and refuse only when the bytes would move under a live pin —
+    # a byte-identical rewrite (the pack is deterministic, seeded by the
+    # record's request hash) is not a rewrite. A pin whose file is gone
+    # (MF1) is a live pin the write would orphan; an unreadable pin file
+    # is treated as live (SF3), so the guard fails closed — unless the
+    # bytes on disk are the bytes this write would produce.
+    if not force:
+        would_move = [p for p in current if p["sha256"] != new_sha]
+        orphaned = [p for p in stale if not p.get("pack_on_disk") and p["sha256"] != new_sha]
+        if blind and new_sha != on_disk:
+            would_move += blind
+        if would_move or orphaned:
+            raise PackAttested(out, would_move + orphaned, force_hint)
+    ipath = Path(pack["instruction"]["path"]) if instruction_out else None
+    instruction_same = (ipath is None or (ipath.exists() and
+                        hashlib.sha256(ipath.read_bytes()).hexdigest() == pack["instruction"]["sha256"]))
+    if new_sha == on_disk and instruction_same:
+        return out, pack                 # nothing would change: the pinned file is not reopened (Codex M5)
+    # Each file lands whole or not at all: written beside its target and
+    # renamed over it (Codex M5 — a truncated pinned pack under an
+    # interruption). The instruction goes first, the pinned pack last, so
+    # a failure between the two leaves the pinned bytes in place; the
+    # instruction then disagrees with the pack's `instruction.sha256`,
+    # which the next `d4d review pack` reproduces (#1189).
+    if ipath is not None and not instruction_same:
+        _replace(ipath, instruction_out[0])
+    if new_sha != on_disk:
+        _replace(out, text)
     return out, pack
+
+
+def _replace(path: Path, text: str) -> None:
+    """Write beside the target and rename over it. The temp name is unique
+    per call (round-9 review, SF-R9-3: a fixed name let two writers rename each
+    other's half-written bytes over the pinned pack) and never matches
+    `{P}_review*.yaml`; a failed rename leaves nothing behind."""
+    import os
+    import tempfile
+    fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    tmp = Path(tmp_name)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(text)
+        # mkstemp opens 0600; the pack is a committed artifact read like
+        # any other (round 10, SF-R10-1): the target's mode where it exists,
+        # else the umask's.
+        # `stat` inside the try: a second writer renaming or unlinking the
+        # target between the two calls is the two-writer case this helper
+        # exists for (round 11, SF-R11-3). The umask read is process-global
+        # and momentarily 0; `write_pack` is reached only from the CLI, not
+        # from a threaded process, so no other file is created in the gap.
+        try:
+            mode = os.stat(path).st_mode & 0o777
+        except OSError:
+            umask = os.umask(0); os.umask(umask)
+            mode = 0o666 & ~umask
+        os.chmod(tmp, mode)
+        os.replace(tmp, path)
+    finally:
+        try:
+            tmp.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
+def pack_shape_problem(pack: Any) -> str | None:
+    """Why `pack` is not a review pack, or None when it is one: a mapping
+    with an integer `pack_version` and a non-empty `items` list of
+    mappings each carrying `id` and `kind` (#1124 Codex review, M1)."""
+    if not isinstance(pack, dict):
+        return f"the pack is a {type(pack).__name__}, not a mapping"
+    if not isinstance(pack.get("pack_version"), int):
+        return "the pack carries no integer pack_version"
+    items = pack.get("items")
+    if not isinstance(items, list) or not items:
+        return "the pack carries no items"
+    if not all(isinstance(i, dict) and i.get("id") and i.get("kind") in VERDICTS for i in items):
+        return "an item lacks an id or a kind the vocabulary knows"
+    return None
+
+
+def review_evidence_why(block: Any) -> str | None:
+    """Why a record's review block is not evidence for canonical selection,
+    or None when it is (#1124 round-9 review, M-R9-1; landed in round 10): "no review block", "not
+    checked", or the findings and unanswered items that keep a checked
+    block out of the ranking — three states, because a block that is not
+    evidence is not the same as no block, and `runs select` says which."""
+    if not isinstance(block, dict):
+        return "no review block"
+    if not block.get("checked"):
+        # A block that says it was not checked carries its reason (a pack
+        # that is not a pack, #1124 round 10 SF-R10-4).
+        return f"not checked ({block['reason']})" if block.get("reason") else "not checked"
+    adverse = block.get("adverse")
+    if not isinstance(adverse, int) or isinstance(adverse, bool):
+        return f"not evidence: adverse is {type(adverse).__name__}, not a count"
+    if adverse < 0:
+        # `min()` would put it first (#1124 round 12, SF-R12-1): a count
+        # that cannot be a count of anything is not evidence, on this
+        # field as on `unanswered_truncated`.
+        return f"not evidence: adverse is {adverse}, not a count"
+    findings, unanswered, truncated = block.get("findings"), block.get("unanswered"), block.get("unanswered_truncated")
+    # A shape the block cannot be measured by is one more way of not being
+    # evidence, never an exception out of `runs select` (round 10, M-R10-2).
+    if findings is not None and not isinstance(findings, list):
+        return f"not evidence: findings is {type(findings).__name__}, not a list"
+    if unanswered is not None and not isinstance(unanswered, list):
+        return f"not evidence: unanswered is {type(unanswered).__name__}, not a list"
+    if truncated is not None and (not isinstance(truncated, int) or isinstance(truncated, bool) or truncated < 0):
+        return (f"not evidence: unanswered_truncated is {type(truncated).__name__}, not a count" if not isinstance(truncated, int)
+                or isinstance(truncated, bool) else f"not evidence: unanswered_truncated is {truncated}, not a count")
+    n_f = len(findings or [])
+    n_u = len(unanswered or []) + (truncated or 0)
+    if n_f or n_u:
+        return f"not evidence: {n_f} finding(s), {n_u} unanswered"
+    return None
+
+
+def review_evidence(block: Any) -> int | None:
+    """The adverse count a checked review block contributes to canonical
+    selection (#660), or None where the block is not evidence: unchecked,
+    no integer `adverse`, any finding (a review of another pack, an
+    out-of-vocabulary verdict, an item answered twice) or any unanswered
+    item — a partial or mismatched review's count is a count of something
+    else (#1124 Codex review, M2)."""
+    return None if review_evidence_why(block) else block["adverse"]
 
 
 def check_review(pack: dict[str, Any], review: dict[str, Any]) -> dict[str, Any]:
@@ -673,6 +1000,17 @@ def check_review(pack: dict[str, Any], review: dict[str, Any]) -> dict[str, Any]
     its kind's vocabulary and a pointer that exists in the pack; the counts
     are affirmative and `cannot_tell` is its own number (#787)."""
     findings: list[dict[str, Any]] = []
+    shape = pack_shape_problem(pack)
+    if shape is None and not isinstance(review, dict):
+        shape = f"the review is a {type(review).__name__}, not a mapping"
+    if shape is not None:
+        # An empty file, `[]`, `{}` or a pack without items used to pass
+        # `--strict --write` with zero items answered and no finding, and
+        # its sha was then pinned and ranked (#1124 Codex review, M1).
+        return {"checked": False, "reason": shape, "items_total": 0, "items_answered": 0,
+                "unanswered": [], "unanswered_truncated": None, "by_kind": {}, "adverse": None,
+                "cannot_tell": None, "findings": [{"kind": "not_a_pack", "reason": shape}],
+                "summary": f"not checked: {shape}"}
     by_id = {i["id"]: i for i in pack.get("items") or []}
     answered: dict[str, dict[str, Any]] = {}
     for a in review.get("items") or []:
