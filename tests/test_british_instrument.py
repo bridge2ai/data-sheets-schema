@@ -54,6 +54,14 @@ class Battery(unittest.TestCase):
         ("tumor edema meters traveling artifact minimize personalized totaling", 0),
         ("in practice the specialist put emphasis on the cancellation of the program", 0),
         ("the synthesis and hypothesis of the analysis", 0),
+        # v4 (#1006): the forms the Codex review of #1003 found the v3
+        # instrument could not see, and the American controls beside them.
+        ("labourers were honourably paid in millilitres and micrometres", 4),
+        ("the paediatrician measured haematopoietic sulphide in grey vials", 4),
+        ("greyscale and greyish, sulphate and haematocrit", 4),
+        ("greyed out and greying", 2),
+        ("laborers honorably measured milliliters and micrometers", 0),
+        ("the pediatrician saw hematopoietic sulfide in gray, and a greyhound", 0),
     )
 
     def test_the_battery(self):

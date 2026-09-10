@@ -1074,6 +1074,33 @@ runner sends says "neighbouring" too and is filed as #1138, because
 `PHASE_INSTRUCTIONS` is in the assembly digest and moving it is a
 condition-boundary change.
 
+### The schema modules are a scanned surface of the real-identifier guard (#1146, 2026-09-09)
+
+The #647 guard scanned the prompts, the two playbooks and the rendered
+digests; the two docExamples the #1126 review found by hand (a registered
+trial number, a DOI that does not exist) sat in schema modules it never
+read. The modules are a surface now — the docExamples reach the agentic
+runtime through the merged schema file and the descriptions reach every
+API request through the digest — and two shapes were made form-aware so
+the surface is scannable without an allowlist: a ROR id is `0` + six
+Crockford base32 characters + two check digits (`01an7q238`; the
+placeholder `0xxxxxxxx` is not one, where the first shape matched any nine
+lowercase alphanumerics), and an ORCID-shaped token counts only when its
+ISO 7064 MOD 11-2 check digit holds — the property #1126 used to make the
+schema's four ORCID-shaped tokens form-only (three docExamples and the
+`orcid` slot's description) is the property the scanner now reads; the
+prompt body keeps the un-narrowed reading, since an identifier-shaped
+token there is a copy-through candidate whether or not it is anyone's.
+The surface's first pass reported green; the review of that pass found
+one real identifier the shape could not read — the `publisher` docExample
+`ror:04t3en479`, Karlsruhe Institute of Technology's ROR, written with a
+lower-case prefix the CURIE shape matched in upper case only (#1178) —
+the #647 defect verbatim, in the merged schema file the agentic playbook
+reads, reported as a pass. The shape reads either case now, the
+docExample is `ROR:0xxxxxxxx`, and the derived artifacts are regenerated.
+The guard is green on all 22 modules; the generated merged files and the
+datamodel are derived from them and are not scanned twice.
+
 ### The schema digest moved with #1114 (2026-09-09)
 
 The `doi` slot's description carried a real Nature DOI as its example,
@@ -1403,6 +1430,35 @@ steps need:
     assembly or datasheet touched — not generation-path changes; #1147's
     rotation of v9 R8 is its own item when it lands.
 
+18. **British spellings instrument v4 (#1006, 2026-09-09).** The Codex
+    review of #1003 found eight forms v3 could not see — `labourers`,
+    `honourably`, `millilitres`, `micrometres`, `paediatricians`,
+    `haematopoietic`, `sulphide`, `grey` — which the normaliser, mirroring
+    the instrument rule for rule, let through while `residual_count` read
+    0. v4 widens seven patterns (the `-our` family takes `ers`, `honour`
+    takes `ably`, `metre` and `litre` take the `micro`/`nano`/`milli`/
+    `deci` prefixes, `paediatric` takes `ians`, `haem` takes any `ato…`
+    stem, `sulph` any suffix) and adds `grey`; the normaliser is v2, one
+    rule per v4 pattern, and its coverage test holds the mirror. The form
+    block now names `british_instrument`. Recomputed with
+    `backfill-checks --blocks form --overwrite` over all 282 records: 18
+    moved, all in the 2026-07 and early-2026-08 arms except the v5 rep1
+    AI_READI record (9 → 10, `haematocrit`), the v6 rep3 CM4AI record
+    (0 → 2, `nanometres`) and the 2026-08-28d v7 AI_READI canary (44 →
+    45), none of which carries a canary block; the v7 production arm (139)
+    and the 2026-08-22c baseline (88) are unchanged, so no gate row and no
+    canary verdict moves; none of the eight forms occurs in any record, and
+    the 52 new occurrences are the widened patterns' (`haematocrit` 19,
+    `microlitre` 15, `micrometres` 12, `nanometres` 6). A surname `Grey`
+    would be counted, as the Temerty Centre is, and the normaliser leaves it
+    as written only inside a title-case run — a bare `family_name: Grey` is
+    rewritten and logged, and the disposition command restores it. An
+    instrument change lands at a condition boundary: the v8 fill is
+    complete and no v9 record exists. Not a generation-path change on its
+    own — but the normaliser is on the generation path, and its v2 rule
+    table rewrites eight more forms in any run made after it, so a v9 arm
+    is compared with v8 across this line as it is across step J.
+
 20. **A receipts recompute reads the bytes a drifted record read (#1140,
     2026-09-10).** `backfill-checks --blocks receipts` refused a record
     whose bundle had drifted since the run and the #907 guard withheld the
@@ -1459,7 +1515,8 @@ steps need:
 
 Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16,
 17 and 20 are not; 15 and 17 are the receipts instrument's revisions and
-17 classifies both); per the production rule none of them may land
+17 classifies both; 18 changes the normaliser's rule table and is a
+generation-path change by that half); per the production rule none of them may land
 between a v8 canary and its fill.
 
 ## Decisions needed before step 3
@@ -1486,7 +1543,10 @@ between a v8 canary and its fill.
   (#922): `ok` before and after, British 0 vs 4, the slips row present,
   the report row unmeasured under #684 (the record read no claim) against
   a baseline worst of 1 (2 before `report_claims` v3, #1022/#1046). The
-  AI_READI block's report row reads the same way today; #1170 re-derives it.
+  AI_READI block was re-derived the same way on 2026-09-10 UTC (#1170):
+  status `regressed` before and after (British 45 vs 43, the same under
+  v4 as proposed in #1173, open at the time of writing), the report row unmeasured, the D4 block (#906) under
+  `prior_verdict` and #891's beneath it.
 - **D5** — adopted 2026-09-03: API-only v8 first; the agentic arm needs
   #688's launcher and the parity update before a v8 playbook run is
   cheap enough to repeat.

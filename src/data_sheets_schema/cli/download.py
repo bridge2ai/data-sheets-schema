@@ -292,7 +292,8 @@ def scope_cmd(project, do_check, strict, manifest):
     require_repo_context("d4d download scope")
     setup_repo_imports()
     from data_sheets_schema.scope import (all_scopes, check_manifest,
-                                          check_record, related_ids)
+                                          check_record, malformed_entries,
+                                          related_ids)
 
     m = Path(manifest)
     scopes = all_scopes(m)
@@ -304,11 +305,24 @@ def scope_cmd(project, do_check, strict, manifest):
             continue
         click.echo(f"{name}")
         click.echo(f"   about     {s.get('referent')}  <{s.get('referent_id')}>")
-        for entry in s.get("related_but_distinct") or []:
+        # A malformed entry is named here, where the declaration is listed
+        # (#1157): the listing used to raise on a non-mapping entry before
+        # any check ran, and `check_manifest` reports the same rows below.
+        rows: dict[int, list] = {}
+        for r in malformed_entries(name, m):
+            rows.setdefault(r["index"], []).append(r)          # an entry can carry two problems (#1177 review, SF-A)
+        for i, entry in enumerate(s.get("related_but_distinct") or []):
+            here = rows.get(i, [])
+            if any(r["skipped"] for r in here):
+                for r in here:
+                    click.echo(f"   ⚠️  {name}: related_but_distinct[{i}]: {r['problem']} — that dataset is unchecked")
+                continue
             click.echo(f"   not about {entry.get('name')}  <{entry.get('id')}>")
             click.echo(f"             express as `{entry.get('express_as')}`"
                        + (f"; in this bundle as {entry['in_bundle']}"
                           if entry.get("in_bundle") else ""))
+            for r in here:
+                click.echo(f"   ⚠️  {name}: related_but_distinct[{i}]: {r['problem']}")
 
     problems = check_manifest(m)
     for p in problems:
