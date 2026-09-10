@@ -185,7 +185,13 @@ validation:
     core:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-02_claude-opus-5-bare_rep3/CHORUS_d4d_core.yaml
       md5: 5ae290a3ccd51bf9f6b0680be852f556
-  recorded_by: api_runner.execute
+  schema:
+    full_sha256: 4138914fe8255024ee8d0679b4a38ff4dd7f7c4e23b2caf77c6bc7ca47de3e47
+    core_sha256: c13c83b4e8c7b2d4f9869c379606ecb03a17a8c5bfd834b316a3b4099114024d
+  duplicate_keys:
+    full: []
+    core: []
+  recorded_by: d4d provenance recheck-validation
 pair_consistency:
   ran: true
   consistent: false

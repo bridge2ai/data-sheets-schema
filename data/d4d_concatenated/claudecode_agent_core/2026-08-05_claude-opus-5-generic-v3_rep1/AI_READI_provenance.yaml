@@ -201,43 +201,44 @@ validation:
     core:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml
       md5: 47e23602b1966ddd83e8df28eadc7509
-  recorded_by: api_runner.execute
+  schema:
+    full_sha256: 4138914fe8255024ee8d0679b4a38ff4dd7f7c4e23b2caf77c6bc7ca47de3e47
+    core_sha256: c13c83b4e8c7b2d4f9869c379606ecb03a17a8c5bfd834b316a3b4099114024d
+  duplicate_keys:
+    full: []
+    core: []
+  recorded_by: d4d provenance recheck-validation
   problems:
   - artifact: data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d.yaml
     class: Dataset
     error: '[ERROR] [data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d.yaml/0]
-      ''The dataset is self-contained but relies on the dataset documentation for
-      users requiring additional information about its provenance; one documentation
-      version is maintained for each dataset version, and the documentation, project
-      website, Zenodo community and GitHub organisation are maintained by the AI-READI
-      project.'' is not of type ''array'', ''null'' in /external_resources/0/future_guarantees
-      | [ERROR] [data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d.yaml/0]
-      ''metadata'' is not of type ''array'', ''null'' in /file_collections/9/collection_type
+      ''Aaron Y. Lee'' is not valid under any of the given schemas in /creators/0/principal_investigator
       | [ERROR] [data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d.yaml/0]
       ''Washington University in St. Louis (https://ror.org/01yc7t268), as recorded
       in the FAIRhub study metadata for v3.0.0; the NIH RePORTER record for award
       OT2OD032644 and the Nature Metabolism comment give the University of Washington''
       is not valid under any of the given schemas in /creators/0/affiliations/0 |
       [ERROR] [data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d.yaml/0]
+      ''Cecilia S. Lee'' is not valid under any of the given schemas in /creators/1/principal_investigator
+      | [ERROR] [data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d.yaml/0]
       ''Washington University in St. Louis (https://ror.org/01yc7t268), as recorded
       in the FAIRhub study metadata; the Nature Metabolism comment gives the University
       of Washington'' is not valid under any of the given schemas in /creators/1/affiliations/0'
   - artifact: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml
     class: CoreDataset
     error: '[ERROR] [data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml/0]
+      ''Aaron Y. Lee'' is not valid under any of the given schemas in /creators/0/principal_investigator
+      | [ERROR] [data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml/0]
       ''Washington University in St. Louis (https://ror.org/01yc7t268), as recorded
       in the FAIRhub study metadata for v3.0.0; the NIH RePORTER record for award
       OT2OD032644 and the Nature Metabolism comment give the University of Washington''
       is not valid under any of the given schemas in /creators/0/affiliations/0 |
       [ERROR] [data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml/0]
+      ''Cecilia S. Lee'' is not valid under any of the given schemas in /creators/1/principal_investigator
+      | [ERROR] [data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml/0]
       ''Washington University in St. Louis (https://ror.org/01yc7t268), as recorded
       in the FAIRhub study metadata; the Nature Metabolism comment gives the University
-      of Washington'' is not valid under any of the given schemas in /creators/1/affiliations/0
-      | [ERROR] [data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml/0]
-      ''Stanford University (https://ror.org/00f54p054)'' is not valid under any of
-      the given schemas in /creators/2/affiliations/0 | [ERROR] [data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml/0]
-      ''University of California, San Diego (https://ror.org/0168r3w48)'' is not valid
-      under any of the given schemas in /creators/3/affiliations/0'
+      of Washington'' is not valid under any of the given schemas in /creators/1/affiliations/0'
 pair_consistency:
   ran: true
   consistent: true

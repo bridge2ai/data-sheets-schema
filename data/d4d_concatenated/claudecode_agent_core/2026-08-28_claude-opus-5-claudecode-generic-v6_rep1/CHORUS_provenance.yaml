@@ -224,9 +224,12 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CHORUS_d4d_core.yaml
       md5: ff69b352fad11142c6bd4467a786f930
   schema:
-    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
-    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
-  recorded_by: d4d runs validate
+    full_sha256: 4138914fe8255024ee8d0679b4a38ff4dd7f7c4e23b2caf77c6bc7ca47de3e47
+    core_sha256: c13c83b4e8c7b2d4f9869c379606ecb03a17a8c5bfd834b316a3b4099114024d
+  duplicate_keys:
+    full: []
+    core: []
+  recorded_by: d4d provenance recheck-validation
 pair_consistency:
   ran: true
   consistent: true
