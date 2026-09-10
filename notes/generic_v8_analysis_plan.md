@@ -1074,6 +1074,23 @@ runner sends says "neighbouring" too and is filed as #1138, because
 `PHASE_INSTRUCTIONS` is in the assembly digest and moving it is a
 condition-boundary change.
 
+### The schema modules are a scanned surface of the real-identifier guard (#1146, 2026-09-09)
+
+The #647 guard scanned the prompts, the two playbooks and the rendered
+digests; the two docExamples the #1126 review found by hand (a registered
+trial number, a DOI that does not exist) sat in schema modules it never
+read. The modules are a surface now — the docExamples reach the agentic
+runtime through the merged schema file and the descriptions reach every
+API request through the digest — and two shapes were made form-aware so
+the surface is scannable without an allowlist: a ROR id is `0` + six
+Crockford base32 characters + two check digits (`01an7q238`; the
+placeholder `0xxxxxxxx` is not one, where the first shape matched any nine
+lowercase alphanumerics), and an ORCID-shaped token counts only when its
+ISO 7064 MOD 11-2 check digit holds — the property #1126 used to make the
+schema's four ORCID docExamples form-only is the property the scanner now
+reads. The guard is green on all 23 modules; the generated merged files
+and the datamodel are derived from them and are not scanned twice.
+
 ### The schema digest moved with #1114 (2026-09-09)
 
 The `doi` slot's description carried a real Nature DOI as its example,
