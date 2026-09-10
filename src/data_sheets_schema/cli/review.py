@@ -101,8 +101,6 @@ def check(method, label, project, write, strict):
     method = method or resolve_method(label, project)
     import hashlib
 
-    import yaml
-
     from data_sheets_schema import backfill_checks as bc
     from data_sheets_schema.review_pack import UnreadableYAML, _load_mapping, check_review, record_paths
     prov = _provenance(method, label, project)
@@ -152,7 +150,7 @@ def check(method, label, project, write, strict):
         from data_sheets_schema.review_pack import review_evidence_why
         try:
             prior = _load_mapping(prov, bc._split_header(prov.read_text(encoding="utf-8"))[1]).get("review")
-        except (UnreadableYAML, OSError) as exc:
+        except (UnreadableYAML, OSError, UnicodeDecodeError) as exc:      # the third way a read fails (round 11, M-R11-1)
             click.echo(f"   (the record could not be re-read to name its earlier review block: {exc})")
             prior = None
         if isinstance(prior, dict):

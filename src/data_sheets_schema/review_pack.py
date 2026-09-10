@@ -913,11 +913,17 @@ def _replace(path: Path, text: str) -> None:
         # mkstemp opens 0600; the pack is a committed artifact read like
         # any other (round 10, SF-R10-1): the target's mode where it exists,
         # else the umask's.
-        if path.exists():
-            os.chmod(tmp, path.stat().st_mode & 0o777)
-        else:
+        # `stat` inside the try: a second writer renaming or unlinking the
+        # target between the two calls is the two-writer case this helper
+        # exists for (round 11, SF-R11-3). The umask read is process-global
+        # and momentarily 0; `write_pack` is reached only from the CLI, not
+        # from a threaded process, so no other file is created in the gap.
+        try:
+            mode = os.stat(path).st_mode & 0o777
+        except OSError:
             umask = os.umask(0); os.umask(umask)
-            os.chmod(tmp, 0o666 & ~umask)
+            mode = 0o666 & ~umask
+        os.chmod(tmp, mode)
         os.replace(tmp, path)
     finally:
         try:
@@ -964,8 +970,9 @@ def review_evidence_why(block: Any) -> str | None:
         return f"not evidence: findings is {type(findings).__name__}, not a list"
     if unanswered is not None and not isinstance(unanswered, list):
         return f"not evidence: unanswered is {type(unanswered).__name__}, not a list"
-    if truncated is not None and (not isinstance(truncated, int) or isinstance(truncated, bool)):
-        return f"not evidence: unanswered_truncated is {type(truncated).__name__}, not a count"
+    if truncated is not None and (not isinstance(truncated, int) or isinstance(truncated, bool) or truncated < 0):
+        return (f"not evidence: unanswered_truncated is {type(truncated).__name__}, not a count" if not isinstance(truncated, int)
+                or isinstance(truncated, bool) else f"not evidence: unanswered_truncated is {truncated}, not a count")
     n_f = len(findings or [])
     n_u = len(unanswered or []) + (truncated or 0)
     if n_f or n_u:

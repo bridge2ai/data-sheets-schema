@@ -1497,7 +1497,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
                  f"this run)" if recorded != status and
                  recorded in (VALID, INVALID) else "")
         adv = adverse_of.get(label)
-        rv = f"  {adv:2d} adverse" if adv is not None else f"  {evidence_why.get(label) or 'no review'}"
+        rv = f"  {adv:2d} adverse" if adv is not None else f"  {evidence_why[label]}"
         click.echo(f" {mark}{label:52s} {slots:3d} slots{rv}  {detail}{drift}")
 
     if not eligible:

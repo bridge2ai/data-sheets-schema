@@ -892,7 +892,8 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
                                                                     "unanswered": ["x"] * 30, "unanswered_truncated": 20}))
             for shape in ({"checked": True, "adverse": 2, "findings": 3}, {"checked": True, "adverse": 2, "unanswered": 7},
                           {"checked": True, "adverse": 2, "unanswered_truncated": "lots"},
-                          {"checked": True, "adverse": 2, "unanswered_truncated": [1, 2]}, {"checked": True, "adverse": "2"}):
+                          {"checked": True, "adverse": 2, "unanswered_truncated": [1, 2]}, {"checked": True, "adverse": "2"},
+                          {"checked": True, "adverse": 0, "findings": [], "unanswered": ["a", "b"], "unanswered_truncated": -2}):
                 self.assertIn("not evidence", rp.review_evidence_why(shape), shape)       # classified, never raised (round 10, M-R10-2)
                 self.assertIsNone(rp.review_evidence(shape))
             self.assertIn("not checked (the pack", rp.review_evidence_why(rp.check_review({}, {})))
@@ -911,11 +912,13 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
                 redo = click.testing.CliRunner().invoke(review_cli, base + ["--strict"])
             self.assertEqual(redo.exit_code, 1); self.assertIn("evidence for runs select; it was not replaced", redo.output)
             # a record that is not a mapping: the refusal still exits 1 with a message, not a traceback (M-R10-1)
-            keep = prov.read_text(); prov.write_text("# header\n- a\n- b\n")
-            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
-                broken = click.testing.CliRunner().invoke(review_cli, base + ["--strict"])
-            self.assertEqual(broken.exit_code, 1); self.assertIsNone(broken.exception if not isinstance(broken.exception, SystemExit) else None)
-            self.assertIn("could not be re-read", broken.output)
+            keep = prov.read_text()
+            for body in (b"# header\n- a\n- b\n", b"# header\nnote: caf\xe9 latin-1\nrun: {}\n"):      # a list; not UTF-8 (round 11, M-R11-1)
+                prov.write_bytes(body)
+                with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                    broken = click.testing.CliRunner().invoke(review_cli, base + ["--strict"])
+                self.assertEqual(broken.exit_code, 1, body); self.assertIsNone(broken.exception if not isinstance(broken.exception, SystemExit) else None, body)
+                self.assertIn("could not be re-read", broken.output, body)
             prov.write_text(keep)
             self.assertIsNone(rp.review_evidence({"checked": True, "adverse": 2, "findings": [], "unanswered": ["slot-001"]}))
             self.assertEqual(rp.review_evidence({"checked": True, "adverse": 2, "findings": [], "unanswered": []}), 2)
@@ -993,7 +996,11 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
                 rp.write_pack(prov, other, self.SMALLER, force=True)
                 rp.write_pack(prov, instr, force=True)
             self.assertEqual(len(names), len(set(names))); self.assertNotIn(out.name + ".tmp", names)
-            self.assertEqual(out.stat().st_mode & 0o777, 0o644)
+            umask = os.umask(0); os.umask(umask)
+            self.assertEqual(out.stat().st_mode & 0o777, 0o666 & ~umask)                # what write_text would have given (round 11, SF-R11-1)
+            out.chmod(0o640)
+            rp.write_pack(prov, instr, self.SMALLER, force=True)
+            self.assertEqual(out.stat().st_mode & 0o777, 0o640)                          # a rewrite keeps the target's mode
 
     def test_an_unusable_snapshot_leaves_the_receipts_block_unchecked(self):
         """#1124 Codex review, M7 and SF2: `block_for` ran the index join over
