@@ -274,15 +274,16 @@ files:
       retired_on: '2026-09-04'
       sha256: 06666c4d10786d4689170acdfd68350d451f84d2f94d4b5a22be6e569d3824f1
   src/download/prompts/d4d_generic_arm_prompt_v9.md:
-    body_sha256: bf642bb6740c18f87eb0595344f23d275825464577f8764253b9cec01e102f9e
-    bytes: 28763
-    pinned_at_commit: b10ec47ef83832fa69ba2feedb28518a93a0d1f0
+    body_sha256: 85032a9d09fbc01414bffa43bf0df369505fe8072490561b39c032f9feefaa6b
+    bytes: 29168
+    pinned_at_commit: 2bcd361b90faba252362a2e867f95386627d0ed3
     pinned_on: '2026-09-09'
-    reason: 'R8 (#1147, round 9, answering the reviewer after the Codex CLI review): the own id is the
-      base to prefer only where it is itself an identifier form, a stated forced id must be
-      a declared CURIE, a resolver URL or an absolute URL, and a person fragment on a fragment-bearing
-      id keeps the record fragment; no v9 record exists, so no record is superseded'
-    sha256: bdcf05beaa0238857933d31922ca2a11a736492291e63ba39d892d3d1ff72763
+    reason: 'R8 (#1147, round 10, answering the round-9 review): an identifier form is a declared
+      CURIE, an absolute URL, or a URI under a registered scheme such as ark or urn, for a
+      stated forced id and for every base; the premise admits a token own id; the person case
+      is literal in the carve-out; a token own id with neither DOI nor page uses the fragment
+      rule resolvable-URL fallback; no v9 record exists, so no record is superseded'
+    sha256: bb905941ee111674fda6a78822222d26af978734eb0fc1ebb42d3330e535b298
     superseded:
     - pinned_on: '2026-09-08'
       reason: "generic_v9: v8 plus R6 (a value in the referent own slots is supported by a\
@@ -378,13 +379,21 @@ files:
       retired_on: '2026-09-09'
       sha256: 33d1d867f0eef5d71f706ab46bb041ae0e5f9bb3310dc8303545c7fb93915ddf
     - pinned_on: '2026-09-09'
-      reason: 'R8 (#1147, round 8, answering the Codex CLI review): a forced id takes the identifier
-        the evidence states and is minted only where none is stated; a DOI or page base must
-        be an identifier form (declared CURIE, resolver URL, absolute URL); a part of a fragment-on-root
-        id keeps the record fragment, hyphen, own label; no v9 record exists, so no record
-        is superseded'
+      reason: 'R8 (#1147, round 8, answering the Codex CLI review): a forced id takes the
+        identifier the evidence states and is minted only where none is stated; a DOI or page
+        base must be an identifier form (declared CURIE, resolver URL, absolute URL); a part
+        of a fragment-on-root id keeps the record fragment, hyphen, own label; no v9 record
+        exists, so no record is superseded'
       retired_on: '2026-09-09'
       sha256: aae4b3598fe1d3c1bc5d603328e54a0b70fdbd1fd78eba99ad50f7bdd70eedc4
+    - pinned_on: '2026-09-09'
+      reason: 'R8 (#1147, round 9, answering the reviewer after the Codex CLI review): the
+        own id is the base to prefer only where it is itself an identifier form, a stated
+        forced id must be a declared CURIE, a resolver URL or an absolute URL, and a person
+        fragment on a fragment-bearing id keeps the record fragment; no v9 record exists,
+        so no record is superseded'
+      retired_on: '2026-09-09'
+      sha256: bdcf05beaa0238857933d31922ca2a11a736492291e63ba39d892d3d1ff72763
   src/download/prompts/d4d_tuned_arm_prompt.md:
     bytes: 2877
     pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
