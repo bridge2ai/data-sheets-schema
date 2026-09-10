@@ -22,7 +22,11 @@ import sys
 from pathlib import Path
 
 
-def problems(schema: Path) -> list[str]:
+def problems(schema: Path, read: list[Path] | None = None) -> list[str]:
+    """Every problem, one string each. A file that will not parse is a
+    problem here too (#1179 review, S2): the glob reaches files the
+    recipe's linter does not, and an all-clear must not cover a file that
+    was not read. `read`, when given, collects the files that were."""
     import yaml
 
     out: list[str] = []
@@ -31,8 +35,11 @@ def problems(schema: Path) -> list[str]:
             continue                       # generated from the files checked here
         try:
             raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-        except yaml.YAMLError:
-            continue                       # the linter's problem, reported there
+        except yaml.YAMLError as exc:
+            out.append(f"{path.name}: not parseable, not checked ({str(exc).splitlines()[0]})")
+            continue
+        if read is not None:
+            read.append(path)
         if not isinstance(raw, dict):
             continue
         for owner, node in _range_carriers(raw):
@@ -69,12 +76,13 @@ def main(argv: list[str]) -> int:
     if not schema.is_file():
         print(f"✖ {schema}: not found")
         return 1
-    found = problems(schema)
+    read: list[Path] = []
+    found = problems(schema, read)
     for p in found:
         print(f"✖ {p}")
     if found:
         return 1
-    print(f"✓ no `range:` without a name in {schema.parent}")
+    print(f"✓ no `range:` without a name in the {len(read)} files read under {schema.parent}")
     return 0
 
 

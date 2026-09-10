@@ -125,7 +125,7 @@ class TestValidateCore(unittest.TestCase):
         self.assertIn("CoreDatasetCollection.resources", result.stdout + result.stderr)
         self.assertRegex(result.stdout, r"✓ .*D4D_Core\.yaml")          # the linter passed it; the range check named it
 
-    def test_the_range_check_reads_slot_usage_and_attributes_and_passes_the_committed_schema(self):
+    def test_the_range_check_reads_slots_slot_usage_and_attributes_and_names_a_file_it_cannot_read(self):
         import importlib.util
         spec = importlib.util.spec_from_file_location("check_schema_ranges", ROOT / "scripts" / "check_schema_ranges.py")
         mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
@@ -139,10 +139,19 @@ class TestValidateCore(unittest.TestCase):
                 text = b.read_text()
                 i = text.index("\nslots:\n"); j = text.index("range: ", i)
                 b.write_text(text[:j] + "range: 123" + text[text.index("\n", j):])
-            found = mod.problems(_broken_copy(tmp, edit))
-        self.assertEqual(len(found), 2, found)
+                c = d / "D4D_Composition.yaml"                              # a slot_usage range
+                text = c.read_text()
+                i = text.index("slot_usage:"); j = text.index("range: ", i)
+                c.write_text(text[:j] + "range: null" + text[text.index("\n", j):])
+                (d / "D4D_FileCollection.yaml").write_text("classes: [\n", encoding="utf-8")   # not parseable
+            read: list = []
+            found = mod.problems(_broken_copy(tmp, edit), read)
+        self.assertEqual(len(found), 4, found)
         self.assertTrue(any("D4D_Core.yaml: CoreDatasetCollection.resources (attributes)" in f and "no value" in f for f in found), found)
         self.assertTrue(any("D4D_Base_import.yaml: slot " in f and "range is a int (123)" in f for f in found), found)
+        self.assertTrue(any("D4D_Composition.yaml: " in f and "(slot_usage)" in f and "no value" in f for f in found), found)
+        self.assertTrue(any("D4D_FileCollection.yaml: not parseable, not checked" in f for f in found), found)
+        self.assertNotIn("D4D_FileCollection.yaml", [p.name for p in read])
 
 if __name__ == "__main__":
     unittest.main()
