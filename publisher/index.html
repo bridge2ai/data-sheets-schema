@@ -407,16 +407,6 @@ Alias: publisher</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
 <td><a href="../Information/">Information</a></td>
 <td>Grouping for datasets and data files</td>
 <td>no</td>
@@ -427,13 +417,23 @@ Alias: publisher</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../FileCollection/">FileCollection</a></td>
-<td>A collection of files with shared characteristics (format, purpose, structure...</td>
+<td><a href="../DatasetCollection/">DatasetCollection</a></td>
+<td>A collection of related datasets, likely containing multiple files of multipl...</td>
 <td>no</td>
 </tr>
 <tr>
 <td><a href="../DataSubset/">DataSubset</a></td>
 <td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../FileCollection/">FileCollection</a></td>
+<td>A collection of files with shared characteristics (format, purpose, structure...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -454,7 +454,7 @@ Alias: publisher</p>
 <tbody>
 <tr>
 <td>d4d:docExample</td>
-<td>ror:04t3en479  # use a ROR ID, DOI, or URL — not a plain name</td>
+<td>ROR:0xxxxxxxx  # a ROR CURIE (form only), a DOI, or a URL — not a plain name</td>
 </tr>
 </tbody>
 </table>
@@ -488,7 +488,8 @@ Alias: publisher</p>
 annotations:
   d4d:docExample:
     tag: d4d:docExample
-    value: 'ror:04t3en479  # use a ROR ID, DOI, or URL — not a plain name'
+    value: 'ROR:0xxxxxxxx  # a ROR CURIE (form only), a DOI, or a URL — not a plain
+      name'
 description: The organization or entity responsible for making the resource available.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
