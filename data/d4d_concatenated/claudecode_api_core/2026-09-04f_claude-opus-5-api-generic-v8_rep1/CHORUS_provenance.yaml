@@ -492,9 +492,13 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
-  instrument: 'v2 (#1123): a fragment minted on an identifier the record carries for
-    the dataset at its top level — its id in CURIE or resolver form, its doi, its
-    page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+  instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
+    anywhere (a minted id reconciliation stripped) is located as a keyless entry —
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
+    of declared dropped; v2 (#1123): a fragment minted on an identifier the record
+    carries for the dataset at its top level — its id in CURIE or resolver form, its
+    doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
     counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
     commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
@@ -528,7 +532,7 @@ receipts:
     exempt: 49
     exempt_on_carried_identifier: 0
     receiptable: 186
-    with_receipt: 53
+    with_receipt: 54
     without_receipt:
     - id
     - name
@@ -580,8 +584,8 @@ receipts:
     - subpopulations[0].subpopulation_elements_present
     - subpopulations[0].identification
     - subpopulations[1].subpopulation_elements_present
-    without_receipt_truncated: 83
-    never_receipted: 128
+    without_receipt_truncated: 82
+    never_receipted: 127
     added_after_receipt: 5
     receipt_paths: 62
     unresolved: []
@@ -604,33 +608,71 @@ receipts:
       resolved_path: creators[5]
     - path: distribution_formats[0].notes
       resolved_path: distribution_formats[0].notes
+    - path: labeling_strategies[0].labeling_details
+      resolved_path: labeling_strategies[0].labeling_details
     - path: splits[0].split_details
       resolved_path: splits[0].split_details
     - path: updates.update_details
       resolved_path: updates.update_details
-    value_changed_after_receipt_count: 8
-    index_reused_by_another_entry:
+    value_changed_after_receipt_count: 9
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    located_after_key_stripped:
+    - path: acquisition_methods[0].acquisition_details
+      resolved_path: acquisition_methods[0].acquisition_details
+    - path: cleaning_strategies[0].cleaning_details
+      resolved_path: cleaning_strategies[0].cleaning_details
+    - path: collection_mechanisms[0].mechanism_details
+      resolved_path: collection_mechanisms[0].mechanism_details
+    - path: collection_mechanisms[1].mechanism_details
+      resolved_path: collection_mechanisms[1].mechanism_details
+    - path: collection_mechanisms[2].mechanism_details
+      resolved_path: collection_mechanisms[2].mechanism_details
+    - path: collection_mechanisms[3].mechanism_details
+      resolved_path: collection_mechanisms[3].mechanism_details
+    - path: creators[0].affiliations[0].name
+      resolved_path: creators[0].affiliations[0].name
+    - path: creators[0].principal_investigator
+      resolved_path: creators[0].principal_investigator
+    - path: creators[1]
+      resolved_path: creators[1]
+    - path: creators[2]
+      resolved_path: creators[2]
+    - path: creators[3]
+      resolved_path: creators[3]
+    - path: creators[4]
+      resolved_path: creators[4]
+    - path: creators[5]
+      resolved_path: creators[5]
+    - path: creators[6].notes
+      resolved_path: creators[6].notes
+    - path: data_collectors[0].collector_details
+      resolved_path: data_collectors[0].collector_details
+    - path: ethical_reviews[0].review_details
+      resolved_path: ethical_reviews[0].review_details
     - path: existing_uses[0].examples[0]
-      basis: entry_dropped
-    - path: labeling_strategies[0].labeling_details
-      basis: entry_dropped
-    index_reused_by_another_entry_count: 2
+      resolved_path: existing_uses[0].examples[0]
+    - path: external_resources[0].external_resources[0]
+      resolved_path: external_resources[0].external_resources[0]
+    - path: funders[0].grants[0].grant_number
+      resolved_path: funders[0].grants[0].grant_number
+    - path: funders[0].grants[0].notes
+      resolved_path: funders[0].grants[0].notes
+    located_after_key_stripped_count: 31
     path_not_in_snapshot: []
     path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
-    - existing_uses[0].examples[0]
     - existing_uses[0].examples[1]
-    - labeling_strategies[0].labeling_details
     - sampling_strategies[0].strategies[0]
     - sampling_strategies[0].strategies[1]
-    receipts_to_removed_values: 5
+    receipts_to_removed_values: 3
   findings: []
   findings_truncated: null
   findings_gated: 0
-  summary: chunks 8/8 reviewed · snippets 79/79 verified · slots 53/186 with a receipt
-    (128 never receipted, 5 added after the receipt) (49 exempt) · 5 receipt path(s)
-    reshaped by reconcile · 8 value(s) changed after the receipt · 2 receipt index(es)
-    reused by another entry
+  summary: chunks 8/8 reviewed · snippets 79/79 verified · slots 54/186 with a receipt
+    (127 never receipted, 5 added after the receipt) (49 exempt) · 3 receipt path(s)
+    reshaped by reconcile · 9 value(s) changed after the receipt · 31 entry(ies) located
+    after a stripped key
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_coverage_receipt.yaml
