@@ -1448,14 +1448,14 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
         """(adverse, why): the review block's adverse count where the block
         is evidence, else None and the reason — no block, not checked, or
         a checked block with findings or unanswered items, which is not the
-        same as no block (#1124 round 9, M-R9-1). Absence is not zero adverse."""
+        same as no block (#1124 round-9 review, M-R9-1). Absence is not zero adverse."""
         pp = record_path_for(project, method, label, CONCAT_DIR)
         if not pp.exists():
-            return None, "no record"
+            return None, "no provenance record"
         try:
             rec = _yaml.safe_load(pp.read_text(encoding="utf-8")) or {}
         except (_yaml.YAMLError, OSError, UnicodeDecodeError):
-            return None, "record unreadable"
+            return None, "provenance record unreadable"
         from data_sheets_schema.review_pack import review_evidence, review_evidence_why
         block = rec.get("review") if isinstance(rec, dict) else None
         return review_evidence(block), review_evidence_why(block)
@@ -1515,7 +1515,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
     if ignore_reviews:
         reviews_applied, why = False, "--ignore-reviews"
     elif unreviewed:
-        reviews_applied, why = False, "; ".join(f"{lab}: {evidence_why.get(lab) or 'no review block'}" for lab in unreviewed)
+        reviews_applied, why = False, "; ".join(f"{lab}: {evidence_why[lab]}" for lab in unreviewed)
     else:
         reviews_applied, why = True, None
     if reviews_applied:

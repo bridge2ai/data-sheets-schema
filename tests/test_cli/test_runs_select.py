@@ -362,7 +362,7 @@ class TestReviewCriterion(TestSelect):
         self.assertEqual(out.exit_code, 0, out.output)
         self.assertIn("→ cfg_rep2", out.output)
         self.assertIn("not evidence: 1 finding(s), 0 unanswered", out.output)
-        self.assertNotIn("no review", out.output)
+        self.assertNotIn("no review block", out.output)                             # every replicate here has one
         prov = yaml.safe_load((self.root / "claudecode_agent_core" / "cfg_rep2" / "P_provenance.yaml").read_text())
         canon = prov["canonical"]
         self.assertFalse(canon["reviews_applied"]); self.assertIn("cfg_rep2: not evidence", canon["reviews_not_applied_because"])

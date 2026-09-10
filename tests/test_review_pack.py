@@ -890,10 +890,33 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
             self.assertIsNone(rp.review_evidence_why({"checked": True, "adverse": 0, "findings": [], "unanswered": []}))
             self.assertIn("50 unanswered", rp.review_evidence_why({"checked": True, "adverse": 0, "findings": [],
                                                                     "unanswered": ["x"] * 30, "unanswered_truncated": 20}))
+            for shape in ({"checked": True, "adverse": 2, "findings": 3}, {"checked": True, "adverse": 2, "unanswered": 7},
+                          {"checked": True, "adverse": 2, "unanswered_truncated": "lots"},
+                          {"checked": True, "adverse": 2, "unanswered_truncated": [1, 2]}, {"checked": True, "adverse": "2"}):
+                self.assertIn("not evidence", rp.review_evidence_why(shape), shape)       # classified, never raised (round 10, M-R10-2)
+                self.assertIsNone(rp.review_evidence(shape))
+            self.assertIn("not checked (the pack", rp.review_evidence_why(rp.check_review({}, {})))
             # a second failing `--strict` names the block that stays (SF-R9-4)
             with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
                 again = click.testing.CliRunner().invoke(review_cli, base + ["--strict"])
             self.assertEqual(again.exit_code, 1); self.assertIn("still carries its earlier review block", again.output)
+            self.assertIn("of this pack", again.output); self.assertIn("not evidence: 1 finding(s)", again.output)
+            # a passing earlier block of this pack, then a failing redo: the refusal says the passing one stands (SF-R10-3)
+            text = prov.read_text(); head, body = text.split("\n", 1); d = yaml.safe_load(body)
+            d["review"] = {"checked": True, "adverse": 1, "findings": [], "unanswered": [],
+                           "artifacts": {"pack": {"sha256": sha}}}
+            prov.write_text(head + "\n" + yaml.safe_dump(d))
+            paths["review"].write_text(yaml.safe_dump({"pack_sha256": "0" * 64, "items": []}))
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                redo = click.testing.CliRunner().invoke(review_cli, base + ["--strict"])
+            self.assertEqual(redo.exit_code, 1); self.assertIn("evidence for runs select; it was not replaced", redo.output)
+            # a record that is not a mapping: the refusal still exits 1 with a message, not a traceback (M-R10-1)
+            keep = prov.read_text(); prov.write_text("# header\n- a\n- b\n")
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                broken = click.testing.CliRunner().invoke(review_cli, base + ["--strict"])
+            self.assertEqual(broken.exit_code, 1); self.assertIsNone(broken.exception if not isinstance(broken.exception, SystemExit) else None)
+            self.assertIn("could not be re-read", broken.output)
+            prov.write_text(keep)
             self.assertIsNone(rp.review_evidence({"checked": True, "adverse": 2, "findings": [], "unanswered": ["slot-001"]}))
             self.assertEqual(rp.review_evidence({"checked": True, "adverse": 2, "findings": [], "unanswered": []}), 2)
             self.assertIsNone(rp.review_evidence({"checked": True, "adverse": "2", "findings": [], "unanswered": []}))
@@ -962,6 +985,15 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
             self.assertEqual(sorted(p.name for p in out.parent.glob("*.tmp")), [])  # no temp file lingers
             self.assertEqual(sorted(p.name for p in out.parent.glob(".*.tmp")), [])
             self.assertFalse(any("review" in p.name and p.suffix == ".tmp" for p in out.parent.iterdir()))
+            # the temp names are unique per call and the landed file keeps the pack's mode (round 10, SF-R10-2/SF-R10-1)
+            names = []
+            def spy(src, dst):
+                names.append(Path(src).name); return real(src, dst)
+            with mock.patch("os.replace", spy):
+                rp.write_pack(prov, other, self.SMALLER, force=True)
+                rp.write_pack(prov, instr, force=True)
+            self.assertEqual(len(names), len(set(names))); self.assertNotIn(out.name + ".tmp", names)
+            self.assertEqual(out.stat().st_mode & 0o777, 0o644)
 
     def test_an_unusable_snapshot_leaves_the_receipts_block_unchecked(self):
         """#1124 Codex review, M7 and SF2: `block_for` ran the index join over

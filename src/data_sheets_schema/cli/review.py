@@ -145,12 +145,23 @@ def check(method, label, project, write, strict):
         n_u = len(block["unanswered"]) + int(block.get("unanswered_truncated") or 0)
         click.echo(f"   not written: --strict and {len(block['findings'])} finding(s), {n_u} unanswered")
         # The block already in the record is named, since it keeps ranking
-        # (round 9, SF-R9-4): a redone review that fails leaves the earlier one standing.
-        prior = (yaml.safe_load(bc._split_header(prov.read_text(encoding="utf-8"))[1]) or {}).get("review")
+        # (round-9 review, SF-R9-4): a redone review that fails leaves the
+        # earlier one standing. Read through the named-failure loader: a
+        # record that is not a mapping is a message, not a traceback (round
+        # 10, M-R10-1), and the refusal still exits 1 whatever the read did.
+        from data_sheets_schema.review_pack import review_evidence_why
+        try:
+            prior = _load_mapping(prov, bc._split_header(prov.read_text(encoding="utf-8"))[1]).get("review")
+        except (UnreadableYAML, OSError) as exc:
+            click.echo(f"   (the record could not be re-read to name its earlier review block: {exc})")
+            prior = None
         if isinstance(prior, dict):
-            prior_sha = str((((prior.get("artifacts") or {}).get("pack") or {}).get("sha256")) or "")[:12]
-            click.echo(f"   the record still carries its earlier review block (pack {prior_sha}…, "
-                       f"{len(prior.get('findings') or [])} finding(s)); it was not replaced")
+            prior_sha = str((((prior.get("artifacts") or {}).get("pack") or {}).get("sha256")) or "")
+            why = review_evidence_why(prior)
+            click.echo(f"   the record still carries its earlier review block — of "
+                       + (f"this pack ({prior_sha[:12]}…)" if prior_sha == pack["_sha256"] else
+                          f"pack {prior_sha[:12]}…, not this one ({pack['_sha256'][:12]}…)" if prior_sha else "no pinned pack")
+                       + f", {why or 'evidence for runs select'}; it was not replaced")
         sys.exit(1)
     if write:
         # Keys kept even when absent (#1097): dropping `reviewed_at` when the
@@ -365,13 +376,13 @@ def agree_cmd(method, label, project, write):
         pack_raw = paths["pack"].read_bytes(); b_raw = paths["review_b"].read_bytes()
         pack = _load_mapping(paths["pack"], raw=pack_raw)
         a = _load_mapping(paths["review"])
-        b = _load_mapping(paths["review_b"], raw=b_raw)                 # the bytes rated are the bytes hashed (round 9, M-R9-2)
+        b = _load_mapping(paths["review_b"], raw=b_raw)                 # the bytes rated are the bytes hashed (round-9 review, M-R9-2)
     except UnreadableYAML as exc:
         raise click.ClickException(str(exc)) from exc
     from data_sheets_schema.review_pack import pack_shape_problem
     shape = pack_shape_problem(pack)
     if shape:
-        raise click.ClickException(f"{paths['pack']} is not a review pack: {shape}")   # not the review's fault (round 9, SF-R9-1)
+        raise click.ClickException(f"{paths['pack']} is not a review pack: {shape}")   # not the review's fault (round-9 review, SF-R9-1)
     pack["_sha256"] = hashlib.sha256(pack_raw).hexdigest()
     # A rating pair is only as good as its ratings: an invalid review
     # (duplicate ids, out-of-vocabulary verdicts, unknown items) must not

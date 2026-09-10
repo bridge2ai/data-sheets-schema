@@ -900,7 +900,7 @@ def write_pack(provenance: Path, instruction_file: Path | None = None,
 
 def _replace(path: Path, text: str) -> None:
     """Write beside the target and rename over it. The temp name is unique
-    per call (round 9, SF-R9-3: a fixed name let two writers rename each
+    per call (round-9 review, SF-R9-3: a fixed name let two writers rename each
     other's half-written bytes over the pinned pack) and never matches
     `{P}_review*.yaml`; a failed rename leaves nothing behind."""
     import os
@@ -910,6 +910,14 @@ def _replace(path: Path, text: str) -> None:
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as fh:
             fh.write(text)
+        # mkstemp opens 0600; the pack is a committed artifact read like
+        # any other (round 10, SF-R10-1): the target's mode where it exists,
+        # else the umask's.
+        if path.exists():
+            os.chmod(tmp, path.stat().st_mode & 0o777)
+        else:
+            umask = os.umask(0); os.umask(umask)
+            os.chmod(tmp, 0o666 & ~umask)
         os.replace(tmp, path)
     finally:
         try:
@@ -936,16 +944,30 @@ def pack_shape_problem(pack: Any) -> str | None:
 
 def review_evidence_why(block: Any) -> str | None:
     """Why a record's review block is not evidence for canonical selection,
-    or None when it is (#1124 round 9, M-R9-1): "no review block", "not
+    or None when it is (#1124 round-9 review, M-R9-1; landed in round 10): "no review block", "not
     checked", or the findings and unanswered items that keep a checked
     block out of the ranking — three states, because a block that is not
     evidence is not the same as no block, and `runs select` says which."""
     if not isinstance(block, dict):
         return "no review block"
-    if not block.get("checked") or not isinstance(block.get("adverse"), int):
-        return "not checked"
-    n_f = len(block.get("findings") or [])
-    n_u = len(block.get("unanswered") or []) + int(block.get("unanswered_truncated") or 0)
+    if not block.get("checked"):
+        # A block that says it was not checked carries its reason (a pack
+        # that is not a pack, #1124 round 10 SF-R10-4).
+        return f"not checked ({block['reason']})" if block.get("reason") else "not checked"
+    adverse = block.get("adverse")
+    if not isinstance(adverse, int) or isinstance(adverse, bool):
+        return f"not evidence: adverse is {type(adverse).__name__}, not a count"
+    findings, unanswered, truncated = block.get("findings"), block.get("unanswered"), block.get("unanswered_truncated")
+    # A shape the block cannot be measured by is one more way of not being
+    # evidence, never an exception out of `runs select` (round 10, M-R10-2).
+    if findings is not None and not isinstance(findings, list):
+        return f"not evidence: findings is {type(findings).__name__}, not a list"
+    if unanswered is not None and not isinstance(unanswered, list):
+        return f"not evidence: unanswered is {type(unanswered).__name__}, not a list"
+    if truncated is not None and (not isinstance(truncated, int) or isinstance(truncated, bool)):
+        return f"not evidence: unanswered_truncated is {type(truncated).__name__}, not a count"
+    n_f = len(findings or [])
+    n_u = len(unanswered or []) + (truncated or 0)
     if n_f or n_u:
         return f"not evidence: {n_f} finding(s), {n_u} unanswered"
     return None
