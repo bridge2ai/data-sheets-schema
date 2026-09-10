@@ -1087,9 +1087,18 @@ Crockford base32 characters + two check digits (`01an7q238`; the
 placeholder `0xxxxxxxx` is not one, where the first shape matched any nine
 lowercase alphanumerics), and an ORCID-shaped token counts only when its
 ISO 7064 MOD 11-2 check digit holds — the property #1126 used to make the
-schema's four ORCID docExamples form-only is the property the scanner now
-reads. The guard is green on all 23 modules; the generated merged files
-and the datamodel are derived from them and are not scanned twice.
+schema's four ORCID-shaped tokens form-only (three docExamples and the
+`orcid` slot's description) is the property the scanner now reads; the
+prompt body keeps the un-narrowed reading, since an identifier-shaped
+token there is a copy-through candidate whether or not it is anyone's.
+The surface found one real identifier on its first pass: the `publisher`
+docExample `ror:04t3en479`, Karlsruhe Institute of Technology's ROR,
+written with a lower-case prefix the first CURIE shape did not match
+(#1178 review) — the #647 defect verbatim, in the merged schema file the
+agentic playbook reads; it is `ROR:0xxxxxxxx` now and the derived
+artifacts are regenerated. The guard is green on all 22 modules; the
+generated merged files and the datamodel are derived from them and are
+not scanned twice.
 
 ### The schema digest moved with #1114 (2026-09-09)
 
