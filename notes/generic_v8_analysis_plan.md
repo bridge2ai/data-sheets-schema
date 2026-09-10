@@ -1408,9 +1408,10 @@ between a v8 canary and its fill.
   (#922): `ok` before and after, British 0 vs 4, the slips row present,
   the report row unmeasured under #684 (the record read no claim) against
   a baseline worst of 1 (2 before `report_claims` v3, #1022/#1046). The
-  AI_READI block was re-derived the same way on 2026-09-09 (#1170): status
-  `regressed` before and after, the report row unmeasured, the D4 block
-  under `prior_verdict`.
+  AI_READI block was re-derived the same way on 2026-09-10 UTC (#1170):
+  status `regressed` before and after (British 45 vs 43, the same under
+  v4), the report row unmeasured, the D4 block (#906) under
+  `prior_verdict` and #891's beneath it.
 - **D5** — adopted 2026-09-03: API-only v8 first; the agentic arm needs
   #688's launcher and the parity update before a v8 playbook run is
   cheap enough to repeat.

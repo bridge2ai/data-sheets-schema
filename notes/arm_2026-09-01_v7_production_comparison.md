@@ -208,12 +208,16 @@ worst 43): decision D4 (#906, adopted 2026-09-03, PR #920) re-derived its
 verdict offline under v3, with the prior v2-basis verdict kept under
 `prior_verdict`. The record stays retained in the completed arm — the
 retention now sits under a regressed-on-British v3 verdict, and every
-other row is unchanged. Re-derived again on 2026-09-09 (#1170, the
-#922 procedure): the report-findings row reads unmeasured rather than 0
-vs 1 — the record's own report block read no claim (`claims_checked` 0,
-#684) — with the D4 block kept under `prior_verdict` beneath it (and
-#906's beneath that); status `regressed` on the British row either way,
-45 vs 43, every other row unchanged.
+other row is unchanged. Re-derived again on 2026-09-10 UTC (#1170, the
+#922 procedure; `recorded_at` 2026-09-10T00:12Z): the report-findings row
+reads unmeasured rather than 0 vs 1 — the record's own report block read
+no claim (`claims_checked` 0, #684) — with the D4 block (#906) kept under
+`prior_verdict` beneath it, and #891's beneath that; status `regressed`
+on the British row either way, 45 vs 43 under instrument v3 — and under
+v4 (#1006), which widens seven patterns and adds `grey`, the run and all
+three 2026-08-22c baseline replicates read the same (45; 33, 43, 0), so
+that revision does not call for a third re-derivation; every other row
+unchanged.
 
 **CM4AI rep1's canary block, re-derived (2026-09-09, #922).** The block
 the #876 re-verdict wrote carried the v2 British baseline (0 vs 0) and
