@@ -350,7 +350,7 @@ pair_consistency:
 report_claims:
   checked: true
   findings: []
-  claims_checked: 1
+  claims_checked: 2
   claims_unnamed: 0
   disposition_rows: 0
   rows_by_record:
@@ -364,7 +364,7 @@ report_claims:
   snapshot_checked: true
   snapshot_basis: 'no dispositions table expected: unrecorded removals listed, not
     findings'
-  prose_retention_claims: 1
+  prose_retention_claims: 2
   removals_unrecorded:
   - conforms_to
   - conforms_to_standard

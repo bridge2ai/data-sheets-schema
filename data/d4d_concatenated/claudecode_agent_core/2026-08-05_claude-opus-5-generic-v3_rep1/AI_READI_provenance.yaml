@@ -261,7 +261,7 @@ pair_consistency:
 report_claims:
   checked: true
   findings: []
-  claims_checked: 2
+  claims_checked: 3
   claims_unnamed: 0
   disposition_rows: 0
   rows_by_record:
@@ -274,7 +274,7 @@ report_claims:
   claims_core_cannot_hold: 0
   snapshot_checked: false
   snapshot_basis: null
-  prose_retention_claims: 2
+  prose_retention_claims: 3
   removals_unrecorded: []
   removals_unrecorded_count: null
   instrument: 'v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the

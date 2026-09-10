@@ -753,6 +753,46 @@ class UnrecordedRemovalTest(Harness):
                             full={"keywords": ["a"]}, core={"keywords": ["a"]})
         self.assertEqual([f for f in b["findings"] if f["kind"] == "removal_not_recorded"], [])
 
+    def test_a_disposition_joined_by_a_dash_or_a_colon_still_records(self):
+        """#1175 round 7, M1: an em dash and a colon join a slot to its
+        disposition in these reports, so splitting on them severed the
+        subject from the removal word in 197 of the 301 corpus reports."""
+        for sent in ("### 2.1 `funders` — removed (high)",
+                     "**`funders` — slot removed entirely.**",
+                     "**`funders`** — object removed in full.",
+                     "- **Removed:** `funders`.",
+                     "**`funders` (finding 3) — slot removed.**",
+                     "`funders`: removed."):
+            b = self.check_with(self.TABLE + "\n" + sent + "\n", {"funders": [1]},
+                                full={"keywords": ["a"]}, core={"keywords": ["a"]})
+            self.assertEqual([f for f in b["findings"] if f["kind"] == "removal_not_recorded"], [], sent)
+
+    def test_a_contrast_after_the_removal_word_does_not_void_it(self):
+        """#1175 round 7, M2: "was removed, not renamed" and "removed
+        rather than guessed" were voided by their own contrast — 21 corpus
+        names — while "retained rather than removed" must still void."""
+        for sent in ("`funders` was removed from all four rather than guessed.",
+                     "**Core dropped `funders` without a structured home.**",
+                     "`funders` was removed, not renamed.",
+                     "`funders` omitted rather than approximated."):
+            b = self.check_with(self.TABLE + "\n" + sent + "\n", {"funders": [1]},
+                                full={"keywords": ["a"]}, core={"keywords": ["a"]})
+            self.assertEqual([f for f in b["findings"] if f["kind"] == "removal_not_recorded"], [], sent)
+        b = self.check_with(self.TABLE + "\n`funders` was retained rather than removed.\n", {"funders": [1]},
+                            full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual([f["slot"] for f in b["findings"] if f["kind"] == "removal_not_recorded"], ["funders"])
+
+    def test_a_negation_in_the_previous_sentence_does_not_void_a_retention_claim(self):
+        """#1175 round 7, M3: the 80-character window spanned a full stop,
+        so all 19 genuine prose retention claims of that shape were dropped."""
+        md = (self.TABLE + "\nThe bundle names no DPIA or equivalent formal privacy risk assessment. "
+              "The substantive content is retained under `notes`.\n")
+        b = self.check(md, full={"keywords": ["a"], "notes": "x"}, core={"keywords": ["a"]})
+        self.assertEqual(b["prose_retention_claims"], 1); self.assertEqual(b["findings"], [])
+        md = self.TABLE + "\nNo value remains in `errata`.\n"
+        b = self.check(md, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual(b["prose_retention_claims"], 0); self.assertEqual(b["findings"], [])
+
     def test_a_claim_the_reader_rejects_records_no_removal(self):
         """#1175 Codex review, M3: a row naming `funders` whose claim is a
         field removed from every entry was counted unnamed and still
@@ -774,9 +814,9 @@ class UnrecordedRemovalTest(Harness):
         """#1175 Codex review, M5: the second table's rows were decoded with
         the first table's column map."""
         md = ("## Dispositions\n\n| slot | disposition | record | reason |\n|---|---|---|---|\n"
-              "| `keywords` | retained | both | fine |\n\n"
+              "| `keywords` | retained | both | fine |\n"
               "| disposition | slot | record | reason |\n|---|---|---|---|\n"
-              "| removed | `errata` | full | gone |\n")
+              "| removed | `errata` | full | gone |\n")     # contiguous: a blank line already reset the header
         b = self.check(md, full={"keywords": ["a"], "errata": [1]}, core={"keywords": ["a"]})
         self.assertEqual([(f["kind"], f["slot"]) for f in b["findings"]], [("removal_not_performed", "errata")])
 

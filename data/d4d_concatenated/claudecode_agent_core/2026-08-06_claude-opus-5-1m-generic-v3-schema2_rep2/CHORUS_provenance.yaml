@@ -310,9 +310,8 @@ report_claims:
   snapshot_basis: 'no dispositions table expected: unrecorded removals listed, not
     findings'
   prose_retention_claims: 2
-  removals_unrecorded:
-  - variables
-  removals_unrecorded_count: 1
+  removals_unrecorded: []
+  removals_unrecorded_count: 0
   instrument: 'v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
     snapshot carried that the final full record does not, with no `removed` row or
     removal sentence naming it, is `removal_not_recorded`; a prose retention claim

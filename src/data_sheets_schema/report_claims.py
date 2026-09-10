@@ -305,7 +305,13 @@ _NEGATION = re.compile(r"\b(?:no|not|never|neither|nor|none|nothing)\b", re.I)
 
 
 def _negated_clause(before: str) -> bool:
-    return bool(_NEGATION.search(_CLAUSE_SPLIT.split(before)[-1]))
+    """Is the retention verb's own clause negated? The window stops at the
+    previous sentence (#1175 round 7, M3): without that it inherited the
+    negation of the sentence before and dropped 19 genuine claims, every
+    one of the form "… no DPIA …. The substantive content is retained
+    under `x`"."""
+    sentence = re.split(r"[.!?]\s", before)[-1]
+    return bool(_NEGATION.search(_CLAUSE_SPLIT.split(sentence)[-1]))
 #: Literals a `remains at`/`remains in` phrase can name that are not slots
 #: ("the flag remains at `false`", #1175 Codex review, M7).
 _NOT_A_SLOT = frozenset({"true", "false", "null", "none", "nan", "n_a", "na", "yes", "no", "unknown"})
@@ -322,13 +328,26 @@ _SLOT_PATH = re.compile(r"[a-z][a-z0-9_]*(?:\[(?:\d+|\*)\])?(?:\.[a-z][a-z0-9_]*
 _REMOVAL_WORD = re.compile(r"\b(?:removed|deleted|dropped|absent|omitted|stripped|withdrawn)\b", re.I)
 #: A removal word that is negated, hypothetical or contrasted records no
 #: removal (#1175 Codex review, M1): "was retained rather than removed",
-#: "was never removed", "if `x` is removed, explain why".
+#: "was never removed", "if `x` is removed, explain why". Order decides
+#: (#1175 round 7, M2): the token must sit *before* the removal word, or
+#: "was removed, not renamed" and "removed rather than guessed" — 21
+#: corpus names — are voided by their own contrast.
 _REMOVAL_VOID = re.compile(r"\b(?:rather than|instead of|not|never|nor|neither|no longer|without|"
                            r"if|whether|unless|would|should|could|may|might|must|please|explain)\b", re.I)
+
+
+def _removal_voided(clause: str) -> bool:
+    m = _REMOVAL_WORD.search(clause)
+    return bool(m and _REMOVAL_VOID.search(clause[:m.start()]))
 #: A clause boundary: the weak signal reads only the clause the removal
 #: word sits in, so "`errata` was removed because `funders` remains valid"
 #: records `errata` and not `funders` (#1175 Codex review, M1).
-_CLAUSE_SPLIT = re.compile(r"\s*(?:[;:—]|,\s*(?:but|while|whereas|although|though|because|since|so|and then)\b|"
+#: A clause boundary. Not an em dash or a colon: in these reports both
+#: join a slot to its disposition — "### 2.1 `publisher` — removed",
+#: "`errata`: removed", "- **Removed:** `publisher`" — and splitting on
+#: them severed the subject from the removal word in 197 of the 301
+#: reports (#1175 round 7, M1).
+_CLAUSE_SPLIT = re.compile(r"\s*(?:;|,\s*(?:but|while|whereas|although|though|because|since|so|and then)\b|"
                            r"\s(?:but|while|whereas|although|though|because|since)\s|"
                            # a relative clause is about its antecedent, not about a
                            # name earlier in the sentence: "`funders` contains
@@ -944,7 +963,7 @@ def check_report(report: Path, full: dict, core: dict,
         # not what was removed, and a negated or hypothetical removal
         # records nothing at all.
         for sent in _CLAUSE_SPLIT.split(whole):
-            if not _REMOVAL_WORD.search(sent) or _REMOVAL_VOID.search(sent):
+            if not _REMOVAL_WORD.search(sent) or _removal_voided(sent):
                 continue
             if _target(sent) == "core" or _target(whole) == "core":
                 continue

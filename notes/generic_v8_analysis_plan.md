@@ -1497,7 +1497,7 @@ steps need:
     Disposition headers parses as one: on the 69 snapshot records never
     asked for a table the removals are listed under `removals_unrecorded`
     and are not findings (`snapshot_basis` says which; the #684 precedent),
-    on the 17 that were, they are; 50 removals are listed corpus-wide. A
+    on the 17 that were, they are; 40 removals are listed corpus-wide. A
     paragraph saying a value "remains in",
     "stays in", "is kept in" a backticked slot path is read like a
     `retained` row that names no record — a negator within a dozen
@@ -1510,7 +1510,7 @@ steps need:
     populated key of the leaf's name under the claim's own root (prose
     names the leaf: "the four named reviewers stay in `review_details`"; a
     dotted path whose root the record lacks is not satisfied elsewhere), a
-    `core.`/`full.` prefix picking the record; 172 such claims corpus-wide,
+    `core.`/`full.` prefix picking the record; 161 such claims corpus-wide,
     all but one satisfied.
     Recomputed with `backfill-checks --blocks report_claims --overwrite`
     over the 277 checked records: exactly the three records above gain a
@@ -1568,31 +1568,42 @@ steps need:
     is bounded by a semicolon, a colon, a dash, a comma before a
     conjunction, a subordinator or a relative pronoun; a removal word that
     is negated, hypothetical or contrasted ("rather than", "never", "if",
-    "would") records nothing; a name after a preposition is a place even
+    "would") **before** the removal word records nothing — order decides,
+    since "was removed, not renamed" and "removed rather than guessed"
+    are records and their contrast follows (#1175 round 7, M2, 21 corpus
+    names); a name after a preposition is a place even
     with two words of noun phrase between ("in the existing `funders`
-    block"). The same review found three claim-side defects: a claim the
+    block"). The clause boundary is a semicolon, a comma before a
+    conjunction, a subordinator or a relative pronoun, and **not** an em
+    dash or a colon: in these reports both join a slot to its disposition
+    ("### 2.1 `publisher` — removed", "- **Removed:** `publisher`"), and
+    splitting on them severed the subject from the removal word in 197 of
+    the 301 reports and invented nine false unrecorded removals (round 7,
+    M1). A retention claim's negation window stops at the previous
+    sentence, or the sentence before ("the bundle names no DPIA …")
+    negated it and dropped 19 genuine claims (round 7, M3). The same review found three claim-side defects: a claim the
     reader rejects as an element removal (#782) was still recording one
     (`removal_named` is updated after the rejection, not before), a
     generic `| full | \`x\` | removed |` row read as `either` because
     `_target` looks for prose and the record is a bare cell, and a second
     recognised header kept the first table's column map. **The corpus
-    recompute under all of this moves one finding and no verdict**: the
-    2026-08-13 v4 rep2 VOICE record reported the same
-    `removal_not_performed` on `distributions` twice, from its table row
-    and from the prose sentence beside it, and reports it once now; the
-    three #1054 instances stand; `removals_unrecorded` rises from 39 to 50
-    across 7 records, which is the silencing the review measured, and
-    every one of the 11 is on a record whose run never asked for a table,
-    so none is a finding. Two further effects of the recompute, neither a
+    recompute under all of this gains four findings on the three records
+    above and loses none**: CHORUS 04f rep2 gains both the unrecorded
+    removal and the prose retention claim beside it, VOICE 04f rep2 and
+    AI_READI 04g rep3 one each. `removals_unrecorded` is 40, one more
+    than the pre-Codex reading: `variables` on the 2026-08-06 schema2
+    rep2 AI_READI record, the miss the review named first, on a run that
+    never asked for a table, so it is listed and not a finding. Two further effects of the recompute, neither a
     finding: because a prose retention claim is now a claim checked,
-    `claims_checked` moved on 100 records and 65 reports that read no
+    `claims_checked` moved on 96 records and 70 reports that read no
     claim before read one now (`canary.report_vacuous` flips from vacuous
-    to measured: 17 of the 2026-07-31 arm, 8 of 2026-07-28, 6 of the
-    2026-09-01 v7 production arm — AI_READI rep1/rep2, CHORUS rep1, CM4AI
-    rep2/rep3, VOICE rep1 — and the rest across earlier arms), so the v7
-    baseline arm's `report_basis` for every project becomes measured 0
-    rather than all-vacuous; the bar is 0 either way and no verdict moves,
-    but the `baseline_basis` line no longer appears on any of those rows;
+    to measured across the 2026-07-28, 2026-07-31 and earlier arms and
+    five of the twelve 2026-09-01 v7 production records), so the v7
+    baseline arm's `report_basis` becomes measured 0 for AI_READI (3 of
+    3), CM4AI (2 measured, 1 vacuous) and VOICE (1 measured, 2 vacuous),
+    while **CHORUS stays all-vacuous** (0 measured, 3 vacuous) and keeps
+    its `baseline_basis` line; the bar is 0 either way and no verdict
+    moves;
     and every block's
     `report_claims.schema` pin moved from the schema the runs attested to
     the schema at this branch's merge with main (the branch touches no
