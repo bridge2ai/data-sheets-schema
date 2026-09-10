@@ -765,6 +765,9 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/VOICE_chunks.yaml
       sha256: f55de43646d5c4a6d61d6339f4d6f6adb3e50cef86d5dad1cb46a43a91fb38bc
+  bundle_basis:
+    source: bundle on disk
+    path: data/preprocessed/concatenated/VOICE_preprocessed.txt
   recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep2/intermediate/VOICE_audit.json

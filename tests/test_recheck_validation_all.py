@@ -173,3 +173,78 @@ class TestTheGate(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTheRecordedAlgorithmSurvives(unittest.TestCase):
+    """#1190 round 4, M1: `validation_block` hashes with md5 and was never
+    brought under #204, which unified provenance hashing on sha256 and
+    deprecated md5. A recheck that wrote its output as it stood moved a
+    record back to the deprecated algorithm and destroyed the sha256 values
+    it had attested, while both documents said the write changed nothing but
+    the duplicate-key field, the schema digest and the recorder."""
+
+    def _entry(self, tmp, text="a: 1\n"):
+        import hashlib
+        p = Path(tmp) / "art.yaml"; p.write_text(text)
+        return p, hashlib.sha256(p.read_bytes()).hexdigest(), hashlib.md5(p.read_bytes()).hexdigest()
+
+    def test_a_sha256_only_entry_is_rewritten_in_sha256(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            p, sha, md5 = self._entry(tmp)
+            out = cli._keep_recorded_algorithms(
+                {"full": {"path": str(p), "md5": md5}},
+                {"full": {"path": str(p), "sha256": "an old value"}})
+            self.assertEqual(out["full"], {"path": str(p), "sha256": sha})
+            self.assertNotIn("md5", out["full"])
+
+    def test_an_md5_only_entry_stays_md5_and_both_stay_both(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            p, sha, md5 = self._entry(tmp)
+            self.assertEqual(cli._keep_recorded_algorithms({"full": {"path": str(p), "md5": md5}},
+                                                           {"full": {"path": str(p), "md5": "old"}}),
+                             {"full": {"path": str(p), "md5": md5}})
+            both = cli._keep_recorded_algorithms({"full": {"path": str(p), "md5": md5}},
+                                                 {"full": {"path": str(p), "md5": "old", "sha256": "old"}})
+            self.assertEqual(both["full"], {"path": str(p), "md5": md5, "sha256": sha})
+
+    def test_a_hash_is_recomputed_not_copied(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            p, sha, md5 = self._entry(tmp)
+            p.write_text("a: 2\n")
+            import hashlib
+            out = cli._keep_recorded_algorithms({"full": {"path": str(p), "md5": "x"}},
+                                                {"full": {"path": str(p), "sha256": sha}})
+            self.assertEqual(out["full"]["sha256"], hashlib.sha256(p.read_bytes()).hexdigest())
+            self.assertNotEqual(out["full"]["sha256"], sha)
+
+    def test_a_missing_file_an_empty_path_and_an_unknown_algorithm_are_left_alone(self):
+        for prior in ({"path": "/no/such/file", "sha256": "x"}, {"path": "", "sha256": "x"},
+                      {"path": "/no/such/file", "crc32": "x"}, "not a mapping"):
+            with self.subTest(prior=prior):
+                new = {"full": {"path": str(prior.get("path", "")) if isinstance(prior, dict) else "", "md5": "m"}}
+                self.assertEqual(cli._keep_recorded_algorithms(new, {"full": prior}), new)
+
+
+class TestSchemaPinMoved(unittest.TestCase):
+    """#1190 round 4, S1: the predicate was reached only through a test that
+    patched it out, so its own semantics were unpinned — and a `schema` that
+    is not a mapping raised and aborted the whole `--all` walk."""
+
+    def test_an_absent_empty_or_null_pin_is_not_moved(self):
+        for block in ({}, {"schema": {}}, {"schema": {"full_sha256": None}},
+                      {"schema": {"full_sha256": ""}}):
+            with self.subTest(block=block):
+                self.assertFalse(cli._schema_pin_moved(block))
+
+    def test_a_schema_that_is_not_a_mapping_is_not_a_pin_and_does_not_raise(self):
+        for block in ({"schema": "b9b31aca"}, {"schema": ["b9b31aca"]}, {"schema": 7}):
+            with self.subTest(block=block):
+                self.assertFalse(cli._schema_pin_moved(block))
+
+    def test_a_live_key_the_pin_lacks_is_not_moved_and_a_pin_that_differs_is(self):
+        from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA, _sha256
+        live_full, live_core = _sha256(FULL_SCHEMA), _sha256(CORE_SCHEMA)
+        self.assertFalse(cli._schema_pin_moved({"schema": {"full_sha256": live_full}}))
+        self.assertFalse(cli._schema_pin_moved({"schema": {"full_sha256": live_full, "core_sha256": live_core}}))
+        self.assertTrue(cli._schema_pin_moved({"schema": {"full_sha256": "something else"}}))
+        self.assertTrue(cli._schema_pin_moved({"schema": {"full_sha256": live_full, "core_sha256": "moved"}}))

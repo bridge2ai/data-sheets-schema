@@ -1493,9 +1493,16 @@ steps need:
     `claudecode_agent_healthsheet_core` (3) — 52 gained a schema block,
     27 had one restamped, and every one pins this checkout's schema. Of
     the 79, 12 already carried `duplicate_keys` and were rewritten only
-    to restamp the pin, 60 gained the field, 6 of those also re-record
-    the validator's message under today's wording with the same
-    pointers, and every one takes this command's `recorded_by`. The
+    to restamp the pin and 67 gained the field, which is the whole 79; 6
+    of those also re-record the validator's message under today's wording
+    with the same pointers, and every one takes this command's
+    `recorded_by`. Each artifact keeps the hash algorithm its own block
+    recorded, recomputed: `api_runner.validation_block` hashes with md5
+    and was never brought under #204, so writing its output as it stood
+    moved a record from sha256 back to the deprecated algorithm and
+    destroyed the sha256 it had attested — one record here, and 81 pin
+    sha256 only and are held today merely because their verdicts flip
+    (#1190 round 4, M1). Zero artifact entries change algorithm. The
     partition of the 282 is 79 written, 198 held, 4 with no block and 1
     missing. **198 held** — 196 whose `passed` flips
     to false under today's schema (the 2026-07 and early-2026-08 arms,

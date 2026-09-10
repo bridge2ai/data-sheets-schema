@@ -608,8 +608,11 @@ the write adds `duplicate_keys`, this checkout's schema digest (saying so
 where it moved) and its own `recorded_by`, and re-records the validator's
 message where the schema reworded it — nothing else. An artifact is
 compared against the hash the block itself recorded, by whichever
-algorithm it used: 82 corpus records pin `sha256` only and 118 `md5`
-only. A record already carrying the field is skipped unless its schema
+algorithm it used, and **rewritten under that same algorithm**: 82 corpus
+records pin `sha256` only and 118 `md5` only, and the recompute
+(`api_runner.validation_block`) emits md5, which #204 deprecated, so
+taking it as written would move a record back to the deprecated
+algorithm and lose the sha256 it attested. A record already carrying the field is skipped unless its schema
 pin has moved, which the write repairs: without that a pass taken before
 a schema change leaves its records reading STALE and unrepairable. Over
 the 282 records: 79 written across five method directories, 12 of which
