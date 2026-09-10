@@ -734,6 +734,58 @@ class UnrecordedRemovalTest(Harness):
                             full={"keywords": ["a"]}, core={"keywords": ["a"]})
         self.assertEqual([f for f in b["findings"] if f["kind"] == "removal_not_recorded"], [])   # still a casualty list
 
+    def test_the_seven_sentences_the_codex_review_named_do_not_record_a_removal(self):
+        """#1175 Codex review, M1: the weak signal added every backticked
+        name in any sentence carrying a removal word, so a retention, a
+        negation, a hypothetical, a neighbouring clause, a container and a
+        core-only statement each silenced a real unrecorded removal."""
+        for sent in ("`funders` was retained rather than removed.",
+                     "`funders` was never removed.",
+                     "If `funders` is removed, explain why.",
+                     "`errata` was removed because `funders` remains valid.",
+                     "`funders` contains identifiers that were removed.",
+                     "Deleted prose remains in the existing `funders` block."):
+            b = self.check_with(self.TABLE + "\n" + sent + "\n", {"funders": [1]},
+                                full={"keywords": ["a"]}, core={"keywords": ["a"]})
+            self.assertEqual([f["slot"] for f in b["findings"] if f["kind"] == "removal_not_recorded"], ["funders"], sent)
+        # ... and a real one still records
+        b = self.check_with(self.TABLE + "\n`funders` was removed.\n", {"funders": [1]},
+                            full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual([f for f in b["findings"] if f["kind"] == "removal_not_recorded"], [])
+
+    def test_a_claim_the_reader_rejects_records_no_removal(self):
+        """#1175 Codex review, M3: a row naming `funders` whose claim is a
+        field removed from every entry was counted unnamed and still
+        suppressed the snapshot finding."""
+        md = self.TABLE + "| `funders` | removed | full | the `role` field was removed from all entries |\n"
+        b = self.check_with(md, {"funders": [1]}, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual([f["slot"] for f in b["findings"] if f["kind"] == "removal_not_recorded"], ["funders"])
+        self.assertEqual(b["claims_unnamed"], 1)
+
+    def test_a_generic_removal_row_reads_its_record_cell(self):
+        """#1175 Codex review, M6: `| full | `x` | removed |` read as
+        `either` — against the core record — so a slot the full record
+        still carries raised nothing."""
+        md = "| record | slot | change |\n|---|---|---|\n| full | `keywords` | removed |\n"
+        b = self.check(md, full={"keywords": ["a"]}, core={})
+        self.assertEqual([(f["kind"], f["record"]) for f in b["findings"]], [("removal_not_performed", "full")])
+
+    def test_a_second_recognised_header_decodes_its_own_columns(self):
+        """#1175 Codex review, M5: the second table's rows were decoded with
+        the first table's column map."""
+        md = ("## Dispositions\n\n| slot | disposition | record | reason |\n|---|---|---|---|\n"
+              "| `keywords` | retained | both | fine |\n\n"
+              "| disposition | slot | record | reason |\n|---|---|---|---|\n"
+              "| removed | `errata` | full | gone |\n")
+        b = self.check(md, full={"keywords": ["a"], "errata": [1]}, core={"keywords": ["a"]})
+        self.assertEqual([(f["kind"], f["slot"]) for f in b["findings"]], [("removal_not_performed", "errata")])
+
+    def test_a_retention_claim_needs_a_slot_and_an_unnegated_clause(self):
+        """#1175 Codex review, M7."""
+        md = self.TABLE + "\nNo value remains in `errata`. The flag remains at `false`.\n"
+        b = self.check(md, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual(b["findings"], []); self.assertEqual(b["prose_retention_claims"], 0)
+
     def test_a_recognised_header_without_a_separator_and_a_decorated_header_are_the_strict_readers(self):
         """#1175 round 5, M2/S1: `disposition_rows` and the exclusion share
         one header rule — no separator row required, markdown decoration

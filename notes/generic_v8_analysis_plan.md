@@ -1497,7 +1497,7 @@ steps need:
     Disposition headers parses as one: on the 69 snapshot records never
     asked for a table the removals are listed under `removals_unrecorded`
     and are not findings (`snapshot_basis` says which; the #684 precedent),
-    on the 17 that were, they are; 39 removals are listed corpus-wide. A
+    on the 17 that were, they are; 50 removals are listed corpus-wide. A
     paragraph saying a value "remains in",
     "stays in", "is kept in" a backticked slot path is read like a
     `retained` row that names no record — a negator within a dozen
@@ -1556,7 +1556,34 @@ steps need:
     strict reader does not — the list is a casualty list only where the
     removal follows it in the same clause, and one header rule, decoration
     stripped and no separator required, serves both readers (neither
-    moves a corpus block). Two further effects of the recompute, neither a
+    moves a corpus block); and the seventh, which the Codex CLI review of
+    this branch read, made the weak signal a fact about the removal's own
+    clause rather than about any sentence carrying a removal word — the
+    review's seven constructed sentences ("`funders` was retained rather
+    than removed", "was never removed", "if `funders` is removed, explain
+    why", "`errata` was removed because `funders` remains valid",
+    "`funders` contains identifiers that were removed", "Deleted prose
+    remains in the existing `funders` block", a core-only statement) each
+    silenced a real unrecorded removal, and each is now pinned. The clause
+    is bounded by a semicolon, a colon, a dash, a comma before a
+    conjunction, a subordinator or a relative pronoun; a removal word that
+    is negated, hypothetical or contrasted ("rather than", "never", "if",
+    "would") records nothing; a name after a preposition is a place even
+    with two words of noun phrase between ("in the existing `funders`
+    block"). The same review found three claim-side defects: a claim the
+    reader rejects as an element removal (#782) was still recording one
+    (`removal_named` is updated after the rejection, not before), a
+    generic `| full | \`x\` | removed |` row read as `either` because
+    `_target` looks for prose and the record is a bare cell, and a second
+    recognised header kept the first table's column map. **The corpus
+    recompute under all of this moves one finding and no verdict**: the
+    2026-08-13 v4 rep2 VOICE record reported the same
+    `removal_not_performed` on `distributions` twice, from its table row
+    and from the prose sentence beside it, and reports it once now; the
+    three #1054 instances stand; `removals_unrecorded` rises from 39 to 50
+    across 7 records, which is the silencing the review measured, and
+    every one of the 11 is on a record whose run never asked for a table,
+    so none is a finding. Two further effects of the recompute, neither a
     finding: because a prose retention claim is now a claim checked,
     `claims_checked` moved on 100 records and 65 reports that read no
     claim before read one now (`canary.report_vacuous` flips from vacuous

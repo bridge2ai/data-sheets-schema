@@ -146,8 +146,8 @@ report_claims:
       path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-27_claude-opus-5_rep1/AI_READI_d4d_core.yaml
       md5: 047f20601a050d467b34976d669e83e9
   schema:
-    full_sha256: 4138914fe8255024ee8d0679b4a38ff4dd7f7c4e23b2caf77c6bc7ca47de3e47
-    core_sha256: c13c83b4e8c7b2d4f9869c379606ecb03a17a8c5bfd834b316a3b4099114024d
+    full_sha256: ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da
+    core_sha256: 7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449
   recorded_by: backfill_checks
 grounding:
   checked: true
