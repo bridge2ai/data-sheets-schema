@@ -152,15 +152,21 @@ def chunk_texts(text: str, chunks: list[dict[str, Any]]) -> list[str]:
 
 
 def build_manifest(bundle: Path, rule: dict[str, Any] | None = None) -> dict[str, Any]:
+    return manifest_from_bytes(bundle.read_bytes(), bundle.name, rule)
+
+
+def manifest_from_bytes(raw: bytes, name: str, rule: dict[str, Any] | None = None) -> dict[str, Any]:
+    """`build_manifest` over bytes that are not on disk (#1140): the version
+    of a bundle a record read, recovered from git after the path drifted.
+    Same bytes + same rule = the same manifest the run would have chunked."""
     rule = dict(rule or DEFAULT_RULE)
-    raw = bundle.read_bytes()
     text = raw.decode("utf-8")
     chunks = chunk_text(text, rule)
     lines, _ = _split_lines(text)
     return {
         # The basename, not the path: the manifest must be the same bytes
         # wherever the bundle was read from (#713).
-        "bundle": bundle.name,
+        "bundle": name,
         "bundle_md5": hashlib.md5(raw).hexdigest(),
         "bundle_sha256": hashlib.sha256(raw).hexdigest(),
         "bundle_lines": len(lines),

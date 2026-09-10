@@ -488,9 +488,35 @@ identity slot, and a bare site root declared as `page` exempts every
 fragment on that root under the same scheme. One of the four had a receipt
 (coverage 59/170 → 58/169); three had none (never-receipted fell by one,
 coverage rose). The file-collections case the issue names exists only in
-the withheld AI_READI 2026-09-01 rep1 record. The recompute reached 29
-records; the 18 receipted records whose bundle has drifted are withheld by
-the #907 guard and stay under v1 (#1140). v9 R8 told the model a
+the AI_READI 2026-09-01 rep1 record, whose bundle has drifted. A drifted
+bundle is not the text a receipt was written against, and the #907 guard
+withholds a recompute that cannot read the right bytes; since #1140 the
+recompute reads them, from the first of three sources that is the
+record's: the manifest on disk where it chunked the bytes the record
+hashed; the bundle on disk where its bytes hash to the record's md5 (or
+sha256, where that is all it carries) but the manifest is missing, stale
+or unreadable — chunked in memory under the record's own
+`inputs.chunks.rule`, git not asked; else the committed version of the
+declared path whose every recorded hash matches
+(`provenance.bundle_bytes_for`, recording which it `matched_on`),
+chunked the same way (the on-disk manifest's rule only for a record that
+carries none, and a version whose chunk count is not the one the record
+cites refused). The block carries `bundle_basis` (`bundle on disk` or
+`git blob` with the commit and hashes, and `manifest: chunked in memory
+…` where no file was read) beside the record's own `bundle_md5`; where
+the manifest was chunked in memory `artifacts.manifest.path` is `None`
+and the rule and hashes stand in its place. Nothing on disk gates the
+recovery: a record that declares a path, a hash and a rule is checkable
+whatever the checkout holds. `backfill-checks`, `provenance record` and
+the runner pass all three. All 47 receipted records are under v3: the 18 formerly
+withheld (nine 2026-08-28 agentic v6, the 2026-08-28b/c/d API v7
+AI_READI canaries, the 2026-09-01 API v7 AI_READI and VOICE records)
+recomputed on the bytes they read with chunk, snippet and finding counts
+identical to the blocks written at run time (the twelve blocks that
+predate `findings_gated` gain that key), and AI_READI 2026-09-01
+rep1's ten landing-page labels now exempt (161/508 → 160/498). `d4d runs
+check` reports receipts blocks by instrument and names those behind the
+current one. v9 R8 told the model a
 landing-page label "needs a receipt like any other value" — the cost v2
 removes; #1147 rotated that sentence (the own-id preference now rests on
 the id naming this dataset alone where it is an identifier form and not
@@ -712,14 +738,52 @@ and v7 reviews and their second ratings (7 of 17 and 6 of 18) and two of
 the twelve v8 ones; every review is made by the same agentic subagent
 whichever runtime generated the record.
 
+**A review never writes its pack** (#1095). A `d4d-review-record` run
+regenerated the pack it was reviewing — `pack_version` 3 → 4 on the
+committed CHORUS 2026-09-01 rep1 pack — underneath the sha256 its own
+record attests, which is the pairing `d4d review agree` depends on. The
+agent reads an existing pack and runs `d4d review pack` only when none
+exists; the command refuses to rewrite a pack that the record's
+`review.artifacts.pack.sha256` or any `{P}_review*.yaml` beside it pins
+(`review_pack.pack_pins`) unless `--force` — a guard on the bytes, not
+the act: the pack is deterministic, so a regeneration that reproduces
+the pinned bytes is not refused; a pin whose pack is gone, or a pin file
+that cannot be read, is treated as live — and then says which review
+must be redone. A pin that names a hash the file already stopped being
+is stale: reported, not blocking. `d4d review check` reports
+`review_of_another_pack` and `d4d runs check` reports a record whose
+review pins a pack not on disk, both after the fact. The Codex CLI
+review of #1124 (round 9) closed what eight reviewer rounds had not: a
+pack that is not a pack — empty bytes, a list, a mapping without items
+— is never checked or attested (`review_pack.pack_shape_problem`); under
+`--strict` a failing review is not written, and a written block with
+any finding or unanswered item is not evidence for `d4d runs select`
+(`review_evidence`) however many adverse verdicts it counts; `runs
+check` reads the same pins the write guard enforces, so a sidecar
+review's stale pin and a pin file that cannot be read (`unreadable`)
+are reported, not silently `None`; an unreadable sidecar no longer
+refuses a regeneration that reproduces the bytes on disk; the pack and
+its instruction are written whole or not at all (a temp file renamed
+over the target, instruction first and the pinned pack last) and an
+unchanged pack is not reopened; and a phase-1 snapshot that is present
+but not usable — a parse error, bytes that are not UTF-8, an empty
+document, a list — leaves the receipts block `checked: false` naming
+it, rather than running the index join the pack itself reports as a
+gap. Every way a read fails names the file. The scan-build-write window
+and a nested `reliability.attested_artifacts` pin are #1189.
+
 ## Canonical selection with the review (#660)
 
 `d4d runs select` ranks validity → **fewest review adverse verdicts**
 (differences ≤ `--review-margin`, default 2, are a tie: a 50-slot sample
 carries ±2–3 of binomial noise) → most slots → label. The review rank
-applies only when every eligible replicate carries a checked `review` block
-(`--ignore-reviews` switches it off), and the `canonical` block records
-`reviews_applied`, each candidate's `review_adverse`, and the criterion
+applies only when every eligible replicate carries a `review` block that
+is evidence — checked, with an integer adverse count, no finding and no
+unanswered item; `review_evidence_why` names any block that is not, as
+distinct from an absent one (#1124 round 10) — and `--ignore-reviews`
+switches it off. The `canonical` block records `reviews_applied`, each
+candidate's `review_adverse` (with `review_not_evidence` where a block
+was set aside), and the criterion
 text. Under the coverage-only criterion the v7 arm picked the most-adverse
 replicate in 3 of 4 projects; under this one AI_READI and VOICE moved to
 rep1.
