@@ -312,14 +312,14 @@ def scope_cmd(project, do_check, strict, manifest):
         for i, entry in enumerate(s.get("related_but_distinct") or []):
             row = rows.get(i)
             if row and row["skipped"]:
-                click.echo(f"   ⚠️  related_but_distinct[{i}]: {row['problem']} — that dataset is unchecked", err=True)
+                click.echo(f"   ⚠️  {name}: related_but_distinct[{i}]: {row['problem']} — that dataset is unchecked")
                 continue
             click.echo(f"   not about {entry.get('name')}  <{entry.get('id')}>")
             click.echo(f"             express as `{entry.get('express_as')}`"
                        + (f"; in this bundle as {entry['in_bundle']}"
                           if entry.get("in_bundle") else ""))
             if row:
-                click.echo(f"             ⚠️  related_but_distinct[{i}]: {row['problem']}", err=True)
+                click.echo(f"   ⚠️  {name}: related_but_distinct[{i}]: {row['problem']}")
 
     problems = check_manifest(m)
     for p in problems:

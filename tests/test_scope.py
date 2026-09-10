@@ -114,6 +114,8 @@ class TestTheAliasesOfAnEntry(unittest.TestCase):
                                          {"id": True, "name": "Boolish", "express_as": "related_datasets"},
                                          {"name": "NoId", "express_as": "related_datasets"},
                                          {"id": ["doi:1"], "name": "Listy", "express_as": "related_datasets"},
+                                         {"id": ["doi:10.1/REAL"], "name": "Half", "express_as": "related_datasets",
+                                          "also_known_as": "https://doi.org/10.1/ALIAS", "manifest_key": ["Q"], "in_bundle": ["s1", {"x": 1}]},
                                          {"id": "https://doi.org/10.1/THIRD", "name": "Third", "express_as": "related_datasets",
                                           "also_known_as": b"raw"}]}}}))
             rows = scope.malformed_entries("P", manifest)
@@ -121,18 +123,23 @@ class TestTheAliasesOfAnEntry(unittest.TestCase):
             ids = scope.related_ids("P", manifest)
             r = click.testing.CliRunner(mix_stderr=False).invoke(scope_cmd, ["--check", "--manifest", str(manifest)])
         self.assertEqual([(x["index"], x["skipped"]) for x in rows],
-                         [(0, True), (1, True), (2, False), (3, True), (4, True), (5, True), (6, False)])
+                         [(0, True), (1, True), (2, False), (3, True), (4, True), (5, True), (6, False), (7, False)])
+        self.assertIn("`id` is a list, not an identifier; only the aliases are read", rows[6]["problem"])   # SF2
+        self.assertTrue(any("manifest_key is a list" in p for p in problems), problems)                      # SF1
+        self.assertTrue(any("in_bundle carries a dict" in p for p in problems), problems)
+        self.assertTrue(any("claims source 's1'" in p for p in problems), problems)
         self.assertIn("not a mapping", rows[0]["problem"]); self.assertIn("NoneType", rows[1]["problem"])
         self.assertIn("2 value(s)", rows[2]["problem"]); self.assertIn("bool", rows[2]["problem"]); self.assertIn("dict", rows[2]["problem"])
         self.assertIn("`id` is a bool", rows[3]["problem"]); self.assertIn("no `id`", rows[4]["problem"]); self.assertIn("`id` is a list", rows[5]["problem"])
-        self.assertIn("bytes", rows[6]["problem"])
+        self.assertIn("bytes", rows[7]["problem"])
         self.assertEqual([p for p in problems if "related_but_distinct[" in p],
                          [f"related_but_distinct[{x['index']}]: {x['problem']}" for x in rows])
-        self.assertEqual(set(ids), {"https://doi.org/10.1/OTHER", "https://doi.org/10.1/OTHER.v3", "https://doi.org/10.1/THIRD"})
+        self.assertEqual(set(ids), {"https://doi.org/10.1/OTHER", "https://doi.org/10.1/OTHER.v3", "https://doi.org/10.1/ALIAS", "https://doi.org/10.1/THIRD"})
         self.assertEqual(r.exit_code, 1, r.output + r.stderr)             # check_manifest problems fail the command, as before
-        self.assertEqual(r.stderr.count("that dataset is unchecked"), 5)            # the five skipped entries, once each
-        self.assertEqual(r.stderr.count("related_but_distinct[2]"), 2)              # check_manifest's row and the listing's note
-        self.assertIn("not about Other", r.output); self.assertIn("not about Third", r.output)
+        self.assertEqual(r.output.count("⚠️  P: related_but_distinct["), 8)         # every row, named, with the listing (SF3)
+        self.assertEqual(r.output.count("that dataset is unchecked"), 5)            # the five skipped entries, once each
+        self.assertEqual(r.stderr.count("related_but_distinct[2]"), 1)              # check_manifest's row, once
+        self.assertIn("not about Other", r.output); self.assertIn("not about Third", r.output); self.assertIn("not about Half", r.output)
         self.assertNotIn("not about Boolish", r.output); self.assertNotIn("not about NoId", r.output)
 
     def test_the_block_and_the_checker_agree_on_which_entries_are_skipped(self):

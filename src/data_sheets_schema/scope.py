@@ -125,12 +125,18 @@ def malformed_in(declared: dict | None) -> list[dict]:
         aka = entry.get("also_known_as")
         bad = ([aka] if aka is not None and not _is_identifier(aka) and not isinstance(aka, (list, tuple))
                else [a for a in aka if not _is_identifier(a)] if isinstance(aka, (list, tuple)) else [])
+        ident = entry.get("id")
         if not aliases_of(entry):
-            ident = entry.get("id")
             why = ("no `id`" if ident is None else f"`id` is a {type(ident).__name__}, not an identifier")
             out.append({"index": i, "skipped": True, "id": ident if _is_identifier(ident) else None,
                         "problem": f"{why} and no usable alias; skipped"})
             continue
+        if ident is not None and not _is_identifier(ident):
+            # A usable alias keeps the entry, but the id itself matches
+            # nothing — a record identifying itself by it reads as in scope
+            # (#1177 review, SF2).
+            out.append({"index": i, "skipped": False, "id": None,
+                        "problem": f"`id` is a {type(ident).__name__}, not an identifier; only the aliases are read"})
         if bad:
             out.append({"index": i, "skipped": False, "id": entry.get("id"),
                         "problem": (f"also_known_as carries {len(bad)} value(s) that are not an identifier "
@@ -314,20 +320,32 @@ def check_manifest(manifest: Path = MANIFEST) -> list[dict]:
         ids = {e.get("id") for e in entries if _is_identifier(e.get("id"))}
         for entry in entries:
             key = entry.get("manifest_key")
-            if key and key not in projects:
+            if key is not None and not _is_identifier(key):
+                problems.append({"project": project,
+                                 "problem": f"related dataset's manifest_key is a "
+                                            f"{type(key).__name__}, not a name"})
+            elif key and key not in projects:
                 problems.append({"project": project,
                                  "problem": f"related dataset names manifest "
                                             f"key {key!r}, which does not exist"})
             src = entry.get("in_bundle")
             if src:
+                # A list of sources is a shape the scope block renders
+                # (#1177 review, SF1): each name is checked.
+                sources = list(src) if isinstance(src, (list, tuple)) else [src]
                 known = {e.get("id") for e in projects.get(project) or []
                          if isinstance(e, dict)}
-                if src not in known:
-                    problems.append({
-                        "project": project,
-                        "problem": f"related dataset claims source {src!r} is "
-                                   f"in this bundle; the manifest lists no "
-                                   f"such source for {project}"})
+                for one in sources:
+                    if not _is_identifier(one):
+                        problems.append({"project": project,
+                                         "problem": f"related dataset's in_bundle carries a "
+                                                    f"{type(one).__name__}, not a source id"})
+                    elif one not in known:
+                        problems.append({
+                            "project": project,
+                            "problem": f"related dataset claims source {one!r} is "
+                                       f"in this bundle; the manifest lists no "
+                                       f"such source for {project}"})
         if scope.get("referent_id") in ids:
             problems.append({"project": project,
                              "problem": "the referent is also listed as "
@@ -340,7 +358,7 @@ def check_manifest(manifest: Path = MANIFEST) -> list[dict]:
         # legitimately has no entry here.
         for entry in entries:
             other = entry.get("manifest_key")
-            other_scope = (data.get("scope") or {}).get(other)
+            other_scope = (data.get("scope") or {}).get(other) if _is_identifier(other) else None
             if not other or not other_scope:
                 continue
             back = {e.get("manifest_key")
