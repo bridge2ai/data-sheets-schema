@@ -413,6 +413,17 @@ def pooled_receipts(reps: list[dict[str, Any]]) -> dict[str, Any]:
                 "snippets", "wrongchunk", "unverified", "unreviewed"):
         vals = [r[key] for r in reps if r.get(key) is not None]
         out[key] = sum(vals) if vals else None
+    # The never/added split needs a phase-1 snapshot and `receiptable` does
+    # not, so the two are carried by different sets of records in general
+    # (#899). Dividing the snapshot-only numerator by the all-records
+    # denominator would understate the rate with nothing on the page to say
+    # so — the silent mis-measure #831's own body made once by dividing by a
+    # capped list. The split gets its own denominator, over exactly the
+    # records that carry it, and the count of those records travels with it.
+    split = [r for r in reps if r.get("neverreceipted") is not None]
+    out["split_records"] = len(split)
+    out["split_receiptable"] = sum(r["receiptable"] for r in split
+                                   if r.get("receiptable") is not None) or None
     return out
 
 
@@ -437,8 +448,12 @@ def receipt_section(data) -> list[str]:
         lines.append(
             f"| {disp} | {t['records']} | {t['receiptable']} | "
             f"{_rate(t['withreceipt'], t['receiptable'])} | "
-            f"{_rate(t['neverreceipted'], t['receiptable'])} | "
-            f"{_rate(t['addedafter'], t['receiptable'])} | "
+            f"{_rate(t['neverreceipted'], t['split_receiptable'])}"
+            + (f" (of {t['split_records']} records)" if t["split_records"] not in (0, t["records"]) else "")
+            + " | "
+            f"{_rate(t['addedafter'], t['split_receiptable'])}"
+            + (f" (of {t['split_records']} records)" if t["split_records"] not in (0, t["records"]) else "")
+            + " | "
             f"{t['snippets'] if t['snippets'] is not None else '–'} | "
             f"{_rate(t['wrongchunk'], t['snippets'])} |")
     lines += ["",
@@ -455,7 +470,12 @@ def receipt_section(data) -> list[str]:
               "have closed: a leaf that resolves in the phase-1 snapshot was there to be "
               "receipted and was not, while one the snapshot does not carry was added by "
               "reconciliation or repair, which have no receipt route at all (#742). It "
-              "needs that snapshot, so an agentic arm shows `–` and not 0.", "",
+              "needs that snapshot, so an agentic arm shows `–` and not 0. Its two rates "
+              "are taken over the receiptable leaves of the records that carry it, "
+              "which is every checked record of an arm or none of them today; where "
+              "an arm ever mixes the two the row says how many records the split "
+              "covers, because a numerator from one set of records over a "
+              "denominator from another is not a rate.", "",
               "`not in the chunk cited` is attribution precision, reported and never "
               "gated (#763): the snippet is verbatim in the bundle, in a chunk other than "
               "the one the receipt names. It is an API-path number — the agentic protocol "
