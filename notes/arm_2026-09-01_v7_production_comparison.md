@@ -209,7 +209,17 @@ worst 43): decision D4 (#906, adopted 2026-09-03, PR #920) re-derived its
 verdict offline under v3, with the prior v2-basis verdict kept under
 `prior_verdict`. The record stays retained in the completed arm — the
 retention now sits under a regressed-on-British v3 verdict, and every
-other row is unchanged.
+other row is unchanged. Re-derived again on 2026-09-10 UTC (#1170, the
+#922 procedure; `recorded_at` 2026-09-10T00:12Z): the report-findings row
+reads unmeasured rather than 0 vs 1 — the record's own report block read
+no claim (`claims_checked` 0, #684) — with the D4 block (#906) kept under
+`prior_verdict` beneath it, and #891's beneath that; status `regressed`
+on the British row either way, 45 vs 43 under instrument v3 — and under
+v4 as proposed in #1173 (#1006; open at the time of writing, its patterns
+checked at that branch's head), the run and all three 2026-08-22c
+baseline replicates read the same (45; 33, 43, 0), so that revision as
+proposed would not call for a third re-derivation; every other row
+unchanged.
 
 **CM4AI rep1's canary block, re-derived (2026-09-09, #922).** The block
 the #876 re-verdict wrote carried the v2 British baseline (0 vs 0) and
@@ -230,8 +240,7 @@ scope only and no longer counts as a false claim; its `distributions`
 finding still counts. Four instruments moved this block, not
 the two #922 named: British v3, the slips row (#891), the #684 vacuity
 reading and report_claims v3. AI_READI rep1's D4 block, one paragraph
-up, now reads its report row the same way (unmeasured, status unchanged
-at `regressed`) and was not re-derived here; #1170 is that re-verdict.
+up, read its report row the same way and was re-derived under #1170.
 CHORUS and VOICE rep1 still carry no block: the batch of 2026-09-01
 wrote no canary block at all — #1020 added that on 2026-09-06 — and a
 verdict they never carried is not re-derived here.
