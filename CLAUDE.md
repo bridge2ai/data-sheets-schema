@@ -648,7 +648,25 @@ that cannot be read, is treated as live — and then says which review
 must be redone. A pin that names a hash the file already stopped being
 is stale: reported, not blocking. `d4d review check` reports
 `review_of_another_pack` and `d4d runs check` reports a record whose
-review pins a pack not on disk, both after the fact.
+review pins a pack not on disk, both after the fact. The Codex CLI
+review of #1124 (round 9) closed what eight reviewer rounds had not: a
+pack that is not a pack — empty bytes, a list, a mapping without items
+— is never checked or attested (`review_pack.pack_shape_problem`); under
+`--strict` a failing review is not written, and a written block with
+any finding or unanswered item is not evidence for `d4d runs select`
+(`review_evidence`) however many adverse verdicts it counts; `runs
+check` reads the same pins the write guard enforces, so a sidecar
+review's stale pin and a pin file that cannot be read (`unreadable`)
+are reported, not silently `None`; an unreadable sidecar no longer
+refuses a regeneration that reproduces the bytes on disk; the pack and
+its instruction are written whole or not at all (a temp file renamed
+over the target, instruction first and the pinned pack last) and an
+unchanged pack is not reopened; and a phase-1 snapshot that is present
+but not usable — a parse error, bytes that are not UTF-8, an empty
+document, a list — leaves the receipts block `checked: false` naming
+it, rather than running the index join the pack itself reports as a
+gap. Every way a read fails names the file. The scan-build-write window
+and a nested `reliability.attested_artifacts` pin are #1189.
 
 ## Canonical selection with the review (#660)
 

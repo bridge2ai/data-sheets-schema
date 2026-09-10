@@ -865,9 +865,10 @@ def check_cmd(method, label, project, strict):
                        f"{r['status']}: {r['reason']}")
 
     if pack_pin_drift:
-        click.echo(f"\n⚠️  {len(pack_pin_drift)} record(s) whose review pins a pack that is not the one on disk "
-                   "(#1095) — the review block and `runs select`'s review rank describe a pack that no "
-                   "longer exists; redo the review or restore the pack:")
+        click.echo(f"\n⚠️  {len(pack_pin_drift)} record(s) whose review pins a pack that is not the one on disk, "
+                   "or whose pin file cannot be read (#1095) — the review block and `runs select`'s review "
+                   "rank describe a pack that no longer exists, or nothing that can be checked; redo the "
+                   "review, restore the pack, or fix the file:")
         for r in pack_pin_drift:
             click.echo(f"   {r['project']:9} {r['label']:44} pack {r['state']}")
     if header_mismatches:
@@ -1355,10 +1356,8 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
             rec = _yaml.safe_load(pp.read_text(encoding="utf-8")) or {}
         except (_yaml.YAMLError, OSError, UnicodeDecodeError):
             return None
-        rv = rec.get("review") if isinstance(rec, dict) else None
-        if not isinstance(rv, dict) or not rv.get("checked") or not isinstance(rv.get("adverse"), int):
-            return None
-        return rv["adverse"]
+        from data_sheets_schema.review_pack import review_evidence
+        return review_evidence(rec.get("review") if isinstance(rec, dict) else None)
 
     candidates = []
     adverse_of: dict[str, int | None] = {}

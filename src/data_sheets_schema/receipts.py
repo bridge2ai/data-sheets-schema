@@ -481,13 +481,28 @@ def phase1_snapshot(receipt: Path) -> dict[str, Any] | None:
     receipt is overwritten, so the contemporary snapshot is the highest-
     numbered one (#761). Absent on the agentic path, whose Phase 3
     re-receipts what it changes."""
+    return phase1_snapshot_state(receipt)[2]
+
+
+def phase1_snapshot_state(receipt: Path) -> tuple[str, Path | None, dict[str, Any] | None, str | None]:
+    """(state, path, snapshot, why): `absent` (no file), `usable` (a
+    mapping), or `unusable` with `why` — a parse error, bytes that are not
+    UTF-8, a file that cannot be opened, an empty document, or a document
+    that is a list or a scalar (#1124 Codex review, SF2: the two-valued
+    reading returned None for all of these and a truthy list as if it were
+    a record)."""
     path = phase1_snapshot_path(receipt)
     if path is None:
-        return None
+        return "absent", None, None, None
     try:
-        return yaml.safe_load(path.read_text(encoding="utf-8")) or None
-    except yaml.YAMLError:
-        return None
+        doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (yaml.YAMLError, UnicodeDecodeError, OSError) as exc:
+        return "unusable", path, None, f"{type(exc).__name__}: {str(exc).splitlines()[0] if str(exc) else ''}".rstrip(": ")
+    if doc is None or doc == {} or doc == []:
+        return "unusable", path, None, "empty document"
+    if not isinstance(doc, dict):
+        return "unusable", path, None, f"the document is a {type(doc).__name__}, not a mapping"
+    return "usable", path, doc, None
 
 
 def phase1_snapshot_path(receipt: Path) -> Path | None:
@@ -1121,7 +1136,16 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     # coverage: its leaves show under `without_receipt` until something
     # re-receipts them. A path whose entry merely moved is followed to it
     # by identity (#899, `remap_path`).
-    original = phase1_snapshot(receipt)
+    snap_state, snap_path, original, snap_why = phase1_snapshot_state(receipt)
+    if snap_state == "unusable":
+        # The pack reports this gap; the block must not run the index join
+        # over it and return `checked: true` (#1124 Codex review, M7) — on
+        # the moved-funder fixture that join credits the inserted entry
+        # with the old grant's receipt.
+        return {**base, "checked": False,
+                "reason": f"the phase-1 snapshot {snap_path} is present but not usable ({snap_why}); "
+                          "receipt paths cannot be joined to the record by entry identity, and an index "
+                          "join would credit the wrong entries (#899)"}
     block = check(rec, m, texts, full, record_bundle_md5, original)
     block["artifacts"] = {
         "receipt": {"path": str(receipt), "sha256": hashlib.sha256(receipt.read_bytes()).hexdigest()},

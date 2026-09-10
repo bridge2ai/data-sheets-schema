@@ -104,7 +104,7 @@ def check(method, label, project, write, strict):
     import yaml
 
     from data_sheets_schema import backfill_checks as bc
-    from data_sheets_schema.review_pack import check_review, record_paths
+    from data_sheets_schema.review_pack import UnreadableYAML, _load_mapping, check_review, record_paths
     prov = _provenance(method, label, project)
     if not prov.exists():
         raise click.ClickException(f"no provenance record at {prov}")
@@ -113,15 +113,36 @@ def check(method, label, project, write, strict):
         raise click.ClickException(f"no review pack at {paths['pack']}; run `d4d review pack` first")
     if not paths["review"].exists():
         raise click.ClickException(f"no review at {paths['review']}")
-    pack = yaml.safe_load(paths["pack"].read_text(encoding="utf-8")) or {}
-    pack["_sha256"] = hashlib.sha256(paths["pack"].read_bytes()).hexdigest()
-    rev = yaml.safe_load(paths["review"].read_text(encoding="utf-8")) or {}
+    # One read per file: the bytes hashed are the bytes parsed (#1124
+    # Codex review, M6), and every way a read fails names the file (SF1).
+    try:
+        pack_raw = paths["pack"].read_bytes(); rev_raw = paths["review"].read_bytes()
+        pack = _load_mapping(paths["pack"], raw=pack_raw)
+        rev = _load_mapping(paths["review"], raw=rev_raw)
+    except OSError as exc:
+        raise click.ClickException(f"{exc.filename or paths['pack']} could not be read: {exc.strerror}") from exc
+    except UnreadableYAML as exc:
+        raise click.ClickException(str(exc)) from exc
+    pack["_sha256"] = hashlib.sha256(pack_raw).hexdigest()
     block = check_review(pack, rev)
     click.echo(f"   {block['summary']}")
     for k, d in block["by_kind"].items():
         click.echo(f"   {k}: " + ", ".join(f"{v} {n}" for v, n in sorted(d.items())))
     for f in block["findings"][:20]:
         click.echo("   ❌ " + ", ".join(f"{k}={v}" for k, v in f.items()))
+    if not block["checked"]:
+        # A pack that is not a pack is never attested (Codex M1).
+        raise click.ClickException(f"not checked: {block['reason']}; nothing written")
+    failing = bool(block["findings"] or block["unanswered"])
+    if write and strict and failing:
+        # `--strict` used to exit 1 after the write, leaving a block that
+        # pinned the current pack over a review of another one, which
+        # `runs select` then ranked (Codex M2). Under --strict a failing
+        # review is not written; without it the block is written with its
+        # findings, and `review_evidence` keeps it out of the ranking.
+        click.echo(f"   not written: --strict and {len(block['findings'])} finding(s), "
+                   f"{len(block['unanswered'])} unanswered")
+        sys.exit(1)
     if write:
         # Keys kept even when absent (#1097): dropping `reviewed_at` when the
         # review omitted it made the provenance block show no gap, and one
@@ -139,7 +160,7 @@ def check(method, label, project, write, strict):
         block["reviewer"]["model_basis"] = "self-reported by the reviewing agent"
         block["artifacts"] = {"pack": {"path": str(paths["pack"]), "sha256": pack["_sha256"]},
                               "review": {"path": str(paths["review"]),
-                                         "sha256": hashlib.sha256(paths["review"].read_bytes()).hexdigest()}}
+                                         "sha256": hashlib.sha256(rev_raw).hexdigest()}}
         block["recorded_by"] = "d4d review check"
         bc.apply(prov, {"review": block}, overwrite=True)
         click.echo(f"   ✓ review block written to {prov}")
@@ -189,8 +210,12 @@ def disposition(method, label, project, item, disposition, note, slot_path, old,
     paths = record_paths(prov)
     if not paths["review"].exists():
         raise click.ClickException(f"no review at {paths['review']}; a disposition answers a review finding")
-    rev = yaml.safe_load(paths["review"].read_text(encoding="utf-8")) or {}
-    items = rev.get("items") if isinstance(rev, dict) else rev
+    from data_sheets_schema.review_pack import UnreadableYAML, _load_mapping
+    try:
+        rev = _load_mapping(paths["review"])
+    except UnreadableYAML as exc:
+        raise click.ClickException(str(exc)) from exc
+    items = rev.get("items")
     found = next((i for i in (items or []) if isinstance(i, dict) and i.get("id") == item), None)
     if found is None:
         raise click.ClickException(f"{paths['review']} has no item {item!r}")
@@ -326,10 +351,15 @@ def agree_cmd(method, label, project, write):
     for k in ("pack", "review", "review_b"):
         if not paths[k].exists():
             raise click.ClickException(f"missing {paths[k]}")
-    pack = yaml.safe_load(paths["pack"].read_text(encoding="utf-8")) or {}
-    pack["_sha256"] = hashlib.sha256(paths["pack"].read_bytes()).hexdigest()
-    a = yaml.safe_load(paths["review"].read_text(encoding="utf-8")) or {}
-    b = yaml.safe_load(paths["review_b"].read_text(encoding="utf-8")) or {}
+    from data_sheets_schema.review_pack import UnreadableYAML, _load_mapping
+    try:
+        pack_raw = paths["pack"].read_bytes()
+        pack = _load_mapping(paths["pack"], raw=pack_raw)
+        a = _load_mapping(paths["review"])
+        b = _load_mapping(paths["review_b"])
+    except UnreadableYAML as exc:
+        raise click.ClickException(str(exc)) from exc
+    pack["_sha256"] = hashlib.sha256(pack_raw).hexdigest()
     # A rating pair is only as good as its ratings: an invalid review
     # (duplicate ids, out-of-vocabulary verdicts, unknown items) must not
     # silently enter a reliability figure (#861).
