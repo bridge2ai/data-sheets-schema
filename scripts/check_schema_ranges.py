@@ -35,8 +35,11 @@ def problems(schema: Path, read: list[Path] | None = None) -> list[str]:
             continue                       # generated from the files checked here
         try:
             raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-        except yaml.YAMLError as exc:
-            out.append(f"{path.name}: not parseable, not checked ({str(exc).splitlines()[0]})")
+        except (yaml.YAMLError, UnicodeDecodeError, OSError) as exc:
+            # Named, whichever way the read failed: a byte that is not
+            # UTF-8 is as concrete here as a parse error (#874, #921), and
+            # a traceback names an offset, not a file (#1179 review).
+            out.append(f"{path.name}: not readable, not checked ({str(exc).splitlines()[0]})")
             continue
         if read is not None:
             read.append(path)

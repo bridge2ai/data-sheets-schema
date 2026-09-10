@@ -17,7 +17,7 @@ The full schema (`data_sheets_schema.yaml`, ~284 attributes) remains the extende
 
 ```bash
 make gen-core-schema     # produce merged data_sheets_schema_core_all.yaml
-make validate-core       # metamodel check + gen-python resolution of the core schema
+make validate-core       # metamodel check of every core file, gen-python resolution, and no `range:` without a name in any schema module
 make lint-core           # linkml-lint on the core module
 ```
 

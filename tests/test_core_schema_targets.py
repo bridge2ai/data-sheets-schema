@@ -150,8 +150,14 @@ class TestValidateCore(unittest.TestCase):
         self.assertTrue(any("D4D_Core.yaml: CoreDatasetCollection.resources (attributes)" in f and "no value" in f for f in found), found)
         self.assertTrue(any("D4D_Base_import.yaml: slot " in f and "range is a int (123)" in f for f in found), found)
         self.assertTrue(any("D4D_Composition.yaml: " in f and "(slot_usage)" in f and "no value" in f for f in found), found)
-        self.assertTrue(any("D4D_FileCollection.yaml: not parseable, not checked" in f for f in found), found)
+        self.assertTrue(any("D4D_FileCollection.yaml: not readable, not checked" in f for f in found), found)
         self.assertNotIn("D4D_FileCollection.yaml", [p.name for p in read])
+        # a byte that is not UTF-8 is named the same way, not a traceback (#1179 review, S1)
+        with tempfile.TemporaryDirectory() as tmp:
+            def edit2(d):
+                (d / "D4D_Metadata.yaml").write_bytes((d / "D4D_Metadata.yaml").read_bytes() + b"\n# caf\xe9\n")
+            found = mod.problems(_broken_copy(tmp, edit2))
+        self.assertEqual(len(found), 1, found); self.assertIn("D4D_Metadata.yaml: not readable", found[0])
 
 if __name__ == "__main__":
     unittest.main()
