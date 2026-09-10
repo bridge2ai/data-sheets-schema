@@ -1459,8 +1459,8 @@ steps need:
     reader does not recognise, the #546 shape, keeps its claims). What the
     weak signal still misses: informal record wording ("present in full,
     absent in core", a sentence naming both records), which suppresses a
-    full-record removal on three pre-v8 records — none a finding, all
-    three runs never asked for a table; tightening further trades against
+    full-record removal on two pre-v8 records — neither a finding, neither
+    run asked for a table; tightening further trades against
     the false positives the first cut found. Objects and leaves alike;
     `conforms_to_*`,
     `notes` and `source_caveats` exempt as from the receipt denominator.
@@ -1470,7 +1470,7 @@ steps need:
     Disposition headers parses as one: on the 69 snapshot records never
     asked for a table the removals are listed under `removals_unrecorded`
     and are not findings (`snapshot_basis` says which; the #684 precedent),
-    on the 17 that were, they are; 38 removals are listed corpus-wide. A
+    on the 17 that were, they are; 39 removals are listed corpus-wide. A
     paragraph saying a value "remains in",
     "stays in", "is kept in" a backticked slot path is read like a
     `retained` row that names no record — a negator within a dozen
@@ -1488,7 +1488,14 @@ steps need:
     Recomputed with `backfill-checks --blocks report_claims --overwrite`
     over the 277 checked records: exactly the three records above gain a
     finding (the 2026-09-01 v7 arm reads 0 on all twelve before and after;
-    no stored canary block's report row disagrees with its record). Two
+    the one stored canary block whose report row read the record as
+    vacuous — AI_READI v7 rep1's, re-derived under #1170 the day before
+    this recompute gave the record two prose retention claims — was
+    re-derived again with `d4d api verdict` in the same change, the
+    #1170 block kept under `prior_verdict`: the row reads 0 against a
+    baseline worst of 1, the status `regressed` on the British row as
+    before, so no verdict moves; every other block agrees with its
+    record). Two
     earlier cuts were narrowed before the recompute was kept: the first
     counted an unrecorded removal on every snapshot record and read a
     leaf-named prose claim as a full path (48 records moved); the second
@@ -1499,10 +1506,22 @@ steps need:
     third read every backticked name in a sentence with a removal word as
     a casualty, so a destination, a sentence about the core, or an
     unparsed table row suppressed a full-record removal (four corpus
-    instances, none a finding; two recovered, three still suppressed by
-    informal record wording, as above), and its negation window dropped
+    instances, none a finding; three recovered, two still suppressed by
+    informal record wording, as above — `variables` on the 2026-08-06
+    schema2 rep2 AI_READI record, `compression` on the 2026-08-20b v5 rep3
+    CM4AI one), and its negation window dropped
     eleven real retention claims; the fourth scoped the table exclusion to
-    a heading, which would have silenced the #546 shape (no corpus loss). Two further effects of the recompute, neither a
+    a heading, which would have silenced the #546 shape (no corpus loss);
+    the fifth keyed the table exclusion on the rows that parsed, so a
+    recognised table none of whose rows the strict reader could read was
+    excluded by nobody and a cell reading "slot kept" became a removal
+    claim (#962 again; latent on two 2026-07-31 reports with no removal
+    cell), and read a list after a preposition as destinations wherever
+    it stood, so "the values in `a`, `b` and `c` were removed" recorded
+    none of them — the exclusion is now keyed on recognised headers, a
+    second header under a table starts its own, and a list is a
+    destination only where a removal word precedes it (neither moves a
+    corpus block). Two further effects of the recompute, neither a
     finding: because a prose retention claim is now a claim checked,
     `claims_checked` moved on 100 records and 65 reports that read no
     claim before read one now (`canary.report_vacuous` flips from vacuous
@@ -1555,7 +1574,9 @@ them may land between a v8 canary and its fill.
   AI_READI block was re-derived the same way on 2026-09-10 UTC (#1170):
   status `regressed` before and after (British 45 vs 43, the same under
   v4 as proposed in #1173, open at the time of writing), the report row unmeasured, the D4 block (#906) under
-  `prior_verdict` and #891's beneath it.
+  `prior_verdict` and #891's beneath it; and once more on 2026-09-10
+  under report_claims v5 (#1054), the report row measured at 0 vs 1 now
+  that the record reads two prose retention claims, status unchanged.
 - **D5** — adopted 2026-09-03: API-only v8 first; the agentic arm needs
   #688's launcher and the parity update before a v8 playbook run is
   cheap enough to repeat.

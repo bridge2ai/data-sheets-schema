@@ -219,7 +219,12 @@ v4 as proposed in #1173 (#1006; open at the time of writing, its patterns
 checked at that branch's head), the run and all three 2026-08-22c
 baseline replicates read the same (45; 33, 43, 0), so that revision as
 proposed would not call for a third re-derivation; every other row
-unchanged.
+unchanged. A third re-derivation came the next day for another reason
+(#1054, report_claims v5, `recorded_at` 2026-09-10): the record's own
+report block now reads two prose retention claims, so the report row
+is measured — 0 against a baseline worst of 1 — with the #1170 block
+under `prior_verdict`, the D4 block beneath it and #891's beneath that;
+status `regressed` on the British row throughout.
 
 **CM4AI rep1's canary block, re-derived (2026-09-09, #922).** The block
 the #876 re-verdict wrote carried the v2 British baseline (0 vs 0) and

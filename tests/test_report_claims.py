@@ -681,6 +681,52 @@ class UnrecordedRemovalTest(Harness):
         b = self.check_with(headless, {"keywords": ["a"], "errata": [{"a": 1}]}, full={"keywords": ["a"]}, core={"keywords": ["a"]})
         self.assertEqual([f["slot"] for f in b["findings"] if f["kind"] == "removal_not_recorded"], ["errata"])
 
+    def test_a_recognised_table_with_no_parseable_row_is_still_the_strict_readers(self):
+        """#1175 round 4, M1: keyed on the parsed rows, a table whose header
+        the strict reader recognised but whose rows it could not read was
+        excluded by nobody, and "| `errata` | Reviewed | both | slot kept |"
+        became a removal claim and a removal record at once (#962 again)."""
+        md = ("## Dispositions\n\n| slot | disposition | record | reason |\n|---|---|---|---|\n"
+              "| `errata` | Reviewed | both | Dropped the duplicate entry; slot kept |\n")
+        b = self.check(md, full={"errata": [{"a": 1}]}, core={"errata": [{"a": 1}]})
+        self.assertEqual(b["findings"], []); self.assertEqual(b["claims_checked"], 0)
+        b = self.check_with(md, {"errata": [{"a": 1}]}, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual([f["slot"] for f in b["findings"] if f["kind"] == "removal_not_recorded"], ["errata"])
+
+    def test_a_second_table_under_the_first_starts_its_own_extent(self):
+        """#1175 round 4, S4: two tables with no blank line between them are
+        one contiguous run of `|` lines; the second's header decides for
+        itself whether it is the strict reader's."""
+        md = (self.TABLE + "| record | slot | change |\n|---|---|---|\n| core | `distributions` | removed; content redistributed |\n")
+        b = self.check(md, full={"keywords": ["a"]}, core={"keywords": ["a"], "distributions": [{"path": "a"}]})
+        self.assertEqual([(f["kind"], f["slot"]) for f in b["findings"]], [("removal_not_performed", "distributions")])
+        md = (self.TABLE + "| slot | disposition | record | reason |\n|---|---|---|---|\n| `errata` | Reviewed | both | kept |\n")
+        b = self.check(md, full={"keywords": ["a"], "errata": [1]}, core={"keywords": ["a"], "errata": [1]})
+        self.assertEqual(b["findings"], [])                                        # recognised too: excluded
+
+    def test_a_coordinated_casualty_list_is_not_a_destination(self):
+        """#1175 round 4, S1: "the values in `a`, `b` and `c` were removed"
+        — the removal word follows the list, so every item is a casualty and
+        an unrecorded removal of any of them is recorded, not a finding."""
+        snapshot = {"collection_timeframes": [1], "distribution_dates": [1], "versions_available": [1], "funders": [1]}
+        md = self.TABLE + "\nThe dates in `collection_timeframes`, `distribution_dates`, `versions_available` and `funders` were removed.\n"
+        b = self.check_with(md, snapshot, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual([f for f in b["findings"] if f["kind"] == "removal_not_recorded"], [])
+        md = self.TABLE + "\n`funders` was removed; its values are already recorded in `collection_timeframes` and `distribution_dates`.\n"
+        b = self.check_with(md, snapshot, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual(sorted(f["slot"] for f in b["findings"] if f["kind"] == "removal_not_recorded"),
+                         ["collection_timeframes", "distribution_dates", "versions_available"])
+
+    def test_a_loose_only_live_value_is_described_from_the_loose_reading(self):
+        """#1175 round 4, S6: a `both` row whose slot is live only through
+        the dotted-over-list reading names the core when the core carries it,
+        and counts the entries rather than saying "a value"."""
+        md = self.TABLE + "| `splits.split_details` | removed | both | gone |\n"
+        core = {"keywords": ["a"], "splits": [{"split_details": [{"n": 1}, {"n": 2}]}]}
+        b = self.check(md, full={"keywords": ["a"]}, core=core)
+        f = [x for x in b["findings"] if x["kind"] == "removal_not_performed"]
+        self.assertEqual(len(f), 1); self.assertNotIn("a value", f[0]["detail"]); self.assertIn("2", f[0]["detail"])
+
     def test_the_weak_signal_skips_coordinated_destinations_and_class_names(self):
         """#1175 round 3, S1/S5."""
         snap = {"keywords": ["a"], "license_and_use_terms": {"x": 1}, "distribution_formats": [{"f": 1}], "variables": [{"v": 1}]}

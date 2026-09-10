@@ -446,30 +446,34 @@ def _core_declares(path: str, declared: dict[str, set[str]]) -> bool:
     return root in declared["CoreDataset"]
 
 
-def _dispositions_table_lines(text: str, rows: list[dict[str, str]]) -> set[str]:
-    """The stripped lines of the table(s) `disposition_rows` recognised —
-    header, rule and every row from a recognised header to the first
-    non-`|` line, parseable or not (#1175 round 3, M1/S2). Scoped to the
-    parsed table's own extent, not to a heading: a removal claim in a table
-    the strict reader does not recognise ("| core | `distributions` |
-    removed |") stays with the generic scan, and a dispositions-shaped table
-    with no heading is still the strict reader's."""
+def _dispositions_table_lines(text: str, rows: list[dict[str, str]] | None = None) -> set[str]:
+    """The stripped lines of every table whose header `disposition_rows`
+    recognises — header, rule and every row to the next header or the
+    first non-`|` line, parseable or not (#1175 round 3, M1/S2; round 4,
+    M1/S4). Keyed on the header, not on the rows that parsed: a
+    recognised table none of whose rows the strict reader can read is
+    still the strict reader's (round 4, M1 — "| `errata` | Reviewed |
+    both | … slot kept |" is nobody's removal claim), and a second header
+    written directly under a table starts another table, which is excluded
+    only if it is recognised too (S4). A table the strict reader does not
+    recognise ("| core | `distributions` | removed |") stays with the
+    generic scan, and a dispositions-shaped table with no heading is still
+    the strict reader's. A header is a row followed by a separator row."""
     out: set[str] = set()
-    if not rows:
-        return out
-    row_lines = {row["line"] for row in rows}
     lines = text.splitlines()
+    recognised = False
     for i, line in enumerate(lines):
-        if line.strip() not in row_lines:
+        if not line.lstrip().startswith("|"):
+            recognised = False
             continue
-        # walk up to the table's header, then down to its end
-        start = i
-        while start > 0 and lines[start - 1].lstrip().startswith("|"):
-            start -= 1
-        end = i
-        while end + 1 < len(lines) and lines[end + 1].lstrip().startswith("|"):
-            end += 1
-        out.update(ln.strip() for ln in lines[start:end + 1])
+        cells = _cells(line)
+        is_header = (cells is not None and i + 1 < len(lines) and lines[i + 1].lstrip().startswith("|")
+                     and _cells(lines[i + 1]) is None)
+        if is_header:
+            low = [c.lower() for c in cells]
+            recognised = "disposition" in low and "slot" in low
+        if recognised:
+            out.add(line.strip())
     return out
 
 
@@ -604,9 +608,14 @@ def check_report(report: Path, full: dict, core: dict,
                 # Describe the value that is live. Under `both` the full
                 # record may be the only one carrying it, and describing the
                 # core's `None` as "record has a value" named the wrong
-                # record (#995).
-                v = (v_full if where == "full"
-                     else v_core if in_core and _populated(v_core) else v_full)
+                # record (#995); a value live only through the loose reading
+                # is described from that reading (round 4, S6).
+                if where == "full":
+                    v = v_full if in_full and _populated(v_full) else _loose_value(full, name)
+                elif core_live:
+                    v = v_core if in_core and _populated(v_core) else _loose_value(core, name)
+                else:
+                    v = v_full if in_full and _populated(v_full) else _loose_value(full, name)
                 findings.append({
                     "kind": "removal_not_performed", "slot": name,
                     "record": where,
@@ -622,7 +631,7 @@ def check_report(report: Path, full: dict, core: dict,
     # carries a free-text reason ("Dropped the duplicate entry; slot kept")
     # that is not a removal claim, and the generic scan below read it as
     # one (#962; #1175 round 2, M1). The table is the strict reader's.
-    disposition_lines = {row["line"] for row in rows} | _dispositions_table_lines(text, rows)
+    disposition_lines = {row["line"] for row in rows} | _dispositions_table_lines(text)
     for line in text.splitlines():
         cells = _cells(line)
         if not cells or line.strip() in disposition_lines:
@@ -861,8 +870,16 @@ def check_report(report: Path, full: dict, core: dict,
             # A coordinated destination list ("recorded in `a` and `b`")
             # names no casualty past its first item, which `_named`'s
             # lookback reaches; the rest are excluded here (#1175 round 3).
-            destinations = {n for m in _DESTINATION_LIST.finditer(sent) for n in _TICKED.findall(m.group(0))}
-            recorded.update(n for n in _named(sent)
+            # ... and only where a removal word precedes the preposition
+            # (round 4, S1): in "the values in `a`, `b` and `c` were
+            # removed" the removal comes after the list, so every item is
+            # a casualty — the first one too, which `_named`'s lookback
+            # would otherwise read as a place.
+            destinations: set[str] = set(); casualties: set[str] = set()
+            for m in _DESTINATION_LIST.finditer(sent):
+                names = _TICKED.findall(m.group(0))
+                (destinations if _REMOVAL_WORD.search(sent[:m.start()]) else casualties).update(names)
+            recorded.update(n for n in [*_named(sent), *casualties]
                             if _SLOT_PATH.fullmatch(n) and n not in destinations)
     unrecorded: list[dict[str, str]] = []
     expected = bool(dispositions_expected)
@@ -931,6 +948,39 @@ def _leaf_under_root(rec: Any, path: str) -> bool:
     if root not in rec:
         return False
     return _has_populated_key(rec.get(root), leaf)
+
+
+def _loose_value(data: Any, path: str) -> Any:
+    """The populated values a dotted-over-list path reads to, as one list,
+    so a loose-only match can be described by its count (round 4, S6)."""
+    parts = re.findall(r"[\w]+|\[\d+\]|\[\*\]", path)
+    out: list[Any] = []
+
+    def walk(cur: Any, i: int) -> None:
+        if i == len(parts):
+            if _populated(cur):
+                out.append(cur)
+            return
+        part = parts[i]
+        if isinstance(cur, list) and not part.startswith("["):
+            for item in cur:
+                walk(item, i)
+            return
+        if part == "[*]":
+            if isinstance(cur, list):
+                for item in cur:
+                    walk(item, i + 1)
+            return
+        if part.startswith("["):
+            idx = int(part[1:-1])
+            if isinstance(cur, list) and idx < len(cur):
+                walk(cur[idx], i + 1)
+            return
+        if isinstance(cur, dict) and part in cur:
+            walk(cur[part], i + 1)
+
+    walk(data, 0)
+    return out if len(out) != 1 else out[0]
 
 
 def _resolve_loose(data: Any, path: str) -> bool:
