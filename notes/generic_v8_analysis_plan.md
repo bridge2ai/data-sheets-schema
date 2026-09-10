@@ -1489,8 +1489,9 @@ steps need:
     over the 277 checked records: exactly the three records above gain a
     finding (the 2026-09-01 v7 arm reads 0 on all twelve before and after;
     the one stored canary block whose report row read the record as
-    vacuous — AI_READI v7 rep1's, re-derived under #1170 the day before
-    this recompute gave the record two prose retention claims — was
+    vacuous — AI_READI v7 rep1's, re-derived under #1170 at 00:12Z on
+    2026-09-10, three hours before this branch's report_claims v5 block
+    gave the record two prose retention claims — was
     re-derived again with `d4d api verdict` in the same change, the
     #1170 block kept under `prior_verdict`: the row reads 0 against a
     baseline worst of 1, the status `regressed` on the British row as
@@ -1521,7 +1522,14 @@ steps need:
     none of them — the exclusion is now keyed on recognised headers, a
     second header under a table starts its own, and a list is a
     destination only where a removal word precedes it (neither moves a
-    corpus block). Two further effects of the recompute, neither a
+    corpus block); the sixth read every un-preceded list as casualties,
+    which would have silenced 51 corpus destinations in 37 reports (four
+    on the gated v8 arm — "already carried under `funders`", "retained …
+    rather than removed"), and required a separator row of a header the
+    strict reader does not — the list is a casualty list only where the
+    removal follows it in the same clause, and one header rule, decoration
+    stripped and no separator required, serves both readers (neither
+    moves a corpus block). Two further effects of the recompute, neither a
     finding: because a prose retention claim is now a claim checked,
     `claims_checked` moved on 100 records and 65 reports that read no
     claim before read one now (`canary.report_vacuous` flips from vacuous

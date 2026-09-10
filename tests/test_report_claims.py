@@ -717,6 +717,35 @@ class UnrecordedRemovalTest(Harness):
         self.assertEqual(sorted(f["slot"] for f in b["findings"] if f["kind"] == "removal_not_recorded"),
                          ["collection_timeframes", "distribution_dates", "versions_available"])
 
+    def test_a_list_named_before_a_retention_or_a_distant_removal_is_not_a_casualty_list(self):
+        """#1175 round 5, M1: the corpus sentences the first casualty rule
+        silenced — a destination named before a removal elsewhere in the
+        sentence, a retention verb after the list, "rather than removed"."""
+        snapshot = {"funders": [1], "prohibition_reason": "x", "description": "y", "related_datasets": [1], "version_access": [1]}
+        for sent in ("The NIH award period (a funding fact, already carried under `funders`) and the site list have been removed.",
+                     "The reasons were rewritten to carry the prohibition statement and its rationale together in `prohibition_reason`, and `description` was trimmed; the duplicates were removed.",
+                     "These are retained as evidence about the prior release — in `related_datasets` and `version_access` — rather than removed.",
+                     "The range stays in `funders`, so nothing is dropped."):
+            b = self.check_with(self.TABLE + "\n" + sent + "\n", snapshot, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+            found = sorted(f["slot"] for f in b["findings"] if f["kind"] == "removal_not_recorded")
+            self.assertEqual(found, sorted(snapshot), sent)                                 # none silenced
+        md = self.TABLE + "\nThe dates in `collection_timeframes`, `distribution_dates` and `versions_available` were removed.\n"
+        b = self.check_with(md, {"collection_timeframes": [1], "distribution_dates": [1], "versions_available": [1]},
+                            full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual([f for f in b["findings"] if f["kind"] == "removal_not_recorded"], [])   # still a casualty list
+
+    def test_a_recognised_header_without_a_separator_and_a_decorated_header_are_the_strict_readers(self):
+        """#1175 round 5, M2/S1: `disposition_rows` and the exclusion share
+        one header rule — no separator row required, markdown decoration
+        stripped — so the two readers cannot own different tables."""
+        for header in ("| slot | disposition | record | reason |", "| **Slot** | **Disposition** | **Record** | **Reason** |",
+                       "| Slot: | Disposition: | Record | Reason |"):
+            md = f"## Dispositions\n\n{header}\n| `keywords` | retained | both | fine |\n| `errata` | Reviewed | both | Dropped the duplicate entry; slot kept |\n"
+            b = self.check(md, full={"keywords": ["a"], "errata": [1]}, core={"keywords": ["a"], "errata": [1]})
+            self.assertEqual(b["findings"], [], header); self.assertEqual(b["claims_checked"], 1, header)
+            b = self.check_with(md, {"keywords": ["a"], "errata": [{"a": 1}]}, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+            self.assertEqual([f["slot"] for f in b["findings"] if f["kind"] == "removal_not_recorded"], ["errata"], header)
+
     def test_a_loose_only_live_value_is_described_from_the_loose_reading(self):
         """#1175 round 4, S6: a `both` row whose slot is live only through
         the dotted-over-list reading names the core when the core carries it,
@@ -726,6 +755,10 @@ class UnrecordedRemovalTest(Harness):
         b = self.check(md, full={"keywords": ["a"]}, core=core)
         f = [x for x in b["findings"] if x["kind"] == "removal_not_performed"]
         self.assertEqual(len(f), 1); self.assertNotIn("a value", f[0]["detail"]); self.assertIn("2", f[0]["detail"])
+        core = {"keywords": ["a"], "splits": [{"split_details": [{"n": 1}, {"n": 2}, {"n": 3}]}, {"split_details": [{"n": 4}, {"n": 5}]}]}
+        b = self.check(md, full={"keywords": ["a"]}, core=core)
+        f = [x for x in b["findings"] if x["kind"] == "removal_not_performed"]
+        self.assertIn("5", f[0]["detail"])                                                  # entries, not matches (round 5, S2)
 
     def test_the_weak_signal_skips_coordinated_destinations_and_class_names(self):
         """#1175 round 3, S1/S5."""

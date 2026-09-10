@@ -302,6 +302,12 @@ _SLOT_PATH = re.compile(r"[a-z][a-z0-9_]*(?:\[(?:\d+|\*)\])?(?:\.[a-z][a-z0-9_]*
 #: is not a casualty, a sentence about the core alone records nothing
 #: about the full record, and no table line is read (#1175 round 2, M1).
 _REMOVAL_WORD = re.compile(r"\b(?:removed|deleted|dropped|absent|omitted|stripped|withdrawn)\b", re.I)
+#: After a list the removal word must follow closely, in the same clause,
+#: for the list to be its casualties: at most a few words, none of them a
+#: retention verb, a negation or "rather than" (#1175 round 5, M1).
+_CASUALTY_TAIL = re.compile(r"(?:\s+(?!(?:remains?|stays?|retained|kept|carried|rather|not|never|neither|nor)\b)[\w'\-]+){0,4}\s+"
+                            r"(?:were|was|are|is|have been|has been|be|being|get|got)?\s*"
+                            r"(?:removed|deleted|dropped|omitted|stripped|withdrawn)\b", re.I)
 #: "recorded in `a`, `b` and `c`": every backticked name in the list after
 #: the preposition is a destination.
 _DESTINATION_LIST = re.compile(r"\b(?:from|into|to|in|on|within|onto|under|beside|alongside)\s+(?:the\s+|core\s+|full\s+)*"
@@ -446,7 +452,21 @@ def _core_declares(path: str, declared: dict[str, set[str]]) -> bool:
     return root in declared["CoreDataset"]
 
 
-def _dispositions_table_lines(text: str, rows: list[dict[str, str]] | None = None) -> set[str]:
+def _header_cells(cells: list[str]) -> list[str]:
+    """Header cells as the strict reader compares them: lower-cased, with
+    markdown decoration (`**Slot**`, `_Slot_`, `Slot:`) stripped (#1175
+    round 5, S1) — one rule for both readers (round 5, M2)."""
+    return [c.strip().strip("*_").strip().rstrip(":").strip().lower() for c in cells]
+
+
+def _is_dispositions_header(cells: list[str] | None) -> bool:
+    if cells is None:
+        return False
+    low = _header_cells(cells)
+    return "disposition" in low and "slot" in low
+
+
+def _dispositions_table_lines(text: str) -> set[str]:
     """The stripped lines of every table whose header `disposition_rows`
     recognises — header, rule and every row to the next header or the
     first non-`|` line, parseable or not (#1175 round 3, M1/S2; round 4,
@@ -458,23 +478,31 @@ def _dispositions_table_lines(text: str, rows: list[dict[str, str]] | None = Non
     only if it is recognised too (S4). A table the strict reader does not
     recognise ("| core | `distributions` | removed |") stays with the
     generic scan, and a dispositions-shaped table with no heading is still
-    the strict reader's. A header is a row followed by a separator row."""
+    the strict reader's. A header is any row the strict reader's own test
+    recognises — a separator row is not required (round 5, M2: the strict
+    reader parses a separator-less table, so the exclusion must cover it)."""
     out: set[str] = set()
-    lines = text.splitlines()
     recognised = False
-    for i, line in enumerate(lines):
+    for line in text.splitlines():
         if not line.lstrip().startswith("|"):
             recognised = False
             continue
         cells = _cells(line)
-        is_header = (cells is not None and i + 1 < len(lines) and lines[i + 1].lstrip().startswith("|")
-                     and _cells(lines[i + 1]) is None)
-        if is_header:
-            low = [c.lower() for c in cells]
-            recognised = "disposition" in low and "slot" in low
+        if _is_dispositions_header(cells):
+            recognised = True
+        elif cells is not None and recognised and _cells_look_like_a_header(cells):
+            recognised = False                      # another table's header, not a dispositions one
         if recognised:
             out.add(line.strip())
     return out
+
+
+def _cells_look_like_a_header(cells: list[str]) -> bool:
+    """A row whose every cell is a bare capitalised or lower-case word with
+    no backtick, digit or disposition word — the shape a header takes and a
+    dispositions row never does."""
+    return all(re.fullmatch(r"[A-Za-z][A-Za-z ]{0,30}", c.strip("*_ ").rstrip(":")) for c in cells) and not any(
+        _DISPOSITION.match(c) for c in cells)
 
 
 def disposition_rows(text: str) -> list[dict[str, str]]:
@@ -499,12 +527,11 @@ def disposition_rows(text: str) -> list[dict[str, str]]:
                 continue                      # the separator row keeps the header
             header = None
             continue
-        low = [c.lower() for c in cells]
-        if "disposition" in low and "slot" in low and header is None:
+        if _is_dispositions_header(cells) and header is None:
             # Both columns, or it is some other table with a Disposition
             # column — a numbered finding table, say (#962) — whose rows are
             # not claims about slots.
-            header = {name: i for i, name in enumerate(low)}
+            header = {name: i for i, name in enumerate(_header_cells(cells))}
             continue
         if header is None:
             continue
@@ -878,7 +905,15 @@ def check_report(report: Path, full: dict, core: dict,
             destinations: set[str] = set(); casualties: set[str] = set()
             for m in _DESTINATION_LIST.finditer(sent):
                 names = _TICKED.findall(m.group(0))
-                (destinations if _REMOVAL_WORD.search(sent[:m.start()]) else casualties).update(names)
+                if _REMOVAL_WORD.search(sent[:m.start()]):
+                    destinations.update(names)
+                elif _CASUALTY_TAIL.match(sent, m.end()):
+                    # "the values in `a`, `b` and `c` were removed": the
+                    # removal follows the list in the same clause, with no
+                    # retention verb or "rather than" between (round 5, M1 —
+                    # the first cut read every un-preceded list as
+                    # casualties and silenced 51 corpus destinations)
+                    casualties.update(n for n in names if n in _named(m.group(0).replace("in ", "", 1)))
             recorded.update(n for n in [*_named(sent), *casualties]
                             if _SLOT_PATH.fullmatch(n) and n not in destinations)
     unrecorded: list[dict[str, str]] = []
@@ -980,7 +1015,11 @@ def _loose_value(data: Any, path: str) -> Any:
             walk(cur[part], i + 1)
 
     walk(data, 0)
-    return out if len(out) != 1 else out[0]
+    if len(out) == 1:
+        return out[0]
+    if out and all(isinstance(o, list) for o in out):
+        return [x for o in out for x in o]              # entries across the matches, not matches (round 5, S2)
+    return out
 
 
 def _resolve_loose(data: Any, path: str) -> bool:
