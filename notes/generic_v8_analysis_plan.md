@@ -1097,9 +1097,9 @@ one real identifier the shape could not read — the `publisher` docExample
 lower-case prefix the CURIE shape matched in upper case only (#1178) —
 the #647 defect verbatim, in the merged schema file the agentic playbook
 reads, reported as a pass. The shape reads either case now, the
-docExample is `ROR:0xxxxxxxx`, and the derived artifacts are regenerated. The guard is green on all 22 modules; the
-generated merged files and the datamodel are derived from them and are
-not scanned twice.
+docExample is `ROR:0xxxxxxxx`, and the derived artifacts are regenerated.
+The guard is green on all 22 modules; the generated merged files and the
+datamodel are derived from them and are not scanned twice.
 
 ### The schema digest moved with #1114 (2026-09-09)
 

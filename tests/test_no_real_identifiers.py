@@ -43,16 +43,6 @@ _ROR_ID = r"0[0-9a-hjkmnp-tv-z]{6}[0-9]{2}"
 SHAPES = {
     "ROR CURIE": re.compile(rf"\b(?i:ror):{_ROR_ID}\b"),       # `ror:04t3en479` (KIT) sat in a docExample in lower case (#1178 review)
     "ror.org URL": re.compile(rf"ror\.org/{_ROR_ID}\b"),
-}
-#: The prompt body's shapes (#1178 review, S1): the un-narrowed ROR forms —
-#: any nine lowercase alphanumerics — because an identifier-shaped token in
-#: the body is a copy-through candidate whether or not it is anyone's. The
-#: rest of the body's shapes are the same as everywhere.
-_STRICT_SHAPES = {
-    "ROR CURIE": re.compile(r"\b(?i:ror):[0-9a-z]{9}\b"),
-    "ror.org URL": re.compile(r"ror\.org/[0-9a-z]{9}\b"),
-}
-SHAPES.update({
     "DOI prefix": re.compile(r"\b10\.\d{3,9}/\S+"),            # registrants of 3+ digits (review note 6)
     "doi: CURIE": re.compile(r"\bdoi:10\.\d{3,9}"),
     "orcid.org URL": re.compile(r"orcid\.org/\d"),
@@ -62,7 +52,15 @@ SHAPES.update({
     "clinical trial": re.compile(r"\bNCT\d{8}\b"),
     "RRID": re.compile(r"\bRRID:\s?[A-Z]+_?\w+"),
     "dbGaP": re.compile(r"\bphs\d{6}\b"),
-})
+}
+#: The prompt body's shapes (#1178 review, S1): the un-narrowed ROR forms —
+#: any nine lowercase alphanumerics — because an identifier-shaped token in
+#: the body is a copy-through candidate whether or not it is anyone's. The
+#: rest of the body's shapes are the same as everywhere.
+_STRICT_SHAPES = {
+    "ROR CURIE": re.compile(r"\b(?i:ror):[0-9a-z]{9}\b"),
+    "ror.org URL": re.compile(r"ror\.org/[0-9a-z]{9}\b"),
+}
 
 
 def _prompt_texts() -> list[tuple[str, str, str]]:
