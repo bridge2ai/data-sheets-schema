@@ -274,14 +274,16 @@ files:
       retired_on: '2026-09-04'
       sha256: 06666c4d10786d4689170acdfd68350d451f84d2f94d4b5a22be6e569d3824f1
   src/download/prompts/d4d_generic_arm_prompt_v9.md:
-    body_sha256: 1f9e61faf8b06531ca9cf5ab7894ec5fa527d380ee3971ddd69838412e1419e9
-    bytes: 27736
-    pinned_at_commit: 7b4ab5565f8d5994c32433b08a31ea3bd2b671b6
+    body_sha256: 3103fac71aea6245d4c20ddd8099ce6af3a9b8c1c93a6e9589bbf4d452d40c28
+    bytes: 28361
+    pinned_at_commit: 70e7da9204b6b79735285d784f9e7624b82d6807
     pinned_on: '2026-09-09'
-    reason: 'R8 (#1147, round 7): the fragment-marker clause written without a backticked
-      token (the block test admits backticks for digest vocabulary only); no v9 record exists,
-      so no record is superseded'
-    sha256: 33d1d867f0eef5d71f706ab46bb041ae0e5f9bb3310dc8303545c7fb93915ddf
+    reason: 'R8 (#1147, round 7, the Codex CLI review): a forced id takes the identifier the
+      evidence states and is minted only where none is stated; a DOI or page base must be
+      an identifier form (declared CURIE, resolver URL, absolute URL); a part of a fragment-on-root
+      id keeps the record fragment, hyphen, own label; no v9 record exists, so no record is
+      superseded'
+    sha256: aae4b3598fe1d3c1bc5d603328e54a0b70fdbd1fd78eba99ad50f7bdd70eedc4
     superseded:
     - pinned_on: '2026-09-08'
       reason: "generic_v9: v8 plus R6 (a value in the referent own slots is supported by a\
@@ -370,6 +372,12 @@ files:
         is superseded'
       retired_on: '2026-09-09'
       sha256: d755a69ba4ac435c9ab5f510b2d743a6355b18eeea87d2de39a1662daf651c40
+    - pinned_on: '2026-09-09'
+      reason: 'R8 (#1147, round 7): the fragment-marker clause written without a backticked
+        token (the block test admits backticks for digest vocabulary only); no v9 record exists,
+        so no record is superseded'
+      retired_on: '2026-09-09'
+      sha256: 33d1d867f0eef5d71f706ab46bb041ae0e5f9bb3310dc8303545c7fb93915ddf
   src/download/prompts/d4d_tuned_arm_prompt.md:
     bytes: 2877
     pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
