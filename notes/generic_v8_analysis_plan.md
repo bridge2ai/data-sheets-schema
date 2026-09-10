@@ -1132,9 +1132,9 @@ ranking) are left out on purpose, their content being a source's.
 
 ### R8 no longer charges a landing-page label a receipt (#1147, 2026-09-09)
 
-The fifteenth v9 pin — the registry's `superseded` list holds fourteen:
+The sixteenth v9 pin — the registry's `superseded` list holds fifteen:
 three registrations and corrections on 2026-09-08, the two #1120 rounds,
-the two #1134 spellings rounds, and this issue's own seven earlier rounds,
+the two #1134 spellings rounds, and this issue's own eight earlier rounds,
 each retired by the next (the third wrote `labelled` into the sentence and
 the file sweep of #1134 caught it after the pin was taken; the fourth's
 premise was false for the 36 CHORUS records whose own id is the site root;
@@ -1150,9 +1150,20 @@ DOI" where the record may carry either bare (`10.13026/8xbn-nq66`,
 `www.bridge2ai.org/chorus`), so the label was a token, not an identifier;
 and its carve-out for an id that is already a fragment dropped the
 record's own discriminator, so parts of `#chorus-dataset` from two runs
-read `#clinical-notes` and `#chorus-dataset-clinical-notes` — 29 bare
-against 10 parent-qualified across five records — with "keep it stable"
-deciding nothing). R8 now takes the stated identifier first for a forced
+read `#clinical-notes` and `#chorus-dataset-clinical-notes` — 19 bare
+against 10 parent-qualified across five delivered full records — with
+"keep it stable" deciding nothing; and the eighth, the round that answered
+it, let a record whose own id is a bare token (`chorus_dataset`,
+`chorus:clinical-care-dataset` on a prefix the schema does not declare)
+label its parts on that token, admitted a bare DOI as a stated forced id
+while calling the same string a token as a base, and left the person
+rule minting a second marker on a fragment-bearing id, the case R8 hands
+it — so the own id is the base to prefer only where it is itself an
+identifier form, a stated identifier must be one too, and a person's
+fragment on such an id is the record's fragment, a hyphen, person and
+the name — said in R8's carve-out, since R5 sits in the v8 block a v9
+prompt carries unchanged, and in the playbook's R5 line, which is the
+single copy the agentic path reads). R8 now takes the stated identifier first for a forced
 id and mints only where none is stated; admits a DOI or page base only as
 a declared CURIE, a resolver URL or an absolute URL; and labels a part of
 a fragment-on-root id as that fragment, a hyphen and the part's own label
@@ -1197,9 +1208,15 @@ join that is on the part id, not the record's, and works under any base.
 The sentence is rewritten in the prompt and in the playbook's mirror; the
 probe moves with it and the shared-clause guard holds both texts to it.
 R8's operative clauses change — the stated-identifier-first order for a
-forced id, the identifier-form requirement on a DOI or page base, the
-kept parent fragment — which is a rule change under the condition's own
-name; the assembly digest does not move, no v9 record exists, so nothing
+forced id, the identifier-form requirement on every base and on a stated
+identifier, the kept parent fragment — which is a rule change under the
+condition's own name; and the first of them moves a forced part id the
+evidence states from the receipt denominator's exemption (a mint on a
+carried identifier, #1123) to a receipted value (`receipts.exempt` exempts
+a fragment, not a stated ARK or DOI — on AI_READI v6 rep1, 32 of 42 `id`
+leaves are receipt-required and the eight `ark:59853/rocrate-b2ai-ai-readi-*`
+component ids are among them), which is the right trade: an identifier
+the evidence supplies is a claim about the evidence; the assembly digest does not move, no v9 record exists, so nothing
 is re-baselined and no record is superseded.
 
 ### What a v9 arm can and cannot be compared against (#1072)

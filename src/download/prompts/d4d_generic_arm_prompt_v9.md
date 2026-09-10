@@ -375,42 +375,47 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   a person given as an object — the id exists because the object does, and
   leaving it out is a validation failure, not a fragment saved. Take the
   identifier the evidence states for that part first — a DOI, an ARK, a URL
-  that names the file or the component dataset — and mint a label only where
-  it states none: on this record's own id, stable across runs, never in place
-  of an identifier the evidence supplies; and do not read that rule as a
-  reason to omit the object. A person's id follows the rule for a person given
-  as an object — the ORCID the evidence states first, a fragment only where it
-  states none. The ids of `file_collections` and of the files under them are
-  copied into the core record's distributions, and top-level `resources` are
-  matched to the core by id, so those ids are used whether or not the text
-  points at them. For every other fragment the test stays the referent: an
-  organization, a grant, an award, a program has a referent outside this
-  record, so a fragment for it on this dataset's identifier is a claim about
-  that identifier, not a label; and an entry under `creators` or `maintainers`
-  is a role this record asserts about a person or an organization, whose id is
-  that person's or organization's own identifier where the evidence states
-  one. Take the identifier the evidence states; where it states none and the
-  schema does not require an id, leave `id` empty and carry the name in
-  `name`. A label this record mints sits on an identifier the evidence
-  supplies for this dataset — which refines the rule that mints a label on an
-  identifier the evidence supplies, without replacing it — and this record's
-  own id is the base to prefer: a label on the dataset's DOI or landing page
-  is licensed too, but only on a form that is itself an identifier — the DOI
-  as a declared CURIE (the doi prefix, a colon, the DOI) or as its resolver
-  URL, the page as an absolute URL with its scheme; a bare DOI string or a
-  schemeless host with a label appended is a token, not an identifier. The own
-  id is the one identifier every record carries, where `page` and `doi` are
-  optional, and where it is not itself a shared root it names this dataset
-  alone, while a landing page is often a site or project root shared with
-  sibling releases, so a part labeled there cannot be told apart from a
-  sibling's by its id alone. Where this record's own id is itself such a root,
-  it is still the base to prefer: it is the identifier this record carries,
-  and the label must stay stable; where the id is already a fragment on such a
-  root, the part's label is that fragment, a hyphen and the part's own label,
-  on the same root — the record's own discriminator is kept, and one
-  identifier carries one fragment marker, never two. A fragment appended to
-  another entity's identifier — an organization's, another dataset's — labels
-  a part of that entity, not of this one.
+  that names the file or the component dataset, in a form that is itself an
+  identifier: a declared CURIE, a resolver URL or an absolute URL — and mint a
+  label only where it states none: on this record's own id, stable across
+  runs, never in place of an identifier the evidence supplies; and do not read
+  that rule as a reason to omit the object. A person's id follows the rule for
+  a person given as an object — the ORCID the evidence states first, a
+  fragment only where it states none. The ids of `file_collections` and of the
+  files under them are copied into the core record's distributions, and
+  top-level `resources` are matched to the core by id, so those ids are used
+  whether or not the text points at them. For every other fragment the test
+  stays the referent: an organization, a grant, an award, a program has a
+  referent outside this record, so a fragment for it on this dataset's
+  identifier is a claim about that identifier, not a label; and an entry under
+  `creators` or `maintainers` is a role this record asserts about a person or
+  an organization, whose id is that person's or organization's own identifier
+  where the evidence states one. Take the identifier the evidence states;
+  where it states none and the schema does not require an id, leave `id` empty
+  and carry the name in `name`. A label this record mints sits on an
+  identifier the evidence supplies for this dataset — which refines the rule
+  that mints a label on an identifier the evidence supplies, without replacing
+  it — and this record's own id is the base to prefer where it is itself an
+  identifier form, a declared CURIE or an absolute URL; a record whose own id
+  is a bare token, or a CURIE on a prefix the schema does not declare, labels
+  its parts on the dataset's DOI or landing page instead, never on the token.
+  A label on the dataset's DOI or landing page is licensed too, but only on a
+  form that is itself an identifier — the DOI as a declared CURIE (the doi
+  prefix, a colon, the DOI) or as its resolver URL, the page as an absolute
+  URL with its scheme; a bare DOI string or a schemeless host with a label
+  appended is a token, not an identifier. The own id is the one identifier
+  every record carries, where `page` and `doi` are optional, and where it is
+  not itself a shared root it names this dataset alone, while a landing page
+  is often a site or project root shared with sibling releases, so a part
+  labeled there cannot be told apart from a sibling's by its id alone. Where
+  this record's own id is itself such a root, it is still the base to prefer:
+  it is the identifier this record carries, and the label must stay stable;
+  where the id is already a fragment on such a root, the part's label — a
+  person's under the person rule included — is that fragment, a hyphen and the
+  part's own label, on the same root — the record's own discriminator is kept,
+  and one identifier carries one fragment marker, never two. A fragment
+  appended to another entity's identifier — an organization's, another
+  dataset's — labels a part of that entity, not of this one.
 - A slot whose declared range is an enumeration is populated only from a
   passage that states the category, in the source's own words or a plain
   restatement of them — never from what a value's name, unit or position

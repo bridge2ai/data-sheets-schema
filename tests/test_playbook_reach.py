@@ -190,6 +190,8 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
                        "never in place of an identifier the evidence supplies",
                        "a token, not an identifier",
                        "that fragment, a hyphen and the part's own label",
+                       "prefer where it is itself an identifier form",
+                       "a person's under the person rule included",
                        "labels a part of that entity, not of this one"),
         "enum from a stated category": ("in the source's own words or a plain restatement of them",
                                         "supports the name and not the class",
