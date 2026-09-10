@@ -1159,9 +1159,10 @@ ranking) are left out on purpose, their content being a source's.
 
 ### R8 no longer charges a landing-page label a receipt (#1147, 2026-09-09)
 
-The seventeenth v9 pin — the registry's `superseded` list holds sixteen:
-three registrations and corrections on 2026-09-08, the two #1120 rounds,
-the two #1134 spellings rounds, and this issue's own nine earlier rounds,
+The eighteenth v9 pin — the registry's `superseded` list holds
+seventeen: three registrations and corrections on 2026-09-08, the two
+#1120 rounds, the two #1134 spellings rounds, and this issue's own ten
+earlier rounds,
 each retired by the next (the third wrote `labelled` into the sentence and
 the file sweep of #1134 caught it after the pin was taken; the fourth's
 premise was false for the 36 CHORUS records whose own id is the site root;
@@ -1192,22 +1193,31 @@ the name — said in R8's carve-out, since R5 sits in the v8 block a v9
 prompt carries unchanged, and in the playbook's R5 line, which is the
 single copy the agentic path reads; and the ninth, answering that round,
 had written the form test as a two-form dichotomy that outlawed the ARK
-and URN forms `identifiers.classify` calls URIs — 639 part ids and 24
-record ids in the corpus, the very ARKs named as M1's evidence — and had
+and URN forms `identifiers.classify` calls URIs — 623 part ids outside
+the record's own `id`, and 24 record ids (16 ARK, 8 URN), the very ARKs
+named as M1's evidence — and had
 kept the premise "the one identifier every record carries" unqualified
 beside the clause that denies it: the forms admitted are now a declared
 CURIE, an absolute URL, or a URI under a registered scheme such as ark
-or urn, in the stated-identifier sentence and the base rule alike, the
-premise says "in whatever form the record gave it", the mint sentence
-points at the base rule, and a token own id with neither DOI nor page
-falls to the fragment rule's own resolvable-URL fallback). R8 now takes the stated identifier first for a forced
+or a URN — named, not "a URI under a registered scheme", which would
+admit the `mailto:` the person rule forbids on 77 corpus ids and the
+`file:` `identifiers.py` excludes on purpose (round 9) — in the
+stated-identifier sentence and the base rule alike, the
+premise names the identity slot rather than calling a bare token an
+identifier, the mint sentence points at the base rule, a token own id
+with neither DOI nor page falls to the fragment rule's own license — a
+label on an identifier the evidence does supply — and the carve-out for
+an id that already carries a fragment covers any base, not only a
+shared root, since a second marker is invalid either way).
+R8 now takes the stated identifier first for a forced
 id, in an identifier form (a declared CURIE, a resolver URL, an absolute
 URL, or a URI under a registered scheme such as ark or urn), and mints
 only where none is stated; prefers the own id as a base only where it is
 itself such a form, else the DOI or page in identifier form, else the
 fragment rule's resolvable-URL fallback; and labels a part of a
 fragment-on-root id — a person's included — as that fragment, a hyphen
-and the part's own label on the same root. The probes that pinned the earlier clauses were
+and the part's own label on the same root. The probes that pinned the
+earlier clauses were
 substring searches a semantic flip passes, so the playbook test now holds
 the whole R8 bullet equal across the two texts once the playbook's markup
 and citations are stripped. R8's own-id
@@ -1249,14 +1259,15 @@ The sentence is rewritten in the prompt and in the playbook's mirror; the
 probe moves with it and the shared-clause guard holds both texts to it.
 R8's operative clauses change — the stated-identifier-first order for a
 forced id, the identifier-form requirement on every base and on a stated
-identifier, the kept parent fragment — which is a rule change under the
+identifier, the kept parent fragment on any fragment-bearing id — which is a rule change under the
 condition's own name; and the first of them moves a forced part id the
 evidence states from the receipt denominator's exemption (a mint on a
 carried identifier, #1123) to a receipted value (`receipts.exempt` exempts
 a fragment, not a stated ARK or DOI — on AI_READI v6 rep1, 32 of 42 `id`
 leaves are receipt-required and the nine `ark:59853/rocrate-b2ai-ai-readi-*`
 component ids are among them), which is the right trade: an identifier
-the evidence supplies is a claim about the evidence; the assembly digest does not move, no v9 record exists, so nothing
+the evidence supplies is a claim about the evidence; the assembly digest
+does not move, no v9 record exists, so nothing
 is re-baselined and no record is superseded.
 
 ### What a v9 arm can and cannot be compared against (#1072)

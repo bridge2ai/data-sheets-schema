@@ -192,8 +192,9 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
                        "that fragment, a hyphen and the part's own label",
                        "prefer where it is itself an identifier form",
                        "for a person under the person rule, that fragment, a hyphen, then person and the name",
-                       "a URI under a registered scheme such as ark or urn",
-                       "in whatever form the record gave it",
+                       "an ARK or a URN",
+                       "the one identity slot every record carries",
+                       "where the id already carries a fragment",
                        "on a resolvable URL the evidence supplies",
                        "labels a part of that entity, not of this one"),
         "enum from a stated category": ("in the source's own words or a plain restatement of them",
@@ -273,7 +274,7 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
                        "mint a label only where it states none",
                        "only on a form that is itself an identifier",
                        "that fragment, a hyphen and the part's own label",
-                       "a uri under a registered scheme such as ark or urn"):
+                       "an ark or a urn"):
             self.assertIn(clause, prompt, clause)
         # the playbook's R5 line and R8's carve-out agree on the person case (round 8, SF5)
         book = re.sub(r"[*`\s]+", " ", PLAYBOOK.read_text(encoding="utf-8")).lower()

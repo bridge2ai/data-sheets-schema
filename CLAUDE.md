@@ -497,10 +497,12 @@ the id naming this dataset alone where it is an identifier form and not
 itself a shared root, while a landing page is often one; a forced id
 takes the identifier the evidence states before any mint; every base and
 every stated identifier must be an identifier form — a declared CURIE,
-an absolute URL, or a URI under a registered scheme such as ark or urn —
-so a bare-token own id labels its parts on the DOI or page instead; and a
-part of a fragment-on-root id, a person's included, keeps the record's
-fragment).
+an absolute URL, an ARK or a URN, named rather than "a registered
+scheme", which would admit the `mailto:` and `file:` ids the person rule
+and `identifiers.py` treat as defects — so a bare-token own id labels
+its parts on the DOI or page, and with neither on a resolvable URL the
+evidence supplies; and a part of an id that already carries a fragment,
+a person's included, keeps that fragment).
 Named non-checks: that `nothing_relevant` was true, and that a real snippet
 supports its value. `backfill-checks` writes a `receipts` block only where a
 receipt exists or the record claims one (#726). Every bundle kind a run may declare has a manifest (#725), so
