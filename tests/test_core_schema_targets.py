@@ -91,11 +91,11 @@ class TestValidateCore(unittest.TestCase):
 
     def test_a_numeric_range_in_the_module_fails_the_recipe(self):
         """#1150 reported that `range: 123` in `D4D_Core.yaml` passed both
-        halves — true of the first recipe, which linted the wrapper only;
-        gen-python coerces the number and degrades the slot to a string. The
-        recipe lints every module now (#1136 round 2), and the linter's
-        metamodel check names the scalar. Pinned here so the case cannot
-        quietly pass again if the module list shrinks."""
+        halves. It did not: gen-python names it (`unrecognized range (123)`)
+        and, since every module is linted (#1136 round 2), so does the
+        linter's metamodel check. The value it reported degraded to a string
+        is what a *null* range produces (the next test). Pinned by the
+        planted sentinel and the file the linter attributes it to."""
         def edit(d):
             m = d / "D4D_Core.yaml"
             text = m.read_text()
@@ -104,8 +104,45 @@ class TestValidateCore(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             result = _make("validate-core", f"D4D_CORE_SCHEMA={_broken_copy(tmp, edit)}")
         self.assertNotEqual(result.returncode, 0)
+        self.assertIn("123", result.stdout + result.stderr)              # the planted sentinel
         self.assertRegex(result.stdout, r"✖ .*D4D_Core\.yaml")
-        self.assertIn("range: 123 is not of type 'string'", result.stdout)
+
+    def test_a_null_range_in_the_module_fails_the_recipe(self):
+        """The break neither half sees (#1150, #1179 review M1): `range: null`
+        is legal LinkML, the linter and gen-python pass it, and the slot
+        generates as `Optional[Union[str, list[str]]]` where a `CoreDataset`
+        collection was meant. The third line of the recipe reads the raw YAML;
+        delete it and this test fails."""
+        def edit(d):
+            m = d / "D4D_Core.yaml"
+            text = m.read_text()
+            self.assertIn("\n        range: CoreDataset\n", text)
+            m.write_text(text.replace("\n        range: CoreDataset\n", "\n        range: null\n", 1))
+        with tempfile.TemporaryDirectory() as tmp:
+            result = _make("validate-core", f"D4D_CORE_SCHEMA={_broken_copy(tmp, edit)}")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("`range:` is present with no value", result.stdout + result.stderr)
+        self.assertIn("CoreDatasetCollection.resources", result.stdout + result.stderr)
+        self.assertRegex(result.stdout, r"✓ .*D4D_Core\.yaml")          # the linter passed it; the range check named it
+
+    def test_the_range_check_reads_slot_usage_and_attributes_and_passes_the_committed_schema(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("check_schema_ranges", ROOT / "scripts" / "check_schema_ranges.py")
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        self.assertEqual(mod.problems(CORE), [])
+        with tempfile.TemporaryDirectory() as tmp:
+            def edit(d):
+                m = d / "D4D_Core.yaml"                                    # an attribute's range
+                text = m.read_text()
+                m.write_text(text.replace("\n        range: CoreDataset\n", "\n        range: null\n", 1))
+                b = d / "D4D_Base_import.yaml"                             # a top-level slot's range
+                text = b.read_text()
+                i = text.index("\nslots:\n"); j = text.index("range: ", i)
+                b.write_text(text[:j] + "range: 123" + text[text.index("\n", j):])
+            found = mod.problems(_broken_copy(tmp, edit))
+        self.assertEqual(len(found), 2, found)
+        self.assertTrue(any("D4D_Core.yaml: CoreDatasetCollection.resources (attributes)" in f and "no value" in f for f in found), found)
+        self.assertTrue(any("D4D_Base_import.yaml: slot " in f and "range is a int (123)" in f for f in found), found)
 
 if __name__ == "__main__":
     unittest.main()
