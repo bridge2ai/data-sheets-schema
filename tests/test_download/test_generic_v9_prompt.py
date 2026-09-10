@@ -149,7 +149,10 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
                       "a token, not an identifier",                  # R8: a DOI or page base must be an identifier form (Codex M2)
                       "that fragment, a hyphen and the part's own label",  # R8: the parent fragment is kept (Codex M3)
                       "prefer where it is itself an identifier form",      # R8: a token own id is no base (#1166 round 7, MF1)
-                      "a person's under the person rule included",         # R8: the carve-out reaches R5 (round 7, MF2)
+                      "for a person under the person rule, that fragment, a hyphen, then person and the name",  # round 8, SF5
+                      "a URI under a registered scheme such as ark or urn",   # R8: the ARK and URN forms are identifiers (round 8, MF1)
+                      "in whatever form the record gave it",               # R8: the premise admits a token own id (round 8, MF2)
+                      "on a resolvable URL the evidence supplies",         # R8: neither DOI nor page (round 8, SF6)
                       "component dataset under `resources`",        # R8: a nested Dataset id is forced (round 2, finding 3)
                       "matched to the core by id",                   # R8: the projector, both facts (finding 9)
                       "a claim about that identifier, not a label",  # R8: the referent test (#901)

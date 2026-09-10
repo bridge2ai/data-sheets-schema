@@ -278,7 +278,7 @@ files:
     bytes: 28763
     pinned_at_commit: b10ec47ef83832fa69ba2feedb28518a93a0d1f0
     pinned_on: '2026-09-09'
-    reason: 'R8 (#1147, round 8, the reviewer after the Codex CLI review): the own id is the
+    reason: 'R8 (#1147, round 9, answering the reviewer after the Codex CLI review): the own id is the
       base to prefer only where it is itself an identifier form, a stated forced id must be
       a declared CURIE, a resolver URL or an absolute URL, and a person fragment on a fragment-bearing
       id keeps the record fragment; no v9 record exists, so no record is superseded'
@@ -378,7 +378,7 @@ files:
       retired_on: '2026-09-09'
       sha256: 33d1d867f0eef5d71f706ab46bb041ae0e5f9bb3310dc8303545c7fb93915ddf
     - pinned_on: '2026-09-09'
-      reason: 'R8 (#1147, round 7, the Codex CLI review): a forced id takes the identifier
+      reason: 'R8 (#1147, round 8, answering the Codex CLI review): a forced id takes the identifier
         the evidence states and is minted only where none is stated; a DOI or page base must
         be an identifier form (declared CURIE, resolver URL, absolute URL); a part of a fragment-on-root
         id keeps the record fragment, hyphen, own label; no v9 record exists, so no record
