@@ -1459,11 +1459,57 @@ steps need:
     table rewrites eight more forms in any run made after it, so a v9 arm
     is compared with v8 across this line as it is across step J.
 
-Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16
-and 17 are not; 15 and 17 are the receipts instrument's revisions and
+20. **A receipts recompute reads the bytes a drifted record read (#1140,
+    2026-09-10).** `backfill-checks --blocks receipts` refused a record
+    whose bundle had drifted since the run and the #907 guard withheld the
+    write, so 18 receipted records stayed under receipts instrument v1
+    after the v2 and v3 recomputes — among them AI_READI 2026-09-01 rep1,
+    the record #1123 was filed about. #1121 already resolves a record's
+    bundle to the committed version whose hash it recorded; the recompute
+    now does the same (`provenance.bundle_bytes_for`, by the record's md5
+    and sha256 where both are recorded — a version matching one and not
+    the other is not the version the run read — naming which matched),
+    chunks the recovered bytes in memory under the record's own
+    `inputs.chunks.rule` (`chunking.manifest_from_bytes`: same bytes + same
+    rule = the manifest the run would have chunked; the on-disk manifest's
+    rule only where the record carries none, and a recovered manifest
+    whose chunk count is not the one the record cites is refused, chunk
+    ids being positional), and writes a block whose `bundle_md5` is the
+    record's own, with `bundle_basis` naming the commit, hashes and rule
+    basis and `artifacts.manifest` carrying the rule and hashes instead of
+    a path. Where the record declares no path, no committed version
+    matches, git cannot supply the blob, or the blob is not UTF-8, the
+    block stays `checked: false` with that reason. `d4d receipts check`
+    and the runner's own receipts block make the same recovery, so the
+    gate on attestation cannot say "unchecked" of a record the backfill
+    checked. Recomputed over the corpus after a one-record canary: 47
+    receipted records, all v3, 29 on the bundle on disk and 18 from a git
+    blob (every one matched on md5, the only hash those records carry, and
+    every one chunked under its own recorded rule, which equals today's);
+    on the 18 the chunk count, the snippet verdicts and the findings are
+    identical to the blocks written at run time, and coverage moves on
+    one — AI_READI 2026-09-01 rep1, 161/508 → 160/498,
+    `exempt_on_carried_identifier` 10, the file-collection labels on the
+    landing page the v5 rule licenses. The twelve blocks written before
+    #840/#891/#899 gain those revisions' keys — about thirty each,
+    among them measured, non-zero values that were unmeasured before
+    (`snippets.no_value_overlap` up to 63 on v6 rep1 AI_READI,
+    `entry_single_leaf`, `slots.never_receipted`, `added_after_receipt`,
+    `value_changed_after_receipt_count`), so their `summary` strings move,
+    and two of those keys are canary display rows ("snippets bearing on
+    no token of their value", "entry receipts overlapping one leaf") for
+    which these records supplied no baseline before and supply a measured
+    one now — the intended consequence of one instrument, stated here.
+    No canary block's receipt row disagrees with its record. `d4d runs
+    check` reports receipts blocks by instrument, counts a record it
+    cannot read, and names those behind the current one (0 today). Not a
+    generation-path change.
+
+Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16,
+17 and 20 are not; 15 and 17 are the receipts instrument's revisions and
 17 classifies both; 18 changes the normaliser's rule table and is a
-generation-path change by that half); per the production rule none of
-them may land between a v8 canary and its fill.
+generation-path change by that half); per the production rule none of them may land
+between a v8 canary and its fill.
 
 ## Decisions needed before step 3
 

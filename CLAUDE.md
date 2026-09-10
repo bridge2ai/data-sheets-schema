@@ -488,9 +488,30 @@ identity slot, and a bare site root declared as `page` exempts every
 fragment on that root under the same scheme. One of the four had a receipt
 (coverage 59/170 → 58/169); three had none (never-receipted fell by one,
 coverage rose). The file-collections case the issue names exists only in
-the withheld AI_READI 2026-09-01 rep1 record. The recompute reached 29
-records; the 18 receipted records whose bundle has drifted are withheld by
-the #907 guard and stay under v1 (#1140). v9 R8 still tells the model a
+the AI_READI 2026-09-01 rep1 record, whose bundle has drifted. A drifted
+bundle is not the text a receipt was written against, and the #907 guard
+withholds a recompute that cannot read the right bytes; since #1140 the
+recompute reads them — `provenance.bundle_bytes_for` recovers the
+committed version of the declared path whose every recorded hash (md5,
+and sha256 where the record carries one) matches, recording which it
+`matched_on`, and the block is computed on a manifest chunked in memory
+from those bytes under the record's own `inputs.chunks.rule` (the
+on-disk manifest's rule only for a record that carries none), refusing
+a version whose chunk count is not the one the record cites; it carries
+`bundle_basis` (`git blob`, the commit, the hashes) beside the record's
+own `bundle_md5`, and `artifacts.manifest` the rule and hashes instead
+of a path. Nothing on disk gates it: an absent bundle, a missing or
+stale manifest, and a drift are one case, checkable from the record's
+path, hash and rule alone. `backfill-checks`, `provenance record` and
+the runner pass all three. All 47 receipted records are under v3: the 18 formerly
+withheld (nine 2026-08-28 agentic v6, the 2026-08-28b/c/d API v7
+AI_READI canaries, the 2026-09-01 API v7 AI_READI and VOICE records)
+recomputed on the bytes they read with chunk, snippet and finding counts
+identical to the blocks written at run time (the twelve blocks that
+predate `findings_gated` gain that key), and AI_READI 2026-09-01
+rep1's ten landing-page labels now exempt (161/508 → 160/498). `d4d runs
+check` reports receipts blocks by instrument and names those behind the
+current one. v9 R8 still tells the model a
 landing-page label "needs a receipt like any other value" — the cost v2
 removes; #1147 rotates that sentence.
 Named non-checks: that `nothing_relevant` was true, and that a real snippet
