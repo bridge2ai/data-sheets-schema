@@ -1233,13 +1233,23 @@ def claims_path(core_dir: Path, project: str) -> Path:
 
 
 def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle_md5: str | None,
-              expected: bool, manifest: Path | None = None) -> dict[str, Any]:
+              expected: bool, manifest: Path | None = None,
+              bundle_rel_path: str | None = None, record_bundle_sha256: str | None = None) -> dict[str, Any]:
     """The provenance block for one run, or why it could not be computed.
 
     `expected` is whether this run's procedure was to write a receipt. It is
     carried into the block so the canary gate can tell "no receipt from a
     procedure that writes none" (not gated) from "no receipt from one that
     does" (UNMEASURABLE, #613). A receipt that exists is checked either way.
+
+    A bundle that has drifted since the run (#452) is not the text the
+    receipt was written against. With `bundle_rel_path` — the path the
+    record declares — the bytes the record hashed are recovered from the
+    committed version of that path whose md5 (or sha256) matches (#1140,
+    `provenance.bundle_bytes_for`) and chunked in memory under the on-disk
+    manifest's rule; the block then carries `bundle_basis` naming the commit,
+    and its `bundle_md5` is the record's own. Where no committed version
+    matches, the block is `checked: false` with the drift named, as before.
     """
     import hashlib
 
@@ -1270,9 +1280,27 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     if hashlib.md5(raw).hexdigest() != m.get("bundle_md5"):
         return {**base, "checked": False,
                 "reason": "the bundle on disk is not the bytes the manifest chunked; rebuild with d4d bundle chunk"}
+    bundle_basis: dict[str, Any] = {"source": "bundle on disk", "path": str(bundle)}
     if record_bundle_md5 and record_bundle_md5 != m.get("bundle_md5"):
-        return {**base, "checked": False,
-                "reason": "bundle drifted since the run; the receipt's chunks are not today's bytes"}
+        recovered = None
+        if bundle_rel_path:
+            from data_sheets_schema.provenance import GitUnavailable, bundle_bytes_for
+            try:
+                recovered = bundle_bytes_for(bundle_rel_path, md5=record_bundle_md5, sha256=record_bundle_sha256)
+            except GitUnavailable as exc:
+                return {**base, "checked": False,
+                        "reason": f"bundle drifted since the run and git could not supply the version the "
+                                  f"record hashed: {exc}"}
+        if recovered is None:
+            return {**base, "checked": False,
+                    "reason": "bundle drifted since the run; the receipt's chunks are not today's bytes, "
+                              "and no committed version of the declared path hashes to the record's md5"}
+        raw, entry = recovered
+        from data_sheets_schema.chunking import manifest_from_bytes
+        m = manifest_from_bytes(raw, bundle.name, m.get("rule"))
+        bundle_basis = {"source": "git blob", "path": bundle_rel_path, "commit": entry["commit"],
+                        "committed_on": entry["date"], "md5": entry["md5"], "sha256": entry["sha256"],
+                        "manifest": "chunked in memory under the on-disk manifest's rule (#1140)"}
     texts = dict(zip([c["id"] for c in m["chunks"]], _texts(raw.decode("utf-8"), m["chunks"])))
     full = (yaml.safe_load(full_path.read_text(encoding="utf-8")) or {}) if full_path.exists() else {}
     # A reshaped path is kept out of the findings and is *not* credited for
@@ -1283,6 +1311,10 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     block = check(rec, m, texts, full, record_bundle_md5, original)
     block["artifacts"] = {
         "receipt": {"path": str(receipt), "sha256": hashlib.sha256(receipt.read_bytes()).hexdigest()},
-        "manifest": {"path": str(mpath), "sha256": hashlib.sha256(mpath.read_bytes()).hexdigest()},
+        "manifest": ({"path": str(mpath), "sha256": hashlib.sha256(mpath.read_bytes()).hexdigest()}
+                     if bundle_basis["source"] == "bundle on disk" else
+                     {"path": None, "rule": m.get("rule"), "chunk_count": m.get("chunk_count"),
+                      "bundle_md5": m.get("bundle_md5"), "bundle_sha256": m.get("bundle_sha256")}),
     }
+    block["bundle_basis"] = bundle_basis
     return {**base, **block}

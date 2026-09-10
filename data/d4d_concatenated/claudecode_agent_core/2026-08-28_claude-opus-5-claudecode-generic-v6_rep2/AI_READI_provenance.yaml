@@ -332,6 +332,15 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
+    anywhere (a minted id reconciliation stripped) is located as a keyless entry —
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
+    of declared dropped; v2 (#1123): a fragment minted on an identifier the record
+    carries for the dataset at its top level — its id in CURIE or resolver form, its
+    doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 28
     reviewed: 28
@@ -344,13 +353,81 @@ receipts:
   snippets:
     total: 328
     verified: 328
+    linewrap_joined: 0
     adjacent: 0
     elsewhere: 0
+    spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
     mismatched: 0
     unchecked: 0
+    no_value_overlap: 21
+    no_value_overlap_sample:
+    - chunk: c005
+      slot: data_governance.committee_name
+      snippet: 'The requirements for controlled
+
+        access data sets are being c'
+    - chunk: c007
+      slot: conforms_to_standard
+      snippet: 'We are also developing new
+
+        standards, such as the Clinical D'
+    - chunk: c007
+      slot: updates.frequency
+      snippet: 'Data are released annually, and each version is
+
+        accessible t'
+    - chunk: c007
+      slot: creators[5].principal_investigator
+      snippet: 'Amir Bahmani
+
+        Hiroshi Ishikawa
+
+        Camille Nebeker'
+    - chunk: c008
+      slot: creators[2].description
+      snippet: 1University of California San Diego, La Jolla, CA, USA. 2Joh
+    - chunk: c008
+      slot: creators[2].description
+      snippet: 4University of Washington, Seattle, WA, USA. 5FAIR Data Inno
+    - chunk: c010
+      slot: instances[0].instance_type
+      snippet: 'a data acquisition protocol across multiple domains (survey '
+    - chunk: c011
+      slot: version_access.versions_available
+      snippet: 'Dataset v3.0.0
+
+        Dataset v3.0.0
+
+        Dataset v2.0.0
+
+        Dataset v1.0.0'
+    - chunk: c012
+      slot: license_and_use_terms.license_terms
+      snippet: 'The current citation can be found
+
+        here: docs.aireadi.org'
+    - chunk: c020
+      slot: sampling_strategies[2].strategies
+      snippet: "\"minimumAge\": \"40 Years\",\n        \"maximumAge\": \"85 Years\"\
+        ,\n"
+    entry_single_leaf: 2
+    entry_single_leaf_sample:
+    - chunk: c002
+      slot: creators[0]
+      leaves: 3
+      overlapping: 1
+    - chunk: c002
+      slot: creators[1]
+      leaves: 3
+      overlapping: 1
   slots:
     populated: 558
     exempt: 22
+    exempt_on_carried_identifier: 0
     receiptable: 536
     with_receipt: 222
     without_receipt:
@@ -405,21 +482,58 @@ receipts:
     - creators[13].name
     - creators[13].affiliations[0].id
     without_receipt_truncated: 264
+    never_receipted: null
+    added_after_receipt: null
     receipt_paths: 234
     unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt: []
+    value_changed_after_receipt_count: null
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: null
+    located_after_key_stripped: []
+    located_after_key_stripped_count: null
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: null
     reshaped_by_reconcile: []
+    receipts_to_removed_values: 0
   findings: []
   findings_truncated: null
-  summary: chunks 28/28 reviewed · snippets 328/328 verified · slots 222/536 with
+  findings_gated: 0
+  summary: chunks 28/28 reviewed · snippets 328/328 verified (21 bearing on no token
+    of their value) (2 entry receipt(s) overlapping one leaf) · slots 222/536 with
     a receipt (22 exempt)
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_coverage_receipt.yaml
       sha256: 1c7c463b35144b07971529f722d02604e896864cc19b80aeb007537ba51e03cf
     manifest:
-      path: data/preprocessed/chunks/AI_READI_chunks.yaml
-      sha256: 631788768d84a9ae689f722a37f2244be4f67393de390c2055585b81f27f33cf
-  recorded_by: d4d receipts check
+      path: null
+      rule:
+        version: 2
+        unit: source-document
+        boundary: 'FILE: line followed by PATH: or ROLE:'
+        preamble: own-chunk
+        split: line-window
+        max_lines: 400
+        max_bytes: 48000
+      chunk_count: 28
+      bundle_md5: 0f3abb51a333555456bedd63891fcd99
+      bundle_sha256: a42eb3aacc8aed05f8a79e54e848db65cc5159425888397242677c4914bf2aca
+  bundle_basis:
+    source: git blob
+    path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+    commit: 9049904493393a6ce1db69b9fe0a855ce0db4435
+    committed_on: '2026-08-12'
+    md5: 0f3abb51a333555456bedd63891fcd99
+    sha256: a42eb3aacc8aed05f8a79e54e848db65cc5159425888397242677c4914bf2aca
+    manifest: chunked in memory under the on-disk manifest's rule (#1140)
+  recorded_by: backfill_checks
 review:
   checked: true
   items_total: 68

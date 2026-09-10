@@ -888,6 +888,37 @@ def check_cmd(method, label, project, strict):
         click.echo("   Each record correctly states the bytes it consumed; the "
                    "path no longer resolves to them.")
 
+    # Receipts instrument drift (#1140): a receipts block names the
+    # instrument it was computed under from v2; a corpus comparison must
+    # know which records are under which. Reported, never fatal — an older
+    # block is a measurement under an older rule, not a defect.
+    import yaml as _yaml
+    from data_sheets_schema.provenance import record_path_for
+    from data_sheets_schema.receipts import RECEIPTS_INSTRUMENT
+    current = RECEIPTS_INSTRUMENT.split(" ", 1)[0]
+    by_instrument: collections.Counter = collections.Counter()
+    behind: list[str] = []
+    for r in rows:
+        try:
+            rec = _yaml.safe_load(record_path_for(r["project"], r["method"], r["label"]).read_text(encoding="utf-8")) or {}
+        except Exception:                                          # noqa: BLE001
+            continue
+        block = rec.get("receipts")
+        if not isinstance(block, dict) or not block.get("checked"):
+            continue
+        name = (block.get("instrument") or "").split(" ", 1)[0] or "none declared"
+        by_instrument[name] += 1
+        if name != current:
+            behind.append(f"{r['label']}/{r['project']} ({name})")
+    if by_instrument:
+        click.echo("\nⓘ  receipts blocks by instrument: "
+                   + ", ".join(f"{k} {n}" for k, n in by_instrument.most_common())
+                   + f" (current {current})")
+        for line in behind[:40]:
+            click.echo(f"     {line}")
+        if len(behind) > 40:
+            click.echo(f"     … {len(behind) - 40} more")
+
     # Reported separately from the provenance verdict, and never fatal. A
     # label naming a condition its prompt does not match is a real defect
     # (#420) — but it is a defect in records that already exist, and failing

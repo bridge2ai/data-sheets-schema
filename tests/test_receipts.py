@@ -574,6 +574,69 @@ class ClaimReceipts(unittest.TestCase):
 
 
 class OnDisk(unittest.TestCase):
+    def test_block_for_recovers_a_drifted_bundle_from_the_version_the_record_hashed(self):
+        """#1140: a drifted bundle is not the text the receipt was written
+        against; with the declared path, the committed version whose md5 the
+        record hashed is recovered and chunked in memory, and the block says
+        so. Where no version matches, the block is `checked: false` with the
+        drift named, as before."""
+        from unittest import mock
+        from data_sheets_schema.chunking import build_manifest, dump_manifest, manifest_from_bytes
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            bundle = tmp / "P_preprocessed.txt"
+            drifted = BUNDLE.replace("multimodal study", "multimodal STUDY (edited after the run)")
+            bundle.write_text(drifted, encoding="utf-8")                        # today's bytes
+            manifest = tmp / "P_chunks.yaml"
+            manifest.write_text(dump_manifest(build_manifest(bundle)), encoding="utf-8")
+            full = tmp / "P_d4d.yaml"; full.write_text(yaml.safe_dump(FULL), encoding="utf-8")
+            md5 = hashlib.md5(BUNDLE.encode()).hexdigest()                       # what the run read
+            receipt = tmp / "P_coverage_receipt.yaml"
+            receipt.write_text(yaml.safe_dump(_receipt(md5)), encoding="utf-8")
+            entry = {"commit": "c" * 40, "date": "2026-09-01", "md5": md5,
+                     "sha256": hashlib.sha256(BUNDLE.encode()).hexdigest()}
+            with mock.patch("data_sheets_schema.provenance.bundle_bytes_for",
+                            lambda path, md5=None, sha256=None: (BUNDLE.encode(), entry) if md5 == entry["md5"] else None):
+                b = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest,
+                                 bundle_rel_path="data/preprocessed/concatenated/P_preprocessed.txt")
+                none = rc.block_for(full, receipt, bundle, "0" * 32, expected=True, manifest=manifest,
+                                    bundle_rel_path="data/preprocessed/concatenated/P_preprocessed.txt")
+            b_direct = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest)
+            # same bytes + same rule = the manifest the run would have chunked
+            self.assertEqual(manifest_from_bytes(drifted.encode(), "P_preprocessed.txt")["chunks"],
+                             build_manifest(bundle)["chunks"])
+        self.assertTrue(b["checked"]); self.assertEqual(b["findings"], [])
+        self.assertEqual(b["bundle_basis"]["source"], "git blob")
+        self.assertEqual(b["bundle_basis"]["commit"], "c" * 40); self.assertEqual(b["bundle_basis"]["md5"], md5)
+        self.assertIsNone(b["artifacts"]["manifest"]["path"])
+        self.assertEqual(b["artifacts"]["manifest"]["bundle_md5"], md5)
+        self.assertEqual(b["artifacts"]["manifest"]["chunk_count"],
+                         manifest_from_bytes(BUNDLE.encode(), "P_preprocessed.txt")["chunk_count"])
+        self.assertEqual(b["snippets"]["verified"], b["snippets"]["total"])       # the snippets are in the recovered bytes
+        self.assertFalse(none["checked"]); self.assertIn("no committed version", none["reason"])
+        self.assertFalse(b_direct["checked"]); self.assertIn("drifted", b_direct["reason"])   # no path: as before
+
+    def test_bundle_bytes_for_reads_the_matching_version_and_none_otherwise(self):
+        from unittest import mock
+        from data_sheets_schema import provenance as pv
+        history = ({"commit": "a" * 40, "date": "2026-09-03", "md5": "m-new", "sha256": "s-new"},
+                   {"commit": "b" * 40, "date": "2026-09-01", "md5": "m-old", "sha256": "s-old"})
+        shown = []
+        def fake_run(cmd, **kw):
+            shown.append(cmd)
+            class R: returncode = 0; stdout = b"the old bytes"; stderr = b""
+            return R()
+        with mock.patch.object(pv, "bundle_blob_history", lambda path: history), \
+             mock.patch.object(pv.subprocess, "run", fake_run):
+            got = pv.bundle_bytes_for("data/x.txt", md5="m-old")
+            by_sha = pv.bundle_bytes_for("data/x.txt", sha256="s-new")
+            missing = pv.bundle_bytes_for("data/x.txt", md5="nope")
+            nothing = pv.bundle_bytes_for("data/x.txt")
+        self.assertEqual(got, (b"the old bytes", history[1]))
+        self.assertEqual(by_sha[1]["commit"], "a" * 40)
+        self.assertIsNone(missing); self.assertIsNone(nothing)
+        self.assertIn(f"{'b' * 40}:data/x.txt", shown[0])
+
     def test_block_for_names_each_reason_and_checks_when_it_can(self):
         from data_sheets_schema.chunking import build_manifest, dump_manifest
         with tempfile.TemporaryDirectory() as tmp:

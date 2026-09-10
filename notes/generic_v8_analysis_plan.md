@@ -1403,8 +1403,34 @@ steps need:
     assembly or datasheet touched — not generation-path changes; #1147's
     rotation of v9 R8 is its own item when it lands.
 
-Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16
-and 17 are not; 15 and 17 are the receipts instrument's revisions and
+20. **A receipts recompute reads the bytes a drifted record read (#1140,
+    2026-09-10).** `backfill-checks --blocks receipts` refused a record
+    whose bundle had drifted since the run and the #907 guard withheld the
+    write, so 18 receipted records stayed under receipts instrument v1
+    after the v2 and v3 recomputes — among them AI_READI 2026-09-01 rep1,
+    the record #1123 was filed about. #1121 already resolves a record's
+    bundle to the committed version whose hash it recorded; the recompute
+    now does the same (`provenance.bundle_bytes_for`, by the record's md5
+    or sha256), chunks the recovered bytes in memory under the on-disk
+    manifest's rule (`chunking.manifest_from_bytes`: same bytes + same
+    rule = the manifest the run would have chunked), and writes a block
+    whose `bundle_md5` is the record's own, with `bundle_basis` naming the
+    commit and hashes and `artifacts.manifest` carrying the rule and
+    hashes instead of a path. Where no committed version matches, the
+    block stays `checked: false` with the drift named. Recomputed over the
+    corpus after a one-record canary: 47 receipted records, all v3, 29 on
+    the bundle on disk and 18 from a git blob; on the 18 the chunk,
+    snippet and finding counts are identical to the blocks written at run
+    time (the twelve older blocks gain `findings_gated: 0`, a key they
+    predate), coverage moves on one — AI_READI 2026-09-01 rep1, 161/508 →
+    160/498, `exempt_on_carried_identifier` 10, the file-collection labels
+    on the landing page the v5 rule licenses — and no canary block's
+    receipt row disagrees with its record. `d4d runs check` reports
+    receipts blocks by instrument and names those behind the current one
+    (0 today). Not a generation-path change.
+
+Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16,
+17 and 20 are not; 15 and 17 are the receipts instrument's revisions and
 17 classifies both); per the production rule none of them may land
 between a v8 canary and its fill.
 

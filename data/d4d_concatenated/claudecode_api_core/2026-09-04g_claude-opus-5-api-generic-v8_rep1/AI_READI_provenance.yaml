@@ -870,6 +870,9 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/AI_READI_chunks.yaml
       sha256: a7b083727b56f9cf7f9c90b05c806c34eecf3bad41603cef6fb80e5960788c6d
+  bundle_basis:
+    source: bundle on disk
+    path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
   recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/intermediate/AI_READI_audit.json

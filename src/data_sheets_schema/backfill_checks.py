@@ -245,7 +245,9 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
         inputs = record.get("inputs") or {}
         out["receipts"] = {**block_for(full, receipt_path(provenance.parent, paths["project"]),
                                        bundle, inputs.get("bundle_md5"),
-                                       bool(inputs.get("receipt_expected"))),
+                                       bool(inputs.get("receipt_expected")),
+                                       bundle_rel_path=inputs.get("bundle_path"),
+                                       record_bundle_sha256=inputs.get("bundle_sha256")),
                            "recorded_by": RECORDED_BY}
     return out
 
