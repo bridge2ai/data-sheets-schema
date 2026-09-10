@@ -779,6 +779,30 @@ class PhaseRequest:
         return chars // 4
 
 
+#: The system prompt every phase is sent (#1138 review, S2: sent on all six
+#: phases and never in the assembly digest, so it is swept as sent text).
+PHASE_SYSTEM = ("You generate Datasheets-for-Datasets records. The declared "
+                "input bundle is your only source of dataset facts. The schema "
+                "digest defines structure, never content. Never consult a "
+                "previously generated D4D record.")
+
+#: Runner-written headers that precede sent material (the chunk-marker note
+#: under a receipt condition, the re-address listing, the regate's two
+#: parts). Constants so the sweep of authored sent text reaches them.
+CHUNK_MARKER_NOTE = ("# Chunk markers: a line of the form [cNNN] opens each chunk; "
+                     "the markers are not part of the bundle's text.\n\n")
+READDRESS_HEADER = "# Receipt entries whose slot is not a path in the record above\n\n"
+REGATE_HEADERS = ("# Reconciliation report as written\n\n", "# Claims the records do not show\n\n")
+
+#: Headers the runner writes above sent material (S3, round 2): the carry
+#: labels, the repair phase's two parts, and the bundle head templates.
+CARRY_LABEL = "# {name}\n\n"
+REPAIR_HEADERS = ("# Record that failed validation\n\n", "# Validator findings\n\n")
+BUNDLE_HEAD = "# Declared input bundle — {bundle}\n"
+BUNDLE_MD5_LINE = "# bundle_md5: {md5}\n"
+
+
+
 PHASE_INSTRUCTIONS = {
     "full": (
         "Phase 1. Produce the FULL D4D record for class `Dataset`. Use only "
@@ -855,7 +879,7 @@ PHASE_INSTRUCTIONS = {
         "embedded inside a name, identifier or affiliation value. Also flag: "
         "a value that states documentation is absent, pending or held "
         "elsewhere instead of answering the field; a value answering a "
-        "neighbouring field (an access route in `future_guarantees` or "
+        "neighboring field (an access route in `future_guarantees` or "
         "`format`, a prohibition statement in `prohibition_reason`); a plan, "
         "proposal or earlier release stated as the dataset's current state; "
         "and a figure computed from other figures presented as one a source "
@@ -1250,13 +1274,12 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     receipted = spec.condition in RECEIPT_CONDITIONS
     if receipted:
         bundle_text, bundle_md5 = chunk_marked_bundle(spec.bundle)
-        bundle_head = (f"# Declared input bundle — {spec.bundle}\n"
-                       f"# bundle_md5: {bundle_md5}\n"
-                       "# Chunk markers: a line of the form [cNNN] opens each chunk; "
-                       "the markers are not part of the bundle's text.\n\n")
+        bundle_head = (BUNDLE_HEAD.format(bundle=spec.bundle)
+                       + BUNDLE_MD5_LINE.format(md5=bundle_md5)
+                       + CHUNK_MARKER_NOTE)
     else:
         bundle_text = spec.bundle.read_text(encoding="utf-8", errors="ignore")
-        bundle_head = f"# Declared input bundle — {spec.bundle}\n\n"
+        bundle_head = BUNDLE_HEAD.format(bundle=spec.bundle) + "\n"
 
     cached = [
         {"type": "text", "text": digest,
@@ -1311,7 +1334,7 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     parts.append({"type": "text", "text": spec.instruction})
     for name, text in carry.items():
         parts.append({"type": "text",
-                      "text": f"# {name}\n\n{text}"})
+                      "text": CARRY_LABEL.format(name=name) + text})
     if phase == "report":
         # The core inventory the instruction's `both` rule refers to (#998);
         # before the instruction so the instruction stays last (#346).
@@ -1323,10 +1346,7 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
 
     return PhaseRequest(
         phase=phase,
-        system=("You generate Datasheets-for-Datasets records. The declared "
-                "input bundle is your only source of dataset facts. The schema "
-                "digest defines structure, never content. Never consult a "
-                "previously generated D4D record."),
+        system=PHASE_SYSTEM,
         cached_blocks=cached,
         messages=[{"role": "user", "content": parts}],
     )
@@ -1693,7 +1713,7 @@ def build_readdress(req: PhaseRequest, response_text: str,
         {"role": "assistant", "content": response_text},
         {"role": "user", "content": [
             {"type": "text",
-             "text": "# Receipt entries whose slot is not a path in the record above\n\n" + listing},
+             "text": READDRESS_HEADER + listing},
             {"type": "text", "text": PHASE_INSTRUCTIONS["full_readdress"]}]},
     ]
     return PhaseRequest(phase="full_readdress", system=req.system,
@@ -2516,6 +2536,32 @@ REPAIR_INSTRUCTION = (
 REPAIR_ROUNDS = 4
 
 
+def sent_text_surfaces() -> dict[str, str]:
+    """The prose the runner itself authors into a request, by name: the phase
+    instructions and the layout the assembly digest hashes, and the surfaces
+    it does not — the system prompt, the repair system prompt and
+    instruction, the core inventory block, the chunk marker note, the
+    re-address and regate headers, the carry labels, the repair headers and
+    the bundle head templates (#1138 review, S2; round 2, S3). Left out on
+    purpose: `scope_block`, `naming_block` and `source_ranking_block`, whose
+    content is manifest data — a British dataset title there is a source's
+    spelling, the reason records get the quotation exemption. A British form
+    in any surface here is sent on every run and, outside the digest,
+    unrecorded; tests/test_american_english_rule.py reads this map and pins
+    its size, so a new surface is added here to be guarded."""
+    out = {f"phase:{k}": v for k, v in PHASE_INSTRUCTIONS.items()}
+    out.update({"assembly_layout": str(ASSEMBLY_LAYOUT), "system": PHASE_SYSTEM,
+                "repair_system": REPAIR_SYSTEM, "repair_instruction": REPAIR_INSTRUCTION,
+                "core_inventory_block": core_inventory_block(),
+                "chunk_marker_note": CHUNK_MARKER_NOTE, "readdress_header": READDRESS_HEADER,
+                "regate_headers": "".join(REGATE_HEADERS),
+                "carry_labels": " ".join(sorted({n for names in PHASE_NEEDS.values() for n in names})),
+                "repair_headers": "".join(REPAIR_HEADERS),
+                "bundle_head": BUNDLE_HEAD.format(bundle="") + BUNDLE_MD5_LINE.format(md5="")})
+    return out
+
+
+
 #: Slots whose declared range is multivalued, from the schema rather than a
 #: hand-kept list — the same derivation `_enum_aliases` uses.
 _MULTIVALUED: set[str] | None = None
@@ -3049,9 +3095,9 @@ def build_repair(artifact: str, body: str, errors: list[str]) -> PhaseRequest:
                "cache_control": {"type": "ephemeral"}}]
     parts: list[dict[str, Any]] = list(cached)
     parts.append({"type": "text",
-                  "text": f"# Record that failed validation\n\n{body}"})
+                  "text": REPAIR_HEADERS[0] + body})
     parts.append({"type": "text",
-                  "text": "# Validator findings\n\n" + "\n".join(errors)})
+                  "text": REPAIR_HEADERS[1] + "\n".join(errors)})
     parts.append({"type": "text", "text": REPAIR_INSTRUCTION})
     return PhaseRequest(phase=f"repair_{artifact}", system=REPAIR_SYSTEM,
                         cached_blocks=cached,
@@ -3658,9 +3704,9 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
         listing = yaml.safe_dump([{k: v for k, v in c.items() if k in ("kind", "slot", "record", "detail", "claim")}
                                   for c in contradictions], sort_keys=False, allow_unicode=True)
         req.messages[0]["content"].extend([
-            {"type": "text", "text": "# Reconciliation report as written\n\n"
+            {"type": "text", "text": REGATE_HEADERS[0]
              + (spec.report_path.read_text(encoding="utf-8") if spec.report_path.exists() else "")},
-            {"type": "text", "text": "# Claims the records do not show\n\n" + listing},
+            {"type": "text", "text": REGATE_HEADERS[1] + listing},
             {"type": "text", "text": PHASE_INSTRUCTIONS["report_regate"]}])
     try:
         resp = _call_with_retry(

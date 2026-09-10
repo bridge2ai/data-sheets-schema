@@ -190,6 +190,9 @@ form:
   undeclared_prefixes:
     b2aivoice: 172
   undeclared_prefix_occurrences: 172
+  prefix_instrument: 'v3 (#982): ark excluded, mailto excluded on Person ids only,
+    urn by NID'
+  british_instrument: 'v4 (#1006; v3 #836/#859)'
   british_spellings: 27
   organisational_fragments: 0
   gc_label_variants:
@@ -198,5 +201,8 @@ form:
     B2AI-Voice: 6
   gc_label_variant_occurrences: 88
   recorded_by: backfill_checks
-  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
-    previous british=21
+  instrument_note: 'form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=21 | form recomputed 2026-09-09 by backfill-checks --overwrite,
+    british instrument v4 (#1006; v3 #836/#859), prefix instrument v3 (#982): ark
+    excluded, mailto excluded on Person ids only, urn by NID; previous british=27,
+    previous undeclared_prefixes=172'

@@ -404,6 +404,9 @@ form:
   - data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/CM4AI_d4d_core.yaml
   undeclared_prefixes: {}
   undeclared_prefix_occurrences: 0
+  prefix_instrument: 'v3 (#982): ark excluded, mailto excluded on Person ids only,
+    urn by NID'
+  british_instrument: 'v4 (#1006; v3 #836/#859)'
   british_spellings: 0
   organisational_fragments: 0
   gc_label_variants: {}
@@ -413,7 +416,10 @@ form:
     classification v2.1 (ark scheme excluded and grounded instead; urn NID-aware —
     a urn under an unregistered NID counts as urn:<nid>; #671). gc_label_variant fields
     date from recompute, not the run. Previous british=0, undeclared=0 | form recomputed
-    2026-09-02 under british instrument v3 (#836/#859); previous british=0'
+    2026-09-02 under british instrument v3 (#836/#859); previous british=0 | form
+    recomputed 2026-09-09 by backfill-checks --overwrite, british instrument v4 (#1006;
+    v3 #836/#859), prefix instrument v3 (#982): ark excluded, mailto excluded on Person
+    ids only, urn by NID; previous british=0, previous undeclared_prefixes=0'
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/intermediate/CM4AI_audit.json
   sha256: f31fafdbc795466489cd16e7bc0e2454d8b0c6ab5d05d118d0d5bc6a66a87a39

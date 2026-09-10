@@ -431,6 +431,9 @@ form:
   - data/d4d_concatenated/claudecode_agent_core/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
   undeclared_prefixes: {}
   undeclared_prefix_occurrences: 0
+  prefix_instrument: 'v3 (#982): ark excluded, mailto excluded on Person ids only,
+    urn by NID'
+  british_instrument: 'v4 (#1006; v3 #836/#859)'
   british_spellings: 2
   organisational_fragments: 0
   gc_label_variants: {}
@@ -440,7 +443,10 @@ form:
     classification v2.1 (ark scheme excluded and grounded instead; urn NID-aware —
     a urn under an unregistered NID counts as urn:<nid>; #671). gc_label_variant fields
     date from recompute, not the run. Previous british=2, undeclared=0 | form recomputed
-    2026-09-02 under british instrument v3 (#836/#859); previous british=2'
+    2026-09-02 under british instrument v3 (#836/#859); previous british=2 | form
+    recomputed 2026-09-09 by backfill-checks --overwrite, british instrument v4 (#1006;
+    v3 #836/#859), prefix instrument v3 (#982): ark excluded, mailto excluded on Person
+    ids only, urn by NID; previous british=2, previous undeclared_prefixes=0'
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-20_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_audit.json
   sha256: 9908271b12b0c6c1f0ff7f5fbc0c332d55793a3769665bfc0e884ffe31a5948e
