@@ -1523,10 +1523,20 @@ steps need:
     #1170 block kept under `prior_verdict`: the row reads 0 against a
     baseline worst of 1, the status `regressed` on the British row as
     before, so no verdict moves. A canary block also quotes the
-    **baseline's** `report_basis`, and v5 moves that too: nine of the
-    eleven blocks that quote one were re-derived the same way, each
-    keeping its prior under `prior_verdict` (#1175 round 8, M2). No
-    status and no bar moves. Five lose a `baseline_basis` line — the
+    **baseline's** `report_basis`, and v5 moves that too: ten blocks in
+    all were re-derived the same way, each keeping its prior under
+    `prior_verdict` (#1175 round 8, M2). No status, no bar and no row
+    moves. One took a `d4d provenance recheck-validation` first: the
+    2026-09-04f VOICE record's `validation` block carried no
+    `duplicate_keys`, so a re-verdict computed from the record correctly
+    found nothing to measure and dropped a row the batch had written —
+    the gated duplicate-key floor, silently no longer reported (#1175
+    round 9, M1). The recheck measures it (0), and the row is back. A
+    re-verdict also carries the curator's own keys forward —
+    `disposition`, `prior_disposition`, `readings` — instead of demoting
+    them into the nested prior, where the plan's own citation of their
+    location stopped being true and four records' plan-owner decisions
+    and registered measurements read as superseded (round 9, M3). Five lose a `baseline_basis` line — the
     line the gate writes only where the baseline measured nothing — now
     that their baseline measures: the v7 arm reads 3 measured for
     AI_READI, 2 for CM4AI, 1 for VOICE, and CHORUS alone stays
@@ -1599,7 +1609,7 @@ steps need:
     recompute under all of this gains four findings on the three records
     above and loses none**: CHORUS 04f rep2 gains both the unrecorded
     removal and the prose retention claim beside it, VOICE 04f rep2 and
-    AI_READI 04g rep3 one each. `removals_unrecorded` is 39 across 12
+    AI_READI 04g rep3 one each. `removals_unrecorded` is 39 across 14
     records — the same count as the pre-Codex reading and not the same
     set. The weak signal reads the present tense as well as the past
     participle ("Both records now omit `citation`" records a removal as
@@ -1616,9 +1626,12 @@ steps need:
     Two further effects of the recompute, neither a
     finding: because a prose retention claim is now a claim checked,
     `claims_checked` moved on 96 records and 70 reports that read no
-    claim before read one now (`canary.report_vacuous` flips from vacuous
-    to measured across the 2026-07-28, 2026-07-31 and earlier arms and
-    five of the twelve 2026-09-01 v7 production records), so the v7
+    claim before read one now. `canary.report_vacuous` flips from vacuous
+    to measured on **63** of those 70 and on none in the other direction
+    — the seven that do not flip had findings over `claims_checked: 0`,
+    so they were never vacuous and had nothing to flip (#1175 round 9,
+    S4) — across the 2026-07-28, 2026-07-31 and earlier arms and
+    five of the twelve 2026-09-01 v7 production records, so the v7
     baseline arm's `report_basis` becomes measured 0 for AI_READI (3 of
     3), CM4AI (2 measured, 1 vacuous) and VOICE (1 measured, 2 vacuous),
     while **CHORUS stays all-vacuous** (0 measured, 3 vacuous) and keeps

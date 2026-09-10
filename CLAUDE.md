@@ -588,9 +588,15 @@ read as `[*]`, or by a populated key of the leaf's name under the claim's
 root. A prose claim is a claim checked, so 70 reports that read no claim
 under v4 read one under v5, and the eleven canary blocks that quote a
 `report_basis` were re-derived with `d4d api verdict` where theirs had
-moved — nine of them, each keeping its prior under `prior_verdict`; no
-status and no bar moved, and five lost a `baseline_basis` line their
-baseline no longer earns. The v7 production arm reads 0 findings on
+moved — ten blocks in all, each keeping its prior under `prior_verdict`;
+no status, no bar and no row moved, and five lost a `baseline_basis`
+line their baseline no longer earns. Run `d4d provenance
+recheck-validation` first where a record's `validation` block predates
+the duplicate-key instrument: a re-verdict computes from the record, so
+an unmeasured metric drops its row, and a gated floor then stops being
+reported. A re-verdict keeps the keys a person put in the block —
+`disposition`, `prior_disposition`, `readings` — at the top level
+rather than only inside `prior_verdict`. The v7 production arm reads 0 findings on
 all twelve either way. Since #998 the report phase carries the core
 class's top-level slot inventory (`core_inventory_block`) before its
 instruction, so the model can see which slots the core declares rather

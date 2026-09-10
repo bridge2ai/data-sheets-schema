@@ -906,6 +906,9 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/VOICE_chunks.yaml
       sha256: f55de43646d5c4a6d61d6339f4d6f6adb3e50cef86d5dad1cb46a43a91fb38bc
+  bundle_basis:
+    source: bundle on disk
+    path: data/preprocessed/concatenated/VOICE_preprocessed.txt
   recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_api_core/2026-09-04d_claude-opus-5-api-generic-v8_rep1/intermediate/VOICE_audit.json
@@ -977,8 +980,19 @@ canary:
   basis: 'verdict from this record''s own check blocks against the per-project worst
     of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions, including
     the #684 report basis ({''measured'': 1, ''vacuous'': 2, ''unchecked'': 0})'
-  recorded_at: '2026-09-10T07:49:52+00:00'
+  recorded_at: '2026-09-10T08:43:06+00:00'
   recorded_by: d4d api verdict (offline)
+  readings:
+    note: registered v8 predictions this record measures on its own; n=1, none gated
+    prediction_2_grant_number: populated 0
+    prediction_5_value_changed_after_receipt: 54 of 195 receipt paths = 27.7%, against
+      a predicted <10%
+    prediction_6_receipt_coverage: 187 of 343 = 54.5%, against a predicted >40%
+    prediction_9_full_output_tokens: '79,582 against the v7 VOICE accepted-attempt
+      mean of 76,159 ([73375, 74126, 80976]): +4.5%'
+    mechanisms: 'full_readdress: 1 moved, 0 unresolved; report_regate: 18 contradictions
+      before, 5 after; identifier form: 0 rewrites; mailto ids: 0 rewritten; resolver
+      URLs 0; undeclared prefixes 0.'
   prior_verdict:
     status: regressed
     rows:

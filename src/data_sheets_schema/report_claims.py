@@ -337,13 +337,31 @@ _REMOVAL_WORD = re.compile(r"\b(?:remove[sd]?|delete[sd]?|drops?|dropped|omits?|
 #: (#1175 round 7, M2): the token must sit *before* the removal word, or
 #: "was removed, not renamed" and "removed rather than guessed" — 21
 #: corpus names — are voided by their own contrast.
-_REMOVAL_VOID = re.compile(r"\b(?:rather than|instead of|not|never|nor|neither|no longer|without|"
+#: `nothing` and `none` are here and bare `no` is not (#1175 round 9, S2):
+#: "None of these is a slot removed from a record: `counts` and …" denies a
+#: removal and recorded one, while 19 of the 20 corpus clauses where `no`
+#: precedes the removal word are removals — "`collection_type` has no
+#: `CoreDistribution` counterpart and is dropped" — which bare `no` would
+#: void. `rewritten` and `alternative` are the present tense's cost (round
+#: 9, S1): "`special_protections` was rewritten to drop the superseded
+#: clause" leaves the slot in place, and "the alternative is to drop five
+#: well-evidenced relations" is a road not taken.
+_REMOVAL_VOID = re.compile(r"\b(?:rather than|instead of|not|never|nor|neither|no longer|nothing|none|"
+                           r"without|rewritten|alternative|"
                            r"if|whether|unless|would|should|could|may|might|must|please|explain)\b", re.I)
+#: A present-tense removal word used as a noun: "The intentional projection
+#: drops are unchanged" (#1175 round 9, S1). Only the -s forms, and only
+#: before a verb: "the slots removed are `a` and `b`" is a real removal, so
+#: a past participle before `are` must not be voided.
+_REMOVAL_AS_NOUN = re.compile(r"\b(?:removes|deletes|drops|omits|strips|withdraws)\s+"
+                              r"(?:are|is|were|was)\b", re.I)
 
 
 def _removal_voided(clause: str) -> bool:
     m = _REMOVAL_WORD.search(clause)
-    return bool(m and _REMOVAL_VOID.search(clause[:m.start()]))
+    if not m:
+        return False
+    return bool(_REMOVAL_VOID.search(clause[:m.start()]) or _REMOVAL_AS_NOUN.search(clause))
 #: A clause boundary: the weak signal reads only the clause the removal
 #: word sits in, so "`errata` was removed because `funders` remains valid"
 #: records `errata` and not `funders` (#1175 Codex review, M1).

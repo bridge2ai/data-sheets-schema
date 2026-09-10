@@ -831,6 +831,9 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/CM4AI_chunks.yaml
       sha256: 3d2d86bac4e9f89d2c6cfb6b5f5361c237995d899ecb6ae41382f82359aedde4
+  bundle_basis:
+    source: bundle on disk
+    path: data/preprocessed/concatenated/CM4AI_preprocessed.txt
   recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_api_core/2026-09-04c_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_audit.json
@@ -894,8 +897,28 @@ canary:
   basis: 'verdict from this record''s own check blocks against the per-project worst
     of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions, including
     the #684 report basis ({''measured'': 2, ''vacuous'': 1, ''unchecked'': 0})'
-  recorded_at: '2026-09-10T07:49:50+00:00'
+  recorded_at: '2026-09-10T08:43:05+00:00'
   recorded_by: d4d api verdict (offline)
+  disposition: 'OK under instrument v3, and **not retained for the fill**: #981''s
+    mechanism and R5 (pin rotated) landed after this run, and the production rule
+    invalidates every earlier record of a changed condition (#984). This record settles
+    the instrument question and stands as evidence of the third package; CM4AI runs
+    a fourth time under the final package before the fill, after VOICE, AI_READI and
+    CHORUS.'
+  readings:
+    note: registered v8 predictions this record measures on its own; n=1, none gated
+    prediction_2_grant_number: 'populated 0 (2026-09-04 rep1: 2; 2026-09-04b: 0)'
+    prediction_5_value_changed_after_receipt: 2 of 153 receipt paths = 1.3%, against
+      a predicted <10% (v7 CM4AI 17.0/17.4/7.9%; earlier v8 runs 28.3%, 36.0%)
+    prediction_6_receipt_coverage: 292 of 415 = 70.4%, against a predicted >40%
+    prediction_9_full_output_tokens: '80,319 against the v7 CM4AI accepted-attempt
+      mean of 41,370: +94.1%'
+    mechanisms: 'full_readdress: not needed (every receipt slot resolved); report_regate:
+      9 claims checked, 1 contradiction before, 0 after (10 claims); normalise_identifier_form:
+      0 rewrites (the model wrote CURIEs); resolver URLs 0; British spellings 0.'
+    the regression: 'undeclared prefixes 6 under instrument v2, all `mailto:` — the
+      `id` of inlined contact persons (D1, #805 forces Person.id) written as mailto:<email>;
+      the v6 agentic CM4AI rep1 wrote two the same way. 0 under v3.'
   prior_verdict:
     status: ok
     rows:

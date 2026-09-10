@@ -928,3 +928,90 @@ class UnrecordedRemovalTest(Harness):
         b = self.check(self.TABLE, full={"keywords": ["a"]}, core={"keywords": ["a"]})
         self.assertTrue(b["instrument"].startswith("v5 (#1054)"))
         self.assertIn("v4 (#1122)", b["instrument"])
+
+
+class PresentTenseRemovalTest(Harness):
+    """#1175 round 8 widened the removal word to the present tense, and round
+    9 found nothing pinned it and that the widening records names the reports
+    do not say were removed (M4, S1, S2). `removals_unrecorded` is a
+    *suppression* set, so a false name here silences a real finding on that
+    slot, and a missing true form raises a false one."""
+
+    TABLE = ("## Dispositions\n\n| slot | disposition | record | reason |\n|---|---|---|---|\n"
+             "| `keywords` | retained | both | fine |\n")
+
+    def unrecorded(self, sentence, slot="citation"):
+        import tempfile
+        tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
+        path = Path(tmp.name) / "r.md"
+        path.write_text(self.TABLE + "\n" + sentence + "\n", encoding="utf-8")
+        snap = {"keywords": ["a"], slot: "a value the record no longer carries"}
+        full = {"keywords": ["a"]}
+        return check_report(path, full, full, DECLARED, snapshot=snap,
+                            dispositions_expected=True)["removals_unrecorded"]
+
+    def test_every_present_tense_form_records_the_removal(self):
+        """Reading only past participles listed `citation` as unrecorded when
+        the report said "Both records now omit `citation`". `omitted?` matches
+        `omitte`, not `omit`, which is how the gap survived a review round."""
+        for sentence in (
+                "Both records now omit `citation`.",
+                "Reconciliation omits `citation` from both records.",
+                "Reconciliation removes `citation` from both records.",
+                "The projection remove `citation` in this pass.",
+                "This pass drops `citation`.",
+                "The reconcile step strips `citation`.",
+                "The core deletes `citation`.",
+                "The curator withdraws `citation`."):
+            with self.subTest(sentence):
+                self.assertEqual(self.unrecorded(sentence), [], sentence)
+
+    def test_a_sentence_about_the_core_alone_records_nothing_about_the_full_record(self):
+        """The deliberate line the widening does not cross: "The core record
+        omits `citation`" is a claim about the core, and the unrecorded-removal
+        finding is against the full record."""
+        self.assertEqual(self.unrecorded("The core record omits `citation`."), ["citation"])
+
+    def test_the_past_participles_still_record_it(self):
+        for sentence in ("`citation` was removed.", "`citation` was deleted.", "`citation` was dropped.",
+                         "`citation` was omitted.", "`citation` was stripped.", "`citation` was withdrawn.",
+                         "`citation` is absent from both records."):
+            with self.subTest(sentence):
+                self.assertEqual(self.unrecorded(sentence), [], sentence)
+
+    def test_a_denied_removal_records_nothing(self):
+        """S2: "None of these is a slot removed from a record: `citation` …"
+        denies a removal and was suppressing one. `nothing` and `none` void;
+        bare `no` does not, because 19 of the 20 corpus clauses where it
+        precedes the removal word are removals."""
+        for sentence in ("None of these is a slot removed from a record: `citation` and `keywords`.",
+                         "Nothing was removed and `citation` stays."):
+            with self.subTest(sentence):
+                self.assertEqual(self.unrecorded(sentence), ["citation"], sentence)
+
+    def test_a_bare_no_before_the_removal_word_is_still_a_removal(self):
+        self.assertEqual(
+            self.unrecorded("`citation` has no `CoreDistribution` counterpart and is dropped."), [])
+
+    def test_a_rewritten_slot_is_present(self):
+        """S1: "`special_protections` was rewritten to drop the superseded
+        clause" leaves the slot in the record; four corpus clauses have this
+        shape."""
+        self.assertEqual(
+            self.unrecorded("`citation` was rewritten to drop the superseded clause."), ["citation"])
+
+    def test_a_road_not_taken_is_not_a_removal(self):
+        """The corpus clause, from the 2026-08-05 v3 rep1 AI_READI report:
+        the sentence explains why the relations were *retained*."""
+        self.assertEqual(
+            self.unrecorded("Retained because `Dataset` requires `citation`, the targets are unambiguous, "
+                            "and the alternative is to drop five well-evidenced relations."), ["citation"])
+
+    def test_the_removal_word_as_a_noun_is_not_a_removal(self):
+        """S1: "The intentional projection drops are unchanged: …". Only the
+        -s forms before a verb — "the slots removed are `a` and `b`" is a
+        real removal and must stay one."""
+        self.assertEqual(
+            self.unrecorded("The intentional projection drops are unchanged: `citation`."), ["citation"])
+        self.assertEqual(
+            self.unrecorded("The slots removed are `citation` and `keywords`."), [])

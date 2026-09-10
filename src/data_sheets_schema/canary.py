@@ -164,6 +164,13 @@ def offline_verdict(record: dict[str, Any], project: str, label_prefix: str,
                          recorded_by=recorded_by + " (offline)", prior=prior if isinstance(prior, dict) else None)
 
 
+#: Keys of a `canary` block that a person put there — a disposition of the
+#: verdict, the reading behind it, the plan's registered measurements — as
+#: against the keys the gate computes. A recomputation keeps them (#1175
+#: round 9, M3).
+CURATOR_KEYS = ("disposition", "prior_disposition", "readings")
+
+
 def verdict_block(v: dict[str, Any], *, label_prefix: str, report_basis_counts: dict[str, int] | None,
                   recorded_by: str, prior: dict[str, Any] | None = None,
                   checks_source: str = "this record's own check blocks") -> dict[str, Any]:
@@ -180,6 +187,15 @@ def verdict_block(v: dict[str, Any], *, label_prefix: str, report_basis_counts: 
     out["recorded_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
     out["recorded_by"] = recorded_by
     if isinstance(prior, dict):
+        # A curator's answer to a verdict is not part of the measurement and
+        # is not re-derivable from the record, so a re-verdict carries it
+        # forward rather than demoting it into the nested prior, where the
+        # note that cites its location stops being true and the decision
+        # reads as superseded (#1175 round 9, M3). The measured keys are
+        # recomputed and are not carried.
+        for k in CURATOR_KEYS:
+            if k in prior and k not in out:
+                out[k] = prior[k]
         out["prior_verdict"] = dict(prior)
     return out
 
