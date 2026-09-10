@@ -120,3 +120,45 @@ class Metrics(unittest.TestCase):
                  "slots": {"receiptable": 10, "with_receipt": 10}}
         out = self.m.receipt_metrics(block)
         self.assertEqual((out["wrongchunk"], out["snippets"]), (6, 100))
+
+
+class Section(unittest.TestCase):
+    """The rendered rows, not only the arithmetic behind them: the denominator
+    switch and the "(of N records)" suffix live in `receipt_section`, and a
+    row is what a reader acts on (#1198 round 2)."""
+
+    def setUp(self):
+        self.m = _module()
+
+    def _rec(self, **kw):
+        base = dict(receiptable=100, withreceipt=50, neverreceipted=40, addedafter=10,
+                    snippets=200, wrongchunk=4, unverified=0, unreviewed=0)
+        base.update(kw)
+        return base
+
+    def _row(self, reps):
+        data = {k: {p: [] for p in self.m.PROJECTS} for k, *_ in self.m.ARMS}
+        first_arm, first_project = self.m.ARMS[0][0], self.m.PROJECTS[0]
+        data[first_arm][first_project] = reps
+        lines = self.m.receipt_section(data)
+        body = [l for l in lines if l.startswith("| ") and not l.startswith("| arm")]
+        return body[0] if body else ""
+
+    def test_a_whole_arm_with_the_split_names_no_record_count(self):
+        row = self._row([self._rec(), self._rec()])
+        self.assertIn("80/200 = 40.0%", row)          # never, over both records
+        self.assertNotIn("of 2 records", row)
+
+    def test_an_arm_that_mixes_snapshot_and_no_snapshot_says_how_many_the_split_covers(self):
+        row = self._row([self._rec(), self._rec(neverreceipted=None, addedafter=None)])
+        self.assertIn("40/100 = 40.0%", row)           # the split's own denominator
+        self.assertIn("(of 1 records)", row)
+        self.assertIn("100/200 = 50.0%", row)          # coverage still over both
+
+    def test_an_arm_with_no_split_at_all_shows_a_dash_and_no_suffix(self):
+        row = self._row([self._rec(neverreceipted=None, addedafter=None) for _ in range(2)])
+        self.assertRegex(row, r"\|\s+–\s+\|\s+–\s+\|")
+        self.assertNotIn("of 0 records", row)
+
+    def test_an_arm_with_no_measured_record_is_left_out_entirely(self):
+        self.assertEqual(self._row([]), "")
