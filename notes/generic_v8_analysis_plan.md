@@ -1466,28 +1466,44 @@ steps need:
     problem's artifact, class and the JSON-pointer paths its message
     names reproduce — a message carries today's enum list and moves with
     the schema while the failure it names does not, but a message naming
-    other paths is another failure (#1190 review). The write then adds
-    `duplicate_keys` and nothing else, restamping the schema digest — the
-    verdict was recomputed against today's schema — and saying so on the
-    line where it moved. `discover` yields a base directory and its
+    other paths is another failure (#1190 review). The message is the
+    validator's first four lines, so the gate sees at most four failures
+    per problem; 8 of the corpus's 28 problem strings are exactly four
+    lines and may be truncated. The write then adds
+    `duplicate_keys` and nothing else, restamping **this checkout's**
+    schema digest and saying so on the line where it moved — and a record
+    already carrying the field is re-checked when, and only when, its
+    schema pin has moved, since a pass taken before a schema change
+    otherwise leaves its records reading STALE
+    (`runs.validation_status`, #426) with no route back (round 2, M1).
+    `discover` yields a base directory and its
     `_core` twin as two runs over one record, so the walk is keyed on the
     record's path: 282 records, not 559 visits. Run over the corpus after
-    a one-record report-mode canary: **68 written**, all with 0 duplicate
-    keys (6 of them restamped a schema digest they already carried, 6
-    failing records whose problems re-record under today's longer enum
-    lists with the same paths); **202 held** — 199 whose `passed` flips
+    a one-record report-mode canary, and re-run after the branch merged
+    main's schema change (#1146 regenerated the merged schema, and 48 of
+    the first pass's records pinned the older digest): **78 written**
+    across `claudecode_agent_core` (39), `claudecode_api_core` (18),
+    `claudecode_agent_crate_only_core` (9),
+    `claudecode_agent_crate_core` (9) and
+    `claudecode_agent_healthsheet_core` (3) — 51 gained a schema block,
+    27 had one restamped, and every one pins this checkout's schema.
+    **199 held** — 196 whose `passed` flips
     to false under today's schema (the 2026-07 and early-2026-08 arms,
     whose records validated against the schema of their day), 2 whose
     problems now name other JSON pointers (the 2026-08-05 v3 rep1
     AI_READI and CHORUS records, whose `file_collections[*].collection_type`
     failures the schema no longer raises and whose first four lines are
     now `creators` failures), 1 whose artifacts have drifted (CHORUS
-    2026-07-29 rep1); 4 with no validation block; one whose full artifact
-    is gone (AI_READI 2026-08-11 api-generic rep3). A held record stays as
+    2026-07-29 rep1). 12 records already carried the field before this
+    branch; 4 have no validation block; one has no full artifact
+    (AI_READI 2026-08-11 api-generic rep3). A held record stays as
     it was — its verdict is the one it attested — and is rerun by label as
-    a deliberate act. No canary verdict moves: `duplicate_keys` is 0 on
-    every written block and the gate reads an absent field as unmeasured,
-    as before. Numbered with 19 (#1054) and 20 (#1140) open. Not a
+    a deliberate act. 77 of the 78 written records record 0 duplicate
+    keys; the one that does not is AI_READI 2026-09-04f rep1, whose own
+    canary already reads `duplicate keys run 1, baseline_worst 0,
+    regressed`, so the recompute reproduces what the record already said.
+    No canary verdict moves, and the gate reads an absent field as
+    unmeasured, as before. Numbered with 19 (#1054) and 20 (#1140) open. Not a
     generation-path change.
 
 Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16,
