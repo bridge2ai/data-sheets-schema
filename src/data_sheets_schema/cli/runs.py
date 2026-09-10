@@ -530,6 +530,7 @@ def check_cmd(method, label, project, strict):
     stale_sizes = []
     from data_sheets_schema.runs import _prov, header_disagreements, stale_output_sizes
     header_mismatches = []
+    pack_pin_drift = []                                        # a record's review pins a pack no longer on disk (#1095)
     for run in discover():
         if run.is_core or run.deterministic:
             continue
@@ -547,6 +548,19 @@ def check_cmd(method, label, project, strict):
             # a standard loader keeps only the last, so a record that
             # carries one is not the record its readers see.
             prov_data = _prov(run.method, run.label, proj) or {}
+            # The record's review block pins the pack by sha256; a pack rewritten
+            # underneath it (a forced `d4d review pack`) leaves `review.adverse`
+            # ranking canonicals on a review of a pack that no longer exists
+            # (#1095; #1124 review, SF2). Reported like bundle drift, never fatal.
+            # Derived from the record's own location, as `pack_pins` does, not
+            # read off the recorded path string: a path recorded absolute, or a
+            # check run elsewhere, would report a false `missing` (#1124
+            # review, N5; the #713 argument).
+            from data_sheets_schema.provenance import record_path_for
+            from data_sheets_schema.review_pack import pack_pin_state
+            state = pack_pin_state(record_path_for(proj, run.method, run.label))
+            if state:
+                pack_pin_drift.append({"project": proj, "label": run.label, "state": state})
             # A record whose stated condition its label contradicts (#1094):
             # the `uncanonical` shape for the condition claim, fatal under
             # --strict for the same reason. Records before #1094 state none.
@@ -948,6 +962,13 @@ def check_cmd(method, label, project, strict):
             click.echo(f"   {mark} {r['project']:9} {r['label']:44} "
                        f"{r['status']}: {r['reason']}")
 
+    if pack_pin_drift:
+        click.echo(f"\n⚠️  {len(pack_pin_drift)} record(s) whose review pins a pack that is not the one on disk, "
+                   "or whose pin file cannot be read (#1095) — the review block and `runs select`'s review "
+                   "rank describe a pack that no longer exists, or nothing that can be checked; redo the "
+                   "review, restore the pack, or fix the file:")
+        for r in pack_pin_drift:
+            click.echo(f"   {r['project']:9} {r['label']:44} pack {r['state']}")
     if header_mismatches:
         click.echo(f"\n⚠️  {len(header_mismatches)} record(s) whose `#` header states a "
                    "setting the request did not carry (#1027):")
@@ -1423,25 +1444,27 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
             f"selection needs at least two replicates of {config!r}; "
             f"found {len(labels)}")
 
-    def review_adverse(label: str) -> int | None:
-        """The checked review block's adverse count, or None when the record
-        carries none (absence is not zero adverse)."""
+    def review_adverse(label: str) -> tuple[int | None, str | None]:
+        """(adverse, why): the review block's adverse count where the block
+        is evidence, else None and the reason — no block, not checked, or
+        a checked block with findings or unanswered items, which is not the
+        same as no block (#1124 round-9 review, M-R9-1). Absence is not zero adverse."""
         pp = record_path_for(project, method, label, CONCAT_DIR)
         if not pp.exists():
-            return None
+            return None, "no provenance record"
         try:
             rec = _yaml.safe_load(pp.read_text(encoding="utf-8")) or {}
         except (_yaml.YAMLError, OSError, UnicodeDecodeError):
-            return None
-        rv = rec.get("review") if isinstance(rec, dict) else None
-        if not isinstance(rv, dict) or not rv.get("checked") or not isinstance(rv.get("adverse"), int):
-            return None
-        return rv["adverse"]
+            return None, "provenance record unreadable"
+        from data_sheets_schema.review_pack import review_evidence, review_evidence_why
+        block = rec.get("review") if isinstance(rec, dict) else None
+        return review_evidence(block), review_evidence_why(block)
 
     candidates = []
     adverse_of: dict[str, int | None] = {}
+    evidence_why: dict[str, str | None] = {}
     for label in labels:
-        adverse_of[label] = review_adverse(label)
+        adverse_of[label], evidence_why[label] = review_adverse(label)
         record = base_dir / label / f"{project}_d4d.yaml"
         if not record.exists():
             candidates.append((label, None, "no record", 0, "no record", "no record"))
@@ -1474,7 +1497,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
                  f"this run)" if recorded != status and
                  recorded in (VALID, INVALID) else "")
         adv = adverse_of.get(label)
-        rv = f"  {adv:2d} adverse" if adv is not None else "  no review"
+        rv = f"  {adv:2d} adverse" if adv is not None else f"  {evidence_why[label]}"
         click.echo(f" {mark}{label:52s} {slots:3d} slots{rv}  {detail}{drift}")
 
     if not eligible:
@@ -1492,7 +1515,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
     if ignore_reviews:
         reviews_applied, why = False, "--ignore-reviews"
     elif unreviewed:
-        reviews_applied, why = False, f"no checked review block on {', '.join(unreviewed)}"
+        reviews_applied, why = False, "; ".join(f"{lab}: {evidence_why[lab]}" for lab in unreviewed)
     else:
         reviews_applied, why = True, None
     if reviews_applied:
@@ -1593,7 +1616,8 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
         "selected_from": [
             {"label": lab, "slots": n, "validation": detail,
              "validation_recorded_at_run_time": rec,
-             "review_adverse": adverse_of.get(lab)}
+             "review_adverse": adverse_of.get(lab),
+             **({"review_not_evidence": evidence_why[lab]} if evidence_why.get(lab) else {})}
             for lab, _r, st, n, rec, detail in candidates],
         "margin_over_runner_up": margin,
         "runtime": winner_runtime,
