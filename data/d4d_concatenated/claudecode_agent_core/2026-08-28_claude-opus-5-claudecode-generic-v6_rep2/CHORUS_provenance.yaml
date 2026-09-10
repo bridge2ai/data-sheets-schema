@@ -106,15 +106,6 @@ phase_log:
     bundle_lines_total: 1698
     receipt_chunks_total: 8
     receipt_chunks_unopened: 0
-    assistant_turns: 67
-    output_tokens: 107427
-    reasoning_tokens_estimate: 75124
-    thinking_blocks: 37
-    thinking_text_chars: 0
-    thinking_tokens: 53627
-    tool_input_chars: 124773
-    turns_with_thinking_tokens: 66
-    visible_text_chars: 4808
   run_observed_basis: 'aggregate totals for the whole run, observed by the orchestrator
     from the subagent runner''s transcript. One number per run, not per phase: four-phase
     project-agent mode runs every phase in one context, so the run is the only observable
@@ -124,38 +115,7 @@ phase_log:
     invocation''s own span, so a resumed run excludes the gap. bundle_lines_read is
     the union of the run''s successful file-reading windows over the declared bundle
     (#700): lines the run never opened, or opened only in a read that errored, may
-    have been reached by search, but nothing attests that. assistant_turns, output_tokens,
-    thinking_blocks, thinking_text_chars, visible_text_chars, tool_input_chars and
-    reasoning_tokens_estimate (output tokens minus a 4-chars-per-token estimate of
-    the text and tool-call payloads — a subtraction, an upper bound, not a measurement)
-    are the transcript''s reasoning measure (#1000/#1011), added after the run under
-    run_observed_extended; thinking_tokens and turns_with_thinking_tokens are the
-    runtime''s own count on the turns whose transcript line carries usage.output_tokens_details,
-    and where turns_with_thinking_tokens is fewer than assistant_turns the count is
-    partial (a resumed run whose earlier transcript predates the detail). Comparable
-    in kind with the API path''s reasoning log, never to be averaged with it.'
-  run_observed_extended:
-  - keys_added:
-    - assistant_turns
-    - output_tokens
-    - reasoning_tokens_estimate
-    - thinking_blocks
-    - thinking_text_chars
-    - thinking_tokens
-    - tool_input_chars
-    - turns_with_thinking_tokens
-    - visible_text_chars
-    instrument: the transcript's reasoning measure (#1000/#1011), recomputed by scripts/agentic_observed.py
-      from the transcripts named on the bytes the record hashed, under the record's
-      own cut; every prior key reproduced exactly
-    transcripts:
-    - agent-av6-CHORUS-rep2-2c3fa2e77a4590dd.jsonl
-    observer_sha256: 1bdeb4fde0bc28a63d9615acba9e53f70db027668086be35ceae8d12c369c0a8
-    bundle_basis:
-      source: bundle on disk
-      path: data/preprocessed/concatenated/CHORUS_preprocessed.txt
-    recorded_by: d4d provenance extend-observed (#1010)
-    recorded_at: '2026-09-10T03:17:22+00:00'
+    have been reached by search, but nothing attests that.'
 schema:
   declared_version: 2.0.0
   declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml

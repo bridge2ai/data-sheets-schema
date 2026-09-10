@@ -537,22 +537,61 @@ _REASONING_KEYS = frozenset({
     "visible_text_chars", "tool_input_chars", "reasoning_tokens_estimate",
     "thinking_tokens", "turns_with_thinking_tokens"})
 
-#: What the reasoning keys mean, appended to `run_observed_basis` when they
-#: are added (#1191 review, M3): the record's own account must describe
-#: every number it carries.
-_REASONING_BASIS = (
-    " assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, "
-    "visible_text_chars, tool_input_chars and reasoning_tokens_estimate "
-    "(output tokens minus a 4-chars-per-token estimate of the text and "
-    "tool-call payloads — a subtraction, an upper bound, not a measurement) "
-    "are the transcript's reasoning measure (#1000/#1011), added after the "
-    "run under run_observed_extended; thinking_tokens and "
-    "turns_with_thinking_tokens are the runtime's own count on the turns "
-    "whose transcript line carries usage.output_tokens_details, and where "
-    "turns_with_thinking_tokens is fewer than assistant_turns the count is "
-    "partial (a resumed run whose earlier transcript predates the detail). "
-    "Comparable in kind with the API path's reasoning log, never to be "
-    "averaged with it.")
+#: The account every `run_observed` carries (#681/#682), written by
+#: `annotate-observed` and supplied by the extension where a record has
+#: none (#1191 round 2, S5).
+_RUN_OBSERVED_BASIS = (
+    "aggregate totals for the whole run, observed by the orchestrator "
+    "from the subagent runner's transcript. One number per run, not per "
+    "phase: four-phase project-agent mode runs every phase in one "
+    "context, so the run is the only observable boundary. Not the "
+    "runtime's own accounting, no input/output split, not billing-grade; "
+    "deliberately not shaped like api_usage (#681/#682). total_tokens "
+    "counts each API message once (a response spans several transcript "
+    "lines); duration_ms sums each invocation's own span, so a resumed "
+    "run excludes the gap. bundle_lines_read is the union of the run's "
+    "successful file-reading windows over the declared bundle (#700): "
+    "lines the run never opened, or opened only in a read that errored, "
+    "may have been reached by search, but nothing attests that.")
+_CUT_BASIS = (" Cut at run_observed_until: the agent kept acting after its run "
+              "completed, and the record describes the run.")
+
+
+def _reasoning_basis(keys: set) -> str:
+    """What the reasoning keys mean — the ones present, and no others
+    (#1191 round 2, S1): the record's own account describes every number
+    it carries and none it does not."""
+    parts = []
+    if {"assistant_turns", "output_tokens", "thinking_blocks", "thinking_text_chars", "visible_text_chars",
+        "tool_input_chars", "reasoning_tokens_estimate"} & keys:
+        parts.append(
+            " assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, visible_text_chars, "
+            "tool_input_chars and reasoning_tokens_estimate (output tokens minus a 4-chars-per-token "
+            "estimate of the text and tool-call payloads — a subtraction, an upper bound, not a "
+            "measurement) are the transcript's reasoning measure (#1000/#1011), comparable in kind with "
+            "the API path's reasoning log, never to be averaged with it.")
+    if "thinking_tokens" in keys:
+        parts.append(
+            " thinking_tokens and turns_with_thinking_tokens are the runtime's own count on the turns whose "
+            "transcript line carries usage.output_tokens_details; where turns_with_thinking_tokens is fewer "
+            "than assistant_turns the count is partial (a resumed run whose earlier transcript predates the "
+            "detail).")
+    elif parts:
+        parts.append(" No thinking_tokens: no line of the transcript carries usage.output_tokens_details, "
+                     "so the runtime's own count is not measured for this run.")
+    return "".join(parts)
+
+
+def _basis_with(log: dict, keys: set) -> str:
+    """`run_observed_basis` with the reasoning sentence for `keys` added
+    once — the standard account where the record has none, the cut
+    sentence where the record carries a cut and the account does not say so."""
+    b = str(log.get("run_observed_basis") or "").rstrip() or _RUN_OBSERVED_BASIS
+    if log.get("run_observed_until") and "Cut at run_observed_until" not in b:
+        b += _CUT_BASIS
+    if "reasoning_tokens_estimate" not in b and "reasoning measure" not in b:
+        b += _reasoning_basis(keys)
+    return b
 
 
 def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrument: str,
@@ -587,9 +626,7 @@ def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrum
                     "recorded_by": recorded_by,
                     "recorded_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat()})
     log["run_observed_extended"] = entries
-    b = str(log.get("run_observed_basis") or "")
-    if "run_observed_extended" not in b:
-        log["run_observed_basis"] = (b.rstrip() + _REASONING_BASIS).strip()
+    log["run_observed_basis"] = _basis_with(log, set(log["run_observed"]) & _REASONING_KEYS)
     return added
 
 
@@ -669,7 +706,8 @@ def _observer_sha256() -> str:
 @click.option('--project', default=None, help='one project; default every project with a record under the label')
 @click.option('--method', default=None, help='run directory family; defaults to the one the label lives in')
 @click.option('--transcript', 'given', multiple=True, type=click.Path(exists=True, path_type=Path),
-              help='the transcript(s) to read, instead of discovery by name')
+              help='the transcript(s) to read, instead of discovery by name; with --project; at most four, '
+                   'every subset of which is tried')
 @click.option('--execute', is_flag=True, help='write the extension; without it, report')
 def extend_observed(label, project, method, given, execute):
     """Recompute an agentic run's observation from its transcript and the
@@ -683,21 +721,15 @@ def extend_observed(label, project, method, given, execute):
     cut. Exactly one candidate must reproduce every key the record already
     carries; none, or more than one, is a refusal that names them.
     """
-    import hashlib as _h
-    import tempfile as _tf
-    from datetime import datetime as _dt
-
     _require_repo_root_cwd("d4d provenance extend-observed")
-    import yaml as _yaml
-
-    from data_sheets_schema.chunking import dump_manifest, manifest_from_bytes
     from data_sheets_schema.cli.method import resolve_method
     from data_sheets_schema.constants import PROJECTS
-    from data_sheets_schema.provenance import (GitUnavailable, ProvenanceRecord, bundle_bytes_for,
-                                               record_path_for)
-    from data_sheets_schema.receipts import receipt_path
+    from data_sheets_schema.provenance import record_path_for
     if given and not project:
         raise click.ClickException("--transcript names one run's files; pass --project with it")
+    if len(given) > 4:
+        raise click.ClickException("--transcript takes at most four files: every subset is tried "
+                                   "(a resumed run's pair among them), and 2^n sets is the cost")
     method = method or resolve_method(label, project)
     projects = [project] if project else [p for p in PROJECTS if record_path_for(p, method, label).exists()]
     if not projects:
@@ -722,89 +754,88 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
     from data_sheets_schema.provenance import (GitUnavailable, ProvenanceRecord, bundle_bytes_for,
                                                record_path_for)
     from data_sheets_schema.receipts import receipt_path
-    if True:
-        path = record_path_for(proj, method, label)
-        data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-        tag = f"{proj} {label}"
-        if data.get("api_usage"):
-            click.echo(f"{tag}: an API-path record; api_usage is its account (#400)"); return
-        log = data.get("phase_log") or {}
-        prior = log.get("run_observed") if isinstance(log, dict) else None
-        if not isinstance(prior, dict) or not prior:
-            click.echo(f"{tag}: no run_observed to extend"); return
-        if _REASONING_KEYS <= set(prior) or (
-                {"reasoning_tokens_estimate", "output_tokens"} <= set(prior) and "thinking_tokens" not in prior
-                and any(isinstance(e, dict) and "thinking_tokens" not in (e.get("keys_added") or []) and
-                        "transcripts" in e for e in (log.get("run_observed_extended") or []))):
-            click.echo(f"{tag}: already carries the reasoning measure"); return
-        inputs = data.get("inputs") or {}
-        bpath, md5 = inputs.get("bundle_path"), inputs.get("bundle_md5")
-        if not bpath or not md5:
-            click.echo(f"{tag}: the record declares no bundle path and md5; the coverage keys cannot be recomputed"); return
-        on_disk = Path(bpath)
-        if on_disk.exists() and _h.md5(on_disk.read_bytes()).hexdigest() == md5:
-            raw, basis = on_disk.read_bytes(), {"bundle_basis": {"source": "bundle on disk", "path": bpath}}
-        else:
-            try:
-                found = bundle_bytes_for(bpath, md5=md5, sha256=inputs.get("bundle_sha256"))
-            except GitUnavailable as exc:
-                click.echo(f"{tag}: bundle drifted and git could not supply the version the record hashed: {exc}"); return
-            if found is None:
-                click.echo(f"{tag}: bundle drifted and no committed version of {bpath} hashes to the record's md5"); return
-            raw, entry = found
-            basis = {"bundle_basis": {"source": "git blob", "path": bpath, "commit": entry["commit"],
-                                      "md5": entry["md5"], "matched_on": entry.get("matched_on")}}
-        rule = ((inputs.get("chunks") or {}).get("rule")) or None
-        candidates = list(given) or _transcript_candidates(proj, label)
-        if not candidates:
-            click.echo(f"{tag}: no transcript found by name for this project and replicate"); return
-        # A killed-and-resumed run has two transcripts under one name and
-        # its observation summed them (#688): every single file is tried,
-        # then every set of files sharing a name, oldest first.
-        sets: list[list[Path]] = [[t] for t in candidates]
-        if given:
-            # Every subset of the files given, oldest first (#1191 review, S6)
-            from itertools import combinations
-            ordered = sorted(candidates, key=lambda t: t.stat().st_mtime)
-            for n in range(2, len(ordered) + 1):
-                sets += [list(c) for c in combinations(ordered, n)]
-        else:
-            import re as _re
-            by_name: dict[str, list[Path]] = {}
-            for t in candidates:
-                by_name.setdefault(_re.sub(r"-[0-9a-f]{16}$", "", t.stem), []).append(t)
-            sets += [sorted(v, key=lambda t: t.stat().st_mtime) for v in by_name.values() if len(v) > 1]
-        until_s = log.get("run_observed_until")
-        until = _dt.fromisoformat(str(until_s).replace("Z", "+00:00")) if until_s else None
-        receipt = receipt_path(path.parent, proj)
-        with _tf.TemporaryDirectory() as tmp:
-            tb = Path(tmp) / Path(bpath).name; tb.write_bytes(raw)
-            tm = Path(tmp) / "chunks.yaml"; tm.write_text(dump_manifest(manifest_from_bytes(raw, tb.name, rule)), encoding="utf-8")
-            results = []
-            for ts in sets:
-                obs = _observe(ts, tb, until, receipt if receipt.exists() else None, tm if receipt.exists() else None)
-                differ = sorted(k for k, v in prior.items() if obs.get(k) != v)
-                results.append((ts, obs, differ))
-        matches = [(ts, obs) for ts, obs, differ in results if not differ]
-        if len(matches) != 1:
-            click.echo(f"{tag}: {len(matches)} of {len(results)} candidate transcript set(s) reproduce every prior key"
-                       + ("; nothing written" if execute else ""))
-            for ts, obs, differ in results:
-                click.echo(f"   {' + '.join(t.name for t in ts)}: " + ("reproduces" if not differ else
-                           "differs on " + ", ".join(f"{k} {prior[k]}→{obs.get(k)}" for k in differ)))
-            return
-        ts, obs = matches[0]
-        added = sorted(set(obs) - set(prior))
-        click.echo(f"{tag}: {' + '.join(t.name for t in ts)} reproduces {len(prior)} prior key(s); adds {added}")
-        if not execute:
-            click.echo("   (report only; --execute writes the extension)"); return
-        _extend_run_observed(log, obs, recorded_by="d4d provenance extend-observed (#1010)",
-                             instrument="the transcript's reasoning measure (#1000/#1011), recomputed by "
-                                        "scripts/agentic_observed.py from the transcripts named on the bytes the "
-                                        "record hashed, under the record's own cut; every prior key reproduced exactly",
-                             basis={"transcripts": [t.name for t in ts], "observer_sha256": observer, **basis})
-        ProvenanceRecord(data=data).write(path)
-        click.echo(f"   wrote {path}")
+    path = record_path_for(proj, method, label)
+    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    tag = f"{proj} {label}"
+    if data.get("api_usage"):
+        click.echo(f"{tag}: an API-path record; api_usage is its account (#400)"); return
+    log = data.get("phase_log") or {}
+    prior = log.get("run_observed") if isinstance(log, dict) else None
+    if not isinstance(prior, dict) or not prior:
+        click.echo(f"{tag}: no run_observed to extend"); return
+    if _REASONING_KEYS <= set(prior) or (
+            {"reasoning_tokens_estimate", "output_tokens"} <= set(prior) and "thinking_tokens" not in prior
+            and any(isinstance(e, dict) and "thinking_tokens" not in (e.get("keys_added") or []) and
+                    "transcripts" in e for e in (log.get("run_observed_extended") or []))):
+        click.echo(f"{tag}: already carries the reasoning measure"); return
+    inputs = data.get("inputs") or {}
+    bpath, md5 = inputs.get("bundle_path"), inputs.get("bundle_md5")
+    if not bpath or not md5:
+        click.echo(f"{tag}: the record declares no bundle path and md5; the coverage keys cannot be recomputed"); return
+    on_disk = Path(bpath)
+    if on_disk.exists() and _h.md5(on_disk.read_bytes()).hexdigest() == md5:
+        raw, basis = on_disk.read_bytes(), {"bundle_basis": {"source": "bundle on disk", "path": bpath}}
+    else:
+        try:
+            found = bundle_bytes_for(bpath, md5=md5, sha256=inputs.get("bundle_sha256"))
+        except GitUnavailable as exc:
+            click.echo(f"{tag}: bundle drifted and git could not supply the version the record hashed: {exc}"); return
+        if found is None:
+            click.echo(f"{tag}: bundle drifted and no committed version of {bpath} hashes to the record's md5"); return
+        raw, entry = found
+        basis = {"bundle_basis": {"source": "git blob", "path": bpath, "commit": entry["commit"],
+                                  "md5": entry["md5"], "matched_on": entry.get("matched_on")}}
+    rule = ((inputs.get("chunks") or {}).get("rule")) or None
+    candidates = list(given) or _transcript_candidates(proj, label)
+    if not candidates:
+        click.echo(f"{tag}: no transcript found by name for this project and replicate"); return
+    # A killed-and-resumed run has two transcripts under one name and
+    # its observation summed them (#688): every single file is tried,
+    # then every set of files sharing a name, oldest first.
+    sets: list[list[Path]] = [[t] for t in candidates]
+    if given:
+        # Every subset of the files given, oldest first (#1191 review, S6)
+        from itertools import combinations
+        ordered = sorted(candidates, key=lambda t: t.stat().st_mtime)
+        for n in range(2, len(ordered) + 1):
+            sets += [list(c) for c in combinations(ordered, n)]
+    else:
+        import re as _re
+        by_name: dict[str, list[Path]] = {}
+        for t in candidates:
+            by_name.setdefault(_re.sub(r"-[0-9a-f]{16}$", "", t.stem), []).append(t)
+        sets += [sorted(v, key=lambda t: t.stat().st_mtime) for v in by_name.values() if len(v) > 1]
+    until_s = log.get("run_observed_until")
+    until = _dt.fromisoformat(str(until_s).replace("Z", "+00:00")) if until_s else None
+    receipt = receipt_path(path.parent, proj)
+    with _tf.TemporaryDirectory() as tmp:
+        tb = Path(tmp) / Path(bpath).name; tb.write_bytes(raw)
+        tm = Path(tmp) / "chunks.yaml"; tm.write_text(dump_manifest(manifest_from_bytes(raw, tb.name, rule)), encoding="utf-8")
+        results = []
+        for ts in sets:
+            obs = _observe(ts, tb, until, receipt if receipt.exists() else None, tm if receipt.exists() else None)
+            differ = sorted(k for k, v in prior.items() if obs.get(k) != v)
+            results.append((ts, obs, differ))
+    matches = [(ts, obs) for ts, obs, differ in results if not differ]
+    if len(matches) != 1:
+        click.echo(f"{tag}: {len(matches)} of {len(results)} candidate transcript set(s) reproduce every prior key"
+                   + ("; nothing written" if execute else ""))
+        for ts, obs, differ in results:
+            click.echo(f"   {' + '.join(t.name for t in ts)}: " + ("reproduces" if not differ else
+                       "differs on " + ", ".join(f"{k} {prior[k]}→{obs.get(k)}" for k in differ)))
+        return
+    ts, obs = matches[0]
+    added = sorted((set(obs) - set(prior)) & _REASONING_KEYS)          # the set --execute writes (round 2, S4)
+    click.echo(f"{tag}: {' + '.join(t.name for t in ts)} reproduces {len(prior)} prior key(s); adds {added}")
+    if not execute:
+        click.echo("   (report only; --execute writes the extension)"); return
+    _extend_run_observed(log, obs, recorded_by="d4d provenance extend-observed (#1010)",
+                         instrument="the transcript's reasoning measure (#1000/#1011), recomputed by "
+                                    "scripts/agentic_observed.py from the transcripts named on the bytes the "
+                                    "record hashed, under the record's own cut; every prior key reproduced exactly",
+                         basis={"transcripts": [t.name for t in ts], "observer_sha256": observer, **basis})
+    ProvenanceRecord(data=data).write(path)
+    click.echo(f"   wrote {path}")
 
 
 @provenance.command('annotate-observed')
@@ -884,11 +915,14 @@ def annotate_observed(project, method, label, run_observed, until, extend):
             "run re-record with --phase first (an agentic run; an API "
             "record would have been refused above).")
     prior = log.get("run_observed")
+    if extend and prior is not None and until and until != log.get("run_observed_until"):
+        raise click.ClickException(
+            f"--until {until} is not the record's own cut ({log.get('run_observed_until') or 'none'}); an "
+            "extension adds keys to the observation on record and keeps its cut (#1191 round 2, S2)")
+    if extend and prior is not None and prior == observed:
+        click.echo(f"{path}: already carries every key given; nothing to extend and nothing changed")
+        return
     if prior is not None and prior != observed and extend:
-        if until and log.get("run_observed_until") and until != log.get("run_observed_until"):
-            raise click.ClickException(
-                f"--until {until} is not the record's own cut {log['run_observed_until']}; an extension "
-                "adds keys to the observation on record and keeps its cut")
         _extend_run_observed(log, observed, recorded_by="d4d provenance annotate-observed --extend (#1010)",
                              instrument="values supplied on the command line by the launcher (--run); the prior "
                                         "keys reproduced exactly, which is the only proof this route offers — "
@@ -910,31 +944,10 @@ def annotate_observed(project, method, label, run_observed, until, extend):
         log["run_observed"] = observed
     if until:
         log["run_observed_until"] = until
-    elif "run_observed_until" in log:
-        del log["run_observed_until"]
-    log["run_observed_basis"] = (
-        "aggregate totals for the whole run, observed by the orchestrator "
-        "from the subagent runner's transcript. One number per run, not per "
-        "phase: four-phase project-agent mode runs every phase in one "
-        "context, so the run is the only observable boundary. Not the "
-        "runtime's own accounting, no input/output split, not billing-grade; "
-        "deliberately not shaped like api_usage (#681/#682). total_tokens "
-        "counts each API message once (a response spans several transcript "
-        "lines); duration_ms sums each invocation's own span, so a resumed "
-        "run excludes the gap. bundle_lines_read is the union of the run's "
-        "successful file-reading windows over the declared bundle (#700): "
-        "lines the run never opened, or opened only in a read that errored, "
-        "may have been reached by search, but nothing attests that. "
-        "assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, "
-        "visible_text_chars, tool_input_chars and reasoning_tokens_estimate "
-        "(output tokens minus a 4-chars-per-token estimate of the text and "
-        "tool-call payloads) are the transcript's reasoning measure (#1000), "
-        "thinking_tokens and "
-        "turns_with_thinking_tokens the runtime's own count where the "
-        "transcript carries usage.output_tokens_details; comparable in kind "
-        "with the API path's reasoning log, never to be averaged with it."
-        + (" Cut at run_observed_until: the agent kept acting after its run "
-           "completed, and the record describes the run." if until else ""))
+    # A cut the record carries is never removed by a call that did not name
+    # one (#1191 rounds 1 and 2, M1): the cut is part of the observation.
+    log["run_observed_basis"] = (_RUN_OBSERVED_BASIS + (_CUT_BASIS if log.get("run_observed_until") else "")
+                                 + _reasoning_basis(set(observed) & _REASONING_KEYS))
     rec = ProvenanceRecord(data=data)
     out = rec.write(path)
     click.echo(f"✓ {out}")

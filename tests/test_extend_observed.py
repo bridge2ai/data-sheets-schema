@@ -52,6 +52,53 @@ class Discovery(unittest.TestCase):
             self.assertEqual(got2, ["agent-av6-AI_READI-rep2"])                         # the canary is rep1's only
 
 
+class Siblings(unittest.TestCase):
+    def test_a_sibling_projects_transcript_is_never_offered_and_an_abbreviation_is_known(self):
+        """#1191 round 1, S3: VOICE_PEDIATRIC is `voicepeds` on disk and must
+        not be offered as VOICE's run."""
+        with tempfile.TemporaryDirectory() as tmp:
+            _transcripts(tmp, ["agent-av6-VOICE-rep3", "agent-avoicepeds-rep3", "agent-avoicepediatric-rep3",
+                               "agent-av6-VOICE-rep10"])
+            roots = [Path(tmp) / "cfg"]
+            got = lambda p, l: sorted(f.name.rsplit("-", 1)[0] for f in cli._transcript_candidates(p, l, roots))
+            self.assertEqual(got("VOICE", "x_rep3"), ["agent-av6-VOICE-rep3"])
+            self.assertEqual(got("VOICE_PEDIATRIC", "x_rep3"), ["agent-avoicepediatric-rep3", "agent-avoicepeds-rep3"])
+            self.assertEqual(got("VOICE", "x_rep1"), [])                                       # rep10 is not rep1
+
+    def test_the_driver_refuses_transcripts_without_a_project_and_more_than_four(self):
+        """#1191 round 1, S6; round 2, S7."""
+        import click.testing
+        with tempfile.TemporaryDirectory() as tmp:
+            ts = _transcripts(tmp, [f"agent-x-rep1-{i}" for i in range(5)])
+            with mock.patch.object(cli, "_require_repo_root_cwd", lambda *a, **k: None):
+                r = click.testing.CliRunner().invoke(cli.provenance, ["extend-observed", "--label", "L_rep1", "--method",
+                                                                       "claudecode_agent", "--transcript", str(ts[0])])
+                self.assertNotEqual(r.exit_code, 0); self.assertIn("pass --project", r.output)
+                args = ["extend-observed", "--label", "L_rep1", "--project", "P", "--method", "claudecode_agent"]
+                for t in ts:
+                    args += ["--transcript", str(t)]
+                r = click.testing.CliRunner().invoke(cli.provenance, args)
+                self.assertNotEqual(r.exit_code, 0); self.assertIn("at most four", r.output)
+
+    def test_one_projects_refusal_does_not_stop_the_others(self):
+        """#1191 round 1, S5."""
+        import click.testing
+        calls = []
+        def one(proj, method, label, given, execute, observer):
+            calls.append(proj)
+            if proj == "AI_READI":
+                raise click.ClickException("boom")
+        with mock.patch.object(cli, "_extend_one", one), \
+             mock.patch.object(cli, "_observer_sha256", lambda: "0" * 64), \
+             mock.patch.object(cli, "_require_repo_root_cwd", lambda *a, **k: None), \
+             mock.patch("data_sheets_schema.provenance.record_path_for",
+                        lambda project, method, label, concat_dir=None: Path(__file__)):
+            r = click.testing.CliRunner().invoke(cli.provenance, ["extend-observed", "--label", "L_rep1", "--method", "claudecode_agent"])
+        self.assertEqual(r.exit_code, 0, r.output); self.assertIn("AI_READI L_rep1: boom", r.output)
+        from data_sheets_schema.constants import PROJECTS
+        self.assertEqual(calls, list(PROJECTS))                                            # every project visited
+
+
 class Extension(unittest.TestCase):
     def _run(self, tmp, path, observations, execute=True, transcripts=()):
         """`observations`: transcript basename prefix → what the observer returns for it."""
@@ -87,8 +134,10 @@ class Extension(unittest.TestCase):
             self.assertEqual(ext["transcripts"], [t.name]); self.assertEqual(ext["bundle_basis"]["source"], "bundle on disk")
             self.assertEqual(ext["recorded_by"], "d4d provenance extend-observed (#1010)")
             self.assertEqual(len(ext["observer_sha256"]), 64); self.assertIn("agentic_observed.py", ext["instrument"])
-            self.assertIn("run_observed_extended", log["run_observed_basis"])                 # the basis describes the new keys (M3)
-            self.assertIn("upper bound", log["run_observed_basis"])
+            self.assertIn("upper bound", log["run_observed_basis"])                           # the basis describes the new keys (M3)
+            self.assertIn("No thinking_tokens", log["run_observed_basis"])                    # ... and only them (round 2, S1)
+            self.assertNotIn("turns_with_thinking_tokens are the runtime", log["run_observed_basis"])
+            self.assertIn("Cut at run_observed_until", log["run_observed_basis"])               # the record's cut is said (S5)
             self.assertEqual(log["run_observed_until"], "2026-08-28T10:00:00+00:00")     # untouched
             r = self._run(tmp, path, {"agent-av6-P-rep1": FULL}, transcripts=[t])
             self.assertIn("already carries the reasoning measure", r.output)
@@ -153,9 +202,17 @@ class Extension(unittest.TestCase):
         self.assertEqual(log["run_observed"], FULL)                                           # the receipt key stays out
         self.assertEqual([e["recorded_by"] for e in log["run_observed_extended"]], ["x"])
         self.assertTrue(log["run_observed_basis"].startswith("prior basis."))
+        self.assertEqual(log["run_observed_basis"].count("reasoning measure"), 1)
         cli._extend_run_observed(log, {**FULL, "thinking_tokens": 3}, recorded_by="y", instrument="j")
         self.assertEqual([e["recorded_by"] for e in log["run_observed_extended"]], ["x", "y"])   # the first trace kept (S4)
-        self.assertEqual(log["run_observed_basis"].count("run_observed_extended"), 1)
+        self.assertEqual(log["run_observed_basis"].count("reasoning measure"), 1)             # appended once (S3)
+        fresh = {"run_observed": dict(PRIOR), "run_observed_until": "2026-08-28T10:00:00+00:00"}   # no basis at all (S5)
+        cli._extend_run_observed(fresh, FULL, recorded_by="x", instrument="i")
+        self.assertTrue(fresh["run_observed_basis"].startswith("aggregate totals for the whole run"))
+        self.assertIn("Cut at run_observed_until", fresh["run_observed_basis"])
+        annotated = {"run_observed": dict(PRIOR), "run_observed_basis": cli._RUN_OBSERVED_BASIS + cli._reasoning_basis(set(FULL))}
+        cli._extend_run_observed(annotated, FULL, recorded_by="x", instrument="i")
+        self.assertEqual(annotated["run_observed_basis"].count("reasoning measure"), 1)      # today's annotate paragraph is not doubled (S3)
 
     def test_annotate_observed_extend_keeps_the_cut_and_names_its_own_route(self):
         """#1191 review, M1/M2: `--extend` deleted `run_observed_until` and
@@ -181,6 +238,28 @@ class Extension(unittest.TestCase):
                                                                        "--run", json.dumps({**FULL, "thinking_tokens": 1}),
                                                                        "--until", "2026-08-28T11:00:00+00:00"])
                 self.assertNotEqual(r.exit_code, 0); self.assertIn("not the record's own cut", r.output)
+                # the same --run again: nothing changes, the cut stays (round 2, M1)
+                before = path.read_text()
+                r = click.testing.CliRunner().invoke(cli.provenance, ["annotate-observed", "--project", "P", "--method",
+                                                                       "claudecode_agent", "--label", "L_rep1", "--extend",
+                                                                       "--run", json.dumps(FULL)])
+                self.assertEqual(r.exit_code, 0, r.output); self.assertIn("nothing changed", r.output)
+                self.assertEqual(path.read_text(), before)
+                # a plain annotate (no --extend) on a record with a cut and no --until keeps the cut too
+                fresh = _record(tmp)
+                r = click.testing.CliRunner().invoke(cli.provenance, ["annotate-observed", "--project", "P", "--method",
+                                                                       "claudecode_agent", "--label", "L_rep1",
+                                                                       "--run", json.dumps(PRIOR)])
+                self.assertEqual(r.exit_code, 0, r.output)
+                log = yaml.safe_load(fresh.read_text().split("\n", 1)[1])["phase_log"]
+                self.assertEqual(log["run_observed_until"], "2026-08-28T10:00:00+00:00"); self.assertIn("Cut at", log["run_observed_basis"])
+                # --until on the extend path where the record has no cut is refused, not dropped (round 2, S2)
+                d = yaml.safe_load(fresh.read_text().split("\n", 1)[1]); del d["phase_log"]["run_observed_until"]
+                fresh.write_text("# header\n" + yaml.safe_dump(d))
+                r = click.testing.CliRunner().invoke(cli.provenance, ["annotate-observed", "--project", "P", "--method",
+                                                                       "claudecode_agent", "--label", "L_rep1", "--extend",
+                                                                       "--run", json.dumps(FULL), "--until", "2026-08-28T11:00:00+00:00"])
+                self.assertNotEqual(r.exit_code, 0); self.assertIn("not the record's own cut (none)", r.output)
 
     def test_the_real_observer_on_a_synthetic_transcript_and_a_bundle_from_git(self):
         """#1191 review, S7: the observer is not stubbed — a small JSONL
