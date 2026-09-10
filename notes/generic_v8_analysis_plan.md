@@ -1421,9 +1421,17 @@ steps need:
     ids being positional), and writes a block whose `bundle_md5` is the
     record's own, with `bundle_basis` naming the commit, hashes and rule
     basis and `artifacts.manifest` carrying the rule and hashes instead of
-    a path. Where the record declares no path, no committed version
-    matches, git cannot supply the blob, or the blob is not UTF-8, the
-    block stays `checked: false` with that reason. `d4d receipts check`
+    a path. Nothing on disk gates the recovery (#1187 round 3): an absent
+    bundle, a missing, stale or unreadable manifest, and a drift are one
+    case, checkable from the record's path, hash and rule alone — and
+    where the bytes on disk are the record's and only the manifest is not,
+    those bytes are chunked in memory rather than asked of git (round 4).
+    A record carrying only a sha256 is recovered by it. Where the record
+    declares no path, no committed version matches, git cannot supply the
+    blob, the blob is not UTF-8, or neither the record nor a usable
+    manifest on disk says which rule to chunk under, the block stays
+    `checked: false`, the outcome named first and the disk state as
+    context. `d4d receipts check`
     and the runner's own receipts block make the same recovery, so the
     gate on attestation cannot say "unchecked" of a record the backfill
     checked. Recomputed over the corpus after a one-record canary: 47
