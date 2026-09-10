@@ -1394,9 +1394,14 @@ steps need:
     row or a removal claim against the full record or no named record (a
     row removing `x.leaf`, `x[0]`, or `x` from the core alone records
     nothing about `x` leaving the full record), or — for suppression only,
-    never for a removal claim — the bare name in a sentence carrying a
-    removal word ("### 4.7 Removed `errata`", "`conforms_to_standard` is
-    absent from both records"). Objects and leaves alike; `conforms_to_*`,
+    never for a removal claim — the bare name, read by the same `_named`
+    the removal claims use, in a prose sentence carrying a removal word
+    that is not about the core alone ("### 4.7 Removed `errata`",
+    "`conforms_to_standard` is absent from both records"; not "recorded
+    in `errata`", not "are absent from the core record", and no table
+    line — a dispositions row whose disposition the reader does not know
+    is the strict reader's, not a removal claim, #962). Objects and leaves
+    alike; `conforms_to_*`,
     `notes` and `source_caveats` exempt as from the receipt denominator.
     The finding needs the table the row belongs to, and the test is the
     run's own statement that it asked for one (`inputs.dispositions_expected`,
@@ -1404,15 +1409,21 @@ steps need:
     Disposition headers parses as one: on the 69 snapshot records never
     asked for a table the removals are listed under `removals_unrecorded`
     and are not findings (`snapshot_basis` says which; the #684 precedent),
-    on the 17 that were, they are. A paragraph saying a value "remains in",
+    on the 17 that were, they are; 38 removals are listed corpus-wide. A
+    paragraph saying a value "remains in",
     "stays in", "is kept in" a backticked slot path is read like a
-    `retained` row that names no record — a negation in the clause before
-    the verb ("nothing remains in") is not a claim, a class name or `HIPAA`
-    is not a path — satisfied at that path in either record with a dotted
-    step over a list read as `[*]`, or by a populated key of the leaf's name
-    under the claim's own root (prose names the leaf: "the four named
-    reviewers stay in `review_details`"), a `core.`/`full.` prefix picking
-    the record; 161 such claims corpus-wide, all but one satisfied.
+    `retained` row that names no record — a negator within a dozen
+    characters of the verb ("nothing remains in", "never remains in") is
+    not a claim, while one in an earlier clause ("the bundle names no
+    committee, so the statement was retained under `notes`") is; a class
+    name or `HIPAA` is not a path — satisfied at that path in either record
+    with a dotted step over a list read as `[*]` (a dispositions row reads
+    the same way, so the two readings of one claim agree), or by a
+    populated key of the leaf's name under the claim's own root (prose
+    names the leaf: "the four named reviewers stay in `review_details`"; a
+    dotted path whose root the record lacks is not satisfied elsewhere), a
+    `core.`/`full.` prefix picking the record; 172 such claims corpus-wide,
+    all but one satisfied.
     Recomputed with `backfill-checks --blocks report_claims --overwrite`
     over the 277 checked records: exactly the three records above gain a
     finding (the 2026-09-01 v7 arm reads 0 on all twelve before and after;
@@ -1423,18 +1434,22 @@ steps need:
     keyed the finding on a parsed table and suppressed on a name's root
     (5 moved — a v4 CM4AI record whose audit summary parsed as the table
     and whose prose recorded the removal, and the VOICE 04d canary whose
-    prose said "`conforms_to_standard` is absent from both records"). Two
-    further effects of the recompute, neither a finding: because a prose
-    retention claim is now a claim checked, `claims_checked` moved on 98
-    records and 63 reports that read no claim before read one now
-    (`canary.report_vacuous` flips from vacuous to measured: 16 of the
-    2026-07-31 arm, 8 of 2026-07-28, 7 of 2026-08-22, 5 of the 2026-09-01
-    v7 production arm — AI_READI rep1/rep2, CM4AI rep2/rep3, VOICE rep1 —
-    and the rest across earlier arms), so the v7 baseline arm's
-    `report_basis` for CM4AI and VOICE becomes measured 0 rather than
-    all-vacuous; the bar is 0 either way and no verdict moves, but the
-    `baseline_basis` line no longer appears on those rows and CHORUS is
-    the one project whose v7 replicates are all vacuous; and every block's
+    prose said "`conforms_to_standard` is absent from both records"); the
+    third read every backticked name in a sentence with a removal word as
+    a casualty, so a destination, a sentence about the core, or an
+    unparsed table row suppressed a full-record removal (four corpus
+    instances, none a finding), and its negation window dropped eleven
+    real retention claims. Two further effects of the recompute, neither a
+    finding: because a prose retention claim is now a claim checked,
+    `claims_checked` moved on 100 records and 65 reports that read no
+    claim before read one now (`canary.report_vacuous` flips from vacuous
+    to measured: 17 of the 2026-07-31 arm, 8 of 2026-07-28, 6 of the
+    2026-09-01 v7 production arm — AI_READI rep1/rep2, CHORUS rep1, CM4AI
+    rep2/rep3, VOICE rep1 — and the rest across earlier arms), so the v7
+    baseline arm's `report_basis` for every project becomes measured 0
+    rather than all-vacuous; the bar is 0 either way and no verdict moves,
+    but the `baseline_basis` line no longer appears on any of those rows;
+    and every block's
     `report_claims.schema` pin moved from the schema the runs attested to
     today's (the branch touches no schema file; the recompute re-pins to
     what `_sha256(FULL_SCHEMA)` returns now) — the re-attestation the

@@ -290,16 +290,18 @@ _PROSE_RETAINED = re.compile(
 #: A negation in the clause before the verb turns the sentence into the
 #: opposite of a retention ("nothing remains in `errata`", "it never
 #: remains in `notes`", "no longer kept in `x`"; #1175 review S2).
-_NEGATED_BEFORE = re.compile(r"\b(?:no longer|not|never|nothing|neither|nor|none|no)\b[^.;:]{0,60}$", re.I)
+_NEGATED_BEFORE = re.compile(r"\b(?:no longer|not|never|nothing|neither|none)\b[^.;:,()—-]{0,12}$", re.I)
 #: A slot path is snake_case segments; `HIPAA` and `CoreDataset` are not.
 _SLOT_PATH = re.compile(r"[a-z][a-z0-9_]*(?:\[(?:\d+|\*)\])?(?:\.[a-z][a-z0-9_]*(?:\[(?:\d+|\*)\])?)*")
 #: The weak signal that a report *records* a removal, for suppressing the
 #: snapshot finding only (#1175 review S1) — never for a removal claim,
 #: where precision matters: a bare backticked slot name in a sentence that
 #: carries a removal word. "### 4.7 Removed `errata`", "- `errata`
-#: **removed**", "`conforms_to_standard` is absent from both records".
+#: **removed**", "`conforms_to_standard` is absent from both records". The
+#: names are read by `_named`, so a destination ("recorded in `errata`")
+#: is not a casualty, a sentence about the core alone records nothing
+#: about the full record, and no table line is read (#1175 round 2, M1).
 _REMOVAL_WORD = re.compile(r"\b(?:removed|deleted|dropped|absent|omitted|stripped|withdrawn)\b", re.I)
-_BARE_TICKED = re.compile(r"`([a-z][a-z0-9_]*)`")
 
 #: Top-level keys a snapshot diff does not report (#1054): the class
 #: declarations and the commentary slots the receipt denominator also
@@ -438,6 +440,27 @@ def _core_declares(path: str, declared: dict[str, set[str]]) -> bool:
                          "the core schema could not be read")
     root = re.split(r"[.\[]", path, maxsplit=1)[0]
     return root in declared["CoreDataset"]
+
+
+def _dispositions_table_lines(text: str) -> set[str]:
+    """The stripped lines of every table under a `Dispositions` heading:
+    header, rule and rows, parseable or not."""
+    out: set[str] = set()
+    in_section = in_table = False
+    for line in text.splitlines():
+        if re.match(r"^#{1,6}\s+.*dispositions", line, re.I):
+            in_section, in_table = True, False
+            continue
+        if in_section and re.match(r"^#{1,6}\s+", line):
+            in_section = False
+        if not in_section:
+            continue
+        if line.lstrip().startswith("|"):
+            in_table = True
+            out.add(line.strip())
+        elif in_table and line.strip():
+            in_table = False
+    return out
 
 
 def disposition_rows(text: str) -> list[dict[str, str]]:
@@ -582,7 +605,12 @@ def check_report(report: Path, full: dict, core: dict,
     # the generic scan would read their free-text `reason` cell as a removal
     # claim ("Dropped the duplicate entry; slot kept", #962).
     rows = disposition_rows(text)
-    disposition_lines = {row["line"] for row in rows}
+    # Every line of the dispositions table, not only the rows that parsed:
+    # a row whose disposition cell the reader does not know ("Reviewed")
+    # carries a free-text reason ("Dropped the duplicate entry; slot kept")
+    # that is not a removal claim, and the generic scan below read it as
+    # one (#962; #1175 round 2, M1). The table is the strict reader's.
+    disposition_lines = {row["line"] for row in rows} | _dispositions_table_lines(text)
     for line in text.splitlines():
         cells = _cells(line)
         if not cells or line.strip() in disposition_lines:
@@ -715,13 +743,16 @@ def check_report(report: Path, full: dict, core: dict,
         claims += 1
         in_full, v_full = resolve(full, row["slot"])
         in_core, v_core = resolve(core, row["slot"])
+        # A dotted step over a list reads as `[*]` here as in prose (#1175
+        # round 2, S3): the two readings of one claim must not disagree.
+        full_has = (in_full and _populated(v_full)) or _resolve_loose(full, row["slot"])
+        core_has = (in_core and _populated(v_core)) or _resolve_loose(core, row["slot"])
         # A table with no record column reads like an empty cell here —
         # against either record — and is only counted apart (#1122).
         where = "either" if row["record"] == "no_record_column" else row["record"]
-        present = {"core": in_core and _populated(v_core),
-                   "full": in_full and _populated(v_full),
-                   "both": (in_core and _populated(v_core)) and (in_full and _populated(v_full)),
-                   "either": (in_core and _populated(v_core)) or (in_full and _populated(v_full))}[where]
+        present = {"core": core_has, "full": full_has,
+                   "both": core_has and full_has,
+                   "either": core_has or full_has}[where]
         if not present:
             # `both` on a slot the core class does not declare is a claim the
             # core cannot satisfy by construction (#990): the VOICE v8
@@ -755,7 +786,6 @@ def check_report(report: Path, full: dict, core: dict,
     # Paragraphs, not lines, as the removal scan reads them (#1175 review,
     # S3); table lines are skipped, their cells are read above.
     prose_retained = 0
-    classes = set(declared)
     for para in re.split(r"\n\s*\n", text):
         prose = " ".join(ln for ln in para.splitlines()
                          if not ln.lstrip().startswith("|") and not _cells(ln)
@@ -770,8 +800,8 @@ def check_report(report: Path, full: dict, core: dict,
             if head in targets and rest:
                 # "remains in `core.notes`" names the record, not a slot.
                 targets, path = {head: targets[head]}, rest
-            if path.split(".")[0] in classes or not _SLOT_PATH.fullmatch(path):
-                continue                       # `CoreDataset`, `HIPAA`: not a slot path
+            if not _SLOT_PATH.fullmatch(path):
+                continue                       # `CoreDataset`, `HIPAA`: not a slot path (snake_case only)
             claims += 1
             prose_retained += 1
             if any(_resolve_loose(rec, path) for rec in targets.values()):
@@ -781,12 +811,7 @@ def check_report(report: Path, full: dict, core: dict,
             # A populated key of that name under the claim's own root (or
             # anywhere, when the root is not a slot) satisfies it; only a
             # name found nowhere is a finding.
-            leaf = re.split(r"[.\[]", path)[-1] if not path.endswith("]") else re.split(r"[.\[]", path)[-2]
-            root = re.split(r"[.\[]", path, maxsplit=1)[0]
-            def within(rec):
-                sub = rec.get(root) if isinstance(rec, dict) and root in rec and root != leaf else rec
-                return _has_populated_key(sub, leaf)
-            if any(within(rec) for rec in targets.values()):
+            if any(_leaf_under_root(rec, path) for rec in targets.values()):
                 continue
             findings.append({
                 "kind": "retention_not_shown", "slot": written, "record": "either",
@@ -813,13 +838,15 @@ def check_report(report: Path, full: dict, core: dict,
     # sentence with a removal word (S1). The strict reading stays for
     # `removal_not_performed`, where precision matters.
     recorded = {n for n, where in removal_named if where in ("full", "both", "either")}
-    # The weak signal reads prose and non-dispositions tables only: a
-    # dispositions row's record cell was read strictly above, and a row
-    # removing `x` from the core must not record a full-record removal.
-    prose_only = "\n".join(ln for ln in text.splitlines() if ln.strip() not in disposition_lines)
+    # The weak signal reads prose only: every table line is left to the
+    # strict readers above (a row whose disposition cell does not parse
+    # carries a free-text reason that is not a statement about the record,
+    # #962), a sentence about the core alone records nothing about the full
+    # record, and `_named` keeps a destination out of the casualties.
+    prose_only = "\n".join(ln for ln in text.splitlines() if not ln.lstrip().startswith("|"))
     for sent in re.split(r"(?<=[.!?])\s+|\n", prose_only):
-        if _REMOVAL_WORD.search(sent):
-            recorded.update(_BARE_TICKED.findall(sent))
+        if _REMOVAL_WORD.search(sent) and _target(sent) != "core":
+            recorded.update(n for n in _named(sent) if not re.search(r"[.\[]", n))
     unrecorded: list[dict[str, str]] = []
     expected = bool(dispositions_expected)
     if isinstance(snapshot, dict):
@@ -870,6 +897,23 @@ def check_report(report: Path, full: dict, core: dict,
             "removals_unrecorded": [u["slot"] for u in unrecorded],
             "removals_unrecorded_count": len(unrecorded) if isinstance(snapshot, dict) else None,
             "instrument": REPORT_CLAIMS_INSTRUMENT}
+
+
+def _leaf_under_root(rec: Any, path: str) -> bool:
+    """The prose fallback (#1054): a populated key of the path's leaf name
+    under the path's root. A dotted path whose root the record lacks cannot
+    be satisfied by a leaf found elsewhere (#1175 round 2, S2); a bare name
+    is searched anywhere."""
+    segs = re.split(r"[.\[]", path.rstrip("]"))
+    segs = [s for s in segs if s and not s.isdigit() and s != "*"]
+    leaf, root = segs[-1], segs[0]
+    if not isinstance(rec, dict):
+        return False
+    if len(segs) == 1:
+        return _has_populated_key(rec, leaf)
+    if root not in rec:
+        return False
+    return _has_populated_key(rec.get(root), leaf)
 
 
 def _resolve_loose(data: Any, path: str) -> bool:

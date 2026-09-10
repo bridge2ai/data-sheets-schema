@@ -540,10 +540,10 @@ and is still vacuous is blind — UNMEASURABLE, the receipt precedent; an
 earlier record's vacuous row is shown as unmeasured and not gated, so the
 arm that defined the gate still satisfies it. The baseline skips vacuous
 replicates; a baseline arm whose replicates ran the check and read no
-claim, none measuring one (`canary.report_basis`: the v7 production arm for
-CHORUS; under report_claims v4 CM4AI and VOICE too, and AI_READI measured 0
-on rep3 — under v5 a prose retention claim is a claim, so CM4AI, VOICE and
-AI_READI measure 0 on some or all replicates), is a floor of 0 with
+claim, none measuring one (`canary.report_basis`: under report_claims v4 the v7 production arm for
+CHORUS, CM4AI and VOICE, with AI_READI measuring 0 on rep3 — under v5 a
+prose retention claim is a claim, so every project's v7 arm measures 0 on
+some replicates and none is all-vacuous today), is a floor of 0 with
 `baseline_basis` on the row, while a baseline whose checker never ran stays
 a missing baseline (#599). A report without the table is regenerated once
 like a contradiction; a rewrite that is truncated, drops the table or
@@ -584,7 +584,7 @@ saying a value "remains in" / "stays in" / "is kept in" a backticked slot
 path is a retention claim (not when negated, not on a class name),
 satisfied at that path in either record with a dotted step over a list
 read as `[*]`, or by a populated key of the leaf's name under the claim's
-root. A prose claim is a claim checked, so 63 reports that read no claim
+root. A prose claim is a claim checked, so 65 reports that read no claim
 under v4 read one under v5. The v7 production arm reads 0 findings on
 all twelve either way. Since #998 the report phase carries the core
 class's top-level slot inventory (`core_inventory_block`) before its

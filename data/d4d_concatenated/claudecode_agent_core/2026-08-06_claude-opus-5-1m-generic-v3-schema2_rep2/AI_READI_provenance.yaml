@@ -406,6 +406,7 @@ report_claims:
   - file_collections
   - distribution_dates
   - third_party_sharing
+  - license_and_use_terms
   - ip_restrictions
   - regulatory_restrictions
   - maintainers
@@ -414,7 +415,7 @@ report_claims:
   - retention_limit
   - related_datasets
   - external_resources
-  removals_unrecorded_count: 13
+  removals_unrecorded_count: 14
   instrument: 'v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
     snapshot carried that the final full record does not, with no `removed` row or
     removal sentence naming it, is `removal_not_recorded`; a prose retention claim

@@ -650,6 +650,34 @@ class UnrecordedRemovalTest(Harness):
         self.assertEqual(b["removals_unrecorded"], [])
         self.assertEqual([f for f in b["findings"] if f["kind"] == "removal_not_performed"], [])
 
+    def test_the_weak_removal_signal_reads_casualties_not_destinations_or_the_core(self):
+        """#1175 round 2, M1: a destination ("recorded in `errata`"), a sentence
+        about the core alone, or a table line with a removal word records
+        nothing about a full-record removal."""
+        snap = {"keywords": ["a"], "errata": [{"a": 1}], "funders": [{"n": 1}], "compression": "gz", "splits": [{"s": 1}]}
+        md = (self.TABLE + "| `errata` | Reviewed | both | Dropped the duplicate entry; slot kept |\n\n"
+              "- `keywords`, `funders` and `compression` are absent from the core record.\n\n"
+              "The enum was dropped; the facts are recorded in `errata`.\n\n"
+              "**`splits`.** Removed from the full record; nothing to keep.\n")
+        b = self.check_with(md, snap, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual(sorted(f["slot"] for f in b["findings"] if f["kind"] == "removal_not_recorded"),
+                         ["compression", "errata", "funders"])
+        self.assertEqual(b["removals_unrecorded"], ["errata", "funders", "compression"])
+
+    def test_a_dotted_claim_whose_root_is_absent_is_not_satisfied_elsewhere(self):
+        """#1175 round 2, S2."""
+        md = self.TABLE + "\nThe figures remain in `errata.description`.\n"
+        b = self.check(md, full={"keywords": ["a"], "description": "top-level"}, core={"keywords": ["a"]})
+        self.assertEqual([f["slot"] for f in b["findings"]], ["errata.description"])
+        b = self.check(md, full={"keywords": ["a"], "errata": [{"description": "x"}]}, core={"keywords": ["a"]})
+        self.assertEqual(b["findings"], [])
+
+    def test_a_table_row_steps_over_a_list_as_prose_does(self):
+        """#1175 round 2, S3: one claim, one reading."""
+        md = self.TABLE + "| `splits.split_details` | retained | full | fine |\n"
+        b = self.check(md, full={"keywords": ["a"], "splits": [{"split_details": "70/15/15"}]}, core={"keywords": ["a"]})
+        self.assertEqual(b["findings"], [])
+
     def test_a_negated_retention_and_a_non_slot_token_are_not_claims(self):
         """#1175 review, S2."""
         md = (self.TABLE + "\nNothing remains in `errata`. It never remains in `notes`; neither record retains it, "
@@ -658,6 +686,10 @@ class UnrecordedRemovalTest(Harness):
         b = self.check(md, full={"keywords": ["a"]}, core={"keywords": ["a"]})
         self.assertEqual(b["findings"], [])
         self.assertEqual(b["prose_retention_claims"], 0)
+        # a negator in an earlier clause does not negate the claim (#1175 round 2, S1)
+        md = self.TABLE + "\nThe bundle names no formal committee, so the statement was retained under `notes`.\n"
+        b = self.check(md, full={"keywords": ["a"], "notes": "x"}, core={"keywords": ["a"]})
+        self.assertEqual(b["prose_retention_claims"], 1); self.assertEqual(b["findings"], [])
 
     def test_prose_paths_step_over_lists_and_a_wrapped_sentence_is_one_claim(self):
         """#1175 review, S3/S4: `splits.split_details` means `splits[*].split_details`,
