@@ -249,6 +249,19 @@ class Extension(unittest.TestCase):
                + " No thinking_tokens were requested by the curator, who checked by hand."}
         out = cli._basis_with(log, set(FULL) & cli._REASONING_KEYS)
         self.assertIn("requested by the curator", out)
+        # a round-3 basis (every estimate key named, the clause inside the sentence) too (round 6, S2)
+        r3 = (cli._RUN_OBSERVED_BASIS + " " + ", ".join(cli._ESTIMATE_KEYS[:-1]) + " and " + cli._ESTIMATE_KEYS[-1]
+              + " (output tokens minus a 4-chars-per-token estimate of the text and tool-call payloads — a "
+                "subtraction, an upper bound, not a measurement) are the transcript's reasoning measure "
+                "(#1000/#1011), added after the run under run_observed_extended; comparable in kind with the "
+                "API path's reasoning log, never to be averaged with it."
+              + " No thinking_tokens: no line of the transcript carries usage.output_tokens_details, so "
+                "the runtime's own count is not measured for this run.")
+        out3 = cli._basis_with({"run_observed": dict(FULL), "run_observed_basis": r3}, set(FULL) & cli._REASONING_KEYS)
+        self.assertEqual(out3.count("reasoning measure"), 1)
+        self.assertEqual(out3.count("No thinking_tokens"), 1)
+        self.assertEqual(cli._basis_with({"run_observed": dict(FULL), "run_observed_basis": out3},
+                                         set(FULL) & cli._REASONING_KEYS), out3)
         # a round-4 basis (the estimate sentence with the aside inside it) is stripped, not doubled (round 5, S2)
         old_shape = {"run_observed": dict(FULL),
                      "run_observed_basis": cli._RUN_OBSERVED_BASIS + cli._superseded_reasoning_basis(set(FULL))}
@@ -269,6 +282,9 @@ class Extension(unittest.TestCase):
         out = cli._basis_with(curated, set(FULL) & cli._REASONING_KEYS)
         self.assertIn("see the launch log for the second transcript.", out)
         self.assertEqual(out.count("Of the transcript's reasoning measure"), 1)
+        # the sentence a lower-case curator sentence follows here is the
+        # negative, and it is the one that doubled before (round 6, S1)
+        self.assertEqual(out.count("No thinking_tokens"), 1)
         self.assertEqual(cli._basis_with({**curated, "run_observed_basis": out}, set(FULL) & cli._REASONING_KEYS), out)
         # a basis with no terminal full stop is not glued to the appended sentence (S3)
         log = {"run_observed": dict(FULL), "run_observed_basis": "prior basis with no full stop"}

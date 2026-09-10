@@ -593,13 +593,18 @@ _LEGACY_REASONING_SENTENCES = (
 
 
 def _superseded_reasoning_basis(keys: set) -> str:
-    """The estimate and negative sentences rounds 3 and 4 emitted, for the
-    same key set — key-set-dependent, so a literal cannot cover them
-    (#1191 round 5, S2), and a record written by that code must not double
-    its paragraph on the next recomputation."""
+    """The sentences rounds 3 and 4 emitted for the same key set — both are
+    key-set-dependent, so a literal cannot cover them (#1191 round 5, S2;
+    round 6, S2), and a record written by either must not double its
+    paragraph on the next recomputation. Round 3 named every estimate key
+    unconditionally and put the after-the-run clause inside the sentence;
+    round 4 enumerated the keys present and carried the subtraction as an
+    aside. Both negatives are here too, and round 4's
+    `turns_with_thinking_tokens`-only sentence."""
     present = [k for k in _ESTIMATE_KEYS if k in keys]
     out = []
     if present:
+        # round 4
         out.append(
             " Of the transcript's reasoning measure (#1000/#1011) the observation carries "
             + ", ".join(present)
@@ -607,9 +612,21 @@ def _superseded_reasoning_basis(keys: set) -> str:
                "and tool-call payloads: a subtraction, an upper bound, not a measurement"
                if "reasoning_tokens_estimate" in present else "")
             + "; comparable in kind with the API path's reasoning log, never to be averaged with it.")
+        # round 3
+        out.append(
+            " " + ", ".join(_ESTIMATE_KEYS[:-1]) + " and " + _ESTIMATE_KEYS[-1]
+            + " (output tokens minus a 4-chars-per-token estimate of the text and tool-call payloads — a "
+              "subtraction, an upper bound, not a measurement) are the transcript's reasoning measure "
+              "(#1000/#1011), added after the run under run_observed_extended; comparable in kind with the "
+              "API path's reasoning log, never to be averaged with it.")
     if "thinking_tokens" not in keys and present:
         out.append(" No thinking_tokens: the observation carries none, so the runtime's own count is not "
                    "measured for this run.")
+        out.append(" No thinking_tokens: no line of the transcript carries usage.output_tokens_details, so "
+                   "the runtime's own count is not measured for this run.")
+    if "turns_with_thinking_tokens" in keys and "thinking_tokens" not in keys:
+        out.append(" turns_with_thinking_tokens counts the turns whose transcript line carries "
+                   "usage.output_tokens_details; the observation carries no thinking_tokens.")
     return "".join(out)
 
 
@@ -624,7 +641,11 @@ def _own_sentences() -> frozenset:
     keys = list(_REASONING_KEYS)
     for n in range(len(keys) + 1):
         for combo in itertools.combinations(keys, n):
-            for ext in (None, set(combo), {k for k in _REASONING_KEYS if k not in combo} or None):
+            # `named` is `extended ∩ keys`, so a superset of `combo` yields the
+            # same text as `combo` itself and the complement yields `None`'s
+            # (#1191 round 6, S3). Enumerating the subsets of `combo` covers
+            # every clause the function can emit.
+            for ext in (None, set(combo)):
                 for s in _split_sentences(_reasoning_basis(set(combo), extended=ext)):
                     out.add(s)
             for s in _split_sentences(_superseded_reasoning_basis(set(combo))):
