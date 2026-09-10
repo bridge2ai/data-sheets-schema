@@ -142,8 +142,15 @@ def check(method, label, project, write, strict):
         # `runs select` then ranked (Codex M2). Under --strict a failing
         # review is not written; without it the block is written with its
         # findings, and `review_evidence` keeps it out of the ranking.
-        click.echo(f"   not written: --strict and {len(block['findings'])} finding(s), "
-                   f"{len(block['unanswered'])} unanswered")
+        n_u = len(block["unanswered"]) + int(block.get("unanswered_truncated") or 0)
+        click.echo(f"   not written: --strict and {len(block['findings'])} finding(s), {n_u} unanswered")
+        # The block already in the record is named, since it keeps ranking
+        # (round 9, SF-R9-4): a redone review that fails leaves the earlier one standing.
+        prior = (yaml.safe_load(bc._split_header(prov.read_text(encoding="utf-8"))[1]) or {}).get("review")
+        if isinstance(prior, dict):
+            prior_sha = str((((prior.get("artifacts") or {}).get("pack") or {}).get("sha256")) or "")[:12]
+            click.echo(f"   the record still carries its earlier review block (pack {prior_sha}…, "
+                       f"{len(prior.get('findings') or [])} finding(s)); it was not replaced")
         sys.exit(1)
     if write:
         # Keys kept even when absent (#1097): dropping `reviewed_at` when the
@@ -355,12 +362,16 @@ def agree_cmd(method, label, project, write):
             raise click.ClickException(f"missing {paths[k]}")
     from data_sheets_schema.review_pack import UnreadableYAML, _load_mapping
     try:
-        pack_raw = paths["pack"].read_bytes()
+        pack_raw = paths["pack"].read_bytes(); b_raw = paths["review_b"].read_bytes()
         pack = _load_mapping(paths["pack"], raw=pack_raw)
         a = _load_mapping(paths["review"])
-        b = _load_mapping(paths["review_b"])
+        b = _load_mapping(paths["review_b"], raw=b_raw)                 # the bytes rated are the bytes hashed (round 9, M-R9-2)
     except UnreadableYAML as exc:
         raise click.ClickException(str(exc)) from exc
+    from data_sheets_schema.review_pack import pack_shape_problem
+    shape = pack_shape_problem(pack)
+    if shape:
+        raise click.ClickException(f"{paths['pack']} is not a review pack: {shape}")   # not the review's fault (round 9, SF-R9-1)
     pack["_sha256"] = hashlib.sha256(pack_raw).hexdigest()
     # A rating pair is only as good as its ratings: an invalid review
     # (duplicate ids, out-of-vocabulary verdicts, unknown items) must not
@@ -386,7 +397,7 @@ def agree_cmd(method, label, project, write):
         if not isinstance(rec.get("review"), dict):
             raise click.ClickException("no review block to attach reliability to; run `d4d review check --write` first")
         rec["review"]["reliability"] = {**rel,
-            "review_b_sha256": hashlib.sha256(paths["review_b"].read_bytes()).hexdigest(),
+            "review_b_sha256": hashlib.sha256(b_raw).hexdigest(),
             "recorded_by": "d4d review agree"}
         ProvenanceRecord(data=rec).write(prov)
         click.echo(f"   ✓ reliability written into {prov}")

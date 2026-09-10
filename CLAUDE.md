@@ -742,8 +742,11 @@ and a nested `reliability.attested_artifacts` pin are #1189.
 (differences ≤ `--review-margin`, default 2, are a tie: a 50-slot sample
 carries ±2–3 of binomial noise) → most slots → label. The review rank
 applies only when every eligible replicate carries a checked `review` block
-(`--ignore-reviews` switches it off), and the `canonical` block records
-`reviews_applied`, each candidate's `review_adverse`, and the criterion
+with no finding and no unanswered item — a block that is checked but not
+evidence is named as such, not as absent (`review_evidence_why`, #1124
+round 9) — (`--ignore-reviews` switches it off), and the `canonical`
+block records `reviews_applied`, each candidate's `review_adverse` (and
+`review_not_evidence` where a block was set aside), and the criterion
 text. Under the coverage-only criterion the v7 arm picked the most-adverse
 replicate in 3 of 4 projects; under this one AI_READI and VOICE moved to
 rep1.

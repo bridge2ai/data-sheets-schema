@@ -884,6 +884,16 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
             block = yaml.safe_load(prov.read_text().split("\n", 1)[1])["review"]
             self.assertTrue(block["checked"]); self.assertTrue(block["findings"])
             self.assertIsNone(rp.review_evidence(block))                                  # written, not ranked
+            self.assertIn("finding(s)", rp.review_evidence_why(block))                     # ... and said to be (round 9, M-R9-1)
+            self.assertEqual(rp.review_evidence_why(None), "no review block")
+            self.assertEqual(rp.review_evidence_why({"checked": False}), "not checked")
+            self.assertIsNone(rp.review_evidence_why({"checked": True, "adverse": 0, "findings": [], "unanswered": []}))
+            self.assertIn("50 unanswered", rp.review_evidence_why({"checked": True, "adverse": 0, "findings": [],
+                                                                    "unanswered": ["x"] * 30, "unanswered_truncated": 20}))
+            # a second failing `--strict` names the block that stays (SF-R9-4)
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                again = click.testing.CliRunner().invoke(review_cli, base + ["--strict"])
+            self.assertEqual(again.exit_code, 1); self.assertIn("still carries its earlier review block", again.output)
             self.assertIsNone(rp.review_evidence({"checked": True, "adverse": 2, "findings": [], "unanswered": ["slot-001"]}))
             self.assertEqual(rp.review_evidence({"checked": True, "adverse": 2, "findings": [], "unanswered": []}), 2)
             self.assertIsNone(rp.review_evidence({"checked": True, "adverse": "2", "findings": [], "unanswered": []}))
@@ -944,12 +954,14 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
                 if Path(dst) == out:
                     raise OSError("disk full")
                 return real(src, dst)
-            with mock.patch("data_sheets_schema.review_pack.os.replace", flaky) if False else mock.patch("os.replace", flaky):
+            with mock.patch("os.replace", flaky):
                 with self.assertRaises(OSError):
                     rp.write_pack(prov, other, self.SMALLER, force=True)
             self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)   # the pinned bytes survive
             self.assertEqual(calls, [ipath.name, out.name])                       # instruction first, pack last
             self.assertEqual(sorted(p.name for p in out.parent.glob("*.tmp")), [])  # no temp file lingers
+            self.assertEqual(sorted(p.name for p in out.parent.glob(".*.tmp")), [])
+            self.assertFalse(any("review" in p.name and p.suffix == ".tmp" for p in out.parent.iterdir()))
 
     def test_an_unusable_snapshot_leaves_the_receipts_block_unchecked(self):
         """#1124 Codex review, M7 and SF2: `block_for` ran the index join over

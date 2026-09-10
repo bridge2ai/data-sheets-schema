@@ -899,14 +899,23 @@ def write_pack(provenance: Path, instruction_file: Path | None = None,
 
 
 def _replace(path: Path, text: str) -> None:
+    """Write beside the target and rename over it. The temp name is unique
+    per call (round 9, SF-R9-3: a fixed name let two writers rename each
+    other's half-written bytes over the pinned pack) and never matches
+    `{P}_review*.yaml`; a failed rename leaves nothing behind."""
     import os
-    tmp = path.with_name(path.name + ".tmp")
+    import tempfile
+    fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    tmp = Path(tmp_name)
     try:
-        tmp.write_text(text, encoding="utf-8")
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(text)
         os.replace(tmp, path)
     finally:
-        if tmp.exists():
-            tmp.unlink()
+        try:
+            tmp.unlink(missing_ok=True)
+        except OSError:
+            pass
 
 
 def pack_shape_problem(pack: Any) -> str | None:
@@ -925,6 +934,23 @@ def pack_shape_problem(pack: Any) -> str | None:
     return None
 
 
+def review_evidence_why(block: Any) -> str | None:
+    """Why a record's review block is not evidence for canonical selection,
+    or None when it is (#1124 round 9, M-R9-1): "no review block", "not
+    checked", or the findings and unanswered items that keep a checked
+    block out of the ranking — three states, because a block that is not
+    evidence is not the same as no block, and `runs select` says which."""
+    if not isinstance(block, dict):
+        return "no review block"
+    if not block.get("checked") or not isinstance(block.get("adverse"), int):
+        return "not checked"
+    n_f = len(block.get("findings") or [])
+    n_u = len(block.get("unanswered") or []) + int(block.get("unanswered_truncated") or 0)
+    if n_f or n_u:
+        return f"not evidence: {n_f} finding(s), {n_u} unanswered"
+    return None
+
+
 def review_evidence(block: Any) -> int | None:
     """The adverse count a checked review block contributes to canonical
     selection (#660), or None where the block is not evidence: unchecked,
@@ -932,11 +958,7 @@ def review_evidence(block: Any) -> int | None:
     out-of-vocabulary verdict, an item answered twice) or any unanswered
     item — a partial or mismatched review's count is a count of something
     else (#1124 Codex review, M2)."""
-    if not isinstance(block, dict) or not block.get("checked") or not isinstance(block.get("adverse"), int):
-        return None
-    if block.get("findings") or block.get("unanswered") or block.get("unanswered_truncated"):
-        return None
-    return block["adverse"]
+    return None if review_evidence_why(block) else block["adverse"]
 
 
 def check_review(pack: dict[str, Any], review: dict[str, Any]) -> dict[str, Any]:

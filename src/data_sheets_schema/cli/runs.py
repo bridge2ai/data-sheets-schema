@@ -1444,23 +1444,27 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
             f"selection needs at least two replicates of {config!r}; "
             f"found {len(labels)}")
 
-    def review_adverse(label: str) -> int | None:
-        """The checked review block's adverse count, or None when the record
-        carries none (absence is not zero adverse)."""
+    def review_adverse(label: str) -> tuple[int | None, str | None]:
+        """(adverse, why): the review block's adverse count where the block
+        is evidence, else None and the reason — no block, not checked, or
+        a checked block with findings or unanswered items, which is not the
+        same as no block (#1124 round 9, M-R9-1). Absence is not zero adverse."""
         pp = record_path_for(project, method, label, CONCAT_DIR)
         if not pp.exists():
-            return None
+            return None, "no record"
         try:
             rec = _yaml.safe_load(pp.read_text(encoding="utf-8")) or {}
         except (_yaml.YAMLError, OSError, UnicodeDecodeError):
-            return None
-        from data_sheets_schema.review_pack import review_evidence
-        return review_evidence(rec.get("review") if isinstance(rec, dict) else None)
+            return None, "record unreadable"
+        from data_sheets_schema.review_pack import review_evidence, review_evidence_why
+        block = rec.get("review") if isinstance(rec, dict) else None
+        return review_evidence(block), review_evidence_why(block)
 
     candidates = []
     adverse_of: dict[str, int | None] = {}
+    evidence_why: dict[str, str | None] = {}
     for label in labels:
-        adverse_of[label] = review_adverse(label)
+        adverse_of[label], evidence_why[label] = review_adverse(label)
         record = base_dir / label / f"{project}_d4d.yaml"
         if not record.exists():
             candidates.append((label, None, "no record", 0, "no record", "no record"))
@@ -1493,7 +1497,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
                  f"this run)" if recorded != status and
                  recorded in (VALID, INVALID) else "")
         adv = adverse_of.get(label)
-        rv = f"  {adv:2d} adverse" if adv is not None else "  no review"
+        rv = f"  {adv:2d} adverse" if adv is not None else f"  {evidence_why.get(label) or 'no review'}"
         click.echo(f" {mark}{label:52s} {slots:3d} slots{rv}  {detail}{drift}")
 
     if not eligible:
@@ -1511,7 +1515,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
     if ignore_reviews:
         reviews_applied, why = False, "--ignore-reviews"
     elif unreviewed:
-        reviews_applied, why = False, f"no checked review block on {', '.join(unreviewed)}"
+        reviews_applied, why = False, "; ".join(f"{lab}: {evidence_why.get(lab) or 'no review block'}" for lab in unreviewed)
     else:
         reviews_applied, why = True, None
     if reviews_applied:
@@ -1612,7 +1616,8 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
         "selected_from": [
             {"label": lab, "slots": n, "validation": detail,
              "validation_recorded_at_run_time": rec,
-             "review_adverse": adverse_of.get(lab)}
+             "review_adverse": adverse_of.get(lab),
+             **({"review_not_evidence": evidence_why[lab]} if evidence_why.get(lab) else {})}
             for lab, _r, st, n, rec, detail in candidates],
         "margin_over_runner_up": margin,
         "runtime": winner_runtime,
