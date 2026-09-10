@@ -214,9 +214,10 @@ reads unmeasured rather than 0 vs 1 — the record's own report block read
 no claim (`claims_checked` 0, #684) — with the D4 block (#906) kept under
 `prior_verdict` beneath it, and #891's beneath that; status `regressed`
 on the British row either way, 45 vs 43 under instrument v3 — and under
-v4 (#1006), which widens seven patterns and adds `grey`, the run and all
-three 2026-08-22c baseline replicates read the same (45; 33, 43, 0), so
-that revision does not call for a third re-derivation; every other row
+v4 as proposed in #1173 (#1006; open at the time of writing, its patterns
+checked at that branch's head), the run and all three 2026-08-22c
+baseline replicates read the same (45; 33, 43, 0), so that revision as
+proposed would not call for a third re-derivation; every other row
 unchanged.
 
 **CM4AI rep1's canary block, re-derived (2026-09-09, #922).** The block
