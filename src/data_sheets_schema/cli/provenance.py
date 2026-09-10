@@ -559,14 +559,57 @@ _CUT_BASIS = (" Cut at run_observed_until: the agent kept acting after its run "
 
 _ESTIMATE_KEYS = ("assistant_turns", "output_tokens", "thinking_blocks", "thinking_text_chars",
                   "visible_text_chars", "tool_input_chars", "reasoning_tokens_estimate")
-#: The sentences `_reasoning_basis` owns, by their opening words, so a
-#: recomputation can strip its own earlier statements and re-emit them for
-#: the keys now present (#1191 round 3, M1).
-_REASONING_OPENERS = ("Of the transcript's reasoning measure", "No thinking_tokens", "thinking_tokens and turns_with_thinking_tokens",
-                      "turns_with_thinking_tokens counts", "These were added after the run")
+#: Sentences `_reasoning_basis` can emit, recognised whole rather than by
+#: their opening words, so a recomputation strips its own earlier
+#: statements (#1191 round 3, M1) and never a sentence a curator wrote
+#: that happens to begin the same way (round 4, S3). Every sentence the
+#: function can produce for any key set is generated and matched exactly;
+#: the two literal forms round 2 and `annotate-observed` wrote are listed
+#: beside them.
+_LEGACY_REASONING_SENTENCES = (
+    "assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, visible_text_chars, "
+    "tool_input_chars and reasoning_tokens_estimate (output tokens minus a 4-chars-per-token estimate "
+    "of the text and tool-call payloads — a subtraction, an upper bound, not a measurement) are the "
+    "transcript's reasoning measure (#1000/#1011), added after the run under run_observed_extended; "
+    "comparable in kind with the API path's reasoning log, never to be averaged with it.",
+    "assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, visible_text_chars, "
+    "tool_input_chars and reasoning_tokens_estimate (output tokens minus a 4-chars-per-token estimate "
+    "of the text and tool-call payloads) are the transcript's reasoning measure (#1000), thinking_tokens "
+    "and turns_with_thinking_tokens the runtime's own count where the transcript carries "
+    "usage.output_tokens_details; comparable in kind with the API path's reasoning log, never to be "
+    "averaged with it.",
+    "thinking_tokens and turns_with_thinking_tokens are the runtime's own count on the turns whose "
+    "transcript line carries usage.output_tokens_details; where turns_with_thinking_tokens is fewer "
+    "than assistant_turns the count is partial (a resumed run whose earlier transcript predates the "
+    "detail).",
+    "thinking_tokens and turns_with_thinking_tokens are the runtime's own count on the turns whose "
+    "transcript line carries usage.output_tokens_details; where turns_with_thinking_tokens is fewer "
+    "than the run's turns the count is partial (a resumed run whose earlier transcript predates the "
+    "detail).",
+    "These were added after the run, under run_observed_extended, which names their source.",
+)
 
 
-def _reasoning_basis(keys: set, *, extended: bool = False) -> str:
+def _own_sentences() -> set:
+    """Every sentence `_reasoning_basis` can emit, for any key set, plus the
+    forms earlier rounds wrote — the exact strings a recomputation strips."""
+    import itertools
+    out = set(_LEGACY_REASONING_SENTENCES)
+    keys = list(_REASONING_KEYS)
+    for n in range(len(keys) + 1):
+        for combo in itertools.combinations(keys, n):
+            for ext in (None, set(combo)):
+                for s in _split_sentences(_reasoning_basis(set(combo), extended=ext)):
+                    out.add(s)
+    return out
+
+
+def _split_sentences(text: str) -> list:
+    import re as _re
+    return [s for s in (p.strip() for p in _re.split(r"(?<=[.])\s+(?=[A-Z(])", text.strip())) if s]
+
+
+def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
     """What the reasoning keys mean — the ones present, and no others
     (#1191 round 2, S1; round 3, S3): the record's own account describes
     every number it carries and none it does not. The negative is a fact
@@ -578,24 +621,28 @@ def _reasoning_basis(keys: set, *, extended: bool = False) -> str:
         parts.append(
             " Of the transcript's reasoning measure (#1000/#1011) the observation carries "
             + ", ".join(present)
-            + (" — reasoning_tokens_estimate is output tokens minus a 4-chars-per-token estimate of the text "
-               "and tool-call payloads: a subtraction, an upper bound, not a measurement"
-               if "reasoning_tokens_estimate" in present else "")
             + "; comparable in kind with the API path's reasoning log, never to be averaged with it.")
-    if "thinking_tokens" in keys:
+        if "reasoning_tokens_estimate" in present:
+            parts.append(" reasoning_tokens_estimate is output tokens minus a 4-chars-per-token estimate of "
+                         "the text and tool-call payloads: a subtraction, an upper bound, not a measurement.")
+    thinking = [k for k in ("thinking_tokens", "turns_with_thinking_tokens") if k in keys]
+    if thinking:
         parts.append(
-            " thinking_tokens and turns_with_thinking_tokens are the runtime's own count on the turns whose "
-            "transcript line carries usage.output_tokens_details; where turns_with_thinking_tokens is fewer "
-            "than the run's turns the count is partial (a resumed run whose earlier transcript predates the "
-            "detail).")
-    elif "turns_with_thinking_tokens" in keys:
-        parts.append(" turns_with_thinking_tokens counts the turns whose transcript line carries "
-                     "usage.output_tokens_details; the observation carries no thinking_tokens.")
+            " " + " and ".join(thinking) + (" are" if len(thinking) > 1 else " is")
+            + " the runtime's own count on the turns whose transcript line carries "
+            "usage.output_tokens_details"
+            + ("; where turns_with_thinking_tokens is fewer than the run's turns the rest of the run's "
+               "thinking is unmeasured, so the count is partial."
+               if "turns_with_thinking_tokens" in thinking else
+               "; the observation carries no turns_with_thinking_tokens, so how much of the run it covers "
+               "is not stated."))
     elif present:
         parts.append(" No thinking_tokens: the observation carries none, so the runtime's own count is not "
                      "measured for this run.")
     if parts and extended:
-        parts.append(" These were added after the run, under run_observed_extended, which names their source.")
+        named = sorted(k for k in extended if k in keys)
+        parts.append(f" Of these, {', '.join(named)} " + ("were" if len(named) > 1 else "was")
+                     + " added after the run, under run_observed_extended, which names the source.")
     return "".join(parts)
 
 
@@ -607,16 +654,16 @@ def _basis_with(log: dict, keys: set) -> str:
     module wrote before are stripped first (round 3, M1), and the one
     paragraph today's `annotate-observed` writes for the same keys is
     replaced rather than doubled (round 2, S3)."""
-    import re as _re
     b = str(log.get("run_observed_basis") or "").rstrip() or _RUN_OBSERVED_BASIS
+    if not b.endswith((".", "!", "?")):
+        b += "."                                   # so a sentence appended to it can be split off again (round 4, S3)
     if log.get("run_observed_until") and "Cut at run_observed_until" not in b:
         b += _CUT_BASIS
-    # strip every sentence this module owns, in either of its two forms
-    sentences = _re.split(r"(?<=[.])\s+(?=[A-Za-z])", b)
-    kept = [s for s in sentences if not s.startswith(_REASONING_OPENERS)
-            and not s.startswith(("assistant_turns, output_tokens, thinking_blocks", "thinking_tokens and"))]
-    b = " ".join(kept).rstrip()
-    return b + _reasoning_basis(keys, extended=bool(log.get("run_observed_extended")))
+    mine = _own_sentences()
+    b = " ".join(s for s in _split_sentences(b) if s not in mine).rstrip()
+    added = {k for e in (log.get("run_observed_extended") or []) if isinstance(e, dict)
+             for k in (e.get("keys_added") or [])}
+    return b + _reasoning_basis(keys, extended=added)
 
 
 def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrument: str,
@@ -973,7 +1020,8 @@ def annotate_observed(project, method, label, run_observed, until, extend):
     # one (#1191 rounds 1 and 2, M1): the cut is part of the observation.
     log["run_observed_basis"] = (_RUN_OBSERVED_BASIS + (_CUT_BASIS if log.get("run_observed_until") else "")
                                  + _reasoning_basis(set(observed) & _REASONING_KEYS,
-                                                    extended=bool(log.get("run_observed_extended"))))
+                                                    extended={k for e in (log.get("run_observed_extended") or [])
+                                                              if isinstance(e, dict) for k in (e.get("keys_added") or [])}))
     rec = ProvenanceRecord(data=data)
     out = rec.write(path)
     click.echo(f"✓ {out}")

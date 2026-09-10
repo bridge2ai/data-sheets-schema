@@ -1031,15 +1031,22 @@ record already carried — 4–5 discriminating integers per record, on
 which the best non-matching candidate reproduces at most 2; each entry
 of `run_observed_extended` (a list, so a second extension keeps the
 first's trace) names the keys, the transcripts, the bundle basis and
-the observer's sha256, and `run_observed_basis` gains the sentence that
-describes the reasoning keys. Only those keys are added under this
+the observer's sha256, and `run_observed_basis` gains a sentence per
+group of keys the record carries — the estimate keys, the runtime's own
+count, and which of them an extension added — and none for keys it does
+not. Only the reasoning keys are added under this
 instrument — a receipt-coverage key is #709's — and `annotate-observed
 --extend`, the hand-entered route, keeps the record's cut and says its
-numbers came from the command line. `thinking_tokens` is present only
-where a transcript's turns carry it (all twelve v6 records; the three
-resumed v5 runs on their second transcript's turns only, which
-`turns_with_thinking_tokens` says), so `reasoning_tokens_estimate` is
-the figure that spans both arms.
+numbers came from the command line. **`thinking_tokens` is a partial
+count on every record that carries it**: the observer counts a turn
+only where that transcript line carries
+`usage.output_tokens_details`, and `turns_with_thinking_tokens` is
+short of `assistant_turns` on all fifteen — by 1 to 6 turns on the
+twelve v6 records, by 36 to 62 on the three resumed v5 rep3 runs, whose
+first transcript predates the detail entirely. The nine v5 rep1/rep2
+records and CHORUS rep3 carry no `thinking_tokens` at all. So
+`reasoning_tokens_estimate` is the figure that spans both arms, and a
+`thinking_tokens` comparison must carry its turn coverage.
 
 So the command distinguishes four empty cases rather than printing one message
 for all of them:

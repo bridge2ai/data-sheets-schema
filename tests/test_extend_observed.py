@@ -229,7 +229,32 @@ class Extension(unittest.TestCase):
         self.assertNotIn("thinking_blocks", cli._reasoning_basis({"output_tokens"}))
         self.assertIn("the observation carries none", cli._reasoning_basis({"output_tokens"}))
         self.assertNotIn("transcript carries", cli._reasoning_basis({"output_tokens"}))
-        self.assertIn("counts the turns", cli._reasoning_basis({"turns_with_thinking_tokens"}))
+        # each sentence names only the keys the observation carries (round 4, S1)
+        alone = cli._reasoning_basis({"turns_with_thinking_tokens"})
+        self.assertIn("turns_with_thinking_tokens is the runtime's own count", alone)
+        self.assertNotIn("thinking_tokens and", alone)
+        only_tt = cli._reasoning_basis({"thinking_tokens"})
+        self.assertNotIn("turns_with_thinking_tokens is fewer", only_tt)
+        self.assertIn("how much of the run it covers is not stated", only_tt)
+        # the estimate's qualification is its own sentence, so "never to be averaged" is about the measure (S5)
+        est = cli._reasoning_basis({"output_tokens", "reasoning_tokens_estimate"})
+        self.assertIn("never to be averaged with it.", est.split("reasoning_tokens_estimate is output tokens")[0])
+        # the after-the-run clause names the keys an extension added, not every key (S2)
+        both = cli._reasoning_basis({"output_tokens", "thinking_tokens", "turns_with_thinking_tokens"},
+                                    extended={"thinking_tokens", "turns_with_thinking_tokens"})
+        self.assertIn("Of these, thinking_tokens, turns_with_thinking_tokens were added after the run", both)
+        self.assertNotIn("output_tokens were added", both)
+        # a curator's sentence that opens like one of ours survives a recomputation (S3)
+        log = {"run_observed": dict(FULL), "run_observed_basis": cli._RUN_OBSERVED_BASIS
+               + " No thinking_tokens were requested by the curator, who checked by hand."}
+        out = cli._basis_with(log, set(FULL) & cli._REASONING_KEYS)
+        self.assertIn("requested by the curator", out)
+        # a basis with no terminal full stop is not glued to the appended sentence (S3)
+        log = {"run_observed": dict(FULL), "run_observed_basis": "prior basis with no full stop"}
+        once = cli._basis_with(log, set(FULL) & cli._REASONING_KEYS)
+        twice = cli._basis_with({**log, "run_observed_basis": once}, set(FULL) & cli._REASONING_KEYS)
+        self.assertEqual(once, twice)
+        self.assertEqual(once.count("Of the transcript's reasoning measure"), 1)
 
     def test_annotate_observed_extend_keeps_the_cut_and_names_its_own_route(self):
         """#1191 review, M1/M2: `--extend` deleted `run_observed_until` and
