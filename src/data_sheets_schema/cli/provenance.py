@@ -486,7 +486,7 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
 @click.option('--project', default=None)
 @click.option('--all', 'every', is_flag=True,
               help='every record with a validation block (#1033): written only where the verdict, the '
-                   "artifacts' md5s and each problem's artifact, class and JSON-pointer paths reproduce; "
+                   "artifacts' recorded hashes and each problem's artifact, class and JSON-pointer paths reproduce; "
                    'a record already carrying `duplicate_keys` is skipped unless its schema pin is not '
                    "this checkout's, which the write repairs")
 @click.option('--execute', is_flag=True, help='write the record; without it, report')
@@ -501,7 +501,7 @@ def recheck_validation(method, label, project, every, execute):
 
     `--all` (#1033) walks every run on disk and brings each record under
     the instrument on one condition: the recomputed verdict and the
-    artifacts' md5s equal the recorded ones and each problem names the same
+    artifacts' recorded hashes equal the recorded ones and each problem names the same
     artifact, class and JSON-pointer paths, so the only thing the write
     adds is the `duplicate_keys` field and, where it moved, this
     checkout's schema digest. A record already under the instrument is
@@ -641,7 +641,7 @@ def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bo
         # said (M4).
         same_verdict = block["passed"] == prior.get("passed")
         # The hashes the prior block records, by whichever algorithm it
-        # recorded them: 82 corpus records pin `sha256` only and 118 `md5`
+        # recorded them: 82 corpus records pin `sha256` only and 196 `md5`
         # only, so comparing `md5` unconditionally held every sha256-only
         # record for a drift that had not happened (#1190 round 3, M1).
         # An artifact still on disk is verified against its own recorded

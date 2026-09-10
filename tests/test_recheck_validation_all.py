@@ -292,6 +292,32 @@ class EveryWritePathKeepsTheAlgorithm(unittest.TestCase):
                 src = Path(path).read_text()
                 self.assertRegex(src, pattern)
 
+    def test_the_real_call_path_survives_a_bad_prior_and_an_unreadable_artifact(self):
+        """#1190 round 6, S1 and S2: the guards were inside
+        `keep_recorded_algorithms`, and `validation_block` crashed before
+        reaching it — on its own unguarded default hash, and on
+        dereferencing a truthy non-mapping `prior`. Exercise the real
+        function, not the helper."""
+        import os
+
+        from data_sheets_schema.api_runner import validation_block
+        with tempfile.TemporaryDirectory() as tmp:
+            full = Path(tmp) / "P_d4d.yaml"; full.write_text("a: 1\n")
+            core = Path(tmp) / "P_d4d_core.yaml"; core.write_text("b: 2\n")
+            spec = mock.Mock(full_path=full, core_path=core, project="P", label="L", method="m")
+            for prior in ("not a mapping", ["nor", "this"], 7):
+                with self.subTest(prior=prior):
+                    block = validation_block(spec, [], recorded_by="t", prior=prior)
+                    self.assertEqual(set(block["artifacts"]["full"]), {"path", "md5"})
+            if os.geteuid() != 0:
+                os.chmod(full, 0)
+                try:
+                    block = validation_block(spec, [], recorded_by="t",
+                                             prior={"artifacts": {"full": {"path": str(full), "sha256": "s"}}})
+                    self.assertIsNone(block["artifacts"]["full"]["md5"])
+                finally:
+                    os.chmod(full, 0o644)
+
     def test_a_prior_that_is_not_a_mapping_and_an_unreadable_file_do_not_abort_the_walk(self):
         """S1: `--all` is the one caller that visits every unaudited record, so
         a single bad one must be skipped, not raise. The same guard
