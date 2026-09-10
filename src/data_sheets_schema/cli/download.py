@@ -319,7 +319,7 @@ def scope_cmd(project, do_check, strict, manifest):
                        + (f"; in this bundle as {entry['in_bundle']}"
                           if entry.get("in_bundle") else ""))
             if row:
-                click.echo(f"             ⚠️  {row['problem']}", err=True)
+                click.echo(f"             ⚠️  related_but_distinct[{i}]: {row['problem']}", err=True)
 
     problems = check_manifest(m)
     for p in problems:
