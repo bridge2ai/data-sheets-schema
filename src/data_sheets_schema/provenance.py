@@ -1798,6 +1798,35 @@ class GitUnavailable(RuntimeError):
     evidence of absence, and the caller must not report the corpus."""
 
 
+def bundle_bytes_for(bundle_path: str, md5: str | None = None,
+                     sha256: str | None = None) -> tuple[bytes, dict[str, str]] | None:
+    """The bytes a record read, recovered from the committed version of its
+    declared bundle whose md5 (or sha256) the record hashed (#1140): the
+    newest matching version's blob and its history entry, or None when no
+    committed version matches. Raises `GitUnavailable` as
+    `bundle_blob_history` does. A receipt was written against these bytes,
+    and a recompute of its block on today's bundle is a recompute against
+    the wrong text; this is what lets the block be recomputed on the right
+    one after the path has drifted."""
+    if not md5 and not sha256:
+        return None
+    for entry in bundle_blob_history(bundle_path):
+        # Every hash given must match (#1187 review, S2): a version that
+        # matches one and not the other is not the version the record read.
+        md5_ok = entry["md5"] == md5 if md5 else None
+        sha_ok = entry["sha256"] == sha256 if sha256 else None
+        if any(ok is False for ok in (md5_ok, sha_ok)) or not any(ok for ok in (md5_ok, sha_ok)):
+            continue
+        blob = subprocess.run(["git", "show", f"{entry['commit']}:{bundle_path}"],
+                              capture_output=True, check=False, cwd=_REPO_ROOT)
+        if blob.returncode != 0:
+            raise GitUnavailable(blob.stderr.decode("utf-8", "replace").strip()
+                                 or f"git show failed for {entry['commit']}:{bundle_path}")
+        matched = [name for name, ok in (("md5", md5_ok), ("sha256", sha_ok)) if ok]
+        return blob.stdout, {**entry, "matched_on": matched}
+    return None
+
+
 @functools.lru_cache(maxsize=None)
 def bundle_blob_history(bundle_path: str) -> tuple[dict[str, str], ...]:
     """Every committed version of a bundle reachable from HEAD under this

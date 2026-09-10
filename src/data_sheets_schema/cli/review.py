@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 import click
+import yaml
 
 from data_sheets_schema.constants import PROJECTS
 
@@ -30,7 +31,9 @@ def _provenance(method: str, label: str, project: str) -> Path:
               help="the instruction file the launcher sent; otherwise re-rendered from the record's spec")
 @click.option("--receipted", default=25, show_default=True, help="receipted slots to sample")
 @click.option("--receiptless", default=25, show_default=True, help="receiptless slots to sample")
-def pack(method, label, project, instruction_file, receipted, receiptless):
+@click.option("--force", is_flag=True,
+              help="rewrite a pack that a review or the record pins by hash (#1095); the attesting review must then be redone")
+def pack(method, label, project, instruction_file, receipted, receiptless, force):
     """Write `{PROJECT}_review_pack.yaml` beside the record: every chunk the
     receipt marked nothing_relevant, a seeded sample of receipted slots with
     their cited passage, the receiptless and reshaped slots, and the
@@ -38,12 +41,26 @@ def pack(method, label, project, instruction_file, receipted, receiptless):
     question, and a closed verdict vocabulary per kind."""
     from data_sheets_schema.cli.method import resolve_method
     method = method or resolve_method(label, project)
-    from data_sheets_schema.review_pack import write_pack
+    from data_sheets_schema.review_pack import PackAttested, pack_pins, write_pack
     prov = _provenance(method, label, project)
     if not prov.exists():
         raise click.ClickException(f"no provenance record at {prov}")
-    out, p = write_pack(prov, Path(instruction_file) if instruction_file else None,
-                        {"receipted_slots": receipted, "receiptless_slots": receiptless})
+    from data_sheets_schema.review_pack import pack_pins_report
+    import hashlib as _hashlib
+    current, stale, unreadable = pack_pins_report(prov)
+    try:
+        out, p = write_pack(prov, Path(instruction_file) if instruction_file else None,
+                            {"receipted_slots": receipted, "receiptless_slots": receiptless},
+                            force=force, force_hint="`--force`")
+    except PackAttested as exc:
+        raise click.ClickException(str(exc)) from exc
+    except yaml.YAMLError as exc:
+        # `review_pack._load_yaml` names the file that failed — the pack
+        # reads the record, the full record, the receipt and the manifest,
+        # and PyYAML's own mark names the string it was handed (#1124
+        # rounds 4 and 5).
+        raise click.ClickException(str(exc)) from exc
+    written = _hashlib.sha256(out.read_bytes()).hexdigest()
     kinds: dict[str, int] = {}
     for i in p["items"]:
         kinds[i["kind"]] = kinds.get(i["kind"], 0) + 1
@@ -52,6 +69,22 @@ def pack(method, label, project, instruction_file, receipted, receiptless):
     click.echo(f"   instruction: {p['instruction']['basis']}")
     for g in p["gaps"]:
         click.echo(f"   ⚠️  {g}")
+    # Warnings after the tick, like the gaps, and only about what actually
+    # moved: a forced rewrite whose bytes equal the pinned bytes moved nothing.
+    for pin in current:
+        if pin["sha256"] != written:
+            click.echo(f"   ⚠️  rewrote a pack pinned by {pin['by']} {pin['path']} (--force); redo that review")
+    for pin in stale:
+        if not pin.get("pack_on_disk") and pin["sha256"] != written:
+            click.echo(f"   ⚠️  {pin['by']} {pin['path']} pinned a pack that was not on disk and is not this "
+                       "one (--force); redo that review")
+        elif pin.get("pack_on_disk") and pin["sha256"] == written:
+            click.echo(f"   ✓ this rewrite restored the pack {pin['by']} {pin['path']} pins")
+        elif pin.get("pack_on_disk"):
+            click.echo(f"   ⚠️  {pin['by']} {pin['path']} pins {pin['sha256'][:12]}…, a pack this file was not "
+                       "before this rewrite either — the pack had already moved under it")
+    for u in unreadable:
+        click.echo(f"   ⚠️  {u['by']} {u['path']} could not be read ({u['error']}); its pin, if any, was not checked")
 
 
 @review.command("check")
@@ -68,10 +101,8 @@ def check(method, label, project, write, strict):
     method = method or resolve_method(label, project)
     import hashlib
 
-    import yaml
-
     from data_sheets_schema import backfill_checks as bc
-    from data_sheets_schema.review_pack import check_review, record_paths
+    from data_sheets_schema.review_pack import UnreadableYAML, _load_mapping, check_review, record_paths
     prov = _provenance(method, label, project)
     if not prov.exists():
         raise click.ClickException(f"no provenance record at {prov}")
@@ -80,9 +111,17 @@ def check(method, label, project, write, strict):
         raise click.ClickException(f"no review pack at {paths['pack']}; run `d4d review pack` first")
     if not paths["review"].exists():
         raise click.ClickException(f"no review at {paths['review']}")
-    pack = yaml.safe_load(paths["pack"].read_text(encoding="utf-8")) or {}
-    pack["_sha256"] = hashlib.sha256(paths["pack"].read_bytes()).hexdigest()
-    rev = yaml.safe_load(paths["review"].read_text(encoding="utf-8")) or {}
+    # One read per file: the bytes hashed are the bytes parsed (#1124
+    # Codex review, M6), and every way a read fails names the file (SF1).
+    try:
+        pack_raw = paths["pack"].read_bytes(); rev_raw = paths["review"].read_bytes()
+        pack = _load_mapping(paths["pack"], raw=pack_raw)
+        rev = _load_mapping(paths["review"], raw=rev_raw)
+    except OSError as exc:
+        raise click.ClickException(f"{exc.filename or paths['pack']} could not be read: {exc.strerror}") from exc
+    except UnreadableYAML as exc:
+        raise click.ClickException(str(exc)) from exc
+    pack["_sha256"] = hashlib.sha256(pack_raw).hexdigest()
     block = check_review(pack, rev)
     click.echo(f"   {block['summary']}")
     for k, d in block["by_kind"].items():
@@ -91,6 +130,37 @@ def check(method, label, project, write, strict):
         click.echo("   ❌ " + ", ".join(f"{k}={v}" for k, v in f.items()))
     for f in block.get("reported") or []:                       # never gated (#1057)
         click.echo("   ⚠️  " + ", ".join(f"{k}={v}" for k, v in f.items()))
+    if not block["checked"]:
+        # A pack that is not a pack is never attested (Codex M1).
+        raise click.ClickException(f"not checked: {block['reason']}; nothing written")
+    failing = bool(block["findings"] or block["unanswered"])
+    if write and strict and failing:
+        # `--strict` used to exit 1 after the write, leaving a block that
+        # pinned the current pack over a review of another one, which
+        # `runs select` then ranked (Codex M2). Under --strict a failing
+        # review is not written; without it the block is written with its
+        # findings, and `review_evidence` keeps it out of the ranking.
+        n_u = len(block["unanswered"]) + int(block.get("unanswered_truncated") or 0)
+        click.echo(f"   not written: --strict and {len(block['findings'])} finding(s), {n_u} unanswered")
+        # The block already in the record is named, since it keeps ranking
+        # (round-9 review, SF-R9-4): a redone review that fails leaves the
+        # earlier one standing. Read through the named-failure loader: a
+        # record that is not a mapping is a message, not a traceback (round
+        # 10, M-R10-1), and the refusal still exits 1 whatever the read did.
+        from data_sheets_schema.review_pack import review_evidence_why
+        try:
+            prior = _load_mapping(prov, bc._split_header(prov.read_text(encoding="utf-8"))[1]).get("review")
+        except (UnreadableYAML, OSError, UnicodeDecodeError) as exc:      # the third way a read fails (round 11, M-R11-1)
+            click.echo(f"   (the record could not be re-read to name its earlier review block: {exc})")
+            prior = None
+        if isinstance(prior, dict):
+            prior_sha = str((((prior.get("artifacts") or {}).get("pack") or {}).get("sha256")) or "")
+            why = review_evidence_why(prior)
+            click.echo(f"   the record still carries its earlier review block — of "
+                       + (f"this pack ({prior_sha[:12]}…)" if prior_sha == pack["_sha256"] else
+                          f"pack {prior_sha[:12]}…, not this one ({pack['_sha256'][:12]}…)" if prior_sha else "no pinned pack")
+                       + f", {why or 'evidence for runs select'}; it was not replaced")
+        sys.exit(1)
     if write:
         # Keys kept even when absent (#1097): dropping `reviewed_at` when the
         # review omitted it made the provenance block show no gap, and one
@@ -108,7 +178,7 @@ def check(method, label, project, write, strict):
         block["reviewer"]["model_basis"] = "self-reported by the reviewing agent"
         block["artifacts"] = {"pack": {"path": str(paths["pack"]), "sha256": pack["_sha256"]},
                               "review": {"path": str(paths["review"]),
-                                         "sha256": hashlib.sha256(paths["review"].read_bytes()).hexdigest()}}
+                                         "sha256": hashlib.sha256(rev_raw).hexdigest()}}
         block["recorded_by"] = "d4d review check"
         bc.apply(prov, {"review": block}, overwrite=True)
         click.echo(f"   ✓ review block written to {prov}")
@@ -158,8 +228,12 @@ def disposition(method, label, project, item, disposition, note, slot_path, old,
     paths = record_paths(prov)
     if not paths["review"].exists():
         raise click.ClickException(f"no review at {paths['review']}; a disposition answers a review finding")
-    rev = yaml.safe_load(paths["review"].read_text(encoding="utf-8")) or {}
-    items = rev.get("items") if isinstance(rev, dict) else rev
+    from data_sheets_schema.review_pack import UnreadableYAML, _load_mapping
+    try:
+        rev = _load_mapping(paths["review"])
+    except UnreadableYAML as exc:
+        raise click.ClickException(str(exc)) from exc
+    items = rev.get("items")
     found = next((i for i in (items or []) if isinstance(i, dict) and i.get("id") == item), None)
     if found is None:
         raise click.ClickException(f"{paths['review']} has no item {item!r}")
@@ -295,10 +369,19 @@ def agree_cmd(method, label, project, write):
     for k in ("pack", "review", "review_b"):
         if not paths[k].exists():
             raise click.ClickException(f"missing {paths[k]}")
-    pack = yaml.safe_load(paths["pack"].read_text(encoding="utf-8")) or {}
-    pack["_sha256"] = hashlib.sha256(paths["pack"].read_bytes()).hexdigest()
-    a = yaml.safe_load(paths["review"].read_text(encoding="utf-8")) or {}
-    b = yaml.safe_load(paths["review_b"].read_text(encoding="utf-8")) or {}
+    from data_sheets_schema.review_pack import UnreadableYAML, _load_mapping
+    try:
+        pack_raw = paths["pack"].read_bytes(); b_raw = paths["review_b"].read_bytes()
+        pack = _load_mapping(paths["pack"], raw=pack_raw)
+        a = _load_mapping(paths["review"])
+        b = _load_mapping(paths["review_b"], raw=b_raw)                 # the bytes rated are the bytes hashed (round-9 review, M-R9-2)
+    except UnreadableYAML as exc:
+        raise click.ClickException(str(exc)) from exc
+    from data_sheets_schema.review_pack import pack_shape_problem
+    shape = pack_shape_problem(pack)
+    if shape:
+        raise click.ClickException(f"{paths['pack']} is not a review pack: {shape}")   # not the review's fault (round-9 review, SF-R9-1)
+    pack["_sha256"] = hashlib.sha256(pack_raw).hexdigest()
     # A rating pair is only as good as its ratings: an invalid review
     # (duplicate ids, out-of-vocabulary verdicts, unknown items) must not
     # silently enter a reliability figure (#861).
@@ -323,7 +406,7 @@ def agree_cmd(method, label, project, write):
         if not isinstance(rec.get("review"), dict):
             raise click.ClickException("no review block to attach reliability to; run `d4d review check --write` first")
         rec["review"]["reliability"] = {**rel,
-            "review_b_sha256": hashlib.sha256(paths["review_b"].read_bytes()).hexdigest(),
+            "review_b_sha256": hashlib.sha256(b_raw).hexdigest(),
             "recorded_by": "d4d review agree"}
         ProvenanceRecord(data=rec).write(prov)
         click.echo(f"   ✓ reliability written into {prov}")

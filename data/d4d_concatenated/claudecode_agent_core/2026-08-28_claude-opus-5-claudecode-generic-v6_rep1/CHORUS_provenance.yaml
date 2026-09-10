@@ -468,6 +468,9 @@ receipts:
     manifest:
       path: data/preprocessed/chunks/CHORUS_chunks.yaml
       sha256: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
+  bundle_basis:
+    source: bundle on disk
+    path: data/preprocessed/concatenated/CHORUS_preprocessed.txt
   recorded_by: backfill_checks
 review:
   checked: true

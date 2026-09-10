@@ -340,6 +340,15 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
+    anywhere (a minted id reconciliation stripped) is located as a keyless entry —
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
+    of declared dropped; v2 (#1123): a fragment minted on an identifier the record
+    carries for the dataset at its top level — its id in CURIE or resolver form, its
+    doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 28
     reviewed: 28
@@ -352,13 +361,87 @@ receipts:
   snippets:
     total: 313
     verified: 313
+    linewrap_joined: 0
     adjacent: 0
     elsewhere: 0
+    spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
     mismatched: 0
     unchecked: 0
+    no_value_overlap: 9
+    no_value_overlap_sample:
+    - chunk: c004
+      slot: machine_annotation_tools[0].tools
+      snippet: to guide the GPT-4 model
+    - chunk: c010
+      slot: creators[0].principal_investigator
+      snippet: corresponding author – tideker@health.ucsd.edu; † co-corresp
+    - chunk: c011
+      slot: version_access.version_details
+      snippet: The PID system currently in use is the ARK scheme42
+    - chunk: c012
+      slot: resources[0].publisher
+      snippet: LibraData is the University of Virginia’s instance of Datave
+    - chunk: c018
+      slot: resources[1].publisher
+      snippet: University of Virginia Dataverse
+    - chunk: c018
+      slot: license_and_use_terms.data_use_permission
+      snippet: Dataset licensed for reuse under Creative Commons Attributio
+    - chunk: c023
+      slot: data_collectors[1].collector_details
+      snippet: in the Nevan Krogan laboratory at the University of Californ
+    - chunk: c026
+      slot: resources[4].publisher
+      snippet: University of Virginia Dataverse
+    - chunk: c026
+      slot: regulatory_restrictions.confidentiality_level
+      snippet: Public (10)
+    entry_single_leaf: 9
+    entry_single_leaf_sample:
+    - chunk: c010
+      slot: sampling_strategies[0]
+      leaves: 3
+      overlapping: 1
+    - chunk: c015
+      slot: instances[0]
+      leaves: 4
+      overlapping: 1
+    - chunk: c015
+      slot: instances[3]
+      leaves: 3
+      overlapping: 1
+    - chunk: c018
+      slot: data_collectors[0]
+      leaves: 3
+      overlapping: 1
+    - chunk: c020
+      slot: resources[2].file_collections[1].resources[0]
+      leaves: 9
+      overlapping: 0
+    - chunk: c023
+      slot: resources[3].file_collections[0].resources[0]
+      leaves: 9
+      overlapping: 0
+    - chunk: c023
+      slot: data_collectors[1]
+      leaves: 3
+      overlapping: 1
+    - chunk: c026
+      slot: resources[4].file_collections[0].resources[0]
+      leaves: 9
+      overlapping: 0
+    - chunk: c026
+      slot: data_governance.accountable_organization
+      leaves: 3
+      overlapping: 1
   slots:
     populated: 860
     exempt: 97
+    exempt_on_carried_identifier: 0
     receiptable: 763
     with_receipt: 724
     without_receipt:
@@ -402,21 +485,60 @@ receipts:
     - retention_limit.name
     - version_access.name
     without_receipt_truncated: null
+    never_receipted: null
+    added_after_receipt: null
     receipt_paths: 241
     unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt: []
+    value_changed_after_receipt_count: null
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: null
+    located_after_key_stripped: []
+    located_after_key_stripped_count: null
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: null
     reshaped_by_reconcile: []
+    receipts_to_removed_values: 0
   findings: []
   findings_truncated: null
-  summary: chunks 28/28 reviewed · snippets 313/313 verified · slots 724/763 with
+  findings_gated: 0
+  summary: chunks 28/28 reviewed · snippets 313/313 verified (9 bearing on no token
+    of their value) (9 entry receipt(s) overlapping one leaf) · slots 724/763 with
     a receipt (97 exempt)
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CM4AI_coverage_receipt.yaml
       sha256: 326d82ca17a1d5cefa0b9730de0fa840d5d3eb48f53b8e04a4c3784bc922852f
     manifest:
-      path: data/preprocessed/chunks/CM4AI_chunks.yaml
-      sha256: d891dbf1aad662eb402acb392d8c8fdb86fbc70bba4427a7cc783d8c9bb8d27b
-  recorded_by: d4d receipts check
+      path: null
+      rule:
+        version: 2
+        unit: source-document
+        boundary: 'FILE: line followed by PATH: or ROLE:'
+        preamble: own-chunk
+        split: line-window
+        max_lines: 400
+        max_bytes: 48000
+      chunk_count: 28
+      bundle_md5: 1dfd34e5610fed7c22bea1f09c0bc60c
+      bundle_sha256: f138e6d5841609841994e0b3e91b2477c824f5675eb91c83d51db0b8d11504d2
+  bundle_basis:
+    source: git blob
+    path: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+    commit: 4fc4d6b22d5522389692e746a4bc715a93163871
+    committed_on: '2026-08-10'
+    md5: 1dfd34e5610fed7c22bea1f09c0bc60c
+    sha256: f138e6d5841609841994e0b3e91b2477c824f5675eb91c83d51db0b8d11504d2
+    matched_on:
+    - md5
+    manifest: chunked in memory under the record's own inputs.chunks.rule (#1140)
+  recorded_by: backfill_checks
 review:
   checked: true
   items_total: 72

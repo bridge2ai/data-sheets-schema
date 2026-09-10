@@ -338,6 +338,15 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
+    anywhere (a minted id reconciliation stripped) is located as a keyless entry —
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
+    of declared dropped; v2 (#1123): a fragment minted on an identifier the record
+    carries for the dataset at its top level — its id in CURIE or resolver form, its
+    doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 28
     reviewed: 28
@@ -350,13 +359,58 @@ receipts:
   snippets:
     total: 367
     verified: 367
+    linewrap_joined: 0
     adjacent: 0
     elsewhere: 0
+    spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
     mismatched: 0
     unchecked: 0
+    no_value_overlap: 35
+    no_value_overlap_sample:
+    - chunk: c003
+      slot: machine_annotation_tools[0].tools
+      snippet: OpenAI’s pre-trained transformer (GPT-4)
+    - chunk: c005
+      slot: preprocessing_strategies[0].used_software[0].description
+      snippet: cellmaps_imagedownloader, cellmaps_ppidownloader
+    - chunk: c008
+      slot: external_resources[2].description
+      snippet: Correspondence to
+    - chunk: c008
+      slot: creators[2].principal_investigator
+      snippet: Emma Lundberg
+    - chunk: c010
+      slot: sampling_strategies[0].description
+      snippet: 'with another 500 proteins pending significant hits
+
+        from the '
+    - chunk: c010
+      slot: direct_collection[0].collection_details
+      snippet: both of which have been ethically sourced
+    - chunk: c012
+      slot: publisher
+      snippet: LibraData is the University of Virginia’s instance of Datave
+    - chunk: c012
+      slot: funders[0].grants[0].grant_number
+      snippet: 1OT2OD032742-01 (Bridge2AI Functional Genomics)
+    - chunk: c015
+      slot: funders[0].grants[0].grant_number
+      snippet: 'NIH funding award number: 1OT2OD032742-01'
+    - chunk: c018
+      slot: resources[1].file_collections[0].resources[0].description
+      snippet: 'JSON
+
+        - 31.1 KB'
+    entry_single_leaf: 0
+    entry_single_leaf_sample: []
   slots:
     populated: 765
     exempt: 12
+    exempt_on_carried_identifier: 0
     receiptable: 753
     with_receipt: 245
     without_receipt:
@@ -411,21 +465,59 @@ receipts:
     - known_limitations[0].name
     - known_limitations[0].limitation_type
     without_receipt_truncated: 458
+    never_receipted: null
+    added_after_receipt: null
     receipt_paths: 255
     unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt: []
+    value_changed_after_receipt_count: null
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: null
+    located_after_key_stripped: []
+    located_after_key_stripped_count: null
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: null
     reshaped_by_reconcile: []
+    receipts_to_removed_values: 0
   findings: []
   findings_truncated: null
-  summary: chunks 28/28 reviewed · snippets 367/367 verified · slots 245/753 with
-    a receipt (12 exempt)
+  findings_gated: 0
+  summary: chunks 28/28 reviewed · snippets 367/367 verified (35 bearing on no token
+    of their value) · slots 245/753 with a receipt (12 exempt)
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CM4AI_coverage_receipt.yaml
       sha256: f1b7f836a90c61b057353269724f631e83e64449d271cbfd88daff75a163d1db
     manifest:
-      path: data/preprocessed/chunks/CM4AI_chunks.yaml
-      sha256: d891dbf1aad662eb402acb392d8c8fdb86fbc70bba4427a7cc783d8c9bb8d27b
-  recorded_by: d4d receipts check
+      path: null
+      rule:
+        version: 2
+        unit: source-document
+        boundary: 'FILE: line followed by PATH: or ROLE:'
+        preamble: own-chunk
+        split: line-window
+        max_lines: 400
+        max_bytes: 48000
+      chunk_count: 28
+      bundle_md5: 1dfd34e5610fed7c22bea1f09c0bc60c
+      bundle_sha256: f138e6d5841609841994e0b3e91b2477c824f5675eb91c83d51db0b8d11504d2
+  bundle_basis:
+    source: git blob
+    path: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+    commit: 4fc4d6b22d5522389692e746a4bc715a93163871
+    committed_on: '2026-08-10'
+    md5: 1dfd34e5610fed7c22bea1f09c0bc60c
+    sha256: f138e6d5841609841994e0b3e91b2477c824f5675eb91c83d51db0b8d11504d2
+    matched_on:
+    - md5
+    manifest: chunked in memory under the record's own inputs.chunks.rule (#1140)
+  recorded_by: backfill_checks
 review:
   checked: true
   items_total: 72

@@ -20,14 +20,22 @@ its instruction gave it.
 
 ## Inputs — from the pack, never from memory
 
-Run, in the repository root:
+Read `data/d4d_concatenated/{METHOD}_core/{LABEL}/{PROJECT}_review_pack.yaml`.
+**If it exists, read it as it is — never regenerate it** (#1095): the pack
+is the artifact your review and the provenance record pin by sha256, and
+`d4d review agree` compares two reviews of the same committed pack; a
+review that rewrites its own pack moves the file underneath that pin and
+is not comparable with the review it was meant to be paired with. Only
+when there is no pack at all, run, in the repository root:
 
 ```bash
 poetry run d4d review pack --label {LABEL} --project {PROJECT} [--method {METHOD}] [--instruction {FILE}]
 ```
 
-and read `data/d4d_concatenated/{METHOD}_core/{LABEL}/{PROJECT}_review_pack.yaml`.
-It names the provenance record, the instruction — written beside the pack
+(the command refuses to move a pinned pack without `--force`, which is
+not yours to pass; regenerating a pack whose bytes would not change is
+allowed, because the pack is deterministic). The pack names the
+provenance record, the instruction — written beside the pack
 as `{PROJECT}_review_instruction.md` (re-rendered from the record's spec,
 or the launcher's file; the pack's `instruction.basis` says which and
 whether the hash matches) — the bundle with its line count and every
@@ -64,14 +72,19 @@ the only source of dataset facts.
   against the phase-1 record, `resolved_path` is where that entry sits
   after reconciliation's inserts and reorders, joined by entry identity —
   judge the value at `resolved_path`, and do not score an index shift as
-  `unsupported`. `pack.receipt_join.basis` says whether the join was by
+  `unsupported`. From `pack_version` 4 — a pack you read as it is may be
+  older, and then the key is simply absent: treat the join as `index` —
+  `pack.receipt_join.basis` says whether the join was by
   identity or (no snapshot, the agentic path) by index. A `values_from`
   CURIE (`B2AI_TOPIC:43`) carries its pinned registry label as
   `value_label` (#912): judge whether the *label* is what the passage
   supports — a well-formed CURIE for the wrong concept is `misread`, and
   `exempt_by_nature` no longer applies to a term that carries its label
   (it did when the pack showed only the bare CURIE).
-  `pack.reference_attributes` lists the class-ranged attributes that are
+  From `pack_version` 4 (absent on an older pack you read as it is: then
+  consult the digest yourself before charging under rule-08, since "every
+  attribute the pack does not list" is the reading that produced the six
+  wrong charges) `pack.reference_attributes` lists the class-ranged attributes that are
   *references* by LinkML's own rule (a class range with an identifier and
   no `inlined`) — a string is the only form that validates there, so the
   "populate the fields that class declares" rule is `not_applicable` to

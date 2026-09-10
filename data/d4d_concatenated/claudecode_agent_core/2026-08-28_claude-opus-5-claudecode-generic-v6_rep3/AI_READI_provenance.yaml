@@ -347,6 +347,15 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
+    anywhere (a minted id reconciliation stripped) is located as a keyless entry —
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
+    of declared dropped; v2 (#1123): a fragment minted on an identifier the record
+    carries for the dataset at its top level — its id in CURIE or resolver form, its
+    doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 28
     reviewed: 28
@@ -359,13 +368,54 @@ receipts:
   snippets:
     total: 415
     verified: 415
+    linewrap_joined: 0
     adjacent: 0
     elsewhere: 0
+    spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
     mismatched: 0
     unchecked: 0
+    no_value_overlap: 28
+    no_value_overlap_sample:
+    - chunk: c002
+      slot: subpopulations[0].identification
+      snippet: 'triple- balanced by recruiting the following populations in '
+    - chunk: c003
+      slot: variables[3].unit
+      snippet: Visual acuity is measured while the participant views the di
+    - chunk: c007
+      slot: updates.frequency
+      snippet: Data are released annually, and each version is accessible t
+    - chunk: c007
+      slot: creators[4].description
+      snippet: Writing Committee Sally L. Baxter
+    - chunk: c009
+      slot: addressing_gaps[1].response
+      snippet: 'The ability to understand and affect the course of complex, '
+    - chunk: c015
+      slot: license_and_use_terms.description
+      snippet: '"rightsURI": "https://doi.org/10.5281/zenodo.17555036"'
+    - chunk: c015
+      slot: file_collections[0].name
+      snippet: '"directoryName": "cardiac_ecg"'
+    - chunk: c015
+      slot: file_collections[1].name
+      snippet: '"directoryName": "clinical_data"'
+    - chunk: c016
+      slot: file_collections[3].name
+      snippet: '"directoryName": "retinal_flio"'
+    - chunk: c016
+      slot: file_collections[4].name
+      snippet: '"directoryName": "retinal_oct"'
+    entry_single_leaf: 0
+    entry_single_leaf_sample: []
   slots:
     populated: 585
     exempt: 18
+    exempt_on_carried_identifier: 0
     receiptable: 567
     with_receipt: 236
     without_receipt:
@@ -420,21 +470,59 @@ receipts:
     - creators[11].affiliations[0].name
     - creators[11].credit_roles
     without_receipt_truncated: 281
+    never_receipted: null
+    added_after_receipt: null
     receipt_paths: 240
     unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt: []
+    value_changed_after_receipt_count: null
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: null
+    located_after_key_stripped: []
+    located_after_key_stripped_count: null
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: null
     reshaped_by_reconcile: []
+    receipts_to_removed_values: 0
   findings: []
   findings_truncated: null
-  summary: chunks 28/28 reviewed · snippets 415/415 verified · slots 236/567 with
-    a receipt (18 exempt)
+  findings_gated: 0
+  summary: chunks 28/28 reviewed · snippets 415/415 verified (28 bearing on no token
+    of their value) · slots 236/567 with a receipt (18 exempt)
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_coverage_receipt.yaml
       sha256: ece5d981773e19f19e626b4bd50e10aa948904719f8b71a5e853e026909b6131
     manifest:
-      path: data/preprocessed/chunks/AI_READI_chunks.yaml
-      sha256: 631788768d84a9ae689f722a37f2244be4f67393de390c2055585b81f27f33cf
-  recorded_by: d4d receipts check
+      path: null
+      rule:
+        version: 2
+        unit: source-document
+        boundary: 'FILE: line followed by PATH: or ROLE:'
+        preamble: own-chunk
+        split: line-window
+        max_lines: 400
+        max_bytes: 48000
+      chunk_count: 28
+      bundle_md5: 0f3abb51a333555456bedd63891fcd99
+      bundle_sha256: a42eb3aacc8aed05f8a79e54e848db65cc5159425888397242677c4914bf2aca
+  bundle_basis:
+    source: git blob
+    path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+    commit: 9049904493393a6ce1db69b9fe0a855ce0db4435
+    committed_on: '2026-08-12'
+    md5: 0f3abb51a333555456bedd63891fcd99
+    sha256: a42eb3aacc8aed05f8a79e54e848db65cc5159425888397242677c4914bf2aca
+    matched_on:
+    - md5
+    manifest: chunked in memory under the record's own inputs.chunks.rule (#1140)
+  recorded_by: backfill_checks
 review:
   checked: true
   items_total: 68

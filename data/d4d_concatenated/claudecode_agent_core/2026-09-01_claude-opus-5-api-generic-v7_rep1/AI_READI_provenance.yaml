@@ -431,6 +431,15 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
+    anywhere (a minted id reconciliation stripped) is located as a keyless entry —
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
+    of declared dropped; v2 (#1123): a fragment minted on an identifier the record
+    carries for the dataset at its top level — its id in CURIE or resolver form, its
+    doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 28
     reviewed: 28
@@ -500,13 +509,14 @@ receipts:
     entry_single_leaf_sample:
     - chunk: c015
       slot: file_collections[0]
-      leaves: 7
+      leaves: 6
       overlapping: 0
   slots:
     populated: 562
-    exempt: 54
-    receiptable: 508
-    with_receipt: 161
+    exempt: 64
+    exempt_on_carried_identifier: 10
+    receiptable: 498
+    with_receipt: 160
     without_receipt:
     - name
     - doi
@@ -558,8 +568,8 @@ receipts:
     - sampling_strategies[0].is_sample
     - sampling_strategies[0].is_random
     - sampling_strategies[0].is_representative
-    without_receipt_truncated: 297
-    never_receipted: 330
+    without_receipt_truncated: 288
+    never_receipted: 321
     added_after_receipt: 17
     receipt_paths: 184
     unresolved: []
@@ -617,6 +627,8 @@ receipts:
     value_changed_after_receipt_count: 21
     index_reused_by_another_entry: []
     index_reused_by_another_entry_count: 0
+    located_after_key_stripped: []
+    located_after_key_stripped_count: 0
     path_not_in_snapshot:
     - variables[24].notes
     path_not_in_snapshot_count: 1
@@ -768,8 +780,8 @@ receipts:
   summary: chunks 28/28 reviewed · snippets 221/243 verified (1 across an artifact
     line) (3 unattesting, below the floors) (17 in an adjacent chunk) (2 in another
     chunk) (12 bearing on no token of their value) (1 entry receipt(s) overlapping
-    one leaf) · slots 161/508 with a receipt (330 never receipted, 17 added after
-    the receipt) (54 exempt) · 7 receipt path(s) reshaped by reconcile · 1 addressing
+    one leaf) · slots 160/498 with a receipt (321 never receipted, 17 added after
+    the receipt) (64 exempt) · 7 receipt path(s) reshaped by reconcile · 1 addressing
     slip(s) · 1 receipt path(s) followed by identity · 21 value(s) changed after the
     receipt · 1 receipt path(s) not in the snapshot
   artifacts:
@@ -777,8 +789,28 @@ receipts:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_coverage_receipt.yaml
       sha256: b2fff0a9c710d8ed28c07aee22ee132e0e0ba2667ee9feb5792b6926f6be3573
     manifest:
-      path: data/preprocessed/chunks/AI_READI_chunks.yaml
-      sha256: b46977b4c4b66adb903c6d288428646024275da21f9dbc2fb931b5c36d48ac0a
+      path: null
+      rule:
+        version: 2
+        unit: source-document
+        boundary: 'FILE: line followed by PATH: or ROLE:'
+        preamble: own-chunk
+        split: line-window
+        max_lines: 400
+        max_bytes: 48000
+      chunk_count: 28
+      bundle_md5: 8abd7bf5389b562b95794d656af19392
+      bundle_sha256: 909c0dd8a1dcade0a0af908771356d5ea13cd91849522d562e9d88107661d368
+  bundle_basis:
+    source: git blob
+    path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+    commit: b8f2aa4616d438495d9153f683784602413c9bc8
+    committed_on: '2026-09-01'
+    md5: 8abd7bf5389b562b95794d656af19392
+    sha256: 909c0dd8a1dcade0a0af908771356d5ea13cd91849522d562e9d88107661d368
+    matched_on:
+    - md5
+    manifest: chunked in memory under the record's own inputs.chunks.rule (#1140)
   recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/intermediate/AI_READI_audit.json

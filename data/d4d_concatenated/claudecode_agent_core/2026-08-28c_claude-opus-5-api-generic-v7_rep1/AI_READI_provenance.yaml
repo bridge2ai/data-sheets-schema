@@ -432,6 +432,15 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
+    anywhere (a minted id reconciliation stripped) is located as a keyless entry —
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
+    of declared dropped; v2 (#1123): a fragment minted on an identifier the record
+    carries for the dataset at its top level — its id in CURIE or resolver form, its
+    doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 28
     reviewed: 28
@@ -448,11 +457,48 @@ receipts:
     adjacent: 8
     elsewhere: 0
     spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
     mismatched: 1
     unchecked: 0
+    no_value_overlap: 8
+    no_value_overlap_sample:
+    - chunk: c002
+      slot: sampling_strategies[0].why_not_representative
+      snippet: target enrollment is 4000 people aged 40 and older
+    - chunk: c002
+      slot: raw_data_sources[0].source_description
+      snippet: R73.09 and E11.X, respectively
+    - chunk: c005
+      slot: funders[0].grants
+      snippet: supported by National Institutes of Health grants
+    - chunk: c019
+      slot: splits[0].split_details
+      snippet: proportions (70%/15%/15%)
+    - chunk: c019
+      slot: subpopulations[0].distribution
+      snippet: Mean age (years ± sd)
+    - chunk: c022
+      slot: data_governance.committee_name
+      snippet: dataGovernanceCommittee
+    - chunk: c027
+      slot: participant_privacy[0].privacy_techniques
+      snippet: all identifiable information will be kept on encrypted compu
+    - chunk: c027
+      slot: known_biases[1].mitigation_strategy
+      snippet: the consent form will be translated into Spanish
+    entry_single_leaf: 1
+    entry_single_leaf_sample:
+    - chunk: c016
+      slot: file_collections[4]
+      leaves: 7
+      overlapping: 1
   slots:
     populated: 434
     exempt: 40
+    exempt_on_carried_identifier: 0
     receiptable: 394
     with_receipt: 175
     without_receipt:
@@ -507,10 +553,67 @@ receipts:
     - subsets[0].description
     - subsets[1].name
     without_receipt_truncated: 169
+    never_receipted: 181
+    added_after_receipt: 38
     receipt_paths: 126
     unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt:
+    - path: at_risk_populations.special_protections
+      resolved_path: at_risk_populations.special_protections
+    - path: collection_timeframes[0].source_caveats
+      resolved_path: collection_timeframes[0].source_caveats
+    - path: collection_timeframes[0].timeframe_details
+      resolved_path: collection_timeframes[0].timeframe_details
+    - path: creators[0].principal_investigator
+      resolved_path: creators[0].principal_investigator
+    - path: creators[0].source_caveats
+      resolved_path: creators[0].source_caveats
+    - path: data_governance.notes
+      resolved_path: data_governance.notes
+    - path: description
+      resolved_path: description
+    - path: ethical_reviews[1].review_details
+      resolved_path: ethical_reviews[1].review_details
+    - path: external_resources[1].external_resources
+      resolved_path: external_resources[1].external_resources
+    - path: human_subject_research.ethics_review_board
+      resolved_path: human_subject_research.ethics_review_board
+    - path: human_subject_research.irb_approval
+      resolved_path: human_subject_research.irb_approval
+    - path: ip_restrictions.restrictions
+      resolved_path: ip_restrictions.restrictions
+    - path: is_deidentified.deidentification_details
+      resolved_path: is_deidentified.deidentification_details
+    - path: maintainers[0].maintainer_details
+      resolved_path: maintainers[0].maintainer_details
+    - path: notes
+      resolved_path: notes
+    - path: participant_compensation[0].compensation_amount
+      resolved_path: participant_compensation[0].compensation_amount
+    - path: participant_compensation[0].compensation_type
+      resolved_path: participant_compensation[0].compensation_type
+    - path: regulatory_restrictions.other_compliance
+      resolved_path: regulatory_restrictions.other_compliance
+    - path: regulatory_restrictions.regulatory_restrictions
+      resolved_path: regulatory_restrictions.regulatory_restrictions
+    - path: regulatory_restrictions.source_caveats
+      resolved_path: regulatory_restrictions.source_caveats
+    value_changed_after_receipt_count: 28
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    located_after_key_stripped: []
+    located_after_key_stripped_count: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
     - sensitive_elements[1].sensitivity_details
+    receipts_to_removed_values: 1
   findings:
   - kind: snippet_adjacent_chunk
     chunk: c008
@@ -574,16 +677,40 @@ receipts:
     snippet: worn on their non-dominant wrist for 10 consecutive days
     reason: not found in chunk
   findings_truncated: null
+  findings_gated: 0
   summary: chunks 28/28 reviewed · snippets 138/147 verified (8 in an adjacent chunk)
-    · slots 175/394 with a receipt (40 exempt) · 1 receipt path(s) reshaped by reconcile
+    (8 bearing on no token of their value) (1 entry receipt(s) overlapping one leaf)
+    · slots 175/394 with a receipt (181 never receipted, 38 added after the receipt)
+    (40 exempt) · 1 receipt path(s) reshaped by reconcile · 28 value(s) changed after
+    the receipt
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_coverage_receipt.yaml
       sha256: 04076d861d45ca26145883a2be6713b02c09f8e614a501d1c957a795afcfff5f
     manifest:
-      path: data/preprocessed/chunks/AI_READI_chunks.yaml
-      sha256: 631788768d84a9ae689f722a37f2244be4f67393de390c2055585b81f27f33cf
-  recorded_by: d4d receipts check
+      path: null
+      rule:
+        version: 2
+        unit: source-document
+        boundary: 'FILE: line followed by PATH: or ROLE:'
+        preamble: own-chunk
+        split: line-window
+        max_lines: 400
+        max_bytes: 48000
+      chunk_count: 28
+      bundle_md5: 0f3abb51a333555456bedd63891fcd99
+      bundle_sha256: a42eb3aacc8aed05f8a79e54e848db65cc5159425888397242677c4914bf2aca
+  bundle_basis:
+    source: git blob
+    path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+    commit: 9049904493393a6ce1db69b9fe0a855ce0db4435
+    committed_on: '2026-08-12'
+    md5: 0f3abb51a333555456bedd63891fcd99
+    sha256: a42eb3aacc8aed05f8a79e54e848db65cc5159425888397242677c4914bf2aca
+    matched_on:
+    - md5
+    manifest: chunked in memory under the record's own inputs.chunks.rule (#1140)
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-28c_claude-opus-5-api-generic-v7_rep1/intermediate/AI_READI_audit.json
   sha256: dbcdc41debe7fd933b957356f4ef74f5c959f5cf043a8e4fc4efd1434911c26d

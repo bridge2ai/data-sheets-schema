@@ -337,6 +337,15 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
+    anywhere (a minted id reconciliation stripped) is located as a keyless entry —
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
+    of declared dropped; v2 (#1123): a fragment minted on an identifier the record
+    carries for the dataset at its top level — its id in CURIE or resolver form, its
+    doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 22
     reviewed: 22
@@ -349,13 +358,57 @@ receipts:
   snippets:
     total: 271
     verified: 271
+    linewrap_joined: 0
     adjacent: 0
     elsewhere: 0
+    spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
     mismatched: 0
     unchecked: 0
+    no_value_overlap: 9
+    no_value_overlap_sample:
+    - chunk: c002
+      slot: creators[0].name
+      snippet: Bridge2AI-Voice Consortium
+    - chunk: c007
+      slot: purposes[2].response
+      snippet: The consortium is also addressing the growing ethical, legal
+    - chunk: c009
+      slot: distribution_dates[0].release_dates[0]
+      snippet: The data was published and made available at the end of Nove
+    - chunk: c009
+      slot: subpopulations[0].distribution
+      snippet: Does the dataset identify any demographic sub-populations (e
+    - chunk: c009
+      slot: conforms_to_standard[0]
+      snippet: 'compliant with the
+
+        Brain Imaging Data Structure v1.9.0'
+    - chunk: c010
+      slot: external_resources[2].external_resources[2]
+      snippet: 'B2Ai-Voice | FHIR
+
+        Description: FHIR profiles for voice as a '
+    - chunk: c011
+      slot: acquisition_methods[0].description
+      snippet: This is a prospective cohort study over 4 years involving 11
+    - chunk: c012
+      slot: creators[1].affiliations[2].name
+      snippet: Maria Powell, PhD
+    - chunk: c019
+      slot: license_and_use_terms.description
+      snippet: 'Required training:
+
+        No training required'
+    entry_single_leaf: 0
+    entry_single_leaf_sample: []
   slots:
     populated: 460
     exempt: 28
+    exempt_on_carried_identifier: 0
     receiptable: 432
     with_receipt: 184
     without_receipt:
@@ -410,21 +463,59 @@ receipts:
     - splits[0].name
     - subpopulations[0].name
     without_receipt_truncated: 198
+    never_receipted: null
+    added_after_receipt: null
     receipt_paths: 217
     unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt: []
+    value_changed_after_receipt_count: null
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: null
+    located_after_key_stripped: []
+    located_after_key_stripped_count: null
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: null
     reshaped_by_reconcile: []
+    receipts_to_removed_values: 0
   findings: []
   findings_truncated: null
-  summary: chunks 22/22 reviewed · snippets 271/271 verified · slots 184/432 with
-    a receipt (28 exempt)
+  findings_gated: 0
+  summary: chunks 22/22 reviewed · snippets 271/271 verified (9 bearing on no token
+    of their value) · slots 184/432 with a receipt (28 exempt)
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/VOICE_coverage_receipt.yaml
       sha256: aa72cbbc3bbaa293ef51a4bbad12a3c9ed46dfa6657f104cc4d796d3a41e9dbf
     manifest:
-      path: data/preprocessed/chunks/VOICE_chunks.yaml
-      sha256: f748d123c5f40b18d70a657088392eebfeb9fc3d5ae051f4aae760084ec182b9
-  recorded_by: d4d receipts check
+      path: null
+      rule:
+        version: 2
+        unit: source-document
+        boundary: 'FILE: line followed by PATH: or ROLE:'
+        preamble: own-chunk
+        split: line-window
+        max_lines: 400
+        max_bytes: 48000
+      chunk_count: 22
+      bundle_md5: dcd717170da6762569c0b4eeafc1c3d2
+      bundle_sha256: a075e1124b91c58283113f6d8d1198daee295e84d585f7e8b35a098bbdd7c7ea
+  bundle_basis:
+    source: git blob
+    path: data/preprocessed/concatenated/VOICE_preprocessed.txt
+    commit: 4fc4d6b22d5522389692e746a4bc715a93163871
+    committed_on: '2026-08-10'
+    md5: dcd717170da6762569c0b4eeafc1c3d2
+    sha256: a075e1124b91c58283113f6d8d1198daee295e84d585f7e8b35a098bbdd7c7ea
+    matched_on:
+    - md5
+    manifest: chunked in memory under the record's own inputs.chunks.rule (#1140)
+  recorded_by: backfill_checks
 validation:
   passed: true
   artifacts:

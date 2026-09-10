@@ -434,6 +434,15 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
+    anywhere (a minted id reconciliation stripped) is located as a keyless entry —
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
+    of declared dropped; v2 (#1123): a fragment minted on an identifier the record
+    carries for the dataset at its top level — its id in CURIE or resolver form, its
+    doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 22
     reviewed: 22
@@ -466,6 +475,7 @@ receipts:
   slots:
     populated: 375
     exempt: 37
+    exempt_on_carried_identifier: 0
     receiptable: 338
     with_receipt: 96
     without_receipt:
@@ -550,6 +560,8 @@ receipts:
     value_changed_after_receipt_count: 8
     index_reused_by_another_entry: []
     index_reused_by_another_entry_count: 0
+    located_after_key_stripped: []
+    located_after_key_stripped_count: 0
     path_not_in_snapshot: []
     path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
@@ -601,8 +613,28 @@ receipts:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_coverage_receipt.yaml
       sha256: 65096bef398a5fe791c679f588089af83e99982698f4e22a755e9875cd7ccf06
     manifest:
-      path: data/preprocessed/chunks/VOICE_chunks.yaml
-      sha256: f748d123c5f40b18d70a657088392eebfeb9fc3d5ae051f4aae760084ec182b9
+      path: null
+      rule:
+        version: 2
+        unit: source-document
+        boundary: 'FILE: line followed by PATH: or ROLE:'
+        preamble: own-chunk
+        split: line-window
+        max_lines: 400
+        max_bytes: 48000
+      chunk_count: 22
+      bundle_md5: dcd717170da6762569c0b4eeafc1c3d2
+      bundle_sha256: a075e1124b91c58283113f6d8d1198daee295e84d585f7e8b35a098bbdd7c7ea
+  bundle_basis:
+    source: git blob
+    path: data/preprocessed/concatenated/VOICE_preprocessed.txt
+    commit: 4fc4d6b22d5522389692e746a4bc715a93163871
+    committed_on: '2026-08-10'
+    md5: dcd717170da6762569c0b4eeafc1c3d2
+    sha256: a075e1124b91c58283113f6d8d1198daee295e84d585f7e8b35a098bbdd7c7ea
+    matched_on:
+    - md5
+    manifest: chunked in memory under the record's own inputs.chunks.rule (#1140)
   recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/VOICE_audit.json
