@@ -1379,7 +1379,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
         bundle_basis = {"source": "git blob", "path": bundle_rel_path, "commit": entry["commit"],
                         "committed_on": entry["date"], "md5": entry["md5"], "sha256": entry["sha256"],
                         "matched_on": entry.get("matched_on"),
-                        "manifest": f"chunked in memory under {rule_basis}; {context} (#1140)"}
+                        "manifest": f"chunked in memory under {rule_basis} (#1140)"}
     elif on_disk is None:
         return {**base, "checked": False, "reason": disk_state + "; chunk texts cannot be loaded"}
     else:
