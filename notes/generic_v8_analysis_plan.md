@@ -1197,14 +1197,12 @@ and URN forms `identifiers.classify` calls URIs — 623 part ids outside
 the record's own `id`, and 24 record ids (16 ARK, 8 URN), the very ARKs
 named as M1's evidence — and had
 kept the premise "the one identifier every record carries" unqualified
-beside the clause that denies it: the forms admitted are now a declared
-CURIE, an absolute URL, or a URI under a registered scheme such as ark
-the forms admitted are now named one by one — a declared CURIE, a
-resolver URL, an absolute URL, an ARK or a URN for a stated identifier,
-the same minus the resolver URL for a base — rather than "a URI under a
-registered scheme", which would admit the `mailto:` the person rule
-forbids on 77 corpus ids and the `file:` `identifiers.py` excludes on
-purpose over 22 (round 9) — in the
+beside the clause that denies it: the forms admitted are now named one
+by one — a declared CURIE, a resolver URL, an absolute URL, an ARK or a
+URN for a stated identifier, the same minus the resolver URL for a base
+— rather than "a URI under a registered scheme", which would admit the
+`mailto:` the person rule forbids on 77 corpus ids and the `file:`
+`identifiers.py` excludes on purpose over its 22 (round 9) — in the
 stated-identifier sentence and the base rule alike, the
 premise names the identity slot rather than calling a bare token an
 identifier, the mint sentence points at the base rule, a token own id
