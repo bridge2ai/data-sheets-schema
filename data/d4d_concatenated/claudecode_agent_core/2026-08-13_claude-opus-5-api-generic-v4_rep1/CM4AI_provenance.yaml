@@ -341,11 +341,23 @@ report_claims:
   claims_checked: 6
   claims_unnamed: 0
   disposition_rows: 0
+  rows_by_record:
+    full: 0
+    core: 0
+    both: 0
+    either: 0
+    no_record_column: 0
+    invalid: 0
   claims_core_cannot_hold: 0
-  instrument: 'v3 (#1022, #1046): a schema claim that names its own scope — the core
-    schema, the full schema, a class — is resolved against that scope only, not against
-    every class; v2 (#990): a finding on a `both` row names when the core class declares
-    no such slot; `claims_core_cannot_hold` counts them'
+  instrument: 'v4 (#1122): `rows_by_record` tallies the dispositions rows by their
+    record column — `full`, `core`, `both`, `either` for an empty cell, `no_record_column`
+    for a table with no such column, `invalid` for anything else — so a `both` row
+    wrongly flipped to `full`, which the gate cannot see (a `full` row resolves against
+    the full record only), is countable from the block; v3 (#1022, #1046): a schema
+    claim that names its own scope — the core schema, the full schema, a class — is
+    resolved against that scope only, not against every class; v2 (#990): a finding
+    on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
+    counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/CM4AI_reconciliation.md
@@ -383,6 +395,9 @@ form:
   - data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/CM4AI_d4d_core.yaml
   undeclared_prefixes: {}
   undeclared_prefix_occurrences: 0
+  prefix_instrument: 'v3 (#982): ark excluded, mailto excluded on Person ids only,
+    urn by NID'
+  british_instrument: 'v4 (#1006; v3 #836/#859)'
   british_spellings: 97
   organisational_fragments: 0
   gc_label_variants: {}
@@ -392,4 +407,7 @@ form:
     classification v2.1 (ark scheme excluded and grounded instead; urn NID-aware —
     a urn under an unregistered NID counts as urn:<nid>; #671). gc_label_variant fields
     date from recompute, not the run. Previous british=53, undeclared=0 | form recomputed
-    2026-09-02 under british instrument v3 (#836/#859); previous british=53'
+    2026-09-02 under british instrument v3 (#836/#859); previous british=53 | form
+    recomputed 2026-09-09 by backfill-checks --overwrite, british instrument v4 (#1006;
+    v3 #836/#859), prefix instrument v3 (#982): ark excluded, mailto excluded on Person
+    ids only, urn by NID; previous british=97, previous undeclared_prefixes=0'

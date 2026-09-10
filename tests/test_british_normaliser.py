@@ -1,6 +1,6 @@
 """The write-time American-spelling normaliser (#1002, v8 step J).
 
-The instrument (`grounding.BRITISH_PATTERNS`, v3) says what is British; the
+The instrument (`grounding.BRITISH_PATTERNS`, v4 since #1006) says what is British; the
 normaliser says what the American form is, one rule per pattern. The VOICE
 v8 canary wrote `programme` four times in its own prose (8 counted, v7
 worst 2) under a prompt that has asked for American English since v5 on
@@ -64,11 +64,18 @@ SAMPLES = {
     "emphasise": "emphasize", "hypothesised": "hypothesized", "synthesise": "synthesize",
     "digitised": "digitized", "authorisation": "authorization", "operationalised": "operationalized",
     "tokenisation": "tokenization", "westernised": "westernized",
+    # v4 (#1006)
+    "labourers": "laborers", "labourer": "laborer", "honourably": "honorably",
+    "millilitres": "milliliters", "microlitre": "microliter", "micrometres": "micrometers",
+    "nanometre": "nanometer", "paediatrician": "pediatrician", "paediatricians": "pediatricians",
+    "haematopoietic": "hematopoietic", "haematocrit": "hematocrit", "sulphide": "sulfide",
+    "sulphate": "sulfate", "grey": "gray", "greyscale": "grayscale", "greyish": "grayish", "greyed": "grayed",
 }
 
 #: American words the instrument deliberately leaves alone (homographs).
 UNTOUCHED = ("analyses", "practice", "license", "program", "emphasis", "hypothesis", "synthesis",
-             "analysis", "specialist", "judgement", "cancellation", "centered", "meter", "enrollment")
+             "analysis", "specialist", "judgement", "cancellation", "centered", "meter", "enrollment",
+             "micrometer", "hematopoietic", "sulfide", "gray", "greyhound", "pediatrician", "laborer")
 
 
 class TestTheRules(unittest.TestCase):
@@ -276,7 +283,7 @@ class TestTheYamlWalker(unittest.TestCase):
         self.assertEqual(summary["british_distinct"], ["centre", "programme"])
         self.assertEqual(summary["british_spellings"]["full"]["title"]["occurrences"], 2)
         self.assertEqual(summary["occurrences"], 1)                    # identifier totals unchanged
-        self.assertTrue(summary["british_normaliser"].startswith("v1 (#1002)"))
+        self.assertTrue(summary["british_normaliser"].startswith("v2 (#1006)"))
 
 
 if __name__ == "__main__":

@@ -51,6 +51,83 @@ class TestTheRuleIsStated(unittest.TestCase):
         self.assertIn("no target slot count is the load-bearing", self.text)
 
 
+class TestTheRunnerSendsWhatItAsksFor(unittest.TestCase):
+    """Every piece of prose the runner writes into a request — the phase
+    instructions and layout the assembly digest hashes, and the system
+    prompt, repair prompts, core inventory block and headers it does not —
+    writes the American English the rule asks for and the normaliser
+    enforces (#1138): the audit phase said "neighbouring field" on every API
+    run while #1002 rewrote the same word out of every record. Swept with
+    the declared instrument as the instrument applies it — lower-cased, and
+    with no quotation exemption, since text the repository authors quotes no
+    source and an example the model is told to copy is the surface that
+    matters (#1151 review, M1/S1/S2)."""
+
+    def test_no_sent_surface_carries_a_british_form(self):
+        from data_sheets_schema import api_runner
+        from tests.british_sweep import british_forms
+        surfaces = api_runner.sent_text_surfaces()
+        # Exact, not a floor (#1151 round 2, S1): deleting a surface from the
+        # map is the regression this guard exists to catch. Nine phase
+        # instructions, the layout, and ten authored surfaces.
+        self.assertEqual(len(surfaces), 20, sorted(surfaces))
+        for name, text in surfaces.items():
+            with self.subTest(surface=name):
+                found = british_forms(text, exempt_quotes=False)
+                self.assertEqual(found, [], f"British forms in {name}: {found}")
+
+    def test_the_sweep_sees_a_capitalised_form_and_a_quoted_example(self):
+        """What the first version missed: the patterns are case-sensitive and
+        the instrument lower-cases; a double-quoted example is authored."""
+        from tests.british_sweep import british_forms
+        self.assertEqual(british_forms("Neighbouring fields are read together."), ["neighbouring"])
+        self.assertEqual(british_forms('write it exactly as "the programme centre"', exempt_quotes=False),
+                         ["centre", "programme"])
+        self.assertEqual(british_forms('write it exactly as "the programme centre"'), [])
+
+    def test_the_sent_surfaces_are_the_request_text(self):
+        """Lifting the literals into constants must not change a byte of
+        what is sent — pinned exactly, trailing newlines included, since
+        these constants are now the only definition (#1151 round 2, S2)."""
+        from data_sheets_schema import api_runner
+        self.assertEqual(api_runner.PHASE_SYSTEM,
+                         "You generate Datasheets-for-Datasets records. The declared input bundle is your "
+                         "only source of dataset facts. The schema digest defines structure, never content. "
+                         "Never consult a previously generated D4D record.")
+        self.assertEqual(api_runner.CHUNK_MARKER_NOTE,
+                         "# Chunk markers: a line of the form [cNNN] opens each chunk; the markers are not "
+                         "part of the bundle's text.\n\n")
+        self.assertEqual(api_runner.READDRESS_HEADER, "# Receipt entries whose slot is not a path in the record above\n\n")
+        self.assertEqual(api_runner.REGATE_HEADERS, ("# Reconciliation report as written\n\n",
+                                                     "# Claims the records do not show\n\n"))
+        self.assertEqual(api_runner.REPAIR_HEADERS, ("# Record that failed validation\n\n", "# Validator findings\n\n"))
+        self.assertEqual(api_runner.CARRY_LABEL.format(name="Audit findings"), "# Audit findings\n\n")
+        self.assertEqual(api_runner.BUNDLE_HEAD.format(bundle="b.txt") + "\n", "# Declared input bundle — b.txt\n\n")
+        self.assertEqual(api_runner.BUNDLE_MD5_LINE.format(md5="x"), "# bundle_md5: x\n")
+
+    def test_the_bundle_head_is_composed_as_main_sent_it(self):
+        """The constants are pinned above; this pins the two places that join
+        them (#1151 review, R3-S2), through `build_phase` — the request as
+        sent, not the test's own reconstruction."""
+        import hashlib
+        from data_sheets_schema.api_runner import RunSpec, build_phase, chunk_marked_bundle
+        from tests.test_download.test_api_runner import BUNDLE
+        plain = build_phase(RunSpec(project="CHORUS", arm="BASELINE (input documents only)", method="claudecode_agent",
+                                    bundle=BUNDLE, label="2026-07-29_claude-opus-5-api-generic_rep1"),
+                            "full", carry={})
+        text = plain.cached_blocks[1]["text"]
+        self.assertTrue(text.startswith(f"# Declared input bundle — {BUNDLE}\n\n"), text[:120])
+        self.assertEqual(text[len(f"# Declared input bundle — {BUNDLE}\n\n"):], BUNDLE.read_text(encoding="utf-8", errors="ignore"))
+        marked, md5 = chunk_marked_bundle(BUNDLE)
+        receipted = build_phase(RunSpec(project="CHORUS", arm="BASELINE (input documents only)", method="claudecode_agent",
+                                        bundle=BUNDLE, label="L_rep1", condition="generic_v7"),
+                                "full", carry={})
+        head = (f"# Declared input bundle — {BUNDLE}\n# bundle_md5: {md5}\n"
+                "# Chunk markers: a line of the form [cNNN] opens each chunk; the markers are not "
+                "part of the bundle's text.\n\n")
+        self.assertEqual(receipted.cached_blocks[1]["text"], head + marked)
+
+
 class TestItDidNotRedefineACondition(unittest.TestCase):
     """The reason it is in the playbook rather than the prompts."""
 

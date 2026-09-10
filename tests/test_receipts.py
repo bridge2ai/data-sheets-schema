@@ -212,6 +212,56 @@ class Validator(unittest.TestCase):
         self.assertNotIn("external_resources[0].id", ex)       # a real anchor elsewhere
         self.assertNotIn("conforms_to", ex)
 
+    def test_a_fragment_on_an_identifier_the_record_carries_for_the_dataset_is_exempt(self):
+        """#1123: the v5 rule licenses a fragment on an identifier the
+        evidence supplies — the landing page, the DOI in its other form —
+        and a record taking that option must not lose receipt coverage
+        for it. A fragment on a component dataset's DOI under `resources`,
+        or on a homepage the record does not carry as its page, is a claim
+        about that identifier and stays receiptable."""
+        full = {"id": "https://doi.org/10.1/ABC", "doi": "10.1/abc",
+                "page": "https://example.org/dataset/",
+                "file_collections": [{"id": "https://example.org/dataset#fc-1", "name": "raw"},
+                                     {"id": "doi:10.1/ABC#fc-2", "name": "derived"},
+                                     {"id": "DOI:10.1/abc#fc-3", "name": "case"}],
+                "resources": [{"id": "doi:10.1/COMPONENT#release-dates", "name": "part"}],
+                "funders": [{"id": "https://project.org/#funder-1", "name": "NIH"}]}
+        carried = rc.dataset_identifier_forms(full)
+        leaves = dict(rc.populated_leaves(full))
+        ex = {p for p, v in leaves.items() if rc.exempt(p, v, full["id"], carried)}
+        self.assertIn("file_collections[0].id", ex)            # the page, trailing slash aside
+        self.assertIn("file_collections[1].id", ex)            # the id in CURIE form
+        self.assertIn("file_collections[2].id", ex)            # DOIs are case-insensitive
+        self.assertNotIn("resources[0].id", ex)                # another dataset's DOI
+        self.assertNotIn("funders[0].id", ex)                  # a homepage the record does not carry
+        # Under v1 those three were receiptable; the block counts the change.
+        v1 = {p for p, v in leaves.items() if rc.exempt(p, v, full["id"])}
+        self.assertEqual(ex - v1, {"file_collections[0].id", "file_collections[1].id", "file_collections[2].id"})
+        self.assertEqual(sum(rc.exempt_on_carried_identifier(p, v, full["id"], carried)
+                             for p, v in leaves.items()), 3)
+
+    def test_doi_forms_cover_every_resolver_and_the_bare_doi_case_folds(self):
+        full = {"id": "urn:uuid:1", "doi": "10.1234/ABC"}
+        carried = rc.dataset_identifier_forms(full)
+        for base in ("https://dx.doi.org/10.1234/abc#p", "http://dx.doi.org/10.1234/ABC#p", "doi:10.1234/abc#p", "10.1234/abc#p"):
+            self.assertTrue(rc.exempt("parts[0].id", base, full["id"], carried), base)
+        self.assertFalse(rc.exempt("parts[0].id", "https://doi.org/10.1234/ABD#p", full["id"], carried))
+
+    def test_a_record_carrying_no_doi_or_page_exempts_own_id_fragments_only(self):
+        full = {"id": "urn:uuid:1", "funders": [{"id": "https://x/ds#f", "name": "n"}]}
+        self.assertEqual(rc.dataset_identifier_forms(full), frozenset({"urn:uuid:1"}))
+        self.assertFalse(rc.exempt("funders[0].id", "https://x/ds#f", full["id"],
+                                   rc.dataset_identifier_forms(full)))
+        self.assertEqual(rc.dataset_identifier_forms(None), frozenset())
+        self.assertEqual(rc.dataset_identifier_forms({"id": 7, "doi": ""}), frozenset())
+
+    def test_the_block_names_its_instrument_and_counts_the_new_exemptions(self):
+        r = _receipt(self.md5)
+        b = rc.check(r, self.manifest, self.texts, FULL, self.md5)
+        self.assertTrue(b["instrument"].startswith("v3 (#1053)"), b["instrument"])
+        self.assertIn("v2 (#1123)", b["instrument"]); self.assertIn("v1 (#720", b["instrument"])
+        self.assertEqual(b["slots"]["exempt_on_carried_identifier"], 0)
+
     def test_malformed_entries_are_findings_not_tracebacks(self):
         r = _receipt(self.md5)
         r["chunks"][1]["extracted"] = "Grant OT2OD032644"
@@ -700,6 +750,76 @@ class IdentityRemap(unittest.TestCase):
         self.assertEqual(rc.remap_path("variables[1].notes", {"variables": [{}]}, self.FINAL)["basis"],
                          "not_in_snapshot")
         self.assertEqual(rc.remap_path("not a path!", self.ORIGINAL, self.FINAL)["basis"], "unresolved")
+
+    def test_an_entry_whose_minted_id_reconcile_stripped_is_not_dropped(self):
+        """#1053: CHORUS 2026-09-04f rep1 — the snapshot's labeling_strategies[0]
+        carried [id, labeling_details]; reconciliation removed the minted id,
+        added source_caveats and lightly rewrote the details. The id matched
+        no final entry, so the entry read as dropped and its receipt lost its
+        credit while the attested value sat at the receipted path."""
+        original = {"labeling_strategies": [{"id": "https://x/ds#labeling-1",
+                                             "labeling_details": "The Network states that an environment will label data."}]}
+        final = {"labeling_strategies": [{"labeling_details": "The Network states that an environment labels data.",
+                                          "source_caveats": "added by reconcile"}]}
+        r = rc.remap_path("labeling_strategies[0].labeling_details", original, final)
+        self.assertEqual(r, {"path": "labeling_strategies[0].labeling_details", "basis": "same_key_stripped"})
+        # a keyed entry whose key the final list still carries, on other entries, is gone
+        r = rc.remap_path("creators[0].name", self.ORIGINAL, self.FINAL)
+        self.assertEqual(r["basis"], "entry_dropped")
+        # the key stripped everywhere and two candidates: overlap decides, or ambiguity does
+        original2 = {"funders": [{"id": "https://x/ds#f-1", "name": "NIH", "grant_id": "OT2"},
+                                 {"id": "https://x/ds#f-2", "name": "NSF", "grant_id": "DBI"}]}
+        final2 = {"funders": [{"name": "NSF", "grant_id": "DBI"}, {"name": "NIH", "grant_id": "OT2"}]}
+        self.assertEqual(rc.remap_path("funders[0].grant_id", original2, final2),
+                         {"path": "funders[1].grant_id", "basis": "by_overlap"})
+        # nothing overlaps and the list kept its length: position is the only
+        # evidence and it is taken (the #908 same-shape rule; the rewrite is
+        # reported under value_changed_after_receipt) — but only then
+        final3 = {"funders": [{"name": "X", "grant_id": "Y"}, {"name": "Z", "grant_id": "W"}]}
+        self.assertEqual(rc.remap_path("funders[0].grant_id", original2, final3)["basis"], "same_key_stripped")
+        final4 = {"funders": [{"name": "Z", "grant_id": "W"}]}
+        self.assertEqual(rc.remap_path("funders[0].grant_id", original2, final4)["basis"], "entry_dropped")
+        final5 = {"funders": [{"name": "Z", "grant_id": "W"}, {"name": "X", "grant_id": "Y"}, {"name": "Q", "grant_id": "R"}]}
+        self.assertEqual(rc.remap_path("funders[0].grant_id", original2, final5)["basis"], "entry_dropped")
+
+    def test_a_stripped_entry_in_a_list_that_shrank_is_not_the_one_at_its_index(self):
+        """#1162 review M1: CHORUS 2026-09-01 rep3 — seven keyed creators in
+        the snapshot, two keyless in the final record, and the Consortium
+        entry (snapshot [6]) now sits at [1] where Azra Bihorac's was. The
+        first v3 credited the Bihorac receipt to it; a shrunken list carries
+        no positional evidence, so the entry is gone and the block says so."""
+        original = {"creators": [{"id": "https://x/ds#creator-team", "name": "Leadership Team"}]
+                    + [{"id": f"https://x/ds#creator-{n}", "name": n,
+                        "affiliations": [{"name": f"University of {n}"}]}
+                       for n in ("bihorac", "c2", "c3", "c4", "c5")]
+                    + [{"id": "https://x/ds#creator-consortium", "name": "CHoRUS Consortium",
+                        "affiliations": [{"name": "CHoRUS Consortium"}]}]}
+        final = {"creators": [{"name": "Leadership Team"},
+                              {"name": "CHoRUS Consortium", "affiliations": [{"name": "CHoRUS Consortium"}]}]}
+        self.assertEqual(rc.remap_path("creators[1].affiliations[0].name", original, final)["basis"], "entry_dropped")
+        self.assertEqual(rc.remap_path("creators[0].name", original, final)["basis"], "same_key_stripped")
+        manifest, texts = _manifest_and_texts()
+        md5 = manifest["bundle_md5"]
+        b = rc.check(_receipt(md5), manifest, texts, {**FULL, **final}, md5, original={**FULL, **original})
+        self.assertEqual(b["slots"]["located_after_key_stripped_count"], 0)
+        self.assertNotIn("creators[1].affiliations[0].name", b["slots"].get("remapped_by_identity", []))
+
+    def test_a_stripped_id_keeps_the_receipts_coverage_credit(self):
+        manifest, texts = _manifest_and_texts()
+        md5 = manifest["bundle_md5"]
+        original = {**FULL, "funders": [{"id": "https://x/ds#funder-1", "name": "NIH Common Fund",
+                                          "grant_id": "OT2OD032644"}]}
+        final = {**FULL, "funders": [{"name": "NIH Common Fund", "grant_id": "OT2OD032644",
+                                      "source_caveats": "the id was minted and removed"}]}
+        rec = _receipt(md5)
+        b = rc.check(rec, manifest, texts, final, md5, original=original)
+        self.assertNotIn("funders[0].grant_id", b["slots"]["without_receipt"])
+        self.assertEqual(b["slots"]["index_reused_by_another_entry"], [])
+        self.assertEqual(sorted(d["path"] for d in b["slots"]["located_after_key_stripped"]),
+                         ["funders[0].grant_id", "funders[0].name"])
+        self.assertEqual(b["slots"]["located_after_key_stripped_count"], 2)
+        self.assertTrue(b["instrument"].startswith("v3 (#1053)"))
+        self.assertIn("v2 (#1123)", b["instrument"]); self.assertIn("v1 (#720", b["instrument"])
 
     def test_a_moved_entry_keeps_its_coverage_and_is_no_slip(self):
         manifest, texts = _manifest_and_texts()

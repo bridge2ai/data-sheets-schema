@@ -20,6 +20,7 @@ with the reason, never silently filled.
 
 from __future__ import annotations
 
+import functools
 import hashlib
 import itertools
 import os
@@ -1775,6 +1776,148 @@ def apply_historical_prompt(project: str, method: str, label: str,
         preamble + yaml.safe_dump(data, sort_keys=False, allow_unicode=True),
         encoding="utf-8")
     new.replace(path)
+    return resolved
+
+
+BUNDLE_MD5_RECOVERED = "recovered"
+BUNDLE_MD5_ALREADY = "already_recorded"
+BUNDLE_MD5_NO_PATH = "no_bundle_path"
+BUNDLE_MD5_NO_SHA256 = "no_bundle_sha256"
+BUNDLE_MD5_NO_BLOB = "no_blob_matches_the_recorded_sha256"
+BUNDLE_MD5_UNREADABLE = "record_unreadable"
+BUNDLE_MD5_GIT_UNAVAILABLE = "git_unavailable"
+
+#: The repository root, so the pathspec resolves the same from any cwd
+#: (#1129 review, finding 3: run from a subdirectory, `git log -- <path>`
+#: silently listed nothing and the tool reported "in no commit").
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+class GitUnavailable(RuntimeError):
+    """`git log` did not run or did not succeed — absence of evidence is not
+    evidence of absence, and the caller must not report the corpus."""
+
+
+@functools.lru_cache(maxsize=None)
+def bundle_blob_history(bundle_path: str) -> tuple[dict[str, str], ...]:
+    """Every committed version of a bundle reachable from HEAD under this
+    name, on every merged side (`--full-history`; 17 versions of the
+    AI_READI bundle against 10 under default simplification), newest
+    first: commit, date, and the sha256 and md5 of the bytes at that
+    commit. Not across a rename: `--follow` cancels `--full-history` and
+    the pre-rename blob lives under a name this function does not read
+    (#1132 round 2). Memoised per path: the backfill asks once per record
+    and 82 records name 11 paths. Read-only result — the cached dicts are
+    shared. Raises `GitUnavailable` when the log call fails, or when the
+    repository is a shallow clone — CI checks out one commit, and a
+    one-commit history reads as "no version matches" for every record
+    whose bytes an earlier commit holds — rather than returning an empty
+    or truncated history."""
+    shallow = subprocess.run(["git", "rev-parse", "--is-shallow-repository"],
+                             capture_output=True, text=True, check=False, cwd=_REPO_ROOT)
+    if shallow.returncode != 0:
+        raise GitUnavailable(shallow.stderr.strip() or "git rev-parse failed")
+    answer = shallow.stdout.strip()
+    if answer not in ("true", "false"):
+        # A git older than 2.15 echoes an option it does not know and exits 0
+        # (#1132 round 4): a probe that cannot fail must not read as "not shallow".
+        raise GitUnavailable(f"git rev-parse --is-shallow-repository answered {answer!r}, not true/false")
+    if answer == "true":
+        raise GitUnavailable("shallow clone: the history is truncated, so a version that does "
+                             "not match is not evidence that none exists (unshallow first)")
+    log = subprocess.run(["git", "log", "--full-history", "--format=%H %ad",
+                          "--date=short", "--", bundle_path],
+                         capture_output=True, text=True, check=False, cwd=_REPO_ROOT)
+    if log.returncode != 0:
+        raise GitUnavailable(log.stderr.strip() or f"git log failed for {bundle_path}")
+    out = []
+    for line in log.stdout.splitlines():
+        commit, date = line.split(maxsplit=1)
+        blob = subprocess.run(["git", "show", f"{commit}:{bundle_path}"], capture_output=True,
+                              check=False, cwd=_REPO_ROOT)
+        if blob.returncode != 0:
+            err = blob.stderr.decode("utf-8", "replace")
+            if "does not exist in" in err or "exists on disk, but not in" in err:
+                continue                              # not this path at that commit
+            # Anything else — an object a partial clone never fetched, a
+            # corrupt store — is a tool failure, not a version that does not
+            # match (#1132 round 4).
+            raise GitUnavailable(f"git show {commit[:12]}:{bundle_path}: {err.strip() or 'failed'}")
+        out.append({"commit": commit, "date": date,
+                    "sha256": hashlib.sha256(blob.stdout).hexdigest(),
+                    "md5": hashlib.md5(blob.stdout).hexdigest()})
+    return tuple(out)
+
+
+def resolve_bundle_md5(record_path: Path,
+                       history=bundle_blob_history) -> dict[str, Any]:
+    """Recover `inputs.bundle_md5` for a record that predates md5 recording
+    (#1121), by proof rather than by guess: the 82 such records carry
+    `inputs.bundle_sha256` of the bytes they consumed, and the md5 is taken
+    from the committed version of the bundle whose sha256 equals it.
+
+    Not from `repo.commit`: those runs read bundles regenerated in a dirty
+    tree (`repo.dirty: true`), and the bytes at the recorded commit are an
+    older version — recovering by commit would have written a hash the run
+    never read for 27 of the 82. The sha256 match is the evidence.
+    """
+    try:
+        text = record_path.read_text(encoding="utf-8")
+        data = yaml.safe_load(text) or {}
+    except (OSError, yaml.YAMLError, UnicodeDecodeError) as exc:
+        return {"status": BUNDLE_MD5_UNREADABLE, "note": f"record unreadable: {type(exc).__name__}"}
+    inputs = data.get("inputs") or {}
+    if inputs.get("bundle_md5"):
+        return {"status": BUNDLE_MD5_ALREADY}
+    if not inputs.get("bundle_path"):
+        return {"status": BUNDLE_MD5_NO_PATH, "note": "the record names no bundle"}
+    sha = inputs.get("bundle_sha256")
+    if not sha:
+        return {"status": BUNDLE_MD5_NO_SHA256,
+                "note": "the record carries no sha256 of the bytes it read, so nothing can prove a recovered md5"}
+    try:
+        versions = list(history(inputs["bundle_path"]))
+    except GitUnavailable as exc:
+        return {"status": BUNDLE_MD5_GIT_UNAVAILABLE, "path": inputs["bundle_path"], "note": str(exc)}
+    matches = [b for b in versions if b["sha256"] == sha]
+    if matches:
+        # The OLDEST matching commit — when the bytes entered history — not
+        # the newest: identical content re-committed (merge sides under
+        # --full-history) would otherwise name an arbitrary later commit.
+        # By date, with list position (git's reverse-chronological order)
+        # as the tie-break, so the intent does not rest on that order.
+        blob = min(reversed(matches), key=lambda b: b["date"])
+        return {"status": BUNDLE_MD5_RECOVERED, "md5": blob["md5"], "commit": blob["commit"],
+                "date": blob["date"], "path": inputs["bundle_path"], "matches": len(matches)}
+    return {"status": BUNDLE_MD5_NO_BLOB, "path": inputs["bundle_path"],
+            "note": (f"none of the {len(versions)} committed version(s) of the bundle hashes to the "
+                     "record's bundle_sha256")}
+
+
+def apply_bundle_md5(record_path: Path, history=bundle_blob_history) -> dict[str, Any] | None:
+    """Write the recovered md5 and its basis, keeping the `#` header (#1121).
+
+    The write is `safe_load` → `safe_dump(sort_keys=False)`, the path
+    `apply_historical_prompt` uses. Non-destructive here because these
+    records were emitted by that same dumper, so the round-trip is a fixed
+    point (verified: 4 lines added, 0 deleted, on all 82). A record carrying
+    interior comments, anchors or non-canonical scalars would be reformatted
+    — a property of this population, not of the method (#1129 review)."""
+    resolved = resolve_bundle_md5(record_path, history)
+    if resolved.get("status") != BUNDLE_MD5_RECOVERED:
+        return None
+    text = record_path.read_text(encoding="utf-8")
+    preamble = "".join(itertools.takewhile(lambda ln: ln.startswith("#"),
+                                           text.splitlines(keepends=True)))
+    data = yaml.safe_load(text) or {}
+    data["inputs"]["bundle_md5"] = resolved["md5"]
+    data["inputs"]["bundle_md5_basis"] = (
+        f"recovered (#1121): the md5 of the bundle at commit {resolved['commit'][:12]} "
+        f"({resolved['date']}), whose sha256 equals this record's bundle_sha256 — "
+        "the bytes the run read, not the file today")
+    new = record_path.with_suffix(record_path.suffix + ".tmp")
+    new.write_text(preamble + yaml.safe_dump(data, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    new.replace(record_path)
     return resolved
 
 

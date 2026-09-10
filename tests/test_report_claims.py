@@ -425,9 +425,70 @@ class ScopedSchemaClaimTest(Harness):
 
     def test_the_instrument_names_the_change(self):
         from data_sheets_schema.report_claims import REPORT_CLAIMS_INSTRUMENT
-        self.assertTrue(REPORT_CLAIMS_INSTRUMENT.startswith("v3"),
+        self.assertTrue(REPORT_CLAIMS_INSTRUMENT.startswith("v4"),
                         REPORT_CLAIMS_INSTRUMENT)
+        self.assertIn("#1122", REPORT_CLAIMS_INSTRUMENT)
         self.assertIn("#1046", REPORT_CLAIMS_INSTRUMENT)
+
+
+class RowsByRecordTest(Harness):
+    """The block tallies the dispositions rows by record column (#1122).
+
+    A `both` row wrongly flipped to `full` produces no finding — a `full`
+    row resolves against the full record only — so the v9 canary reader
+    compares the `both` count with the v8 fill's. That count has to be on
+    the record, not recomputed from the report by whoever reads it."""
+
+    MD = ("## Dispositions\n\n"
+          "| slot | disposition | record | reason |\n|---|---|---|---|\n"
+          "| `notes` | retained | both | as written |\n"
+          "| `errata` | retained | full | full only |\n"
+          "| `keywords` | retained | core | core only |\n"
+          "| `conforms_to` | retained |  | unsaid |\n"
+          "| `source_caveats` | retained | ambos | not a record |\n"
+          "| `collection_timeframes` | retained | both | as written |\n")
+
+    def test_every_record_value_is_counted_under_its_own_key(self):
+        block = self.check(self.MD, full={"notes": 1, "errata": 1, "conforms_to": 1,
+                                          "source_caveats": 1, "collection_timeframes": 1},
+                           core={"notes": 1, "keywords": 1, "collection_timeframes": 1})
+        self.assertEqual(block["rows_by_record"],
+                         {"full": 1, "core": 1, "both": 2, "either": 1, "no_record_column": 0, "invalid": 1})
+        self.assertEqual(sum(block["rows_by_record"].values()), block["disposition_rows"])
+
+    def test_the_keys_are_fixed_and_zero_filled(self):
+        block = self.check("## Dispositions\n\n| slot | disposition | record |\n|---|---|---|\n"
+                           "| `notes` | retained | both |\n", full={"notes": 1}, core={"notes": 1})
+        self.assertEqual(list(block["rows_by_record"]),
+                         ["full", "core", "both", "either", "no_record_column", "invalid"])
+        self.assertEqual(block["rows_by_record"],
+                         {"full": 0, "core": 0, "both": 1, "either": 0, "no_record_column": 0, "invalid": 0})
+
+    def test_a_table_with_no_record_column_is_counted_apart_from_an_empty_cell(self):
+        """Every `either` in the corpus came from a table with no record
+        column — a report format that named no record, not a run that left
+        a cell empty (#1139 review, S2). A reader comparing `both` counts
+        across arms must be able to tell "none" from "not measurable"."""
+        block = self.check("## Dispositions\n\n| # | Severity | Slot | Disposition |\n|---|---|---|---|\n"
+                           "| 1 | low | `notes` | retained |\n| 2 | low | `errata` | retained |\n",
+                           full={"notes": 1, "errata": 1}, core={"notes": 1})
+        self.assertEqual(block["rows_by_record"]["no_record_column"], 2)
+        self.assertEqual(block["rows_by_record"]["either"], 0)
+
+    def test_a_cell_that_spells_the_sentinel_is_invalid_not_a_missing_column(self):
+        """#1139 review, R1: the column's presence must not be forgeable
+        from a cell, or the two states S2 separated collapse again."""
+        block = self.check("## Dispositions\n\n| slot | disposition | record |\n|---|---|---|\n"
+                           "| `notes` | retained | no_record_column |\n| `errata` | retained | No_Record_Column |\n",
+                           full={"notes": 1, "errata": 1}, core={"notes": 1})
+        self.assertEqual(block["rows_by_record"]["invalid"], 2)
+        self.assertEqual(block["rows_by_record"]["no_record_column"], 0)
+        self.assertEqual(block["claims_unnamed"], 2)
+
+    def test_a_report_without_a_table_tallies_zero(self):
+        block = self.check("## Report\n\nNothing changed.\n")
+        self.assertEqual(block["disposition_rows"], 0)
+        self.assertEqual(sum(block["rows_by_record"].values()), 0)
 
 
 class TheFixtureMatchesTheSchemaTest(unittest.TestCase):

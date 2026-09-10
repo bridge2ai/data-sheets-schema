@@ -10,7 +10,11 @@ reported with its confounds rather than presented as a measurement of the
 prompt block.
 """
 
+import tempfile
 import unittest
+from pathlib import Path
+
+import yaml
 
 from data_sheets_schema.runs import (
     ARM_PROCEDURE_FIELDS,
@@ -201,6 +205,7 @@ class ConditionIsAFieldThatCanFire(unittest.TestCase):
         import tempfile
         import yaml
         from pathlib import Path
+
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             for rep, cond in ((1, "generic_v9"), (2, None)):
@@ -246,3 +251,53 @@ class ConditionIsAFieldThatCanFire(unittest.TestCase):
         api_cli._refuse_condition_mismatch(RunSpec(project="CHORUS", arm="baseline", method="claudecode_api",
                                                    bundle=Path("x"), label="2026-09-10_x-api-generic-v9_rep1",
                                                    condition="generic_v9"), allow=False)      # agrees
+
+
+class TestTheFullPhaseCapIsAProcedureField(unittest.TestCase):
+    """#771: earlier v7 records ran the full phase at 96k and later ones at
+    128k, and no comparability check read it. The cap is a procedure field
+    now — reported across arms by `arm_confounds` and within an arm by
+    `compare-arms`' "not constant" line."""
+
+    def test_the_field_is_read_from_the_record_or_its_usage_rows(self):
+        from data_sheets_schema.runs import ARM_PROCEDURE_FIELDS, arm_facts
+        self.assertIn(("full max_tokens", ("model", "max_tokens_by_phase", "full")), ARM_PROCEDURE_FIELDS)
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            for label, rec in (("L_rep1", {"model": {"max_tokens_by_phase": {"full": 96000}}}),
+                               ("L_rep2", {"api_usage": [{"phase": "full", "max_tokens": 128000}]}),
+                               ("L_rep3", {"model": {"agent_runtime": "Claude Code"}})):
+                d = base / "claudecode_agent_core" / label; d.mkdir(parents=True)
+                (d / "P_provenance.yaml").write_text(yaml.safe_dump(rec))
+            facts = arm_facts("L", method="claudecode_agent", concat_dir=base)
+        self.assertEqual(facts["values"]["full max_tokens"], ["128000", "96000", "None"])
+
+    def test_the_rows_outrank_the_block_and_a_two_cap_record_is_not_constant(self):
+        """#1164 review S1: the block is recomputed at record write, the rows
+        are what each call sent; a run whose `full` phase completed under one
+        cap and was resumed under another carries both, and reads as both."""
+        from data_sheets_schema.runs import arm_facts
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            d = base / "claudecode_agent_core" / "L_rep1"; d.mkdir(parents=True)
+            (d / "P_provenance.yaml").write_text(yaml.safe_dump(
+                {"model": {"max_tokens_by_phase": {"full": 128000}},
+                 "api_usage": [{"phase": "full", "max_tokens": 96000, "stop_reason": "max_tokens"},
+                               {"phase": "full", "max_tokens": 128000}]}))
+            facts = arm_facts("L", method="claudecode_agent", concat_dir=base)
+        self.assertEqual(facts["values"]["full max_tokens"], ["128000", "96000"])
+
+    def test_the_v7_canaries_straddle_the_cap_and_the_production_arm_does_not(self):
+        from data_sheets_schema.runs import CONCAT_DIR, arm_confounds, arm_facts
+        if not (CONCAT_DIR / "claudecode_agent_core" / "2026-08-28_claude-opus-5-api-generic-v7_rep1").exists():
+            self.skipTest("the v7 canaries are not in this checkout")
+        canaries = arm_facts("2026-08-28", method="claudecode_agent")
+        self.assertEqual([v for v in canaries["values"]["full max_tokens"] if v != "None"], ["128000", "96000"])
+        production = arm_facts("2026-09-01_claude-opus-5-api-generic-v7", method="claudecode_agent")
+        self.assertEqual(production["values"]["full max_tokens"], ["128000"])
+        self.assertEqual([c["field"] for c in arm_confounds(canaries, production) if c["field"] == "full max_tokens"],
+                         ["full max_tokens"])
+        v8 = arm_facts("2026-09-04f_claude-opus-5-api-generic-v8", method="claudecode_api")
+        self.assertEqual(v8["values"]["full max_tokens"], ["128000"])       # measured, not absent (#1164 review, S2)
+        self.assertEqual([c for c in arm_confounds(production, v8) if c["field"] == "full max_tokens"], [])
+

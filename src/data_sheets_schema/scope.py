@@ -68,6 +68,29 @@ def scope_of(project: str, manifest: Path = MANIFEST) -> dict | None:
     return all_scopes(manifest).get(project)
 
 
+def aliases_of(entry: Any) -> list[str]:
+    """The identifiers a `related_but_distinct` entry answers to: its `id`
+    and every `also_known_as`, each as a stripped string. A scalar
+    `also_known_as` is one alias, not its characters (#1070; the renderer
+    half was #1068) — the one definition every reader of the declaration
+    uses, so the checker and the scope block cannot disagree about it."""
+    if not isinstance(entry, dict):
+        return []
+    aka = entry.get("also_known_as")
+    if aka is None:
+        aka = []
+    elif isinstance(aka, (str, bytes, int, float)):
+        aka = [aka]
+    elif not isinstance(aka, (list, tuple)):
+        aka = list(aka) if hasattr(aka, "__iter__") else [aka]
+    out = []
+    for ident in [entry.get("id"), *aka]:
+        text = str(ident).strip() if ident is not None else ""
+        if text and text not in out:
+            out.append(text)
+    return out
+
+
 def related_ids(project: str, manifest: Path = MANIFEST) -> dict[str, dict]:
     """Identifier -> declaration, for datasets this project is *not* about.
 
@@ -78,9 +101,8 @@ def related_ids(project: str, manifest: Path = MANIFEST) -> dict[str, dict]:
     scope = scope_of(project, manifest) or {}
     out = {}
     for entry in scope.get("related_but_distinct") or []:
-        for ident in [entry.get("id"), *(entry.get("also_known_as") or [])]:
-            if ident:
-                out[str(ident).strip()] = entry
+        for ident in aliases_of(entry):
+            out[ident] = entry
     return out
 
 

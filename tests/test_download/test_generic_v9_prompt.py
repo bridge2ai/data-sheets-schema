@@ -45,6 +45,32 @@ def _norm(text):
     return re.sub(r"\s+", " ", text).strip()
 
 
+# v9 corrected the spelling of the text it inherits (#1134): "organisation" and
+# "recognise" stood in the v5 block and R7 while the same body says "Write
+# American English throughout" and the runner rewrites British forms out of
+# every record (#1002). v8 keeps them because its records were generated under
+# those bytes and its pin is theirs; v9 had no record when it was corrected.
+# The inheritance tests apply this to the v8 side only, so any other difference
+# between the two still fails them.
+SPELLING_CORRECTED_IN_V9 = {"organisation": "organization", "recognise": "recognize",
+                            "neighbouring": "neighboring"}          # #1137 review, M1
+
+
+def _as_v9_spells(text):
+    for british, american in SPELLING_CORRECTED_IN_V9.items():
+        text = text.replace(british, american)
+    return text
+
+
+# The sweep is the repository's own instrument (#1137 review, M2): the
+# patterns `grounding.british_spellings` counts, the canary metric reads and
+# the normaliser rewrites (#1002), under its declared version — not a second
+# hand-written list, which omitted the v3 half and re-admitted `analyses`.
+def british_forms(text):
+    from tests.british_sweep import british_forms as _sweep               # one wrapper for every guard (#1151 review, S3)
+    return _sweep(text, exempt_quotes=True)                                # a prompt quotes sources
+
+
 class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
     VERSION_STAMP = re.compile(r"#\s*(?:Mode|Prompt):[^\n]*")
 
@@ -53,7 +79,7 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
         v9 = prompt_body(GENERIC_PROMPT_V9)
         stripped = (v9.split(MARK_START, 1)[0] + v9.split(MARK_END, 1)[1]).strip()
         scrub = lambda t: _norm(self.VERSION_STAMP.sub("", t))  # noqa: E731
-        self.assertEqual(scrub(stripped), scrub(v8))
+        self.assertEqual(scrub(stripped), scrub(_as_v9_spells(v8)))
 
     def test_the_version_stamp_names_v9(self):
         v9 = prompt_body(GENERIC_PROMPT_V9)
@@ -67,7 +93,40 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
         for mark in ("v2", "v3", "v4", "v5", "v6", "v8"):
             a = v8.split(f"--- ADDED IN {mark} ---", 1)[1].split(f"--- END ADDED IN {mark} ---", 1)[0]
             b = v9.split(f"--- ADDED IN {mark} ---", 1)[1].split(f"--- END ADDED IN {mark} ---", 1)[0]
-            self.assertEqual(_norm(a), _norm(b), f"the {mark} block changed")
+            self.assertEqual(_norm(_as_v9_spells(a)), _norm(b), f"the {mark} block changed")
+
+    def test_the_whole_file_writes_american_english(self):
+        """The prompt's own prose is the example the model copies (#1134),
+        and the rationale is what the next prompt is written from. The rule
+        and the normaliser (#1002) both say American; the v9 body said
+        "organisation" eight times, "recognise" once and "neighbouring" once
+        while saying so, and the rationale two more (one the plural).
+        Swept with the declared instrument, so the guard moves with it."""
+        from data_sheets_schema import grounding
+        text = GENERIC_PROMPT_V9.read_text()
+        self.assertTrue(grounding.BRITISH_INSTRUMENT.startswith("v4"))
+        found = british_forms(text)
+        self.assertEqual(found, [], f"British forms in the v9 prompt file: {found}")
+        self.assertEqual(grounding.british_spellings(prompt_body(GENERIC_PROMPT_V9)), 0)
+
+    def test_the_sweep_sees_what_the_first_version_missed(self):
+        """The first sweep was a hand-written list that passed on
+        "neighbouring" (#1137 review, M1) and would have flagged the
+        American plural "analyses" (M2)."""
+        self.assertEqual(british_forms("a neighbouring field"), ["neighbouring"])
+        self.assertEqual(british_forms("two analyses were run; the judgement stands"), [])
+        self.assertEqual(british_forms('the "organisation" quoted from a source'), [])
+
+    def test_the_corrected_spellings_are_the_only_ones_the_v8_side_needs(self):
+        """Every entry of the correction table is a word v8 actually carries
+        and v9 does not — a table entry nothing uses would let a future
+        drift hide under it."""
+        v8 = GENERIC_PROMPT_V8.read_text()
+        v9 = GENERIC_PROMPT_V9.read_text()
+        for british, american in SPELLING_CORRECTED_IN_V9.items():
+            self.assertIn(british, v8)
+            self.assertNotIn(british, v9)
+            self.assertIn(american, v9)
 
     def test_the_block_carries_the_nine_registered_rules(self):
         block = _added_block(GENERIC_PROMPT_V9.read_text())
@@ -280,7 +339,7 @@ class TestTheConditionIsWiredComparably(unittest.TestCase):
 
     def test_the_audit_phase_carries_the_e2_flags(self):
         audit = PHASE_INSTRUCTIONS["audit"]
-        for probe in ("absent, pending or held elsewhere", "neighbouring field", "`prohibition_reason`",
+        for probe in ("absent, pending or held elsewhere", "neighboring field", "`prohibition_reason`",
                       "earlier release stated as the dataset's current state",
                       "computed from other figures"):
             self.assertIn(probe, audit)

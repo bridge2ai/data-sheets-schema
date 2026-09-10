@@ -47,6 +47,10 @@ inputs:
     path: data/preprocessed/source_manifest.yaml
     md5: e633ee3827eb151efca663f14d0b2f5c
   bundle_sha256: 2c071543a14978fbe2a9a595538580d062969aa72b806fe44a17513d8531ba82
+  bundle_md5: 3694e188106bbf8b1871d44450925e9a
+  bundle_md5_basis: 'recovered (#1121): the md5 of the bundle at commit fa90b4ec036f
+    (2026-07-28), whose sha256 equals this record''s bundle_sha256 — the bytes the
+    run read, not the file today'
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-programme-deprimed_rep1/CM4AI_d4d.yaml
@@ -104,11 +108,23 @@ report_claims:
   claims_checked: 0
   claims_unnamed: 0
   disposition_rows: 0
+  rows_by_record:
+    full: 0
+    core: 0
+    both: 0
+    either: 0
+    no_record_column: 0
+    invalid: 0
   claims_core_cannot_hold: 0
-  instrument: 'v3 (#1022, #1046): a schema claim that names its own scope — the core
-    schema, the full schema, a class — is resolved against that scope only, not against
-    every class; v2 (#990): a finding on a `both` row names when the core class declares
-    no such slot; `claims_core_cannot_hold` counts them'
+  instrument: 'v4 (#1122): `rows_by_record` tallies the dispositions rows by their
+    record column — `full`, `core`, `both`, `either` for an empty cell, `no_record_column`
+    for a table with no such column, `invalid` for anything else — so a `both` row
+    wrongly flipped to `full`, which the gate cannot see (a `full` row resolves against
+    the full record only), is countable from the block; v3 (#1022, #1046): a schema
+    claim that names its own scope — the core schema, the full schema, a class — is
+    resolved against that scope only, not against every class; v2 (#990): a finding
+    on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
+    counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-programme-deprimed_rep1/CM4AI_reconciliation.md
@@ -147,10 +163,16 @@ form:
   - data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-programme-deprimed_rep1/CM4AI_d4d_core.yaml
   undeclared_prefixes: {}
   undeclared_prefix_occurrences: 0
+  prefix_instrument: 'v3 (#982): ark excluded, mailto excluded on Person ids only,
+    urn by NID'
+  british_instrument: 'v4 (#1006; v3 #836/#859)'
   british_spellings: 67
   organisational_fragments: 0
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
-  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
-    previous british=64
+  instrument_note: 'form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=64 | form recomputed 2026-09-09 by backfill-checks --overwrite,
+    british instrument v4 (#1006; v3 #836/#859), prefix instrument v3 (#982): ark
+    excluded, mailto excluded on Person ids only, urn by NID; previous british=67,
+    previous undeclared_prefixes=0'

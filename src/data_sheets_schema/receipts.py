@@ -229,14 +229,109 @@ def _populated(value: Any) -> bool:
     return value not in (None, [], {}, "")
 
 
-def _minted(value: Any, record_id: str | None = None) -> bool:
-    """A urn, or a fragment on the record's own id — the form the rules allow
-    minting in. A `#` on some other base is a real anchor, not a minting."""
+#: Slots of the record's top level that carry an identifier *for the dataset
+#: itself* (#1123): its `id`, its bare `doi`, its landing `page`. A fragment
+#: minted on any of these is a label on this dataset, which the v5 rule
+#: licenses ("on an identifier the evidence *does* supply"). v9 R8 prefers
+#: the record's own id and says a landing-page label "needs a receipt like
+#: any other value, where a label on this record's own id does not" — the
+#: cost this revision removes; the prompt sentence is #1147's to rotate.
+#: The exemption reaches the record's own top-level `id` when it is itself
+#: a fragment on the page (CHORUS: `https://chorus4ai.org/#chorus-dataset`
+#: on `page: https://chorus4ai.org/`), which is the whole observed effect on
+#: the recomputed corpus. A fragment on any other base — a component
+#: dataset's DOI under `resources`, a project homepage the record does not
+#: carry as its page — is a claim about that identifier and stays
+#: receiptable; a `page` that is a bare site root exempts every fragment on
+#: that root under the same scheme, which is the exposure of trusting the
+#: slot without a shape check.
+DATASET_IDENTIFIER_SLOTS = ("id", "doi", "page")
+
+#: What this validator's numbers mean, revision by revision. Written into
+#: the block so a reader can tell which revision produced it; nothing pools
+#: blocks across revisions today, and #1140's recompute is what would bring
+#: the records a drifted bundle withholds under one.
+RECEIPTS_INSTRUMENT = ("v3 (#1053): an entry whose identity key the final list no longer carries "
+                       "anywhere (a minted id reconciliation stripped) is located as a keyless "
+                       "entry — by overlap, else by position for the same shape when the list "
+                       "kept its length (`same_key_stripped`, counted under "
+                       "`slots.located_after_key_stripped`) — instead of declared dropped; "
+                       "v2 (#1123): a fragment minted on an identifier the record carries "
+                       "for the dataset at its top level — its id in CURIE or resolver form, "
+                       "its doi, its page — is exempt like one on its own id; "
+                       "`slots.exempt_on_carried_identifier` counts them; v1 (#720, #721, "
+                       "#722, #891): snippet floors, entry-not-list coverage, commentary and "
+                       "own-id fragments exempt, unattesting snippets counted apart")
+
+
+_DOI_RESOLVERS = ("https://doi.org/", "http://doi.org/", "https://dx.doi.org/", "http://dx.doi.org/")
+_BARE_DOI = re.compile(r"^10\.\d{4,}/\S+$")
+
+
+def _doi_forms(doi: str) -> set[str]:
+    return {f"doi:{doi}", *(f"{base}{doi}" for base in _DOI_RESOLVERS)}
+
+
+def dataset_identifier_forms(record: dict[str, Any] | None) -> frozenset[str]:
+    """Every form of an identifier the record carries for the dataset at its
+    top level (#1123): the `id` and, when it is a DOI in CURIE or resolver
+    form, the other forms of it; the bare `doi` in CURIE and resolver forms;
+    the landing `page`. Trailing slashes are dropped and DOI forms are
+    lower-cased, as `_minted` compares them."""
+    forms: set[str] = set()
+    if not isinstance(record, dict):
+        return frozenset()
+    for slot in DATASET_IDENTIFIER_SLOTS:
+        value = record.get(slot)
+        if not isinstance(value, str) or not value.strip():
+            continue
+        value = value.strip()
+        forms.add(value)
+        low = value.lower()
+        if slot == "doi":
+            forms |= _doi_forms(value)
+        elif low.startswith("doi:"):
+            forms |= _doi_forms(value[4:])
+        else:
+            for base in _DOI_RESOLVERS:
+                if low.startswith(base):
+                    forms |= _doi_forms(value[len(base):])
+    return frozenset(_base_key(f) for f in forms)
+
+
+def _base_key(base: str) -> str:
+    """The comparison form of a fragment's base: no trailing slash, and a DOI
+    (bare, CURIE or resolver URL) lower-cased, since DOIs are
+    case-insensitive. No scheme or host folding for anything else — a page
+    written `http://` does not match a fragment on `https://`, which errs
+    conservative. `review_pack._canonical_identifier` folds scheme and host
+    because it classifies a label's *origin* (own, constructed, stated);
+    this key decides whether a leaf needs a receipt, and the two are kept
+    apart on purpose (#1141 review, S6)."""
+    base = base.strip().rstrip("/")
+    low = base.lower()
+    if low.startswith(("doi:", *_DOI_RESOLVERS)) or _BARE_DOI.match(base):
+        return low
+    return base
+
+
+def _minted(value: Any, record_id: str | None = None,
+            carried: frozenset[str] | None = None) -> bool:
+    """A urn, or a fragment on the record's own id or on another identifier
+    the record carries for the dataset (`carried`, from
+    `dataset_identifier_forms`, #1123) — the forms the rules allow minting in.
+    A `#` on some other base is a real anchor or a claim about that
+    identifier, not a minting."""
     if not isinstance(value, str):
         return False
     if value.startswith("urn:"):
         return True
-    return bool(record_id) and "#" in value and value.split("#", 1)[0] == str(record_id)
+    if "#" not in value:
+        return False
+    base = _base_key(value.split("#", 1)[0])
+    if record_id and base == _base_key(str(record_id)):
+        return True
+    return bool(carried) and base in carried
 
 
 def populated_leaves(record: dict[str, Any]) -> list[tuple[str, Any]]:
@@ -260,14 +355,37 @@ def populated_leaves(record: dict[str, Any]) -> list[tuple[str, Any]]:
     return out
 
 
-def exempt(path: str, value: Any, record_id: str | None = None) -> bool:
+def exempt(path: str, value: Any, record_id: str | None = None,
+           carried: frozenset[str] | None = None) -> bool:
     top = re.split(r"[.\[]", path, maxsplit=1)[0]
     leaf = path.rsplit(".", 1)[-1]
     if top in EXEMPT_SLOTS or leaf in EXEMPT_LEAVES:
         return True
-    if leaf == "id" and _minted(value, record_id):
+    if leaf == "id" and _minted(value, record_id, carried):
         return True                      # a minted fragment or urn has no source
     return False
+
+
+def _minted_v1(value: Any, record_id: str | None) -> bool:
+    """The exemption as instrument v1 read it (#722): a urn, or a fragment
+    whose base is the record's id byte for byte. Kept so the v2 block can
+    count what v2 exempts that v1 did not."""
+    if not isinstance(value, str):
+        return False
+    if value.startswith("urn:"):
+        return True
+    return bool(record_id) and "#" in value and value.split("#", 1)[0] == str(record_id)
+
+
+def exempt_on_carried_identifier(path: str, value: Any, record_id: str | None,
+                                 carried: frozenset[str] | None) -> bool:
+    """Exempt under v2 (#1123) and not under v1: an `id` leaf minted on an
+    identifier the record carries for the dataset — its doi, its page, or
+    its own id in another form (CURIE for resolver URL, a trailing slash, a
+    DOI's case) — that v1's byte-for-byte own-id test did not reach."""
+    leaf = path.rsplit(".", 1)[-1]
+    return (leaf == "id" and _minted(value, record_id, carried)
+            and not _minted_v1(value, record_id) and not exempt(path, value, None))
 
 
 def resolve(record: Any, path: str) -> bool:
@@ -343,19 +461,35 @@ def _scalar_pairs(node: Any) -> set[tuple[str, str]]:
             if isinstance(v, (str, int, float, bool)) and str(v).strip()}
 
 
-def _locate(entry: Any, i: int, candidates: list[Any]) -> tuple[int | None, str]:
+def _locate(entry: Any, i: int, candidates: list[Any],
+            siblings: list[Any] | None = None) -> tuple[int | None, str]:
     """The index in `candidates` of the entry that is `entry`, and how it was
-    found: `same` (the key matches at the same index), `by_<key>` (the key
+    found: `same` (the key matches at the same index, or a keyless entry
+    joined by overlap or by shape at its own index), `by_<key>` (the key
     matches elsewhere), `by_overlap` (no key; the unique best overlap of
-    scalar pairs, sharing at least one), or None — the same index is never
-    assumed when identity says otherwise (#899)."""
+    scalar pairs, sharing at least one), `same_key_stripped` (the key the
+    entry carried is on no candidate — reconciliation stripped it, #1053 —
+    and the entry was then joined at its own index by overlap, or by shape
+    when `siblings`, the snapshot list, and `candidates` have the same
+    length), or None with the reason — the same index is never assumed
+    when identity says otherwise (#899), and a stripped entry in a list
+    that shrank is never assumed to be the entry now at its index."""
     key = _entry_key(entry)
+    stripped = False
     if key is not None:
         hits = [k for k, e in enumerate(candidates) if _entry_key(e) == key]
         if hits:
             return (i, "same") if i in hits else (hits[0], f"by_{key[0]}")
         if key[0] == "value":
             return None, "entry_dropped"
+        if not any(isinstance(e, dict) and key[0] in e for e in candidates):
+            # The key the snapshot entry carried is on no entry of the final
+            # list: reconciliation stripped it (a minted `id` under rule
+            # 11/14 is the usual case, #1053), which says nothing about
+            # which entry this is. Located as a keyless entry from here —
+            # by overlap, then by position for the same shape — rather than
+            # declared gone because a key nobody carries matched nobody.
+            key, stripped = None, True
     pairs = _scalar_pairs(entry)
     scored = [(len(pairs & _scalar_pairs(e)), k) for k, e in enumerate(candidates)]
     best = max((s for s, _k in scored), default=0)
@@ -370,12 +504,25 @@ def _locate(entry: Any, i: int, candidates: list[Any]) -> tuple[int | None, str]
         same_shape = (key is None and i < len(candidates) and isinstance(entry, dict)
                       and isinstance(candidates[i], dict)
                       and bool(set(entry) & set(candidates[i])))
-        return (i, "same") if same_shape else (None, "entry_dropped")
+        if same_shape and stripped and (siblings is None or len(siblings) != len(candidates)):
+            # The strip test cannot tell "every entry lost its key" from
+            # "this entry was deleted and the survivors lost theirs". When
+            # the list shrank, the entry at this index may be a survivor
+            # from further down — CHORUS 2026-09-01 rep3's `creators` went
+            # 7 → 2 and the Consortium entry landed where Azra Bihorac's
+            # had been (#1162 review). Position is evidence only when the
+            # list kept its length; otherwise the entry is gone.
+            return (None, "entry_dropped")
+        if same_shape:
+            return (i, "same_key_stripped" if stripped else "same")
+        return (None, "entry_dropped")
     winners = [k for s, k in scored if s == best]
     if len(winners) > 1 and i not in winners:
         return None, "ambiguous"
     j = i if i in winners else winners[0]
-    return (j, "same" if j == i else "by_overlap")
+    if j == i:
+        return (i, "same_key_stripped" if stripped else "same")
+    return (j, "by_overlap")
 
 
 def remap_path(path: str, original: dict[str, Any] | None, full: dict[str, Any]) -> dict[str, Any]:
@@ -393,6 +540,8 @@ def remap_path(path: str, original: dict[str, Any] | None, full: dict[str, Any])
 
     Returns `{path, basis}`: `path` is the resolved path in `full` (None when
     the entry or leaf is gone) and `basis` says how — `same` (unchanged),
+    `same_key_stripped` (same index; the key the snapshot entry carried is on
+    no final entry, #1053),
     `by_<key>` (the entry moved; found by that key), `by_overlap` (moved; no
     key, found by its scalar pairs), `not_in_snapshot` (the written path did
     not resolve in the snapshot, so identity could not be read — resolved as
@@ -417,7 +566,7 @@ def remap_path(path: str, original: dict[str, Any] | None, full: dict[str, Any])
                 return {"path": path if resolve(full, path) else None, "basis": "not_in_snapshot"}
             if not isinstance(cur_f, list):
                 return {"path": None, "basis": "unresolved"}
-            j, how = _locate(cur_o[i], i, cur_f)
+            j, how = _locate(cur_o[i], i, cur_f, cur_o)
             if j is None:
                 return {"path": None, "basis": how}
             if how != "same":
@@ -739,6 +888,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # `adjacent` (the chunk before or after), `elsewhere` (any other) — and
     # reported, never gated; the floor of 0 is for text found nowhere.
     record_id_flag = full.get("id") if isinstance(full.get("id"), str) else None
+    carried_ids = dataset_identifier_forms(full)                        # #1123
     snippets = {"total": 0, "verified": 0, "linewrap_joined": 0, "adjacent": 0, "elsewhere": 0,
                 "spans_boundary": 0, "split_at_linebreaks": 0, "artifact_elided": 0,
                 # #891: a snippet below the #720 floors attests nothing - it is
@@ -801,7 +951,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                 # outside the denominator — neither is screened. A boolean
                 # or numeric leaf is attested by a sentence whose tokens
                 # never equal the value (#841): the screen is text vs text.
-                if (resolved and spath != "id" and not exempt(spath, value, record_id_flag)
+                if (resolved and spath != "id" and not exempt(spath, value, record_id_flag, carried_ids)
                         and not isinstance(value, (bool, int, float))):
                     stoks = {t for t in normalise(snippet).split() if len(t) >= 4}
                     if isinstance(value, dict):
@@ -812,7 +962,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                         kids = [(k, v) for k, v in value.items()
                                 if _is_leaf(v) and _populated(v)
                                 and not isinstance(v, (bool, int, float))
-                                and not (k == "id" and _minted(v, record_id_flag))]
+                                and not (k == "id" and _minted(v, record_id_flag, carried_ids))]
                         if len(kids) >= 3 and stoks:
                             hit = sum(1 for _k, v in kids if stoks & _value_tokens(v))
                             if hit <= 1:
@@ -896,7 +1046,13 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # CHORUS rep3 `creators[1]` credited to an unnamed entry that replaced
     # Azra Bihorac; CM4AI rep3 `creators[38].id` credited to a creator
     # added after the receipt). Those paths are reported and carry no credit.
+    # The one exception is an entry whose key reconciliation stripped from
+    # the whole list (#1053): joined at its own index by overlap, or by
+    # shape when the list kept its length — never when it shrank, which is
+    # the rep3 case again (#1162 review) — and listed under
+    # `located_after_key_stripped` so the class is countable from the block.
     gone: dict[str, str] = {}
+    located_stripped: list[dict[str, Any]] = []
     index_reused: list[dict[str, Any]] = []
     not_in_snapshot: list[str] = []
     if original is not None:
@@ -914,6 +1070,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
             if rm["path"] != p:
                 remapped.append({"path": p, "resolved_path": rm["path"], "basis": rm["basis"]})
                 effective[p] = rm["path"]
+            if rm["basis"] == "same_key_stripped":
+                located_stripped.append({"path": p, "resolved_path": rm["path"]})
             ok_o, v_o = _resolve_value(original, p)
             ok_f, v_f = _resolve_value(full, rm["path"])
             if ok_o and ok_f and _rewritten(v_o, v_f):
@@ -999,7 +1157,11 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
         findings.append({"kind": "slot_not_in_record" if p else "slot_empty", "slot": p})
     leaves = populated_leaves(full)
     record_id = full.get("id") if isinstance(full.get("id"), str) else None
-    receiptable = [(p, v) for p, v in leaves if not exempt(p, v, record_id)]
+    carried = carried_ids                                               # one set, computed once above
+    receiptable = [(p, v) for p, v in leaves if not exempt(p, v, record_id, carried)]
+    # #1123: how many `id` leaves this revision exempts that v1 receipted —
+    # a label minted on the dataset's doi or page rather than its own id.
+    exempt_on_carried = sum(1 for p, v in leaves if exempt_on_carried_identifier(p, v, record_id, carried))
     attesting_at = {effective.get(r, r) for r in attesting}
     without = [p for p, _v in receiptable if not any(_covers(r, p) for r in attesting_at)]
     # #807: `without_receipt` is a mixture on the API path. Split against the
@@ -1016,6 +1178,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
         never_receipted = sum(1 for p in without if resolve(original, p))
         added_after_receipt = len(without) - never_receipted
     slots = {"populated": len(leaves), "exempt": len(leaves) - len(receiptable),
+             "exempt_on_carried_identifier": exempt_on_carried,
              "receiptable": len(receiptable), "with_receipt": len(receiptable) - len(without),
              "without_receipt": without[:50],
              "without_receipt_truncated": max(0, len(without) - 50) or None,
@@ -1031,6 +1194,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
              "value_changed_after_receipt_count": len(value_changed) if original is not None else None,
              "index_reused_by_another_entry": index_reused[:20],
              "index_reused_by_another_entry_count": len(index_reused) if original is not None else None,
+             "located_after_key_stripped": located_stripped[:20],
+             "located_after_key_stripped_count": len(located_stripped) if original is not None else None,
              "path_not_in_snapshot": not_in_snapshot[:20],
              "path_not_in_snapshot_count": len(not_in_snapshot) if original is not None else None,
              "reshaped_by_reconcile": reshaped,
@@ -1047,7 +1212,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     reported_kinds = {"snippet_mismatch", "snippet_empty", "snippet_adjacent_chunk",
                       "snippet_elsewhere_chunk", "snippet_spans_boundary"}
     findings_gated = sum(1 for f in findings if f.get("kind") not in reported_kinds)
-    return {"checked": True,
+    return {"checked": True, "instrument": RECEIPTS_INSTRUMENT,
             "chunks": chunks, "snippets": snippets, "slots": slots,
             "findings": findings[:100], "findings_truncated": max(0, len(findings) - 100) or None,
             "findings_gated": findings_gated,
@@ -1076,6 +1241,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                         + (f" · {len(remapped)} receipt path(s) followed by identity" if remapped else "")
                         + (f" · {len(value_changed)} value(s) changed after the receipt" if value_changed else "")
                         + (f" · {len(index_reused)} receipt index(es) reused by another entry" if index_reused else "")
+                        + (f" · {len(located_stripped)} entry(ies) located after a stripped key" if located_stripped else "")
                         + (f" · {len(not_in_snapshot)} receipt path(s) not in the snapshot" if not_in_snapshot else "")),
             "non_checks": list(NON_CHECKS)}
 

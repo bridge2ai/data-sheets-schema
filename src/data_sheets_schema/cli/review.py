@@ -130,6 +130,8 @@ def check(method, label, project, write, strict):
         click.echo(f"   {k}: " + ", ".join(f"{v} {n}" for v, n in sorted(d.items())))
     for f in block["findings"][:20]:
         click.echo("   ❌ " + ", ".join(f"{k}={v}" for k, v in f.items()))
+    for f in block.get("reported") or []:                       # never gated (#1057)
+        click.echo("   ⚠️  " + ", ".join(f"{k}={v}" for k, v in f.items()))
     if not block["checked"]:
         # A pack that is not a pack is never attested (Codex M1).
         raise click.ClickException(f"not checked: {block['reason']}; nothing written")
@@ -364,11 +366,14 @@ def agree_cmd(method, label, project, write):
     # (duplicate ids, out-of-vocabulary verdicts, unknown items) must not
     # silently enter a reliability figure (#861).
     for name, rev in (("review", a), ("review_b", b)):
-        bad = check_review(pack, rev)["findings"]
+        checked = check_review(pack, rev)
+        bad = checked["findings"]
         if bad:
             raise click.ClickException(
                 f"{paths[name]} has {len(bad)} check finding(s) "
                 f"(first: {bad[0].get('kind')}); fix the review before pairing")
+        for f in checked.get("reported") or []:                 # a reviewer version is argued from *when* (#1097, #1057)
+            click.echo(f"   ⚠️  {name}: " + ", ".join(f"{k}={v}" for k, v in f.items()))
     rel = agree(pack, a, b)
     click.echo(f"   paired {rel['paired_items']} · class agreement {rel['percent_class_agreement']}% · "
                f"exact {rel['percent_exact_agreement']}% · kappa {rel['kappa_class']} · "

@@ -5,6 +5,8 @@ from pathlib import Path
 
 import click
 
+from data_sheets_schema.constants import PROJECTS
+
 
 @click.group()
 def runs():
@@ -65,6 +67,102 @@ def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
                 f"telemetry report failed schema validation:\n"
                 f"{(res.stdout + res.stderr).strip()[:800]}")
         click.echo("✓ report validates against d4d_run_telemetry.yaml")
+
+
+@runs.command("award-numbers")
+@click.option("--method", default=None, help="run directory family; defaults to the one the first label lives in (#934)")
+@click.option("--label", "labels", multiple=True, help="record labels to read grant_number from; repeat for each")
+@click.option("--project", "projects", multiple=True, type=click.Choice(PROJECTS), help="default: every project")
+@click.option("--bundle-dir", default="data/preprocessed/concatenated", show_default=True,
+              help="directory holding {PROJECT}_preprocessed.txt (to run from another root); the crate and healthsheet bundles have their own denominators and this command does not read them")
+@click.option("--contexts", is_flag=True, help="print every bundle mention with its source file and context")
+def award_numbers_cmd(method, labels, projects, bundle_dir, contexts):
+    """NIH award numbers per bundle, and per record under grant_number (#1028).
+
+    The bundle count is mechanical and pinned to the bundle's md5; which of
+    those awards fund *this* dataset is a reading the plan note registers,
+    and --contexts prints what that reading rests on.
+    """
+    from data_sheets_schema.awards import NIH_AWARD, bundle_awards, record_award_numbers
+    from data_sheets_schema.cli.method import resolve_method
+    from data_sheets_schema.runs import full_record_path
+    import yaml as _yaml
+    projects = list(projects) or list(PROJECTS)
+    method = method or (resolve_method(labels[0]) if labels else None)
+    for project in projects:
+        bundle = Path(bundle_dir) / f"{project}_preprocessed.txt"
+        if not bundle.exists():
+            click.echo(f"{project}: no bundle at {bundle}")
+            continue
+        b = bundle_awards(bundle)
+        click.echo(f"{project} (bundle md5 {b['bundle_md5'][:12]}): "
+                   + ", ".join(f"{a} ×{n}" for a, n in sorted(b["awards"].items(), key=lambda kv: -kv[1]))
+                   + f"  [narrow pattern: {len(b['narrow'])}]")
+        if contexts:
+            for m in b["mentions"]:
+                click.echo(f"   {m['award']} <{m['as_written']}> in {m['source']}\n      …{m['context']}…")
+        for label in labels:
+            path = full_record_path(method, label, project)
+            if not path.exists():
+                continue
+            rec = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+            got = record_award_numbers(rec)
+            shaped = [g for g in got if NIH_AWARD.fullmatch(g)]
+            grounded = [g for g in shaped if g in b["awards"]]
+            ungrounded = [g for g in shaped if g not in b["awards"]]
+            click.echo(f"   {label}: grant_number → {', '.join(got) if got else '—'}"
+                       f" ({len(shaped)} award-shaped; {len(grounded)} of the bundle's {len(b['awards'])}"
+                       + (f"; NOT in the bundle: {', '.join(ungrounded)}" if ungrounded else "") + ")")
+
+
+@runs.command("full-output-baseline")
+@click.option("--method", default=None, help="run directory family; defaults to the one the first label lives in (#934)")
+@click.option("--label", "labels", multiple=True, required=True, help="a replicate label; repeat for each")
+@click.option("--project", "projects", multiple=True, type=click.Choice(PROJECTS), help="default: every project")
+@click.option("--json", "as_json", is_flag=True)
+def full_output_baseline_cmd(method, labels, projects, as_json):
+    """Per-project `full` output baseline under `PREDICTION_9_RULE` (#1026),
+    printed with the result so the two cannot disagree. No row is computed
+    by hand again. Labels must live under one method directory; a set that
+    spans `claudecode_agent` and `claudecode_api` is refused, as `runs merge`
+    refuses it (#934) — a wrong directory reads as "no record", not as an
+    error.
+    """
+    import json as _json
+
+    from data_sheets_schema.cli.method import resolve_method
+    from data_sheets_schema.run_telemetry import PREDICTION_9_RULE, full_output_baseline
+    if not method:
+        # Resolve what resolves; a label under neither directory is named by
+        # the rule's "no row" line rather than aborting the baseline (round
+        # 3, S1). Refuse only a resolved set that spans two families.
+        found = {}
+        for label in labels:
+            try:
+                found[label] = resolve_method(label)
+            except click.ClickException:
+                continue
+        families = set(found.values())
+        if len(families) > 1:
+            raise click.ClickException(f"labels live under {sorted(families)}; pass --method")
+        if not families:
+            raise click.ClickException("none of the labels lives under claudecode_agent_core or claudecode_api_core; pass --method")
+        method = families.pop()
+    base = full_output_baseline(method, list(labels), list(projects) or list(PROJECTS))
+    if as_json:
+        click.echo(_json.dumps(base, indent=2))
+        return
+    click.echo(f"rule: {PREDICTION_9_RULE}")
+    for project, b in base.items():
+        click.echo(f"{project}: mean {b['mean']} over {b['n']} replicate(s)"
+                   + (f", range {b['min']}–{b['max']}" if b["n"] > 1 else "")
+                   + (f"; no row: {', '.join(b['without_a_row'])}" if b["without_a_row"] else ""))
+        for r in b["replicates"]:
+            if r["output_tokens"] is None:
+                click.echo(f"   {r['label']}: — ({r.get('reason')})")
+            else:
+                click.echo(f"   {r['label']}: {r['output_tokens']} (attempt {r['attempt']}, {r['source']}"
+                           + (f", {r['retried']} retried attempt(s) excluded" if r["retried"] else "") + ")")
 
 
 @runs.command("identifiers")
@@ -1725,7 +1823,8 @@ def compare_arms(prefix_a, prefix_b, method):
     # meets it: the function has no other caller, and the ergonomic form —
     # two condition names — is exactly the form that answers `["base"]` and
     # gets quoted in a pull request body as though the prompt were all that
-    # moved. It is one field of the five above, never a replacement for them.
+    # moved. It is one field of the `ARM_PROCEDURE_FIELDS` above, never a
+    # replacement for them.
     from data_sheets_schema.api_runner import (condition_delta,
                                                confounded_note)
     # From the records (#1094): `arm_facts` reads `run.condition`, else the

@@ -357,11 +357,23 @@ report_claims:
   claims_checked: 0
   claims_unnamed: 0
   disposition_rows: 0
+  rows_by_record:
+    full: 0
+    core: 0
+    both: 0
+    either: 0
+    no_record_column: 0
+    invalid: 0
   claims_core_cannot_hold: 0
-  instrument: 'v3 (#1022, #1046): a schema claim that names its own scope — the core
-    schema, the full schema, a class — is resolved against that scope only, not against
-    every class; v2 (#990): a finding on a `both` row names when the core class declares
-    no such slot; `claims_core_cannot_hold` counts them'
+  instrument: 'v4 (#1122): `rows_by_record` tallies the dispositions rows by their
+    record column — `full`, `core`, `both`, `either` for an empty cell, `no_record_column`
+    for a table with no such column, `invalid` for anything else — so a `both` row
+    wrongly flipped to `full`, which the gate cannot see (a `full` row resolves against
+    the full record only), is countable from the block; v3 (#1022, #1046): a schema
+    claim that names its own scope — the core schema, the full schema, a class — is
+    resolved against that scope only, not against every class; v2 (#990): a finding
+    on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
+    counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/CHORUS_reconciliation.md
@@ -399,13 +411,19 @@ form:
   - data/d4d_concatenated/claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d_core.yaml
   undeclared_prefixes: {}
   undeclared_prefix_occurrences: 0
+  prefix_instrument: 'v3 (#982): ark excluded, mailto excluded on Person ids only,
+    urn by NID'
+  british_instrument: 'v4 (#1006; v3 #836/#859)'
   british_spellings: 0
   organisational_fragments: 0
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
-  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
-    previous british=0
+  instrument_note: 'form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=0 | form recomputed 2026-09-09 by backfill-checks --overwrite,
+    british instrument v4 (#1006; v3 #836/#859), prefix instrument v3 (#982): ark
+    excluded, mailto excluded on Person ids only, urn by NID; previous british=0,
+    previous undeclared_prefixes=0'
 receipts:
   expected: true
   non_checks:
@@ -414,6 +432,15 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
+    anywhere (a minted id reconciliation stripped) is located as a keyless entry —
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
+    of declared dropped; v2 (#1123): a fragment minted on an identifier the record
+    carries for the dataset at its top level — its id in CURIE or resolver form, its
+    doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 8
     reviewed: 8
@@ -451,11 +478,11 @@ receipts:
     entry_single_leaf_sample: []
   slots:
     populated: 195
-    exempt: 28
-    receiptable: 167
+    exempt: 29
+    exempt_on_carried_identifier: 1
+    receiptable: 166
     with_receipt: 54
     without_receipt:
-    - id
     - name
     - status
     - is_tabular
@@ -505,8 +532,9 @@ receipts:
     - acquisition_methods[3].was_inferred_derived
     - acquisition_methods[4].acquisition_details
     - acquisition_methods[4].was_validated_verified
-    without_receipt_truncated: 63
-    never_receipted: 113
+    - collection_mechanisms[3].mechanism_details
+    without_receipt_truncated: 62
+    never_receipted: 112
     added_after_receipt: 0
     receipt_paths: 80
     unresolved: []
@@ -540,6 +568,8 @@ receipts:
     value_changed_after_receipt_count: 7
     index_reused_by_another_entry: []
     index_reused_by_another_entry_count: 0
+    located_after_key_stripped: []
+    located_after_key_stripped_count: 0
     path_not_in_snapshot: []
     path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
@@ -574,8 +604,8 @@ receipts:
   findings_truncated: null
   findings_gated: 0
   summary: chunks 8/8 reviewed · snippets 96/98 verified (2 in an adjacent chunk)
-    (3 bearing on no token of their value) · slots 54/167 with a receipt (113 never
-    receipted, 0 added after the receipt) (28 exempt) · 14 receipt path(s) reshaped
+    (3 bearing on no token of their value) · slots 54/166 with a receipt (112 never
+    receipted, 0 added after the receipt) (29 exempt) · 14 receipt path(s) reshaped
     by reconcile · 2 receipt path(s) followed by identity · 7 value(s) changed after
     the receipt
   artifacts:

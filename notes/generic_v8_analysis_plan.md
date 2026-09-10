@@ -207,7 +207,7 @@ work with a migration of committed values; separate).
 | # | metric | attributed to | prediction |
 |---|---|---|---|
 | 1 | rule-08 violated in the review pass, on inlined class ranges only (Grant; Person too if D1 inlines it) — reviewers told which attributes are references | A + C + D1 | 0 of 12; on v7 the 6 of 12 were Person slots the schema forced to strings, which the corrected pack no longer charges |
-| 2 | `grant_number` populated where the bundle states an NIH award number — denominator registered now: AI_READI 2, CHORUS 1, CM4AI 3, VOICE 3 distinct award numbers per bundle (pattern `\b[A-Z]\d{2}[A-Z]{2}\d{6}\b` and kin, e.g. OT2OD032644) | A | ≥ 1 per project in every replicate, from 0 of 12 on v7; the denominator is the ceiling, not the target (some are cited, not funding) |
+| 2 | `grant_number` populated where the bundle states an NIH award number — denominator registered now: AI_READI 2, CHORUS 1, CM4AI 3, VOICE 3 distinct award numbers per bundle (pattern `\b[A-Z]\d{2}[A-Z]{2}\d{6}\b` and kin, e.g. OT2OD032644). **Recounted 2026-09-09 (#1028)** with the pattern actually used (`awards.NIH_AWARD`: a leading type digit, one-letter-two-digit or two-letter-one-digit activity codes, an optional space or hyphen before the institute code as the flagship papers write it, a `-NN` suffix — the narrow form matches only 1/0/2/2 of them), pinned to each bundle's md5 and reproduced by `tests/test_awards.py`: award-shaped tokens AI_READI **4** (d22b61a9…), CHORUS **1** (9b2ef4b6…), CM4AI **8** (50037fc6…), VOICE **3** (9193c3cb…). That is the ceiling as registered ("where the bundle states an NIH award number"; the registration itself anticipated that some are cited, not funding). A second, *post-hoc* reading — stated as funding this dataset: an award the dataset paper's funding statement attributes to this research or this work; not one it attributes to named investigators, to another named project, or to the platform hosting the release — gives AI_READI **3** (OT2OD032644, P30DK035816, UL1TR003096, the BMJ Open protocol paper's "This research is supported by"; the Nature Metabolism paper corroborates P30 DK035816; UL1TR001442 is an author's competing-interest grant), CHORUS **1**, CM4AI **2** (OT2OD032742 and U54HG012513: the CM4AI dataset paper's "This work was funded by"; the CM4AI Nature resource paper's acknowledgement names U54CA274502, U24HG012107, U24CA269436, U24HG006673, R01GM083960 and P41GM109824 against named investigators and the Cancer Cell Map, Cytoscape, NDEx and BioPlex projects), VOICE **1** (OT2OD032720; R01EB030362 and U24EB037545 are PhysioNet's platform grants in every release page's footer). `d4d runs award-numbers --contexts` prints the passages both readings rest on. | A | ≥ 1 per project in every replicate, from 0 of 12 on v7; the denominator is the ceiling, not the target (some are cited, not funding) |
 | 3 | rule-06/07 violated (absence statements, access routes) | E2 | ≤ 2 of 12, from 7 of 12; a fall that does not reach this says the audit did not catch them |
 | 4 | misread verdicts of the tense/scope class — classifier: a `misread` whose evidence names a plan/proposal/future release, an earlier version or archive, or a related-but-distinct source as the passage's subject | R2 | 0 in the sampled receipted slots, from 5 on v7 (CHORUS rep2 ×2, CM4AI rep2, VOICE rep2, CM4AI rep3) |
 | 5 | `value_changed_after_receipt` | A (work moved out of reconcile), halved by the Person finding | below 10% of receipt paths, from 13.0%; the v6 agentic arm re-receipts and sits at 0 |
@@ -215,6 +215,36 @@ work with a migration of committed values; separate).
 | 7 | unforced mints (rule-11/14) | none, watched | no record above v7's worst (VOICE rep3, 22) and the arm median stays 0; v8 adds no minting rule, so a fall would be the digest's labels displacing invented ids |
 | 8 | populated leaves, rubric10/20 | A, watched | not below the v7 per-project replicate minimum; a fall means the larger digest displaced reading (the v7 markers confound, in a new form) |
 | 9 | spend | A | prompt tokens rise by ~2,900 chars of digest per call; `full` output tokens within ±10% of v7's per-project mean |
+
+**Prediction 9's baseline rule, registered (#1026, 2026-09-09).** The v7
+per-project mean is `run_telemetry.full_output_baseline` under
+`PREDICTION_9_RULE` — the accepted attempt per phase (the last `end_turn`
+`full` attempt with no abandoned-transport marker and no
+`unusable_reason`; a retried attempt excluded; `full_readdress` and
+`repair_full` are their own phases and not counted), a row the provenance
+lost — a resume past the phase, or an abandoned attempt whose completed
+retry was lost with the unseeded prior usage while the abandoned row
+survived through the ledger (a shape no corpus record has today; VOICE
+2026-09-04f rep2 keeps both rows) — recovered from the reasoning log, whose
+entries are matched by (attempt, output_tokens) against the rows the
+provenance refused, never by attempt number alone; the mean over the
+replicates that yield a row with the replicate range beside it, and the
+others named — printed by `d4d runs full-output-baseline`. The AI_READI 2026-09-04f row was read
+three ways before the rule was code: by hand from rep2's retried attempt
+(86,707, +3.2%), then over the two replicates with a provenance row alone,
+rep3 dropped (78,646, +13.8%); the rule reads +4.4% (v7 production: 79,078
+/ 78,215 / 99,870 → 85,721, rep3 recovered from its reasoning log). Under
+the same rule VOICE is 76,159 (73,375 / 74,126 / 80,976), CHORUS 41,068
+(35,025 / 40,186 / 47,994) and CM4AI 41,370 (26,766 with rep1's accepted
+attempt 2 / 31,044 / 66,300 — a 2.5× range, so a ±10% band on that mean is
+a weaker instrument than the mean suggests). The telemetry comparison
+(`d4d runs telemetry`) read the *first* `end_turn` attempt until this
+change — the one a retried phase threw away, wrong on all nine records
+whose provenance carries more than one accepted-eligible `full` attempt
+(ten phases with AI_READI 2026-09-01 rep3, whose two live only in its
+log); on the five that kept a phase-1 snapshot the accepted attempt is
+the one whose `visible_text_chars` matches the artifact — and now reads
+the accepted one.
 
 ### Falsification tests
 
@@ -273,7 +303,7 @@ excluded from every v8 comparison as they were from v7's.
 | VOICE | `2026-09-04e_claude-opus-5-api-generic-v8_rep1` | **regressed** on one metric for a runner reason: chunks unreviewed 15 of 22 vs 0. The full phase's stream ended before `message_stop` (`output_tokens: 5, stop_reason: null` for 68,183 characters; 04d: 79,582 / `end_turn`), the SDK returned the partial snapshot, the runner accepted it because it parsed and carried the receipt marker, and the receipt — what was being streamed — stopped at c007. Everything else clean under the final package: report findings 1 → 0 after the regate among 34 claims, British 0 (the normaliser rewrote one `colour`), resolver URLs 0, prefixes 0, pair errors 0, snippets 17/17. | Runner defect (#1013, item 13): a stream without `message_stop` is retried as a transient failure. Not retained; VOICE runs again under the guard. Not a generation-path change: a complete stream's output is untouched. |
 | VOICE | `2026-09-04f_claude-opus-5-api-generic-v8_rep1` | **passed the gate** — the first complete run under the final package (04e ran under it and lost its stream), with the incomplete-stream guard (#1013) in place and no retry needed. Receipts 22/22 chunks, 238/243 snippets verified in the chunk cited (5 verbatim in another chunk, 0 mismatched or unchecked; 2 bearing on no token), 223/343 slots with a receipt; report gate 2 → 0 among 46 claims (the v7 floor of 0 is a derived floor: 3 vacuous, 0 measured, #684); British 2 = the baseline worst, both the `Temerty Centre` title-case skip in `source_caveats` (full + core; the normaliser rewrote nothing else); resolver URLs 0, prefixes 0, ungrounded 0, pair errors 0. Prediction 5: **6.3%** (12/189, under the registered < 10%); 6: 65.0%; 9: **unfavourable**, +24.7% against a registered ±10% (full output 94,936 vs the v7 VOICE mean 76,159; the full phase took 2,257 s); 2: `grant_number` populated 2. First record with the endpoint's own thinking count (#999): full phase 59,495 observed, the estimate 69,825 ran 17% high; thinking was 63% of the phase's output. | **Retained.** VOICE done; the order is now AI_READI, CHORUS, CM4AI (fourth). |
 | AI_READI | `2026-09-04f_claude-opus-5-api-generic-v8_rep1` | **passed the gate as instrumented — not retained**: the full record carries a top-level `source_caveats` key three times (the model's own phase-1 output had two), which no instrument counted and a standard loader silently reduces to the last, losing two caveats from the parsed record and the core (#1029; 0 of the 270 records on main have a duplicate key, so the floor is 0 and this is a regression). No regate, no recorded retry; one repair round (13 findings). Receipts 28/28 chunks, 254/265 snippets verified in the chunk cited (8 adjacent, 1 elsewhere, 0 mismatched or unchecked; 18 bearing on no token, 2 unattesting below the floors — reported, not gated), 151/431 slots with a receipt; report gate 0 among 43 claims (the v7 floor: 1 measured, 2 vacuous); British **0 vs a v7 worst of 52** — the normaliser rewrote 15 (`programme`, `enrolment`, `colour`, `licence`, `metres`, `centimetre`, `minimise`, `personalised`, `generalisability`), the model's own count; resolver URLs 0, prefixes 0, ungrounded 0, pair errors 0. Prediction 5: **8.9%** (17/192, under < 10%); 6: **unfavourable**, 35.0% against the registered > 40% (inside v7 AI_READI's own 31.7–47.4%; 148 short scalars and enums carry no receipt and 64 prose values are the thin part); 9: +4.4% (full output 89,500 vs the v7 production mean 85,721 over the accepted full attempts of all three replicates — rep2's attempt 2, 78,215, not the retried 94,336; rep3's 99,870 recovered from its reasoning log, its provenance having no full row after a resume — within ±10%; the rule is registered in #1026); 2: `grant_number` populated 3 (the registered ceiling of 2 undercounts the bundle's three awards, #1028). Thinking count: full phase 46,248 observed of 89,500 output (52%); the full phase took 977 s. The record header says `Temperature: 0.0` while the request sent none (#1027). | **Not retained** (#1029). Re-verdicted 2026-09-06 under the instrument (#1030): validation `passed: false` (`source_caveats` at lines 812, 1019, 1565), canary **regressed** on `duplicate keys` 1 against a floor of 0, the prior `ok` kept under `prior_verdict`. AI_READI runs again; CHORUS and CM4AI (fourth) follow. |
-| CHORUS | `2026-09-04f_claude-opus-5-api-generic-v8_rep1` | **passed the gate** on every row, the first run to complete under the recorder of #1037 — AI_READI 04g started six minutes earlier in a parallel batch and finished after it (verdict written by the batch to the record; sizes match the files; no retry). Receipts 8/8 chunks, 79/79 snippets verified in the chunk cited (0 adjacent, 0 elsewhere, 0 mismatched or unchecked; 0 bearing on no token), 53/186 slots with a receipt; report gate 2 → 0 among 46 claims (the v7 floor of 0 is derived: 3 vacuous, 0 measured, #684); one repair round (3 findings); British 0 (the normaliser rewrote nothing; v7 worst 0); resolver URLs 0, prefixes 0, ungrounded 0, pair errors 0, duplicate keys 0. Prediction 5: **12.9%** (8/62 changed after receipt, against < 10%; v7 CHORUS 33.8 / 6.8 / 4.4%); 6: **unfavourable**, 28.5% against > 40% (below v7 CHORUS's own 33.8–37.4%; 133 of 186 receiptable slots carry none, most of them enums and short scalars); 9: **unfavourable**, +26.8% (full output 52,066 vs the v7 CHORUS mean 41,068; the full phase took 591 s); 2: `grant_number` populated **1** (v7: 0 on all three; the row first said 0, read off the wrong path — #1049). Thinking count: full phase 34,907 observed of 52,066 output (67%). The record's `repo.dirty_paths` names `urelian` for `aurelian` (#1039, recorder-only). | **Retained.** CHORUS done; AI_READI (again) ran alongside it, CM4AI (fourth) follows. |
+| CHORUS | `2026-09-04f_claude-opus-5-api-generic-v8_rep1` | **passed the gate** on every row, the first run to complete under the recorder of #1037 — AI_READI 04g started six minutes earlier in a parallel batch and finished after it (verdict written by the batch to the record; sizes match the files; no retry). Receipts 8/8 chunks, 79/79 snippets verified in the chunk cited (0 adjacent, 0 elsewhere, 0 mismatched or unchecked; 0 bearing on no token), 54/186 slots with a receipt (53 before receipts v3, #1053); report gate 2 → 0 among 46 claims (the v7 floor of 0 is derived: 3 vacuous, 0 measured, #684); one repair round (3 findings); British 0 (the normaliser rewrote nothing; v7 worst 0); resolver URLs 0, prefixes 0, ungrounded 0, pair errors 0, duplicate keys 0. Prediction 5: **14.5%** (9/62 changed after receipt, 8/62 before receipts v3; against < 10%; v7 CHORUS 33.8 / 6.8 / 4.4%); 6: **unfavourable**, 29.0% against > 40% (28.5% before v3; below v7 CHORUS's own 33.8–37.4%; 132 of 186 receiptable slots carry none, most of them enums and short scalars); 9: **unfavourable**, +26.8% (full output 52,066 vs the v7 CHORUS mean 41,068; the full phase took 591 s); 2: `grant_number` populated **1** (v7: 0 on all three; the row first said 0, read off the wrong path — #1049). Thinking count: full phase 34,907 observed of 52,066 output (67%). The record's `repo.dirty_paths` names `urelian` for `aurelian` (#1039, recorder-only). | **Retained.** CHORUS done; AI_READI (again) ran alongside it, CM4AI (fourth) follows. |
 | AI_READI | `2026-09-04g_claude-opus-5-api-generic-v8_rep1` | **passed the gate** on every row, duplicate keys 0 (the 04f defect, #1029, did not recur). First live capture of the transport-error path (#1017/#1037): the `reconcile_full` stream lost its connection to an `httpx.ReadError` after 84 s and 23,672 characters, the runner recorded the snapshot and the ledger row and the retry completed (335 s); no regate. Receipts 28/28 chunks, 346/351 snippets verified in the chunk cited (4 adjacent, 1 elsewhere, 0 mismatched or unchecked; 27 bearing on no token, 0 unattesting), 280/480 slots with a receipt; report gate 0 among 42 claims; one repair round (5 findings); British **0 vs a v7 worst of 52**, the normaliser having rewritten 16; resolver URLs 0, prefixes 0, ungrounded 0, pair errors 0. Prediction 5: **3.3%** (8/246, under < 10%); 6: **58.3%** (above > 40%, and above v7 AI_READI's 31.7–47.4% — 04f measured 35.0% on the same bundle); 9: **unfavourable**, +34.3% (full output 115,100 vs the v7 production mean 85,721; the full phase took 1,245 s); 2: `grant_number` populated **3** (as 04f did; the row first said 0, read off the wrong path — #1049). Thinking count: full phase 72,735 observed of 115,100 output (63%). The header still says `Temperature: 0.0` (#1027); `repo.dirty_paths` carries `urelian` (#1039). | **Retained.** Three of four canaries retained (VOICE 04f, CHORUS 04f, AI_READI 04g); CM4AI (fourth) runs under `2026-09-04g`, then the fill. |
 | CM4AI | `2026-09-04g_claude-opus-5-api-generic-v8_rep1` | **passed the gate** on every row — the fourth CM4AI canary and the first under the final package (04c ran before steps I and J). The first `full` stream dropped to a `RemoteProtocolError` after 386 s and 19,748 characters (snapshot and ledger row recorded, #1017); the retry completed (1,274 s). Receipts 28/28 chunks, 156/174 snippets verified in the chunk cited (12 adjacent, 6 elsewhere, 0 mismatched or unchecked; 0 bearing on no token; 10 entry receipts over one leaf, reported), 279/374 slots with a receipt; report gate 0 among 10 claims; one repair round (2 findings); British 0 (v7 worst 2; nothing rewritten); undeclared prefixes 0 under v3 with no `mailto:` id written (the 04c defect, #981, did not recur); resolver URLs 0, ungrounded 0, pair errors 0, duplicate keys 0; minted fragments 16 distinct (v7 CM4AI 17 / 10 / 17; reported, never gated). Prediction 5: **1.2%** (2/161, under < 10%; v7 CM4AI 17.0 / 17.4 / 7.9%); 6: **74.6%** (above > 40% and v7 CM4AI's 21.9–37.0%); 9: **unfavourable**, +93.7% (full output 80,122 vs the v7 CM4AI mean 41,370 over accepted attempts — rep1's attempt 2, 26,766; 04c measured 80,319); 2: `grant_number` populated **3** (v7: 0 on all three; registered 3; the row first said 0, read off the wrong path — #1049). Thinking count: full phase 50,081 observed of 80,122 output (62.5%). `repo.dirty_paths` carries `urelian` and the snapshot `events: -1` (#1039/#1040, addressed in #1041, open when this row was written); the header still says `Temperature: 0.0` (#1027). | **Retained.** All four canaries retained (VOICE 04f, CHORUS 04f, AI_READI 04g, CM4AI 04g); the fill (8 runs) is next, on the maintainer's word. |
 | CM4AI | `2026-09-04b_claude-opus-5-api-generic-v8_rep1` | **regressed** on one metric: resolver URLs in identifier slots 16 vs 0 (the dataset DOI as a URL under `id` plus 15 minted fragments); every receipt metric passed — the re-addressing turn dropped the one mis-addressed entry and the report gate regenerated 1 contradiction among 40 claims to 0, both firing on a live run for the first time. Coverage 288/407 (70.8%). British 2 (= v7 worst). One repair round (14). | **Deferred fix, step H (#974)**: identifier form is a rule with no mechanism; the normaliser lands before the third canary. Predictions: 2 unfavourable (0), 5 unfavourable (36.0%), 6 favourable (70.8%), 9 unfavourable (−26.7%). |
@@ -295,7 +325,7 @@ the arm table `notes/arm_comparison.md` carries the v8 column.
 | VOICE | 1 | 65.0% 223/343 | 6.3% 12/189 | 15 | 2 | 0 (0) | 2 / 0 | 94,936 (+24.7%) | 59,495 | 2,257 | 1 / 0 | 10 |
 | VOICE | 2 | 54.0% 141/261 | 12.5% 19/152 | 0 | 2 | 2 (2)ᶠ | 0 / 0 | 83,711 (+9.9%) | 47,827 | 2,091 | 2 / 1 | 9 |
 | VOICE | 3 | 57.6% 220/382 | 8.1% 14/173 | 21 | 3 | 1 (1)ᶠ | 2 / 1 | 86,279 (+13.3%) | 47,302 | 928 | 1 / 1 | 8 |
-| CHORUS | 1 | 28.5% 53/186 | 12.9% 8/62 | 0 | 1 | 0 (0) | 0 / 0 | 52,066 (+26.8%) | 34,907 | 591 | 1 / 0 | 3 |
+| CHORUS | 1 | 29.0% 54/186 | 14.5% 9/62 | 0 | 1 | 0 (0) | 0 / 0 | 52,066 (+26.8%) | 34,907 | 591 | 1 / 0 | 3 |
 | CHORUS | 2 | 33.5% 83/248 | 22.8% 18/79 | 0 | 1 | 0 | 0 / 0 | 43,814 (+6.7%) | 26,716 | 485 | 3ᵘ / 0 | 2 |
 | CHORUS | 3 | 39.4% 78/198 | 13.7% 14/102 | 0 | 1 | 0 (0) | 0 / 0 | 42,656 (+3.9%) | 22,902 | 474 | 1 / 0 | 11 |
 | AI_READI | 1 | 58.3% 280/480 | 3.3% 8/246 | 19 | 3 | 0 | 0 / 16 | 115,100 (+34.3%) | 72,735 | 1,245 | 1 / 1 | 5 |
@@ -336,7 +366,7 @@ the arm, each with a snapshot and ledger row (#1017).
 
 | # | result | reading |
 |---|---|---|
-| 2 | **favourable** — `grant_number` populated in 12 of 12 (1–3 per record), from 0 of 12 on v7 | A did what it was for; the registered target is ≥ 1 per record. The ceilings (AI_READI 2, CHORUS 1, CM4AI 3, VOICE 3) are met on 8 of 12 — VOICE rep1/2 and CM4AI rep2/3 populate fewer — and exceeded on AI_READI, where the excess is a supplement (#1028) |
+| 2 | **favourable** — `grant_number` populated in 12 of 12 (1–3 entries per record; VOICE's are one award under two or three application numbers), from 0 of 12 on v7 | A did what it was for; the registered target is ≥ 1 per record and is met on 12 of 12. Whether a record reaches the *ceiling* depends on which ceiling and which unit (#1028): under the ceiling as registered — every award-shaped token the bundle states, recounted AI_READI 4, CHORUS 1, CM4AI 8, VOICE 3, counting distinct awards — it is met on **3 of 12** (CHORUS only); under the post-hoc funding reading (3/1/2/1) on **11 of 12**, CM4AI rep3 alone one short (OT2OD032742 without U54HG012513). The row first said 8 of 12 against ceilings of 2/1/3/3 counting `grant_number` *entries*, under which VOICE rep3's three application numbers of one award "met" a ceiling of 3 and AI_READI's three awards read as an excess over 2; the ceilings undercounted the bundle and the unit was entries, not awards. No record populates an award its bundle does not state |
 | 5 | **unfavourable** — 11.1% of receipt paths pooled (218/1,962) against < 10%, from 13.0%; 6 of 12 records under 10%; CM4AI rep3 alone 43.8% (70/160) | reconcile still rewrites receipted values; the fall is 2 points, not the halving predicted, and one record without thinking carries a third of the arm's rewrites |
 | 6 | **favourable** — 56.4% pooled (2,309/4,094) against > 40%, from 35.4% (1,387/3,917); 8 of 12 records above 40%, CHORUS all three below (28.5–39.4%, its v7 33.8–37.4%) | R4/D2 moved coverage everywhere but CHORUS, whose bundle is the smallest (8 chunks) |
 | 7 | **unfavourable** on the median — 15.5 against "stays 0" (v7 median 0), 8 of 12 records mint; the max, 28 (CM4AI rep3), is below v7's worst, which the records put at **31** (VOICE rep3; the registered text's 22 was wrong) | the digest's labels did not displace invented ids: minting rose arm-wide, reported and never gated |
@@ -983,9 +1013,23 @@ slot, and no change anywhere else — read with one caveat the review
 named: the gate resolves a `full` row against the full record only, so a
 row wrongly flipped from `both` to `full` produces no finding; the block
 therefore says the test is on the *root* of the slot path and applies to
-retained/changed/added rows, and a canary reader should compare the count
-of `both` rows with the v8 fill's (612 of 682) rather than trust the zero
-alone. The v8 labels already carry three assembly digests (2026-09-04
+retained/changed/added rows, and a canary reader should compare the rate
+of `both` rows with the v8 fill's rather than trust the zero alone — read
+off `report_claims.rows_by_record` (instrument v4, #1122). The fill as
+defined above (12 records) reads 419 `both` of 461 (90.9%); all 18
+v8-labelled API records, the fill plus the six canaries, read 617 of 682
+(90.5%), with the five rows on slots the core cannot hold all on the VOICE
+2026-09-04d canary and none in the fill. (The "612 of 682" this paragraph
+first gave was the 18-record count less those five, computed by hand from
+the reports, and called the fill; it was neither.) The recorded tally is
+the post-regate reading: the tally moved on nine of the ten v8 records
+with a pre-regate snapshot (only 04b rep1 CM4AI is unchanged); on five
+the `both` count fell while `full` rose, three of them with the row
+total unchanged — the unambiguous flip of `both` to `full` (04e rep1
+VOICE ×1, 04f rep1 CHORUS ×2, 04g rep3 CM4AI ×2); 04f rep3 VOICE gained
+four `full` and lost three `both` while a row was added. So `report_gate` now carries
+the tally before and after, and the comparison is post-regate against
+post-regate. The v8 labels already carry three assembly digests (2026-09-04
 rep1; b/c/d; e/f/g), so "one boundary" is a statement about v9, not a
 claim that v8 was one arm; and the block is unconditional, as step E was,
 so a re-run of an earlier condition would receive it too.
@@ -1010,6 +1054,108 @@ agentic v6 records among them, the re-marked v6 canonicals included);
 the edited line is a conditions catalogue, not a decision rule, so no
 rule those records ran under moved — reported, never fatal, and named
 here so the drift is attributable.
+
+### The v9 body writes American English (#1134, 2026-09-09)
+
+The fourth v9 pin in two days, and the first that changes no rule. Under
+the declared instrument the whole file carried twelve British forms: the
+body eight "organisation" (inherited from v8's v5 block, and one in R7),
+one "recognise" (v5 block) and one "neighbouring" (v2 block), and the
+rationale two more, one of them the plural — while the body's own v5 rule
+says "Write American English throughout" and the runner rewrites British
+forms out of every record (#1002). All twelve are American now. v8 and earlier keep theirs:
+their records were generated under those bytes. No v9 record existed, so
+nothing is re-baselined; the assembly digest does not move (the prompt
+file is covered by its pin, not the assembly); `condition_delta` stays
+`["base"]`. The guard is the declared instrument, `grounding.BRITISH_PATTERNS`
+(v3), swept over the whole file — the first version was a hand-written
+list that passed on "neighbouring" (#1143). The audit-phase instruction the
+runner sends says "neighbouring" too and is filed as #1138, because
+`PHASE_INSTRUCTIONS` is in the assembly digest and moving it is a
+condition-boundary change.
+
+### The schema modules are a scanned surface of the real-identifier guard (#1146, 2026-09-09)
+
+The #647 guard scanned the prompts, the two playbooks and the rendered
+digests; the two docExamples the #1126 review found by hand (a registered
+trial number, a DOI that does not exist) sat in schema modules it never
+read. The modules are a surface now — the docExamples reach the agentic
+runtime through the merged schema file and the descriptions reach every
+API request through the digest — and two shapes were made form-aware so
+the surface is scannable without an allowlist: a ROR id is `0` + six
+Crockford base32 characters + two check digits (`01an7q238`; the
+placeholder `0xxxxxxxx` is not one, where the first shape matched any nine
+lowercase alphanumerics), and an ORCID-shaped token counts only when its
+ISO 7064 MOD 11-2 check digit holds — the property #1126 used to make the
+schema's four ORCID-shaped tokens form-only (three docExamples and the
+`orcid` slot's description) is the property the scanner now reads; the
+prompt body keeps the un-narrowed reading, since an identifier-shaped
+token there is a copy-through candidate whether or not it is anyone's.
+The surface's first pass reported green; the review of that pass found
+one real identifier the shape could not read — the `publisher` docExample
+`ror:04t3en479`, Karlsruhe Institute of Technology's ROR, written with a
+lower-case prefix the CURIE shape matched in upper case only (#1178) —
+the #647 defect verbatim, in the merged schema file the agentic playbook
+reads, reported as a pass. The shape reads either case now, the
+docExample is `ROR:0xxxxxxxx`, and the derived artifacts are regenerated.
+The guard is green on all 22 modules; the generated merged files and the
+datamodel are derived from them and are not scanned twice.
+
+### The schema digest moved with #1114 (2026-09-09)
+
+The `doi` slot's description carried a real Nature DOI as its example,
+and the schema digest — sent ahead of the arm prompt on every request —
+renders slot descriptions, so a real identifier sat in model-facing text
+on every run (#1114, found by the #647 guard once it scanned the digest).
+The example is now a form (the docExample
+`10.xxxxx/example.1234`; the description states the shape without an
+instance). `schema_digest`'s
+`Dataset` fingerprint moved from `ffe03dd469feb388e0a4149e4f5ccb6f` to
+`a91bad8b8eaf7c34b147ff5970474342` (CoreDataset `386a470d…` → `dfb9f93c…`) and
+`schema.core_sha256` with it (the inventory ledger gained the new digest; no
+slot was added or removed). The operative sentence of the `doi`
+description — the bare DOI only — stays inside the digest's 300-character
+window; the first draft pushed it out, which would have been a rule
+removal presented as an identifier removal (#1126 review). The docExample
+annotations and `latest_version_doi`'s description lost their real and
+corpus identifiers too: they reach the agentic runtime through the merged
+schema file, not the digest.
+No v9 record exists, so the condition still has one boundary; a v9 run
+differs from the v8 fill by the scope block, R6–R14, the report-phase
+inventory (#998) and this digest together, and no comparison against the
+fill can attribute a difference to any one of them. The organization
+docExample pair is form-only (`https://ror.org/0xxxxxxxx`, "Example
+University", #1115), because docExample is model-facing on the agentic
+path. The review of round 2 found two more real-identifier docExamples
+(a registered trial in `D4D_Human.yaml`, a DOI that does not exist in
+`D4D_Uses.yaml`) and the review of round 3 an ORCID placeholder whose
+ISO 7064 check digit was valid (`0000-0001-2345-6789`, assignable to a
+person); all three are form-only now — the ORCID ends in a digit its
+checksum forbids — and none moved the digest.
+
+### The audit-phase instruction writes American English (#1138, 2026-09-09)
+
+The audit phase's instruction — sent on every API run, under every
+condition — said "a value answering a neighbouring field" while the
+same runner rewrites that word out of every record it writes (#1002, v8
+step J). It says "neighboring" now. `PHASE_INSTRUCTIONS` is hashed into
+the assembly digest, so the digest moves for every condition from here:
+`a0c34202…` → `a78228e9…`, one re-baseline registered here as #352's,
+E2's (#928), G's (#952), E's (#929), #932's and #998's were. No v9 record
+exists, so v9 still has one boundary; the v8 fill's records carry the
+digests they ran under and are compared among themselves as before. The
+prompt pins do not move. The instruction's spelling had propagated into
+model output — "neighbouring" in 17 audit JSONs and 24 reconciliation
+reports — and stopped short of the records, so the form block and the
+canary's British row do not move. A test sweeps every piece of prose the
+runner writes into a request (`api_runner.sent_text_surfaces`: the phase
+instructions and layout the digest hashes, and the system prompt, repair
+prompts, core inventory block and headers it does not) with the declared
+instrument as the instrument applies it — lower-cased, no quotation
+exemption — so the runner's sent text is guarded with the same wrapper
+as the v9 prompt file (#1134), which exempts quotations because a prompt
+quotes sources; the manifest-derived blocks (scope, naming, source
+ranking) are left out on purpose, their content being a source's.
 
 ### What a v9 arm can and cannot be compared against (#1072)
 
@@ -1210,8 +1356,114 @@ steps need:
     is untouched, so VOICE 04f stays retained; the AI_READI 04f record is
     re-verdicted under the instrument (regressed) and AI_READI runs again.
 
-Each of 2–5, 7–10, 11 and 12 is a generation-path change (13 and 14 are not); per the production rule
-none of them may land between a v8 canary and its fill.
+15. **A label minted on an identifier the record carries is exempt from the
+    receipt denominator (#1123, 2026-09-09, receipts instrument v2).** v1
+    exempted only a fragment on the record's own id byte for byte; the v5
+    rule licenses one on any identifier the evidence supplies, so a record
+    that labelled its file collections on the landing page (AI_READI
+    2026-09-01 rep1, withheld below) or wrote its own id as a fragment on
+    its page (CHORUS) was counted as uncovered for them. v2 exempts a
+    fragment on the record's `id` in either form, its `doi` or its `page`,
+    names its instrument in the block, and counts the difference
+    (`slots.exempt_on_carried_identifier`: 4 leaves, all CHORUS API v7, all
+    the record's own top-level `id`; one had a receipt, three had none).
+    Recomputed with `backfill-checks --blocks receipts --overwrite`: 29
+    records; no *gated* number moved (findings, snippet verdicts and chunk
+    counts identical). Reported-only values that had never been recomputed
+    under later revisions did: three 2026-08-28 CHORUS agentic blocks gained
+    the #840/#891/#899 keys and their `recorded_by` moved from `d4d receipts
+    check` to `backfill_checks`; `entry_single_leaf_sample[*].leaves` fell
+    by one on two CM4AI records (6→5, 7→6: the #842 minted-id filter, own-id
+    fragments, not v2); `remapped_by_identity[*].basis` read `by_id` for
+    `by_overlap` on CM4AI 2026-09-04b (the #899 remap, not v2); 18 v8 blocks
+    gained `recorded_by`. The 18 receipted records whose bundle drifted are
+    withheld by the #907 guard and stay under v1 — #1140 is the recompute
+    from the git blob. v9 R8's "needs a receipt like any other value" clause
+    states the cost v2 removes; #1147 rotates it (no v9 record exists).
+
+16. **The dispositions rows are tallied by record column (#1122, 2026-09-09,
+    report_claims instrument v4).** The v9 canary reader was told to compare
+    the count of `both` rows with the v8 fill's, and the block carried only
+    the total. `rows_by_record` (`full`/`core`/`both`/`either`/
+    `no_record_column`/`invalid`, fixed keys, summing to `disposition_rows`)
+    is now on every record: recomputed over the corpus with
+    `backfill-checks --blocks report_claims --overwrite`, which moved no
+    finding and no count into or out of the block — only the new key and
+    the instrument string, and 12 rows on two pre-v8 records from `either`
+    to `no_record_column` when the two were split. The 12-record fill reads 419 `both` of 461;
+    all 18 v8-labelled API records, 617 of 682. Not a generation-path
+    change: a derived key in the provenance record, no prompt, assembly or
+    datasheet touched.
+
+17. **An entry whose stripped identity key matched nobody is not dropped
+    (#1053, 2026-09-09, receipts instrument v3).** The identity join (#899)
+    keyed on `id` first; when reconciliation removed a minted id and
+    rewrote the entry in place, the id matched no final entry and the
+    entry read as `entry_dropped` / `index_reused_by_another_entry`, so
+    the pack showed `<path does not resolve>` and the receipt lost its
+    credit for a value sitting at the receipted path (CHORUS 2026-09-04f
+    rep1, `labeling_strategies[0]`). v3 locates an entry whose key the
+    final list carries nowhere as a keyless one — by overlap, else by
+    position for the same shape **when the list kept its length**, basis
+    `same_key_stripped`, listed under `slots.located_after_key_stripped`;
+    a keyed entry whose key other final entries still carry is gone as
+    before, and so is a stripped entry in a list that shrank: the strip
+    test cannot tell every entry losing its key from this entry being
+    deleted and the survivors losing theirs, and the first v3 credited
+    the CHORUS 2026-09-01 rep3 receipt for Azra Bihorac / University of
+    Florida (`creators[1]`, snapshot 7 creators) to the CHoRUS Consortium
+    entry the final record's 2 creators put at that index — the #907
+    misjoin again (#1162 review). Recomputed with `backfill-checks
+    --blocks receipts --overwrite`: 29 records under v3 (the 18 drifted
+    are withheld by the #907 guard and carry no `instrument` key at all,
+    #1140); one record moved — CHORUS v8 2026-09-04f rep1, two
+    index-reused paths (`existing_uses[0].examples[0]`,
+    `labeling_strategies[0].labeling_details`) to none and 53 → 54 slots
+    with a receipt, 8 → 9 values changed after the receipt; rep3 reads as
+    on main; no finding, snippet verdict or chunk count moved anywhere.
+    52 paths corpus-wide carry the basis, 50 of them resolved by overlap
+    before and after — so `claim_receipts` puts a new `resolution` on those
+    items and a regenerated review pack differs from its committed copy
+    (its sha moves and the attestation reads stale, #969); the committed
+    04f rep1 pack still shows the two paths as `entry_dropped` until it is
+    rebuilt. 15 and 17 are recomputes of a check block with no prompt,
+    assembly or datasheet touched — not generation-path changes; #1147's
+    rotation of v9 R8 is its own item when it lands.
+
+18. **British spellings instrument v4 (#1006, 2026-09-09).** The Codex
+    review of #1003 found eight forms v3 could not see — `labourers`,
+    `honourably`, `millilitres`, `micrometres`, `paediatricians`,
+    `haematopoietic`, `sulphide`, `grey` — which the normaliser, mirroring
+    the instrument rule for rule, let through while `residual_count` read
+    0. v4 widens seven patterns (the `-our` family takes `ers`, `honour`
+    takes `ably`, `metre` and `litre` take the `micro`/`nano`/`milli`/
+    `deci` prefixes, `paediatric` takes `ians`, `haem` takes any `ato…`
+    stem, `sulph` any suffix) and adds `grey`; the normaliser is v2, one
+    rule per v4 pattern, and its coverage test holds the mirror. The form
+    block now names `british_instrument`. Recomputed with
+    `backfill-checks --blocks form --overwrite` over all 282 records: 18
+    moved, all in the 2026-07 and early-2026-08 arms except the v5 rep1
+    AI_READI record (9 → 10, `haematocrit`), the v6 rep3 CM4AI record
+    (0 → 2, `nanometres`) and the 2026-08-28d v7 AI_READI canary (44 →
+    45), none of which carries a canary block; the v7 production arm (139)
+    and the 2026-08-22c baseline (88) are unchanged, so no gate row and no
+    canary verdict moves; none of the eight forms occurs in any record, and
+    the 52 new occurrences are the widened patterns' (`haematocrit` 19,
+    `microlitre` 15, `micrometres` 12, `nanometres` 6). A surname `Grey`
+    would be counted, as the Temerty Centre is, and the normaliser leaves it
+    as written only inside a title-case run — a bare `family_name: Grey` is
+    rewritten and logged, and the disposition command restores it. An
+    instrument change lands at a condition boundary: the v8 fill is
+    complete and no v9 record exists. Not a generation-path change on its
+    own — but the normaliser is on the generation path, and its v2 rule
+    table rewrites eight more forms in any run made after it, so a v9 arm
+    is compared with v8 across this line as it is across step J.
+
+Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16
+and 17 are not; 15 and 17 are the receipts instrument's revisions and
+17 classifies both; 18 changes the normaliser's rule table and is a
+generation-path change by that half); per the production rule none of
+them may land between a v8 canary and its fill.
 
 ## Decisions needed before step 3
 
@@ -1233,7 +1485,14 @@ none of them may land between a v8 canary and its fill.
   v7 form blocks already hold v3 counts, so the baseline v8's canaries
   are gated against is v3 either way; this decided only that one
   recorded verdict. CM4AI rep1's block (v2 baseline numbers, pre-#891
-  rows) is the same shape and is #922.
+  rows) was the same shape and was re-derived the same way on 2026-09-09
+  (#922): `ok` before and after, British 0 vs 4, the slips row present,
+  the report row unmeasured under #684 (the record read no claim) against
+  a baseline worst of 1 (2 before `report_claims` v3, #1022/#1046). The
+  AI_READI block was re-derived the same way on 2026-09-10 UTC (#1170):
+  status `regressed` before and after (British 45 vs 43, the same under
+  v4 as proposed in #1173, open at the time of writing), the report row unmeasured, the D4 block (#906) under
+  `prior_verdict` and #891's beneath it.
 - **D5** — adopted 2026-09-03: API-only v8 first; the agentic arm needs
   #688's launcher and the parity update before a v8 playbook run is
   cheap enough to repeat.

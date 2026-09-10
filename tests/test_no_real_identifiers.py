@@ -20,8 +20,8 @@ next version is drafted from it, which is how the v5 rationale's real ROR
 would have travelled; it is scanned too. The two **playbooks** drive the
 agentic runtime. The **rendered schema digest** (`Dataset`, `CoreDataset`)
 is sent ahead of the arm prompt on every API request (`ASSEMBLY_LAYOUT`),
-so a slot description is as model-facing as a rule — that is where the one
-real identifier left in the scanned surface sits today (#1114).
+so a slot description is as model-facing as a rule — that is where the last
+real identifier in the scanned surface sat until #1114 removed it.
 
 The allowlist is checked in both directions and each entry is held to the
 line it claims to be on; an entry cannot outlive its token, and a token
@@ -35,9 +35,14 @@ REPO = Path(__file__).resolve().parents[1]
 
 #: What a real identifier looks like. Form-only phrasing in the rules — "a
 #: ROR: CURIE, not the ror.org URL" — contains none of these by construction.
+#: A ROR id is `0` + six Crockford base32 characters (no i, l, o, u) + two
+#: check digits (#1146): `01an7q238` is one, the form-only placeholder
+#: `0xxxxxxxx` is not — the first version matched any nine lowercase
+#: alphanumerics and could not tell a form from an id.
+_ROR_ID = r"0[0-9a-hjkmnp-tv-z]{6}[0-9]{2}"
 SHAPES = {
-    "ROR CURIE": re.compile(r"\bROR:[0-9a-z]{9}\b"),
-    "ror.org URL": re.compile(r"ror\.org/[0-9a-z]{9}\b"),
+    "ROR CURIE": re.compile(rf"\b(?i:ror):{_ROR_ID}\b"),       # `ror:04t3en479` (KIT) sat in a docExample in lower case (#1178 review)
+    "ror.org URL": re.compile(rf"ror\.org/{_ROR_ID}\b"),
     "DOI prefix": re.compile(r"\b10\.\d{3,9}/\S+"),            # registrants of 3+ digits (review note 6)
     "doi: CURIE": re.compile(r"\bdoi:10\.\d{3,9}"),
     "orcid.org URL": re.compile(r"orcid\.org/\d"),
@@ -47,6 +52,14 @@ SHAPES = {
     "clinical trial": re.compile(r"\bNCT\d{8}\b"),
     "RRID": re.compile(r"\bRRID:\s?[A-Z]+_?\w+"),
     "dbGaP": re.compile(r"\bphs\d{6}\b"),
+}
+#: The prompt body's shapes (#1178 review, S1): the un-narrowed ROR forms —
+#: any nine lowercase alphanumerics — because an identifier-shaped token in
+#: the body is a copy-through candidate whether or not it is anyone's. The
+#: rest of the body's shapes are the same as everywhere.
+_STRICT_SHAPES = {
+    "ROR CURIE": re.compile(r"\b(?i:ror):[0-9a-z]{9}\b"),
+    "ror.org URL": re.compile(r"ror\.org/[0-9a-z]{9}\b"),
 }
 
 
@@ -75,43 +88,102 @@ def _digest_texts() -> list[tuple[str, str, str]]:
             for cls in ("Dataset", "CoreDataset")]
 
 
+def _schema_texts() -> list[tuple[str, str, str]]:
+    """The schema source modules (#1146): docExamples and descriptions reach
+    the agentic runtime through the merged schema file, and the digest
+    renders descriptions to every API request, so a real identifier in a
+    module is model-facing on both paths. The generated merged file and the
+    datamodel are derived from these and are not scanned twice."""
+    return [(str(p.relative_to(REPO)), "schema", p.read_text(encoding="utf-8"))
+            for p in sorted((REPO / "src" / "data_sheets_schema" / "schema").glob("*.yaml"))
+            if not p.name.endswith("_all.yaml")]
+
+
 def texts() -> list[tuple[str, str, str]]:
     """Every scanned surface: (name, surface, text)."""
     return (_prompt_texts()
             + [(str(p.relative_to(REPO)), "playbook", p.read_text(encoding="utf-8"))
                for p in (REPO / ".claude" / "commands" / "d4d-uniform-rules.md",
                          REPO / ".claude" / "commands" / "d4d-full-core.md")]
-            + _digest_texts())
+            + _digest_texts()
+            + _schema_texts())
 
 
 #: Known real identifiers that cannot yet be removed: (name, token) ->
 #: {reason, surface, line_contains}. `surface` is the only surface the token
 #: may sit on and `line_contains` a phrase the token's line must carry, so
 #: the entry holds the token to the context that justifies it.
-ALLOWED = {
-    ("schema digest (Dataset)", "10.1038/s41586-020-2649-2',"): {
-        "surface": "digest", "line_contains": "in format 10.xxxx/xxxxx",
-        "reason": f"the `doi` slot's description gives a real Nature DOI as its "
-                  f"example; a form-only placeholder needs a schema edit and "
-                  f"`make gen-project`, which moves the schema digest every run "
-                  f"records — scheduled at the next condition boundary (#1114)"},
-    ("schema digest (Dataset)", "10.5281/zenodo.1234567')."): {
-        "surface": "digest", "line_contains": "in format 10.xxxx/xxxxx",
-        "reason": f"same line as the Nature DOI; a Zenodo record number of the "
-                  f"placeholder shape, allowlisted with it until #1114"},
-    ("schema digest (CoreDataset)", "10.1038/s41586-020-2649-2',"): {
-        "surface": "digest", "line_contains": "in format 10.xxxx/xxxxx", "reason": f"as for Dataset (#1114)"},
-    ("schema digest (CoreDataset)", "10.5281/zenodo.1234567')."): {
-        "surface": "digest", "line_contains": "in format 10.xxxx/xxxxx", "reason": f"as for Dataset (#1114)"},
+ALLOWED: dict[tuple[str, str], dict[str, str]] = {
+    # Empty since #1114 removed the doi description's real Nature DOI. An
+    # entry, when one is needed again, is {surface, line_contains, reason}.
 }
 
 
-def real_identifiers(text: str) -> list[tuple[str, str]]:
-    """Every (shape, token) in `text` that looks like a real identifier."""
+def allowlist_findings(allowed: dict, surfaces: list[tuple[str, str, str]]) -> list[str]:
+    """Both directions of the allowlist, as strings a test can assert on:
+    a scanned token not allowlisted; an entry whose token is gone; an entry
+    whose token has left the line that justified it. Factored out so the
+    machinery is exercised even while the real allowlist is empty (#1126
+    review, S5)."""
+    out = []
+    by_name = {(n, s): t for n, s, t in surfaces}
+    for name, surface, text in surfaces:
+        for shape, tok in real_identifiers(text):
+            if (name, tok) not in allowed:
+                out.append(f"unlisted: {name} [{surface}] {shape} {tok!r}")
+    for (name, tok), entry in allowed.items():
+        if not str(entry.get("reason", "")).strip():
+            out.append(f"no reason: {name} {tok!r}")
+        text = by_name.get((name, entry["surface"]))
+        if text is None:
+            out.append(f"no surface: {name} [{entry['surface']}]"); continue
+        lines = [ln for ln in text.splitlines() if tok in ln]
+        if not lines:
+            out.append(f"gone: {name} {tok!r}"); continue
+        for ln in lines:
+            if entry["line_contains"] not in ln:
+                out.append(f"moved: {name} {tok!r} off a line containing {entry['line_contains']!r}")
+    return out
+
+
+def orcid_checksum_holds(token: str) -> bool:
+    """ISO 7064 MOD 11-2 over the 15 base digits of an ORCID iD (#1146):
+    an ORCID-shaped placeholder whose check digit is wrong cannot name a
+    person, which is how #1126 made the schema's four examples form-only,
+    and is the property the scanner reads rather than an allowlist. A
+    form written with X's (`XXXX-XXXX-XXXX-XXXX`) is not an id."""
+    digits = re.sub(r"[^0-9X]", "", token.upper())
+    if len(digits) != 16 or not digits[:15].isdigit():
+        return False
+    total = 0
+    for d in digits[:15]:
+        total = (total + int(d)) * 2
+    check = (12 - total % 11) % 11
+    return digits[15] == ("X" if check == 10 else str(check))
+
+
+def real_identifiers(text: str, strict: bool = False) -> list[tuple[str, str]]:
+    """Every (shape, token) in `text` that looks like a real identifier. An
+    ORCID-shaped token whose check digit fails is a form, not an id — except
+    under `strict`, the prompt body's rule (#1178 review, S3): the body is
+    what is sent, and an identifier-shaped token there is a candidate for
+    copy-through into a record whether or not it is anyone's, so the body
+    keeps the un-narrowed reading."""
     hits = []
-    for shape, rx in SHAPES.items():
+    shapes = {**SHAPES, **_STRICT_SHAPES} if strict else SHAPES
+    for shape, rx in shapes.items():
         for m in rx.finditer(text):
-            hits.append((shape, m.group(0)))
+            tok = m.group(0)
+            if strict:
+                hits.append((shape, tok))
+                continue
+            if shape == "bare ORCID" and not orcid_checksum_holds(tok):
+                continue
+            if shape == "orcid.org URL":
+                tail = re.search(r"orcid\.org/(\d{4}-\d{4}-\d{4}-\d{3}[\dX])", text[m.start():m.start() + 40])
+                if tail and not orcid_checksum_holds(tail.group(1)):
+                    continue
+            hits.append((shape, tok))
     return hits
 
 
@@ -137,6 +209,32 @@ class TestTheScannerSeesEachShape(unittest.TestCase):
             with self.subTest(shape=shape):
                 self.assertTrue(any(s == shape for s, _ in real_identifiers(text)))
 
+    def test_a_form_only_ror_placeholder_is_not_an_identifier(self):
+        """#1146: the organization docExample `https://ror.org/0xxxxxxxx` is a
+        form, and a shape that cannot tell it from an id would make the
+        schema surface unscannable."""
+        self.assertEqual(real_identifiers("see https://ror.org/0xxxxxxxx and ROR:0xxxxxxxx"), [])
+        self.assertEqual(real_identifiers("https://ror.org/01an7q238"), [("ror.org URL", "ror.org/01an7q238")])
+        self.assertEqual(real_identifiers("ROR:01an7q238"), [("ROR CURIE", "ROR:01an7q238")])
+        self.assertEqual(real_identifiers("ror:04t3en479"), [("ROR CURIE", "ror:04t3en479")])   # the KIT id, lower-case prefix
+        self.assertEqual(real_identifiers("ROR:0lio1u238"), [])        # i, l, o, u are not in the alphabet
+        self.assertFalse(orcid_checksum_holds("XXXX-XXXX-XXXX-XXXX"))
+        self.assertEqual(real_identifiers("0000-0002-1234-5678", strict=True), [("bare ORCID", "0000-0002-1234-5678")])
+        self.assertEqual(real_identifiers("ROR:0xxxxxxxx and ror.org/abcdefghi", strict=True),
+                         [("ROR CURIE", "ROR:0xxxxxxxx"), ("ror.org URL", "ror.org/abcdefghi")])   # the body keeps both halves
+
+    def test_an_orcid_whose_check_digit_fails_is_a_form(self):
+        """#1146: the schema's four ORCID-shaped tokens (three docExamples and
+        the `orcid` slot's description) end in a digit their checksum forbids
+        (#1126); the scanner reads the checksum, so the schema surface can be
+        scanned without allowlisting them."""
+        self.assertTrue(orcid_checksum_holds("0000-0002-1825-0097"))
+        self.assertFalse(orcid_checksum_holds("0000-0000-0000-0000"))
+        self.assertFalse(orcid_checksum_holds("0000-0002-1234-5678"))
+        self.assertEqual(real_identifiers("orcid 0000-0002-1234-5678 and https://orcid.org/0000-0000-0000-0000"), [])
+        self.assertEqual([s for s, _ in real_identifiers("0000-0002-1825-0097 https://orcid.org/0000-0002-1825-0097")],
+                         ["orcid.org URL", "bare ORCID", "bare ORCID"])     # the URL's tail is a bare id too
+
     def test_form_only_phrasing_is_clean(self):
         """The wording the rules actually use contains none of the shapes."""
         clean = ("Give a ROR: CURIE, not the ror.org URL. Cite a DOI as doi:<prefix>/"
@@ -145,19 +243,50 @@ class TestTheScannerSeesEachShape(unittest.TestCase):
         self.assertEqual(real_identifiers(clean), [])
 
 
+class TestTheAllowlistMachinery(unittest.TestCase):
+    """The real allowlist is empty since #1114; the checks it relies on are
+    driven here over a synthetic one so they cannot rot unexercised."""
+    def test_an_entry_without_a_reason_is_a_finding(self):
+        surfaces = [("f", "body", "see doi:10.1234/abcd here")]
+        allowed = {("f", "doi:10.1234/abcd"): {"surface": "body", "line_contains": "see", "reason": "  "}}
+        self.assertIn("no reason: f 'doi:10.1234/abcd'", allowlist_findings(allowed, surfaces))
+        allowed[("f", "doi:10.1234/abcd")]["reason"] = "#647"
+        self.assertNotIn("no reason: f 'doi:10.1234/abcd'", allowlist_findings(allowed, surfaces))
+
+
+    SURFACES = [("t", "digest", "a line with ROR:01an7q238 (e.g. context)\nanother line\n")]
+
+    def test_an_entry_on_its_line_passes(self):
+        allowed = {("t", "ROR:01an7q238"): {"surface": "digest", "line_contains": "e.g.", "reason": "x"}}
+        self.assertEqual(allowlist_findings(allowed, self.SURFACES), [])
+
+    def test_an_unlisted_token_is_a_finding(self):
+        self.assertEqual(allowlist_findings({}, self.SURFACES), ["unlisted: t [digest] ROR CURIE 'ROR:01an7q238'"])
+
+    def test_a_token_that_left_its_line_is_a_finding(self):
+        allowed = {("t", "ROR:01an7q238"): {"surface": "digest", "line_contains": "nowhere", "reason": "x"}}
+        self.assertEqual([f.split(":")[0] for f in allowlist_findings(allowed, self.SURFACES)], ["moved"])
+
+    def test_an_entry_whose_token_is_gone_is_a_finding(self):
+        allowed = {("t", "ROR:09zzzzzzz"): {"surface": "digest", "line_contains": "e.g.", "reason": "x"}}
+        found = allowlist_findings(allowed, self.SURFACES)
+        self.assertTrue(any(f.startswith("gone:") for f in found), found)
+
+
 class TestNoRealIdentifierOnAnyModelFacingSurface(unittest.TestCase):
     def test_every_surface_is_present(self):
         names = {(n, s) for n, s, _ in texts()}
         self.assertGreaterEqual(len([1 for n, s in names if s == "body"]), 9)   # v1 + v2–v9; a v10 adds one
         self.assertIn(("schema digest (Dataset)", "digest"), names)
         self.assertIn((".claude/commands/d4d-full-core.md", "playbook"), names)
+        self.assertIn(("src/data_sheets_schema/schema/D4D_Base_import.yaml", "schema"), names)   # #1146
+        self.assertGreaterEqual(len([1 for n, s in names if s == "schema"]), 22)
 
     def test_no_unlisted_real_identifier(self):
-        offenders = []
-        for name, surface, text in texts():
-            for shape, tok in real_identifiers(text):
-                if (name, tok) not in ALLOWED:
-                    offenders.append(f"{name} [{surface}]: {shape} {tok!r}")
+        """Delegates to `allowlist_findings`, the machinery the synthetic
+        tests exercise, so the check that gates the repository is the one
+        that is tested (#1126 review, R1)."""
+        offenders = [f for f in allowlist_findings(ALLOWED, texts()) if f.startswith("unlisted:")]
         self.assertEqual(offenders, [],
                          "a real identifier on a model-facing surface is a candidate "
                          "for copy-through into a record where it grounds against "
@@ -172,23 +301,14 @@ class TestNoRealIdentifierOnAnyModelFacingSurface(unittest.TestCase):
         review, finding 5)."""
         for name, surface, text in texts():
             if surface == "body":
-                self.assertEqual(real_identifiers(text), [], name)
+                self.assertEqual(real_identifiers(text, strict=True), [], name)   # no narrowing on the body (#1178 review, S3)
 
     def test_every_allowlisted_identifier_is_still_where_it_says(self):
         """An entry for a token that is gone is a claim that has stopped being
         true; an entry whose token has left the line that justified it is one
         that has stopped applying. Both come out when the token moves."""
-        by_name = {(n, s): t for n, s, t in texts()}
-        for (name, tok), entry in ALLOWED.items():
-            with self.subTest(entry=f"{name}: {tok}"):
-                self.assertTrue(entry["reason"].strip(), "an allowlist entry needs a reason")
-                text = by_name.get((name, entry["surface"]))
-                self.assertIsNotNone(text, f"no surface {entry['surface']!r} named {name!r}")
-                lines = [ln for ln in text.splitlines() if tok in ln]
-                self.assertTrue(lines, "the token is gone; drop the entry")
-                for ln in lines:
-                    self.assertIn(entry["line_contains"], ln,
-                                  "the token has left the line that justified the entry")
+        stale = [f for f in allowlist_findings(ALLOWED, texts()) if not f.startswith("unlisted:")]
+        self.assertEqual(stale, [], "\n".join(stale))
 
     def test_the_removed_v5_ror_stays_out(self):
         """The first version allowlisted USF's ROR in the v5 rationale as
