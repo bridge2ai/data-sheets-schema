@@ -1159,10 +1159,10 @@ ranking) are left out on purpose, their content being a source's.
 
 ### R8 no longer charges a landing-page label a receipt (#1147, 2026-09-09)
 
-The eighteenth v9 pin — the registry's `superseded` list holds
-seventeen: three registrations and corrections on 2026-09-08, the two
-#1120 rounds, the two #1134 spellings rounds, and this issue's own ten
-earlier rounds,
+The nineteenth v9 pin — the registry's `superseded` list holds
+eighteen: three registrations and corrections on 2026-09-08, the two
+#1120 rounds, the two #1134 spellings rounds, and this issue's own
+eleven earlier rounds,
 each retired by the next (the third wrote `labelled` into the sentence and
 the file sweep of #1134 caught it after the pin was taken; the fourth's
 premise was false for the 36 CHORUS records whose own id is the site root;
@@ -1199,9 +1199,12 @@ named as M1's evidence — and had
 kept the premise "the one identifier every record carries" unqualified
 beside the clause that denies it: the forms admitted are now a declared
 CURIE, an absolute URL, or a URI under a registered scheme such as ark
-or a URN — named, not "a URI under a registered scheme", which would
-admit the `mailto:` the person rule forbids on 77 corpus ids and the
-`file:` `identifiers.py` excludes on purpose (round 9) — in the
+the forms admitted are now named one by one — a declared CURIE, a
+resolver URL, an absolute URL, an ARK or a URN for a stated identifier,
+the same minus the resolver URL for a base — rather than "a URI under a
+registered scheme", which would admit the `mailto:` the person rule
+forbids on 77 corpus ids and the `file:` `identifiers.py` excludes on
+purpose over 22 (round 9) — in the
 stated-identifier sentence and the base rule alike, the
 premise names the identity slot rather than calling a bare token an
 identifier, the mint sentence points at the base rule, a token own id
@@ -1211,12 +1214,13 @@ an id that already carries a fragment covers any base, not only a
 shared root, since a second marker is invalid either way).
 R8 now takes the stated identifier first for a forced
 id, in an identifier form (a declared CURIE, a resolver URL, an absolute
-URL, or a URI under a registered scheme such as ark or urn), and mints
+URL, an ARK or a URN), and mints
 only where none is stated; prefers the own id as a base only where it is
 itself such a form, else the DOI or page in identifier form, else the
 fragment rule's resolvable-URL fallback; and labels a part of a
-fragment-on-root id — a person's included — as that fragment, a hyphen
-and the part's own label on the same root. The probes that pinned the
+base that already carries a fragment — a person's label included — as
+that fragment, a hyphen and the part's own label on the same base. The
+probes that pinned the
 earlier clauses were
 substring searches a semantic flip passes, so the playbook test now holds
 the whole R8 bullet equal across the two texts once the playbook's markup
@@ -1259,7 +1263,8 @@ The sentence is rewritten in the prompt and in the playbook's mirror; the
 probe moves with it and the shared-clause guard holds both texts to it.
 R8's operative clauses change — the stated-identifier-first order for a
 forced id, the identifier-form requirement on every base and on a stated
-identifier, the kept parent fragment on any fragment-bearing id — which is a rule change under the
+identifier, the kept parent fragment on any base that already carries
+one — which is a rule change under the
 condition's own name; and the first of them moves a forced part id the
 evidence states from the receipt denominator's exemption (a mint on a
 carried identifier, #1123) to a receipted value (`receipts.exempt` exempts

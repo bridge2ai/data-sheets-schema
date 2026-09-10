@@ -194,7 +194,7 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
                        "for a person under the person rule, that fragment, a hyphen, then person and the name",
                        "an ARK or a URN",
                        "the one identity slot every record carries",
-                       "where the id already carries a fragment",
+                       "already carries a fragment",
                        "on a resolvable URL the evidence supplies",
                        "labels a part of that entity, not of this one"),
         "enum from a stated category": ("in the source's own words or a plain restatement of them",

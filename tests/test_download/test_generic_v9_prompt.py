@@ -152,7 +152,7 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
                       "for a person under the person rule, that fragment, a hyphen, then person and the name",  # round 8, SF5
                       "an ARK or a URN",                                  # R8: those forms and no others (round 9, MF1)
                       "the one identity slot every record carries",        # R8: the premise names the slot (round 9, SF4)
-                      "where the id already carries a fragment",           # R8: any base, not only a shared root (round 9, SF1)
+                      "already carries a fragment",           # R8: any base, not only a shared root (round 9, SF1)
                       "on a resolvable URL the evidence supplies",         # R8: neither DOI nor page (round 8, SF6)
                       "component dataset under `resources`",        # R8: a nested Dataset id is forced (round 2, finding 3)
                       "matched to the core by id",                   # R8: the projector, both facts (finding 9)

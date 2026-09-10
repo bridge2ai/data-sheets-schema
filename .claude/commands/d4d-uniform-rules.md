@@ -113,7 +113,7 @@ to every project:
 
   - **Quoted source text keeps its original spelling.** Changing a quotation to
     match house style corrupts evidence, which is the one thing the provenance
-    guard exists to prevent. The bundles contain `license` 13 times and
+    guard exists to prevent. The bundles contain `licence` 13 times and
     `programme` 6.
   - **Proper nouns keep their spelling** — "Wellcome Trust Sanger Centre",
     "Medical Research Council Programme Grant". A name is not prose.
@@ -244,14 +244,15 @@ to every project:
   project root shared with sibling releases, so a part labeled there cannot be
   told apart from a sibling's by its id alone. Where this record's own id is
   itself such a root, it is still the base to prefer: it is the identifier
-  this record carries, and the label must stay stable; where the id already
-  carries a fragment, on a shared root or on any other base, the part's label
-  is that fragment, a hyphen and the part's own label, on the same base — for
-  a person under the person rule, that fragment, a hyphen, then person and the
-  name — so the record's own discriminator is kept, and one identifier carries
-  one fragment marker, never two (#1123, #1147). A fragment appended to
-  another entity's identifier — an organization's, another dataset's — labels
-  a part of that entity, not of this one.
+  this record carries, and the label must stay stable; where that base — the
+  own id where it is an identifier form, else the DOI or page this rule sends
+  the record to — already carries a fragment, the part's label is that
+  fragment, a hyphen and the part's own label, on the same base — for a person
+  under the person rule, that fragment, a hyphen, then person and the name —
+  so the record's own discriminator is kept, and one identifier carries one
+  fragment marker, never two (#1123, #1147). A fragment appended to another
+  entity's identifier — an organization's, another dataset's — labels a part
+  of that entity, not of this one.
 
 - **A slot whose declared range is an enumeration is populated only from a
   passage that states the category** (v9, R9, #830), in the source's own
