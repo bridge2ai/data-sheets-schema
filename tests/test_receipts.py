@@ -695,7 +695,13 @@ class OnDisk(unittest.TestCase):
             self.assertTrue(b["checked"], (name, b.get("reason")))
             self.assertEqual(b["bundle_basis"]["source"], "bundle on disk", name)
             self.assertIn("chunked in memory", b["bundle_basis"]["manifest"], name)
+            # the persisted basis is a statement about the bytes, never an
+            # imperative (#1187 round 5, SF1) — asserted on a route-2 block,
+            # which is the one that carries a `manifest` key at all (round 6, SF2)
+            self.assertNotIn("d4d bundle chunk", str(b["bundle_basis"]), name)
             self.assertEqual(b["artifacts"]["manifest"]["chunk_count"], 5, name); self.assertIsNone(b["artifacts"]["manifest"]["path"])
+        # ... and the refusal that route composes does carry it (round 6, SF1)
+        self.assertIn("d4d bundle chunk", ruleless["reason"])
         self.assertFalse(ruleless["checked"]); self.assertIn("which chunking rule", ruleless["reason"])
         self.assertTrue(plain["checked"]); self.assertEqual(plain["artifacts"]["manifest"]["path"], str(manifest))
 
@@ -724,7 +730,6 @@ class OnDisk(unittest.TestCase):
                 b = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest, bundle_rel_path="x", record_bundle_sha256=sha)
             self.assertTrue(b["checked"]); self.assertEqual(b["artifacts"]["manifest"]["path"], str(manifest))
             self.assertNotIn("None", b["bundle_basis"].get("manifest", ""))
-            self.assertNotIn("d4d bundle chunk", str(b["bundle_basis"]))         # ... and never in the persisted basis
 
     def test_a_record_carrying_only_a_sha256_is_recovered_on_a_drift(self):
         """#1187 round 3, SF4: the drift test keyed on the md5 alone, so a

@@ -1357,7 +1357,10 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
         except UnicodeDecodeError as exc:
             return {**base, "checked": False,
                     "reason": f"the bundle on disk is the bytes the record hashed but is not UTF-8 ({exc}); {disk_because}"}
-        built = _in_memory(disk_bytes, bundle.name, f"the bundle on disk is the bytes the record hashed ({disk_state})")  # type: ignore[arg-type]
+        # `where` composes `_in_memory`'s two refusals and is discarded on
+        # success, so it carries the advice; the basis below keeps the bare
+        # state (#1187 round 6, SF1).
+        built = _in_memory(disk_bytes, bundle.name, f"the bundle on disk is the bytes the record hashed ({disk_because})")  # type: ignore[arg-type]
         if built is None:
             return {**base, "checked": False, "reason": refusal}
         m, raw = built, disk_bytes                                              # type: ignore[assignment]
