@@ -373,7 +373,7 @@ report_claims:
     detail: report says changed; the either record does not carry it
     claim: '| 19 | low | `data_topic` terms | **Changed** (one), caveat added |'
   claims_checked: 14
-  claims_unnamed: 2
+  claims_unnamed: 0
   disposition_rows: 11
   rows_by_record:
     full: 0

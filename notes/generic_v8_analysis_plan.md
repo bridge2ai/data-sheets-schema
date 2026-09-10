@@ -1398,10 +1398,18 @@ steps need:
     the removal claims use, in a prose sentence carrying a removal word
     that is not about the core alone ("### 4.7 Removed `errata`",
     "`conforms_to_standard` is absent from both records"; not "recorded
-    in `errata`", not "are absent from the core record", and no table
-    line — a dispositions row whose disposition the reader does not know
-    is the strict reader's, not a removal claim, #962). Objects and leaves
-    alike; `conforms_to_*`,
+    in `errata`" nor the rest of a coordinated destination list, not "are
+    absent from the core record", not a class name, and no table line —
+    the generic cell scan skips the parsed dispositions table's own extent,
+    header to last row, so a row whose disposition the reader does not
+    know is nobody's removal claim, #962, while a removal table the strict
+    reader does not recognise, the #546 shape, keeps its claims). What the
+    weak signal still misses: informal record wording ("present in full,
+    absent in core", a sentence naming both records), which suppresses a
+    full-record removal on three pre-v8 records — none a finding, all
+    three runs never asked for a table; tightening further trades against
+    the false positives the first cut found. Objects and leaves alike;
+    `conforms_to_*`,
     `notes` and `source_caveats` exempt as from the receipt denominator.
     The finding needs the table the row belongs to, and the test is the
     run's own statement that it asked for one (`inputs.dispositions_expected`,
@@ -1438,8 +1446,10 @@ steps need:
     third read every backticked name in a sentence with a removal word as
     a casualty, so a destination, a sentence about the core, or an
     unparsed table row suppressed a full-record removal (four corpus
-    instances, none a finding), and its negation window dropped eleven
-    real retention claims. Two further effects of the recompute, neither a
+    instances, none a finding; two recovered, three still suppressed by
+    informal record wording, as above), and its negation window dropped
+    eleven real retention claims; the fourth scoped the table exclusion to
+    a heading, which would have silenced the #546 shape (no corpus loss). Two further effects of the recompute, neither a
     finding: because a prose retention claim is now a claim checked,
     `claims_checked` moved on 100 records and 65 reports that read no
     claim before read one now (`canary.report_vacuous` flips from vacuous

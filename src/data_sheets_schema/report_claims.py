@@ -302,6 +302,10 @@ _SLOT_PATH = re.compile(r"[a-z][a-z0-9_]*(?:\[(?:\d+|\*)\])?(?:\.[a-z][a-z0-9_]*
 #: is not a casualty, a sentence about the core alone records nothing
 #: about the full record, and no table line is read (#1175 round 2, M1).
 _REMOVAL_WORD = re.compile(r"\b(?:removed|deleted|dropped|absent|omitted|stripped|withdrawn)\b", re.I)
+#: "recorded in `a`, `b` and `c`": every backticked name in the list after
+#: the preposition is a destination.
+_DESTINATION_LIST = re.compile(r"\b(?:from|into|to|in|on|within|onto|under|beside|alongside)\s+(?:the\s+|core\s+|full\s+)*"
+                               r"`[^`]+`(?:\s*,\s*`[^`]+`)*(?:\s*,?\s*(?:and|or)\s+`[^`]+`)?", re.I)
 
 #: Top-level keys a snapshot diff does not report (#1054): the class
 #: declarations and the commentary slots the receipt denominator also
@@ -442,24 +446,30 @@ def _core_declares(path: str, declared: dict[str, set[str]]) -> bool:
     return root in declared["CoreDataset"]
 
 
-def _dispositions_table_lines(text: str) -> set[str]:
-    """The stripped lines of every table under a `Dispositions` heading:
-    header, rule and rows, parseable or not."""
+def _dispositions_table_lines(text: str, rows: list[dict[str, str]]) -> set[str]:
+    """The stripped lines of the table(s) `disposition_rows` recognised —
+    header, rule and every row from a recognised header to the first
+    non-`|` line, parseable or not (#1175 round 3, M1/S2). Scoped to the
+    parsed table's own extent, not to a heading: a removal claim in a table
+    the strict reader does not recognise ("| core | `distributions` |
+    removed |") stays with the generic scan, and a dispositions-shaped table
+    with no heading is still the strict reader's."""
     out: set[str] = set()
-    in_section = in_table = False
-    for line in text.splitlines():
-        if re.match(r"^#{1,6}\s+.*dispositions", line, re.I):
-            in_section, in_table = True, False
+    if not rows:
+        return out
+    row_lines = {row["line"] for row in rows}
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
+        if line.strip() not in row_lines:
             continue
-        if in_section and re.match(r"^#{1,6}\s+", line):
-            in_section = False
-        if not in_section:
-            continue
-        if line.lstrip().startswith("|"):
-            in_table = True
-            out.add(line.strip())
-        elif in_table and line.strip():
-            in_table = False
+        # walk up to the table's header, then down to its end
+        start = i
+        while start > 0 and lines[start - 1].lstrip().startswith("|"):
+            start -= 1
+        end = i
+        while end + 1 < len(lines) and lines[end + 1].lstrip().startswith("|"):
+            end += 1
+        out.update(ln.strip() for ln in lines[start:end + 1])
     return out
 
 
@@ -583,11 +593,13 @@ def check_report(report: Path, full: dict, core: dict,
                 continue
             in_full, v_full = resolve(full, name)
             in_core, v_core = resolve(core, name)
-            live = {"core": in_core and _populated(v_core),
-                    "full": in_full and _populated(v_full),
-                    "both": (in_core and _populated(v_core))
-                            or (in_full and _populated(v_full)),
-                    "either": in_core and _populated(v_core)}[where]
+            # A dotted step over a list reads as `[*]` here too (#1175
+            # round 3, S4): one claim, one reading, for removals as well.
+            full_live = (in_full and _populated(v_full)) or _resolve_loose(full, name)
+            core_live = (in_core and _populated(v_core)) or _resolve_loose(core, name)
+            live = {"core": core_live, "full": full_live,
+                    "both": core_live or full_live,
+                    "either": core_live}[where]
             if live:
                 # Describe the value that is live. Under `both` the full
                 # record may be the only one carrying it, and describing the
@@ -610,7 +622,7 @@ def check_report(report: Path, full: dict, core: dict,
     # carries a free-text reason ("Dropped the duplicate entry; slot kept")
     # that is not a removal claim, and the generic scan below read it as
     # one (#962; #1175 round 2, M1). The table is the strict reader's.
-    disposition_lines = {row["line"] for row in rows} | _dispositions_table_lines(text)
+    disposition_lines = {row["line"] for row in rows} | _dispositions_table_lines(text, rows)
     for line in text.splitlines():
         cells = _cells(line)
         if not cells or line.strip() in disposition_lines:
@@ -846,7 +858,12 @@ def check_report(report: Path, full: dict, core: dict,
     prose_only = "\n".join(ln for ln in text.splitlines() if not ln.lstrip().startswith("|"))
     for sent in re.split(r"(?<=[.!?])\s+|\n", prose_only):
         if _REMOVAL_WORD.search(sent) and _target(sent) != "core":
-            recorded.update(n for n in _named(sent) if not re.search(r"[.\[]", n))
+            # A coordinated destination list ("recorded in `a` and `b`")
+            # names no casualty past its first item, which `_named`'s
+            # lookback reaches; the rest are excluded here (#1175 round 3).
+            destinations = {n for m in _DESTINATION_LIST.finditer(sent) for n in _TICKED.findall(m.group(0))}
+            recorded.update(n for n in _named(sent)
+                            if _SLOT_PATH.fullmatch(n) and n not in destinations)
     unrecorded: list[dict[str, str]] = []
     expected = bool(dispositions_expected)
     if isinstance(snapshot, dict):

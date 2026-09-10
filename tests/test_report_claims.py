@@ -664,6 +664,38 @@ class UnrecordedRemovalTest(Harness):
                          ["compression", "errata", "funders"])
         self.assertEqual(b["removals_unrecorded"], ["errata", "funders", "compression"])
 
+    def test_a_removal_claim_in_an_unrecognised_table_is_still_read(self):
+        """#1175 round 3, M1/S2: the exclusion is the parsed table's own
+        extent, not the heading's section, so a `| core | slot | change |`
+        table under `## Dispositions` keeps its claims (the #546 shape) and a
+        dispositions-shaped table with no heading is still the strict
+        reader's."""
+        md = ("## Dispositions\n\n| record | slot | change |\n|---|---|---|\n| core | `distributions` | removed; content redistributed |\n")
+        b = self.check(md, full={"keywords": ["a"]}, core={"distributions": [{"path": "a"}]})
+        self.assertEqual([(f["kind"], f["slot"]) for f in b["findings"]], [("removal_not_performed", "distributions")])
+        md2 = self.TABLE + "\n| record | slot | change |\n|---|---|---|\n| core | `distributions` | removed; content redistributed |\n"
+        b = self.check(md2, full={"keywords": ["a"]}, core={"keywords": ["a"], "distributions": [{"path": "a"}]})
+        self.assertEqual([(f["kind"], f["slot"]) for f in b["findings"]], [("removal_not_performed", "distributions")])
+        headless = ("| slot | disposition | record | reason |\n|---|---|---|---|\n| `keywords` | retained | both | fine |\n"
+                    "| `errata` | Reviewed | both | Dropped the duplicate entry; slot kept |\n")
+        b = self.check_with(headless, {"keywords": ["a"], "errata": [{"a": 1}]}, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual([f["slot"] for f in b["findings"] if f["kind"] == "removal_not_recorded"], ["errata"])
+
+    def test_the_weak_signal_skips_coordinated_destinations_and_class_names(self):
+        """#1175 round 3, S1/S5."""
+        snap = {"keywords": ["a"], "license_and_use_terms": {"x": 1}, "distribution_formats": [{"f": 1}], "variables": [{"v": 1}]}
+        md = (self.TABLE + "\nThe enum was dropped; the access conditions are already recorded in `license_and_use_terms` and `distribution_formats`.\n\n"
+              "The full record's 57 `VariableMetadata` objects were removed with the `variables` slot.\n")
+        b = self.check_with(md, snap, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual(sorted(f["slot"] for f in b["findings"] if f["kind"] == "removal_not_recorded"),
+                         ["distribution_formats", "license_and_use_terms"])
+
+    def test_a_removed_row_steps_over_a_list_as_a_retained_row_does(self):
+        """#1175 round 3, S4."""
+        md = self.TABLE + "| `splits.split_details` | removed | full | gone |\n"
+        b = self.check(md, full={"keywords": ["a"], "splits": [{"split_details": "70/15/15"}]}, core={"keywords": ["a"]})
+        self.assertEqual([(f["kind"], f["slot"]) for f in b["findings"]], [("removal_not_performed", "splits.split_details")])
+
     def test_a_dotted_claim_whose_root_is_absent_is_not_satisfied_elsewhere(self):
         """#1175 round 2, S2."""
         md = self.TABLE + "\nThe figures remain in `errata.description`.\n"
