@@ -14,12 +14,19 @@ import yaml
 from data_sheets_schema.cli import provenance as cli
 
 
-def _record(tmp, passed=True, md5="m1", with_field=False):
+def _record(tmp, passed=True, md5=None, with_field=False, algo="md5"):
+    """The artifacts carry a path and a hash of that path's bytes, as the
+    corpus does — 82 corpus records pin `sha256` only and 118 `md5` only
+    (#1190 round 3, M1), so `algo` selects which."""
+    import hashlib
     d = Path(tmp) / "claudecode_api_core" / "L_rep1"; d.mkdir(parents=True, exist_ok=True)
     (Path(tmp) / "claudecode_api" / "L_rep1").mkdir(parents=True, exist_ok=True)
-    (Path(tmp) / "claudecode_api" / "L_rep1" / "P_d4d.yaml").write_text("id: x\n")
-    (d / "P_d4d_core.yaml").write_text("id: x\n")
-    block = {"passed": passed, "artifacts": {"full": {"md5": md5}, "core": {"md5": md5}}}
+    full = Path(tmp) / "claudecode_api" / "L_rep1" / "P_d4d.yaml"; full.write_text("id: x\n")
+    core = d / "P_d4d_core.yaml"; core.write_text("id: x\n")
+    def h(p):
+        return md5 if md5 else getattr(hashlib, algo)(p.read_bytes()).hexdigest()
+    block = {"passed": passed, "artifacts": {"full": {"path": str(full), algo: h(full)},
+                                             "core": {"path": str(core), algo: h(core)}}}
     if with_field:
         block["duplicate_keys"] = {"full": [], "core": []}
     (d / "P_provenance.yaml").write_text("# header\n" + yaml.safe_dump({"validation": block}))
@@ -55,8 +62,18 @@ class TestTheGate(unittest.TestCase):
             path = _record(tmp)
             before = path.read_text()
             self.assertEqual(self._run(tmp, new_passed=False), "held")
-            self.assertEqual(self._run(tmp, new_md5="m2"), "held")
             self.assertEqual(path.read_text(), before)
+        # an artifact whose bytes moved since the verdict is held, under
+        # either hash algorithm the corpus uses (#1190 round 3, M1)
+        for algo in ("md5", "sha256"):
+            with tempfile.TemporaryDirectory() as tmp:
+                path = _record(tmp, algo=algo); before = path.read_text()
+                self.assertEqual(self._run(tmp), "written", algo)      # unmoved: written
+            with tempfile.TemporaryDirectory() as tmp:
+                path = _record(tmp, algo=algo); before = path.read_text()
+                (Path(tmp) / "claudecode_api" / "L_rep1" / "P_d4d.yaml").write_text("id: edited\n")
+                self.assertEqual(self._run(tmp), "held", algo)
+                self.assertEqual(path.read_text(), before, algo)
 
     def test_problems_that_name_another_artifact_class_or_path_are_held_but_a_reworded_message_is_not(self):
         """A validator message carries today's enum list and moves with the

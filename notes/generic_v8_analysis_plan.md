@@ -1468,10 +1468,15 @@ steps need:
     the schema while the failure it names does not, but a message naming
     other paths is another failure (#1190 review). The message is the
     validator's first four lines, so the gate sees at most four failures
-    per problem; 8 of the corpus's 28 problem strings are exactly four
-    lines and may be truncated. The write then adds
-    `duplicate_keys` and nothing else, restamping **this checkout's**
-    schema digest and saying so on the line where it moved — and a record
+    per problem; 8 of the corpus's 29 problem strings are exactly four
+    lines and may be truncated. An artifact is compared against the hash
+    the block itself recorded, by whichever algorithm it used — 82
+    records pin `sha256` only and 118 `md5` only, and reading `md5`
+    unconditionally held a record for a drift that had not happened
+    (round 3, M1). The write then adds `duplicate_keys`, **this
+    checkout's** schema digest and its own `recorded_by` — re-recording
+    the validator's message where the schema reworded it — and nothing
+    else, saying so on the line where the digest moved; and a record
     already carrying the field is re-checked when, and only when, its
     schema pin has moved, since a pass taken before a schema change
     otherwise leaves its records reading STALE
@@ -1481,27 +1486,38 @@ steps need:
     record's path: 282 records, not 559 visits. Run over the corpus after
     a one-record report-mode canary, and re-run after the branch merged
     main's schema change (#1146 regenerated the merged schema, and 48 of
-    the first pass's records pinned the older digest): **78 written**
-    across `claudecode_agent_core` (39), `claudecode_api_core` (18),
+    the first pass's records pinned the older digest): **79 written**
+    across `claudecode_agent_core` (40), `claudecode_api_core` (18),
     `claudecode_agent_crate_only_core` (9),
     `claudecode_agent_crate_core` (9) and
-    `claudecode_agent_healthsheet_core` (3) — 51 gained a schema block,
-    27 had one restamped, and every one pins this checkout's schema.
-    **199 held** — 196 whose `passed` flips
+    `claudecode_agent_healthsheet_core` (3) — 52 gained a schema block,
+    27 had one restamped, and every one pins this checkout's schema. Of
+    the 79, 12 already carried `duplicate_keys` and were rewritten only
+    to restamp the pin, 60 gained the field, 6 of those also re-record
+    the validator's message under today's wording with the same
+    pointers, and every one takes this command's `recorded_by`. The
+    partition of the 282 is 79 written, 198 held, 4 with no block and 1
+    missing. **198 held** — 196 whose `passed` flips
     to false under today's schema (the 2026-07 and early-2026-08 arms,
     whose records validated against the schema of their day), 2 whose
     problems now name other JSON pointers (the 2026-08-05 v3 rep1
     AI_READI and CHORUS records, whose `file_collections[*].collection_type`
     failures the schema no longer raises and whose first four lines are
-    now `creators` failures), 1 whose artifacts have drifted (CHORUS
-    2026-07-29 rep1). 12 records already carried the field before this
-    branch; 4 have no validation block; one has no full artifact
-    (AI_READI 2026-08-11 api-generic rep3). A held record stays as
+    now `creators` failures). No record is held for a drifted artifact:
+    every candidate's artifacts still hash to what its verdict recorded,
+    which the round-2 reading of `md5` alone could not see — the CHORUS
+    2026-07-29 rep1 record it named pins `sha256` and verifies. 4
+    records have no validation block; one has no full artifact (AI_READI
+    2026-08-11 api-generic rep3). A held record stays as
     it was — its verdict is the one it attested — and is rerun by label as
-    a deliberate act. 77 of the 78 written records record 0 duplicate
+    a deliberate act. 78 of the 79 written records record 0 duplicate
     keys; the one that does not is AI_READI 2026-09-04f rep1, whose own
     canary already reads `duplicate keys run 1, baseline_worst 0,
     regressed`, so the recompute reproduces what the record already said.
+    The straddle test's per-record assertion widened with it: a record of
+    the 2026-08-11 arm reads `valid` rather than `stale` once it has been
+    re-validated against today's schema, which is what this change is
+    for, and the artifact-hash check its rationale rests on is unchanged.
     No canary verdict moves, and the gate reads an absent field as
     unmeasured, as before. Numbered with 19 (#1054) and 20 (#1140) open. Not a
     generation-path change.

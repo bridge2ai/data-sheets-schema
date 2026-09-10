@@ -508,7 +508,7 @@ def recheck_validation(method, label, project, every, execute):
     skipped unless its schema pin has moved, which the write repairs
     (#1190 round 2). A record whose verdict, artifacts or problems
     would move is named and left alone — rerun it by label to write it
-    deliberately — and one already carrying the field is skipped.
+    deliberately.
     """
     _require_repo_root_cwd("d4d provenance recheck-validation")
     if every:
@@ -555,13 +555,15 @@ def _schema_pin_moved(block: dict) -> bool:
     (#1190 round 2, M1): a corpus pass taken before the branch merged a
     schema change left 48 records pinning the older digest, which
     `runs.validation_status` reads as STALE, and the `already` short
-    circuit made it unrepairable."""
+    circuit made it unrepairable. A key the block does not pin is not
+    moved, the same rule `runs.validation_status` applies — "absent is not
+    stale" (#1190 round 3, S1). A record with no `schema` block at all
+    never acquires one this way; it acquires one by being written for the
+    duplicate-key field, which is the only claim `--all` exists to add."""
     from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA, _sha256
     pinned = block.get("schema") or {}
-    if not pinned:
-        return False
-    return (pinned.get("full_sha256") != _sha256(FULL_SCHEMA)
-            or pinned.get("core_sha256") != _sha256(CORE_SCHEMA))
+    live = {"full_sha256": _sha256(FULL_SCHEMA), "core_sha256": _sha256(CORE_SCHEMA)}
+    return any(pinned.get(k) and pinned[k] != v for k, v in live.items())
 
 
 def _problem_shape(block: dict) -> list:
@@ -628,9 +630,16 @@ def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bo
         # recomputed against today's schema — and a digest that moved is
         # said (M4).
         same_verdict = block["passed"] == prior.get("passed")
-        old_md5 = {k: (v or {}).get("md5") for k, v in (prior.get("artifacts") or {}).items()}
-        new_md5 = {k: (v or {}).get("md5") for k, v in (block.get("artifacts") or {}).items()}
-        moved = ("verdict" if not same_verdict else "artifacts" if old_md5 != new_md5
+        # The hashes the prior block records, by whichever algorithm it
+        # recorded them: 82 corpus records pin `sha256` only and 118 `md5`
+        # only, so comparing `md5` unconditionally held every sha256-only
+        # record for a drift that had not happened (#1190 round 3, M1).
+        # An artifact still on disk is verified against its own recorded
+        # hash, as `provenance.verify_entry` does.
+        from data_sheets_schema.provenance import verify_entry
+        drifted = [k for k, v in (prior.get("artifacts") or {}).items()
+                   if isinstance(v, dict) and verify_entry(v) is False]
+        moved = ("verdict" if not same_verdict else "artifacts" if drifted
                  else "problems" if _problem_shape(prior) != _problem_shape(block) else None)
         if moved:
             click.echo(f"   held: the {moved} would move; rerun by label to write it deliberately")
