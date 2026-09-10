@@ -11,6 +11,7 @@ from unittest import mock
 
 import yaml
 
+from data_sheets_schema.api_runner import keep_recorded_algorithms
 from data_sheets_schema.cli import provenance as cli
 
 
@@ -41,7 +42,7 @@ class TestTheGate(unittest.TestCase):
         if schema is not None:
             block["schema"] = dict(schema)
         with mock.patch("data_sheets_schema.api_runner.validate_outputs", lambda spec: []), \
-             mock.patch("data_sheets_schema.api_runner.validation_block", lambda spec, problems, recorded_by: dict(block)), \
+             mock.patch("data_sheets_schema.api_runner.validation_block", lambda spec, problems, recorded_by, prior=None: dict(block)), \
              mock.patch("data_sheets_schema.provenance.record_path_for",
                         lambda project, method, label, concat_dir=None: Path(tmp) / "claudecode_api_core" / label / f"{project}_provenance.yaml"), \
              mock.patch("data_sheets_schema.api_runner.RunSpec") as spec_cls:
@@ -191,7 +192,7 @@ class TestTheRecordedAlgorithmSurvives(unittest.TestCase):
     def test_a_sha256_only_entry_is_rewritten_in_sha256(self):
         with tempfile.TemporaryDirectory() as tmp:
             p, sha, md5 = self._entry(tmp)
-            out = cli._keep_recorded_algorithms(
+            out = keep_recorded_algorithms(
                 {"full": {"path": str(p), "md5": md5}},
                 {"full": {"path": str(p), "sha256": "an old value"}})
             self.assertEqual(out["full"], {"path": str(p), "sha256": sha})
@@ -200,10 +201,10 @@ class TestTheRecordedAlgorithmSurvives(unittest.TestCase):
     def test_an_md5_only_entry_stays_md5_and_both_stay_both(self):
         with tempfile.TemporaryDirectory() as tmp:
             p, sha, md5 = self._entry(tmp)
-            self.assertEqual(cli._keep_recorded_algorithms({"full": {"path": str(p), "md5": md5}},
+            self.assertEqual(keep_recorded_algorithms({"full": {"path": str(p), "md5": md5}},
                                                            {"full": {"path": str(p), "md5": "old"}}),
                              {"full": {"path": str(p), "md5": md5}})
-            both = cli._keep_recorded_algorithms({"full": {"path": str(p), "md5": md5}},
+            both = keep_recorded_algorithms({"full": {"path": str(p), "md5": md5}},
                                                  {"full": {"path": str(p), "md5": "old", "sha256": "old"}})
             self.assertEqual(both["full"], {"path": str(p), "md5": md5, "sha256": sha})
 
@@ -212,7 +213,7 @@ class TestTheRecordedAlgorithmSurvives(unittest.TestCase):
             p, sha, md5 = self._entry(tmp)
             p.write_text("a: 2\n")
             import hashlib
-            out = cli._keep_recorded_algorithms({"full": {"path": str(p), "md5": "x"}},
+            out = keep_recorded_algorithms({"full": {"path": str(p), "md5": "x"}},
                                                 {"full": {"path": str(p), "sha256": sha}})
             self.assertEqual(out["full"]["sha256"], hashlib.sha256(p.read_bytes()).hexdigest())
             self.assertNotEqual(out["full"]["sha256"], sha)
@@ -222,7 +223,7 @@ class TestTheRecordedAlgorithmSurvives(unittest.TestCase):
                       {"path": "/no/such/file", "crc32": "x"}, "not a mapping"):
             with self.subTest(prior=prior):
                 new = {"full": {"path": str(prior.get("path", "")) if isinstance(prior, dict) else "", "md5": "m"}}
-                self.assertEqual(cli._keep_recorded_algorithms(new, {"full": prior}), new)
+                self.assertEqual(keep_recorded_algorithms(new, {"full": prior}), new)
 
 
 class TestSchemaPinMoved(unittest.TestCase):
@@ -248,3 +249,66 @@ class TestSchemaPinMoved(unittest.TestCase):
         self.assertFalse(cli._schema_pin_moved({"schema": {"full_sha256": live_full, "core_sha256": live_core}}))
         self.assertTrue(cli._schema_pin_moved({"schema": {"full_sha256": "something else"}}))
         self.assertTrue(cli._schema_pin_moved({"schema": {"full_sha256": live_full, "core_sha256": "moved"}}))
+
+
+class EveryWritePathKeepsTheAlgorithm(unittest.TestCase):
+    """#1190 round 5, M2: the round-4 fix sat in the recheck's own call site,
+    and `validation_block` — whose md5-only hashing is the root cause — is
+    called from two other places that overwrite an existing record's block:
+    `d4d runs validate --recheck`, whose documented purpose is to touch
+    already-verdicted records and which had no reproduction gate at all, and
+    `d4d review disposition --amend`. Either would have moved a sha256-only
+    record to the deprecated algorithm on an ordinary run."""
+
+    def test_validation_block_keeps_a_prior_sha256_and_adds_no_md5(self):
+        import hashlib
+
+        from data_sheets_schema.api_runner import validation_block
+        with tempfile.TemporaryDirectory() as tmp:
+            full = Path(tmp) / "P_d4d.yaml"; full.write_text("a: 1\n")
+            core = Path(tmp) / "P_d4d_core.yaml"; core.write_text("b: 2\n")
+            spec = mock.Mock(full_path=full, core_path=core, project="P", label="L", method="m")
+            prior = {"artifacts": {"full": {"path": str(full), "sha256": "stale"},
+                                   "core": {"path": str(core), "md5": "stale"}}}
+            block = validation_block(spec, [], recorded_by="t", prior=prior)
+            self.assertEqual(block["artifacts"]["full"],
+                             {"path": str(full), "sha256": hashlib.sha256(full.read_bytes()).hexdigest()})
+            self.assertEqual(block["artifacts"]["core"],
+                             {"path": str(core), "md5": hashlib.md5(core.read_bytes()).hexdigest()})
+            # with no prior the function is unchanged: md5, as every first write does
+            fresh = validation_block(spec, [], recorded_by="t")
+            self.assertEqual(set(fresh["artifacts"]["full"]), {"path", "md5"})
+
+    def test_the_three_write_paths_pass_a_prior(self):
+        """A call site that forgets is the defect this round found, so the
+        wiring itself is pinned: each of the three reads the record's existing
+        block and hands it over."""
+        import re
+        for path, pattern in (
+                ("src/data_sheets_schema/cli/provenance.py", r"prior=prior"),
+                ("src/data_sheets_schema/cli/runs.py", r'prior=data\.get\("validation"\)'),
+                ("src/data_sheets_schema/cli/review.py", r'prior=rec\.get\("validation"\)')):
+            with self.subTest(path):
+                src = Path(path).read_text()
+                self.assertRegex(src, pattern)
+
+    def test_a_prior_that_is_not_a_mapping_and_an_unreadable_file_do_not_abort_the_walk(self):
+        """S1: `--all` is the one caller that visits every unaudited record, so
+        a single bad one must be skipped, not raise. The same guard
+        `_schema_pin_moved` carries."""
+        import os
+
+        from data_sheets_schema.api_runner import keep_recorded_algorithms
+        with tempfile.TemporaryDirectory() as tmp:
+            f = Path(tmp) / "a.yaml"; f.write_text("a: 1\n")
+            new = {"full": {"path": str(f), "md5": "m"}}
+            for prior in ([], "not a mapping", 7, None, {"full": ["not", "a", "mapping"]}):
+                with self.subTest(prior=prior):
+                    self.assertEqual(keep_recorded_algorithms(new, prior), new)
+            if os.geteuid() != 0:               # root reads anything
+                os.chmod(f, 0)
+                try:
+                    self.assertEqual(
+                        keep_recorded_algorithms(new, {"full": {"path": str(f), "sha256": "s"}}), new)
+                finally:
+                    os.chmod(f, 0o644)          # inside the temp dir's lifetime

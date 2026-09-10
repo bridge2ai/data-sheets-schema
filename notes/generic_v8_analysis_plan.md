@@ -1525,7 +1525,8 @@ steps need:
     per problem; 8 of the corpus's 29 problem strings are exactly four
     lines and may be truncated. An artifact is compared against the hash
     the block itself recorded, by whichever algorithm it used — 82
-    records pin `sha256` only and 118 `md5` only, and reading `md5`
+    records pin `sha256` only and 196 `md5` only, which is every record
+    carrying a validation block, and reading `md5`
     unconditionally held a record for a drift that had not happened
     (round 3, M1). The write then adds `duplicate_keys`, **this
     checkout's** schema digest and its own `recorded_by` — re-recording

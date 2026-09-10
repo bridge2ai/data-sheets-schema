@@ -494,7 +494,7 @@ def recheck_validation(method, label, project, every, execute):
     """Re-run validation on a record's files and rewrite its `validation` block (#1029).
 
     Validation is bound to bytes, so re-running it is a legitimate act: the
-    block records the artifacts' md5s and the schema digests it was reached
+    block records the artifacts' recorded hashes and the schema digests it was reached
     against, and `recorded_by` names this command. Used to bring a record
     under an instrument revision — duplicate-key detection — without
     touching anything else in the record.
@@ -572,49 +572,6 @@ def _schema_pin_moved(block: dict) -> bool:
     return any(pinned.get(k) and pinned[k] != v for k, v in live.items())
 
 
-def _keep_recorded_algorithms(new: dict, prior: dict) -> dict:
-    """The new artifact entries, hashed by whichever algorithm each prior
-    entry recorded.
-
-    `api_runner.validation_block` hashes with md5 and was never brought
-    under #204, which unified provenance hashing on sha256 and deprecated
-    md5. A recheck that wrote its output as it stood moved a record from
-    the current convention back to the deprecated one and destroyed the
-    sha256 values it had attested — 81 records pin `sha256` only and are
-    held today merely because their verdicts flip (#1190 round 4, M1).
-    An entry whose prior recorded neither known algorithm is left as
-    computed; a file that has gone is left as the block wrote it.
-    """
-    from data_sheets_schema.provenance import _md5, _sha256
-    from pathlib import Path as _Path
-    out = {}
-    for name, entry in (new or {}).items():
-        was = (prior or {}).get(name)
-        if not isinstance(entry, dict) or not isinstance(was, dict):
-            out[name] = entry
-            continue
-        wanted = [a for a in ("sha256", "md5") if a in was]
-        named = str(entry.get("path") or "")
-        path = _Path(named)
-        # `is_file`, not `exists`: an empty path is `.` and a directory
-        # cannot be hashed.
-        if not wanted or not named or not path.is_file():
-            out[name] = entry
-            continue
-        fresh = {"path": entry.get("path")}
-        for algorithm in wanted:
-            fresh[algorithm] = (_sha256 if algorithm == "sha256" else _md5)(path)
-        # anything else the recompute carried (a size, a note) stays, but not
-        # a hash under an algorithm the prior did not record: adding md5 to a
-        # sha256-only entry re-introduces the deprecated algorithm the write
-        # is not supposed to touch.
-        for k, v in entry.items():
-            if k not in ("sha256", "md5"):
-                fresh.setdefault(k, v)
-        out[name] = fresh
-    return out
-
-
 def _problem_shape(block: dict) -> list:
     """What a validation problem names, message wording aside: its artifact,
     its class and the JSON-pointer paths in its message (#1190 review, M3)."""
@@ -658,21 +615,18 @@ def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bo
         raise click.ClickException("refusing to write a verdict over a missing artifact: "
                                    + ", ".join(missing))
     problems = validate_outputs(spec)
-    block = validation_block(spec, problems, recorded_by="d4d provenance recheck-validation")
-    # The gate reads whichever algorithm the block recorded; the recompute
-    # always emits md5. Re-express before anything compares them, so a
-    # sha256-only record stays sha256 rather than being converted to the
-    # deprecated algorithm by a write that claims to change nothing else
-    # (#1190 round 4, M1).
-    block["artifacts"] = _keep_recorded_algorithms(block.get("artifacts") or {},
-                                                   prior.get("artifacts") or {})
+    # `prior` makes the write keep whichever algorithm that block recorded
+    # (#1190 round 4, M1) — in `validation_block` itself since round 5, so
+    # every caller that rewrites an existing block gets it.
+    block = validation_block(spec, problems, recorded_by="d4d provenance recheck-validation",
+                             prior=prior)
     from data_sheets_schema.canary import duplicate_key_count
     click.echo(f"{tag}: passed {prior.get('passed')} → {block['passed']}; "
                f"duplicate keys {duplicate_key_count(prior) if 'duplicate_keys' in prior else 'unmeasured'} → "
                f"{duplicate_key_count(block)}; problems {len(block.get('problems') or [])}")
     if gated:
         # Three things must reproduce for the write to add the field and
-        # nothing else: the verdict, the artifacts' md5s, and the problems —
+        # nothing else: the verdict, the artifacts' recorded hashes, and the problems —
         # each problem by its artifact, its class and the JSON-pointer
         # paths its message names, not by the message text, since a
         # validator message carries today's enum list and moves when the

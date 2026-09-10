@@ -1230,7 +1230,8 @@ def validate_cmd(method, project, label, recheck, dry_run):
         # artifacts' md5s so a record edited afterwards reports STALE instead of
         # carrying a verdict about bytes that no longer exist.
         data["validation"] = validation_block(spec, problems,
-                                              recorded_by="d4d runs validate")
+                                              recorded_by="d4d runs validate",
+                                              prior=data.get("validation"))
         # Rewrite through Record.write so the file keeps its header. Dumping
         # `data` directly loses the two leading comment lines that point a
         # reader at the module defining this format — safe_load drops comments
