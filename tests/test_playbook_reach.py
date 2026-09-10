@@ -276,9 +276,18 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
                        "that fragment, a hyphen and the part's own label",
                        "an ark or a urn"):
             self.assertIn(clause, prompt, clause)
-        # the playbook's R5 line and R8's carve-out agree on the person case (round 8, SF5)
+        # The playbook's R5 line and R8's carve-out agree on the person case
+        # (round 8, SF5). The base is whichever one R8 sends the record to,
+        # not the record's own id unconditionally: R8 forbids labelling parts
+        # on a bare-token own id, and three CHORUS records have one, so an R5
+        # line naming `<record id>` contradicted R8 in the same file (round
+        # 11, SF6). Both forms are pinned — the fragment carve-out and the
+        # refusal of a token base — because the correspondence this test
+        # exists for is between the two rules, not with one wording.
         book = re.sub(r"[*`\s]+", " ", PLAYBOOK.read_text(encoding="utf-8")).lower()
-        self.assertIn("<record id>-person-<name>", book)
+        self.assertIn("<base>-person-<name>", book)
+        self.assertIn("<base>#person-<name>", book)
+        self.assertIn("never a bare token, which is no base for a label", book)
         for clause in ("for a person under the person rule, that fragment, a hyphen, then person and the name",):
             self.assertIn(clause, prompt, clause)
 
