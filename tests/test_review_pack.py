@@ -279,7 +279,7 @@ class PairWarnings(unittest.TestCase):
         self.assertEqual(rp.ADVERSE["pair_warning"], ("divergent",))
 
     def test_an_answered_pair_item_counts(self):
-        pack = {"_sha256": "abc", "items": [{"id": "pair-01", "kind": "pair_warning"}]}
+        pack = {"_sha256": "abc", "pack_version": 5, "items": [{"id": "pair-01", "kind": "pair_warning"}]}
         good = rp.check_review(pack, {"pack_sha256": "abc", "items": [
             {"id": "pair-01", "verdict": "consistent", "evidence": "file_collections[0] vs distributions[0]"}]})
         self.assertEqual((good["adverse"], good["cannot_tell"]), (0, 0))
@@ -289,7 +289,7 @@ class PairWarnings(unittest.TestCase):
 
 
 class Agree(unittest.TestCase):
-    PACK = {"_sha256": "abc", "items": [
+    PACK = {"_sha256": "abc", "pack_version": 5, "items": [
         {"id": "slot-001", "kind": "slot_receipted"}, {"id": "slot-002", "kind": "slot_receipted"},
         {"id": "slot-003", "kind": "slot_receiptless"}, {"id": "rule-01", "kind": "rule"}]}
 
@@ -392,7 +392,7 @@ class Agree(unittest.TestCase):
 
 
 class Check(unittest.TestCase):
-    PACK = {"_sha256": "abc", "items": [
+    PACK = {"_sha256": "abc", "pack_version": 5, "items": [
         {"id": "chunk-c001", "kind": "chunk_nothing_relevant"},
         {"id": "slot-001", "kind": "slot_receipted"},
         {"id": "rule-01", "kind": "rule"}]}
@@ -517,3 +517,542 @@ class ReferenceAttributes(unittest.TestCase):
             # future reference attribute is named to the reviewer
             self.assertEqual(entries, [])
             self.assertIn("not inlined", p["reference_attributes"]["note"])
+
+
+class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
+    """#1095: a review run regenerated the pack it was reviewing, moving the
+    committed file underneath the sha256 its own record attests. The guard
+    is on the bytes (#1124 review, SF1): a rewrite that would leave the
+    file as it is passes; one that would move it under a live pin — or
+    orphan a pin whose pack is gone (MF1), or that cannot read a pin file
+    (SF3) — is refused unless forced."""
+
+    SMALLER = {"receipted_slots": 3, "receiptless_slots": 3}   # a different sample: different bytes
+
+    def _pinned(self, tmp, by, name="P_review.yaml"):
+        prov, instr = Pack()._run(tmp)
+        out, _ = rp.write_pack(prov, instr)
+        sha = hashlib.sha256(out.read_bytes()).hexdigest()
+        if by == "review":
+            (out.parent / name).write_text(yaml.safe_dump({"pack_sha256": sha, "items": []}))
+        else:
+            text = prov.read_text(); head, body = text.split("\n", 1)
+            d = yaml.safe_load(body); d["review"] = {"artifacts": {"pack": {"sha256": sha}}}
+            prov.write_text(head + "\n" + yaml.safe_dump(d))
+        return prov, instr, out, sha
+
+    def test_a_rewrite_that_would_move_a_pinned_pack_is_refused_and_force_moves_it(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            self.assertEqual([p["by"] for p in rp.pack_pins(prov)[0]], ["review"])
+            with self.assertRaises(rp.PackAttested) as cm:
+                rp.write_pack(prov, instr, self.SMALLER)
+            self.assertIn("review_of_another_pack", str(cm.exception))
+            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)     # untouched
+            rp.write_pack(prov, instr, self.SMALLER, force=True)                       # deliberate
+            self.assertNotEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)
+
+    def test_a_byte_identical_rewrite_is_not_a_rewrite(self):
+        """The pack is deterministic; regenerating it with the same inputs
+        leaves every pin holding, so nothing is refused and nothing is
+        warned about (#1124 review, SF1)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            rp.write_pack(prov, instr)                                                  # no force needed
+            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)
+
+    def test_a_pack_the_record_pins_is_refused(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "record")
+            self.assertEqual([p["by"] for p in rp.pack_pins(prov)[0]], ["provenance record"])
+            with self.assertRaises(rp.PackAttested):
+                rp.write_pack(prov, instr, self.SMALLER)
+
+    def test_a_deleted_pack_does_not_delete_the_guard(self):
+        """#1124 review, MF1: the agent is told to run `d4d review pack`
+        exactly when no pack exists — and every committed pack is behind
+        the code, so removing one to get a current one would orphan the
+        review beside it silently."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            out.unlink()
+            current, stale = rp.pack_pins(prov)
+            self.assertEqual(current, []); self.assertEqual([(p["by"], p["pack_on_disk"]) for p in stale], [("review", False)])
+            with self.assertRaises(rp.PackAttested):
+                rp.write_pack(prov, instr, self.SMALLER)           # would orphan the review's pin
+            rp.write_pack(prov, instr)                              # reproduces the pinned bytes: allowed
+            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)
+
+    def test_an_unreadable_pin_file_fails_closed(self):
+        """#1124 review, SF3: a review file that does not parse used to lose
+        its pin silently, leaving the pack freely rewritable."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            (out.parent / "P_review_b.yaml").write_text("pack_sha256: [unclosed")
+            _, _, unreadable = rp.pack_pins_report(prov)
+            self.assertEqual([u["by"] for u in unreadable], ["review"])
+            with self.assertRaises(rp.PackAttested) as cm:
+                rp.write_pack(prov, instr, self.SMALLER)
+            self.assertIn("unreadable", str(cm.exception))
+
+    def test_a_refusal_leaves_the_instruction_file_as_it_found_it(self):
+        """#1124 review, MF-R1: building before the guard had `build_pack`
+        rewrite `{P}_review_instruction.md` on a refused call, so the
+        reviewer read an instruction the pack does not attest."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            ipath = rp.record_paths(prov)["instruction"]
+            before = ipath.read_text()
+            other = Path(tmp) / "other_instruction.md"
+            other.write_text(before + "\nTAMPERED\n")
+            with self.assertRaises(rp.PackAttested):
+                rp.write_pack(prov, other, self.SMALLER)
+            self.assertEqual(ipath.read_text(), before)                                # untouched
+            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)
+            rp.write_pack(prov, other, self.SMALLER, force=True)
+            self.assertIn("TAMPERED", ipath.read_text())                               # written with the pack
+
+    def test_build_pack_refuses_the_state_that_writes_nothing_and_returns_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = Pack()._run(tmp)
+            with self.assertRaises(ValueError):
+                rp.build_pack(prov, instr, write_instruction=False)
+
+    def test_the_cli_names_the_record_that_would_not_parse(self):
+        import click.testing
+        from unittest import mock
+        from data_sheets_schema.cli.review import review as review_cli
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            prov.write_text("# header\nreview: [unclosed")
+            base = ["pack", "--method", "claudecode_agent", "--label", "L", "--project", "VOICE", "--force",
+                    "--instruction", str(instr)]
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                r = click.testing.CliRunner().invoke(review_cli, base)
+            self.assertNotEqual(r.exit_code, 0)
+            self.assertTrue(r.output.startswith(f"Error: {prov} could not be read as YAML"), r.output)   # the record, not PyYAML's mark
+
+    def test_a_broken_core_record_names_itself_in_the_pair_gap(self):
+        """#1124 round 6, SF-R6a: the pair-warnings block degrades to a named
+        gap; the name must be the file, not the wrapper's class."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = Pack()._run(tmp)
+            core = rp.record_paths(prov)["core"]
+            core.write_text("bad: [unclosed")
+            pack = rp.build_pack(prov, instr)
+            gaps = [g for g in pack["gaps"] if g.startswith("pair warnings unavailable")]
+        self.assertEqual(len(gaps), 1, pack["gaps"])
+        self.assertIn(str(core), gaps[0])
+        self.assertNotIn("UnreadableYAML", gaps[0])
+        self.assertNotIn("\n", gaps[0])                                   # one line, not PyYAML's mark block
+
+    def test_an_unreadable_snapshot_is_not_reported_as_no_snapshot(self):
+        """#1124 round 6, SF-R6b: `receipt_join.basis` is what the reviewer reads
+        to decide whether an index shift may be scored unsupported; a snapshot
+        that exists and will not parse is a gap, not an absence."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = Pack()._run(tmp)
+            receipt = rp.record_paths(prov)["receipt"]
+            snap_dir = receipt.parent / "intermediate"; snap_dir.mkdir(exist_ok=True)
+            snap = snap_dir / receipt.name.replace("_coverage_receipt.yaml", "_full.yaml")
+            snap.write_text("bad: [unclosed")
+            pack = rp.build_pack(prov, instr)
+            self.assertEqual(pack["receipt_join"]["basis"], "index")
+            self.assertIn("present but not usable", pack["receipt_join"]["reason"])
+            self.assertTrue(any(str(snap) in g for g in pack["gaps"]), pack["gaps"])
+            snap.unlink()
+            pack = rp.build_pack(prov, instr)
+            self.assertIn("no phase-1 snapshot", pack["receipt_join"]["reason"])
+
+    def test_the_cli_names_whichever_file_would_not_parse(self):
+        """The pack reads several YAML files; the message names the one that
+        failed, not the record by default (#1124 round 5)."""
+        import click.testing
+        from unittest import mock
+        from data_sheets_schema.cli.review import review as review_cli
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            paths = rp.record_paths(prov)
+            for broken in ("full", "receipt"):
+                path = paths[broken]
+                keep = path.read_text()
+                path.write_text("bad: [unclosed")
+                base = ["pack", "--method", "claudecode_agent", "--label", "L", "--project", "VOICE", "--force",
+                        "--instruction", str(instr)]
+                with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                    r = click.testing.CliRunner().invoke(review_cli, base)
+                path.write_text(keep)
+                self.assertNotEqual(r.exit_code, 0, broken)
+                self.assertTrue(r.output.startswith(f"Error: {path} could not be read as YAML"), (broken, r.output))
+
+    def test_an_unparsable_provenance_record_is_a_named_refusal(self):
+        """#1124 review, SF-R2: `build_pack` re-parsed the record before the
+        guard and raised a bare ParserError."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            prov.write_text("# header\nreview: [unclosed")
+            with self.assertRaises(rp.PackAttested) as cm:
+                rp.write_pack(prov, instr, self.SMALLER)
+            self.assertIn("provenance record", str(cm.exception)); self.assertIn("unreadable", str(cm.exception))
+
+    def test_pack_pins_folds_unreadable_into_stale(self):
+        """SF-R1: the 2-tuple's docstring promised this and the first
+        version dropped them."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            (out.parent / "P_review_b.yaml").write_text("pack_sha256: [unclosed")
+            current, stale = rp.pack_pins(prov)
+            self.assertEqual([p["by"] for p in current], ["review"])
+            self.assertEqual([(p["by"], p["sha256"]) for p in stale], [("review", "unreadable (ParserError)")])
+
+    def test_the_refusal_names_each_pins_class_and_the_callers_override(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            out.unlink()
+            with self.assertRaises(rp.PackAttested) as cm:
+                rp.write_pack(prov, instr, self.SMALLER, force_hint="`--force`")
+            self.assertIn("its pack is not on disk", str(cm.exception)); self.assertIn("Pass `--force`", str(cm.exception))
+            self.assertNotIn("force=True", str(cm.exception))
+
+    def test_runs_check_reads_the_pin_state_from_the_records_location(self):
+        """The `d4d runs check` drift branch (SF2), through the function it
+        calls: no drift while the pack is the pinned one, `missing` when it
+        is gone, `rewritten` after a forced rewrite."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "record")
+            self.assertIsNone(rp.pack_pin_state(prov))
+            rp.write_pack(prov, instr, self.SMALLER, force=True)
+            self.assertEqual(rp.pack_pin_state(prov), "rewritten")
+            out.unlink()
+            self.assertEqual(rp.pack_pin_state(prov), "missing")
+            prov.write_text("# header\nrun: {}\n")
+            self.assertIsNone(rp.pack_pin_state(prov))                                 # no pin, no drift
+
+    def test_the_cli_says_when_a_rewrite_restored_a_stale_pins_pack(self):
+        """SF-R3: regenerating a pack back to the bytes a stale review pins
+        is the repair case, and used to be reported as the pack having
+        moved under that pin."""
+        import click.testing
+        from unittest import mock
+        from data_sheets_schema.cli.review import review as review_cli
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            rp.write_pack(prov, instr, self.SMALLER, force=True)                       # moved away from the pin
+            self.assertEqual(rp.pack_pins(prov)[0], [])
+            base = ["pack", "--method", "claudecode_agent", "--label", "L", "--project", "VOICE", "--force",
+                    "--instruction", str(instr)]
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                r = click.testing.CliRunner().invoke(review_cli, base)                  # default sample: the pinned bytes
+            self.assertEqual(r.exit_code, 0, r.output)
+            self.assertIn("restored the pack", r.output); self.assertNotIn("had already moved", r.output)
+            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)
+
+    def test_build_pack_returns_only_the_pack(self):
+        """SF-R3a: the instruction travels out of band, never as a key."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = Pack()._run(tmp)
+            out: list[str] = []
+            pack = rp.build_pack(prov, instr, write_instruction=False, instruction_out=out)
+            self.assertNotIn("_instruction_text", pack)
+            self.assertEqual(len(out), 1); self.assertIn("rule", out[0].lower())
+            self.assertEqual(pack, rp.build_pack(prov, instr))                        # identical mapping either way
+
+    def test_runs_check_reports_a_moved_pack_through_the_cli(self):
+        """SF-R3c: the `d4d runs check` drift branch, end to end — the
+        wiring MF-R3 broke and the wording a reader sees."""
+        import os
+        import click.testing
+        from data_sheets_schema import provenance
+        from data_sheets_schema.cli.runs import runs as runs_cli
+        from tests.test_provenance_reasoning_effort import header                # the fixture's record header
+        here = os.getcwd()
+        with tempfile.TemporaryDirectory() as tmp:
+            try:
+                os.chdir(tmp)
+                label, method = "2026-08-09_test_rep1", "claudecode_agent"
+                concat = Path("data/d4d_concatenated")
+                full = concat / method / label; core = concat / f"{method}_core" / label
+                full.mkdir(parents=True); core.mkdir(parents=True)
+                Path("src/data_sheets_schema").mkdir(parents=True)               # the repo-root marker (#672)
+                body = yaml.safe_dump({"id": "https://example.org/x", "name": "x"})
+                head = header("claude-opus-5", "Claude Code")
+                (full / "P_d4d.yaml").write_text(head + body); (core / "P_d4d_core.yaml").write_text(head + body)
+                (core / "P_reconciliation.md").write_text("# r\n"); Path("b.txt").write_text("docs\n")
+                rec = provenance.build_record("P", method, label, mode="live", input_bundle=Path("b.txt"),
+                                              input_verified=True, concat_dir=concat)
+                prov = provenance.record_path_for("P", method, label, concat)
+                rec.write(prov)
+                pack = core / "P_review_pack.yaml"; pack.write_text("pack_version: 5\nitems: []\n")
+                text = prov.read_text(); hdr, rest = text.split("\n", 1)
+                d = yaml.safe_load(rest); d["review"] = {"artifacts": {"pack": {"sha256": hashlib.sha256(pack.read_bytes()).hexdigest()}}}
+                prov.write_text(hdr + "\n" + yaml.safe_dump(d))
+                r = click.testing.CliRunner().invoke(runs_cli, ["check"])
+                self.assertEqual(r.exit_code, 0, r.output); self.assertNotIn("pins a pack", r.output)
+                pack.write_text("pack_version: 5\nitems: [moved]\n")
+                r = click.testing.CliRunner().invoke(runs_cli, ["check"])
+                self.assertEqual(r.exit_code, 0, r.output)
+                self.assertIn("pins a pack that is not the one on disk", r.output); self.assertIn("rewritten", r.output)
+                pack.unlink()
+                r = click.testing.CliRunner().invoke(runs_cli, ["check"])
+                self.assertEqual(r.exit_code, 0, r.output)
+                self.assertIn("pins a pack that is not the one on disk", r.output)
+                self.assertRegex(r.output, r"missing")
+                self.assertNotIn("rewritten", r.output.split("pins a pack that is not the one on disk", 1)[1])
+            finally:
+                os.chdir(here)
+
+    def test_the_b_review_and_the_pack_itself(self):
+        """The `_b` glob case the six three-pin records exercise; the pack
+        file never reads as a pin on itself."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review", name="P_review_b.yaml")
+            current, _ = rp.pack_pins(prov)
+            self.assertEqual([p["path"].split("/")[-1] for p in current], ["P_review_b.yaml"])
+
+    def test_a_stale_pin_does_not_block_and_is_named(self):
+        """A review that pins a hash the file no longer has: the pack already
+        moved once; rewriting it is allowed, and the stale pin is reported."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            (out.parent / "P_review.yaml").write_text(yaml.safe_dump({"pack_sha256": "0" * 64, "items": []}))
+            current, stale = rp.pack_pins(prov)
+            self.assertEqual(current, []); self.assertEqual([p["by"] for p in stale], ["review"])
+            rp.write_pack(prov, instr, self.SMALLER)
+
+    def test_no_pack_means_no_pins_and_a_free_write(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = Pack()._run(tmp)
+            self.assertEqual(rp.pack_pins(prov), ([], []))
+            rp.write_pack(prov, instr)
+
+    def test_the_cli_refuses_without_force_and_names_what_moved(self):
+        import click.testing
+        from data_sheets_schema.cli.review import review as review_cli
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            from unittest import mock
+            base = ["pack", "--method", "claudecode_agent", "--label", "L", "--project", "VOICE", "--receipted", "3", "--receiptless", "3"]
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                r = click.testing.CliRunner().invoke(review_cli, base)
+                self.assertNotEqual(r.exit_code, 0); self.assertIn("pinned by hash", r.output)
+                r = click.testing.CliRunner().invoke(review_cli, base + ["--force"])
+                self.assertEqual(r.exit_code, 0, r.output); self.assertIn("redo that review", r.output)
+                self.assertLess(r.output.index("✓"), r.output.index("redo that review"))   # warnings after the tick
+                r = click.testing.CliRunner().invoke(review_cli, base + ["--force"])         # byte-identical now
+                self.assertEqual(r.exit_code, 0, r.output); self.assertNotIn("redo that review", r.output)
+
+    def test_a_pack_that_is_not_a_pack_is_never_attested(self):
+        """#1124 Codex review, M1: empty bytes, `[]`, `{}` and a pack without
+        items passed `--strict --write` as zero items answered, no finding,
+        and their sha was pinned and ranked."""
+        import click.testing
+        from unittest import mock
+        from data_sheets_schema.cli.review import review as review_cli
+        for body in ("", "[]", "{}", "pack_version: 5\nitems: []\n", "- a\n- b\n"):
+            self.assertIsNotNone(rp.pack_shape_problem(yaml.safe_load(body)), body)
+            self.assertFalse(rp.check_review(yaml.safe_load(body), {"pack_sha256": "x", "items": []})["checked"], body)
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            paths = rp.record_paths(prov)
+            for body in ("", "[]", "{}", "pack_version: 5\nitems: []\n"):
+                out.write_text(body)
+                paths["review"].write_text(yaml.safe_dump({"pack_sha256": hashlib.sha256(body.encode()).hexdigest(), "items": []}))
+                with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                    r = click.testing.CliRunner().invoke(review_cli, ["check", "--method", "claudecode_agent", "--label", "L",
+                                                                      "--project", "VOICE", "--write", "--strict"])
+                self.assertEqual(r.exit_code, 1, (body, r.output)); self.assertIn("not checked", r.output)
+                self.assertNotIn("review", yaml.safe_load(prov.read_text().split("\n", 1)[1]) or {}, body)
+
+    def test_a_failing_review_is_not_written_under_strict_and_is_not_evidence(self):
+        """#1124 Codex review, M2: `--strict --write` wrote the block (pinning
+        the current pack over a review of another one) and exited 1 after;
+        `runs select` then ranked its adverse count."""
+        import click.testing
+        from unittest import mock
+        from data_sheets_schema.cli.review import review as review_cli
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            paths = rp.record_paths(prov)
+            paths["review"].write_text(yaml.safe_dump({"pack_sha256": "0" * 64, "items": []}))   # another pack
+            base = ["check", "--method", "claudecode_agent", "--label", "L", "--project", "VOICE", "--write"]
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                strict = click.testing.CliRunner().invoke(review_cli, base + ["--strict"])
+                self.assertEqual(strict.exit_code, 1, strict.output); self.assertIn("not written", strict.output)
+                self.assertNotIn("review", yaml.safe_load(prov.read_text().split("\n", 1)[1]))
+                loose = click.testing.CliRunner().invoke(review_cli, base)
+                self.assertEqual(loose.exit_code, 0, loose.output)
+            block = yaml.safe_load(prov.read_text().split("\n", 1)[1])["review"]
+            self.assertTrue(block["checked"]); self.assertTrue(block["findings"])
+            self.assertIsNone(rp.review_evidence(block))                                  # written, not ranked
+            self.assertIn("finding(s)", rp.review_evidence_why(block))                     # ... and said to be (round 9, M-R9-1)
+            self.assertEqual(rp.review_evidence_why(None), "no review block")
+            self.assertEqual(rp.review_evidence_why({"checked": False}), "not checked")
+            self.assertIsNone(rp.review_evidence_why({"checked": True, "adverse": 0, "findings": [], "unanswered": []}))
+            self.assertIn("50 unanswered", rp.review_evidence_why({"checked": True, "adverse": 0, "findings": [],
+                                                                    "unanswered": ["x"] * 30, "unanswered_truncated": 20}))
+            for shape in ({"checked": True, "adverse": 2, "findings": 3}, {"checked": True, "adverse": 2, "unanswered": 7},
+                          {"checked": True, "adverse": 2, "unanswered_truncated": "lots"},
+                          {"checked": True, "adverse": 2, "unanswered_truncated": [1, 2]}, {"checked": True, "adverse": "2"},
+                          {"checked": True, "adverse": 0, "findings": [], "unanswered": ["a", "b"], "unanswered_truncated": -2},
+                          {"checked": True, "adverse": -7, "findings": [], "unanswered": []}):
+                self.assertIn("not evidence", rp.review_evidence_why(shape), shape)       # classified, never raised (round 10, M-R10-2)
+                self.assertIsNone(rp.review_evidence(shape))
+            self.assertIn("not checked (the pack", rp.review_evidence_why(rp.check_review({}, {})))
+            # a second failing `--strict` names the block that stays (SF-R9-4)
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                again = click.testing.CliRunner().invoke(review_cli, base + ["--strict"])
+            self.assertEqual(again.exit_code, 1); self.assertIn("still carries its earlier review block", again.output)
+            self.assertIn("of this pack", again.output); self.assertIn("not evidence: 1 finding(s)", again.output)
+            # a passing earlier block of this pack, then a failing redo: the refusal says the passing one stands (SF-R10-3)
+            text = prov.read_text(); head, body = text.split("\n", 1); d = yaml.safe_load(body)
+            d["review"] = {"checked": True, "adverse": 1, "findings": [], "unanswered": [],
+                           "artifacts": {"pack": {"sha256": sha}}}
+            prov.write_text(head + "\n" + yaml.safe_dump(d))
+            paths["review"].write_text(yaml.safe_dump({"pack_sha256": "0" * 64, "items": []}))
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                redo = click.testing.CliRunner().invoke(review_cli, base + ["--strict"])
+            self.assertEqual(redo.exit_code, 1); self.assertIn("evidence for runs select; it was not replaced", redo.output)
+            # a record that is not a mapping: the refusal still exits 1 with a message, not a traceback (M-R10-1)
+            keep = prov.read_text()
+            for body in (b"# header\n- a\n- b\n", b"# header\nnote: caf\xe9 latin-1\nrun: {}\n"):      # a list; not UTF-8 (round 11, M-R11-1)
+                prov.write_bytes(body)
+                with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                    broken = click.testing.CliRunner().invoke(review_cli, base + ["--strict"])
+                self.assertEqual(broken.exit_code, 1, body); self.assertIsNone(broken.exception if not isinstance(broken.exception, SystemExit) else None, body)
+                self.assertIn("could not be re-read", broken.output, body)
+            prov.write_text(keep)
+            self.assertIsNone(rp.review_evidence({"checked": True, "adverse": 2, "findings": [], "unanswered": ["slot-001"]}))
+            self.assertEqual(rp.review_evidence({"checked": True, "adverse": 2, "findings": [], "unanswered": []}), 2)
+            self.assertIsNone(rp.review_evidence({"checked": True, "adverse": "2", "findings": [], "unanswered": []}))
+
+    def test_pack_pin_state_reads_the_same_pins_as_the_guard(self):
+        """#1124 Codex review, M3: `pack_pin_state` read only the record's own
+        pin, so a sidecar review's stale pin reported nothing, and a record
+        parsing to a list raised out of `runs check`."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")            # sidecar only
+            self.assertIsNone(rp.pack_pin_state(prov))
+            out.write_text(out.read_text() + "# moved\n")
+            self.assertEqual(rp.pack_pin_state(prov), "rewritten")
+            out.unlink()
+            self.assertEqual(rp.pack_pin_state(prov), "missing")
+            rp.write_pack(prov, instr, force=True)
+            (out.parent / "P_review_b.yaml").write_text("pack_sha256: [unclosed")
+            self.assertEqual(rp.pack_pin_state(prov), "unreadable")
+            (out.parent / "P_review_b.yaml").unlink()
+            prov.write_text("# header\n- {}\n")
+            self.assertEqual(rp.pack_pin_state(prov), "unreadable")          # not AttributeError
+            self.assertEqual(rp.pack_pins_report(prov)[2][0]["error"], "not a mapping")
+            self.assertIsNone(rp.pack_pin_state(Path(tmp) / "absent_provenance.yaml"))
+
+    def test_an_unreadable_sidecar_does_not_refuse_a_byte_identical_regeneration(self):
+        """#1124 Codex review, M4: the blind refusal fired before the build,
+        so the effect rule did not reach it."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            (out.parent / "P_review_b.yaml").write_text("pack_sha256: [unclosed")
+            rp.write_pack(prov, instr)                                        # same inputs: allowed
+            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)
+            with self.assertRaises(rp.PackAttested) as cm:
+                rp.write_pack(prov, instr, self.SMALLER)                     # different bytes: refused
+            self.assertIn("unreadable", str(cm.exception))
+            prov.write_text("# header\n" + prov.read_text().split("\n", 1)[1] + "\nbad: [unclosed\n")
+            with self.assertRaises(rp.PackAttested):                         # the record itself: before the build
+                rp.write_pack(prov, instr)
+
+    def test_writes_land_whole_and_an_unchanged_pack_is_not_reopened(self):
+        """#1124 Codex review, M5: the pinned file was opened with mode w even
+        for identical bytes, and a failure after the pack write left a pack
+        pinning an instruction never written."""
+        import os
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr, out, sha = self._pinned(tmp, "review")
+            ipath = rp.record_paths(prov)["instruction"]
+            before = out.stat().st_mtime_ns
+            with mock.patch("data_sheets_schema.review_pack._replace", side_effect=AssertionError("reopened")):
+                rp.write_pack(prov, instr)                                    # identical: no write at all
+            self.assertEqual(out.stat().st_mtime_ns, before)
+            other = Path(tmp) / "other_instruction.md"; other.write_text(ipath.read_text() + "\nMORE\n")
+            calls = []
+            real = os.replace
+            def flaky(src, dst):
+                calls.append(Path(dst).name)
+                if Path(dst) == out:
+                    raise OSError("disk full")
+                return real(src, dst)
+            with mock.patch("os.replace", flaky):
+                with self.assertRaises(OSError):
+                    rp.write_pack(prov, other, self.SMALLER, force=True)
+            self.assertEqual(hashlib.sha256(out.read_bytes()).hexdigest(), sha)   # the pinned bytes survive
+            self.assertEqual(calls, [ipath.name, out.name])                       # instruction first, pack last
+            self.assertEqual(sorted(p.name for p in out.parent.glob("*.tmp")), [])  # no temp file lingers
+            self.assertEqual(sorted(p.name for p in out.parent.glob(".*.tmp")), [])
+            self.assertFalse(any("review" in p.name and p.suffix == ".tmp" for p in out.parent.iterdir()))
+            # the temp names are unique per call and the landed file keeps the pack's mode (round 10, SF-R10-2/SF-R10-1)
+            names = []
+            def spy(src, dst):
+                names.append(Path(src).name); return real(src, dst)
+            with mock.patch("os.replace", spy):
+                rp.write_pack(prov, other, self.SMALLER, force=True)
+                rp.write_pack(prov, instr, force=True)
+            self.assertEqual(len(names), len(set(names))); self.assertNotIn(out.name + ".tmp", names)
+            umask = os.umask(0); os.umask(umask)
+            self.assertEqual(out.stat().st_mode & 0o777, 0o666 & ~umask)                # what write_text would have given (round 11, SF-R11-1)
+            out.chmod(0o640)
+            rp.write_pack(prov, instr, self.SMALLER, force=True)
+            self.assertEqual(out.stat().st_mode & 0o777, 0o640)                          # a rewrite keeps the target's mode
+
+    def test_an_unusable_snapshot_leaves_the_receipts_block_unchecked(self):
+        """#1124 Codex review, M7 and SF2: `block_for` ran the index join over
+        a snapshot that would not parse and returned `checked: true`; and
+        `{}`, `[]`, a scalar and non-UTF-8 bytes were all read as "no
+        snapshot" or as a record."""
+        from data_sheets_schema import receipts as rc
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = Pack()._run(tmp)
+            paths = rp.record_paths(prov)
+            snap_dir = paths["receipt"].parent / "intermediate"; snap_dir.mkdir(exist_ok=True)
+            snap = snap_dir / paths["receipt"].name.replace("_coverage_receipt.yaml", "_full.yaml")
+            rec = yaml.safe_load(prov.read_text().split("\n", 1)[1])
+            bundle = Path(rec["inputs"]["bundle_path"]); md5 = rec["inputs"]["bundle_md5"]
+            manifest = Path(rec["inputs"]["chunks"]["path"])
+            for body, why in ((b"bad: [unclosed", "ParserError"), (b"{}", "empty document"), (b"[]", "empty document"),
+                              (b"- a\n", "not a mapping"), (b"just a string\n", "not a mapping"), (b"\xff\xfe", "UnicodeDecodeError")):
+                snap.write_bytes(body)
+                state, path, doc, reason = rc.phase1_snapshot_state(paths["receipt"])
+                self.assertEqual((state, path, doc), ("unusable", snap, None), body); self.assertIn(why, reason, body)
+                block = rc.block_for(paths["full"], paths["receipt"], bundle, md5, expected=True, manifest=manifest)
+                self.assertFalse(block["checked"], body); self.assertIn(str(snap), block["reason"]); self.assertIn(why, block["reason"])
+                pack = rp.build_pack(prov, instr)
+                self.assertEqual(pack["receipt_join"]["basis"], "index"); self.assertIn(why, pack["receipt_join"]["reason"])
+            snap.write_text(yaml.safe_dump({"id": "x"}))
+            self.assertEqual(rc.phase1_snapshot_state(paths["receipt"])[0], "usable")
+            self.assertTrue(rc.block_for(paths["full"], paths["receipt"], bundle, md5, expected=True, manifest=manifest)["checked"])
+            snap.unlink()
+            self.assertEqual(rc.phase1_snapshot_state(paths["receipt"])[0], "absent")
+
+    def test_every_way_a_read_fails_names_the_file(self):
+        """#1124 Codex review, SF1: `_load_yaml` caught only YAMLError."""
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "x.yaml"
+            p.write_bytes(b"\xff\xfe not utf-8")
+            with self.assertRaises(rp.UnreadableYAML) as cm:
+                rp._load_yaml(p)
+            self.assertIn(str(p), str(cm.exception)); self.assertIn("utf-8", str(cm.exception).lower())
+            with self.assertRaises(rp.UnreadableYAML) as cm:
+                rp._load_yaml(Path(tmp) / "absent.yaml")
+            self.assertIn("absent.yaml", str(cm.exception))
+            p.write_text("- a\n")
+            with self.assertRaises(rp.UnreadableYAML) as cm:
+                rp._load_mapping(p)
+            self.assertIn("not a mapping", str(cm.exception))
+            self.assertEqual(rp._load_yaml(p, raw=b"a: 1\n"), {"a": 1})
+
+    def test_the_agent_is_told_never_to_regenerate(self):
+        text = (Path(__file__).resolve().parents[1] / ".claude" / "agents" / "d4d-review-record.md").read_text()
+        self.assertIn("never regenerate it", text)
+        self.assertIn("Only\nwhen there is no pack at all", text)
+        self.assertNotIn("not yours to pass). The pack\nIt names", text)              # the dangling sentence (#1124 MF2)
+        for key in ("receipt_join", "reference_attributes"):                           # version-conditioned (SF4)
+            i = text.index(key); self.assertIn("pack_version", text[i - 400:i + 400], key)

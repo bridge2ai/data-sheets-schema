@@ -344,11 +344,31 @@ class TestReviewCriterion(TestSelect):
     """#660: the review's adverse count joins the criterion, ahead of coverage,
     when every eligible replicate carries a checked review block."""
 
-    def _review(self, label, adverse, checked=True):
+    def _review(self, label, adverse, checked=True, findings=(), unanswered=()):
         p = self.root / "claudecode_agent_core" / label / "P_provenance.yaml"
         d = yaml.safe_load(p.read_text())
-        d["review"] = {"checked": checked, "adverse": adverse, "items_answered": 70}
+        d["review"] = {"checked": checked, "adverse": adverse, "items_answered": 70,
+                       "findings": list(findings), "unanswered": list(unanswered)}
         p.write_text(yaml.safe_dump(d))
+
+    def test_a_checked_block_with_findings_is_not_evidence_and_is_named_as_such(self):
+        """#1124 round 9, M-R9-1: a review of another pack, or one with
+        unanswered items, is not ranked — and is not called "no review"
+        either, in the table, in `reviews_not_applied_because`, or in the
+        canonical block."""
+        self._review("cfg_rep1", 2); self._review("cfg_rep3", 9)
+        self._review("cfg_rep2", 0, findings=[{"kind": "review_of_another_pack"}])
+        out = self._run("--execute")
+        self.assertEqual(out.exit_code, 0, out.output)
+        self.assertIn("→ cfg_rep2", out.output)
+        self.assertIn("not evidence: 1 finding(s), 0 unanswered", out.output)
+        self.assertNotIn("no review block", out.output)                             # every replicate here has one
+        prov = yaml.safe_load((self.root / "claudecode_agent_core" / "cfg_rep2" / "P_provenance.yaml").read_text())
+        canon = prov["canonical"]
+        self.assertFalse(canon["reviews_applied"]); self.assertIn("cfg_rep2: not evidence", canon["reviews_not_applied_because"])
+        rep2 = next(c for c in canon["selected_from"] if c["label"] == "cfg_rep2")
+        self.assertIsNone(rep2["review_adverse"]); self.assertIn("finding", rep2["review_not_evidence"])
+        self.assertNotIn("review_not_evidence", next(c for c in canon["selected_from"] if c["label"] == "cfg_rep1"))
 
     def test_fewest_adverse_beats_coverage(self):
         self._review("cfg_rep1", 2); self._review("cfg_rep2", 12); self._review("cfg_rep3", 9)
@@ -375,7 +395,7 @@ class TestReviewCriterion(TestSelect):
         self._review("cfg_rep1", 2); self._review("cfg_rep3", 9)
         out = self._run("--execute")
         self.assertIn("→ cfg_rep2", out.output)
-        self.assertIn("no checked review block on cfg_rep2", out.output)
+        self.assertIn("cfg_rep2: no review block", out.output)                 # absence, named as absence (#1124 round 9)
         prov = yaml.safe_load((self.root / "claudecode_agent_core" / "cfg_rep2" / "P_provenance.yaml").read_text())
         self.assertFalse(prov["canonical"]["reviews_applied"])
         self.assertIn("cfg_rep2", prov["canonical"]["reviews_not_applied_because"])

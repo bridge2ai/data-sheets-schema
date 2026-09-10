@@ -1228,9 +1228,13 @@ def _receipts_block(spec: RunSpec, record: dict[str, Any]) -> dict[str, Any]:
     """The receipts check recomputed from disk — like pair, report, grounding
     and form on a resumed batch (#599), never read back from the record."""
     from data_sheets_schema.receipts import block_for
+    inputs = record.get("inputs") or {}
     return block_for(spec.full_path, _receipt_path(spec), spec.bundle,
-                     (record.get("inputs") or {}).get("bundle_md5"),
-                     spec.condition in RECEIPT_CONDITIONS)
+                     inputs.get("bundle_md5"),
+                     spec.condition in RECEIPT_CONDITIONS,
+                     bundle_rel_path=inputs.get("bundle_path"),
+                     record_bundle_sha256=inputs.get("bundle_sha256"),
+                     record_chunks=inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None)
 
 
 def core_inventory_block() -> str:

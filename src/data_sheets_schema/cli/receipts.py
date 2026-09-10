@@ -58,6 +58,8 @@ def check(method, label, project, write, strict, bundle_opt):
         inputs = record.get("inputs") or {}
         bundle = bc.declared_bundle(record)
         md5, expected = inputs.get("bundle_md5"), bool(inputs.get("receipt_expected"))
+        recovery = {"bundle_rel_path": inputs.get("bundle_path"), "record_bundle_sha256": inputs.get("bundle_sha256"),
+                    "record_chunks": inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None}
     else:
         # Before the record exists — Phase 1 runs this before Phase 2 (#730).
         # Everything the check needs is on disk; the bundle comes from the
@@ -74,8 +76,11 @@ def check(method, label, project, write, strict, bundle_opt):
         bundle = Path(declared)
         md5 = _md5(bundle) if bundle.exists() else None
         expected = True
+        recovery = {}
         click.echo(f"   · no provenance record yet; checking against {bundle} as on disk")
-    block = rc.block_for(p["full"], rc.receipt_path(p["core_dir"], project), bundle, md5, expected)
+    # The same recovery the backfill makes (#1140, #1187 review M2): the gate
+    # on attestation must not say "unchecked" of a record the backfill checked.
+    block = rc.block_for(p["full"], rc.receipt_path(p["core_dir"], project), bundle, md5, expected, **recovery)
     if not block.get("checked"):
         click.echo(f"   · unchecked: {block['reason']}"
                    + ("" if block["expected"] else " (this run's procedure wrote none)"))
