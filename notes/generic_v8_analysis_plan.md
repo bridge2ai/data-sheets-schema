@@ -1462,19 +1462,30 @@ steps need:
 21. **Every record is brought under the duplicate-key instrument where
     nothing else moves (#1033, 2026-09-09).** `d4d provenance
     recheck-validation --all` recomputes each record's validation and
-    writes the block only where the verdict, the artifacts' md5s and the
-    problems' artifacts and classes reproduce — the write then adds
-    `duplicate_keys` (and the schema digests on the 41 blocks that
-    predate them) and nothing else. Run over the corpus after a one-record
-    report-mode canary: 50 written, all with 0 duplicate keys, 8 of them
+    writes the block only where the verdict, the artifacts' md5s and each
+    problem's artifact, class and the JSON-pointer paths its message
+    names reproduce — a message carries today's enum list and moves with
+    the schema while the failure it names does not, but a message naming
+    other paths is another failure (#1190 review). The write then adds
+    `duplicate_keys` and nothing else, restamping the schema digest — the
+    verdict was recomputed against today's schema — and saying so on the
+    line where it moved. `discover` yields a base directory and its
+    `_core` twin as two runs over one record, so the walk is keyed on the
+    record's path: 282 records, not 559 visits. Run over the corpus after
+    a one-record report-mode canary: **68 written**, all with 0 duplicate
+    keys (6 of them restamped a schema digest they already carried, 6
     failing records whose problems re-record under today's longer enum
-    lists; 334 held — 332 whose `passed` flips to false under today's
-    schema (the 2026-07 and early-2026-08 arms, whose records validated
-    against the schema of their day), 2 whose artifacts have drifted
-    (CHORUS 2026-07-29 rep1, both records); one whose full artifact is
-    gone (AI_READI 2026-08-11 api-generic rep3). A held record stays as it
-    was — its verdict is the one it attested — and is rerun by label as a
-    deliberate act. No canary verdict moves: `duplicate_keys` is 0 on
+    lists with the same paths); **202 held** — 199 whose `passed` flips
+    to false under today's schema (the 2026-07 and early-2026-08 arms,
+    whose records validated against the schema of their day), 2 whose
+    problems now name other JSON pointers (the 2026-08-05 v3 rep1
+    AI_READI and CHORUS records, whose `file_collections[*].collection_type`
+    failures the schema no longer raises and whose first four lines are
+    now `creators` failures), 1 whose artifacts have drifted (CHORUS
+    2026-07-29 rep1); 4 with no validation block; one whose full artifact
+    is gone (AI_READI 2026-08-11 api-generic rep3). A held record stays as
+    it was — its verdict is the one it attested — and is rerun by label as
+    a deliberate act. No canary verdict moves: `duplicate_keys` is 0 on
     every written block and the gate reads an absent field as unmeasured,
     as before. Numbered with 19 (#1054) and 20 (#1140) open. Not a
     generation-path change.

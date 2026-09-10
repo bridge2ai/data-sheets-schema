@@ -600,14 +600,16 @@ and gated against a floor of 0 as a count of distinct duplicated keys
 (none of the 270 full records of the model-written arms, nor their
 cores, had one); the repair round is told what to merge like any other
 validation failure, `d4d provenance recheck-validation` brings an earlier
-record under the instrument — `--all` (#1033) walks every record and
-writes only where the recorded verdict, the artifacts' md5s and the
-problems' artifacts and classes reproduce, so the write adds the field
-and nothing else: on 2026-09-09, 50 written (none with a duplicate key;
-8 of them failing records whose problems re-record under today's longer
-enum lists), 334 held — 332 whose `passed` flips to false under today's
-schema and 2 whose artifacts drifted — and one whose full record is
-gone; a held record is rerun by label as a deliberate act, and stays
+record under the instrument — `--all` (#1033) walks every record once
+(the base directory and its `_core` twin are one record, keyed on the
+path) and writes only where the recorded verdict, the artifacts' md5s
+and each problem's artifact, class and JSON-pointer paths reproduce, so
+the write adds `duplicate_keys` and nothing else, restamping the schema
+digest and saying so where it moved: over the 282 records, 68 written
+(none with a duplicate key), 199 held whose `passed` flips to false
+under today's schema, 2 whose problems name other paths, 1 whose
+artifacts drifted, 4 with no validation block and one whose full record
+is gone; a held record is rerun by label as a deliberate act, and stays
 gated as unmeasured until it is — `d4d api verdict` re-verdicts it
 offline with the gate's own functions, keeping the prior block under
 `prior_verdict`, and `d4d runs check` reports such records without

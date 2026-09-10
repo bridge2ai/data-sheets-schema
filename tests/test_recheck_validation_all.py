@@ -11,6 +11,8 @@ from unittest import mock
 
 import yaml
 
+from data_sheets_schema.cli import provenance as cli
+
 
 def _record(tmp, passed=True, md5="m1", with_field=False):
     d = Path(tmp) / "claudecode_api_core" / "L_rep1"; d.mkdir(parents=True, exist_ok=True)
@@ -54,17 +56,23 @@ class TestTheGate(unittest.TestCase):
             self.assertEqual(self._run(tmp, new_md5="m2"), "held")
             self.assertEqual(path.read_text(), before)
 
-    def test_problems_that_name_another_artifact_or_class_are_held_but_a_reworded_message_is_not(self):
-        """The eight failing records the corpus run wrote carry the same
-        failures under a longer enum list in the message; a record whose
-        failures move to another artifact or class is a different verdict."""
-        same = [{"artifact": "a", "class": "Dataset", "error": "old wording"}]
+    def test_problems_that_name_another_artifact_class_or_path_are_held_but_a_reworded_message_is_not(self):
+        """A validator message carries today's enum list and moves with the
+        schema while the failure it names does not; a failure on another
+        artifact, class or JSON-pointer path is a different verdict (#1190
+        review, M3: two written records had swapped one failure set for
+        another under the same artifact and class)."""
+        same = [{"artifact": "a", "class": "Dataset", "error": "'x' is not one of [a, b] in /related_datasets/0/relationship_type"}]
         with tempfile.TemporaryDirectory() as tmp:
             path = _record(tmp, passed=False)
             d = yaml.safe_load(path.read_text().split("\n", 1)[1]); d["validation"]["problems"] = same
             path.write_text("# header\n" + yaml.safe_dump(d))
-            reworded = [{"artifact": "a", "class": "Dataset", "error": "new wording with a longer list"}]
+            reworded = [{"artifact": "a", "class": "Dataset", "error": "'x' is not one of [a, b, c, d] in /related_datasets/0/relationship_type"}]
             self.assertEqual(self._run(tmp, new_passed=False, problems=reworded), "written")
+            path = _record(tmp, passed=False)
+            path.write_text("# header\n" + yaml.safe_dump(d))
+            other_path = [{"artifact": "a", "class": "Dataset", "error": "True is not valid in /creators/0/principal_investigator"}]
+            self.assertEqual(self._run(tmp, new_passed=False, problems=other_path), "held")
             path = _record(tmp, passed=False)
             path.write_text("# header\n" + yaml.safe_dump(d))
             elsewhere = [{"artifact": "a", "class": "Person", "error": "old wording"}]
@@ -78,11 +86,47 @@ class TestTheGate(unittest.TestCase):
             self.assertEqual(self._run(tmp), "already")
             self.assertEqual(path.read_text(), before)
 
+    def test_all_visits_each_record_once_and_names_a_method_that_matches_nothing(self):
+        """#1190 review, M1/S3/S5: `discover` yields a base directory and its
+        _core twin as two runs over one record; the walk is keyed on the
+        record path, the summary counts records, and a --method that
+        reaches no directory is an error rather than a silent all-zero."""
+        import click.testing
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp)
+            runs = [SimpleNamespace(method="claudecode_api", label="L_rep1", projects=["P"]),
+                    SimpleNamespace(method="claudecode_api_core", label="L_rep1", projects=["P"])]
+            calls = []
+            def one(method, label, project, execute, gated):
+                calls.append(method); return "written"
+            with mock.patch("data_sheets_schema.runs.discover", lambda: runs), \
+                 mock.patch("data_sheets_schema.provenance.record_path_for",
+                            lambda project, method, label, concat_dir=None: path), \
+                 mock.patch.object(cli, "_recheck_one", one), \
+                 mock.patch.object(cli, "_require_repo_root_cwd", lambda *a, **k: None):
+                r = click.testing.CliRunner().invoke(cli.provenance, ["recheck-validation", "--all", "--execute"])
+                self.assertEqual(r.exit_code, 0, r.output); self.assertEqual(len(calls), 1)
+                self.assertIn("summary over 1 record(s): written 1, would write 0, already 0", r.output)
+                r = click.testing.CliRunner().invoke(cli.provenance, ["recheck-validation", "--all", "--method", "claudecode_api_core"])
+                self.assertEqual(len(calls), 2)
+                r = click.testing.CliRunner().invoke(cli.provenance, ["recheck-validation", "--all", "--method", "nosuch"])
+                self.assertNotEqual(r.exit_code, 0); self.assertIn("matched no run directory", r.output)
+
+    def test_a_gated_dry_run_counts_what_it_would_write_and_says_when_the_schema_digest_moves(self):
+        """#1190 review, S2/M4."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp)
+            d = yaml.safe_load(path.read_text().split("\n", 1)[1]); d["validation"]["schema"] = {"full_sha256": "old"}
+            path.write_text("# header\n" + yaml.safe_dump(d))
+            self.assertEqual(self._run(tmp, execute=False), "would write")
+            self.assertNotIn("duplicate_keys", yaml.safe_load(path.read_text().split("\n", 1)[1])["validation"])
+
     def test_report_mode_writes_nothing(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = _record(tmp)
             before = path.read_text()
-            self.assertEqual(self._run(tmp, execute=False), "reported")
+            self.assertEqual(self._run(tmp, execute=False), "would write")               # gated: what --execute would do
             self.assertEqual(path.read_text(), before)
 
 

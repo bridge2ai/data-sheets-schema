@@ -479,7 +479,9 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
 
 
 @provenance.command('recheck-validation')
-@click.option('--method', default=None, help='required unless --all; with --all, restrict to one method directory')
+@click.option('--method', default=None, help='required unless --all; with --all, restrict to one base directory and its '
+                                           '_core twin (claudecode_agent reaches claudecode_agent_core, not the _crate, '
+                                           '_healthsheet or _merged siblings)')
 @click.option('--label', default=None)
 @click.option('--project', default=None)
 @click.option('--all', 'every', is_flag=True,
@@ -509,21 +511,46 @@ def recheck_validation(method, label, project, every, execute):
             raise click.ClickException("--all takes no --label or --project; --method may restrict it")
         from data_sheets_schema.provenance import record_path_for
         from data_sheets_schema.runs import discover
-        counts: dict[str, int] = {"written": 0, "already": 0, "held": 0, "no block": 0, "missing": 0}
+        # `discover` yields the base directory and its _core twin as two
+        # runs over one record (#1190 review, M1): visits are keyed on the
+        # record's path, so each record is rechecked once. `--method`
+        # names a base or its _core and reaches exactly that pair — not
+        # `_crate`, `_healthsheet` or `_merged` siblings, which are their
+        # own bases.
+        wanted = None
+        if method:
+            base = method[:-5] if method.endswith("_core") else method
+            wanted = {base, base + "_core"}
+        counts: dict[str, int] = {"written": 0, "would write": 0, "already": 0, "held": 0,
+                                  "no block": 0, "missing": 0}
+        seen: set[str] = set(); considered: set[str] = set()
         for run in discover():
-            if method and run.method not in (method, method + "_core", method[:-5] if method.endswith("_core") else method):
+            if wanted is not None and run.method not in wanted:
                 continue
+            considered.add(run.method)
             for proj in run.projects:
                 path = record_path_for(proj, run.method, run.label)
-                if not path.exists():
+                if not path.exists() or str(path) in seen:
                     continue
+                seen.add(str(path))
                 status = _recheck_one(run.method, run.label, proj, execute, gated=True)
                 counts[status] = counts.get(status, 0) + 1
-        click.echo("summary: " + ", ".join(f"{k} {v}" for k, v in counts.items()))
+        if wanted is not None and not considered:
+            raise click.ClickException(f"--method {method!r} matched no run directory")
+        click.echo(f"summary over {len(seen)} record(s): " + ", ".join(f"{k} {v}" for k, v in counts.items()))
         return
     if not (method and label and project):
         raise click.ClickException("--method, --label and --project are required without --all")
     _recheck_one(method, label, project, execute, gated=False)
+
+
+def _problem_shape(block: dict) -> list:
+    """What a validation problem names, message wording aside: its artifact,
+    its class and the JSON-pointer paths in its message (#1190 review, M3)."""
+    import re as _re
+    return sorted((str(p.get("artifact")), str(p.get("class")),
+                   tuple(sorted(set(_re.findall(r"\bin (/[^\s|]*)", str(p.get("error") or ""))))))
+                  for p in (block.get("problems") or []))
 
 
 def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bool) -> str:
@@ -544,11 +571,12 @@ def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bo
     spec = RunSpec(project=project, arm="", method=base, bundle=_P(""), label=label)
     data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     prior = data.get("validation") or {}
-    tag = f"{project} {label}"
+    tag = f"{project} {method} {label}"
     if gated and not prior:
         click.echo(f"{tag}: no validation block; nothing to bring under the instrument")
         return "no block"
     if gated and "duplicate_keys" in prior:
+        click.echo(f"{tag}: already under the instrument")
         return "already"
     missing = [str(q) for q in (spec.full_path, spec.core_path) if not q.exists()]
     if missing and (execute or gated):
@@ -566,21 +594,29 @@ def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bo
     if gated:
         # Three things must reproduce for the write to add the field and
         # nothing else: the verdict, the artifacts' md5s, and the problems —
-        # the latter by artifact and class, not by message text, since a
+        # each problem by its artifact, its class and the JSON-pointer
+        # paths its message names, not by the message text, since a
         # validator message carries today's enum list and moves when the
-        # schema does while the failure it names does not.
+        # schema does while the failure it names does not; a message whose
+        # paths moved names a different failure (#1190 review, M3). The
+        # schema digest is restamped on every write — the verdict was
+        # recomputed against today's schema — and a digest that moved is
+        # said (M4).
         same_verdict = block["passed"] == prior.get("passed")
         old_md5 = {k: (v or {}).get("md5") for k, v in (prior.get("artifacts") or {}).items()}
         new_md5 = {k: (v or {}).get("md5") for k, v in (block.get("artifacts") or {}).items()}
-        shape = lambda b: sorted((str(p.get("artifact")), str(p.get("class"))) for p in (b.get("problems") or []))  # noqa: E731
         moved = ("verdict" if not same_verdict else "artifacts" if old_md5 != new_md5
-                 else "problems" if shape(prior) != shape(block) else None)
+                 else "problems" if _problem_shape(prior) != _problem_shape(block) else None)
         if moved:
             click.echo(f"   held: the {moved} would move; rerun by label to write it deliberately")
             return "held"
+        old_schema, new_schema = prior.get("schema") or {}, block.get("schema") or {}
+        if old_schema and old_schema != new_schema:
+            click.echo("   schema digest restamped: the verdict is recomputed against today's schema "
+                       f"({', '.join(f'{k} {str(old_schema.get(k))[:8]}→{str(new_schema.get(k))[:8]}' for k in new_schema if old_schema.get(k) != new_schema.get(k))})")
     if not execute:
         click.echo("   (report only; --execute writes the block)")
-        return "reported"
+        return "would write" if gated else "reported"
     from data_sheets_schema.provenance import ProvenanceRecord
     rec = ProvenanceRecord(data=data)
     rec.data["validation"] = block
