@@ -325,7 +325,12 @@ _SLOT_PATH = re.compile(r"[a-z][a-z0-9_]*(?:\[(?:\d+|\*)\])?(?:\.[a-z][a-z0-9_]*
 #: names are read by `_named`, so a destination ("recorded in `errata`")
 #: is not a casualty, a sentence about the core alone records nothing
 #: about the full record, and no table line is read (#1175 round 2, M1).
-_REMOVAL_WORD = re.compile(r"\b(?:removed|deleted|dropped|absent|omitted|stripped|withdrawn)\b", re.I)
+#: The present-tense forms are here for the weak signal's sake (#1175
+#: round 8, M1): "Both records now omit `citation`" records a removal as
+#: plainly as "`citation` was removed", and reading only past participles
+#: listed it as unrecorded.
+_REMOVAL_WORD = re.compile(r"\b(?:remove[sd]?|delete[sd]?|drops?|dropped|omits?|omitted|"
+                           r"strips?|stripped|absent|withdraws?|withdrawn)\b", re.I)
 #: A removal word that is negated, hypothetical or contrasted records no
 #: removal (#1175 Codex review, M1): "was retained rather than removed",
 #: "was never removed", "if `x` is removed, explain why". Order decides

@@ -733,8 +733,6 @@ canary:
   - metric: report findings
     run: 0
     baseline_worst: 0
-    baseline_basis: 'floor 0: 3 baseline replicate(s) ran the report check and read
-      no claim, none measured one (#684)'
   - metric: ungrounded identifiers
     run: 0
     baseline_worst: 0
@@ -765,18 +763,14 @@ canary:
   - metric: receipt findings
     run: 0
     baseline_worst: 0
-  - metric: duplicate keys
-    run: 0
-    baseline_worst: 0
   blind: []
   unbaselined: []
   regressions: []
-  basis: 'verdict from checks recomputed from the artifacts on disk at resume (the
-    record''s stored blocks were not rewritten) against the per-project worst of ''2026-09-01_claude-opus-5-api-generic-v7''
-    with the gate''s functions, including the #684 report basis ({''measured'': 0,
-    ''vacuous'': 3, ''unchecked'': 0})'
-  recorded_at: '2026-09-07T03:44:27+00:00'
-  recorded_by: d4d api batch
+  basis: 'verdict from this record''s own check blocks against the per-project worst
+    of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions, including
+    the #684 report basis ({''measured'': 1, ''vacuous'': 2, ''unchecked'': 0})'
+  recorded_at: '2026-09-10T07:49:55+00:00'
+  recorded_by: d4d api verdict (offline)
   prior_verdict:
     status: ok
     rows:
@@ -818,18 +812,71 @@ canary:
     - metric: receipt findings
       run: 0
       baseline_worst: 0
+    - metric: duplicate keys
+      run: 0
+      baseline_worst: 0
     blind: []
     unbaselined: []
     regressions: []
-    basis: 'offline write of the verdict the batch gate printed after the run''s last
-      phase (report_regate; the phase timings sum to about 2026-09-05T21:24Z from
-      the full phase''s 20:33:39Z start) and fanned out on (the batch log''s line
-      `canary ok — fanning out`), recomputed from this record''s own check blocks
-      against the v7 production per-project worst with the gate''s functions, including
-      the #684 report basis (v7 VOICE: 3 vacuous, 0 measured → floor 0). The batch
-      writes no verdict block of its own (#1020).'
-    recorded_at: '2026-09-05T21:28:16+00:00'
-    recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-05
+    basis: 'verdict from checks recomputed from the artifacts on disk at resume (the
+      record''s stored blocks were not rewritten) against the per-project worst of
+      ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions, including
+      the #684 report basis ({''measured'': 0, ''vacuous'': 3, ''unchecked'': 0})'
+    recorded_at: '2026-09-07T03:44:27+00:00'
+    recorded_by: d4d api batch
+    prior_verdict:
+      status: ok
+      rows:
+      - metric: pair errors
+        run: 0
+        baseline_worst: 0
+      - metric: report findings
+        run: 0
+        baseline_worst: 0
+        baseline_basis: 'floor 0: 3 baseline replicate(s) ran the report check and
+          read no claim, none measured one (#684)'
+      - metric: ungrounded identifiers
+        run: 0
+        baseline_worst: 0
+      - metric: resolver URLs in identifier slots
+        run: 0
+        baseline_worst: 0
+      - metric: organisational fragments
+        run: 0
+        baseline_worst: 0
+      - metric: undeclared prefixes
+        run: 0
+        baseline_worst: 0
+      - metric: British spellings
+        run: 2
+        baseline_worst: 2
+      - metric: chunks unreviewed
+        run: 0
+        baseline_worst: 0
+      - metric: snippets unverified
+        run: 0
+        baseline_worst: 0
+      - metric: addressing slips over tolerance
+        run: 0
+        baseline_worst: 0
+      - metric: receipts vacuous
+        run: 0
+        baseline_worst: 0
+      - metric: receipt findings
+        run: 0
+        baseline_worst: 0
+      blind: []
+      unbaselined: []
+      regressions: []
+      basis: 'offline write of the verdict the batch gate printed after the run''s
+        last phase (report_regate; the phase timings sum to about 2026-09-05T21:24Z
+        from the full phase''s 20:33:39Z start) and fanned out on (the batch log''s
+        line `canary ok — fanning out`), recomputed from this record''s own check
+        blocks against the v7 production per-project worst with the gate''s functions,
+        including the #684 report basis (v7 VOICE: 3 vacuous, 0 measured → floor 0).
+        The batch writes no verdict block of its own (#1020).'
+      recorded_at: '2026-09-05T21:28:16+00:00'
+      recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-05
 review:
   checked: true
   items_total: 83

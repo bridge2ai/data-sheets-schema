@@ -542,8 +542,9 @@ arm that defined the gate still satisfies it. The baseline skips vacuous
 replicates; a baseline arm whose replicates ran the check and read no
 claim, none measuring one (`canary.report_basis`: under report_claims v4 the v7 production arm for
 CHORUS, CM4AI and VOICE, with AI_READI measuring 0 on rep3 — under v5 a
-prose retention claim is a claim, so every project's v7 arm measures 0 on
-some replicates and none is all-vacuous today), is a floor of 0 with
+prose retention claim is a claim, so the v7 arm measures 0 on some
+replicate for AI_READI (3 of 3), CM4AI (2) and VOICE (1), and **CHORUS
+alone stays all-vacuous**), is a floor of 0 with
 `baseline_basis` on the row, while a baseline whose checker never ran stays
 a missing baseline (#599). A report without the table is regenerated once
 like a contradiction; a rewrite that is truncated, drops the table or
@@ -584,8 +585,12 @@ saying a value "remains in" / "stays in" / "is kept in" a backticked slot
 path is a retention claim (not when negated, not on a class name),
 satisfied at that path in either record with a dotted step over a list
 read as `[*]`, or by a populated key of the leaf's name under the claim's
-root. A prose claim is a claim checked, so 65 reports that read no claim
-under v4 read one under v5. The v7 production arm reads 0 findings on
+root. A prose claim is a claim checked, so 70 reports that read no claim
+under v4 read one under v5, and the eleven canary blocks that quote a
+`report_basis` were re-derived with `d4d api verdict` where theirs had
+moved — nine of them, each keeping its prior under `prior_verdict`; no
+status and no bar moved, and five lost a `baseline_basis` line their
+baseline no longer earns. The v7 production arm reads 0 findings on
 all twelve either way. Since #998 the report phase carries the core
 class's top-level slot inventory (`core_inventory_block`) before its
 instruction, so the model can see which slots the core declares rather

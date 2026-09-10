@@ -938,14 +938,13 @@ canary:
   unbaselined: []
   regressions:
   - 'duplicate keys: 1 against a floor of 0'
-  basis: 'offline verdict from this record''s own check blocks against the per-project
-    worst of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions,
-    including the #684 report basis ({''measured'': 1, ''vacuous'': 2, ''unchecked'':
-    0}); the batch writes no verdict block of its own (#1020)'
-  recorded_at: '2026-09-06T07:00:13+00:00'
-  recorded_by: d4d api verdict
+  basis: 'verdict from this record''s own check blocks against the per-project worst
+    of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions, including
+    the #684 report basis ({''measured'': 3, ''vacuous'': 0, ''unchecked'': 0})'
+  recorded_at: '2026-09-10T07:49:54+00:00'
+  recorded_by: d4d api verdict (offline)
   prior_verdict:
-    status: ok
+    status: regressed
     rows:
     - metric: pair errors
       run: 0
@@ -983,14 +982,68 @@ canary:
     - metric: receipt findings
       run: 0
       baseline_worst: 0
+    - metric: duplicate keys
+      run: 1
+      baseline_worst: 0
+      regressed: true
     blind: []
     unbaselined: []
-    regressions: []
-    basis: 'offline write of the verdict the batch gate printed after the run''s last
-      phase and fanned out on (the batch log''s line `canary ok — fanning out`; the
-      full phase started 2026-09-06T03:58:35+00:00), recomputed from this record''s
-      own check blocks against the v7 production per-project worst with the gate''s
-      functions, including the #684 report basis (v7 AI_READI: {''measured'': 1, ''vacuous'':
-      2, ''unchecked'': 0}). The batch writes no verdict block of its own (#1020).'
-    recorded_at: '2026-09-06T04:33:02+00:00'
-    recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-06
+    regressions:
+    - 'duplicate keys: 1 against a floor of 0'
+    basis: 'offline verdict from this record''s own check blocks against the per-project
+      worst of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions,
+      including the #684 report basis ({''measured'': 1, ''vacuous'': 2, ''unchecked'':
+      0}); the batch writes no verdict block of its own (#1020)'
+    recorded_at: '2026-09-06T07:00:13+00:00'
+    recorded_by: d4d api verdict
+    prior_verdict:
+      status: ok
+      rows:
+      - metric: pair errors
+        run: 0
+        baseline_worst: 0
+      - metric: report findings
+        run: 0
+        baseline_worst: 0
+      - metric: ungrounded identifiers
+        run: 0
+        baseline_worst: 0
+      - metric: resolver URLs in identifier slots
+        run: 0
+        baseline_worst: 0
+      - metric: organisational fragments
+        run: 0
+        baseline_worst: 0
+      - metric: undeclared prefixes
+        run: 0
+        baseline_worst: 0
+      - metric: British spellings
+        run: 0
+        baseline_worst: 52
+      - metric: chunks unreviewed
+        run: 0
+        baseline_worst: 0
+      - metric: snippets unverified
+        run: 0
+        baseline_worst: 0
+      - metric: addressing slips over tolerance
+        run: 0
+        baseline_worst: 0
+      - metric: receipts vacuous
+        run: 0
+        baseline_worst: 0
+      - metric: receipt findings
+        run: 0
+        baseline_worst: 0
+      blind: []
+      unbaselined: []
+      regressions: []
+      basis: 'offline write of the verdict the batch gate printed after the run''s
+        last phase and fanned out on (the batch log''s line `canary ok — fanning out`;
+        the full phase started 2026-09-06T03:58:35+00:00), recomputed from this record''s
+        own check blocks against the v7 production per-project worst with the gate''s
+        functions, including the #684 report basis (v7 AI_READI: {''measured'': 1,
+        ''vacuous'': 2, ''unchecked'': 0}). The batch writes no verdict block of its
+        own (#1020).'
+      recorded_at: '2026-09-06T04:33:02+00:00'
+      recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-06

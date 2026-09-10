@@ -1497,7 +1497,7 @@ steps need:
     Disposition headers parses as one: on the 69 snapshot records never
     asked for a table the removals are listed under `removals_unrecorded`
     and are not findings (`snapshot_basis` says which; the #684 precedent),
-    on the 17 that were, they are; 40 removals are listed corpus-wide. A
+    on the 17 that were, they are; 39 removals are listed corpus-wide. A
     paragraph saying a value "remains in",
     "stays in", "is kept in" a backticked slot path is read like a
     `retained` row that names no record — a negator within a dozen
@@ -1522,8 +1522,17 @@ steps need:
     re-derived again with `d4d api verdict` in the same change, the
     #1170 block kept under `prior_verdict`: the row reads 0 against a
     baseline worst of 1, the status `regressed` on the British row as
-    before, so no verdict moves; every other block agrees with its
-    record). Two
+    before, so no verdict moves. A canary block also quotes the
+    **baseline's** `report_basis`, and v5 moves that too: nine of the
+    eleven blocks that quote one were re-derived the same way, each
+    keeping its prior under `prior_verdict` (#1175 round 8, M2). No
+    status and no bar moves. Five lose a `baseline_basis` line — the
+    line the gate writes only where the baseline measured nothing — now
+    that their baseline measures: the v7 arm reads 3 measured for
+    AI_READI, 2 for CM4AI, 1 for VOICE, and CHORUS alone stays
+    all-vacuous and keeps its line. The one gated row among them, the
+    2026-09-04d VOICE canary's 5 report findings against a floor of 0,
+    was regressed before and is regressed now). Two
     earlier cuts were narrowed before the recompute was kept: the first
     counted an unrecorded removal on every snapshot record and read a
     leaf-named prose claim as a full path (48 records moved); the second
@@ -1590,10 +1599,21 @@ steps need:
     recompute under all of this gains four findings on the three records
     above and loses none**: CHORUS 04f rep2 gains both the unrecorded
     removal and the prose retention claim beside it, VOICE 04f rep2 and
-    AI_READI 04g rep3 one each. `removals_unrecorded` is 40, one more
-    than the pre-Codex reading: `variables` on the 2026-08-06 schema2
-    rep2 AI_READI record, the miss the review named first, on a run that
-    never asked for a table, so it is listed and not a finding. Two further effects of the recompute, neither a
+    AI_READI 04g rep3 one each. `removals_unrecorded` is 39 across 12
+    records — the same count as the pre-Codex reading and not the same
+    set. The weak signal reads the present tense as well as the past
+    participle ("Both records now omit `citation`" records a removal as
+    plainly as "was removed"), which retires three listings that cut
+    carried, while the narrowed clause and void rules retire and add
+    others. Three misses the Codex review named are listed by nobody and
+    are the residual class this amendment already describes: `variables`
+    on the 2026-08-06 schema2 rep2 AI_READI record ("absent from the core
+    record by schema design, not by omission" — a sentence about the core
+    record, where the snapshot finding is about the full one),
+    `compression` on the 2026-08-20b v5 rep3 CM4AI record, and
+    `extension_mechanism` on the 2026-09-01 v7 rep3 AI_READI record. None
+    of the three is a finding: no run among them was asked for a table.
+    Two further effects of the recompute, neither a
     finding: because a prose retention claim is now a claim checked,
     `claims_checked` moved on 96 records and 70 reports that read no
     claim before read one now (`canary.report_vacuous` flips from vacuous

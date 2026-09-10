@@ -951,9 +951,59 @@ canary:
   regressions: []
   basis: 'verdict from this record''s own check blocks against the per-project worst
     of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions, including
-    the #684 report basis ({''measured'': 1, ''vacuous'': 2, ''unchecked'': 0})'
-  recorded_at: '2026-09-07T00:51:07+00:00'
-  recorded_by: d4d api batch
+    the #684 report basis ({''measured'': 3, ''vacuous'': 0, ''unchecked'': 0})'
+  recorded_at: '2026-09-10T07:49:57+00:00'
+  recorded_by: d4d api verdict (offline)
+  prior_verdict:
+    status: ok
+    rows:
+    - metric: pair errors
+      run: 0
+      baseline_worst: 0
+    - metric: report findings
+      run: 0
+      baseline_worst: 0
+    - metric: ungrounded identifiers
+      run: 0
+      baseline_worst: 0
+    - metric: resolver URLs in identifier slots
+      run: 0
+      baseline_worst: 0
+    - metric: organisational fragments
+      run: 0
+      baseline_worst: 0
+    - metric: undeclared prefixes
+      run: 0
+      baseline_worst: 0
+    - metric: British spellings
+      run: 0
+      baseline_worst: 52
+    - metric: chunks unreviewed
+      run: 0
+      baseline_worst: 0
+    - metric: snippets unverified
+      run: 0
+      baseline_worst: 0
+    - metric: addressing slips over tolerance
+      run: 0
+      baseline_worst: 0
+    - metric: receipts vacuous
+      run: 0
+      baseline_worst: 0
+    - metric: receipt findings
+      run: 0
+      baseline_worst: 0
+    - metric: duplicate keys
+      run: 0
+      baseline_worst: 0
+    blind: []
+    unbaselined: []
+    regressions: []
+    basis: 'verdict from this record''s own check blocks against the per-project worst
+      of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions, including
+      the #684 report basis ({''measured'': 1, ''vacuous'': 2, ''unchecked'': 0})'
+    recorded_at: '2026-09-07T00:51:07+00:00'
+    recorded_by: d4d api batch
 review:
   checked: true
   items_total: 82
