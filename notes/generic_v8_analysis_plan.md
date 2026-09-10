@@ -1141,7 +1141,7 @@ itself, since a second `#` is not a URI (#1166 round 4; no record carries
 two today).
 Two earlier rewrites were retired by review (#1166): "a reader who follows this
 record's `id` finds its parts under it, which a label on another base does
-not give" either contradicted the licence granted two clauses earlier or
+not give" either contradicted the license granted two clauses earlier or
 reduced to preferring the id because it is the id (a CURIE with a fragment
 is namespacing, not a dereference); "the one base every consumer already
 holds — the core projector and the `resources` match join on it" cited a
