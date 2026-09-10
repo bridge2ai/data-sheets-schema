@@ -27,10 +27,12 @@ def _record(tmp, passed=True, md5="m1", with_field=False):
 
 
 class TestTheGate(unittest.TestCase):
-    def _run(self, tmp, new_passed=True, new_md5="m1", execute=True, problems=()):
+    def _run(self, tmp, new_passed=True, new_md5="m1", execute=True, problems=(), schema=None):
         from data_sheets_schema.cli import provenance as cli
         block = {"passed": new_passed, "artifacts": {"full": {"md5": new_md5}, "core": {"md5": new_md5}},
                  "duplicate_keys": {"full": [], "core": []}, "problems": list(problems)}
+        if schema is not None:
+            block["schema"] = dict(schema)
         with mock.patch("data_sheets_schema.api_runner.validate_outputs", lambda spec: []), \
              mock.patch("data_sheets_schema.api_runner.validation_block", lambda spec, problems, recorded_by: dict(block)), \
              mock.patch("data_sheets_schema.provenance.record_path_for",
@@ -114,13 +116,35 @@ class TestTheGate(unittest.TestCase):
                 self.assertNotEqual(r.exit_code, 0); self.assertIn("matched no run directory", r.output)
 
     def test_a_gated_dry_run_counts_what_it_would_write_and_says_when_the_schema_digest_moves(self):
-        """#1190 review, S2/M4."""
+        """#1190 review, S2/M4; round 2, S2: the message is asserted on a
+        populated new digest, not on the empty rendering."""
+        import contextlib, io
         with tempfile.TemporaryDirectory() as tmp:
             path = _record(tmp)
-            d = yaml.safe_load(path.read_text().split("\n", 1)[1]); d["validation"]["schema"] = {"full_sha256": "old"}
+            d = yaml.safe_load(path.read_text().split("\n", 1)[1]); d["validation"]["schema"] = {"full_sha256": "oldoldoldold"}
             path.write_text("# header\n" + yaml.safe_dump(d))
-            self.assertEqual(self._run(tmp, execute=False), "would write")
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                self.assertEqual(self._run(tmp, execute=False, schema={"full_sha256": "newnewnewnew"}), "would write")
+            self.assertIn("schema digest restamped", buf.getvalue())
+            self.assertIn("full_sha256 oldoldol→newnewne", buf.getvalue())
             self.assertNotIn("duplicate_keys", yaml.safe_load(path.read_text().split("\n", 1)[1])["validation"])
+
+    def test_a_record_already_under_the_instrument_is_rechecked_when_its_schema_pin_moved(self):
+        """#1190 round 2, M1: a corpus pass taken before the branch merged a
+        schema change left records pinning the older digest, which
+        `validation_status` reads as STALE, and the `already` short circuit
+        made it unrepairable."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp, with_field=True)
+            d = yaml.safe_load(path.read_text().split("\n", 1)[1]); d["validation"]["schema"] = {"full_sha256": "stale"}
+            path.write_text("# header\n" + yaml.safe_dump(d))
+            with mock.patch.object(cli, "_schema_pin_moved", lambda block: True):
+                self.assertEqual(self._run(tmp, schema={"full_sha256": "fresh"}), "written")
+            self.assertEqual(yaml.safe_load(path.read_text().split("\n", 1)[1])["validation"]["schema"],
+                             {"full_sha256": "fresh"})
+            with mock.patch.object(cli, "_schema_pin_moved", lambda block: False):
+                self.assertEqual(self._run(tmp, schema={"full_sha256": "fresh"}), "already")
 
     def test_report_mode_writes_nothing(self):
         with tempfile.TemporaryDirectory() as tmp:

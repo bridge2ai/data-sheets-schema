@@ -485,8 +485,10 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
 @click.option('--label', default=None)
 @click.option('--project', default=None)
 @click.option('--all', 'every', is_flag=True,
-              help='every record with a validation block (#1033): written only where the verdict '
-                   'and the artifacts are unchanged and the block lacks `duplicate_keys`')
+              help='every record with a validation block (#1033): written only where the verdict, the '
+                   "artifacts' md5s and each problem's artifact, class and JSON-pointer paths reproduce; "
+                   'a record already carrying `duplicate_keys` is skipped unless its schema pin is not '
+                   "this checkout's, which the write repairs")
 @click.option('--execute', is_flag=True, help='write the record; without it, report')
 def recheck_validation(method, label, project, every, execute):
     """Re-run validation on a record's files and rewrite its `validation` block (#1029).
@@ -499,9 +501,12 @@ def recheck_validation(method, label, project, every, execute):
 
     `--all` (#1033) walks every run on disk and brings each record under
     the instrument on one condition: the recomputed verdict and the
-    artifacts' md5s equal the recorded ones and the problems name the same
-    artifacts and classes, so the only thing the write adds is the
-    `duplicate_keys` field. A record whose verdict, artifacts or problems
+    artifacts' md5s equal the recorded ones and each problem names the same
+    artifact, class and JSON-pointer paths, so the only thing the write
+    adds is the `duplicate_keys` field and, where it moved, this
+    checkout's schema digest. A record already under the instrument is
+    skipped unless its schema pin has moved, which the write repairs
+    (#1190 round 2). A record whose verdict, artifacts or problems
     would move is named and left alone — rerun it by label to write it
     deliberately — and one already carrying the field is skipped.
     """
@@ -544,6 +549,21 @@ def recheck_validation(method, label, project, every, execute):
     _recheck_one(method, label, project, execute, gated=False)
 
 
+def _schema_pin_moved(block: dict) -> bool:
+    """Does the block pin a schema that is no longer this checkout's? A
+    record already under the instrument is re-checked only for this
+    (#1190 round 2, M1): a corpus pass taken before the branch merged a
+    schema change left 48 records pinning the older digest, which
+    `runs.validation_status` reads as STALE, and the `already` short
+    circuit made it unrepairable."""
+    from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA, _sha256
+    pinned = block.get("schema") or {}
+    if not pinned:
+        return False
+    return (pinned.get("full_sha256") != _sha256(FULL_SCHEMA)
+            or pinned.get("core_sha256") != _sha256(CORE_SCHEMA))
+
+
 def _problem_shape(block: dict) -> list:
     """What a validation problem names, message wording aside: its artifact,
     its class and the JSON-pointer paths in its message (#1190 review, M3)."""
@@ -575,7 +595,8 @@ def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bo
     if gated and not prior:
         click.echo(f"{tag}: no validation block; nothing to bring under the instrument")
         return "no block"
-    if gated and "duplicate_keys" in prior:
+    already = gated and "duplicate_keys" in prior
+    if already and not _schema_pin_moved(prior):
         click.echo(f"{tag}: already under the instrument")
         return "already"
     missing = [str(q) for q in (spec.full_path, spec.core_path) if not q.exists()]
@@ -599,6 +620,10 @@ def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bo
         # validator message carries today's enum list and moves when the
         # schema does while the failure it names does not; a message whose
         # paths moved names a different failure (#1190 review, M3). The
+        # message is `" | ".join(lines[:4])` (`api_runner`), so the gate
+        # sees at most four failures per problem and cannot tell a fifth
+        # from a fifth that changed — 8 of the corpus's 28 problem strings
+        # are exactly four lines and may be truncated (#1190 round 2, S1). The
         # schema digest is restamped on every write — the verdict was
         # recomputed against today's schema — and a digest that moved is
         # said (M4).
@@ -611,9 +636,13 @@ def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bo
             click.echo(f"   held: the {moved} would move; rerun by label to write it deliberately")
             return "held"
         old_schema, new_schema = prior.get("schema") or {}, block.get("schema") or {}
-        if old_schema and old_schema != new_schema:
-            click.echo("   schema digest restamped: the verdict is recomputed against today's schema "
-                       f"({', '.join(f'{k} {str(old_schema.get(k))[:8]}→{str(new_schema.get(k))[:8]}' for k in new_schema if old_schema.get(k) != new_schema.get(k))})")
+        moved_keys = [k for k in new_schema if old_schema.get(k) != new_schema.get(k)]
+        if old_schema and moved_keys:
+            click.echo("   schema digest restamped: the verdict is recomputed against this checkout's schema "
+                       + ", ".join(f"{k} {str(old_schema.get(k))[:8]}→{str(new_schema.get(k))[:8]}" for k in moved_keys))
+        elif old_schema and old_schema != new_schema:
+            click.echo("   schema block changed shape: "
+                       f"{sorted(set(old_schema) ^ set(new_schema))}")
     if not execute:
         click.echo("   (report only; --execute writes the block)")
         return "would write" if gated else "reported"

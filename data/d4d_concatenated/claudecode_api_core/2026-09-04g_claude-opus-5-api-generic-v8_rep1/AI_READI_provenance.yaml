@@ -326,12 +326,12 @@ validation:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d_core.yaml
       md5: 9975df3564ffee678f849518f2bdeec9
   schema:
-    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
-    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
+    full_sha256: ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da
+    core_sha256: 7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449
   duplicate_keys:
     full: []
     core: []
-  recorded_by: api_runner.execute
+  recorded_by: d4d provenance recheck-validation
 core_derivation:
   derived: true
   rule: shared slots copied from the full record; resources projected by id with full-only

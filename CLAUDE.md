@@ -604,13 +604,21 @@ record under the instrument — `--all` (#1033) walks every record once
 (the base directory and its `_core` twin are one record, keyed on the
 path) and writes only where the recorded verdict, the artifacts' md5s
 and each problem's artifact, class and JSON-pointer paths reproduce, so
-the write adds `duplicate_keys` and nothing else, restamping the schema
-digest and saying so where it moved: over the 282 records, 68 written
-(none with a duplicate key), 199 held whose `passed` flips to false
-under today's schema, 2 whose problems name other paths, 1 whose
-artifacts drifted, 4 with no validation block and one whose full record
-is gone; a held record is rerun by label as a deliberate act, and stays
-gated as unmeasured until it is — `d4d api verdict` re-verdicts it
+the write adds `duplicate_keys` and nothing else, restamping this
+checkout's schema digest and saying so where it moved. A record already
+carrying the field is skipped unless its schema pin has moved, which the
+write repairs: without that a pass taken before a schema change leaves
+its records reading STALE and unrepairable. Over the 282 records: 78
+written across five method directories (60 in the final pass, 18 already
+current), 199 held — 196 whose `passed` flips to false under today's
+schema, 2 whose problems name other JSON pointers, 1 whose artifacts
+drifted — 12 already under the instrument before this, 4 with no
+validation block, one whose full record is gone. One written record
+records a duplicate key, the AI_READI 2026-09-04f rep1 record whose own
+canary already reads `duplicate keys run 1, baseline_worst 0`; every
+other reads 0, so no verdict moves. A held record is rerun by label as a
+deliberate act, and stays gated as unmeasured until it is — `d4d api
+verdict` re-verdicts it
 offline with the gate's own functions, keeping the prior block under
 `prior_verdict`, and `d4d runs check` reports such records without
 failing `--strict`, which gates attestation, not validity (#1035). Since
