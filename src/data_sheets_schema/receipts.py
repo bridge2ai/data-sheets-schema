@@ -1234,7 +1234,8 @@ def claims_path(core_dir: Path, project: str) -> Path:
 
 def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle_md5: str | None,
               expected: bool, manifest: Path | None = None,
-              bundle_rel_path: str | None = None, record_bundle_sha256: str | None = None) -> dict[str, Any]:
+              bundle_rel_path: str | None = None, record_bundle_sha256: str | None = None,
+              record_chunks: dict[str, Any] | None = None) -> dict[str, Any]:
     """The provenance block for one run, or why it could not be computed.
 
     `expected` is whether this run's procedure was to write a receipt. It is
@@ -1250,6 +1251,11 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     manifest's rule; the block then carries `bundle_basis` naming the commit,
     and its `bundle_md5` is the record's own. Where no committed version
     matches, the block is `checked: false` with the drift named, as before.
+    `record_chunks` is the record's `inputs.chunks` — the rule the run
+    chunked under wins over today's manifest's, and a recovered manifest
+    whose chunk count is not the one the record cites is refused, since
+    chunk ids are positional and a different rule would put the same ids
+    over different text (#1187 review, S1).
     """
     import hashlib
 
@@ -1282,25 +1288,42 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
                 "reason": "the bundle on disk is not the bytes the manifest chunked; rebuild with d4d bundle chunk"}
     bundle_basis: dict[str, Any] = {"source": "bundle on disk", "path": str(bundle)}
     if record_bundle_md5 and record_bundle_md5 != m.get("bundle_md5"):
-        recovered = None
-        if bundle_rel_path:
-            from data_sheets_schema.provenance import GitUnavailable, bundle_bytes_for
-            try:
-                recovered = bundle_bytes_for(bundle_rel_path, md5=record_bundle_md5, sha256=record_bundle_sha256)
-            except GitUnavailable as exc:
-                return {**base, "checked": False,
-                        "reason": f"bundle drifted since the run and git could not supply the version the "
-                                  f"record hashed: {exc}"}
+        if not bundle_rel_path:
+            return {**base, "checked": False,
+                    "reason": "bundle drifted since the run; the receipt's chunks are not today's bytes, "
+                              "and the record declares no bundle path, so the version it read cannot be looked for"}
+        from data_sheets_schema.provenance import GitUnavailable, bundle_bytes_for
+        try:
+            recovered = bundle_bytes_for(bundle_rel_path, md5=record_bundle_md5, sha256=record_bundle_sha256)
+        except GitUnavailable as exc:
+            return {**base, "checked": False,
+                    "reason": f"bundle drifted since the run and git could not supply the version the "
+                              f"record hashed: {exc}"}
         if recovered is None:
             return {**base, "checked": False,
                     "reason": "bundle drifted since the run; the receipt's chunks are not today's bytes, "
                               "and no committed version of the declared path hashes to the record's md5"}
         raw, entry = recovered
         from data_sheets_schema.chunking import manifest_from_bytes
-        m = manifest_from_bytes(raw, bundle.name, m.get("rule"))
+        rule = (record_chunks or {}).get("rule") or m.get("rule")
+        rule_basis = ("the record's own inputs.chunks.rule" if (record_chunks or {}).get("rule")
+                      else "the on-disk manifest's rule (the record carries none)")
+        try:
+            m = manifest_from_bytes(raw, bundle.name, rule)
+        except UnicodeDecodeError as exc:
+            return {**base, "checked": False,
+                    "reason": f"bundle drifted since the run; the version the record hashed was recovered "
+                              f"from {entry['commit'][:12]} but is not UTF-8 ({exc})"}
+        expected_count = (record_chunks or {}).get("chunk_count")
+        if expected_count is not None and m.get("chunk_count") != expected_count:
+            return {**base, "checked": False,
+                    "reason": f"bundle drifted since the run; the version recovered from {entry['commit'][:12]} "
+                              f"chunks to {m.get('chunk_count')} under {rule_basis}, not the {expected_count} "
+                              f"the record cites, so its chunk ids would not name the receipt's text"}
         bundle_basis = {"source": "git blob", "path": bundle_rel_path, "commit": entry["commit"],
                         "committed_on": entry["date"], "md5": entry["md5"], "sha256": entry["sha256"],
-                        "manifest": "chunked in memory under the on-disk manifest's rule (#1140)"}
+                        "matched_on": entry.get("matched_on"),
+                        "manifest": f"chunked in memory under {rule_basis} (#1140)"}
     texts = dict(zip([c["id"] for c in m["chunks"]], _texts(raw.decode("utf-8"), m["chunks"])))
     full = (yaml.safe_load(full_path.read_text(encoding="utf-8")) or {}) if full_path.exists() else {}
     # A reshaped path is kept out of the findings and is *not* credited for

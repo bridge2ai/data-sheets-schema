@@ -677,7 +677,9 @@ receipts:
     committed_on: '2026-08-10'
     md5: dcd717170da6762569c0b4eeafc1c3d2
     sha256: a075e1124b91c58283113f6d8d1198daee295e84d585f7e8b35a098bbdd7c7ea
-    manifest: chunked in memory under the on-disk manifest's rule (#1140)
+    matched_on:
+    - md5
+    manifest: chunked in memory under the record's own inputs.chunks.rule (#1140)
   recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/intermediate/VOICE_audit.json

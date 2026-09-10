@@ -602,6 +602,17 @@ class OnDisk(unittest.TestCase):
                 none = rc.block_for(full, receipt, bundle, "0" * 32, expected=True, manifest=manifest,
                                     bundle_rel_path="data/preprocessed/concatenated/P_preprocessed.txt")
             b_direct = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest)
+            # the record's own rule wins, and a chunk count the record does not cite is refused (S1)
+            with mock.patch("data_sheets_schema.provenance.bundle_bytes_for",
+                            lambda path, md5=None, sha256=None: (BUNDLE.encode(), entry)):
+                wrong = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest,
+                                     bundle_rel_path="x", record_chunks={"rule": None, "chunk_count": 99})
+                own = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest,
+                                   bundle_rel_path="x", record_chunks={"rule": build_manifest(bundle)["rule"], "chunk_count": None})
+                bad = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest, bundle_rel_path="x")
+            with mock.patch("data_sheets_schema.provenance.bundle_bytes_for",
+                            lambda path, md5=None, sha256=None: (b"\xff\xfe not utf-8", entry)):
+                undecodable = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest, bundle_rel_path="x")
             # same bytes + same rule = the manifest the run would have chunked
             self.assertEqual(manifest_from_bytes(drifted.encode(), "P_preprocessed.txt")["chunks"],
                              build_manifest(bundle)["chunks"])
@@ -614,7 +625,12 @@ class OnDisk(unittest.TestCase):
                          manifest_from_bytes(BUNDLE.encode(), "P_preprocessed.txt")["chunk_count"])
         self.assertEqual(b["snippets"]["verified"], b["snippets"]["total"])       # the snippets are in the recovered bytes
         self.assertFalse(none["checked"]); self.assertIn("no committed version", none["reason"])
-        self.assertFalse(b_direct["checked"]); self.assertIn("drifted", b_direct["reason"])   # no path: as before
+        self.assertFalse(b_direct["checked"]); self.assertIn("declares no bundle path", b_direct["reason"])   # no path: no false search claim (M1)
+        self.assertNotIn("no committed version", b_direct["reason"])
+        self.assertFalse(wrong["checked"]); self.assertIn("not the 99 the record cites", wrong["reason"])
+        self.assertTrue(own["checked"]); self.assertIn("the record's own inputs.chunks.rule", own["bundle_basis"]["manifest"])
+        self.assertTrue(bad["checked"]); self.assertIn("on-disk manifest's rule", bad["bundle_basis"]["manifest"])
+        self.assertFalse(undecodable["checked"]); self.assertIn("not UTF-8", undecodable["reason"])
 
     def test_bundle_bytes_for_reads_the_matching_version_and_none_otherwise(self):
         from unittest import mock
@@ -632,9 +648,12 @@ class OnDisk(unittest.TestCase):
             by_sha = pv.bundle_bytes_for("data/x.txt", sha256="s-new")
             missing = pv.bundle_bytes_for("data/x.txt", md5="nope")
             nothing = pv.bundle_bytes_for("data/x.txt")
-        self.assertEqual(got, (b"the old bytes", history[1]))
-        self.assertEqual(by_sha[1]["commit"], "a" * 40)
+            both = pv.bundle_bytes_for("data/x.txt", md5="m-old", sha256="s-old")
+            disagree = pv.bundle_bytes_for("data/x.txt", md5="m-old", sha256="s-new")   # S2: both must match
+        self.assertEqual(got, (b"the old bytes", {**history[1], "matched_on": ["md5"]}))
+        self.assertEqual(by_sha[1]["commit"], "a" * 40); self.assertEqual(by_sha[1]["matched_on"], ["sha256"])
         self.assertIsNone(missing); self.assertIsNone(nothing)
+        self.assertEqual(both[1]["matched_on"], ["md5", "sha256"]); self.assertIsNone(disagree)
         self.assertIn(f"{'b' * 40}:data/x.txt", shown[0])
 
     def test_block_for_names_each_reason_and_checks_when_it_can(self):

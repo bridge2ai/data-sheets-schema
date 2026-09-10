@@ -247,7 +247,8 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
                                        bundle, inputs.get("bundle_md5"),
                                        bool(inputs.get("receipt_expected")),
                                        bundle_rel_path=inputs.get("bundle_path"),
-                                       record_bundle_sha256=inputs.get("bundle_sha256")),
+                                       record_bundle_sha256=inputs.get("bundle_sha256"),
+                                       record_chunks=inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None),
                            "recorded_by": RECORDED_BY}
     return out
 

@@ -788,7 +788,9 @@ receipts:
     committed_on: '2026-09-01'
     md5: 8abd7bf5389b562b95794d656af19392
     sha256: 909c0dd8a1dcade0a0af908771356d5ea13cd91849522d562e9d88107661d368
-    manifest: chunked in memory under the on-disk manifest's rule (#1140)
+    matched_on:
+    - md5
+    manifest: chunked in memory under the record's own inputs.chunks.rule (#1140)
   recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/intermediate/AI_READI_audit.json

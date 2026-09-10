@@ -517,7 +517,9 @@ receipts:
     committed_on: '2026-08-10'
     md5: 1dfd34e5610fed7c22bea1f09c0bc60c
     sha256: f138e6d5841609841994e0b3e91b2477c824f5675eb91c83d51db0b8d11504d2
-    manifest: chunked in memory under the on-disk manifest's rule (#1140)
+    matched_on:
+    - md5
+    manifest: chunked in memory under the record's own inputs.chunks.rule (#1140)
   recorded_by: backfill_checks
 review:
   checked: true

@@ -901,7 +901,11 @@ def check_cmd(method, label, project, strict):
     for r in rows:
         try:
             rec = _yaml.safe_load(record_path_for(r["project"], r["method"], r["label"]).read_text(encoding="utf-8")) or {}
-        except Exception:                                          # noqa: BLE001
+        except Exception as exc:                                   # noqa: BLE001
+            # Counted, not swallowed (#1187 review, S5): this is the command
+            # whose job is to report what the corpus holds.
+            by_instrument["could not read"] += 1
+            behind.append(f"{r['label']}/{r['project']} (could not read: {type(exc).__name__})")
             continue
         block = rec.get("receipts")
         if not isinstance(block, dict) or not block.get("checked"):

@@ -1811,13 +1811,19 @@ def bundle_bytes_for(bundle_path: str, md5: str | None = None,
     if not md5 and not sha256:
         return None
     for entry in bundle_blob_history(bundle_path):
-        if (md5 and entry["md5"] == md5) or (sha256 and entry["sha256"] == sha256):
-            blob = subprocess.run(["git", "show", f"{entry['commit']}:{bundle_path}"],
-                                  capture_output=True, check=False, cwd=_REPO_ROOT)
-            if blob.returncode != 0:
-                raise GitUnavailable(blob.stderr.decode("utf-8", "replace").strip()
-                                     or f"git show failed for {entry['commit']}:{bundle_path}")
-            return blob.stdout, dict(entry)
+        # Every hash given must match (#1187 review, S2): a version that
+        # matches one and not the other is not the version the record read.
+        md5_ok = entry["md5"] == md5 if md5 else None
+        sha_ok = entry["sha256"] == sha256 if sha256 else None
+        if any(ok is False for ok in (md5_ok, sha_ok)) or not any(ok for ok in (md5_ok, sha_ok)):
+            continue
+        blob = subprocess.run(["git", "show", f"{entry['commit']}:{bundle_path}"],
+                              capture_output=True, check=False, cwd=_REPO_ROOT)
+        if blob.returncode != 0:
+            raise GitUnavailable(blob.stderr.decode("utf-8", "replace").strip()
+                                 or f"git show failed for {entry['commit']}:{bundle_path}")
+        matched = [name for name, ok in (("md5", md5_ok), ("sha256", sha_ok)) if ok]
+        return blob.stdout, {**entry, "matched_on": matched}
     return None
 
 
