@@ -89,6 +89,23 @@ class TestValidateCore(unittest.TestCase):
         self.assertIn("999", result.stdout + result.stderr)
         self.assertRegex(result.stdout, r"✖ .*D4D_Core\.yaml")
 
+    def test_a_numeric_range_in_the_module_fails_the_recipe(self):
+        """#1150 reported that `range: 123` in `D4D_Core.yaml` passed both
+        halves — true of the first recipe, which linted the wrapper only;
+        gen-python coerces the number and degrades the slot to a string. The
+        recipe lints every module now (#1136 round 2), and the linter's
+        metamodel check names the scalar. Pinned here so the case cannot
+        quietly pass again if the module list shrinks."""
+        def edit(d):
+            m = d / "D4D_Core.yaml"
+            text = m.read_text()
+            self.assertIn("\n        range: CoreDataset\n", text)
+            m.write_text(text.replace("\n        range: CoreDataset\n", "\n        range: 123\n", 1))
+        with tempfile.TemporaryDirectory() as tmp:
+            result = _make("validate-core", f"D4D_CORE_SCHEMA={_broken_copy(tmp, edit)}")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertRegex(result.stdout, r"✖ .*D4D_Core\.yaml")
+        self.assertIn("range: 123 is not of type 'string'", result.stdout)
 
 if __name__ == "__main__":
     unittest.main()
