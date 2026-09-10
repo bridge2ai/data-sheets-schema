@@ -364,7 +364,7 @@ slots:
     slot_uri: dcterms:publisher
     range: uriorcurie
     annotations:
-      "d4d:docExample": "ror:04t3en479  # use a ROR ID, DOI, or URL — not a plain name"
+      "d4d:docExample": "ROR:0xxxxxxxx  # a ROR CURIE (form only), a DOI, or a URL — not a plain name"
 
   issued:
     description: >-

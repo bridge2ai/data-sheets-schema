@@ -1080,9 +1080,14 @@ def scope_block(project: str,
     # raise out of here into `build_phase` and end the run. A malformed entry
     # is skipped and named in the block, so the model is told the declaration
     # is incomplete rather than silently given less than was declared.
-    raw = [e for e in (declared.get("related_but_distinct") or []) if e]
-    related = [e for e in raw if isinstance(e, dict)]
-    malformed = len(raw) - len(related)
+    # One classifier with the checkers (#1157): `scope.malformed_in` says
+    # which entries every reader skips (omitted and counted here) and which
+    # carry an alias no reader can match (kept, the alias dropped).
+    from data_sheets_schema.scope import malformed_in   # function-local, so a test can patch the scope module
+    rows = malformed_in(declared)
+    skipped = {r["index"] for r in rows if r["skipped"]}
+    related = [e for i, e in enumerate(declared.get("related_but_distinct") or []) if i not in skipped]
+    malformed = len(skipped)
     if related:
         lines.append("")
         lines.append("The declared bundle also documents datasets that are "

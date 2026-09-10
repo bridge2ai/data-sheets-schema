@@ -35,9 +35,14 @@ REPO = Path(__file__).resolve().parents[1]
 
 #: What a real identifier looks like. Form-only phrasing in the rules — "a
 #: ROR: CURIE, not the ror.org URL" — contains none of these by construction.
+#: A ROR id is `0` + six Crockford base32 characters (no i, l, o, u) + two
+#: check digits (#1146): `01an7q238` is one, the form-only placeholder
+#: `0xxxxxxxx` is not — the first version matched any nine lowercase
+#: alphanumerics and could not tell a form from an id.
+_ROR_ID = r"0[0-9a-hjkmnp-tv-z]{6}[0-9]{2}"
 SHAPES = {
-    "ROR CURIE": re.compile(r"\bROR:[0-9a-z]{9}\b"),
-    "ror.org URL": re.compile(r"ror\.org/[0-9a-z]{9}\b"),
+    "ROR CURIE": re.compile(rf"\b(?i:ror):{_ROR_ID}\b"),       # `ror:04t3en479` (KIT) sat in a docExample in lower case (#1178 review)
+    "ror.org URL": re.compile(rf"ror\.org/{_ROR_ID}\b"),
     "DOI prefix": re.compile(r"\b10\.\d{3,9}/\S+"),            # registrants of 3+ digits (review note 6)
     "doi: CURIE": re.compile(r"\bdoi:10\.\d{3,9}"),
     "orcid.org URL": re.compile(r"orcid\.org/\d"),
@@ -47,6 +52,14 @@ SHAPES = {
     "clinical trial": re.compile(r"\bNCT\d{8}\b"),
     "RRID": re.compile(r"\bRRID:\s?[A-Z]+_?\w+"),
     "dbGaP": re.compile(r"\bphs\d{6}\b"),
+}
+#: The prompt body's shapes (#1178 review, S1): the un-narrowed ROR forms —
+#: any nine lowercase alphanumerics — because an identifier-shaped token in
+#: the body is a copy-through candidate whether or not it is anyone's. The
+#: rest of the body's shapes are the same as everywhere.
+_STRICT_SHAPES = {
+    "ROR CURIE": re.compile(r"\b(?i:ror):[0-9a-z]{9}\b"),
+    "ror.org URL": re.compile(r"ror\.org/[0-9a-z]{9}\b"),
 }
 
 
@@ -75,13 +88,25 @@ def _digest_texts() -> list[tuple[str, str, str]]:
             for cls in ("Dataset", "CoreDataset")]
 
 
+def _schema_texts() -> list[tuple[str, str, str]]:
+    """The schema source modules (#1146): docExamples and descriptions reach
+    the agentic runtime through the merged schema file, and the digest
+    renders descriptions to every API request, so a real identifier in a
+    module is model-facing on both paths. The generated merged file and the
+    datamodel are derived from these and are not scanned twice."""
+    return [(str(p.relative_to(REPO)), "schema", p.read_text(encoding="utf-8"))
+            for p in sorted((REPO / "src" / "data_sheets_schema" / "schema").glob("*.yaml"))
+            if not p.name.endswith("_all.yaml")]
+
+
 def texts() -> list[tuple[str, str, str]]:
     """Every scanned surface: (name, surface, text)."""
     return (_prompt_texts()
             + [(str(p.relative_to(REPO)), "playbook", p.read_text(encoding="utf-8"))
                for p in (REPO / ".claude" / "commands" / "d4d-uniform-rules.md",
                          REPO / ".claude" / "commands" / "d4d-full-core.md")]
-            + _digest_texts())
+            + _digest_texts()
+            + _schema_texts())
 
 
 #: Known real identifiers that cannot yet be removed: (name, token) ->
@@ -121,12 +146,44 @@ def allowlist_findings(allowed: dict, surfaces: list[tuple[str, str, str]]) -> l
     return out
 
 
-def real_identifiers(text: str) -> list[tuple[str, str]]:
-    """Every (shape, token) in `text` that looks like a real identifier."""
+def orcid_checksum_holds(token: str) -> bool:
+    """ISO 7064 MOD 11-2 over the 15 base digits of an ORCID iD (#1146):
+    an ORCID-shaped placeholder whose check digit is wrong cannot name a
+    person, which is how #1126 made the schema's four examples form-only,
+    and is the property the scanner reads rather than an allowlist. A
+    form written with X's (`XXXX-XXXX-XXXX-XXXX`) is not an id."""
+    digits = re.sub(r"[^0-9X]", "", token.upper())
+    if len(digits) != 16 or not digits[:15].isdigit():
+        return False
+    total = 0
+    for d in digits[:15]:
+        total = (total + int(d)) * 2
+    check = (12 - total % 11) % 11
+    return digits[15] == ("X" if check == 10 else str(check))
+
+
+def real_identifiers(text: str, strict: bool = False) -> list[tuple[str, str]]:
+    """Every (shape, token) in `text` that looks like a real identifier. An
+    ORCID-shaped token whose check digit fails is a form, not an id — except
+    under `strict`, the prompt body's rule (#1178 review, S3): the body is
+    what is sent, and an identifier-shaped token there is a candidate for
+    copy-through into a record whether or not it is anyone's, so the body
+    keeps the un-narrowed reading."""
     hits = []
-    for shape, rx in SHAPES.items():
+    shapes = {**SHAPES, **_STRICT_SHAPES} if strict else SHAPES
+    for shape, rx in shapes.items():
         for m in rx.finditer(text):
-            hits.append((shape, m.group(0)))
+            tok = m.group(0)
+            if strict:
+                hits.append((shape, tok))
+                continue
+            if shape == "bare ORCID" and not orcid_checksum_holds(tok):
+                continue
+            if shape == "orcid.org URL":
+                tail = re.search(r"orcid\.org/(\d{4}-\d{4}-\d{4}-\d{3}[\dX])", text[m.start():m.start() + 40])
+                if tail and not orcid_checksum_holds(tail.group(1)):
+                    continue
+            hits.append((shape, tok))
     return hits
 
 
@@ -151,6 +208,32 @@ class TestTheScannerSeesEachShape(unittest.TestCase):
         for shape, text in samples.items():
             with self.subTest(shape=shape):
                 self.assertTrue(any(s == shape for s, _ in real_identifiers(text)))
+
+    def test_a_form_only_ror_placeholder_is_not_an_identifier(self):
+        """#1146: the organization docExample `https://ror.org/0xxxxxxxx` is a
+        form, and a shape that cannot tell it from an id would make the
+        schema surface unscannable."""
+        self.assertEqual(real_identifiers("see https://ror.org/0xxxxxxxx and ROR:0xxxxxxxx"), [])
+        self.assertEqual(real_identifiers("https://ror.org/01an7q238"), [("ror.org URL", "ror.org/01an7q238")])
+        self.assertEqual(real_identifiers("ROR:01an7q238"), [("ROR CURIE", "ROR:01an7q238")])
+        self.assertEqual(real_identifiers("ror:04t3en479"), [("ROR CURIE", "ror:04t3en479")])   # the KIT id, lower-case prefix
+        self.assertEqual(real_identifiers("ROR:0lio1u238"), [])        # i, l, o, u are not in the alphabet
+        self.assertFalse(orcid_checksum_holds("XXXX-XXXX-XXXX-XXXX"))
+        self.assertEqual(real_identifiers("0000-0002-1234-5678", strict=True), [("bare ORCID", "0000-0002-1234-5678")])
+        self.assertEqual(real_identifiers("ROR:0xxxxxxxx and ror.org/abcdefghi", strict=True),
+                         [("ROR CURIE", "ROR:0xxxxxxxx"), ("ror.org URL", "ror.org/abcdefghi")])   # the body keeps both halves
+
+    def test_an_orcid_whose_check_digit_fails_is_a_form(self):
+        """#1146: the schema's four ORCID-shaped tokens (three docExamples and
+        the `orcid` slot's description) end in a digit their checksum forbids
+        (#1126); the scanner reads the checksum, so the schema surface can be
+        scanned without allowlisting them."""
+        self.assertTrue(orcid_checksum_holds("0000-0002-1825-0097"))
+        self.assertFalse(orcid_checksum_holds("0000-0000-0000-0000"))
+        self.assertFalse(orcid_checksum_holds("0000-0002-1234-5678"))
+        self.assertEqual(real_identifiers("orcid 0000-0002-1234-5678 and https://orcid.org/0000-0000-0000-0000"), [])
+        self.assertEqual([s for s, _ in real_identifiers("0000-0002-1825-0097 https://orcid.org/0000-0002-1825-0097")],
+                         ["orcid.org URL", "bare ORCID", "bare ORCID"])     # the URL's tail is a bare id too
 
     def test_form_only_phrasing_is_clean(self):
         """The wording the rules actually use contains none of the shapes."""
@@ -196,6 +279,8 @@ class TestNoRealIdentifierOnAnyModelFacingSurface(unittest.TestCase):
         self.assertGreaterEqual(len([1 for n, s in names if s == "body"]), 9)   # v1 + v2–v9; a v10 adds one
         self.assertIn(("schema digest (Dataset)", "digest"), names)
         self.assertIn((".claude/commands/d4d-full-core.md", "playbook"), names)
+        self.assertIn(("src/data_sheets_schema/schema/D4D_Base_import.yaml", "schema"), names)   # #1146
+        self.assertGreaterEqual(len([1 for n, s in names if s == "schema"]), 22)
 
     def test_no_unlisted_real_identifier(self):
         """Delegates to `allowlist_findings`, the machinery the synthetic
@@ -216,7 +301,7 @@ class TestNoRealIdentifierOnAnyModelFacingSurface(unittest.TestCase):
         review, finding 5)."""
         for name, surface, text in texts():
             if surface == "body":
-                self.assertEqual(real_identifiers(text), [], name)
+                self.assertEqual(real_identifiers(text, strict=True), [], name)   # no narrowing on the body (#1178 review, S3)
 
     def test_every_allowlisted_identifier_is_still_where_it_says(self):
         """An entry for a token that is gone is a claim that has stopped being
