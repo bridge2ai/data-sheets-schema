@@ -1413,7 +1413,6 @@ and 17 are not; 15 and 17 are the receipts instrument's revisions and
 17 classifies both; 18 changes the normaliser's rule table and is a
 generation-path change by that half); per the production rule none of
 them may land between a v8 canary and its fill.
-between a v8 canary and its fill.
 
 ## Decisions needed before step 3
 
