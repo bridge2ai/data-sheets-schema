@@ -201,14 +201,49 @@ receipt, CM4AI rep3's archive-channel sentence. Rubric evaluations of the
 two amended records predate the amendments and are listed as such.
 
 **British spellings, instrument v3 (#836/#859).** Every form block was
-recomputed: v6 arm 47, v7 production 139 (AI_READI 45/38/52 — the
+recomputed: v6 arm 47 (49 under v4, #1006: one `nanometres` in CM4AI
+rep3, counted in the full and the core), v7 production 139 (AI_READI 45/38/52 — the
 reviewers' ~24 lines were real), v5 baseline 88. Under v3 the AI_READI
 rep1 canary reads *regressed* on the British row (45 vs the baseline's
 worst 43): decision D4 (#906, adopted 2026-09-03, PR #920) re-derived its
 verdict offline under v3, with the prior v2-basis verdict kept under
 `prior_verdict`. The record stays retained in the completed arm — the
 retention now sits under a regressed-on-British v3 verdict, and every
-other row is unchanged.
+other row is unchanged. Re-derived again on 2026-09-10 UTC (#1170, the
+#922 procedure; `recorded_at` 2026-09-10T00:12Z): the report-findings row
+reads unmeasured rather than 0 vs 1 — the record's own report block read
+no claim (`claims_checked` 0, #684) — with the D4 block (#906) kept under
+`prior_verdict` beneath it, and #891's beneath that; status `regressed`
+on the British row either way, 45 vs 43 under instrument v3 — and under
+v4 as proposed in #1173 (#1006; open at the time of writing, its patterns
+checked at that branch's head), the run and all three 2026-08-22c
+baseline replicates read the same (45; 33, 43, 0), so that revision as
+proposed would not call for a third re-derivation; every other row
+unchanged.
+
+**CM4AI rep1's canary block, re-derived (2026-09-09, #922).** The block
+the #876 re-verdict wrote carried the v2 British baseline (0 vs 0) and
+predated the addressing-slips row (#891); under #907 the v2 numbers no
+longer exist in the corpus, so its basis — "recomputes against the same
+2026-08-22c baseline the batch used" — named rows that could not be
+reproduced. Re-derived offline with `d4d api verdict` under today's
+instrument, the prior block kept under `prior_verdict`: status `ok`
+either way; British reads 0 vs a baseline worst of 4 (v3), the
+addressing-slips row is present at 0 vs 0, and the report-findings row
+reads unmeasured rather than 0 vs 2 — the record's own report block read
+no claim (`claims_checked` 0, #684: an earlier record's vacuous row is
+shown as unmeasured and not gated), and the baseline's worst fell from 2
+to 1 under `report_claims` instrument v3 (#1022/#1046): 2026-08-22c rep1
+— the one replicate that measured, the other two vacuous — claimed
+`citation` is undeclared on `CoreDataset`, which v3 resolves against that
+scope only and no longer counts as a false claim; its `distributions`
+finding still counts. Four instruments moved this block, not
+the two #922 named: British v3, the slips row (#891), the #684 vacuity
+reading and report_claims v3. AI_READI rep1's D4 block, one paragraph
+up, read its report row the same way and was re-derived under #1170.
+CHORUS and VOICE rep1 still carry no block: the batch of 2026-09-01
+wrote no canary block at all — #1020 added that on 2026-09-06 — and a
+verdict they never carried is not re-derived here.
 
 **Correction (2026-09-03, #805/#916):** the rule-08 verdicts on the
 Person-ranged slots — `principal_investigator`, `contact_person`,

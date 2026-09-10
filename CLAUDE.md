@@ -645,7 +645,19 @@ resolved as written even when another entry now sits at that index; those
 are reported as `index_reused_by_another_entry` / `path_not_in_snapshot`
 and carry no coverage credit; the gone-entry classes also count under
 `reshaped_by_reconcile` (they resolved in the snapshot), a never-present
-path does not.
+path does not. An entry whose identity key the final list no longer
+carries *anywhere* is not gone: reconciliation stripped the key (a minted
+`id` under rule 11/14, the usual case), which says nothing about which
+entry it is, so it is located as a keyless entry — by overlap, else by
+position for the same shape when the list kept its length, basis
+`same_key_stripped`, listed under `slots.located_after_key_stripped`
+(receipts instrument **v3**, #1053); a keyed entry whose key other final
+entries still carry is gone as before, and so is a stripped entry in a
+list that shrank — position is no evidence there, and the first v3
+credited CHORUS 2026-09-01 rep3's Bihorac receipt to the Consortium
+entry a 7 → 2 reconcile left at its index (#1162 review). Before v3 the
+CHORUS 2026-09-04f rep1 record read two such entries as dropped and lost
+the receipt credit on values sitting at the receipted path.
 Keyless entries whose only leaves are lists still join by position (#908).
 
 ## Method directories and runtime-scoped canonicals (#690, v8 D6)
@@ -753,10 +765,22 @@ entry here is indistinguishable from one the generator wrote.
 `d4d provenance backfill-checks --blocks form,receipts` restricts a backfill
 to the named blocks and computes only those — an instrument revision to one
 block must not overwrite a grounding block the run attested on bytes that
-have since drifted. British spellings are instrument **v3** (#836/#859):
-the form blocks of all 264 records were recomputed under it in the same
-change; v2 numbers in earlier notes are not comparable (see #906 for the
-canary consequence).
+have since drifted. British spellings are instrument **v4** (#1006; v3
+#836/#859): the form blocks of all 282 records were recomputed under it in
+the same change and now carry `british_instrument`; v2 numbers in earlier
+notes are not comparable (see #906 for the canary consequence). v4 admits
+labourers, honourably, millilitres, micrometres, paediatricians,
+haematopoietic, sulphide and grey — forms the Codex review of #1003 found
+the v3 patterns could not see. None of the eight occurs in any record; the
+patterns they widened do (`haematocrit` 19, `microlitre` 15, `micrometres`
+12, `nanometres` 6 — 52 occurrences), and 18 records moved on those, none
+of them a gate baseline or a record carrying a canary block (the v7
+production arm stays 139 and 2026-08-22c 88); the v6 agentic arm reads 49
+(47 under v3). A surname Grey is counted like the Temerty Centre is — the
+count is a fact about the text — and the normaliser leaves it as written
+only inside a title-case run ("Jane Grey", "Grey Institute"); a bare
+`family_name: Grey` or "led by Grey" is rewritten and logged under
+`british_rewrites`, and `d4d review disposition --amend` restores it.
 
 ## Proving which agent definition a subagent read (#1077)
 
@@ -1043,7 +1067,7 @@ slots only; every `mailto:` id it leaves is logged as skipped, under
 whose ORCID the documents list is a review matter (rule-03), not the
 normaliser's. Since #1002 (v8 step J) British
 forms in prose are rewritten to American, one rule per pattern of the
-form block's instrument (v3), double-quoted spans and identifier-shaped
+form block's instrument (v4 since #1006), double-quoted spans and identifier-shaped
 tokens (`://`, `/`, `@`, `:x`, `.x` inside a token) left as written, keys
 and the `#` header untouched; each rewrite is logged under
 `normalisation.british_spellings` by phase and slot, so the model's own

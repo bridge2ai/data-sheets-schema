@@ -251,7 +251,12 @@ DATASET_IDENTIFIER_SLOTS = ("id", "doi", "page")
 #: the block so a reader can tell which revision produced it; nothing pools
 #: blocks across revisions today, and #1140's recompute is what would bring
 #: the records a drifted bundle withholds under one.
-RECEIPTS_INSTRUMENT = ("v2 (#1123): a fragment minted on an identifier the record carries "
+RECEIPTS_INSTRUMENT = ("v3 (#1053): an entry whose identity key the final list no longer carries "
+                       "anywhere (a minted id reconciliation stripped) is located as a keyless "
+                       "entry — by overlap, else by position for the same shape when the list "
+                       "kept its length (`same_key_stripped`, counted under "
+                       "`slots.located_after_key_stripped`) — instead of declared dropped; "
+                       "v2 (#1123): a fragment minted on an identifier the record carries "
                        "for the dataset at its top level — its id in CURIE or resolver form, "
                        "its doi, its page — is exempt like one on its own id; "
                        "`slots.exempt_on_carried_identifier` counts them; v1 (#720, #721, "
@@ -456,19 +461,35 @@ def _scalar_pairs(node: Any) -> set[tuple[str, str]]:
             if isinstance(v, (str, int, float, bool)) and str(v).strip()}
 
 
-def _locate(entry: Any, i: int, candidates: list[Any]) -> tuple[int | None, str]:
+def _locate(entry: Any, i: int, candidates: list[Any],
+            siblings: list[Any] | None = None) -> tuple[int | None, str]:
     """The index in `candidates` of the entry that is `entry`, and how it was
-    found: `same` (the key matches at the same index), `by_<key>` (the key
+    found: `same` (the key matches at the same index, or a keyless entry
+    joined by overlap or by shape at its own index), `by_<key>` (the key
     matches elsewhere), `by_overlap` (no key; the unique best overlap of
-    scalar pairs, sharing at least one), or None — the same index is never
-    assumed when identity says otherwise (#899)."""
+    scalar pairs, sharing at least one), `same_key_stripped` (the key the
+    entry carried is on no candidate — reconciliation stripped it, #1053 —
+    and the entry was then joined at its own index by overlap, or by shape
+    when `siblings`, the snapshot list, and `candidates` have the same
+    length), or None with the reason — the same index is never assumed
+    when identity says otherwise (#899), and a stripped entry in a list
+    that shrank is never assumed to be the entry now at its index."""
     key = _entry_key(entry)
+    stripped = False
     if key is not None:
         hits = [k for k, e in enumerate(candidates) if _entry_key(e) == key]
         if hits:
             return (i, "same") if i in hits else (hits[0], f"by_{key[0]}")
         if key[0] == "value":
             return None, "entry_dropped"
+        if not any(isinstance(e, dict) and key[0] in e for e in candidates):
+            # The key the snapshot entry carried is on no entry of the final
+            # list: reconciliation stripped it (a minted `id` under rule
+            # 11/14 is the usual case, #1053), which says nothing about
+            # which entry this is. Located as a keyless entry from here —
+            # by overlap, then by position for the same shape — rather than
+            # declared gone because a key nobody carries matched nobody.
+            key, stripped = None, True
     pairs = _scalar_pairs(entry)
     scored = [(len(pairs & _scalar_pairs(e)), k) for k, e in enumerate(candidates)]
     best = max((s for s, _k in scored), default=0)
@@ -483,12 +504,25 @@ def _locate(entry: Any, i: int, candidates: list[Any]) -> tuple[int | None, str]
         same_shape = (key is None and i < len(candidates) and isinstance(entry, dict)
                       and isinstance(candidates[i], dict)
                       and bool(set(entry) & set(candidates[i])))
-        return (i, "same") if same_shape else (None, "entry_dropped")
+        if same_shape and stripped and (siblings is None or len(siblings) != len(candidates)):
+            # The strip test cannot tell "every entry lost its key" from
+            # "this entry was deleted and the survivors lost theirs". When
+            # the list shrank, the entry at this index may be a survivor
+            # from further down — CHORUS 2026-09-01 rep3's `creators` went
+            # 7 → 2 and the Consortium entry landed where Azra Bihorac's
+            # had been (#1162 review). Position is evidence only when the
+            # list kept its length; otherwise the entry is gone.
+            return (None, "entry_dropped")
+        if same_shape:
+            return (i, "same_key_stripped" if stripped else "same")
+        return (None, "entry_dropped")
     winners = [k for s, k in scored if s == best]
     if len(winners) > 1 and i not in winners:
         return None, "ambiguous"
     j = i if i in winners else winners[0]
-    return (j, "same" if j == i else "by_overlap")
+    if j == i:
+        return (i, "same_key_stripped" if stripped else "same")
+    return (j, "by_overlap")
 
 
 def remap_path(path: str, original: dict[str, Any] | None, full: dict[str, Any]) -> dict[str, Any]:
@@ -506,6 +540,8 @@ def remap_path(path: str, original: dict[str, Any] | None, full: dict[str, Any])
 
     Returns `{path, basis}`: `path` is the resolved path in `full` (None when
     the entry or leaf is gone) and `basis` says how — `same` (unchanged),
+    `same_key_stripped` (same index; the key the snapshot entry carried is on
+    no final entry, #1053),
     `by_<key>` (the entry moved; found by that key), `by_overlap` (moved; no
     key, found by its scalar pairs), `not_in_snapshot` (the written path did
     not resolve in the snapshot, so identity could not be read — resolved as
@@ -530,7 +566,7 @@ def remap_path(path: str, original: dict[str, Any] | None, full: dict[str, Any])
                 return {"path": path if resolve(full, path) else None, "basis": "not_in_snapshot"}
             if not isinstance(cur_f, list):
                 return {"path": None, "basis": "unresolved"}
-            j, how = _locate(cur_o[i], i, cur_f)
+            j, how = _locate(cur_o[i], i, cur_f, cur_o)
             if j is None:
                 return {"path": None, "basis": how}
             if how != "same":
@@ -987,7 +1023,13 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # CHORUS rep3 `creators[1]` credited to an unnamed entry that replaced
     # Azra Bihorac; CM4AI rep3 `creators[38].id` credited to a creator
     # added after the receipt). Those paths are reported and carry no credit.
+    # The one exception is an entry whose key reconciliation stripped from
+    # the whole list (#1053): joined at its own index by overlap, or by
+    # shape when the list kept its length — never when it shrank, which is
+    # the rep3 case again (#1162 review) — and listed under
+    # `located_after_key_stripped` so the class is countable from the block.
     gone: dict[str, str] = {}
+    located_stripped: list[dict[str, Any]] = []
     index_reused: list[dict[str, Any]] = []
     not_in_snapshot: list[str] = []
     if original is not None:
@@ -1005,6 +1047,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
             if rm["path"] != p:
                 remapped.append({"path": p, "resolved_path": rm["path"], "basis": rm["basis"]})
                 effective[p] = rm["path"]
+            if rm["basis"] == "same_key_stripped":
+                located_stripped.append({"path": p, "resolved_path": rm["path"]})
             ok_o, v_o = _resolve_value(original, p)
             ok_f, v_f = _resolve_value(full, rm["path"])
             if ok_o and ok_f and _rewritten(v_o, v_f):
@@ -1127,6 +1171,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
              "value_changed_after_receipt_count": len(value_changed) if original is not None else None,
              "index_reused_by_another_entry": index_reused[:20],
              "index_reused_by_another_entry_count": len(index_reused) if original is not None else None,
+             "located_after_key_stripped": located_stripped[:20],
+             "located_after_key_stripped_count": len(located_stripped) if original is not None else None,
              "path_not_in_snapshot": not_in_snapshot[:20],
              "path_not_in_snapshot_count": len(not_in_snapshot) if original is not None else None,
              "reshaped_by_reconcile": reshaped,
@@ -1172,6 +1218,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                         + (f" · {len(remapped)} receipt path(s) followed by identity" if remapped else "")
                         + (f" · {len(value_changed)} value(s) changed after the receipt" if value_changed else "")
                         + (f" · {len(index_reused)} receipt index(es) reused by another entry" if index_reused else "")
+                        + (f" · {len(located_stripped)} entry(ies) located after a stripped key" if located_stripped else "")
                         + (f" · {len(not_in_snapshot)} receipt path(s) not in the snapshot" if not_in_snapshot else "")),
             "non_checks": list(NON_CHECKS)}
 

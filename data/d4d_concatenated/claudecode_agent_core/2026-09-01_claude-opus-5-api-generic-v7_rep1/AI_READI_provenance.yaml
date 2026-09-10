@@ -396,13 +396,19 @@ form:
   - data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d_core.yaml
   undeclared_prefixes: {}
   undeclared_prefix_occurrences: 0
+  prefix_instrument: 'v3 (#982): ark excluded, mailto excluded on Person ids only,
+    urn by NID'
+  british_instrument: 'v4 (#1006; v3 #836/#859)'
   british_spellings: 45
   organisational_fragments: 0
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
-  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
-    previous british=30
+  instrument_note: 'form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=30 | form recomputed 2026-09-09 by backfill-checks --overwrite,
+    british instrument v4 (#1006; v3 #836/#859), prefix instrument v3 (#982): ark
+    excluded, mailto excluded on Person ids only, urn by NID; previous british=45,
+    previous undeclared_prefixes=0'
 receipts:
   expected: true
   non_checks:
@@ -784,8 +790,9 @@ canary:
     run: 0
     baseline_worst: 18
   - metric: report findings
-    run: 0
+    run: null
     baseline_worst: 1
+    note: 'unmeasured: the report carried no claim the checker reads (#684)'
   - metric: ungrounded identifiers
     run: 0
     baseline_worst: 0
@@ -821,17 +828,13 @@ canary:
   unbaselined: []
   regressions:
   - 'British spellings: 45 against a baseline worst of 43'
-  basis: 'offline re-verdict under British-spelling instrument v3 (#836/#859, #906;
-    decision D4 of the v8 plan, adopted 2026-09-03): the form blocks of both this
-    run and the 2026-08-22c baseline were recomputed under v3 in #907, and against
-    the same baseline the British row now reads 45 vs baseline worst 43 — regressed
-    on that row, every other row unchanged from the prior verdict. The record stays
-    retained as part of the completed 2026-09-01 arm; this is bookkeeping, not a retry.
-    The prior verdict is kept under `prior_verdict`.'
-  recorded_by: canary.verdict, offline (#906)
-  recorded_at: '2026-09-03T06:37:02+00:00'
+  basis: 'verdict from this record''s own check blocks against the per-project worst
+    of ''2026-08-22c'' with the gate''s functions, including the #684 report basis
+    ({''measured'': 1, ''vacuous'': 2, ''unchecked'': 0})'
+  recorded_at: '2026-09-10T00:12:18+00:00'
+  recorded_by: d4d api verdict (offline)
   prior_verdict:
-    status: ok
+    status: regressed
     rows:
     - metric: pair errors
       run: 0
@@ -852,8 +855,9 @@ canary:
       run: 0
       baseline_worst: 0
     - metric: British spellings
-      run: 30
-      baseline_worst: 37
+      run: 45
+      baseline_worst: 43
+      regressed: true
     - metric: chunks unreviewed
       run: 0
       baseline_worst: 0
@@ -871,14 +875,66 @@ canary:
       baseline_worst: 0
     blind: []
     unbaselined: []
-    regressions: []
-    basis: 'offline re-verdict under the exposure-adjusted revision (#891, registered
-      in the v7 plan): the batch gate ran before the checker classified under-floor
-      snippets as unattesting and addressing-shaped unresolved paths under the ceil(N/200)
-      tolerance; the receipts block was re-checked on 2026-09-02 and this verdict
-      recomputes against the same 2026-08-22c baseline the batch used, with the correct
-      pair/report key mapping.'
-    recorded_by: d4d receipts check + canary.verdict, offline (#891)
+    regressions:
+    - 'British spellings: 45 against a baseline worst of 43'
+    basis: 'offline re-verdict under British-spelling instrument v3 (#836/#859, #906;
+      decision D4 of the v8 plan, adopted 2026-09-03): the form blocks of both this
+      run and the 2026-08-22c baseline were recomputed under v3 in #907, and against
+      the same baseline the British row now reads 45 vs baseline worst 43 — regressed
+      on that row, every other row unchanged from the prior verdict. The record stays
+      retained as part of the completed 2026-09-01 arm; this is bookkeeping, not a
+      retry. The prior verdict is kept under `prior_verdict`.'
+    recorded_by: canary.verdict, offline (#906)
+    recorded_at: '2026-09-03T06:37:02+00:00'
+    prior_verdict:
+      status: ok
+      rows:
+      - metric: pair errors
+        run: 0
+        baseline_worst: 18
+      - metric: report findings
+        run: 0
+        baseline_worst: 1
+      - metric: ungrounded identifiers
+        run: 0
+        baseline_worst: 0
+      - metric: resolver URLs in identifier slots
+        run: 0
+        baseline_worst: 0
+      - metric: organisational fragments
+        run: 0
+        baseline_worst: 0
+      - metric: undeclared prefixes
+        run: 0
+        baseline_worst: 0
+      - metric: British spellings
+        run: 30
+        baseline_worst: 37
+      - metric: chunks unreviewed
+        run: 0
+        baseline_worst: 0
+      - metric: snippets unverified
+        run: 0
+        baseline_worst: 0
+      - metric: addressing slips over tolerance
+        run: 0
+        baseline_worst: 0
+      - metric: receipts vacuous
+        run: 0
+        baseline_worst: 0
+      - metric: receipt findings
+        run: 0
+        baseline_worst: 0
+      blind: []
+      unbaselined: []
+      regressions: []
+      basis: 'offline re-verdict under the exposure-adjusted revision (#891, registered
+        in the v7 plan): the batch gate ran before the checker classified under-floor
+        snippets as unattesting and addressing-shaped unresolved paths under the ceil(N/200)
+        tolerance; the receipts block was re-checked on 2026-09-02 and this verdict
+        recomputes against the same 2026-08-22c baseline the batch used, with the
+        correct pair/report key mapping.'
+      recorded_by: d4d receipts check + canary.verdict, offline (#891)
 review:
   checked: true
   items_total: 78

@@ -411,13 +411,19 @@ form:
   - data/d4d_concatenated/claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d_core.yaml
   undeclared_prefixes: {}
   undeclared_prefix_occurrences: 0
+  prefix_instrument: 'v3 (#982): ark excluded, mailto excluded on Person ids only,
+    urn by NID'
+  british_instrument: 'v4 (#1006; v3 #836/#859)'
   british_spellings: 0
   organisational_fragments: 0
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
-  instrument_note: form recomputed 2026-09-02 under british instrument v3 (#836/#859);
-    previous british=0
+  instrument_note: 'form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=0 | form recomputed 2026-09-09 by backfill-checks --overwrite,
+    british instrument v4 (#1006; v3 #836/#859), prefix instrument v3 (#982): ark
+    excluded, mailto excluded on Person ids only, urn by NID; previous british=0,
+    previous undeclared_prefixes=0'
 receipts:
   expected: true
   non_checks:
@@ -426,9 +432,13 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
-  instrument: 'v2 (#1123): a fragment minted on an identifier the record carries for
-    the dataset at its top level — its id in CURIE or resolver form, its doi, its
-    page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+  instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
+    anywhere (a minted id reconciliation stripped) is located as a keyless entry —
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
+    of declared dropped; v2 (#1123): a fragment minted on an identifier the record
+    carries for the dataset at its top level — its id in CURIE or resolver form, its
+    doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
     counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
     commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
@@ -558,6 +568,8 @@ receipts:
     value_changed_after_receipt_count: 7
     index_reused_by_another_entry: []
     index_reused_by_another_entry_count: 0
+    located_after_key_stripped: []
+    located_after_key_stripped_count: 0
     path_not_in_snapshot: []
     path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
