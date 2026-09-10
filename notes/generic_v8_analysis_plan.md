@@ -1159,10 +1159,10 @@ ranking) are left out on purpose, their content being a source's.
 
 ### R8 no longer charges a landing-page label a receipt (#1147, 2026-09-09)
 
-The nineteenth v9 pin — the registry's `superseded` list holds
-eighteen: three registrations and corrections on 2026-09-08, the two
+The twenty-first v9 pin — the registry's `superseded` list holds
+twenty: three registrations and corrections on 2026-09-08, the two
 #1120 rounds, the two #1134 spellings rounds, and this issue's own
-eleven earlier rounds,
+thirteen earlier rounds,
 each retired by the next (the third wrote `labelled` into the sentence and
 the file sweep of #1134 caught it after the pin was taken; the fourth's
 premise was false for the 36 CHORUS records whose own id is the site root;
@@ -1199,25 +1199,29 @@ URN), the very ARKs named as M1's evidence — and had
 kept the premise "the one identifier every record carries" unqualified
 beside the clause that denies it: the forms admitted are now named one
 by one, and the same four for a stated identifier and for a base — a
-declared CURIE, an absolute URL, an ARK or a URN. A resolver URL is an
-identifier the evidence may state and is not a form to write: in a
-`uriorcurie` slot, which is what every id R8 governs is, the v8 rule
-already in this prompt calls a resolver URL on a declared prefix a
-defect, and R8 admitting it as a written form contradicted that rule
-170 lines above it (#1166 round 10, MF1) — rather than "a URI under a registered scheme", which would admit the
-`mailto:` the person rule forbids on 77 corpus ids and the `file:`
-`identifiers.py` excludes on purpose over its 22 (round 9) — in the
+declared CURIE, an absolute URL, an ARK or a URN — rather than "a URI
+under a registered scheme", which would admit the `mailto:` the person
+rule forbids on 77 corpus ids and the `file:` `identifiers.py` excludes
+on purpose over its 22 (round 9). A resolver URL is an identifier the
+evidence may state and is not a form to write: every id R8 governs sits
+in a slot whose declared range takes a CURIE, where the v8 rule already
+in this prompt calls a resolver URL on a declared prefix a defect, so
+R8 admitting it as a written form contradicted that rule 170 lines
+above it (#1166 round 10, MF1). In the
 stated-identifier sentence and the base rule alike, the
 premise names the identity slot rather than calling a bare token an
 identifier, the mint sentence points at the base rule, a token own id
 with neither DOI nor page falls to the fragment rule's own license — a
 label on an identifier the evidence does supply — and the carve-out for
 a base that already carries a fragment is scoped to the base this rule
-sends the record to, whichever of the three it is — the own id where it
-is an identifier form, else the DOI or page, else the resolvable URL the
-evidence supplies — so it cannot label a part on a base the same bullet
-disqualified, and it reaches the fallback URL as well as the first two
-(round 10, SF2 and SF4)).
+sends the record to, whichever that is, so it cannot label a part on a
+base the same bullet disqualified and it reaches the fallback URL as
+well as the own id, the DOI and the page. The rule names four bases, so
+the carve-out counts none of them: an earlier wording said "three" and
+had deleted the enumeration the numeral referred to (round 10, SF2 and
+SF4; round 11, MF2). The fallback base takes the same identifier test as
+the others — an absolute URL with its scheme — which it did not carry
+when it was the one base left unconstrained (round 11)).
 R8 now takes the stated identifier first for a forced
 id, in an identifier form (a declared CURIE, an absolute URL, an ARK or
 a URN, a stated resolver URL written as the CURIE), and mints
