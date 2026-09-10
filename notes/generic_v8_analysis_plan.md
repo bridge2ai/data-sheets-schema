@@ -1595,8 +1595,11 @@ steps need:
     but the `baseline_basis` line no longer appears on any of those rows;
     and every block's
     `report_claims.schema` pin moved from the schema the runs attested to
-    today's (the branch touches no schema file; the recompute re-pins to
-    what `_sha256(FULL_SCHEMA)` returns now) — the re-attestation the
+    the schema at this branch's merge with main (the branch touches no
+    schema file; the recompute re-pins to what `_sha256(FULL_SCHEMA)`
+    returns there, which the Codex review found had moved under the
+    branch's base — the recompute of round 7 was taken after merging
+    main, so the pins name the schema this PR lands against) — the re-attestation the
     `--blocks` restriction exists to make visible, stated here. The regate
     sees the new class through the same contradictions list; its preamble
     still introduces the list as "claims the records do not show", which
