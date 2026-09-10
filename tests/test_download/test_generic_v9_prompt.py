@@ -145,6 +145,7 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
                       "ORCID the evidence states first",             # R8 defers to the person rule (finding 5)
                       "the base to prefer",                          # R8: own id first (round 2, finding 4)
                       "names this dataset and nothing else",         # R8: the uniqueness reason, not a receipt cost (#1147)
+                      "labeled on that same root",                   # R8: the carve-out for an id that is already a fragment (#1166 round 5)
                       "component dataset under `resources`",        # R8: a nested Dataset id is forced (round 2, finding 3)
                       "matched to the core by id",                   # R8: the projector, both facts (finding 9)
                       "a claim about that identifier, not a label",  # R8: the referent test (#901)
