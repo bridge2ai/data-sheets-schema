@@ -577,3 +577,49 @@ class CodexRound(unittest.TestCase):
             self.assertEqual(r.exit_code, 0, r.output)
             (ext,) = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]["run_observed_extended"]
             self.assertEqual(sorted(ext["transcripts"]), sorted(f.name for f in pair))
+
+
+class Round8(unittest.TestCase):
+    """The reviewer round after the Codex one."""
+
+    def test_a_curator_sentence_that_ends_inside_a_quote_or_bracket_is_left_alone(self):
+        """M1: `_split_sentences` learned that a closing quote or bracket may
+        follow terminal punctuation; the "does this need a full stop" test did
+        not, so a basis ending `."` or `.]` was given a stray one outside its
+        own quotation marks on the first extension. Idempotent afterwards, but
+        the curator's text is wrong from then on — assert the text exactly,
+        not that it is a substring, which the corrupted string also satisfies."""
+        keys = set(FULL) & cli._REASONING_KEYS
+        for ending in ('the curator said "checked."', "the curator checked [twice.]",
+                       "curator checked!", "did the curator check?"):
+            with self.subTest(ending):
+                log = {"run_observed": dict(FULL), "run_observed_basis": ending}
+                text, appended, terminated, _edited = cli._basis_parts(log, keys)
+                self.assertFalse(terminated, ending)
+                self.assertEqual(text, ending + appended)
+
+    def test_a_basis_with_no_terminal_punctuation_still_gets_one_and_says_so(self):
+        keys = set(FULL) & cli._REASONING_KEYS
+        text, appended, terminated, _e = cli._basis_parts(
+            {"run_observed": dict(FULL), "run_observed_basis": "prior basis with no full stop"}, keys)
+        self.assertTrue(terminated)
+        self.assertEqual(text, "prior basis with no full stop." + appended)
+
+    def test_a_whitespace_only_recorded_addition_does_not_wipe_the_account(self):
+        """M2: it passed the truthy filter, `prior.rstrip()` was then `""`,
+        `b.endswith("")` is True for every string, and `b[: -len("")]` is
+        `b[:0]` — the whole account, curator prose included. No caller can
+        produce one; the mechanism exists so that nothing is destroyed by
+        guesswork, and this was the one path that could destroy everything."""
+        keys = set(FULL) & cli._REASONING_KEYS
+        for value in ("   ", "\t", "\n", ""):
+            with self.subTest(repr(value)):
+                log = {"run_observed": dict(FULL),
+                       "run_observed_basis": "a curator wrote this account by hand.",
+                       "run_observed_extended": [{"keys_added": sorted(keys), "basis_added": value}]}
+                text, _a, _t, edited = cli._basis_parts(log, keys)
+                self.assertTrue(text.startswith("a curator wrote this account by hand."), repr(value))
+                self.assertFalse(edited)
+        self.assertEqual(cli._recorded_additions(
+            {"run_observed_extended": [{"basis_added": "  "}, {"basis_added": "real text."}]}),
+            ["real text."])

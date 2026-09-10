@@ -638,7 +638,12 @@ def _superseded_reasoning_basis(keys: set) -> str:
                "and tool-call payloads: a subtraction, an upper bound, not a measurement"
                if "reasoning_tokens_estimate" in present else "")
             + "; comparable in kind with the API path's reasoning log, never to be averaged with it.")
-        # round 3
+        # A variant no round is known to have emitted: round 3's own sentence
+        # carries no "added after the run" clause and is in
+        # `_LEGACY_REASONING_SENTENCES` as the literal it was. This one is
+        # kept because an over-wide strip of text this module could have
+        # written costs nothing, while a missing one doubles a paragraph —
+        # but it is not evidence that any record says this (#1191 round 8, S1).
         out.append(
             " " + ", ".join(_ESTIMATE_KEYS[:-1]) + " and " + _ESTIMATE_KEYS[-1]
             + " (output tokens minus a 4-chars-per-token estimate of the text and tool-call payloads — a "
@@ -752,6 +757,13 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
     return "".join(parts)
 
 
+#: Does the text already end a sentence? Terminal punctuation, optionally
+#: followed by the closers `_SENTENCE_END` also takes — so a curator's
+#: `… said "checked."` is finished, and is not given a second full stop
+#: outside its own quotation marks (#1191 round 8, M1).
+_ENDS_A_SENTENCE = __import__("re").compile(r"[.!?][\"\'\u2019\u201d)\]]*\s*$")
+
+
 def _recorded_additions(log: dict) -> list:
     """The exact text each prior extension recorded appending, newest first.
 
@@ -762,8 +774,16 @@ def _recorded_additions(log: dict) -> list:
     one removes that string and nothing else."""
     out = []
     for e in (log.get("run_observed_extended") or []):
-        if isinstance(e, dict) and isinstance(e.get("basis_added"), str) and e["basis_added"]:
-            out.append(e["basis_added"])
+        added = e.get("basis_added") if isinstance(e, dict) else None
+        # `.strip()`, not truthiness: a whitespace-only value passes a truthy
+        # test, `prior.rstrip()` is then the empty string, `b.endswith("")` is
+        # True for every string, and `b[: -len("")]` is `b[:0]` — the whole
+        # account, curator prose included, silently wiped (#1191 round 8, M2).
+        # No caller can produce one today; the mechanism exists so that
+        # nothing is destroyed by guesswork, and this was the one path that
+        # could destroy everything.
+        if isinstance(added, str) and added.strip():
+            out.append(added)
     return list(reversed(out))
 
 
@@ -797,7 +817,7 @@ def _basis_parts(log: dict, keys: set) -> tuple:
     if not recorded:
         mine = _own_sentences()
         b = " ".join(s for s in _split_sentences(b) if s not in mine).rstrip()
-    terminated = not b.endswith((".", "!", "?"))
+    terminated = not _ENDS_A_SENTENCE.search(b)
     if terminated:
         # Recorded, not silent (#1195 M3): the account is a curator's text
         # and an edit to it is a fact about the record, small as it is.
