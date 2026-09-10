@@ -1091,12 +1091,13 @@ schema's four ORCID-shaped tokens form-only (three docExamples and the
 `orcid` slot's description) is the property the scanner now reads; the
 prompt body keeps the un-narrowed reading, since an identifier-shaped
 token there is a copy-through candidate whether or not it is anyone's.
-The surface found one real identifier on its first pass: the `publisher`
-docExample `ror:04t3en479`, Karlsruhe Institute of Technology's ROR,
-written with a lower-case prefix the first CURIE shape did not match
-(#1178 review) — the #647 defect verbatim, in the merged schema file the
-agentic playbook reads; it is `ROR:0xxxxxxxx` now and the derived
-artifacts are regenerated. The guard is green on all 22 modules; the
+The surface's first pass reported green; the review of that pass found
+one real identifier the shape could not read — the `publisher` docExample
+`ror:04t3en479`, Karlsruhe Institute of Technology's ROR, written with a
+lower-case prefix the CURIE shape matched in upper case only (#1178) —
+the #647 defect verbatim, in the merged schema file the agentic playbook
+reads, reported as a pass. The shape reads either case now, the
+docExample is `ROR:0xxxxxxxx`, and the derived artifacts are regenerated. The guard is green on all 22 modules; the
 generated merged files and the datamodel are derived from them and are
 not scanned twice.
 
