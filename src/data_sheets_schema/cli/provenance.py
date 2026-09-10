@@ -528,12 +528,46 @@ def recheck_validation(method, label, project, execute):
     click.echo(f"   wrote {path}")
 
 
-def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, basis: dict | None = None) -> list[str]:
+#: The keys an extension may add (#1010): the transcript's reasoning
+#: measure (#1000/#1011), and nothing else — a coverage claim such as
+#: `receipt_chunks_unopened` is a different instrument (#709) and is not
+#: added under this one (#1191 review, S2).
+_REASONING_KEYS = frozenset({
+    "assistant_turns", "output_tokens", "thinking_blocks", "thinking_text_chars",
+    "visible_text_chars", "tool_input_chars", "reasoning_tokens_estimate",
+    "thinking_tokens", "turns_with_thinking_tokens"})
+
+#: What the reasoning keys mean, appended to `run_observed_basis` when they
+#: are added (#1191 review, M3): the record's own account must describe
+#: every number it carries.
+_REASONING_BASIS = (
+    " assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, "
+    "visible_text_chars, tool_input_chars and reasoning_tokens_estimate "
+    "(output tokens minus a 4-chars-per-token estimate of the text and "
+    "tool-call payloads — a subtraction, an upper bound, not a measurement) "
+    "are the transcript's reasoning measure (#1000/#1011), added after the "
+    "run under run_observed_extended; thinking_tokens and "
+    "turns_with_thinking_tokens are the runtime's own count on the turns "
+    "whose transcript line carries usage.output_tokens_details, and where "
+    "turns_with_thinking_tokens is fewer than assistant_turns the count is "
+    "partial (a resumed run whose earlier transcript predates the detail). "
+    "Comparable in kind with the API path's reasoning log, never to be "
+    "averaged with it.")
+
+
+def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrument: str,
+                         basis: dict | None = None) -> list[str]:
     """The reviewed route #1010 asked for: a prior observation is extended
     only when every key it already carries recomputes to the same value
     from the same transcripts — the proof that the new keys describe the
     observation on record, not another run — and the extension is written
-    down beside it. Returns the keys added."""
+    down beside it, under `run_observed_extended`, a list so that a second
+    extension keeps the first one's trace (#1191 review, S4). Only the
+    reasoning keys are added (S2); `instrument` is the caller's statement
+    of where the numbers came from (M2), and the record's
+    `run_observed_basis` gains the sentence that describes them (M3).
+    Returns the keys added."""
+    from datetime import datetime, timezone
     prior = log["run_observed"]
     differ = {k: (v, observed.get(k)) for k, v in prior.items() if observed.get(k) != v}
     if differ:
@@ -541,17 +575,30 @@ def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, basis: 
             "refusing to extend: the recomputed observation disagrees with the "
             f"record on {sorted(differ)} ({differ}); a value that does not "
             "reproduce is not the same observation, so nothing is added")
-    added = sorted(set(observed) - set(prior))
+    added = sorted((set(observed) - set(prior)) & _REASONING_KEYS)
+    ignored = sorted((set(observed) - set(prior)) - _REASONING_KEYS)
     if not added:
-        raise click.ClickException("nothing to extend: the recomputation carries no key the record lacks")
+        raise click.ClickException("nothing to extend: the recomputation carries no reasoning key the record lacks"
+                                   + (f" (not added, another instrument's: {ignored})" if ignored else ""))
     log["run_observed"] = {**prior, **{k: observed[k] for k in added}}
-    log["run_observed_extended"] = {
-        "keys_added": added,
-        "instrument": "the transcript's reasoning measure (#1000/#1011), recomputed from the same "
-                      "transcripts on the bytes the record hashed; every prior key reproduced exactly",
-        **(basis or {}),
-        "recorded_by": recorded_by}
+    entries = log.get("run_observed_extended")
+    entries = entries if isinstance(entries, list) else ([entries] if isinstance(entries, dict) else [])
+    entries.append({"keys_added": added, "instrument": instrument, **(basis or {}),
+                    "recorded_by": recorded_by,
+                    "recorded_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat()})
+    log["run_observed_extended"] = entries
+    b = str(log.get("run_observed_basis") or "")
+    if "run_observed_extended" not in b:
+        log["run_observed_basis"] = (b.rstrip() + _REASONING_BASIS).strip()
     return added
+
+
+#: How launchers have named a project in a subagent's name: the project
+#: itself with its underscore dropped, and the abbreviations on disk.
+_PROJECT_NAME_KEYS: dict[str, tuple[str, ...]] = {
+    "AI_READI": ("aireadi",), "CHORUS": ("chorus",), "CM4AI": ("cm4ai",),
+    "VOICE": ("voice",), "VOICE_PEDIATRIC": ("voicepediatric", "voicepeds"),
+}
 
 
 def _transcript_candidates(project: str, label: str, roots: list[Path] | None = None) -> list[Path]:
@@ -580,14 +627,18 @@ def _transcript_candidates(project: str, label: str, roots: list[Path] | None = 
                                              Path.home() / ".claude-work" / "projects" / repo_dir]
     m = _re.search(r"_rep(\d+)$", label)
     rep = m.group(1) if m else None
-    key = project.lower().replace("_", "")
+    keys = _PROJECT_NAME_KEYS.get(project, (project.lower().replace("_", ""),))
+    # A sibling project whose name contains this one's (VOICE_PEDIATRIC,
+    # VOICE) must not be offered as this one's run (#1191 review, S3).
+    others = [k for p, ks in _PROJECT_NAME_KEYS.items() if p != project for k in ks
+              if any(key in k and key != k for key in keys)]
     out: list[Path] = []; seen: set[str] = set()
     for root in roots:
         for f in sorted(root.glob("*/subagents/agent-*.jsonl")):
             name = _re.sub(r"-[0-9a-f]{16}$", "", f.stem).lower().replace("_", "").replace("-", "")
-            if key not in name:
+            if not any(k in name for k in keys) or any(o in name for o in others):
                 continue
-            if rep is not None and f"rep{rep}" not in name and not ("canary" in name and rep == "1"):
+            if rep is not None and not _re.search(rf"rep{rep}(?!\d)", name) and not ("canary" in name and rep == "1"):
                 continue
             digest = _h.sha256(f.read_bytes()).hexdigest()
             if digest in seen:
@@ -604,6 +655,13 @@ def _observe(transcripts: list, bundle, until, receipt, manifest) -> dict:
     obs = mod.observe(transcripts, bundle, until, receipt, manifest)
     return {k: v for k, v in obs.items() if not k.startswith("_") and k in _RUN_OBSERVED_FIELDS
             and isinstance(v, int) and not isinstance(v, bool)}
+
+
+def _observer_sha256() -> str:
+    """The instrument's own hash, recorded with every extension (#1191
+    review, S1): the observer is what the proof rests on."""
+    import hashlib as _h
+    return _h.sha256(Path("scripts/agentic_observed.py").read_bytes()).hexdigest()
 
 
 @provenance.command('extend-observed')
@@ -638,26 +696,51 @@ def extend_observed(label, project, method, given, execute):
     from data_sheets_schema.provenance import (GitUnavailable, ProvenanceRecord, bundle_bytes_for,
                                                record_path_for)
     from data_sheets_schema.receipts import receipt_path
+    if given and not project:
+        raise click.ClickException("--transcript names one run's files; pass --project with it")
     method = method or resolve_method(label, project)
     projects = [project] if project else [p for p in PROJECTS if record_path_for(p, method, label).exists()]
     if not projects:
         raise click.ClickException(f"no record under {method} {label}")
+    observer = _observer_sha256()
     for proj in projects:
+        try:
+            _extend_one(proj, method, label, list(given), execute, observer)
+        except click.ClickException as exc:
+            # One project's refusal is not another's (#1191 review, S5).
+            click.echo(f"{proj} {label}: {exc.message}")
+
+
+def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, observer: str) -> None:
+    import hashlib as _h
+    import tempfile as _tf
+    from datetime import datetime as _dt
+
+    import yaml as _yaml
+
+    from data_sheets_schema.chunking import dump_manifest, manifest_from_bytes
+    from data_sheets_schema.provenance import (GitUnavailable, ProvenanceRecord, bundle_bytes_for,
+                                               record_path_for)
+    from data_sheets_schema.receipts import receipt_path
+    if True:
         path = record_path_for(proj, method, label)
         data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         tag = f"{proj} {label}"
         if data.get("api_usage"):
-            click.echo(f"{tag}: an API-path record; api_usage is its account (#400)"); continue
+            click.echo(f"{tag}: an API-path record; api_usage is its account (#400)"); return
         log = data.get("phase_log") or {}
         prior = log.get("run_observed") if isinstance(log, dict) else None
         if not isinstance(prior, dict) or not prior:
-            click.echo(f"{tag}: no run_observed to extend"); continue
-        if "reasoning_tokens_estimate" in prior:
-            click.echo(f"{tag}: already carries the reasoning measure"); continue
+            click.echo(f"{tag}: no run_observed to extend"); return
+        if _REASONING_KEYS <= set(prior) or (
+                {"reasoning_tokens_estimate", "output_tokens"} <= set(prior) and "thinking_tokens" not in prior
+                and any(isinstance(e, dict) and "thinking_tokens" not in (e.get("keys_added") or []) and
+                        "transcripts" in e for e in (log.get("run_observed_extended") or []))):
+            click.echo(f"{tag}: already carries the reasoning measure"); return
         inputs = data.get("inputs") or {}
         bpath, md5 = inputs.get("bundle_path"), inputs.get("bundle_md5")
         if not bpath or not md5:
-            click.echo(f"{tag}: the record declares no bundle path and md5; the coverage keys cannot be recomputed"); continue
+            click.echo(f"{tag}: the record declares no bundle path and md5; the coverage keys cannot be recomputed"); return
         on_disk = Path(bpath)
         if on_disk.exists() and _h.md5(on_disk.read_bytes()).hexdigest() == md5:
             raw, basis = on_disk.read_bytes(), {"bundle_basis": {"source": "bundle on disk", "path": bpath}}
@@ -665,23 +748,26 @@ def extend_observed(label, project, method, given, execute):
             try:
                 found = bundle_bytes_for(bpath, md5=md5, sha256=inputs.get("bundle_sha256"))
             except GitUnavailable as exc:
-                click.echo(f"{tag}: bundle drifted and git could not supply the version the record hashed: {exc}"); continue
+                click.echo(f"{tag}: bundle drifted and git could not supply the version the record hashed: {exc}"); return
             if found is None:
-                click.echo(f"{tag}: bundle drifted and no committed version of {bpath} hashes to the record's md5"); continue
+                click.echo(f"{tag}: bundle drifted and no committed version of {bpath} hashes to the record's md5"); return
             raw, entry = found
             basis = {"bundle_basis": {"source": "git blob", "path": bpath, "commit": entry["commit"],
                                       "md5": entry["md5"], "matched_on": entry.get("matched_on")}}
         rule = ((inputs.get("chunks") or {}).get("rule")) or None
         candidates = list(given) or _transcript_candidates(proj, label)
         if not candidates:
-            click.echo(f"{tag}: no transcript found by name for this project and replicate"); continue
+            click.echo(f"{tag}: no transcript found by name for this project and replicate"); return
         # A killed-and-resumed run has two transcripts under one name and
         # its observation summed them (#688): every single file is tried,
         # then every set of files sharing a name, oldest first.
         sets: list[list[Path]] = [[t] for t in candidates]
         if given:
-            if len(candidates) > 1:
-                sets.append(sorted(candidates, key=lambda t: t.stat().st_mtime))
+            # Every subset of the files given, oldest first (#1191 review, S6)
+            from itertools import combinations
+            ordered = sorted(candidates, key=lambda t: t.stat().st_mtime)
+            for n in range(2, len(ordered) + 1):
+                sets += [list(c) for c in combinations(ordered, n)]
         else:
             import re as _re
             by_name: dict[str, list[Path]] = {}
@@ -706,14 +792,17 @@ def extend_observed(label, project, method, given, execute):
             for ts, obs, differ in results:
                 click.echo(f"   {' + '.join(t.name for t in ts)}: " + ("reproduces" if not differ else
                            "differs on " + ", ".join(f"{k} {prior[k]}→{obs.get(k)}" for k in differ)))
-            continue
+            return
         ts, obs = matches[0]
         added = sorted(set(obs) - set(prior))
         click.echo(f"{tag}: {' + '.join(t.name for t in ts)} reproduces {len(prior)} prior key(s); adds {added}")
         if not execute:
-            click.echo("   (report only; --execute writes the extension)"); continue
+            click.echo("   (report only; --execute writes the extension)"); return
         _extend_run_observed(log, obs, recorded_by="d4d provenance extend-observed (#1010)",
-                             basis={"transcripts": [t.name for t in ts], **basis})
+                             instrument="the transcript's reasoning measure (#1000/#1011), recomputed by "
+                                        "scripts/agentic_observed.py from the transcripts named on the bytes the "
+                                        "record hashed, under the record's own cut; every prior key reproduced exactly",
+                             basis={"transcripts": [t.name for t in ts], "observer_sha256": observer, **basis})
         ProvenanceRecord(data=data).write(path)
         click.echo(f"   wrote {path}")
 
@@ -796,7 +885,20 @@ def annotate_observed(project, method, label, run_observed, until, extend):
             "record would have been refused above).")
     prior = log.get("run_observed")
     if prior is not None and prior != observed and extend:
-        _extend_run_observed(log, observed, recorded_by="d4d provenance annotate-observed --extend (#1010)")
+        if until and log.get("run_observed_until") and until != log.get("run_observed_until"):
+            raise click.ClickException(
+                f"--until {until} is not the record's own cut {log['run_observed_until']}; an extension "
+                "adds keys to the observation on record and keeps its cut")
+        _extend_run_observed(log, observed, recorded_by="d4d provenance annotate-observed --extend (#1010)",
+                             instrument="values supplied on the command line by the launcher (--run); the prior "
+                                        "keys reproduced exactly, which is the only proof this route offers — "
+                                        "no transcript was read and no bundle hashed by this command")
+        rec = ProvenanceRecord(data=data)
+        out = rec.write(path)
+        click.echo(f"✓ {out} (extended; run_observed_until and run_observed_basis kept)")
+        for v in rec.conformance:
+            click.echo(f"  ⚠️  {v}")
+        return
     elif prior is not None and prior != observed:
         raise click.ClickException(
             f"the record already carries run_observed {prior}. An "

@@ -1513,17 +1513,30 @@ steps need:
     where every prior key reproduced exactly — 24 of 24, 21 from one
     transcript and 3 (the v5 rep3 AI_READI, CM4AI and VOICE runs, killed
     and resumed) from the pair of files their name covers, whose sums are
-    the recorded totals. Added: `assistant_turns`, `output_tokens`,
+    the recorded token, tool and duration totals and whose union of read
+    windows is the recorded `bundle_lines_read`. "Every prior key" is 4–5
+    discriminating integers per record (`total_tokens`, eight digits, and
+    `duration_ms`, seven, carry the identification; `bundle_lines_total`
+    and `receipt_chunks_total` are the bundle's and the manifest's, the
+    same for every candidate) — the best non-matching candidate
+    reproduces at most 2 of them, and 0 on 16 of the 24. Added: `assistant_turns`, `output_tokens`,
     `thinking_blocks`, `thinking_text_chars` (0 throughout), `visible_text_chars`,
     `tool_input_chars`, `reasoning_tokens_estimate`, and where the turns
     carry it `thinking_tokens` / `turns_with_thinking_tokens` (the twelve
     v6 records; the three resumed v5 runs on their second transcript's
-    turns only). `output_tokens` median 116,774 (v5) and 153,027 (v6);
-    `reasoning_tokens_estimate` median 68,316 and 88,556 — an upper
+    turns only). `output_tokens` median 116,774 (v5) and 153,026.5 (v6);
+    `reasoning_tokens_estimate` median 68,315.5 and 88,556 — an upper
     bound on a runtime whose output is mostly tool payloads, never
     averaged with `api_usage`. `d4d provenance reasoning` reports all 24
-    as `recovered_from_transcript`. Numbered with 19, 20 and 21 open. Not
-    a generation-path change; no verdict reads these keys.
+    as `recovered_from_transcript`. Each record's `run_observed_basis`
+    now describes the added keys (the estimate is a subtraction; a
+    `thinking_tokens` whose `turns_with_thinking_tokens` is fewer than
+    `assistant_turns` is partial), and `run_observed_extended` is a list
+    of extensions naming the keys, the transcripts, the bundle basis and
+    the observer script's sha256 (#1191 review). A `VOICE_PEDIATRIC` run
+    is looked for as `voicepediatric` or `voicepeds` and never offered as
+    VOICE's. Numbered with 19, 20 and 21 open. Not a generation-path
+    change; no verdict reads these keys.
 
 Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16,
 17, 20 and 22 are not; 15 and 17 are the receipts instrument's revisions and

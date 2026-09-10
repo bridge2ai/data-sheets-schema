@@ -1027,8 +1027,15 @@ record's rule, re-runs the observer with the record's own
 `run_observed_until` cut, and extends `run_observed` only when exactly
 one candidate — a file, or the set of files a killed-and-resumed run
 left under one name (three v5 rep3 runs) — reproduces every key the
-record already carried; `run_observed_extended` names the keys, the
-transcripts and the bundle basis. `thinking_tokens` is present only
+record already carried — 4–5 discriminating integers per record, on
+which the best non-matching candidate reproduces at most 2; each entry
+of `run_observed_extended` (a list, so a second extension keeps the
+first's trace) names the keys, the transcripts, the bundle basis and
+the observer's sha256, and `run_observed_basis` gains the sentence that
+describes the reasoning keys. Only those keys are added under this
+instrument — a receipt-coverage key is #709's — and `annotate-observed
+--extend`, the hand-entered route, keeps the record's cut and says its
+numbers came from the command line. `thinking_tokens` is present only
 where a transcript's turns carry it (all twelve v6 records; the three
 resumed v5 runs on their second transcript's turns only, which
 `turns_with_thinking_tokens` says), so `reasoning_tokens_estimate` is

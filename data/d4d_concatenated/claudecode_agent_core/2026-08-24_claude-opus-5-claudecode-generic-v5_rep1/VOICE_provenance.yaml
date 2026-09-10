@@ -106,13 +106,6 @@ phase_log:
     duration_ms: 1975777
     bundle_lines_read: 4570
     bundle_lines_total: 5746
-    assistant_turns: 82
-    output_tokens: 112676
-    reasoning_tokens_estimate: 66283
-    thinking_blocks: 43
-    thinking_text_chars: 0
-    tool_input_chars: 184923
-    visible_text_chars: 4266
   run_observed_basis: 'aggregate totals for the whole run, observed by the orchestrator
     from the subagent runner''s transcript. One number per run, not per phase: four-phase
     project-agent mode runs every phase in one context, so the run is the only observable
@@ -123,28 +116,6 @@ phase_log:
     the union of the run''s successful file-reading windows over the declared bundle
     (#700): lines the run never opened, or opened only in a read that errored, may
     have been reached by search, but nothing attests that.'
-  run_observed_extended:
-    keys_added:
-    - assistant_turns
-    - output_tokens
-    - reasoning_tokens_estimate
-    - thinking_blocks
-    - thinking_text_chars
-    - tool_input_chars
-    - visible_text_chars
-    instrument: the transcript's reasoning measure (#1000/#1011), recomputed from
-      the same transcripts on the bytes the record hashed; every prior key reproduced
-      exactly
-    transcripts:
-    - agent-afanout-voice-rep1-3881372e43f96de0.jsonl
-    bundle_basis:
-      source: git blob
-      path: data/preprocessed/concatenated/VOICE_preprocessed.txt
-      commit: 4fc4d6b22d5522389692e746a4bc715a93163871
-      md5: dcd717170da6762569c0b4eeafc1c3d2
-      matched_on:
-      - md5
-    recorded_by: d4d provenance extend-observed (#1010)
 schema:
   declared_version: 2.0.0
   declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml

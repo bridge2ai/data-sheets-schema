@@ -82,10 +82,13 @@ class Extension(unittest.TestCase):
             self.assertEqual(r.exit_code, 0, r.output); self.assertIn("wrote", r.output)
             log = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]
             self.assertEqual(log["run_observed"], FULL)
-            ext = log["run_observed_extended"]
+            (ext,) = log["run_observed_extended"]                                          # a list: a second extension keeps the first (S4)
             self.assertEqual(ext["keys_added"], ["assistant_turns", "output_tokens", "reasoning_tokens_estimate"])
             self.assertEqual(ext["transcripts"], [t.name]); self.assertEqual(ext["bundle_basis"]["source"], "bundle on disk")
             self.assertEqual(ext["recorded_by"], "d4d provenance extend-observed (#1010)")
+            self.assertEqual(len(ext["observer_sha256"]), 64); self.assertIn("agentic_observed.py", ext["instrument"])
+            self.assertIn("run_observed_extended", log["run_observed_basis"])                 # the basis describes the new keys (M3)
+            self.assertIn("upper bound", log["run_observed_basis"])
             self.assertEqual(log["run_observed_until"], "2026-08-28T10:00:00+00:00")     # untouched
             r = self._run(tmp, path, {"agent-av6-P-rep1": FULL}, transcripts=[t])
             self.assertIn("already carries the reasoning measure", r.output)
@@ -120,7 +123,7 @@ class Extension(unittest.TestCase):
             with mock.patch.object(cli, "_transcript_candidates", lambda p, l, roots=None: [b, a]):
                 r = self._run(tmp, path, {"agent-afanout-p-rep1+agent-afanout-p-rep1": FULL})
             self.assertEqual(r.exit_code, 0, r.output); self.assertIn("wrote", r.output)
-            ext = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]["run_observed_extended"]
+            (ext,) = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]["run_observed_extended"]
             self.assertEqual(ext["transcripts"], [a.name, b.name])                     # oldest first
 
     def test_report_mode_writes_nothing_and_an_api_record_is_refused(self):
@@ -137,13 +140,92 @@ class Extension(unittest.TestCase):
         """One function, two commands: `annotate-observed --extend` and this
         driver must refuse and record identically."""
         import click
-        log = {"run_observed": dict(PRIOR)}
+        log = {"run_observed": dict(PRIOR), "run_observed_basis": "prior basis."}
         with self.assertRaises(click.ClickException):
-            cli._extend_run_observed(log, {**PRIOR, "tool_uses": 6}, recorded_by="x")
+            cli._extend_run_observed(log, {**PRIOR, "tool_uses": 6}, recorded_by="x", instrument="i")
         with self.assertRaises(click.ClickException):
-            cli._extend_run_observed(log, dict(PRIOR), recorded_by="x")                 # nothing to add
-        self.assertEqual(cli._extend_run_observed(log, FULL, recorded_by="x"), ["assistant_turns", "output_tokens", "reasoning_tokens_estimate"])
-        self.assertEqual(log["run_observed"], FULL); self.assertEqual(log["run_observed_extended"]["recorded_by"], "x")
+            cli._extend_run_observed(log, dict(PRIOR), recorded_by="x", instrument="i")     # nothing to add
+        with self.assertRaises(click.ClickException) as cm:                                  # another instrument's key is not added (S2)
+            cli._extend_run_observed(log, {**PRIOR, "receipt_chunks_unopened": 1}, recorded_by="x", instrument="i")
+        self.assertIn("receipt_chunks_unopened", str(cm.exception))
+        self.assertEqual(cli._extend_run_observed(log, {**FULL, "receipt_chunks_unopened": 1}, recorded_by="x", instrument="i"),
+                         ["assistant_turns", "output_tokens", "reasoning_tokens_estimate"])
+        self.assertEqual(log["run_observed"], FULL)                                           # the receipt key stays out
+        self.assertEqual([e["recorded_by"] for e in log["run_observed_extended"]], ["x"])
+        self.assertTrue(log["run_observed_basis"].startswith("prior basis."))
+        cli._extend_run_observed(log, {**FULL, "thinking_tokens": 3}, recorded_by="y", instrument="j")
+        self.assertEqual([e["recorded_by"] for e in log["run_observed_extended"]], ["x", "y"])   # the first trace kept (S4)
+        self.assertEqual(log["run_observed_basis"].count("run_observed_extended"), 1)
+
+    def test_annotate_observed_extend_keeps_the_cut_and_names_its_own_route(self):
+        """#1191 review, M1/M2: `--extend` deleted `run_observed_until` and
+        wrote the driver's instrument text for numbers typed on the command line."""
+        import json
+        import click.testing
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp)
+            with mock.patch("data_sheets_schema.provenance.record_path_for",
+                            lambda project, method, label, concat_dir=None: path), \
+                 mock.patch.object(cli, "_require_repo_root_cwd", lambda *a, **k: None):
+                r = click.testing.CliRunner().invoke(cli.provenance, ["annotate-observed", "--project", "P", "--method",
+                                                                       "claudecode_agent", "--label", "L_rep1", "--extend",
+                                                                       "--run", json.dumps(FULL)])
+                self.assertEqual(r.exit_code, 0, r.output)
+                log = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]
+                self.assertEqual(log["run_observed_until"], "2026-08-28T10:00:00+00:00")     # kept (M1)
+                self.assertEqual(log["run_observed"], FULL)
+                (ext,) = log["run_observed_extended"]
+                self.assertIn("command line", ext["instrument"]); self.assertNotIn("transcripts", ext)  # its own route (M2)
+                r = click.testing.CliRunner().invoke(cli.provenance, ["annotate-observed", "--project", "P", "--method",
+                                                                       "claudecode_agent", "--label", "L_rep1", "--extend",
+                                                                       "--run", json.dumps({**FULL, "thinking_tokens": 1}),
+                                                                       "--until", "2026-08-28T11:00:00+00:00"])
+                self.assertNotEqual(r.exit_code, 0); self.assertIn("not the record's own cut", r.output)
+
+    def test_the_real_observer_on_a_synthetic_transcript_and_a_bundle_from_git(self):
+        """#1191 review, S7: the observer is not stubbed — a small JSONL
+        transcript through `scripts/agentic_observed.py`, the key filter, the
+        `run_observed_until` parse, and the git-blob branch with the bundle
+        gone from disk."""
+        import click.testing
+        import sys
+        sys.path.insert(0, str(Path(__file__).parent))
+        from test_agentic_observed import _event
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp)
+            rec = yaml.safe_load(path.read_text().split("\n", 1)[1])
+            bundle = Path(rec["inputs"]["bundle_path"]); raw = bundle.read_bytes(); md5 = rec["inputs"]["bundle_md5"]
+            lines = [_event("2026-08-28T09:00:00Z", usage={"input_tokens": 10, "output_tokens": 40},
+                            tools=[("Read", {"file_path": str(bundle)})]),
+                     _event("2026-08-28T09:01:00Z", usage={"input_tokens": 1, "output_tokens": 1},
+                            tools=[("Read", {"file_path": str(bundle), "offset": 3, "limit": 4})]),
+                     _event("2026-08-28T12:00:00Z", usage={"output_tokens": 999}, tools=[])]   # after the cut
+            root = Path(tmp) / "cfg" / "s1" / "subagents"; root.mkdir(parents=True)
+            t = root / "agent-av6-P-rep1-0000000000000000.jsonl"; t.write_text("\n".join(lines) + "\n")
+            # the prior keys as the real observer computes them, so the proof is real
+            obs = cli._observe([t], bundle, __import__("datetime").datetime.fromisoformat("2026-08-28T10:00:00+00:00"), None, None)
+            rec["phase_log"]["run_observed"] = {k: obs[k] for k in ("total_tokens", "tool_uses", "duration_ms",
+                                                                   "bundle_lines_read", "bundle_lines_total")}
+            self.assertEqual(rec["phase_log"]["run_observed"]["tool_uses"], 2)                   # the cut applied
+            path.write_text("# header\n" + yaml.safe_dump(rec))
+            bundle.unlink()                                                                     # gone from disk: git supplies it
+            entry = {"commit": "c" * 40, "date": "2026-08-28", "md5": md5, "sha256": "s", "matched_on": ["md5"]}
+            with mock.patch.object(cli, "_require_repo_root_cwd", lambda *a, **k: None), \
+                 mock.patch("data_sheets_schema.provenance.record_path_for",
+                            lambda project, method, label, concat_dir=None: path), \
+                 mock.patch("data_sheets_schema.provenance.bundle_bytes_for",
+                            lambda p, md5=None, sha256=None: (raw, entry) if md5 == entry["md5"] else None), \
+                 mock.patch("data_sheets_schema.receipts.receipt_path", lambda core, p: Path(tmp) / "no_receipt.yaml"), \
+                 mock.patch.object(cli, "_transcript_candidates", lambda p, l, roots=None: [t]):
+                r = click.testing.CliRunner().invoke(cli.provenance, ["extend-observed", "--label", "L_rep1", "--project", "P",
+                                                                       "--method", "claudecode_agent", "--execute"])
+            self.assertEqual(r.exit_code, 0, r.output); self.assertIn("wrote", r.output)
+            log = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]
+            self.assertEqual(log["run_observed"]["output_tokens"], 41)                          # 999 after the cut is not the run
+            self.assertEqual(log["run_observed"]["assistant_turns"], 2)
+            (ext,) = log["run_observed_extended"]
+            self.assertEqual(ext["bundle_basis"]["source"], "git blob"); self.assertEqual(ext["bundle_basis"]["commit"], "c" * 40)
+            self.assertFalse(any(isinstance(v, bool) for v in log["run_observed"].values()))
 
 
 if __name__ == "__main__":
