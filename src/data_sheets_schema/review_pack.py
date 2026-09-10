@@ -571,15 +571,26 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         # reorders otherwise shift a receipt onto a neighbouring entry and
         # the reviewer scores a bundle-attested value `unsupported`. The
         # item carries the path as written and where it resolves.
-        from data_sheets_schema.receipts import phase1_snapshot
+        from data_sheets_schema.receipts import phase1_snapshot, phase1_snapshot_path
         original = phase1_snapshot(paths["receipt"])
+        snapshot_file = phase1_snapshot_path(paths["receipt"])
         # Not a gap: the agentic path writes no snapshot by design (its
         # Phase 3 re-receipts what it changes), so an index join there is
-        # the instrument, not a defect in this pack.
-        pack["receipt_join"] = ({"basis": "identity", "snapshot": "intermediate/ phase-1 full record"}
-                                if original is not None else
-                                {"basis": "index", "reason": "no phase-1 snapshot under intermediate/; "
-                                                             "receipt paths joined by index, not entry identity (#899)"})
+        # the instrument, not a defect in this pack. A snapshot that exists
+        # and will not parse IS a gap (#1124 round 6): the join falls back
+        # to index, and the pack must not say there was no snapshot — the
+        # reviewer reads `basis` to decide whether an index shift may be
+        # scored unsupported.
+        if original is not None:
+            pack["receipt_join"] = {"basis": "identity", "snapshot": "intermediate/ phase-1 full record"}
+        elif snapshot_file is not None:
+            pack["receipt_join"] = {"basis": "index",
+                                    "reason": f"the phase-1 snapshot {snapshot_file.name} is present but "
+                                              "unreadable; receipt paths joined by index, not entry identity (#899)"}
+            pack["gaps"].append(f"phase-1 snapshot unreadable: {snapshot_file}")
+        else:
+            pack["receipt_join"] = {"basis": "index", "reason": "no phase-1 snapshot under intermediate/; "
+                                                                "receipt paths joined by index, not entry identity (#899)"}
         claims = claim_receipts(receipt, full, original)
         rc = record.get("receipts") or {}
         receipted = sorted(claims["slots"])
@@ -684,7 +695,10 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         else:
             pack["gaps"].append("pair warnings: full or core record missing; the checker did not run")
     except Exception as e:                                    # noqa: BLE001
-        pack["gaps"].append(f"pair warnings unavailable: {type(e).__name__}")
+        # The class alone says nothing once `_load_yaml` wraps the parse
+        # (#1124 round 6): name the file where the loader named it.
+        pack["gaps"].append("pair warnings unavailable: "
+                            + (str(e) if isinstance(e, UnreadableYAML) else type(e).__name__))
 
     pack["items"] = items
     pack["verdicts"] = {k: list(v) for k, v in VERDICTS.items()}

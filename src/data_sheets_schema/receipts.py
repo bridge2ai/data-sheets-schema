@@ -481,16 +481,24 @@ def phase1_snapshot(receipt: Path) -> dict[str, Any] | None:
     receipt is overwritten, so the contemporary snapshot is the highest-
     numbered one (#761). Absent on the agentic path, whose Phase 3
     re-receipts what it changes."""
+    path = phase1_snapshot_path(receipt)
+    if path is None:
+        return None
+    try:
+        return yaml.safe_load(path.read_text(encoding="utf-8")) or None
+    except yaml.YAMLError:
+        return None
+
+
+def phase1_snapshot_path(receipt: Path) -> Path | None:
+    """The file `phase1_snapshot` would read, or None where none exists —
+    so a caller can tell "no snapshot" from "a snapshot that would not
+    parse" (#1124 round 6): the two are different claims about a record."""
     stem = receipt.name.replace("_coverage_receipt.yaml", "_full")
     snaps = sorted((receipt.parent / "intermediate").glob(f"{stem}.yaml")) + sorted(
         (receipt.parent / "intermediate").glob(f"{stem}_[0-9]*.yaml"),
         key=lambda p: int(p.stem.rsplit("_", 1)[1]))
-    if not snaps:
-        return None
-    try:
-        return yaml.safe_load(snaps[-1].read_text(encoding="utf-8")) or None
-    except yaml.YAMLError:
-        return None
+    return snaps[-1] if snaps else None
 
 
 # ---------------------------------------------------------------- derived core

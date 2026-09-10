@@ -582,6 +582,37 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
             self.assertNotEqual(r.exit_code, 0)
             self.assertTrue(r.output.startswith(f"Error: {prov} could not be read as YAML"), r.output)   # the record, not PyYAML's mark
 
+    def test_a_broken_core_record_names_itself_in_the_pair_gap(self):
+        """#1124 round 6, SF-R6a: the pair-warnings block degrades to a named
+        gap; the name must be the file, not the wrapper's class."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = Pack()._run(tmp)
+            core = rp.record_paths(prov)["core"]
+            core.write_text("bad: [unclosed")
+            pack = rp.build_pack(prov, instr)
+            gaps = [g for g in pack["gaps"] if g.startswith("pair warnings unavailable")]
+        self.assertEqual(len(gaps), 1, pack["gaps"])
+        self.assertIn(str(core), gaps[0])
+        self.assertNotIn("UnreadableYAML", gaps[0])
+
+    def test_an_unreadable_snapshot_is_not_reported_as_no_snapshot(self):
+        """#1124 round 6, SF-R6b: `receipt_join.basis` is what the reviewer reads
+        to decide whether an index shift may be scored unsupported; a snapshot
+        that exists and will not parse is a gap, not an absence."""
+        with tempfile.TemporaryDirectory() as tmp:
+            prov, instr = Pack()._run(tmp)
+            receipt = rp.record_paths(prov)["receipt"]
+            snap_dir = receipt.parent / "intermediate"; snap_dir.mkdir(exist_ok=True)
+            snap = snap_dir / receipt.name.replace("_coverage_receipt.yaml", "_full.yaml")
+            snap.write_text("bad: [unclosed")
+            pack = rp.build_pack(prov, instr)
+            self.assertEqual(pack["receipt_join"]["basis"], "index")
+            self.assertIn("present but unreadable", pack["receipt_join"]["reason"])
+            self.assertTrue(any(str(snap) in g for g in pack["gaps"]), pack["gaps"])
+            snap.unlink()
+            pack = rp.build_pack(prov, instr)
+            self.assertIn("no phase-1 snapshot", pack["receipt_join"]["reason"])
+
     def test_the_cli_names_whichever_file_would_not_parse(self):
         """The pack reads several YAML files; the message names the one that
         failed, not the record by default (#1124 round 5)."""
