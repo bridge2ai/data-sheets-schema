@@ -602,20 +602,42 @@ class OnDisk(unittest.TestCase):
                 none = rc.block_for(full, receipt, bundle, "0" * 32, expected=True, manifest=manifest,
                                     bundle_rel_path="data/preprocessed/concatenated/P_preprocessed.txt")
             b_direct = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest)
-            # the record's own rule wins, and a chunk count the record does not cite is refused (S1)
+            # the record's own rule wins over the on-disk manifest's (S1): a
+            # rule that diverges from today's chunks the same bytes differently
+            # (5 windows of 5 lines against the default's 3), and the block
+            # is computed under the record's; a chunk count the record does
+            # not cite is refused
+            from data_sheets_schema.chunking import DEFAULT_RULE
+            five = {**DEFAULT_RULE, "max_lines": 5}
             with mock.patch("data_sheets_schema.provenance.bundle_bytes_for",
                             lambda path, md5=None, sha256=None: (BUNDLE.encode(), entry)):
                 wrong = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest,
                                      bundle_rel_path="x", record_chunks={"rule": None, "chunk_count": 99})
                 own = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest,
-                                   bundle_rel_path="x", record_chunks={"rule": build_manifest(bundle)["rule"], "chunk_count": None})
+                                   bundle_rel_path="x", record_chunks={"rule": five, "chunk_count": 5})
                 bad = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest, bundle_rel_path="x")
+                # SF2 (#1187 review): the recovery needs nothing on disk — an
+                # absent bundle, a missing manifest, and a manifest that no
+                # longer matches its bundle all still recover the record's
+                # bytes when the record says path, hash and rule
+                absent = rc.block_for(full, receipt, tmp / "gone.txt", md5, expected=True,
+                                      bundle_rel_path="x", record_chunks={"rule": five, "chunk_count": 5})
+                no_manifest = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=tmp / "none.yaml",
+                                           bundle_rel_path="x", record_chunks={"rule": five, "chunk_count": 5})
+                stale = tmp / "P_stale_chunks.yaml"
+                stale.write_text(dump_manifest(manifest_from_bytes(b"other bytes", "P_preprocessed.txt")), encoding="utf-8")
+                mismatched = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=stale,
+                                          bundle_rel_path="x", record_chunks={"rule": five, "chunk_count": 5})
+                # ... and without a rule from either side it says which is missing
+                ruleless = rc.block_for(full, receipt, tmp / "gone.txt", md5, expected=True, bundle_rel_path="x")
             with mock.patch("data_sheets_schema.provenance.bundle_bytes_for",
                             lambda path, md5=None, sha256=None: (b"\xff\xfe not utf-8", entry)):
                 undecodable = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest, bundle_rel_path="x")
-            # same bytes + same rule = the manifest the run would have chunked
-            self.assertEqual(manifest_from_bytes(drifted.encode(), "P_preprocessed.txt")["chunks"],
-                             build_manifest(bundle)["chunks"])
+            # a bundle nothing can check on disk and the record hashes nothing: the disk reason, as before
+            unhashed_absent = rc.block_for(full, receipt, tmp / "gone.txt", None, expected=True, bundle_rel_path="x")
+            with mock.patch("data_sheets_schema.provenance.bundle_bytes_for", lambda path, md5=None, sha256=None: None):
+                both = rc.block_for(full, receipt, bundle, "0" * 32, expected=True, manifest=manifest,
+                                    bundle_rel_path="x", record_bundle_sha256="1" * 64)
         self.assertTrue(b["checked"]); self.assertEqual(b["findings"], [])
         self.assertEqual(b["bundle_basis"]["source"], "git blob")
         self.assertEqual(b["bundle_basis"]["commit"], "c" * 40); self.assertEqual(b["bundle_basis"]["md5"], md5)
@@ -625,11 +647,21 @@ class OnDisk(unittest.TestCase):
                          manifest_from_bytes(BUNDLE.encode(), "P_preprocessed.txt")["chunk_count"])
         self.assertEqual(b["snippets"]["verified"], b["snippets"]["total"])       # the snippets are in the recovered bytes
         self.assertFalse(none["checked"]); self.assertIn("no committed version", none["reason"])
+        self.assertIn("record's md5", none["reason"])
+        self.assertIn("record's md5 and sha256", both["reason"])                  # every hash the search required (SF4)
         self.assertFalse(b_direct["checked"]); self.assertIn("declares no bundle path", b_direct["reason"])   # no path: no false search claim (M1)
         self.assertNotIn("no committed version", b_direct["reason"])
         self.assertFalse(wrong["checked"]); self.assertIn("not the 99 the record cites", wrong["reason"])
         self.assertTrue(own["checked"]); self.assertIn("the record's own inputs.chunks.rule", own["bundle_basis"]["manifest"])
+        self.assertEqual(own["artifacts"]["manifest"]["chunk_count"], 5)
+        self.assertEqual(own["artifacts"]["manifest"]["rule"]["max_lines"], 5)
         self.assertTrue(bad["checked"]); self.assertIn("on-disk manifest's rule", bad["bundle_basis"]["manifest"])
+        self.assertEqual(bad["artifacts"]["manifest"]["chunk_count"], 3)
+        for name, blk in (("absent", absent), ("no_manifest", no_manifest), ("mismatched", mismatched)):
+            self.assertTrue(blk["checked"], name); self.assertEqual(blk["bundle_basis"]["source"], "git blob", name)
+            self.assertEqual(blk["artifacts"]["manifest"]["chunk_count"], 5, name)
+        self.assertFalse(ruleless["checked"]); self.assertIn("which chunking rule", ruleless["reason"])
+        self.assertFalse(unhashed_absent["checked"]); self.assertEqual(unhashed_absent["reason"], "the record's bundle is absent; chunk texts cannot be loaded")
         self.assertFalse(undecodable["checked"]); self.assertIn("not UTF-8", undecodable["reason"])
 
     def test_bundle_bytes_for_reads_the_matching_version_and_none_otherwise(self):
