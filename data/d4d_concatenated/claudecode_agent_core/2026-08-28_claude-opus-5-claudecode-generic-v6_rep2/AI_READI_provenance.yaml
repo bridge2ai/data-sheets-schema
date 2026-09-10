@@ -107,6 +107,15 @@ phase_log:
     bundle_lines_total: 7376
     receipt_chunks_total: 28
     receipt_chunks_unopened: 0
+    assistant_turns: 116
+    output_tokens: 160442
+    reasoning_tokens_estimate: 98473
+    thinking_blocks: 63
+    thinking_text_chars: 0
+    thinking_tokens: 58886
+    tool_input_chars: 267747
+    turns_with_thinking_tokens: 110
+    visible_text_chars: 6574
   run_observed_basis: 'aggregate totals for the whole run, observed by the orchestrator
     from the subagent runner''s transcript. One number per run, not per phase: four-phase
     project-agent mode runs every phase in one context, so the run is the only observable
@@ -117,6 +126,30 @@ phase_log:
     the union of the run''s successful file-reading windows over the declared bundle
     (#700): lines the run never opened, or opened only in a read that errored, may
     have been reached by search, but nothing attests that.'
+  run_observed_extended:
+    keys_added:
+    - assistant_turns
+    - output_tokens
+    - reasoning_tokens_estimate
+    - thinking_blocks
+    - thinking_text_chars
+    - thinking_tokens
+    - tool_input_chars
+    - turns_with_thinking_tokens
+    - visible_text_chars
+    instrument: the transcript's reasoning measure (#1000/#1011), recomputed from
+      the same transcripts on the bytes the record hashed; every prior key reproduced
+      exactly
+    transcripts:
+    - agent-av6-AI_READI-rep2-487e227af64725d7.jsonl
+    bundle_basis:
+      source: git blob
+      path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+      commit: 9049904493393a6ce1db69b9fe0a855ce0db4435
+      md5: 0f3abb51a333555456bedd63891fcd99
+      matched_on:
+      - md5
+    recorded_by: d4d provenance extend-observed (#1010)
 schema:
   declared_version: 2.0.0
   declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
