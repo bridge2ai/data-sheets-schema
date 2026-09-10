@@ -2050,7 +2050,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "ror:04t3en479  # use a ROR ID, DOI, or URL \u2014 not a plain name",
+          "value": "ROR:0xxxxxxxx  # a ROR CURIE (form only), a DOI, or a URL \u2014 not a plain name",
           "@type": "Annotation"
         }
       ],
@@ -14336,9 +14336,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-09-09T11:21:04",
+  "source_file_date": "2026-09-09T17:04:03",
   "source_file_size": 34754,
-  "generation_date": "2026-09-09T11:47:52",
+  "generation_date": "2026-09-09T17:31:11",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
