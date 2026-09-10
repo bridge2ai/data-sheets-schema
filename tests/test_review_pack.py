@@ -594,6 +594,7 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
         self.assertEqual(len(gaps), 1, pack["gaps"])
         self.assertIn(str(core), gaps[0])
         self.assertNotIn("UnreadableYAML", gaps[0])
+        self.assertNotIn("\n", gaps[0])                                   # one line, not PyYAML's mark block
 
     def test_an_unreadable_snapshot_is_not_reported_as_no_snapshot(self):
         """#1124 round 6, SF-R6b: `receipt_join.basis` is what the reviewer reads

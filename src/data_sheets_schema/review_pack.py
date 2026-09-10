@@ -697,8 +697,10 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     except Exception as e:                                    # noqa: BLE001
         # The class alone says nothing once `_load_yaml` wraps the parse
         # (#1124 round 6): name the file where the loader named it.
+        # One line: the file and the verb; PyYAML's mark and caret point into
+        # a string the reviewer cannot see (#1124 round 7).
         pack["gaps"].append("pair warnings unavailable: "
-                            + (str(e) if isinstance(e, UnreadableYAML) else type(e).__name__))
+                            + (str(e).splitlines()[0] if isinstance(e, UnreadableYAML) else type(e).__name__))
 
     pack["items"] = items
     pack["verdicts"] = {k: list(v) for k, v in VERDICTS.items()}
