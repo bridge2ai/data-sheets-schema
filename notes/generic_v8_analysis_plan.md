@@ -1193,14 +1193,18 @@ the name — said in R8's carve-out, since R5 sits in the v8 block a v9
 prompt carries unchanged, and in the playbook's R5 line, which is the
 single copy the agentic path reads; and the ninth, answering that round,
 had written the form test as a two-form dichotomy that outlawed the ARK
-and URN forms `identifiers.classify` calls URIs — 623 part ids outside
-the record's own `id`, and 24 record ids (16 ARK, 8 URN), the very ARKs
-named as M1's evidence — and had
+and URN forms `identifiers.classify` calls URIs — 1,707 part ids outside
+the record's own `id` (623 ARK, 1,084 URN), and 24 record ids (16 ARK, 8
+URN), the very ARKs named as M1's evidence — and had
 kept the premise "the one identifier every record carries" unqualified
 beside the clause that denies it: the forms admitted are now named one
-by one — a declared CURIE, a resolver URL, an absolute URL, an ARK or a
-URN for a stated identifier, the same minus the resolver URL for a base
-— rather than "a URI under a registered scheme", which would admit the
+by one, and the same four for a stated identifier and for a base — a
+declared CURIE, an absolute URL, an ARK or a URN. A resolver URL is an
+identifier the evidence may state and is not a form to write: in a
+`uriorcurie` slot, which is what every id R8 governs is, the v8 rule
+already in this prompt calls a resolver URL on a declared prefix a
+defect, and R8 admitting it as a written form contradicted that rule
+170 lines above it (#1166 round 10, MF1) — rather than "a URI under a registered scheme", which would admit the
 `mailto:` the person rule forbids on 77 corpus ids and the `file:`
 `identifiers.py` excludes on purpose over its 22 (round 9) — in the
 stated-identifier sentence and the base rule alike, the
@@ -1208,11 +1212,15 @@ premise names the identity slot rather than calling a bare token an
 identifier, the mint sentence points at the base rule, a token own id
 with neither DOI nor page falls to the fragment rule's own license — a
 label on an identifier the evidence does supply — and the carve-out for
-an id that already carries a fragment covers any base, not only a
-shared root, since a second marker is invalid either way).
+a base that already carries a fragment is scoped to the base this rule
+sends the record to, whichever of the three it is — the own id where it
+is an identifier form, else the DOI or page, else the resolvable URL the
+evidence supplies — so it cannot label a part on a base the same bullet
+disqualified, and it reaches the fallback URL as well as the first two
+(round 10, SF2 and SF4)).
 R8 now takes the stated identifier first for a forced
-id, in an identifier form (a declared CURIE, a resolver URL, an absolute
-URL, an ARK or a URN), and mints
+id, in an identifier form (a declared CURIE, an absolute URL, an ARK or
+a URN, a stated resolver URL written as the CURIE), and mints
 only where none is stated; prefers the own id as a base only where it is
 itself such a form, else the DOI or page in identifier form, else the
 fragment rule's resolvable-URL fallback; and labels a part of a
