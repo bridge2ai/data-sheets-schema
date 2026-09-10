@@ -1255,7 +1255,10 @@ schema does not admit (the score beside it is intact, so the cross-arm
 table is unaffected), and 8 rubric20-semantic evaluations under
 `concatenated/` that still carry the `max_points: 84` shape #314
 identified and were never re-run or archived. Neither is edited: an
-evaluation is what the evaluator produced.
+evaluation is what the evaluator produced. **So the script exits
+non-zero on every run today**, and will until those nine are archived or
+re-run (#1200) — read the summary, not the exit code, until then. It is
+not wired into CI or the Makefile for that reason.
 
 ## Running Single Tests
 

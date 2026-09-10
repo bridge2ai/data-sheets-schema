@@ -76,7 +76,7 @@ def validate_evaluation(eval_data: Dict, schema: Dict) -> Tuple[bool, List[str]]
 #: arm's scores. An invalid record in one of these is what an older
 #: instrument produced and must not be rewritten to satisfy today's schema,
 #: so it is reported and does not fail the run.
-KEPT_DIR = _re.compile(r"^(?:_archive|superseded)|^\d{4}-\d{2}-\d{2}[_-]")
+KEPT_DIR = _re.compile(r"^(?:_archive|superseded)|^\d{4}-\d{2}-\d{2}(?:[_-]|$)")
 
 
 def is_kept(path: Path, base: Path) -> bool:
@@ -98,11 +98,16 @@ def discover(base: Path) -> List[Path]:
     return sorted(base.rglob("*_evaluation.json"))
 
 
-def main():
-    """Validate every evaluation JSON under `data/evaluation_llm`."""
+def main(eval_base: Path | None = None, schema_dir: Path | None = None) -> int:
+    """Validate every evaluation JSON under `data/evaluation_llm`.
+
+    The two roots are arguments so that the exit code — the thing #833 asked
+    for, and the thing four tests of the helpers did not reach — can be
+    exercised end to end over a tree built for the purpose.
+    """
     base_dir = Path(__file__).parent.parent
-    schema_dir = base_dir / "src" / "download" / "prompts"
-    eval_base = base_dir / "data" / "evaluation_llm"
+    schema_dir = schema_dir or base_dir / "src" / "download" / "prompts"
+    eval_base = eval_base or base_dir / "data" / "evaluation_llm"
 
     schemas = {
         "rubric10-semantic": load_schema(schema_dir / "rubric10_semantic_schema.json"),

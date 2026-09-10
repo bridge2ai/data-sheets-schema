@@ -87,3 +87,65 @@ class TheRepositoryState(unittest.TestCase):
             if self.m.classify(d, schema)[0] == "invalid":
                 bad.append(p.name)
         self.assertEqual(bad, ["AI_READI_2026-08-28dapi_rep1_evaluation.json"])
+
+
+class ExitCode(unittest.TestCase):
+    """#833 asked for a regression test that a schema-invalid label-aware
+    artifact makes the run fail. Four tests of the helpers did not reach the
+    exit code, which is the whole point of the check: the artifact it was
+    filed about had been sitting in `label_aware/` unreported."""
+
+    def setUp(self):
+        self.m = _module()
+        self.schema_dir = ROOT / "src" / "download" / "prompts"
+        if not (self.schema_dir / "rubric10_semantic_schema.json").exists():
+            self.skipTest("no schemas in this checkout")
+        good = ROOT / "data" / "evaluation_llm" / "rubric10_semantic" / "label_aware"
+        cands = [p for p in good.glob("*_evaluation.json")
+                 if self.m.classify(json.loads(p.read_text()),
+                                    self.m.load_schema(self.schema_dir / "rubric10_semantic_schema.json"))[0] == "valid"]
+        if not cands:
+            self.skipTest("no valid rubric10-semantic artifact to build from")
+        self.valid = json.loads(cands[0].read_text())
+
+    def _tree(self, tmp, where, doc):
+        d = Path(tmp) / "rubric10_semantic" / where
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "X_evaluation.json").write_text(json.dumps(doc))
+        return Path(tmp)
+
+    def _invalid(self):
+        doc = json.loads(json.dumps(self.valid))
+        issues = doc.setdefault("semantic_analysis", {}).setdefault("issues_detected", [])
+        if issues:
+            issues[0]["severity"] = "info"          # the value the schema does not admit
+        else:
+            issues.append({"severity": "info", "issue": "x", "location": "x", "recommendation": "x"})
+        return doc
+
+    def test_a_valid_label_aware_artifact_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = self._tree(tmp, "label_aware", self.valid)
+            self.assertEqual(self.m.main(eval_base=base, schema_dir=self.schema_dir), 0)
+
+    def test_an_invalid_label_aware_artifact_fails_the_run(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = self._tree(tmp, "label_aware", self._invalid())
+            self.assertEqual(self.m.main(eval_base=base, schema_dir=self.schema_dir), 1)
+
+    def test_the_same_artifact_under_an_archive_marker_does_not(self):
+        """Kept evidence is reported and never rewritten to pass, so it must
+        not fail the run either."""
+        for where in ("label_aware/superseded_fable5", "concatenated/_archive_2026-07-22",
+                      "concatenated/2026-07-22_opus-4.8", "concatenated/2026-07-22"):
+            with self.subTest(where):
+                with tempfile.TemporaryDirectory() as tmp:
+                    base = self._tree(tmp, where, self._invalid())
+                    self.assertEqual(self.m.main(eval_base=base, schema_dir=self.schema_dir), 0)
+
+    def test_an_unreadable_artifact_in_a_live_directory_fails_the_run(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            d = base / "rubric10_semantic" / "label_aware"; d.mkdir(parents=True)
+            (d / "X_evaluation.json").write_text("{not json")
+            self.assertEqual(self.m.main(eval_base=base, schema_dir=self.schema_dir), 1)
