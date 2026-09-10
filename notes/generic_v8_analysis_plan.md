@@ -1106,6 +1106,30 @@ ISO 7064 check digit was valid (`0000-0001-2345-6789`, assignable to a
 person); all three are form-only now — the ORCID ends in a digit its
 checksum forbids — and none moved the digest.
 
+### The audit-phase instruction writes American English (#1138, 2026-09-09)
+
+The audit phase's instruction — sent on every API run, under every
+condition — said "a value answering a neighbouring field" while the
+same runner rewrites that word out of every record it writes (#1002, v8
+step J). It says "neighboring" now. `PHASE_INSTRUCTIONS` is hashed into
+the assembly digest, so the digest moves for every condition from here:
+`a0c34202…` → `a78228e9…`, one re-baseline registered here as #352's,
+E2's (#928), G's (#952), E's (#929), #932's and #998's were. No v9 record
+exists, so v9 still has one boundary; the v8 fill's records carry the
+digests they ran under and are compared among themselves as before. The
+prompt pins do not move. The instruction's spelling had propagated into
+model output — "neighbouring" in 17 audit JSONs and 24 reconciliation
+reports — and stopped short of the records, so the form block and the
+canary's British row do not move. A test sweeps every piece of prose the
+runner writes into a request (`api_runner.sent_text_surfaces`: the phase
+instructions and layout the digest hashes, and the system prompt, repair
+prompts, core inventory block and headers it does not) with the declared
+instrument as the instrument applies it — lower-cased, no quotation
+exemption — so the runner's sent text is guarded with the same wrapper
+as the v9 prompt file (#1134), which exempts quotations because a prompt
+quotes sources; the manifest-derived blocks (scope, naming, source
+ranking) are left out on purpose, their content being a source's.
+
 ### What a v9 arm can and cannot be compared against (#1072)
 
 `condition_delta("generic_v8", "generic_v9")` returns `["base"]`, and that
