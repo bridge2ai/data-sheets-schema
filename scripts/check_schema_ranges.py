@@ -13,6 +13,9 @@ reads every file in the wrapper's directory and fails on a `range` key
 whose value is null or not a string — on a slot, a class's `slot_usage`,
 or an attribute. A scalar range (`range: 123`) is the linter's and
 gen-python's to name; this reports it too, so one message covers the class.
+A file it cannot read — not valid YAML, not UTF-8, not openable — is a
+problem as well ("not readable, not checked"), named, since an all-clear
+must not cover a file that was not read; the ✓ line counts the files read.
 
     python scripts/check_schema_ranges.py SCHEMA.yaml
 """
@@ -23,10 +26,11 @@ from pathlib import Path
 
 
 def problems(schema: Path, read: list[Path] | None = None) -> list[str]:
-    """Every problem, one string each. A file that will not parse is a
-    problem here too (#1179 review, S2): the glob reaches files the
-    recipe's linter does not, and an all-clear must not cover a file that
-    was not read. `read`, when given, collects the files that were."""
+    """Every problem, one string each. A file that cannot be read — not
+    valid YAML, not UTF-8, not openable — is a problem here too (#1179
+    review, S2/S1): the glob reaches files the recipe's linter does not,
+    and an all-clear must not cover a file that was not read. `read`, when
+    given, collects the files that were."""
     import yaml
 
     out: list[str] = []
