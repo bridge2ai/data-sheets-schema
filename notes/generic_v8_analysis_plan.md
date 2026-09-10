@@ -1459,8 +1459,28 @@ steps need:
     table rewrites eight more forms in any run made after it, so a v9 arm
     is compared with v8 across this line as it is across step J.
 
-Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16
-and 17 are not; 15 and 17 are the receipts instrument's revisions and
+21. **Every record is brought under the duplicate-key instrument where
+    nothing else moves (#1033, 2026-09-09).** `d4d provenance
+    recheck-validation --all` recomputes each record's validation and
+    writes the block only where the verdict, the artifacts' md5s and the
+    problems' artifacts and classes reproduce — the write then adds
+    `duplicate_keys` (and the schema digests on the 41 blocks that
+    predate them) and nothing else. Run over the corpus after a one-record
+    report-mode canary: 50 written, all with 0 duplicate keys, 8 of them
+    failing records whose problems re-record under today's longer enum
+    lists; 334 held — 332 whose `passed` flips to false under today's
+    schema (the 2026-07 and early-2026-08 arms, whose records validated
+    against the schema of their day), 2 whose artifacts have drifted
+    (CHORUS 2026-07-29 rep1, both records); one whose full artifact is
+    gone (AI_READI 2026-08-11 api-generic rep3). A held record stays as it
+    was — its verdict is the one it attested — and is rerun by label as a
+    deliberate act. No canary verdict moves: `duplicate_keys` is 0 on
+    every written block and the gate reads an absent field as unmeasured,
+    as before. Numbered with 19 (#1054) and 20 (#1140) open. Not a
+    generation-path change.
+
+Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16,
+17 and 21 are not; 15 and 17 are the receipts instrument's revisions and
 17 classifies both; 18 changes the normaliser's rule table and is a
 generation-path change by that half); per the production rule none of
 them may land between a v8 canary and its fill.

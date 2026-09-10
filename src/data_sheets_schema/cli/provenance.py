@@ -479,11 +479,14 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
 
 
 @provenance.command('recheck-validation')
-@click.option('--method', required=True)
-@click.option('--label', required=True)
-@click.option('--project', required=True)
+@click.option('--method', default=None, help='required unless --all; with --all, restrict to one method directory')
+@click.option('--label', default=None)
+@click.option('--project', default=None)
+@click.option('--all', 'every', is_flag=True,
+              help='every record with a validation block (#1033): written only where the verdict '
+                   'and the artifacts are unchanged and the block lacks `duplicate_keys`')
 @click.option('--execute', is_flag=True, help='write the record; without it, report')
-def recheck_validation(method, label, project, execute):
+def recheck_validation(method, label, project, every, execute):
     """Re-run validation on a record's files and rewrite its `validation` block (#1029).
 
     Validation is bound to bytes, so re-running it is a legitimate act: the
@@ -491,8 +494,41 @@ def recheck_validation(method, label, project, execute):
     against, and `recorded_by` names this command. Used to bring a record
     under an instrument revision — duplicate-key detection — without
     touching anything else in the record.
+
+    `--all` (#1033) walks every run on disk and brings each record under
+    the instrument on one condition: the recomputed verdict and the
+    artifacts' md5s equal the recorded ones and the problems name the same
+    artifacts and classes, so the only thing the write adds is the
+    `duplicate_keys` field. A record whose verdict, artifacts or problems
+    would move is named and left alone — rerun it by label to write it
+    deliberately — and one already carrying the field is skipped.
     """
     _require_repo_root_cwd("d4d provenance recheck-validation")
+    if every:
+        if label or project:
+            raise click.ClickException("--all takes no --label or --project; --method may restrict it")
+        from data_sheets_schema.provenance import record_path_for
+        from data_sheets_schema.runs import discover
+        counts: dict[str, int] = {"written": 0, "already": 0, "held": 0, "no block": 0, "missing": 0}
+        for run in discover():
+            if method and run.method not in (method, method + "_core", method[:-5] if method.endswith("_core") else method):
+                continue
+            for proj in run.projects:
+                path = record_path_for(proj, run.method, run.label)
+                if not path.exists():
+                    continue
+                status = _recheck_one(run.method, run.label, proj, execute, gated=True)
+                counts[status] = counts.get(status, 0) + 1
+        click.echo("summary: " + ", ".join(f"{k} {v}" for k, v in counts.items()))
+        return
+    if not (method and label and project):
+        raise click.ClickException("--method, --label and --project are required without --all")
+    _recheck_one(method, label, project, execute, gated=False)
+
+
+def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bool) -> str:
+    """One record; returns what happened. Under `gated` the write needs the
+    verdict and the artifacts unchanged and the field absent."""
     import yaml as _yaml
 
     from data_sheets_schema.api_runner import RunSpec, validate_outputs, validation_block
@@ -506,26 +542,51 @@ def recheck_validation(method, label, project, execute):
     # not the method (#1032).
     base = method[:-5] if method.endswith("_core") else method
     spec = RunSpec(project=project, arm="", method=base, bundle=_P(""), label=label)
+    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    prior = data.get("validation") or {}
+    tag = f"{project} {label}"
+    if gated and not prior:
+        click.echo(f"{tag}: no validation block; nothing to bring under the instrument")
+        return "no block"
+    if gated and "duplicate_keys" in prior:
+        return "already"
     missing = [str(q) for q in (spec.full_path, spec.core_path) if not q.exists()]
-    if missing and execute:
+    if missing and (execute or gated):
+        click.echo(f"{tag}: artifact missing, not rechecked: " + ", ".join(missing))
+        if gated:
+            return "missing"
         raise click.ClickException("refusing to write a verdict over a missing artifact: "
                                    + ", ".join(missing))
     problems = validate_outputs(spec)
     block = validation_block(spec, problems, recorded_by="d4d provenance recheck-validation")
-    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    prior = data.get("validation") or {}
     from data_sheets_schema.canary import duplicate_key_count
-    click.echo(f"{project} {label}: passed {prior.get('passed')} → {block['passed']}; "
+    click.echo(f"{tag}: passed {prior.get('passed')} → {block['passed']}; "
                f"duplicate keys {duplicate_key_count(prior) if 'duplicate_keys' in prior else 'unmeasured'} → "
                f"{duplicate_key_count(block)}; problems {len(block.get('problems') or [])}")
+    if gated:
+        # Three things must reproduce for the write to add the field and
+        # nothing else: the verdict, the artifacts' md5s, and the problems —
+        # the latter by artifact and class, not by message text, since a
+        # validator message carries today's enum list and moves when the
+        # schema does while the failure it names does not.
+        same_verdict = block["passed"] == prior.get("passed")
+        old_md5 = {k: (v or {}).get("md5") for k, v in (prior.get("artifacts") or {}).items()}
+        new_md5 = {k: (v or {}).get("md5") for k, v in (block.get("artifacts") or {}).items()}
+        shape = lambda b: sorted((str(p.get("artifact")), str(p.get("class"))) for p in (b.get("problems") or []))  # noqa: E731
+        moved = ("verdict" if not same_verdict else "artifacts" if old_md5 != new_md5
+                 else "problems" if shape(prior) != shape(block) else None)
+        if moved:
+            click.echo(f"   held: the {moved} would move; rerun by label to write it deliberately")
+            return "held"
     if not execute:
         click.echo("   (report only; --execute writes the block)")
-        return
+        return "reported"
     from data_sheets_schema.provenance import ProvenanceRecord
     rec = ProvenanceRecord(data=data)
     rec.data["validation"] = block
     rec.write(path)
     click.echo(f"   wrote {path}")
+    return "written"
 
 
 @provenance.command('annotate-observed')
