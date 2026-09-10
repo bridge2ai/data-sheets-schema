@@ -1159,10 +1159,10 @@ ranking) are left out on purpose, their content being a source's.
 
 ### R8 no longer charges a landing-page label a receipt (#1147, 2026-09-09)
 
-The twenty-first v9 pin — the registry's `superseded` list holds
-twenty: three registrations and corrections on 2026-09-08, the two
+The twenty-second v9 pin — the registry's `superseded` list holds
+twenty-one: three registrations and corrections on 2026-09-08, the two
 #1120 rounds, the two #1134 spellings rounds, and this issue's own
-thirteen earlier rounds,
+fourteen earlier rounds,
 each retired by the next (the third wrote `labelled` into the sentence and
 the file sweep of #1134 caught it after the pin was taken; the fourth's
 premise was false for the 36 CHORUS records whose own id is the site root;

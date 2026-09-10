@@ -236,29 +236,29 @@ to every project:
   URL, an ARK or a URN. A record whose own id is a bare token, or a CURIE on a
   prefix the schema does not declare, labels its parts on the dataset's DOI or
   landing page instead, never on the token, and where it carries neither, on a
-  resolvable URL the evidence supplies for this dataset, which must be an
-  identifier form like the others — an absolute URL with its scheme — the
-  fragment rule's own license, a label minted on an identifier the evidence
-  does supply. A label on the dataset's DOI or landing page is licensed too,
-  but only on a form that is itself an identifier — the DOI as a declared
-  CURIE (the doi prefix, a colon, the DOI), which is the form to write even
-  where the evidence states the resolver URL, the page as an absolute URL with
-  its scheme; a bare DOI string or a schemeless host with a label appended is
-  a token, not an identifier. The own id is the one identity slot every record
-  carries, whatever form the record gave it, where `page` and `doi` are
-  optional; where it is an identifier form and not itself a shared root it
-  names this dataset alone, while a landing page is often a site or project
-  root shared with sibling releases, so a part labeled there cannot be told
-  apart from a sibling's by its id alone. Where this record's own id is itself
-  such a root, it is still the base to prefer: it is the identifier this
-  record carries, and the label must stay stable; where the base this rule
-  sends the record to already carries a fragment, the part's label is that
-  fragment, a hyphen and the part's own label, on the same base — for a person
-  under the person rule, that fragment, a hyphen, then person and the name —
-  so the record's own discriminator is kept, and one identifier carries one
-  fragment marker, never two (#1123, #1147). A fragment appended to another
-  entity's identifier — an organization's, another dataset's — labels a part
-  of that entity, not of this one.
+  resolvable URL the evidence supplies for this dataset — the fragment rule's
+  own license, a label minted on an identifier the evidence does supply —
+  which, like every other base here, must itself be an identifier form: an
+  absolute URL with its scheme. A label on the dataset's DOI or landing page
+  is licensed too, but only on a form that is itself an identifier — the DOI
+  as a declared CURIE (the doi prefix, a colon, the DOI), which is the form to
+  write even where the evidence states the resolver URL, the page as an
+  absolute URL with its scheme; a bare DOI string or a schemeless host with a
+  label appended is a token, not an identifier. The own id is the one identity
+  slot every record carries, whatever form the record gave it, where `page`
+  and `doi` are optional; where it is an identifier form and not itself a
+  shared root it names this dataset alone, while a landing page is often a
+  site or project root shared with sibling releases, so a part labeled there
+  cannot be told apart from a sibling's by its id alone. Where this record's
+  own id is itself such a root, it is still the base to prefer: it is the
+  identifier this record carries, and the label must stay stable; where the
+  base this rule sends the record to already carries a fragment, the part's
+  label is that fragment, a hyphen and the part's own label, on the same base
+  — for a person under the person rule, that fragment, a hyphen, then person
+  and the name — so the record's own discriminator is kept, and one identifier
+  carries one fragment marker, never two (#1123, #1147). A fragment appended
+  to another entity's identifier — an organization's, another dataset's —
+  labels a part of that entity, not of this one.
 
 - **A slot whose declared range is an enumeration is populated only from a
   passage that states the category** (v9, R9, #830), in the source's own
