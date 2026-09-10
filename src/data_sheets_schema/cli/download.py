@@ -305,11 +305,21 @@ def scope_cmd(project, do_check, strict, manifest):
             continue
         click.echo(f"{name}")
         click.echo(f"   about     {s.get('referent')}  <{s.get('referent_id')}>")
-        for entry in s.get("related_but_distinct") or []:
+        # A malformed entry is named here, where the declaration is listed
+        # (#1157): the listing used to raise on a non-mapping entry before
+        # any check ran, and `check_manifest` reports the same rows below.
+        rows = {r["index"]: r for r in malformed_entries(name, m)}
+        for i, entry in enumerate(s.get("related_but_distinct") or []):
+            row = rows.get(i)
+            if row and row["skipped"]:
+                click.echo(f"   ⚠️  related_but_distinct[{i}]: {row['problem']} — that dataset is unchecked", err=True)
+                continue
             click.echo(f"   not about {entry.get('name')}  <{entry.get('id')}>")
             click.echo(f"             express as `{entry.get('express_as')}`"
                        + (f"; in this bundle as {entry['in_bundle']}"
                           if entry.get("in_bundle") else ""))
+            if row:
+                click.echo(f"             ⚠️  {row['problem']}", err=True)
 
     problems = check_manifest(m)
     for p in problems:
@@ -343,12 +353,6 @@ def scope_cmd(project, do_check, strict, manifest):
             if refs:
                 absorbed.append((rec, refs))
         click.echo(f"\n{checked} record(s) checked against the declaration")
-        # Entries the checker skipped (#1157): the scope block names them
-        # to the model as omitted; the reader of `--check` is told the same.
-        for name in (names if project else sorted(scopes)):
-            for row in malformed_entries(name, m):
-                click.echo(f"   ⚠️  {name}: related_but_distinct[{row['index']}] {row['problem']} "
-                           f"— that dataset is unchecked", err=True)
         for rec, why in bad:
             click.echo(f"   ❌ {rec}\n      {why}")
         if not bad:

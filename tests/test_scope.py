@@ -98,39 +98,65 @@ class TestTheAliasesOfAnEntry(unittest.TestCase):
         self.assertEqual(scope.aliases_of({"id": "a", "also_known_as": ["b", ["c"], {"d": 1}, False, 7]}), ["a", "b", "7"])
         self.assertEqual(scope.aliases_of({"id": True}), [])
 
-    def test_a_malformed_entry_is_reported_by_the_manifest_check_and_the_cli_reader(self):
+    def test_a_malformed_entry_is_reported_by_the_manifest_check_the_checker_and_the_cli(self):
+        """#1157: the two readers of the declaration name the same rows, the
+        CLI lists them without raising (#1177 review, M1), and an `id` that
+        is not an identifier is reported, not dropped (S1)."""
+        import click.testing
+        from data_sheets_schema.cli.download import scope_cmd
         with tempfile.TemporaryDirectory() as tmp:
             manifest = Path(tmp) / "m.yaml"
             manifest.write_text(yaml.safe_dump({"projects": {"P": [], "Q": []}, "scope": {"P": {
-                "referent_id": "https://doi.org/10.1/P",
-                "related_but_distinct": ["https://doi.org/10.1/BARE",
-                                         {"id": "https://doi.org/10.1/OTHER", "express_as": "related_datasets",
+                "referent": "P", "referent_id": "https://doi.org/10.1/P",
+                "related_but_distinct": ["https://doi.org/10.1/BARE", None,
+                                         {"id": "https://doi.org/10.1/OTHER", "name": "Other", "express_as": "related_datasets",
                                           "also_known_as": ["https://doi.org/10.1/OTHER.v3", {"oops": 1}, True]},
-                                         {"id": "https://doi.org/10.1/THIRD", "express_as": "related_datasets",
+                                         {"id": True, "name": "Boolish", "express_as": "related_datasets"},
+                                         {"name": "NoId", "express_as": "related_datasets"},
+                                         {"id": ["doi:1"], "name": "Listy", "express_as": "related_datasets"},
+                                         {"id": "https://doi.org/10.1/THIRD", "name": "Third", "express_as": "related_datasets",
                                           "also_known_as": b"raw"}]}}}))
             rows = scope.malformed_entries("P", manifest)
             problems = [p["problem"] for p in scope.check_manifest(manifest) if p["project"] == "P"]
             ids = scope.related_ids("P", manifest)
-        self.assertEqual([r["index"] for r in rows], [0, 1, 2])
-        self.assertIn("not a mapping", rows[0]["problem"])
-        self.assertIn("2 value(s)", rows[1]["problem"]); self.assertIn("bool", rows[1]["problem"]); self.assertIn("dict", rows[1]["problem"])
-        self.assertIn("bytes", rows[2]["problem"])
-        self.assertEqual([p for p in problems if "related_but_distinct[" in p], [f"related_but_distinct[{r['index']}]: {r['problem']}" for r in rows])
+            r = click.testing.CliRunner(mix_stderr=False).invoke(scope_cmd, ["--check", "--manifest", str(manifest)])
+        self.assertEqual([(x["index"], x["skipped"]) for x in rows],
+                         [(0, True), (1, True), (2, False), (3, True), (4, True), (5, True), (6, False)])
+        self.assertIn("not a mapping", rows[0]["problem"]); self.assertIn("NoneType", rows[1]["problem"])
+        self.assertIn("2 value(s)", rows[2]["problem"]); self.assertIn("bool", rows[2]["problem"]); self.assertIn("dict", rows[2]["problem"])
+        self.assertIn("`id` is a bool", rows[3]["problem"]); self.assertIn("no `id`", rows[4]["problem"]); self.assertIn("`id` is a list", rows[5]["problem"])
+        self.assertIn("bytes", rows[6]["problem"])
+        self.assertEqual([p for p in problems if "related_but_distinct[" in p],
+                         [f"related_but_distinct[{x['index']}]: {x['problem']}" for x in rows])
         self.assertEqual(set(ids), {"https://doi.org/10.1/OTHER", "https://doi.org/10.1/OTHER.v3", "https://doi.org/10.1/THIRD"})
+        self.assertEqual(r.exit_code, 1, r.output + r.stderr)             # check_manifest problems fail the command, as before
+        self.assertEqual(r.stderr.count("that dataset is unchecked"), 5)            # the five skipped entries, once each
+        self.assertEqual(r.stderr.count("related_but_distinct[2]"), 2)              # check_manifest's row and the listing's note
+        self.assertIn("not about Other", r.output); self.assertIn("not about Third", r.output)
+        self.assertNotIn("not about Boolish", r.output); self.assertNotIn("not about NoId", r.output)
 
-    def test_the_block_and_the_checker_agree_on_how_many_entries_are_malformed(self):
+    def test_the_block_and_the_checker_agree_on_which_entries_are_skipped(self):
         """The runner's block says "N declared entries are malformed … and
-        omitted"; the checker must count the same N (#1157)."""
+        omitted" and names the rest; the checker must skip exactly those N
+        and read the rest (#1157; #1177 review, M2) — one classifier,
+        `scope.malformed_in`, for both, including a falsy entry and an
+        entry whose id is not an identifier."""
         from unittest import mock
         from data_sheets_schema.api_runner import scope_block
         declaration = {"referent": "the P dataset", "referent_id": "https://doi.org/10.1/P",
-                       "related_but_distinct": ["bare", {"id": "https://doi.org/10.1/OTHER", "name": "Other",
-                                                         "express_as": "related_datasets"}, 7]}
+                       "related_but_distinct": ["bare", None, "",
+                                                {"id": "https://doi.org/10.1/OTHER", "name": "Other", "express_as": "related_datasets",
+                                                 "also_known_as": [True, "https://doi.org/10.1/OTHER.v2"]},
+                                                {"id": True, "name": "Boolish"}, {"name": "NoId"}, 7]}
         with mock.patch.object(scope, "scope_of", lambda project, manifest=None: declaration):
             block = scope_block("P")
             rows = scope.malformed_entries("P")
-        self.assertIn("2 declared entries are malformed", block)
-        self.assertEqual([r["index"] for r in rows if "not a mapping" in r["problem"]], [0, 2])
+        skipped = [r["index"] for r in rows if r["skipped"]]
+        self.assertEqual(skipped, [0, 1, 2, 4, 5, 6])
+        self.assertIn(f"({len(skipped)} declared entries are malformed", block)
+        self.assertIn("Other — https://doi.org/10.1/OTHER, https://doi.org/10.1/OTHER.v2", block)   # the bool alias dropped, the entry kept
+        self.assertNotIn("Boolish", block); self.assertNotIn("NoId", block)
+        self.assertEqual([r["index"] for r in rows if not r["skipped"]], [3])
 
     def test_related_ids_maps_the_scalar_alias_to_its_entry(self):
         with tempfile.TemporaryDirectory() as tmp:
