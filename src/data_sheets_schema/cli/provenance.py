@@ -559,6 +559,10 @@ _CUT_BASIS = (" Cut at run_observed_until: the agent kept acting after its run "
               "completed, and the record describes the run.")
 
 
+#: How many same-named transcripts are worth enumerating exhaustively: the
+#: sets are 2**n and each one re-reads every file (#1195 M7).
+_MAX_AUTOMATIC_GROUP = 6
+
 _ESTIMATE_KEYS = ("assistant_turns", "output_tokens", "thinking_blocks", "thinking_text_chars",
                   "visible_text_chars", "tool_input_chars", "reasoning_tokens_estimate")
 #: Sentences `_reasoning_basis` can emit, recognised whole rather than by
@@ -589,6 +593,28 @@ _LEGACY_REASONING_SENTENCES = (
     "than the run's turns the count is partial (a resumed run whose earlier transcript predates the "
     "detail).",
     "These were added after the run, under run_observed_extended, which names their source.",
+    # Round 2 (da720634) wrote one block naming every key unconditionally,
+    # with the comparability clause as a second sentence; round 3 (d1b24ea5)
+    # the same list with that clause folded in. Neither is reachable from
+    # today's function, so the enumeration cannot find them and a record
+    # extended by either doubles its paragraph (#1195 M1).
+    "assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, visible_text_chars, "
+    "tool_input_chars and reasoning_tokens_estimate (output tokens minus a 4-chars-per-token estimate "
+    "of the text and tool-call payloads \u2014 a subtraction, an upper bound, not a measurement) are the "
+    "transcript's reasoning measure (#1000/#1011), added after the run under run_observed_extended; "
+    "thinking_tokens and turns_with_thinking_tokens are the runtime's own count on the turns whose "
+    "transcript line carries usage.output_tokens_details, and where turns_with_thinking_tokens is "
+    "fewer than assistant_turns the count is partial (a resumed run whose earlier transcript predates "
+    "the detail).",
+    "Comparable in kind with the API path's reasoning log, never to be averaged with it.",
+    "assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, visible_text_chars, "
+    "tool_input_chars and reasoning_tokens_estimate (output tokens minus a 4-chars-per-token estimate "
+    "of the text and tool-call payloads \u2014 a subtraction, an upper bound, not a measurement) are the "
+    "transcript's reasoning measure (#1000/#1011), comparable in kind with the API path's reasoning "
+    "log, never to be averaged with it.",
+    # Round 5 emitted the extension clause with an empty name list when the
+    # extended set named no key the observation still carried.
+    "Of these,  was added after the run, under run_observed_extended, which names the source.",
 )
 
 
@@ -653,14 +679,37 @@ def _own_sentences() -> frozenset:
     return frozenset(out)
 
 
+#: A sentence ends at `.`, `!` or `?` and takes any closing quote or bracket
+#: with it. `_basis_with` has always accepted all three as terminal, while the
+#: split looked only for a full stop, so a basis ending `checked!` was not
+#: idempotent and a quoted or bracketed ending could not be separated from the
+#: sentence appended after it (#1195 M3).
+_SENTENCE_END = __import__("re").compile(r"[.!?][\"\'\u2019\u201d)\]]*(?=\s)")
+
+
 def _split_sentences(text: str) -> list:
-    """Sentences, split after a full stop before any non-space. Three of
-    the four sentences `_reasoning_basis` emits begin with a lower-case
-    identifier, so a boundary requiring a capital could not find them and
-    a curator's lower-case sentence beside one was never separable
-    (#1191 round 5, S4)."""
-    import re as _re
-    return [s for s in (p.strip() for p in _re.split(r"(?<=[.])\s+(?=\S)", text.strip())) if s]
+    """Sentences, split after terminal punctuation and any closer that
+    follows it, before any non-space. Three of the four sentences
+    `_reasoning_basis` emits begin with a lower-case identifier, so a
+    boundary requiring a capital could not find them and a curator's
+    lower-case sentence beside one was never separable (#1191 round 5, S4).
+
+    An abbreviation or an ellipsis followed by a space still splits here:
+    the boundary is a heuristic, which is why the sentences this module
+    writes are stripped by the exact text recorded for them (#1195 M2) and
+    the heuristic is left to reach only the records that predate that.
+    """
+    text = text.strip()
+    out, start = [], 0
+    for m in _SENTENCE_END.finditer(text):
+        s = text[start:m.end()].strip()
+        if s:
+            out.append(s)
+        start = m.end()
+    tail = text[start:].strip()
+    if tail:
+        out.append(tail)
+    return out
 
 
 def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
@@ -703,24 +752,67 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
     return "".join(parts)
 
 
-def _basis_with(log: dict, keys: set) -> str:
-    """`run_observed_basis` with the reasoning sentences for `keys` — the
-    standard account where the record has none, the cut sentence where the
-    record carries a cut and the account does not say so, and the
-    reasoning sentences recomputed for the keys now present: the ones this
-    module wrote before are stripped first (round 3, M1), and the one
-    paragraph today's `annotate-observed` writes for the same keys is
-    replaced rather than doubled (round 2, S3)."""
+def _recorded_additions(log: dict) -> list:
+    """The exact text each prior extension recorded appending, newest first.
+
+    Authorship cannot be read off a sentence: a curator sentence that
+    happens to match this module's is deleted, and one of this module's
+    that a curator edited by a word survives beside its replacement
+    (#1195 M2). So an extension writes down what it appended, and the next
+    one removes that string and nothing else."""
+    out = []
+    for e in (log.get("run_observed_extended") or []):
+        if isinstance(e, dict) and isinstance(e.get("basis_added"), str) and e["basis_added"]:
+            out.append(e["basis_added"])
+    return list(reversed(out))
+
+
+def _basis_parts(log: dict, keys: set) -> tuple:
+    """`(basis, appended, terminated, edited)` — the recomputed account, the
+    text this call appends to it, whether a full stop was supplied because
+    the account carried no terminal punctuation of its own, and whether a
+    previous extension's recorded text is no longer where it was written.
+
+    The account is the record's, the standard one where it has none, plus
+    the cut sentence where the record carries a cut and does not say so.
+    What earlier extensions appended is removed by the text they recorded
+    (#1195 M2); the sentence-matching strip is kept only for a record
+    written before that text was recorded, which is a bounded set that
+    shrinks to nothing as they are re-extended."""
     b = str(log.get("run_observed_basis") or "").rstrip() or _RUN_OBSERVED_BASIS
-    if not b.endswith((".", "!", "?")):
-        b += "."                                   # so a sentence appended to it can be split off again (round 4, S3)
+    recorded = _recorded_additions(log)
+    edited = False
+    for prior in recorded:
+        if b.endswith(prior):
+            b = b[: -len(prior)].rstrip()
+        elif b.endswith(prior.rstrip()):
+            b = b[: -len(prior.rstrip())].rstrip()
+        else:
+            # The account no longer ends with what that extension recorded
+            # appending, so it was edited since. Removing an approximation of
+            # it would be guessing at a curator's text, which is the thing
+            # #1195 M2 says this must not do; leaving it doubles the
+            # paragraph, so the doubling is stated in the record instead.
+            edited = True
+    if not recorded:
+        mine = _own_sentences()
+        b = " ".join(s for s in _split_sentences(b) if s not in mine).rstrip()
+    terminated = not b.endswith((".", "!", "?"))
+    if terminated:
+        # Recorded, not silent (#1195 M3): the account is a curator's text
+        # and an edit to it is a fact about the record, small as it is.
+        b += "."
     if log.get("run_observed_until") and "Cut at run_observed_until" not in b:
         b += _CUT_BASIS
-    mine = _own_sentences()
-    b = " ".join(s for s in _split_sentences(b) if s not in mine).rstrip()
     added = {k for e in (log.get("run_observed_extended") or []) if isinstance(e, dict)
              for k in (e.get("keys_added") or [])}
-    return b + _reasoning_basis(keys, extended=added)
+    appended = _reasoning_basis(keys, extended=added)
+    return b + appended, appended, terminated, edited
+
+
+def _basis_with(log: dict, keys: set) -> str:
+    """The recomputed `run_observed_basis` alone."""
+    return _basis_parts(log, keys)[0]
 
 
 def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrument: str,
@@ -751,11 +843,23 @@ def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrum
     log["run_observed"] = {**prior, **{k: observed[k] for k in added}}
     entries = log.get("run_observed_extended")
     entries = entries if isinstance(entries, list) else ([entries] if isinstance(entries, dict) else [])
-    entries.append({"keys_added": added, "instrument": instrument, **(basis or {}),
-                    "recorded_by": recorded_by,
-                    "recorded_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat()})
+    entry = {"keys_added": added, "instrument": instrument, **(basis or {}),
+             "recorded_by": recorded_by,
+             "recorded_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat()}
+    entries.append(entry)
     log["run_observed_extended"] = entries
-    log["run_observed_basis"] = _basis_with(log, set(log["run_observed"]) & _REASONING_KEYS)
+    text, appended, terminated, edited = _basis_parts(log, set(log["run_observed"]) & _REASONING_KEYS)
+    # What this extension appended, so the next one removes this text and
+    # not a sentence that merely reads like it (#1195 M2).
+    entry["basis_added"] = appended
+    if terminated:
+        entry["basis_terminated"] = "a full stop was added: the account carried no terminal punctuation"
+    if edited:
+        entry["basis_prior_edited"] = (
+            "the account no longer ends with the text a previous extension recorded appending, so it was "
+            "edited after that extension; that paragraph is left exactly as it stands and this one is "
+            "added after it, rather than guess at which words are the curator's (#1195)")
+    log["run_observed_basis"] = text
     return added
 
 
@@ -892,8 +996,15 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
     prior = log.get("run_observed") if isinstance(log, dict) else None
     if not isinstance(prior, dict) or not prior:
         click.echo(f"{tag}: no run_observed to extend"); return
+    # A record carries the measure when it has every estimate key, or when a
+    # prior transcript-backed extension added them and found no
+    # thinking_tokens to add — the runtime's own count is absent from many
+    # transcripts and its absence is a finding, not a gap to retry. Requiring
+    # only two of the estimate keys skipped a record for good while it still
+    # lacked assistant_turns, thinking_blocks and the character counts
+    # (#1195 M4).
     if _REASONING_KEYS <= set(prior) or (
-            {"reasoning_tokens_estimate", "output_tokens"} <= set(prior) and "thinking_tokens" not in prior
+            set(_ESTIMATE_KEYS) <= set(prior) and "thinking_tokens" not in prior
             and any(isinstance(e, dict) and "thinking_tokens" not in (e.get("keys_added") or []) and
                     "transcripts" in e for e in (log.get("run_observed_extended") or []))):
         click.echo(f"{tag}: already carries the reasoning measure"); return
@@ -930,10 +1041,25 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
             sets += [list(c) for c in combinations(ordered, n)]
     else:
         import re as _re
+        from itertools import combinations
         by_name: dict[str, list[Path]] = {}
         for t in candidates:
             by_name.setdefault(_re.sub(r"-[0-9a-f]{16}$", "", t.stem), []).append(t)
-        sets += [sorted(v, key=lambda t: t.stat().st_mtime) for v in by_name.values() if len(v) > 1]
+        for v in by_name.values():
+            if len(v) < 2:
+                continue
+            ordered = sorted(v, key=lambda t: t.stat().st_mtime)
+            if len(ordered) <= _MAX_AUTOMATIC_GROUP:
+                # Every subset, not only the whole group: three files under
+                # one launcher name include a valid resumed pair the group
+                # itself is not (#1195 M7).
+                for n in range(2, len(ordered) + 1):
+                    sets += [list(c) for c in combinations(ordered, n)]
+            else:
+                sets.append(ordered)
+                click.echo(f"{tag}: {len(ordered)} transcripts share the name "
+                           f"{_re.sub(r'-[0-9a-f]{16}$', '', ordered[0].stem)}; only each single file and "
+                           "the whole group are tried — pass --transcript to try a particular set")
     until_s = log.get("run_observed_until")
     until = _dt.fromisoformat(str(until_s).replace("Z", "+00:00")) if until_s else None
     receipt = receipt_path(path.parent, proj)
@@ -954,6 +1080,25 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
                        "differs on " + ", ".join(f"{k} {prior[k]}→{obs.get(k)}" for k in differ)))
         return
     ts, obs = matches[0]
+    # What the losing candidates reproduced, so the identification can be
+    # audited from the record rather than by replaying a candidate pool that
+    # has since changed (#1195 S8). `best_other_reproduces` is how many of the
+    # record's prior keys the closest non-matching set got; null where the
+    # winner was the only candidate.
+    others = [len(prior) - len(differ) for cand, _o, differ in results if cand is not ts]
+    # Not every prior key identifies a transcript: `bundle_lines_total` is the
+    # bundle's and `receipt_chunks_total` the manifest's, so every candidate
+    # reproduces them. A discriminating key is one at least two candidate sets
+    # disagree on, and it is the count over those that says how far the winner
+    # stood from the field.
+    disc = sorted(k for k in prior
+                  if len({str(o.get(k)) for _c, o, _d in results}) > 1) if len(results) > 1 else []
+    others_disc = [sum(1 for k in disc if o.get(k) == prior[k])
+                   for cand, o, _d in results if cand is not ts]
+    identification = {"sets_tried": len(results), "prior_keys": len(prior),
+                      "discriminating_keys": disc,
+                      "best_other_reproduces": max(others) if others else None,
+                      "best_other_reproduces_discriminating": max(others_disc) if others_disc else None}
     added = sorted((set(obs) - set(prior)) & _REASONING_KEYS)          # the set --execute writes (round 2, S4)
     click.echo(f"{tag}: {' + '.join(t.name for t in ts)} reproduces {len(prior)} prior key(s); adds {added}")
     if not execute:
@@ -961,8 +1106,19 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
     _extend_run_observed(log, obs, recorded_by="d4d provenance extend-observed (#1010)",
                          instrument="the transcript's reasoning measure (#1000/#1011), recomputed by "
                                     "scripts/agentic_observed.py from the transcripts named on the bytes the "
-                                    "record hashed, under the record's own cut; every prior key reproduced exactly",
-                         basis={"transcripts": [t.name for t in ts], "observer_sha256": observer, **basis})
+                                    "record hashed, "
+                                    + ("under the record's own run_observed_until cut"
+                                       if until is not None else
+                                       "over the whole transcript: the record records no cut")
+                                    + "; every prior key reproduced exactly",
+                         # The bytes, not the basename: two different files can
+                         # carry one name under the two config roots, and a
+                         # name alone neither says which was read nor detects a
+                         # later edit (#1195 M6).
+                         basis={"identification": identification,
+                                "transcripts": [t.name for t in ts],
+                                "transcript_sha256": {t.name: _h.sha256(t.read_bytes()).hexdigest() for t in ts},
+                                "observer_sha256": observer, **basis})
     ProvenanceRecord(data=data).write(path)
     click.echo(f"   wrote {path}")
 

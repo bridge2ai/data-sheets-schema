@@ -1517,17 +1517,28 @@ steps need:
     2026-09-10).** `d4d provenance extend-observed` recomputed every one
     of the 24 agentic records' `run_observed` from its transcript on the
     bundle bytes the record hashed (18 recovered from git, 6 on disk),
-    with the record's own `run_observed_until` cut, and extended it only
+    under the record's own `run_observed_until` cut where it declares one
+    — one of the 24 does, and the other 23 are observed over the whole
+    transcript, which each entry's `instrument` now says rather than
+    claiming a cut the record does not carry (#1195 M5) — and extended it only
     where every prior key reproduced exactly — 24 of 24, 21 from one
     transcript and 3 (the v5 rep3 AI_READI, CM4AI and VOICE runs, killed
     and resumed) from the pair of files their name covers, whose sums are
     the recorded token, tool and duration totals and whose union of read
-    windows is the recorded `bundle_lines_read`. "Every prior key" is 4–5
-    discriminating integers per record (`total_tokens`, eight digits, and
-    `duration_ms`, seven, carry the identification; `bundle_lines_total`
-    and `receipt_chunks_total` are the bundle's and the manifest's, the
-    same for every candidate) — the best non-matching candidate
-    reproduces at most 2 of them, and 0 on 16 of the 24. Added: `assistant_turns`, `output_tokens`,
+    windows is the recorded `bundle_lines_read`. "Every prior key" is 5 or 7 integers per record, of which 4 or 5
+    discriminate: `total_tokens` (eight digits on 22 of the 24, seven on
+    the two CHORUS v5 records) and `duration_ms` carry the
+    identification, while `bundle_lines_total` and
+    `receipt_chunks_total` are the bundle's and the manifest's and every
+    candidate reproduces them. The closest non-matching candidate
+    reproduces 0 of a record's discriminating keys on 17 of the 24, 1 on
+    four and 2 on three, and each record now records that beside its
+    extension under `identification` (`sets_tried`,
+    `discriminating_keys`, `best_other_reproduces_discriminating`), so the
+    claim is auditable from the record rather than by replaying a
+    candidate pool that has since changed (#1195 S8). Ten to nineteen
+    candidate sets were tried per record.
+    Added: `assistant_turns`, `output_tokens`,
     `thinking_blocks`, `thinking_text_chars` (0 throughout), `visible_text_chars`,
     `tool_input_chars`, `reasoning_tokens_estimate`, and where any turn
     carries it `thinking_tokens` / `turns_with_thinking_tokens` (the
@@ -1555,6 +1566,28 @@ steps need:
     that the observation carries none), and one naming which of them an
     extension added — the record's only in-text statement that those
     numbers are not the orchestrator's own run-time observation.
+    A Codex CLI review after six reviewer rounds (#1195) found the
+    recomputation was inferring authorship from sentence text: a curator
+    sentence identical to one of this module's was deleted and one of its
+    own that a curator had edited by a word survived beside its
+    replacement, neither of which a text match can tell apart. An
+    extension now records the exact text it appended
+    (`basis_added`), and the next one removes that string and nothing
+    else; where the account no longer ends with it the paragraph was
+    edited since, and that is stated (`basis_prior_edited`) rather than
+    guessed at. The sentence-matching strip is kept only for a record
+    written before the text was recorded — a set that empties as those
+    records are re-extended — and it now knows the two forms rounds 2
+    and 3 wrote and the empty extension clause round 5 could emit, none
+    of which today's function can produce. Four more from the same
+    review: the sentence boundary takes `!`, `?` and a closing quote or
+    bracket, so a basis ending in one is idempotent; a full stop supplied
+    to an account that carried none is recorded rather than silent; the
+    skip guard asks for every estimate key, not two of the seven, so a
+    record missing `assistant_turns` or the character counts is no longer
+    skipped for good; and the transcripts are recorded by sha256 as well
+    as name, since one basename can name different bytes under the two
+    config roots.
 
 Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16,
 17, 20 and 22 are not; 15 and 17 are the receipts instrument's revisions and

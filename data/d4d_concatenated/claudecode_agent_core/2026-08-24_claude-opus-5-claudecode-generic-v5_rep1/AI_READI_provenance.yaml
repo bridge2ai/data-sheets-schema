@@ -146,9 +146,21 @@ phase_log:
     - visible_text_chars
     instrument: the transcript's reasoning measure (#1000/#1011), recomputed by scripts/agentic_observed.py
       from the transcripts named on the bytes the record hashed, under the record's
-      own cut; every prior key reproduced exactly
+      own run_observed_until cut; every prior key reproduced exactly
+    identification:
+      sets_tried: 12
+      prior_keys: 5
+      discriminating_keys:
+      - bundle_lines_read
+      - duration_ms
+      - tool_uses
+      - total_tokens
+      best_other_reproduces: 1
+      best_other_reproduces_discriminating: 0
     transcripts:
     - agent-afanout-aireadi-rep1-92ae283927edabf1.jsonl
+    transcript_sha256:
+      agent-afanout-aireadi-rep1-92ae283927edabf1.jsonl: 27e406320a5ae61e0389f0f3b27794db44d0f9a784d371ad9a5d0d2c6fe20cf2
     observer_sha256: 1bdeb4fde0bc28a63d9615acba9e53f70db027668086be35ceae8d12c369c0a8
     bundle_basis:
       source: git blob
@@ -158,7 +170,17 @@ phase_log:
       matched_on:
       - md5
     recorded_by: d4d provenance extend-observed (#1010)
-    recorded_at: '2026-09-10T07:43:16+00:00'
+    recorded_at: '2026-09-10T08:36:06+00:00'
+    basis_added: ' Of the transcript''s reasoning measure (#1000/#1011) the observation
+      carries assistant_turns, output_tokens, thinking_blocks, thinking_text_chars,
+      visible_text_chars, tool_input_chars, reasoning_tokens_estimate; comparable
+      in kind with the API path''s reasoning log, never to be averaged with it. reasoning_tokens_estimate
+      is output tokens minus a 4-chars-per-token estimate of the text and tool-call
+      payloads: a subtraction, an upper bound, not a measurement. No thinking_tokens:
+      the observation carries none, so the runtime''s own count is not measured for
+      this run. Of these, assistant_turns, output_tokens, reasoning_tokens_estimate,
+      thinking_blocks, thinking_text_chars, tool_input_chars, visible_text_chars were
+      added after the run, under run_observed_extended, which names the source.'
 schema:
   declared_version: 2.0.0
   declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml

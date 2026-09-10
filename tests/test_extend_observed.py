@@ -141,8 +141,37 @@ class Extension(unittest.TestCase):
             self.assertNotIn("thinking_blocks", log["run_observed_basis"])                    # a key not carried is not described (round 3, S3)
             self.assertIn("Cut at run_observed_until", log["run_observed_basis"])               # the record's cut is said (S5)
             self.assertEqual(log["run_observed_until"], "2026-08-28T10:00:00+00:00")     # untouched
+            # A second run adds nothing, and says so as "nothing to extend"
+            # rather than "already carries the reasoning measure": this
+            # fixture's observation carries three of the seven estimate keys,
+            # and a record missing thinking_blocks or the character counts is
+            # not a record that carries the measure. The guard read two keys
+            # and would have skipped such a record for good (#1195 M4).
             r = self._run(tmp, path, {"agent-av6-P-rep1": FULL}, transcripts=[t])
-            self.assertIn("already carries the reasoning measure", r.output)
+            self.assertIn("nothing to extend", r.output)
+            self.assertNotIn("already carries the reasoning measure", r.output)
+
+    def test_a_partial_estimate_is_not_the_measure_and_a_complete_one_with_no_thinking_count_is(self):
+        """The skip-for-good guard (#1195 M4). A record whose extension added
+        every estimate key and found no `thinking_tokens` carries the measure —
+        the runtime's own count is absent from many transcripts and its absence
+        is a finding, not a gap to retry. A record carrying only some of those
+        keys does not, however it got them."""
+        from data_sheets_schema.cli import provenance as cli
+        complete = {k: 1 for k in cli._ESTIMATE_KEYS}
+        partial = {k: 1 for k in cli._ESTIMATE_KEYS[:3]}
+        ext = [{"keys_added": sorted(complete), "transcripts": ["agent-x.jsonl"]}]
+
+        def carries(prior, extended):
+            return (cli._REASONING_KEYS <= set(prior) or (
+                set(cli._ESTIMATE_KEYS) <= set(prior) and "thinking_tokens" not in prior
+                and any(isinstance(e, dict) and "thinking_tokens" not in (e.get("keys_added") or [])
+                        and "transcripts" in e for e in extended)))
+
+        self.assertTrue(carries(complete, ext))
+        self.assertFalse(carries(partial, ext))
+        self.assertFalse(carries(partial, []))
+        self.assertTrue(carries({k: 1 for k in cli._REASONING_KEYS}, []))
 
     def test_a_transcript_that_does_not_reproduce_a_prior_key_writes_nothing_and_names_the_key(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -388,3 +417,163 @@ class Extension(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+#: Verbatim from the branch's own history, not regenerated: the paragraph
+#: round 2 (`da720634`) appended, and the estimate sentence round 3
+#: (`d1b24ea5`) appended. A fixture the implementation produces cannot show
+#: that the implementation has forgotten a form (#1195 M1, S9).
+ROUND_2_BASIS = (
+    " assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, "
+    "visible_text_chars, tool_input_chars and reasoning_tokens_estimate "
+    "(output tokens minus a 4-chars-per-token estimate of the text and "
+    "tool-call payloads — a subtraction, an upper bound, not a measurement) "
+    "are the transcript's reasoning measure (#1000/#1011), added after the "
+    "run under run_observed_extended; thinking_tokens and "
+    "turns_with_thinking_tokens are the runtime's own count on the turns "
+    "whose transcript line carries usage.output_tokens_details, and where "
+    "turns_with_thinking_tokens is fewer than assistant_turns the count is "
+    "partial (a resumed run whose earlier transcript predates the detail). "
+    "Comparable in kind with the API path's reasoning log, never to be "
+    "averaged with it.")
+ROUND_3_BASIS = (
+    " assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, visible_text_chars, "
+    "tool_input_chars and reasoning_tokens_estimate (output tokens minus a 4-chars-per-token "
+    "estimate of the text and tool-call payloads — a subtraction, an upper bound, not a "
+    "measurement) are the transcript's reasoning measure (#1000/#1011), comparable in kind with "
+    "the API path's reasoning log, never to be averaged with it."
+    " No thinking_tokens: no line of the transcript carries usage.output_tokens_details, "
+    "so the runtime's own count is not measured for this run.")
+
+
+class CodexRound(unittest.TestCase):
+    """The Codex CLI review of PR #1191 (#1195)."""
+
+    def test_a_basis_written_by_an_earlier_round_is_stripped_not_doubled(self):
+        """M1. Both fixtures are the historical text, so a form the strip has
+        forgotten fails here rather than being generated into the answer."""
+        for name, prior in (("round 2", ROUND_2_BASIS), ("round 3", ROUND_3_BASIS)):
+            with self.subTest(name):
+                log = {"run_observed": dict(FULL), "run_observed_basis": cli._RUN_OBSERVED_BASIS + prior}
+                out = cli._basis_with(log, set(FULL) & cli._REASONING_KEYS)
+                self.assertEqual(out.count("reasoning measure"), 1, out)
+                self.assertEqual(out.count("No thinking_tokens"), 1, out)
+                self.assertEqual(cli._basis_with({**log, "run_observed_basis": out},
+                                                 set(FULL) & cli._REASONING_KEYS), out)
+
+    def test_the_no_op_extension_clause_an_earlier_round_wrote_is_stripped(self):
+        """M1. Round 5 emitted the clause with an empty name list when the
+        extension named no key the observation still carried; the head cannot
+        produce it, so only a literal can remove it."""
+        empty = " Of these,  was added after the run, under run_observed_extended, which names the source."
+        log = {"run_observed": {"output_tokens": 1},
+               "run_observed_basis": cli._RUN_OBSERVED_BASIS + empty}
+        out = cli._basis_with(log, {"output_tokens"})
+        self.assertNotIn("Of these,  was", out)
+
+    def test_a_sentence_ending_in_other_punctuation_is_a_sentence(self):
+        """M3. `_basis_with` has always treated `!` and `?` as terminal while
+        the split looked only for a full stop, so a second recomputation
+        doubled the paragraph."""
+        for ending in ("curator checked!", "did the curator check?",
+                       'the curator said "checked."', "the curator checked [twice.]"):
+            with self.subTest(ending):
+                log = {"run_observed": dict(FULL), "run_observed_basis": ending}
+                once = cli._basis_with(log, set(FULL) & cli._REASONING_KEYS)
+                twice = cli._basis_with({**log, "run_observed_basis": once}, set(FULL) & cli._REASONING_KEYS)
+                self.assertEqual(once, twice)
+                self.assertEqual(once.count("Of the transcript's reasoning measure"), 1)
+                self.assertIn(ending, once)
+
+    def test_what_is_removed_is_the_text_the_last_extension_recorded(self):
+        """M2. Authorship is not readable from a sentence. Once an extension
+        records what it appended, that text is what the next one removes — so
+        a curator sentence identical to one of ours survives beside it."""
+        base = {"run_observed": dict(FULL), "run_observed_basis": cli._RUN_OBSERVED_BASIS}
+        text, appended, _t, _e = cli._basis_parts(base, set(FULL) & cli._REASONING_KEYS)
+        twin = " No thinking_tokens: the observation carries none, so the runtime's own count is not measured for this run."
+        log = {"run_observed": dict(FULL),
+               "run_observed_basis": cli._RUN_OBSERVED_BASIS + twin + appended,
+               "run_observed_extended": [{"keys_added": sorted(set(FULL) & cli._REASONING_KEYS),
+                                          "basis_added": appended}]}
+        out, _a, _t, edited = cli._basis_parts(log, set(FULL) & cli._REASONING_KEYS)
+        self.assertFalse(edited)
+        self.assertIn(twin.strip(), out)                       # the curator's copy is left alone
+        self.assertEqual(out.count("Of the transcript's reasoning measure"), 1)
+
+    def test_an_edited_paragraph_is_reported_rather_than_guessed_at(self):
+        """M2, the other direction: a word changed inside the recorded text
+        means it can no longer be located, and removing an approximation of it
+        would be editing the curator. The doubling is stated instead."""
+        base = {"run_observed": dict(FULL), "run_observed_basis": cli._RUN_OBSERVED_BASIS}
+        _text, appended, _t, _e = cli._basis_parts(base, set(FULL) & cli._REASONING_KEYS)
+        edited_text = appended.replace("upper bound", "curator-reviewed upper bound")
+        log = {"run_observed": dict(FULL),
+               "run_observed_basis": cli._RUN_OBSERVED_BASIS + edited_text,
+               "run_observed_extended": [{"keys_added": sorted(set(FULL) & cli._REASONING_KEYS),
+                                          "basis_added": appended}]}
+        out, _a, _t, edited = cli._basis_parts(log, set(FULL) & cli._REASONING_KEYS)
+        self.assertTrue(edited)
+        self.assertIn("curator-reviewed upper bound", out)
+
+    def test_a_record_with_no_cut_does_not_claim_one(self):
+        """M5. The observer correctly gets `until=None`; the extension said
+        "under the record's own cut" whatever the record carried."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp)
+            data = yaml.safe_load(path.read_text().split("\n", 1)[1])
+            data["phase_log"].pop("run_observed_until")
+            path.write_text("# header\n" + yaml.safe_dump(data))
+            (t,) = _transcripts(tmp, ["agent-av6-P-rep1"])
+            r = Extension._run(self, tmp, path, {"agent-av6-P-rep1": FULL}, transcripts=[t])
+            self.assertEqual(r.exit_code, 0, r.output)
+            log = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]
+            (ext,) = log["run_observed_extended"]
+            self.assertIn("the record records no cut", ext["instrument"])
+            self.assertNotIn("under the record's own", ext["instrument"])
+            self.assertNotIn("Cut at run_observed_until", log["run_observed_basis"])
+
+    def test_the_transcript_is_recorded_by_its_bytes(self):
+        """M6. Two files with one basename under the two config roots are
+        different inputs and were recorded identically."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp); (t,) = _transcripts(tmp, ["agent-av6-P-rep1"])
+            r = Extension._run(self, tmp, path, {"agent-av6-P-rep1": FULL}, transcripts=[t])
+            self.assertEqual(r.exit_code, 0, r.output)
+            (ext,) = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]["run_observed_extended"]
+            self.assertEqual(ext["transcript_sha256"],
+                             {t.name: hashlib.sha256(t.read_bytes()).hexdigest()})
+
+    def test_three_transcripts_under_one_name_offer_the_resumed_pair(self):
+        """M7. Discovery tried every single file and the whole group, so the
+        pair that is the resumed run was never offered."""
+        import click.testing
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _record(tmp)
+            root = Path(tmp) / "cfg" / "s1" / "subagents"; root.mkdir(parents=True, exist_ok=True)
+            files = []
+            for i, h in enumerate(("a" * 16, "b" * 16, "c" * 16)):
+                f = root / f"agent-x-rep1-{h}.jsonl"; f.write_text(f"{i}\n")
+                import os
+                os.utime(f, (1_700_000_000 + i, 1_700_000_000 + i))
+                files.append(f)
+            pair = {files[0], files[1]}
+            tried = []
+
+            def observe(ts, bundle, until, receipt, manifest):
+                tried.append(frozenset(ts))
+                return dict(FULL) if set(ts) == pair else {k: 0 for k in FULL}
+
+            with mock.patch.object(cli, "_observe", observe), \
+                 mock.patch.object(cli, "_require_repo_root_cwd", lambda *a, **k: None), \
+                 mock.patch.object(cli, "_transcript_candidates", lambda p, l: list(files)), \
+                 mock.patch("data_sheets_schema.provenance.record_path_for",
+                            lambda project, method, label, concat_dir=None: path), \
+                 mock.patch("data_sheets_schema.receipts.receipt_path", lambda core, p: Path(tmp) / "none.yaml"):
+                r = click.testing.CliRunner().invoke(
+                    cli.provenance, ["extend-observed", "--label", "L_rep1", "--project", "P",
+                                     "--method", "claudecode_agent", "--execute"])
+            self.assertIn(frozenset(pair), tried, "the resumed pair was never tried")
+            self.assertEqual(r.exit_code, 0, r.output)
+            (ext,) = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]["run_observed_extended"]
+            self.assertEqual(sorted(ext["transcripts"]), sorted(f.name for f in pair))
