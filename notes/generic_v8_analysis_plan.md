@@ -1410,7 +1410,7 @@ between a v8 canary and its fill.
   a baseline worst of 1 (2 before `report_claims` v3, #1022/#1046). The
   AI_READI block was re-derived the same way on 2026-09-10 UTC (#1170):
   status `regressed` before and after (British 45 vs 43, the same under
-  v4), the report row unmeasured, the D4 block (#906) under
+  v4 as proposed in #1173, open at the time of writing), the report row unmeasured, the D4 block (#906) under
   `prior_verdict` and #891's beneath it.
 - **D5** — adopted 2026-09-03: API-only v8 first; the agentic arm needs
   #688's launcher and the parity update before a v8 playbook run is
