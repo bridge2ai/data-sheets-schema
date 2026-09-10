@@ -1404,7 +1404,11 @@ between a v8 canary and its fill.
   v7 form blocks already hold v3 counts, so the baseline v8's canaries
   are gated against is v3 either way; this decided only that one
   recorded verdict. CM4AI rep1's block (v2 baseline numbers, pre-#891
-  rows) is the same shape and is #922.
+  rows) was the same shape and was re-derived the same way on 2026-09-09
+  (#922): `ok` before and after, British 0 vs 4, the slips row present,
+  the report row unmeasured under #684 (the record read no claim) against
+  a baseline worst of 1 (2 before `report_claims` v3, #1022/#1046). The
+  AI_READI block's report row reads the same way today; #1170 re-derives it.
 - **D5** — adopted 2026-09-03: API-only v8 first; the agentic arm needs
   #688's launcher and the parity update before a v8 playbook run is
   cheap enough to repeat.

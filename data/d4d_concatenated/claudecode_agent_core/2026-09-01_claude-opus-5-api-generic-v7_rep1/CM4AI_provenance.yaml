@@ -865,8 +865,9 @@ canary:
     run: 0
     baseline_worst: 9
   - metric: report findings
-    run: 0
-    baseline_worst: 2
+    run: null
+    baseline_worst: 1
+    note: 'unmeasured: the report carried no claim the checker reads (#684)'
   - metric: ungrounded identifiers
     run: 0
     baseline_worst: 0
@@ -881,11 +882,14 @@ canary:
     baseline_worst: 0
   - metric: British spellings
     run: 0
-    baseline_worst: 0
+    baseline_worst: 4
   - metric: chunks unreviewed
     run: 0
     baseline_worst: 0
   - metric: snippets unverified
+    run: 0
+    baseline_worst: 0
+  - metric: addressing slips over tolerance
     run: 0
     baseline_worst: 0
   - metric: receipts vacuous
@@ -897,15 +901,59 @@ canary:
   blind: []
   unbaselined: []
   regressions: []
-  basis: 'offline re-verdict after the path_off_by_one interpretation (#876, registered
-    in the v7 plan): the batch gate ran before the checker distinguished addressing
-    slips from fabricated paths; the receipts block was re-checked strict on 2026-09-01
-    and this verdict recomputes against the same 2026-08-22c baseline the batch used.
-    Two earlier writings in the same session were themselves defective and are superseded
-    by this one: the first passed baseline_for''s arguments reversed, the second mapped
-    the record''s block names where counts_from expects ''pair''/''report'' - both
-    recorded unmeasurable.'
-  recorded_by: d4d receipts check + canary.verdict, offline (#876)
+  basis: 'verdict from this record''s own check blocks against the per-project worst
+    of ''2026-08-22c'' with the gate''s functions, including the #684 report basis
+    ({''measured'': 1, ''vacuous'': 2, ''unchecked'': 0})'
+  recorded_at: '2026-09-09T21:55:48+00:00'
+  recorded_by: d4d api verdict (offline)
+  prior_verdict:
+    status: ok
+    rows:
+    - metric: pair errors
+      run: 0
+      baseline_worst: 9
+    - metric: report findings
+      run: 0
+      baseline_worst: 2
+    - metric: ungrounded identifiers
+      run: 0
+      baseline_worst: 0
+    - metric: resolver URLs in identifier slots
+      run: 0
+      baseline_worst: 0
+    - metric: organisational fragments
+      run: 0
+      baseline_worst: 0
+    - metric: undeclared prefixes
+      run: 0
+      baseline_worst: 0
+    - metric: British spellings
+      run: 0
+      baseline_worst: 0
+    - metric: chunks unreviewed
+      run: 0
+      baseline_worst: 0
+    - metric: snippets unverified
+      run: 0
+      baseline_worst: 0
+    - metric: receipts vacuous
+      run: 0
+      baseline_worst: 0
+    - metric: receipt findings
+      run: 0
+      baseline_worst: 0
+    blind: []
+    unbaselined: []
+    regressions: []
+    basis: 'offline re-verdict after the path_off_by_one interpretation (#876, registered
+      in the v7 plan): the batch gate ran before the checker distinguished addressing
+      slips from fabricated paths; the receipts block was re-checked strict on 2026-09-01
+      and this verdict recomputes against the same 2026-08-22c baseline the batch
+      used. Two earlier writings in the same session were themselves defective and
+      are superseded by this one: the first passed baseline_for''s arguments reversed,
+      the second mapped the record''s block names where counts_from expects ''pair''/''report''
+      - both recorded unmeasurable.'
+    recorded_by: d4d receipts check + canary.verdict, offline (#876)
 review:
   checked: true
   items_total: 83
