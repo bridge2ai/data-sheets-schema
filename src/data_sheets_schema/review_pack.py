@@ -963,6 +963,11 @@ def review_evidence_why(block: Any) -> str | None:
     adverse = block.get("adverse")
     if not isinstance(adverse, int) or isinstance(adverse, bool):
         return f"not evidence: adverse is {type(adverse).__name__}, not a count"
+    if adverse < 0:
+        # `min()` would put it first (#1124 round 12, SF-R12-1): a count
+        # that cannot be a count of anything is not evidence, on this
+        # field as on `unanswered_truncated`.
+        return f"not evidence: adverse is {adverse}, not a count"
     findings, unanswered, truncated = block.get("findings"), block.get("unanswered"), block.get("unanswered_truncated")
     # A shape the block cannot be measured by is one more way of not being
     # evidence, never an exception out of `runs select` (round 10, M-R10-2).

@@ -893,7 +893,8 @@ class APackIsNeverRewrittenUnderItsPin(unittest.TestCase):
             for shape in ({"checked": True, "adverse": 2, "findings": 3}, {"checked": True, "adverse": 2, "unanswered": 7},
                           {"checked": True, "adverse": 2, "unanswered_truncated": "lots"},
                           {"checked": True, "adverse": 2, "unanswered_truncated": [1, 2]}, {"checked": True, "adverse": "2"},
-                          {"checked": True, "adverse": 0, "findings": [], "unanswered": ["a", "b"], "unanswered_truncated": -2}):
+                          {"checked": True, "adverse": 0, "findings": [], "unanswered": ["a", "b"], "unanswered_truncated": -2},
+                          {"checked": True, "adverse": -7, "findings": [], "unanswered": []}):
                 self.assertIn("not evidence", rp.review_evidence_why(shape), shape)       # classified, never raised (round 10, M-R10-2)
                 self.assertIsNone(rp.review_evidence(shape))
             self.assertIn("not checked (the pack", rp.review_evidence_why(rp.check_review({}, {})))
