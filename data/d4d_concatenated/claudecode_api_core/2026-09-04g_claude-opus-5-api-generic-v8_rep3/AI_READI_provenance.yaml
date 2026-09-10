@@ -714,8 +714,8 @@ report_claims:
     slot: content_warnings
     record: full
     detail: the phase-1 record carried `content_warnings` (1 entry); the final record
-      does not, and no Dispositions row and no removal statement the checker reads
-      names it — add a `removed` row or restore the value
+      does not, and no Dispositions row and no removal statement names it — add a
+      `removed` row for `content_warnings`
     claim: ''
   claims_checked: 22
   claims_unnamed: 0
@@ -729,7 +729,7 @@ report_claims:
     invalid: 0
   claims_core_cannot_hold: 0
   snapshot_checked: true
-  snapshot_basis: unrecorded removals are findings
+  snapshot_basis: 'dispositions table expected: unrecorded removals are findings'
   prose_retention_claims: 0
   removals_unrecorded:
   - content_warnings

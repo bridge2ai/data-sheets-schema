@@ -1386,36 +1386,63 @@ steps need:
     finding — CHORUS 04f rep2 `regulatory_restrictions` (the report's prose
     says the analysis "remains in" it), AI_READI 04g rep3 `content_warnings`
     (a receipted "No"), VOICE 04f rep2 the whole `data_governance` object
-    (five receipted leaves) — and the checker read 31, 10 and 94 claims
-    and found nothing. v5 adds two readings. With the phase-1 snapshot
+    (five receipted leaves) — and the checker read 31, 22 and 35 claims and
+    found nothing. v5 adds two readings. With the phase-1 snapshot
     (`intermediate/{P}_full.yaml`, 86 records) a populated top-level slot
-    the final full record does not carry, with no `removed` row and no
-    removal statement the checker reads naming its root, is
-    `removal_not_recorded` — deterministic, no claim parsing, objects and
-    leaves alike; `conforms_to_schema`/`conforms_to_class`, `notes` and
-    `source_caveats` are exempt as they are from the receipt denominator.
-    The finding needs the table the row belongs to: on the 68 snapshot
-    records whose report predates the table (#929) the removals are listed
-    under `removals_unrecorded` and are not findings (`snapshot_basis` says
-    which; the #684 precedent). A sentence saying a value "remains in",
-    "stays in", "is kept in" a backticked path is read like a `retained`
-    row that names no record — satisfied at that path in either record, or
-    by a populated key of the leaf's name anywhere in either (prose names
-    the leaf: "the four named reviewers stay in `review_details`"), a
-    `core.`/`full.` prefix picking the record; 162 such claims corpus-wide.
+    the final full record does not carry is `removal_not_recorded` unless
+    the report records the removal: an exact top-level name in a `removed`
+    row or a removal claim against the full record or no named record (a
+    row removing `x.leaf`, `x[0]`, or `x` from the core alone records
+    nothing about `x` leaving the full record), or — for suppression only,
+    never for a removal claim — the bare name in a sentence carrying a
+    removal word ("### 4.7 Removed `errata`", "`conforms_to_standard` is
+    absent from both records"). Objects and leaves alike; `conforms_to_*`,
+    `notes` and `source_caveats` exempt as from the receipt denominator.
+    The finding needs the table the row belongs to, and the test is the
+    run's own statement that it asked for one (`inputs.dispositions_expected`,
+    #961), not a parsed table — a pre-#929 audit summary with Slot and
+    Disposition headers parses as one: on the 69 snapshot records never
+    asked for a table the removals are listed under `removals_unrecorded`
+    and are not findings (`snapshot_basis` says which; the #684 precedent),
+    on the 17 that were, they are. A paragraph saying a value "remains in",
+    "stays in", "is kept in" a backticked slot path is read like a
+    `retained` row that names no record — a negation in the clause before
+    the verb ("nothing remains in") is not a claim, a class name or `HIPAA`
+    is not a path — satisfied at that path in either record with a dotted
+    step over a list read as `[*]`, or by a populated key of the leaf's name
+    under the claim's own root (prose names the leaf: "the four named
+    reviewers stay in `review_details`"), a `core.`/`full.` prefix picking
+    the record; 161 such claims corpus-wide, all but one satisfied.
     Recomputed with `backfill-checks --blocks report_claims --overwrite`
-    over the 277 checked records: 5 moved — the three instances above, the
-    VOICE 04d canary (5 → 6, `conforms_to_standard`; already regressed and
-    not retained, its stored canary block predates v5) and the 2026-08-13
-    v4 CM4AI rep2 record (`created_on`); the 2026-09-01 v7 arm reads 0 on
-    all twelve before and after, so no baseline and no retained verdict
-    moves. 93 removals are listed corpus-wide under the no-table basis. The
-    first cut of v5 counted an unrecorded removal on every snapshot record
-    and read a leaf-named prose claim as a full path: 48 records moved,
-    most of them reports that were never asked for a row; both readings
-    were narrowed before the recompute was kept. The regate sees the new
-    class through the same contradictions list (add a `removed` row or
-    restore the value). Not a generation-path change.
+    over the 277 checked records: exactly the three records above gain a
+    finding (the 2026-09-01 v7 arm reads 0 on all twelve before and after;
+    no stored canary block's report row disagrees with its record). Two
+    earlier cuts were narrowed before the recompute was kept: the first
+    counted an unrecorded removal on every snapshot record and read a
+    leaf-named prose claim as a full path (48 records moved); the second
+    keyed the finding on a parsed table and suppressed on a name's root
+    (5 moved — a v4 CM4AI record whose audit summary parsed as the table
+    and whose prose recorded the removal, and the VOICE 04d canary whose
+    prose said "`conforms_to_standard` is absent from both records"). Two
+    further effects of the recompute, neither a finding: because a prose
+    retention claim is now a claim checked, `claims_checked` moved on 98
+    records and 63 reports that read no claim before read one now
+    (`canary.report_vacuous` flips from vacuous to measured: 16 of the
+    2026-07-31 arm, 8 of 2026-07-28, 7 of 2026-08-22, 5 of the 2026-09-01
+    v7 production arm — AI_READI rep1/rep2, CM4AI rep2/rep3, VOICE rep1 —
+    and the rest across earlier arms), so the v7 baseline arm's
+    `report_basis` for CM4AI and VOICE becomes measured 0 rather than
+    all-vacuous; the bar is 0 either way and no verdict moves, but the
+    `baseline_basis` line no longer appears on those rows and CHORUS is
+    the one project whose v7 replicates are all vacuous; and every block's
+    `report_claims.schema` pin moved from the schema the runs attested to
+    today's (the branch touches no schema file; the recompute re-pins to
+    what `_sha256(FULL_SCHEMA)` returns now) — the re-attestation the
+    `--blocks` restriction exists to make visible, stated here. The regate
+    sees the new class through the same contradictions list; its preamble
+    still introduces the list as "claims the records do not show", which
+    the new class is not — widening it moves the assembly digest and is
+    filed apart. Not a generation-path change.
 
 Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16,
 17 and 19 are not; 15 and 17 are the receipts instrument's revisions and

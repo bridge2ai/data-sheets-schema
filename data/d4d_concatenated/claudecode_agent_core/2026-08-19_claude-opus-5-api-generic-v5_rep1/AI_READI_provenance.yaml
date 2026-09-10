@@ -414,11 +414,10 @@ report_claims:
     invalid: 0
   claims_core_cannot_hold: 0
   snapshot_checked: true
-  snapshot_basis: 'no dispositions table: unrecorded removals listed, not findings'
+  snapshot_basis: 'no dispositions table expected: unrecorded removals listed, not
+    findings'
   prose_retention_claims: 2
   removals_unrecorded:
-  - created_on
-  - was_derived_from
   - existing_uses
   - use_repository
   - machine_annotation_tools
@@ -426,7 +425,7 @@ report_claims:
   - imputation_protocols
   - data_protection_impacts
   - errata
-  removals_unrecorded_count: 9
+  removals_unrecorded_count: 7
   instrument: 'v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
     snapshot carried that the final full record does not, with no `removed` row or
     removal sentence naming it, is `removal_not_recorded`; a prose retention claim

@@ -541,7 +541,9 @@ earlier record's vacuous row is shown as unmeasured and not gated, so the
 arm that defined the gate still satisfies it. The baseline skips vacuous
 replicates; a baseline arm whose replicates ran the check and read no
 claim, none measuring one (`canary.report_basis`: the v7 production arm for
-CHORUS, CM4AI and VOICE; AI_READI measured 0 on rep3), is a floor of 0 with
+CHORUS; under report_claims v4 CM4AI and VOICE too, and AI_READI measured 0
+on rep3 — under v5 a prose retention claim is a claim, so CM4AI, VOICE and
+AI_READI measure 0 on some or all replicates), is a floor of 0 with
 `baseline_basis` on the row, while a baseline whose checker never ran stays
 a missing baseline (#599). A report without the table is regenerated once
 like a contradiction; a rewrite that is truncated, drops the table or
@@ -568,17 +570,23 @@ The recorded tally is the post-regate reading, and the regate is the step
 that flips rows — `report_gate` carries `rows_by_record_before`/`_after` on
 runs made since #1122. From v5 (#1054) the checker reads two more things: with the phase-1
 snapshot (`intermediate/{P}_full.yaml`) a populated top-level slot the
-final full record lacks, with no `removed` row and no removal statement
-naming it, is `removal_not_recorded` — listed under
-`removals_unrecorded` and, where the report carries the table the row
-belongs to, a finding (three of nine v8 reviews had found one: CHORUS
-04f rep2 `regulatory_restrictions`, AI_READI 04g rep3 `content_warnings`,
-VOICE 04f rep2 `data_governance`); on a report that predates the table
-the removals are listed, not findings (`snapshot_basis`); and a prose
-sentence saying a value "remains in" / "stays in" / "is kept in" a
-backticked path is a retention claim, satisfied at that path or by a
-populated key of the leaf's name anywhere in either record. The v7
-production arm reads 0 on all twelve either way. Since #998 the report phase carries the core
+final full record lacks is `removal_not_recorded` unless the report
+records the removal — an exact top-level name in a `removed` row or
+removal claim against the full record or no named record, or, for
+suppression only, the bare name in a sentence carrying a removal word —
+listed under `removals_unrecorded` and, where the run asked for the table
+(`inputs.dispositions_expected`, #961; a parsed table is not the test), a
+finding (three of nine v8 reviews had found one: CHORUS 04f rep2
+`regulatory_restrictions`, AI_READI 04g rep3 `content_warnings`, VOICE
+04f rep2 `data_governance`); on a run never asked for a table the
+removals are listed, not findings (`snapshot_basis`); and a paragraph
+saying a value "remains in" / "stays in" / "is kept in" a backticked slot
+path is a retention claim (not when negated, not on a class name),
+satisfied at that path in either record with a dotted step over a list
+read as `[*]`, or by a populated key of the leaf's name under the claim's
+root. A prose claim is a claim checked, so 63 reports that read no claim
+under v4 read one under v5. The v7 production arm reads 0 findings on
+all twelve either way. Since #998 the report phase carries the core
 class's top-level slot inventory (`core_inventory_block`) before its
 instruction, so the model can see which slots the core declares rather
 than infer it from the carried core record, where an empty slot and an

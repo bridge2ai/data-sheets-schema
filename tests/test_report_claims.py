@@ -532,13 +532,14 @@ class UnrecordedRemovalTest(Harness):
     TABLE = ("## Dispositions\n\n| slot | disposition | record | reason |\n|---|---|---|---|\n"
              "| `keywords` | retained | both | fine |\n")
 
-    def check_with(self, markdown, snapshot, full=None, core=None):
+    def check_with(self, markdown, snapshot, full=None, core=None, expected=True):
         import tempfile
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         path = Path(tmp.name) / "r.md"
         path.write_text(markdown, encoding="utf-8")
-        return check_report(path, full or {}, core or {}, DECLARED, snapshot=snapshot)
+        return check_report(path, full or {}, core or {}, DECLARED, snapshot=snapshot,
+                            dispositions_expected=expected)
 
     def test_a_slot_the_snapshot_carried_and_the_record_dropped_with_no_row_is_a_finding(self):
         snap = {"keywords": ["a"], "regulatory_restrictions": {"regulatory_restrictions": "a legal framework"}}
@@ -549,7 +550,7 @@ class UnrecordedRemovalTest(Harness):
         self.assertTrue(b["snapshot_checked"])
         self.assertEqual(b["removals_unrecorded"], ["regulatory_restrictions"])
         self.assertEqual(b["removals_unrecorded_count"], 1)
-        self.assertIn("add a `removed` row or restore the value", b["findings"][0]["detail"])
+        self.assertIn("add a `removed` row for `regulatory_restrictions`", b["findings"][0]["detail"])
 
     def test_a_removed_row_or_a_removal_sentence_records_it(self):
         snap = {"keywords": ["a"], "data_governance": {"accountable_organization": "USF"}, "content_warnings": {"content_warnings_present": False}}
@@ -597,16 +598,76 @@ class UnrecordedRemovalTest(Harness):
         b = self.check(md, full={**full, "notes": "the caveat"}, core={"keywords": ["a"]})
         self.assertEqual([f["slot"] for f in b["findings"]], ["core.notes"])
 
-    def test_a_snapshot_diff_without_a_table_lists_and_does_not_find(self):
+    def test_a_snapshot_diff_on_a_run_never_asked_for_the_table_lists_and_does_not_find(self):
+        """The gate is the run's own expectation (#961), not a parsed table
+        (#1175 review, M2): a pre-#929 audit summary with Slot/Disposition
+        headers parses as one and must not promote a report into findings."""
         snap = {"keywords": ["a"], "publisher": "NIH"}
-        b = self.check_with("## Changes\n\nProse only, no table.\n", snap, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        audit = ("| # | Severity | Slot | Disposition |\n|---|---|---|---|\n| 1 | low | `keywords` | retained |\n\n"
+                 "- `publisher` **removed**. The bundle gives no publisher.\n")
+        b = self.check_with("## Changes\n\nProse only, no table.\n", snap, full={"keywords": ["a"]}, core={"keywords": ["a"]}, expected=False)
         self.assertEqual(b["findings"], [])
         self.assertEqual(b["removals_unrecorded"], ["publisher"])
         self.assertEqual(b["removals_unrecorded_count"], 1)
-        self.assertIn("no dispositions table", b["snapshot_basis"])
+        self.assertIn("no dispositions table expected", b["snapshot_basis"])
+        b = self.check_with(audit, {"keywords": ["a"], "publisher": "NIH", "created_on": "2025"},
+                            full={"keywords": ["a"]}, core={"keywords": ["a"]}, expected=False)
+        self.assertEqual(b["findings"], [])                                     # the audit table is not the table
+        self.assertEqual(b["removals_unrecorded"], ["created_on"])              # `publisher` is recorded in prose
+        # expected and the table unparsable: still findings, and the basis says so
+        b = self.check_with("## Dispositions\n\n(the model wrote no table)\n", snap, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual([f["slot"] for f in b["findings"]], ["publisher"])
+        self.assertIn("no table parsed", b["snapshot_basis"])
         b = self.check_with(self.TABLE, snap, full={"keywords": ["a"]}, core={"keywords": ["a"]})
         self.assertEqual([f["slot"] for f in b["findings"]], ["publisher"])
-        self.assertEqual(b["snapshot_basis"], "unrecorded removals are findings")
+        self.assertEqual(b["snapshot_basis"], "dispositions table expected: unrecorded removals are findings")
+
+    def test_a_nested_or_core_only_removal_does_not_record_a_whole_slot_removal(self):
+        """#1175 review, M1: a row removing `x.leaf` or `x[0]`, or removing `x`
+        from the core alone, says nothing about `x` leaving the full record."""
+        snap = {"keywords": ["a"], "data_governance": {"committee_contact": "x", "other": "y"},
+                "errata": [{"a": 1}, {"b": 2}], "funders": [{"name": "NIH"}]}
+        md = (self.TABLE + "| `data_governance.committee_contact` | removed | both | PII |\n"
+              "| `errata[0]` | removed | full | dup |\n| `funders` | removed | core | out of core |\n")
+        b = self.check_with(md, snap, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual(sorted(f["slot"] for f in b["findings"] if f["kind"] == "removal_not_recorded"),
+                         ["data_governance", "errata", "funders"])
+        md2 = self.TABLE + "| `funders` | removed | full | out |\n| `errata` | removed | both | dup |\n"
+        b = self.check_with(md2, {"keywords": ["a"], "funders": [{"name": "NIH"}], "errata": [{"a": 1}]},
+                            full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual([f for f in b["findings"] if f["kind"] == "removal_not_recorded"], [])
+
+    def test_a_prose_removal_statement_records_it_for_suppression_only(self):
+        """#1175 review, S1: headings, bold leads and "is absent from" record a
+        removal the strict claim parser does not read; they suppress the
+        snapshot finding and are never removal claims."""
+        snap = {"keywords": ["a"], "errata": [{"a": 1}], "cleaning_strategies": [{"x": 1}],
+                "conforms_to_standard": "x", "splits": [{"s": 1}]}
+        md = (self.TABLE + "\n### 4.7 Removed `errata` (low)\n\n- `cleaning_strategies` **removed**. Rationale.\n\n"
+              "`conforms_to_standard` is absent from both records.\n\n#### F12. `splits` removed from full record\n")
+        b = self.check_with(md, snap, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual([f for f in b["findings"] if f["kind"] == "removal_not_recorded"], [])
+        self.assertEqual(b["removals_unrecorded"], [])
+        self.assertEqual([f for f in b["findings"] if f["kind"] == "removal_not_performed"], [])
+
+    def test_a_negated_retention_and_a_non_slot_token_are_not_claims(self):
+        """#1175 review, S2."""
+        md = (self.TABLE + "\nNothing remains in `errata`. It never remains in `notes`; neither record retains it, "
+              "so nothing remains in `content_warnings`. The slot remains in `CoreDataset`. "
+              "The literal string remains in `HIPAA`.\n")
+        b = self.check(md, full={"keywords": ["a"]}, core={"keywords": ["a"]})
+        self.assertEqual(b["findings"], [])
+        self.assertEqual(b["prose_retention_claims"], 0)
+
+    def test_prose_paths_step_over_lists_and_a_wrapped_sentence_is_one_claim(self):
+        """#1175 review, S3/S4: `splits.split_details` means `splits[*].split_details`,
+        and a claim that wraps across lines is still read."""
+        md = (self.TABLE + "\nThe split rationale remains in\n`splits.split_details` and the roles stay in\n"
+              "`data_governance.stewards`.\n")
+        full = {"keywords": ["a"], "splits": [{"split_details": "70/15/15"}], "data_governance": {"stewards": [{"n": 1}]}}
+        b = self.check(md, full=full, core={"keywords": ["a"]})
+        self.assertEqual(b["findings"], [])
+        self.assertEqual(b["prose_retention_claims"], 2)
 
     def test_a_prose_retention_claim_is_checked(self):
         md = (self.TABLE + "\nThe legal analysis remains in `regulatory_restrictions.regulatory_restrictions` "

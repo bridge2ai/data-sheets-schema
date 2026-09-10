@@ -362,7 +362,8 @@ report_claims:
     invalid: 0
   claims_core_cannot_hold: 0
   snapshot_checked: true
-  snapshot_basis: 'no dispositions table: unrecorded removals listed, not findings'
+  snapshot_basis: 'no dispositions table expected: unrecorded removals listed, not
+    findings'
   prose_retention_claims: 1
   removals_unrecorded: []
   removals_unrecorded_count: 0

@@ -283,10 +283,23 @@ _DISPOSITION = re.compile(r"^\W*(?:\*\*)?(removed|deleted|dropped|retained|kept|
 #: right after the verb phrase; a negated clause ("no longer remains in") is
 #: not a retention.
 _PROSE_RETAINED = re.compile(
-    r"(?<!\bno longer )(?<!\bnot )\b(?:remains?|stays?|is (?:kept|retained|left|preserved)|"
+    r"\b(?:remains?|stays?|is (?:kept|retained|left|preserved)|"
     r"are (?:kept|retained|left|preserved)|(?:was|were) (?:kept|retained|left|preserved))\s+"
     r"(?:in|under|at|on)\s+`([A-Za-z_][\w]*(?:\[(?:\d+|\*)\])?(?:\.[A-Za-z_][\w]*(?:\[(?:\d+|\*)\])?)*)`",
     re.I)
+#: A negation in the clause before the verb turns the sentence into the
+#: opposite of a retention ("nothing remains in `errata`", "it never
+#: remains in `notes`", "no longer kept in `x`"; #1175 review S2).
+_NEGATED_BEFORE = re.compile(r"\b(?:no longer|not|never|nothing|neither|nor|none|no)\b[^.;:]{0,60}$", re.I)
+#: A slot path is snake_case segments; `HIPAA` and `CoreDataset` are not.
+_SLOT_PATH = re.compile(r"[a-z][a-z0-9_]*(?:\[(?:\d+|\*)\])?(?:\.[a-z][a-z0-9_]*(?:\[(?:\d+|\*)\])?)*")
+#: The weak signal that a report *records* a removal, for suppressing the
+#: snapshot finding only (#1175 review S1) — never for a removal claim,
+#: where precision matters: a bare backticked slot name in a sentence that
+#: carries a removal word. "### 4.7 Removed `errata`", "- `errata`
+#: **removed**", "`conforms_to_standard` is absent from both records".
+_REMOVAL_WORD = re.compile(r"\b(?:removed|deleted|dropped|absent|omitted|stripped|withdrawn)\b", re.I)
+_BARE_TICKED = re.compile(r"`([a-z][a-z0-9_]*)`")
 
 #: Top-level keys a snapshot diff does not report (#1054): the class
 #: declarations and the commentary slots the receipt denominator also
@@ -485,7 +498,8 @@ def disposition_rows(text: str) -> list[dict[str, str]]:
 
 def check_report(report: Path, full: dict, core: dict,
                  declared: dict[str, set[str]],
-                 snapshot: dict | None = None) -> dict[str, Any]:
+                 snapshot: dict | None = None,
+                 dispositions_expected: bool | None = None) -> dict[str, Any]:
     """Findings, plus what was skipped.
 
     `declared` maps a class name to its induced slot names — passed in so a
@@ -496,6 +510,12 @@ def check_report(report: Path, full: dict, core: dict,
     deterministic finding that needs no claim parsing (#1054, instrument
     v5). Without it — the agentic path, a run before #758 — that check is
     reported as not made (`snapshot_checked: false`), never as clean.
+    `dispositions_expected` is the run's own statement that its report
+    phase was asked for the table (`inputs.dispositions_expected`, #961):
+    only then is an unrecorded removal a finding — on a report never asked
+    for a row the removals are listed, not counted (the #684 precedent) —
+    and a parsed table is not the test, because a pre-#929 audit summary
+    can parse as one (#1175 review, M2).
     """
     if not report.exists():
         return {"checked": False, "reason": f"no report at {report}",
@@ -510,11 +530,17 @@ def check_report(report: Path, full: dict, core: dict,
         raise ValueError("declared slots carry no `CoreDataset` class; "
                          "the core schema could not be read")
 
-    removal_named: set[str] = set()
+    # (name as written, record the removal is claimed from), for the
+    # snapshot diff's suppression: only an exact top-level name, claimed
+    # from the full record or from no named record, records a whole-slot
+    # removal — a row removing `x.leaf` or `x[0]`, or removing `x` from the
+    # core alone, says nothing about `x` leaving the full record (#1175
+    # review, M1).
+    removal_named: set[tuple[str, str]] = set()
 
     def removal(names: list[str], context: str, claim: str) -> None:
         nonlocal claims, unnamed
-        removal_named.update(re.split(r"[.\[]", n, maxsplit=1)[0] for n in names)
+        removal_named.update((n, _target(context)) for n in names)
         if not names:
             unnamed += 1
             return
@@ -726,66 +752,92 @@ def check_report(report: Path, full: dict, core: dict,
     # Prose retention claims (#1054): read like a `retained` row that names no
     # record — present in either record satisfies it — so a sentence saying a
     # value "remains in `X`" when nothing is at `X` is a finding, not silence.
-    # Table lines are skipped: their cells are read above.
+    # Paragraphs, not lines, as the removal scan reads them (#1175 review,
+    # S3); table lines are skipped, their cells are read above.
     prose_retained = 0
-    for line in text.splitlines():
-        if line.lstrip().startswith("|") or _cells(line) or line.strip() in disposition_lines:
-            continue
-        for m in _PROSE_RETAINED.finditer(line):
+    classes = set(declared)
+    for para in re.split(r"\n\s*\n", text):
+        prose = " ".join(ln for ln in para.splitlines()
+                         if not ln.lstrip().startswith("|") and not _cells(ln)
+                         and ln.strip() not in disposition_lines)
+        for m in _PROSE_RETAINED.finditer(prose):
             path = m.group(1)
-            claims += 1
-            prose_retained += 1
-            # "remains in `core.notes`" names the record, not a slot called
-            # `core`: the prefix picks the record the claim is about.
+            if _NEGATED_BEFORE.search(prose[max(0, m.start() - 80):m.start()]):
+                continue                       # "nothing remains in `x`" is not a retention
             targets = {"full": full, "core": core}
             written = path
             head, _, rest = path.partition(".")
             if head in targets and rest:
+                # "remains in `core.notes`" names the record, not a slot.
                 targets, path = {head: targets[head]}, rest
-            if any(resolve(rec, path)[0] and _populated(resolve(rec, path)[1]) for rec in targets.values()):
+            if path.split(".")[0] in classes or not _SLOT_PATH.fullmatch(path):
+                continue                       # `CoreDataset`, `HIPAA`: not a slot path
+            claims += 1
+            prose_retained += 1
+            if any(_resolve_loose(rec, path) for rec in targets.values()):
                 continue
             # Prose names a leaf, not a path: "the four named reviewers stay
             # in `review_details`" means `ethical_reviews[0].review_details`.
-            # A populated key of that name anywhere in either record
-            # satisfies the claim; only a name found nowhere is a finding.
+            # A populated key of that name under the claim's own root (or
+            # anywhere, when the root is not a slot) satisfies it; only a
+            # name found nowhere is a finding.
             leaf = re.split(r"[.\[]", path)[-1] if not path.endswith("]") else re.split(r"[.\[]", path)[-2]
-            if any(_has_populated_key(rec, leaf) for rec in targets.values()):
+            root = re.split(r"[.\[]", path, maxsplit=1)[0]
+            def within(rec):
+                sub = rec.get(root) if isinstance(rec, dict) and root in rec and root != leaf else rec
+                return _has_populated_key(sub, leaf)
+            if any(within(rec) for rec in targets.values()):
                 continue
             findings.append({
                 "kind": "retention_not_shown", "slot": written, "record": "either",
                 "detail": "report says the value remains there; neither record carries it, "
                           "at that path or under that name anywhere",
-                "claim": line.strip()[:240]})
+                "claim": prose.strip()[:240]})
     # The snapshot diff (#1054): deterministic, no claim parsing. A top-level
     # slot the phase-1 record populated and the final full record does not,
-    # with no `removed` row and no removal sentence naming its root, is a
+    # with no `removed` row and no removal statement naming it, is a
     # removal the report did not record — the CHORUS 04f rep2
     # `regulatory_restrictions` case, the AI_READI 04g rep3 `content_warnings`
     # case, the VOICE 04f rep2 `data_governance` object (five receipted
     # leaves). Objects and leaves alike: the test is the root key.
-    # A finding only where the report carries the table the row belongs to:
-    # a report written before the table was asked for (#929) has no row for
-    # anything, and every removal in it would read as unrecorded. Those are
-    # listed under `removals_unrecorded` and not counted as findings, the
-    # #684 precedent — a check the instruction never asked for is not a
-    # floor of 0.
+    # A finding only where the run was asked for the table the row belongs
+    # to (`dispositions_expected`, #961): a report never asked for a row
+    # has none for anything, and every removal in it would read as
+    # unrecorded. Those are listed under `removals_unrecorded` and not
+    # counted as findings, the #684 precedent — a check the instruction
+    # never asked for is not a floor of 0. A parsed table is not the test:
+    # a pre-#929 audit summary parses as one (#1175 review, M2).
+    # What records a removal, for suppression only: an exact top-level name
+    # in a `removed` row or a removal claim against the full record or no
+    # named record (M1), or the weak prose signal — the bare name in a
+    # sentence with a removal word (S1). The strict reading stays for
+    # `removal_not_performed`, where precision matters.
+    recorded = {n for n, where in removal_named if where in ("full", "both", "either")}
+    # The weak signal reads prose and non-dispositions tables only: a
+    # dispositions row's record cell was read strictly above, and a row
+    # removing `x` from the core must not record a full-record removal.
+    prose_only = "\n".join(ln for ln in text.splitlines() if ln.strip() not in disposition_lines)
+    for sent in re.split(r"(?<=[.!?])\s+|\n", prose_only):
+        if _REMOVAL_WORD.search(sent):
+            recorded.update(_BARE_TICKED.findall(sent))
     unrecorded: list[dict[str, str]] = []
+    expected = bool(dispositions_expected)
     if isinstance(snapshot, dict):
         for key, before in snapshot.items():
             if key in _SNAPSHOT_EXEMPT or not _populated(before):
                 continue
             if key in full and _populated(full.get(key)):
                 continue
-            if key in removal_named:
+            if key in recorded:
                 continue
             unrecorded.append({"slot": key})
-            if not rows:
+            if not expected:
                 continue
             findings.append({
                 "kind": "removal_not_recorded", "slot": key, "record": "full",
                 "detail": (f"the phase-1 record carried `{key}` ({_describe(before)}); the final "
-                           f"record does not, and no Dispositions row and no removal statement the "
-                           f"checker reads names it — add a `removed` row or restore the value"),
+                           f"record does not, and no Dispositions row and no removal statement "
+                           f"names it — add a `removed` row for `{key}`"),
                 "claim": ""})
     seen, unique = set(), []
     for f in findings:
@@ -810,12 +862,36 @@ def check_report(report: Path, full: dict, core: dict,
             # record with no snapshot reads `false` here, not zero findings.
             "snapshot_checked": isinstance(snapshot, dict),
             "snapshot_basis": (None if not isinstance(snapshot, dict)
-                               else "unrecorded removals are findings" if rows
-                               else "no dispositions table: unrecorded removals listed, not findings"),
+                               else ("dispositions table expected: unrecorded removals are findings"
+                                     + ("" if rows else " (no table parsed)"))
+                               if expected
+                               else "no dispositions table expected: unrecorded removals listed, not findings"),
             "prose_retention_claims": prose_retained,
             "removals_unrecorded": [u["slot"] for u in unrecorded],
             "removals_unrecorded_count": len(unrecorded) if isinstance(snapshot, dict) else None,
             "instrument": REPORT_CLAIMS_INSTRUMENT}
+
+
+def _resolve_loose(data: Any, path: str) -> bool:
+    """`resolve`, but a dotted step over a list reads as `[*]`: prose writes
+    `splits.split_details` for `splits[*].split_details` (#1175 review, S4).
+    True when a populated value sits at the path."""
+    parts = re.findall(r"[\w]+|\[\d+\]|\[\*\]", path)
+
+    def walk(cur: Any, i: int) -> bool:
+        if i == len(parts):
+            return _populated(cur)
+        part = parts[i]
+        if isinstance(cur, list) and not part.startswith("["):
+            return any(walk(item, i) for item in cur)
+        if part == "[*]":
+            return isinstance(cur, list) and any(walk(item, i + 1) for item in cur)
+        if part.startswith("["):
+            idx = int(part[1:-1])
+            return isinstance(cur, list) and idx < len(cur) and walk(cur[idx], i + 1)
+        return isinstance(cur, dict) and part in cur and walk(cur[part], i + 1)
+
+    return walk(data, 0)
 
 
 def _has_populated_key(node: Any, name: str) -> bool:

@@ -167,7 +167,9 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
             yaml.safe_load(full.read_text(encoding="utf-8")) if full.exists() else {},
             yaml.safe_load(core.read_text(encoding="utf-8")) if core.exists() else {},
             declared if declared is not None else declared_slots(),
-            snapshot=phase1_snapshot_for(core))
+            snapshot=phase1_snapshot_for(core),
+            dispositions_expected=bool((record.get("inputs") or {}).get("dispositions_expected")
+                                       or (record.get("report_claims") or {}).get("dispositions_expected")))
         # The report, and the two records it makes claims about, and the
         # schema those claims are resolved against (#1085). The runner writes
         # all four; this wrote only the report, so recomputing a block for an
