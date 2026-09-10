@@ -491,18 +491,23 @@ coverage rose). The file-collections case the issue names exists only in
 the AI_READI 2026-09-01 rep1 record, whose bundle has drifted. A drifted
 bundle is not the text a receipt was written against, and the #907 guard
 withholds a recompute that cannot read the right bytes; since #1140 the
-recompute reads them — `provenance.bundle_bytes_for` recovers the
-committed version of the declared path whose every recorded hash (md5,
-and sha256 where the record carries one) matches, recording which it
-`matched_on`, and the block is computed on a manifest chunked in memory
-from those bytes under the record's own `inputs.chunks.rule` (the
-on-disk manifest's rule only for a record that carries none), refusing
-a version whose chunk count is not the one the record cites; it carries
-`bundle_basis` (`git blob`, the commit, the hashes) beside the record's
-own `bundle_md5`, and `artifacts.manifest` the rule and hashes instead
-of a path. Nothing on disk gates it: an absent bundle, a missing or
-stale manifest, and a drift are one case, checkable from the record's
-path, hash and rule alone. `backfill-checks`, `provenance record` and
+recompute reads them, from the first of three sources that is the
+record's: the manifest on disk where it chunked the bytes the record
+hashed; the bundle on disk where its bytes hash to the record's md5 (or
+sha256, where that is all it carries) but the manifest is missing, stale
+or unreadable — chunked in memory under the record's own
+`inputs.chunks.rule`, git not asked; else the committed version of the
+declared path whose every recorded hash matches
+(`provenance.bundle_bytes_for`, recording which it `matched_on`),
+chunked the same way (the on-disk manifest's rule only for a record that
+carries none, and a version whose chunk count is not the one the record
+cites refused). The block carries `bundle_basis` (`bundle on disk` or
+`git blob` with the commit and hashes, and `manifest: chunked in memory
+…` where no file was read) beside the record's own `bundle_md5`; where
+the manifest was chunked in memory `artifacts.manifest.path` is `None`
+and the rule and hashes stand in its place. Nothing on disk gates the
+recovery: a record that declares a path, a hash and a rule is checkable
+whatever the checkout holds. `backfill-checks`, `provenance record` and
 the runner pass all three. All 47 receipted records are under v3: the 18 formerly
 withheld (nine 2026-08-28 agentic v6, the 2026-08-28b/c/d API v7
 AI_READI canaries, the 2026-09-01 API v7 AI_READI and VOICE records)

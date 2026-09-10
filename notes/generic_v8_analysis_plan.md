@@ -1486,8 +1486,8 @@ steps need:
     declares no path, no committed version matches, git cannot supply the
     blob, the blob is not UTF-8, or neither the record nor a usable
     manifest on disk says which rule to chunk under, the block stays
-    `checked: false`, the outcome named first and the disk state as
-    context. `d4d receipts check`
+    `checked: false` — where a recovery produced bytes, the refusal names
+    that outcome first and the disk state as context. `d4d receipts check`
     and the runner's own receipts block make the same recovery, so the
     gate on attestation cannot say "unchecked" of a record the backfill
     checked. Recomputed over the corpus after a one-record canary: 47

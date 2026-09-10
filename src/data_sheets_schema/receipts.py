@@ -1257,10 +1257,11 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     ids are positional and a different rule would put the same ids over
     different text. The block carries `bundle_basis` naming the source
     (and the commit), and its `bundle_md5` is the record's own. It is
-    `checked: false`, naming the outcome first and the disk state as
-    context, where the record declares no path, no committed version
-    matches, git cannot supply the blob, the blob is not UTF-8, or no rule
-    is known.
+    `checked: false` where the record declares no path, no committed
+    version matches, git cannot supply the blob, the bytes are not UTF-8,
+    or no rule is known — and where a recovery did produce bytes the
+    refusal names that outcome first and the disk state as context, so no
+    message says the chunks could not be loaded and that they were.
     """
     import hashlib
 
@@ -1296,14 +1297,15 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
         disk_bytes = bundle.read_bytes()
         mpath = manifest if manifest is not None else manifest_for(bundle)
         if not mpath.exists():
-            disk_state = f"no chunk manifest for {bundle.name} at {mpath}"
+            disk_state = (f"no chunk manifest for {bundle.name} at {mpath}; run `d4d bundle chunk` "
+                          "(every bundle kind is chunked, #725)")
         else:
             try:
                 cand = load_manifest(mpath)
                 if not isinstance(cand, dict) or not isinstance(cand.get("chunks"), list):
                     raise ValueError("manifest is not a mapping with a chunks list")
                 if hashlib.md5(disk_bytes).hexdigest() != cand.get("bundle_md5"):
-                    disk_state = "the manifest on disk did not chunk the bytes on disk"
+                    disk_state = "the manifest on disk did not chunk the bytes on disk; rebuild with `d4d bundle chunk`"
                 else:
                     on_disk = cand
             except (ValueError, yaml.YAMLError) as exc:
@@ -1311,8 +1313,10 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     disk_hashes = ({"md5": hashlib.md5(disk_bytes).hexdigest(), "sha256": hashlib.sha256(disk_bytes).hexdigest()}
                    if disk_bytes is not None else {})
     bytes_on_disk_are_the_records = bool(recorded) and all(disk_hashes.get(k) == v for k, v in recorded.items())
-    manifest_is_the_records = on_disk is not None and (
-        not recorded or all(on_disk.get(f"bundle_{k}", disk_hashes.get(k)) == v for k, v in recorded.items()))
+    # `on_disk` already proves the manifest chunked the bytes on disk, so the
+    # bytes decide (round 4 review, SF2): a manifest whose own sha256 line
+    # disagrees with its md5 is not a third state.
+    manifest_is_the_records = on_disk is not None and (not recorded or bytes_on_disk_are_the_records)
     bundle_basis: dict[str, Any] = {"source": "bundle on disk", "path": str(bundle)}
     rule = (record_chunks or {}).get("rule") or (on_disk or {}).get("rule")
     rule_basis = ("the record's own inputs.chunks.rule" if (record_chunks or {}).get("rule")
@@ -1340,6 +1344,11 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     elif bytes_on_disk_are_the_records:
         # The bytes are right and only the manifest is not (round 3
         # review, SF3): chunk them here rather than ask git for what is open.
+        try:
+            disk_bytes.decode("utf-8")                                       # type: ignore[union-attr]
+        except UnicodeDecodeError as exc:
+            return {**base, "checked": False,
+                    "reason": f"the bundle on disk is the bytes the record hashed but is not UTF-8 ({exc}); {disk_state}"}
         built = _in_memory(disk_bytes, bundle.name, f"the bundle on disk is the bytes the record hashed ({disk_state})")  # type: ignore[arg-type]
         if built is None:
             return {**base, "checked": False, "reason": refusal}

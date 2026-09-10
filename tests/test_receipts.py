@@ -699,6 +699,32 @@ class OnDisk(unittest.TestCase):
         self.assertFalse(ruleless["checked"]); self.assertIn("which chunking rule", ruleless["reason"])
         self.assertTrue(plain["checked"]); self.assertEqual(plain["artifacts"]["manifest"]["path"], str(manifest))
 
+    def test_non_utf8_bytes_on_disk_are_a_named_refusal_and_a_manifest_that_lies_about_its_sha_is_not_a_third_state(self):
+        """#1187 round 4, SF1/SF2."""
+        from unittest import mock
+        from data_sheets_schema.chunking import DEFAULT_RULE, build_manifest, dump_manifest
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            raw = b"\xff\xfe not utf-8 at all\n"
+            bundle = tmp / "P_preprocessed.txt"; bundle.write_bytes(raw)
+            md5 = hashlib.md5(raw).hexdigest()
+            full = tmp / "P_d4d.yaml"; full.write_text(yaml.safe_dump(FULL), encoding="utf-8")
+            receipt = tmp / "P_coverage_receipt.yaml"; receipt.write_text(yaml.safe_dump(_receipt(md5)), encoding="utf-8")
+            with mock.patch("data_sheets_schema.provenance.bundle_bytes_for", side_effect=AssertionError("git was asked")):
+                b = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=tmp / "none.yaml",
+                                 bundle_rel_path="x", record_chunks={"rule": DEFAULT_RULE, "chunk_count": 1})
+            self.assertFalse(b["checked"]); self.assertIn("not UTF-8", b["reason"]); self.assertIn("no chunk manifest", b["reason"])
+            self.assertIn("d4d bundle chunk", b["reason"])
+            # a manifest that chunked the bytes on disk but carries a wrong sha256 line, record carrying both hashes
+            bundle.write_text(BUNDLE, encoding="utf-8"); md5 = hashlib.md5(BUNDLE.encode()).hexdigest(); sha = hashlib.sha256(BUNDLE.encode()).hexdigest()
+            receipt.write_text(yaml.safe_dump(_receipt(md5)), encoding="utf-8")
+            m = build_manifest(bundle); m["bundle_sha256"] = "0" * 64
+            manifest = tmp / "P_chunks.yaml"; manifest.write_text(dump_manifest(m), encoding="utf-8")
+            with mock.patch("data_sheets_schema.provenance.bundle_bytes_for", side_effect=AssertionError("git was asked")):
+                b = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest, bundle_rel_path="x", record_bundle_sha256=sha)
+            self.assertTrue(b["checked"]); self.assertEqual(b["artifacts"]["manifest"]["path"], str(manifest))
+            self.assertNotIn("None", b["bundle_basis"].get("manifest", ""))
+
     def test_a_record_carrying_only_a_sha256_is_recovered_on_a_drift(self):
         """#1187 round 3, SF4: the drift test keyed on the md5 alone, so a
         sha256-only record was checked against today's bytes."""
