@@ -107,15 +107,6 @@ phase_log:
     bundle_lines_total: 7866
     receipt_chunks_total: 28
     receipt_chunks_unopened: 0
-    assistant_turns: 130
-    output_tokens: 158769
-    reasoning_tokens_estimate: 100263
-    thinking_blocks: 81
-    thinking_text_chars: 0
-    thinking_tokens: 53872
-    tool_input_chars: 244596
-    turns_with_thinking_tokens: 125
-    visible_text_chars: 5483
   run_observed_basis: 'aggregate totals for the whole run, observed by the orchestrator
     from the subagent runner''s transcript. One number per run, not per phase: four-phase
     project-agent mode runs every phase in one context, so the run is the only observable
@@ -125,45 +116,7 @@ phase_log:
     invocation''s own span, so a resumed run excludes the gap. bundle_lines_read is
     the union of the run''s successful file-reading windows over the declared bundle
     (#700): lines the run never opened, or opened only in a read that errored, may
-    have been reached by search, but nothing attests that. Of the transcript''s reasoning
-    measure (#1000/#1011) the observation carries assistant_turns, output_tokens,
-    thinking_blocks, thinking_text_chars, visible_text_chars, tool_input_chars, reasoning_tokens_estimate;
-    comparable in kind with the API path''s reasoning log, never to be averaged with
-    it. reasoning_tokens_estimate is output tokens minus a 4-chars-per-token estimate
-    of the text and tool-call payloads: a subtraction, an upper bound, not a measurement.
-    thinking_tokens and turns_with_thinking_tokens are the runtime''s own count on
-    the turns whose transcript line carries usage.output_tokens_details; where turns_with_thinking_tokens
-    is fewer than the run''s turns the rest of the run''s thinking is unmeasured,
-    so the count is partial. Of these, assistant_turns, output_tokens, reasoning_tokens_estimate,
-    thinking_blocks, thinking_text_chars, thinking_tokens, tool_input_chars, turns_with_thinking_tokens,
-    visible_text_chars were added after the run, under run_observed_extended, which
-    names the source.'
-  run_observed_extended:
-  - keys_added:
-    - assistant_turns
-    - output_tokens
-    - reasoning_tokens_estimate
-    - thinking_blocks
-    - thinking_text_chars
-    - thinking_tokens
-    - tool_input_chars
-    - turns_with_thinking_tokens
-    - visible_text_chars
-    instrument: the transcript's reasoning measure (#1000/#1011), recomputed by scripts/agentic_observed.py
-      from the transcripts named on the bytes the record hashed, under the record's
-      own cut; every prior key reproduced exactly
-    transcripts:
-    - agent-av6-CM4AI-rep3-b0c3a30ec69b1ca9.jsonl
-    observer_sha256: 1bdeb4fde0bc28a63d9615acba9e53f70db027668086be35ceae8d12c369c0a8
-    bundle_basis:
-      source: git blob
-      path: data/preprocessed/concatenated/CM4AI_preprocessed.txt
-      commit: 4fc4d6b22d5522389692e746a4bc715a93163871
-      md5: 1dfd34e5610fed7c22bea1f09c0bc60c
-      matched_on:
-      - md5
-    recorded_by: d4d provenance extend-observed (#1010)
-    recorded_at: '2026-09-10T04:23:08+00:00'
+    have been reached by search, but nothing attests that.'
 schema:
   declared_version: 2.0.0
   declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml

@@ -1533,12 +1533,8 @@ steps need:
     bound on a runtime whose output is mostly tool payloads, never
     averaged with `api_usage`. `d4d provenance reasoning` reports all 24
     as `recovered_from_transcript`. Each record's `run_observed_basis`
-    describes the keys it carries and no others — a sentence for the
-    estimate keys present, one for `reasoning_tokens_estimate`'s
-    subtraction, one for the runtime's count and what its turn coverage
-    means, and one naming which of them an extension added, the record's
-    only in-text statement that those numbers are not the orchestrator's
-    own run-time observation — and `run_observed_extended` is a list
+    describes the keys it carries and no others, and
+    `run_observed_extended` is a list
     of extensions naming the keys, the transcripts, the bundle basis and
     the observer script's sha256 (#1191 review). A `VOICE_PEDIATRIC` run
     is looked for as `voicepediatric` or `voicepeds` and never offered as

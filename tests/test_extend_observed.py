@@ -249,6 +249,27 @@ class Extension(unittest.TestCase):
                + " No thinking_tokens were requested by the curator, who checked by hand."}
         out = cli._basis_with(log, set(FULL) & cli._REASONING_KEYS)
         self.assertIn("requested by the curator", out)
+        # a round-4 basis (the estimate sentence with the aside inside it) is stripped, not doubled (round 5, S2)
+        old_shape = {"run_observed": dict(FULL),
+                     "run_observed_basis": cli._RUN_OBSERVED_BASIS + cli._superseded_reasoning_basis(set(FULL))}
+        out = cli._basis_with(old_shape, set(FULL) & cli._REASONING_KEYS)
+        self.assertEqual(out.count("Of the transcript's reasoning measure"), 1)
+        self.assertEqual(out.count("No thinking_tokens"), 1)
+        # an extension naming a key the observation no longer carries emits no clause (round 5, S3)
+        gone = cli._reasoning_basis({"output_tokens"}, extended={"thinking_tokens"})
+        self.assertNotIn("Of these", gone); self.assertNotIn("  ", gone)
+        log = {"run_observed": {"output_tokens": 1}, "run_observed_extended": [{"keys_added": ["thinking_tokens"]}],
+               "run_observed_basis": cli._RUN_OBSERVED_BASIS}
+        once = cli._basis_with(log, {"output_tokens"}); twice = cli._basis_with({**log, "run_observed_basis": once}, {"output_tokens"})
+        self.assertEqual(once, twice)
+        # a curator sentence that follows one of ours, and starts lower-case, survives (round 5, S4)
+        base = cli._basis_with({"run_observed": dict(FULL), "run_observed_basis": cli._RUN_OBSERVED_BASIS},
+                               set(FULL) & cli._REASONING_KEYS)
+        curated = {"run_observed": dict(FULL), "run_observed_basis": base + " see the launch log for the second transcript."}
+        out = cli._basis_with(curated, set(FULL) & cli._REASONING_KEYS)
+        self.assertIn("see the launch log for the second transcript.", out)
+        self.assertEqual(out.count("Of the transcript's reasoning measure"), 1)
+        self.assertEqual(cli._basis_with({**curated, "run_observed_basis": out}, set(FULL) & cli._REASONING_KEYS), out)
         # a basis with no terminal full stop is not glued to the appended sentence (S3)
         log = {"run_observed": dict(FULL), "run_observed_basis": "prior basis with no full stop"}
         once = cli._basis_with(log, set(FULL) & cli._REASONING_KEYS)

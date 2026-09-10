@@ -1,5 +1,7 @@
 """Provenance commands for the D4D CLI."""
 
+import functools
+
 import click
 
 from data_sheets_schema.cli.api import ARMS as _ARMS
@@ -590,23 +592,54 @@ _LEGACY_REASONING_SENTENCES = (
 )
 
 
-def _own_sentences() -> set:
+def _superseded_reasoning_basis(keys: set) -> str:
+    """The estimate and negative sentences rounds 3 and 4 emitted, for the
+    same key set — key-set-dependent, so a literal cannot cover them
+    (#1191 round 5, S2), and a record written by that code must not double
+    its paragraph on the next recomputation."""
+    present = [k for k in _ESTIMATE_KEYS if k in keys]
+    out = []
+    if present:
+        out.append(
+            " Of the transcript's reasoning measure (#1000/#1011) the observation carries "
+            + ", ".join(present)
+            + (" — reasoning_tokens_estimate is output tokens minus a 4-chars-per-token estimate of the text "
+               "and tool-call payloads: a subtraction, an upper bound, not a measurement"
+               if "reasoning_tokens_estimate" in present else "")
+            + "; comparable in kind with the API path's reasoning log, never to be averaged with it.")
+    if "thinking_tokens" not in keys and present:
+        out.append(" No thinking_tokens: the observation carries none, so the runtime's own count is not "
+                   "measured for this run.")
+    return "".join(out)
+
+
+@functools.lru_cache(maxsize=1)
+def _own_sentences() -> frozenset:
     """Every sentence `_reasoning_basis` can emit, for any key set, plus the
-    forms earlier rounds wrote — the exact strings a recomputation strips."""
+    forms earlier rounds wrote — the exact strings a recomputation strips.
+    Cached: the enumeration is exponential in the key count and the answer
+    never changes within a process (#1191 round 5, NOTES)."""
     import itertools
     out = set(_LEGACY_REASONING_SENTENCES)
     keys = list(_REASONING_KEYS)
     for n in range(len(keys) + 1):
         for combo in itertools.combinations(keys, n):
-            for ext in (None, set(combo)):
+            for ext in (None, set(combo), {k for k in _REASONING_KEYS if k not in combo} or None):
                 for s in _split_sentences(_reasoning_basis(set(combo), extended=ext)):
                     out.add(s)
-    return out
+            for s in _split_sentences(_superseded_reasoning_basis(set(combo))):
+                out.add(s)
+    return frozenset(out)
 
 
 def _split_sentences(text: str) -> list:
+    """Sentences, split after a full stop before any non-space. Three of
+    the four sentences `_reasoning_basis` emits begin with a lower-case
+    identifier, so a boundary requiring a capital could not find them and
+    a curator's lower-case sentence beside one was never separable
+    (#1191 round 5, S4)."""
     import re as _re
-    return [s for s in (p.strip() for p in _re.split(r"(?<=[.])\s+(?=[A-Z(])", text.strip())) if s]
+    return [s for s in (p.strip() for p in _re.split(r"(?<=[.])\s+(?=\S)", text.strip())) if s]
 
 
 def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
@@ -639,8 +672,11 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
     elif present:
         parts.append(" No thinking_tokens: the observation carries none, so the runtime's own count is not "
                      "measured for this run.")
-    if parts and extended:
-        named = sorted(k for k in extended if k in keys)
+    named = sorted(k for k in (extended or ()) if k in keys)
+    if parts and named:
+        # No clause where the extension names no key the observation still
+        # carries: "Of these,  was added…" was unstrippable and doubled the
+        # paragraph on every recomputation (#1191 round 5, S3).
         parts.append(f" Of these, {', '.join(named)} " + ("were" if len(named) > 1 else "was")
                      + " added after the run, under run_observed_extended, which names the source.")
     return "".join(parts)
