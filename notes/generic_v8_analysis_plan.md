@@ -1484,7 +1484,7 @@ steps need:
     those bytes are chunked in memory rather than asked of git (round 4).
     A record carrying only a sha256 is recovered by it. Where the record
     declares no path, no committed version matches, git cannot supply the
-    blob, the blob is not UTF-8, or neither the record nor a usable
+    blob, the bytes are not UTF-8, or neither the record nor a usable
     manifest on disk says which rule to chunk under, the block stays
     `checked: false` — where a recovery produced bytes, the refusal names
     that outcome first and the disk state as context. `d4d receipts check`

@@ -714,7 +714,7 @@ class OnDisk(unittest.TestCase):
                 b = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=tmp / "none.yaml",
                                  bundle_rel_path="x", record_chunks={"rule": DEFAULT_RULE, "chunk_count": 1})
             self.assertFalse(b["checked"]); self.assertIn("not UTF-8", b["reason"]); self.assertIn("no chunk manifest", b["reason"])
-            self.assertIn("d4d bundle chunk", b["reason"])
+            self.assertIn("d4d bundle chunk", b["reason"])                      # the advice is on the refusal (round 5, SF1)
             # a manifest that chunked the bytes on disk but carries a wrong sha256 line, record carrying both hashes
             bundle.write_text(BUNDLE, encoding="utf-8"); md5 = hashlib.md5(BUNDLE.encode()).hexdigest(); sha = hashlib.sha256(BUNDLE.encode()).hexdigest()
             receipt.write_text(yaml.safe_dump(_receipt(md5)), encoding="utf-8")
@@ -724,6 +724,7 @@ class OnDisk(unittest.TestCase):
                 b = rc.block_for(full, receipt, bundle, md5, expected=True, manifest=manifest, bundle_rel_path="x", record_bundle_sha256=sha)
             self.assertTrue(b["checked"]); self.assertEqual(b["artifacts"]["manifest"]["path"], str(manifest))
             self.assertNotIn("None", b["bundle_basis"].get("manifest", ""))
+            self.assertNotIn("d4d bundle chunk", str(b["bundle_basis"]))         # ... and never in the persisted basis
 
     def test_a_record_carrying_only_a_sha256_is_recovered_on_a_drift(self):
         """#1187 round 3, SF4: the drift test keyed on the md5 alone, so a

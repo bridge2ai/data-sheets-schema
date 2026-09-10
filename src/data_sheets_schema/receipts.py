@@ -1287,6 +1287,10 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     from data_sheets_schema.chunking import manifest_from_bytes
     recorded = {k: v for k, v in (("md5", record_bundle_md5), ("sha256", record_bundle_sha256)) if v}
     disk_state: str | None = None          # why the manifest on disk is not the instrument, if it is not
+    # What an operator would do about it. Kept out of `disk_state`, which
+    # is interpolated into the persisted `bundle_basis` and must be a
+    # statement about the bytes, not an imperative (#1187 round 5, SF1).
+    disk_advice: str | None = None
     m: dict[str, Any] = {}
     raw = b""
     on_disk: dict[str, Any] | None = None
@@ -1297,15 +1301,16 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
         disk_bytes = bundle.read_bytes()
         mpath = manifest if manifest is not None else manifest_for(bundle)
         if not mpath.exists():
-            disk_state = (f"no chunk manifest for {bundle.name} at {mpath}; run `d4d bundle chunk` "
-                          "(every bundle kind is chunked, #725)")
+            disk_state = f"no chunk manifest for {bundle.name} at {mpath}"
+            disk_advice = "run `d4d bundle chunk` (every bundle kind is chunked, #725)"
         else:
             try:
                 cand = load_manifest(mpath)
                 if not isinstance(cand, dict) or not isinstance(cand.get("chunks"), list):
                     raise ValueError("manifest is not a mapping with a chunks list")
                 if hashlib.md5(disk_bytes).hexdigest() != cand.get("bundle_md5"):
-                    disk_state = "the manifest on disk did not chunk the bytes on disk; rebuild with `d4d bundle chunk`"
+                    disk_state = "the manifest on disk did not chunk the bytes on disk"
+                    disk_advice = "rebuild it with `d4d bundle chunk`"
                 else:
                     on_disk = cand
             except (ValueError, yaml.YAMLError) as exc:
@@ -1313,6 +1318,9 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     disk_hashes = ({"md5": hashlib.md5(disk_bytes).hexdigest(), "sha256": hashlib.sha256(disk_bytes).hexdigest()}
                    if disk_bytes is not None else {})
     bytes_on_disk_are_the_records = bool(recorded) and all(disk_hashes.get(k) == v for k, v in recorded.items())
+    # A refusal names what an operator would do; `disk_state` alone goes
+    # into the persisted `bundle_basis` (#1187 round 5, SF1).
+    disk_because = (disk_state + (f" — {disk_advice}" if disk_advice else "")) if disk_state else None
     # `on_disk` already proves the manifest chunked the bytes on disk, so the
     # bytes decide (round 4 review, SF2): a manifest whose own sha256 line
     # disagrees with its md5 is not a third state.
@@ -1348,7 +1356,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
             disk_bytes.decode("utf-8")                                       # type: ignore[union-attr]
         except UnicodeDecodeError as exc:
             return {**base, "checked": False,
-                    "reason": f"the bundle on disk is the bytes the record hashed but is not UTF-8 ({exc}); {disk_state}"}
+                    "reason": f"the bundle on disk is the bytes the record hashed but is not UTF-8 ({exc}); {disk_because}"}
         built = _in_memory(disk_bytes, bundle.name, f"the bundle on disk is the bytes the record hashed ({disk_state})")  # type: ignore[arg-type]
         if built is None:
             return {**base, "checked": False, "reason": refusal}
@@ -1356,7 +1364,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
         bundle_basis = {"source": "bundle on disk", "path": str(bundle),
                         "manifest": f"chunked in memory under {rule_basis}: {disk_state} (#1140)"}
     elif recorded:
-        context = (disk_state if disk_state else
+        context = (disk_because if disk_because else
                    "the bundle drifted since the run (the bytes on disk are not the bytes the record hashed, "
                    "so the receipt's chunks are not today's bytes)")
         if not bundle_rel_path:
@@ -1390,7 +1398,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
                         "matched_on": entry.get("matched_on"),
                         "manifest": f"chunked in memory under {rule_basis} (#1140)"}
     elif on_disk is None:
-        return {**base, "checked": False, "reason": disk_state + "; chunk texts cannot be loaded"}
+        return {**base, "checked": False, "reason": disk_because + "; chunk texts cannot be loaded"}
     else:
         m, raw = on_disk, disk_bytes                                          # type: ignore[assignment]
     texts = dict(zip([c["id"] for c in m["chunks"]], _texts(raw.decode("utf-8"), m["chunks"])))
