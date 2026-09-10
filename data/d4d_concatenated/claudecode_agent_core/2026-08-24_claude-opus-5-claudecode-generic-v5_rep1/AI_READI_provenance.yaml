@@ -106,6 +106,13 @@ phase_log:
     duration_ms: 1676412
     bundle_lines_read: 5876
     bundle_lines_total: 7376
+    assistant_turns: 68
+    output_tokens: 108261
+    reasoning_tokens_estimate: 60046
+    thinking_blocks: 43
+    thinking_text_chars: 0
+    tool_input_chars: 188036
+    visible_text_chars: 5040
   run_observed_basis: 'aggregate totals for the whole run, observed by the orchestrator
     from the subagent runner''s transcript. One number per run, not per phase: four-phase
     project-agent mode runs every phase in one context, so the run is the only observable
@@ -116,8 +123,39 @@ phase_log:
     the union of the run''s successful file-reading windows over the declared bundle
     (#700): lines the run never opened, or opened only in a read that errored, may
     have been reached by search, but nothing attests that. Cut at run_observed_until:
-    the agent kept acting after its run completed, and the record describes the run.'
+    the agent kept acting after its run completed, and the record describes the run.
+    assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, visible_text_chars,
+    tool_input_chars and reasoning_tokens_estimate (output tokens minus a 4-chars-per-token
+    estimate of the text and tool-call payloads — a subtraction, an upper bound, not
+    a measurement) are the transcript''s reasoning measure (#1000/#1011), comparable
+    in kind with the API path''s reasoning log, never to be averaged with it. No thinking_tokens:
+    no line of the transcript carries usage.output_tokens_details, so the runtime''s
+    own count is not measured for this run.'
   run_observed_until: '2026-08-26T01:20:00Z'
+  run_observed_extended:
+  - keys_added:
+    - assistant_turns
+    - output_tokens
+    - reasoning_tokens_estimate
+    - thinking_blocks
+    - thinking_text_chars
+    - tool_input_chars
+    - visible_text_chars
+    instrument: the transcript's reasoning measure (#1000/#1011), recomputed by scripts/agentic_observed.py
+      from the transcripts named on the bytes the record hashed, under the record's
+      own cut; every prior key reproduced exactly
+    transcripts:
+    - agent-afanout-aireadi-rep1-92ae283927edabf1.jsonl
+    observer_sha256: 1bdeb4fde0bc28a63d9615acba9e53f70db027668086be35ceae8d12c369c0a8
+    bundle_basis:
+      source: git blob
+      path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+      commit: 9049904493393a6ce1db69b9fe0a855ce0db4435
+      md5: 0f3abb51a333555456bedd63891fcd99
+      matched_on:
+      - md5
+    recorded_by: d4d provenance extend-observed (#1010)
+    recorded_at: '2026-09-10T03:40:36+00:00'
 schema:
   declared_version: 2.0.0
   declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
