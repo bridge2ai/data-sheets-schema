@@ -305,10 +305,16 @@ def check_manifest(manifest: Path = MANIFEST) -> list[dict]:
             problems.append({"project": project,
                              "problem": "scope declared for a project the "
                                         "manifest has no sources for"})
-        if not scope.get("referent_id"):
+        referent = scope.get("referent_id")
+        if not referent:
             problems.append({"project": project,
                              "problem": "no referent_id: the scope says what "
                                         "the record is about in prose only"})
+        elif not _is_identifier(referent):
+            # The identifier every rule is anchored on, written as a list
+            # or a mapping: reported, not hashed (#1177 review, SF-B).
+            problems.append({"project": project,
+                             "problem": f"referent_id is a {type(referent).__name__}, not an identifier"})
         # A non-mapping entry, or an alias no reader can match, is reported
         # here rather than raised on or dropped (#1157): the scope block the
         # runner sends names such an entry to the model as omitted, and the
@@ -346,7 +352,7 @@ def check_manifest(manifest: Path = MANIFEST) -> list[dict]:
                             "problem": f"related dataset claims source {one!r} is "
                                        f"in this bundle; the manifest lists no "
                                        f"such source for {project}"})
-        if scope.get("referent_id") in ids:
+        if _is_identifier(referent) and referent in ids:
             problems.append({"project": project,
                              "problem": "the referent is also listed as "
                                         "related-but-distinct"})

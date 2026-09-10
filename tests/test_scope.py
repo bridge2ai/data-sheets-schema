@@ -117,13 +117,15 @@ class TestTheAliasesOfAnEntry(unittest.TestCase):
                                          {"id": ["doi:10.1/REAL"], "name": "Half", "express_as": "related_datasets",
                                           "also_known_as": "https://doi.org/10.1/ALIAS", "manifest_key": ["Q"], "in_bundle": ["s1", {"x": 1}]},
                                          {"id": "https://doi.org/10.1/THIRD", "name": "Third", "express_as": "related_datasets",
-                                          "also_known_as": b"raw"}]}}}))
+                                          "also_known_as": b"raw"},
+                                         {"id": ["doi:10.1/BOTH"], "name": "Both", "express_as": "related_datasets",
+                                          "also_known_as": ["https://doi.org/10.1/BOTH.alias", True]}]}}}))
             rows = scope.malformed_entries("P", manifest)
             problems = [p["problem"] for p in scope.check_manifest(manifest) if p["project"] == "P"]
             ids = scope.related_ids("P", manifest)
             r = click.testing.CliRunner(mix_stderr=False).invoke(scope_cmd, ["--check", "--manifest", str(manifest)])
         self.assertEqual([(x["index"], x["skipped"]) for x in rows],
-                         [(0, True), (1, True), (2, False), (3, True), (4, True), (5, True), (6, False), (7, False)])
+                         [(0, True), (1, True), (2, False), (3, True), (4, True), (5, True), (6, False), (7, False), (8, False), (8, False)])
         self.assertIn("`id` is a list, not an identifier; only the aliases are read", rows[6]["problem"])   # SF2
         self.assertTrue(any("manifest_key is a list" in p for p in problems), problems)                      # SF1
         self.assertTrue(any("in_bundle carries a dict" in p for p in problems), problems)
@@ -134,9 +136,18 @@ class TestTheAliasesOfAnEntry(unittest.TestCase):
         self.assertIn("bytes", rows[7]["problem"])
         self.assertEqual([p for p in problems if "related_but_distinct[" in p],
                          [f"related_but_distinct[{x['index']}]: {x['problem']}" for x in rows])
-        self.assertEqual(set(ids), {"https://doi.org/10.1/OTHER", "https://doi.org/10.1/OTHER.v3", "https://doi.org/10.1/ALIAS", "https://doi.org/10.1/THIRD"})
+        self.assertEqual(set(ids), {"https://doi.org/10.1/OTHER", "https://doi.org/10.1/OTHER.v3", "https://doi.org/10.1/ALIAS",
+                                    "https://doi.org/10.1/THIRD", "https://doi.org/10.1/BOTH.alias"})
+        # a referent_id that is a list is reported, not hashed (SF-B)
+        with tempfile.TemporaryDirectory() as tmp:
+            manifest = Path(tmp) / "m.yaml"
+            manifest.write_text(yaml.safe_dump({"projects": {"P": []}, "scope": {"P": {
+                "referent_id": ["https://doi.org/10.1/P"], "related_but_distinct": [{"id": "doi:1", "express_as": "related_datasets"}]}}}))
+            problems = [p["problem"] for p in scope.check_manifest(manifest)]
+        self.assertTrue(any("referent_id is a list" in p for p in problems), problems)
         self.assertEqual(r.exit_code, 1, r.output + r.stderr)             # check_manifest problems fail the command, as before
-        self.assertEqual(r.output.count("⚠️  P: related_but_distinct["), 8)         # every row, named, with the listing (SF3)
+        self.assertEqual(r.output.count("⚠️  P: related_but_distinct["), 10)        # every row, named, with the listing (SF3); both of entry 8's (SF-A)
+        self.assertEqual(r.output.count("related_but_distinct[8]"), 2)
         self.assertEqual(r.output.count("that dataset is unchecked"), 5)            # the five skipped entries, once each
         self.assertEqual(r.stderr.count("related_but_distinct[2]"), 1)              # check_manifest's row, once
         self.assertIn("not about Other", r.output); self.assertIn("not about Third", r.output); self.assertIn("not about Half", r.output)

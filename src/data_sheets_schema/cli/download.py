@@ -308,18 +308,21 @@ def scope_cmd(project, do_check, strict, manifest):
         # A malformed entry is named here, where the declaration is listed
         # (#1157): the listing used to raise on a non-mapping entry before
         # any check ran, and `check_manifest` reports the same rows below.
-        rows = {r["index"]: r for r in malformed_entries(name, m)}
+        rows: dict[int, list] = {}
+        for r in malformed_entries(name, m):
+            rows.setdefault(r["index"], []).append(r)          # an entry can carry two problems (#1177 review, SF-A)
         for i, entry in enumerate(s.get("related_but_distinct") or []):
-            row = rows.get(i)
-            if row and row["skipped"]:
-                click.echo(f"   ⚠️  {name}: related_but_distinct[{i}]: {row['problem']} — that dataset is unchecked")
+            here = rows.get(i, [])
+            if any(r["skipped"] for r in here):
+                for r in here:
+                    click.echo(f"   ⚠️  {name}: related_but_distinct[{i}]: {r['problem']} — that dataset is unchecked")
                 continue
             click.echo(f"   not about {entry.get('name')}  <{entry.get('id')}>")
             click.echo(f"             express as `{entry.get('express_as')}`"
                        + (f"; in this bundle as {entry['in_bundle']}"
                           if entry.get("in_bundle") else ""))
-            if row:
-                click.echo(f"   ⚠️  {name}: related_but_distinct[{i}]: {row['problem']}")
+            for r in here:
+                click.echo(f"   ⚠️  {name}: related_but_distinct[{i}]: {r['problem']}")
 
     problems = check_manifest(m)
     for p in problems:
