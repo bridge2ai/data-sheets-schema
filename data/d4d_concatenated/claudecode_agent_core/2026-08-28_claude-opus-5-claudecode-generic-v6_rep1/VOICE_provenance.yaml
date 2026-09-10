@@ -340,6 +340,15 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
+    anywhere (a minted id reconciliation stripped) is located as a keyless entry —
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
+    of declared dropped; v2 (#1123): a fragment minted on an identifier the record
+    carries for the dataset at its top level — its id in CURIE or resolver form, its
+    doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 22
     reviewed: 22
@@ -352,13 +361,48 @@ receipts:
   snippets:
     total: 199
     verified: 199
+    linewrap_joined: 0
     adjacent: 0
     elsewhere: 0
+    spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
     mismatched: 0
     unchecked: 0
+    no_value_overlap: 8
+    no_value_overlap_sample:
+    - chunk: c003
+      slot: funders[0].grants[0].grant_number
+      snippet: 1OT2OD032720-01
+    - chunk: c009
+      slot: version_access.versions_available[0]
+      snippet: older versions of the dataset will continue to be supported,
+    - chunk: c009
+      slot: conforms_to_standard[0]
+      snippet: converted to be compliant with the Brain Imaging Data Struct
+    - chunk: c011
+      slot: data_collectors[1].collector_details
+      snippet: Potential participants will be recruited through clinic appo
+    - chunk: c012
+      slot: data_collectors[1].role
+      snippet: data collection will be performed during clinic visits by th
+    - chunk: c012
+      slot: creators[3].name
+      snippet: Weill Cornell Medicine (WCM) Alexandros Sigaras, PhD
+    - chunk: c015
+      slot: related_datasets[0].target_dataset
+      snippet: Note that the Bridge2AI-Voice Pediatric Dataset is also avai
+    - chunk: c015
+      slot: creators[10].description
+      snippet: Johnson, Alistair and Bélisle-Pipon, Jean-Christophe and Dor
+    entry_single_leaf: 0
+    entry_single_leaf_sample: []
   slots:
     populated: 617
     exempt: 30
+    exempt_on_carried_identifier: 0
     receiptable: 587
     with_receipt: 140
     without_receipt:
@@ -413,21 +457,59 @@ receipts:
     - creators[4].description
     - creators[4].affiliations[0].name
     without_receipt_truncated: 397
+    never_receipted: null
+    added_after_receipt: null
     receipt_paths: 160
     unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt: []
+    value_changed_after_receipt_count: null
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: null
+    located_after_key_stripped: []
+    located_after_key_stripped_count: null
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: null
     reshaped_by_reconcile: []
+    receipts_to_removed_values: 0
   findings: []
   findings_truncated: null
-  summary: chunks 22/22 reviewed · snippets 199/199 verified · slots 140/587 with
-    a receipt (30 exempt)
+  findings_gated: 0
+  summary: chunks 22/22 reviewed · snippets 199/199 verified (8 bearing on no token
+    of their value) · slots 140/587 with a receipt (30 exempt)
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/VOICE_coverage_receipt.yaml
       sha256: ff7aba02530aad2b64e84a7f522f4df89ee8878f0bcd77aa840a0acc17c2c51d
     manifest:
-      path: data/preprocessed/chunks/VOICE_chunks.yaml
-      sha256: f748d123c5f40b18d70a657088392eebfeb9fc3d5ae051f4aae760084ec182b9
-  recorded_by: d4d receipts check
+      path: null
+      rule:
+        version: 2
+        unit: source-document
+        boundary: 'FILE: line followed by PATH: or ROLE:'
+        preamble: own-chunk
+        split: line-window
+        max_lines: 400
+        max_bytes: 48000
+      chunk_count: 22
+      bundle_md5: dcd717170da6762569c0b4eeafc1c3d2
+      bundle_sha256: a075e1124b91c58283113f6d8d1198daee295e84d585f7e8b35a098bbdd7c7ea
+  bundle_basis:
+    source: git blob
+    path: data/preprocessed/concatenated/VOICE_preprocessed.txt
+    commit: 4fc4d6b22d5522389692e746a4bc715a93163871
+    committed_on: '2026-08-10'
+    md5: dcd717170da6762569c0b4eeafc1c3d2
+    sha256: a075e1124b91c58283113f6d8d1198daee295e84d585f7e8b35a098bbdd7c7ea
+    matched_on:
+    - md5
+    manifest: chunked in memory under the record's own inputs.chunks.rule (#1140)
+  recorded_by: backfill_checks
 review:
   checked: true
   items_total: 67

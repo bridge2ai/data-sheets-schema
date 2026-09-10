@@ -417,6 +417,15 @@ receipts:
   - that a verified snippet supports the value it is attached to — a snippet can be
     real and irrelevant; sample by slot path in review
   checked: true
+  instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
+    anywhere (a minted id reconciliation stripped) is located as a keyless entry —
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
+    of declared dropped; v2 (#1123): a fragment minted on an identifier the record
+    carries for the dataset at its top level — its id in CURIE or resolver form, its
+    doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
   chunks:
     total: 28
     reviewed: 28
@@ -433,11 +442,50 @@ receipts:
     adjacent: 12
     elsewhere: 0
     spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
     mismatched: 0
     unchecked: 0
+    no_value_overlap: 15
+    no_value_overlap_sample:
+    - chunk: c002
+      slot: description
+      snippet: target enrollment is 4000 people aged 40 and older
+    - chunk: c003
+      slot: raw_data_sources[0].source_description
+      snippet: Asks about social determinants of health and access to healt
+    - chunk: c009
+      slot: funders[0].grantor
+      snippet: 'Project number: 1OT2OD032644-01'
+    - chunk: c014
+      slot: page
+      snippet: The AI-READI project seeks to create and share a flagship et
+    - chunk: c016
+      slot: file_collections[4].description
+      snippet: '"directoryName": "heidelberg_spectralis"'
+    - chunk: c017
+      slot: file_collections[7].description
+      snippet: '"directoryName": "garmin_vivosmart5"'
+    - chunk: c018
+      slot: known_limitations[0].limitation_description
+      snippet: 'it does not include other races/ethnicities such as Pacific '
+    - chunk: c019
+      slot: subsets[0].description
+      snippet: data splits into proportions (70%/15%/15%)
+    - chunk: c019
+      slot: human_subject_research.regulatory_compliance
+      snippet: '"humanSubjectReviewStatus": "Submitted, approved"'
+    - chunk: c020
+      slot: sampling_strategies[0].strategies
+      snippet: '"enrollmentCount": "4000"'
+    entry_single_leaf: 0
+    entry_single_leaf_sample: []
   slots:
     populated: 685
     exempt: 49
+    exempt_on_carried_identifier: 0
     receiptable: 636
     with_receipt: 157
     without_receipt:
@@ -492,10 +540,55 @@ receipts:
     - subsets[0].name
     - subsets[0].is_data_split
     without_receipt_truncated: 429
+    never_receipted: 251
+    added_after_receipt: 228
     receipt_paths: 167
     unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt:
+    - path: data_governance.stewardship_roles
+      resolved_path: data_governance.stewardship_roles
+    - path: ethical_reviews[1].review_details
+      resolved_path: ethical_reviews[1].review_details
+    - path: funders[0].notes
+      resolved_path: funders[0].notes
+    - path: funders[1]
+      resolved_path: funders[1]
+    - path: human_subject_research.ethics_review_board
+      resolved_path: human_subject_research.ethics_review_board
+    - path: human_subject_research.notes
+      resolved_path: human_subject_research.notes
+    - path: is_deidentified.source_caveats
+      resolved_path: is_deidentified.source_caveats
+    - path: notes
+      resolved_path: notes
+    - path: regulatory_restrictions.notes
+      resolved_path: regulatory_restrictions.notes
+    - path: source_caveats
+      resolved_path: source_caveats
+    - path: splits[0].split_details
+      resolved_path: splits[0].split_details
+    - path: subpopulations[0].distribution
+      resolved_path: subpopulations[0].distribution
+    - path: subsets[0].description
+      resolved_path: subsets[0].description
+    - path: variables[19].measurement_technique
+      resolved_path: variables[19].measurement_technique
+    value_changed_after_receipt_count: 14
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    located_after_key_stripped: []
+    located_after_key_stripped_count: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
     reshaped_by_reconcile:
     - publisher
+    receipts_to_removed_values: 1
   findings:
   - kind: snippet_adjacent_chunk
     chunk: c003
@@ -575,17 +668,39 @@ receipts:
     slot: informed_consent[0].consent_scope
     snippet: Data will be placed in an open-source repository
   findings_truncated: null
+  findings_gated: 0
   summary: chunks 28/28 reviewed · snippets 207/219 verified (1 across a wrapped line)
-    (12 in an adjacent chunk) · slots 157/636 with a receipt (49 exempt) · 1 receipt
-    path(s) reshaped by reconcile
+    (12 in an adjacent chunk) (15 bearing on no token of their value) · slots 157/636
+    with a receipt (251 never receipted, 228 added after the receipt) (49 exempt)
+    · 1 receipt path(s) reshaped by reconcile · 14 value(s) changed after the receipt
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_coverage_receipt.yaml
       sha256: e89ed1343899f406e1685d2050d432896cee7cff3a0131d264098216109b90da
     manifest:
-      path: data/preprocessed/chunks/AI_READI_chunks.yaml
-      sha256: 631788768d84a9ae689f722a37f2244be4f67393de390c2055585b81f27f33cf
-  recorded_by: d4d receipts check
+      path: null
+      rule:
+        version: 2
+        unit: source-document
+        boundary: 'FILE: line followed by PATH: or ROLE:'
+        preamble: own-chunk
+        split: line-window
+        max_lines: 400
+        max_bytes: 48000
+      chunk_count: 28
+      bundle_md5: 0f3abb51a333555456bedd63891fcd99
+      bundle_sha256: a42eb3aacc8aed05f8a79e54e848db65cc5159425888397242677c4914bf2aca
+  bundle_basis:
+    source: git blob
+    path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+    commit: 9049904493393a6ce1db69b9fe0a855ce0db4435
+    committed_on: '2026-08-12'
+    md5: 0f3abb51a333555456bedd63891fcd99
+    sha256: a42eb3aacc8aed05f8a79e54e848db65cc5159425888397242677c4914bf2aca
+    matched_on:
+    - md5
+    manifest: chunked in memory under the record's own inputs.chunks.rule (#1140)
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-28d_claude-opus-5-api-generic-v7_rep1/intermediate/AI_READI_audit.json
   sha256: 4727e58a66a46c5d6c2dd9bc6a229d499a8ac7bdd98e5b9b37bced916d0af6c3

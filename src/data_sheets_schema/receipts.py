@@ -1256,13 +1256,35 @@ def claims_path(core_dir: Path, project: str) -> Path:
 
 
 def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle_md5: str | None,
-              expected: bool, manifest: Path | None = None) -> dict[str, Any]:
+              expected: bool, manifest: Path | None = None,
+              bundle_rel_path: str | None = None, record_bundle_sha256: str | None = None,
+              record_chunks: dict[str, Any] | None = None) -> dict[str, Any]:
     """The provenance block for one run, or why it could not be computed.
 
     `expected` is whether this run's procedure was to write a receipt. It is
     carried into the block so the canary gate can tell "no receipt from a
     procedure that writes none" (not gated) from "no receipt from one that
     does" (UNMEASURABLE, #613). A receipt that exists is checked either way.
+
+    The bytes and the chunks come from the first of three sources that is
+    the record's (#1140; #1187 rounds 3 and 4): the manifest on disk where
+    it chunked the bytes the record hashed; the bundle on disk where its
+    bytes hash to the record's md5 (or sha256, where that is all it
+    carries) but the manifest is missing, stale or unreadable — chunked in
+    memory; else the committed version of `bundle_rel_path` whose every
+    recorded hash matches (`provenance.bundle_bytes_for`, naming which
+    matched). Nothing on disk gates the recovery. In memory the rule is the
+    record's own `inputs.chunks.rule` (`record_chunks`), the on-disk
+    manifest's only where the record carries none, and a manifest whose
+    chunk count is not the one the record cites is refused, since chunk
+    ids are positional and a different rule would put the same ids over
+    different text. The block carries `bundle_basis` naming the source
+    (and the commit), and its `bundle_md5` is the record's own. It is
+    `checked: false` where the record declares no path, no committed
+    version matches, git cannot supply the blob, the bytes are not UTF-8,
+    or no rule is known — and where a recovery did produce bytes the
+    refusal names that outcome first and the disk state as context, so no
+    message says the chunks could not be loaded and that they were.
     """
     import hashlib
 
@@ -1276,26 +1298,135 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
         rec = load_receipt(receipt)
     except (ValueError, yaml.YAMLError) as exc:
         return {**base, "checked": False, "reason": f"receipt unreadable: {exc}"}
+    # Three sources for the bytes and the chunks, in order (#1140; #1187
+    # rounds 3 and 4): the manifest on disk where it chunked the bytes the
+    # record hashed; the bundle on disk where its bytes are the record's
+    # but the manifest is missing, stale or unreadable (chunked in memory
+    # under the record's rule); a committed version of the declared path
+    # otherwise. Nothing on disk gates the third: a record that declares a
+    # path, a hash and a rule is checkable from git whatever the checkout
+    # holds. The record's hash is its md5 or, where it carries only that,
+    # its sha256 (round 3 review, SF4).
+    from data_sheets_schema.chunking import manifest_from_bytes
+    recorded = {k: v for k, v in (("md5", record_bundle_md5), ("sha256", record_bundle_sha256)) if v}
+    disk_state: str | None = None          # why the manifest on disk is not the instrument, if it is not
+    # What an operator would do about it. Kept out of `disk_state`, which
+    # is interpolated into the persisted `bundle_basis` and must be a
+    # statement about the bytes, not an imperative (#1187 round 5, SF1).
+    disk_advice: str | None = None
+    m: dict[str, Any] = {}
+    raw = b""
+    on_disk: dict[str, Any] | None = None
+    disk_bytes: bytes | None = None
     if bundle is None or not bundle.exists():
-        return {**base, "checked": False, "reason": "the record's bundle is absent; chunk texts cannot be loaded"}
-    mpath = manifest if manifest is not None else manifest_for(bundle)
-    if not mpath.exists():
-        return {**base, "checked": False,
-                "reason": f"no chunk manifest for {bundle.name} at {mpath}; run "
-                          "`d4d bundle chunk` (every bundle kind is chunked, #725)"}
-    try:
-        m = load_manifest(mpath)
-        if not isinstance(m, dict) or not isinstance(m.get("chunks"), list):
-            raise ValueError("manifest is not a mapping with a chunks list")
-    except (ValueError, yaml.YAMLError) as exc:
-        return {**base, "checked": False, "reason": f"manifest unreadable: {exc}"}
-    raw = bundle.read_bytes()
-    if hashlib.md5(raw).hexdigest() != m.get("bundle_md5"):
-        return {**base, "checked": False,
-                "reason": "the bundle on disk is not the bytes the manifest chunked; rebuild with d4d bundle chunk"}
-    if record_bundle_md5 and record_bundle_md5 != m.get("bundle_md5"):
-        return {**base, "checked": False,
-                "reason": "bundle drifted since the run; the receipt's chunks are not today's bytes"}
+        disk_state = "the record's bundle is absent"
+    else:
+        disk_bytes = bundle.read_bytes()
+        mpath = manifest if manifest is not None else manifest_for(bundle)
+        if not mpath.exists():
+            disk_state = f"no chunk manifest for {bundle.name} at {mpath}"
+            disk_advice = "run `d4d bundle chunk` (every bundle kind is chunked, #725)"
+        else:
+            try:
+                cand = load_manifest(mpath)
+                if not isinstance(cand, dict) or not isinstance(cand.get("chunks"), list):
+                    raise ValueError("manifest is not a mapping with a chunks list")
+                if hashlib.md5(disk_bytes).hexdigest() != cand.get("bundle_md5"):
+                    disk_state = "the manifest on disk did not chunk the bytes on disk"
+                    disk_advice = "rebuild it with `d4d bundle chunk`"
+                else:
+                    on_disk = cand
+            except (ValueError, yaml.YAMLError) as exc:
+                disk_state = f"the manifest on disk is unreadable ({exc})"
+    disk_hashes = ({"md5": hashlib.md5(disk_bytes).hexdigest(), "sha256": hashlib.sha256(disk_bytes).hexdigest()}
+                   if disk_bytes is not None else {})
+    bytes_on_disk_are_the_records = bool(recorded) and all(disk_hashes.get(k) == v for k, v in recorded.items())
+    # A refusal names what an operator would do; `disk_state` alone goes
+    # into the persisted `bundle_basis` (#1187 round 5, SF1).
+    disk_because = (disk_state + (f" — {disk_advice}" if disk_advice else "")) if disk_state else None
+    # `on_disk` already proves the manifest chunked the bytes on disk, so the
+    # bytes decide (round 4 review, SF2): a manifest whose own sha256 line
+    # disagrees with its md5 is not a third state.
+    manifest_is_the_records = on_disk is not None and (not recorded or bytes_on_disk_are_the_records)
+    bundle_basis: dict[str, Any] = {"source": "bundle on disk", "path": str(bundle)}
+    rule = (record_chunks or {}).get("rule") or (on_disk or {}).get("rule")
+    rule_basis = ("the record's own inputs.chunks.rule" if (record_chunks or {}).get("rule")
+                  else "the on-disk manifest's rule (the record carries none)")
+    expected_count = (record_chunks or {}).get("chunk_count")
+
+    def _in_memory(source_bytes: bytes, name: str, where: str) -> dict[str, Any] | None:
+        """Chunk `source_bytes` under `rule`; None with the refusal set in
+        `refusal` where the rule is missing or the count is not the record's."""
+        nonlocal refusal
+        if rule is None:
+            refusal = (f"{where}, but neither the record nor a usable manifest on disk says which chunking "
+                       "rule to read it under")
+            return None
+        built = manifest_from_bytes(source_bytes, name, rule)
+        if expected_count is not None and built.get("chunk_count") != expected_count:
+            refusal = (f"{where}, but chunks to {built.get('chunk_count')} under {rule_basis}, not the "
+                       f"{expected_count} the record cites, so its chunk ids would not name the receipt's text")
+            return None
+        return built
+
+    refusal: str | None = None
+    if manifest_is_the_records:
+        m, raw = on_disk, disk_bytes                                          # type: ignore[assignment]
+    elif bytes_on_disk_are_the_records:
+        # The bytes are right and only the manifest is not (round 3
+        # review, SF3): chunk them here rather than ask git for what is open.
+        try:
+            disk_bytes.decode("utf-8")                                       # type: ignore[union-attr]
+        except UnicodeDecodeError as exc:
+            return {**base, "checked": False,
+                    "reason": f"the bundle on disk is the bytes the record hashed but is not UTF-8 ({exc}); {disk_because}"}
+        # `where` composes `_in_memory`'s two refusals and is discarded on
+        # success, so it carries the advice; the basis below keeps the bare
+        # state (#1187 round 6, SF1).
+        built = _in_memory(disk_bytes, bundle.name, f"the bundle on disk is the bytes the record hashed ({disk_because})")  # type: ignore[arg-type]
+        if built is None:
+            return {**base, "checked": False, "reason": refusal}
+        m, raw = built, disk_bytes                                              # type: ignore[assignment]
+        bundle_basis = {"source": "bundle on disk", "path": str(bundle),
+                        "manifest": f"chunked in memory under {rule_basis}: {disk_state} (#1140)"}
+    elif recorded:
+        context = (disk_because if disk_because else
+                   "the bundle drifted since the run (the bytes on disk are not the bytes the record hashed, "
+                   "so the receipt's chunks are not today's bytes)")
+        if not bundle_rel_path:
+            return {**base, "checked": False,
+                    "reason": f"{context}, and the record declares no bundle path, so the version it read "
+                              "cannot be looked for"}
+        from data_sheets_schema.provenance import GitUnavailable, bundle_bytes_for
+        try:
+            recovered = bundle_bytes_for(bundle_rel_path, md5=record_bundle_md5, sha256=record_bundle_sha256)
+        except GitUnavailable as exc:
+            return {**base, "checked": False,
+                    "reason": f"{context}, and git could not supply the version the record hashed: {exc}"}
+        if recovered is None:
+            return {**base, "checked": False,
+                    "reason": f"{context}, and no committed version of the declared path hashes to the "
+                              f"record's {' and '.join(recorded)}"}
+        raw, entry = recovered
+        try:
+            raw.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            return {**base, "checked": False,
+                    "reason": f"the version the record hashed was recovered from {entry['commit'][:12]} but is "
+                              f"not UTF-8 ({exc}); {context}"}
+        name = Path(bundle_rel_path).name if bundle is None else bundle.name
+        built = _in_memory(raw, name, f"the version the record hashed was recovered from {entry['commit'][:12]}")
+        if built is None:
+            return {**base, "checked": False, "reason": f"{refusal}; {context}"}
+        m = built
+        bundle_basis = {"source": "git blob", "path": bundle_rel_path, "commit": entry["commit"],
+                        "committed_on": entry["date"], "md5": entry["md5"], "sha256": entry["sha256"],
+                        "matched_on": entry.get("matched_on"),
+                        "manifest": f"chunked in memory under {rule_basis} (#1140)"}
+    elif on_disk is None:
+        return {**base, "checked": False, "reason": disk_because + "; chunk texts cannot be loaded"}
+    else:
+        m, raw = on_disk, disk_bytes                                          # type: ignore[assignment]
     texts = dict(zip([c["id"] for c in m["chunks"]], _texts(raw.decode("utf-8"), m["chunks"])))
     full = (yaml.safe_load(full_path.read_text(encoding="utf-8")) or {}) if full_path.exists() else {}
     # A reshaped path is kept out of the findings and is *not* credited for
@@ -1315,6 +1446,10 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     block = check(rec, m, texts, full, record_bundle_md5, original)
     block["artifacts"] = {
         "receipt": {"path": str(receipt), "sha256": hashlib.sha256(receipt.read_bytes()).hexdigest()},
-        "manifest": {"path": str(mpath), "sha256": hashlib.sha256(mpath.read_bytes()).hexdigest()},
+        "manifest": ({"path": str(mpath), "sha256": hashlib.sha256(mpath.read_bytes()).hexdigest()}
+                     if bundle_basis["source"] == "bundle on disk" and "manifest" not in bundle_basis else
+                     {"path": None, "rule": m.get("rule"), "chunk_count": m.get("chunk_count"),
+                      "bundle_md5": m.get("bundle_md5"), "bundle_sha256": m.get("bundle_sha256")}),
     }
+    block["bundle_basis"] = bundle_basis
     return {**base, **block}
