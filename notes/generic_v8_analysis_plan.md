@@ -1108,15 +1108,34 @@ checksum forbids — and none moved the digest.
 
 ### R8 no longer charges a landing-page label a receipt (#1147, 2026-09-09)
 
-The fourteenth v9 pin — the registry's `superseded` list holds thirteen:
+The fifteenth v9 pin — the registry's `superseded` list holds fourteen:
 three registrations and corrections on 2026-09-08, the two #1120 rounds,
-the two #1134 spellings rounds, and this issue's own six earlier rounds,
+the two #1134 spellings rounds, and this issue's own seven earlier rounds,
 each retired by the next (the third wrote `labelled` into the sentence and
 the file sweep of #1134 caught it after the pin was taken; the fourth's
-premise was false for the 35 CHORUS records whose own id is the site root;
+premise was false for the 36 CHORUS records whose own id is the site root;
 the fifth told the 9 CHORUS records whose id is already a fragment on the
 root to mint a second `#`, which RFC 3986 forbids; the sixth wrote that
-marker in backticks, which the block test reserves for digest vocabulary). R8's own-id
+marker in backticks, which the block test reserves for digest vocabulary;
+the seventh survived six reviewer rounds and fell to the Codex CLI review
+on three operative clauses — it let a forced File, FileCollection,
+DataSubset, Software or component-Dataset id be minted over an identifier
+the evidence stated, where AI_READI v6 rep1 carries evidence-stated ARKs
+for its component datasets; it licensed a label on "the landing page or
+DOI" where the record may carry either bare (`10.13026/8xbn-nq66`,
+`www.bridge2ai.org/chorus`), so the label was a token, not an identifier;
+and its carve-out for an id that is already a fragment dropped the
+record's own discriminator, so parts of `#chorus-dataset` from two runs
+read `#clinical-notes` and `#chorus-dataset-clinical-notes` — 29 bare
+against 10 parent-qualified across five records — with "keep it stable"
+deciding nothing). R8 now takes the stated identifier first for a forced
+id and mints only where none is stated; admits a DOI or page base only as
+a declared CURIE, a resolver URL or an absolute URL; and labels a part of
+a fragment-on-root id as that fragment, a hyphen and the part's own label
+on the same root. The probes that pinned the earlier clauses were
+substring searches a semantic flip passes, so the playbook test now holds
+the whole R8 bullet equal across the two texts once the playbook's markup
+and citations are stripped. R8's own-id
 preference was argued from cost: "a label on
 the dataset's landing page … names an identifier the evidence must supply,
 so it needs a receipt like any other value, where a label on this record's
@@ -1125,20 +1144,25 @@ own id does not" (#1109, round 2). Receipts instrument v2 (#1123, amendment
 for the dataset at its top level is exempt from the denominator — so the
 sentence told the model to trade coverage away for a charge the instrument
 no longer makes. The preference stands on the reason that was always
-underneath it: the record's own id names this dataset and nothing else,
+underneath it: the record's own id, where it is not itself a shared root,
+names this dataset alone,
 where `page` is often a site or project root shared with sibling releases
-(`https://cm4ai.org/` on CM4AI 04g rep3; `https://chorus4ai.org/` on 62 of
-the 79 CHORUS records, a `/dataset` path on 12, none on 4), so a part
+(`https://cm4ai.org/` on CM4AI 04g rep3; `https://chorus4ai.org/` on 64 of
+the 82 CHORUS records outside the attic, a `/dataset` path on 12, none on
+5, and a schemeless `www.bridge2ai.org/chorus` on one — the Codex review's
+78-of-79 recount was of the same files under an earlier total), so a part
 labeled on a shared root cannot be told apart
 from a sibling's by its id alone; and `id` is the `Dataset` identifier
 every record carries, where `page` and `doi` are optional slots. Where the
-record's own id is itself such a root — 35 CHORUS records carry
+record's own id is itself such a root — 36 CHORUS records carry
 `https://chorus4ai.org/` as their `id` — the sentence says it is still the
 base to prefer, so a model does not read its own record as contradicting
 the premise and mint elsewhere (#1166 round 3); where the id is already a
-fragment on the root (9 CHORUS records), the part is labeled on the root
-itself, since a second `#` is not a URI (#1166 round 4; no record carries
-two today).
+fragment on the root (9 CHORUS records), the part's label is the record's
+fragment, a hyphen and the part's own label on the root, since a second
+`#` is not a URI (#1166 round 4) and a label that drops the record's
+fragment cannot be told from a sibling's (the Codex review; no record
+carries two markers today).
 Two earlier rewrites were retired by review (#1166): "a reader who follows this
 record's `id` finds its parts under it, which a label on another base does
 not give" either contradicted the license granted two clauses earlier or
@@ -1147,8 +1171,12 @@ is namespacing, not a dereference); "the one base every consumer already
 holds — the core projector and the `resources` match join on it" cited a
 join that is on the part id, not the record's, and works under any base.
 The sentence is rewritten in the prompt and in the playbook's mirror; the
-probe moves with it and the shared-clause guard holds both texts to it. No rule changes, the assembly digest does not move, no v9 record
-exists, so nothing is re-baselined.
+probe moves with it and the shared-clause guard holds both texts to it.
+R8's operative clauses change — the stated-identifier-first order for a
+forced id, the identifier-form requirement on a DOI or page base, the
+kept parent fragment — which is a rule change under the condition's own
+name; the assembly digest does not move, no v9 record exists, so nothing
+is re-baselined and no record is superseded.
 
 ### What a v9 arm can and cannot be compared against (#1072)
 

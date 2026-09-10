@@ -144,8 +144,11 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
                       "software tool under `used_software`",         # R8: the Software hole (review finding 4)
                       "ORCID the evidence states first",             # R8 defers to the person rule (finding 5)
                       "the base to prefer",                          # R8: own id first (round 2, finding 4)
-                      "names this dataset and nothing else",         # R8: the uniqueness reason, not a receipt cost (#1147)
-                      "labeled on that same root",                   # R8: the carve-out for an id that is already a fragment (#1166 round 5)
+                      "it names this dataset alone",                 # R8: the uniqueness reason, not a receipt cost (#1147)
+                      "mint a label only where it states none",      # R8: a forced id takes the stated identifier first (#1166 Codex M1)
+                      "never in place of an identifier the evidence supplies",
+                      "a token, not an identifier",                  # R8: a DOI or page base must be an identifier form (Codex M2)
+                      "that fragment, a hyphen and the part's own label",  # R8: the parent fragment is kept (Codex M3)
                       "component dataset under `resources`",        # R8: a nested Dataset id is forced (round 2, finding 3)
                       "matched to the core by id",                   # R8: the projector, both facts (finding 9)
                       "a claim about that identifier, not a label",  # R8: the referent test (#901)

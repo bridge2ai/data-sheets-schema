@@ -493,8 +493,10 @@ records; the 18 receipted records whose bundle has drifted are withheld by
 the #907 guard and stay under v1 (#1140). v9 R8 told the model a
 landing-page label "needs a receipt like any other value" — the cost v2
 removes; #1147 rotated that sentence (the own-id preference now rests on
-the id naming this dataset and nothing else, where a landing page is often
-a root shared with sibling releases).
+the id naming this dataset alone where it is not itself a shared root,
+while a landing page is often one; a forced id takes the identifier the
+evidence states before any mint, a DOI or page base must be an identifier
+form, and a part of a fragment-on-root id keeps the record's fragment).
 Named non-checks: that `nothing_relevant` was true, and that a real snippet
 supports its value. `backfill-checks` writes a `receipts` block only where a
 receipt exists or the record claims one (#726). Every bundle kind a run may declare has a manifest (#725), so
