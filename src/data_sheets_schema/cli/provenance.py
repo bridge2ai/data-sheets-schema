@@ -569,9 +569,15 @@ _ESTIMATE_KEYS = ("assistant_turns", "output_tokens", "thinking_blocks", "thinki
 #: their opening words, so a recomputation strips its own earlier
 #: statements (#1191 round 3, M1) and never a sentence a curator wrote
 #: that happens to begin the same way (round 4, S3). Every sentence the
-#: function can produce for any key set is generated and matched exactly;
-#: the two literal forms round 2 and `annotate-observed` wrote are listed
-#: beside them.
+#: function can produce for any key set is generated and matched exactly,
+#: and the literal forms earlier code wrote are listed beside them. Which
+#: round wrote which is recorded where it could be established from git;
+#: the first entry and the "round 3" variant in
+#: `_superseded_reasoning_basis` match no round's output that a replay of
+#: this branch's history could find (#1191 rounds 8 and 9, S1). They stay,
+#: because an over-wide strip of text this module could have written costs
+#: nothing while a missing one doubles a paragraph — but neither is
+#: evidence that a record says it.
 _LEGACY_REASONING_SENTENCES = (
     "assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, visible_text_chars, "
     "tool_input_chars and reasoning_tokens_estimate (output tokens minus a 4-chars-per-token estimate "

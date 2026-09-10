@@ -1577,9 +1577,14 @@ steps need:
     edited since, and that is stated (`basis_prior_edited`) rather than
     guessed at. The sentence-matching strip is kept only for a record
     written before the text was recorded — a set that empties as those
-    records are re-extended — and it now knows the two forms rounds 2
-    and 3 wrote and the empty extension clause round 5 could emit, none
-    of which today's function can produce. Four more from the same
+    records are re-extended — and it now knows the forms earlier rounds
+    wrote, among them round 2's block and round 5's empty extension
+    clause, none of which today's function can produce. Two of the
+    literals it carries match no round's output that a replay of this
+    branch's history could find; they are kept, since an over-wide strip
+    of text this module could have written costs nothing while a missing
+    one doubles a paragraph, and labelled as what they are rather than as
+    evidence that a record says them (rounds 8 and 9, S1). Four more from the same
     review: the sentence boundary takes `!`, `?` and a closing quote or
     bracket, so a basis ending in one is idempotent; a full stop supplied
     to an account that carried none is recorded rather than silent; the
