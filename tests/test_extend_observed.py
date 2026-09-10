@@ -137,6 +137,8 @@ class Extension(unittest.TestCase):
             self.assertIn("upper bound", log["run_observed_basis"])                           # the basis describes the new keys (M3)
             self.assertIn("No thinking_tokens", log["run_observed_basis"])                    # ... and only them (round 2, S1)
             self.assertNotIn("turns_with_thinking_tokens are the runtime", log["run_observed_basis"])
+            self.assertIn("added after the run, under run_observed_extended", log["run_observed_basis"])   # round 3, S2
+            self.assertNotIn("thinking_blocks", log["run_observed_basis"])                    # a key not carried is not described (round 3, S3)
             self.assertIn("Cut at run_observed_until", log["run_observed_basis"])               # the record's cut is said (S5)
             self.assertEqual(log["run_observed_until"], "2026-08-28T10:00:00+00:00")     # untouched
             r = self._run(tmp, path, {"agent-av6-P-rep1": FULL}, transcripts=[t])
@@ -179,8 +181,10 @@ class Extension(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = _record(tmp); (t,) = _transcripts(tmp, ["agent-av6-P-rep1"])
             before = path.read_text()
-            r = self._run(tmp, path, {"agent-av6-P-rep1": FULL}, execute=False, transcripts=[t])
+            r = self._run(tmp, path, {"agent-av6-P-rep1": {**FULL, "receipt_chunks_unopened": 1}}, execute=False, transcripts=[t])
             self.assertIn("report only", r.output); self.assertEqual(path.read_text(), before)
+            self.assertIn("adds ['assistant_turns', 'output_tokens', 'reasoning_tokens_estimate']", r.output)   # the set --execute writes (round 2, S4)
+            self.assertNotIn("receipt_chunks", r.output)
             path = _record(tmp, api=True)
             r = self._run(tmp, path, {"agent-av6-P-rep1": FULL}, transcripts=[t])
             self.assertIn("API-path record", r.output)
@@ -213,6 +217,19 @@ class Extension(unittest.TestCase):
         annotated = {"run_observed": dict(PRIOR), "run_observed_basis": cli._RUN_OBSERVED_BASIS + cli._reasoning_basis(set(FULL))}
         cli._extend_run_observed(annotated, FULL, recorded_by="x", instrument="i")
         self.assertEqual(annotated["run_observed_basis"].count("reasoning measure"), 1)      # today's annotate paragraph is not doubled (S3)
+        # a later extension that adds thinking_tokens replaces the "No thinking_tokens" statement (round 3, M1)
+        self.assertIn("No thinking_tokens", annotated["run_observed_basis"])
+        cli._extend_run_observed(annotated, {**FULL, "thinking_tokens": 11, "turns_with_thinking_tokens": 3}, recorded_by="y", instrument="j")
+        self.assertNotIn("No thinking_tokens", annotated["run_observed_basis"])
+        self.assertIn("thinking_tokens and turns_with_thinking_tokens are the runtime", annotated["run_observed_basis"])
+        self.assertEqual(annotated["run_observed_basis"].count("reasoning measure"), 1)
+        self.assertEqual(annotated["run_observed_basis"].count("added after the run"), 1)
+        self.assertTrue(annotated["run_observed_basis"].startswith("aggregate totals"))
+        # the sentences name only the keys present (round 3, S3), and the negative is about the observation (S1)
+        self.assertNotIn("thinking_blocks", cli._reasoning_basis({"output_tokens"}))
+        self.assertIn("the observation carries none", cli._reasoning_basis({"output_tokens"}))
+        self.assertNotIn("transcript carries", cli._reasoning_basis({"output_tokens"}))
+        self.assertIn("counts the turns", cli._reasoning_basis({"turns_with_thinking_tokens"}))
 
     def test_annotate_observed_extend_keeps_the_cut_and_names_its_own_route(self):
         """#1191 review, M1/M2: `--extend` deleted `run_observed_until` and
