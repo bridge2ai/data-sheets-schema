@@ -1018,8 +1018,21 @@ them under `phase_log.run_observed`, and `d4d provenance reasoning` reports
 such a run as `recovered_from_transcript`. Cache-inclusive orchestrator
 accounting, one number per run: the same subtraction as the API log's
 estimate, on a runtime whose output is mostly tool payloads, so an upper
-bound rather than a like-for-like figure; never averaged with `api_usage`. Existing agentic records carry the older
-`run_observed` shape until re-annotated from their transcripts.
+bound rather than a like-for-like figure; never averaged with `api_usage`. The 24 agentic records (v5 2026-08-24, v6
+2026-08-28) carry the measure since #1010: `d4d provenance
+extend-observed --label L [--execute]` finds the run's transcript by
+name in both config directories, recovers the bundle version the record
+hashed (#1140; 18 of the 24 from a git blob), chunks it under the
+record's rule, re-runs the observer with the record's own
+`run_observed_until` cut, and extends `run_observed` only when exactly
+one candidate — a file, or the set of files a killed-and-resumed run
+left under one name (three v5 rep3 runs) — reproduces every key the
+record already carried; `run_observed_extended` names the keys, the
+transcripts and the bundle basis. `thinking_tokens` is present only
+where a transcript's turns carry it (all twelve v6 records; the three
+resumed v5 runs on their second transcript's turns only, which
+`turns_with_thinking_tokens` says), so `reasoning_tokens_estimate` is
+the figure that spans both arms.
 
 So the command distinguishes four empty cases rather than printing one message
 for all of them:

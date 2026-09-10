@@ -1505,8 +1505,28 @@ steps need:
     cannot read, and names those behind the current one (0 today). Not a
     generation-path change.
 
+22. **The agentic arms carry the transcript's reasoning measure (#1010,
+    2026-09-10).** `d4d provenance extend-observed` recomputed every one
+    of the 24 agentic records' `run_observed` from its transcript on the
+    bundle bytes the record hashed (18 recovered from git, 6 on disk),
+    with the record's own `run_observed_until` cut, and extended it only
+    where every prior key reproduced exactly — 24 of 24, 21 from one
+    transcript and 3 (the v5 rep3 AI_READI, CM4AI and VOICE runs, killed
+    and resumed) from the pair of files their name covers, whose sums are
+    the recorded totals. Added: `assistant_turns`, `output_tokens`,
+    `thinking_blocks`, `thinking_text_chars` (0 throughout), `visible_text_chars`,
+    `tool_input_chars`, `reasoning_tokens_estimate`, and where the turns
+    carry it `thinking_tokens` / `turns_with_thinking_tokens` (the twelve
+    v6 records; the three resumed v5 runs on their second transcript's
+    turns only). `output_tokens` median 116,774 (v5) and 153,027 (v6);
+    `reasoning_tokens_estimate` median 68,316 and 88,556 — an upper
+    bound on a runtime whose output is mostly tool payloads, never
+    averaged with `api_usage`. `d4d provenance reasoning` reports all 24
+    as `recovered_from_transcript`. Numbered with 19, 20 and 21 open. Not
+    a generation-path change; no verdict reads these keys.
+
 Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16,
-17 and 20 are not; 15 and 17 are the receipts instrument's revisions and
+17, 20 and 22 are not; 15 and 17 are the receipts instrument's revisions and
 17 classifies both; 18 changes the normaliser's rule table and is a
 generation-path change by that half); per the production rule none of them may land
 between a v8 canary and its fill.
