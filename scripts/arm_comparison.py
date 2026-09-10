@@ -162,13 +162,35 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                    "receipts (#708): mismatched + unchecked snippets; same caveat"),
     "wrongchunk": ("snippets not in the chunk cited", "record", True,
                    "receipts (#763): verbatim in the bundle but not in the chunk cited — "
-                   "attribution precision, reported not gated; 3.8% on the five v7 API canaries (33/859)"),
+                   "attribution precision, reported not gated. Read it against `snippets "
+                   "checked` on the row below, never as a bare count; the pooled rates "
+                   "are in the receipt-coverage section"),
+    "snippets": ("snippets checked", "record", False,
+                 "receipts (#708): the denominator for `snippets not in the chunk cited` "
+                 "and for unverified — the receipt's own snippet count, which is a "
+                 "property of how much the model quoted, not of the record"),
     "leaves": ("populated leaves (full record)", "record", False,
                "count of populated leaf values in the full record (receipts.populated_leaves); "
                "informational — the v6 plan's prediction 5 is that it does not fall"),
     "noreceipt": ("slots without a receipt", "record", True,
                   "receipts (#708): receiptable populated leaves with no receipt; exempt "
-                  "slots (runner-set, minted, commentary) are outside the denominator"),
+                  "slots (runner-set, minted, commentary) are outside the denominator. "
+                  "`receiptable` on the row below is that denominator, so coverage degree "
+                  "is readable here rather than inferable (#902)"),
+    "receiptable": ("receiptable slots (denominator)", "record", False,
+                    "receipts (#708): populated leaves that are not exempt — the "
+                    "denominator every receipt count on these rows shares. It varies "
+                    "two- to three-fold between records of one arm, so a bare "
+                    "without-a-receipt count compares nothing (#902)"),
+    "neverreceipted": ("of those, never receipted", "record", True,
+                       "receipts (#807): the receiptless leaf resolved in the phase-1 "
+                       "snapshot, so the model never receipted it. Needs that snapshot — "
+                       "the API path writes one and the agentic path does not, so an "
+                       "agentic arm is – here, not 0 (#899)"),
+    "addedafter": ("of those, added after the receipt", "record", True,
+                   "receipts (#807): the receiptless leaf is absent from the phase-1 "
+                   "snapshot, so reconciliation or repair added it after the receipt was "
+                   "written and no receipt route existed (#742). Same snapshot caveat"),
     "gc": ("GC label variants (reported)", "live", True,
            "reported-only; counted against the manifest naming declaration decided "
            "2026-08-22, so anachronistic for the v4 arm and same-day for 22c. For VOICE "
@@ -182,6 +204,51 @@ EXCLUDED_INVALID: dict[tuple[str, str], None] = {}   # (label, project) skipped 
 
 def load(path: Path) -> dict[str, Any]:
     return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+
+
+RECEIPT_KEYS = ("unreviewed", "unverified", "wrongchunk", "snippets", "noreceipt",
+                "receiptable", "withreceipt", "neverreceipted", "addedafter")
+
+
+def receipt_metrics(rcp: dict[str, Any]) -> dict[str, Any]:
+    """The receipt row values for one record, or all None where the receipt
+    was not checked — an unchecked receipt is not a measurement of zero."""
+    if not rcp.get("checked"):
+        return {k: None for k in RECEIPT_KEYS}
+    from data_sheets_schema.canary import receipt_floors
+    floors = receipt_floors(rcp)
+    sn = rcp.get("snippets") or {}
+    sl = rcp.get("slots") or {}
+    receiptable = sl.get("receiptable")
+    with_receipt = sl.get("with_receipt")
+    # The stored `without_receipt` list is capped at 50 entries with the
+    # remainder in `without_receipt_truncated`; #831's body divided by the
+    # capped list and reported coverage at twice its real level. The two
+    # integers are the definition, so subtract them where the block carries
+    # them (every block on disk today, and they agree with the list
+    # arithmetic on all of them) and keep the list only for a block that
+    # predates the counters.
+    if receiptable is not None and with_receipt is not None:
+        noreceipt = int(receiptable) - int(with_receipt)
+    else:
+        noreceipt = (len(sl.get("without_receipt") or [])
+                     + int(sl.get("without_receipt_truncated") or 0))
+    # `never_receipted`/`added_after_receipt` are None, not 0, on a run with
+    # no phase-1 snapshot to resolve the path against (#899) — the agentic
+    # path writes none. A 0 would read as "reconciliation added nothing after
+    # the receipt", which is not what an absent snapshot says.
+    never = sl.get("never_receipted")
+    added = sl.get("added_after_receipt")
+    return {"unreviewed": floors["chunks unreviewed"],
+            "unverified": floors["snippets unverified"],
+            "wrongchunk": int(sn.get("adjacent") or 0) + int(sn.get("elsewhere") or 0)
+            + int(sn.get("spans_boundary") or 0),
+            "snippets": int(sn.get("total") or 0),
+            "noreceipt": noreceipt,
+            "receiptable": int(receiptable) if receiptable is not None else None,
+            "withreceipt": int(with_receipt) if with_receipt is not None else None,
+            "neverreceipted": int(never) if never is not None else None,
+            "addedafter": int(added) if added is not None else None}
 
 
 def run_metrics(label: str, project: str) -> dict[str, Any] | None:
@@ -214,18 +281,7 @@ def run_metrics(label: str, project: str) -> dict[str, Any] | None:
                 return sum(v.values()) if isinstance(v, dict) else int(v)
         return None
 
-    rcp = rec.get("receipts") or {}
-    if rcp.get("checked"):
-        from data_sheets_schema.canary import receipt_floors
-        floors = receipt_floors(rcp)
-        sn = rcp.get("snippets") or {}
-        receipt_vals = {"unreviewed": floors["chunks unreviewed"],
-                        "unverified": floors["snippets unverified"],
-                        "wrongchunk": int(sn.get("adjacent") or 0) + int(sn.get("elsewhere") or 0) + int(sn.get("spans_boundary") or 0),
-                        "noreceipt": len((rcp.get("slots") or {}).get("without_receipt") or [])
-                        + int((rcp.get("slots") or {}).get("without_receipt_truncated") or 0)}
-    else:
-        receipt_vals = {"unreviewed": None, "unverified": None, "wrongchunk": None, "noreceipt": None}
+    receipt_vals = receipt_metrics(rec.get("receipts") or {})
     from data_sheets_schema.receipts import populated_leaves
     leaves = len(populated_leaves(load(full)))
     return {
@@ -342,6 +398,74 @@ def worst(reps: list[dict[str, Any]], metric: str) -> str:
     return str(w)
 
 
+def pooled_receipts(reps: list[dict[str, Any]]) -> dict[str, Any]:
+    """Receipt totals for an arm, pooled over its records.
+
+    Pooled, not a mean of per-record rates: the receiptable denominator varies
+    two- to three-fold within one arm (#902), and a mean of ratios would weight
+    a 142-slot record like a 508-slot one. A key is summed only over the
+    records that carry it, and stays None when none does — the never/added
+    split needs a phase-1 snapshot the agentic path never wrote (#899), and 0
+    there would assert something the arm did not measure.
+    """
+    out: dict[str, Any] = {"records": sum(1 for r in reps if r.get("receiptable") is not None)}
+    for key in ("receiptable", "withreceipt", "neverreceipted", "addedafter",
+                "snippets", "wrongchunk", "unverified", "unreviewed"):
+        vals = [r[key] for r in reps if r.get(key) is not None]
+        out[key] = sum(vals) if vals else None
+    return out
+
+
+def _rate(num: Any, den: Any) -> str:
+    """`n/d = p%`, or `–` where either side was not measured. A zero
+    denominator is not 0% — it is nothing to divide."""
+    if num is None or not den:
+        return "–"
+    return f"{num}/{den} = {100 * num / den:.1f}%"
+
+
+def receipt_section(data) -> list[str]:
+    lines = ["## Receipt coverage and attribution, pooled per arm (#831, #902)", "",
+             "| arm | records | receiptable slots | with a receipt | never receipted | "
+             "added after the receipt | snippets | not in the chunk cited |",
+             "|---|---|---|---|---|---|---|---|"]
+    for key, disp, _pfx, _rt, _role in ARMS:
+        reps = [r for p in PROJECTS for r in data[key][p]]
+        t = pooled_receipts(reps)
+        if not t["records"]:
+            continue
+        lines.append(
+            f"| {disp} | {t['records']} | {t['receiptable']} | "
+            f"{_rate(t['withreceipt'], t['receiptable'])} | "
+            f"{_rate(t['neverreceipted'], t['receiptable'])} | "
+            f"{_rate(t['addedafter'], t['receiptable'])} | "
+            f"{t['snippets'] if t['snippets'] is not None else '–'} | "
+            f"{_rate(t['wrongchunk'], t['snippets'])} |")
+    lines += ["",
+              "Coverage **degree**, which the twelve v7 production reviewers read as a "
+              "rule-15 violation on eight records and which is a property of the arm "
+              "rather than of any one record (#902). The denominator is receiptable "
+              "populated leaves: an entry receipt covers many leaves at once, so this is "
+              "the strict leaf reading, and the exempt slots (runner-set, minted on an "
+              "identifier the record carries, commentary) are outside it. Zero "
+              "`not_in_bundle` verdicts were returned anywhere on the v7 production arm, "
+              "so what these rows measure is how much of a record the receipt reaches, "
+              "not whether its values are supported.", "",
+              "The never/added split (#807) says which half of the gap the protocol could "
+              "have closed: a leaf that resolves in the phase-1 snapshot was there to be "
+              "receipted and was not, while one the snapshot does not carry was added by "
+              "reconciliation or repair, which have no receipt route at all (#742). It "
+              "needs that snapshot, so an agentic arm shows `–` and not 0.", "",
+              "`not in the chunk cited` is attribution precision, reported and never "
+              "gated (#763): the snippet is verbatim in the bundle, in a chunk other than "
+              "the one the receipt names. It is an API-path number — the agentic protocol "
+              "names chunk ids from the manifest it read, the API path infers them from "
+              "`[cNNN]` marker lines in the cached bundle, and the marker side was checked "
+              "byte-for-byte on the CM4AI canary and found correct (#873), so what the "
+              "rate measures is the model mis-citing, usually one chunk early.", ""]
+    return lines
+
+
 def write_markdown(data, scores) -> None:
     lines = ["# Cross-arm comparison (regenerated)", "",
              f"Generated by `scripts/arm_comparison.py` from the provenance records under "
@@ -391,6 +515,8 @@ def write_markdown(data, scores) -> None:
               "better summary. ᵘ = unmeasured — the report-claims checker parsed zero "
               "claims (#684); unmeasured values are excluded from the mean and n, and a "
               "cell with no measured replicate shows only its raw values.", ""]
+
+    lines += receipt_section(data)
 
     lines += ["## Per-metric caveats (attached, not footnoted elsewhere)", ""]
     for mk, (disp, src, _hiw, cav) in METRICS.items():

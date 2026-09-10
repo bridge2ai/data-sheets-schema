@@ -28,9 +28,9 @@ Arms: **v4 API (2026-08-13)** — `2026-08-13_claude-opus-5-api-generic-v4_rep{1
 | undeclared prefixes | CHORUS | 76.0 ± 131.6 [228,0,0] worst 228 | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] |
 | undeclared prefixes | CM4AI | 42.3 ± 43.0 [0,86,41] worst 86 | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | – | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] |
 | undeclared prefixes | VOICE | 0.0 ± 0.0 [0,0,0] worst 0 | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | – | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] |
-| British spellings | AI_READI | 176.7 ± 46.6 [225,132,173] worst 225 | 25.3 ± 22.5 [33,43,0] | 1.3 ± 2.3 [4,0,0] | 2.7 ± 3.8 [0,1,7] | 32.3 ± 12.0 [33,20,44] | 45.0 ± 7.0 [45,38,52] | 0.0 ± 0.0 [0,0,0] |
+| British spellings | AI_READI | 176.7 ± 46.6 [225,132,173] worst 225 | 25.3 ± 22.5 [33,43,0] | 1.3 ± 2.3 [4,0,0] | 2.7 ± 3.8 [0,1,7] | 32.7 ± 12.5 [33,20,45] | 45.0 ± 7.0 [45,38,52] | 0.0 ± 0.0 [0,0,0] |
 | British spellings | CHORUS | 17.0 ± 5.2 [20,20,11] worst 20 | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] |
-| British spellings | CM4AI | 35.7 ± 53.1 [97,6,4] worst 97 | 1.3 ± 2.3 [4,0,0] | 1.3 ± 2.3 [0,4,0] | 1.3 ± 2.3 [0,4,0] | – | 0.7 ± 1.2 [0,0,2] | 0.0 ± 0.0 [0,0,0] |
+| British spellings | CM4AI | 35.7 ± 53.1 [97,6,4] worst 97 | 1.3 ± 2.3 [4,0,0] | 1.3 ± 2.3 [0,4,0] | 2.0 ± 2.0 [0,4,2] | – | 0.7 ± 1.2 [0,0,2] | 0.0 ± 0.0 [0,0,0] |
 | British spellings | VOICE | 70.3 ± 18.6 [49,79,83] worst 83 | 2.7 ± 3.1 [2,0,6] | 2.3 ± 2.1 [3,4,0] | 11.7 ± 20.2 [0,35,0] | – | 0.7 ± 1.2 [0,0,2] | 1.3 ± 1.2 [2,0,2] |
 | pair errors | AI_READI | 8.0 ± 2.0 [10,8,6] worst 10 | 8.7 ± 8.3 [2,18,6] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] |
 | pair errors | CHORUS | 3.0 ± 3.0 [6,0,3] worst 6 | 1.0 ± 1.0 [1,0,2] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] |
@@ -38,8 +38,8 @@ Arms: **v4 API (2026-08-13)** — `2026-08-13_claude-opus-5-api-generic-v4_rep{1
 | pair errors | VOICE | 6.3 ± 2.5 [9,4,6] worst 9 | 5.7 ± 1.2 [7,5,5] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | – | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] |
 | report findings | AI_READI | 1.7 ± 0.6 [2,1,2] worst 2 | 1.0 [0ᵘ,1,0ᵘ] (n=1) | – [0ᵘ,0ᵘ,0ᵘ] | – [0ᵘ,0ᵘ,0ᵘ] | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 [0ᵘ,0ᵘ,0] (n=1) | 0.0 ± 0.0 [0,0,0] |
 | report findings | CHORUS | – [0ᵘ,0ᵘ,0ᵘ] | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 [0ᵘ,0ᵘ,0] (n=1) | – [0ᵘ,0ᵘ,0ᵘ] | – [0ᵘ,0ᵘ] | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 ± 0.0 [0,0,0] |
-| report findings | CM4AI | 2.7 ± 1.5 [3,1,4] worst 4 | 2.0 [2,0ᵘ,0ᵘ] (n=1) | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 [0ᵘ,0ᵘ,0] (n=1) | – | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 ± 0.0 [0,0,0] |
-| report findings | VOICE | 2.0 ± 0.0 [2,2,2] worst 2 | 1.0 ± 0.0 [0ᵘ,1,1] (n=2) | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 [0ᵘ,0,0ᵘ] (n=1) | – | – [0ᵘ,0ᵘ,0ᵘ] | 1.0 ± 1.0 [0,2,1] |
+| report findings | CM4AI | 3.3 ± 0.6 [3,3,4] worst 4 | 1.0 [1,0ᵘ,0ᵘ] (n=1) | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 [0ᵘ,0ᵘ,0] (n=1) | – | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 ± 0.0 [0,0,0] |
+| report findings | VOICE | 2.0 ± 0.0 [2,2,2] worst 2 | 1.0 ± 0.0 [0ᵘ,1,1] (n=2) | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 [0ᵘ,0,0ᵘ] (n=1) | – | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 ± 0.0 [0,0,0] |
 | minted fragments (reported) | AI_READI | 14.7 ± 2.1 [17,14,13] worst 17 | 9.0 ± 7.8 [0,13,14] | 10.3 ± 6.7 [16,3,12] | 10.7 ± 2.1 [10,13,9] | 5.7 ± 6.4 [1,3,13] | 4.0 ± 6.9 [0,0,12] | 18.0 ± 4.6 [19,22,13] |
 | minted fragments (reported) | CHORUS | 0.0 ± 0.0 [0,0,0] worst 0 | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] |
 | minted fragments (reported) | CM4AI | 4.0 ± 6.9 [12,0,0] worst 12 | 13.7 ± 3.2 [15,10,16] | 49.3 ± 6.7 [42,55,51] | 39.0 ± 20.8 [51,15,51] | – | 14.7 ± 4.0 [17,10,17] | 23.3 ± 6.4 [16,26,28] |
@@ -56,20 +56,51 @@ Arms: **v4 API (2026-08-13)** — `2026-08-13_claude-opus-5-api-generic-v4_rep{1
 | snippets not in the chunk cited | CHORUS | – [–,–,–] | – [–,–,–] | – [–,–,–] | 0.0 ± 0.0 [0,0,0] | 2.0 ± 0.0 [2,2] | 1.0 ± 0.0 [1,1,1] | 0.7 ± 0.6 [0,1,1] |
 | snippets not in the chunk cited | CM4AI | – [–,–,–] | – [–,–,–] | – [–,–,–] | 0.0 ± 0.0 [0,0,0] | – | 24.0 ± 15.1 [26,38,8] | 32.7 ± 14.5 [18,33,47] |
 | snippets not in the chunk cited | VOICE | – [–,–,–] | – [–,–,–] | – [–,–,–] | 0.0 ± 0.0 [0,0,0] | – | 8.3 ± 4.0 [9,4,12] | 8.3 ± 3.1 [5,11,9] |
+| snippets checked | AI_READI | – [–,–,–] | – [–,–,–] | – [–,–,–] | 441.0 ± 128.0 [580,328,415] | 217.3 ± 69.5 [286,147,219] | 221.0 ± 19.2 [243,212,208] | 334.7 ± 18.9 [351,339,314] |
+| snippets checked | CHORUS | – [–,–,–] | – [–,–,–] | – [–,–,–] | 107.7 ± 1.5 [106,109,108] | 103.5 ± 7.8 [109,98] | 96.3 ± 13.9 [81,100,108] | 95.3 ± 19.6 [79,90,117] |
+| snippets checked | CM4AI | – [–,–,–] | – [–,–,–] | – [–,–,–] | 336.0 ± 27.9 [367,328,313] | – | 110.7 ± 27.4 [116,135,81] | 181.3 ± 6.4 [174,186,184] |
+| snippets checked | VOICE | – [–,–,–] | – [–,–,–] | – [–,–,–] | 248.7 ± 43.1 [199,271,276] | – | 149.7 ± 11.2 [154,137,158] | 240.7 ± 8.7 [243,248,231] |
 | populated leaves (full record) | AI_READI | 642.3 ± 98.9 [748,552,627] worst 748 | 674.3 ± 123.9 [594,817,612] | 641.3 ± 38.1 [649,675,600] | 603.3 ± 56.8 [667,558,585] | 521.7 ± 141.6 [446,434,685] | 493.3 ± 62.4 [562,478,440] | 499.7 ± 43.9 [525,525,449] |
 | populated leaves (full record) | CHORUS | 265.0 ± 68.7 [342,210,243] worst 342 | 241.7 ± 48.3 [220,208,297] | 287.3 ± 37.9 [299,245,318] | 227.7 ± 46.4 [197,281,205] | 202.0 ± 9.9 [209,195] | 192.3 ± 21.8 [199,168,210] | 254.7 ± 21.7 [235,278,251] |
 | populated leaves (full record) | CM4AI | 555.0 ± 127.4 [415,664,586] worst 664 | 444.7 ± 57.3 [489,465,380] | 928.0 ± 84.2 [835,999,950] | 706.0 ± 190.5 [765,493,860] | – | 432.0 ± 65.0 [458,480,358] | 458.0 ± 31.3 [422,473,479] |
 | populated leaves (full record) | VOICE | 567.3 ± 36.5 [577,598,527] worst 598 | 450.3 ± 62.1 [417,522,412] | 542.7 ± 93.5 [545,448,635] | 545.7 ± 79.5 [617,460,560] | – | 373.7 ± 67.0 [306,375,440] | 371.7 ± 68.6 [386,297,432] |
-| slots without a receipt | AI_READI | – [–,–,–] | – [–,–,–] | – [–,–,–] | 312.0 ± 20.1 [291,314,331] | 310.7 ± 146.0 [234,219,479] | 264.3 ± 72.0 [347,231,215] | 198.3 ± 59.5 [200,257,138] |
-| slots without a receipt | CHORUS | – [–,–,–] | – [–,–,–] | – [–,–,–] | 82.7 ± 23.2 [104,58,86] | 112.5 ± 0.7 [112,113] | 105.7 ± 10.1 [111,94,112] | 139.3 ± 23.2 [133,165,120] |
+| slots without a receipt | AI_READI | – [–,–,–] | – [–,–,–] | – [–,–,–] | 312.0 ± 20.1 [291,314,331] | 310.7 ± 146.0 [234,219,479] | 261.3 ± 66.9 [338,231,215] | 198.3 ± 59.5 [200,257,138] |
+| slots without a receipt | CHORUS | – [–,–,–] | – [–,–,–] | – [–,–,–] | 82.7 ± 23.2 [104,58,86] | 111.5 ± 0.7 [111,112] | 105.3 ± 9.8 [111,94,111] | 139.0 ± 23.3 [132,165,120] |
 | slots without a receipt | CM4AI | – [–,–,–] | – [–,–,–] | – [–,–,–] | 270.0 ± 234.6 [508,263,39] | – | 253.0 ± 39.0 [288,260,211] | 123.3 ± 35.4 [95,112,163] |
 | slots without a receipt | VOICE | – [–,–,–] | – [–,–,–] | – [–,–,–] | 344.0 ± 99.7 [447,248,337] | – | 220.3 ± 46.5 [167,242,252] | 134.0 ± 24.2 [120,120,162] |
+| receiptable slots (denominator) | AI_READI | – [–,–,–] | – [–,–,–] | – [–,–,–] | 580.7 ± 52.8 [639,536,567] | 474.7 ± 139.7 [394,394,636] | 439.3 ± 58.5 [498,439,381] | 429.7 ± 46.3 [480,420,389] |
+| receiptable slots (denominator) | CHORUS | – [–,–,–] | – [–,–,–] | – [–,–,–] | 188.7 ± 6.1 [190,194,182] | 169.0 ± 4.2 [172,166] | 163.0 ± 18.7 [169,142,178] | 210.7 ± 32.9 [186,248,198] |
+| receiptable slots (denominator) | CM4AI | – [–,–,–] | – [–,–,–] | – [–,–,–] | 662.7 ± 165.2 [753,472,763] | – | 367.7 ± 84.7 [420,413,270] | 395.7 ± 25.7 [374,424,389] |
+| receiptable slots (denominator) | VOICE | – [–,–,–] | – [–,–,–] | – [–,–,–] | 516.7 ± 78.5 [587,432,531] | – | 331.7 ± 40.9 [288,338,369] | 328.7 ± 61.8 [343,261,382] |
+| of those, never receipted | AI_READI | – [–,–,–] | – [–,–,–] | – [–,–,–] | – [–,–,–] | 214.7 ± 35.1 [212,181,251] | 237.0 ± 79.9 [321,228,162] | 193.0 ± 56.5 [192,250,137] |
+| of those, never receipted | CHORUS | – [–,–,–] | – [–,–,–] | – [–,–,–] | – [–,–,–] | 104.5 ± 10.6 [97,112] | 95.3 ± 13.5 [95,82,109] | 134.0 ± 20.4 [127,157,118] |
+| of those, never receipted | CM4AI | – [–,–,–] | – [–,–,–] | – [–,–,–] | – [–,–,–] | – | 234.0 ± 33.5 [259,247,196] | 119.7 ± 31.4 [95,109,155] |
+| of those, never receipted | VOICE | – [–,–,–] | – [–,–,–] | – [–,–,–] | – [–,–,–] | – | 172.7 ± 30.0 [164,206,148] | 131.7 ± 23.8 [116,120,159] |
+| of those, added after the receipt | AI_READI | – [–,–,–] | – [–,–,–] | – [–,–,–] | – [–,–,–] | 96.0 ± 114.6 [22,38,228] | 24.3 ± 25.8 [17,3,53] | 5.3 ± 3.8 [8,7,1] |
+| of those, added after the receipt | CHORUS | – [–,–,–] | – [–,–,–] | – [–,–,–] | – [–,–,–] | 7.0 ± 9.9 [14,0] | 10.0 ± 7.2 [16,12,2] | 5.0 ± 3.0 [5,8,2] |
+| of those, added after the receipt | CM4AI | – [–,–,–] | – [–,–,–] | – [–,–,–] | – [–,–,–] | – | 19.0 ± 8.7 [29,13,15] | 3.7 ± 4.0 [0,3,8] |
+| of those, added after the receipt | VOICE | – [–,–,–] | – [–,–,–] | – [–,–,–] | – [–,–,–] | – | 47.7 ± 51.5 [3,36,104] | 2.3 ± 2.1 [4,0,3] |
 | GC label variants (reported) | AI_READI | 0.0 ± 0.0 [0,0,0] worst 0 | 0.3 ± 0.6 [1,0,0] | 0.0 ± 0.0 [0,0,0] | 0.7 ± 1.2 [2,0,0] | 0.0 ± 0.0 [0,0,0] | 0.7 ± 1.2 [0,2,0] | 0.0 ± 0.0 [0,0,0] |
 | GC label variants (reported) | CHORUS | 0.0 ± 0.0 [0,0,0] worst 0 | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] |
 | GC label variants (reported) | CM4AI | 0.0 ± 0.0 [0,0,0] worst 0 | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | – | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] |
 | GC label variants (reported) | VOICE | 59.0 ± 3.5 [57,57,63] worst 63 | 65.7 ± 11.0 [53,71,73] | 36.7 ± 5.8 [40,40,30] | 52.7 ± 21.9 [60,70,28] | – | 48.3 ± 7.6 [55,50,40] | 51.3 ± 11.1 [41,50,63] |
 
 Cells are mean ± sample SD over the *measured* replicates, with every replicate value in brackets; n is 3 unless stated. The baseline arm adds its per-project worst, the value the canary gate holds runs against. Read the SD as a spread, not a confidence interval: with n = 3 and one outlier (e.g. [3,14,130]) the SD is that outlier, and the bracketed values are the better summary. ᵘ = unmeasured — the report-claims checker parsed zero claims (#684); unmeasured values are excluded from the mean and n, and a cell with no measured replicate shows only its raw values.
+
+## Receipt coverage and attribution, pooled per arm (#831, #902)
+
+| arm | records | receiptable slots | with a receipt | never receipted | added after the receipt | snippets | not in the chunk cited |
+|---|---|---|---|---|---|---|---|
+| v6 agentic (2026-08-28) | 12 | 5846 | 2820/5846 = 48.2% | – | – | 3400 | 0/3400 = 0.0% |
+| v7 API canaries (2026-08-28…d, exploratory) | 5 | 1762 | 607/1762 = 34.4% | 853/1762 = 48.4% | 302/1762 = 17.1% | 859 | 33/859 = 3.8% |
+| v7 API production (2026-09-01) | 12 | 3905 | 1385/3905 = 35.5% | 2217/3905 = 56.8% | 303/3905 = 7.8% | 1733 | 132/1733 = 7.6% |
+| v8 API production (2026-09-04f/g) | 12 | 4094 | 2310/4094 = 56.4% | 1735/4094 = 42.4% | 49/4094 = 1.2% | 2556 | 153/2556 = 6.0% |
+
+Coverage **degree**, which the twelve v7 production reviewers read as a rule-15 violation on eight records and which is a property of the arm rather than of any one record (#902). The denominator is receiptable populated leaves: an entry receipt covers many leaves at once, so this is the strict leaf reading, and the exempt slots (runner-set, minted on an identifier the record carries, commentary) are outside it. Zero `not_in_bundle` verdicts were returned anywhere on the v7 production arm, so what these rows measure is how much of a record the receipt reaches, not whether its values are supported.
+
+The never/added split (#807) says which half of the gap the protocol could have closed: a leaf that resolves in the phase-1 snapshot was there to be receipted and was not, while one the snapshot does not carry was added by reconciliation or repair, which have no receipt route at all (#742). It needs that snapshot, so an agentic arm shows `–` and not 0.
+
+`not in the chunk cited` is attribution precision, reported and never gated (#763): the snippet is verbatim in the bundle, in a chunk other than the one the receipt names. It is an API-path number — the agentic protocol names chunk ids from the manifest it read, the API path infers them from `[cNNN]` marker lines in the cached bundle, and the marker side was checked byte-for-byte on the CM4AI canary and found correct (#873), so what the rate measures is the model mis-citing, usually one chunk early.
 
 ## Per-metric caveats (attached, not footnoted elsewhere)
 
@@ -82,9 +113,13 @@ Cells are mean ± sample SD over the *measured* replicates, with every replicate
 - **minted fragments (reported)** — record block. reported-only; every fragment hangs off an attested base wherever ungrounded is 0. Appetite varies 3→130 within one project (#685).
 - **chunks unreviewed** — record block. receipts (#708): manifest chunks with no receipt entry. Only arms whose procedure wrote a coverage receipt carry a value; earlier arms are –, not 0.
 - **snippets unverified** — record block. receipts (#708): mismatched + unchecked snippets; same caveat.
-- **snippets not in the chunk cited** — record block. receipts (#763): verbatim in the bundle but not in the chunk cited — attribution precision, reported not gated; 3.8% on the five v7 API canaries (33/859).
+- **snippets not in the chunk cited** — record block. receipts (#763): verbatim in the bundle but not in the chunk cited — attribution precision, reported not gated. Read it against `snippets checked` on the row below, never as a bare count; the pooled rates are in the receipt-coverage section.
+- **snippets checked** — record block. receipts (#708): the denominator for `snippets not in the chunk cited` and for unverified — the receipt's own snippet count, which is a property of how much the model quoted, not of the record.
 - **populated leaves (full record)** — record block. count of populated leaf values in the full record (receipts.populated_leaves); informational — the v6 plan's prediction 5 is that it does not fall.
-- **slots without a receipt** — record block. receipts (#708): receiptable populated leaves with no receipt; exempt slots (runner-set, minted, commentary) are outside the denominator.
+- **slots without a receipt** — record block. receipts (#708): receiptable populated leaves with no receipt; exempt slots (runner-set, minted, commentary) are outside the denominator. `receiptable` on the row below is that denominator, so coverage degree is readable here rather than inferable (#902).
+- **receiptable slots (denominator)** — record block. receipts (#708): populated leaves that are not exempt — the denominator every receipt count on these rows shares. It varies two- to three-fold between records of one arm, so a bare without-a-receipt count compares nothing (#902).
+- **of those, never receipted** — record block. receipts (#807): the receiptless leaf resolved in the phase-1 snapshot, so the model never receipted it. Needs that snapshot — the API path writes one and the agentic path does not, so an agentic arm is – here, not 0 (#899).
+- **of those, added after the receipt** — record block. receipts (#807): the receiptless leaf is absent from the phase-1 snapshot, so reconciliation or repair added it after the receipt was written and no receipt route existed (#742). Same snapshot caveat.
 - **GC label variants (reported)** — live recompute, current instrument. reported-only; counted against the manifest naming declaration decided 2026-08-22, so anachronistic for the v4 arm and same-day for 22c. For VOICE the count is the dataset's own PhysioNet title, lawful under the proper-noun carve-out (#674).
 
 ## Rubric10-semantic scores (every evaluated replicate; earlier arms have their canonical only)
