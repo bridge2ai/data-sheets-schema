@@ -430,7 +430,12 @@ report_claims:
   prose_retention_claims: 1
   removals_unrecorded: []
   removals_unrecorded_count: 0
-  instrument: 'v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
+  instrument: 'v6 (#994): a `both` row''s path is judged step by step against the
+    core class''s declared ranges rather than at its root alone, a `[*]` wildcard
+    is a step''s subscript rather than a step of its own, and `claims_core_cannot_hold`
+    counts only a path the core cannot hold: one that descends through a scalar violates
+    the core schema''s declared range, carries its own cause and is excluded from
+    that count; v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
     snapshot carried that the final full record does not, with no `removed` row or
     removal sentence naming it, is `removal_not_recorded`; a prose retention claim
     (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is
