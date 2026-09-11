@@ -417,24 +417,26 @@ report_claims:
   prose_retention_claims: 2
   removals_unrecorded: []
   removals_unrecorded_count: 0
-  instrument: 'v6 (#994): a `both` row''s path is judged step by step against the
-    core class''s declared ranges rather than at its root alone, a `[*]` wildcard
-    is a step''s subscript rather than a step of its own, and `claims_core_cannot_hold`
-    counts only a path the core cannot hold: one that descends through a scalar violates
-    the core schema''s declared range, carries its own cause and is excluded from
-    that count; v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
-    snapshot carried that the final full record does not, with no `removed` row or
-    removal sentence naming it, is `removal_not_recorded`; a prose retention claim
-    (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is
-    read like a retained row; v4 (#1122): `rows_by_record` tallies the dispositions
-    rows by their record column — `full`, `core`, `both`, `either` for an empty cell,
-    `no_record_column` for a table with no such column, `invalid` for anything else
-    — so a `both` row wrongly flipped to `full`, which the gate cannot see (a `full`
-    row resolves against the full record only), is countable from the block; v3 (#1022,
-    #1046): a schema claim that names its own scope — the core schema, the full schema,
-    a class — is resolved against that scope only, not against every class; v2 (#990):
-    a finding on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
-    counts them'
+  instrument: 'v7 (#1089, #1194, #1196): attributed schema claims, exact nested paths
+    and record scopes, table positions, mixed list counts and removal suppression
+    are distinguished; phase-1 snapshot bytes are pinned; v6 (#994): a `both` row''s
+    path is judged step by step against the core class''s declared ranges rather than
+    at its root alone, a `[*]` wildcard is a step''s subscript rather than a step
+    of its own, and `claims_core_cannot_hold` counts only a path the core cannot hold:
+    one that descends through a scalar violates the core schema''s declared range,
+    carries its own cause and is excluded from that count; v5 (#1054): with the phase-1
+    snapshot on disk, a top-level slot the snapshot carried that the final full record
+    does not, with no `removed` row or removal sentence naming it, is `removal_not_recorded`;
+    a prose retention claim (`remains in`, `stays in`, `is kept in`, `is retained
+    in` a backticked path) is read like a retained row; v4 (#1122): `rows_by_record`
+    tallies the dispositions rows by their record column — `full`, `core`, `both`,
+    `either` for an empty cell, `no_record_column` for a table with no such column,
+    `invalid` for anything else — so a `both` row wrongly flipped to `full`, which
+    the gate cannot see (a `full` row resolves against the full record only), is countable
+    from the block; v3 (#1022, #1046): a schema claim that names its own scope — the
+    core schema, the full schema, a class — is resolved against that scope only, not
+    against every class; v2 (#990): a finding on a `both` row names when the core
+    class declares no such slot; `claims_core_cannot_hold` counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_reconciliation.md
@@ -445,6 +447,10 @@ report_claims:
     core:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d_core.yaml
       md5: 90bdb1a588098ba32161094f8ed60a5d
+    phase1_snapshot:
+      path: data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_full.yaml
+      sha256: f9f5194c69cd88e25c89b2581c648a27ebd5ff3798617971148510f6a5ef6f3b
+      state: usable
   schema:
     full_sha256: ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da
     core_sha256: 7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449
@@ -1340,6 +1346,9 @@ canary:
   - metric: receipt findings
     run: 0
     baseline_worst: 0
+  - metric: duplicate keys
+    run: 0
+    baseline_worst: 0
   blind: []
   unbaselined: []
   regressions:
@@ -1347,7 +1356,7 @@ canary:
   basis: 'verdict from this record''s own check blocks against the per-project worst
     of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions, including
     the #684 report basis ({''measured'': 2, ''vacuous'': 1, ''unchecked'': 0})'
-  recorded_at: '2026-09-10T08:43:05+00:00'
+  recorded_at: '2026-09-11T20:57:54+00:00'
   recorded_by: d4d api verdict (offline)
   disposition: 'regressed on identifier form only; the fix (a write-time CURIE normaliser)
     is filed as #974 and deferred by the plan owner on 2026-09-04. Every receipt metric
@@ -1357,21 +1366,7 @@ canary:
     (the dataset DOI under `id`) and its 15 minted fragments; the value resolves and
     nothing in the record is wrong. No fill launched; whether the fill proceeds on
     this basis is the plan owner''s call.'
-  readings:
-    note: registered v8 predictions this record measures on its own (plan, 'Predictions,
-      registered'); n=1, none gated
-    prediction_2_grant_number: populated 0 (the 2026-09-04 rep1 populated 2 of 3)
-      — unfavourable
-    prediction_5_value_changed_after_receipt: 59 of 164 receipt paths = 36.0%, against
-      a predicted <10% (v7 CM4AI 17.0/17.4/7.9%; the 2026-09-04 rep1 28.3%) — unfavourable
-    prediction_6_receipt_coverage: 288 of 407 receiptable slots = 70.8%, against a
-      predicted >40% — favourable
-    prediction_9_full_output_tokens: '30,328 against the v7 CM4AI accepted-attempt
-      mean of 41,370: -26.7%, outside the ±10% band — unfavourable'
-    mechanisms: 'full_readdress: 1 entry dropped (`subject`, the same mis-addressing
-      as the 2026-09-04 rep1), 0 unresolved, receipt findings 0; report_regate: 40
-      claims checked, 1 contradiction before, 0 after; one repair round (14 findings).'
-  prior_verdict:
+  disposition_basis:
     status: regressed
     rows:
     - metric: pair errors
@@ -1417,13 +1412,133 @@ canary:
     unbaselined: []
     regressions:
     - 'resolver URLs in identifier slots: 16 against a baseline worst of 0'
-    basis: 'offline write of the verdict the batch gate printed at 2026-09-04T06:4xZ
-      and stopped on (`d4d api batch ... --canary-baseline 2026-09-01_claude-opus-5-api-generic-v7`;
-      the gate writes no block), recomputed from this record''s own check blocks against
-      the same baseline with the gate''s functions, including the #684 report basis
-      (v7 CM4AI: 3 vacuous, 0 measured → floor 0).'
     recorded_at: '2026-09-04T07:39:46+00:00'
-    recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-04
+    annotation_sha256: 4b7dc0d9e13b69aebc8f0f9ec770c3eb581802e7e281e3725decd4a5fda1fa32
+    stale: true
+    changed_fields:
+    - rows
+  readings:
+    note: registered v8 predictions this record measures on its own (plan, 'Predictions,
+      registered'); n=1, none gated
+    prediction_2_grant_number: populated 0 (the 2026-09-04 rep1 populated 2 of 3)
+      — unfavourable
+    prediction_5_value_changed_after_receipt: 59 of 164 receipt paths = 36.0%, against
+      a predicted <10% (v7 CM4AI 17.0/17.4/7.9%; the 2026-09-04 rep1 28.3%) — unfavourable
+    prediction_6_receipt_coverage: 288 of 407 receiptable slots = 70.8%, against a
+      predicted >40% — favourable
+    prediction_9_full_output_tokens: '30,328 against the v7 CM4AI accepted-attempt
+      mean of 41,370: -26.7%, outside the ±10% band — unfavourable'
+    mechanisms: 'full_readdress: 1 entry dropped (`subject`, the same mis-addressing
+      as the 2026-09-04 rep1), 0 unresolved, receipt findings 0; report_regate: 40
+      claims checked, 1 contradiction before, 0 after; one repair round (14 findings).'
+  readings_basis:
+    status: regressed
+    rows:
+    - metric: pair errors
+      run: 0
+      baseline_worst: 0
+    - metric: report findings
+      run: 0
+      baseline_worst: 0
+      baseline_basis: 'floor 0: 3 baseline replicate(s) ran the report check and read
+        no claim, none measured one (#684)'
+    - metric: ungrounded identifiers
+      run: 0
+      baseline_worst: 0
+    - metric: resolver URLs in identifier slots
+      run: 16
+      baseline_worst: 0
+      regressed: true
+    - metric: organisational fragments
+      run: 0
+      baseline_worst: 0
+    - metric: undeclared prefixes
+      run: 0
+      baseline_worst: 0
+    - metric: British spellings
+      run: 2
+      baseline_worst: 2
+    - metric: chunks unreviewed
+      run: 0
+      baseline_worst: 0
+    - metric: snippets unverified
+      run: 0
+      baseline_worst: 0
+    - metric: addressing slips over tolerance
+      run: 0
+      baseline_worst: 0
+    - metric: receipts vacuous
+      run: 0
+      baseline_worst: 0
+    - metric: receipt findings
+      run: 0
+      baseline_worst: 0
+    blind: []
+    unbaselined: []
+    regressions:
+    - 'resolver URLs in identifier slots: 16 against a baseline worst of 0'
+    recorded_at: '2026-09-04T07:39:46+00:00'
+    annotation_sha256: 11a3c26acc463cb06f06e8c08925fceda9f720a807f7e01ea74e607531286bf3
+    stale: true
+    changed_fields:
+    - rows
+  prior_verdict:
+    status: regressed
+    rows:
+    - metric: pair errors
+      run: 0
+      baseline_worst: 0
+    - metric: report findings
+      run: 0
+      baseline_worst: 0
+    - metric: ungrounded identifiers
+      run: 0
+      baseline_worst: 0
+    - metric: resolver URLs in identifier slots
+      run: 16
+      baseline_worst: 0
+      regressed: true
+    - metric: organisational fragments
+      run: 0
+      baseline_worst: 0
+    - metric: undeclared prefixes
+      run: 0
+      baseline_worst: 0
+    - metric: British spellings
+      run: 2
+      baseline_worst: 2
+    - metric: chunks unreviewed
+      run: 0
+      baseline_worst: 0
+    - metric: snippets unverified
+      run: 0
+      baseline_worst: 0
+    - metric: addressing slips over tolerance
+      run: 0
+      baseline_worst: 0
+    - metric: receipts vacuous
+      run: 0
+      baseline_worst: 0
+    - metric: receipt findings
+      run: 0
+      baseline_worst: 0
+    blind: []
+    unbaselined: []
+    regressions:
+    - 'resolver URLs in identifier slots: 16 against a baseline worst of 0'
+    basis: 'verdict from this record''s own check blocks against the per-project worst
+      of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions, including
+      the #684 report basis ({''measured'': 2, ''vacuous'': 1, ''unchecked'': 0})'
+    recorded_at: '2026-09-10T08:43:05+00:00'
+    recorded_by: d4d api verdict (offline)
+    disposition: 'regressed on identifier form only; the fix (a write-time CURIE normaliser)
+      is filed as #974 and deferred by the plan owner on 2026-09-04. Every receipt
+      metric passed: the re-addressing turn (#952) dropped the one mis-addressed entry
+      and the report gate (#929) regenerated the one contradiction to zero — both
+      mechanisms fired for the first time on a live run. The 16 resolver URLs are
+      one identifier (the dataset DOI under `id`) and its 15 minted fragments; the
+      value resolves and nothing in the record is wrong. No fill launched; whether
+      the fill proceeds on this basis is the plan owner''s call.'
     readings:
       note: registered v8 predictions this record measures on its own (plan, 'Predictions,
         registered'); n=1, none gated
@@ -1438,11 +1553,80 @@ canary:
       mechanisms: 'full_readdress: 1 entry dropped (`subject`, the same mis-addressing
         as the 2026-09-04 rep1), 0 unresolved, receipt findings 0; report_regate:
         40 claims checked, 1 contradiction before, 0 after; one repair round (14 findings).'
-    disposition: 'regressed on identifier form only; the fix (a write-time CURIE normaliser)
-      is filed as #974 and deferred by the plan owner on 2026-09-04. Every receipt
-      metric passed: the re-addressing turn (#952) dropped the one mis-addressed entry
-      and the report gate (#929) regenerated the one contradiction to zero — both
-      mechanisms fired for the first time on a live run. The 16 resolver URLs are
-      one identifier (the dataset DOI under `id`) and its 15 minted fragments; the
-      value resolves and nothing in the record is wrong. No fill launched; whether
-      the fill proceeds on this basis is the plan owner''s call.'
+    prior_verdict:
+      status: regressed
+      rows:
+      - metric: pair errors
+        run: 0
+        baseline_worst: 0
+      - metric: report findings
+        run: 0
+        baseline_worst: 0
+        baseline_basis: 'floor 0: 3 baseline replicate(s) ran the report check and
+          read no claim, none measured one (#684)'
+      - metric: ungrounded identifiers
+        run: 0
+        baseline_worst: 0
+      - metric: resolver URLs in identifier slots
+        run: 16
+        baseline_worst: 0
+        regressed: true
+      - metric: organisational fragments
+        run: 0
+        baseline_worst: 0
+      - metric: undeclared prefixes
+        run: 0
+        baseline_worst: 0
+      - metric: British spellings
+        run: 2
+        baseline_worst: 2
+      - metric: chunks unreviewed
+        run: 0
+        baseline_worst: 0
+      - metric: snippets unverified
+        run: 0
+        baseline_worst: 0
+      - metric: addressing slips over tolerance
+        run: 0
+        baseline_worst: 0
+      - metric: receipts vacuous
+        run: 0
+        baseline_worst: 0
+      - metric: receipt findings
+        run: 0
+        baseline_worst: 0
+      blind: []
+      unbaselined: []
+      regressions:
+      - 'resolver URLs in identifier slots: 16 against a baseline worst of 0'
+      basis: 'offline write of the verdict the batch gate printed at 2026-09-04T06:4xZ
+        and stopped on (`d4d api batch ... --canary-baseline 2026-09-01_claude-opus-5-api-generic-v7`;
+        the gate writes no block), recomputed from this record''s own check blocks
+        against the same baseline with the gate''s functions, including the #684 report
+        basis (v7 CM4AI: 3 vacuous, 0 measured → floor 0).'
+      recorded_at: '2026-09-04T07:39:46+00:00'
+      recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-04
+      readings:
+        note: registered v8 predictions this record measures on its own (plan, 'Predictions,
+          registered'); n=1, none gated
+        prediction_2_grant_number: populated 0 (the 2026-09-04 rep1 populated 2 of
+          3) — unfavourable
+        prediction_5_value_changed_after_receipt: 59 of 164 receipt paths = 36.0%,
+          against a predicted <10% (v7 CM4AI 17.0/17.4/7.9%; the 2026-09-04 rep1 28.3%)
+          — unfavourable
+        prediction_6_receipt_coverage: 288 of 407 receiptable slots = 70.8%, against
+          a predicted >40% — favourable
+        prediction_9_full_output_tokens: '30,328 against the v7 CM4AI accepted-attempt
+          mean of 41,370: -26.7%, outside the ±10% band — unfavourable'
+        mechanisms: 'full_readdress: 1 entry dropped (`subject`, the same mis-addressing
+          as the 2026-09-04 rep1), 0 unresolved, receipt findings 0; report_regate:
+          40 claims checked, 1 contradiction before, 0 after; one repair round (14
+          findings).'
+      disposition: 'regressed on identifier form only; the fix (a write-time CURIE
+        normaliser) is filed as #974 and deferred by the plan owner on 2026-09-04.
+        Every receipt metric passed: the re-addressing turn (#952) dropped the one
+        mis-addressed entry and the report gate (#929) regenerated the one contradiction
+        to zero — both mechanisms fired for the first time on a live run. The 16 resolver
+        URLs are one identifier (the dataset DOI under `id`) and its 15 minted fragments;
+        the value resolves and nothing in the record is wrong. No fill launched; whether
+        the fill proceeds on this basis is the plan owner''s call.'

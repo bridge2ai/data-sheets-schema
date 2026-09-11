@@ -6,6 +6,7 @@ those files carries a header comment `yaml.safe_dump` would silently drop, and
 a backfilled verdict makes a claim the run itself never made.
 """
 
+import hashlib
 import unittest
 from pathlib import Path
 
@@ -113,7 +114,7 @@ class CorpusTest(unittest.TestCase):
         self.assertEqual(set(rec["pair_consistency"]["schema"]),
                          {"full_sha256", "core_sha256"})
 
-    def test_the_computation_itself_pins_all_three(self):
+    def test_the_computation_itself_pins_all_inputs(self):
         """The code, not the records it already wrote.
 
         The two tests below read blocks off disk, so they would keep passing
@@ -127,10 +128,13 @@ class CorpusTest(unittest.TestCase):
         if not p.exists():
             self.skipTest(f"{p} not present in this checkout")
         block = compute(p, only={"report_claims"})["report_claims"]
-        self.assertEqual(set(block["artifacts"]), {"report", "full", "core"})
+        self.assertEqual(set(block["artifacts"]), {"report", "full", "core", "phase1_snapshot"})
         self.assertEqual(set(block["schema"]), {"full_sha256", "core_sha256"})
         self.assertTrue(block["artifacts"]["full"]["md5"])
         self.assertTrue(block["artifacts"]["core"]["md5"])
+        snapshot = block["artifacts"]["phase1_snapshot"]
+        self.assertEqual(snapshot["state"], "usable")
+        self.assertEqual(snapshot["sha256"], hashlib.sha256(Path(snapshot["path"]).read_bytes()).hexdigest())
 
     def test_a_backfilled_report_verdict_pins_what_it_read(self):
         """The same lesson as the pair verdict above, learned twice (#1085).
@@ -151,13 +155,13 @@ class CorpusTest(unittest.TestCase):
         if block.get("recorded_by") != RECORDED_BY:
             self.skipTest("this record's block was not written by the backfill")
         self.assertEqual(set(block["schema"]), {"full_sha256", "core_sha256"})
-        self.assertEqual(set(block["artifacts"]), {"report", "full", "core"})
+        self.assertEqual(set(block["artifacts"]), {"report", "full", "core", "phase1_snapshot"})
         for name in ("report", "full", "core"):
             with self.subTest(artifact=name):
                 self.assertIn("md5", block["artifacts"][name])
                 self.assertIn("path", block["artifacts"][name])
 
-    def test_every_backfilled_report_block_in_the_corpus_pins_all_three(self):
+    def test_every_backfilled_report_block_in_the_corpus_pins_all_inputs(self):
         """Not one record: the whole recompute. An `md5: null` is allowed and
         says the file was absent; a missing key is the defect."""
         thin = []
@@ -166,10 +170,15 @@ class CorpusTest(unittest.TestCase):
             block = rec.get("report_claims") or {}
             if block.get("recorded_by") != RECORDED_BY or not block.get("checked"):
                 continue
-            if (set(block.get("artifacts") or {}) != {"report", "full", "core"}
+            if (set(block.get("artifacts") or {}) != {"report", "full", "core", "phase1_snapshot"}
                     or set(block.get("schema") or {}) != {"full_sha256",
                                                           "core_sha256"}):
                 thin.append(str(p))
+            snapshot = (block.get("artifacts") or {}).get("phase1_snapshot")
+            if block.get("snapshot_checked"):
+                if (not snapshot or snapshot.get("state") != "usable"
+                        or snapshot.get("sha256") != hashlib.sha256(Path(snapshot["path"]).read_bytes()).hexdigest()):
+                    thin.append(f"{p}: missing or stale phase-1 snapshot pin")
         if not thin and not list(self.BASE.rglob("*_provenance.yaml")):
             self.skipTest("no records in this checkout")
         self.assertEqual(thin, [])

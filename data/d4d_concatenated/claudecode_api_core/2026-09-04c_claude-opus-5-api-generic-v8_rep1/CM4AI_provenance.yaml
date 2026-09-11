@@ -359,24 +359,26 @@ report_claims:
   prose_retention_claims: 0
   removals_unrecorded: []
   removals_unrecorded_count: 0
-  instrument: 'v6 (#994): a `both` row''s path is judged step by step against the
-    core class''s declared ranges rather than at its root alone, a `[*]` wildcard
-    is a step''s subscript rather than a step of its own, and `claims_core_cannot_hold`
-    counts only a path the core cannot hold: one that descends through a scalar violates
-    the core schema''s declared range, carries its own cause and is excluded from
-    that count; v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
-    snapshot carried that the final full record does not, with no `removed` row or
-    removal sentence naming it, is `removal_not_recorded`; a prose retention claim
-    (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is
-    read like a retained row; v4 (#1122): `rows_by_record` tallies the dispositions
-    rows by their record column — `full`, `core`, `both`, `either` for an empty cell,
-    `no_record_column` for a table with no such column, `invalid` for anything else
-    — so a `both` row wrongly flipped to `full`, which the gate cannot see (a `full`
-    row resolves against the full record only), is countable from the block; v3 (#1022,
-    #1046): a schema claim that names its own scope — the core schema, the full schema,
-    a class — is resolved against that scope only, not against every class; v2 (#990):
-    a finding on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
-    counts them'
+  instrument: 'v7 (#1089, #1194, #1196): attributed schema claims, exact nested paths
+    and record scopes, table positions, mixed list counts and removal suppression
+    are distinguished; phase-1 snapshot bytes are pinned; v6 (#994): a `both` row''s
+    path is judged step by step against the core class''s declared ranges rather than
+    at its root alone, a `[*]` wildcard is a step''s subscript rather than a step
+    of its own, and `claims_core_cannot_hold` counts only a path the core cannot hold:
+    one that descends through a scalar violates the core schema''s declared range,
+    carries its own cause and is excluded from that count; v5 (#1054): with the phase-1
+    snapshot on disk, a top-level slot the snapshot carried that the final full record
+    does not, with no `removed` row or removal sentence naming it, is `removal_not_recorded`;
+    a prose retention claim (`remains in`, `stays in`, `is kept in`, `is retained
+    in` a backticked path) is read like a retained row; v4 (#1122): `rows_by_record`
+    tallies the dispositions rows by their record column — `full`, `core`, `both`,
+    `either` for an empty cell, `no_record_column` for a table with no such column,
+    `invalid` for anything else — so a `both` row wrongly flipped to `full`, which
+    the gate cannot see (a `full` row resolves against the full record only), is countable
+    from the block; v3 (#1022, #1046): a schema claim that names its own scope — the
+    core schema, the full schema, a class — is resolved against that scope only, not
+    against every class; v2 (#990): a finding on a `both` row names when the core
+    class declares no such slot; `claims_core_cannot_hold` counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04c_claude-opus-5-api-generic-v8_rep1/CM4AI_reconciliation.md
@@ -387,6 +389,10 @@ report_claims:
     core:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04c_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d_core.yaml
       md5: 1e04763ce5aac90b198c9a7e7e4ec549
+    phase1_snapshot:
+      path: data/d4d_concatenated/claudecode_api_core/2026-09-04c_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_full.yaml
+      sha256: 224cebc4ab6139afb37148fb37b324f02883b9afbc5cabb19d70d1453fdff172
+      state: usable
   schema:
     full_sha256: ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da
     core_sha256: 7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449
@@ -899,13 +905,16 @@ canary:
   - metric: receipt findings
     run: 0
     baseline_worst: 0
+  - metric: duplicate keys
+    run: 0
+    baseline_worst: 0
   blind: []
   unbaselined: []
   regressions: []
   basis: 'verdict from this record''s own check blocks against the per-project worst
     of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions, including
     the #684 report basis ({''measured'': 2, ''vacuous'': 1, ''unchecked'': 0})'
-  recorded_at: '2026-09-10T08:43:05+00:00'
+  recorded_at: '2026-09-11T20:57:55+00:00'
   recorded_by: d4d api verdict (offline)
   disposition: 'OK under instrument v3, and **not retained for the fill**: #981''s
     mechanism and R5 (pin rotated) landed after this run, and the production rule
@@ -913,21 +922,7 @@ canary:
     the instrument question and stands as evidence of the third package; CM4AI runs
     a fourth time under the final package before the fill, after VOICE, AI_READI and
     CHORUS.'
-  readings:
-    note: registered v8 predictions this record measures on its own; n=1, none gated
-    prediction_2_grant_number: 'populated 0 (2026-09-04 rep1: 2; 2026-09-04b: 0)'
-    prediction_5_value_changed_after_receipt: 2 of 153 receipt paths = 1.3%, against
-      a predicted <10% (v7 CM4AI 17.0/17.4/7.9%; earlier v8 runs 28.3%, 36.0%)
-    prediction_6_receipt_coverage: 292 of 415 = 70.4%, against a predicted >40%
-    prediction_9_full_output_tokens: '80,319 against the v7 CM4AI accepted-attempt
-      mean of 41,370: +94.1%'
-    mechanisms: 'full_readdress: not needed (every receipt slot resolved); report_regate:
-      9 claims checked, 1 contradiction before, 0 after (10 claims); normalise_identifier_form:
-      0 rewrites (the model wrote CURIEs); resolver URLs 0; British spellings 0.'
-    the regression: 'undeclared prefixes 6 under instrument v2, all `mailto:` — the
-      `id` of inlined contact persons (D1, #805 forces Person.id) written as mailto:<email>;
-      the v6 agentic CM4AI rep1 wrote two the same way. 0 under v3.'
-  prior_verdict:
+  disposition_basis:
     status: ok
     rows:
     - metric: pair errors
@@ -972,13 +967,126 @@ canary:
     unbaselined: []
     regressions: []
     recorded_at: '2026-09-04T16:58:45+00:00'
-    recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-04
-    basis: 'offline re-verdict after the undeclared-prefix instrument moved to v3
-      (#982: mailto excluded on a Person''s id), the form block recomputed under it
-      by `backfill-checks --blocks form --overwrite --execute` (6 → 0, the instrument
-      note carries the trail), against the same v7 production per-project worst the
-      batch used, with the #684 report basis. The prior verdict (regressed, instrument
-      v2) is kept below as prior_verdict, the #920 pattern.'
+    annotation_sha256: 392acaa64c31ccd0f5551633415b569fb395e45c0a59baf4e5a744fdb3e132fa
+    stale: true
+    changed_fields:
+    - rows
+  readings:
+    note: registered v8 predictions this record measures on its own; n=1, none gated
+    prediction_2_grant_number: 'populated 0 (2026-09-04 rep1: 2; 2026-09-04b: 0)'
+    prediction_5_value_changed_after_receipt: 2 of 153 receipt paths = 1.3%, against
+      a predicted <10% (v7 CM4AI 17.0/17.4/7.9%; earlier v8 runs 28.3%, 36.0%)
+    prediction_6_receipt_coverage: 292 of 415 = 70.4%, against a predicted >40%
+    prediction_9_full_output_tokens: '80,319 against the v7 CM4AI accepted-attempt
+      mean of 41,370: +94.1%'
+    mechanisms: 'full_readdress: not needed (every receipt slot resolved); report_regate:
+      9 claims checked, 1 contradiction before, 0 after (10 claims); normalise_identifier_form:
+      0 rewrites (the model wrote CURIEs); resolver URLs 0; British spellings 0.'
+    the regression: 'undeclared prefixes 6 under instrument v2, all `mailto:` — the
+      `id` of inlined contact persons (D1, #805 forces Person.id) written as mailto:<email>;
+      the v6 agentic CM4AI rep1 wrote two the same way. 0 under v3.'
+  readings_basis:
+    status: ok
+    rows:
+    - metric: pair errors
+      run: 0
+      baseline_worst: 0
+    - metric: report findings
+      run: 0
+      baseline_worst: 0
+      baseline_basis: 'floor 0: 3 baseline replicate(s) ran the report check and read
+        no claim, none measured one (#684)'
+    - metric: ungrounded identifiers
+      run: 0
+      baseline_worst: 0
+    - metric: resolver URLs in identifier slots
+      run: 0
+      baseline_worst: 0
+    - metric: organisational fragments
+      run: 0
+      baseline_worst: 0
+    - metric: undeclared prefixes
+      run: 0
+      baseline_worst: 0
+    - metric: British spellings
+      run: 0
+      baseline_worst: 2
+    - metric: chunks unreviewed
+      run: 0
+      baseline_worst: 0
+    - metric: snippets unverified
+      run: 0
+      baseline_worst: 0
+    - metric: addressing slips over tolerance
+      run: 0
+      baseline_worst: 0
+    - metric: receipts vacuous
+      run: 0
+      baseline_worst: 0
+    - metric: receipt findings
+      run: 0
+      baseline_worst: 0
+    blind: []
+    unbaselined: []
+    regressions: []
+    recorded_at: '2026-09-04T16:58:45+00:00'
+    annotation_sha256: 900d051d9317fa40b7ded32f88fc72aa3f23e4d864f0bfb268f1ffb3ebef7830
+    stale: true
+    changed_fields:
+    - rows
+  prior_verdict:
+    status: ok
+    rows:
+    - metric: pair errors
+      run: 0
+      baseline_worst: 0
+    - metric: report findings
+      run: 0
+      baseline_worst: 0
+    - metric: ungrounded identifiers
+      run: 0
+      baseline_worst: 0
+    - metric: resolver URLs in identifier slots
+      run: 0
+      baseline_worst: 0
+    - metric: organisational fragments
+      run: 0
+      baseline_worst: 0
+    - metric: undeclared prefixes
+      run: 0
+      baseline_worst: 0
+    - metric: British spellings
+      run: 0
+      baseline_worst: 2
+    - metric: chunks unreviewed
+      run: 0
+      baseline_worst: 0
+    - metric: snippets unverified
+      run: 0
+      baseline_worst: 0
+    - metric: addressing slips over tolerance
+      run: 0
+      baseline_worst: 0
+    - metric: receipts vacuous
+      run: 0
+      baseline_worst: 0
+    - metric: receipt findings
+      run: 0
+      baseline_worst: 0
+    blind: []
+    unbaselined: []
+    regressions: []
+    basis: 'verdict from this record''s own check blocks against the per-project worst
+      of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions, including
+      the #684 report basis ({''measured'': 2, ''vacuous'': 1, ''unchecked'': 0})'
+    recorded_at: '2026-09-10T08:43:05+00:00'
+    recorded_by: d4d api verdict (offline)
+    disposition: 'OK under instrument v3, and **not retained for the fill**: #981''s
+      mechanism and R5 (pin rotated) landed after this run, and the production rule
+      invalidates every earlier record of a changed condition (#984). This record
+      settles the instrument question and stands as evidence of the third package;
+      CM4AI runs a fourth time under the final package before the fill, after VOICE,
+      AI_READI and CHORUS.'
     readings:
       note: registered v8 predictions this record measures on its own; n=1, none gated
       prediction_2_grant_number: 'populated 0 (2026-09-04 rep1: 2; 2026-09-04b: 0)'
@@ -994,14 +1102,8 @@ canary:
         the `id` of inlined contact persons (D1, #805 forces Person.id) written as
         mailto:<email>; the v6 agentic CM4AI rep1 wrote two the same way. 0 under
         v3.'
-    disposition: 'OK under instrument v3, and **not retained for the fill**: #981''s
-      mechanism and R5 (pin rotated) landed after this run, and the production rule
-      invalidates every earlier record of a changed condition (#984). This record
-      settles the instrument question and stands as evidence of the third package;
-      CM4AI runs a fourth time under the final package before the fill, after VOICE,
-      AI_READI and CHORUS.'
     prior_verdict:
-      status: regressed
+      status: ok
       rows:
       - metric: pair errors
         run: 0
@@ -1021,9 +1123,8 @@ canary:
         run: 0
         baseline_worst: 0
       - metric: undeclared prefixes
-        run: 6
+        run: 0
         baseline_worst: 0
-        regressed: true
       - metric: British spellings
         run: 0
         baseline_worst: 2
@@ -1044,11 +1145,88 @@ canary:
         baseline_worst: 0
       blind: []
       unbaselined: []
-      regressions:
-      - 'undeclared prefixes: 6 against a baseline worst of 0'
-      basis: 'offline write of the verdict the batch gate printed at 2026-09-04T09:0xZ
-        and stopped on, recomputed from this record''s own check blocks against the
-        v7 production per-project worst with the gate''s functions, including the
-        #684 report basis (v7 CM4AI: 3 vacuous, 0 measured → floor 0).'
-      recorded_at: '2026-09-04T09:39:55+00:00'
+      regressions: []
+      recorded_at: '2026-09-04T16:58:45+00:00'
       recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-04
+      basis: 'offline re-verdict after the undeclared-prefix instrument moved to v3
+        (#982: mailto excluded on a Person''s id), the form block recomputed under
+        it by `backfill-checks --blocks form --overwrite --execute` (6 → 0, the instrument
+        note carries the trail), against the same v7 production per-project worst
+        the batch used, with the #684 report basis. The prior verdict (regressed,
+        instrument v2) is kept below as prior_verdict, the #920 pattern.'
+      readings:
+        note: registered v8 predictions this record measures on its own; n=1, none
+          gated
+        prediction_2_grant_number: 'populated 0 (2026-09-04 rep1: 2; 2026-09-04b:
+          0)'
+        prediction_5_value_changed_after_receipt: 2 of 153 receipt paths = 1.3%, against
+          a predicted <10% (v7 CM4AI 17.0/17.4/7.9%; earlier v8 runs 28.3%, 36.0%)
+        prediction_6_receipt_coverage: 292 of 415 = 70.4%, against a predicted >40%
+        prediction_9_full_output_tokens: '80,319 against the v7 CM4AI accepted-attempt
+          mean of 41,370: +94.1%'
+        mechanisms: 'full_readdress: not needed (every receipt slot resolved); report_regate:
+          9 claims checked, 1 contradiction before, 0 after (10 claims); normalise_identifier_form:
+          0 rewrites (the model wrote CURIEs); resolver URLs 0; British spellings
+          0.'
+        the regression: 'undeclared prefixes 6 under instrument v2, all `mailto:`
+          — the `id` of inlined contact persons (D1, #805 forces Person.id) written
+          as mailto:<email>; the v6 agentic CM4AI rep1 wrote two the same way. 0 under
+          v3.'
+      disposition: 'OK under instrument v3, and **not retained for the fill**: #981''s
+        mechanism and R5 (pin rotated) landed after this run, and the production rule
+        invalidates every earlier record of a changed condition (#984). This record
+        settles the instrument question and stands as evidence of the third package;
+        CM4AI runs a fourth time under the final package before the fill, after VOICE,
+        AI_READI and CHORUS.'
+      prior_verdict:
+        status: regressed
+        rows:
+        - metric: pair errors
+          run: 0
+          baseline_worst: 0
+        - metric: report findings
+          run: 0
+          baseline_worst: 0
+          baseline_basis: 'floor 0: 3 baseline replicate(s) ran the report check and
+            read no claim, none measured one (#684)'
+        - metric: ungrounded identifiers
+          run: 0
+          baseline_worst: 0
+        - metric: resolver URLs in identifier slots
+          run: 0
+          baseline_worst: 0
+        - metric: organisational fragments
+          run: 0
+          baseline_worst: 0
+        - metric: undeclared prefixes
+          run: 6
+          baseline_worst: 0
+          regressed: true
+        - metric: British spellings
+          run: 0
+          baseline_worst: 2
+        - metric: chunks unreviewed
+          run: 0
+          baseline_worst: 0
+        - metric: snippets unverified
+          run: 0
+          baseline_worst: 0
+        - metric: addressing slips over tolerance
+          run: 0
+          baseline_worst: 0
+        - metric: receipts vacuous
+          run: 0
+          baseline_worst: 0
+        - metric: receipt findings
+          run: 0
+          baseline_worst: 0
+        blind: []
+        unbaselined: []
+        regressions:
+        - 'undeclared prefixes: 6 against a baseline worst of 0'
+        basis: 'offline write of the verdict the batch gate printed at 2026-09-04T09:0xZ
+          and stopped on, recomputed from this record''s own check blocks against
+          the v7 production per-project worst with the gate''s functions, including
+          the #684 report basis (v7 CM4AI: 3 vacuous, 0 measured → floor 0).'
+        recorded_at: '2026-09-04T09:39:55+00:00'
+        recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-04

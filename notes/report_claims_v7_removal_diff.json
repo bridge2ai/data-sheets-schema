@@ -1,0 +1,362 @@
+{
+  "basis": "Compare removal suppression before/after a parser change (#1196).\n\nUse a saved report_claims.py as --baseline-source. Each report is tested\nagainst a synthetic snapshot containing every slot it names, followed by\nempty records. Thus a name that suppresses a hypothetical removal is visible\neven when the real corpus has not dropped that slot. This calls the actual\nchecker on both sides; it does not reimplement its clause parsing.",
+  "baseline_source_sha256": "2bd19b0f2d37b0a35422b0f77d30a77f0c57731ee332844317d6884167882007",
+  "before_instrument": "v6 (#994): a `both` row's path is judged step by step against the core class's declared ranges rather than at its root alone, a `[*]` wildcard is a step's subscript rather than a step of its own, and `claims_core_cannot_hold` counts only a path the core cannot hold: one that descends through a scalar violates the core schema's declared range, carries its own cause and is excluded from that count; v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the snapshot carried that the final full record does not, with no `removed` row or removal sentence naming it, is `removal_not_recorded`; a prose retention claim (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is read like a retained row; v4 (#1122): `rows_by_record` tallies the dispositions rows by their record column \u2014 `full`, `core`, `both`, `either` for an empty cell, `no_record_column` for a table with no such column, `invalid` for anything else \u2014 so a `both` row wrongly flipped to `full`, which the gate cannot see (a `full` row resolves against the full record only), is countable from the block; v3 (#1022, #1046): a schema claim that names its own scope \u2014 the core schema, the full schema, a class \u2014 is resolved against that scope only, not against every class; v2 (#990): a finding on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold` counts them",
+  "after_instrument": "v7 (#1089, #1194, #1196): attributed schema claims, exact nested paths and record scopes, table positions, mixed list counts and removal suppression are distinguished; phase-1 snapshot bytes are pinned; v6 (#994): a `both` row's path is judged step by step against the core class's declared ranges rather than at its root alone, a `[*]` wildcard is a step's subscript rather than a step of its own, and `claims_core_cannot_hold` counts only a path the core cannot hold: one that descends through a scalar violates the core schema's declared range, carries its own cause and is excluded from that count; v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the snapshot carried that the final full record does not, with no `removed` row or removal sentence naming it, is `removal_not_recorded`; a prose retention claim (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is read like a retained row; v4 (#1122): `rows_by_record` tallies the dispositions rows by their record column \u2014 `full`, `core`, `both`, `either` for an empty cell, `no_record_column` for a table with no such column, `invalid` for anything else \u2014 so a `both` row wrongly flipped to `full`, which the gate cannot see (a `full` row resolves against the full record only), is countable from the block; v3 (#1022, #1046): a schema claim that names its own scope \u2014 the core schema, the full schema, a class \u2014 is resolved against that scope only, not against every class; v2 (#990): a finding on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold` counts them",
+  "totals": {
+    "reports": 277,
+    "before": 1881,
+    "after": 1780,
+    "gained": 0,
+    "lost": 101
+  },
+  "changes": {
+    "data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep1/CM4AI_reconciliation.md": {
+      "sha256": "6970bedd740ac4fccaa664962be8281bd3d12813188ba29f51df5cb39505b9f0",
+      "gained": [],
+      "lost": [
+        "file_collections",
+        "total_file_count"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep2/CM4AI_reconciliation.md": {
+      "sha256": "e58d150b81ba15b6afb7c8087f8e6780c63ed06fea3159050863d0446cba1ac1",
+      "gained": [],
+      "lost": [
+        "total_file_count"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep1/VOICE_reconciliation.md": {
+      "sha256": "9677a914c3dea1b55d137d0b8277381085bf69e04805516e47a9adca2f535995",
+      "gained": [],
+      "lost": [
+        "citation",
+        "related_datasets"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep2/VOICE_reconciliation.md": {
+      "sha256": "48c3961ea87015e94067ec6969867bd723dd9c43dddd65d218e28d7023223f9b",
+      "gained": [],
+      "lost": [
+        "citation",
+        "related_datasets"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep2/CM4AI_reconciliation.md": {
+      "sha256": "07c47fe427fd5a73f807d931a487d65dbd74fa170e8b55e3cc9d744147586a2d",
+      "gained": [],
+      "lost": [
+        "file_collections",
+        "total_file_count"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-programme-deprimed_rep1/CM4AI_reconciliation.md": {
+      "sha256": "2f81c52f60b59af12b88d5e6f0b5f6615007d4c5a97db5bace8f31a3ca17cdfa",
+      "gained": [],
+      "lost": [
+        "citation",
+        "total_file_count"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-02_claude-opus-5-bare_rep2/CHORUS_reconciliation.md": {
+      "sha256": "eb9616189a607da92412acb1034eb9b7814f954d64a7570eaa51bdfd4ad45406",
+      "gained": [],
+      "lost": [
+        "direct_collection",
+        "participant_privacy",
+        "splits",
+        "third_party_sharing"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/CHORUS_reconciliation.md": {
+      "sha256": "a77bfccba9fe1dfeef0c41b0d9efe3825f3369996dd5c99dd74a7b3fbea49b02",
+      "gained": [],
+      "lost": [
+        "splits"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/AI_READI_reconciliation.md": {
+      "sha256": "d25f40ae2a91fe598b014c56af1962fe2e22973f3abe362f5fff679c0fdbb746",
+      "gained": [],
+      "lost": [
+        "collection_consents",
+        "collection_notifications",
+        "consent_revocations",
+        "direct_collection",
+        "relationships",
+        "splits",
+        "subsets",
+        "third_party_sharing",
+        "variables"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/AI_READI_reconciliation.md": {
+      "sha256": "409f3ed5e7b70b69105fdf89767a643620e42df9c6877068d7ebe2b651953bef",
+      "gained": [],
+      "lost": [
+        "variables"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/CM4AI_reconciliation.md": {
+      "sha256": "e3f215c231e4e109ffe1303281683acb561df3327caaf91b7c8b18cb0b67bf77",
+      "gained": [],
+      "lost": [
+        "total_file_count"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep2/CM4AI_reconciliation.md": {
+      "sha256": "5df9cdce048c834617b1bb26f477c0621f9bbb9c57e76d13abc8125929c09b6e",
+      "gained": [],
+      "lost": [
+        "affiliations"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/CHORUS_reconciliation.md": {
+      "sha256": "e80ac52f5bf468ad6748f54fca4b6047f9d19ac740041aff326301ee563a9106",
+      "gained": [],
+      "lost": [
+        "data_substrate",
+        "data_topic"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/AI_READI_reconciliation.md": {
+      "sha256": "c30a27a3b3408fbf8e5af685a973f5536b213024aebfebcc52f4b5092365e5db",
+      "gained": [],
+      "lost": [
+        "file_collections",
+        "total_file_count",
+        "total_size_bytes"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/CM4AI_reconciliation.md": {
+      "sha256": "e9e2e11ab22c0e00c1c83f3ffc0bfa9a77f5d74ed758f80552b5c413b80e7681",
+      "gained": [],
+      "lost": [
+        "citation",
+        "direct_collection",
+        "file_collections",
+        "relationships",
+        "subsets",
+        "third_party_sharing",
+        "total_file_count"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md": {
+      "sha256": "ac6fc2c11fde7320b76c8d35fe14f8dfa63e4d43c17753d2e34d00c0c65a3cd8",
+      "gained": [],
+      "lost": [
+        "collection_consents",
+        "collection_notifications",
+        "participant_compensation"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md": {
+      "sha256": "eb525559781c4a862d15a212c37bdaa377332c92a6bd1c52782c304876e51e10",
+      "gained": [],
+      "lost": [
+        "download_url"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md": {
+      "sha256": "06a83f1ec55709397665d832c6912ef628a5d9ef0d99ac47c112817ecd09591e",
+      "gained": [],
+      "lost": [
+        "withdrawal_mechanism"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/VOICE_reconciliation.md": {
+      "sha256": "ee358db35a561e8caa64d46fbeb197a3d2a1b8c83f167bb51554b6d6f0967fb0",
+      "gained": [],
+      "lost": [
+        "annotation_analyses"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/CHORUS_reconciliation.md": {
+      "sha256": "8c3eb48236e5c6c353787f32c63ca5fc8e6edafde3faaafabf6273e3d7c5c971",
+      "gained": [],
+      "lost": [
+        "is_data_split",
+        "is_direct",
+        "is_shared",
+        "release_dates"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/CM4AI_reconciliation.md": {
+      "sha256": "b7053085331d10c34e2b265eb824d51c72827701de80a5486f125924d84a7990",
+      "gained": [],
+      "lost": [
+        "file_collections"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/CM4AI_reconciliation.md": {
+      "sha256": "cd0bbbe9a948d57b19c2d9cf2be46e75c5d36161199ba0337b2913c6b4a37392",
+      "gained": [],
+      "lost": [
+        "distribution_formats[1].media_type"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/CHORUS_reconciliation.md": {
+      "sha256": "af0c4fbaa455fa8dc3832c942140d4398f0155d3f281f4503cee8b9fb88458a9",
+      "gained": [],
+      "lost": [
+        "machine_annotation_tools",
+        "subsets",
+        "third_party_sharing"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/VOICE_reconciliation.md": {
+      "sha256": "9e3978061746e0776f73e6fd0326afaac3db64066badcedf740cf24d5fc4aa93",
+      "gained": [],
+      "lost": [
+        "committee_contact"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/CM4AI_reconciliation.md": {
+      "sha256": "53f75b9796d8ae56724d533b2397d7417c864686718002ac5971bbf4d19cf732",
+      "gained": [],
+      "lost": [
+        "citation",
+        "direct_collection",
+        "third_party_sharing",
+        "total_file_count"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/CM4AI_reconciliation.md": {
+      "sha256": "a58d581ad8174e5e9c7672ec3b58eda775d34fcb9e1810992ca42df0c5017064",
+      "gained": [],
+      "lost": [
+        "citation",
+        "file_collections",
+        "total_file_count"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CM4AI_reconciliation.md": {
+      "sha256": "8971475aeb433934cb6682c12266e797df96d6465fccfd315f38fb39c0c70554",
+      "gained": [],
+      "lost": [
+        "id"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_reconciliation.md": {
+      "sha256": "edbd094d3efda86f542ac19096a7314e0d0e9f23b4266f837328fa151ce986cc",
+      "gained": [],
+      "lost": [
+        "direct_collection",
+        "id",
+        "name",
+        "splits",
+        "third_party_sharing"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_reconciliation.md": {
+      "sha256": "ad674fced61514c347cb6ea586a86bb48a1fcc4c618fb0dca0162779b3d50a49",
+      "gained": [],
+      "lost": [
+        "extension_mechanism",
+        "purposes",
+        "splits",
+        "subsets",
+        "variables"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/VOICE_reconciliation.md": {
+      "sha256": "dfa0029fbda9be473afae1259e20e2e9d2b1dfc9f397f196ea46004cfaa20b5d",
+      "gained": [],
+      "lost": [
+        "future_guarantees"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-deprimed_rep2/VOICE_reconciliation.md": {
+      "sha256": "a133d3cad9afc916daca7ce8f076e0bdaa5f911ac09526405446f446c1581668",
+      "gained": [],
+      "lost": [
+        "file_collections"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-deprimed_rep3/CHORUS_reconciliation.md": {
+      "sha256": "360821719614193ac48c141ca1e740ba51301fa050f73117118bc86179c38c06",
+      "gained": [],
+      "lost": [
+        "total_size_bytes"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep1/CM4AI_reconciliation.md": {
+      "sha256": "99eb2d2a17105a013566f385835a4ce56909e5809bed14fe43a29105ed744a12",
+      "gained": [],
+      "lost": [
+        "citation",
+        "direct_collection",
+        "distributions",
+        "relationships",
+        "subsets",
+        "third_party_sharing",
+        "total_size_bytes"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep2/CM4AI_reconciliation.md": {
+      "sha256": "206f433da072000edc7c380cf915ef56a62c1e96836628d6b43bf60c13d8111f",
+      "gained": [],
+      "lost": [
+        "creators"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep3/CHORUS_reconciliation.md": {
+      "sha256": "2a2c5dcadf5cbdcb857481dea085a6e78f11150d9c0ad03dc4c221a30cb28c9f",
+      "gained": [],
+      "lost": [
+        "direct_collection",
+        "file_collections",
+        "participant_privacy",
+        "relationships",
+        "splits",
+        "third_party_sharing",
+        "variables"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-denoised_rep1/CM4AI_reconciliation.md": {
+      "sha256": "0ac810e17f92a35587ac37a2d36a98ca53213757ecf31adf66c35e6a0a3ab3ea",
+      "gained": [],
+      "lost": [
+        "citation"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep1/CM4AI_reconciliation.md": {
+      "sha256": "b75ed88cf0ba9174ae6f880010e2321d82d83cbb7a0f960e33ffd5652b08ee4e",
+      "gained": [],
+      "lost": [
+        "instances"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep1/VOICE_reconciliation.md": {
+      "sha256": "81dc576d61416c7e81062e3744c7cdf03dc7667f2c8ed2f8bd6118b4a5186feb",
+      "gained": [],
+      "lost": [
+        "total_size_bytes"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-31_claude-opus-5-api-generic_rep1/AI_READI_reconciliation.md": {
+      "sha256": "3efa3714ebc0a082861a2b93136c765258210c1e819fa951c5e89cb26a63da90",
+      "gained": [],
+      "lost": [
+        "id",
+        "intended_uses"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_reconciliation.md": {
+      "sha256": "04dd407b63a3e0fe87a775e13c656f6d3059605d4be5467251709e6910581c94",
+      "gained": [],
+      "lost": [
+        "direct_collection",
+        "splits",
+        "third_party_sharing"
+      ]
+    },
+    "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_reconciliation.md": {
+      "sha256": "595cab41deeec3a1216d81a605e4676a3f6f9f95503f8f107bc116be4f7abdc1",
+      "gained": [],
+      "lost": [
+        "external_resources"
+      ]
+    }
+  }
+}

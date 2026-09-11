@@ -170,13 +170,14 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
                                 "reason": "no reconciliation report",
                                 "recorded_by": RECORDED_BY}
     else:
-        from data_sheets_schema.report_claims import declared_ranges, phase1_snapshot_for
+        from data_sheets_schema.report_claims import declared_ranges, phase1_snapshot_with_pin_for
+        snapshot, snapshot_pin = phase1_snapshot_with_pin_for(core)
         block = check_report(
             report,
             yaml.safe_load(full.read_text(encoding="utf-8")) if full.exists() else {},
             yaml.safe_load(core.read_text(encoding="utf-8")) if core.exists() else {},
             declared if declared is not None else declared_slots(),
-            snapshot=phase1_snapshot_for(core),
+            snapshot=snapshot,
             # Both maps describe one core schema and travel together: the
             # caller builds each once for a whole corpus pass, and rebuilding
             # one per record would both cost a SchemaView load per record and
@@ -197,6 +198,7 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
             "report": {"path": str(report), "md5": _md5(report)},
             "full": {"path": str(full), "md5": _md5(full) if full.exists() else None},
             "core": {"path": str(core), "md5": _md5(core) if core.exists() else None},
+            "phase1_snapshot": snapshot_pin,
         }
         block["schema"] = {"full_sha256": _schema_sha(FULL_SCHEMA),
                            "core_sha256": _schema_sha(CORE_SCHEMA)}
