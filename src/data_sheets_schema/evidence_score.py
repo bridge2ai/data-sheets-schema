@@ -779,6 +779,22 @@ class FitnessJudgement:
     reason: str = ""
 
 
+def slot_specification_snapshot(class_name: str = "Dataset", schema_path: Path | None = None) -> tuple:
+    """One captured inventory/vocabulary and both generation/complete-spec hashes."""
+    from data_sheets_schema import schema_digest
+    inventory = schema_digest.build(class_name, schema_path)
+    vocabulary = schema_digest.vocabularies()
+    schema = schema_digest.fingerprint(schema_digest.render(inventory, vocabulary=vocabulary))
+    # Generation deliberately truncates some ranges; the fitness and subtype
+    # judges see all of them. Key their full specifications separately (#1261).
+    specifications = {s.name: _render_slot_spec(s.name, inventory, vocabulary)
+                      for s in inventory.slots}
+    specification = hashlib.sha256(json.dumps(
+        {"class": inventory.class_name, "slots": specifications},
+        sort_keys=True).encode("utf-8")).hexdigest()
+    return schema, inventory, vocabulary, specification
+
+
 class LLMSlotFitnessScorer:
     """Judge slot values against the schema specification, not the bundle.
 
@@ -821,18 +837,7 @@ class LLMSlotFitnessScorer:
         return self._client, self._model
 
     def _snapshot(self) -> tuple:
-        from data_sheets_schema import schema_digest
-        inventory = schema_digest.build(self.class_name, self.schema_path)
-        vocabulary = schema_digest.vocabularies()
-        schema = schema_digest.fingerprint(schema_digest.render(inventory, vocabulary=vocabulary))
-        # Generation deliberately truncates some ranges; the fitness judge
-        # sees all of them. Key its full specifications separately (#1261).
-        specifications = {s.name: _render_slot_spec(s.name, inventory, vocabulary)
-                          for s in inventory.slots}
-        specification = hashlib.sha256(json.dumps(
-            {"class": inventory.class_name, "slots": specifications},
-            sort_keys=True).encode("utf-8")).hexdigest()
-        return schema, inventory, vocabulary, specification
+        return slot_specification_snapshot(self.class_name, self.schema_path)
 
     def _context(self, model: str, *, schema: str | None = None,
                  specification: str | None = None) -> "JudgementContext":

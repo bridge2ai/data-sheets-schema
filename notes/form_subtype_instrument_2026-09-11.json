@@ -1,0 +1,47 @@
+{
+  "registered_at": "2026-09-11T23:44:56.921871+00:00",
+  "issues": [
+    1263,
+    1268
+  ],
+  "historical_schema": "34d24ff30fb6ad0f10d82af09ddc1fba",
+  "historical_model": "google/claude-opus-5-high",
+  "historical_complete_specification": null,
+  "labels_replayed": 106,
+  "table": {
+    "collapsed_cardinality": {
+      "v1": 34,
+      "v2": 2
+    },
+    "hollow_object": {
+      "v2": 45
+    },
+    "both": {
+      "v1": 8,
+      "v2": 5
+    },
+    "other": {
+      "v1": 8,
+      "v2": 4
+    }
+  },
+  "folded": {
+    "collapsed_cardinality": {
+      "v1": 42,
+      "v2": 7
+    },
+    "hollow_object": {
+      "v2": 50,
+      "v1": 8
+    }
+  },
+  "live_calls": 0,
+  "old_cache_bytes_match_main": true,
+  "cache_sha256": {
+    "data/evaluation_llm/judgement_cache/AI_READI_fitness.jsonl": "dddd5570161b7ae3fe7ad648e4fc4db7f02757875af3b2d4d71e3a56298b1eeb",
+    "data/evaluation_llm/judgement_cache/CHORUS_fitness.jsonl": "41d984db9d0ace58d782157c53b2f78eac769c49188a037cd64f7d038eca76a7",
+    "data/evaluation_llm/judgement_cache/CM4AI_fitness.jsonl": "4c97afb04e418bfe2da7c84bb9117052f2e1716009d70dffae6e0d52b9c71077",
+    "data/evaluation_llm/judgement_cache/VOICE_fitness.jsonl": "d64cce858b5206229515c682755f745941fbaa1ac55a70ed7fb5479871f94ca4",
+    "data/evaluation_llm/form_subtype_cache/form_subtypes.jsonl": "0c36e3f05b562b84a65442ad3f7dc02ab9c4f425d8341d4bd48968f6517d06b0"
+  }
+}

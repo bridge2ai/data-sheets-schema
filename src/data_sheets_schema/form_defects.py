@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import hashlib
 import json
 import sys
 from dataclasses import dataclass
@@ -286,9 +287,11 @@ class FormSubtypeClassifier:
 
     def __init__(self, client=None, model: str | None = None,
                  max_tokens: int = 8000, cache_path: Path | None = None,
-                 offline: bool = False, schema: str | None = None):
+                 offline: bool = False, schema: str | None = None,
+                 specification: str | None = None):
         self._client, self._model = client, model
         self._schema = schema
+        self._specification = specification
         self.max_tokens = max_tokens
         self.cache_path = Path(cache_path) if cache_path else None
         self.offline = offline
@@ -349,8 +352,44 @@ class FormSubtypeClassifier:
                 continue
             if recorded is None and self.schema != LEGACY_SCHEMA:
                 continue
-            self._memo[entry["key"]] = (entry["subtype"],
-                                        entry.get("reason", ""))
+            if entry.get("specification", "") != self.specification:
+                continue
+            key = entry["key"]
+            if self.specification:
+                reason_hash = entry.get("input_reason_sha256")
+                if not isinstance(reason_hash, str) or len(reason_hash) != 64:
+                    raise ValueError("attested subtype cache entry lacks input_reason_sha256")
+                key += ":" + reason_hash
+            self._memo[key] = (entry["subtype"], entry.get("reason", ""))
+
+    @staticmethod
+    def _live_snapshot() -> tuple:
+        from data_sheets_schema.evidence_score import slot_specification_snapshot
+        return slot_specification_snapshot()
+
+    @property
+    def specification(self) -> str:
+        """Selected complete specification; empty means historical/unattested.
+
+        A frozen cache remains replayable. A miss can only be filled when its
+        selected instrument matches the exact captured specification (#1263).
+        """
+        if self._specification is None:
+            recorded = set()
+            if self.cache_path and self.cache_path.exists():
+                for line in self.cache_path.read_text(encoding="utf-8").splitlines():
+                    if not line.strip():
+                        continue
+                    entry = json.loads(line)
+                    if (entry.get("rubric") == _digest(FORM_SUBTYPE_SYSTEM)
+                            and entry.get("model") == self.model
+                            and (entry.get("schema") or LEGACY_SCHEMA) == self.schema):
+                        recorded.add(entry.get("specification", ""))
+            if len(recorded) > 1:
+                raise PooledInstruments("subtype cache contains multiple complete specifications; "
+                                        "select one explicitly or use a fresh cache")
+            self._specification = recorded.pop() if recorded else self._live_snapshot()[3]
+        return self._specification
 
     @property
     def schema(self) -> str:
@@ -381,25 +420,27 @@ class FormSubtypeClassifier:
         correctly takes the live schema.
         """
         from data_sheets_schema import schema_digest
-        live = schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
+        def live_schema():
+            return schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
         if not (self.cache_path and Path(self.cache_path).exists()):
-            return live
+            return live_schema()
         try:
             recorded = recorded_schemas(self.cache_path)
         except OSError:
-            return live
+            return live_schema()
         if len(recorded) == 1:
             # The frozen case. Pin what the cache records regardless of the
             # working tree — this is what keeps the published table
             # reproducible after a slot description is edited.
             return recorded.pop()
         if not recorded:
-            return live
+            return live_schema()
         # More than one, which for schemas is the expected end state rather
         # than an error: every entry is correctly scoped and a cache
         # legitimately accumulates labels across schema versions. Unlike two
         # *models* (#277), there is a principled choice — the schema the caller
         # is actually working at (#483).
+        live = live_schema()
         if live in recorded:
             return live
         raise PooledInstruments(
@@ -407,31 +448,40 @@ class FormSubtypeClassifier:
             f"({sorted(recorded)}) and none is the live schema {live}; "
             f"pass an explicit schema to say which is meant.")
 
-    def _save(self, key: str, slot: str, subtype: str, reason: str) -> None:
+    def _save(self, key: str, slot: str, subtype: str, reason: str, *,
+              specification: str | None = None, input_reason_sha256: str | None = None) -> None:
         if not self.cache_path:
             return
         self.cache_path.parent.mkdir(parents=True, exist_ok=True)
+        attestation = ({"specification": specification, "input_reason_sha256": input_reason_sha256}
+                       if specification is not None else {})
         with self.cache_path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps({"rubric": _digest(FORM_SUBTYPE_SYSTEM),
                                  "model": self.model, "chars": VALUE_CHARS,
                                  "schema": self.schema,
+                                 **attestation,
                                  "key": key, "slot": slot,
                                  "subtype": subtype, "reason": reason}) + "\n")
 
     def __call__(self, failure: FormFailure) -> tuple[str, str]:
-        key = failure.key
+        reason_hash = hashlib.sha256(str(failure.reason).encode("utf-8")).hexdigest()
+        key = failure.key + (":" + reason_hash if self.specification else "")
         if key in self._memo:
             self.memo_hits += 1
             return self._memo[key]
         if self.offline:
             raise OfflineCacheMiss(f"no cached subtype for {failure.slot!r}")
 
+        snapshot = self._live_snapshot()
+        if self.schema != snapshot[0] or self.specification != snapshot[3]:
+            raise ValueError("cannot fill this frozen subtype instrument from the current schema; "
+                             "replay it offline or start a fresh cache for new judgements")
         from data_sheets_schema.api_runner import _call_with_retry, _client
-        from data_sheets_schema.evidence_score import slot_spec
+        from data_sheets_schema.evidence_score import _render_slot_spec
         if self._client is None:
             self._client = _client()
 
-        prompt = (f"{slot_spec(failure.slot)}\n\n"
+        prompt = (f"{_render_slot_spec(failure.slot, snapshot[1], snapshot[2])}\n\n"
                   f"Value as written:\n{failure.value[:VALUE_CHARS]}\n\n"
                   f"The fitness judge said: {failure.reason}\n\n"
                   "Which form failure is this?")
@@ -444,7 +494,8 @@ class FormSubtypeClassifier:
                        if getattr(b, "type", "") == "text")
         subtype, reason = _parse_subtype(text)
         self._memo[key] = (subtype, reason)
-        self._save(key, failure.slot, subtype, reason)
+        self._save(failure.key, failure.slot, subtype, reason,
+                   specification=snapshot[3], input_reason_sha256=reason_hash)
         return subtype, reason
 
 
@@ -539,6 +590,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="schema digest to scope labels to; defaults to "
                              "the one the cache records, or the live schema "
                              "for a new cache (#465)")
+    parser.add_argument("--specification", default=None,
+                        help="complete specification SHA256 to select in a multi-instrument cache")
     parser.add_argument("--config", action="append", metavar="TAG=LABEL",
                         help="arm to attribute against, repeatable; defaults to "
                              "the historical v1/v2 labels. Required for any "
@@ -578,8 +631,11 @@ def main(argv: list[str] | None = None) -> int:
     classifier = FormSubtypeClassifier(cache_path=args.cache,
                                        model=args.model,
                                        schema=args.schema,
+                                       specification=args.specification,
                                        offline=args.offline)
     print(f"instrument: {classifier.model}  schema: {classifier.schema[:8]}",
+          file=sys.stderr)
+    print(f"specification: {classifier.specification or 'historical, unattested; replay only'}",
           file=sys.stderr)
     classified = classify(failures, classifier)
     counts = table(classified)
