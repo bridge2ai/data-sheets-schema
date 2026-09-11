@@ -532,7 +532,8 @@ Return your evaluation as a **JSON object** with this EXACT structure:
   "evaluation_timestamp": "<ISO 8601 timestamp>",
   "model": {
     "name": "<the evaluating session's actual runtime model>",
-    "temperature": 0.0,
+    "temperature": null,
+    "temperature_note": "Not exposed by this runtime; no deterministic-score guarantee",
     "evaluation_type": "semantic_llm_judge"
   },
   "semantic_analysis": {
@@ -930,12 +931,11 @@ The agent will iterate through files, evaluate each one, and save results.
 
 ## Reproducibility
 
-**This agent provides fully reproducible evaluations:**
-- Same D4D file → Same quality score every time
-- Temperature: 0.0 (fully deterministic)
-- Model: the evaluator pinned in this file's frontmatter, recorded as the session's actual runtime identity
-- Rubric: Version-controlled in `data/rubric/rubric10.txt`
-- All within Claude Code conversation
+Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.
+
+Record the actual runtime temperature only if it is exposed; otherwise use null and explain that the setting is unknown, without copying a numeric value from an example. Record the session's actual model identity and the definition digest, retain each repeated evaluation, and report its score bases and spread.
+
+The rubric text is version-controlled in `data/rubric/rubric10.txt`; the scoring rules also depend on this agent definition.
 
 **Optional: Batch Scripts for External Automation**
 
@@ -949,7 +949,6 @@ See `notes/RUBRIC_AGENT_USAGE.md` for comprehensive usage examples.
 
 ## Notes
 
-- **Temperature Setting:** This agent uses temperature=0.0 for fully deterministic, reproducible quality assessments
 - **Model:** the evaluator pinned in this file's frontmatter, recorded as the session's actual runtime identity
 - **Complement, Not Replace:** This LLM-based evaluation complements the existing field-presence detection in `src/evaluation/evaluate_d4d.py`
 - **Cost:** ~$0.10-0.30 per file evaluation via Anthropic API

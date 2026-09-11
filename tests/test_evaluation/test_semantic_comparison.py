@@ -7,12 +7,13 @@ import sys
 from pathlib import Path
 
 import pytest
+import jsonschema
 
 from data_sheets_schema.semantic_comparison import (
     comparison_warnings, excluded_items, score_bases,
 )
 from tests.test_evaluation.test_semantic_evaluation_contract import (
-    _rubric10_record, _rubric20_record,
+    _rubric10_record, _rubric20_record, _schema,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -80,6 +81,19 @@ def test_conflicting_denominators_are_rejected():
     doc["overall_score"]["excluded_max_points"] = 1
     with pytest.raises(ValueError, match="disagree"):
         score_bases(doc, 88)
+
+
+@pytest.mark.parametrize("number,make", [(10, _rubric10_record), (20, _rubric20_record)])
+def test_unexposed_runtime_temperature_can_be_recorded_honestly(number, make):
+    doc = make()
+    doc["model"]["temperature"] = None
+    jsonschema.validate(doc, _schema(f"rubric{number}-semantic"))
+    doc["model"]["temperature"] = "unknown"
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(doc, _schema(f"rubric{number}-semantic"))
+    agent = (ROOT / f".claude/agents/d4d-rubric{number}-semantic.md").read_text()
+    assert '"temperature": null' in agent
+    assert "does not guarantee identical semantic judgements" in agent
 
 
 def test_full_current_rubric10_renders_names_scores_and_na_without_mutating(tmp_path):

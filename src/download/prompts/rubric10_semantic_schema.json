@@ -81,10 +81,13 @@
           "description": "Model identifier (e.g., claude-sonnet-4-5-20250929)"
         },
         "temperature": {
-          "type": "number",
+          "type": [
+            "number",
+            "null"
+          ],
           "minimum": 0.0,
           "maximum": 1.0,
-          "description": "Model temperature setting"
+          "description": "Actual runtime temperature, or null when the runtime does not expose it; a fixed temperature does not guarantee repeated scores."
         },
         "evaluation_type": {
           "type": "string",

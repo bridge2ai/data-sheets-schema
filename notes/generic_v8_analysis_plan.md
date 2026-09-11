@@ -2179,7 +2179,7 @@ historical outputs; current agent instructions require it for new outputs.
 
 This definition change precedes the reference canary. The definition and
 schema hashes are in `notes/semantic_comparison_boundary_2026-09-11.json`.
-No evaluator was run at this boundary. #1080's repeated measurements and
+The final runtime review (#1247) also removed the zero-temperature determinism claim; unexposed temperatures are recorded as null, and repeated judgements must be measured. No evaluator was run at this boundary. #1080's repeated measurements and
 #1062's two new ratings remain pending; historical mixed-instrument movements
 must not be reported as a measured same-instrument standard deviation.
 
