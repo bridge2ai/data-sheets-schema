@@ -1,0 +1,63 @@
+{
+  "date": "2026-09-11",
+  "issue": 919,
+  "decision": "Keep existing fitness judgements under their original context; do not use them as shared-instrument v7/v8 reference scores. The requested reference rescore is both semantic rubrics, a separate instrument.",
+  "current_context": {
+    "axis": "fitness",
+    "model": "google/claude-opus-5-high",
+    "rubric": "6c5b10778ade",
+    "corpus": "",
+    "schema": "a91bad8b8eaf7c34b147ff5970474342"
+  },
+  "cache_audit": [
+    {
+      "path": "data/evaluation_llm/judgement_cache/AI_READI_fitness.jsonl",
+      "sha256": "dddd5570161b7ae3fe7ad648e4fc4db7f02757875af3b2d4d71e3a56298b1eeb",
+      "entries": 380,
+      "recorded_schema_digests": [
+        "34d24ff30fb6ad0f10d82af09ddc1fba"
+      ],
+      "current_context_loaded": 0,
+      "current_context_skipped": {
+        "schema": 380
+      }
+    },
+    {
+      "path": "data/evaluation_llm/judgement_cache/CHORUS_fitness.jsonl",
+      "sha256": "41d984db9d0ace58d782157c53b2f78eac769c49188a037cd64f7d038eca76a7",
+      "entries": 293,
+      "recorded_schema_digests": [
+        "34d24ff30fb6ad0f10d82af09ddc1fba"
+      ],
+      "current_context_loaded": 0,
+      "current_context_skipped": {
+        "schema": 293
+      }
+    },
+    {
+      "path": "data/evaluation_llm/judgement_cache/CM4AI_fitness.jsonl",
+      "sha256": "4c97afb04e418bfe2da7c84bb9117052f2e1716009d70dffae6e0d52b9c71077",
+      "entries": 354,
+      "recorded_schema_digests": [
+        "34d24ff30fb6ad0f10d82af09ddc1fba"
+      ],
+      "current_context_loaded": 0,
+      "current_context_skipped": {
+        "schema": 354
+      }
+    },
+    {
+      "path": "data/evaluation_llm/judgement_cache/VOICE_fitness.jsonl",
+      "sha256": "d64cce858b5206229515c682755f745941fbaa1ac55a70ed7fb5479871f94ca4",
+      "entries": 414,
+      "recorded_schema_digests": [
+        "34d24ff30fb6ad0f10d82af09ddc1fba"
+      ],
+      "current_context_loaded": 0,
+      "current_context_skipped": {
+        "schema": 414
+      }
+    }
+  ],
+  "new_fitness_calls": 0
+}
