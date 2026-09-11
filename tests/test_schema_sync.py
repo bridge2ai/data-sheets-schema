@@ -129,18 +129,22 @@ class SyncCheckTest(unittest.TestCase):
         merged, source, cls, marker = MERGED_SCHEMAS[0]
         if not merged.exists():
             self.skipTest("merged schema not present in this checkout")
-        original = merged.read_bytes()
-        try:
-            merged.write_bytes(original + b"\n# not a line any rebuild emits\n")
-            row = check_one(merged, source, cls, marker)
+        # Other tests read the committed artifact concurrently. Tamper with
+        # a private copy, including when restoring its original bytes (#1217).
+        with tempfile.TemporaryDirectory() as tmp:
+            copy = Path(tmp) / merged.name
+            original = merged.read_bytes()
+            copy.write_bytes(original + b"\n# not a line any rebuild emits\n")
+            row = check_one(copy, source, cls, marker)
             self.assertEqual(row["status"], STALE)
             self.assertIn("differs from a fresh build", row["reason"])
             # The evidence is kept rather than deleted with the temp dir.
-            self.assertTrue(Path(row["rebuilt_at"]).exists())
-        finally:
-            merged.write_bytes(original)
-        self.assertEqual(check_one(merged, source, cls, marker)["status"],
-                         IN_SYNC, "the fixture must restore the schema")
+            rebuilt = Path(row["rebuilt_at"])
+            self.addCleanup(shutil.rmtree, rebuilt.parent)
+            self.assertTrue(rebuilt.exists())
+            copy.write_bytes(original)
+            self.assertEqual(check_one(copy, source, cls, marker)["status"],
+                             IN_SYNC, "the restored copy must be in sync")
 
     def test_a_missing_source_is_unchecked_and_still_blocks(self):
         """A gate that could not run has not passed."""
