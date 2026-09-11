@@ -412,8 +412,15 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   as a declared CURIE (the doi prefix, a colon, the DOI), which is the form to
   write even where the evidence states the resolver URL, the page as an
   absolute URL with its scheme; a bare DOI string or a schemeless host with a
-  label appended is a token, not an identifier. The own id is the one identity
-  slot every record carries, whatever form the record gave it, where `page`
+  label appended is a token, not an identifier. A label for a part of this
+  dataset is exempt from a receipt only when its base matches an identifier
+  carried in this record's top-level `id`, `doi` or `page`: DOI spellings
+  and a trailing slash are normalized, but a missing or different URL scheme
+  is not. A label on a scheme-added page or fallback URL needs a receipt
+  when its resulting base is absent from those carried identifiers. This
+  exemption covers labels for parts of this dataset, not claims about an
+  external entity. The own id is the one identity slot every record carries,
+  whatever form the record gave it, where `page`
   and `doi` are optional; where it is an identifier form and not itself a
   shared root it names this dataset alone, while a landing page is often a
   site or project root shared with sibling releases, so a part labeled there

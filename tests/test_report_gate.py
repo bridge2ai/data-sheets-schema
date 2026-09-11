@@ -336,6 +336,31 @@ class TestTheRunnerGate(unittest.TestCase):
         self.assertEqual(g["remaining"][0]["kind"], "removal_not_performed")
         self.assertEqual(len(d["report_claims"]["findings"]), 1)
 
+    def test_an_unrecorded_removal_is_rechecked_as_a_missing_disposition(self):
+        """#1181: no claim was false; the full record lost an unreported slot."""
+        retained = "| `keywords` | retained | full | kept |\n"
+        fake = _ReportFake(retained, retained + "| `errata` | removed | full | unsupported |\n")
+        original = fake.create
+
+        def create(**kw):
+            blob = " ".join(p.get("text", "") for p in kw["messages"][0]["content"])
+            if PHASE_INSTRUCTIONS["full"] in blob:
+                fake.calls.append(kw)
+                return FakeResponse("```yaml\nid: x\ntitle: T\nname: n\ndescription: d\n"
+                                    "keywords: [a]\nerrata: [unsupported]\n```")
+            return original(**kw)
+
+        fake.create = create
+        _, res, d = self._run(fake)
+        self.assertEqual((d["report_gate"]["findings_before"], d["report_gate"]["findings_after"]), (1, 0))
+        self.assertEqual(res["usage"][-1]["phase"], "report_regate")
+        regate = fake.calls[-1]
+        blob = " ".join(p.get("text", "") for p in regate["messages"][0]["content"])
+        self.assertIn("removal_not_recorded", blob)
+        self.assertIn("# Report discrepancies", blob)
+        self.assertIn("For an unrecorded removal, add a removed disposition row for that slot.", blob)
+        self.assertEqual(d["report_claims"]["removals_unrecorded"], [])
+
     def test_a_clean_report_makes_no_extra_call(self):
         fake = _ReportFake("| `keywords` | retained | full | kept |\n", "unused")
         s, res, d = self._run(fake)
@@ -450,6 +475,14 @@ class TestTheAssemblyDigestCoversIt(unittest.TestCase):
         before = api_runner.assembly_digest()["sha256"]
         for key in ("report", "report_regate"):
             with unittest.mock.patch.dict(PHASE_INSTRUCTIONS, {key: "changed"}):
+                self.assertNotEqual(api_runner.assembly_digest()["sha256"], before)
+
+    def test_recheck_headers_are_part_of_the_recorded_instrument(self):
+        before = api_runner.assembly_digest()["sha256"]
+        for index in range(len(api_runner.REGATE_HEADERS)):
+            changed = list(api_runner.REGATE_HEADERS)
+            changed[index] = "# A different interpretation\n\n"
+            with unittest.mock.patch.object(api_runner, "REGATE_HEADERS", tuple(changed)):
                 self.assertNotEqual(api_runner.assembly_digest()["sha256"], before)
 
 

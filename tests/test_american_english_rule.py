@@ -99,7 +99,7 @@ class TestTheRunnerSendsWhatItAsksFor(unittest.TestCase):
                          "part of the bundle's text.\n\n")
         self.assertEqual(api_runner.READDRESS_HEADER, "# Receipt entries whose slot is not a path in the record above\n\n")
         self.assertEqual(api_runner.REGATE_HEADERS, ("# Reconciliation report as written\n\n",
-                                                     "# Claims the records do not show\n\n"))
+                                                     "# Report discrepancies\n\n"))  # #1181: also unrecorded changes
         self.assertEqual(api_runner.REPAIR_HEADERS, ("# Record that failed validation\n\n", "# Validator findings\n\n"))
         self.assertEqual(api_runner.CARRY_LABEL.format(name="Audit findings"), "# Audit findings\n\n")
         self.assertEqual(api_runner.BUNDLE_HEAD.format(bundle="b.txt") + "\n", "# Declared input bundle — b.txt\n\n")

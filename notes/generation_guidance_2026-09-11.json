@@ -1,0 +1,23 @@
+{
+  "date": "2026-09-11",
+  "issues": [
+    1181,
+    1197
+  ],
+  "before": {
+    "assembly_sha256": "a78228e917cc25777a5f00bdd689adc5104c28feaf347f98b2602a47aacc90d0",
+    "files": {
+      "src/download/prompts/d4d_generic_arm_prompt_v9.md": "f527b1243b8339abd63e47028fde5af4f696d2938970a522e58cfdcada102d4a",
+      ".claude/commands/d4d-uniform-rules.md": "cf79f2abc804a28709f551695ceca0e52e7154326d0af6c18f44e59d22ba8597"
+    }
+  },
+  "after": {
+    "assembly_sha256": "2c47cffe0e63bc1ce962cbd6c1340c4f878fb61f1d0efe4b271a9e650da3eebf",
+    "files": {
+      "src/download/prompts/d4d_generic_arm_prompt_v9.md": "a14c871598880ad490130be9ada71d67190488d3323b39d829441cbe7a67d051",
+      ".claude/commands/d4d-uniform-rules.md": "fe861496d0127fbbddbb33d3c66141490f52d7dd8a18fe2ad34f2a345ee91f31"
+    }
+  },
+  "receipt_instrument_changed": false,
+  "existing_generation_artifacts_changed": false
+}

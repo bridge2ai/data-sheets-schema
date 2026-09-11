@@ -147,6 +147,9 @@ class TestV9IsV8PlusTheAddedBlock(unittest.TestCase):
                       "mint a label only where it states none",      # R8: a forced id takes the stated identifier first (#1166 Codex M1)
                       "never in place of an identifier the evidence supplies",
                       "a token, not an identifier",                  # R8: a DOI or page base must be an identifier form (Codex M2)
+                      "exempt from a receipt only when its base matches an identifier carried in this record's top-level",
+                      "a missing or different URL scheme is not",  # #1197: normalization does not grant an exemption
+                      "when its resulting base is absent from those carried identifiers",
                       "that fragment, a hyphen and the part's own label",  # R8: the parent fragment is kept (Codex M3)
                       "prefer where it is itself an identifier form",      # R8: a token own id is no base (#1166 round 7, MF1)
                       "for a person under the person rule, that fragment, a hyphen, then person and the name",  # round 8, SF5

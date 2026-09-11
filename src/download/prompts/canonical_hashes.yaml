@@ -274,15 +274,14 @@ files:
       retired_on: '2026-09-04'
       sha256: 06666c4d10786d4689170acdfd68350d451f84d2f94d4b5a22be6e569d3824f1
   src/download/prompts/d4d_generic_arm_prompt_v9.md:
-    body_sha256: 54922d0b1556e8e5b5b58d587188c0f3cc8cac2bc8e5bdf8d8fb0ac7dae0d548
-    bytes: 29568
-    pinned_at_commit: f8553f97445d22c81f8136fb741a5250df40075a
-    pinned_on: '2026-09-10'
-    reason: 'The fallback bases appositive sits next to the noun it describes: round 11 inserted
-      the form constraint between them, so the fragment rules own license read as describing
-      an absolute URL rather than the resolvable URL it qualifies (#1166 round 12, SF1). Content
-      unchanged; the constraint is now a trailing clause.'
-    sha256: f527b1243b8339abd63e47028fde5af4f696d2938970a522e58cfdcada102d4a
+    body_sha256: bc817ed3aab001da54d1a7040a4511f457ef0fdef87ddcff4b01fbd3fda836f7
+    bytes: 30060
+    pinned_at_commit: c64df6d0964e53b8eac1c703bf21502da23d6261
+    pinned_on: '2026-09-11'
+    reason: '#1197: R8 states the existing receipt cost of scheme-added page and fallback
+      URL bases; mirrored in the agentic playbook and registered before the first v9 run.
+      PR #1231, review #1234.'
+    sha256: a14c871598880ad490130be9ada71d67190488d3323b39d829441cbe7a67d051
     superseded:
     - pinned_on: '2026-09-08'
       reason: "generic_v9: v8 plus R6 (a value in the referent own slots is supported by a\
@@ -437,6 +436,13 @@ files:
         the others, an absolute URL with its scheme.'
       retired_on: '2026-09-10'
       sha256: 4b35cd0bc91c94eb1ae949a5bcd8aa3dff0ce20529bad06aab1707819c215e82
+    - pinned_on: '2026-09-10'
+      reason: 'The fallback bases appositive sits next to the noun it describes: round 11
+        inserted the form constraint between them, so the fragment rules own license read
+        as describing an absolute URL rather than the resolvable URL it qualifies (#1166 round
+        12, SF1). Content unchanged; the constraint is now a trailing clause.'
+      retired_on: '2026-09-11'
+      sha256: f527b1243b8339abd63e47028fde5af4f696d2938970a522e58cfdcada102d4a
   src/download/prompts/d4d_tuned_arm_prompt.md:
     bytes: 2877
     pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866

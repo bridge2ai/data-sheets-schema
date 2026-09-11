@@ -574,8 +574,9 @@ ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, "
                    "answer moves the entry only to a resolving path or drops it "
                    "(#952); the report phase ends with a dispositions table, "
                    "checked against the records before the run completes, and "
-                   "a report whose claims contradict them is regenerated once "
-                   "with the contradictions named (#929); the report phase "
+                   "a report with contradictory claims, unrecorded changes or "
+                   "a missing dispositions table is regenerated once with the "
+                   "discrepancies named (#929, #1181); the report phase "
                    "carries the core class's top-level slot inventory before "
                    "its instruction, so the model can see which slots the core "
                    "declares — the gate still judges presence in the two "
@@ -626,9 +627,10 @@ def assembly_digest() -> dict[str, Any]:
     instructions — a change that materially altered every request — yet a
     record made the day before and the day after carried byte-identical prompt
     evidence. This digest covers what those hashes do not: the phase
-    instruction texts and the order the parts are assembled in.
+    instruction texts, report re-check headers and the order the parts are
+    assembled in.
     """
-    basis = json.dumps([ASSEMBLY_LAYOUT, PHASE_INSTRUCTIONS], sort_keys=True)
+    basis = json.dumps([ASSEMBLY_LAYOUT, PHASE_INSTRUCTIONS, REGATE_HEADERS], sort_keys=True)
     return {"sha256": hashlib.sha256(basis.encode("utf-8")).hexdigest(),
             "layout": ASSEMBLY_LAYOUT}
 
@@ -792,7 +794,7 @@ PHASE_SYSTEM = ("You generate Datasheets-for-Datasets records. The declared "
 CHUNK_MARKER_NOTE = ("# Chunk markers: a line of the form [cNNN] opens each chunk; "
                      "the markers are not part of the bundle's text.\n\n")
 READDRESS_HEADER = "# Receipt entries whose slot is not a path in the record above\n\n"
-REGATE_HEADERS = ("# Reconciliation report as written\n\n", "# Claims the records do not show\n\n")
+REGATE_HEADERS = ("# Reconciliation report as written\n\n", "# Report discrepancies\n\n")
 
 #: Headers the runner writes above sent material (S3, round 2): the carry
 #: labels, the repair phase's two parts, and the bundle head templates.
@@ -957,9 +959,10 @@ PHASE_INSTRUCTIONS = {
     # Sent once when the report's claims contradict the records (#929): the
     # gate that used to read the report only after the run.
     "report_regate": (
-        "Report re-check. The reconciliation report above makes claims the "
-        "records do not show; each is listed with the slot, the claim and what "
-        "the record actually holds. Rewrite the whole report so that every "
+        "Report re-check. Correct the listed mismatches: claims the records "
+        "do not show, changes the report does not record, or a missing "
+        "dispositions table. For an unrecorded removal, add a removed "
+        "disposition row for that slot. Rewrite the whole report so that every "
         "disposition row and every statement matches the records supplied, "
         "keeping everything that was already right. Output only Markdown."),
 }
