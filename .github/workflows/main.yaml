@@ -61,8 +61,13 @@ jobs:
       # -v: the log names each test as it starts, so a runner that dies
       # mid-suite still says which test was running. `--durations` keeps the
       # slowest tests visible so the next regression is seen, not felt.
+      # `-n auto` across the runner's cores. Measured on a 4-core machine with
+      # the #1203 caches: 15 min serial, 5 min 52 s on four workers, same
+      # 3,094 passing. `-v` names each test as it starts, so a runner that
+      # dies mid-suite still says which test was running; `--durations` keeps
+      # the slowest visible, so the next regression is seen rather than felt.
       - name: Run the suite without the corpus walks
-        run: poetry run pytest tests -v -p no:cacheprovider --durations=25 -m "not corpus"
+        run: poetry run pytest tests -v -p no:cacheprovider --durations=25 -n auto -m "not corpus"
 
   # Merge to main, or on demand: everything, everywhere.
   full:
@@ -108,4 +113,4 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Run the whole of make test
-        run: make test PYTEST_ARGS=-v
+        run: make test PYTEST_ARGS="-v -n auto"

@@ -43,6 +43,7 @@ linkml-term-validator = {version = ">=0.1.1", python = ">=3.10,<4.0"}
 linkml-reference-validator = {version = ">=0.1.1", python = ">=3.10,<4.0"}
 matplotlib = ">=3.8"
 pytest = "^7.4"
+pytest-xdist = "^3.6"
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]

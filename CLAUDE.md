@@ -1413,6 +1413,37 @@ is not cacheable. The remaining CI levers — one interpreter per pull
 request, `pytest-xdist`, the corpus-walk tests in their own lane — are
 listed on #1203.
 
+## Two CI lanes, and running the suite yourself (#1203)
+
+A pull request runs the suite **once**, on 3.12, in parallel, without the
+tests that walk the committed corpus. Merging to `main` — and
+`workflow_dispatch` — runs everything on 3.10, 3.11 and 3.12, the corpus
+tests and `test-schema` and `test-examples` included. The split is by
+what a test is evidence about: a corpus walk checks the data, not the
+change, and a pull request that touches neither gains nothing from
+running it three times.
+
+```bash
+poetry run pytest tests -n auto -m "not corpus"   # the pull-request lane
+poetry run pytest tests -m corpus                 # what merging will also run
+poetry run pytest tests -n auto                   # everything
+```
+
+The eight corpus-walk classes carry the registered `corpus` marker: the
+playbook-drift, URI-scheme, duplicate-key and scope walks, the schema
+straddle check, the hash-unification and end-of-run gates, and the
+instrument-manifest reproduction. **Mark a new test `corpus` when it
+iterates `data/d4d_concatenated` or spawns a whole-corpus CLI check**, so
+the fast lane stays fast; leave it unmarked when it builds its own
+fixture.
+
+Measured on a 4-core machine, whole suite, 3,094 tests: 26 to 32 minutes
+before #1203, 15 minutes 19 seconds with the caches, **5 minutes 52
+seconds** with the caches and `-n auto`. The pull-request lane is 2
+minutes 26 seconds of that; the corpus lane is 3 minutes 21 seconds and
+runs on merge. CI was 40 to 54 minutes per pull request, its wall time
+the slowest of three interpreters.
+
 ## Running Single Tests
 
 ```bash
