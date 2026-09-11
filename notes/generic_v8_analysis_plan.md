@@ -2021,6 +2021,38 @@ Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16,
 generation-path change by that half); per the production rule none of them may land
 between a v8 canary and its fill.
 
+### Semantic scoring boundary (#697, #1062, #1080, #1232; 2026-09-11)
+
+Before the requested reference rescore, rubric20 Q14 is always applicable.
+It uses the stated 0/3/5 bands; distinct non-publication resources count, and
+multiple resources without a formal dataset citation earn 3. Its own missing
+fields cannot remove five points from the denominator. Rubric10 Element 10's
+citation sub-element now follows only the shared-dataset gate, as its siblings
+do; lack of a publication is no additional exclusion. This fixes a mechanical
+contributor to #1080, not the remaining uncertainty in evaluator judgement.
+
+Both definitions and output schemas require integer individual item scores
+and sums. Rubric20 explicitly forbids fractional points; fractional means
+across evaluations remain legitimate. Illustrative individual totals and
+percentages now follow those rules. The schema rejects Q14 exclusions and
+interpolated bands as well as fractional scores and totals.
+
+[The boundary audit](semantic_instrument_boundary_2026-09-11.json) records
+before/after definition and schema SHA-256 values. Of 202 stored semantic
+outputs examined, 25 that passed the former schema differ from this new
+contract. Each is listed with its existing byte hash and the exact new-contract
+errors. They remain unchanged as evidence of the earlier instrument; failing
+the new contract does not retrospectively change what they measured.
+
+The reference rescore is **not yet run**. It remains one Opus 5 record/rubric
+canary first, then both production cohorts: 24 v7/v8 records, both semantic
+rubrics, 48 primary outputs with the canary included. Every evaluator must
+receive the preamble and pinned definition and pass check-echo plus exact-file
+validation. New outputs will sit beside the prior scores. #1062 stays open
+until its two affected v7 records have been rescored; #1080 stays open for
+repeatability measurement and uncertainty-aware reporting. Final evaluator
+pins will be registered after the remaining comparison-instrument work.
+
 ## Decisions needed before step 3
 
 - **D1 (#805)** — adopted 2026-09-03, option (a), applied in step C:

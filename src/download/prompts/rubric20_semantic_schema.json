@@ -98,22 +98,22 @@
       ],
       "properties": {
         "total_points": {
-          "type": "number",
+          "type": "integer",
           "minimum": 0,
           "description": "Points earned across applicable items"
         },
         "max_points": {
-          "type": "number",
+          "type": "integer",
           "const": 88,
           "description": "Maximum before N/A exclusions"
         },
         "excluded_max_points": {
-          "type": "number",
+          "type": "integer",
           "minimum": 0,
           "description": "Sum of max_score over items marked applicable: false"
         },
         "adjusted_max_points": {
-          "type": "number",
+          "type": "integer",
           "minimum": 0,
           "description": "max_points minus excluded_max_points"
         },
@@ -188,13 +188,13 @@
                 },
                 "score": {
                   "type": [
-                    "number",
+                    "integer",
                     "null"
                   ],
-                  "description": "Points awarded. null when applicable is false — distinct from 0, which means scored and earned nothing."
+                  "description": "Points awarded. null when applicable is false \u2014 distinct from 0, which means scored and earned nothing."
                 },
                 "max_score": {
-                  "type": "number",
+                  "type": "integer",
                   "minimum": 1,
                   "maximum": 5,
                   "description": "Maximum points possible"
@@ -230,8 +230,55 @@
                   "type": "string",
                   "description": "Fields belonging to a different question that evidence the applicability decision (the anti-circular rule)"
                 }
-              }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "id": {
+                        "const": 14
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ]
+                  },
+                  "then": {
+                    "properties": {
+                      "score": {
+                        "enum": [
+                          0,
+                          3,
+                          5
+                        ]
+                      },
+                      "applicable": {
+                        "enum": [
+                          true,
+                          "true"
+                        ]
+                      },
+                      "applicability_status": {
+                        "enum": [
+                          "always_applicable",
+                          "applicable"
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
             }
+          },
+          "category_score": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Sum of the applicable integer question scores in this category."
+          },
+          "category_max": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Category maximum as defined by the rubric."
           }
         }
       }
