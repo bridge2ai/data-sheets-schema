@@ -143,8 +143,10 @@ Some sub-elements are only applicable under certain conditions (see 'Applies to'
    - `excluded_max_points` = count of sub-elements where `applicable: false`
    - `adjusted_max_points` = `max_points` − `excluded_max_points`
    - `normalized_percentage` = `total_points / adjusted_max_points × 100`
+   - `fixed_percentage` = `total_points / max_points × 100`
+   - Report both bases with their denominators and the identities of excluded items. A fixed-base percentage describes earned points against the whole rubric; it does not penalize N/A items in the adjusted score.
 
-3. **Batch aggregation:** Apply the same convention in the `EvaluationSummary`. Report `average_excluded_max_points`, `average_adjusted_max_points`, and `average_normalized_percentage` at the overall, method, and project levels so cross-file comparisons remain meaningful even when different datasheets trigger different N/A conditions.
+3. **Batch aggregation:** Report both fixed and N/A-adjusted percentages, their maxima, and the excluded item identities for every record. Within each project, flag different adjusted maxima or different excluded items, even if the excluded point totals match. Do not rank or pool adjusted percentages across those applicability groups. Neither percentage alone establishes comparability; retain the evaluator model and instrument identity, and report within-group replicate counts and spread before interpreting small differences.
 
 Report the count of non-applicable sub-elements in the `sub_elements_not_applicable` field of `overall_score`.
 
@@ -569,6 +571,7 @@ Return your evaluation as a **JSON object** with this EXACT structure:
     "excluded_max_points": 0,
     "adjusted_max_points": 50,
     "normalized_percentage": 76.0,
+    "fixed_percentage": 76.0,
     "sub_elements_not_applicable": 0
   },
   "elements": [
@@ -855,7 +858,7 @@ semantic_analysis_summary:
 ### Additional Output Files
 
 1. **CSV Summary:** `all_scores.csv`
-   - Columns: project, method, file, total_score, excluded_max_points, adjusted_max_points, normalized_percentage, consistency_passed, consistency_failed, issues_detected
+   - Columns: project, method, file, total_score, excluded_max_points, adjusted_max_points, fixed_percentage, normalized_percentage, excluded_item_ids, consistency_passed, consistency_failed, issues_detected
 
 2. **Markdown Report:** `summary_report.md`
    - Executive summary with comparison tables

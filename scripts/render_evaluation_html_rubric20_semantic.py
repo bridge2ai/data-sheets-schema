@@ -17,7 +17,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
-from data_sheets_schema.rubric_pooling import reported_percentage
+from data_sheets_schema.semantic_comparison import ScoreBases, score_bases
 
 
 def generate_evaluation_html(eval_data, output_path):
@@ -30,28 +30,10 @@ def generate_evaluation_html(eval_data, output_path):
     method = eval_data.get("method", "N/A")
     timestamp = eval_data.get("evaluation_timestamp", "N/A")
     model_info = eval_data.get("model", {})
-
-    # Extract overall score
     overall = eval_data.get("overall_score", {})
-    total_score = overall.get("total_points", 0)
-    max_score = overall.get("max_points", RUBRIC20_MAX_SCORE)
-    percentage = reported_percentage({'overall_score': overall})
 
-    # Calculate grade
-    if percentage >= 95:
-        grade = "A+"
-    elif percentage >= 90:
-        grade = "A"
-    elif percentage >= 85:
-        grade = "B+"
-    elif percentage >= 80:
-        grade = "B"
-    elif percentage >= 75:
-        grade = "C+"
-    elif percentage >= 70:
-        grade = "C"
-    else:
-        grade = "D"
+    bases = score_bases(eval_data, RUBRIC20_MAX_SCORE)
+    fixed_label, adjusted_label = bases.labels()
 
     # Extract categories (with nested questions)
     categories = eval_data.get("categories", [])
@@ -441,8 +423,9 @@ def generate_evaluation_html(eval_data, output_path):
         </div>
 
         <div class="score-card">
-            <div class="score-large">{total_score}/{max_score}</div>
-            <div class="score-subtitle">{percentage:.1f}% Overall Score · Grade: {grade}</div>
+            <div class="score-large">{fixed_label}</div>
+            <div class="score-subtitle">{adjusted_label}</div>
+            <p>Compare excluded items as well as denominators. Neither percentage alone establishes a quality difference.</p>
         </div>
 
         <h2>Category Performance</h2>
@@ -455,16 +438,20 @@ def generate_evaluation_html(eval_data, output_path):
         questions = cat.get('questions', [])
 
         # Calculate category totals from questions
-        cat_score = sum(q.get('score', 0) for q in questions)
+        cat_score = sum(q.get('score') or 0 for q in questions)
         cat_max = sum(q.get('max_score', 5) for q in questions)
-        cat_pct = (cat_score / cat_max * 100) if cat_max > 0 else 0
+        cat_adjusted = sum(q.get('max_score', 5) for q in questions if q.get('score') is not None)
+        if cat_max:
+            fixed_category, adjusted_category = ScoreBases(cat_score, cat_max, cat_adjusted).labels()
+        else:
+            fixed_category, adjusted_category = "No questions reported", ""
 
         html += f"""
             <div class="category-card">
                 <div class="category-header">Category</div>
                 <div class="category-title">{cat_name}</div>
-                <div class="category-score">{cat_score}/{cat_max}</div>
-                <div class="category-percentage">{cat_pct:.1f}%</div>
+                <div class="category-score">{fixed_category}</div>
+                <div class="category-percentage">{adjusted_category}</div>
             </div>
 """
 
@@ -491,7 +478,8 @@ def generate_evaluation_html(eval_data, output_path):
             q_desc = q.get('description', '')
             q_score = q.get('score', 0)
             q_max = q.get('max_score', 5)
-            q_pct = (q_score / q_max * 100) if q_max > 0 else 0
+            q_pct = (q_score / q_max * 100) if q_score is not None and q_max > 0 else None
+            q_score_label = "N/A (excluded)" if q_score is None else f"{q_score}/{q_max}"
             q_type = q.get('score_type', '0-5 scale')
             q_label = q.get('score_label', '')
             justification = q.get('quality_note', '')
@@ -499,7 +487,9 @@ def generate_evaluation_html(eval_data, output_path):
             semantic_analysis = q.get('semantic_analysis', '')
 
             # Determine score class
-            if q_pct == 100:
+            if q_pct is None:
+                score_class = "score-na"
+            elif q_pct == 100:
                 score_class = "score-perfect"
             elif q_pct >= 80:
                 score_class = "score-high"
@@ -518,7 +508,7 @@ def generate_evaluation_html(eval_data, output_path):
                         {q_text}
                         <span class="badge badge-success">{q_type}</span>
                     </div>
-                    <div class="question-score {score_class}">{q_score}/{q_max}</div>
+                    <div class="question-score {score_class}">{q_score_label}</div>
                 </div>
                 <div class="question-body">
                     <div class="detail">
