@@ -26,6 +26,8 @@ from data_sheets_schema.report_claims import check_report, resolve
 #: below pass under either reading. It did: with `distributions` on both, the
 #: #1087 regression test caught the defect through its `scope` string alone
 #: and its finding-level assertion was vacuous.
+import data_sheets_schema.report_claims as rc
+
 DECLARED = {"Dataset": {"file_collections", "keywords", "source_caveats",
                         "notes", "conforms_to", "errata",
                         "collection_timeframes"},
@@ -425,8 +427,9 @@ class ScopedSchemaClaimTest(Harness):
 
     def test_the_instrument_names_the_change(self):
         from data_sheets_schema.report_claims import REPORT_CLAIMS_INSTRUMENT
-        self.assertTrue(REPORT_CLAIMS_INSTRUMENT.startswith("v5"),
+        self.assertTrue(REPORT_CLAIMS_INSTRUMENT.startswith("v6"),
                         REPORT_CLAIMS_INSTRUMENT)
+        self.assertIn("#994", REPORT_CLAIMS_INSTRUMENT)
         self.assertIn("#1122", REPORT_CLAIMS_INSTRUMENT)
         self.assertIn("#1046", REPORT_CLAIMS_INSTRUMENT)
 
@@ -924,9 +927,12 @@ class UnrecordedRemovalTest(Harness):
         self.assertEqual(b["prose_retention_claims"], 0)
         self.assertEqual(b["findings"], [])
 
-    def test_the_instrument_is_v5(self):
+    def test_the_instrument_is_v6(self):
+        """The block names the current reading first and keeps every earlier
+        one, so a block computed under either is readable from its own text."""
         b = self.check(self.TABLE, full={"keywords": ["a"]}, core={"keywords": ["a"]})
-        self.assertTrue(b["instrument"].startswith("v5 (#1054)"))
+        self.assertTrue(b["instrument"].startswith("v6 (#994)"))
+        self.assertIn("v5 (#1054)", b["instrument"])
         self.assertIn("v4 (#1122)", b["instrument"])
 
 
@@ -1015,3 +1021,286 @@ class PresentTenseRemovalTest(Harness):
             self.unrecorded("The intentional projection drops are unchanged: `citation`."), ["citation"])
         self.assertEqual(
             self.unrecorded("The slots removed are `citation` and `keywords`."), [])
+
+
+#: What `declared_ranges` returns, in miniature: every core class, its slots,
+#: and the class each slot ranges to (`None` for a scalar). `resources` ranges
+#: back to `CoreDataset`, which is what makes a nested path worth walking.
+RANGES = {
+    "CoreDataset": {"keywords": None, "notes": None, "source_caveats": None,
+                    "resources": "CoreDataset", "distributions": "CoreDistribution",
+                    "creators": "Creator"},
+    "CoreDistribution": {"format": None, "media_type": None, "path": None},
+    "Creator": {"name": None, "orcid": None},
+}
+
+#: The slot map that goes with `RANGES`, derived from it so the two describe
+#: one schema. In production both come from the same `SchemaView`; a test that
+#: let them drift would be checking a core class that does not exist.
+NESTED_DECLARED = {cls: set(slots) for cls, slots in RANGES.items()}
+
+
+class CoreDeclaresNestedTest(unittest.TestCase):
+    """#994: the core-declares test read the path's root slot only.
+
+    Sound while every class-ranged slot the two classes share has the same
+    range. Two do not: `resources` ranges to `Dataset` on the full and
+    `CoreDataset` on the core, so it recurses into a smaller class, and a
+    derived core carries `distributions` where the full carries
+    `distribution_formats`. A finding on a `both` row under either was
+    already correct — the row is checked against the core record literally —
+    but it could not say the core *could not* carry the value, which is the
+    difference between "name `full`" and "the two records disagree".
+    """
+
+    def test_indices_are_not_steps(self):
+        self.assertEqual(rc._path_steps("resources[0].creators[12].name"),
+                         ["resources", "creators", "name"])
+        self.assertEqual(rc._path_steps("keywords"), ["keywords"])
+
+    def test_a_nested_path_is_walked_against_the_class_each_step_lands_in(self):
+        for path, expected in (("keywords", True),
+                               ("resources", True),
+                               ("resources[0].keywords", True),
+                               ("resources[0].resources[1].keywords", True),
+                               ("resources[0].file_collections", False),   # Dataset has it, CoreDataset does not
+                               ("distributions[0].format", True),
+                               ("distributions[0].keywords", False),       # CoreDistribution has no keywords
+                               ("creators[0].name", True),
+                               ("creators[0].affiliation", False)):
+            with self.subTest(path):
+                self.assertIs(rc._core_declares(path, NESTED_DECLARED, RANGES), expected)
+
+    def test_a_scalar_cannot_carry_a_further_step(self):
+        self.assertFalse(rc._core_declares("keywords[0].anything", NESTED_DECLARED, RANGES))
+
+    def test_a_class_the_map_does_not_carry_is_not_read_as_a_scalar(self):
+        """#994 round 2, S1. `ranges` said `creators` ranges to `Creator`;
+        the map simply had no `Creator` entry. Reading that back as "the
+        step before it was a scalar" wrote a sentence contradicting the
+        map's own entry and dropped the row from the total. A gap in the
+        map is not evidence, so the walk stops and leaves the root test's
+        answer standing."""
+        partial = {"CoreDataset": {"keywords": None, "creators": "Creator"}}
+        verdict, cause = rc._core_path_verdict("creators.name", NESTED_DECLARED, partial)
+        self.assertEqual(verdict, rc.HOLDABLE)
+        self.assertEqual(cause, "")
+
+    def test_the_root_class_missing_from_the_map_names_no_step_at_all(self):
+        """The same gap at the first step. It used to index `steps[-1]`,
+        which Python reads from the end, so the sentence named the path's
+        last step as the scalar (#994 round 2, S1)."""
+        verdict, cause = rc._core_path_verdict("creators.name", NESTED_DECLARED, {"Other": {}})
+        self.assertEqual(verdict, rc.HOLDABLE)
+        self.assertEqual(cause, "")
+
+    def test_a_real_scalar_still_names_the_step_that_holds_the_value(self):
+        verdict, cause = rc._core_path_verdict("creators[0].name.given", NESTED_DECLARED, RANGES)
+        self.assertEqual(verdict, rc.NOT_A_PATH)
+        self.assertIn("`name` holds a value, not an object", cause)
+
+    def test_without_ranges_the_root_test_stands(self):
+        """A caller that has not been updated keeps the old answer rather
+        than a wrong one."""
+        for path in ("resources[0].file_collections", "distributions[0].keywords"):
+            with self.subTest(path):
+                self.assertTrue(rc._core_declares(path, NESTED_DECLARED))
+                self.assertFalse(rc._core_declares(path, NESTED_DECLARED, RANGES))
+
+    def test_a_root_the_core_lacks_is_still_caught_either_way(self):
+        for ranges in (None, RANGES):
+            with self.subTest(ranges=bool(ranges)):
+                self.assertFalse(rc._core_declares("file_collections", NESTED_DECLARED, ranges))
+
+    def test_an_empty_path_declares_nothing(self):
+        self.assertFalse(rc._core_declares("", NESTED_DECLARED, RANGES))
+
+
+    def test_a_wildcard_subscript_is_not_a_step(self):
+        """#994 round 1, M1: `[*]` is this module's own notation and appears
+        in committed dispositions tables (`creators[*].name`). Splitting on
+        `[` and filtering digits left `*]` standing as a step, so a real row
+        walked into a slot no class has and was reported as one the core
+        could not carry — a fabricated finding with `*]` in its cause."""
+        self.assertEqual(rc._path_steps("creators[*].affiliations"),
+                         ["creators", "affiliations"])
+        self.assertEqual(rc._path_steps("a[*][0].b[12].c"), ["a", "b", "c"])
+        declared, ranges = rc.declared_slots(), rc.declared_ranges()
+        for path in ("creators[*].name", "creators[*].affiliations", "instances[*].notes"):
+            with self.subTest(path):
+                self.assertTrue(rc._core_declares(path, declared, ranges))
+                # the broken form was a step literally named `*]`
+                self.assertNotIn("declares no `*]`",
+                                 rc._core_cannot_hold_cause(path, declared, ranges))
+
+    def test_the_walk_can_narrow_the_root_test_and_never_widen_it(self):
+        """#994 round 1, M2. The checker's failure direction is silencing, so
+        a `ranges` map that disagreed with `declared` — stale, or a caller
+        mixing two schemas — must not be able to answer True where the root
+        test says False. The root gate stands whatever the ranges say."""
+        generous = {"CoreDataset": {"anything": None, "keywords": None}}
+        self.assertFalse(rc._core_declares("anything", {"CoreDataset": set()}, generous))
+        self.assertFalse(rc._core_declares("keywords", {"CoreDataset": {"other"}}, generous))
+        self.assertIn("the core class declares no `keywords` slot",
+                      rc._core_cannot_hold_cause("keywords", {"CoreDataset": {"other"}}, generous))
+        # and it still narrows
+        self.assertFalse(rc._core_declares("resources[0].subsets", NESTED_DECLARED, RANGES))
+
+    def test_a_core_schema_with_no_CoreDataset_is_refused(self):
+        with self.assertRaises(ValueError):
+            rc._core_declares("keywords", {"Dataset": {"keywords"}}, RANGES)
+
+    def test_the_cause_names_the_step_and_the_class_that_lacks_it(self):
+        self.assertIn("the core class declares no `file_collections` slot",
+                      rc._core_cannot_hold_cause("file_collections", NESTED_DECLARED, RANGES))
+        self.assertIn("`CoreDataset` declares no `file_collections` slot",
+                      rc._core_cannot_hold_cause("resources[0].file_collections", NESTED_DECLARED, RANGES))
+        self.assertIn("`CoreDistribution` declares no `keywords` slot",
+                      rc._core_cannot_hold_cause("distributions[0].keywords", NESTED_DECLARED, RANGES))
+
+    def test_without_ranges_there_is_no_nested_cause_to_give(self):
+        """The sentence never claims a precision the walk did not have. With
+        no ranges the root test is the whole answer: a path whose root the
+        core declares is holdable and carries no cause at all, and only a
+        missing root produces one, naming the root."""
+        self.assertEqual(
+            rc._core_cannot_hold_cause("resources[0].file_collections", NESTED_DECLARED, None), "")
+        cause = rc._core_cannot_hold_cause("file_collections", NESTED_DECLARED, None)
+        self.assertIn("the core class declares no `file_collections` slot", cause)
+        self.assertNotIn("CoreDataset", cause)
+
+    def test_the_real_schema_agrees_on_the_two_divergences_the_issue_names(self):
+        """Against the committed schema, not the fixture: `resources` recurses
+        into `CoreDataset` and `distributions` into `CoreDistribution`."""
+        declared, ranges = rc.declared_slots(), rc.declared_ranges()
+        self.assertEqual(ranges["CoreDataset"]["resources"], "CoreDataset")
+        self.assertEqual(ranges["CoreDataset"]["distributions"], "CoreDistribution")
+        self.assertTrue(rc._core_declares("resources[0].keywords", declared, ranges))
+        self.assertFalse(rc._core_declares("resources[0].subsets", declared, ranges))
+        self.assertFalse(rc._core_declares("resources[0].file_collections", declared, ranges))
+        # and the root test, which is what shipped before, says otherwise
+        self.assertTrue(rc._core_declares("resources[0].subsets", declared))
+
+
+class CoreCannotHoldEndToEndTest(Harness):
+    """The cause as a reader meets it, on a `both` row (#994)."""
+
+    def check_with_ranges(self, markdown, full, core):
+        import tempfile
+        tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
+        path = Path(tmp.name) / "r.md"
+        path.write_text(markdown, encoding="utf-8")
+        return check_report(path, full, core, NESTED_DECLARED, ranges=RANGES)
+
+    TABLE = ("## Dispositions\n\n| slot | disposition | record | reason |\n|---|---|---|---|\n")
+
+    def test_a_nested_both_row_names_the_class_that_cannot_carry_it(self):
+        full = {"resources": [{"file_collections": [{"id": "x"}]}]}
+        for slot in ("resources[0].file_collections", "resources[*].file_collections",
+                     "resources.file_collections"):
+            with self.subTest(slot=slot):
+                md = self.TABLE + f"| `{slot}` | retained | both | kept |\n"
+                b = self.check_with_ranges(md, full, {"keywords": ["a"]})
+                (f,) = [x for x in b["findings"] if x["slot"] == slot]
+                self.assertIn("`CoreDataset` declares no `file_collections` slot", f["detail"])
+                self.assertEqual(b["claims_core_cannot_hold"], 1)
+
+    def test_an_unpopulated_implicit_list_path_is_not_a_core_schema_cause(self):
+        for child in ({}, {"file_collections": []}, {"file_collections": None}):
+            with self.subTest(child=child):
+                md = self.TABLE + "| `resources.file_collections` | retained | both | kept |\n"
+                b = self.check_with_ranges(md, {"resources": [child]}, {})
+                self.assertEqual(b["claims_core_cannot_hold"], 0)
+                self.assertTrue(b["findings"])
+                self.assertNotIn("declares no", b["findings"][0]["detail"])
+
+    def test_a_nested_row_the_core_can_carry_is_a_plain_contradiction(self):
+        """Not every nested `both` row is a schema matter: where the core
+        could carry it and does not, the two records disagree."""
+        full = {"resources": [{"keywords": ["a"]}]}
+        md = self.TABLE + "| `resources[0].keywords` | retained | both | kept |\n"
+        b = self.check_with_ranges(md, full, {"keywords": ["a"]})
+        (f,) = [x for x in b["findings"] if x["slot"] == "resources[0].keywords"]
+        self.assertNotIn("declares no", f["detail"])
+        self.assertEqual(b["claims_core_cannot_hold"], 0)
+
+
+class CorePathVerdictTest(unittest.TestCase):
+    """Three answers, not two (#994 round 1, S3). A path the core cannot
+    carry and a path no class can carry are different things, and only the
+    first is the core's fault."""
+
+    def test_a_step_through_a_scalar_is_not_the_cores_fault(self):
+        for path in ("keywords[0].anything", "keywords.anything", "notes[0].x"):
+            with self.subTest(path):
+                verdict, cause = rc._core_path_verdict(path, NESTED_DECLARED, RANGES)
+                self.assertEqual(verdict, rc.NOT_A_PATH)
+                self.assertIn("holds a value, not an object", cause)
+                # the old text named an empty class and gave advice that
+                # cannot help: the full record's slot is equally scalar
+                self.assertNotIn("no `` class", cause)
+                self.assertNotIn("must name `full`", cause)
+
+    def test_a_step_the_core_lacks_is_the_cores_fault_and_says_so(self):
+        verdict, cause = rc._core_path_verdict("resources[0].subsets", NESTED_DECLARED, RANGES)
+        self.assertEqual(verdict, rc.CORE_CANNOT_HOLD)
+        self.assertIn("must name `full`", cause)
+
+    def test_a_holdable_path_carries_no_cause(self):
+        self.assertEqual(rc._core_path_verdict("resources[0].keywords", NESTED_DECLARED, RANGES),
+                         (rc.HOLDABLE, ""))
+
+    def test_an_empty_path_names_no_slot(self):
+        verdict, cause = rc._core_path_verdict("", NESTED_DECLARED, RANGES)
+        self.assertEqual(verdict, rc.NOT_A_PATH)
+        self.assertIn("names no slot", cause)
+
+    def test_a_dotted_digit_is_a_step_and_a_subscript_is_not(self):
+        """#994 round 1, S2: filtering digits from the flattened tokens
+        dropped a dotted `0` as though it were an index. No slot is named
+        that today; a quiet behaviour change is still one."""
+        self.assertEqual(rc._path_steps("0"), ["0"])
+        self.assertEqual(rc._path_steps("a.0.b"), ["a", "0", "b"])
+        self.assertEqual(rc._path_steps("a[0].b[*].c"), ["a", "b", "c"])
+
+    def test_the_scalar_case_needs_a_schema_invalid_full_record(self):
+        """Worth pinning, because it bounds how much the S3 fix mattered.
+        The cause is only consulted where the *full* record carries a
+        populated value at the path. `resolve` walks the parsed record with
+        no schema awareness, so nothing can be populated under a slot the
+        full record holds as a scalar — and for a schema-valid record that
+        is every slot the core schema declares scalar. A row like
+        `keywords[0].anything` is then a plain contradiction, with no cause
+        and nothing counted. Only a full record that violates its own
+        schema reaches the sentence through here (#994 round 2, S2); the
+        companion test below is that record."""
+        import tempfile
+        tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
+        path = Path(tmp.name) / "r.md"
+        path.write_text("## Dispositions\n\n| slot | disposition | record | reason |\n|---|---|---|---|\n"
+                        "| `keywords[0].anything` | retained | both | kept |\n", encoding="utf-8")
+        b = check_report(path, {"keywords": ["a"]}, {"keywords": ["a"]},
+                         NESTED_DECLARED, ranges=RANGES)
+        (f,) = [x for x in b["findings"] if x["slot"] == "keywords[0].anything"]
+        self.assertEqual(f["detail"], "report says retained; the both record does not carry it")
+        self.assertEqual(b["claims_core_cannot_hold"], 0)
+
+    def test_a_full_record_that_breaks_its_schema_does_reach_the_scalar_cause(self):
+        """The bound above is on schema-valid records, not on the entry
+        point. Nothing validates `full` before `check_report` reads it, and
+        `resolve` asks only whether the value it is standing on is a dict
+        or a list. A full record holding objects under a slot the core
+        schema declares scalar resolves the path, reaches the verdict, and
+        gets the sentence describing the core schema's declared range.
+        It remains a finding, excluded from `claims_core_cannot_hold`
+        (#994 round 2, S2)."""
+        import tempfile
+        tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
+        path = Path(tmp.name) / "r.md"
+        path.write_text("## Dispositions\n\n| slot | disposition | record | reason |\n|---|---|---|---|\n"
+                        "| `keywords[0].anything` | retained | both | kept |\n", encoding="utf-8")
+        b = check_report(path, {"keywords": [{"anything": "x"}]}, {"keywords": ["a"]},
+                         NESTED_DECLARED, ranges=RANGES)
+        (f,) = [x for x in b["findings"] if x["slot"] == "keywords[0].anything"]
+        self.assertIn("`keywords` holds a value, not an object", f["detail"])
+        self.assertEqual(b["claims_core_cannot_hold"], 0)
