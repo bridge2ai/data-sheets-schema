@@ -83,6 +83,9 @@ def events(doc, validator_success=True):
 def environment(tmp_path, monkeypatch):
     monkeypatch.setattr(runner, "ROOT", tmp_path)
     monkeypatch.setattr(runner, "PLAN", tmp_path / "plan")
+    temporary = tmp_path / "temporary"
+    temporary.mkdir()
+    monkeypatch.setattr(runner.tempfile, "tempdir", str(temporary))
     monkeypatch.setattr(runner, "spawn_preamble", lambda agent: "PREAMBLE")
 
     def echo(agent, text):
@@ -123,6 +126,7 @@ def environment(tmp_path, monkeypatch):
 
 def fake_cli(path, doc, trace, failure=False):
     path.write_text(f"#!{sys.executable}\nimport json,sys\nfrom pathlib import Path\n" +
+                    f"assert Path.cwd().parent == Path({str(path.parent / 'temporary')!r})\n" +
                     ("print('Weekly quota exhausted')\nsys.exit(1)\n" if failure else
                      "prompt=sys.stdin.read()\nassert Path('input/record.yaml').read_text() in prompt\n" +
                      f"Path('output_evaluation.json').write_text({json.dumps(doc)!r})\n" +

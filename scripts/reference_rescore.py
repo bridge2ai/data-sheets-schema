@@ -291,7 +291,7 @@ def run_job(manifest: dict, job: dict, claude: str) -> dict:
     receipt["user_prompt_sha256"] = digest(attempt / "prompt.txt")
     receipt["system_prompt_sha256"] = instrument["definition_sha256"]
     try:
-        with tempfile.TemporaryDirectory(prefix="d4d-reference-", dir="/private/tmp") as temp:
+        with tempfile.TemporaryDirectory(prefix="d4d-reference-") as temp:
             isolated = Path(temp)
             copy_paths = [instrument["rubric"], instrument["schema"], "scripts/validate_evaluation_schema.py",
                           "pyproject.toml", "poetry.lock"]
