@@ -383,11 +383,11 @@ def _id_slots(full: Any, root_class: str | None = None,
     SchemaView, unknown root class) — named, not filled; exception class
     only, so pack bytes stay machine-neutral."""
     try:
-        from linkml_runtime import SchemaView
-
-        from data_sheets_schema.constants.schemas import SCHEMA_PATH
+        from data_sheets_schema.constants.schemas import SCHEMA_FULL_PATH
         from data_sheets_schema.receipts import _minted, populated_leaves
-        schema_path = Path(SCHEMA_PATH)
+        # The merged artifact carries every imported module's rules. A view
+        # keyed only on the modular root misses changes to its imports (#948).
+        schema_path = Path(SCHEMA_FULL_PATH)
         if not schema_path.is_absolute():                     # cwd-proof (#822)
             schema_path = Path(__file__).resolve().parents[2] / schema_path
         sv = shared_view(schema_path)
@@ -460,7 +460,9 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         #    slot_receiptless is sampled under receipts instrument v2 (#1123): a
         #    fragment on an identifier the record carries for the dataset is not
         #    asked about (no committed pack was at 5 under v1, so no bump)
-        "pack_version": 5,
+        # 6: identifier flags come from the merged full schema (#948), whose
+        #    compiler normalizes identifiers to required. `forced` is unchanged.
+        "pack_version": 6,
         "run": {"label": run.get("label"), "project": run.get("project"), "method": run.get("method"),
                 "condition": (((record.get("prompts") or {}).get("request") or {}).get("spec") or {}).get("condition")},
         # The path only: `review check --write` adds a block to this record,
@@ -531,7 +533,9 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                         # identifier for this dataset vs a third party's) can be
                         # made from the pack (round 2, note 7)
                         "record_id": full_record.get("id") if isinstance(full_record, dict) else None,
-                        "note": "forced: the schema declares this class's id as an identifier or required, "
+                        "note": "Flags use the merged full schema; required includes the compiler's "
+                                "normalization of identifier slots. forced: the schema declares this "
+                                "class's id as an identifier or required, "
                                 "so the record could not omit the id given the object — it settles the id's "
                                 "presence, not the object's. origin (#901): minted is a urn or a fragment on "
                                 "the record's own id (in any form); constructed is a fragment on an "
