@@ -14,7 +14,7 @@ Usage:
   python scripts/render_interleaved_evaluation.py \
       --yaml data/d4d_concatenated/claudecode_agent/AI_READI_d4d.yaml \
       --r10  data/evaluation_llm/rubric10_semantic/concatenated/AI_READI_claudecode_agent_evaluation.json \
-      --r20  data/evaluation_llm/rubric20_semantic/concatenated/AI_READI_claudecode_agent_evaluation.json \
+      --r20  data/evaluation_llm/rubric20_semantic/concatenated/_archive_pre_314/AI_READI_claudecode_agent_evaluation.json \
       --out  data/d4d_html/concatenated/claudecode_agent/AI_READI_d4d_interleaved.html
 """
 

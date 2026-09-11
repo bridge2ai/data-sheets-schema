@@ -6,7 +6,9 @@ artifacts in the repository and never looked at `label_aware/`, which is
 where every evaluation since 2026-08 lives and which the cross-arm table
 reads. A schema-invalid artifact sat there unreported.
 """
+import contextlib
 import importlib.util
+import io
 import json
 import tempfile
 import unittest
@@ -149,3 +151,20 @@ class ExitCode(unittest.TestCase):
             d = base / "rubric10_semantic" / "label_aware"; d.mkdir(parents=True)
             (d / "X_evaluation.json").write_text("{not json")
             self.assertEqual(self.m.main(eval_base=base, schema_dir=self.schema_dir), 1)
+
+    def test_non_object_json_does_not_abort_the_remaining_inventory(self):
+        for doc in (None, [], "not an object"):
+            for kept in (False, True):
+                with self.subTest(doc=doc, kept=kept), tempfile.TemporaryDirectory() as tmp:
+                    base = self._tree(tmp, "label_aware", self.valid)
+                    bad_dir = base / "_archive" if kept else base
+                    bad_dir.mkdir(exist_ok=True)
+                    (bad_dir / "A_evaluation.json").write_text(json.dumps(doc))
+                    output = io.StringIO()
+                    with contextlib.redirect_stdout(output):
+                        result = self.m.main(eval_base=base, schema_dir=self.schema_dir)
+                    self.assertEqual(result, 0 if kept else 1)
+                    self.assertIn("evaluation must be a JSON object", output.getvalue())
+                    self.assertRegex(output.getvalue(), r"live\s+valid\s+1")
+                    where = "kept" if kept else "live"
+                    self.assertRegex(output.getvalue(), where + r"\s+valid[^\n]+unreadable\s+1")
