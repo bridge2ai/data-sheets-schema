@@ -1,0 +1,296 @@
+{
+  "date": "2026-09-11",
+  "issue": 948,
+  "pack_version": 6,
+  "records": 24,
+  "identifier_leaves": 607,
+  "records_with_required_normalization": 17,
+  "required_false_to_true": 122,
+  "forced_or_other_field_changes": 0,
+  "historical_artifacts_rewritten": 0,
+  "rows": [
+    {
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml",
+      "sha256": "dd656a3a6e8b6bc0f00a50c5d1a5e75c6d2eae8407866c2ba3d2cc3c63b8fdb5",
+      "identifier_leaves": 22,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id",
+        "file_collections[3].id",
+        "file_collections[4].id",
+        "file_collections[5].id",
+        "file_collections[6].id",
+        "file_collections[7].id",
+        "file_collections[8].id",
+        "file_collections[9].id"
+      ]
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml",
+      "sha256": "e5c0f47198cd20ea47158959f6cfb4d25648965eb8c063ac977e2b5b9aba355d",
+      "identifier_leaves": 1,
+      "required_false_to_true": []
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_d4d.yaml",
+      "sha256": "4ed78cb10f8d8d5b18f601ea82e38f7ab620a1fa05bc81977d9fa944ab0d47f9",
+      "identifier_leaves": 60,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id",
+        "file_collections[3].id",
+        "file_collections[4].id",
+        "file_collections[5].id",
+        "file_collections[6].id",
+        "file_collections[7].id",
+        "file_collections[8].id",
+        "file_collections[9].id"
+      ]
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_d4d.yaml",
+      "sha256": "7660c4d93ccf05a12ebdd26c6c960e8f5d07455b3088cd3b2e909e95c802d048",
+      "identifier_leaves": 0,
+      "required_false_to_true": []
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_d4d.yaml",
+      "sha256": "c56d8261656557a68a8d94045593dd5c6b1b408d84f6aa98af5745955ef67f61",
+      "identifier_leaves": 11,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id",
+        "file_collections[3].id",
+        "file_collections[4].id",
+        "file_collections[5].id",
+        "file_collections[6].id",
+        "file_collections[7].id",
+        "file_collections[8].id"
+      ]
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml",
+      "sha256": "d96b8b8fb1dbc2748fc5cfcab49aa2eb745a8bcd3c8e83978ca4226b93922379",
+      "identifier_leaves": 3,
+      "required_false_to_true": []
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_d4d.yaml",
+      "sha256": "af41bfae4fd0cea107b3468ad46e9a1a1599e297bfa5dd92739c48e6008f30b1",
+      "identifier_leaves": 56,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id",
+        "file_collections[3].id",
+        "file_collections[4].id",
+        "file_collections[5].id",
+        "file_collections[6].id",
+        "file_collections[7].id",
+        "file_collections[8].id",
+        "file_collections[9].id"
+      ]
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d.yaml",
+      "sha256": "9b103567b3c018761b67ea065d6e6e7c336b1866ed5d161a36d890566e1e9459",
+      "identifier_leaves": 0,
+      "required_false_to_true": []
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml",
+      "sha256": "d221e2b36c2a98ebe21f57bc72039e6b840323b37d5155053e592fe9fb247409",
+      "identifier_leaves": 14,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id",
+        "file_collections[3].id",
+        "file_collections[4].id",
+        "file_collections[5].id",
+        "file_collections[6].id",
+        "file_collections[7].id",
+        "file_collections[8].id"
+      ]
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_d4d.yaml",
+      "sha256": "90bc2010147407e66842a5504cdd6b9883bc987263e313ff60a28ca4f4963881",
+      "identifier_leaves": 0,
+      "required_false_to_true": []
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CM4AI_d4d.yaml",
+      "sha256": "206c62821db4d7dc688ccff5de23020294dca149aa36de7682cafdfd9a083ad6",
+      "identifier_leaves": 60,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id",
+        "file_collections[3].id",
+        "file_collections[4].id"
+      ]
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/VOICE_d4d.yaml",
+      "sha256": "48a64a4e950a1ed59daf3d4efed662513451e2a0d192fd0b381031684efe2275",
+      "identifier_leaves": 34,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id",
+        "file_collections[3].id"
+      ]
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml",
+      "sha256": "f2a4d6229e5b4188a281727cb6723120e8ebbcfefe2883e6b1ada1c434bb0bb7",
+      "identifier_leaves": 6,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id",
+        "file_collections[3].id",
+        "file_collections[4].id"
+      ]
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml",
+      "sha256": "6ad8a47eab05cc4fe6015485d79d8601bc26a03c90d2c86711c1ff511a13030f",
+      "identifier_leaves": 15,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id"
+      ]
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml",
+      "sha256": "960c3500b4c6b43bd1eb1a17508148529a021c7ee3205c81aa19b021f75aa943",
+      "identifier_leaves": 11,
+      "required_false_to_true": []
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_d4d.yaml",
+      "sha256": "0766cb45aa40e3557eb0501fd4883cedbaf7462f6c2f59099c05dac4b3d59aea",
+      "identifier_leaves": 5,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id"
+      ]
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_d4d.yaml",
+      "sha256": "82963f6ea262f9cff93d4216ba18dacef48c4a6b7286445f83e195782e162759",
+      "identifier_leaves": 6,
+      "required_false_to_true": []
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/VOICE_d4d.yaml",
+      "sha256": "ba8876a62b15682af22bae93fe16f4ee6d229afca706435d4595064ad1d8b55c",
+      "identifier_leaves": 21,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id"
+      ]
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml",
+      "sha256": "4f09d95003ba1f3f5af5b611412126444f14acc1336410f0a962abd9c0f7f85f",
+      "identifier_leaves": 32,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id",
+        "file_collections[3].id",
+        "file_collections[4].id",
+        "file_collections[5].id",
+        "file_collections[6].id",
+        "file_collections[7].id",
+        "file_collections[8].id",
+        "file_collections[9].id"
+      ]
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml",
+      "sha256": "b14858313cb86f692a326c76764505a6d3c1f64a92ee452638eedd3636baba41",
+      "identifier_leaves": 58,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id",
+        "file_collections[3].id",
+        "file_collections[4].id",
+        "file_collections[5].id"
+      ]
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml",
+      "sha256": "225e5fd96d9599600b8fa789943bec45e46f5a9b6d2f78c2da809111e27ab2b8",
+      "identifier_leaves": 27,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id",
+        "file_collections[3].id",
+        "file_collections[4].id",
+        "file_collections[5].id",
+        "file_collections[6].id",
+        "file_collections[7].id",
+        "file_collections[8].id",
+        "file_collections[9].id"
+      ]
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/CM4AI_d4d.yaml",
+      "sha256": "9fce395dfcba6684dbf183e6c5cf2acc7b6b656c2f76b4ba519974025ca80200",
+      "identifier_leaves": 73,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id",
+        "file_collections[3].id",
+        "file_collections[4].id"
+      ]
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml",
+      "sha256": "01e3ef504db5ba6f21691c35fd0aa322661dd48f6d864cb38e053591b9763936",
+      "identifier_leaves": 17,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id",
+        "file_collections[3].id",
+        "file_collections[4].id",
+        "file_collections[5].id",
+        "file_collections[6].id",
+        "file_collections[7].id",
+        "file_collections[8].id",
+        "file_collections[9].id"
+      ]
+    },
+    {
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/CM4AI_d4d.yaml",
+      "sha256": "e3311d40121521b83f803ad969395396f63b7446fed36c1f55416379d0f16800",
+      "identifier_leaves": 75,
+      "required_false_to_true": [
+        "file_collections[0].id",
+        "file_collections[1].id",
+        "file_collections[2].id",
+        "file_collections[3].id",
+        "file_collections[4].id",
+        "file_collections[5].id",
+        "file_collections[6].id",
+        "file_collections[7].id",
+        "file_collections[8].id",
+        "file_collections[9].id"
+      ]
+    }
+  ]
+}
