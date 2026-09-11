@@ -48,3 +48,18 @@ that a file cannot change after a completed check; the generation inputs must
 remain stable for the run.
 
 No schema, vocabulary, generation artifact or prior evaluation was rewritten.
+
+The Codex plugin review then returned two material findings, retained verbatim
+in `schema_cache_codex_review_2026-09-11.txt`: #1259's downstream slot-prompt cache
+and #1260's separate hash/parse reads. Both are addressed. Shared views and the
+digest/vocabulary caches now hash and parse the same captured bytes; relative
+imports still resolve against the original source directory. Renderers receive
+one vocabulary snapshot. Fitness contexts and slot specifications use the same
+captured inventory and vocabulary, with specifications invalidated when that
+instrument changes. Existing persisted judgements remain under their original
+contexts.
+
+Five snapshot regressions and four fitness regressions failed before the fixes.
+All 150 focused tests pass after them, including an edit between fitness context
+creation and prompt construction. The current full/core fingerprints and fitness
+schema context remain unchanged. A follow-up plugin review checks the fixes.

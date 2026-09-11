@@ -708,10 +708,17 @@ def slot_spec(slot: str, class_name: str = "Dataset",
     """
     from data_sheets_schema import schema_digest
 
-    digest = schema_digest.build(class_name, schema_path)
+    return _render_slot_spec(slot, schema_digest.build(class_name, schema_path),
+                             schema_digest.vocabularies())
+
+
+def _render_slot_spec(slot: str, digest, vocabulary: dict) -> str:
+    """Render from the same captured inventory and vocabulary as the context."""
+    from data_sheets_schema import schema_digest
+
     sd = next((s for s in digest.slots if s.name == slot), None)
     if sd is None:
-        return f"`{slot}` — not a slot of {class_name}."
+        return f"`{slot}` — not a slot of {digest.class_name}."
 
     lines = [f"Field: `{sd.name}`",
              f"Declared range: {sd.range}"
@@ -757,9 +764,9 @@ def slot_spec(slot: str, class_name: str = "Dataset",
         # `data_substrate` is the wrong *kind* of thing — it is a resolvable
         # IRI, so every syntactic check passes it.
         for attribute, names in sorted(nested.values_from.items()):
-            vocabulary = schema_digest.render_values_from(names)
-            if vocabulary:
-                lines.append(f"`{attribute}` must be drawn from {vocabulary}")
+            terms = schema_digest.render_values_from(names, vocabulary=vocabulary)
+            if terms:
+                lines.append(f"`{attribute}` must be drawn from {terms}")
     return "\n".join(lines)
 
 
@@ -796,6 +803,7 @@ class LLMSlotFitnessScorer:
         self._memo: dict[tuple[str, str, str], FitnessJudgement] = {}
         self.cache_skipped: dict[str, int] = {}
         self._specs: dict[str, str] = {}
+        self._spec_schema: str | None = None
         self.calls = 0
         self.memo_hits = 0
         self.truncated = 0
@@ -810,12 +818,17 @@ class LLMSlotFitnessScorer:
             self._model = api_runner._model_settings()["name"]
         return self._client, self._model
 
-    def _context(self, model: str) -> "JudgementContext":
+    def _snapshot(self) -> tuple:
         from data_sheets_schema import schema_digest
+        inventory = schema_digest.build(self.class_name, self.schema_path)
+        vocabulary = schema_digest.vocabularies()
+        schema = schema_digest.fingerprint(schema_digest.render(inventory, vocabulary=vocabulary))
+        return schema, inventory, vocabulary
+
+    def _context(self, model: str, *, schema: str | None = None) -> "JudgementContext":
         return JudgementContext(
             axis="fitness", model=model, rubric=digest_of(FITNESS_SYSTEM),
-            schema=schema_digest.fingerprint(
-                schema_digest.digest_text(self.class_name, self.schema_path)))
+            schema=self._snapshot()[0] if schema is None else schema)
 
     def _load_cache(self, ctx: "JudgementContext") -> None:
         """Keep only entries produced under this exact context.
@@ -863,9 +876,14 @@ class LLMSlotFitnessScorer:
         return _score
 
     def spec(self, slot: str) -> str:
+        return self._spec_from_snapshot(slot, *self._snapshot())
+
+    def _spec_from_snapshot(self, slot: str, schema: str, inventory, vocabulary: dict) -> str:
+        if schema != self._spec_schema:
+            self._specs.clear()
+            self._spec_schema = schema
         if slot not in self._specs:
-            self._specs[slot] = slot_spec(slot, self.class_name,
-                                          self.schema_path)
+            self._specs[slot] = _render_slot_spec(slot, inventory, vocabulary)
         return self._specs[slot]
 
     def __call__(self, *, project: str, slot: str, value: Any,
@@ -877,7 +895,10 @@ class LLMSlotFitnessScorer:
         from.
         """
         client, model = self._resolve()
-        ctx = self._context(model)
+        # Capture once: an edit between context creation and prompt rendering
+        # must not put a judgement under another instrument's key (#1259).
+        snapshot = self._snapshot()
+        ctx = self._context(model, schema=snapshot[0])
         self._load_cache(ctx)
 
         key = (ctx.fingerprint(), slot,
@@ -890,7 +911,7 @@ class LLMSlotFitnessScorer:
 
         rendered = yaml.safe_dump({slot: value}, sort_keys=False,
                                   allow_unicode=True)
-        prompt = (f"{self.spec(slot)}\n\n"
+        prompt = (f"{self._spec_from_snapshot(slot, *snapshot)}\n\n"
                   f"Value supplied:\n\n```yaml\n{rendered}```\n\n"
                   "Does this value satisfy the field as specified?")
         resp = _call_with_retry(client, model=model, max_tokens=self.max_tokens,

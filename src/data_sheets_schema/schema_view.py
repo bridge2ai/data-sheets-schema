@@ -30,25 +30,33 @@ import hashlib
 from pathlib import Path
 
 from linkml_runtime import SchemaView
+from linkml_runtime.linkml_model.meta import SchemaDefinition
+from linkml_runtime.loaders import yaml_loader
 
 _VIEWS: dict[tuple[str, str], SchemaView] = {}
 
 
-def content_key(path: str | Path) -> tuple[str, str]:
+def content_key(path: str | Path, *, content: bytes | None = None) -> tuple[str, str]:
     """(resolved path, blake2b of the bytes) — what a view is keyed by."""
     p = Path(path).resolve()
-    return (str(p), hashlib.blake2b(p.read_bytes(), digest_size=16).hexdigest())
+    data = p.read_bytes() if content is None else content
+    return (str(p), hashlib.blake2b(data, digest_size=16).hexdigest())
 
 
-def shared_view(path: str | Path) -> SchemaView:
+def shared_view(path: str | Path, *, content: bytes | None = None) -> SchemaView:
     """The one ``SchemaView`` for the schema file at ``path``."""
-    key = content_key(path)
-    p = Path(key[0])
+    p = Path(path).resolve()
+    data = p.read_bytes() if content is None else content
+    key = content_key(p, content=data)
     view = _VIEWS.get(key)
     if view is None:
         for stale in [k for k in _VIEWS if k[0] == key[0]]:
             del _VIEWS[stale]
-        view = _VIEWS[key] = SchemaView(str(p))
+        # Hash and parse the same bytes. Loading the path after hashing it
+        # can permanently store a different revision under this key (#1260).
+        schema = yaml_loader.loads(data.decode("utf-8"), target_class=SchemaDefinition)
+        schema.source_file = str(p)  # Preserve relative import resolution.
+        view = _VIEWS[key] = SchemaView(schema)
     return view
 
 

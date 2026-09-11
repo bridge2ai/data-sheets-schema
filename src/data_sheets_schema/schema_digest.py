@@ -141,19 +141,20 @@ _VOCABULARIES: dict[str, dict[str, str]] | None = None
 _VOCABULARY_KEY: tuple[str, str] | None = None
 
 
-def vocabularies() -> dict[str, dict[str, str]]:
+def vocabularies(*, content: bytes | None = None) -> dict[str, dict[str, str]]:
     """The pinned registry vocabularies, keyed by `values_from` name."""
     global _VOCABULARIES, _VOCABULARY_KEY
-    key = content_key(VOCABULARY_PIN)
+    data = VOCABULARY_PIN.read_bytes() if content is None else content
+    key = content_key(VOCABULARY_PIN, content=data)
     if _VOCABULARIES is None or key != _VOCABULARY_KEY:
         import yaml as _yaml
-        doc = _yaml.safe_load(VOCABULARY_PIN.read_text(encoding="utf-8")) or {}
+        doc = _yaml.safe_load(data) or {}
         _VOCABULARIES = doc.get("vocabularies") or {}
         _VOCABULARY_KEY = key
-    return _VOCABULARIES
+    return copy.deepcopy(_VOCABULARIES)
 
 
-def render_values_from(names: list[str]) -> str | None:
+def render_values_from(names: list[str], *, vocabulary: dict | None = None) -> str | None:
     """The permitted terms for a slot that declares `values_from` (#538).
 
     Rendered because nothing rendered it before. `data_topic` and
@@ -172,7 +173,7 @@ def render_values_from(names: list[str]) -> str | None:
     """
     if not names:
         return None
-    known = vocabularies()
+    known = vocabularies() if vocabulary is None else vocabulary
     parts = []
     for name in names:
         terms = known.get(name)
@@ -273,11 +274,11 @@ def _schema_name(class_name: str, path: Path) -> str:
     return str(known) if known and path.name == Path(known).name else str(path)
 
 
-def _cache_key(class_name: str, path: Path) -> _CacheKey:
+def _cache_key(class_name: str, path: Path, content: bytes) -> _CacheKey:
     # Preserve the caller's displayed path in custom-schema renders, while
     # also distinguishing the actual file after a cwd change. Use the same
     # content hash as shared_view: size/mtime can collide on rewrites (#943).
-    return (class_name, str(path), *content_key(path))
+    return (class_name, str(path), *content_key(path, content=content))
 
 
 def _drop_stale(cache: dict, key: tuple[str, ...]) -> None:
@@ -310,18 +311,26 @@ def build(class_name: str, schema_path: Path | None = None) -> ClassDigest:
     expensive part this cache exists to avoid repeating.
     """
     path = _schema_path(class_name, schema_path)
-    key = _cache_key(class_name, path)
+    content = path.read_bytes()
+    return copy.deepcopy(_build_cached(class_name, path, content))
+
+
+def _build_cached(class_name: str, path: Path, content: bytes) -> ClassDigest:
+    """Internal inventory from one snapshot; callers must copy before exposing it."""
+    key = _cache_key(class_name, path, content)
     if key not in _BUILD_CACHE:
-        fresh = _build_uncached(class_name, path)
+        fresh = _build_uncached(class_name, path, content=content)
         _drop_stale(_BUILD_CACHE, key)
         _BUILD_CACHE[key] = fresh
-    return copy.deepcopy(_BUILD_CACHE[key])
+    return _BUILD_CACHE[key]
 
 
-def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDigest:
+def _build_uncached(class_name: str, schema_path: Path | None = None, *,
+                    content: bytes | None = None) -> ClassDigest:
     """Slot inventory for one target class."""
-    path = _schema_path(class_name, schema_path)
-    sv = shared_view(path)
+    path = (Path(schema_path) if content is not None and schema_path is not None
+            else _schema_path(class_name, schema_path))
+    sv = shared_view(path, content=content)
     # The digest names the schema it came from, and that name is rendered into
     # the digest text — so an identical schema read from a different location
     # produced a different fingerprint. Verifying a digest by rebuilding the
@@ -439,8 +448,9 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
     return digest
 
 
-def render(digest: ClassDigest) -> str:
+def render(digest: ClassDigest, *, vocabulary: dict | None = None) -> str:
     """Markdown rendering, sized for prompt injection."""
+    vocabulary = vocabularies() if vocabulary is None else vocabulary
     lines = [
         f"# Target class `{digest.class_name}` — slot inventory",
         "",
@@ -462,9 +472,9 @@ def render(digest: ClassDigest) -> str:
             shown = ", ".join(f"`{v}`" for v in s.enum_values)
             tail = f" (+{s.enum_truncated} more)" if s.enum_truncated else ""
             lines.append(f"Permitted: {shown}{tail}")
-        vocabulary = render_values_from(s.values_from)
-        if vocabulary:
-            lines.append(f"Draw from: {vocabulary}")
+        terms = render_values_from(s.values_from, vocabulary=vocabulary)
+        if terms:
+            lines.append(f"Draw from: {terms}")
         lines.append("")
 
     if digest.nested:
@@ -543,9 +553,9 @@ def render(digest: ClassDigest) -> str:
             # The registry vocabulary a nested attribute draws from (#538).
             # Here or nowhere, exactly as for the enums above.
             for slot_name, names in sorted(n.values_from.items()):
-                vocabulary = render_values_from(names)
-                if vocabulary:
-                    lines.append(f"    - `{slot_name}` draws from {vocabulary}")
+                terms = render_values_from(names, vocabulary=vocabulary)
+                if terms:
+                    lines.append(f"    - `{slot_name}` draws from {terms}")
         lines.append("")
     return "\n".join(lines)
 
@@ -637,9 +647,13 @@ def digest_text(class_name: str, schema_path: Path | None = None) -> str:
     in the same process cannot leave the prompt and fingerprint stale (#942).
     """
     path = _schema_path(class_name, schema_path)
-    key = (*_cache_key(class_name, path), *content_key(VOCABULARY_PIN))
+    content = path.read_bytes()
+    vocabulary_bytes = VOCABULARY_PIN.read_bytes()
+    key = (*_cache_key(class_name, path, content),
+           *content_key(VOCABULARY_PIN, content=vocabulary_bytes))
     if key not in _TEXT_CACHE:
-        fresh = render(build(class_name, path))
+        fresh = render(_build_cached(class_name, path, content),
+                       vocabulary=vocabularies(content=vocabulary_bytes))
         _drop_stale(_TEXT_CACHE, key)
         _TEXT_CACHE[key] = fresh
     return _TEXT_CACHE[key]
