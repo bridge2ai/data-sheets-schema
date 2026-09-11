@@ -597,8 +597,8 @@ replicates; a baseline arm whose replicates ran the check and read no
 claim, none measuring one (`canary.report_basis`: under report_claims v4 the v7 production arm for
 CHORUS, CM4AI and VOICE, with AI_READI measuring 0 on rep3 — under v5 a
 prose retention claim is a claim, so the v7 arm measures 0 on some
-replicate for AI_READI (3 of 3), CM4AI (2) and VOICE (1), and **CHORUS
-alone stays all-vacuous**), is a floor of 0 with
+replicate for AI_READI (3 of 3), CM4AI (2) and VOICE (1), and CHORUS stayed all-vacuous. Under v7, CHORUS rep1 also measures a
+retention claim: its basis is 1 measured, 2 vacuous), is a floor of 0 with
 `baseline_basis` on the row, while a baseline whose checker never ran stays
 a missing baseline (#599). A report without the table is regenerated once
 like a contradiction; a rewrite that is truncated, drops the table or
@@ -619,7 +619,18 @@ carries its own cause. It remains a finding, excluded from
 `claims_core_cannot_hold`; telling a schema-valid record to name `full`
 would not repair that path. Missing classes in a caller-supplied range
 map retain the root-only answer instead of being mistaken for scalars.
-All 277 checked blocks were recomputed under v6 in the same change.
+The current 277 checked blocks use **v7** (#1089/#1194/#1196): 83 findings
+(41 removal, 23 false-schema, 6 change, 10 retention, 3 unrecorded-removal),
+1,033 claims, 164 prose retention claims, and 41 unrecorded removals listed.
+The checker distinguishes an assertion quoted from a record from the report's
+own assertion; preserves every segment of a named path; honors prose record
+scope; reads unbordered dispositions tables and embedded record qualifiers;
+and excludes table rows by position. Mixed list/scalar matches count entries.
+Each snapshot-backed block pins the exact phase-1 bytes it parsed: 86 usable
+snapshot pins and 191 absent snapshots. The dated plan amendment and
+`notes/report_claims_v7_audit.json` preserve the prior aggregate and every
+changed measurement; `scripts/report_claims_removal_diff.py` also measures
+latent removal suppression against a supplied earlier checker.
 The block carries
 `instrument` from v2 (#996), from v4 (#1122) `rows_by_record` — the
 dispositions rows tallied by their record column (`full`, `core`, `both`,
@@ -648,9 +659,10 @@ finding (three of nine v8 reviews had found one: CHORUS 04f rep2
 removals are listed, not findings (`snapshot_basis`); and a paragraph
 saying a value "remains in" / "stays in" / "is kept in" a backticked slot
 path is a retention claim (not when negated, not on a class name),
-satisfied at that path in either record with a dotted step over a list
-read as `[*]`, or by a populated key of the leaf's name under the claim's
-root. A prose claim is a claim checked, so 70 reports that read no claim
+satisfied at the complete path with a dotted step over a list read as
+`[*]`. A declared root slot must exist at the root; only a bare non-root leaf
+such as `review_details` can abbreviate a nested field. An explicit core or
+full scope chooses that record, and a claim about both requires both. A prose claim is a claim checked, so 70 reports that read no claim
 under v4 read one under v5, and the eleven canary blocks that quote a
 `report_basis` were re-derived with `d4d api verdict` where theirs had
 moved — ten blocks in all, each keeping its prior under `prior_verdict`;

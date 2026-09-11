@@ -430,24 +430,26 @@ report_claims:
   prose_retention_claims: 1
   removals_unrecorded: []
   removals_unrecorded_count: 0
-  instrument: 'v6 (#994): a `both` row''s path is judged step by step against the
-    core class''s declared ranges rather than at its root alone, a `[*]` wildcard
-    is a step''s subscript rather than a step of its own, and `claims_core_cannot_hold`
-    counts only a path the core cannot hold: one that descends through a scalar violates
-    the core schema''s declared range, carries its own cause and is excluded from
-    that count; v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
-    snapshot carried that the final full record does not, with no `removed` row or
-    removal sentence naming it, is `removal_not_recorded`; a prose retention claim
-    (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is
-    read like a retained row; v4 (#1122): `rows_by_record` tallies the dispositions
-    rows by their record column — `full`, `core`, `both`, `either` for an empty cell,
-    `no_record_column` for a table with no such column, `invalid` for anything else
-    — so a `both` row wrongly flipped to `full`, which the gate cannot see (a `full`
-    row resolves against the full record only), is countable from the block; v3 (#1022,
-    #1046): a schema claim that names its own scope — the core schema, the full schema,
-    a class — is resolved against that scope only, not against every class; v2 (#990):
-    a finding on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
-    counts them'
+  instrument: 'v7 (#1089, #1194, #1196): attributed schema claims, exact nested paths
+    and record scopes, table positions, mixed list counts and removal suppression
+    are distinguished; phase-1 snapshot bytes are pinned; v6 (#994): a `both` row''s
+    path is judged step by step against the core class''s declared ranges rather than
+    at its root alone, a `[*]` wildcard is a step''s subscript rather than a step
+    of its own, and `claims_core_cannot_hold` counts only a path the core cannot hold:
+    one that descends through a scalar violates the core schema''s declared range,
+    carries its own cause and is excluded from that count; v5 (#1054): with the phase-1
+    snapshot on disk, a top-level slot the snapshot carried that the final full record
+    does not, with no `removed` row or removal sentence naming it, is `removal_not_recorded`;
+    a prose retention claim (`remains in`, `stays in`, `is kept in`, `is retained
+    in` a backticked path) is read like a retained row; v4 (#1122): `rows_by_record`
+    tallies the dispositions rows by their record column — `full`, `core`, `both`,
+    `either` for an empty cell, `no_record_column` for a table with no such column,
+    `invalid` for anything else — so a `both` row wrongly flipped to `full`, which
+    the gate cannot see (a `full` row resolves against the full record only), is countable
+    from the block; v3 (#1022, #1046): a schema claim that names its own scope — the
+    core schema, the full schema, a class — is resolved against that scope only, not
+    against every class; v2 (#990): a finding on a `both` row names when the core
+    class declares no such slot; `claims_core_cannot_hold` counts them'
   artifacts:
     report:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_reconciliation.md
@@ -458,6 +460,10 @@ report_claims:
     core:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d_core.yaml
       md5: 7091184fe856d0b71e1ef53690e21f55
+    phase1_snapshot:
+      path: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_full.yaml
+      sha256: 7b2e57949317d2bffb43ed283b288a99ab663133bd00e2f192cc4db49d275593
+      state: usable
   schema:
     full_sha256: ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da
     core_sha256: 7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449

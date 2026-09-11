@@ -44,6 +44,7 @@ what was skipped is reported rather than left silent.
 
 from __future__ import annotations
 
+import hashlib
 import re
 from pathlib import Path
 from typing import Any
@@ -84,6 +85,23 @@ _ABSENT_FROM_SCHEMA = re.compile(
     r"\bnot in the (?:inventory|schema)\b|\bnot attested (?:keys?|slots?)\b|"
     r"\bappears? to have been invented\b", re.I)
 
+# A record-side assertion being discussed is not an assertion by the report
+# (#1089). Match the grammatical subject, not a generic denial phrase.
+_RECORD_SCHEMA_ASSERTION = re.compile(
+    r"\b(?:the\s+)?(?:core|full) record(?:['’]s)?"
+    r"(?:\s+`[^`]+`)?(?:\s+(?:field|slot|text|sentence|note))?\s+"
+    r"(?:asserts?|asserted|claims?|claimed|says|said|states|stated)\b", re.I)
+
+
+def _record_asserted_schema_claim(before: str) -> bool:
+    clause = re.split(r"(?<=[.!?])\s+|;|\b(?:but|however|whereas|while|yet)\b", before, flags=re.I)[-1]
+    match = _RECORD_SCHEMA_ASSERTION.search(clause)
+    if not match:
+        return False
+    return not re.search(r"\b(?:I|we|the report|the audit)\s+"
+                         r"(?:assert|claim|conclude|find|confirm|state|say)\w*\b",
+                         clause[match.end():], re.I)
+
 _TICKED = re.compile(r"`([A-Za-z_][\w]*(?:\[(?:\d+|\*)\])?"
                      r"(?:\.[\w]+(?:\[(?:\d+|\*)\])?)*)`")
 #: A backticked name in this position is a container or a destination, not the
@@ -107,9 +125,9 @@ _CONTENT_NOUN = re.compile(
     r"keys?|fields?|reference|prefix)\b", re.I)
 
 
-def _cells(line: str) -> list[str] | None:
+def _cells(line: str, *, unbordered: bool = False) -> list[str] | None:
     """The cells of a markdown table row, or None if this is not one."""
-    if not line.lstrip().startswith("|"):
+    if "|" not in line or (not unbordered and not line.lstrip().startswith("|")):
         return None
     parts = [c.strip() for c in line.strip().strip("|").split("|")]
     if len(parts) < 2 or all(set(c) <= set("-: ") for c in parts):
@@ -170,6 +188,8 @@ def _target(text: str) -> str:
     full record's absence of it made the claim look satisfied.
     """
     low = text.lower()
+    if re.search(r"\b(?:full\s+and\s+core|core\s+and\s+full)\s+(?:records?|files?)\b", low):
+        return "both"
     core = "core record" in low or "core file" in low or "from core" in low
     full = "full record" in low or "full file" in low or "from full" in low
     if core and not full:
@@ -293,15 +313,11 @@ _PROSE_RETAINED = re.compile(
     r"are (?:kept|retained|left|preserved)|(?:was|were) (?:kept|retained|left|preserved))\s+"
     r"(?:in|under|at|on)\s+`([A-Za-z_][\w]*(?:\[(?:\d+|\*)\])?(?:\.[A-Za-z_][\w]*(?:\[(?:\d+|\*)\])?)*)`",
     re.I)
-#: A negation in the clause before the verb turns the sentence into the
-#: opposite of a retention ("nothing remains in `errata`", "it never
-#: remains in `notes`", "no longer kept in `x`"; #1175 review S2).
-_NEGATED_BEFORE = re.compile(r"\b(?:no longer|not|never|nothing|neither|none)\b[^.;:,()—-]{0,12}$", re.I)
 #: A negation anywhere in the verb's own clause: "No value remains in
 #: `errata`" (#1175 Codex review, M7). The clause is the last one
 #: `_CLAUSE_SPLIT` yields, so "names no committee, so … retained under
 #: `notes`" is a claim (#1175 round 2, S1).
-_NEGATION = re.compile(r"\b(?:no|not|never|neither|nor|none|nothing)\b", re.I)
+_NEGATION = re.compile(r"\b(?:no|not(?!\s+only\b)|never|neither|nor|none|nothing)\b", re.I)
 
 
 def _negated_clause(before: str) -> bool:
@@ -311,6 +327,10 @@ def _negated_clause(before: str) -> bool:
     one of the form "… no DPIA …. The substantive content is retained
     under `x`"."""
     sentence = re.split(r"[.!?]\s", before)[-1]
+    # A balanced em-dash aside has its own subject: “the identifier — no
+    # prefix is supplied — and why the award details remain in `notes`”.
+    # Removing the aside keeps a surrounding “No value — even ... —” intact.
+    sentence = re.sub(r"—[^—]*—", " ", sentence)
     return bool(_NEGATION.search(_CLAUSE_SPLIT.split(sentence)[-1]))
 #: Literals a `remains at`/`remains in` phrase can name that are not slots
 #: ("the flag remains at `false`", #1175 Codex review, M7).
@@ -370,7 +390,7 @@ def _removal_voided(clause: str) -> bool:
 #: "`errata`: removed", "- **Removed:** `publisher`" — and splitting on
 #: them severed the subject from the removal word in 197 of the 301
 #: reports (#1175 round 7, M1).
-_CLAUSE_SPLIT = re.compile(r"\s*(?:;|,\s*(?:but|while|whereas|although|though|because|since|so|and then)\b|"
+_CLAUSE_SPLIT = re.compile(r"\s*(?:;|,\s*(?:but|while|whereas|although|though|because|since|so|and then|and(?!\s+(?:`|the\s+`)))\b|"
                            r"\s(?:but|while|whereas|although|though|because|since)\s|"
                            # a relative clause is about its antecedent, not about a
                            # name earlier in the sentence: "`funders` contains
@@ -387,6 +407,132 @@ _CASUALTY_TAIL = re.compile(r"(?:\s+(?!(?:remains?|stays?|retained|kept|carried|
 _DESTINATION_LIST = re.compile(r"\b(?:from|into|to|in|on|within|onto|under|beside|alongside)\s+(?:the\s+|core\s+|full\s+)*"
                                r"`[^`]+`(?:\s*,\s*`[^`]+`)*(?:\s*,?\s*(?:and|or)\s+`[^`]+`)?", re.I)
 
+_KEEPS_CONTENT = re.compile(r"\b(?:keeps?|retains?|carries|contains?|includes?|preserves?)\b", re.I)
+_CORE_REMOVAL_SUBJECT = re.compile(
+    r"\b(?:the\s+)?core (?:record|file)\s+(?:(?:now|still|also)\s+)?"
+    r"(?:omits?|drops?|removes?|deletes?|excludes?)\b", re.I)
+_CORE_REMOVAL_OBJECT = re.compile(
+    r"\b(?:omitted|removed|dropped|deleted|stripped|absent|withdrawn)\s+from\s+"
+    r"(?:the\s+)?(?:(?:reconciled|final)\s+)?core(?:\s+(?:record|file))?\b", re.I)
+
+
+def _core_only_removal(clause: str, sentence: str) -> bool:
+    """Resolve the removal's core scope even when full is mentioned (#1227)."""
+    clause = clause.replace("**", "")
+    # A second absence predicate is context, not a retraction of an
+    # explicit full removal: 'removed from full, was already absent from
+    # core' (#1230). Its separate slot, if any, is split by the caller.
+    if (re.search(r"\b(?:removed|deleted|dropped|omitted|stripped|withdrawn)\s+from\s+"
+                  r"(?:the\s+)?(?:(?:reconciled|final)\s+)?full\b", clause, re.I)
+            or re.search(r"\bfull (?:record|file)\s+(?:(?:now|still|also)\s+)?"
+                         r"(?:omits?|drops?|removes?|deletes?|strips?|withdraws?)\b", clause, re.I)):
+        return False
+    subject = _CORE_REMOVAL_SUBJECT.search(clause)
+    if subject and not re.search(r"\bfull(?: record)?\s+and\s+(?:the\s+)?$",
+                                 clause[:subject.start()], re.I):
+        return True
+    # A comma-and clause can inherit its subject: 'The core record ...
+    # carries no fact the full record does not, and omits `x`'.
+    if (re.match(r"\s*(?:the\s+)?core (?:record|file)\b", sentence, re.I)
+            and re.match(r"\s*(?:(?:it|now|still|also)\s+)*"
+                         r"(?:omits?|drops?|removes?|deletes?|excludes?)\b", clause, re.I)):
+        return True
+    # 'Retained in the full record and absent from the core record' is a
+    # statement about the latter omission, not a removal from both.
+    target = _CORE_REMOVAL_OBJECT.search(clause)
+    return bool(target and not re.match(r"\s*(?:and|as well as)\s+(?:the\s+)?full\b",
+                                       clause[target.end():], re.I))
+
+
+def _prose_lines_with_sentence(text: str):
+    """Keep soft-wrapped subject context without joining separate claims."""
+    for paragraph in re.split(r"\n\s*\n", text):
+        for sentence in re.split(r"(?<=[.!?])\s+", paragraph):
+            context = " ".join(sentence.splitlines()).strip()
+            for line in sentence.splitlines():
+                yield line, context
+
+
+_AND_REMOVAL_SUBJECT = re.compile(
+    r"\s+and\s+(?=(?:(?:the\s+)?(?:core|full) (?:record|file)\s+"
+    r"(?:(?:now|still|also)\s+)?(?:omits?|drops?|removes?|deletes?)\b|"
+    r"`[^`]+`\s+(?:was|were|is|are|has been|have been)\s+"
+    r"(?:removed|deleted|dropped|omitted|stripped|withdrawn|absent)\b))", re.I)
+
+
+def _removal_clauses(sentence: str):
+    """Independent predicates can name different records (#1228).
+
+    A prior removal is required, so 'full and core record omit ...' and
+    '`a` and `b` were removed' remain coordinated subjects.
+    """
+    for clause in _CLAUSE_SPLIT.split(sentence):
+        start = 0
+        for boundary in _AND_REMOVAL_SUBJECT.finditer(clause):
+            if _REMOVAL_WORD.search(clause[start:boundary.start()]):
+                yield clause[start:boundary.start()]
+                start = boundary.end()
+        yield clause[start:]
+
+
+def _weak_removal_names(sentence: str) -> list[str]:
+    """Remove content holders and retained destinations from weak casualties.
+
+    Gerunds remain outside the weak removal vocabulary: the corpus's
+    'Removing ...' forms describe alternatives, not recorded actions (#1196).
+    """
+    removal = _REMOVAL_WORD.search(sentence)
+    names = set(_named(sentence))
+    if not removal:
+        return []
+    out = []
+    for match in _TICKED.finditer(sentence):
+        if match.group(1) not in names:
+            continue
+        if match.end() <= removal.start():
+            if _KEEPS_CONTENT.search(sentence[match.end():removal.start()]):
+                continue
+        elif _KEEPS_CONTENT.search(sentence[removal.end():match.start()]):
+            continue
+        out.append(match.group(1))
+    return out
+
+
+_RECORD_PREDICATE = re.compile(
+    r"\b(?:remains?|stays?|(?:is|are|was|were)\s+"
+    r"(?:(?:already|still|also|now|not|never)\s+)*(?:kept|retained|left|preserved|absent)|"
+    r"remove[sd]?|delete[sd]?|drops?|dropped|omits?|omitted|strips?|stripped|"
+    r"absent|withdraws?|withdrawn)\b", re.I)
+
+
+def _retention_predicate_context(sentence: str, offset: int) -> tuple[str, str]:
+    """Return this predicate's scope and its possibly shared subject.
+
+    Adjacent absence/removal predicates carry their own record scopes.
+    Coordinated verbs inherit their subject and its negation; an independent
+    subject starts a new assertion (#1230, #1233).
+    """
+    spans = []
+    start = 0
+    for boundary in re.finditer(r"[;,]\s*|\s+(?:and|but|while|whereas|yet)\s+", sentence, re.I):
+        if (_RECORD_PREDICATE.search(sentence[start:boundary.start()])
+                and _RECORD_PREDICATE.search(sentence[boundary.end():])):
+            spans.append((start, boundary.start()))
+            start = boundary.end()
+    spans.append((start, len(sentence)))
+    subject = ""
+    for start, end in spans:
+        clause = sentence[start:end]
+        predicate = _RECORD_PREDICATE.search(clause)
+        prefix = clause[:predicate.start()] if predicate else clause
+        shared = bool(re.fullmatch(r"\s*(?:(?:and|but|also|already|still|now|not|never)\s+)*", prefix, re.I))
+        if not shared:
+            subject = prefix
+        if start <= offset < end:
+            before = clause[:offset - start]
+            return clause, (subject + " " + before if shared else before)
+    return sentence, sentence[:offset]
+
 #: Top-level keys a snapshot diff does not report (#1054): the class
 #: declarations and the commentary slots the receipt denominator also
 #: excludes (#722), which reconciliation rewrites freely.
@@ -397,7 +543,10 @@ _SNAPSHOT_EXEMPT = frozenset({"conforms_to_schema", "conforms_to_class", "notes"
 #: and the schema by hash, but the checker moved under #914, #929, #962 and
 #: #990 with nothing recording which reading produced a block; everything
 #: before this constant is v1.
-REPORT_CLAIMS_INSTRUMENT = ("v6 (#994): a `both` row's path is judged step by step against the "
+REPORT_CLAIMS_INSTRUMENT = ("v7 (#1089, #1194, #1196): attributed schema claims, exact nested "
+                            "paths and record scopes, table positions, mixed list counts and "
+                            "removal suppression are distinguished; phase-1 snapshot bytes are pinned; "
+                            "v6 (#994): a `both` row's path is judged step by step against the "
                             "core class's declared ranges rather than at its root alone, a `[*]` "
                             "wildcard is a step's subscript rather than a step of its own, and "
                             "`claims_core_cannot_hold` counts only a path the core cannot hold: one "
@@ -629,10 +778,10 @@ def _is_dispositions_header(cells: list[str] | None) -> bool:
     return "disposition" in low and "slot" in low
 
 
-def _dispositions_table_lines(text: str) -> set[str]:
-    """The stripped lines of every table whose header `disposition_rows`
+def _dispositions_table_indices(text: str) -> set[int]:
+    """The line positions of every table whose header `disposition_rows`
     recognises — header, rule and every row to the next header or the
-    first non-`|` line, parseable or not (#1175 round 3, M1/S2; round 4,
+    first line without table cells, parseable or not (#1175 round 3, M1/S2; round 4,
     M1/S4). Keyed on the header, not on the rows that parsed: a
     recognised table none of whose rows the strict reader can read is
     still the strict reader's (round 4, M1 — "| `errata` | Reviewed |
@@ -644,28 +793,35 @@ def _dispositions_table_lines(text: str) -> set[str]:
     the strict reader's. A header is any row the strict reader's own test
     recognises — a separator row is not required (round 5, M2: the strict
     reader parses a separator-less table, so the exclusion must cover it)."""
-    out: set[str] = set()
+    out: set[int] = set()
     recognised = False
-    for line in text.splitlines():
-        if not line.lstrip().startswith("|"):
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        if "|" not in line:
             recognised = False
             continue
-        cells = _cells(line)
+        cells = _cells(line, unbordered=True)
         if _is_dispositions_header(cells):
             recognised = True
-        elif cells is not None and recognised and _cells_look_like_a_header(cells):
+        elif cells is not None and recognised and _cells_look_like_a_header(
+                cells, lines[index + 1] if index + 1 < len(lines) else ""):
             recognised = False                      # another table's header, not a dispositions one
         if recognised:
-            out.add(line.strip())
+            out.add(index)
     return out
 
 
-def _cells_look_like_a_header(cells: list[str]) -> bool:
-    """A row whose every cell is a bare capitalised or lower-case word with
-    no backtick, digit or disposition word — the shape a header takes and a
-    dispositions row never does."""
-    return all(re.fullmatch(r"[A-Za-z][A-Za-z ]{0,30}", c.strip("*_ ").rstrip(":")) for c in cells) and not any(
-        _DISPOSITION.match(c) for c in cells)
+def _cells_look_like_a_header(cells: list[str], following: str = "") -> bool:
+    """Recognize column labels, not arbitrary prose in an unsupported row.
+
+    'errata | Reviewed | No change needed' is data, so later rows still
+    belong to the same table (#1230). A following Markdown separator is
+    structural header evidence even for unfamiliar column labels (#1233).
+    Recognized disposition headers are handled by the callers even without
+    a separator; an unfamiliar header needs that structural evidence.
+    """
+    separator = [c.strip() for c in following.strip().strip("|").split("|")]
+    return len(separator) == len(cells) and all(re.fullmatch(r":?-{3,}:?", c) for c in separator)
 
 
 def disposition_rows(text: str) -> list[dict[str, str]]:
@@ -683,10 +839,11 @@ def disposition_rows(text: str) -> list[dict[str, str]]:
     """
     rows: list[dict[str, str]] = []
     header: dict[str, int] | None = None
-    for line in text.splitlines():
-        cells = _cells(line)
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        cells = _cells(line, unbordered=True)
         if cells is None:
-            if line.lstrip().startswith("|"):
+            if "|" in line:
                 continue                      # the separator row keeps the header
             header = None
             continue
@@ -699,6 +856,9 @@ def disposition_rows(text: str) -> list[dict[str, str]]:
             header = {name: i for i, name in enumerate(_header_cells(cells))}
             continue
         if header is None:
+            continue
+        if _cells_look_like_a_header(cells, lines[index + 1] if index + 1 < len(lines) else ""):
+            header = None
             continue
         d = cells[header["disposition"]] if header["disposition"] < len(cells) else ""
         m = _DISPOSITION.match(d)
@@ -717,6 +877,11 @@ def disposition_rows(text: str) -> list[dict[str, str]]:
         # checker will not guess at, like any other, and stays `invalid`.
         has_col = "record" in header
         record = cells[header["record"]].strip().lower() if has_col and header["record"] < len(cells) else ""
+        qualifier = re.match(r"^\s*(full|core)\s+`", slot_cell, re.I)
+        if qualifier:
+            named_record = qualifier.group(1).lower()
+            record = named_record if not record or record == named_record else "invalid"
+            has_col = True
         if record not in ("full", "core", "both"):
             record = "no_record_column" if not has_col else ("either" if not record else "invalid")
         for name in names:
@@ -836,10 +1001,10 @@ def check_report(report: Path, full: dict, core: dict,
     # carries a free-text reason ("Dropped the duplicate entry; slot kept")
     # that is not a removal claim, and the generic scan below read it as
     # one (#962; #1175 round 2, M1). The table is the strict reader's.
-    disposition_lines = {row["line"] for row in rows} | _dispositions_table_lines(text)
-    for line in text.splitlines():
+    disposition_lines = _dispositions_table_indices(text)
+    for index, line in enumerate(text.splitlines()):
         cells = _cells(line)
-        if not cells or line.strip() in disposition_lines:
+        if not cells or index in disposition_lines:
             continue
         # The change cell is found rather than assumed at a fixed index: one
         # report writes `| core | \`distributions\` | removed; … |`, putting the
@@ -894,7 +1059,11 @@ def check_report(report: Path, full: dict, core: dict,
     for line in text.splitlines():
         cells = _cells(line)
         if cells and len(cells) >= 3 and _ABSENT_FROM_SCHEMA.search(cells[-1]):
-            sentence_subjects = [(_TICKED.findall(cells[0]), cells[-1])]
+            sentence_subjects = []
+            for sent in re.split(r"(?<=[.!?])\s+", cells[-1]):
+                if any(not _record_asserted_schema_claim(sent[:phrase.start()])
+                       for phrase in _ABSENT_FROM_SCHEMA.finditer(sent)):
+                    sentence_subjects.append((_TICKED.findall(cells[0]), sent))
         elif cells:
             continue
         else:
@@ -903,6 +1072,8 @@ def check_report(report: Path, full: dict, core: dict,
             for sent in re.split(r"(?<=[.!?])\s+", line):
                 here = [n for n in _TICKED.findall(sent) if n not in classes]
                 for phrase in _ABSENT_FROM_SCHEMA.finditer(sent):
+                    if _record_asserted_schema_claim(sent[:phrase.start()]):
+                        continue
                     # Only names *before* the phrase. After it they are
                     # attributions, and the report is generally right about
                     # them: "the key set is a hybrid of `FileCollection`
@@ -1023,40 +1194,55 @@ def check_report(report: Path, full: dict, core: dict,
     # Paragraphs, not lines, as the removal scan reads them (#1175 review,
     # S3); table lines are skipped, their cells are read above.
     prose_retained = 0
-    for para in re.split(r"\n\s*\n", text):
-        prose = " ".join(ln for ln in para.splitlines()
-                         if not ln.lstrip().startswith("|") and not _cells(ln)
-                         and ln.strip() not in disposition_lines)
+    prose_text = "\n".join(ln if index not in disposition_lines and not ln.lstrip().startswith("|")
+                           else "" for index, ln in enumerate(text.splitlines()))
+    root_slots = declared.get("Dataset", set()) | declared.get("CoreDataset", set())
+    for para in re.split(r"\n\s*\n", prose_text):
+        prose = " ".join(para.splitlines())
         for m in _PROSE_RETAINED.finditer(prose):
             path = m.group(1)
             if path.lower() in _NOT_A_SLOT or path.isdigit():
                 continue                       # "remains at `false`" names a value, not a slot (Codex M7)
-            before = prose[max(0, m.start() - 80):m.start()]
-            if _NEGATED_BEFORE.search(before) or _negated_clause(before):
-                continue                       # "nothing remains in `x`", "no value remains in `x`"
+            before = prose[:m.start()]
             targets = {"full": full, "core": core}
             written = path
+            sentence = (re.split(r"(?<=[.!?])\s+", before)[-1]
+                        + m.group(0)
+                        + re.split(r"(?<=[.!?])\s+", prose[m.end():], maxsplit=1)[0])
+            shared_scope = re.match(r"\s*(?:in|within|for)\s+(?:the\s+)?(?:both|full|core)"
+                                    r"(?:\s+and\s+(?:the\s+)?(?:full|core))?\s+"
+                                    r"(?:records?|files?)\b", sentence, re.I)
+            offset = len(re.split(r"(?<=[.!?])\s+", before)[-1])
+            sentence, predicate_before = _retention_predicate_context(sentence, offset)
+            if _negated_clause(predicate_before):
+                continue                       # the negation belongs to this predicate only
+            # This is the retention sentence. A generic table row can also
+            # mention 'both records' when describing a destination, so do
+            # not widen the removal reader's shared target helper.
+            where = "both" if re.search(r"\bboth\s+(?:records|files)\b", sentence, re.I) else _target(sentence)
+            if where == "either" and shared_scope:
+                scope = shared_scope.group(0)
+                where = "both" if re.search(r"\bboth\b", scope, re.I) else _target(scope)
             head, _, rest = path.partition(".")
             if head in targets and rest:
                 # "remains in `core.notes`" names the record, not a slot.
                 targets, path = {head: targets[head]}, rest
+                where = head
+            elif where in targets:
+                targets = {where: targets[where]}
             if not _SLOT_PATH.fullmatch(path):
                 continue                       # `CoreDataset`, `HIPAA`: not a slot path (snake_case only)
             claims += 1
             prose_retained += 1
-            if any(_resolve_loose(rec, path) for rec in targets.values()):
-                continue
-            # Prose names a leaf, not a path: "the four named reviewers stay
-            # in `review_details`" means `ethical_reviews[0].review_details`.
-            # A populated key of that name under the claim's own root (or
-            # anywhere, when the root is not a slot) satisfies it; only a
-            # name found nowhere is a finding.
-            if any(_leaf_under_root(rec, path) for rec in targets.values()):
+            # A bare non-root leaf such as `review_details` can abbreviate
+            # `ethical_reviews[0].review_details`. A declared root slot or
+            # an explicit path never searches elsewhere for a namesake.
+            present = [_leaf_under_root(rec, path, root_slots) for rec in targets.values()]
+            if (all(present) if where == "both" else any(present)):
                 continue
             findings.append({
-                "kind": "retention_not_shown", "slot": written, "record": "either",
-                "detail": "report says the value remains there; neither record carries it, "
-                          "at that path or under that name anywhere",
+                "kind": "retention_not_shown", "slot": written, "record": where,
+                "detail": f"report says the value remains there; the {where} record does not carry it at the claimed path",
                 "claim": prose.strip()[:240]})
     # The snapshot diff (#1054): deterministic, no claim parsing. A top-level
     # slot the phase-1 record populated and the final full record does not,
@@ -1083,17 +1269,22 @@ def check_report(report: Path, full: dict, core: dict,
     # carries a free-text reason that is not a statement about the record,
     # #962), a sentence about the core alone records nothing about the full
     # record, and `_named` keeps a destination out of the casualties.
-    prose_only = "\n".join(ln for ln in text.splitlines() if not ln.lstrip().startswith("|"))
-    for whole in re.split(r"(?<=[.!?])\s+|\n", prose_only):
+    prose_only = prose_text
+    for whole, scope_sentence in _prose_lines_with_sentence(prose_only):
         # Only the clause the removal word sits in, and only where nothing
         # voids it (#1175 Codex review, M1): a name in another clause is
         # not what was removed, and a negated or hypothetical removal
         # records nothing at all.
-        for sent in _CLAUSE_SPLIT.split(whole):
+        # Keep a denial attached across its 'that' boundary; ordinary
+        # relative clauses still split away from an unrelated earlier slot.
+        whole = re.sub(r"(\bnot\s+(?:the case|true))\s+that\b", r"\1", whole, flags=re.I)
+        for sent in _removal_clauses(whole):
             if not _REMOVAL_WORD.search(sent) or _removal_voided(sent):
                 continue
             if _target(sent) == "core" or _target(whole) == "core":
                 continue
+            if _core_only_removal(sent, scope_sentence):
+                continue                       # the full record is the object of a core-only omission
             # A coordinated destination list ("recorded in `a` and `b`")
             # names no casualty past its first item, which `_named`'s
             # lookback reaches; the rest are excluded here (#1175 round 3).
@@ -1114,7 +1305,7 @@ def check_report(report: Path, full: dict, core: dict,
                     # the first cut read every un-preceded list as
                     # casualties and silenced 51 corpus destinations)
                     casualties.update(n for n in names if n in _named(m.group(0).replace("in ", "", 1)))
-            recorded.update(n for n in [*_named(sent), *casualties]
+            recorded.update(n for n in [*_weak_removal_names(sent), *casualties]
                             if _SLOT_PATH.fullmatch(n) and n not in destinations)
     unrecorded: list[dict[str, str]] = []
     expected = bool(dispositions_expected)
@@ -1137,7 +1328,10 @@ def check_report(report: Path, full: dict, core: dict,
                 "claim": ""})
     seen, unique = set(), []
     for f in findings:
-        key = (f["kind"], f.get("slot"), f.get("record"))
+        target = f.get("record")
+        if f["kind"] == "removal_not_performed" and target == "either":
+            target = "core"                         # an unnamed removal is read against core
+        key = (f["kind"], f.get("slot"), target)
         if key in seen:
             continue
         seen.add(key)
@@ -1168,21 +1362,15 @@ def check_report(report: Path, full: dict, core: dict,
             "instrument": REPORT_CLAIMS_INSTRUMENT}
 
 
-def _leaf_under_root(rec: Any, path: str) -> bool:
-    """The prose fallback (#1054): a populated key of the path's leaf name
-    under the path's root. A dotted path whose root the record lacks cannot
-    be satisfied by a leaf found elsewhere (#1175 round 2, S2); a bare name
-    is searched anywhere."""
-    segs = re.split(r"[.\[]", path.rstrip("]"))
-    segs = [s for s in segs if s and not s.isdigit() and s != "*"]
-    leaf, root = segs[-1], segs[0]
-    if not isinstance(rec, dict):
+def _leaf_under_root(rec: Any, path: str, root_slots: set[str] | None = None) -> bool:
+    """Exact paths, with shorthand only for a bare non-root leaf (#1194)."""
+    if _resolve_loose(rec, path):
+        return True
+    # Only an unqualified leaf that is not itself a declared root slot can
+    # be shorthand for a nested field. A named path never drops its middle.
+    if "." in path or "[" in path or path in (root_slots or set()):
         return False
-    if len(segs) == 1:
-        return _has_populated_key(rec, leaf)
-    if root not in rec:
-        return False
-    return _has_populated_key(rec.get(root), leaf)
+    return _has_populated_key(rec, path)
 
 
 def _loose_value(data: Any, path: str) -> Any:
@@ -1217,9 +1405,7 @@ def _loose_value(data: Any, path: str) -> Any:
     walk(data, 0)
     if len(out) == 1:
         return out[0]
-    if out and all(isinstance(o, list) for o in out):
-        return [x for o in out for x in o]              # entries across the matches, not matches (round 5, S2)
-    return out
+    return [x for value in out for x in (value if isinstance(value, list) else [value])]
 
 
 def _resolve_loose(data: Any, path: str) -> bool:
@@ -1260,9 +1446,27 @@ def phase1_snapshot_for(core_path: Path) -> dict | None:
     receipts join uses (`receipts.phase1_snapshot`, #758/#761): the
     highest-numbered `intermediate/{P}_full*.yaml`. None where the runner
     kept none."""
-    from data_sheets_schema.receipts import phase1_snapshot
+    return phase1_snapshot_with_pin_for(core_path)[0]
+
+
+def phase1_snapshot_with_pin_for(core_path: Path) -> tuple[dict | None, dict | None]:
+    """Read the snapshot once and pin the exact bytes being judged (#1194)."""
+    import yaml
+    from data_sheets_schema.receipts import phase1_snapshot_path
     receipt = core_path.parent / core_path.name.replace("_d4d_core.yaml", "_coverage_receipt.yaml")
-    return phase1_snapshot(receipt)
+    path = phase1_snapshot_path(receipt)
+    if path is None:
+        return None, None
+    raw = None
+    try:
+        raw = path.read_bytes()
+        doc = yaml.safe_load(raw.decode("utf-8"))
+        if not isinstance(doc, dict) or not doc:
+            raise ValueError("snapshot is not a nonempty mapping")
+    except (OSError, UnicodeDecodeError, yaml.YAMLError, ValueError) as exc:
+        return None, {"path": str(path), "sha256": hashlib.sha256(raw).hexdigest() if raw is not None else None,
+                      "state": "unusable", "reason": str(exc).splitlines()[0] if str(exc) else type(exc).__name__}
+    return doc, {"path": str(path), "sha256": hashlib.sha256(raw).hexdigest(), "state": "usable"}
 
 
 def declared_slots() -> dict[str, set[str]]:

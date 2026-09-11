@@ -2540,7 +2540,7 @@ def report_claims_block(spec: RunSpec) -> dict[str, Any] | None:
 
         from data_sheets_schema.report_claims import (check_report, declared_ranges,
                                                       declared_slots,
-                                                      phase1_snapshot_for)
+                                                      phase1_snapshot_with_pin_for)
         if not spec.report_path.exists():
             return {"checked": False, "reason": "no reconciliation report"}
         full = _yaml.safe_load(spec.full_path.read_text(encoding="utf-8")) \
@@ -2549,9 +2549,10 @@ def report_claims_block(spec: RunSpec) -> dict[str, Any] | None:
             if spec.core_path.exists() else {}
         # This runner always asks the report phase for the table (#929),
         # and records the expectation on the record it writes (#961).
+        snapshot, snapshot_pin = phase1_snapshot_with_pin_for(spec.core_path)
         out = check_report(spec.report_path, full or {}, core or {},
                            declared_slots(),
-                           snapshot=phase1_snapshot_for(spec.core_path),
+                           snapshot=snapshot,
                            dispositions_expected=True,
                            # Both maps from the one core schema, so a nested
                            # `both` row names the step the core cannot carry
@@ -2571,6 +2572,7 @@ def report_claims_block(spec: RunSpec) -> dict[str, Any] | None:
                    "md5": _md5(spec.report_path)},
         "full": {"path": str(spec.full_path), "md5": _md5(spec.full_path)},
         "core": {"path": str(spec.core_path), "md5": _md5(spec.core_path)},
+        "phase1_snapshot": snapshot_pin,
     }
     out["schema"] = {"full_sha256": _sha256(FULL_SCHEMA),
                      "core_sha256": _sha256(CORE_SCHEMA)}
