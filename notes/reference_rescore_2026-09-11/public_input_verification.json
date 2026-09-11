@@ -1,0 +1,12 @@
+{
+  "checked_at": "2026-09-11",
+  "repository": "bridge2ai/data-sheets-schema",
+  "visibility": "PUBLIC",
+  "github_is_private": false,
+  "path": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml",
+  "github_blob_sha": "c70971457e150a36dd525e3b4f554dbd676cea1e",
+  "local_blob_sha": "c70971457e150a36dd525e3b4f554dbd676cea1e",
+  "size": 33560,
+  "basis": "gh repo view visibility/isPrivate and gh api contents at main; local git hash-object matched exactly",
+  "approval_review": "Both execution requests were rejected before process creation. Public visibility and matching byte identity were verified between requests. The second review still required explicit authorization for the Anthropic Claude destination and paid evaluation; user approval was requested. No evaluator process or paid call has run."
+}
