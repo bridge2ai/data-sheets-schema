@@ -2026,11 +2026,11 @@ def _enum_aliases() -> dict[str, dict[str, str]]:
     spellings — `IsNewVersionOf`, `HasPart`, `References` — and those are what
     generation emits, because they are what the vocabulary is called elsewhere.
     """
-    import yaml as _yaml
+    from data_sheets_schema.schema_cache import load_schema
     schema = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
     if not schema.exists():
         return {}
-    doc = _yaml.safe_load(schema.read_text(encoding="utf-8"))
+    doc = load_schema(schema) or {}                  # one parse per process (#1203)
     enums = doc.get("enums") or {}
 
     def table_for(enum_name: str) -> dict[str, str]:

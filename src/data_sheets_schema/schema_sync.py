@@ -62,9 +62,49 @@ STALE = "stale"
 UNCHECKED = "unchecked"
 
 
+_REBUILT: dict[tuple, bytes] = {}
+
+
+def forget_rebuilds() -> None:
+    """Drop every cached rebuild. `schema_cache.clear` calls this too."""
+    _REBUILT.clear()
+
+
+def _generator_versions() -> tuple:
+    """The installed `linkml` and `linkml-runtime` — a rebuild's bytes depend
+    on them, and on `linkml:types` imported from the runtime package, which
+    no file under the schema directory can attest (#1204 review, S5)."""
+    import importlib.metadata as _m
+    out = []
+    for name in ("linkml", "linkml-runtime"):
+        try:
+            out.append((name, _m.version(name)))
+        except _m.PackageNotFoundError:
+            out.append((name, None))
+    return tuple(out)
+
+
+def _source_state(source: Path) -> tuple:
+    """Everything the merged schema is derived from: the source, every
+    module beside it, and the generator that builds it. A rebuild is a pure
+    function of these, so a second rebuild inside one process, with none of
+    them changed, is the same bytes — and it was a five-second subprocess on
+    every record write and every runner test (#1203). A package upgraded
+    mid-process by another process is the one input this cannot see."""
+    from data_sheets_schema.schema_cache import tree_fingerprint
+    merged_names = tuple(m.name for m, _s, _c, _k in MERGED_SCHEMAS)
+    return (str(source.resolve()), _generator_versions(),
+            tree_fingerprint(source.parent, "*.yaml", exclude=merged_names))
+
+
 def _regenerate(source: Path, target: Path,
                 marker: bool) -> tuple[bool, str | None]:
     """Run the same generation the Makefile runs. (ok, why not)"""
+    key = (_source_state(source), marker)
+    cached = _REBUILT.get(key)
+    if cached is not None:
+        target.write_bytes(cached)
+        return True, None
     try:
         result = subprocess.run(
             ["poetry", "run", "gen-linkml", "-o", str(target), "-f", "yaml",
@@ -80,6 +120,7 @@ def _regenerate(source: Path, target: Path,
     if marker:
         target.write_text("---\n" + target.read_text(encoding="utf-8"),
                           encoding="utf-8")
+    _REBUILT[key] = target.read_bytes()
     return True, None
 
 

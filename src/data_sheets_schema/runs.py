@@ -31,6 +31,7 @@ is idempotent, so a replicate index would imply sampling that does not happen.
 
 from __future__ import annotations
 
+from data_sheets_schema.schema_cache import load_yaml as _cached_yaml  # one parse per file per process (#1203)
 import re
 from dataclasses import dataclass, field
 import shutil
@@ -232,7 +233,7 @@ def procedure_fingerprint(path: Path) -> dict[str, str]:
 
 
 def slots(path: Path) -> set[str]:
-    return set(yaml.safe_load(path.read_text(encoding="utf-8")) or {})
+    return set(_cached_yaml(path) or {})
 
 
 def record_path(method: str, label: str, project: str,
@@ -282,7 +283,7 @@ def validation_status(method: str, label: str, project: str,
     if not rec.exists():
         return UNVERIFIED
     try:
-        data = yaml.safe_load(rec.read_text(encoding="utf-8")) or {}
+        data = _cached_yaml(rec) or {}
     except Exception:                                        # noqa: BLE001
         return UNVERIFIED
     # A record that parses but is not a mapping is as unusable as one that does
@@ -345,7 +346,7 @@ def generation_digest(method: str, label: str, project: str,
     path = record_path_for(project, method, label, concat_dir)
     if not path.exists():
         return None
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    data = _cached_yaml(path) or {}
     return ((data.get("schema") or {}).get("digest_md5")) or None
 
 
@@ -418,7 +419,7 @@ def verdict_schema_pin(method: str, label: str, project: str,
     if not path.exists():
         return VERDICT_ABSENT
     try:
-        data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        data = _cached_yaml(path) or {}
     except (_yaml.YAMLError, OSError, UnicodeDecodeError):
         return VERDICT_ABSENT
     verdict = data.get("validation")
@@ -464,7 +465,7 @@ def canonical_runs(concat_dir: Path | None = None,
     seen: dict[str, list[str]] = {}
     for prov in sorted(concat_dir.rglob("*_provenance.yaml")):
         try:
-            data = yaml.safe_load(prov.read_text(encoding="utf-8")) or {}
+            data = _cached_yaml(prov) or {}
         except (yaml.YAMLError, OSError, UnicodeDecodeError):
             continue
         if not isinstance(data, dict) or "canonical" not in data:
@@ -534,7 +535,7 @@ def record_mode(method: str, label: str, project: str,
     p = record_path_for(project, method, label, concat_dir)
     if not p.exists():
         return "none"
-    data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+    data = _cached_yaml(p) or {}
     return str(data.get("record_mode") or "none")
 
 
@@ -665,7 +666,7 @@ def check_provenance(method: str, label: str, project: str,
         unreadable = None
         if record.exists():
             try:
-                data = yaml.safe_load(record.read_text(encoding="utf-8")) or {}
+                data = _cached_yaml(record) or {}
             except (yaml.YAMLError, OSError, UnicodeDecodeError) as exc:
                 unreadable = f"{type(exc).__name__}: {str(exc).splitlines()[0][:90]}"
             if not isinstance(data, dict):
@@ -794,7 +795,7 @@ def _prov(method: str, label: str, project: str,
     if not p.exists():
         return None
     try:
-        data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+        data = _cached_yaml(p) or {}
     except (_yaml.YAMLError, OSError, UnicodeDecodeError):
         return None
     # The annotation said `dict | None` and the code returned whatever YAML
@@ -836,7 +837,7 @@ def attestation(method: str, label: str, project: str,
     p = record_path_for(project, method, label, concat_dir)
     if not p.exists():
         return NO_RECORD
-    data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+    data = _cached_yaml(p) or {}
     if data.get("record_mode") == "live":
         return LIVE
 
@@ -1034,7 +1035,7 @@ def input_fingerprint(method: str, label: str, project: str,
     if not rec.exists():
         return None
     try:
-        data = yaml.safe_load(rec.read_text(encoding="utf-8")) or {}
+        data = _cached_yaml(rec) or {}
     except Exception:
         return None
     return (data.get("inputs") or {}).get("bundle_md5")
@@ -1139,7 +1140,7 @@ def verify_request(method: str, label: str, project: str,
     p = record_path_for(project, method, label, concat_dir)
     if not p.exists():
         return "absent", "no provenance record"
-    data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+    data = _cached_yaml(p) or {}
     req = ((data.get("prompts") or {}).get("request")) or {}
     if not req.get("sha256"):
         return "absent", None
@@ -1282,7 +1283,7 @@ def bundle_drift_detail(method: str, label: str, project: str,
     path = record_path_for(project, method, label, concat_dir)
     if not path.exists():
         return BUNDLE_UNRECORDED, "no provenance record", None
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    data = _cached_yaml(path) or {}
     inputs = data.get("inputs") or {}
     recorded = inputs.get("bundle_md5")
     declared = inputs.get("bundle_path")
@@ -1468,7 +1469,7 @@ def arm_facts(label_prefix: str, method: str | None = None,
     seen: dict[str, set] = {name: set() for name, _ in ARM_PROCEDURE_FIELDS}
     labels, projects = set(), set()
     for path in sorted(base.glob(f"{method}_core/{label_prefix}*/*_provenance.yaml")):
-        rec = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        rec = _cached_yaml(path) or {}
         labels.add(path.parts[-2])
         projects.add(path.name[: -len("_provenance.yaml")])
         for name, field in ARM_PROCEDURE_FIELDS:
@@ -1600,7 +1601,7 @@ def phase_log_status(method: str, label: str, project: str,
     path = record_path_for(project, method, label, concat_dir or CONCAT_DIR)
     if not path.exists():
         return PHASES_ABSENT, 0
-    rec = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    rec = _cached_yaml(path) or {}
     block = rec.get("phase_log")
     if isinstance(block, dict) and block.get("phases"):
         return PHASES_RECORDED, len(block["phases"])
@@ -1636,7 +1637,7 @@ def grounding_status(method: str, label: str, project: str,
     path = record_path_for(project, method, label, concat_dir or CONCAT_DIR)
     if not path.exists():
         return GROUNDED_UNRECORDED, 0
-    rec = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    rec = _cached_yaml(path) or {}
     block = rec.get("grounding")
     if not isinstance(block, dict):
         return GROUNDED_UNRECORDED, 0
@@ -1668,7 +1669,7 @@ def report_claim_status(method: str, label: str, project: str,
     path = record_path_for(project, method, label, concat_dir or CONCAT_DIR)
     if not path.exists():
         return CLAIMS_UNRECORDED, 0
-    rec = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    rec = _cached_yaml(path) or {}
     block = rec.get("report_claims")
     if not isinstance(block, dict):
         return CLAIMS_UNRECORDED, 0
@@ -1711,7 +1712,7 @@ def pair_status(method: str, label: str, project: str,
     path = record_path_for(project, method, label, concat_dir or CONCAT_DIR)
     if not path.exists():
         return PAIR_UNRECORDED, 0
-    rec = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    rec = _cached_yaml(path) or {}
     block = rec.get("pair_consistency")
     if not isinstance(block, dict):
         return PAIR_UNRECORDED, 0
@@ -1763,7 +1764,7 @@ def playbook_drift(method: str, label: str, project: str,
     path = record_path_for(project, method, label, concat_dir)
     if not path.exists():
         return PLAYBOOK_UNRECORDED, "no provenance record"
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    data = _cached_yaml(path) or {}
     block = data.get("playbooks") or {}
     files = block.get("files") if isinstance(block, dict) else None
     if not files:
@@ -1831,7 +1832,7 @@ def canonical_prompt_status(method: str, label: str, project: str,
     p = record_path_for(project, method, label, concat_dir)
     if not p.exists():
         return "absent", "no provenance record"
-    data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+    data = _cached_yaml(p) or {}
     prompts = data.get("prompts") or {}
 
     # A prompt recovered from git at the run's own commit (#399) is attested by
@@ -1999,7 +2000,7 @@ def condition_of(method: str, label: str, project: str,
     p = record_path_for(project, method, label, concat_dir)
     if not p.exists():
         return None
-    data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+    data = _cached_yaml(p) or {}
     paths = ((data.get("prompts") or {}).get("files")
              or (data.get("prompts") or {}).get("paths") or [])
     # Entries are mappings — `{"path": ..., "sha256": ...}` — not bare strings.
