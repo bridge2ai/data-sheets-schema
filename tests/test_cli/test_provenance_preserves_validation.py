@@ -512,9 +512,8 @@ class SchemaResolutionAwayFromRepoRoot(unittest.TestCase):
         from data_sheets_schema import schema_digest as sd
         from data_sheets_schema.provenance import schema_facts
         cwd = os.getcwd()
-        # Clear the digest caches first: they are process-global and keyed on
-        # (class, ""), so a warm cache from any earlier test would satisfy the
-        # assertion without resolve_schema ever running (#672 review).
+        # Start cold so this also exercises the packaged fallback without
+        # depending on any earlier test's cached inventory (#672 review).
         sd._BUILD_CACHE.clear()
         sd._TEXT_CACHE.clear()
         try:
