@@ -41,7 +41,7 @@ class TestDisposition(unittest.TestCase):
         self._orig = pv.CONCAT_DIR; pv.CONCAT_DIR = root
         self.patches = [mock.patch("data_sheets_schema.api_runner.validate_outputs", lambda spec: []),
                         mock.patch("data_sheets_schema.api_runner.validation_block",
-                                   lambda spec, problems, recorded_by: {"valid": True, "recorded_by": recorded_by}),
+                                   lambda spec, problems, recorded_by, prior=None: {"valid": True, "recorded_by": recorded_by}),
                         mock.patch("data_sheets_schema.backfill_checks.compute", lambda p: {})]
         for p in self.patches:
             p.start()

@@ -116,6 +116,15 @@ phase_log:
     bundle_lines_total: 5746
     receipt_chunks_total: 22
     receipt_chunks_unopened: 0
+    assistant_turns: 126
+    output_tokens: 147284
+    reasoning_tokens_estimate: 78639
+    thinking_blocks: 49
+    thinking_text_chars: 0
+    thinking_tokens: 37319
+    tool_input_chars: 273553
+    turns_with_thinking_tokens: 122
+    visible_text_chars: 6328
   run_observed_basis: 'aggregate totals for the whole run, observed by the orchestrator
     from the subagent runner''s transcript. One number per run, not per phase: four-phase
     project-agent mode runs every phase in one context, so the run is the only observable
@@ -125,7 +134,72 @@ phase_log:
     invocation''s own span, so a resumed run excludes the gap. bundle_lines_read is
     the union of the run''s successful file-reading windows over the declared bundle
     (#700): lines the run never opened, or opened only in a read that errored, may
-    have been reached by search, but nothing attests that.'
+    have been reached by search, but nothing attests that. Of the transcript''s reasoning
+    measure (#1000/#1011) the observation carries assistant_turns, output_tokens,
+    thinking_blocks, thinking_text_chars, visible_text_chars, tool_input_chars, reasoning_tokens_estimate;
+    comparable in kind with the API path''s reasoning log, never to be averaged with
+    it. reasoning_tokens_estimate is output tokens minus a 4-chars-per-token estimate
+    of the text and tool-call payloads: a subtraction, an upper bound, not a measurement.
+    thinking_tokens and turns_with_thinking_tokens are the runtime''s own count on
+    the turns whose transcript line carries usage.output_tokens_details; where turns_with_thinking_tokens
+    is fewer than the run''s turns the rest of the run''s thinking is unmeasured,
+    so the count is partial. Of these, assistant_turns, output_tokens, reasoning_tokens_estimate,
+    thinking_blocks, thinking_text_chars, thinking_tokens, tool_input_chars, turns_with_thinking_tokens,
+    visible_text_chars were added after the run, under run_observed_extended, which
+    names the source.'
+  run_observed_extended:
+  - keys_added:
+    - assistant_turns
+    - output_tokens
+    - reasoning_tokens_estimate
+    - thinking_blocks
+    - thinking_text_chars
+    - thinking_tokens
+    - tool_input_chars
+    - turns_with_thinking_tokens
+    - visible_text_chars
+    instrument: 'the transcript''s reasoning measure (#1000/#1011), recomputed by
+      scripts/agentic_observed.py from the transcripts named on the bytes the record
+      hashed, over the whole transcript: the record records no cut; every prior key
+      reproduced exactly'
+    identification:
+      sets_tried: 13
+      prior_keys: 7
+      discriminating_keys:
+      - bundle_lines_read
+      - duration_ms
+      - receipt_chunks_unopened
+      - tool_uses
+      - total_tokens
+      best_other_reproduces: 2
+      best_other_reproduces_discriminating: 0
+    transcripts:
+    - agent-av6-VOICE-rep3-6a2560546c322a99.jsonl
+    transcript_sha256:
+      agent-av6-VOICE-rep3-6a2560546c322a99.jsonl: 5838a3ff614922812670999cc56663f3c3c848c529169030964748359608fb69
+    observer_sha256: 1bdeb4fde0bc28a63d9615acba9e53f70db027668086be35ceae8d12c369c0a8
+    bundle_basis:
+      source: git blob
+      path: data/preprocessed/concatenated/VOICE_preprocessed.txt
+      commit: 4fc4d6b22d5522389692e746a4bc715a93163871
+      md5: dcd717170da6762569c0b4eeafc1c3d2
+      matched_on:
+      - md5
+    recorded_by: d4d provenance extend-observed (#1010)
+    recorded_at: '2026-09-10T08:36:19+00:00'
+    basis_added: ' Of the transcript''s reasoning measure (#1000/#1011) the observation
+      carries assistant_turns, output_tokens, thinking_blocks, thinking_text_chars,
+      visible_text_chars, tool_input_chars, reasoning_tokens_estimate; comparable
+      in kind with the API path''s reasoning log, never to be averaged with it. reasoning_tokens_estimate
+      is output tokens minus a 4-chars-per-token estimate of the text and tool-call
+      payloads: a subtraction, an upper bound, not a measurement. thinking_tokens
+      and turns_with_thinking_tokens are the runtime''s own count on the turns whose
+      transcript line carries usage.output_tokens_details; where turns_with_thinking_tokens
+      is fewer than the run''s turns the rest of the run''s thinking is unmeasured,
+      so the count is partial. Of these, assistant_turns, output_tokens, reasoning_tokens_estimate,
+      thinking_blocks, thinking_text_chars, thinking_tokens, tool_input_chars, turns_with_thinking_tokens,
+      visible_text_chars were added after the run, under run_observed_extended, which
+      names the source.'
 schema:
   declared_version: 2.0.0
   declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
@@ -531,9 +605,12 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_d4d_core.yaml
       md5: 17ccc09913c56a4f9bc5838718c421da
   schema:
-    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
-    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
-  recorded_by: d4d runs validate
+    full_sha256: ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da
+    core_sha256: 7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449
+  duplicate_keys:
+    full: []
+    core: []
+  recorded_by: d4d provenance recheck-validation
 review:
   checked: true
   items_total: 67

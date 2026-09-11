@@ -1,5 +1,7 @@
 """Provenance commands for the D4D CLI."""
 
+import functools
+
 import click
 
 from data_sheets_schema.cli.api import ARMS as _ARMS
@@ -479,20 +481,111 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
 
 
 @provenance.command('recheck-validation')
-@click.option('--method', required=True)
-@click.option('--label', required=True)
-@click.option('--project', required=True)
+@click.option('--method', default=None, help='required unless --all; with --all, restrict to one base directory and its '
+                                           '_core twin (claudecode_agent reaches claudecode_agent_core, not the _crate, '
+                                           '_healthsheet or _merged siblings)')
+@click.option('--label', default=None)
+@click.option('--project', default=None)
+@click.option('--all', 'every', is_flag=True,
+              help='every record with a validation block (#1033): written only where the verdict, the '
+                   "artifacts' recorded hashes and each problem's artifact, class and JSON-pointer paths reproduce; "
+                   'a record already carrying `duplicate_keys` is skipped unless its schema pin is not '
+                   "this checkout's, which the write repairs")
 @click.option('--execute', is_flag=True, help='write the record; without it, report')
-def recheck_validation(method, label, project, execute):
+def recheck_validation(method, label, project, every, execute):
     """Re-run validation on a record's files and rewrite its `validation` block (#1029).
 
     Validation is bound to bytes, so re-running it is a legitimate act: the
-    block records the artifacts' md5s and the schema digests it was reached
+    block records the artifacts' recorded hashes and the schema digests it was reached
     against, and `recorded_by` names this command. Used to bring a record
     under an instrument revision — duplicate-key detection — without
     touching anything else in the record.
+
+    `--all` (#1033) walks every run on disk and brings each record under
+    the instrument on one condition: the recomputed verdict and the
+    artifacts' recorded hashes equal the recorded ones and each problem names the same
+    artifact, class and JSON-pointer paths, so the only thing the write
+    adds is the `duplicate_keys` field and, where it moved, this
+    checkout's schema digest. A record already under the instrument is
+    skipped unless its schema pin has moved, which the write repairs
+    (#1190 round 2). A record whose verdict, artifacts or problems
+    would move is named and left alone — rerun it by label to write it
+    deliberately.
     """
     _require_repo_root_cwd("d4d provenance recheck-validation")
+    if every:
+        if label or project:
+            raise click.ClickException("--all takes no --label or --project; --method may restrict it")
+        from data_sheets_schema.provenance import record_path_for
+        from data_sheets_schema.runs import discover
+        # `discover` yields the base directory and its _core twin as two
+        # runs over one record (#1190 review, M1): visits are keyed on the
+        # record's path, so each record is rechecked once. `--method`
+        # names a base or its _core and reaches exactly that pair — not
+        # `_crate`, `_healthsheet` or `_merged` siblings, which are their
+        # own bases.
+        wanted = None
+        if method:
+            base = method[:-5] if method.endswith("_core") else method
+            wanted = {base, base + "_core"}
+        counts: dict[str, int] = {"written": 0, "would write": 0, "already": 0, "held": 0,
+                                  "no block": 0, "missing": 0}
+        seen: set[str] = set(); considered: set[str] = set()
+        for run in discover():
+            if wanted is not None and run.method not in wanted:
+                continue
+            considered.add(run.method)
+            for proj in run.projects:
+                path = record_path_for(proj, run.method, run.label)
+                if not path.exists() or str(path) in seen:
+                    continue
+                seen.add(str(path))
+                status = _recheck_one(run.method, run.label, proj, execute, gated=True)
+                counts[status] = counts.get(status, 0) + 1
+        if wanted is not None and not considered:
+            raise click.ClickException(f"--method {method!r} matched no run directory")
+        click.echo(f"summary over {len(seen)} record(s): " + ", ".join(f"{k} {v}" for k, v in counts.items()))
+        return
+    if not (method and label and project):
+        raise click.ClickException("--method, --label and --project are required without --all")
+    _recheck_one(method, label, project, execute, gated=False)
+
+
+def _schema_pin_moved(block: dict) -> bool:
+    """Does the block pin a schema that is no longer this checkout's? A
+    record already under the instrument is re-checked only for this
+    (#1190 round 2, M1): a corpus pass taken before the branch merged a
+    schema change left 48 records pinning the older digest, which
+    `runs.validation_status` reads as STALE, and the `already` short
+    circuit made it unrepairable. A key the block does not pin is not
+    moved, the same rule `runs.validation_status` applies — "absent is not
+    stale" (#1190 round 3, S1). A record with no `schema` block at all
+    never acquires one this way; it acquires one by being written for the
+    duplicate-key field, which is the only claim `--all` exists to add."""
+    from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA, _sha256
+    pinned = block.get("schema")
+    # A `schema` that is not a mapping is not a pin. `runs.validation_status`
+    # guards the same way; without it a scalar `schema:` in one record raises
+    # and aborts the whole `--all` walk, which is the one caller that visits
+    # 282 files nobody has audited (#1190 round 4, S1).
+    if not isinstance(pinned, dict):
+        return False
+    live = {"full_sha256": _sha256(FULL_SCHEMA), "core_sha256": _sha256(CORE_SCHEMA)}
+    return any(pinned.get(k) and pinned[k] != v for k, v in live.items())
+
+
+def _problem_shape(block: dict) -> list:
+    """What a validation problem names, message wording aside: its artifact,
+    its class and the JSON-pointer paths in its message (#1190 review, M3)."""
+    import re as _re
+    return sorted((str(p.get("artifact")), str(p.get("class")),
+                   tuple(sorted(set(_re.findall(r"\bin (/[^\s|]*)", str(p.get("error") or ""))))))
+                  for p in (block.get("problems") or []))
+
+
+def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bool) -> str:
+    """One record; returns what happened. Under `gated` the write needs the
+    verdict and the artifacts unchanged and the field absent."""
     import yaml as _yaml
 
     from data_sheets_schema.api_runner import RunSpec, validate_outputs, validation_block
@@ -506,25 +599,698 @@ def recheck_validation(method, label, project, execute):
     # not the method (#1032).
     base = method[:-5] if method.endswith("_core") else method
     spec = RunSpec(project=project, arm="", method=base, bundle=_P(""), label=label)
+    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    prior = data.get("validation") or {}
+    tag = f"{project} {method} {label}"
+    if gated and not prior:
+        click.echo(f"{tag}: no validation block; nothing to bring under the instrument")
+        return "no block"
+    already = gated and "duplicate_keys" in prior
+    if already and not _schema_pin_moved(prior):
+        click.echo(f"{tag}: already under the instrument")
+        return "already"
     missing = [str(q) for q in (spec.full_path, spec.core_path) if not q.exists()]
-    if missing and execute:
+    if missing and (execute or gated):
+        click.echo(f"{tag}: artifact missing, not rechecked: " + ", ".join(missing))
+        if gated:
+            return "missing"
         raise click.ClickException("refusing to write a verdict over a missing artifact: "
                                    + ", ".join(missing))
     problems = validate_outputs(spec)
-    block = validation_block(spec, problems, recorded_by="d4d provenance recheck-validation")
-    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    prior = data.get("validation") or {}
+    # `prior` makes the write keep whichever algorithm that block recorded
+    # (#1190 round 4, M1) — in `validation_block` itself since round 5, so
+    # every caller that rewrites an existing block gets it.
+    block = validation_block(spec, problems, recorded_by="d4d provenance recheck-validation",
+                             prior=prior)
     from data_sheets_schema.canary import duplicate_key_count
-    click.echo(f"{project} {label}: passed {prior.get('passed')} → {block['passed']}; "
+    click.echo(f"{tag}: passed {prior.get('passed')} → {block['passed']}; "
                f"duplicate keys {duplicate_key_count(prior) if 'duplicate_keys' in prior else 'unmeasured'} → "
                f"{duplicate_key_count(block)}; problems {len(block.get('problems') or [])}")
+    if gated:
+        # Three things must reproduce for the write to add the field and
+        # nothing else: the verdict, the artifacts' recorded hashes, and the problems —
+        # each problem by its artifact, its class and the JSON-pointer
+        # paths its message names, not by the message text, since a
+        # validator message carries today's enum list and moves when the
+        # schema does while the failure it names does not; a message whose
+        # paths moved names a different failure (#1190 review, M3). The
+        # message is `" | ".join(lines[:4])` (`api_runner`), so the gate
+        # sees at most four failures per problem and cannot tell a fifth
+        # from a fifth that changed — 8 of the corpus's 28 problem strings
+        # are exactly four lines and may be truncated (#1190 round 2, S1). The
+        # schema digest is restamped on every write — the verdict was
+        # recomputed against today's schema — and a digest that moved is
+        # said (M4).
+        same_verdict = block["passed"] == prior.get("passed")
+        # The hashes the prior block records, by whichever algorithm it
+        # recorded them: 82 corpus records pin `sha256` only and 196 `md5`
+        # only, so comparing `md5` unconditionally held every sha256-only
+        # record for a drift that had not happened (#1190 round 3, M1).
+        # An artifact still on disk is verified against its own recorded
+        # hash, as `provenance.verify_entry` does.
+        from data_sheets_schema.provenance import verify_entry
+        drifted = [k for k, v in (prior.get("artifacts") or {}).items()
+                   if isinstance(v, dict) and verify_entry(v) is False]
+        moved = ("verdict" if not same_verdict else "artifacts" if drifted
+                 else "problems" if _problem_shape(prior) != _problem_shape(block) else None)
+        if moved:
+            click.echo(f"   held: the {moved} would move; rerun by label to write it deliberately")
+            return "held"
+        old_schema, new_schema = prior.get("schema") or {}, block.get("schema") or {}
+        moved_keys = [k for k in new_schema if old_schema.get(k) != new_schema.get(k)]
+        if old_schema and moved_keys:
+            click.echo("   schema digest restamped: the verdict is recomputed against this checkout's schema "
+                       + ", ".join(f"{k} {str(old_schema.get(k))[:8]}→{str(new_schema.get(k))[:8]}" for k in moved_keys))
+        elif old_schema and old_schema != new_schema:
+            click.echo("   schema block changed shape: "
+                       f"{sorted(set(old_schema) ^ set(new_schema))}")
     if not execute:
         click.echo("   (report only; --execute writes the block)")
-        return
+        return "would write" if gated else "reported"
     from data_sheets_schema.provenance import ProvenanceRecord
     rec = ProvenanceRecord(data=data)
     rec.data["validation"] = block
     rec.write(path)
+    click.echo(f"   wrote {path}")
+    return "written"
+
+
+#: The keys an extension may add (#1010): the transcript's reasoning
+#: measure (#1000/#1011), and nothing else — a coverage claim such as
+#: `receipt_chunks_unopened` is a different instrument (#709) and is not
+#: added under this one (#1191 review, S2).
+_REASONING_KEYS = frozenset({
+    "assistant_turns", "output_tokens", "thinking_blocks", "thinking_text_chars",
+    "visible_text_chars", "tool_input_chars", "reasoning_tokens_estimate",
+    "thinking_tokens", "turns_with_thinking_tokens"})
+
+#: The account every `run_observed` carries (#681/#682), written by
+#: `annotate-observed` and supplied by the extension where a record has
+#: none (#1191 round 2, S5).
+_RUN_OBSERVED_BASIS = (
+    "aggregate totals for the whole run, observed by the orchestrator "
+    "from the subagent runner's transcript. One number per run, not per "
+    "phase: four-phase project-agent mode runs every phase in one "
+    "context, so the run is the only observable boundary. Not the "
+    "runtime's own accounting, no input/output split, not billing-grade; "
+    "deliberately not shaped like api_usage (#681/#682). total_tokens "
+    "counts each API message once (a response spans several transcript "
+    "lines); duration_ms sums each invocation's own span, so a resumed "
+    "run excludes the gap. bundle_lines_read is the union of the run's "
+    "successful file-reading windows over the declared bundle (#700): "
+    "lines the run never opened, or opened only in a read that errored, "
+    "may have been reached by search, but nothing attests that.")
+_CUT_BASIS = (" Cut at run_observed_until: the agent kept acting after its run "
+              "completed, and the record describes the run.")
+
+
+#: How many same-named transcripts are worth enumerating exhaustively: the
+#: sets are 2**n and each one re-reads every file (#1195 M7).
+_MAX_AUTOMATIC_GROUP = 6
+
+_ESTIMATE_KEYS = ("assistant_turns", "output_tokens", "thinking_blocks", "thinking_text_chars",
+                  "visible_text_chars", "tool_input_chars", "reasoning_tokens_estimate")
+#: Sentences `_reasoning_basis` can emit, recognised whole rather than by
+#: their opening words, so a recomputation strips its own earlier
+#: statements (#1191 round 3, M1) and never a sentence a curator wrote
+#: that happens to begin the same way (round 4, S3). Every sentence the
+#: function can produce for any key set is generated and matched exactly,
+#: and the literal forms earlier code wrote are listed beside them. Which
+#: round wrote which is recorded where it could be established from git;
+#: the first entry and the "round 3" variant in
+#: `_superseded_reasoning_basis` match no round's output that a replay of
+#: this branch's history could find (#1191 rounds 8 and 9, S1). They stay,
+#: because an over-wide strip of text this module could have written costs
+#: nothing while a missing one doubles a paragraph — but neither is
+#: evidence that a record says it.
+_LEGACY_REASONING_SENTENCES = (
+    "assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, visible_text_chars, "
+    "tool_input_chars and reasoning_tokens_estimate (output tokens minus a 4-chars-per-token estimate "
+    "of the text and tool-call payloads — a subtraction, an upper bound, not a measurement) are the "
+    "transcript's reasoning measure (#1000/#1011), added after the run under run_observed_extended; "
+    "comparable in kind with the API path's reasoning log, never to be averaged with it.",
+    "assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, visible_text_chars, "
+    "tool_input_chars and reasoning_tokens_estimate (output tokens minus a 4-chars-per-token estimate "
+    "of the text and tool-call payloads) are the transcript's reasoning measure (#1000), thinking_tokens "
+    "and turns_with_thinking_tokens the runtime's own count where the transcript carries "
+    "usage.output_tokens_details; comparable in kind with the API path's reasoning log, never to be "
+    "averaged with it.",
+    "thinking_tokens and turns_with_thinking_tokens are the runtime's own count on the turns whose "
+    "transcript line carries usage.output_tokens_details; where turns_with_thinking_tokens is fewer "
+    "than assistant_turns the count is partial (a resumed run whose earlier transcript predates the "
+    "detail).",
+    "thinking_tokens and turns_with_thinking_tokens are the runtime's own count on the turns whose "
+    "transcript line carries usage.output_tokens_details; where turns_with_thinking_tokens is fewer "
+    "than the run's turns the count is partial (a resumed run whose earlier transcript predates the "
+    "detail).",
+    "These were added after the run, under run_observed_extended, which names their source.",
+    # Round 2 (da720634) wrote one block naming every key unconditionally,
+    # with the comparability clause as a second sentence; round 3 (d1b24ea5)
+    # the same list with that clause folded in. Neither is reachable from
+    # today's function, so the enumeration cannot find them and a record
+    # extended by either doubles its paragraph (#1195 M1).
+    "assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, visible_text_chars, "
+    "tool_input_chars and reasoning_tokens_estimate (output tokens minus a 4-chars-per-token estimate "
+    "of the text and tool-call payloads \u2014 a subtraction, an upper bound, not a measurement) are the "
+    "transcript's reasoning measure (#1000/#1011), added after the run under run_observed_extended; "
+    "thinking_tokens and turns_with_thinking_tokens are the runtime's own count on the turns whose "
+    "transcript line carries usage.output_tokens_details, and where turns_with_thinking_tokens is "
+    "fewer than assistant_turns the count is partial (a resumed run whose earlier transcript predates "
+    "the detail).",
+    "Comparable in kind with the API path's reasoning log, never to be averaged with it.",
+    "assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, visible_text_chars, "
+    "tool_input_chars and reasoning_tokens_estimate (output tokens minus a 4-chars-per-token estimate "
+    "of the text and tool-call payloads \u2014 a subtraction, an upper bound, not a measurement) are the "
+    "transcript's reasoning measure (#1000/#1011), comparable in kind with the API path's reasoning "
+    "log, never to be averaged with it.",
+    # Round 5 emitted the extension clause with an empty name list when the
+    # extended set named no key the observation still carried.
+    "Of these,  was added after the run, under run_observed_extended, which names the source.",
+)
+
+
+def _superseded_reasoning_basis(keys: set) -> str:
+    """The sentences rounds 3 and 4 emitted for the same key set — both are
+    key-set-dependent, so a literal cannot cover them (#1191 round 5, S2;
+    round 6, S2), and a record written by either must not double its
+    paragraph on the next recomputation. Round 3 named every estimate key
+    unconditionally and put the after-the-run clause inside the sentence;
+    round 4 enumerated the keys present and carried the subtraction as an
+    aside. Both negatives are here too, and round 4's
+    `turns_with_thinking_tokens`-only sentence."""
+    present = [k for k in _ESTIMATE_KEYS if k in keys]
+    out = []
+    if present:
+        # round 4
+        out.append(
+            " Of the transcript's reasoning measure (#1000/#1011) the observation carries "
+            + ", ".join(present)
+            + (" — reasoning_tokens_estimate is output tokens minus a 4-chars-per-token estimate of the text "
+               "and tool-call payloads: a subtraction, an upper bound, not a measurement"
+               if "reasoning_tokens_estimate" in present else "")
+            + "; comparable in kind with the API path's reasoning log, never to be averaged with it.")
+        # A variant no round is known to have emitted: round 3's own sentence
+        # carries no "added after the run" clause and is in
+        # `_LEGACY_REASONING_SENTENCES` as the literal it was. This one is
+        # kept because an over-wide strip of text this module could have
+        # written costs nothing, while a missing one doubles a paragraph —
+        # but it is not evidence that any record says this (#1191 round 8, S1).
+        out.append(
+            " " + ", ".join(_ESTIMATE_KEYS[:-1]) + " and " + _ESTIMATE_KEYS[-1]
+            + " (output tokens minus a 4-chars-per-token estimate of the text and tool-call payloads — a "
+              "subtraction, an upper bound, not a measurement) are the transcript's reasoning measure "
+              "(#1000/#1011), added after the run under run_observed_extended; comparable in kind with the "
+              "API path's reasoning log, never to be averaged with it.")
+    if "thinking_tokens" not in keys and present:
+        out.append(" No thinking_tokens: the observation carries none, so the runtime's own count is not "
+                   "measured for this run.")
+        out.append(" No thinking_tokens: no line of the transcript carries usage.output_tokens_details, so "
+                   "the runtime's own count is not measured for this run.")
+    if "turns_with_thinking_tokens" in keys and "thinking_tokens" not in keys:
+        out.append(" turns_with_thinking_tokens counts the turns whose transcript line carries "
+                   "usage.output_tokens_details; the observation carries no thinking_tokens.")
+    return "".join(out)
+
+
+@functools.lru_cache(maxsize=1)
+def _own_sentences() -> frozenset:
+    """Every sentence `_reasoning_basis` can emit, for any key set, plus the
+    forms earlier rounds wrote — the exact strings a recomputation strips.
+    Cached: the enumeration is exponential in the key count and the answer
+    never changes within a process (#1191 round 5, NOTES)."""
+    import itertools
+    out = set(_LEGACY_REASONING_SENTENCES)
+    keys = list(_REASONING_KEYS)
+    for n in range(len(keys) + 1):
+        for combo in itertools.combinations(keys, n):
+            # `named` is `extended ∩ keys`, so a superset of `combo` yields the
+            # same text as `combo` itself and the complement yields `None`'s
+            # (#1191 round 6, S3). Enumerating the subsets of `combo` covers
+            # every clause the function can emit.
+            for ext in (None, set(combo)):
+                for s in _split_sentences(_reasoning_basis(set(combo), extended=ext)):
+                    out.add(s)
+            for s in _split_sentences(_superseded_reasoning_basis(set(combo))):
+                out.add(s)
+    return frozenset(out)
+
+
+#: A sentence ends at `.`, `!` or `?` and takes any closing quote or bracket
+#: with it. `_basis_with` has always accepted all three as terminal, while the
+#: split looked only for a full stop, so a basis ending `checked!` was not
+#: idempotent and a quoted or bracketed ending could not be separated from the
+#: sentence appended after it (#1195 M3).
+_SENTENCE_END = __import__("re").compile(r"[.!?][\"\'\u2019\u201d)\]]*(?=\s)")
+
+
+def _split_sentences(text: str) -> list:
+    """Sentences, split after terminal punctuation and any closer that
+    follows it, before any non-space. Three of the four sentences
+    `_reasoning_basis` emits begin with a lower-case identifier, so a
+    boundary requiring a capital could not find them and a curator's
+    lower-case sentence beside one was never separable (#1191 round 5, S4).
+
+    An abbreviation or an ellipsis followed by a space still splits here:
+    the boundary is a heuristic, which is why the sentences this module
+    writes are stripped by the exact text recorded for them (#1195 M2) and
+    the heuristic is left to reach only the records that predate that.
+    """
+    text = text.strip()
+    out, start = [], 0
+    for m in _SENTENCE_END.finditer(text):
+        s = text[start:m.end()].strip()
+        if s:
+            out.append(s)
+        start = m.end()
+    tail = text[start:].strip()
+    if tail:
+        out.append(tail)
+    return out
+
+
+def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
+    """What the reasoning keys mean — the ones present, and no others
+    (#1191 round 2, S1; round 3, S3): the record's own account describes
+    every number it carries and none it does not. The negative is a fact
+    about the observation, not about a transcript this command may not
+    have read (round 3, S1)."""
+    present = [k for k in _ESTIMATE_KEYS if k in keys]
+    parts = []
+    if present:
+        parts.append(
+            " Of the transcript's reasoning measure (#1000/#1011) the observation carries "
+            + ", ".join(present)
+            + "; comparable in kind with the API path's reasoning log, never to be averaged with it.")
+        if "reasoning_tokens_estimate" in present:
+            parts.append(" reasoning_tokens_estimate is output tokens minus a 4-chars-per-token estimate of "
+                         "the text and tool-call payloads: a subtraction, an upper bound, not a measurement.")
+    thinking = [k for k in ("thinking_tokens", "turns_with_thinking_tokens") if k in keys]
+    if thinking:
+        parts.append(
+            " " + " and ".join(thinking) + (" are" if len(thinking) > 1 else " is")
+            + " the runtime's own count on the turns whose transcript line carries "
+            "usage.output_tokens_details"
+            + ("; where turns_with_thinking_tokens is fewer than the run's turns the rest of the run's "
+               "thinking is unmeasured, so the count is partial."
+               if "turns_with_thinking_tokens" in thinking else
+               "; the observation carries no turns_with_thinking_tokens, so how much of the run it covers "
+               "is not stated."))
+    elif present:
+        parts.append(" No thinking_tokens: the observation carries none, so the runtime's own count is not "
+                     "measured for this run.")
+    named = sorted(k for k in (extended or ()) if k in keys)
+    if parts and named:
+        # No clause where the extension names no key the observation still
+        # carries: "Of these,  was added…" was unstrippable and doubled the
+        # paragraph on every recomputation (#1191 round 5, S3).
+        parts.append(f" Of these, {', '.join(named)} " + ("were" if len(named) > 1 else "was")
+                     + " added after the run, under run_observed_extended, which names the source.")
+    return "".join(parts)
+
+
+#: Does the text already end a sentence? Terminal punctuation, optionally
+#: followed by the closers `_SENTENCE_END` also takes — so a curator's
+#: `… said "checked."` is finished, and is not given a second full stop
+#: outside its own quotation marks (#1191 round 8, M1).
+_ENDS_A_SENTENCE = __import__("re").compile(r"[.!?][\"\'\u2019\u201d)\]]*\s*$")
+
+
+def _recorded_additions(log: dict) -> list:
+    """The exact text each prior extension recorded appending, newest first.
+
+    Authorship cannot be read off a sentence: a curator sentence that
+    happens to match this module's is deleted, and one of this module's
+    that a curator edited by a word survives beside its replacement
+    (#1195 M2). So an extension writes down what it appended, and the next
+    one removes that string and nothing else."""
+    out = []
+    for e in (log.get("run_observed_extended") or []):
+        added = e.get("basis_added") if isinstance(e, dict) else None
+        # `.strip()`, not truthiness: a whitespace-only value passes a truthy
+        # test, `prior.rstrip()` is then the empty string, `b.endswith("")` is
+        # True for every string, and `b[: -len("")]` is `b[:0]` — the whole
+        # account, curator prose included, silently wiped (#1191 round 8, M2).
+        # No caller can produce one today; the mechanism exists so that
+        # nothing is destroyed by guesswork, and this was the one path that
+        # could destroy everything.
+        if isinstance(added, str) and added.strip():
+            out.append(added)
+    return list(reversed(out))
+
+
+def _basis_parts(log: dict, keys: set) -> tuple:
+    """`(basis, appended, terminated, edited)` — the recomputed account, the
+    text this call appends to it, whether a full stop was supplied because
+    the account carried no terminal punctuation of its own, and whether a
+    previous extension's recorded text is no longer where it was written.
+
+    The account is the record's, the standard one where it has none, plus
+    the cut sentence where the record carries a cut and does not say so.
+    What earlier extensions appended is removed by the text they recorded
+    (#1195 M2); the sentence-matching strip is kept only for a record
+    written before that text was recorded, which is a bounded set that
+    shrinks to nothing as they are re-extended."""
+    b = str(log.get("run_observed_basis") or "").rstrip() or _RUN_OBSERVED_BASIS
+    recorded = _recorded_additions(log)
+    edited = False
+    for prior in recorded:
+        if b.endswith(prior):
+            b = b[: -len(prior)].rstrip()
+        elif b.endswith(prior.rstrip()):
+            b = b[: -len(prior.rstrip())].rstrip()
+        else:
+            # The account no longer ends with what that extension recorded
+            # appending, so it was edited since. Removing an approximation of
+            # it would be guessing at a curator's text, which is the thing
+            # #1195 M2 says this must not do; leaving it doubles the
+            # paragraph, so the doubling is stated in the record instead.
+            edited = True
+    if not recorded:
+        mine = _own_sentences()
+        b = " ".join(s for s in _split_sentences(b) if s not in mine).rstrip()
+    terminated = not _ENDS_A_SENTENCE.search(b)
+    if terminated:
+        # Recorded, not silent (#1195 M3): the account is a curator's text
+        # and an edit to it is a fact about the record, small as it is.
+        b += "."
+    if log.get("run_observed_until") and "Cut at run_observed_until" not in b:
+        b += _CUT_BASIS
+    added = {k for e in (log.get("run_observed_extended") or []) if isinstance(e, dict)
+             for k in (e.get("keys_added") or [])}
+    appended = _reasoning_basis(keys, extended=added)
+    return b + appended, appended, terminated, edited
+
+
+def _basis_with(log: dict, keys: set) -> str:
+    """The recomputed `run_observed_basis` alone."""
+    return _basis_parts(log, keys)[0]
+
+
+def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrument: str,
+                         basis: dict | None = None) -> list[str]:
+    """The reviewed route #1010 asked for: a prior observation is extended
+    only when every key it already carries recomputes to the same value
+    from the same transcripts — the proof that the new keys describe the
+    observation on record, not another run — and the extension is written
+    down beside it, under `run_observed_extended`, a list so that a second
+    extension keeps the first one's trace (#1191 review, S4). Only the
+    reasoning keys are added (S2); `instrument` is the caller's statement
+    of where the numbers came from (M2), and the record's
+    `run_observed_basis` gains the sentence that describes them (M3).
+    Returns the keys added."""
+    from datetime import datetime, timezone
+    prior = log["run_observed"]
+    differ = {k: (v, observed.get(k)) for k, v in prior.items() if observed.get(k) != v}
+    if differ:
+        raise click.ClickException(
+            "refusing to extend: the recomputed observation disagrees with the "
+            f"record on {sorted(differ)} ({differ}); a value that does not "
+            "reproduce is not the same observation, so nothing is added")
+    added = sorted((set(observed) - set(prior)) & _REASONING_KEYS)
+    ignored = sorted((set(observed) - set(prior)) - _REASONING_KEYS)
+    if not added:
+        raise click.ClickException("nothing to extend: the recomputation carries no reasoning key the record lacks"
+                                   + (f" (not added, another instrument's: {ignored})" if ignored else ""))
+    log["run_observed"] = {**prior, **{k: observed[k] for k in added}}
+    entries = log.get("run_observed_extended")
+    entries = entries if isinstance(entries, list) else ([entries] if isinstance(entries, dict) else [])
+    entry = {"keys_added": added, "instrument": instrument, **(basis or {}),
+             "recorded_by": recorded_by,
+             "recorded_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat()}
+    entries.append(entry)
+    log["run_observed_extended"] = entries
+    text, appended, terminated, edited = _basis_parts(log, set(log["run_observed"]) & _REASONING_KEYS)
+    # What this extension appended, so the next one removes this text and
+    # not a sentence that merely reads like it (#1195 M2).
+    entry["basis_added"] = appended
+    if terminated:
+        entry["basis_terminated"] = "a full stop was added: the account carried no terminal punctuation"
+    if edited:
+        entry["basis_prior_edited"] = (
+            "the account no longer ends with the text a previous extension recorded appending, so it was "
+            "edited after that extension; that paragraph is left exactly as it stands and this one is "
+            "added after it, rather than guess at which words are the curator's (#1195)")
+    log["run_observed_basis"] = text
+    return added
+
+
+#: How launchers have named a project in a subagent's name: the project
+#: itself with its underscore dropped, and the abbreviations on disk.
+_PROJECT_NAME_KEYS: dict[str, tuple[str, ...]] = {
+    "AI_READI": ("aireadi",), "CHORUS": ("chorus",), "CM4AI": ("cm4ai",),
+    "VOICE": ("voice",), "VOICE_PEDIATRIC": ("voicepediatric", "voicepeds"),
+}
+
+
+def _transcript_candidates(project: str, label: str, roots: list[Path] | None = None) -> list[Path]:
+    """Subagent transcripts that could be this run's, by name (#1010): a
+    launcher names its subagent after the project and the replicate
+    (`agent-av6-AI_READI-rep1-…`, `agent-afanout-aireadi-rep3-…`) or, for
+    the canary that opened an arm, after the project and the word canary
+    (`agent-acanary-chorus-agentic-…`). Both config directories are
+    searched — the two hold identical copies of some transcripts (#688) —
+    and a copy whose bytes another candidate already has is dropped. The
+    name is a lead, not a proof: the caller recomputes every prior key
+    from each candidate, and only the one that reproduces them is the run."""
+    import hashlib as _h
+    import re as _re
+    # The config directories key their transcripts by the main checkout's
+    # path; a worktree's cwd is not it, so the path comes from git.
+    import subprocess as _sp
+    try:
+        common = _sp.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+                         capture_output=True, text=True, check=True).stdout.strip()
+        repo = Path(common).parent
+    except (OSError, _sp.CalledProcessError):
+        repo = Path.cwd().resolve()
+    repo_dir = "-" + str(repo).strip("/").replace("/", "-")
+    roots = roots if roots is not None else [Path.home() / ".claude" / "projects" / repo_dir,
+                                             Path.home() / ".claude-work" / "projects" / repo_dir]
+    m = _re.search(r"_rep(\d+)$", label)
+    rep = m.group(1) if m else None
+    keys = _PROJECT_NAME_KEYS.get(project, (project.lower().replace("_", ""),))
+    # A sibling project whose name contains this one's (VOICE_PEDIATRIC,
+    # VOICE) must not be offered as this one's run (#1191 review, S3).
+    others = [k for p, ks in _PROJECT_NAME_KEYS.items() if p != project for k in ks
+              if any(key in k and key != k for key in keys)]
+    out: list[Path] = []; seen: set[str] = set()
+    for root in roots:
+        for f in sorted(root.glob("*/subagents/agent-*.jsonl")):
+            name = _re.sub(r"-[0-9a-f]{16}$", "", f.stem).lower().replace("_", "").replace("-", "")
+            if not any(k in name for k in keys) or any(o in name for o in others):
+                continue
+            if rep is not None and not _re.search(rf"rep{rep}(?!\d)", name) and not ("canary" in name and rep == "1"):
+                continue
+            digest = _h.sha256(f.read_bytes()).hexdigest()
+            if digest in seen:
+                continue
+            seen.add(digest); out.append(f)
+    return out
+
+
+def _observe(transcripts: list, bundle, until, receipt, manifest) -> dict:
+    """`scripts/agentic_observed.observe`, imported from the script."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("agentic_observed", Path("scripts/agentic_observed.py"))
+    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+    obs = mod.observe(transcripts, bundle, until, receipt, manifest)
+    return {k: v for k, v in obs.items() if not k.startswith("_") and k in _RUN_OBSERVED_FIELDS
+            and isinstance(v, int) and not isinstance(v, bool)}
+
+
+def _observer_sha256() -> str:
+    """The instrument's own hash, recorded with every extension (#1191
+    review, S1): the observer is what the proof rests on."""
+    import hashlib as _h
+    return _h.sha256(Path("scripts/agentic_observed.py").read_bytes()).hexdigest()
+
+
+@provenance.command('extend-observed')
+@click.option('--label', required=True)
+@click.option('--project', default=None, help='one project; default every project with a record under the label')
+@click.option('--method', default=None, help='run directory family; defaults to the one the label lives in')
+@click.option('--transcript', 'given', multiple=True, type=click.Path(exists=True, path_type=Path),
+              help='the transcript(s) to read, instead of discovery by name; with --project; at most four, '
+                   'every subset of which is tried')
+@click.option('--execute', is_flag=True, help='write the extension; without it, report')
+def extend_observed(label, project, method, given, execute):
+    """Recompute an agentic run's observation from its transcript and the
+    bytes it read, and extend `run_observed` with the reasoning keys (#1010).
+
+    Candidates are found by name (`_transcript_candidates`), the bundle is
+    the committed version whose md5 the record hashed (`bundle_bytes_for`,
+    #1140 — today's file where it still is those bytes), the manifest is
+    chunked from it in memory under the record's rule, and the observer is
+    `scripts/agentic_observed.py` with the record's own `run_observed_until`
+    cut. Exactly one candidate must reproduce every key the record already
+    carries; none, or more than one, is a refusal that names them.
+    """
+    _require_repo_root_cwd("d4d provenance extend-observed")
+    from data_sheets_schema.cli.method import resolve_method
+    from data_sheets_schema.constants import PROJECTS
+    from data_sheets_schema.provenance import record_path_for
+    if given and not project:
+        raise click.ClickException("--transcript names one run's files; pass --project with it")
+    if len(given) > 4:
+        raise click.ClickException("--transcript takes at most four files: every subset is tried "
+                                   "(a resumed run's pair among them), and 2^n sets is the cost")
+    method = method or resolve_method(label, project)
+    projects = [project] if project else [p for p in PROJECTS if record_path_for(p, method, label).exists()]
+    if not projects:
+        raise click.ClickException(f"no record under {method} {label}")
+    observer = _observer_sha256()
+    for proj in projects:
+        try:
+            _extend_one(proj, method, label, list(given), execute, observer)
+        except click.ClickException as exc:
+            # One project's refusal is not another's (#1191 review, S5).
+            click.echo(f"{proj} {label}: {exc.message}")
+
+
+def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, observer: str) -> None:
+    import hashlib as _h
+    import tempfile as _tf
+    from datetime import datetime as _dt
+
+    import yaml as _yaml
+
+    from data_sheets_schema.chunking import dump_manifest, manifest_from_bytes
+    from data_sheets_schema.provenance import (GitUnavailable, ProvenanceRecord, bundle_bytes_for,
+                                               record_path_for)
+    from data_sheets_schema.receipts import receipt_path
+    path = record_path_for(proj, method, label)
+    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    tag = f"{proj} {label}"
+    if data.get("api_usage"):
+        click.echo(f"{tag}: an API-path record; api_usage is its account (#400)"); return
+    log = data.get("phase_log") or {}
+    prior = log.get("run_observed") if isinstance(log, dict) else None
+    if not isinstance(prior, dict) or not prior:
+        click.echo(f"{tag}: no run_observed to extend"); return
+    # A record carries the measure when it has every estimate key, or when a
+    # prior transcript-backed extension added them and found no
+    # thinking_tokens to add — the runtime's own count is absent from many
+    # transcripts and its absence is a finding, not a gap to retry. Requiring
+    # only two of the estimate keys skipped a record for good while it still
+    # lacked assistant_turns, thinking_blocks and the character counts
+    # (#1195 M4).
+    if _REASONING_KEYS <= set(prior) or (
+            set(_ESTIMATE_KEYS) <= set(prior) and "thinking_tokens" not in prior
+            and any(isinstance(e, dict) and "thinking_tokens" not in (e.get("keys_added") or []) and
+                    "transcripts" in e for e in (log.get("run_observed_extended") or []))):
+        click.echo(f"{tag}: already carries the reasoning measure"); return
+    inputs = data.get("inputs") or {}
+    bpath, md5 = inputs.get("bundle_path"), inputs.get("bundle_md5")
+    if not bpath or not md5:
+        click.echo(f"{tag}: the record declares no bundle path and md5; the coverage keys cannot be recomputed"); return
+    on_disk = Path(bpath)
+    if on_disk.exists() and _h.md5(on_disk.read_bytes()).hexdigest() == md5:
+        raw, basis = on_disk.read_bytes(), {"bundle_basis": {"source": "bundle on disk", "path": bpath}}
+    else:
+        try:
+            found = bundle_bytes_for(bpath, md5=md5, sha256=inputs.get("bundle_sha256"))
+        except GitUnavailable as exc:
+            click.echo(f"{tag}: bundle drifted and git could not supply the version the record hashed: {exc}"); return
+        if found is None:
+            click.echo(f"{tag}: bundle drifted and no committed version of {bpath} hashes to the record's md5"); return
+        raw, entry = found
+        basis = {"bundle_basis": {"source": "git blob", "path": bpath, "commit": entry["commit"],
+                                  "md5": entry["md5"], "matched_on": entry.get("matched_on")}}
+    rule = ((inputs.get("chunks") or {}).get("rule")) or None
+    candidates = list(given) or _transcript_candidates(proj, label)
+    if not candidates:
+        click.echo(f"{tag}: no transcript found by name for this project and replicate"); return
+    # A killed-and-resumed run has two transcripts under one name and
+    # its observation summed them (#688): every single file is tried,
+    # then every set of files sharing a name, oldest first.
+    sets: list[list[Path]] = [[t] for t in candidates]
+    if given:
+        # Every subset of the files given, oldest first (#1191 review, S6)
+        from itertools import combinations
+        ordered = sorted(candidates, key=lambda t: t.stat().st_mtime)
+        for n in range(2, len(ordered) + 1):
+            sets += [list(c) for c in combinations(ordered, n)]
+    else:
+        import re as _re
+        from itertools import combinations
+        by_name: dict[str, list[Path]] = {}
+        for t in candidates:
+            by_name.setdefault(_re.sub(r"-[0-9a-f]{16}$", "", t.stem), []).append(t)
+        for v in by_name.values():
+            if len(v) < 2:
+                continue
+            ordered = sorted(v, key=lambda t: t.stat().st_mtime)
+            if len(ordered) <= _MAX_AUTOMATIC_GROUP:
+                # Every subset, not only the whole group: three files under
+                # one launcher name include a valid resumed pair the group
+                # itself is not (#1195 M7).
+                for n in range(2, len(ordered) + 1):
+                    sets += [list(c) for c in combinations(ordered, n)]
+            else:
+                sets.append(ordered)
+                click.echo(f"{tag}: {len(ordered)} transcripts share the name "
+                           f"{_re.sub(r'-[0-9a-f]{16}$', '', ordered[0].stem)}; only each single file and "
+                           "the whole group are tried — pass --transcript to try a particular set")
+    until_s = log.get("run_observed_until")
+    until = _dt.fromisoformat(str(until_s).replace("Z", "+00:00")) if until_s else None
+    receipt = receipt_path(path.parent, proj)
+    with _tf.TemporaryDirectory() as tmp:
+        tb = Path(tmp) / Path(bpath).name; tb.write_bytes(raw)
+        tm = Path(tmp) / "chunks.yaml"; tm.write_text(dump_manifest(manifest_from_bytes(raw, tb.name, rule)), encoding="utf-8")
+        results = []
+        for ts in sets:
+            obs = _observe(ts, tb, until, receipt if receipt.exists() else None, tm if receipt.exists() else None)
+            differ = sorted(k for k, v in prior.items() if obs.get(k) != v)
+            results.append((ts, obs, differ))
+    matches = [(ts, obs) for ts, obs, differ in results if not differ]
+    if len(matches) != 1:
+        click.echo(f"{tag}: {len(matches)} of {len(results)} candidate transcript set(s) reproduce every prior key"
+                   + ("; nothing written" if execute else ""))
+        for ts, obs, differ in results:
+            click.echo(f"   {' + '.join(t.name for t in ts)}: " + ("reproduces" if not differ else
+                       "differs on " + ", ".join(f"{k} {prior[k]}→{obs.get(k)}" for k in differ)))
+        return
+    ts, obs = matches[0]
+    # What the losing candidates reproduced, so the identification can be
+    # audited from the record rather than by replaying a candidate pool that
+    # has since changed (#1195 S8). `best_other_reproduces` is how many of the
+    # record's prior keys the closest non-matching set got; null where the
+    # winner was the only candidate.
+    others = [len(prior) - len(differ) for cand, _o, differ in results if cand is not ts]
+    # Not every prior key identifies a transcript: `bundle_lines_total` is the
+    # bundle's and `receipt_chunks_total` the manifest's, so every candidate
+    # reproduces them. A discriminating key is one at least two candidate sets
+    # disagree on, and it is the count over those that says how far the winner
+    # stood from the field.
+    disc = sorted(k for k in prior
+                  if len({str(o.get(k)) for _c, o, _d in results}) > 1) if len(results) > 1 else []
+    others_disc = [sum(1 for k in disc if o.get(k) == prior[k])
+                   for cand, o, _d in results if cand is not ts]
+    identification = {"sets_tried": len(results), "prior_keys": len(prior),
+                      "discriminating_keys": disc,
+                      "best_other_reproduces": max(others) if others else None,
+                      "best_other_reproduces_discriminating": max(others_disc) if others_disc else None}
+    added = sorted((set(obs) - set(prior)) & _REASONING_KEYS)          # the set --execute writes (round 2, S4)
+    click.echo(f"{tag}: {' + '.join(t.name for t in ts)} reproduces {len(prior)} prior key(s); adds {added}")
+    if not execute:
+        click.echo("   (report only; --execute writes the extension)"); return
+    _extend_run_observed(log, obs, recorded_by="d4d provenance extend-observed (#1010)",
+                         instrument="the transcript's reasoning measure (#1000/#1011), recomputed by "
+                                    "scripts/agentic_observed.py from the transcripts named on the bytes the "
+                                    "record hashed, "
+                                    + ("under the record's own run_observed_until cut"
+                                       if until is not None else
+                                       "over the whole transcript: the record records no cut")
+                                    + "; every prior key reproduced exactly",
+                         # The bytes, not the basename: two different files can
+                         # carry one name under the two config roots, and a
+                         # name alone neither says which was read nor detects a
+                         # later edit (#1195 M6).
+                         basis={"identification": identification,
+                                "transcripts": [t.name for t in ts],
+                                "transcript_sha256": {t.name: _h.sha256(t.read_bytes()).hexdigest() for t in ts},
+                                "observer_sha256": observer, **basis})
+    ProvenanceRecord(data=data).write(path)
     click.echo(f"   wrote {path}")
 
 
@@ -542,7 +1308,11 @@ def recheck_validation(method, label, project, execute):
                    'agent kept acting after its run completed. Recorded as '
                    'run_observed_until so the totals can be reproduced from '
                    'the transcript with the same cut.')
-def annotate_observed(project, method, label, run_observed, until):
+@click.option('--extend', is_flag=True,
+              help='extend a prior run_observed with new keys (#1010): every key the '
+                   'record already carries must recompute to the same value in --run, '
+                   'which is the proof it is the same observation; the extension is recorded')
+def annotate_observed(project, method, label, run_observed, until, extend):
     """Add run-level observed totals to an existing record (#681 follow-on).
 
     The two-speakers model, applied where four-phase project-agent mode leaves
@@ -601,40 +1371,41 @@ def annotate_observed(project, method, label, run_observed, until):
             "run re-record with --phase first (an agentic run; an API "
             "record would have been refused above).")
     prior = log.get("run_observed")
-    if prior is not None and prior != observed:
+    if extend and prior is not None and until and until != log.get("run_observed_until"):
+        raise click.ClickException(
+            f"--until {until} is not the record's own cut ({log.get('run_observed_until') or 'none'}); an "
+            "extension adds keys to the observation on record and keeps its cut (#1191 round 2, S2)")
+    if extend and prior is not None and prior == observed:
+        click.echo(f"{path}: already carries every key given; nothing to extend and nothing changed")
+        return
+    if prior is not None and prior != observed and extend:
+        _extend_run_observed(log, observed, recorded_by="d4d provenance annotate-observed --extend (#1010)",
+                             instrument="values supplied on the command line by the launcher (--run); the prior "
+                                        "keys reproduced exactly, which is the only proof this route offers — "
+                                        "no transcript was read and no bundle hashed by this command")
+        rec = ProvenanceRecord(data=data)
+        out = rec.write(path)
+        click.echo(f"✓ {out} (extended; run_observed_until and run_observed_basis kept)")
+        for v in rec.conformance:
+            click.echo(f"  ⚠️  {v}")
+        return
+    elif prior is not None and prior != observed:
         raise click.ClickException(
             f"the record already carries run_observed {prior}. An "
             "observation is made once; silently replacing it would drop "
             "measurements without trace. If the prior value is wrong, "
-            "remove it in a reviewed edit that says why.")
-    log["run_observed"] = observed
+            "remove it in a reviewed edit that says why; to add the reasoning "
+            "keys to an observation that reproduces, pass --extend (#1010).")
+    else:
+        log["run_observed"] = observed
     if until:
         log["run_observed_until"] = until
-    elif "run_observed_until" in log:
-        del log["run_observed_until"]
-    log["run_observed_basis"] = (
-        "aggregate totals for the whole run, observed by the orchestrator "
-        "from the subagent runner's transcript. One number per run, not per "
-        "phase: four-phase project-agent mode runs every phase in one "
-        "context, so the run is the only observable boundary. Not the "
-        "runtime's own accounting, no input/output split, not billing-grade; "
-        "deliberately not shaped like api_usage (#681/#682). total_tokens "
-        "counts each API message once (a response spans several transcript "
-        "lines); duration_ms sums each invocation's own span, so a resumed "
-        "run excludes the gap. bundle_lines_read is the union of the run's "
-        "successful file-reading windows over the declared bundle (#700): "
-        "lines the run never opened, or opened only in a read that errored, "
-        "may have been reached by search, but nothing attests that. "
-        "assistant_turns, output_tokens, thinking_blocks, thinking_text_chars, "
-        "visible_text_chars, tool_input_chars and reasoning_tokens_estimate "
-        "(output tokens minus a 4-chars-per-token estimate of the text and "
-        "tool-call payloads) are the transcript's reasoning measure (#1000), "
-        "thinking_tokens and "
-        "turns_with_thinking_tokens the runtime's own count where the "
-        "transcript carries usage.output_tokens_details; comparable in kind "
-        "with the API path's reasoning log, never to be averaged with it."
-        + (" Cut at run_observed_until: the agent kept acting after its run "
-           "completed, and the record describes the run." if until else ""))
+    # A cut the record carries is never removed by a call that did not name
+    # one (#1191 rounds 1 and 2, M1): the cut is part of the observation.
+    log["run_observed_basis"] = (_RUN_OBSERVED_BASIS + (_CUT_BASIS if log.get("run_observed_until") else "")
+                                 + _reasoning_basis(set(observed) & _REASONING_KEYS,
+                                                    extended={k for e in (log.get("run_observed_extended") or [])
+                                                              if isinstance(e, dict) for k in (e.get("keys_added") or [])}))
     rec = ProvenanceRecord(data=data)
     out = rec.write(path)
     click.echo(f"✓ {out}")

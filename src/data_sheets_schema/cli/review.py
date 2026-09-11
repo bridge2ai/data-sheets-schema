@@ -329,7 +329,8 @@ def disposition(method, label, project, item, disposition, note, slot_path, old,
                            bundle=Path("data/preprocessed/concatenated") / f"{project}_preprocessed.txt", label=label)
             problems = validate_outputs(spec)
             rec = yaml.safe_load(bc._split_header(prov.read_text(encoding="utf-8"))[1]) or {}
-            rec["validation"] = validation_block(spec, problems, recorded_by="d4d review disposition")
+            rec["validation"] = validation_block(spec, problems, recorded_by="d4d review disposition",
+                                                 prior=rec.get("validation"))
             rec["dispositions"][-1]["validation_after"] = "valid" if not problems else f"{len(problems)} problem(s)"
             ProvenanceRecord(data=rec).write(prov)
             click.echo(f"   re-validated: {rec['dispositions'][-1]['validation_after']}")

@@ -106,6 +106,13 @@ phase_log:
     duration_ms: 2539121
     bundle_lines_read: 5898
     bundle_lines_total: 7376
+    assistant_turns: 94
+    output_tokens: 121405
+    reasoning_tokens_estimate: 70348
+    thinking_blocks: 57
+    thinking_text_chars: 0
+    tool_input_chars: 198762
+    visible_text_chars: 5725
   run_observed_basis: 'aggregate totals for the whole run, observed by the orchestrator
     from the subagent runner''s transcript. One number per run, not per phase: four-phase
     project-agent mode runs every phase in one context, so the run is the only observable
@@ -115,7 +122,63 @@ phase_log:
     invocation''s own span, so a resumed run excludes the gap. bundle_lines_read is
     the union of the run''s successful file-reading windows over the declared bundle
     (#700): lines the run never opened, or opened only in a read that errored, may
-    have been reached by search, but nothing attests that.'
+    have been reached by search, but nothing attests that. Of the transcript''s reasoning
+    measure (#1000/#1011) the observation carries assistant_turns, output_tokens,
+    thinking_blocks, thinking_text_chars, visible_text_chars, tool_input_chars, reasoning_tokens_estimate;
+    comparable in kind with the API path''s reasoning log, never to be averaged with
+    it. reasoning_tokens_estimate is output tokens minus a 4-chars-per-token estimate
+    of the text and tool-call payloads: a subtraction, an upper bound, not a measurement.
+    No thinking_tokens: the observation carries none, so the runtime''s own count
+    is not measured for this run. Of these, assistant_turns, output_tokens, reasoning_tokens_estimate,
+    thinking_blocks, thinking_text_chars, tool_input_chars, visible_text_chars were
+    added after the run, under run_observed_extended, which names the source.'
+  run_observed_extended:
+  - keys_added:
+    - assistant_turns
+    - output_tokens
+    - reasoning_tokens_estimate
+    - thinking_blocks
+    - thinking_text_chars
+    - tool_input_chars
+    - visible_text_chars
+    instrument: 'the transcript''s reasoning measure (#1000/#1011), recomputed by
+      scripts/agentic_observed.py from the transcripts named on the bytes the record
+      hashed, over the whole transcript: the record records no cut; every prior key
+      reproduced exactly'
+    identification:
+      sets_tried: 11
+      prior_keys: 5
+      discriminating_keys:
+      - bundle_lines_read
+      - duration_ms
+      - tool_uses
+      - total_tokens
+      best_other_reproduces: 1
+      best_other_reproduces_discriminating: 0
+    transcripts:
+    - agent-afanout-aireadi-rep2-92b315ec9d076e67.jsonl
+    transcript_sha256:
+      agent-afanout-aireadi-rep2-92b315ec9d076e67.jsonl: 68bb9f3cafdfbf7fbb61364496a4901630fadc57b7242fa03946e459cdca5c21
+    observer_sha256: 1bdeb4fde0bc28a63d9615acba9e53f70db027668086be35ceae8d12c369c0a8
+    bundle_basis:
+      source: git blob
+      path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+      commit: 9049904493393a6ce1db69b9fe0a855ce0db4435
+      md5: 0f3abb51a333555456bedd63891fcd99
+      matched_on:
+      - md5
+    recorded_by: d4d provenance extend-observed (#1010)
+    recorded_at: '2026-09-10T08:36:07+00:00'
+    basis_added: ' Of the transcript''s reasoning measure (#1000/#1011) the observation
+      carries assistant_turns, output_tokens, thinking_blocks, thinking_text_chars,
+      visible_text_chars, tool_input_chars, reasoning_tokens_estimate; comparable
+      in kind with the API path''s reasoning log, never to be averaged with it. reasoning_tokens_estimate
+      is output tokens minus a 4-chars-per-token estimate of the text and tool-call
+      payloads: a subtraction, an upper bound, not a measurement. No thinking_tokens:
+      the observation carries none, so the runtime''s own count is not measured for
+      this run. Of these, assistant_turns, output_tokens, reasoning_tokens_estimate,
+      thinking_blocks, thinking_text_chars, tool_input_chars, visible_text_chars were
+      added after the run, under run_observed_extended, which names the source.'
 schema:
   declared_version: 2.0.0
   declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml

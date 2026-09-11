@@ -519,6 +519,24 @@ check` reports receipts blocks by instrument and names those behind the
 current one. v9 R8 still tells the model a
 landing-page label "needs a receipt like any other value" — the cost v2
 removes; #1147 rotates that sentence.
+**Coverage degree is a property of the arm** (#902), and the denominator
+is what makes it readable: receiptable populated leaves, which run from
+142 to 508 in one arm, so a bare without-a-receipt count compares
+nothing. Pooled per arm — the table
+`scripts/arm_comparison.py` writes into `notes/arm_comparison.md`, never a
+mean of per-record rates — the v6 agentic arm receipts 2,820 of 5,846
+leaves (48.2%), the v7 API canaries 607 of 1,762 (34.4%), the v7
+production arm 1,385 of 3,905 (35.5%) and the v8 production arm 2,310 of
+4,094 (56.4%): the v7 degree limit that eight of twelve production
+reviewers read as a rule-15 violation is real, and v8 recovers past v6.
+Zero `not_in_bundle` verdicts were returned anywhere on that arm, so what
+this measures is how far the receipt reaches, not whether the values are
+supported. The #807 split says which half of the gap the protocol could
+have closed: never-receipted dominates (56.8% of receiptable leaves on
+v7 production, 42.4% on v8) over leaves reconciliation or repair added
+after the receipt was written, which have no receipt route at all
+(7.8% and 1.2%, #742). It needs the phase-1 snapshot, so an agentic arm
+reports no split rather than a zero.
 Named non-checks: that `nothing_relevant` was true, and that a real snippet
 supports its value. `backfill-checks` writes a `receipts` block only where a
 receipt exists or the record claims one (#726). Every bundle kind a run may declare has a manifest (#725), so
@@ -645,8 +663,15 @@ chunk, unverified snippet, finding, or vacuous receipt (zero snippets over a
 non-empty bundle) is a regression against a floor of 0. A snippet that is
 verbatim in the bundle but in a chunk other than the one cited is
 `adjacent`/`elsewhere` — reported as "snippets in another chunk", never
-gated (#763; ~2% on the v7 API canaries): support holds, attribution
-precision is its own number. When false, the
+gated (#763): support holds, attribution precision is its own number.
+Pooled over an arm it is 3.8% on the five v7 API canaries (33 of 859
+snippets), 7.6% on the v7 production arm (132 of 1,733) and 6.0% on v8
+(153 of 2,556) — against 0 of 3,400 on the v6 agentic arm, which names
+chunk ids from the manifest it read instead of inferring them from the
+`[cNNN]` marker lines the API path inserts. The marker side was checked
+byte-for-byte on the CM4AI canary and sits correctly (#873), so the rate
+is a property of that protocol and of the model reading it, usually one
+chunk early, not of the receipt (#831). When false, the
 block is not a metric for that run: earlier arms and the API arm before v7
 (#710) wrote none, and "no receipt" from them is not a measurement.
 **Duplicate mapping keys** (#1029) are a validation failure read off the
@@ -657,7 +682,32 @@ and gated against a floor of 0 as a count of distinct duplicated keys
 (none of the 270 full records of the model-written arms, nor their
 cores, had one); the repair round is told what to merge like any other
 validation failure, `d4d provenance recheck-validation` brings an earlier
-record under the instrument, `d4d api verdict` re-verdicts it
+record under the instrument — `--all` (#1033) walks every record once
+(the base directory and its `_core` twin are one record, keyed on the
+path) and writes only where the recorded verdict, the artifacts' recorded hashes
+and each problem's artifact, class and JSON-pointer paths reproduce, so
+the write adds `duplicate_keys`, this checkout's schema digest (saying so
+where it moved) and its own `recorded_by`, and re-records the validator's
+message where the schema reworded it — nothing else. An artifact is
+compared against the hash the block itself recorded, by whichever
+algorithm it used, and **rewritten under that same algorithm**: 82 corpus
+records pin `sha256` only and 196 `md5` only — every record carrying a
+validation block — and the recompute
+(`api_runner.validation_block`) emits md5, which #204 deprecated, so
+taking it as written would move a record back to the deprecated
+algorithm and lose the sha256 it attested. A record already carrying the field is skipped unless its schema
+pin has moved, which the write repairs: without that a pass taken before
+a schema change leaves its records reading STALE and unrepairable. Over
+the 282 records: 79 written across five method directories, 12 of which
+already carried the field and were rewritten only to restamp the pin;
+198 held — 196 whose `passed` flips to false under today's schema and 2
+whose problems name other JSON pointers; 4 with no validation block; one
+whose full record is gone. One written record
+records a duplicate key, the AI_READI 2026-09-04f rep1 record whose own
+canary already reads `duplicate keys run 1, baseline_worst 0`; every
+other reads 0, so no verdict moves. A held record is rerun by label as a
+deliberate act, and stays gated as unmeasured until it is — `d4d api
+verdict` re-verdicts it
 offline with the gate's own functions, keeping the prior block under
 `prior_verdict`, and `d4d runs check` reports such records without
 failing `--strict`, which gates attestation, not validity (#1035). Since
@@ -1092,8 +1142,45 @@ them under `phase_log.run_observed`, and `d4d provenance reasoning` reports
 such a run as `recovered_from_transcript`. Cache-inclusive orchestrator
 accounting, one number per run: the same subtraction as the API log's
 estimate, on a runtime whose output is mostly tool payloads, so an upper
-bound rather than a like-for-like figure; never averaged with `api_usage`. Existing agentic records carry the older
-`run_observed` shape until re-annotated from their transcripts.
+bound rather than a like-for-like figure; never averaged with `api_usage`. The 24 agentic records (v5 2026-08-24, v6
+2026-08-28) carry the measure since #1010: `d4d provenance
+extend-observed --label L [--execute]` finds the run's transcript by
+name in both config directories, recovers the bundle version the record
+hashed (#1140; 18 of the 24 from a git blob), chunks it under the
+record's rule, re-runs the observer under the record's own
+`run_observed_until` cut where it declares one (one of the 24; the other
+23 are observed over the whole transcript and their entries say so), and
+extends `run_observed` only when exactly one candidate — a file, or a
+set of the files a killed-and-resumed run left under one name (three v5
+rep3 runs; every subset of such a group is tried, since three files
+under one name include a resumed pair the group itself is not) —
+reproduces every key the record already carried. That is 4–5
+discriminating integers per record, on which the closest non-matching
+candidate reproduces none on 17 of the 24, one on four and two on
+three; each entry of `run_observed_extended` (a list, so a second
+extension keeps the first's trace) names the keys, the transcripts and
+their sha256 — a basename is the same under both config roots and
+identifies no bytes — how the winner was identified, the bundle basis
+and the observer's sha256, the text the extension appended to the
+account so the next one removes that and not a sentence that merely
+reads like it, and `run_observed_basis` gains a sentence per
+group of keys the record carries and none for keys it does not: the
+estimate keys present, `reasoning_tokens_estimate`'s subtraction, the
+runtime's own count and what its turn coverage means (or, on a run
+carrying none, that the observation carries none), and which of them an
+extension added. Only the reasoning keys are added under this
+instrument — a receipt-coverage key is #709's — and `annotate-observed
+--extend`, the hand-entered route, keeps the record's cut and says its
+numbers came from the command line. **`thinking_tokens` is a partial
+count on every record that carries it**: the observer counts a turn
+only where that transcript line carries an integer `thinking_tokens`
+inside `usage.output_tokens_details`, and `turns_with_thinking_tokens` is
+short of `assistant_turns` on all fifteen — by 1 to 6 turns on the
+twelve v6 records, by 36 to 62 on the three resumed v5 rep3 runs, whose
+first transcript predates the detail entirely. The nine v5 rep1/rep2
+records and CHORUS rep3 carry no `thinking_tokens` at all. So
+`reasoning_tokens_estimate` is the figure that spans both arms, and a
+`thinking_tokens` comparison must carry its turn coverage.
 
 So the command distinguishes four empty cases rather than printing one message
 for all of them:
@@ -1254,6 +1341,42 @@ make compare-evaluations
 | Evidence | None | Quotes, reasoning |
 
 See `notes/LLM_EVALUATION.md` and `notes/RUBRIC_AGENT_USAGE.md` for details.
+
+### Validating the evaluation artifacts (#833)
+
+```bash
+poetry run python scripts/validate_evaluation_schema.py
+```
+
+Walks **every** `*_evaluation.json` under `data/evaluation_llm/` at any
+depth and judges each against the schema its own `rubric` field names. It
+used to read `{rubric}_semantic/concatenated/*.json` only — 28 of the 204
+semantic artifacts, and never `label_aware/`, which is where every
+evaluation since 2026-08 lives and which `scripts/arm_comparison.py`
+reads; one schema-invalid artifact sat there unreported. Nothing runs the
+script in CI or the Makefile, so it is a check you invoke.
+
+Results are partitioned into **live** and **kept**: a directory whose name
+starts `_archive`, `superseded`, or a date is evidence of what an older
+instrument produced, and an invalid record there is reported and never
+rewritten to satisfy today's schema. A **superseded shape** — the
+pre-2026 `summary_scores`/`element_scores` contract — is likewise
+reported, not failed. Only a live invalid artifact makes the run exit
+non-zero. Today: 109 live valid, 12 live superseded, 9 live invalid, and
+40/8/24 kept; the presence-style `rubric10`/`rubric20` outputs (143 each)
+have no schema here and are counted as unjudged rather than skipped in
+silence.
+
+The 9 live invalid are one rubric10-semantic evaluation whose
+`semantic_analysis.issues_detected[].severity` says `info`, which the
+schema does not admit (the score beside it is intact, so the cross-arm
+table is unaffected), and 8 rubric20-semantic evaluations under
+`concatenated/` that still carry the `max_points: 84` shape #314
+identified and were never re-run or archived. Neither is edited: an
+evaluation is what the evaluator produced. **So the script exits
+non-zero on every run today**, and will until those nine are archived or
+re-run (#1200) — read the summary, not the exit code, until then. It is
+not wired into CI or the Makefile for that reason.
 
 ## Running Single Tests
 

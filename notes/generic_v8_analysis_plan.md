@@ -1513,7 +1513,190 @@ steps need:
     cannot read, and names those behind the current one (0 today). Not a
     generation-path change.
 
-21. **An unrecorded removal is a finding, and a prose retention claim is a
+21. **Receipt coverage degree is an arm number, with its denominator
+    (#902, #831, #873, 2026-09-10).** The receipts block has carried
+    `slots.receiptable` and the #807 never/added split since those
+    revisions, but the cross-arm table printed only the count of leaves
+    without a receipt, which compares nothing: the denominator runs from
+    142 to 508 leaves within one arm. `scripts/arm_comparison.py` now
+    carries the denominator, the split and the snippet total as their own
+    rows, and writes a pooled per-arm section — pooled, not a mean of
+    per-record rates, which would weight a 142-leaf record like a
+    508-leaf one. Measured: the v6 agentic arm receipts 2,820 of 5,846
+    receiptable leaves (48.2%), the v7 API canaries 607 of 1,762 (34.4%),
+    the v7 production arm 1,385 of 3,905 (35.5%) and the v8 production
+    arm 2,310 of 4,094 (56.4%). So the v7 degree limit #902 reports from
+    the reviewers is real at arm level and v8 recovers past v6, and the
+    gap is overwhelmingly never-receipted (56.8% of receiptable leaves on
+    v7 production, 42.4% on v8) rather than added after the receipt
+    (7.8% and 1.2%) — the half the protocol could have closed, not the
+    half #742 says has no receipt route. Attribution: 33 of 859 snippets
+    not in the chunk cited on the v7 canaries (3.8%), 132 of 1,733 on v7
+    production (7.6%), 153 of 2,556 on v8 (6.0%), and 0 of 3,400 on the
+    v6 agentic arm, which names chunk ids from the manifest rather than
+    inferring them from marker lines; with the marker side checked
+    byte-for-byte (#873) the rate is the model mis-citing under the
+    `[cNNN]` protocol, usually one chunk early. Nothing is recomputed and
+    no record moves: this is a reading of blocks already on disk, and not
+    a generation-path change. The regeneration also absorbs the drift the
+    note had accumulated since 2026-09-08 — six rows moved by British
+    instrument v4 (amendment 18), report_claims v4 (#1122) and receipts
+    v2/v3 (amendments 15 and 17), none of them by this change, which
+    reproduces the previous without-a-receipt figures exactly.
+
+22. **The agentic arms carry the transcript's reasoning measure (#1010,
+    2026-09-10).** `d4d provenance extend-observed` recomputed every one
+    of the 24 agentic records' `run_observed` from its transcript on the
+    bundle bytes the record hashed (18 recovered from git, 6 on disk),
+    under the record's own `run_observed_until` cut where it declares one
+    — one of the 24 does, and the other 23 are observed over the whole
+    transcript, which each entry's `instrument` now says rather than
+    claiming a cut the record does not carry (#1195 M5) — and extended it only
+    where every prior key reproduced exactly — 24 of 24, 21 from one
+    transcript and 3 (the v5 rep3 AI_READI, CM4AI and VOICE runs, killed
+    and resumed) from the pair of files their name covers, whose sums are
+    the recorded token, tool and duration totals and whose union of read
+    windows is the recorded `bundle_lines_read`. "Every prior key" is 5 or 7 integers per record, of which 4 or 5
+    discriminate: `total_tokens` (eight digits on 22 of the 24, seven on
+    the two CHORUS v5 records) and `duration_ms` carry the
+    identification, while `bundle_lines_total` and
+    `receipt_chunks_total` are the bundle's and the manifest's and every
+    candidate reproduces them. The closest non-matching candidate
+    reproduces 0 of a record's discriminating keys on 17 of the 24, 1 on
+    four and 2 on three, and each record now records that beside its
+    extension under `identification` (`sets_tried`,
+    `discriminating_keys`, `best_other_reproduces_discriminating`), so the
+    claim is auditable from the record rather than by replaying a
+    candidate pool that has since changed (#1195 S8). Ten to nineteen
+    candidate sets were tried per record.
+    Added: `assistant_turns`, `output_tokens`,
+    `thinking_blocks`, `thinking_text_chars` (0 throughout), `visible_text_chars`,
+    `tool_input_chars`, `reasoning_tokens_estimate`, and where any turn
+    carries it `thinking_tokens` / `turns_with_thinking_tokens` (the
+    twelve v6 records and the three resumed v5 rep3 runs). That count is
+    partial on all fifteen — `turns_with_thinking_tokens` is short of
+    `assistant_turns` by 1 to 6 turns on the v6 records and by 36 to 62
+    on the resumed ones, whose first transcript carries the detail on no
+    turn — so it is a floor, not the run's thinking, and only
+    `reasoning_tokens_estimate` spans both arms. `output_tokens` median 116,774 (v5) and 153,026.5 (v6);
+    `reasoning_tokens_estimate` median 68,315.5 and 88,556 — an upper
+    bound on a runtime whose output is mostly tool payloads, never
+    averaged with `api_usage`. `d4d provenance reasoning` reports all 24
+    as `recovered_from_transcript`. Each record's `run_observed_basis`
+    describes the keys it carries and no others, and
+    `run_observed_extended` is a list
+    of extensions naming the keys, the transcripts, the bundle basis and
+    the observer script's sha256 (#1191 review). A `VOICE_PEDIATRIC` run
+    is looked for as `voicepediatric` or `voicepeds` and never offered as
+    VOICE's. Numbered with 19, 20 and 21 open. Not a generation-path
+    change; no verdict reads these keys. Each record's
+    `run_observed_basis` describes the keys it carries and no others: a
+    sentence for the estimate keys present, one for
+    `reasoning_tokens_estimate`'s subtraction, one for the runtime's
+    count and what its turn coverage means (or, on the nine without it,
+    that the observation carries none), and one naming which of them an
+    extension added — the record's only in-text statement that those
+    numbers are not the orchestrator's own run-time observation.
+    A Codex CLI review after six reviewer rounds (#1195) found the
+    recomputation was inferring authorship from sentence text: a curator
+    sentence identical to one of this module's was deleted and one of its
+    own that a curator had edited by a word survived beside its
+    replacement, neither of which a text match can tell apart. An
+    extension now records the exact text it appended
+    (`basis_added`), and the next one removes that string and nothing
+    else; where the account no longer ends with it the paragraph was
+    edited since, and that is stated (`basis_prior_edited`) rather than
+    guessed at. The sentence-matching strip is kept only for a record
+    written before the text was recorded — a set that empties as those
+    records are re-extended — and it now knows the forms earlier rounds
+    wrote, among them round 2's block and round 5's empty extension
+    clause, none of which today's function can produce. Two of the
+    literals it carries match no round's output that a replay of this
+    branch's history could find; they are kept, since an over-wide strip
+    of text this module could have written costs nothing while a missing
+    one doubles a paragraph, and labelled as what they are rather than as
+    evidence that a record says them (rounds 8 and 9, S1). Four more from the same
+    review: the sentence boundary takes `!`, `?` and a closing quote or
+    bracket, so a basis ending in one is idempotent; a full stop supplied
+    to an account that carried none is recorded rather than silent; the
+    skip guard asks for every estimate key, not two of the seven, so a
+    record missing `assistant_turns` or the character counts is no longer
+    skipped for good; and the transcripts are recorded by sha256 as well
+    as name, since one basename can name different bytes under the two
+    config roots.
+
+23. **Every record is brought under the duplicate-key instrument where
+    nothing else moves (#1033, 2026-09-09).** `d4d provenance
+    recheck-validation --all` recomputes each record's validation and
+    writes the block only where the verdict, the artifacts' md5s and each
+    problem's artifact, class and the JSON-pointer paths its message
+    names reproduce — a message carries today's enum list and moves with
+    the schema while the failure it names does not, but a message naming
+    other paths is another failure (#1190 review). The message is the
+    validator's first four lines, so the gate sees at most four failures
+    per problem; 8 of the corpus's 29 problem strings are exactly four
+    lines and may be truncated. An artifact is compared against the hash
+    the block itself recorded, by whichever algorithm it used — 82
+    records pin `sha256` only and 196 `md5` only, which is every record
+    carrying a validation block, and reading `md5`
+    unconditionally held a record for a drift that had not happened
+    (round 3, M1). The write then adds `duplicate_keys`, **this
+    checkout's** schema digest and its own `recorded_by` — re-recording
+    the validator's message where the schema reworded it — and nothing
+    else, saying so on the line where the digest moved; and a record
+    already carrying the field is re-checked when, and only when, its
+    schema pin has moved, since a pass taken before a schema change
+    otherwise leaves its records reading STALE
+    (`runs.validation_status`, #426) with no route back (round 2, M1).
+    `discover` yields a base directory and its
+    `_core` twin as two runs over one record, so the walk is keyed on the
+    record's path: 282 records, not 559 visits. Run over the corpus after
+    a one-record report-mode canary, and re-run after the branch merged
+    main's schema change (#1146 regenerated the merged schema, and 48 of
+    the first pass's records pinned the older digest): **79 written**
+    across `claudecode_agent_core` (40), `claudecode_api_core` (18),
+    `claudecode_agent_crate_only_core` (9),
+    `claudecode_agent_crate_core` (9) and
+    `claudecode_agent_healthsheet_core` (3) — 52 gained a schema block,
+    27 had one restamped, and every one pins this checkout's schema. Of
+    the 79, 12 already carried `duplicate_keys` and were rewritten only
+    to restamp the pin and 67 gained the field, which is the whole 79; 6
+    of those also re-record the validator's message under today's wording
+    with the same pointers, and every one takes this command's
+    `recorded_by`. Each artifact keeps the hash algorithm its own block
+    recorded, recomputed: `api_runner.validation_block` hashes with md5
+    and was never brought under #204, so writing its output as it stood
+    moved a record from sha256 back to the deprecated algorithm and
+    destroyed the sha256 it had attested — one record here, and 81 pin
+    sha256 only and are held today merely because their verdicts flip
+    (#1190 round 4, M1). Zero artifact entries change algorithm. The
+    partition of the 282 is 79 written, 198 held, 4 with no block and 1
+    missing. **198 held** — 196 whose `passed` flips
+    to false under today's schema (the 2026-07 and early-2026-08 arms,
+    whose records validated against the schema of their day), 2 whose
+    problems now name other JSON pointers (the 2026-08-05 v3 rep1
+    AI_READI and CHORUS records, whose `file_collections[*].collection_type`
+    failures the schema no longer raises and whose first four lines are
+    now `creators` failures). No record is held for a drifted artifact:
+    every candidate's artifacts still hash to what its verdict recorded,
+    which the round-2 reading of `md5` alone could not see — the CHORUS
+    2026-07-29 rep1 record it named pins `sha256` and verifies. 4
+    records have no validation block; one has no full artifact (AI_READI
+    2026-08-11 api-generic rep3). A held record stays as
+    it was — its verdict is the one it attested — and is rerun by label as
+    a deliberate act. 78 of the 79 written records record 0 duplicate
+    keys; the one that does not is AI_READI 2026-09-04f rep1, whose own
+    canary already reads `duplicate keys run 1, baseline_worst 0,
+    regressed`, so the recompute reproduces what the record already said.
+    The straddle test's per-record assertion widened with it: a record of
+    the 2026-08-11 arm reads `valid` rather than `stale` once it has been
+    re-validated against today's schema, which is what this change is
+    for, and the artifact-hash check its rationale rests on is unchanged.
+    No canary verdict moves, and the gate reads an absent field as
+    unmeasured, as before. Numbered with 19 (#1054) and 20 (#1140) open. Not a
+    generation-path change.
+
+24. **An unrecorded removal is a finding, and a prose retention claim is a
     claim (#1054, 2026-09-09, report_claims instrument v5).** Three of nine
     v8 reviews found a top-level slot the phase-1 record carried, receipted,
     that both final records lack with no Dispositions row and no audit
@@ -1705,7 +1888,7 @@ steps need:
     filed apart. Not a generation-path change.
 
 Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16,
-17, 20 and 21 are not; 15 and 17 are the receipts instrument's revisions and
+17 and 20 to 24 are not; 15 and 17 are the receipts instrument's revisions and
 17 classifies both; 18 changes the normaliser's rule table and is a
 generation-path change by that half); per the production rule none of them may land
 between a v8 canary and its fill.

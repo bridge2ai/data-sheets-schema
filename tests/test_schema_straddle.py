@@ -240,17 +240,21 @@ class TestAgainstTheRealArm(unittest.TestCase):
                     self.assertIn(
                         bundle_drift("claudecode_agent", label, project)[0],
                         ("current", "drifted"))
-                    # `stale`, not `valid`, since #646 moved the schema after
-                    # this arm's verdicts — the same shape as `drifted` above:
-                    # the record states what it validated against, and the
-                    # path no longer resolves to those bytes. The distinction
-                    # that must hold is *why* it is stale: the artifacts still
-                    # hash to what the verdict pinned (nothing was edited);
-                    # only the schema pin moved. Artifact-stale would be
-                    # corruption and fails here.
+                    # `stale` where #646 moved the schema after this arm's
+                    # verdicts — the same shape as `drifted` above: the record
+                    # states what it validated against, and the path no longer
+                    # resolves to those bytes. `valid` where the record has
+                    # since been re-validated against today's schema and its
+                    # verdict, artifacts and problems reproduced, which is
+                    # what `d4d provenance recheck-validation --all` does
+                    # (#1033) — rep3 CHORUS is such a record. Never
+                    # `invalid`, and never artifact-stale: the distinction
+                    # that must hold is that nothing was edited, which the
+                    # `verify_entry` loop below asserts on the hashes the
+                    # verdict pinned.
                     status = validation_status("claudecode_agent", label,
                                                project)
-                    self.assertEqual(status, "stale")
+                    self.assertIn(status, ("stale", "valid"))
                     from data_sheets_schema.provenance import (record_path_for,
                                                                verify_entry)
                     import yaml as _y
