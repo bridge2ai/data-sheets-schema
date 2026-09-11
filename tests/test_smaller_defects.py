@@ -4,6 +4,7 @@ Grouped because each is small; separated here by class so a failure names the
 one that broke.
 """
 
+import hashlib
 import unittest
 from pathlib import Path
 
@@ -134,7 +135,16 @@ class ReportPhaseTest(unittest.TestCase):
         if not spec.report_path.exists():
             self.skipTest("v4 arm not present in this checkout")
         block = report_claims_block(spec)
-        self.assertEqual(set(block["artifacts"]), {"report", "full", "core"})
+        self.assertEqual(set(block["artifacts"]),
+                         {"report", "full", "core", "phase1_snapshot"})
+        for name in ("report", "full", "core"):
+            pin = block["artifacts"][name]
+            self.assertEqual(pin["md5"],
+                             hashlib.md5(Path(pin["path"]).read_bytes()).hexdigest())
+        snapshot = block["artifacts"]["phase1_snapshot"]
+        self.assertEqual(snapshot["state"], "usable")
+        self.assertEqual(snapshot["sha256"],
+                         hashlib.sha256(Path(snapshot["path"]).read_bytes()).hexdigest())
         self.assertEqual(set(block["schema"]), {"full_sha256", "core_sha256"})
 
 
