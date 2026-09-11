@@ -50,3 +50,8 @@ build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry.extras]
 docs = ["linkml", "mkdocs-material"]
+
+[tool.pytest.ini_options]
+markers = [
+    "corpus: walks the committed corpus under data/ (hundreds of records or a whole-corpus CLI check). Run on merge to main and on demand; a pull request runs the rest (#1203).",
+]

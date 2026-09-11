@@ -11,6 +11,7 @@ consistent and checkable, and the instruction that goes out carries no
 project-specific text that could quietly become load-bearing again.
 """
 
+import pytest
 import re
 import tempfile
 import unittest
@@ -204,6 +205,7 @@ class TestTheAliasesOfAnEntry(unittest.TestCase):
         self.assertIn("SENTINEL-42", block)
 
 
+@pytest.mark.corpus   # walks the committed corpus; the main-branch lane (#1203)
 class TestCheckingARecord(unittest.TestCase):
     def test_a_record_about_the_companion_cohort_is_caught(self):
         status, why = scope.check_record(

@@ -1,5 +1,6 @@
 """Tests for D4D generation provenance records."""
 
+import pytest
 import tempfile
 import unittest
 from pathlib import Path
@@ -221,6 +222,7 @@ class TestCuratedIsNotAReference(unittest.TestCase):
             self.assertIsNone(rec["model"]["model"])
 
 
+@pytest.mark.corpus   # walks the committed corpus; the main-branch lane (#1203)
 class TestHashUnification(unittest.TestCase):
     """One algorithm for new records, both readable for old ones (#168).
 
@@ -460,6 +462,7 @@ class TestOutputsDescribeRatherThanAssert(unittest.TestCase):
             self.skipTest("no derived records present")
 
 
+@pytest.mark.corpus   # walks the committed corpus; the main-branch lane (#1203)
 class TestTheEndOfRunGate(unittest.TestCase):
     """`d4d runs check` re-verifies rather than noting a hash is present."""
 

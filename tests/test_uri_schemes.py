@@ -13,6 +13,7 @@ Nor are they resolvable. `urn:cm4ai:org:ucsd` is a well-formed URN on an
 unregistered NID. Hence a third category rather than a move into `uri`.
 """
 
+import pytest
 import unittest
 
 from data_sheets_schema.identifiers import (BARE, CURIE_DECLARED,
@@ -87,6 +88,7 @@ class TestItIsNeitherNeighbour(unittest.TestCase):
         self.assertEqual(classify("https://ror.org/01an7q238", PREFIXES), URI)
 
 
+@pytest.mark.corpus   # walks the committed corpus; the main-branch lane (#1203)
 class TestAgainstTheCorpus(unittest.TestCase):
     def test_the_reclassification_moves_the_headline(self):
         """1,067 values move out of unresolvable — 28% of the undeclared-CURIE
