@@ -1367,6 +1367,8 @@ See `notes/LLM_EVALUATION.md` and `notes/RUBRIC_AGENT_USAGE.md` for details.
 
 ```bash
 poetry run python scripts/validate_evaluation_schema.py
+# Before completing a new evaluation: check only that file, strictly.
+poetry run python scripts/validate_evaluation_schema.py --file OUTPUT_PATH --rubric rubric10-semantic
 ```
 
 Walks **every** `*_evaluation.json` under `data/evaluation_llm/` at any
@@ -1374,8 +1376,11 @@ depth and judges each against the schema its own `rubric` field names. It
 used to read `{rubric}_semantic/concatenated/*.json` only — 28 of the 204
 semantic artifacts, and never `label_aware/`, which is where every
 evaluation since 2026-08 lives and which `scripts/arm_comparison.py`
-reads; one schema-invalid artifact sat there unreported. Nothing runs the
-script in CI or the Makefile, so it is a check you invoke.
+reads; one schema-invalid artifact sat there unreported. Both semantic rubric
+agents now require the exact-file command before completion (#833), which
+checks only their own output and rejects invalid or superseded output even
+inside a dated/archive directory. The whole-corpus command is a historical
+inventory; it is not the completion check for a newly written file.
 
 Results are partitioned into **live** and **kept**: a directory whose name
 starts `_archive`, `superseded`, or a date is evidence of what an older
@@ -1383,21 +1388,23 @@ instrument produced, and an invalid record there is reported and never
 rewritten to satisfy today's schema. A **superseded shape** — the
 pre-2026 `summary_scores`/`element_scores` contract — is likewise
 reported, not failed. Only a live invalid artifact makes the run exit
-non-zero. Today: 109 live valid, 12 live superseded, 9 live invalid, and
-40/8/24 kept; the presence-style `rubric10`/`rubric20` outputs (143 each)
+non-zero. Today: 109 live valid, 12 live superseded, 1 live invalid, and
+40/8/32 kept; the presence-style `rubric10`/`rubric20` outputs (143 each)
 have no schema here and are counted as unjudged rather than skipped in
 silence.
 
-The 9 live invalid are one rubric10-semantic evaluation whose
+The remaining live invalid is the rubric10-semantic evaluation whose
 `semantic_analysis.issues_detected[].severity` says `info`, which the
 schema does not admit (the score beside it is intact, so the cross-arm
-table is unaffected), and 8 rubric20-semantic evaluations under
-`concatenated/` that still carry the `max_points: 84` shape #314
-identified and were never re-run or archived. Neither is edited: an
-evaluation is what the evaluator produced. **So the script exits
-non-zero on every run today**, and will until those nine are archived or
-re-run (#1200) — read the summary, not the exit code, until then. It is
-not wired into CI or the Makefile for that reason.
+table is unaffected). Its disposition and unchanged hash are recorded in
+`data/evaluation_llm/rubric10_semantic/label_aware/README.md`: preserve the
+historical score and explicitly report its structural invalidity. It remains
+invalid; no exception makes it pass. The eight obsolete rubric20 outputs with
+`max_points: 84` are preserved byte for byte in
+`rubric20_semantic/concatenated/_archive_pre_314/`, with their relocation and
+hashes recorded (#1200). The whole-corpus command therefore still exits 1 for
+the one annotated artifact. New evaluations use the strict exact-file check,
+whose exit status must be 0.
 
 ## One parse per file per process (#1203)
 

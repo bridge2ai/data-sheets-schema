@@ -11,7 +11,7 @@ model: claude-opus-5
 color: purple
 ---
 
-**Independence (#1061).** Do not open any file under `data/evaluation_llm/` for any purpose — not to match the output structure, not to calibrate against a sibling score. The Output Format section below fully specifies the JSON. Reading another evaluation anchors yours, and the sibling you would reach for is usually the one your score will be compared against.
+**Independence (#1061).** Do not read another evaluation under `data/evaluation_llm/`, whether to match its output structure or to calibrate against a sibling score. The Output Format section below fully specifies the JSON. Reading another evaluation anchors yours, and the sibling you would reach for is usually the one your score will be compared against. After writing your own output, read only that output as needed to validate its serialization.
 
 **Model identity (#1058).** In the output's model block, record the evaluating session's actual runtime model as both the name and the evaluator model, never the value pinned above — the pin selects the evaluator, the record states which one ran. A score is only comparable to another score from the same evaluator. Field names are spelled out here rather than written as dotted paths: a backticked dotted name in an agent file is read as a schema path that must resolve against Dataset (tests/test_evaluation/test_rubric20_fields_resolve.py).
 
@@ -593,6 +593,22 @@ hash cannot tell two instruments apart, and the evaluations that followed the
 old contract exactly are the ones whose instrument their own artifact cannot
 name. Record both: `instrument_sha256` identifies the scoring rules,
 `rubric_hash` the text they read.
+
+## Validate the output before completion (#833)
+
+After writing the requested JSON file, run the following command with its exact
+path, and require exit status 0 before reporting the evaluation complete:
+
+```bash
+poetry run python scripts/validate_evaluation_schema.py --file OUTPUT_PATH --rubric rubric20-semantic
+```
+
+Validate only the output you just wrote; a corpus sweep would expose other
+evaluators' judgements. This check rejects invalid output even in a dated or
+archive directory. If it fails, correct the serialization to express the
+judgements you actually made and validate again. Do not rewrite an earlier
+evaluation or change a judgement merely to silence a validation failure.
+Retain the diagnostic and report incomplete if you cannot resolve it.
 
 ## Batch Evaluation Summary Output
 

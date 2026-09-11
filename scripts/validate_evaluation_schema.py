@@ -5,6 +5,7 @@ Validate D4D evaluation JSON files against their schemas.
 This ensures evaluations conform to the standardized schema, which in turn
 ensures HTML renderers can reliably parse the output.
 """
+import argparse
 import json
 import re as _re
 import sys
@@ -71,6 +72,39 @@ def validate_evaluation(eval_data: Dict, schema: Dict) -> Tuple[bool, List[str]]
     return status == "valid", errors
 
 
+def validate_outputs(paths: List[Path], rubric: str | None = None,
+                     schema_dir: Path | None = None) -> int:
+    """Require each explicitly named new output to pass its semantic schema.
+
+    Directory names and superseded shapes do not exempt a new output. This
+    path reads only the files named by the caller, so an evaluator can check
+    its own output without reading another evaluator's judgements (#833).
+    """
+    schema_dir = schema_dir or Path(__file__).resolve().parents[1] / "src/download/prompts"
+    names = {"rubric10-semantic": "rubric10_semantic_schema.json",
+             "rubric20-semantic": "rubric20_semantic_schema.json"}
+    failed = not paths
+    for path in paths:
+        try:
+            doc = load_evaluation(path)
+            if not isinstance(doc, dict):
+                raise ValueError("evaluation must be a JSON object")
+            declared = doc.get("rubric")
+            if not isinstance(declared, str) or declared not in names:
+                raise ValueError(f"no semantic evaluation schema for rubric {declared!r}")
+            if rubric is not None and declared != rubric:
+                raise ValueError(f"expected {rubric}, found {declared}")
+            valid, errors = validate_evaluation(doc, load_schema(schema_dir / names[declared]))
+            if not valid:
+                raise ValueError("\n".join(errors))
+        except (OSError, ValueError, jsonschema.SchemaError) as exc:
+            print(f"INVALID {path}: {exc}")
+            failed = True
+        else:
+            print(f"VALID {path}: {declared}")
+    return int(failed)
+
+
 #: A directory whose name marks its contents as kept evidence rather than a
 #: live artifact: an archive, a superseded set, or a dated snapshot of one
 #: arm's scores. An invalid record in one of these is what an older
@@ -132,6 +166,8 @@ def main(eval_base: Path | None = None, schema_dir: Path | None = None) -> int:
         shown = eval_file.relative_to(eval_base)
         try:
             eval_data = load_evaluation(eval_file)
+            if not isinstance(eval_data, dict):
+                raise ValueError("evaluation must be a JSON object")
         except Exception as e:
             print(f"❌ {shown}: failed to load: {e}")
             counts[(where, "unreadable")] += 1
@@ -177,5 +213,17 @@ def main(eval_base: Path | None = None, schema_dir: Path | None = None) -> int:
     return 0 if not live_invalid and not counts[("live", "unreadable")] else 1
 
 
+def cli(argv: List[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--file", type=Path, action="append", dest="files",
+                        help="validate this exact new output strictly; repeat for multiple files")
+    parser.add_argument("--rubric", choices=("rubric10-semantic", "rubric20-semantic"),
+                        help="require the named outputs to use this rubric")
+    args = parser.parse_args(argv)
+    if args.rubric and not args.files:
+        parser.error("--rubric requires --file")
+    return validate_outputs(args.files, args.rubric) if args.files else main()
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(cli())
