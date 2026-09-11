@@ -3,9 +3,10 @@
   "issue": 829,
   "status": "definition and reporting boundary; no rescore yet",
   "sha256": {
-    ".claude/agents/d4d-rubric10-semantic.md": "f350138dbe80b7a5d9684736e6a7753a69a5dd552b14229636d58d213effcf43",
-    ".claude/agents/d4d-rubric20-semantic.md": "c413b66394de37965deefd9ef45aaee7e398a5afca612fc36ba058c2d9f7b222",
+    ".claude/agents/d4d-rubric10-semantic.md": "afead1a2355425e211a28cf4674110bb64d2cda344797d29a6c733b695b4b297",
+    ".claude/agents/d4d-rubric20-semantic.md": "4958f9fe884c19b13703afa72ed39a7365f17ba787401eac270c864e0b14d0a9",
     "src/download/prompts/rubric10_semantic_schema.json": "7afb97db312f332bf110a834ef49f64f933e7a0df9a2a7594309f4392d009591",
     "src/download/prompts/rubric20_semantic_schema.json": "234f5db629109c989cbf12d7abc33ce88bad64a5afcd7c82de111e00a3fce641"
-  }
+  },
+  "pin_review_issue": 1246
 }

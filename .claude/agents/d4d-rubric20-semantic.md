@@ -826,6 +826,10 @@ multiple evaluations may be fractional; they are not individual scores.
 
 3. **Batch aggregation:** Report both fixed and N/A-adjusted percentages, their maxima, and the excluded item identities for every record. Within each project, flag different adjusted maxima or different excluded items, even if the excluded point totals match. Do not rank or pool adjusted percentages across those applicability groups. Neither percentage alone establishes comparability; retain the evaluator model and instrument identity, and report within-group replicate counts and spread before interpreting small differences.
 
+### Comparing applicability
+
+Same-project comparisons must name the item identities whose applicability differs, because two evaluations can exclude the same number of points while omitting different evidence requirements.
+
 **NOTE:** Report the count of non-applicable questions in the `questions_not_applicable` field of `overall_score`.
 
 ## Key Principles
