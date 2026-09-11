@@ -61,6 +61,18 @@ jobs:
       # -v: the log names each test as it starts, so a runner that dies
       # mid-suite still says which test was running. `--durations` keeps the
       # slowest tests visible so the next regression is seen, not felt.
+      # `make test` builds the merged schema before pytest, because
+      # `test-schema` depends on it; the runner's schema-sync gate then
+      # compares a freshly built file against a freshly built file. Running
+      # pytest directly skipped that and nine runner tests failed on
+      # "the merged schema is not built from the current source" — the
+      # committed merged schema does not reproduce byte-for-byte under the
+      # runner's own linkml, and `make` was quietly rebuilding it. Kept
+      # explicit here rather than inherited, so the dependency is visible;
+      # whether the committed file should reproduce is #1208.
+      - name: Build the merged schema, as make test does
+        run: make full-schema
+
       # `-n auto` across the runner's cores. Measured on a 4-core machine with
       # the #1203 caches: 15 min serial, 5 min 52 s on four workers, same
       # 3,094 passing. `-v` names each test as it starts, so a runner that
