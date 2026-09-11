@@ -91,10 +91,38 @@ class TestVerdictBlock(unittest.TestCase):
         self.assertEqual(b["prior_disposition"], prior["prior_disposition"])
         self.assertEqual(b["readings"], prior["readings"])
         self.assertEqual(b["status"], "ok")                       # the measurement is the new one
+        self.assertEqual(b["disposition_basis"]["status"], "regressed")
+        self.assertTrue(b["disposition_basis"]["stale"])
+        self.assertEqual(b["disposition_basis"]["rows"], [1])
+        self.assertTrue(b["readings_basis"]["stale"])
         self.assertEqual(b["prior_verdict"], prior)               # and the whole prior is still kept
         # a computed key the new verdict carries is never overwritten by the prior's
         self.assertEqual(verdict_block({**v, "disposition": "fresh"}, label_prefix="v7",
                                        report_basis_counts={}, recorded_by="x", prior=prior)["disposition"], "fresh")
+
+    def test_annotation_keeps_its_original_basis_across_repeated_verdicts(self):
+        v = {"status": "ok", "rows": [{"metric": "report findings", "run": 0}],
+             "regressions": [], "blind": [], "unbaselined": []}
+        first = {**v, "recorded_at": "2026-09-01T00:00:00Z", "disposition": "retained"}
+        # Existing history can predate the basis field; the oldest matching
+        # annotation is the evidence, not the latest refresh's timestamp.
+        legacy = {**first, "recorded_at": "2026-09-02T00:00:00Z", "prior_verdict": first}
+        def refresh(value, prior):
+            return verdict_block(value, label_prefix="v7", report_basis_counts={}, recorded_by="test", prior=prior)
+        same = refresh(v, legacy)
+        self.assertFalse(same["disposition_basis"]["stale"])
+        self.assertEqual(same["disposition_basis"]["recorded_at"], first["recorded_at"])
+        changed = {**v, "rows": [{"metric": "report findings", "run": 1}]}
+        stale = refresh(changed, same)
+        self.assertEqual(stale["disposition_basis"]["changed_fields"], ["rows"])
+        again = refresh(changed, stale)
+        self.assertEqual(again["disposition_basis"], stale["disposition_basis"])
+        self.assertEqual(first["rows"][0]["run"], 0)
+        # A curator can supply a new answer to the changed verdict.
+        again["disposition"] = "retained after checking the additional finding"
+        fresh = refresh(changed, again)
+        self.assertFalse(fresh["disposition_basis"]["stale"])
+        self.assertEqual(fresh["disposition_basis"]["recorded_at"], again["recorded_at"])
 
 
 class _Usage:

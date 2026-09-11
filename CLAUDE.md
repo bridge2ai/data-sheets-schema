@@ -944,6 +944,23 @@ only inside a title-case run ("Jane Grey", "Grey Institute"); a bare
 `family_name: Grey` or "led by Grey" is rewritten and logged under
 `british_rewrites`, and `d4d review disposition --amend` restores it.
 
+## Canary measurement and curator bases (#1201/#1202)
+
+A carried `canary.disposition`, `prior_disposition`, or `readings` keeps a
+matching `<key>_basis`: the original verdict's status, rows, blind checks,
+missing baselines, regressions and recording date, plus a hash of the
+annotation. A status or measurement change marks it `stale` and names the
+changed fields. A timestamp refresh alone does not. Repeated re-verdicts keep
+the original basis; a changed curator annotation starts a new basis at the
+verdict it answers. Legacy history is followed back through identical carried
+annotations. The whole previous verdict is still retained under `prior_verdict`.
+
+A duplicate-key count is measured only when both full and core artifact lists
+are present and readable. Null, malformed or missing lists produce an
+`unmeasured` row and an `unmeasurable` canary that stops the sweep. A historical
+validation block without the `duplicate_keys` field still predates this
+metric; it adds no duplicate-key row. A measured zero remains a zero floor.
+
 ## Proving which agent definition a subagent read (#1077)
 
 An edit to `.claude/agents/*.md` does not always reach a subagent spawned

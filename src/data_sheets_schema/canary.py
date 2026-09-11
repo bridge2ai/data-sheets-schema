@@ -171,6 +171,39 @@ def offline_verdict(record: dict[str, Any], project: str, label_prefix: str,
 CURATOR_KEYS = ("disposition", "prior_disposition", "readings")
 
 
+def _annotation_basis(prior: dict[str, Any], key: str, current: dict[str, Any]) -> dict[str, Any]:
+    """Keep a curator's original measurement basis across re-verdicts (#1201).
+
+    A changed annotation starts a new basis. For legacy blocks, walk back
+    through identical carried annotations to the verdict they first answered.
+    The date identifies that verdict; a later recording date alone is not a
+    change in its measurement.
+    """
+    import hashlib
+    import json
+    from copy import deepcopy
+
+    digest = hashlib.sha256(json.dumps(prior[key], sort_keys=True, default=str).encode()).hexdigest()
+    fields = ("status", "rows", "blind", "unbaselined", "regressions")
+    source = prior
+    seen = set()
+    while id(source) not in seen:
+        seen.add(id(source))
+        existing = source.get(f"{key}_basis")
+        if isinstance(existing, dict) and existing.get("annotation_sha256") == digest:
+            origin = {field: deepcopy(existing.get(field)) for field in (*fields, "recorded_at")}
+            break
+        older = source.get("prior_verdict")
+        if not isinstance(older, dict) or key not in older or older[key] != prior[key]:
+            origin = {field: deepcopy(source.get(field)) for field in (*fields, "recorded_at")}
+            break
+        source = older
+    else:
+        origin = {field: deepcopy(source.get(field)) for field in (*fields, "recorded_at")}
+    changed = [field for field in fields if origin[field] != current.get(field)]
+    return {**origin, "annotation_sha256": digest, "stale": bool(changed), "changed_fields": changed}
+
+
 def verdict_block(v: dict[str, Any], *, label_prefix: str, report_basis_counts: dict[str, int] | None,
                   recorded_by: str, prior: dict[str, Any] | None = None,
                   checks_source: str = "this record's own check blocks") -> dict[str, Any]:
@@ -196,15 +229,19 @@ def verdict_block(v: dict[str, Any], *, label_prefix: str, report_basis_counts: 
         for k in CURATOR_KEYS:
             if k in prior and k not in out:
                 out[k] = prior[k]
+                out[f"{k}_basis"] = _annotation_basis(prior, k, v)
         out["prior_verdict"] = dict(prior)
     return out
 
 
-def duplicate_key_count(validation: dict[str, Any] | None) -> int:
+def duplicate_key_count(validation: dict[str, Any] | None) -> int | None:
     """Duplicated mapping keys across the full and core records, as the
-    validation block recorded them (#1029)."""
-    dk = (validation or {}).get("duplicate_keys") or {}
-    return sum(len(v or []) for v in dk.values()) if isinstance(dk, dict) else 0
+    validation block recorded them (#1029). None means not measured (#1202)."""
+    dk = (validation or {}).get("duplicate_keys")
+    if (not isinstance(dk, dict) or not {"full", "core"} <= dk.keys()
+            or any(not isinstance(v, list) for v in dk.values())):
+        return None
+    return sum(len(v) for v in dk.values())
 
 
 def receipt_floors(block: dict[str, Any]) -> dict[str, int]:
@@ -434,10 +471,13 @@ def verdict(checks: dict[str, Any], baseline: dict[str, int | None],
     # validation block without the field predates the instrument and is
     # not a metric for that run.
     vb = (checks or {}).get("validation")
-    if isinstance(vb, dict) and isinstance(vb.get("duplicate_keys"), dict):
+    if isinstance(vb, dict) and "duplicate_keys" in vb:
         n = duplicate_key_count(vb)
         row = {"metric": "duplicate keys", "run": n, "baseline_worst": 0}
-        if n > 0:
+        if n is None:
+            row["note"] = "unmeasured: duplicate keys could not be checked for every artifact (#1202)"
+            blind.append("duplicate keys")
+        elif n > 0:
             row["regressed"] = True
             regressions.append(f"duplicate keys: {n} against a floor of 0")
         rows.append(row)

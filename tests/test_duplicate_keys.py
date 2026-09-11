@@ -15,7 +15,7 @@ from pathlib import Path
 
 import yaml
 
-from data_sheets_schema.canary import OK, REGRESSED, duplicate_key_count, verdict
+from data_sheets_schema.canary import OK, REGRESSED, UNMEASURABLE, duplicate_key_count, verdict
 from data_sheets_schema.duplicate_keys import describe, find_duplicate_keys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -76,7 +76,22 @@ class TestTheGate(unittest.TestCase):
         v = verdict({**GOOD, "validation": {"passed": True}}, BAR)      # predates the instrument
         self.assertEqual(v["status"], OK)
         self.assertNotIn("duplicate keys", [r["metric"] for r in v["rows"]])
-        self.assertEqual(duplicate_key_count({"passed": True}), 0)
+        self.assertIsNone(duplicate_key_count({"passed": True}))
+
+    def test_an_unreadable_artifact_is_not_a_measured_zero(self):
+        for counts in ({"full": None, "core": []}, {"full": [], "core": None},
+                       {"full": [{}], "core": None}, {}, None, {"full": "invalid"},
+                       {"full": []}, {"core": []}):
+            with self.subTest(counts=counts):
+                block = {"passed": False, "duplicate_keys": counts}
+                self.assertIsNone(duplicate_key_count(block))
+                v = verdict({**GOOD, "validation": block}, BAR)
+                self.assertEqual(v["status"], UNMEASURABLE)
+                self.assertIn("duplicate keys", v["blind"])
+                row = next(r for r in v["rows"] if r["metric"] == "duplicate keys")
+                self.assertIsNone(row["run"])
+                self.assertIn("unmeasured", row["note"])
+                self.assertNotIn("regressed", row)
 
 
 class TestValidateOutputs(unittest.TestCase):
