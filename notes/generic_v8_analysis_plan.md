@@ -2186,7 +2186,14 @@ must not be reported as a measured same-instrument standard deviation.
 
 ### Reference rescore and fitness-cache decision (2026-09-11; #919, #1080, #1248)
 
-Manifest registered at 2026-09-11T22:22:36.847937+00:00 from checkout `fe3d8e60355defbd35685e9668c0075a99b89859`.
+Original manifest registered at 2026-09-11T22:22:36.847937+00:00 from checkout `fe3d8e60355defbd35685e9668c0075a99b89859`.
+It is retained byte-for-byte under `notes/reference_rescore_2026-09-11/registrations/manifest-before-portability-fix.json`.
+
+The current registration at 2026-09-11T22:38:28.150419+00:00 pins checkout `202e4fdccbc5a863a4ddada902ab50d78f14631d`.
+Issue #1255 corrected the runner to use the platform temporary directory after Linux CI failed before launch.
+Only the runner source hash changed: all 24 inputs, both rubric definitions, schemas and texts,
+202 prior evaluations, and 56 planned ratings are identical. No evaluator had started under
+either registration. The current manifest records the superseded manifest path and SHA256.
 The evaluator must quote the definition identified by these SHA256 values:
 
 - rubric10-semantic: `70a50310b9ec717981fc089d8fedb20ea8c3ca3b665870f8d1d2d2573c9fccdd`

@@ -1,7 +1,7 @@
 {
   "issue": 1248,
-  "registered_at": "2026-09-11T22:38:28.150419+00:00",
-  "definition_commit": "202e4fdccbc5a863a4ddada902ab50d78f14631d",
+  "registered_at": "2026-09-11T22:22:36.847937+00:00",
+  "definition_commit": "fe3d8e60355defbd35685e9668c0075a99b89859",
   "requested_model": "claude-opus-5[1m]",
   "effort": "high",
   "temperature": null,
@@ -844,7 +844,7 @@
     "data/rubric/rubric20.txt": "669490b61351353476ce7c1d4be9efb7da790da6499eb57078d1da0f06c0291b",
     "poetry.lock": "57a1c937b54e24a0450316bb5f1e82c3b1f5366dbbe156b3d1d5bf7ee81725fa",
     "pyproject.toml": "210e6e897d375a24e4a1ba67344e1b21e6cc2a4f6cd3104fcbe53c604d9d40ac",
-    "scripts/reference_rescore.py": "80137e8593d6c222a5fc8d23c6511b794d2784974f584269e536b59725027282",
+    "scripts/reference_rescore.py": "6eacfce2447ab40609262872b233eac1eb2d2ab10395cab84b7a7b39bde18fe5",
     "scripts/validate_evaluation_schema.py": "dc2e540c4800950eb866914c72894cda668b9a92d41c5f05aa045ff17483652c",
     "src/download/prompts/rubric10_semantic_schema.json": "5ac1989a60414d41f03383266535eee9963816d0d9b42bf5b90e1efe8d9d3dc2",
     "src/download/prompts/rubric20_semantic_schema.json": "5ccdbd229471748fa1dde8074d904c0334c983741dd90c7e56f95b45b012f32b"
@@ -1052,10 +1052,5 @@
     "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/CHORUS_2026-09-01api_rep2_evaluation.json": "4f9fd80a4589c287ce28e4b1c3a0a5bcee6b95ad2d2509f1261dafd7c10bd366",
     "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/AI_READI_2026-09-01api_rep3_evaluation.json": "71e028f6b4b2342f893349db01368fae7c257ddefa21a8154438ed48fdadab2b",
     "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/VOICE_2026-09-01api_rep1_evaluation.json": "d7e3086e4f1ff9fc8cfc0a8550aa4712dd8e8e2b30293653e27b1f18f2f82df8"
-  },
-  "supersedes_registration": {
-    "path": "notes/reference_rescore_2026-09-11/registrations/manifest-before-portability-fix.json",
-    "sha256": "d998f8d656aecac592c661878f2269e604adfc4b676f2ce7a2672df4d8dc7d91",
-    "reason": "#1255: portable temporary directory; no evaluator process had started"
   }
 }
