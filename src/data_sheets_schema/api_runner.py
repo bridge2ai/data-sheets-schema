@@ -2538,7 +2538,7 @@ def report_claims_block(spec: RunSpec) -> dict[str, Any] | None:
     try:
         import yaml as _yaml
 
-        from data_sheets_schema.report_claims import (check_report,
+        from data_sheets_schema.report_claims import (check_report, declared_ranges,
                                                       declared_slots,
                                                       phase1_snapshot_for)
         if not spec.report_path.exists():
@@ -2552,7 +2552,11 @@ def report_claims_block(spec: RunSpec) -> dict[str, Any] | None:
         out = check_report(spec.report_path, full or {}, core or {},
                            declared_slots(),
                            snapshot=phase1_snapshot_for(spec.core_path),
-                           dispositions_expected=True)
+                           dispositions_expected=True,
+                           # Both maps from the one core schema, so a nested
+                           # `both` row names the step the core cannot carry
+                           # rather than only its root (#994).
+                           ranges=declared_ranges())
     except Exception as exc:                                       # noqa: BLE001
         return {"checked": False, "reason": str(exc)[:200]}
     from data_sheets_schema.provenance import (CORE_SCHEMA, FULL_SCHEMA, _md5,

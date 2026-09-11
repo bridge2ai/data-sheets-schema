@@ -506,15 +506,37 @@ def _claim_scope(claim: str, classes: set[str]) -> tuple[set[str], str]:
     return classes, "unscoped"
 
 
-def _core_declares(path: str, declared: dict[str, set[str]]) -> bool:
-    """Whether the core class declares the root slot of `path`.
+def _path_steps(path: str) -> list[str]:
+    """`resources[0].file_collections[1].id` → the slot names, in order.
+    Indices are dropped: a list index says nothing about what a class
+    declares."""
+    return [s for s in re.split(r"[.\[]", path) if s and not s.rstrip("]").isdigit()]
 
-    Root-only by design: every class-ranged slot CoreDataset shares with
-    Dataset has the same range, so a nested path the core cannot carry is
-    one whose *root* it lacks. The residual is `resources` (Dataset and
-    CoreDataset differ, recursively) and a derived core that carries
-    `distributions` in place of `distribution_formats`: a finding on a
-    `both` row under either is still correct, but names no cause (#994).
+
+def _core_declares(path: str, declared: dict[str, set[str]],
+                   ranges: dict[str, dict[str, str | None]] | None = None) -> bool:
+    """Whether the core class can carry `path`, step by step.
+
+    Root-only until #994, on the reasoning that every class-ranged slot
+    CoreDataset shares with Dataset has the same range. Two do not.
+    `resources` is ranged `Dataset` on the full and `CoreDataset` on the
+    core, so it recurses into a smaller class — `resources[0].subsets` is a
+    path the full can hold and the core cannot — and a derived core carries
+    `distributions`, ranged `CoreDistribution`, where the full carries
+    `distribution_formats`. A finding on a `both` row under either was
+    still correct, because the row is checked against the core record
+    literally; what it could not say was that the core *could not* carry
+    the value, which is the difference between "name `full`" and "the two
+    records disagree".
+
+    With `ranges` — class name to slot name to the range class it induces,
+    from `declared_ranges` — each step is resolved against the class the
+    step before it lands in. Without it the root test stands, so a caller
+    that has not been updated keeps the old answer rather than a wrong one.
+    A step whose range is not a class in the core schema ends the walk: a
+    scalar cannot carry a slot, so a deeper path is one the core cannot
+    hold.
+
     `declared` without a `CoreDataset` entry is a broken core schema:
     `check_report` refuses it up front, since a checker that carried on
     would drop the cause from every such finding with no signal (#993).
@@ -522,8 +544,47 @@ def _core_declares(path: str, declared: dict[str, set[str]]) -> bool:
     if "CoreDataset" not in declared:
         raise ValueError("declared slots carry no `CoreDataset` class; "
                          "the core schema could not be read")
-    root = re.split(r"[.\[]", path, maxsplit=1)[0]
-    return root in declared["CoreDataset"]
+    steps = _path_steps(path)
+    if not steps:
+        return False
+    if not ranges:
+        return steps[0] in declared["CoreDataset"]
+    cls = "CoreDataset"
+    for i, step in enumerate(steps):
+        here = ranges.get(cls)
+        if here is None:                       # a class the core schema does not define
+            return False
+        if step not in here:
+            return False
+        if i + 1 == len(steps):
+            return True
+        cls = here[step] or ""                 # a scalar range ends the walk
+    return True
+
+
+def _core_cannot_hold_cause(path: str, declared: dict[str, set[str]],
+                            ranges: dict[str, dict[str, str | None]] | None) -> str:
+    """The clause naming which step of `path` the core cannot carry (#994).
+
+    Root-only phrasing where there are no ranges, so the sentence never
+    claims a precision the walk did not have."""
+    steps = _path_steps(path)
+    if not ranges or len(steps) < 2:
+        root = steps[0] if steps else path
+        return (f"; the core class declares no `{root}` slot, so the row "
+                f"must name `full`")
+    cls = "CoreDataset"
+    for i, step in enumerate(steps):
+        here = ranges.get(cls)
+        if here is None:
+            return (f"; the core schema defines no `{cls}` class, so the row "
+                    f"must name `full`")
+        if step not in here:
+            where = "the core class" if i == 0 else f"`{cls}`"
+            return (f"; {where} declares no `{step}` slot, so the row must "
+                    f"name `full`")
+        cls = here[step] or ""
+    return (f"; the core class cannot carry `{path}`, so the row must name `full`")
 
 
 def _header_cells(cells: list[str]) -> list[str]:
@@ -639,11 +700,20 @@ def disposition_rows(text: str) -> list[dict[str, str]]:
 def check_report(report: Path, full: dict, core: dict,
                  declared: dict[str, set[str]],
                  snapshot: dict | None = None,
-                 dispositions_expected: bool | None = None) -> dict[str, Any]:
+                 dispositions_expected: bool | None = None,
+                 ranges: dict[str, dict[str, str | None]] | None = None) -> dict[str, Any]:
     """Findings, plus what was skipped.
 
     `declared` maps a class name to its induced slot names — passed in so a
-    caller checking twelve reports builds the SchemaView once. `snapshot` is
+    caller checking twelve reports builds the SchemaView once. `ranges`
+    (`declared_ranges`) is the same for the range class each core slot
+    induces, and is what lets a `both` row on a nested path say which step
+    the core cannot carry rather than only which root (#994). It is not
+    defaulted from the schema: `declared` and `ranges` must describe one
+    core schema, and filling one from disk while the caller supplied the
+    other would judge a synthetic slot map against the real classes.
+    Without it the root test stands, which is what every caller had before
+    #994. `snapshot` is
     the phase-1 record (`intermediate/{P}_full.yaml`, #758) where the runner
     kept one: with it, a top-level slot the snapshot carried and the final
     record does not, with no row or sentence recording the removal, is a
@@ -901,11 +971,9 @@ def check_report(report: Path, full: dict, core: dict,
             # slot neither record holds is a substantive contradiction, and
             # "name `full`" would be wrong advice.
             if (where == "both" and in_full and _populated(v_full)
-                    and not _core_declares(row["slot"], declared)):
+                    and not _core_declares(row["slot"], declared, ranges)):
                 core_cannot_hold += 1
-                root = re.split(r"[.\[]", row["slot"], maxsplit=1)[0]
-                cause = (f"; the core class declares no `{root}` slot, so the row "
-                         f"must name `full`")
+                cause = _core_cannot_hold_cause(row["slot"], declared, ranges)
             findings.append({
                 "kind": ("retention_not_shown" if row["disposition"] in
                          ("retained", "kept", "unchanged", "left as-is", "left as is")
@@ -1163,8 +1231,6 @@ def phase1_snapshot_for(core_path: Path) -> dict | None:
 
 def declared_slots() -> dict[str, set[str]]:
     """Induced slots for the classes a report makes claims about."""
-    from linkml_runtime import SchemaView
-
     from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA
     out: dict[str, set[str]] = {}
     for schema, classes in ((FULL_SCHEMA, ("Dataset",)),
@@ -1173,4 +1239,23 @@ def declared_slots() -> dict[str, set[str]]:
         for cls in classes:
             if cls in view.all_classes():
                 out[cls] = {s.name for s in view.class_induced_slots(cls)}
+    return out
+
+
+def declared_ranges() -> dict[str, dict[str, str | None]]:
+    """Every core class, its induced slots, and the class each slot ranges
+    to — the map `_core_declares` walks a nested path against (#994).
+
+    Every class the core schema defines, not only `CoreDataset`, because
+    `resources` ranges back to `CoreDataset` and `distributions` to
+    `CoreDistribution`, and a path can descend through either. A slot whose
+    range is not a class in this schema is recorded as `None`: a scalar,
+    and the end of any walk that reaches it."""
+    from data_sheets_schema.provenance import CORE_SCHEMA
+    view = shared_view(CORE_SCHEMA)
+    classes = set(view.all_classes())
+    out: dict[str, dict[str, str | None]] = {}
+    for cls in classes:
+        out[cls] = {s.name: (s.range if s.range in classes else None)
+                    for s in view.class_induced_slots(cls)}
     return out

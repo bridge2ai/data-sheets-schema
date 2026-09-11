@@ -161,13 +161,16 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
                                 "reason": "no reconciliation report",
                                 "recorded_by": RECORDED_BY}
     else:
-        from data_sheets_schema.report_claims import phase1_snapshot_for
+        from data_sheets_schema.report_claims import declared_ranges, phase1_snapshot_for
         block = check_report(
             report,
             yaml.safe_load(full.read_text(encoding="utf-8")) if full.exists() else {},
             yaml.safe_load(core.read_text(encoding="utf-8")) if core.exists() else {},
             declared if declared is not None else declared_slots(),
             snapshot=phase1_snapshot_for(core),
+            # Both maps from the one core schema, so a nested `both` row
+            # names the step the core cannot carry (#994).
+            ranges=declared_ranges(),
             dispositions_expected=bool((record.get("inputs") or {}).get("dispositions_expected")
                                        or (record.get("report_claims") or {}).get("dispositions_expected")))
         # The report, and the two records it makes claims about, and the

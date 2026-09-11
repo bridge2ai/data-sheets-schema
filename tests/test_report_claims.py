@@ -26,6 +26,8 @@ from data_sheets_schema.report_claims import check_report, resolve
 #: below pass under either reading. It did: with `distributions` on both, the
 #: #1087 regression test caught the defect through its `scope` string alone
 #: and its finding-level assertion was vacuous.
+import data_sheets_schema.report_claims as rc
+
 DECLARED = {"Dataset": {"file_collections", "keywords", "source_caveats",
                         "notes", "conforms_to", "errata",
                         "collection_timeframes"},
@@ -1015,3 +1017,141 @@ class PresentTenseRemovalTest(Harness):
             self.unrecorded("The intentional projection drops are unchanged: `citation`."), ["citation"])
         self.assertEqual(
             self.unrecorded("The slots removed are `citation` and `keywords`."), [])
+
+
+#: What `declared_ranges` returns, in miniature: every core class, its slots,
+#: and the class each slot ranges to (`None` for a scalar). `resources` ranges
+#: back to `CoreDataset`, which is what makes a nested path worth walking.
+RANGES = {
+    "CoreDataset": {"keywords": None, "notes": None, "source_caveats": None,
+                    "resources": "CoreDataset", "distributions": "CoreDistribution",
+                    "creators": "Creator"},
+    "CoreDistribution": {"format": None, "media_type": None, "path": None},
+    "Creator": {"name": None, "orcid": None},
+}
+
+#: The slot map that goes with `RANGES`, derived from it so the two describe
+#: one schema. In production both come from the same `SchemaView`; a test that
+#: let them drift would be checking a core class that does not exist.
+NESTED_DECLARED = {cls: set(slots) for cls, slots in RANGES.items()}
+
+
+class CoreDeclaresNestedTest(unittest.TestCase):
+    """#994: the core-declares test read the path's root slot only.
+
+    Sound while every class-ranged slot the two classes share has the same
+    range. Two do not: `resources` ranges to `Dataset` on the full and
+    `CoreDataset` on the core, so it recurses into a smaller class, and a
+    derived core carries `distributions` where the full carries
+    `distribution_formats`. A finding on a `both` row under either was
+    already correct — the row is checked against the core record literally —
+    but it could not say the core *could not* carry the value, which is the
+    difference between "name `full`" and "the two records disagree".
+    """
+
+    def test_indices_are_not_steps(self):
+        self.assertEqual(rc._path_steps("resources[0].creators[12].name"),
+                         ["resources", "creators", "name"])
+        self.assertEqual(rc._path_steps("keywords"), ["keywords"])
+
+    def test_a_nested_path_is_walked_against_the_class_each_step_lands_in(self):
+        for path, expected in (("keywords", True),
+                               ("resources", True),
+                               ("resources[0].keywords", True),
+                               ("resources[0].resources[1].keywords", True),
+                               ("resources[0].file_collections", False),   # Dataset has it, CoreDataset does not
+                               ("distributions[0].format", True),
+                               ("distributions[0].keywords", False),       # CoreDistribution has no keywords
+                               ("creators[0].name", True),
+                               ("creators[0].affiliation", False)):
+            with self.subTest(path):
+                self.assertIs(rc._core_declares(path, NESTED_DECLARED, RANGES), expected)
+
+    def test_a_scalar_cannot_carry_a_further_step(self):
+        self.assertFalse(rc._core_declares("keywords[0].anything", NESTED_DECLARED, RANGES))
+
+    def test_without_ranges_the_root_test_stands(self):
+        """A caller that has not been updated keeps the old answer rather
+        than a wrong one."""
+        for path in ("resources[0].file_collections", "distributions[0].keywords"):
+            with self.subTest(path):
+                self.assertTrue(rc._core_declares(path, NESTED_DECLARED))
+                self.assertFalse(rc._core_declares(path, NESTED_DECLARED, RANGES))
+
+    def test_a_root_the_core_lacks_is_still_caught_either_way(self):
+        for ranges in (None, RANGES):
+            with self.subTest(ranges=bool(ranges)):
+                self.assertFalse(rc._core_declares("file_collections", NESTED_DECLARED, ranges))
+
+    def test_an_empty_path_declares_nothing(self):
+        self.assertFalse(rc._core_declares("", NESTED_DECLARED, RANGES))
+
+    def test_where_ranges_are_given_they_are_what_the_walk_reads(self):
+        """`declared` still gates the refusal; the walk itself reads `ranges`,
+        because a step past the root must be resolved against the class it
+        lands in. In production both come from one `SchemaView`, so they
+        cannot disagree — this pins which one decides if they ever do."""
+        thin = {"CoreDataset": set()}                    # declares nothing
+        self.assertTrue(rc._core_declares("keywords", thin, RANGES))
+        self.assertFalse(rc._core_declares("keywords", thin))
+
+    def test_a_core_schema_with_no_CoreDataset_is_refused(self):
+        with self.assertRaises(ValueError):
+            rc._core_declares("keywords", {"Dataset": {"keywords"}}, RANGES)
+
+    def test_the_cause_names_the_step_and_the_class_that_lacks_it(self):
+        self.assertIn("the core class declares no `file_collections` slot",
+                      rc._core_cannot_hold_cause("file_collections", NESTED_DECLARED, RANGES))
+        self.assertIn("`CoreDataset` declares no `file_collections` slot",
+                      rc._core_cannot_hold_cause("resources[0].file_collections", NESTED_DECLARED, RANGES))
+        self.assertIn("`CoreDistribution` declares no `keywords` slot",
+                      rc._core_cannot_hold_cause("distributions[0].keywords", NESTED_DECLARED, RANGES))
+
+    def test_without_ranges_the_cause_names_only_the_root(self):
+        """The sentence never claims a precision the walk did not have."""
+        cause = rc._core_cannot_hold_cause("resources[0].file_collections", NESTED_DECLARED, None)
+        self.assertIn("the core class declares no `resources` slot", cause)
+        self.assertNotIn("CoreDataset", cause)
+
+    def test_the_real_schema_agrees_on_the_two_divergences_the_issue_names(self):
+        """Against the committed schema, not the fixture: `resources` recurses
+        into `CoreDataset` and `distributions` into `CoreDistribution`."""
+        declared, ranges = rc.declared_slots(), rc.declared_ranges()
+        self.assertEqual(ranges["CoreDataset"]["resources"], "CoreDataset")
+        self.assertEqual(ranges["CoreDataset"]["distributions"], "CoreDistribution")
+        self.assertTrue(rc._core_declares("resources[0].keywords", declared, ranges))
+        self.assertFalse(rc._core_declares("resources[0].subsets", declared, ranges))
+        self.assertFalse(rc._core_declares("resources[0].file_collections", declared, ranges))
+        # and the root test, which is what shipped before, says otherwise
+        self.assertTrue(rc._core_declares("resources[0].subsets", declared))
+
+
+class CoreCannotHoldEndToEndTest(Harness):
+    """The cause as a reader meets it, on a `both` row (#994)."""
+
+    def check_with_ranges(self, markdown, full, core):
+        import tempfile
+        tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
+        path = Path(tmp.name) / "r.md"
+        path.write_text(markdown, encoding="utf-8")
+        return check_report(path, full, core, NESTED_DECLARED, ranges=RANGES)
+
+    TABLE = ("## Dispositions\n\n| slot | disposition | record | reason |\n|---|---|---|---|\n")
+
+    def test_a_nested_both_row_names_the_class_that_cannot_carry_it(self):
+        full = {"resources": [{"file_collections": [{"id": "x"}]}]}
+        md = self.TABLE + "| `resources[0].file_collections` | retained | both | kept |\n"
+        b = self.check_with_ranges(md, full, {"keywords": ["a"]})
+        (f,) = [x for x in b["findings"] if x["slot"] == "resources[0].file_collections"]
+        self.assertIn("`CoreDataset` declares no `file_collections` slot", f["detail"])
+        self.assertEqual(b["claims_core_cannot_hold"], 1)
+
+    def test_a_nested_row_the_core_can_carry_is_a_plain_contradiction(self):
+        """Not every nested `both` row is a schema matter: where the core
+        could carry it and does not, the two records disagree."""
+        full = {"resources": [{"keywords": ["a"]}]}
+        md = self.TABLE + "| `resources[0].keywords` | retained | both | kept |\n"
+        b = self.check_with_ranges(md, full, {"keywords": ["a"]})
+        (f,) = [x for x in b["findings"] if x["slot"] == "resources[0].keywords"]
+        self.assertNotIn("declares no", f["detail"])
+        self.assertEqual(b["claims_core_cannot_hold"], 0)
