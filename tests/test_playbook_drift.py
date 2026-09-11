@@ -10,6 +10,7 @@ Found by editing one. #524 adds the American-English rule to
 the previous bytes, and `runs check --strict` still exited 0 with nothing said.
 """
 
+import pytest
 import hashlib
 import json
 import tempfile
@@ -108,6 +109,7 @@ class TestOnFixtures(unittest.TestCase):
         self.assertEqual(playbook_drift(*args, self.dir)[0], PLAYBOOK_CURRENT)
 
 
+@pytest.mark.corpus   # walks the committed corpus; the main-branch lane (#1203)
 class TestAgainstTheCorpus(unittest.TestCase):
     def test_it_is_reported_and_never_fatal(self):
         """Playbooks are meant to evolve. A gate would turn every improvement

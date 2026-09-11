@@ -28,6 +28,7 @@ The test is that **no evaluation is unresolved**. A new evaluation whose
 instrument cannot be placed either way fails here rather than joining the
 corpus unidentifiable.
 """
+import pytest
 import hashlib
 import json
 import subprocess
@@ -213,6 +214,7 @@ class TestTheContractAsksForTheScoringRules(unittest.TestCase):
                               f'{rubric}.txt>"', text)
 
 
+@pytest.mark.corpus   # walks the committed corpus; the main-branch lane (#1203)
 class TestTheResolverIsReproducible(InstrumentManifest):
     def test_regenerating_the_manifest_changes_nothing(self):
         """Content, not counts (#1100).

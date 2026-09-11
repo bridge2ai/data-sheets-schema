@@ -6,6 +6,7 @@ three times; `yaml.safe_load` keeps the last, and until #1030 its
 kept as declared evidence (`passed: false`, the key named) and not retained.
 """
 
+import pytest
 import glob
 import tempfile
 import unittest
@@ -118,6 +119,7 @@ def _declared_duplicates(artifact: Path) -> list[tuple[str, str, list[int]]]:
     return [(d["path"], d["key"], d["lines"]) for d in ((v.get("duplicate_keys") or {}).get(kind) or [])]
 
 
+@pytest.mark.corpus   # walks the committed corpus; the main-branch lane (#1203)
 class TestTheCorpus(unittest.TestCase):
     def test_no_committed_record_hides_a_duplicate_key(self):
         """The floor is a fact about the corpus, and a record with a duplicate

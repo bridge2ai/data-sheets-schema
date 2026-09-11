@@ -10,6 +10,7 @@ was satisfied. The property is only visible *between* records, and nothing
 looked between them.
 """
 
+import pytest
 import subprocess
 import tempfile
 import unittest
@@ -273,6 +274,7 @@ class TestAgainstTheRealArm(unittest.TestCase):
                             "verdict — corruption, not schema movement")
 
 
+@pytest.mark.corpus   # walks the committed corpus; the main-branch lane (#1203)
 class TestTheCheckReportsIt(unittest.TestCase):
     def test_check_names_the_straddled_series(self):
         out = subprocess.run(["poetry", "run", "d4d", "runs", "check"],

@@ -1,5 +1,6 @@
 """Tests for D4D generation provenance records."""
 
+import pytest
 import tempfile
 import unittest
 from pathlib import Path
@@ -304,6 +305,7 @@ class TestHashUnification(unittest.TestCase):
             self.assertEqual(out["sha256"], hashlib.sha256(b"stable").hexdigest())
             self.assertNotIn("md5", out)
 
+    @pytest.mark.corpus
     def test_the_corpus_carries_no_stale_verdicts_after_migration(self):
         """No *artifact*-stale verdicts — schema-pin staleness is lawful.
 
@@ -498,6 +500,7 @@ class TestTheEndOfRunGate(unittest.TestCase):
             self.assertEqual(r["drifted"], ["full"])
             self.assertIn("changed after provenance was recorded", r["reason"])
 
+    @pytest.mark.corpus
     def test_the_whole_corpus_passes_the_gate(self):
         from data_sheets_schema.runs import check_provenance, discover, is_complete
         failing = []

@@ -1,16 +1,74 @@
 # Built from:
 # https://docs.github.com/en/actions/guides/building-and-testing-python
 # https://github.com/snok/install-poetry#workflows-and-tips
+#
+# Two lanes (#1203). A pull request runs the suite once, on one interpreter,
+# without the tests that walk the committed corpus: those check the data, not
+# the change, and a pull request that touches neither gains nothing from
+# running them three times. Merging to `main` — and a manual dispatch — runs
+# everything on every supported interpreter, the corpus tests and the schema
+# and example builds included. Wall time for a pull request is one job, not
+# the slowest of three.
 ---
 name: Build and test data_sheets_schema
 
-on: [pull_request]
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  test:
 
+  # Every pull request: the fast lane.
+  test:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    # The suite takes ~25 min on a laptop and longer here (#926). Without a
+    timeout-minutes: 60
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      # `fairscape_models` is a git submodule imported by
+      # `src/fairscape_integration`, not a pip dependency (#926).
+      - name: Initialise the FAIRSCAPE models submodule
+        run: git submodule update --init fairscape_models
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1.3
+        with:
+          virtualenvs-in-project: true
+
+      # The environment is a function of the lock file; rebuilding it on every
+      # run is a minute nobody needed to spend.
+      - name: Cache the virtualenv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-py3.12-${{ hashFiles('poetry.lock') }}
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Install project
+        run: poetry install --no-interaction
+
+      # The schema-generation tests build into temporary directories (#1208),
+      # so the parallel suite reads the committed schemas without rebuilding
+      # them first. Keep slow tests visible in the timing report.
+      - name: Run the suite without the corpus walks
+        run: poetry run pytest tests -v -p no:cacheprovider --durations=25 -n auto -m "not corpus"
+
+  # Merge to main, or on demand: everything, everywhere.
+  full:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    # The full suite took ~25 min on a laptop and longer here (#926). Without a
     # limit of our own the job ran until the runner was shut down, which
     # reads as an infrastructure failure rather than a slow suite.
     timeout-minutes: 150
@@ -20,17 +78,10 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
-
     steps:
-
       - name: Check out repository
         uses: actions/checkout@v5
 
-      # `fairscape_models` is a git submodule imported by
-      # `src/fairscape_integration`, not a pip dependency. An un-initialised
-      # submodule is an empty directory, and every RO-Crate test then fails on
-      # `No module named 'fairscape_models.rocrate'` (#926). `aurelian` is not
-      # imported by the suite and stays uninitialised.
       - name: Initialise the FAIRSCAPE models submodule
         run: git submodule update --init fairscape_models
 
@@ -41,6 +92,14 @@ jobs:
 
       - name: Install Poetry
         uses: snok/install-poetry@v1.3
+        with:
+          virtualenvs-in-project: true
+
+      - name: Cache the virtualenv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
 
       - name: Install dependencies
         run: poetry install --no-interaction --no-root
@@ -48,7 +107,5 @@ jobs:
       - name: Install project
         run: poetry install --no-interaction
 
-      - name: Run test suite
-        # -v: the log names each test as it starts, so a runner that dies
-        # mid-suite (memory, a hang) still says which test was running.
-        run: make test PYTEST_ARGS=-v
+      - name: Run the whole of make test
+        run: make test PYTEST_ARGS="-v -n auto"

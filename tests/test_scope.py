@@ -11,6 +11,7 @@ consistent and checkable, and the instruction that goes out carries no
 project-specific text that could quietly become load-bearing again.
 """
 
+import pytest
 import re
 import tempfile
 import unittest
@@ -263,6 +264,7 @@ class TestCheckingARecord(unittest.TestCase):
         self.assertEqual("undeclared", status)
         self.assertIn("no scope declared", why)
 
+    @pytest.mark.corpus
     def test_the_whole_corpus_agrees_with_the_declaration(self):
         """329 records at the time of writing (full and core), none about the
         other cohort. The paragraph was belt-and-braces; this is the braces."""

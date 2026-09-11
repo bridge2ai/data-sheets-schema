@@ -122,38 +122,26 @@ if __name__ == '__main__':
 class TestDigestBuildIsMemoised(unittest.TestCase):
     """Rebuilding cost ~0.5s per call and was paid once per distinct slot (#181).
 
-    Asserted by cost, not by object identity. This used to be `assertIs(a, b)`,
-    which was a proxy for "it was memoised" — and stopped being a valid one when
-    #528 made `build` return a copy, precisely so that a caller mutating the
-    result could not corrupt the cache for the rest of the process.
-
-    Identity was the means; not re-reading the schema is the end.
+    Repeated calls must avoid the schema reader while returning equal content.
+    Object identity cannot establish this because callers receive copies
+    (#528). A wall-clock speed ratio also depends on competing CI workers
+    and failed despite a working cache (#1218).
     """
 
     def test_a_repeated_build_does_not_reread_the_schema(self):
-        import time
+        from unittest import mock
 
         from data_sheets_schema import schema_digest
 
-        schema_digest.build("Dataset")                 # warm
-        start = time.perf_counter()
-        for _ in range(10):
-            schema_digest.build("Dataset")
-        cached = (time.perf_counter() - start) / 10
-
-        # Cold means the schema is read again. Since #926 the SchemaView is
-        # shared per file (`schema_view`), so clearing the digest cache alone
-        # leaves a build that costs milliseconds against linkml's own caches.
-        schema_digest._BUILD_CACHE.clear()
-        from data_sheets_schema import schema_view
-        schema_view._VIEWS.clear()
-        start = time.perf_counter()
-        schema_digest.build("Dataset")
-        cold = time.perf_counter() - start
-
-        self.assertLess(cached, cold / 10,
-                        f"cached build {cached*1000:.1f}ms against a cold "
-                        f"{cold*1000:.0f}ms — the memo is not working")
+        with mock.patch.dict(schema_digest._BUILD_CACHE, {}, clear=True), \
+                mock.patch.object(schema_digest, "shared_view",
+                                  wraps=schema_digest.shared_view) as reader:
+            expected = schema_digest.build("Dataset")
+            reader.assert_called_once()
+            reader.reset_mock()
+            for _ in range(10):
+                self.assertEqual(schema_digest.build("Dataset"), expected)
+            reader.assert_not_called()
 
     def test_repeated_builds_return_equal_content(self):
         """What a caller actually depends on, now that the objects differ."""
