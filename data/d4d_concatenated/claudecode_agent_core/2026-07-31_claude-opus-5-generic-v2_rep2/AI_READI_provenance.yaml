@@ -118,25 +118,44 @@ validation:
     core:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d_core.yaml
       md5: 22dad1269afd0467e0e2a0c2e9c35b72
-  recorded_by: api_runner.execute
+  schema:
+    full_sha256: ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da
+    core_sha256: 7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449
+  duplicate_keys:
+    full: []
+    core: []
+  recorded_by: d4d provenance recheck-validation
   problems:
   - artifact: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml
     class: Dataset
     error: '[ERROR] [data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml/0]
-      ''IsNewVersionOf'' is not one of [''derives_from'', ''supplements'', ''is_supplemented_by'',
-      ''is_version_of'', ''is_new_version_of'', ''replaces'', ''is_replaced_by'',
-      ''is_required_by'', ''requires'', ''is_part_of'', ''has_part'', ''is_referenced_by'',
-      ''references'', ''is_identical_to''] in /related_datasets/0/relationship_type
-      | [ERROR] [data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml/0]
-      ''IsNewVersionOf'' is not one of [''derives_from'', ''supplements'', ''is_supplemented_by'',
-      ''is_version_of'', ''is_new_version_of'', ''replaces'', ''is_replaced_by'',
-      ''is_required_by'', ''requires'', ''is_part_of'', ''has_part'', ''is_referenced_by'',
-      ''references'', ''is_identical_to''] in /related_datasets/1/relationship_type
-      | [ERROR] [data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml/0]
-      ''HasPart'' is not one of [''derives_from'', ''supplements'', ''is_supplemented_by'',
-      ''is_version_of'', ''is_new_version_of'', ''replaces'', ''is_replaced_by'',
-      ''is_required_by'', ''requires'', ''is_part_of'', ''has_part'', ''is_referenced_by'',
-      ''references'', ''is_identical_to''] in /related_datasets/2/relationship_type'
+      ''IsNewVersionOf'' is not one of [''derives_from'', ''is_source_of'', ''supplements'',
+      ''is_supplemented_by'', ''is_version_of'', ''has_version'', ''is_new_version_of'',
+      ''is_previous_version_of'', ''replaces'', ''is_replaced_by'', ''is_required_by'',
+      ''requires'', ''is_part_of'', ''has_part'', ''is_published_in'', ''is_referenced_by'',
+      ''references'', ''is_cited_by'', ''cites'', ''is_continued_by'', ''continues'',
+      ''is_described_by'', ''describes'', ''has_metadata'', ''is_metadata_for'', ''is_documented_by'',
+      ''documents'', ''is_compiled_by'', ''compiles'', ''is_variant_form_of'', ''is_original_form_of'',
+      ''is_reviewed_by'', ''reviews'', ''is_collected_by'', ''collects'', ''is_identical_to'']
+      in /related_datasets/0/relationship_type | [ERROR] [data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml/0]
+      ''IsNewVersionOf'' is not one of [''derives_from'', ''is_source_of'', ''supplements'',
+      ''is_supplemented_by'', ''is_version_of'', ''has_version'', ''is_new_version_of'',
+      ''is_previous_version_of'', ''replaces'', ''is_replaced_by'', ''is_required_by'',
+      ''requires'', ''is_part_of'', ''has_part'', ''is_published_in'', ''is_referenced_by'',
+      ''references'', ''is_cited_by'', ''cites'', ''is_continued_by'', ''continues'',
+      ''is_described_by'', ''describes'', ''has_metadata'', ''is_metadata_for'', ''is_documented_by'',
+      ''documents'', ''is_compiled_by'', ''compiles'', ''is_variant_form_of'', ''is_original_form_of'',
+      ''is_reviewed_by'', ''reviews'', ''is_collected_by'', ''collects'', ''is_identical_to'']
+      in /related_datasets/1/relationship_type | [ERROR] [data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml/0]
+      ''HasPart'' is not one of [''derives_from'', ''is_source_of'', ''supplements'',
+      ''is_supplemented_by'', ''is_version_of'', ''has_version'', ''is_new_version_of'',
+      ''is_previous_version_of'', ''replaces'', ''is_replaced_by'', ''is_required_by'',
+      ''requires'', ''is_part_of'', ''has_part'', ''is_published_in'', ''is_referenced_by'',
+      ''references'', ''is_cited_by'', ''cites'', ''is_continued_by'', ''continues'',
+      ''is_described_by'', ''describes'', ''has_metadata'', ''is_metadata_for'', ''is_documented_by'',
+      ''documents'', ''is_compiled_by'', ''compiles'', ''is_variant_form_of'', ''is_original_form_of'',
+      ''is_reviewed_by'', ''reviews'', ''is_collected_by'', ''collects'', ''is_identical_to'']
+      in /related_datasets/2/relationship_type'
 pair_consistency:
   ran: true
   consistent: false

@@ -198,7 +198,13 @@ validation:
     core:
       path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d_core.yaml
       md5: 758561e3e1ab0176951a55ad867a54f2
-  recorded_by: api_runner.execute
+  schema:
+    full_sha256: ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da
+    core_sha256: 7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449
+  duplicate_keys:
+    full: []
+    core: []
+  recorded_by: d4d provenance recheck-validation
   problems:
   - artifact: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d_core.yaml
     class: CoreDataset

@@ -2209,8 +2209,58 @@ def _artifact_path(spec: RunSpec, artifact: str) -> Path:
 
 
 
+def keep_recorded_algorithms(new: dict, prior: dict) -> dict:
+    """The new artifact entries, hashed by whichever algorithm each prior entry
+    recorded, recomputed from the file rather than copied.
+
+    An entry whose prior recorded neither known algorithm is left as computed,
+    and so is one whose file is gone: this preserves what a block already
+    attested, it does not invent an attestation.
+    """
+    from pathlib import Path as _Path
+
+    from data_sheets_schema.provenance import _md5, _sha256
+    out = {}
+    # A `prior` that is not a mapping is not a record of anything, and one bad
+    # record must not abort the walk that visits every unaudited file (#1190
+    # round 5, S1 — the guard `_schema_pin_moved` already carries).
+    prior = prior if isinstance(prior, dict) else {}
+    for name, entry in (new or {}).items():
+        was = prior.get(name)
+        if not isinstance(entry, dict) or not isinstance(was, dict):
+            out[name] = entry
+            continue
+        wanted = [alg for alg in ("sha256", "md5") if alg in was]
+        named = str(entry.get("path") or "")
+        path = _Path(named)
+        # `is_file`, not `exists`: an empty path is `.` and a directory cannot
+        # be hashed.
+        if not wanted or not named or not path.is_file():
+            out[name] = entry
+            continue
+        fresh = {"path": entry.get("path")}
+        try:
+            for alg in wanted:
+                fresh[alg] = (_sha256 if alg == "sha256" else _md5)(path)
+        except OSError:
+            # Unreadable where it was readable when the block was written: the
+            # recompute cannot re-express it, so it is left as computed rather
+            # than killing the run (S1).
+            out[name] = entry
+            continue
+        # anything else the recompute carried (a size, a note) stays, but not a
+        # hash under an algorithm the prior did not record: adding md5 to a
+        # sha256-only entry re-introduces the deprecated algorithm.
+        for k, v in entry.items():
+            if k not in ("sha256", "md5"):
+                fresh.setdefault(k, v)
+        out[name] = fresh
+    return out
+
+
 def validation_block(spec: RunSpec, problems: list[dict[str, str]],
-                     recorded_by: str = "api_runner.execute") -> dict[str, Any]:
+                     recorded_by: str = "api_runner.execute",
+                     prior: dict[str, Any] | None = None) -> dict[str, Any]:
     """The validation verdict, bound to the exact bytes it was reached on.
 
     A verdict alone is a cached assertion about a file: edit the record and the
@@ -2226,8 +2276,28 @@ def validation_block(spec: RunSpec, problems: list[dict[str, str]],
     from data_sheets_schema.provenance import _md5
     artifacts = {}
     for name, path in (("full", spec.full_path), ("core", spec.core_path)):
-        artifacts[name] = {"path": str(path),
-                           "md5": _md5(path) if path.exists() else None}
+        # An artifact that exists but cannot be read is a hash this run cannot
+        # take, not a reason to abort the walk that visits every unaudited
+        # record (#1190 round 6, S1). The guard belongs here, before the
+        # default hash, and not only inside the re-expression below, which
+        # this line would never reach.
+        try:
+            digest = _md5(path) if path.exists() else None
+        except OSError:
+            digest = None
+        artifacts[name] = {"path": str(path), "md5": digest}
+    # Rewriting an existing block keeps the algorithm that block recorded
+    # (#1190 round 4, M1; round 5, M2). This function hashes with md5, which
+    # #204 deprecated when it unified provenance hashing on sha256, so every
+    # caller that overwrites a record's `validation` — the recheck, `d4d runs
+    # validate --recheck`, `d4d review disposition --amend` — would otherwise
+    # move a sha256-only record back to the deprecated algorithm and destroy
+    # the values it had attested. 82 records pin sha256 only.
+    # `isinstance`, not truthiness: a record whose `validation` key is a
+    # string or a list is corrupt, and `.get` on it raises before the guard
+    # inside `keep_recorded_algorithms` can run (#1190 round 6, S2).
+    if isinstance(prior, dict) and prior:
+        artifacts = keep_recorded_algorithms(artifacts, prior.get("artifacts") or {})
     # The schema the verdict was reached against, not only the record it was
     # reached on. "Validates" is a claim about a record *against a schema*, and
     # pinning only the artifacts let a verdict survive a schema change that
@@ -2238,7 +2308,17 @@ def validation_block(spec: RunSpec, problems: list[dict[str, str]],
     # so a record that carries the field was measured and one that lacks it
     # predates the instrument — the canary reads the count as a floor of 0.
     from data_sheets_schema.duplicate_keys import duplicate_keys_in
-    duplicate_keys = {name: (duplicate_keys_in(path) if path.exists() else [])
+    def _dupes(path):
+        # Unreadable is not "no duplicates": the same guard as the hash above
+        # (#1190 round 6, S1). A file this run cannot read is a measurement it
+        # cannot take, and `None` says so where `[]` would assert none.
+        if not path.exists():
+            return []
+        try:
+            return duplicate_keys_in(path)
+        except OSError:
+            return None
+    duplicate_keys = {name: _dupes(path)
                       for name, path in (("full", spec.full_path), ("core", spec.core_path))}
     block: dict[str, Any] = {"passed": not problems, "artifacts": artifacts,
                              "schema": {"full_sha256": _sha256(FULL_SCHEMA),

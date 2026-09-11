@@ -481,20 +481,111 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
 
 
 @provenance.command('recheck-validation')
-@click.option('--method', required=True)
-@click.option('--label', required=True)
-@click.option('--project', required=True)
+@click.option('--method', default=None, help='required unless --all; with --all, restrict to one base directory and its '
+                                           '_core twin (claudecode_agent reaches claudecode_agent_core, not the _crate, '
+                                           '_healthsheet or _merged siblings)')
+@click.option('--label', default=None)
+@click.option('--project', default=None)
+@click.option('--all', 'every', is_flag=True,
+              help='every record with a validation block (#1033): written only where the verdict, the '
+                   "artifacts' recorded hashes and each problem's artifact, class and JSON-pointer paths reproduce; "
+                   'a record already carrying `duplicate_keys` is skipped unless its schema pin is not '
+                   "this checkout's, which the write repairs")
 @click.option('--execute', is_flag=True, help='write the record; without it, report')
-def recheck_validation(method, label, project, execute):
+def recheck_validation(method, label, project, every, execute):
     """Re-run validation on a record's files and rewrite its `validation` block (#1029).
 
     Validation is bound to bytes, so re-running it is a legitimate act: the
-    block records the artifacts' md5s and the schema digests it was reached
+    block records the artifacts' recorded hashes and the schema digests it was reached
     against, and `recorded_by` names this command. Used to bring a record
     under an instrument revision — duplicate-key detection — without
     touching anything else in the record.
+
+    `--all` (#1033) walks every run on disk and brings each record under
+    the instrument on one condition: the recomputed verdict and the
+    artifacts' recorded hashes equal the recorded ones and each problem names the same
+    artifact, class and JSON-pointer paths, so the only thing the write
+    adds is the `duplicate_keys` field and, where it moved, this
+    checkout's schema digest. A record already under the instrument is
+    skipped unless its schema pin has moved, which the write repairs
+    (#1190 round 2). A record whose verdict, artifacts or problems
+    would move is named and left alone — rerun it by label to write it
+    deliberately.
     """
     _require_repo_root_cwd("d4d provenance recheck-validation")
+    if every:
+        if label or project:
+            raise click.ClickException("--all takes no --label or --project; --method may restrict it")
+        from data_sheets_schema.provenance import record_path_for
+        from data_sheets_schema.runs import discover
+        # `discover` yields the base directory and its _core twin as two
+        # runs over one record (#1190 review, M1): visits are keyed on the
+        # record's path, so each record is rechecked once. `--method`
+        # names a base or its _core and reaches exactly that pair — not
+        # `_crate`, `_healthsheet` or `_merged` siblings, which are their
+        # own bases.
+        wanted = None
+        if method:
+            base = method[:-5] if method.endswith("_core") else method
+            wanted = {base, base + "_core"}
+        counts: dict[str, int] = {"written": 0, "would write": 0, "already": 0, "held": 0,
+                                  "no block": 0, "missing": 0}
+        seen: set[str] = set(); considered: set[str] = set()
+        for run in discover():
+            if wanted is not None and run.method not in wanted:
+                continue
+            considered.add(run.method)
+            for proj in run.projects:
+                path = record_path_for(proj, run.method, run.label)
+                if not path.exists() or str(path) in seen:
+                    continue
+                seen.add(str(path))
+                status = _recheck_one(run.method, run.label, proj, execute, gated=True)
+                counts[status] = counts.get(status, 0) + 1
+        if wanted is not None and not considered:
+            raise click.ClickException(f"--method {method!r} matched no run directory")
+        click.echo(f"summary over {len(seen)} record(s): " + ", ".join(f"{k} {v}" for k, v in counts.items()))
+        return
+    if not (method and label and project):
+        raise click.ClickException("--method, --label and --project are required without --all")
+    _recheck_one(method, label, project, execute, gated=False)
+
+
+def _schema_pin_moved(block: dict) -> bool:
+    """Does the block pin a schema that is no longer this checkout's? A
+    record already under the instrument is re-checked only for this
+    (#1190 round 2, M1): a corpus pass taken before the branch merged a
+    schema change left 48 records pinning the older digest, which
+    `runs.validation_status` reads as STALE, and the `already` short
+    circuit made it unrepairable. A key the block does not pin is not
+    moved, the same rule `runs.validation_status` applies — "absent is not
+    stale" (#1190 round 3, S1). A record with no `schema` block at all
+    never acquires one this way; it acquires one by being written for the
+    duplicate-key field, which is the only claim `--all` exists to add."""
+    from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA, _sha256
+    pinned = block.get("schema")
+    # A `schema` that is not a mapping is not a pin. `runs.validation_status`
+    # guards the same way; without it a scalar `schema:` in one record raises
+    # and aborts the whole `--all` walk, which is the one caller that visits
+    # 282 files nobody has audited (#1190 round 4, S1).
+    if not isinstance(pinned, dict):
+        return False
+    live = {"full_sha256": _sha256(FULL_SCHEMA), "core_sha256": _sha256(CORE_SCHEMA)}
+    return any(pinned.get(k) and pinned[k] != v for k, v in live.items())
+
+
+def _problem_shape(block: dict) -> list:
+    """What a validation problem names, message wording aside: its artifact,
+    its class and the JSON-pointer paths in its message (#1190 review, M3)."""
+    import re as _re
+    return sorted((str(p.get("artifact")), str(p.get("class")),
+                   tuple(sorted(set(_re.findall(r"\bin (/[^\s|]*)", str(p.get("error") or ""))))))
+                  for p in (block.get("problems") or []))
+
+
+def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bool) -> str:
+    """One record; returns what happened. Under `gated` the write needs the
+    verdict and the artifacts unchanged and the field absent."""
     import yaml as _yaml
 
     from data_sheets_schema.api_runner import RunSpec, validate_outputs, validation_block
@@ -508,26 +599,80 @@ def recheck_validation(method, label, project, execute):
     # not the method (#1032).
     base = method[:-5] if method.endswith("_core") else method
     spec = RunSpec(project=project, arm="", method=base, bundle=_P(""), label=label)
+    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    prior = data.get("validation") or {}
+    tag = f"{project} {method} {label}"
+    if gated and not prior:
+        click.echo(f"{tag}: no validation block; nothing to bring under the instrument")
+        return "no block"
+    already = gated and "duplicate_keys" in prior
+    if already and not _schema_pin_moved(prior):
+        click.echo(f"{tag}: already under the instrument")
+        return "already"
     missing = [str(q) for q in (spec.full_path, spec.core_path) if not q.exists()]
-    if missing and execute:
+    if missing and (execute or gated):
+        click.echo(f"{tag}: artifact missing, not rechecked: " + ", ".join(missing))
+        if gated:
+            return "missing"
         raise click.ClickException("refusing to write a verdict over a missing artifact: "
                                    + ", ".join(missing))
     problems = validate_outputs(spec)
-    block = validation_block(spec, problems, recorded_by="d4d provenance recheck-validation")
-    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    prior = data.get("validation") or {}
+    # `prior` makes the write keep whichever algorithm that block recorded
+    # (#1190 round 4, M1) — in `validation_block` itself since round 5, so
+    # every caller that rewrites an existing block gets it.
+    block = validation_block(spec, problems, recorded_by="d4d provenance recheck-validation",
+                             prior=prior)
     from data_sheets_schema.canary import duplicate_key_count
-    click.echo(f"{project} {label}: passed {prior.get('passed')} → {block['passed']}; "
+    click.echo(f"{tag}: passed {prior.get('passed')} → {block['passed']}; "
                f"duplicate keys {duplicate_key_count(prior) if 'duplicate_keys' in prior else 'unmeasured'} → "
                f"{duplicate_key_count(block)}; problems {len(block.get('problems') or [])}")
+    if gated:
+        # Three things must reproduce for the write to add the field and
+        # nothing else: the verdict, the artifacts' recorded hashes, and the problems —
+        # each problem by its artifact, its class and the JSON-pointer
+        # paths its message names, not by the message text, since a
+        # validator message carries today's enum list and moves when the
+        # schema does while the failure it names does not; a message whose
+        # paths moved names a different failure (#1190 review, M3). The
+        # message is `" | ".join(lines[:4])` (`api_runner`), so the gate
+        # sees at most four failures per problem and cannot tell a fifth
+        # from a fifth that changed — 8 of the corpus's 28 problem strings
+        # are exactly four lines and may be truncated (#1190 round 2, S1). The
+        # schema digest is restamped on every write — the verdict was
+        # recomputed against today's schema — and a digest that moved is
+        # said (M4).
+        same_verdict = block["passed"] == prior.get("passed")
+        # The hashes the prior block records, by whichever algorithm it
+        # recorded them: 82 corpus records pin `sha256` only and 196 `md5`
+        # only, so comparing `md5` unconditionally held every sha256-only
+        # record for a drift that had not happened (#1190 round 3, M1).
+        # An artifact still on disk is verified against its own recorded
+        # hash, as `provenance.verify_entry` does.
+        from data_sheets_schema.provenance import verify_entry
+        drifted = [k for k, v in (prior.get("artifacts") or {}).items()
+                   if isinstance(v, dict) and verify_entry(v) is False]
+        moved = ("verdict" if not same_verdict else "artifacts" if drifted
+                 else "problems" if _problem_shape(prior) != _problem_shape(block) else None)
+        if moved:
+            click.echo(f"   held: the {moved} would move; rerun by label to write it deliberately")
+            return "held"
+        old_schema, new_schema = prior.get("schema") or {}, block.get("schema") or {}
+        moved_keys = [k for k in new_schema if old_schema.get(k) != new_schema.get(k)]
+        if old_schema and moved_keys:
+            click.echo("   schema digest restamped: the verdict is recomputed against this checkout's schema "
+                       + ", ".join(f"{k} {str(old_schema.get(k))[:8]}→{str(new_schema.get(k))[:8]}" for k in moved_keys))
+        elif old_schema and old_schema != new_schema:
+            click.echo("   schema block changed shape: "
+                       f"{sorted(set(old_schema) ^ set(new_schema))}")
     if not execute:
         click.echo("   (report only; --execute writes the block)")
-        return
+        return "would write" if gated else "reported"
     from data_sheets_schema.provenance import ProvenanceRecord
     rec = ProvenanceRecord(data=data)
     rec.data["validation"] = block
     rec.write(path)
     click.echo(f"   wrote {path}")
+    return "written"
 
 
 #: The keys an extension may add (#1010): the transcript's reasoning
