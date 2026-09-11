@@ -50,9 +50,12 @@ RUBRICS = {
 
 
 def versions(path):
-    """Every distinct version of a tracked file, oldest first."""
+    """Every distinct version in this checkout's history, oldest first.
+
+    Unmerged branches do not define this checkout's instruments (#1240).
+    """
     out, seen = [], set()
-    log = subprocess.run(["git", "log", "--all", "--reverse", "--format=%H %cI",
+    log = subprocess.run(["git", "log", "HEAD", "--reverse", "--format=%H %cI",
                           "--", path], capture_output=True, text=True,
                          cwd=ROOT).stdout.strip().splitlines()
     for line in log:
@@ -146,7 +149,24 @@ def resolve(rubric):
         # commit, so following the fix downgraded the evidence it produced.
         digest = meta.get("instrument_sha256") or meta.get("rubric_hash")
         name = str(Path(path).resolve().relative_to(base))
-        if digest in by_agent:
+        if meta.get("instrument_kind") == "api_system_prompt":
+            api_digest = meta.get("instrument_sha256")
+            valid_digest = (isinstance(api_digest, str) and len(api_digest) == 64
+                            and all(c in "0123456789abcdef" for c in api_digest))
+            out[name] = {
+                "basis": "recorded_api_system_prompt" if valid_digest else "unresolved",
+                "instrument_kind": "api_system_prompt",
+                "instrument_sha256": api_digest if valid_digest else None,
+                "instrument_commit": None,
+                **({"reason": "API system prompt digest is missing or malformed"} if not valid_digest else {}),
+            }
+        elif meta.get("instrument_kind") not in (None, "agent_definition"):
+            out[name] = {
+                "basis": "unresolved", "instrument_kind": meta["instrument_kind"],
+                "instrument_sha256": None, "instrument_commit": None,
+                "reason": "unknown instrument kind; not assumed to be an agent definition",
+            }
+        elif digest in by_agent:
             v = by_agent[digest]
             out[name] = {"basis": "recorded", "instrument_sha256": digest,
                          "instrument_commit": v["commit"]}

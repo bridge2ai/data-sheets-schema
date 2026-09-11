@@ -62,8 +62,8 @@ def identity_of(key: str, project_results: dict) -> tuple[str, str]:
 @dataclass
 class LLMEvaluationConfig:
     """Configuration for LLM-based evaluation"""
-    model: str = "claude-sonnet-4-5-20250929"  # Date-pinned for determinism
-    temperature: float = 0.0  # Fully deterministic evaluation
+    model: str = "claude-sonnet-4-5-20250929"  # Date-pinned model selection
+    temperature: float = 0.0  # Reduces sampling variation; repeatability still needs measurement
     max_tokens: int = 8000
     rubric_dir: Path = Path("data/rubric")
     prompts_dir: Path = Path("src/download/prompts")
@@ -246,26 +246,21 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
                 f"Failed to parse LLM response. Response saved to {error_file}"
             ) from e
 
-        # Add metadata. Merged, not replaced (#1100): assigning wholesale
-        # deleted whatever the model emitted, including the
-        # `instrument_sha256` the agents' contract now asks for — so the one
-        # field that identifies the rules a score was reached under was
-        # discarded by the path that produces scores.
+        # Preserve judge annotations, but attest the actual request ourselves.
+        # This runner sends an expanded API template, not a Claude agent
+        # definition (#1239). A judge's claimed digest is separate evidence.
         metadata = dict(evaluation.get("metadata") or {})
+        if "instrument_sha256" in metadata:
+            metadata["evaluator_reported_instrument_sha256"] = metadata["instrument_sha256"]
         metadata.update({
             "evaluator_id": metadata.get("evaluator_id") or str(uuid.uuid4()),
             "rubric_hash": self._calculate_file_hash(
                 self.config.rubric_dir / f"{rubric_name}.txt"),
             "d4d_file_hash": d4d_file_hash,
+            "instrument_kind": "api_system_prompt",
+            "instrument_sha256": hashlib.sha256(system_prompt.encode("utf-8")).hexdigest(),
+            "request_user_prompt_sha256": hashlib.sha256(user_prompt.encode("utf-8")).hexdigest(),
         })
-        #: The scoring rules, where this runner can name them. `rubric_hash`
-        #: is the rubric *text*, which did not change across the revisions
-        #: that moved scores (#1099), so it cannot identify an instrument.
-        agent = (Path(__file__).resolve().parents[2] / ".claude" / "agents"
-                 / f"d4d-{rubric_name}-semantic.md")
-        if agent.exists():
-            metadata.setdefault("instrument_sha256",
-                                self._calculate_file_hash(agent))
         evaluation["metadata"] = metadata
 
         return evaluation
