@@ -341,8 +341,7 @@ if __name__ == "__main__":
 
 
 class TestReviewCriterion(TestSelect):
-    """#660: the review's adverse count joins the criterion, ahead of coverage,
-    when every eligible replicate carries a checked review block."""
+    """#835: checked review counts are reported but cannot rank candidates."""
 
     def _review(self, label, adverse, checked=True, findings=(), unanswered=()):
         p = self.root / "claudecode_agent_core" / label / "P_provenance.yaml"
@@ -370,26 +369,31 @@ class TestReviewCriterion(TestSelect):
         self.assertIsNone(rep2["review_adverse"]); self.assertIn("finding", rep2["review_not_evidence"])
         self.assertNotIn("review_not_evidence", next(c for c in canon["selected_from"] if c["label"] == "cfg_rep1"))
 
-    def test_fewest_adverse_beats_coverage(self):
+    def test_even_a_large_adverse_difference_does_not_rank_without_calibration(self):
         self._review("cfg_rep1", 2); self._review("cfg_rep2", 12); self._review("cfg_rep3", 9)
         out = self._run("--execute")
         self.assertEqual(out.exit_code, 0, out.output)
-        self.assertIn("→ cfg_rep1", out.output)                      # 4 slots, but 2 adverse
+        self.assertIn("→ cfg_rep2", out.output)                      # coverage selects; adverse is report-only
         self.assertIn("2 adverse", out.output)
-        prov = yaml.safe_load((self.root / "claudecode_agent_core" / "cfg_rep1" / "P_provenance.yaml").read_text())
+        prov = yaml.safe_load((self.root / "claudecode_agent_core" / "cfg_rep2" / "P_provenance.yaml").read_text())
         canon = prov["canonical"]
-        self.assertTrue(canon["reviews_applied"]); self.assertEqual(canon["review_margin"], 2)
-        self.assertIn("fewest review adverse", canon["criterion"])
+        self.assertFalse(canon["reviews_applied"])
+        self.assertIn("report-only", canon["reviews_not_applied_because"])
+        self.assertEqual(canon["review_policy"], "reported_only_pending_calibration_v1 (#835)")
+        self.assertNotIn("review_margin", canon)
+        self.assertNotIn("adverse", canon["criterion"])
         self.assertEqual({c["label"]: c["review_adverse"] for c in canon["selected_from"]},
                          {"cfg_rep1": 2, "cfg_rep2": 12, "cfg_rep3": 9})
 
-    def test_within_the_margin_coverage_decides(self):
+    def test_a_manual_margin_cannot_bypass_the_calibration_policy(self):
         self._review("cfg_rep1", 9); self._review("cfg_rep2", 11); self._review("cfg_rep3", 15)
-        out = self._run()
-        self.assertIn("→ cfg_rep2", out.output)                      # 11 is within 2 of 9; 9 slots wins
-        self.assertIn("out of contention", out.output)               # rep3 at 15 is not
-        out = self._run("--review-margin", "0")
-        self.assertIn("→ cfg_rep1", out.output)
+        for margin in ("0", "2", "100", "-1"):
+            with self.subTest(margin=margin):
+                before = {p: p.read_bytes() for p in self.root.rglob("*provenance.yaml")}
+                out = self._run("--review-margin", margin, "--execute")
+                self.assertNotEqual(out.exit_code, 0)
+                self.assertIn("reported only", out.output)
+                self.assertEqual(before, {p: p.read_bytes() for p in before})
 
     def test_one_unreviewed_replicate_reverts_to_coverage_and_says_so(self):
         self._review("cfg_rep1", 2); self._review("cfg_rep3", 9)
@@ -405,13 +409,13 @@ class TestReviewCriterion(TestSelect):
         self._review("cfg_rep1", 2); self._review("cfg_rep2", 12, checked=False); self._review("cfg_rep3", 9)
         self.assertIn("→ cfg_rep2", self._run().output)
         self._review("cfg_rep2", 12)
-        self.assertIn("→ cfg_rep1", self._run().output)
+        self.assertIn("→ cfg_rep2", self._run().output)
         out = self._run("--ignore-reviews")
         self.assertIn("→ cfg_rep2", out.output); self.assertIn("--ignore-reviews", out.output)
 
     def test_validity_still_outranks_the_review(self):
         self._review("cfg_rep1", 2); self._review("cfg_rep2", 12); self._review("cfg_rep3", 9)
-        out = self._run(valid={"cfg_rep1": False})
+        out = self._run(valid={"cfg_rep2": False})
         self.assertIn("→ cfg_rep3", out.output)
 
 

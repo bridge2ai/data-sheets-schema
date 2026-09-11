@@ -864,21 +864,17 @@ it, rather than running the index join the pack itself reports as a
 gap. Every way a read fails names the file. The scan-build-write window
 and a nested `reliability.attested_artifacts` pin are #1189.
 
-## Canonical selection with the review (#660)
+## Canonical selection and review calibration (#660, #835)
 
-`d4d runs select` ranks validity → **fewest review adverse verdicts**
-(differences ≤ `--review-margin`, default 2, are a tie: a 50-slot sample
-carries ±2–3 of binomial noise) → most slots → label. The review rank
-applies only when every eligible replicate carries a `review` block that
-is evidence — checked, with an integer adverse count, no finding and no
-unanswered item; `review_evidence_why` names any block that is not, as
-distinct from an absent one (#1124 round 10) — and `--ignore-reviews`
-switches it off. The `canonical` block records `reviews_applied`, each
-candidate's `review_adverse` (with `review_not_evidence` where a block
-was set aside), and the criterion
-text. Under the coverage-only criterion the v7 arm picked the most-adverse
-replicate in 3 of 4 projects; under this one AI_READI and VOICE moved to
-rep1.
+`d4d runs select` ranks validity → coverage → label. Review counts are
+**reported only** (#835): the recorded calibration did not meet its
+preregistered reliability criterion, and adjudication did not establish a
+new selection threshold. `--review-margin` is retired and rejected;
+`--ignore-reviews` remains a compatibility flag. New canonical blocks record
+`reviews_applied: false`, the available review evidence, and the policy
+`reported_only_pending_calibration_v1 (#835)`. See
+`notes/review_selection_policy_2026-09-11.md` for the evidence and the
+requirements before review counts may influence selection again.
 
 ## Id slots in the review pack (#803, #901)
 
