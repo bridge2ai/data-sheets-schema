@@ -309,8 +309,10 @@ def disposition(method, label, project, item, disposition, note, slot_path, old,
         # entry is the #657 laundering (#907 review). The recompute and the
         # re-validation follow; if either raises, the entry already names
         # the edit and gains the error.
+        from data_sheets_schema.schema_cache import forget
         for v in files.values():
             Path(v["path"]).write_text(v["_text"], encoding="utf-8")
+            forget(Path(v["path"]))                # a reader must not be served what this replaced (#1204 review, S2)
         append_entry()
         try:
             # the check blocks now describe bytes the run did not write:

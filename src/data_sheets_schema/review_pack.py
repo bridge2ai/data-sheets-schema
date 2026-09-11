@@ -50,7 +50,8 @@ def _load_yaml(path: Path, text: str | None = None, *, raw: bytes | None = None)
         if raw is not None:
             text = raw.decode("utf-8")
         elif text is None:
-            text = path.read_text(encoding="utf-8")
+            from data_sheets_schema.schema_cache import load_yaml
+            return load_yaml(path) or {}             # one parse per file per process (#1203)
         return yaml.safe_load(text) or {}
     except (yaml.YAMLError, UnicodeDecodeError, OSError) as exc:
         raise UnreadableYAML(path, exc) from exc

@@ -137,10 +137,9 @@ def declared_bases() -> list[tuple[str, str]]:
     and `https://w3id.org/aio/` share a host, so matching the shorter one first
     would attribute a value to the wrong prefix.
     """
-    import yaml
-
     from data_sheets_schema.provenance import FULL_SCHEMA
-    schema = yaml.safe_load(FULL_SCHEMA.read_text(encoding="utf-8")) or {}
+    from data_sheets_schema.schema_cache import load_schema
+    schema = load_schema(FULL_SCHEMA) or {}          # one parse per process (#1203)
     out = []
     for prefix, value in (schema.get("prefixes") or {}).items():
         base = value.get("prefix_reference") if isinstance(value, dict) else value
