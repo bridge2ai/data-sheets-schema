@@ -1,0 +1,129 @@
+﻿id: "https://w3id.org/bridge2ai/data-sheets-schema/ethics"
+name: "data-sheets-schema-ethics"
+title: "Datasheets for Datasets – Ethics Module"
+description: >
+  Subschema for ethics-related information in Datasheets for Datasets.
+  This includes any ethical review processes, consent procedures, and other
+  data-protection considerations.
+
+
+license: MIT
+see_also:
+  - "https://bridge2ai.github.io/data-sheets-schema"
+
+
+imports:
+  - "https://w3id.org/bridge2ai/data-sheets-schema"
+
+
+subsets:
+  Ethics:
+    description: >
+      The questions in this section address ethical and data-protection concerns,
+      including review by institutional bodies, consent and notification to data
+      subjects, and potential impacts on data-protection rights.
+
+
+prefixes:
+  linkml: "https://w3id.org/linkml/"
+  d4d-ethics: "https://w3id.org/bridge2ai/data-sheets-schema/ethics#"
+
+
+default_prefix: "d4d-ethics"
+
+
+# ------------------------------------------------------------------------------
+# Classes
+# ------------------------------------------------------------------------------
+
+
+classes:
+
+
+  EthicalReview:
+    description: >
+      Were any ethical or compliance review processes conducted (e.g., by an institutional
+      review board)? If so, please provide a description of these review processes,
+      including the frequency of review and documentation of outcomes, as well as a link or other access point to any
+      supporting documentation.
+    is_a: DatasetProperty
+    in_subset:
+      - Ethics
+    attributes:
+      description:
+        description: "Short summary or details about the ethical review process(es)."
+        range: string
+        multivalued: true
+
+
+  DataProtectionImpact:
+    description: >
+      Has an analysis of the potential impact of the dataset and its use on data subjects
+      (e.g., a data protection impact analysis) been conducted? If so, please provide a
+      description of this analysis, including the outcomes, and any supporting documentation.
+    is_a: DatasetProperty
+    in_subset:
+      - Ethics
+    attributes:
+      description:
+        description: "Details of the data protection impact analysis, if conducted."
+        range: string
+        multivalued: true
+
+
+  DirectCollection:
+    description: >
+      Did you collect the data from the individuals in question directly, or obtain it via
+      third parties or other sources (e.g., websites)?
+    is_a: DatasetProperty
+    in_subset:
+      - Ethics
+    attributes:
+      description:
+        description: "Explanation of how data were obtained, e.g., from the subjects or elsewhere."
+        range: string
+        multivalued: true
+
+
+  CollectionNotification:
+    description: >
+      Were the individuals in question notified about the data collection? If so, please
+      describe (or show with screenshots, etc.) how notice was provided, and reproduce the
+      language of the notification itself if possible.
+    is_a: DatasetProperty
+    in_subset:
+      - Ethics
+    attributes:
+      description:
+        description: "Details about any notification provided to individuals whose data was collected."
+        range: string
+        multivalued: true
+
+
+  CollectionConsent:
+    description: >
+      Did the individuals in question consent to the collection and use of their data?
+      If so, how was consent requested and provided, and what language did individuals
+      consent to?
+    is_a: DatasetProperty
+    in_subset:
+      - Ethics
+    attributes:
+      description:
+        description: "Details about how consent was sought, provided, and documented."
+        range: string
+        multivalued: true
+
+
+  ConsentRevocation:
+    description: >
+      If consent was obtained, were the consenting individuals provided with a mechanism
+      to revoke their consent in the future or for certain uses? If so, please describe.
+    is_a: DatasetProperty
+    in_subset:
+      - Ethics
+    attributes:
+      description:
+        description: "Information about any consent-revocation mechanism offered to data subjects."
+        range: string
+        multivalued: true

@@ -1086,8 +1086,45 @@ them under `phase_log.run_observed`, and `d4d provenance reasoning` reports
 such a run as `recovered_from_transcript`. Cache-inclusive orchestrator
 accounting, one number per run: the same subtraction as the API log's
 estimate, on a runtime whose output is mostly tool payloads, so an upper
-bound rather than a like-for-like figure; never averaged with `api_usage`. Existing agentic records carry the older
-`run_observed` shape until re-annotated from their transcripts.
+bound rather than a like-for-like figure; never averaged with `api_usage`. The 24 agentic records (v5 2026-08-24, v6
+2026-08-28) carry the measure since #1010: `d4d provenance
+extend-observed --label L [--execute]` finds the run's transcript by
+name in both config directories, recovers the bundle version the record
+hashed (#1140; 18 of the 24 from a git blob), chunks it under the
+record's rule, re-runs the observer under the record's own
+`run_observed_until` cut where it declares one (one of the 24; the other
+23 are observed over the whole transcript and their entries say so), and
+extends `run_observed` only when exactly one candidate — a file, or a
+set of the files a killed-and-resumed run left under one name (three v5
+rep3 runs; every subset of such a group is tried, since three files
+under one name include a resumed pair the group itself is not) —
+reproduces every key the record already carried. That is 4–5
+discriminating integers per record, on which the closest non-matching
+candidate reproduces none on 17 of the 24, one on four and two on
+three; each entry of `run_observed_extended` (a list, so a second
+extension keeps the first's trace) names the keys, the transcripts and
+their sha256 — a basename is the same under both config roots and
+identifies no bytes — how the winner was identified, the bundle basis
+and the observer's sha256, the text the extension appended to the
+account so the next one removes that and not a sentence that merely
+reads like it, and `run_observed_basis` gains a sentence per
+group of keys the record carries and none for keys it does not: the
+estimate keys present, `reasoning_tokens_estimate`'s subtraction, the
+runtime's own count and what its turn coverage means (or, on a run
+carrying none, that the observation carries none), and which of them an
+extension added. Only the reasoning keys are added under this
+instrument — a receipt-coverage key is #709's — and `annotate-observed
+--extend`, the hand-entered route, keeps the record's cut and says its
+numbers came from the command line. **`thinking_tokens` is a partial
+count on every record that carries it**: the observer counts a turn
+only where that transcript line carries an integer `thinking_tokens`
+inside `usage.output_tokens_details`, and `turns_with_thinking_tokens` is
+short of `assistant_turns` on all fifteen — by 1 to 6 turns on the
+twelve v6 records, by 36 to 62 on the three resumed v5 rep3 runs, whose
+first transcript predates the detail entirely. The nine v5 rep1/rep2
+records and CHORUS rep3 carry no `thinking_tokens` at all. So
+`reasoning_tokens_estimate` is the figure that spans both arms, and a
+`thinking_tokens` comparison must carry its turn coverage.
 
 So the command distinguishes four empty cases rather than printing one message
 for all of them:
