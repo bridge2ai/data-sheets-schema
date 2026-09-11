@@ -4,7 +4,8 @@ The old test ran `make full-schema` in the checkout. Its non-atomic write
 could expose a partial schema to a parallel reader even though the final
 bytes were identical (#1208). Run that test in a disposable repository with
 older merged artifacts so Make cannot hide the regression with a no-op
-(#1215). The real checkout remains safe even when this guard fails.
+(#1215). The sync test also used to tamper with the real artifact (#1217).
+Both tests run here without exposing the real checkout to a regression.
 """
 import hashlib
 import os
@@ -31,6 +32,14 @@ def _state(root):
 
 class TheSuiteLeavesTheMergedSchemasAlone(unittest.TestCase):
     def test_the_full_schema_tests_do_not_rewrite_the_committed_artifact(self):
+        self._assert_does_not_rewrite("tests/test_d4d_full_schema.py")
+
+    def test_the_sync_test_does_not_rewrite_the_committed_artifact(self):
+        self._assert_does_not_rewrite(
+            "tests/test_schema_sync.py",
+            "SyncCheckTest.test_a_tampered_merged_schema_is_caught")
+
+    def _assert_does_not_rewrite(self, test_file, case=None):
         with tempfile.TemporaryDirectory() as tmp:
             checkout = Path(tmp)
             # Include the real build rules and inputs: restoring the old
@@ -38,7 +47,7 @@ class TheSuiteLeavesTheMergedSchemasAlone(unittest.TestCase):
             # mutation assertion, rather than fail on a missing Makefile.
             for name in ("Makefile", "project.Makefile", "config.env", "about.yaml",
                          "pyproject.toml", "utils/get-value.sh",
-                         "tests/test_d4d_full_schema.py"):
+                         test_file):
                 target = checkout / name
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(ROOT / name, target)
@@ -60,12 +69,12 @@ class TheSuiteLeavesTheMergedSchemasAlone(unittest.TestCase):
             # environment is still named, even inside a Python virtualenv.
             env.pop("CONDA_DEFAULT_ENV", None)
             result = subprocess.run(
-                [sys.executable, "tests/test_d4d_full_schema.py"],
+                [sys.executable, test_file] + ([case] if case else []),
                 cwd=checkout, env=env,
                 capture_output=True, text=True, timeout=900)
             self.assertEqual(result.returncode, 0,
                              (result.stdout + result.stderr)[-2000:])
             self.assertEqual(
                 _state(checkout), before,
-                "the full-schema tests rewrote a repository artifact; "
+                f"{test_file} rewrote a repository artifact; "
                 "generate into a temporary directory instead (#1208)")
