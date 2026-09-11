@@ -2201,6 +2201,14 @@ canary counted once. The full launch contract, dated pins, exact records and
 output paths are registered in `notes/reference_rescore_2026-09-11/manifest.json`
 before any call. Old scores remain beside the new instrument's outputs.
 
+**Execution status at registration:** no live evaluator process has started.
+Automatic approval review rejected both launch requests, including the retry
+after public repository visibility and byte identity were verified. Explicit
+approval for sending the records to Anthropic Claude for paid evaluation is
+pending. No canary acceptance exists, no fill is allowed, and no new score or
+repeatability estimate is reported. Details are retained in
+`notes/reference_rescore_2026-09-11/public_input_verification.json` and #1248.
+
 The canary is CHORUS v7 rep1 with rubric10, in a fresh Opus 5 evaluator session.
 Every session receives the current `d4d agents preamble` and the exact pinned
 definition, verifies check-echo, records actual model and definition identity,
