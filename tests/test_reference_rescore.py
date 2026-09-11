@@ -1,0 +1,269 @@
+"""Offline checks of the paid-run gates; these never call an evaluator service."""
+import copy
+import importlib.util
+import json
+from pathlib import Path
+import shutil
+import sys
+
+import pytest
+
+from tests.test_evaluation.test_semantic_evaluation_contract import _rubric10_record, _rubric20_record
+
+REAL_ROOT = Path(__file__).resolve().parents[1]
+spec = importlib.util.spec_from_file_location("reference_rescore", REAL_ROOT / "scripts/reference_rescore.py")
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
+
+
+def valid_record(number=10):
+    doc = _rubric10_record() if number == 10 else _rubric20_record()
+    if number == 10:
+        for e in doc["elements"]:
+            for sub in e["sub_elements"]:
+                sub["applicable"] = sub["score"] is not None
+        doc["overall_score"]["total_points"] = 48
+        doc["overall_score"]["normalized_percentage"] = 100.0
+        doc["overall_score"]["fixed_percentage"] = 96.0
+    else:
+        doc["overall_score"]["fixed_percentage"] = round(100 * 83 / 88, 1)
+    return doc
+
+
+def test_registered_cohort_and_repeats_are_exact():
+    jobs = runner.cohort_jobs()
+    assert len(jobs) == 56 and len({j["id"] for j in jobs}) == 56
+    assert jobs[0]["id"] == "CHORUS_v7_rep1_r10_rating1"
+    assert len({j["input"] for j in jobs}) == 24
+    assert sum(j["purpose"] == "primary" for j in jobs) == 48
+    repeated = [j for j in jobs if j["purpose"] == "repeatability"]
+    assert len(repeated) == 8
+    assert {j["rubric"] for j in repeated} == {"rubric10-semantic"}
+    assert all(j["cohort"] == "v7" and j["generation_rep"] == 1 for j in repeated)
+    assert all((REAL_ROOT / j["input"]).exists() for j in jobs)
+
+
+@pytest.mark.parametrize("number", [10, 20])
+def test_arithmetic_checks_the_actual_item_scores(number):
+    doc = valid_record(number)
+    runner.check_arithmetic(doc)
+    doc["overall_score"]["total_points"] -= 1
+    with pytest.raises(ValueError, match="overall"):
+        runner.check_arithmetic(doc)
+
+
+@pytest.mark.parametrize("mutation", ["duplicates", "denominator", "percentage", "na"])
+def test_plausible_but_wrong_item_or_percentage_results_fail(mutation):
+    doc = valid_record()
+    if mutation == "duplicates":
+        doc["elements"][0]["id"] = 2
+    elif mutation == "denominator":
+        doc["elements"][7]["element_max"] = 5
+    elif mutation == "percentage":
+        doc["overall_score"]["fixed_percentage"] = 100
+    else:
+        doc["elements"][7]["sub_elements"][0]["applicable"] = True
+    with pytest.raises(ValueError):
+        runner.check_arithmetic(doc)
+
+
+def events(doc, validator_success=True):
+    return [
+        {"type": "assistant", "message": {"model": "claude-opus-5", "content": [
+            {"type": "text", "text": "verified current definition"},
+            {"type": "tool_use", "name": "Bash", "id": "validate", "input": {
+                "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic"}}]}},
+        {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "validate",
+            "is_error": not validator_success, "content": "VALID output_evaluation.json: rubric10-semantic"}]}},
+        {"type": "result", "subtype": "success", "is_error": False},
+    ]
+
+
+@pytest.fixture
+def environment(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "ROOT", tmp_path)
+    monkeypatch.setattr(runner, "PLAN", tmp_path / "plan")
+    monkeypatch.setattr(runner, "spawn_preamble", lambda agent: "PREAMBLE")
+
+    def echo(agent, text):
+        if "verified current definition" not in text:
+            raise ValueError("stale echo")
+
+    monkeypatch.setattr(runner, "verify_echo", echo)
+    job = copy.deepcopy(runner.cohort_jobs()[0])
+    (tmp_path / job["input"]).parent.mkdir(parents=True)
+    (tmp_path / job["input"]).write_text("id: example\n")
+    paths = ["scripts/validate_evaluation_schema.py", "scripts/reference_rescore.py", "pyproject.toml", "poetry.lock",
+             ".claude/agents/d4d-rubric10-semantic.md", "data/rubric/rubric10.txt",
+             "src/download/prompts/rubric10_semantic_schema.json"]
+    for path in paths:
+        dest = tmp_path / path
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(REAL_ROOT / path, dest)
+    instrument = {"definition": paths[4], "definition_sha256": runner.digest(tmp_path / paths[4]),
+                  "agent": job["agent"], "rubric": paths[5], "schema": paths[6], "preamble": "PREAMBLE"}
+    prior = tmp_path / "prior_evaluation.json"
+    prior.write_text('{"previous": true}\n')
+    manifest = {"canary_id": job["id"], "jobs": [job], "requested_model": runner.MODEL,
+                "effort": "high", "budget_cap_usd_per_attempt": 5,
+                "instruments": {job["rubric"]: instrument},
+                "pinned_files": {p: runner.digest(tmp_path / p) for p in paths + [job["input"]]},
+                "prior_evaluations": {"prior_evaluation.json": runner.digest(prior)}}
+    runner.write_json(runner.PLAN / "manifest.json", manifest)
+    doc = valid_record()
+    doc.update({k: job[k] for k in ("rubric", "project", "method", "label")})
+    doc["d4d_file"] = job["input"]
+    doc["model"] = {"name": "claude-opus-5", "evaluator_model": "claude-opus-5",
+                    "temperature": None, "evaluation_type": "semantic_llm_judge"}
+    doc["metadata"] = {"instrument_sha256": instrument["definition_sha256"],
+                       "instrument_kind": "agent_definition", "rubric_hash": manifest["pinned_files"][instrument["rubric"]],
+                       "input_sha256": manifest["pinned_files"][job["input"]]}
+    return tmp_path, manifest, job, doc
+
+
+def fake_cli(path, doc, trace, failure=False):
+    path.write_text(f"#!{sys.executable}\nimport json,sys\nfrom pathlib import Path\n" +
+                    ("print('Weekly quota exhausted')\nsys.exit(1)\n" if failure else
+                     "prompt=sys.stdin.read()\nassert Path('input/record.yaml').read_text() in prompt\n" +
+                     f"Path('output_evaluation.json').write_text({json.dumps(doc)!r})\n" +
+                     f"print({chr(10).join(json.dumps(e) for e in trace)!r})\n"))
+    path.chmod(0o755)
+    return str(path)
+
+
+def test_invalid_or_unmatched_validator_receipt_is_rejected():
+    trace = events(valid_record())
+    trace[1]["message"]["content"][0]["content"] = "INVALID output_evaluation.json: rubric10-semantic"
+    assert not runner.evaluator_validated(trace, "rubric10-semantic")
+    trace = events(valid_record())
+    trace[1]["message"]["content"][0]["tool_use_id"] = "another-call"
+    assert not runner.evaluator_validated(trace, "rubric10-semantic")
+
+
+def test_exact_poetry_validator_command_runs_in_isolated_environment(environment):
+    import os
+    import subprocess
+    root, _, _, doc = environment
+    (root / "output_evaluation.json").write_text(json.dumps(doc))
+    env = {**os.environ, "VIRTUAL_ENV": sys.prefix,
+           "PATH": str(Path(sys.executable).parent) + os.pathsep + os.environ.get("PATH", "")}
+    env.pop("CONDA_DEFAULT_ENV", None)
+    done = subprocess.run(["poetry", "run", "python", "scripts/validate_evaluation_schema.py",
+                           "--file", "output_evaluation.json", "--rubric", "rubric10-semantic"],
+                          cwd=root, env=env, text=True, capture_output=True)
+    assert done.returncode == 0, done.stdout + done.stderr
+    assert "VALID output_evaluation.json: rubric10-semantic" in done.stdout
+
+
+def test_successful_canary_preserves_old_scores_and_gates_the_fill(environment):
+    root, manifest, job, doc = environment
+    old = (root / "prior_evaluation.json").read_bytes()
+    cli = fake_cli(root / "fake-claude", doc, events(doc))
+    receipt = runner.run_job(manifest, job, cli)
+    assert receipt["status"] == "passed", receipt
+    assert (root / "prior_evaluation.json").read_bytes() == old
+    fill = {**job, "id": "another-record"}
+    with pytest.raises(FileNotFoundError):
+        runner.require_canary(manifest, fill)
+    runner.accept_canary(manifest)
+    runner.require_canary(manifest, fill)
+    assert runner.successful_receipt(manifest, job)["evaluation_sha256"] == runner.digest(root / job["output"])
+    with pytest.raises(ValueError, match="overwrite"):
+        runner.run_job(manifest, job, cli)
+
+
+def test_failed_attempt_cannot_unlock_fill_or_create_a_live_rating(environment):
+    root, manifest, job, doc = environment
+    cli = fake_cli(root / "fake-claude", doc, [], failure=True)
+    receipt = runner.run_job(manifest, job, cli)
+    assert receipt["status"] == "incomplete"
+    assert not (root / job["output"]).exists()
+    assert list(runner.PLAN.glob("attempts/*/*/receipt.json"))
+    assert "Weekly quota" in next(runner.PLAN.glob("attempts/*/*/transcript.jsonl")).read_text()
+    with pytest.raises(ValueError, match="successful receipt"):
+        runner.accept_canary(manifest)
+
+
+@pytest.mark.parametrize("part", ["input", "definition", "prior"])
+def test_frozen_byte_changes_stop_before_the_cli(environment, part):
+    root, manifest, job, doc = environment
+    path = {"input": job["input"], "definition": manifest["instruments"][job["rubric"]]["definition"],
+            "prior": "prior_evaluation.json"}[part]
+    (root / path).write_text("changed")
+    with pytest.raises(ValueError, match="frozen bytes"):
+        runner.run_job(manifest, job, "this-command-must-not-run")
+
+
+@pytest.mark.parametrize("defect", ["model", "instrument", "echo", "validator", "input", "temperature", "kind", "rubric"])
+def test_unattested_or_misidentified_candidate_is_retained_but_not_published(environment, defect):
+    root, manifest, job, doc = environment
+    trace = events(doc)
+    if defect == "model":
+        trace[0]["message"]["model"] = "another-model"
+    elif defect == "instrument":
+        doc["metadata"]["instrument_sha256"] = "0" * 64
+    elif defect == "echo":
+        trace[0]["message"]["content"][0]["text"] = "old definition"
+    elif defect == "validator":
+        trace = events(doc, validator_success=False)
+    elif defect == "input":
+        doc["metadata"]["input_sha256"] = "0" * 64
+    elif defect == "kind":
+        doc["metadata"]["instrument_kind"] = "api_system_prompt"
+    elif defect == "rubric":
+        doc["metadata"]["rubric_hash"] = "0" * 64
+    else:
+        doc["model"]["temperature"] = 0.0
+    cli = fake_cli(root / "fake-claude", doc, trace)
+    receipt = runner.run_job(manifest, job, cli)
+    assert receipt["status"] == "incomplete"
+    assert not (root / job["output"]).exists()
+    assert list(runner.PLAN.glob("attempts/*/*/candidate.json"))
+
+
+def test_existing_output_without_receipt_or_with_changed_bytes_cannot_resume(environment):
+    root, manifest, job, doc = environment
+    dest = root / job["output"]
+    dest.parent.mkdir(parents=True)
+    dest.write_text(json.dumps(doc))
+    with pytest.raises(ValueError, match="successful receipt"):
+        runner.successful_receipt(manifest, job)
+
+    runner.write_json(runner.PLAN / "attempts" / job["id"] / "one/receipt.json", {
+        "status": "passed", "evaluation_sha256": runner.digest(dest),
+        "manifest_sha256": runner.digest(runner.PLAN / "manifest.json")})
+    dest.write_text(dest.read_text() + "\n")
+    with pytest.raises(ValueError, match="successful receipt"):
+        runner.successful_receipt(manifest, job)
+
+
+def test_repeatability_report_separates_repeated_ratings_from_generation_records(environment, monkeypatch):
+    root, manifest, job, doc = environment
+    monkeypatch.syspath_prepend(str(REAL_ROOT / "scripts"))
+    jobs = []
+    for rating in (1, 2, 3):
+        j = {**job, "id": f"rating{rating}", "rating": rating,
+             "purpose": "primary" if rating == 1 else "repeatability", "output": f"rating{rating}.json"}
+        jobs.append(j)
+    manifest["jobs"] = jobs
+    runner.write_json(runner.PLAN / "manifest.json", manifest)
+    for index, j in enumerate(jobs):
+        d = copy.deepcopy(doc)
+        # Score rows are independently attested by their receipts; this
+        # fixture isolates aggregation of a known two-point spacing.
+        d["overall_score"]["total_points"] = 40 + index
+        d["overall_score"]["fixed_percentage"] = 80 + 2 * index
+        d["overall_score"]["normalized_percentage"] = round(100 * (40 + index) / 48, 1)
+        runner.write_json(root / j["output"], d)
+        runner.write_json(runner.PLAN / "attempts" / j["id"] / "one/receipt.json", {
+            "status": "passed", "evaluation_sha256": runner.digest(root / j["output"]),
+            "manifest_sha256": runner.digest(runner.PLAN / "manifest.json")})
+    results = runner.report_results(manifest)
+    chorus = next(r for r in results["repeatability"] if r["project"] == "CHORUS")
+    assert chorus["fixed_sample_sd"] == 2
+    assert chorus["fixed_range"] == 4
+    primary = next(r for r in results["generation_replicates"] if r["project"] == "CHORUS"
+                   and r["cohort"] == "v7" and r["rubric"] == "rubric10-semantic")
+    assert primary["records"] == 1
+    ai_readi = next(r for r in results["repeatability"] if r["project"] == "AI_READI")
+    assert ai_readi["fixed_sample_sd"] is None
