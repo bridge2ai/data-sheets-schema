@@ -6,6 +6,7 @@ This ensures evaluations conform to the standardized schema, which in turn
 ensures HTML renderers can reliably parse the output.
 """
 import json
+import re as _re
 import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -70,85 +71,110 @@ def validate_evaluation(eval_data: Dict, schema: Dict) -> Tuple[bool, List[str]]
     return status == "valid", errors
 
 
-def main():
-    """Validate all evaluation JSON files in specified directories."""
+#: A directory whose name marks its contents as kept evidence rather than a
+#: live artifact: an archive, a superseded set, or a dated snapshot of one
+#: arm's scores. An invalid record in one of these is what an older
+#: instrument produced and must not be rewritten to satisfy today's schema,
+#: so it is reported and does not fail the run.
+KEPT_DIR = _re.compile(r"^(?:_archive|superseded)|^\d{4}-\d{2}-\d{2}(?:[_-]|$)")
 
-    # Paths
+
+def is_kept(path: Path, base: Path) -> bool:
+    """Is any directory between `base` and `path` an archive marker?"""
+    return any(KEPT_DIR.match(part) for part in path.relative_to(base).parts[:-1])
+
+
+def discover(base: Path) -> List[Path]:
+    """Every evaluation JSON under `base`, at any depth.
+
+    The loop was `{rubric}_semantic/concatenated/*.json` — one directory per
+    rubric, one level deep (#833). That reached 28 of the 204 semantic
+    artifacts on disk: not `label_aware/`, which is where every evaluation
+    since 2026-08 lives and which the cross-arm table reads, not the dated
+    per-arm subdirectories beside it, and not the archives. The rubric a file
+    declares decides which schema it is judged against, so the directory does
+    not have to.
+    """
+    return sorted(base.rglob("*_evaluation.json"))
+
+
+def main(eval_base: Path | None = None, schema_dir: Path | None = None) -> int:
+    """Validate every evaluation JSON under `data/evaluation_llm`.
+
+    The two roots are arguments so that the exit code — the thing #833 asked
+    for, and the thing four tests of the helpers did not reach — can be
+    exercised end to end over a tree built for the purpose.
+    """
     base_dir = Path(__file__).parent.parent
-    schema_dir = base_dir / "src" / "download" / "prompts"
-    eval_base = base_dir / "data" / "evaluation_llm"
+    schema_dir = schema_dir or base_dir / "src" / "download" / "prompts"
+    eval_base = eval_base or base_dir / "data" / "evaluation_llm"
 
-    # Load schemas
     schemas = {
         "rubric10-semantic": load_schema(schema_dir / "rubric10_semantic_schema.json"),
         "rubric20-semantic": load_schema(schema_dir / "rubric20_semantic_schema.json"),
     }
 
-    # Find all evaluation JSON files
-    eval_files = []
-    for rubric_type in ["rubric10_semantic", "rubric20_semantic"]:
-        rubric_dir = eval_base / rubric_type / "concatenated"
-        if rubric_dir.exists():
-            eval_files.extend(rubric_dir.glob("*_evaluation.json"))
-
+    eval_files = discover(eval_base)
     if not eval_files:
         print(f"No evaluation files found in {eval_base}")
         return 1
 
-    print(f"Found {len(eval_files)} evaluation files to validate\n")
+    print(f"Found {len(eval_files)} evaluation file(s) under {eval_base}\n")
 
-    # Validate each file
-    valid_count = 0
-    invalid_count = 0
-    superseded_count = 0
+    counts = {("live", k): 0 for k in ("valid", "superseded", "invalid", "unreadable")}
+    counts.update({("kept", k): 0 for k in ("valid", "superseded", "invalid", "unreadable")})
+    no_schema: Dict[str, int] = {}
+    live_invalid: List[Tuple[Path, List[str]]] = []
+    kept_invalid: List[Tuple[Path, List[str]]] = []
 
-    for eval_file in sorted(eval_files):
-        print(f"Validating: {eval_file.name}")
-
-        # Load evaluation
+    for eval_file in eval_files:
+        where = "kept" if is_kept(eval_file, eval_base) else "live"
+        shown = eval_file.relative_to(eval_base)
         try:
             eval_data = load_evaluation(eval_file)
         except Exception as e:
-            print(f"  ❌ Failed to load: {e}")
-            invalid_count += 1
+            print(f"❌ {shown}: failed to load: {e}")
+            counts[(where, "unreadable")] += 1
             continue
 
-        # Determine rubric type
         rubric = eval_data.get("rubric", "unknown")
         if rubric not in schemas:
-            print(f"  ⚠️  No schema available for rubric type: {rubric}")
+            # Named and counted, not skipped in silence: the presence-style
+            # rubric10/rubric20 outputs have no schema in this repository, and
+            # a reader of the summary should see that they were not judged.
+            no_schema[str(rubric)] = no_schema.get(str(rubric), 0) + 1
             continue
 
-        # Validate
         status, errors = classify(eval_data, schemas[rubric])
-
-        if status == "valid":
-            print(f"  ✅ Valid")
-            valid_count += 1
+        counts[(where, status)] += 1
+        if status == "invalid":
+            (kept_invalid if where == "kept" else live_invalid).append((shown, errors))
         elif status == "superseded":
-            print(f"  🕐 Superseded shape (pre-2026 rubric10 output):")
-            print(f"     {errors[0]}")
-            superseded_count += 1
-        else:
-            print(f"  ❌ Invalid:")
+            print(f"🕐 {shown}: superseded shape — {errors[0]}")
+
+    for label, rows in (("live", live_invalid), ("kept as evidence", kept_invalid)):
+        for shown, errors in rows:
+            print(f"❌ {shown} ({label}):")
             for error in errors:
                 print(f"     {error}")
-            invalid_count += 1
 
-        print()
-
-    # Summary
+    print()
     print("=" * 60)
-    print(f"SUMMARY:")
-    print(f"  ✅ Valid:      {valid_count}")
-    print(f"  🕐 Superseded: {superseded_count}")
-    print(f"  ❌ Invalid:    {invalid_count}")
-    print(f"  📊 Total:      {valid_count + superseded_count + invalid_count}")
+    print("SUMMARY (judged against a schema):")
+    for where in ("live", "kept"):
+        row = {k: counts[(where, k)] for k in ("valid", "superseded", "invalid", "unreadable")}
+        print(f"  {where:5}  valid {row['valid']:4}  superseded {row['superseded']:3}  "
+              f"invalid {row['invalid']:3}  unreadable {row['unreadable']:3}")
+    if no_schema:
+        print("  no schema in this repository, not judged: "
+              + ", ".join(f"{k} {v}" for k, v in sorted(no_schema.items())))
     print("=" * 60)
 
-    # Superseded records do not fail the run: they are historical output of a
-    # contract that no longer applies, and nothing can be done to them.
-    return 0 if invalid_count == 0 else 1
+    # A superseded record is historical output of a contract that no longer
+    # applies, and one kept under an archive marker is evidence of what an
+    # older instrument produced: reported, never rewritten to pass. Only a
+    # live invalid artifact fails the run.
+    return 0 if not live_invalid and not counts[("live", "unreadable")] else 1
 
 
 if __name__ == "__main__":
