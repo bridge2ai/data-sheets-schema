@@ -105,7 +105,7 @@ class TheRebuildCache(unittest.TestCase):
             src = d / "data_sheets_schema.yaml"; _write(src, "id: x\n", 1_000_000_000)
             key = (schema_sync._source_state(src), False)
             schema_sync._REBUILT[key] = b"merged bytes\n"
-            self.addCleanup(schema_sync._REBUILT.pop, key, None)
+            self.addCleanup(schema_sync.forget_rebuilds)
             target = d / "out.yaml"
             with mock.patch.object(schema_sync.subprocess, "run", side_effect=AssertionError("spawned")):
                 ok, why = schema_sync._regenerate(src, target, marker=False)
@@ -120,9 +120,60 @@ class TheRebuildCache(unittest.TestCase):
             d = Path(tmp)
             src = d / "data_sheets_schema.yaml"; _write(src, "id: x\n", 1_000_000_000)
             key = (schema_sync._source_state(src), False)
-            schema_sync._REBUILT.pop(key, None)
+            schema_sync.forget_rebuilds()
             failed = mock.Mock(returncode=1, stderr="boom", stdout="")
             with mock.patch.object(schema_sync.subprocess, "run", return_value=failed):
                 ok, why = schema_sync._regenerate(src, d / "out.yaml", marker=False)
             self.assertFalse(ok); self.assertIn("gen-linkml failed", why)
             self.assertNotIn(key, schema_sync._REBUILT)
+
+    def test_the_key_carries_the_generator_versions_and_clear_drops_rebuilds(self):
+        """#1204 review, S5: a rebuild's bytes depend on the installed linkml,
+        which no file under the schema directory attests."""
+        from unittest import mock
+
+        from data_sheets_schema import schema_sync
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp)
+            src = d / "data_sheets_schema.yaml"; _write(src, "id: x\n", 1_000_000_000)
+            k1 = schema_sync._source_state(src)
+            with mock.patch.object(schema_sync, "_generator_versions", return_value=(("linkml", "9.9.9"),)):
+                k2 = schema_sync._source_state(src)
+            self.assertNotEqual(k1, k2)
+            schema_sync._REBUILT[(k1, False)] = b"x"
+            schema_cache.clear()
+            self.assertEqual(schema_sync._REBUILT, {})
+
+
+class EveryWriterForgets(unittest.TestCase):
+    """#1204 review, S1 and S2: three writers replace a record or artifact
+    in place — `ProvenanceRecord.write`, `backfill_checks.apply` and the
+    amend command — and a reader after any of them must not be served the
+    bytes it replaced. The wiring is pinned at each, because a writer that
+    forgets to forget is the defect this exists to prevent."""
+
+    def test_each_writer_calls_forget(self):
+        """Within a few hundred characters after the write, not at a fixed
+        distance: the calls span nested parentheses."""
+        import re
+        for path, write, forget in (
+                ("src/data_sheets_schema/provenance.py", r"        path\.write_text\(", r"forget\(path\)"),
+                ("src/data_sheets_schema/backfill_checks.py", r"    provenance\.write_text\(", r"forget\(provenance\)"),
+                ("src/data_sheets_schema/cli/review.py", r'Path\(v\["path"\]\)\.write_text\(', r'forget\(Path\(v\["path"\]\)\)')):
+            with self.subTest(path):
+                src = Path(path).read_text()
+                m = re.search(write, src)
+                self.assertIsNotNone(m, f"no write site matched in {path}")
+                self.assertRegex(src[m.start():m.start() + 600], forget)
+
+    def test_the_backfill_writer_really_invalidates(self):
+        """Behaviour, not only wiring: read through the cache, rewrite with
+        the same size in the same mtime tick, read again."""
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "r.yaml"
+            _write(p, "a: 1\n", 1_000_000_000)
+            self.assertEqual(schema_cache.load_yaml(p), {"a": 1})
+            _write(p, "a: 2\n", 1_000_000_000)        # same size, same tick: invisible to the key
+            self.assertEqual(schema_cache.load_yaml(p), {"a": 1})
+            schema_cache.forget(p)
+            self.assertEqual(schema_cache.load_yaml(p), {"a": 2})

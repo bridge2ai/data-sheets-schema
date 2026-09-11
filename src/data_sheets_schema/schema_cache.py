@@ -48,12 +48,17 @@ load_schema = load_yaml
 
 
 def forget(path: Path) -> None:
-    """Drop every cached parse of `path` — called by the record writer, so a
-    rewrite that lands with the same size inside one mtime tick (the one
-    edit the key cannot see) is never served stale."""
-    p = str(Path(path).resolve())
-    # lru_cache has no per-key eviction; the cache is small and a write is
-    # rare next to a read, so clearing it all is the honest option.
+    """A writer has just replaced `path`: drop the whole parse cache.
+
+    The whole cache, not one entry — `lru_cache` has no per-key eviction,
+    and a write is rare next to a read, so paying a few re-parses is cheaper
+    than a second index. The argument names the file for the reader of the
+    call site; it does not narrow the eviction (#1204 review, S3). Called by
+    every writer of a record or artifact, so a rewrite that lands with the
+    same size inside one mtime tick — the one edit the key cannot see — is
+    never served stale.
+    """
+    del path
     _parsed.cache_clear()
 
 
@@ -86,7 +91,10 @@ def tree_fingerprint(directory: Path, pattern: str = "*.yaml", exclude: tuple[st
 
 
 def clear() -> None:
-    """Forget every entry — for tests that replace a file's bytes with the
-    same size inside one mtime tick, where the key cannot see the edit."""
+    """Forget every entry, the rebuilt-schema cache included — for tests
+    that replace a file's bytes with the same size inside one mtime tick,
+    where the key cannot see the edit."""
     _parsed.cache_clear()
     _digest.cache_clear()
+    from data_sheets_schema import schema_sync
+    schema_sync.forget_rebuilds()
