@@ -108,3 +108,17 @@ transitive imports, fitness memo invalidation, and real direct-versus-snapshot
 generation for import aliases, root aliases and Unicode paths. The existing
 full/core generation digests and complete fitness specification SHA256 remain
 unchanged. A fourth plugin review checks the complete implementation.
+
+The fourth plugin review is retained in
+`schema_cache_codex_fourth_2026-09-11.txt`. Its three findings are addressed:
+stable logical aliases coexist instead of evicting one another's pinned views
+(#1269); captured metadata is normalized through LinkML's own metamodel,
+including list-form prefixes (#1271); import resolution and lazy namespace
+initialization follow the installed LinkML behavior (#1270). Four regressions
+failed against the reviewed revision. Direct and captured views now agree on
+both the imported specification and the namespace map after a prefix override.
+
+All 185 focused tests passed, followed by 38 affected view/import/sync/fitness
+tests after the final lazy-loader adjustment. A fifth plugin review checks the
+complete branch before merge. No current generation digest, fitness instrument
+hash or historical measurement changed in this compatibility round.

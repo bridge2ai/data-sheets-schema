@@ -15,7 +15,7 @@ signal" rather than as a test failure.
 Every in-process construction site in this package takes its view from here
 instead (linkml's own validator builds views of its own; see
 ``provenance._record_validator`` for the one on the execute path). The key
-is the resolved path with a hash of the captured root and transitive import
+is the logical absolute path with a hash of the captured root and transitive import
 bytes — not size and mtime,
 which a same-length rewrite within one timestamp tick can collide on (#943)
 — so a schema rewritten under a running process (``make regen-all``, the
@@ -30,9 +30,10 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
-from linkml_runtime import SchemaView
+from linkml_runtime import SCHEMA_DIRECTORY, SchemaView
 from linkml_runtime.linkml_model.meta import SchemaDefinition
 from linkml_runtime.loaders import yaml_loader
+from linkml_runtime.utils.context_utils import map_import
 from data_sheets_schema.schema_snapshot import SchemaSnapshot, capture_schema
 
 _VIEWS: dict[tuple[str, str], SchemaView] = {}
@@ -62,7 +63,19 @@ def shared_view(path: str | Path, *, content: bytes | None = None,
             schema.source_file = str(source)
             schemas[name] = schema
         view = SchemaView(next(iter(schemas.values())))
-        view.schema_map = schemas
+        # Keep LinkML's lazy schema-map and namespace initialization order,
+        # while satisfying every import from the captured bytes (#1270).
+        def load_captured(imp, from_schema=None):
+            if from_schema is not None and from_schema is not view.schema:
+                raise ValueError("snapshot imports must be resolved from the root schema")
+            # This has a relevant side effect: prefixed imports initialize
+            # SchemaView's cached namespaces at the same point as load_import.
+            map_import({"linkml:": str(SCHEMA_DIRECTORY)}, view.namespaces, imp)
+            try:
+                return schemas[str(imp)]
+            except KeyError as exc:
+                raise ValueError(f"schema import {imp!r} is outside the captured closure") from exc
+        view.load_import = load_captured
         _VIEWS[key] = view
     return view
 

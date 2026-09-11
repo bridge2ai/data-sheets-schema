@@ -16,6 +16,7 @@ from pathlib import Path
 
 import yaml
 from linkml_runtime import SCHEMA_DIRECTORY
+from linkml_runtime.linkml_model.meta import SchemaDefinition
 from linkml_runtime.utils.context_utils import map_import
 from linkml_runtime.utils.namespaces import Namespaces
 
@@ -30,12 +31,11 @@ class SchemaSnapshot:
 @functools.lru_cache(maxsize=128)
 def _metadata(content: bytes) -> tuple:
     doc = yaml.safe_load(content) or {}
-    imports = doc.get("imports") or []
-    if isinstance(imports, str):
-        imports = [imports]
-    prefixes = tuple((name, value.get("prefix_reference") if isinstance(value, dict) else value)
-                     for name, value in (doc.get("prefixes") or {}).items())
-    return str(doc.get("name")), tuple(imports), prefixes, tuple(doc.get("default_curi_maps") or [])
+    # Let the installed metamodel normalize its supported mapping/list forms.
+    schema = SchemaDefinition(**{k: doc[k] for k in
+        ("id", "name", "imports", "prefixes", "default_curi_maps") if k in doc})
+    prefixes = tuple((str(p.prefix_prefix), str(p.prefix_reference)) for p in schema.prefixes.values())
+    return str(schema.name), tuple(schema.imports), prefixes, tuple(schema.default_curi_maps)
 
 
 def capture_schema(path: str | Path, *, content: bytes | None = None) -> SchemaSnapshot:
@@ -46,7 +46,10 @@ def capture_schema(path: str | Path, *, content: bytes | None = None) -> SchemaS
     schemas: dict[str, tuple[Path, bytes]] = {}
     metadata: dict[str, tuple] = {}
 
+    @functools.lru_cache(maxsize=1)
     def namespaces():
+        # SchemaView freezes namespaces at first use. Recomputing after an
+        # imported prefix override changes which files a later import selects.
         ns = Namespaces()
         for meta in metadata.values():
             for cmap in root_meta[3]:
@@ -84,6 +87,8 @@ def capture_schema(path: str | Path, *, content: bytes | None = None) -> SchemaS
 
     identity = [(str(p), str(p.resolve()), hashlib.sha256(data).hexdigest())
                 for p, data in sorted(files.items())]
-    key = (str(root.resolve()), hashlib.blake2b(
+    # Distinct logical aliases may resolve imports differently. Keep each
+    # stable alias cached rather than evicting views by their shared target.
+    key = (str(root), hashlib.blake2b(
         json.dumps(identity, ensure_ascii=False).encode("utf-8"), digest_size=16).hexdigest())
     return SchemaSnapshot(tuple((name, path, data) for name, (path, data) in schemas.items()), key)
