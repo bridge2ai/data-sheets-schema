@@ -1,83 +1,71 @@
-"""Running the tests must not rewrite the repository's merged schemas (#1208).
+"""Schema-generation tests must leave their repository artifacts untouched.
 
-`tests/test_d4d_full_schema.py` used to run `make full-schema` in the
-repository root as class setup, rewriting
-`src/data_sheets_schema/schema/data_sheets_schema_all.yaml` in place.
-`gen-linkml` writes that file non-atomically, so a concurrent reader saw a
-partial one — and `schema_sync.check`, which `api_runner.execute` treats as
-fatal, then reported the merged schema as differing from a fresh build of
-its source. The rewrite produces **identical bytes**: the committed file
-reproduces exactly, on Linux and on macOS, so nothing about the content
-was ever wrong and a content check could never have found this. What
-mattered was that the file was replaced at all, while other tests were
-reading it. Serially the rewrite finished before anything else looked;
-under `pytest -n auto` between one and nine runner-gate tests failed per
-run, on different tests each time, which read as flakiness rather than as
-one test mutating shared state.
-
-The committed merged schemas are an input to every generation run — their
-sha256 is recorded in every provenance record — so a test suite that
-rewrites them is changing the thing under test.
+The old test ran `make full-schema` in the checkout. Its non-atomic write
+could expose a partial schema to a parallel reader even though the final
+bytes were identical (#1208). Run that test in a disposable repository with
+older merged artifacts so Make cannot hide the regression with a no-op
+(#1215). The real checkout remains safe even when this guard fails.
 """
 import hashlib
+import os
+import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-MERGED = (ROOT / "src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
-          ROOT / "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml")
+SCHEMA_DIR = Path("src/data_sheets_schema/schema")
+MERGED = ("data_sheets_schema_all.yaml", "data_sheets_schema_core_all.yaml")
 
 
-def _state():
-    """Hash *and* mtime. The hash alone cannot see this: the rewrite puts
-    back byte-identical content, and the damage is the window during the
-    write, not the result."""
-    out = {}
-    for p in MERGED:
-        if p.exists():
-            st = p.stat()
-            out[p.name] = (hashlib.sha256(p.read_bytes()).hexdigest(), st.st_mtime_ns)
-    return out
+def _state(root):
+    """Mtime detects rewrites that reproduce the original content."""
+    return {
+        name: (hashlib.sha256((root / SCHEMA_DIR / name).read_bytes()).hexdigest(),
+               (root / SCHEMA_DIR / name).stat().st_mtime_ns)
+        for name in MERGED
+    }
 
 
 class TheSuiteLeavesTheMergedSchemasAlone(unittest.TestCase):
     def test_the_full_schema_tests_do_not_rewrite_the_committed_artifact(self):
-        """Behavioural, not a grep: run the module that used to do it and
-        compare hash and mtime before and after."""
-        if not all(p.exists() for p in MERGED):
-            self.skipTest("merged schemas are not built in this checkout")
-        before = _state()
-        r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider",
-                            "tests/test_d4d_full_schema.py"],
-                           cwd=ROOT, capture_output=True, text=True, timeout=1800)
-        self.assertIn(r.returncode, (0, 5), (r.stdout or r.stderr)[-600:])
-        after = _state()
-        self.assertEqual(after, before,
-                         "running the full-schema tests replaced a committed merged schema "
-                         "(the content may be identical — the mtime says it was rewritten, "
-                         "and a concurrent reader sees the partial file); generate into a "
-                         "temporary directory instead (#1208)")
-
-    #: `make` targets that write a committed artifact. `validate-core` and
-    #: the other checking targets are fine in the repository root — they
-    #: read. These rewrite, and a test that calls one is mutating an input
-    #: every other test and every generation run shares.
-    GENERATING_TARGETS = ("full-schema", "gen-project", "regen-all",
-                          "gen-core-schema", "gen-doc", "gendoc")
-
-    def test_no_test_calls_a_generating_make_target_in_the_repository_root(self):
-        """The narrow guard for the shape that caused it. The behavioural
-        test above is the real one; this names the offender at the line
-        rather than as a hash that changed."""
-        offenders = []
-        for path in sorted((ROOT / "tests").rglob("test_*.py")):
-            if path.name == Path(__file__).name:
-                continue
-            for n, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
-                if '"make"' in line and any(f'"{t}"' in line for t in self.GENERATING_TARGETS):
-                    offenders.append(f"{path.relative_to(ROOT).as_posix()}:{n}")
-        self.assertEqual(offenders, [],
-                         "these run a generating `make` target in the repository root, which "
-                         "rewrites a committed artifact while other tests read it (#1208)")
+        with tempfile.TemporaryDirectory() as tmp:
+            checkout = Path(tmp)
+            # Include the real build rules and inputs: restoring the old
+            # `make` invocation must successfully build, then fail our
+            # mutation assertion, rather than fail on a missing Makefile.
+            for name in ("Makefile", "project.Makefile", "config.env", "about.yaml",
+                         "pyproject.toml", "utils/get-value.sh",
+                         "tests/test_d4d_full_schema.py"):
+                target = checkout / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(ROOT / name, target)
+            shutil.copytree(ROOT / SCHEMA_DIR, checkout / SCHEMA_DIR)
+            # Deterministically force Make to rebuild if the regression
+            # returns, regardless of checkout order or prior test runs.
+            oldest_source = min(p.stat().st_mtime_ns
+                                for p in (checkout / SCHEMA_DIR).glob("*.yaml")
+                                if p.name not in MERGED)
+            for name in MERGED:
+                older = oldest_source - 2_000_000_000
+                os.utime(checkout / SCHEMA_DIR / name, ns=(older, older))
+            before = _state(checkout)
+            # The module's unittest entrypoint runs its tests independently
+            # of the outer pytest selection. Reuse this interpreter's
+            # environment for its `poetry run gen-linkml` subprocess.
+            env = {**os.environ, "VIRTUAL_ENV": sys.prefix}
+            # Poetry ignores VIRTUAL_ENV when an inherited Conda base
+            # environment is still named, even inside a Python virtualenv.
+            env.pop("CONDA_DEFAULT_ENV", None)
+            result = subprocess.run(
+                [sys.executable, "tests/test_d4d_full_schema.py"],
+                cwd=checkout, env=env,
+                capture_output=True, text=True, timeout=900)
+            self.assertEqual(result.returncode, 0,
+                             (result.stdout + result.stderr)[-2000:])
+            self.assertEqual(
+                _state(checkout), before,
+                "the full-schema tests rewrote a repository artifact; "
+                "generate into a temporary directory instead (#1208)")
