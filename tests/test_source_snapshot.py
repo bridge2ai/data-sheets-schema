@@ -113,3 +113,29 @@ def test_logical_source_name_is_preserved_when_yaml_wraps_a_path_with_spaces(tmp
     target = tmp_path / "data_sheets_schema_all.yaml"
     assert schema_sync._regenerate(source, target, False) == (True, None)
     assert yaml.safe_load(target.read_bytes())["source_file"] == str(source)
+
+
+@pytest.mark.parametrize("layout", ["import_alias", "source_alias", "unicode"])
+def test_snapshot_matches_direct_generation_for_supported_source_paths(tmp_path, layout):
+    directory = tmp_path / "input"
+    directory.mkdir()
+    source = directory / ("schéma.yaml" if layout == "unicode" else "source.yaml")
+    if layout == "import_alias":
+        common = tmp_path / "common"
+        common.mkdir()
+        base = common / "base.yaml"
+        base.write_text(source_text("country"))
+        (directory / "base.yaml").symlink_to(base)
+        source.write_text("id: https://example.org/root\nname: root\nimports: [base]\n")
+    elif layout == "source_alias":
+        original = tmp_path / "original.yaml"
+        original.write_text(source_text("country"))
+        source.symlink_to(original)
+    else:
+        source.write_text(source_text("country"))
+    direct = tmp_path / "direct.yaml"
+    subprocess.run(["poetry", "run", "gen-linkml", "-f", "yaml", "-o", str(direct), str(source)],
+                   check=True, capture_output=True, text=True)
+    rebuilt = tmp_path / "rebuilt.yaml"
+    assert schema_sync._regenerate(source, rebuilt, False) == (True, None)
+    assert rebuilt.read_bytes() == direct.read_bytes()

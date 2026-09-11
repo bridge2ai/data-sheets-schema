@@ -15,7 +15,8 @@ signal" rather than as a test failure.
 Every in-process construction site in this package takes its view from here
 instead (linkml's own validator builds views of its own; see
 ``provenance._record_validator`` for the one on the execute path). The key
-is the resolved path with a hash of the file's bytes — not size and mtime,
+is the resolved path with a hash of the captured root and transitive import
+bytes — not size and mtime,
 which a same-length rewrite within one timestamp tick can collide on (#943)
 — so a schema rewritten under a running process (``make regen-all``, the
 sync test that tampers with the merged file and restores it) gets a fresh
@@ -32,6 +33,7 @@ from pathlib import Path
 from linkml_runtime import SchemaView
 from linkml_runtime.linkml_model.meta import SchemaDefinition
 from linkml_runtime.loaders import yaml_loader
+from data_sheets_schema.schema_snapshot import SchemaSnapshot, capture_schema
 
 _VIEWS: dict[tuple[str, str], SchemaView] = {}
 
@@ -43,20 +45,25 @@ def content_key(path: str | Path, *, content: bytes | None = None) -> tuple[str,
     return (str(p), hashlib.blake2b(data, digest_size=16).hexdigest())
 
 
-def shared_view(path: str | Path, *, content: bytes | None = None) -> SchemaView:
-    """The one ``SchemaView`` for the schema file at ``path``."""
-    p = Path(path).resolve()
-    data = p.read_bytes() if content is None else content
-    key = content_key(p, content=data)
+def shared_view(path: str | Path, *, content: bytes | None = None,
+                snapshot: SchemaSnapshot | None = None) -> SchemaView:
+    """The shared view of captured root/import bytes at ``path`` (#1265)."""
+    captured = capture_schema(path, content=content) if snapshot is None else snapshot
+    key = captured.key
     view = _VIEWS.get(key)
     if view is None:
         for stale in [k for k in _VIEWS if k[0] == key[0]]:
             del _VIEWS[stale]
         # Hash and parse the same bytes. Loading the path after hashing it
         # can permanently store a different revision under this key (#1260).
-        schema = yaml_loader.loads(data.decode("utf-8"), target_class=SchemaDefinition)
-        schema.source_file = str(p)  # Preserve relative import resolution.
-        view = _VIEWS[key] = SchemaView(schema)
+        schemas = {}
+        for name, source, data in captured.sources:
+            schema = yaml_loader.loads(data.decode("utf-8"), target_class=SchemaDefinition)
+            schema.source_file = str(source)
+            schemas[name] = schema
+        view = SchemaView(next(iter(schemas.values())))
+        view.schema_map = schemas
+        _VIEWS[key] = view
     return view
 
 

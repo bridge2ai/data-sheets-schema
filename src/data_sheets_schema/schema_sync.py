@@ -107,10 +107,10 @@ def _source_snapshot(source: Path) -> tuple[tuple, dict[Path, bytes]]:
     LinkML package imports are covered by the installed dependency versions.
     """
     source_name = str(source)
-    source = source.resolve()
+    source = Path(os.path.abspath(source))
     merged_names = {m.name for m, _s, _c, _k in MERGED_SCHEMAS}
-    files = {p.resolve(): p.read_bytes() for p in source.parent.rglob("*.yaml")
-             if p.name not in merged_names or p.resolve() == source}
+    files = {Path(os.path.abspath(p)): p.read_bytes() for p in source.parent.rglob("*.yaml")
+             if p.name not in merged_names or Path(os.path.abspath(p)) == source}
     if source not in files:
         files[source] = source.read_bytes()
     pending, visited = [source], set()
@@ -124,12 +124,12 @@ def _source_snapshot(source: Path) -> tuple[tuple, dict[Path, bytes]]:
                 continue
             if ":" in name or Path(name).is_absolute():
                 raise ValueError(f"cannot snapshot non-relative schema import {name!r}")
-            dependency = (path.parent / (name + ".yaml")).resolve()
+            dependency = Path(os.path.abspath(path.parent / (name + ".yaml")))
             if dependency not in files:
                 files[dependency] = dependency.read_bytes()
             pending.append(dependency)
     state = (str(source), _generator_versions(),
-             tuple((str(p), hashlib.sha256(data).hexdigest()) for p, data in sorted(files.items())),
+             tuple((str(p), str(p.resolve()), hashlib.sha256(data).hexdigest()) for p, data in sorted(files.items())),
              source_name)
     return state, files
 
@@ -155,7 +155,7 @@ def _regenerate(source: Path, target: Path,
                 copy = Path(tmp) / path.relative_to(base)
                 copy.parent.mkdir(parents=True, exist_ok=True)
                 copy.write_bytes(content)
-            captured_source = Path(tmp) / source.resolve().relative_to(base)
+            captured_source = Path(tmp) / Path(os.path.abspath(source)).relative_to(base)
             result = subprocess.run(
                 ["poetry", "run", "gen-linkml", "-o", str(target.resolve()), "-f", "yaml",
                  str(captured_source)],
@@ -174,7 +174,7 @@ def _regenerate(source: Path, target: Path,
     content = target.read_text(encoding="utf-8")
     source_line = re.search(r"(?ms)^source_file:.*?(?=^\S|\Z)", content)
     if source_line and yaml.safe_load(source_line.group()).get("source_file") == str(captured_source):
-        named = yaml.safe_dump({"source_file": str(source)}, sort_keys=False)
+        named = yaml.safe_dump({"source_file": str(source)}, sort_keys=False, allow_unicode=True)
         content = content[:source_line.start()] + named + content[source_line.end():]
     target.write_text(("---\n" if marker else "") + content, encoding="utf-8")
     _REBUILT[key] = target.read_bytes()

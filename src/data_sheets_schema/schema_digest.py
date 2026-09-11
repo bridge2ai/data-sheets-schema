@@ -27,6 +27,7 @@ from typing import Any
 
 from linkml_runtime import SchemaView
 from data_sheets_schema.schema_view import content_key, shared_view
+from data_sheets_schema.schema_snapshot import SchemaSnapshot, capture_schema
 
 FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
 CORE_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml")
@@ -274,11 +275,11 @@ def _schema_name(class_name: str, path: Path) -> str:
     return str(known) if known and path.name == Path(known).name else str(path)
 
 
-def _cache_key(class_name: str, path: Path, content: bytes) -> _CacheKey:
+def _cache_key(class_name: str, path: Path, snapshot: SchemaSnapshot) -> _CacheKey:
     # Preserve the caller's displayed path in custom-schema renders, while
     # also distinguishing the actual file after a cwd change. Use the same
     # content hash as shared_view: size/mtime can collide on rewrites (#943).
-    return (class_name, str(path), *content_key(path, content=content))
+    return (class_name, str(path), *snapshot.key)
 
 
 def _drop_stale(cache: dict, key: tuple[str, ...]) -> None:
@@ -311,26 +312,27 @@ def build(class_name: str, schema_path: Path | None = None) -> ClassDigest:
     expensive part this cache exists to avoid repeating.
     """
     path = _schema_path(class_name, schema_path)
-    content = path.read_bytes()
-    return copy.deepcopy(_build_cached(class_name, path, content))
+    snapshot = capture_schema(path)
+    return copy.deepcopy(_build_cached(class_name, path, snapshot))
 
 
-def _build_cached(class_name: str, path: Path, content: bytes) -> ClassDigest:
+def _build_cached(class_name: str, path: Path, snapshot: SchemaSnapshot) -> ClassDigest:
     """Internal inventory from one snapshot; callers must copy before exposing it."""
-    key = _cache_key(class_name, path, content)
+    key = _cache_key(class_name, path, snapshot)
     if key not in _BUILD_CACHE:
-        fresh = _build_uncached(class_name, path, content=content)
+        fresh = _build_uncached(class_name, path, snapshot=snapshot)
         _drop_stale(_BUILD_CACHE, key)
         _BUILD_CACHE[key] = fresh
     return _BUILD_CACHE[key]
 
 
 def _build_uncached(class_name: str, schema_path: Path | None = None, *,
-                    content: bytes | None = None) -> ClassDigest:
+                    content: bytes | None = None,
+                    snapshot: SchemaSnapshot | None = None) -> ClassDigest:
     """Slot inventory for one target class."""
-    path = (Path(schema_path) if content is not None and schema_path is not None
+    path = (Path(schema_path) if (content is not None or snapshot is not None) and schema_path is not None
             else _schema_path(class_name, schema_path))
-    sv = shared_view(path, content=content)
+    sv = shared_view(path, content=content, snapshot=snapshot)
     # The digest names the schema it came from, and that name is rendered into
     # the digest text — so an identical schema read from a different location
     # produced a different fingerprint. Verifying a digest by rebuilding the
@@ -647,12 +649,12 @@ def digest_text(class_name: str, schema_path: Path | None = None) -> str:
     in the same process cannot leave the prompt and fingerprint stale (#942).
     """
     path = _schema_path(class_name, schema_path)
-    content = path.read_bytes()
+    snapshot = capture_schema(path)
     vocabulary_bytes = VOCABULARY_PIN.read_bytes()
-    key = (*_cache_key(class_name, path, content),
+    key = (*_cache_key(class_name, path, snapshot),
            *content_key(VOCABULARY_PIN, content=vocabulary_bytes))
     if key not in _TEXT_CACHE:
-        fresh = render(_build_cached(class_name, path, content),
+        fresh = render(_build_cached(class_name, path, snapshot),
                        vocabulary=vocabularies(content=vocabulary_bytes))
         _drop_stale(_TEXT_CACHE, key)
         _TEXT_CACHE[key] = fresh

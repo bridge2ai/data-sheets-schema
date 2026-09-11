@@ -91,3 +91,20 @@ The combined targeted run passes all 153 tests. Both real repository schemas
 remain in sync, with the unchanged fingerprints and lengths above. The offline
 cache audit confirms all 1,441 historical fitness judgements remain unchanged
 and ineligible under the new context. A third plugin review checks these fixes.
+
+The third plugin review, retained in `schema_cache_codex_third_2026-09-11.txt`,
+found imported-file invalidation (#1265), discarded symlink aliases in rebuild
+snapshots (#1266), and Unicode escaping in the restored source filename (#1267).
+Six regressions failed against that revision. The cache identity now includes
+the full transitive import closure. Views preload those captured definitions,
+so LinkML never reopens their live files after hashing. Logical import paths
+and separately resolved target identities preserve symlink behavior. Package
+imports use the installed LinkML bytes; remote imports are explicitly refused
+because a local snapshot cannot attest them. Source rebuilds preserve their
+logical aliases and use LinkML-compatible Unicode serialization.
+
+All 181 focused tests pass, including edits when LinkML starts parsing,
+transitive imports, fitness memo invalidation, and real direct-versus-snapshot
+generation for import aliases, root aliases and Unicode paths. The existing
+full/core generation digests and complete fitness specification SHA256 remain
+unchanged. A fourth plugin review checks the complete implementation.

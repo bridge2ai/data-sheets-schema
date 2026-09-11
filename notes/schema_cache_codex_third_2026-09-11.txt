@@ -1,0 +1,20 @@
+# Codex Adversarial Review
+
+Target: branch diff against origin/main
+Verdict: needs-attention
+
+Do not ship: imported edits still reuse stale fitness judgements, and snapshot rebuilds fail for valid source layouts. Historical cache hashes remain unchanged.
+
+Findings:
+- [high] Include imported schemas in cache identity and snapshots (src/data_sheets_schema/schema_digest.py:277-281)
+  The key hashes only the root file, while LinkML loads imports separately. Offline reproduction: warm a scorer whose schema imports base.yaml, then change the imported subject description from country to species. The context and prompt remain unchanged, and scoring the same value returns a memo hit. Clearing the view and digest caches exposes the species specification. Imported edits therefore bypass the new fitness invalidation.
+  Recommendation: Capture the transitive import closure, include its content identity in every view/build/text cache key, and parse those captured bytes.
+- [medium] Preserve symlinked import paths in source snapshots (src/data_sheets_schema/schema_sync.py:112-113)
+  Resolving dictionary keys discards the paths used by imports. With source.yaml importing base and base.yaml symlinked to ../common/base.yaml, direct LinkML generation succeeds. Running the real generator through _regenerate with in-memory file I/O fails because the snapshot contains common/base.yaml but lacks input/base.yaml. Valid symlinked source trees consequently become unchecked and block generation.
+  Recommendation: Preserve logical import paths when copying captured bytes, including symlink aliases, while separately tracking resolved targets for identity.
+- [medium] Match LinkML's Unicode serialization when restoring source_file (src/data_sheets_schema/schema_sync.py:175-178)
+  LinkML dumps YAML with allow_unicode=True, but this replacement uses PyYAML's default escaping. Reproduced with the real generator: a source named schéma.yaml produces a literal Unicode source_file directly, while _regenerate emits a quoted path containing an escaped é. The resulting bytes differ, so check_one rejects an otherwise current independently generated schema as stale.
+  Recommendation: Use LinkML-equivalent serialization options, including allow_unicode=True, and compare direct versus snapshot generator bytes for Unicode source paths.
+
+Next steps:
+- Add offline regressions for imported-only edits, symlinked imports, and Unicode paths; rerun the focused suite without evaluator calls.
