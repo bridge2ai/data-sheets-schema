@@ -26,6 +26,7 @@ import sys
 from pathlib import Path
 
 import yaml
+from data_sheets_schema.semantic_comparison import score_bases
 from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
 
 
@@ -336,20 +337,8 @@ def render_html(yaml_data: dict, r10: dict, r20: dict, source_paths: dict) -> st
 
     by_field, unmatched = build_field_map(all_items)
 
-    # summary
-    r10_total = (r10.get("summary_scores") or r10.get("overall_score") or {}).get("total_score") or \
-                (r10.get("overall_score") or {}).get("total_points")
-    r10_max = (r10.get("summary_scores") or r10.get("overall_score") or {}).get("total_max_score") or \
-              (r10.get("overall_score") or {}).get("max_points") or 50
-    r10_pct = (r10.get("summary_scores") or r10.get("overall_score") or {}).get("overall_percentage") or \
-              (r10.get("overall_score") or {}).get("percentage")
-
-    r20_total = (r20.get("overall_score") or {}).get("total_points") or \
-                (r20.get("summary_scores") or {}).get("total_score")
-    r20_max = (r20.get("overall_score") or {}).get("max_points") or \
-              (r20.get("summary_scores") or {}).get("total_max_score") or RUBRIC20_MAX_SCORE
-    r20_pct = (r20.get("overall_score") or {}).get("percentage") or \
-              (r20.get("summary_scores") or {}).get("overall_percentage")
+    bases10 = score_bases(r10, 50)
+    bases20 = score_bases(r20, RUBRIC20_MAX_SCORE)
 
     project = r10.get("project") or r20.get("project") or "Unknown"
     method = r10.get("method") or r20.get("method") or "Unknown"
@@ -391,16 +380,12 @@ def render_html(yaml_data: dict, r10: dict, r20: dict, source_paths: dict) -> st
 </div>
 """)
 
-    def _fmt_pct(p):
-        if p is None: return ""
-        try: return f"({float(p):.1f}%)"
-        except Exception: return ""
-
     parts.append('<div class="scorecard">')
-    parts.append(f'<div class="score"><div class="lbl">Rubric10 (semantic)</div>'
-                 f'<div class="num">{r10_total}/{r10_max} <span class="pct">{_fmt_pct(r10_pct)}</span></div></div>')
-    parts.append(f'<div class="score"><div class="lbl">Rubric20 (semantic)</div>'
-                 f'<div class="num">{r20_total}/{r20_max} <span class="pct">{_fmt_pct(r20_pct)}</span></div></div>')
+    for name, bases in (("Rubric10", bases10), ("Rubric20", bases20)):
+        fixed, adjusted = bases.labels()
+        parts.append(f'<div class="score"><div class="lbl">{name} (semantic)</div>'
+                     f'<div class="num">{fixed}</div><div class="pct">{adjusted}</div>'
+                     '<div class="legend">Compare excluded items as well as denominators.</div></div>')
     cc10 = (r10.get("semantic_analysis") or {}).get("consistency_checks", {}) or {}
     cc20 = (r20.get("semantic_analysis") or {}).get("consistency_checks", {}) or {}
     def _cc_len(d, k):

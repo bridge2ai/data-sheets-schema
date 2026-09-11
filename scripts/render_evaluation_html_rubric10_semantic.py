@@ -3,14 +3,16 @@
 Render rubric10-semantic evaluation JSON files to HTML
 """
 import json
+from copy import deepcopy
 from pathlib import Path
 from datetime import datetime
-from data_sheets_schema.rubric_pooling import reported_percentage
+from data_sheets_schema.semantic_comparison import ScoreBases, score_bases
 
 
 def generate_evaluation_html(eval_data, output_path):
     """Generate HTML from evaluation JSON data"""
 
+    eval_data = deepcopy(eval_data)
     metadata = eval_data.get("evaluation_metadata") or {
         "dataset_id": eval_data.get("project", "Unknown"),
         "method": eval_data.get("method", "Unknown"),
@@ -20,21 +22,14 @@ def generate_evaluation_html(eval_data, output_path):
         "evaluation_timestamp": eval_data.get("evaluation_timestamp", "Unknown"),
     }
     element_scores = eval_data.get("element_scores", eval_data.get("elements", []))
-    summary = eval_data.get("summary_scores") or {
-        "total_score": eval_data.get("overall_score", {}).get("total_points", 0),
-        "total_max_score": eval_data.get("overall_score", {}).get("max_points", 50),
-        "overall_percentage": reported_percentage(eval_data),
-    }
     semantic = eval_data.get("semantic_analysis", {})
     assessment = eval_data.get("assessment", {})
     semantic.setdefault("strengths", assessment.get("strengths", []))
     semantic.setdefault("weaknesses", assessment.get("weaknesses", []))
     recommendations = eval_data.get("recommendations", assessment.get("recommendations", {}))
 
-    # Calculate overall stats
-    total_score = summary.get("total_score", 0)
-    max_score = summary.get("total_max_score", 50)
-    percentage = summary.get("overall_percentage", 0)
+    bases = score_bases(eval_data, 50)
+    fixed_label, adjusted_label = bases.labels()
 
     # Start HTML
     html = f"""<!DOCTYPE html>
@@ -343,8 +338,9 @@ def generate_evaluation_html(eval_data, output_path):
         </div>
 
         <div class="score-card">
-            <div class="score-large">{total_score}/{max_score}</div>
-            <div class="score-subtitle">{percentage:.1f}% Overall Score</div>
+            <div class="score-large">{fixed_label}</div>
+            <div class="score-subtitle">{adjusted_label}</div>
+            <p>Compare excluded items as well as denominators. Neither percentage alone establishes a quality difference.</p>
         </div>
 """
 
@@ -401,6 +397,9 @@ def generate_evaluation_html(eval_data, output_path):
 
     # Also handle array format elements that have sub_elements instead of sub_element_scores
     for element in element_scores:
+        element.setdefault('element_id', element.get('id'))
+        element.setdefault('element_name', element.get('name'))
+        element.setdefault('element_max_score', element.get('element_max', 5))
         # If element has sub_elements but empty sub_element_scores, convert it
         if 'sub_elements' in element and not element.get('sub_element_scores'):
             sub_elem = element['sub_elements']
@@ -435,10 +434,14 @@ def generate_evaluation_html(eval_data, output_path):
     for element in element_scores:
         elem_score = element.get('element_score', 0)
         elem_max = element.get('element_max_score', 5)
-        elem_pct = element.get('element_percentage', 0)
+        element_bases = ScoreBases(elem_score, 5, elem_max)
+        elem_pct = element_bases.adjusted_percentage
+        fixed_element, adjusted_element = element_bases.labels()
 
         # Determine score class
-        if elem_pct >= 80:
+        if elem_pct is None:
+            score_class = "score-na"
+        elif elem_pct >= 80:
             score_class = "score-high"
         elif elem_pct >= 50:
             score_class = "score-medium"
@@ -449,7 +452,7 @@ def generate_evaluation_html(eval_data, output_path):
         <div class="element">
             <div class="element-header">
                 <div class="element-title">Element {element.get('element_id')}: {element.get('element_name')}</div>
-                <div class="element-score {score_class}">{elem_score}/{elem_max} ({elem_pct:.0f}%)</div>
+                <div class="element-score {score_class}">{fixed_element}<br>{adjusted_element}</div>
             </div>
 """
 
@@ -457,15 +460,19 @@ def generate_evaluation_html(eval_data, output_path):
         for sub in element.get('sub_element_scores', []):
             score = sub.get('score', 0)
             score_class = f"score-{score}"
+            score_label = "N/A (excluded)" if score is None else f"{score}/1"
+            fields = sub.get('fields', [])
+            if isinstance(fields, str):
+                fields = [fields]
 
             html += f"""
             <div class="sub-element">
                 <div class="sub-element-name">
                     {sub.get('name')}
-                    <span class="sub-element-score {score_class}">{score}/1</span>
+                    <span class="sub-element-score {score_class}">{score_label}</span>
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Fields:</span> {', '.join(sub.get('fields', []))}
+                    <span class="detail-label">Fields:</span> {', '.join(fields)}
                 </div>
                 <div class="detail">
                     <span class="detail-label">Rationale:</span> {sub.get('rationale', 'N/A')}
