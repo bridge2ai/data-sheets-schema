@@ -95,7 +95,8 @@ def declared_prefixes(schema_path: Path = FULL_SCHEMA) -> set[str]:
     list, so a prefix added to the schema is immediately admissible here and
     the audit cannot drift from what the schema would actually resolve.
     """
-    doc = yaml.safe_load(schema_path.read_text(encoding="utf-8")) or {}
+    from data_sheets_schema.schema_cache import load_schema
+    doc = load_schema(schema_path) or {}             # one parse per process (#1203)
     return set(doc.get("prefixes") or {})
 
 

@@ -62,9 +62,28 @@ STALE = "stale"
 UNCHECKED = "unchecked"
 
 
+_REBUILT: dict[tuple, bytes] = {}
+
+
+def _source_state(source: Path) -> tuple:
+    """Everything the merged schema is derived from: the source and every
+    module beside it. A rebuild is a pure function of these bytes, so a
+    second rebuild inside one process, with none of them changed, is the
+    same bytes — and it was a five-second subprocess on every record write
+    and every runner test (#1203)."""
+    from data_sheets_schema.schema_cache import tree_fingerprint
+    merged_names = tuple(m.name for m, _s, _c, _k in MERGED_SCHEMAS)
+    return (str(source.resolve()), tree_fingerprint(source.parent, "*.yaml", exclude=merged_names))
+
+
 def _regenerate(source: Path, target: Path,
                 marker: bool) -> tuple[bool, str | None]:
     """Run the same generation the Makefile runs. (ok, why not)"""
+    key = (_source_state(source), marker)
+    cached = _REBUILT.get(key)
+    if cached is not None:
+        target.write_bytes(cached)
+        return True, None
     try:
         result = subprocess.run(
             ["poetry", "run", "gen-linkml", "-o", str(target), "-f", "yaml",
@@ -80,6 +99,7 @@ def _regenerate(source: Path, target: Path,
     if marker:
         target.write_text("---\n" + target.read_text(encoding="utf-8"),
                           encoding="utf-8")
+    _REBUILT[key] = target.read_bytes()
     return True, None
 
 
