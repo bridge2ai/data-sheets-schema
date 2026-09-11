@@ -1327,6 +1327,32 @@ also differ on assembly (`d2f01480…` against `f7006dc1…`), so
 `comparable_conditions("generic_v7", "generic_v8")` is true by name and
 false on the evidence.
 
+### Report re-check and R8 receipt guidance (#1181, #1197, 2026-09-11)
+
+Before the first v9 run, the report re-check now names all three kinds of
+repair: contradictory claims, unrecorded changes, and a missing dispositions
+table. An unrecorded removal calls for a removed disposition row. The heading
+is “Report discrepancies”; it no longer describes every finding as an
+unsupported claim. The assembly digest now includes both re-check headings,
+so future wording changes to those headings are recorded automatically.
+
+R8, in both the v9 API prompt and the agentic playbook, states the current
+receipt boundary. A label on a carried top-level id, DOI or page can be
+exempt; DOI spellings and trailing slashes normalize, but ordinary URL schemes
+do not. A scheme-added page or fallback URL base absent from those carried
+identifiers requires a receipt. This clarifies the cost of the permitted
+choice without changing receipts v3. The paired rule remains byte-equivalent
+after markup normalization.
+
+This is a generation condition boundary, registered before spending on a new
+run. An ignored-inclusive search of the concatenated corpus found no v9 run
+directory. Existing generation and evaluation artifacts remain unchanged.
+[The boundary pins](generation_guidance_2026-09-11.json) record the complete
+before/after assembly, v9 prompt and playbook SHA-256 values. The new assembly
+SHA-256 is `2c47cffe0e63bc1ce962cbd6c1340c4f878fb61f1d0efe4b271a9e650da3eebf`.
+The next run's provenance must carry these new pins; the old v8 runs retain
+the assembly and prompt evidence they actually received.
+
 ## Sequencing (PRs, in order)
 
 The first PR (#916) landed A and the #912 pack half ahead of this

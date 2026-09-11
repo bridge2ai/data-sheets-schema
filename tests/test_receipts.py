@@ -255,6 +255,21 @@ class Validator(unittest.TestCase):
         self.assertEqual(rc.dataset_identifier_forms(None), frozenset())
         self.assertEqual(rc.dataset_identifier_forms({"id": 7, "doi": ""}), frozenset())
 
+    def test_r8_scheme_added_and_fallback_bases_need_receipts_unless_carried(self):
+        """#1197: choosing a valid fragment base does not grant receipt coverage."""
+        cases = (
+            ({"id": "token", "page": "example.org/dataset"}, "https://example.org/dataset#part", False),
+            ({"id": "token", "page": "http://example.org/dataset"}, "https://example.org/dataset#part", False),
+            ({"id": "token"}, "https://fallback.org/dataset#part", False),
+            ({"id": "token", "page": "https://example.org/dataset/"}, "https://example.org/dataset#part", True),
+            ({"id": "https://example.org/dataset", "page": "example.org/dataset"},
+             "https://example.org/dataset#part", True),
+        )
+        for full, fragment, expected in cases:
+            with self.subTest(full=full, fragment=fragment):
+                self.assertEqual(rc.exempt("parts[0].id", fragment, full["id"],
+                                           rc.dataset_identifier_forms(full)), expected)
+
     def test_the_block_names_its_instrument_and_counts_the_new_exemptions(self):
         r = _receipt(self.md5)
         b = rc.check(r, self.manifest, self.texts, FULL, self.md5)
