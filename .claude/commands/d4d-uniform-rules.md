@@ -165,8 +165,12 @@ to every project:
 - **A `Person` object's `id` is the ORCID the evidence states, else a
   fragment minted on this record's own id** (v8, R5, #981): `ORCID:` CURIE
   where the documents list one — look for it before minting — otherwise
-  `<record id>#person-<name>`; never a `mailto:` or any other scheme as the
-  id, the address goes in `email`.
+  `<base>#person-<name>`, where the base is the one R8 sends this record
+  to: its own id where that is itself an identifier form, else the
+  dataset's DOI or landing page — never a bare token, which is no base
+  for a label. Where that base already carries a fragment,
+  `<base>-person-<name>` (one marker, never two — R8's carve-out). Never
+  a `mailto:` or any other scheme as the id; the address goes in `email`.
 
 - **A value in one of the referent's own slots is supported by a passage
   whose subject is the referent** (v9, R6, #913). You are given a declared
@@ -196,36 +200,65 @@ to every project:
   entry you write in a multivalued slot and ask whether exactly one thing
   the sources name answers to it.
 
-- **The rule that a fragment is minted only where a value points at the
-  part (v6, #685) does not reach an id the schema forces** (v9, R8, #803,
-  #901). Where a class declares `id` as its identifier or requires it — a
-  file, a file collection, a data subset, a component dataset under
-  `resources`, a software tool under `used_software`, a person given as an
-  object — the id exists because the object does, and leaving it out is a
-  validation failure, not a fragment saved: mint it on this record's own
-  id, keep it stable, and do not read that rule as a reason to omit the
-  object; a person's id follows the rule for a person given as an object
-  (R5) — the ORCID the evidence states first, a fragment only where it
-  states none. The ids of `file_collections` and of the files under them
-  are copied into the core record's distributions, and top-level
-  `resources` are matched to the core by id, so those ids are used whether
-  or not the text points at them. For every other fragment the test stays
-  the referent: an organization, a grant, an award, a program has a
-  referent outside this record, so a fragment for it on this dataset's
-  identifier is a claim about that identifier, not a label; and an entry
-  under `creators` or `maintainers` is a role this record asserts about a
-  person or an organization, whose id is that person's or organization's
-  own identifier where the evidence states one. Take the identifier the
-  evidence states; where it states none and the schema does not require an
-  id, leave `id` empty and carry the name in `name`. A label this record
-  mints sits on an identifier the evidence supplies for this dataset —
+- **The rule that a fragment is minted only where a value points at the part
+  (v6, #685) does not reach an id the schema forces** (v9, R8, #803, #901).
+  Where a class declares `id` as its identifier or requires it — a file, a
+  file collection, a data subset, a component dataset under `resources`, a
+  software tool under `used_software`, a person given as an object — the id
+  exists because the object does, and leaving it out is a validation failure,
+  not a fragment saved. Take the identifier the evidence states for that part
+  first — a DOI, an ARK, a URL that names the file or the component dataset,
+  in a form that is itself an identifier: a declared CURIE, an absolute URL,
+  an ARK or a URN, and where the evidence states a resolver URL for a prefix
+  the schema declares, that identifier written as the CURIE the rule above on
+  declared prefixes requires, not as the URL — and mint a label only where it
+  states none: on this record's own id where that id is itself such a form
+  (the base rule below), stable across runs, never in place of an identifier
+  the evidence supplies; and do not read that rule as a reason to omit the
+  object. A person's id follows the rule for a person given as an object (R5)
+  — the ORCID the evidence states first, a fragment only where it states none,
+  on the base this rule sends the record to and never on a bare token. The ids
+  of `file_collections` and of the files under them are copied into the core
+  record's distributions, and top-level `resources` are matched to the core by
+  id, so those ids are used whether or not the text points at them. For every
+  other fragment the test stays the referent: an organization, a grant, an
+  award, a program has a referent outside this record, so a fragment for it on
+  this dataset's identifier is a claim about that identifier, not a label; and
+  an entry under `creators` or `maintainers` is a role this record asserts
+  about a person or an organization, whose id is that person's or
+  organization's own identifier where the evidence states one. Take the
+  identifier the evidence states; where it states none and the schema does not
+  require an id, leave `id` empty and carry the name in `name`. A label this
+  record mints sits on an identifier the evidence supplies for this dataset —
   which refines the rule that mints a label on an identifier the evidence
   supplies, without replacing it — and this record's own id is the base to
-  prefer: a label on the dataset's landing page is licensed too, but it
-  names an identifier the evidence must supply, so it needs a receipt like
-  any other value, where a label on this record's own id does not (#1123).
-  A fragment appended to another entity's identifier — an organization's,
-  another dataset's — labels a part of that entity, not of this one.
+  prefer where it is itself an identifier form: a declared CURIE, an absolute
+  URL, an ARK or a URN. A record whose own id is a bare token, or a CURIE on a
+  prefix the schema does not declare, labels its parts on the dataset's DOI or
+  landing page instead, never on the token, and where it carries neither, on a
+  resolvable URL the evidence supplies for this dataset — the fragment rule's
+  own license, a label minted on an identifier the evidence does supply —
+  which, like every other base here, must itself be an identifier form: an
+  absolute URL with its scheme. A label on the dataset's DOI or landing page
+  is licensed too, but only on a form that is itself an identifier — the DOI
+  as a declared CURIE (the doi prefix, a colon, the DOI), which is the form to
+  write even where the evidence states the resolver URL, the page as an
+  absolute URL with its scheme; a bare DOI string or a schemeless host with a
+  label appended is a token, not an identifier. The own id is the one identity
+  slot every record carries, whatever form the record gave it, where `page`
+  and `doi` are optional; where it is an identifier form and not itself a
+  shared root it names this dataset alone, while a landing page is often a
+  site or project root shared with sibling releases, so a part labeled there
+  cannot be told apart from a sibling's by its id alone. Where this record's
+  own id is itself such a root, it is still the base to prefer: it is the
+  identifier this record carries, and the label must stay stable; where the
+  base this rule sends the record to already carries a fragment, the part's
+  label is that fragment, a hyphen and the part's own label, on the same base
+  — for a person under the person rule, that fragment, a hyphen, then person
+  and the name — so the record's own discriminator is kept, and one identifier
+  carries one fragment marker, never two (#1123, #1147). A fragment appended
+  to another entity's identifier — an organization's, another dataset's —
+  labels a part of that entity, not of this one.
 
 - **A slot whose declared range is an enumeration is populated only from a
   passage that states the category** (v9, R9, #830), in the source's own

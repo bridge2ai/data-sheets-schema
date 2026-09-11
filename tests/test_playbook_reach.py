@@ -185,6 +185,17 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
                        "do not read that rule as a reason to omit the object",
                        "copied into the core record's distributions",
                        "and the schema does not require an id",
+                       "it names this dataset alone",
+                       "mint a label only where it states none",
+                       "never in place of an identifier the evidence supplies",
+                       "a token, not an identifier",
+                       "that fragment, a hyphen and the part's own label",
+                       "prefer where it is itself an identifier form",
+                       "for a person under the person rule, that fragment, a hyphen, then person and the name",
+                       "an ARK or a URN",
+                       "the one identity slot every record carries",
+                       "already carries a fragment",
+                       "on a resolvable URL the evidence supplies",
                        "labels a part of that entity, not of this one"),
         "enum from a stated category": ("in the source's own words or a plain restatement of them",
                                         "supports the name and not the class",
@@ -242,6 +253,44 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
                 missing.append(f"{name}: absent from {self.CURRENT_PROMPT}")
         self.assertEqual(missing, [])
 
+    def test_R8_is_one_rule_in_both_texts(self):
+        """Not probes (#1166 Codex review, M4): a substring probe passes when
+        the operative clause around it flips. The whole R8 bullet, from its
+        first words to its last, must be the same sentences in the prompt
+        and in the playbook once the playbook's markup and issue citations
+        are stripped — so an edit to one text that does not reach the other
+        fails here, whatever the probes say."""
+        def rule(text):
+            start = text.index("The rule that a fragment is minted only where a value points at the part")
+            end = re.search(r"labels\s+a\s+part\s+of\s+that\s+entity,\s+not\s+of\s+this\s+one\.", text[start:]).end() + start
+            span = text[start:end]
+            span = re.sub(r"\((?:v\d+, )?(?:R\d+, )?#\d+(?:,\s*#\d+)*\)|\(R\d+\)", "", span)   # (v9, R8, #803, #901), (R5), (#1123, #1147)
+            span = re.sub(r"[*`\s]+", " ", span).strip().lower()
+            return re.sub(r"\s+([.,;:])", r"\1", span)                  # a citation removed before a period leaves a space
+        playbook = rule(PLAYBOOK.read_text(encoding="utf-8"))
+        prompt = rule((PROMPTS / self.CURRENT_PROMPT).read_text(encoding="utf-8"))
+        self.assertEqual(playbook, prompt)
+        for clause in ("take the identifier the evidence states for that part first",
+                       "mint a label only where it states none",
+                       "only on a form that is itself an identifier",
+                       "that fragment, a hyphen and the part's own label",
+                       "an ark or a urn"):
+            self.assertIn(clause, prompt, clause)
+        # The playbook's R5 line and R8's carve-out agree on the person case
+        # (round 8, SF5). The base is whichever one R8 sends the record to,
+        # not the record's own id unconditionally: R8 forbids labelling parts
+        # on a bare-token own id, and three CHORUS records have one, so an R5
+        # line naming `<record id>` contradicted R8 in the same file (round
+        # 11, SF6). Both forms are pinned — the fragment carve-out and the
+        # refusal of a token base — because the correspondence this test
+        # exists for is between the two rules, not with one wording.
+        book = re.sub(r"[*`\s]+", " ", PLAYBOOK.read_text(encoding="utf-8")).lower()
+        self.assertIn("<base>-person-<name>", book)
+        self.assertIn("<base>#person-<name>", book)
+        self.assertIn("never a bare token, which is no base for a label", book)
+        for clause in ("for a person under the person rule, that fragment, a hyphen, then person and the name",):
+            self.assertIn(clause, prompt, clause)
+
     def test_every_operative_clause_reaches_both(self):
         """Fidelity, not arrival (#1128 review, N8). Every v9 row of
         SHARED_RULES has a clause entry — the pre-v9 rows predate the
@@ -267,7 +316,7 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
         # prose the file composes.
         text = re.sub(r'"[^"\n]*"', "", re.sub(r"`[^`]*`", "", PLAYBOOK.read_text(encoding="utf-8"))).lower()
         for british in ("organisation", "characterise", "standardise", "analyse", "behaviour", "licence",
-                        "recognise", "programme", "centre"):
+                        "recognise", "programme", "centre", "labelled"):
             self.assertNotIn(british, text, british)
 
     def test_the_playbook_has_no_rule_this_table_does_not_know(self):

@@ -516,9 +516,19 @@ identical to the blocks written at run time (the twelve blocks that
 predate `findings_gated` gain that key), and AI_READI 2026-09-01
 rep1's ten landing-page labels now exempt (161/508 → 160/498). `d4d runs
 check` reports receipts blocks by instrument and names those behind the
-current one. v9 R8 still tells the model a
+current one. v9 R8 told the model a
 landing-page label "needs a receipt like any other value" — the cost v2
-removes; #1147 rotates that sentence.
+removes; #1147 rotated that sentence (the own-id preference now rests on
+the id naming this dataset alone where it is an identifier form and not
+itself a shared root, while a landing page is often one; a forced id
+takes the identifier the evidence states before any mint; every base and
+every stated identifier must be an identifier form — a declared CURIE,
+an absolute URL, an ARK or a URN, named rather than "a registered
+scheme", which would admit the `mailto:` and `file:` ids the person rule
+and `identifiers.py` treat as defects — so a bare-token own id labels
+its parts on the DOI or page, and with neither on a resolvable URL the
+evidence supplies; and a part of an id that already carries a fragment,
+a person's included, keeps that fragment).
 **Coverage degree is a property of the arm** (#902), and the denominator
 is what makes it readable: receiptable populated leaves, which run from
 142 to 508 in one arm, so a bare without-a-receipt count compares

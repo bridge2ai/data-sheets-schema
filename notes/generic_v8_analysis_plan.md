@@ -1157,6 +1157,134 @@ as the v9 prompt file (#1134), which exempts quotations because a prompt
 quotes sources; the manifest-derived blocks (scope, naming, source
 ranking) are left out on purpose, their content being a source's.
 
+### R8 no longer charges a landing-page label a receipt (#1147, 2026-09-09)
+
+The twenty-second v9 pin — the registry's `superseded` list holds
+twenty-one: three registrations and corrections on 2026-09-08, the two
+#1120 rounds, the two #1134 spellings rounds, and this issue's own
+fourteen earlier rounds,
+each retired by the next (the third wrote `labelled` into the sentence and
+the file sweep of #1134 caught it after the pin was taken; the fourth's
+premise was false for the 36 CHORUS records whose own id is the site root;
+the fifth told the 9 CHORUS records whose id is already a fragment on the
+root to mint a second `#`, which RFC 3986 forbids; the sixth wrote that
+marker in backticks, which the block test reserves for digest vocabulary;
+the seventh survived six reviewer rounds and fell to the Codex CLI review
+on three operative clauses — it let a forced File, FileCollection,
+DataSubset, Software or component-Dataset id be minted over an identifier
+the evidence stated, where AI_READI v6 rep1 carries evidence-stated ARKs
+for its component datasets; it licensed a label on "the landing page or
+DOI" where the record may carry either bare (`10.13026/8xbn-nq66`,
+`www.bridge2ai.org/chorus`), so the label was a token, not an identifier;
+and its carve-out for an id that is already a fragment dropped the
+record's own discriminator, so parts of `#chorus-dataset` from two runs
+read `#clinical-notes` and `#chorus-dataset-clinical-notes` — 19 bare
+against 10 parent-qualified across five delivered full records — with
+"keep it stable" deciding nothing; and the eighth, the round that answered
+it, let a record whose own id is a bare token (`chorus_dataset`,
+`chorus:clinical-care-dataset` on a prefix the schema does not declare)
+label its parts on that token, admitted a bare DOI as a stated forced id
+while calling the same string a token as a base, and left the person
+rule minting a second marker on a fragment-bearing id, the case R8 hands
+it — so the own id is the base to prefer only where it is itself an
+identifier form, a stated identifier must be one too, and a person's
+fragment on such an id is the record's fragment, a hyphen, person and
+the name — said in R8's carve-out, since R5 sits in the v8 block a v9
+prompt carries unchanged, and in the playbook's R5 line, which is the
+single copy the agentic path reads; and the ninth, answering that round,
+had written the form test as a two-form dichotomy that outlawed the ARK
+and URN forms `identifiers.classify` calls URIs — 1,707 part ids outside
+the record's own `id` (623 ARK, 1,084 URN), and 24 record ids (16 ARK, 8
+URN), the very ARKs named as M1's evidence — and had
+kept the premise "the one identifier every record carries" unqualified
+beside the clause that denies it: the forms admitted are now named one
+by one, and the same four for a stated identifier and for a base — a
+declared CURIE, an absolute URL, an ARK or a URN — rather than "a URI
+under a registered scheme", which would admit the `mailto:` the person
+rule forbids on 77 corpus ids and the `file:` `identifiers.py` excludes
+on purpose over its 22 (round 9). A resolver URL is an identifier the
+evidence may state and is not a form to write: every id R8 governs sits
+in a slot whose declared range takes a CURIE, where the v8 rule already
+in this prompt calls a resolver URL on a declared prefix a defect, so
+R8 admitting it as a written form contradicted that rule 170 lines
+above it (#1166 round 10, MF1). In the
+stated-identifier sentence and the base rule alike, the
+premise names the identity slot rather than calling a bare token an
+identifier, the mint sentence points at the base rule, a token own id
+with neither DOI nor page falls to the fragment rule's own license — a
+label on an identifier the evidence does supply — and the carve-out for
+a base that already carries a fragment is scoped to the base this rule
+sends the record to, whichever that is, so it cannot label a part on a
+base the same bullet disqualified and it reaches the fallback URL as
+well as the own id, the DOI and the page. The rule names four bases, so
+the carve-out counts none of them: an earlier wording said "three" and
+had deleted the enumeration the numeral referred to (round 10, SF2 and
+SF4; round 11, MF2). The fallback base takes the same identifier test as
+the others — an absolute URL with its scheme — which it did not carry
+when it was the one base left unconstrained (round 11)).
+R8 now takes the stated identifier first for a forced
+id, in an identifier form (a declared CURIE, an absolute URL, an ARK or
+a URN, a stated resolver URL written as the CURIE), and mints
+only where none is stated; prefers the own id as a base only where it is
+itself such a form, else the DOI or page in identifier form, else the
+fragment rule's resolvable-URL fallback; and labels a part of a
+base that already carries a fragment — a person's label included — as
+that fragment, a hyphen and the part's own label on the same base. The
+probes that pinned the
+earlier clauses were
+substring searches a semantic flip passes, so the playbook test now holds
+the whole R8 bullet equal across the two texts once the playbook's markup
+and citations are stripped. R8's own-id
+preference was argued from cost: "a label on
+the dataset's landing page … names an identifier the evidence must supply,
+so it needs a receipt like any other value, where a label on this record's
+own id does not" (#1109, round 2). Receipts instrument v2 (#1123, amendment
+15) removed that cost — a fragment on any identifier the record carries
+for the dataset at its top level is exempt from the denominator — so the
+sentence told the model to trade coverage away for a charge the instrument
+no longer makes. The preference stands on the reason that was always
+underneath it: the record's own id, where it is not itself a shared root,
+names this dataset alone,
+where `page` is often a site or project root shared with sibling releases
+(`https://cm4ai.org/` on CM4AI 04g rep3; `https://chorus4ai.org/` on 64 of
+the 82 CHORUS records outside the attic, a `/dataset` path on 12, none on
+5, and a schemeless `www.bridge2ai.org/chorus` on one — the Codex review's
+78-of-79 recount was of the same files under an earlier total), so a part
+labeled on a shared root cannot be told apart
+from a sibling's by its id alone; and `id` is the `Dataset` identifier
+every record carries, where `page` and `doi` are optional slots. Where the
+record's own id is itself such a root — 36 CHORUS records carry
+`https://chorus4ai.org/` as their `id` — the sentence says it is still the
+base to prefer, so a model does not read its own record as contradicting
+the premise and mint elsewhere (#1166 round 3); where the id is already a
+fragment on the root (9 CHORUS records), the part's label is the record's
+fragment, a hyphen and the part's own label on the root, since a second
+`#` is not a URI (#1166 round 4) and a label that drops the record's
+fragment cannot be told from a sibling's (the Codex review; no record
+carries two markers today).
+Two earlier rewrites were retired by review (#1166): "a reader who follows this
+record's `id` finds its parts under it, which a label on another base does
+not give" either contradicted the license granted two clauses earlier or
+reduced to preferring the id because it is the id (a CURIE with a fragment
+is namespacing, not a dereference); "the one base every consumer already
+holds — the core projector and the `resources` match join on it" cited a
+join that is on the part id, not the record's, and works under any base.
+The sentence is rewritten in the prompt and in the playbook's mirror; the
+probe moves with it and the shared-clause guard holds both texts to it.
+R8's operative clauses change — the stated-identifier-first order for a
+forced id, the identifier-form requirement on every base and on a stated
+identifier, the kept parent fragment on any base that already carries
+one — which is a rule change under the
+condition's own name; and the first of them moves a forced part id the
+evidence states from the receipt denominator's exemption (a mint on a
+carried identifier, #1123) to a receipted value (`receipts.exempt` exempts
+a fragment, not a stated ARK or DOI — on AI_READI v6 rep1, 32 of 42 `id`
+leaves are receipt-required and the nine `ark:59853/rocrate-b2ai-ai-readi-*`
+component ids are among them), which is the right trade: an identifier
+the evidence supplies is a claim about the evidence; the assembly digest
+does not move, no v9 record exists, so nothing
+is re-baselined and no record is superseded.
+
 ### What a v9 arm can and cannot be compared against (#1072)
 
 `condition_delta("generic_v8", "generic_v9")` returns `["base"]`, and that
@@ -1379,7 +1507,7 @@ steps need:
     gained `recorded_by`. The 18 receipted records whose bundle drifted are
     withheld by the #907 guard and stay under v1 — #1140 is the recompute
     from the git blob. v9 R8's "needs a receipt like any other value" clause
-    states the cost v2 removes; #1147 rotates it (no v9 record exists).
+    stated the cost v2 removes; #1147 rotated it (no v9 record exists).
 
 16. **The dispositions rows are tallied by record column (#1122, 2026-09-09,
     report_claims instrument v4).** The v9 canary reader was told to compare
