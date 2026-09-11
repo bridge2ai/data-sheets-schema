@@ -516,91 +516,83 @@ def _path_steps(path: str) -> list[str]:
     (`creators[*].name`), so a real row walked into a slot no class has and
     was reported as one the core could not carry (#994 round 1, M1).
     """
-    return [s for s in re.findall(r"[^.\[\]]+", path) if s != "*" and not s.isdigit()]
+    out = []
+    for segment in path.split("."):
+        # The subscripts come off the segment; the segment itself is a step
+        # whatever it looks like. Filtering digits from the flattened token
+        # list dropped a dotted `0` as though it were an index — no slot is
+        # named that today, and a quiet behaviour change is still one
+        # (#994 round 1, S2).
+        name = re.sub(r"\[[^\]]*\]", "", segment).strip()
+        if name:
+            out.append(name)
+    return out
 
 
-def _core_declares(path: str, declared: dict[str, set[str]],
-                   ranges: dict[str, dict[str, str | None]] | None = None) -> bool:
-    """Whether the core class can carry `path`, step by step.
+#: What a `both` row's path is, judged against the core schema (#994).
+HOLDABLE = "holdable"                     #: the core could carry it
+CORE_CANNOT_HOLD = "core_cannot_hold"     #: a step the core does not declare
+NOT_A_PATH = "not_a_path"                 #: a step descends through a scalar
 
-    Root-only until #994, on the reasoning that every class-ranged slot
-    CoreDataset shares with Dataset has the same range. Two do not.
-    `resources` is ranged `Dataset` on the full and `CoreDataset` on the
-    core, so it recurses into a smaller class — `resources[0].subsets` is a
-    path the full can hold and the core cannot — and a derived core carries
-    `distributions`, ranged `CoreDistribution`, where the full carries
-    `distribution_formats`. A finding on a `both` row under either was
-    still correct, because the row is checked against the core record
-    literally; what it could not say was that the core *could not* carry
-    the value, which is the difference between "name `full`" and "the two
-    records disagree".
 
-    With `ranges` — class name to slot name to the range class it induces,
-    from `declared_ranges` — each step is resolved against the class the
-    step before it lands in. Without it the root test stands, so a caller
-    that has not been updated keeps the old answer rather than a wrong one.
-    A step whose range is not a class in the core schema ends the walk: a
-    scalar cannot carry a slot, so a deeper path is one the core cannot
-    hold.
+def _core_path_verdict(path: str, declared: dict[str, set[str]],
+                       ranges: dict[str, dict[str, str | None]] | None = None) -> tuple[str, str]:
+    """`(verdict, cause)` for `path` against the core schema.
 
-    `declared` without a `CoreDataset` entry is a broken core schema:
-    `check_report` refuses it up front, since a checker that carried on
-    would drop the cause from every such finding with no signal (#993).
+    Three answers, not two. A path whose every step the core declares is
+    `HOLDABLE`. One with a step the core lacks is `CORE_CANNOT_HOLD`, and
+    the row should name `full`. One that descends through a *scalar* —
+    `keywords[0].anything` — is `NOT_A_PATH`: no class can carry it, the
+    full record's slot is equally scalar, so "name `full`" would be wrong
+    advice and the core is not what is at fault. It was reported as the
+    core's fault with an empty class name in the sentence (#994 round 1,
+    S3).
     """
     if "CoreDataset" not in declared:
         raise ValueError("declared slots carry no `CoreDataset` class; "
                          "the core schema could not be read")
     steps = _path_steps(path)
     if not steps:
-        return False
+        return NOT_A_PATH, f"; `{path}` names no slot"
     # The root gate stands whatever `ranges` says, so the walk can only ever
     # narrow what the root test admitted, never widen it. This checker's
-    # failure direction is silencing, and a `ranges` map that disagreed with
-    # `declared` — a stale one, a caller mixing two schemas — could otherwise
-    # answer True where the root test said False (#994 round 1, M2).
+    # failure direction is silencing (#994 round 1, M2).
     if steps[0] not in declared["CoreDataset"]:
-        return False
+        return CORE_CANNOT_HOLD, (f"; the core class declares no `{steps[0]}` slot, "
+                                  f"so the row must name `full`")
     if not ranges:
-        return True
-    cls = "CoreDataset"
-    for i, step in enumerate(steps):
-        here = ranges.get(cls)
-        if here is None:                       # a class the core schema does not define
-            return False
-        if step not in here:
-            return False
-        if i + 1 == len(steps):
-            return True
-        cls = here[step] or ""                 # a scalar range ends the walk
-    return True
-
-
-def _core_cannot_hold_cause(path: str, declared: dict[str, set[str]],
-                            ranges: dict[str, dict[str, str | None]] | None) -> str:
-    """The clause naming which step of `path` the core cannot carry (#994).
-
-    Root-only phrasing where there are no ranges, so the sentence never
-    claims a precision the walk did not have."""
-    steps = _path_steps(path)
-    if not ranges or len(steps) < 2:
-        root = steps[0] if steps else path
-        return (f"; the core class declares no `{root}` slot, so the row "
-                f"must name `full`")
-    if steps[0] not in declared["CoreDataset"]:
-        return (f"; the core class declares no `{steps[0]}` slot, so the row "
-                f"must name `full`")
+        return HOLDABLE, ""
     cls = "CoreDataset"
     for i, step in enumerate(steps):
         here = ranges.get(cls)
         if here is None:
-            return (f"; the core schema defines no `{cls}` class, so the row "
-                    f"must name `full`")
+            # `cls` is empty exactly when the step before it was a scalar.
+            return NOT_A_PATH, (f"; `{steps[i - 1]}` holds a value, not an object, "
+                                f"so `{path}` names nothing in either record")
         if step not in here:
             where = "the core class" if i == 0 else f"`{cls}`"
-            return (f"; {where} declares no `{step}` slot, so the row must "
-                    f"name `full`")
+            return CORE_CANNOT_HOLD, (f"; {where} declares no `{step}` slot, "
+                                      f"so the row must name `full`")
         cls = here[step] or ""
-    return (f"; the core class cannot carry `{path}`, so the row must name `full`")
+    return HOLDABLE, ""
+
+
+def _core_declares(path: str, declared: dict[str, set[str]],
+                   ranges: dict[str, dict[str, str | None]] | None = None) -> bool:
+    """Whether the core class can carry `path`, step by step.
+
+    True where the core could carry every step. See `_core_path_verdict`
+    for the three-way answer the finding actually uses; this stays because
+    "can the core hold it" is the question most callers ask.
+    """
+    return _core_path_verdict(path, declared, ranges)[0] == HOLDABLE
+
+
+def _core_cannot_hold_cause(path: str, declared: dict[str, set[str]],
+                            ranges: dict[str, dict[str, str | None]] | None) -> str:
+    """The clause naming what the core cannot carry, or why the path names
+    nothing. Empty where the core could hold it."""
+    return _core_path_verdict(path, declared, ranges)[1]
 
 
 def _header_cells(cells: list[str]) -> list[str]:
@@ -986,10 +978,16 @@ def check_report(report: Path, full: dict, core: dict,
             # Only where the full record does carry it: a `both` row on a
             # slot neither record holds is a substantive contradiction, and
             # "name `full`" would be wrong advice.
-            if (where == "both" and in_full and _populated(v_full)
-                    and not _core_declares(row["slot"], declared, ranges)):
-                core_cannot_hold += 1
-                cause = _core_cannot_hold_cause(row["slot"], declared, ranges)
+            if where == "both" and in_full and _populated(v_full):
+                verdict, why = _core_path_verdict(row["slot"], declared, ranges)
+                cause = why
+                # Only the core's own inability counts here. A path that
+                # descends through a scalar is malformed rather than
+                # mis-recorded, and counting it would put it in a total the
+                # block documents as rows the core cannot hold (#994 round
+                # 1, S3).
+                if verdict == CORE_CANNOT_HOLD:
+                    core_cannot_hold += 1
             findings.append({
                 "kind": ("retention_not_shown" if row["disposition"] in
                          ("retained", "kept", "unchanged", "left as-is", "left as is")
