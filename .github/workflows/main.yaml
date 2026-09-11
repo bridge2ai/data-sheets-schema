@@ -48,33 +48,6 @@ jobs:
       - name: Install project
         run: poetry install --no-interaction
 
-      # #1208: the schema-sync gate fails on the runner and passes locally,
-      # and a Linux container reproduces the committed merged schema
-      # byte-for-byte, so the generator is not the difference. Print what the
-      # gate actually sees, once, rather than guessing again.
-      - name: What the schema-sync gate sees
-        run: |
-          poetry run python - <<'PY'
-          import difflib, hashlib, pathlib, subprocess, sys
-          sys.path.insert(0, "src")
-          from data_sheets_schema import schema_sync
-          for row in schema_sync.check():
-              print(f"=== {row['class']}: {row['status']} — {row.get('reason', '')}")
-              print(f"    digest live={row.get('digest')} rebuilt={row.get('digest_rebuilt')}")
-              kept = row.get("rebuilt_at")
-              if not kept:
-                  continue
-              merged = pathlib.Path(row["merged"])
-              a = merged.read_bytes(); b = pathlib.Path(kept).read_bytes()
-              print(f"    committed {len(a)} bytes sha {hashlib.sha256(a).hexdigest()[:16]}")
-              print(f"    rebuilt   {len(b)} bytes sha {hashlib.sha256(b).hexdigest()[:16]}")
-              d = list(difflib.unified_diff(a.decode().splitlines(), b.decode().splitlines(),
-                                            "committed", "rebuilt", n=1, lineterm=""))
-              print(f"    diff lines: {len(d)}")
-              print("\n".join("    " + x for x in d[:40]))
-          PY
-        continue-on-error: true
-
       - name: Run test suite
         # -v: the log names each test as it starts, so a runner that dies
         # mid-suite (memory, a hang) still says which test was running.

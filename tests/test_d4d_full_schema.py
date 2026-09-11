@@ -1,6 +1,7 @@
 """Test D4D Full Schema generation and validation."""
 import os
 import subprocess
+import tempfile
 import unittest
 import yaml
 
@@ -24,24 +25,46 @@ class TestD4DFullSchema(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Set up test class by generating the D4D Full Schema."""
-        cls.d4d_root_path = os.path.join(SCHEMA_DIR, "data_sheets_schema.yaml")
-        cls.d4d_full_path = os.path.join(
-            SCHEMA_DIR, "data_sheets_schema_all.yaml")
+        """Build the merged schema into a temporary directory.
 
-        # Generate the D4D Full Schema using the Makefile target
+        This used to run `make full-schema` in the repository root, which
+        rewrites the committed `data_sheets_schema_all.yaml` **in place** as
+        a side effect of running the tests. The rewrite puts back
+        byte-identical content — the committed file reproduces exactly, on
+        Linux and on macOS — so nothing about it was ever wrong. What
+        mattered is that `gen-linkml` writes the file non-atomically, so
+        another test reading it during the write sees a partial one, and
+        `schema_sync.check`, which `api_runner.execute` treats as fatal,
+        then reports the merged schema as differing from a fresh build of
+        its source. Serially the rewrite finishes before anything else
+        looks; under `pytest -n auto` between one and nine runner-gate
+        tests failed per run, on different tests each time, which read as
+        flakiness rather than as one test mutating a shared input (#1208).
+
+        Generating into a temporary directory tests the same thing — that
+        the merged schema builds from source and is valid — without making
+        the repository's own artifact a mutable fixture.
+        """
+        cls.d4d_root_path = os.path.join(SCHEMA_DIR, "data_sheets_schema.yaml")
+        cls._tmp = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(cls._tmp.cleanup)
+        cls.d4d_full_path = os.path.join(cls._tmp.name, "data_sheets_schema_all.yaml")
+
         try:
-            result = subprocess.run(
-                ["make", "full-schema"],
-                cwd=ROOT,
-                capture_output=True,
-                text=True,
-                check=True
+            subprocess.run(
+                ["poetry", "run", "gen-linkml", "-o", cls.d4d_full_path,
+                 "-f", "yaml", cls.d4d_root_path],
+                cwd=ROOT, capture_output=True, text=True, check=True, timeout=600,
             )
-            print(f"D4D Full Schema generation output: {result.stdout}")
         except subprocess.CalledProcessError as e:
-            print(f"Error generating D4D Full Schema: {e.stderr}")
-            raise
+            raise AssertionError(
+                f"the merged schema could not be generated: {(e.stderr or e.stdout)[-400:]}") from e
+        # The Makefile rule pipes `---` onto its output; the committed file
+        # carries it, so a test comparing against that file needs it too.
+        with open(cls.d4d_full_path, encoding="utf-8") as fh:
+            body = fh.read()
+        with open(cls.d4d_full_path, "w", encoding="utf-8") as fh:
+            fh.write("---\n" + body)
 
     def test_d4d_root_exists(self):
         """Test that root exists."""
