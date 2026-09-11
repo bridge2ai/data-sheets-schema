@@ -1086,14 +1086,36 @@ class CoreDeclaresNestedTest(unittest.TestCase):
     def test_an_empty_path_declares_nothing(self):
         self.assertFalse(rc._core_declares("", NESTED_DECLARED, RANGES))
 
-    def test_where_ranges_are_given_they_are_what_the_walk_reads(self):
-        """`declared` still gates the refusal; the walk itself reads `ranges`,
-        because a step past the root must be resolved against the class it
-        lands in. In production both come from one `SchemaView`, so they
-        cannot disagree — this pins which one decides if they ever do."""
-        thin = {"CoreDataset": set()}                    # declares nothing
-        self.assertTrue(rc._core_declares("keywords", thin, RANGES))
-        self.assertFalse(rc._core_declares("keywords", thin))
+
+    def test_a_wildcard_subscript_is_not_a_step(self):
+        """#994 round 1, M1: `[*]` is this module's own notation and appears
+        in committed dispositions tables (`creators[*].name`). Splitting on
+        `[` and filtering digits left `*]` standing as a step, so a real row
+        walked into a slot no class has and was reported as one the core
+        could not carry — a fabricated finding with `*]` in its cause."""
+        self.assertEqual(rc._path_steps("creators[*].affiliations"),
+                         ["creators", "affiliations"])
+        self.assertEqual(rc._path_steps("a[*][0].b[12].c"), ["a", "b", "c"])
+        declared, ranges = rc.declared_slots(), rc.declared_ranges()
+        for path in ("creators[*].name", "creators[*].affiliations", "instances[*].notes"):
+            with self.subTest(path):
+                self.assertTrue(rc._core_declares(path, declared, ranges))
+                # the broken form was a step literally named `*]`
+                self.assertNotIn("declares no `*]`",
+                                 rc._core_cannot_hold_cause(path, declared, ranges))
+
+    def test_the_walk_can_narrow_the_root_test_and_never_widen_it(self):
+        """#994 round 1, M2. The checker's failure direction is silencing, so
+        a `ranges` map that disagreed with `declared` — stale, or a caller
+        mixing two schemas — must not be able to answer True where the root
+        test says False. The root gate stands whatever the ranges say."""
+        generous = {"CoreDataset": {"anything": None, "keywords": None}}
+        self.assertFalse(rc._core_declares("anything", {"CoreDataset": set()}, generous))
+        self.assertFalse(rc._core_declares("keywords", {"CoreDataset": {"other"}}, generous))
+        self.assertIn("the core class declares no `keywords` slot",
+                      rc._core_cannot_hold_cause("keywords", {"CoreDataset": {"other"}}, generous))
+        # and it still narrows
+        self.assertFalse(rc._core_declares("resources[0].subsets", NESTED_DECLARED, RANGES))
 
     def test_a_core_schema_with_no_CoreDataset_is_refused(self):
         with self.assertRaises(ValueError):

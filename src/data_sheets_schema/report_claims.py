@@ -507,10 +507,16 @@ def _claim_scope(claim: str, classes: set[str]) -> tuple[set[str], str]:
 
 
 def _path_steps(path: str) -> list[str]:
-    """`resources[0].file_collections[1].id` → the slot names, in order.
-    Indices are dropped: a list index says nothing about what a class
-    declares."""
-    return [s for s in re.split(r"[.\[]", path) if s and not s.rstrip("]").isdigit()]
+    """`resources[0].file_collections[*].id` → the slot names, in order.
+
+    Subscripts are dropped, numeric and wildcard alike: neither says
+    anything about what a class declares. The first version split on `[`
+    and filtered digits, which left `*]` standing as a step — and `[*]` is
+    this module's own notation, used by committed dispositions tables
+    (`creators[*].name`), so a real row walked into a slot no class has and
+    was reported as one the core could not carry (#994 round 1, M1).
+    """
+    return [s for s in re.findall(r"[^.\[\]]+", path) if s != "*" and not s.isdigit()]
 
 
 def _core_declares(path: str, declared: dict[str, set[str]],
@@ -547,8 +553,15 @@ def _core_declares(path: str, declared: dict[str, set[str]],
     steps = _path_steps(path)
     if not steps:
         return False
+    # The root gate stands whatever `ranges` says, so the walk can only ever
+    # narrow what the root test admitted, never widen it. This checker's
+    # failure direction is silencing, and a `ranges` map that disagreed with
+    # `declared` — a stale one, a caller mixing two schemas — could otherwise
+    # answer True where the root test said False (#994 round 1, M2).
+    if steps[0] not in declared["CoreDataset"]:
+        return False
     if not ranges:
-        return steps[0] in declared["CoreDataset"]
+        return True
     cls = "CoreDataset"
     for i, step in enumerate(steps):
         here = ranges.get(cls)
@@ -572,6 +585,9 @@ def _core_cannot_hold_cause(path: str, declared: dict[str, set[str]],
     if not ranges or len(steps) < 2:
         root = steps[0] if steps else path
         return (f"; the core class declares no `{root}` slot, so the row "
+                f"must name `full`")
+    if steps[0] not in declared["CoreDataset"]:
+        return (f"; the core class declares no `{steps[0]}` slot, so the row "
                 f"must name `full`")
     cls = "CoreDataset"
     for i, step in enumerate(steps):

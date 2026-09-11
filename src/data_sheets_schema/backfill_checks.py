@@ -85,7 +85,8 @@ def declared_bundle(record: dict[str, Any]) -> Path | None:
 
 
 def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
-            only: set[str] | None = None) -> dict[str, Any]:
+            only: set[str] | None = None,
+            ranges: dict[str, dict[str, str | None]] | None = None) -> dict[str, Any]:
     """The check blocks for one record, or reasons they cannot be computed.
     `only` restricts the computation to the named blocks (`--blocks`): the
     receipts and grounding checks read the bundle and every chunk, which
@@ -168,9 +169,11 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
             yaml.safe_load(core.read_text(encoding="utf-8")) if core.exists() else {},
             declared if declared is not None else declared_slots(),
             snapshot=phase1_snapshot_for(core),
-            # Both maps from the one core schema, so a nested `both` row
-            # names the step the core cannot carry (#994).
-            ranges=declared_ranges(),
+            # Both maps describe one core schema and travel together: the
+            # caller builds each once for a whole corpus pass, and rebuilding
+            # one per record would both cost a SchemaView load per record and
+            # leave the two on different footings (#994 round 1, M2).
+            ranges=ranges if ranges is not None else declared_ranges(),
             dispositions_expected=bool((record.get("inputs") or {}).get("dispositions_expected")
                                        or (record.get("report_claims") or {}).get("dispositions_expected")))
         # The report, and the two records it makes claims about, and the
