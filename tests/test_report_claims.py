@@ -427,8 +427,9 @@ class ScopedSchemaClaimTest(Harness):
 
     def test_the_instrument_names_the_change(self):
         from data_sheets_schema.report_claims import REPORT_CLAIMS_INSTRUMENT
-        self.assertTrue(REPORT_CLAIMS_INSTRUMENT.startswith("v5"),
+        self.assertTrue(REPORT_CLAIMS_INSTRUMENT.startswith("v6"),
                         REPORT_CLAIMS_INSTRUMENT)
+        self.assertIn("#994", REPORT_CLAIMS_INSTRUMENT)
         self.assertIn("#1122", REPORT_CLAIMS_INSTRUMENT)
         self.assertIn("#1046", REPORT_CLAIMS_INSTRUMENT)
 
@@ -926,9 +927,12 @@ class UnrecordedRemovalTest(Harness):
         self.assertEqual(b["prose_retention_claims"], 0)
         self.assertEqual(b["findings"], [])
 
-    def test_the_instrument_is_v5(self):
+    def test_the_instrument_is_v6(self):
+        """The block names the current reading first and keeps every earlier
+        one, so a block computed under either is readable from its own text."""
         b = self.check(self.TABLE, full={"keywords": ["a"]}, core={"keywords": ["a"]})
-        self.assertTrue(b["instrument"].startswith("v5 (#1054)"))
+        self.assertTrue(b["instrument"].startswith("v6 (#994)"))
+        self.assertIn("v5 (#1054)", b["instrument"])
         self.assertIn("v4 (#1122)", b["instrument"])
 
 
@@ -1070,6 +1074,31 @@ class CoreDeclaresNestedTest(unittest.TestCase):
     def test_a_scalar_cannot_carry_a_further_step(self):
         self.assertFalse(rc._core_declares("keywords[0].anything", NESTED_DECLARED, RANGES))
 
+    def test_a_class_the_map_does_not_carry_is_not_read_as_a_scalar(self):
+        """#994 round 2, S1. `ranges` said `creators` ranges to `Creator`;
+        the map simply had no `Creator` entry. Reading that back as "the
+        step before it was a scalar" wrote a sentence contradicting the
+        map's own entry and dropped the row from the total. A gap in the
+        map is not evidence, so the walk stops and leaves the root test's
+        answer standing."""
+        partial = {"CoreDataset": {"keywords": None, "creators": "Creator"}}
+        verdict, cause = rc._core_path_verdict("creators.name", NESTED_DECLARED, partial)
+        self.assertEqual(verdict, rc.HOLDABLE)
+        self.assertEqual(cause, "")
+
+    def test_the_root_class_missing_from_the_map_names_no_step_at_all(self):
+        """The same gap at the first step. It used to index `steps[-1]`,
+        which Python reads from the end, so the sentence named the path's
+        last step as the scalar (#994 round 2, S1)."""
+        verdict, cause = rc._core_path_verdict("creators.name", NESTED_DECLARED, {"Other": {}})
+        self.assertEqual(verdict, rc.HOLDABLE)
+        self.assertEqual(cause, "")
+
+    def test_a_real_scalar_still_names_the_step_that_holds_the_value(self):
+        verdict, cause = rc._core_path_verdict("creators[0].name.given", NESTED_DECLARED, RANGES)
+        self.assertEqual(verdict, rc.NOT_A_PATH)
+        self.assertIn("`name` holds a value, not an object", cause)
+
     def test_without_ranges_the_root_test_stands(self):
         """A caller that has not been updated keeps the old answer rather
         than a wrong one."""
@@ -1167,11 +1196,23 @@ class CoreCannotHoldEndToEndTest(Harness):
 
     def test_a_nested_both_row_names_the_class_that_cannot_carry_it(self):
         full = {"resources": [{"file_collections": [{"id": "x"}]}]}
-        md = self.TABLE + "| `resources[0].file_collections` | retained | both | kept |\n"
-        b = self.check_with_ranges(md, full, {"keywords": ["a"]})
-        (f,) = [x for x in b["findings"] if x["slot"] == "resources[0].file_collections"]
-        self.assertIn("`CoreDataset` declares no `file_collections` slot", f["detail"])
-        self.assertEqual(b["claims_core_cannot_hold"], 1)
+        for slot in ("resources[0].file_collections", "resources[*].file_collections",
+                     "resources.file_collections"):
+            with self.subTest(slot=slot):
+                md = self.TABLE + f"| `{slot}` | retained | both | kept |\n"
+                b = self.check_with_ranges(md, full, {"keywords": ["a"]})
+                (f,) = [x for x in b["findings"] if x["slot"] == slot]
+                self.assertIn("`CoreDataset` declares no `file_collections` slot", f["detail"])
+                self.assertEqual(b["claims_core_cannot_hold"], 1)
+
+    def test_an_unpopulated_implicit_list_path_is_not_a_core_schema_cause(self):
+        for child in ({}, {"file_collections": []}, {"file_collections": None}):
+            with self.subTest(child=child):
+                md = self.TABLE + "| `resources.file_collections` | retained | both | kept |\n"
+                b = self.check_with_ranges(md, {"resources": [child]}, {})
+                self.assertEqual(b["claims_core_cannot_hold"], 0)
+                self.assertTrue(b["findings"])
+                self.assertNotIn("declares no", b["findings"][0]["detail"])
 
     def test_a_nested_row_the_core_can_carry_is_a_plain_contradiction(self):
         """Not every nested `both` row is a schema matter: where the core
@@ -1222,13 +1263,17 @@ class CorePathVerdictTest(unittest.TestCase):
         self.assertEqual(rc._path_steps("a.0.b"), ["a", "0", "b"])
         self.assertEqual(rc._path_steps("a[0].b[*].c"), ["a", "b", "c"])
 
-    def test_the_scalar_case_is_unreachable_through_check_report(self):
+    def test_the_scalar_case_needs_a_schema_invalid_full_record(self):
         """Worth pinning, because it bounds how much the S3 fix mattered.
         The cause is only consulted where the *full* record carries a
-        populated value at the path, and nothing can be populated under a
-        scalar — so a row like `keywords[0].anything` is a plain
-        contradiction, with no cause and nothing counted. The garbled
-        sentence was reachable only by calling the helper directly."""
+        populated value at the path. `resolve` walks the parsed record with
+        no schema awareness, so nothing can be populated under a slot the
+        full record holds as a scalar — and for a schema-valid record that
+        is every slot the core schema declares scalar. A row like
+        `keywords[0].anything` is then a plain contradiction, with no cause
+        and nothing counted. Only a full record that violates its own
+        schema reaches the sentence through here (#994 round 2, S2); the
+        companion test below is that record."""
         import tempfile
         tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
         path = Path(tmp.name) / "r.md"
@@ -1238,4 +1283,24 @@ class CorePathVerdictTest(unittest.TestCase):
                          NESTED_DECLARED, ranges=RANGES)
         (f,) = [x for x in b["findings"] if x["slot"] == "keywords[0].anything"]
         self.assertEqual(f["detail"], "report says retained; the both record does not carry it")
+        self.assertEqual(b["claims_core_cannot_hold"], 0)
+
+    def test_a_full_record_that_breaks_its_schema_does_reach_the_scalar_cause(self):
+        """The bound above is on schema-valid records, not on the entry
+        point. Nothing validates `full` before `check_report` reads it, and
+        `resolve` asks only whether the value it is standing on is a dict
+        or a list. A full record holding objects under a slot the core
+        schema declares scalar resolves the path, reaches the verdict, and
+        gets the sentence describing the core schema's declared range.
+        It remains a finding, excluded from `claims_core_cannot_hold`
+        (#994 round 2, S2)."""
+        import tempfile
+        tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
+        path = Path(tmp.name) / "r.md"
+        path.write_text("## Dispositions\n\n| slot | disposition | record | reason |\n|---|---|---|---|\n"
+                        "| `keywords[0].anything` | retained | both | kept |\n", encoding="utf-8")
+        b = check_report(path, {"keywords": [{"anything": "x"}]}, {"keywords": ["a"]},
+                         NESTED_DECLARED, ranges=RANGES)
+        (f,) = [x for x in b["findings"] if x["slot"] == "keywords[0].anything"]
+        self.assertIn("`keywords` holds a value, not an object", f["detail"])
         self.assertEqual(b["claims_core_cannot_hold"], 0)

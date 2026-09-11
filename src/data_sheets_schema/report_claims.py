@@ -397,7 +397,13 @@ _SNAPSHOT_EXEMPT = frozenset({"conforms_to_schema", "conforms_to_class", "notes"
 #: and the schema by hash, but the checker moved under #914, #929, #962 and
 #: #990 with nothing recording which reading produced a block; everything
 #: before this constant is v1.
-REPORT_CLAIMS_INSTRUMENT = ("v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the "
+REPORT_CLAIMS_INSTRUMENT = ("v6 (#994): a `both` row's path is judged step by step against the "
+                            "core class's declared ranges rather than at its root alone, a `[*]` "
+                            "wildcard is a step's subscript rather than a step of its own, and "
+                            "`claims_core_cannot_hold` counts only a path the core cannot hold: one "
+                            "that descends through a scalar violates the core schema's declared "
+                            "range, carries its own cause and is excluded from that count; "
+                            "v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the "
                             "snapshot carried that the final full record does not, with no `removed` "
                             "row or removal sentence naming it, is `removal_not_recorded`; a prose "
                             "retention claim (`remains in`, `stays in`, `is kept in`, `is retained "
@@ -534,6 +540,11 @@ HOLDABLE = "holdable"                     #: the core could carry it
 CORE_CANNOT_HOLD = "core_cannot_hold"     #: a step the core does not declare
 NOT_A_PATH = "not_a_path"                 #: a step descends through a scalar
 
+#: The walk's "the step before this one ranged to a value, not a class".
+#: Its own object, because `None` and `""` are also what an incomplete
+#: `ranges` map returns for a class it does not carry (#994 round 2, S1).
+_SCALAR = object()
+
 
 def _core_path_verdict(path: str, declared: dict[str, set[str]],
                        ranges: dict[str, dict[str, str | None]] | None = None) -> tuple[str, str]:
@@ -542,11 +553,9 @@ def _core_path_verdict(path: str, declared: dict[str, set[str]],
     Three answers, not two. A path whose every step the core declares is
     `HOLDABLE`. One with a step the core lacks is `CORE_CANNOT_HOLD`, and
     the row should name `full`. One that descends through a *scalar* —
-    `keywords[0].anything` — is `NOT_A_PATH`: no class can carry it, the
-    full record's slot is equally scalar, so "name `full`" would be wrong
-    advice and the core is not what is at fault. It was reported as the
-    core's fault with an empty class name in the sentence (#994 round 1,
-    S3).
+    `keywords[0].anything` — is `NOT_A_PATH`: it violates the core schema's
+    declared range. The full schema's corresponding slots are also scalar,
+    so "name `full`" would be wrong advice for a schema-valid record.
     """
     if "CoreDataset" not in declared:
         raise ValueError("declared slots carry no `CoreDataset` class; "
@@ -562,18 +571,29 @@ def _core_path_verdict(path: str, declared: dict[str, set[str]],
                                   f"so the row must name `full`")
     if not ranges:
         return HOLDABLE, ""
-    cls = "CoreDataset"
+    cls: str | object = "CoreDataset"
     for i, step in enumerate(steps):
+        if cls is _SCALAR:
+            # Said by the previous step's own entry, never inferred from a
+            # lookup that came back empty: a missing class and a scalar
+            # range are different facts (#994 round 2, S1). `cls` starts as
+            # a class, so `i` is at least 1 here.
+            return NOT_A_PATH, (f"; `{steps[i - 1]}` holds a value, not an object, "
+                                f"so `{path}` cannot follow the core schema's declared range")
         here = ranges.get(cls)
         if here is None:
-            # `cls` is empty exactly when the step before it was a scalar.
-            return NOT_A_PATH, (f"; `{steps[i - 1]}` holds a value, not an object, "
-                                f"so `{path}` names nothing in either record")
+            # A class the map does not carry is a gap in the map, not a
+            # scalar. `declared_ranges()` enumerates every class in the
+            # view, so no caller here today reaches this; one that did
+            # would get the answer it would have got passing no map at all
+            # — the walk narrows on evidence or not at all.
+            return HOLDABLE, ""
         if step not in here:
             where = "the core class" if i == 0 else f"`{cls}`"
             return CORE_CANNOT_HOLD, (f"; {where} declares no `{step}` slot, "
                                       f"so the row must name `full`")
-        cls = here[step] or ""
+        nxt = here[step]
+        cls = _SCALAR if nxt is None else nxt
     return HOLDABLE, ""
 
 
@@ -978,7 +998,9 @@ def check_report(report: Path, full: dict, core: dict,
             # Only where the full record does carry it: a `both` row on a
             # slot neither record holds is a substantive contradiction, and
             # "name `full`" would be wrong advice.
-            if where == "both" and in_full and _populated(v_full):
+            # Presence and its explanation use the same reading: a dotted
+            # step over a list is accepted without an explicit [*] (#1214).
+            if where == "both" and full_has:
                 verdict, why = _core_path_verdict(row["slot"], declared, ranges)
                 cause = why
                 # Only the core's own inability counts here. A path that
