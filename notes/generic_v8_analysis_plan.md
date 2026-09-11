@@ -2186,10 +2186,19 @@ must not be reported as a measured same-instrument standard deviation.
 
 ### Reference rescore and fitness-cache decision (2026-09-11; #919, #1080, #1248)
 
+Manifest registered at 2026-09-11T22:22:36.847937+00:00 from checkout `fe3d8e60355defbd35685e9668c0075a99b89859`.
+The evaluator must quote the definition identified by these SHA256 values:
+
+- rubric10-semantic: `70a50310b9ec717981fc089d8fedb20ea8c3ca3b665870f8d1d2d2573c9fccdd`
+- rubric20-semantic: `9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3`
+
+The manifest lists all 24 exact input paths and hashes, all 56 planned output
+paths, and 202 prior semantic evaluation hashes. No prior output will be overwritten.
+
 The approved reference cohort is both production arms, 24 full records and
 both semantic rubric agents: 48 primary evaluations, with the one-record
 canary counted once. The full launch contract, dated pins, exact records and
-output paths will be registered in `notes/reference_rescore_2026-09-11/`
+output paths are registered in `notes/reference_rescore_2026-09-11/manifest.json`
 before any call. Old scores remain beside the new instrument's outputs.
 
 The canary is CHORUS v7 rep1 with rubric10, in a fresh Opus 5 evaluator session.
