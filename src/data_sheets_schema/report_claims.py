@@ -88,8 +88,14 @@ _TICKED = re.compile(r"`([A-Za-z_][\w]*(?:\[(?:\d+|\*)\])?"
                      r"(?:\.[\w]+(?:\[(?:\d+|\*)\])?)*)`")
 #: A backticked name in this position is a container or a destination, not the
 #: thing removed: "citation prose removed from core `notes`".
+#: A name after a preposition is a place, not a casualty — with up to two
+#: words of the noun phrase between ("in the existing `funders` block",
+#: #1175 Codex review, M1), which stop at a clause boundary or a verb this
+#: reader knows, so the preposition of an earlier clause does not reach.
 _OBLIQUE = re.compile(r"\b(?:from|into|to|in|on|within|onto|under|beside|"
-                      r"alongside)\s+(?:the\s+|core\s+|full\s+)*`")
+                      r"alongside)\s+(?:the\s+|core\s+|full\s+)*"
+                      r"(?:(?!(?:was|were|is|are|has|have|had|will|removed|deleted|dropped|remains?)\b)"
+                      r"[A-Za-z][\w-]*\s+){0,2}`")
 #: The head noun after a backticked name decides what was removed. "the
 #: `distributions` block was removed" removes the slot; "the unfounded
 #: `source_caveats` claim was removed" removes a sentence of prose from inside
@@ -276,12 +282,127 @@ _PRESENCE_DISPOSITIONS = {"retained", "kept", "unchanged", "left as-is", "left a
 _DISPOSITION = re.compile(r"^\W*(?:\*\*)?(removed|deleted|dropped|retained|kept|unchanged|"
                           r"left as-is|left as is|changed|amended|corrected|added)\b", re.I)
 
+#: A retention claim in prose (#1054): "the legal analysis remains in
+#: `regulatory_restrictions.regulatory_restrictions`" is the table's
+#: `retained` row said in a sentence, and the first four instrument versions
+#: read only the table and the removal verbs. The path is the backticked one
+#: right after the verb phrase; a negated clause ("no longer remains in") is
+#: not a retention.
+_PROSE_RETAINED = re.compile(
+    r"\b(?:remains?|stays?|is (?:kept|retained|left|preserved)|"
+    r"are (?:kept|retained|left|preserved)|(?:was|were) (?:kept|retained|left|preserved))\s+"
+    r"(?:in|under|at|on)\s+`([A-Za-z_][\w]*(?:\[(?:\d+|\*)\])?(?:\.[A-Za-z_][\w]*(?:\[(?:\d+|\*)\])?)*)`",
+    re.I)
+#: A negation in the clause before the verb turns the sentence into the
+#: opposite of a retention ("nothing remains in `errata`", "it never
+#: remains in `notes`", "no longer kept in `x`"; #1175 review S2).
+_NEGATED_BEFORE = re.compile(r"\b(?:no longer|not|never|nothing|neither|none)\b[^.;:,()—-]{0,12}$", re.I)
+#: A negation anywhere in the verb's own clause: "No value remains in
+#: `errata`" (#1175 Codex review, M7). The clause is the last one
+#: `_CLAUSE_SPLIT` yields, so "names no committee, so … retained under
+#: `notes`" is a claim (#1175 round 2, S1).
+_NEGATION = re.compile(r"\b(?:no|not|never|neither|nor|none|nothing)\b", re.I)
+
+
+def _negated_clause(before: str) -> bool:
+    """Is the retention verb's own clause negated? The window stops at the
+    previous sentence (#1175 round 7, M3): without that it inherited the
+    negation of the sentence before and dropped 19 genuine claims, every
+    one of the form "… no DPIA …. The substantive content is retained
+    under `x`"."""
+    sentence = re.split(r"[.!?]\s", before)[-1]
+    return bool(_NEGATION.search(_CLAUSE_SPLIT.split(sentence)[-1]))
+#: Literals a `remains at`/`remains in` phrase can name that are not slots
+#: ("the flag remains at `false`", #1175 Codex review, M7).
+_NOT_A_SLOT = frozenset({"true", "false", "null", "none", "nan", "n_a", "na", "yes", "no", "unknown"})
+#: A slot path is snake_case segments; `HIPAA` and `CoreDataset` are not.
+_SLOT_PATH = re.compile(r"[a-z][a-z0-9_]*(?:\[(?:\d+|\*)\])?(?:\.[a-z][a-z0-9_]*(?:\[(?:\d+|\*)\])?)*")
+#: The weak signal that a report *records* a removal, for suppressing the
+#: snapshot finding only (#1175 review S1) — never for a removal claim,
+#: where precision matters: a bare backticked slot name in a sentence that
+#: carries a removal word. "### 4.7 Removed `errata`", "- `errata`
+#: **removed**", "`conforms_to_standard` is absent from both records". The
+#: names are read by `_named`, so a destination ("recorded in `errata`")
+#: is not a casualty, a sentence about the core alone records nothing
+#: about the full record, and no table line is read (#1175 round 2, M1).
+#: The present-tense forms are here for the weak signal's sake (#1175
+#: round 8, M1): "Both records now omit `citation`" records a removal as
+#: plainly as "`citation` was removed", and reading only past participles
+#: listed it as unrecorded.
+_REMOVAL_WORD = re.compile(r"\b(?:remove[sd]?|delete[sd]?|drops?|dropped|omits?|omitted|"
+                           r"strips?|stripped|absent|withdraws?|withdrawn)\b", re.I)
+#: A removal word that is negated, hypothetical or contrasted records no
+#: removal (#1175 Codex review, M1): "was retained rather than removed",
+#: "was never removed", "if `x` is removed, explain why". Order decides
+#: (#1175 round 7, M2): the token must sit *before* the removal word, or
+#: "was removed, not renamed" and "removed rather than guessed" — 21
+#: corpus names — are voided by their own contrast.
+#: `nothing` and `none` are here and bare `no` is not (#1175 round 9, S2):
+#: "None of these is a slot removed from a record: `counts` and …" denies a
+#: removal and recorded one, while 19 of the 20 corpus clauses where `no`
+#: precedes the removal word are removals — "`collection_type` has no
+#: `CoreDistribution` counterpart and is dropped" — which bare `no` would
+#: void. `rewritten` and `alternative` are the present tense's cost (round
+#: 9, S1): "`special_protections` was rewritten to drop the superseded
+#: clause" leaves the slot in place, and "the alternative is to drop five
+#: well-evidenced relations" is a road not taken.
+_REMOVAL_VOID = re.compile(r"\b(?:rather than|instead of|not|never|nor|neither|no longer|nothing|none|"
+                           r"without|rewritten|alternative|"
+                           r"if|whether|unless|would|should|could|may|might|must|please|explain)\b", re.I)
+#: A present-tense removal word used as a noun: "The intentional projection
+#: drops are unchanged" (#1175 round 9, S1). Only the -s forms, and only
+#: before a verb: "the slots removed are `a` and `b`" is a real removal, so
+#: a past participle before `are` must not be voided.
+_REMOVAL_AS_NOUN = re.compile(r"\b(?:removes|deletes|drops|omits|strips|withdraws)\s+"
+                              r"(?:are|is|were|was)\b", re.I)
+
+
+def _removal_voided(clause: str) -> bool:
+    m = _REMOVAL_WORD.search(clause)
+    if not m:
+        return False
+    return bool(_REMOVAL_VOID.search(clause[:m.start()]) or _REMOVAL_AS_NOUN.search(clause))
+#: A clause boundary: the weak signal reads only the clause the removal
+#: word sits in, so "`errata` was removed because `funders` remains valid"
+#: records `errata` and not `funders` (#1175 Codex review, M1).
+#: A clause boundary. Not an em dash or a colon: in these reports both
+#: join a slot to its disposition — "### 2.1 `publisher` — removed",
+#: "`errata`: removed", "- **Removed:** `publisher`" — and splitting on
+#: them severed the subject from the removal word in 197 of the 301
+#: reports (#1175 round 7, M1).
+_CLAUSE_SPLIT = re.compile(r"\s*(?:;|,\s*(?:but|while|whereas|although|though|because|since|so|and then)\b|"
+                           r"\s(?:but|while|whereas|although|though|because|since)\s|"
+                           # a relative clause is about its antecedent, not about a
+                           # name earlier in the sentence: "`funders` contains
+                           # identifiers that were removed" (Codex review, M1)
+                           r"\s(?:that|which|whose|who)\s)\s*", re.I)
+#: After a list the removal word must follow closely, in the same clause,
+#: for the list to be its casualties: at most a few words, none of them a
+#: retention verb, a negation or "rather than" (#1175 round 5, M1).
+_CASUALTY_TAIL = re.compile(r"(?:\s+(?!(?:remains?|stays?|retained|kept|carried|rather|not|never|neither|nor)\b)[\w'\-]+){0,4}\s+"
+                            r"(?:were|was|are|is|have been|has been|be|being|get|got)?\s*"
+                            r"(?:removed|deleted|dropped|omitted|stripped|withdrawn)\b", re.I)
+#: "recorded in `a`, `b` and `c`": every backticked name in the list after
+#: the preposition is a destination.
+_DESTINATION_LIST = re.compile(r"\b(?:from|into|to|in|on|within|onto|under|beside|alongside)\s+(?:the\s+|core\s+|full\s+)*"
+                               r"`[^`]+`(?:\s*,\s*`[^`]+`)*(?:\s*,?\s*(?:and|or)\s+`[^`]+`)?", re.I)
+
+#: Top-level keys a snapshot diff does not report (#1054): the class
+#: declarations and the commentary slots the receipt denominator also
+#: excludes (#722), which reconciliation rewrites freely.
+_SNAPSHOT_EXEMPT = frozenset({"conforms_to_schema", "conforms_to_class", "notes", "source_caveats"})
+
 
 #: The checker's own version (#996). The block pins the report, both records
 #: and the schema by hash, but the checker moved under #914, #929, #962 and
 #: #990 with nothing recording which reading produced a block; everything
 #: before this constant is v1.
-REPORT_CLAIMS_INSTRUMENT = ("v4 (#1122): `rows_by_record` tallies the dispositions rows by "
+REPORT_CLAIMS_INSTRUMENT = ("v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the "
+                            "snapshot carried that the final full record does not, with no `removed` "
+                            "row or removal sentence naming it, is `removal_not_recorded`; a prose "
+                            "retention claim (`remains in`, `stays in`, `is kept in`, `is retained "
+                            "in` a backticked path) is read like a retained row; "
+                            "v4 (#1122): `rows_by_record` tallies the dispositions rows by "
                             "their record column — `full`, `core`, `both`, `either` for an empty "
                             "cell, `no_record_column` for a table with no such column, `invalid` "
                             "for anything else — so a `both` row wrongly flipped to `full`, "
@@ -405,6 +526,59 @@ def _core_declares(path: str, declared: dict[str, set[str]]) -> bool:
     return root in declared["CoreDataset"]
 
 
+def _header_cells(cells: list[str]) -> list[str]:
+    """Header cells as the strict reader compares them: lower-cased, with
+    markdown decoration (`**Slot**`, `_Slot_`, `Slot:`) stripped (#1175
+    round 5, S1) — one rule for both readers (round 5, M2)."""
+    return [c.strip().strip("*_").strip().rstrip(":").strip().lower() for c in cells]
+
+
+def _is_dispositions_header(cells: list[str] | None) -> bool:
+    if cells is None:
+        return False
+    low = _header_cells(cells)
+    return "disposition" in low and "slot" in low
+
+
+def _dispositions_table_lines(text: str) -> set[str]:
+    """The stripped lines of every table whose header `disposition_rows`
+    recognises — header, rule and every row to the next header or the
+    first non-`|` line, parseable or not (#1175 round 3, M1/S2; round 4,
+    M1/S4). Keyed on the header, not on the rows that parsed: a
+    recognised table none of whose rows the strict reader can read is
+    still the strict reader's (round 4, M1 — "| `errata` | Reviewed |
+    both | … slot kept |" is nobody's removal claim), and a second header
+    written directly under a table starts another table, which is excluded
+    only if it is recognised too (S4). A table the strict reader does not
+    recognise ("| core | `distributions` | removed |") stays with the
+    generic scan, and a dispositions-shaped table with no heading is still
+    the strict reader's. A header is any row the strict reader's own test
+    recognises — a separator row is not required (round 5, M2: the strict
+    reader parses a separator-less table, so the exclusion must cover it)."""
+    out: set[str] = set()
+    recognised = False
+    for line in text.splitlines():
+        if not line.lstrip().startswith("|"):
+            recognised = False
+            continue
+        cells = _cells(line)
+        if _is_dispositions_header(cells):
+            recognised = True
+        elif cells is not None and recognised and _cells_look_like_a_header(cells):
+            recognised = False                      # another table's header, not a dispositions one
+        if recognised:
+            out.add(line.strip())
+    return out
+
+
+def _cells_look_like_a_header(cells: list[str]) -> bool:
+    """A row whose every cell is a bare capitalised or lower-case word with
+    no backtick, digit or disposition word — the shape a header takes and a
+    dispositions row never does."""
+    return all(re.fullmatch(r"[A-Za-z][A-Za-z ]{0,30}", c.strip("*_ ").rstrip(":")) for c in cells) and not any(
+        _DISPOSITION.match(c) for c in cells)
+
+
 def disposition_rows(text: str) -> list[dict[str, str]]:
     """Rows of every table whose header names `slot` and `disposition` columns.
 
@@ -427,12 +601,13 @@ def disposition_rows(text: str) -> list[dict[str, str]]:
                 continue                      # the separator row keeps the header
             header = None
             continue
-        low = [c.lower() for c in cells]
-        if "disposition" in low and "slot" in low and header is None:
+        if _is_dispositions_header(cells):
             # Both columns, or it is some other table with a Disposition
             # column — a numbered finding table, say (#962) — whose rows are
-            # not claims about slots.
-            header = {name: i for i, name in enumerate(low)}
+            # not claims about slots. A second recognised header starts its
+            # own table: keeping the first's column map decoded the second's
+            # rows by the wrong columns (#1175 Codex review, M5).
+            header = {name: i for i, name in enumerate(_header_cells(cells))}
             continue
         if header is None:
             continue
@@ -462,11 +637,25 @@ def disposition_rows(text: str) -> list[dict[str, str]]:
 
 
 def check_report(report: Path, full: dict, core: dict,
-                 declared: dict[str, set[str]]) -> dict[str, Any]:
+                 declared: dict[str, set[str]],
+                 snapshot: dict | None = None,
+                 dispositions_expected: bool | None = None) -> dict[str, Any]:
     """Findings, plus what was skipped.
 
     `declared` maps a class name to its induced slot names — passed in so a
-    caller checking twelve reports builds the SchemaView once.
+    caller checking twelve reports builds the SchemaView once. `snapshot` is
+    the phase-1 record (`intermediate/{P}_full.yaml`, #758) where the runner
+    kept one: with it, a top-level slot the snapshot carried and the final
+    record does not, with no row or sentence recording the removal, is a
+    deterministic finding that needs no claim parsing (#1054, instrument
+    v5). Without it — the agentic path, a run before #758 — that check is
+    reported as not made (`snapshot_checked: false`), never as clean.
+    `dispositions_expected` is the run's own statement that its report
+    phase was asked for the table (`inputs.dispositions_expected`, #961):
+    only then is an unrecorded removal a finding — on a report never asked
+    for a row the removals are listed, not counted (the #684 precedent) —
+    and a parsed table is not the test, because a pre-#929 audit summary
+    can parse as one (#1175 review, M2).
     """
     if not report.exists():
         return {"checked": False, "reason": f"no report at {report}",
@@ -481,14 +670,27 @@ def check_report(report: Path, full: dict, core: dict,
         raise ValueError("declared slots carry no `CoreDataset` class; "
                          "the core schema could not be read")
 
+    # (name as written, record the removal is claimed from), for the
+    # snapshot diff's suppression: only an exact top-level name, claimed
+    # from the full record or from no named record, records a whole-slot
+    # removal — a row removing `x.leaf` or `x[0]`, or removing `x` from the
+    # core alone, says nothing about `x` leaving the full record (#1175
+    # review, M1).
+    removal_named: set[tuple[str, str]] = set()
+
     def removal(names: list[str], context: str, claim: str) -> None:
         nonlocal claims, unnamed
         if not names:
             unnamed += 1
             return
         if _ELEMENT_REMOVAL.search(claim):
-            unnamed += 1                     # a nested field of the entries (#782)
+            # A field removed from every entry is not the slot leaving, so
+            # the claim is unusable — and a claim the reader cannot use
+            # records nothing either (#1175 Codex review, M3: it was
+            # counted unnamed and still suppressed the snapshot finding).
+            unnamed += 1
             return
+        removal_named.update((n, _target(context)) for n in names)
         claims += 1
         where = _target(context)
         for name in names:
@@ -502,18 +704,25 @@ def check_report(report: Path, full: dict, core: dict,
                 continue
             in_full, v_full = resolve(full, name)
             in_core, v_core = resolve(core, name)
-            live = {"core": in_core and _populated(v_core),
-                    "full": in_full and _populated(v_full),
-                    "both": (in_core and _populated(v_core))
-                            or (in_full and _populated(v_full)),
-                    "either": in_core and _populated(v_core)}[where]
+            # A dotted step over a list reads as `[*]` here too (#1175
+            # round 3, S4): one claim, one reading, for removals as well.
+            full_live = (in_full and _populated(v_full)) or _resolve_loose(full, name)
+            core_live = (in_core and _populated(v_core)) or _resolve_loose(core, name)
+            live = {"core": core_live, "full": full_live,
+                    "both": core_live or full_live,
+                    "either": core_live}[where]
             if live:
                 # Describe the value that is live. Under `both` the full
                 # record may be the only one carrying it, and describing the
                 # core's `None` as "record has a value" named the wrong
-                # record (#995).
-                v = (v_full if where == "full"
-                     else v_core if in_core and _populated(v_core) else v_full)
+                # record (#995); a value live only through the loose reading
+                # is described from that reading (round 4, S6).
+                if where == "full":
+                    v = v_full if in_full and _populated(v_full) else _loose_value(full, name)
+                elif core_live:
+                    v = v_core if in_core and _populated(v_core) else _loose_value(core, name)
+                else:
+                    v = v_full if in_full and _populated(v_full) else _loose_value(full, name)
                 findings.append({
                     "kind": "removal_not_performed", "slot": name,
                     "record": where,
@@ -524,7 +733,12 @@ def check_report(report: Path, full: dict, core: dict,
     # the generic scan would read their free-text `reason` cell as a removal
     # claim ("Dropped the duplicate entry; slot kept", #962).
     rows = disposition_rows(text)
-    disposition_lines = {row["line"] for row in rows}
+    # Every line of the dispositions table, not only the rows that parsed:
+    # a row whose disposition cell the reader does not know ("Reviewed")
+    # carries a free-text reason ("Dropped the duplicate entry; slot kept")
+    # that is not a removal claim, and the generic scan below read it as
+    # one (#962; #1175 round 2, M1). The table is the strict reader's.
+    disposition_lines = {row["line"] for row in rows} | _dispositions_table_lines(text)
     for line in text.splitlines():
         cells = _cells(line)
         if not cells or line.strip() in disposition_lines:
@@ -535,7 +749,12 @@ def check_report(report: Path, full: dict, core: dict,
         for i, cell in enumerate(cells):
             if i and _CELL_REMOVED.match(cell):
                 named = [n for c in cells[:i] for n in _named(c)]
-                removal(named, line, line)
+                # `| core | `distributions` | removed |`: the record is a
+                # bare cell, which `_target`'s prose test cannot see, so the
+                # row read as `either` (#1175 Codex review, M6).
+                bare = [c.strip().strip("`*_ ").lower() for c in cells]
+                where = next((c for c in bare if c in ("full", "core", "both")), None)
+                removal(named, f"the {where} record" if where else line, line)
                 break
 
     # Paragraphs, not lines: an outcome sentence wraps, and "The three
@@ -657,13 +876,16 @@ def check_report(report: Path, full: dict, core: dict,
         claims += 1
         in_full, v_full = resolve(full, row["slot"])
         in_core, v_core = resolve(core, row["slot"])
+        # A dotted step over a list reads as `[*]` here as in prose (#1175
+        # round 2, S3): the two readings of one claim must not disagree.
+        full_has = (in_full and _populated(v_full)) or _resolve_loose(full, row["slot"])
+        core_has = (in_core and _populated(v_core)) or _resolve_loose(core, row["slot"])
         # A table with no record column reads like an empty cell here —
         # against either record — and is only counted apart (#1122).
         where = "either" if row["record"] == "no_record_column" else row["record"]
-        present = {"core": in_core and _populated(v_core),
-                   "full": in_full and _populated(v_full),
-                   "both": (in_core and _populated(v_core)) and (in_full and _populated(v_full)),
-                   "either": (in_core and _populated(v_core)) or (in_full and _populated(v_full))}[where]
+        present = {"core": core_has, "full": full_has,
+                   "both": core_has and full_has,
+                   "either": core_has or full_has}[where]
         if not present:
             # `both` on a slot the core class does not declare is a claim the
             # core cannot satisfy by construction (#990): the VOICE v8
@@ -691,6 +913,124 @@ def check_report(report: Path, full: dict, core: dict,
                 "slot": row["slot"], "record": where,
                 "detail": f"report says {row['disposition']}; the {where} record does not carry it" + cause,
                 "claim": row["line"][:240]})
+    # Prose retention claims (#1054): read like a `retained` row that names no
+    # record — present in either record satisfies it — so a sentence saying a
+    # value "remains in `X`" when nothing is at `X` is a finding, not silence.
+    # Paragraphs, not lines, as the removal scan reads them (#1175 review,
+    # S3); table lines are skipped, their cells are read above.
+    prose_retained = 0
+    for para in re.split(r"\n\s*\n", text):
+        prose = " ".join(ln for ln in para.splitlines()
+                         if not ln.lstrip().startswith("|") and not _cells(ln)
+                         and ln.strip() not in disposition_lines)
+        for m in _PROSE_RETAINED.finditer(prose):
+            path = m.group(1)
+            if path.lower() in _NOT_A_SLOT or path.isdigit():
+                continue                       # "remains at `false`" names a value, not a slot (Codex M7)
+            before = prose[max(0, m.start() - 80):m.start()]
+            if _NEGATED_BEFORE.search(before) or _negated_clause(before):
+                continue                       # "nothing remains in `x`", "no value remains in `x`"
+            targets = {"full": full, "core": core}
+            written = path
+            head, _, rest = path.partition(".")
+            if head in targets and rest:
+                # "remains in `core.notes`" names the record, not a slot.
+                targets, path = {head: targets[head]}, rest
+            if not _SLOT_PATH.fullmatch(path):
+                continue                       # `CoreDataset`, `HIPAA`: not a slot path (snake_case only)
+            claims += 1
+            prose_retained += 1
+            if any(_resolve_loose(rec, path) for rec in targets.values()):
+                continue
+            # Prose names a leaf, not a path: "the four named reviewers stay
+            # in `review_details`" means `ethical_reviews[0].review_details`.
+            # A populated key of that name under the claim's own root (or
+            # anywhere, when the root is not a slot) satisfies it; only a
+            # name found nowhere is a finding.
+            if any(_leaf_under_root(rec, path) for rec in targets.values()):
+                continue
+            findings.append({
+                "kind": "retention_not_shown", "slot": written, "record": "either",
+                "detail": "report says the value remains there; neither record carries it, "
+                          "at that path or under that name anywhere",
+                "claim": prose.strip()[:240]})
+    # The snapshot diff (#1054): deterministic, no claim parsing. A top-level
+    # slot the phase-1 record populated and the final full record does not,
+    # with no `removed` row and no removal statement naming it, is a
+    # removal the report did not record — the CHORUS 04f rep2
+    # `regulatory_restrictions` case, the AI_READI 04g rep3 `content_warnings`
+    # case, the VOICE 04f rep2 `data_governance` object (five receipted
+    # leaves). Objects and leaves alike: the test is the root key.
+    # A finding only where the run was asked for the table the row belongs
+    # to (`dispositions_expected`, #961): a report never asked for a row
+    # has none for anything, and every removal in it would read as
+    # unrecorded. Those are listed under `removals_unrecorded` and not
+    # counted as findings, the #684 precedent — a check the instruction
+    # never asked for is not a floor of 0. A parsed table is not the test:
+    # a pre-#929 audit summary parses as one (#1175 review, M2).
+    # What records a removal, for suppression only: an exact top-level name
+    # in a `removed` row or a removal claim against the full record or no
+    # named record (M1), or the weak prose signal — the bare name in a
+    # sentence with a removal word (S1). The strict reading stays for
+    # `removal_not_performed`, where precision matters.
+    recorded = {n for n, where in removal_named if where in ("full", "both", "either")}
+    # The weak signal reads prose only: every table line is left to the
+    # strict readers above (a row whose disposition cell does not parse
+    # carries a free-text reason that is not a statement about the record,
+    # #962), a sentence about the core alone records nothing about the full
+    # record, and `_named` keeps a destination out of the casualties.
+    prose_only = "\n".join(ln for ln in text.splitlines() if not ln.lstrip().startswith("|"))
+    for whole in re.split(r"(?<=[.!?])\s+|\n", prose_only):
+        # Only the clause the removal word sits in, and only where nothing
+        # voids it (#1175 Codex review, M1): a name in another clause is
+        # not what was removed, and a negated or hypothetical removal
+        # records nothing at all.
+        for sent in _CLAUSE_SPLIT.split(whole):
+            if not _REMOVAL_WORD.search(sent) or _removal_voided(sent):
+                continue
+            if _target(sent) == "core" or _target(whole) == "core":
+                continue
+            # A coordinated destination list ("recorded in `a` and `b`")
+            # names no casualty past its first item, which `_named`'s
+            # lookback reaches; the rest are excluded here (#1175 round 3).
+            # ... and only where a removal word precedes the preposition
+            # (round 4, S1): in "the values in `a`, `b` and `c` were
+            # removed" the removal comes after the list, so every item is
+            # a casualty — the first one too, which `_named`'s lookback
+            # would otherwise read as a place.
+            destinations: set[str] = set(); casualties: set[str] = set()
+            for m in _DESTINATION_LIST.finditer(sent):
+                names = _TICKED.findall(m.group(0))
+                if _REMOVAL_WORD.search(sent[:m.start()]):
+                    destinations.update(names)
+                elif _CASUALTY_TAIL.match(sent, m.end()):
+                    # "the values in `a`, `b` and `c` were removed": the
+                    # removal follows the list in the same clause, with no
+                    # retention verb or "rather than" between (round 5, M1 —
+                    # the first cut read every un-preceded list as
+                    # casualties and silenced 51 corpus destinations)
+                    casualties.update(n for n in names if n in _named(m.group(0).replace("in ", "", 1)))
+            recorded.update(n for n in [*_named(sent), *casualties]
+                            if _SLOT_PATH.fullmatch(n) and n not in destinations)
+    unrecorded: list[dict[str, str]] = []
+    expected = bool(dispositions_expected)
+    if isinstance(snapshot, dict):
+        for key, before in snapshot.items():
+            if key in _SNAPSHOT_EXEMPT or not _populated(before):
+                continue
+            if key in full and _populated(full.get(key)):
+                continue
+            if key in recorded:
+                continue
+            unrecorded.append({"slot": key})
+            if not expected:
+                continue
+            findings.append({
+                "kind": "removal_not_recorded", "slot": key, "record": "full",
+                "detail": (f"the phase-1 record carried `{key}` ({_describe(before)}); the final "
+                           f"record does not, and no Dispositions row and no removal statement "
+                           f"names it — add a `removed` row for `{key}`"),
+                "claim": ""})
     seen, unique = set(), []
     for f in findings:
         key = (f["kind"], f.get("slot"), f.get("record"))
@@ -710,7 +1050,115 @@ def check_report(report: Path, full: dict, core: dict,
             # declare (#990/#992): a mis-named record rather than a
             # substantive contradiction, and a reader should see the two apart.
             "claims_core_cannot_hold": core_cannot_hold,
+            # The snapshot diff (#1054): made or not, and what it found. A
+            # record with no snapshot reads `false` here, not zero findings.
+            "snapshot_checked": isinstance(snapshot, dict),
+            "snapshot_basis": (None if not isinstance(snapshot, dict)
+                               else ("dispositions table expected: unrecorded removals are findings"
+                                     + ("" if rows else " (no table parsed)"))
+                               if expected
+                               else "no dispositions table expected: unrecorded removals listed, not findings"),
+            "prose_retention_claims": prose_retained,
+            "removals_unrecorded": [u["slot"] for u in unrecorded],
+            "removals_unrecorded_count": len(unrecorded) if isinstance(snapshot, dict) else None,
             "instrument": REPORT_CLAIMS_INSTRUMENT}
+
+
+def _leaf_under_root(rec: Any, path: str) -> bool:
+    """The prose fallback (#1054): a populated key of the path's leaf name
+    under the path's root. A dotted path whose root the record lacks cannot
+    be satisfied by a leaf found elsewhere (#1175 round 2, S2); a bare name
+    is searched anywhere."""
+    segs = re.split(r"[.\[]", path.rstrip("]"))
+    segs = [s for s in segs if s and not s.isdigit() and s != "*"]
+    leaf, root = segs[-1], segs[0]
+    if not isinstance(rec, dict):
+        return False
+    if len(segs) == 1:
+        return _has_populated_key(rec, leaf)
+    if root not in rec:
+        return False
+    return _has_populated_key(rec.get(root), leaf)
+
+
+def _loose_value(data: Any, path: str) -> Any:
+    """The populated values a dotted-over-list path reads to, as one list,
+    so a loose-only match can be described by its count (round 4, S6)."""
+    parts = re.findall(r"[\w]+|\[\d+\]|\[\*\]", path)
+    out: list[Any] = []
+
+    def walk(cur: Any, i: int) -> None:
+        if i == len(parts):
+            if _populated(cur):
+                out.append(cur)
+            return
+        part = parts[i]
+        if isinstance(cur, list) and not part.startswith("["):
+            for item in cur:
+                walk(item, i)
+            return
+        if part == "[*]":
+            if isinstance(cur, list):
+                for item in cur:
+                    walk(item, i + 1)
+            return
+        if part.startswith("["):
+            idx = int(part[1:-1])
+            if isinstance(cur, list) and idx < len(cur):
+                walk(cur[idx], i + 1)
+            return
+        if isinstance(cur, dict) and part in cur:
+            walk(cur[part], i + 1)
+
+    walk(data, 0)
+    if len(out) == 1:
+        return out[0]
+    if out and all(isinstance(o, list) for o in out):
+        return [x for o in out for x in o]              # entries across the matches, not matches (round 5, S2)
+    return out
+
+
+def _resolve_loose(data: Any, path: str) -> bool:
+    """`resolve`, but a dotted step over a list reads as `[*]`: prose writes
+    `splits.split_details` for `splits[*].split_details` (#1175 review, S4).
+    True when a populated value sits at the path."""
+    parts = re.findall(r"[\w]+|\[\d+\]|\[\*\]", path)
+
+    def walk(cur: Any, i: int) -> bool:
+        if i == len(parts):
+            return _populated(cur)
+        part = parts[i]
+        if isinstance(cur, list) and not part.startswith("["):
+            return any(walk(item, i) for item in cur)
+        if part == "[*]":
+            return isinstance(cur, list) and any(walk(item, i + 1) for item in cur)
+        if part.startswith("["):
+            idx = int(part[1:-1])
+            return isinstance(cur, list) and idx < len(cur) and walk(cur[idx], i + 1)
+        return isinstance(cur, dict) and part in cur and walk(cur[part], i + 1)
+
+    return walk(data, 0)
+
+
+def _has_populated_key(node: Any, name: str) -> bool:
+    """A populated mapping key of this name anywhere in the structure."""
+    if isinstance(node, dict):
+        if name in node and _populated(node[name]):
+            return True
+        return any(_has_populated_key(v, name) for v in node.values())
+    if isinstance(node, list):
+        return any(_has_populated_key(v, name) for v in node)
+    return False
+
+
+def phase1_snapshot_for(core_path: Path) -> dict | None:
+    """The phase-1 snapshot beside a core record, by the same rule the
+    receipts join uses (`receipts.phase1_snapshot`, #758/#761): the
+    highest-numbered `intermediate/{P}_full*.yaml`. None where the runner
+    kept none."""
+    from data_sheets_schema.receipts import phase1_snapshot
+    receipt = core_path.parent / core_path.name.replace("_d4d_core.yaml", "_coverage_receipt.yaml")
+    return phase1_snapshot(receipt)
 
 
 def declared_slots() -> dict[str, set[str]]:

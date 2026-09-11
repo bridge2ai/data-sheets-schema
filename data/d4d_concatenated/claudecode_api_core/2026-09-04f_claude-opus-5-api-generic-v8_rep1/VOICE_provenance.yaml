@@ -300,9 +300,12 @@ validation:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d_core.yaml
       md5: a2d739619182fb2b62f87d0d8eeb1dee
   schema:
-    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
-    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
-  recorded_by: api_runner.execute
+    full_sha256: ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da
+    core_sha256: 7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449
+  duplicate_keys:
+    full: []
+    core: []
+  recorded_by: d4d provenance recheck-validation
 core_derivation:
   derived: true
   rule: shared slots copied from the full record; resources projected by id with full-only
@@ -415,7 +418,7 @@ report_gate:
 report_claims:
   checked: true
   findings: []
-  claims_checked: 46
+  claims_checked: 48
   claims_unnamed: 1
   disposition_rows: 46
   rows_by_record:
@@ -426,14 +429,23 @@ report_claims:
     no_record_column: 0
     invalid: 0
   claims_core_cannot_hold: 0
-  instrument: 'v4 (#1122): `rows_by_record` tallies the dispositions rows by their
-    record column — `full`, `core`, `both`, `either` for an empty cell, `no_record_column`
-    for a table with no such column, `invalid` for anything else — so a `both` row
-    wrongly flipped to `full`, which the gate cannot see (a `full` row resolves against
-    the full record only), is countable from the block; v3 (#1022, #1046): a schema
-    claim that names its own scope — the core schema, the full schema, a class — is
-    resolved against that scope only, not against every class; v2 (#990): a finding
-    on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
+  snapshot_checked: true
+  snapshot_basis: 'dispositions table expected: unrecorded removals are findings'
+  prose_retention_claims: 2
+  removals_unrecorded: []
+  removals_unrecorded_count: 0
+  instrument: 'v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
+    snapshot carried that the final full record does not, with no `removed` row or
+    removal sentence naming it, is `removal_not_recorded`; a prose retention claim
+    (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is
+    read like a retained row; v4 (#1122): `rows_by_record` tallies the dispositions
+    rows by their record column — `full`, `core`, `both`, `either` for an empty cell,
+    `no_record_column` for a table with no such column, `invalid` for anything else
+    — so a `both` row wrongly flipped to `full`, which the gate cannot see (a `full`
+    row resolves against the full record only), is countable from the block; v3 (#1022,
+    #1046): a schema claim that names its own scope — the core schema, the full schema,
+    a class — is resolved against that scope only, not against every class; v2 (#990):
+    a finding on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
     counts them'
   artifacts:
     report:
@@ -446,8 +458,8 @@ report_claims:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d_core.yaml
       md5: a2d739619182fb2b62f87d0d8eeb1dee
   schema:
-    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
-    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
+    full_sha256: ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da
+    core_sha256: 7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449
   recorded_by: backfill_checks
   dispositions_expected: true
 grounding:
@@ -727,8 +739,6 @@ canary:
   - metric: report findings
     run: 0
     baseline_worst: 0
-    baseline_basis: 'floor 0: 3 baseline replicate(s) ran the report check and read
-      no claim, none measured one (#684)'
   - metric: ungrounded identifiers
     run: 0
     baseline_worst: 0
@@ -765,12 +775,11 @@ canary:
   blind: []
   unbaselined: []
   regressions: []
-  basis: 'verdict from checks recomputed from the artifacts on disk at resume (the
-    record''s stored blocks were not rewritten) against the per-project worst of ''2026-09-01_claude-opus-5-api-generic-v7''
-    with the gate''s functions, including the #684 report basis ({''measured'': 0,
-    ''vacuous'': 3, ''unchecked'': 0})'
-  recorded_at: '2026-09-07T03:44:27+00:00'
-  recorded_by: d4d api batch
+  basis: 'verdict from this record''s own check blocks against the per-project worst
+    of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions, including
+    the #684 report basis ({''measured'': 1, ''vacuous'': 2, ''unchecked'': 0})'
+  recorded_at: '2026-09-10T08:42:10+00:00'
+  recorded_by: d4d api verdict (offline)
   prior_verdict:
     status: ok
     rows:
@@ -780,8 +789,6 @@ canary:
     - metric: report findings
       run: 0
       baseline_worst: 0
-      baseline_basis: 'floor 0: 3 baseline replicate(s) ran the report check and read
-        no claim, none measured one (#684)'
     - metric: ungrounded identifiers
       run: 0
       baseline_worst: 0
@@ -815,15 +822,118 @@ canary:
     blind: []
     unbaselined: []
     regressions: []
-    basis: 'offline write of the verdict the batch gate printed after the run''s last
-      phase (report_regate; the phase timings sum to about 2026-09-05T21:24Z from
-      the full phase''s 20:33:39Z start) and fanned out on (the batch log''s line
-      `canary ok — fanning out`), recomputed from this record''s own check blocks
-      against the v7 production per-project worst with the gate''s functions, including
-      the #684 report basis (v7 VOICE: 3 vacuous, 0 measured → floor 0). The batch
-      writes no verdict block of its own (#1020).'
-    recorded_at: '2026-09-05T21:28:16+00:00'
-    recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-05
+    basis: 'verdict from this record''s own check blocks against the per-project worst
+      of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions, including
+      the #684 report basis ({''measured'': 1, ''vacuous'': 2, ''unchecked'': 0})'
+    recorded_at: '2026-09-10T07:49:55+00:00'
+    recorded_by: d4d api verdict (offline)
+    prior_verdict:
+      status: ok
+      rows:
+      - metric: pair errors
+        run: 0
+        baseline_worst: 0
+      - metric: report findings
+        run: 0
+        baseline_worst: 0
+        baseline_basis: 'floor 0: 3 baseline replicate(s) ran the report check and
+          read no claim, none measured one (#684)'
+      - metric: ungrounded identifiers
+        run: 0
+        baseline_worst: 0
+      - metric: resolver URLs in identifier slots
+        run: 0
+        baseline_worst: 0
+      - metric: organisational fragments
+        run: 0
+        baseline_worst: 0
+      - metric: undeclared prefixes
+        run: 0
+        baseline_worst: 0
+      - metric: British spellings
+        run: 2
+        baseline_worst: 2
+      - metric: chunks unreviewed
+        run: 0
+        baseline_worst: 0
+      - metric: snippets unverified
+        run: 0
+        baseline_worst: 0
+      - metric: addressing slips over tolerance
+        run: 0
+        baseline_worst: 0
+      - metric: receipts vacuous
+        run: 0
+        baseline_worst: 0
+      - metric: receipt findings
+        run: 0
+        baseline_worst: 0
+      - metric: duplicate keys
+        run: 0
+        baseline_worst: 0
+      blind: []
+      unbaselined: []
+      regressions: []
+      basis: 'verdict from checks recomputed from the artifacts on disk at resume
+        (the record''s stored blocks were not rewritten) against the per-project worst
+        of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions,
+        including the #684 report basis ({''measured'': 0, ''vacuous'': 3, ''unchecked'':
+        0})'
+      recorded_at: '2026-09-07T03:44:27+00:00'
+      recorded_by: d4d api batch
+      prior_verdict:
+        status: ok
+        rows:
+        - metric: pair errors
+          run: 0
+          baseline_worst: 0
+        - metric: report findings
+          run: 0
+          baseline_worst: 0
+          baseline_basis: 'floor 0: 3 baseline replicate(s) ran the report check and
+            read no claim, none measured one (#684)'
+        - metric: ungrounded identifiers
+          run: 0
+          baseline_worst: 0
+        - metric: resolver URLs in identifier slots
+          run: 0
+          baseline_worst: 0
+        - metric: organisational fragments
+          run: 0
+          baseline_worst: 0
+        - metric: undeclared prefixes
+          run: 0
+          baseline_worst: 0
+        - metric: British spellings
+          run: 2
+          baseline_worst: 2
+        - metric: chunks unreviewed
+          run: 0
+          baseline_worst: 0
+        - metric: snippets unverified
+          run: 0
+          baseline_worst: 0
+        - metric: addressing slips over tolerance
+          run: 0
+          baseline_worst: 0
+        - metric: receipts vacuous
+          run: 0
+          baseline_worst: 0
+        - metric: receipt findings
+          run: 0
+          baseline_worst: 0
+        blind: []
+        unbaselined: []
+        regressions: []
+        basis: 'offline write of the verdict the batch gate printed after the run''s
+          last phase (report_regate; the phase timings sum to about 2026-09-05T21:24Z
+          from the full phase''s 20:33:39Z start) and fanned out on (the batch log''s
+          line `canary ok — fanning out`), recomputed from this record''s own check
+          blocks against the v7 production per-project worst with the gate''s functions,
+          including the #684 report basis (v7 VOICE: 3 vacuous, 0 measured → floor
+          0). The batch writes no verdict block of its own (#1020).'
+        recorded_at: '2026-09-05T21:28:16+00:00'
+        recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-05
 review:
   checked: true
   items_total: 83

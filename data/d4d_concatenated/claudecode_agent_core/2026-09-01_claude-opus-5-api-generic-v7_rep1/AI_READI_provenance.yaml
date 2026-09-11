@@ -340,7 +340,7 @@ pair_consistency:
 report_claims:
   checked: true
   findings: []
-  claims_checked: 0
+  claims_checked: 2
   claims_unnamed: 0
   disposition_rows: 0
   rows_by_record:
@@ -351,14 +351,28 @@ report_claims:
     no_record_column: 0
     invalid: 0
   claims_core_cannot_hold: 0
-  instrument: 'v4 (#1122): `rows_by_record` tallies the dispositions rows by their
-    record column — `full`, `core`, `both`, `either` for an empty cell, `no_record_column`
-    for a table with no such column, `invalid` for anything else — so a `both` row
-    wrongly flipped to `full`, which the gate cannot see (a `full` row resolves against
-    the full record only), is countable from the block; v3 (#1022, #1046): a schema
-    claim that names its own scope — the core schema, the full schema, a class — is
-    resolved against that scope only, not against every class; v2 (#990): a finding
-    on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
+  snapshot_checked: true
+  snapshot_basis: 'no dispositions table expected: unrecorded removals listed, not
+    findings'
+  prose_retention_claims: 2
+  removals_unrecorded:
+  - download_url
+  - data_protection_impacts
+  - future_use_impacts
+  - extension_mechanism
+  removals_unrecorded_count: 4
+  instrument: 'v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
+    snapshot carried that the final full record does not, with no `removed` row or
+    removal sentence naming it, is `removal_not_recorded`; a prose retention claim
+    (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is
+    read like a retained row; v4 (#1122): `rows_by_record` tallies the dispositions
+    rows by their record column — `full`, `core`, `both`, `either` for an empty cell,
+    `no_record_column` for a table with no such column, `invalid` for anything else
+    — so a `both` row wrongly flipped to `full`, which the gate cannot see (a `full`
+    row resolves against the full record only), is countable from the block; v3 (#1022,
+    #1046): a schema claim that names its own scope — the core schema, the full schema,
+    a class — is resolved against that scope only, not against every class; v2 (#990):
+    a finding on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
     counts them'
   artifacts:
     report:
@@ -371,8 +385,8 @@ report_claims:
       path: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d_core.yaml
       md5: 37f167b9585641deadf41b81e0ccfbb7
   schema:
-    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
-    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
+    full_sha256: ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da
+    core_sha256: 7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449
   recorded_by: backfill_checks
 grounding:
   checked: true
@@ -822,9 +836,8 @@ canary:
     run: 0
     baseline_worst: 18
   - metric: report findings
-    run: null
+    run: 0
     baseline_worst: 1
-    note: 'unmeasured: the report carried no claim the checker reads (#684)'
   - metric: ungrounded identifiers
     run: 0
     baseline_worst: 0
@@ -862,8 +875,8 @@ canary:
   - 'British spellings: 45 against a baseline worst of 43'
   basis: 'verdict from this record''s own check blocks against the per-project worst
     of ''2026-08-22c'' with the gate''s functions, including the #684 report basis
-    ({''measured'': 1, ''vacuous'': 2, ''unchecked'': 0})'
-  recorded_at: '2026-09-10T00:12:18+00:00'
+    ({''measured'': 2, ''vacuous'': 1, ''unchecked'': 0})'
+  recorded_at: '2026-09-10T03:05:56+00:00'
   recorded_by: d4d api verdict (offline)
   prior_verdict:
     status: regressed
@@ -872,8 +885,9 @@ canary:
       run: 0
       baseline_worst: 18
     - metric: report findings
-      run: 0
+      run: null
       baseline_worst: 1
+      note: 'unmeasured: the report carried no claim the checker reads (#684)'
     - metric: ungrounded identifiers
       run: 0
       baseline_worst: 0
@@ -909,17 +923,13 @@ canary:
     unbaselined: []
     regressions:
     - 'British spellings: 45 against a baseline worst of 43'
-    basis: 'offline re-verdict under British-spelling instrument v3 (#836/#859, #906;
-      decision D4 of the v8 plan, adopted 2026-09-03): the form blocks of both this
-      run and the 2026-08-22c baseline were recomputed under v3 in #907, and against
-      the same baseline the British row now reads 45 vs baseline worst 43 — regressed
-      on that row, every other row unchanged from the prior verdict. The record stays
-      retained as part of the completed 2026-09-01 arm; this is bookkeeping, not a
-      retry. The prior verdict is kept under `prior_verdict`.'
-    recorded_by: canary.verdict, offline (#906)
-    recorded_at: '2026-09-03T06:37:02+00:00'
+    basis: 'verdict from this record''s own check blocks against the per-project worst
+      of ''2026-08-22c'' with the gate''s functions, including the #684 report basis
+      ({''measured'': 1, ''vacuous'': 2, ''unchecked'': 0})'
+    recorded_at: '2026-09-10T00:12:18+00:00'
+    recorded_by: d4d api verdict (offline)
     prior_verdict:
-      status: ok
+      status: regressed
       rows:
       - metric: pair errors
         run: 0
@@ -940,8 +950,9 @@ canary:
         run: 0
         baseline_worst: 0
       - metric: British spellings
-        run: 30
-        baseline_worst: 37
+        run: 45
+        baseline_worst: 43
+        regressed: true
       - metric: chunks unreviewed
         run: 0
         baseline_worst: 0
@@ -959,14 +970,66 @@ canary:
         baseline_worst: 0
       blind: []
       unbaselined: []
-      regressions: []
-      basis: 'offline re-verdict under the exposure-adjusted revision (#891, registered
-        in the v7 plan): the batch gate ran before the checker classified under-floor
-        snippets as unattesting and addressing-shaped unresolved paths under the ceil(N/200)
-        tolerance; the receipts block was re-checked on 2026-09-02 and this verdict
-        recomputes against the same 2026-08-22c baseline the batch used, with the
-        correct pair/report key mapping.'
-      recorded_by: d4d receipts check + canary.verdict, offline (#891)
+      regressions:
+      - 'British spellings: 45 against a baseline worst of 43'
+      basis: 'offline re-verdict under British-spelling instrument v3 (#836/#859,
+        #906; decision D4 of the v8 plan, adopted 2026-09-03): the form blocks of
+        both this run and the 2026-08-22c baseline were recomputed under v3 in #907,
+        and against the same baseline the British row now reads 45 vs baseline worst
+        43 — regressed on that row, every other row unchanged from the prior verdict.
+        The record stays retained as part of the completed 2026-09-01 arm; this is
+        bookkeeping, not a retry. The prior verdict is kept under `prior_verdict`.'
+      recorded_by: canary.verdict, offline (#906)
+      recorded_at: '2026-09-03T06:37:02+00:00'
+      prior_verdict:
+        status: ok
+        rows:
+        - metric: pair errors
+          run: 0
+          baseline_worst: 18
+        - metric: report findings
+          run: 0
+          baseline_worst: 1
+        - metric: ungrounded identifiers
+          run: 0
+          baseline_worst: 0
+        - metric: resolver URLs in identifier slots
+          run: 0
+          baseline_worst: 0
+        - metric: organisational fragments
+          run: 0
+          baseline_worst: 0
+        - metric: undeclared prefixes
+          run: 0
+          baseline_worst: 0
+        - metric: British spellings
+          run: 30
+          baseline_worst: 37
+        - metric: chunks unreviewed
+          run: 0
+          baseline_worst: 0
+        - metric: snippets unverified
+          run: 0
+          baseline_worst: 0
+        - metric: addressing slips over tolerance
+          run: 0
+          baseline_worst: 0
+        - metric: receipts vacuous
+          run: 0
+          baseline_worst: 0
+        - metric: receipt findings
+          run: 0
+          baseline_worst: 0
+        blind: []
+        unbaselined: []
+        regressions: []
+        basis: 'offline re-verdict under the exposure-adjusted revision (#891, registered
+          in the v7 plan): the batch gate ran before the checker classified under-floor
+          snippets as unattesting and addressing-shaped unresolved paths under the
+          ceil(N/200) tolerance; the receipts block was re-checked on 2026-09-02 and
+          this verdict recomputes against the same 2026-08-22c baseline the batch
+          used, with the correct pair/report key mapping.'
+        recorded_by: d4d receipts check + canary.verdict, offline (#891)
 review:
   checked: true
   items_total: 78

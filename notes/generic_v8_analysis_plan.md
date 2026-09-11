@@ -1641,8 +1641,382 @@ steps need:
     cannot read, and names those behind the current one (0 today). Not a
     generation-path change.
 
+21. **Receipt coverage degree is an arm number, with its denominator
+    (#902, #831, #873, 2026-09-10).** The receipts block has carried
+    `slots.receiptable` and the #807 never/added split since those
+    revisions, but the cross-arm table printed only the count of leaves
+    without a receipt, which compares nothing: the denominator runs from
+    142 to 508 leaves within one arm. `scripts/arm_comparison.py` now
+    carries the denominator, the split and the snippet total as their own
+    rows, and writes a pooled per-arm section — pooled, not a mean of
+    per-record rates, which would weight a 142-leaf record like a
+    508-leaf one. Measured: the v6 agentic arm receipts 2,820 of 5,846
+    receiptable leaves (48.2%), the v7 API canaries 607 of 1,762 (34.4%),
+    the v7 production arm 1,385 of 3,905 (35.5%) and the v8 production
+    arm 2,310 of 4,094 (56.4%). So the v7 degree limit #902 reports from
+    the reviewers is real at arm level and v8 recovers past v6, and the
+    gap is overwhelmingly never-receipted (56.8% of receiptable leaves on
+    v7 production, 42.4% on v8) rather than added after the receipt
+    (7.8% and 1.2%) — the half the protocol could have closed, not the
+    half #742 says has no receipt route. Attribution: 33 of 859 snippets
+    not in the chunk cited on the v7 canaries (3.8%), 132 of 1,733 on v7
+    production (7.6%), 153 of 2,556 on v8 (6.0%), and 0 of 3,400 on the
+    v6 agentic arm, which names chunk ids from the manifest rather than
+    inferring them from marker lines; with the marker side checked
+    byte-for-byte (#873) the rate is the model mis-citing under the
+    `[cNNN]` protocol, usually one chunk early. Nothing is recomputed and
+    no record moves: this is a reading of blocks already on disk, and not
+    a generation-path change. The regeneration also absorbs the drift the
+    note had accumulated since 2026-09-08 — six rows moved by British
+    instrument v4 (amendment 18), report_claims v4 (#1122) and receipts
+    v2/v3 (amendments 15 and 17), none of them by this change, which
+    reproduces the previous without-a-receipt figures exactly.
+
+22. **The agentic arms carry the transcript's reasoning measure (#1010,
+    2026-09-10).** `d4d provenance extend-observed` recomputed every one
+    of the 24 agentic records' `run_observed` from its transcript on the
+    bundle bytes the record hashed (18 recovered from git, 6 on disk),
+    under the record's own `run_observed_until` cut where it declares one
+    — one of the 24 does, and the other 23 are observed over the whole
+    transcript, which each entry's `instrument` now says rather than
+    claiming a cut the record does not carry (#1195 M5) — and extended it only
+    where every prior key reproduced exactly — 24 of 24, 21 from one
+    transcript and 3 (the v5 rep3 AI_READI, CM4AI and VOICE runs, killed
+    and resumed) from the pair of files their name covers, whose sums are
+    the recorded token, tool and duration totals and whose union of read
+    windows is the recorded `bundle_lines_read`. "Every prior key" is 5 or 7 integers per record, of which 4 or 5
+    discriminate: `total_tokens` (eight digits on 22 of the 24, seven on
+    the two CHORUS v5 records) and `duration_ms` carry the
+    identification, while `bundle_lines_total` and
+    `receipt_chunks_total` are the bundle's and the manifest's and every
+    candidate reproduces them. The closest non-matching candidate
+    reproduces 0 of a record's discriminating keys on 17 of the 24, 1 on
+    four and 2 on three, and each record now records that beside its
+    extension under `identification` (`sets_tried`,
+    `discriminating_keys`, `best_other_reproduces_discriminating`), so the
+    claim is auditable from the record rather than by replaying a
+    candidate pool that has since changed (#1195 S8). Ten to nineteen
+    candidate sets were tried per record.
+    Added: `assistant_turns`, `output_tokens`,
+    `thinking_blocks`, `thinking_text_chars` (0 throughout), `visible_text_chars`,
+    `tool_input_chars`, `reasoning_tokens_estimate`, and where any turn
+    carries it `thinking_tokens` / `turns_with_thinking_tokens` (the
+    twelve v6 records and the three resumed v5 rep3 runs). That count is
+    partial on all fifteen — `turns_with_thinking_tokens` is short of
+    `assistant_turns` by 1 to 6 turns on the v6 records and by 36 to 62
+    on the resumed ones, whose first transcript carries the detail on no
+    turn — so it is a floor, not the run's thinking, and only
+    `reasoning_tokens_estimate` spans both arms. `output_tokens` median 116,774 (v5) and 153,026.5 (v6);
+    `reasoning_tokens_estimate` median 68,315.5 and 88,556 — an upper
+    bound on a runtime whose output is mostly tool payloads, never
+    averaged with `api_usage`. `d4d provenance reasoning` reports all 24
+    as `recovered_from_transcript`. Each record's `run_observed_basis`
+    describes the keys it carries and no others, and
+    `run_observed_extended` is a list
+    of extensions naming the keys, the transcripts, the bundle basis and
+    the observer script's sha256 (#1191 review). A `VOICE_PEDIATRIC` run
+    is looked for as `voicepediatric` or `voicepeds` and never offered as
+    VOICE's. Numbered with 19, 20 and 21 open. Not a generation-path
+    change; no verdict reads these keys. Each record's
+    `run_observed_basis` describes the keys it carries and no others: a
+    sentence for the estimate keys present, one for
+    `reasoning_tokens_estimate`'s subtraction, one for the runtime's
+    count and what its turn coverage means (or, on the nine without it,
+    that the observation carries none), and one naming which of them an
+    extension added — the record's only in-text statement that those
+    numbers are not the orchestrator's own run-time observation.
+    A Codex CLI review after six reviewer rounds (#1195) found the
+    recomputation was inferring authorship from sentence text: a curator
+    sentence identical to one of this module's was deleted and one of its
+    own that a curator had edited by a word survived beside its
+    replacement, neither of which a text match can tell apart. An
+    extension now records the exact text it appended
+    (`basis_added`), and the next one removes that string and nothing
+    else; where the account no longer ends with it the paragraph was
+    edited since, and that is stated (`basis_prior_edited`) rather than
+    guessed at. The sentence-matching strip is kept only for a record
+    written before the text was recorded — a set that empties as those
+    records are re-extended — and it now knows the forms earlier rounds
+    wrote, among them round 2's block and round 5's empty extension
+    clause, none of which today's function can produce. Two of the
+    literals it carries match no round's output that a replay of this
+    branch's history could find; they are kept, since an over-wide strip
+    of text this module could have written costs nothing while a missing
+    one doubles a paragraph, and labelled as what they are rather than as
+    evidence that a record says them (rounds 8 and 9, S1). Four more from the same
+    review: the sentence boundary takes `!`, `?` and a closing quote or
+    bracket, so a basis ending in one is idempotent; a full stop supplied
+    to an account that carried none is recorded rather than silent; the
+    skip guard asks for every estimate key, not two of the seven, so a
+    record missing `assistant_turns` or the character counts is no longer
+    skipped for good; and the transcripts are recorded by sha256 as well
+    as name, since one basename can name different bytes under the two
+    config roots.
+
+23. **Every record is brought under the duplicate-key instrument where
+    nothing else moves (#1033, 2026-09-09).** `d4d provenance
+    recheck-validation --all` recomputes each record's validation and
+    writes the block only where the verdict, the artifacts' md5s and each
+    problem's artifact, class and the JSON-pointer paths its message
+    names reproduce — a message carries today's enum list and moves with
+    the schema while the failure it names does not, but a message naming
+    other paths is another failure (#1190 review). The message is the
+    validator's first four lines, so the gate sees at most four failures
+    per problem; 8 of the corpus's 29 problem strings are exactly four
+    lines and may be truncated. An artifact is compared against the hash
+    the block itself recorded, by whichever algorithm it used — 82
+    records pin `sha256` only and 196 `md5` only, which is every record
+    carrying a validation block, and reading `md5`
+    unconditionally held a record for a drift that had not happened
+    (round 3, M1). The write then adds `duplicate_keys`, **this
+    checkout's** schema digest and its own `recorded_by` — re-recording
+    the validator's message where the schema reworded it — and nothing
+    else, saying so on the line where the digest moved; and a record
+    already carrying the field is re-checked when, and only when, its
+    schema pin has moved, since a pass taken before a schema change
+    otherwise leaves its records reading STALE
+    (`runs.validation_status`, #426) with no route back (round 2, M1).
+    `discover` yields a base directory and its
+    `_core` twin as two runs over one record, so the walk is keyed on the
+    record's path: 282 records, not 559 visits. Run over the corpus after
+    a one-record report-mode canary, and re-run after the branch merged
+    main's schema change (#1146 regenerated the merged schema, and 48 of
+    the first pass's records pinned the older digest): **79 written**
+    across `claudecode_agent_core` (40), `claudecode_api_core` (18),
+    `claudecode_agent_crate_only_core` (9),
+    `claudecode_agent_crate_core` (9) and
+    `claudecode_agent_healthsheet_core` (3) — 52 gained a schema block,
+    27 had one restamped, and every one pins this checkout's schema. Of
+    the 79, 12 already carried `duplicate_keys` and were rewritten only
+    to restamp the pin and 67 gained the field, which is the whole 79; 6
+    of those also re-record the validator's message under today's wording
+    with the same pointers, and every one takes this command's
+    `recorded_by`. Each artifact keeps the hash algorithm its own block
+    recorded, recomputed: `api_runner.validation_block` hashes with md5
+    and was never brought under #204, so writing its output as it stood
+    moved a record from sha256 back to the deprecated algorithm and
+    destroyed the sha256 it had attested — one record here, and 81 pin
+    sha256 only and are held today merely because their verdicts flip
+    (#1190 round 4, M1). Zero artifact entries change algorithm. The
+    partition of the 282 is 79 written, 198 held, 4 with no block and 1
+    missing. **198 held** — 196 whose `passed` flips
+    to false under today's schema (the 2026-07 and early-2026-08 arms,
+    whose records validated against the schema of their day), 2 whose
+    problems now name other JSON pointers (the 2026-08-05 v3 rep1
+    AI_READI and CHORUS records, whose `file_collections[*].collection_type`
+    failures the schema no longer raises and whose first four lines are
+    now `creators` failures). No record is held for a drifted artifact:
+    every candidate's artifacts still hash to what its verdict recorded,
+    which the round-2 reading of `md5` alone could not see — the CHORUS
+    2026-07-29 rep1 record it named pins `sha256` and verifies. 4
+    records have no validation block; one has no full artifact (AI_READI
+    2026-08-11 api-generic rep3). A held record stays as
+    it was — its verdict is the one it attested — and is rerun by label as
+    a deliberate act. 78 of the 79 written records record 0 duplicate
+    keys; the one that does not is AI_READI 2026-09-04f rep1, whose own
+    canary already reads `duplicate keys run 1, baseline_worst 0,
+    regressed`, so the recompute reproduces what the record already said.
+    The straddle test's per-record assertion widened with it: a record of
+    the 2026-08-11 arm reads `valid` rather than `stale` once it has been
+    re-validated against today's schema, which is what this change is
+    for, and the artifact-hash check its rationale rests on is unchanged.
+    No canary verdict moves, and the gate reads an absent field as
+    unmeasured, as before. Numbered with 19 (#1054) and 20 (#1140) open. Not a
+    generation-path change.
+
+24. **An unrecorded removal is a finding, and a prose retention claim is a
+    claim (#1054, 2026-09-09, report_claims instrument v5).** Three of nine
+    v8 reviews found a top-level slot the phase-1 record carried, receipted,
+    that both final records lack with no Dispositions row and no audit
+    finding — CHORUS 04f rep2 `regulatory_restrictions` (the report's prose
+    says the analysis "remains in" it), AI_READI 04g rep3 `content_warnings`
+    (a receipted "No"), VOICE 04f rep2 the whole `data_governance` object
+    (five receipted leaves) — and the checker read 31, 22 and 35 claims and
+    found nothing. v5 adds two readings. With the phase-1 snapshot
+    (`intermediate/{P}_full.yaml`, 86 records) a populated top-level slot
+    the final full record does not carry is `removal_not_recorded` unless
+    the report records the removal: an exact top-level name in a `removed`
+    row or a removal claim against the full record or no named record (a
+    row removing `x.leaf`, `x[0]`, or `x` from the core alone records
+    nothing about `x` leaving the full record), or — for suppression only,
+    never for a removal claim — the bare name, read by the same `_named`
+    the removal claims use, in a prose sentence carrying a removal word
+    that is not about the core alone ("### 4.7 Removed `errata`",
+    "`conforms_to_standard` is absent from both records"; not "recorded
+    in `errata`" nor the rest of a coordinated destination list, not "are
+    absent from the core record", not a class name, and no table line —
+    the generic cell scan skips the parsed dispositions table's own extent,
+    header to last row, so a row whose disposition the reader does not
+    know is nobody's removal claim, #962, while a removal table the strict
+    reader does not recognise, the #546 shape, keeps its claims). What the
+    weak signal still misses: informal record wording ("present in full,
+    absent in core", a sentence naming both records), which suppresses a
+    full-record removal on two pre-v8 records — neither a finding, neither
+    run asked for a table; tightening further trades against
+    the false positives the first cut found. Objects and leaves alike;
+    `conforms_to_*`,
+    `notes` and `source_caveats` exempt as from the receipt denominator.
+    The finding needs the table the row belongs to, and the test is the
+    run's own statement that it asked for one (`inputs.dispositions_expected`,
+    #961), not a parsed table — a pre-#929 audit summary with Slot and
+    Disposition headers parses as one: on the 69 snapshot records never
+    asked for a table the removals are listed under `removals_unrecorded`
+    and are not findings (`snapshot_basis` says which; the #684 precedent),
+    on the 17 that were, they are; 39 removals are listed corpus-wide. A
+    paragraph saying a value "remains in",
+    "stays in", "is kept in" a backticked slot path is read like a
+    `retained` row that names no record — a negator within a dozen
+    characters of the verb ("nothing remains in", "never remains in") is
+    not a claim, while one in an earlier clause ("the bundle names no
+    committee, so the statement was retained under `notes`") is; a class
+    name or `HIPAA` is not a path — satisfied at that path in either record
+    with a dotted step over a list read as `[*]` (a dispositions row reads
+    the same way, so the two readings of one claim agree), or by a
+    populated key of the leaf's name under the claim's own root (prose
+    names the leaf: "the four named reviewers stay in `review_details`"; a
+    dotted path whose root the record lacks is not satisfied elsewhere), a
+    `core.`/`full.` prefix picking the record; 161 such claims corpus-wide,
+    all but one satisfied.
+    Recomputed with `backfill-checks --blocks report_claims --overwrite`
+    over the 277 checked records: exactly the three records above gain a
+    finding (the 2026-09-01 v7 arm reads 0 on all twelve before and after;
+    the one stored canary block whose report row read the record as
+    vacuous — AI_READI v7 rep1's, re-derived under #1170 at 00:12Z on
+    2026-09-10, three hours before this branch's report_claims v5 block
+    gave the record two prose retention claims — was
+    re-derived again with `d4d api verdict` in the same change, the
+    #1170 block kept under `prior_verdict`: the row reads 0 against a
+    baseline worst of 1, the status `regressed` on the British row as
+    before, so no verdict moves. A canary block also quotes the
+    **baseline's** `report_basis`, and v5 moves that too: ten blocks in
+    all were re-derived the same way, each keeping its prior under
+    `prior_verdict` (#1175 round 8, M2). No status, no bar and no row
+    moves. One took a `d4d provenance recheck-validation` first: the
+    2026-09-04f VOICE record's `validation` block carried no
+    `duplicate_keys`, so a re-verdict computed from the record correctly
+    found nothing to measure and dropped a row the batch had written —
+    the gated duplicate-key floor, silently no longer reported (#1175
+    round 9, M1). The recheck measures it (0), and the row is back. A
+    re-verdict also carries the curator's own keys forward —
+    `disposition`, `prior_disposition`, `readings` — instead of demoting
+    them into the nested prior, where the plan's own citation of their
+    location stopped being true and four records' plan-owner decisions
+    and registered measurements read as superseded (round 9, M3). Five lose a `baseline_basis` line — the
+    line the gate writes only where the baseline measured nothing — now
+    that their baseline measures: the v7 arm reads 3 measured for
+    AI_READI, 2 for CM4AI, 1 for VOICE, and CHORUS alone stays
+    all-vacuous and keeps its line. The one gated row among them, the
+    2026-09-04d VOICE canary's 5 report findings against a floor of 0,
+    was regressed before and is regressed now). Two
+    earlier cuts were narrowed before the recompute was kept: the first
+    counted an unrecorded removal on every snapshot record and read a
+    leaf-named prose claim as a full path (48 records moved); the second
+    keyed the finding on a parsed table and suppressed on a name's root
+    (5 moved — a v4 CM4AI record whose audit summary parsed as the table
+    and whose prose recorded the removal, and the VOICE 04d canary whose
+    prose said "`conforms_to_standard` is absent from both records"); the
+    third read every backticked name in a sentence with a removal word as
+    a casualty, so a destination, a sentence about the core, or an
+    unparsed table row suppressed a full-record removal (four corpus
+    instances, none a finding; three recovered, two still suppressed by
+    informal record wording, as above — `variables` on the 2026-08-06
+    schema2 rep2 AI_READI record, `compression` on the 2026-08-20b v5 rep3
+    CM4AI one), and its negation window dropped
+    eleven real retention claims; the fourth scoped the table exclusion to
+    a heading, which would have silenced the #546 shape (no corpus loss);
+    the fifth keyed the table exclusion on the rows that parsed, so a
+    recognised table none of whose rows the strict reader could read was
+    excluded by nobody and a cell reading "slot kept" became a removal
+    claim (#962 again; latent on two 2026-07-31 reports with no removal
+    cell), and read a list after a preposition as destinations wherever
+    it stood, so "the values in `a`, `b` and `c` were removed" recorded
+    none of them — the exclusion is now keyed on recognised headers, a
+    second header under a table starts its own, and a list is a
+    destination only where a removal word precedes it (neither moves a
+    corpus block); the sixth read every un-preceded list as casualties,
+    which would have silenced 51 corpus destinations in 37 reports (four
+    on the gated v8 arm — "already carried under `funders`", "retained …
+    rather than removed"), and required a separator row of a header the
+    strict reader does not — the list is a casualty list only where the
+    removal follows it in the same clause, and one header rule, decoration
+    stripped and no separator required, serves both readers (neither
+    moves a corpus block); and the seventh, which the Codex CLI review of
+    this branch read, made the weak signal a fact about the removal's own
+    clause rather than about any sentence carrying a removal word — the
+    review's seven constructed sentences ("`funders` was retained rather
+    than removed", "was never removed", "if `funders` is removed, explain
+    why", "`errata` was removed because `funders` remains valid",
+    "`funders` contains identifiers that were removed", "Deleted prose
+    remains in the existing `funders` block", a core-only statement) each
+    silenced a real unrecorded removal, and each is now pinned. The clause
+    is bounded by a semicolon, a colon, a dash, a comma before a
+    conjunction, a subordinator or a relative pronoun; a removal word that
+    is negated, hypothetical or contrasted ("rather than", "never", "if",
+    "would") **before** the removal word records nothing — order decides,
+    since "was removed, not renamed" and "removed rather than guessed"
+    are records and their contrast follows (#1175 round 7, M2, 21 corpus
+    names); a name after a preposition is a place even
+    with two words of noun phrase between ("in the existing `funders`
+    block"). The clause boundary is a semicolon, a comma before a
+    conjunction, a subordinator or a relative pronoun, and **not** an em
+    dash or a colon: in these reports both join a slot to its disposition
+    ("### 2.1 `publisher` — removed", "- **Removed:** `publisher`"), and
+    splitting on them severed the subject from the removal word in 197 of
+    the 301 reports and invented nine false unrecorded removals (round 7,
+    M1). A retention claim's negation window stops at the previous
+    sentence, or the sentence before ("the bundle names no DPIA …")
+    negated it and dropped 19 genuine claims (round 7, M3). The same review found three claim-side defects: a claim the
+    reader rejects as an element removal (#782) was still recording one
+    (`removal_named` is updated after the rejection, not before), a
+    generic `| full | \`x\` | removed |` row read as `either` because
+    `_target` looks for prose and the record is a bare cell, and a second
+    recognised header kept the first table's column map. **The corpus
+    recompute under all of this gains four findings on the three records
+    above and loses none**: CHORUS 04f rep2 gains both the unrecorded
+    removal and the prose retention claim beside it, VOICE 04f rep2 and
+    AI_READI 04g rep3 one each. `removals_unrecorded` is 39 across 14
+    records — the same count as the pre-Codex reading and not the same
+    set. The weak signal reads the present tense as well as the past
+    participle ("Both records now omit `citation`" records a removal as
+    plainly as "was removed"), which retires three listings that cut
+    carried, while the narrowed clause and void rules retire and add
+    others. Three misses the Codex review named are listed by nobody and
+    are the residual class this amendment already describes: `variables`
+    on the 2026-08-06 schema2 rep2 AI_READI record ("absent from the core
+    record by schema design, not by omission" — a sentence about the core
+    record, where the snapshot finding is about the full one),
+    `compression` on the 2026-08-20b v5 rep3 CM4AI record, and
+    `extension_mechanism` on the 2026-09-01 v7 rep3 AI_READI record. None
+    of the three is a finding: no run among them was asked for a table.
+    Two further effects of the recompute, neither a
+    finding: because a prose retention claim is now a claim checked,
+    `claims_checked` moved on 96 records and 70 reports that read no
+    claim before read one now. `canary.report_vacuous` flips from vacuous
+    to measured on **63** of those 70 and on none in the other direction
+    — the seven that do not flip had findings over `claims_checked: 0`,
+    so they were never vacuous and had nothing to flip (#1175 round 9,
+    S4) — across the 2026-07-28, 2026-07-31 and earlier arms and
+    five of the twelve 2026-09-01 v7 production records, so the v7
+    baseline arm's `report_basis` becomes measured 0 for AI_READI (3 of
+    3), CM4AI (2 measured, 1 vacuous) and VOICE (1 measured, 2 vacuous),
+    while **CHORUS stays all-vacuous** (0 measured, 3 vacuous) and keeps
+    its `baseline_basis` line; the bar is 0 either way and no verdict
+    moves;
+    and every block's
+    `report_claims.schema` pin moved from the schema the runs attested to
+    the schema at this branch's merge with main (the branch touches no
+    schema file; the recompute re-pins to what `_sha256(FULL_SCHEMA)`
+    returns there, which the Codex review found had moved under the
+    branch's base — the recompute of round 7 was taken after merging
+    main, so the pins name the schema this PR lands against) — the re-attestation the
+    `--blocks` restriction exists to make visible, stated here. The regate
+    sees the new class through the same contradictions list; its preamble
+    still introduces the list as "claims the records do not show", which
+    the new class is not — widening it moves the assembly digest and is
+    filed apart. Not a generation-path change.
+
 Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16,
-17 and 20 are not; 15 and 17 are the receipts instrument's revisions and
+17 and 20 to 24 are not; 15 and 17 are the receipts instrument's revisions and
 17 classifies both; 18 changes the normaliser's rule table and is a
 generation-path change by that half); per the production rule none of them may land
 between a v8 canary and its fill.
@@ -1674,7 +2048,9 @@ between a v8 canary and its fill.
   AI_READI block was re-derived the same way on 2026-09-10 UTC (#1170):
   status `regressed` before and after (British 45 vs 43, the same under
   v4 as proposed in #1173, open at the time of writing), the report row unmeasured, the D4 block (#906) under
-  `prior_verdict` and #891's beneath it.
+  `prior_verdict` and #891's beneath it; and once more on 2026-09-10
+  under report_claims v5 (#1054), the report row measured at 0 vs 1 now
+  that the record reads two prose retention claims, status unchanged.
 - **D5** — adopted 2026-09-03: API-only v8 first; the agentic arm needs
   #688's launcher and the parity update before a v8 playbook run is
   cheap enough to repeat.

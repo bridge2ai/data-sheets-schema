@@ -75,6 +75,27 @@ class TestVerdictBlock(unittest.TestCase):
         self.assertIn("'v7'", b["basis"]); self.assertIn("measured", b["basis"])
         self.assertNotIn("prior_verdict", verdict_block(v, label_prefix="v7", report_basis_counts={}, recorded_by="x"))
 
+    def test_a_re_verdict_keeps_the_keys_a_person_put_in_the_block(self):
+        """#1175 round 9, M3: a re-verdict taken to refresh one `report_basis`
+        line demoted the plan owner's disposition and the plan's registered
+        readings into the nested prior, so the note citing their location
+        stopped being true and four records' decisions read as superseded.
+        The measured keys are recomputed; a person's are carried."""
+        v = {"status": "ok", "rows": [], "regressions": [], "blind": [], "unbaselined": []}
+        prior = {"status": "regressed", "rows": [1],
+                 "disposition": "v8 defect (#952), decided by the plan owner on 2026-09-04",
+                 "prior_disposition": "retained with basis, withdrawn",
+                 "readings": {"prediction_2_grant_number": "held"}}
+        b = verdict_block(v, label_prefix="v7", report_basis_counts={}, recorded_by="x", prior=prior)
+        self.assertEqual(b["disposition"], prior["disposition"])
+        self.assertEqual(b["prior_disposition"], prior["prior_disposition"])
+        self.assertEqual(b["readings"], prior["readings"])
+        self.assertEqual(b["status"], "ok")                       # the measurement is the new one
+        self.assertEqual(b["prior_verdict"], prior)               # and the whole prior is still kept
+        # a computed key the new verdict carries is never overwritten by the prior's
+        self.assertEqual(verdict_block({**v, "disposition": "fresh"}, label_prefix="v7",
+                                       report_basis_counts={}, recorded_by="x", prior=prior)["disposition"], "fresh")
+
 
 class _Usage:
     input_tokens = 6349; output_tokens = 5; cache_read_input_tokens = 0; cache_creation_input_tokens = 0

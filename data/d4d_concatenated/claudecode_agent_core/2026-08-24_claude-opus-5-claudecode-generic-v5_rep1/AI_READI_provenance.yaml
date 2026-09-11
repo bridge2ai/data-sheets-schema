@@ -106,6 +106,13 @@ phase_log:
     duration_ms: 1676412
     bundle_lines_read: 5876
     bundle_lines_total: 7376
+    assistant_turns: 68
+    output_tokens: 108261
+    reasoning_tokens_estimate: 60046
+    thinking_blocks: 43
+    thinking_text_chars: 0
+    tool_input_chars: 188036
+    visible_text_chars: 5040
   run_observed_basis: 'aggregate totals for the whole run, observed by the orchestrator
     from the subagent runner''s transcript. One number per run, not per phase: four-phase
     project-agent mode runs every phase in one context, so the run is the only observable
@@ -116,8 +123,64 @@ phase_log:
     the union of the run''s successful file-reading windows over the declared bundle
     (#700): lines the run never opened, or opened only in a read that errored, may
     have been reached by search, but nothing attests that. Cut at run_observed_until:
-    the agent kept acting after its run completed, and the record describes the run.'
+    the agent kept acting after its run completed, and the record describes the run.
+    Of the transcript''s reasoning measure (#1000/#1011) the observation carries assistant_turns,
+    output_tokens, thinking_blocks, thinking_text_chars, visible_text_chars, tool_input_chars,
+    reasoning_tokens_estimate; comparable in kind with the API path''s reasoning log,
+    never to be averaged with it. reasoning_tokens_estimate is output tokens minus
+    a 4-chars-per-token estimate of the text and tool-call payloads: a subtraction,
+    an upper bound, not a measurement. No thinking_tokens: the observation carries
+    none, so the runtime''s own count is not measured for this run. Of these, assistant_turns,
+    output_tokens, reasoning_tokens_estimate, thinking_blocks, thinking_text_chars,
+    tool_input_chars, visible_text_chars were added after the run, under run_observed_extended,
+    which names the source.'
   run_observed_until: '2026-08-26T01:20:00Z'
+  run_observed_extended:
+  - keys_added:
+    - assistant_turns
+    - output_tokens
+    - reasoning_tokens_estimate
+    - thinking_blocks
+    - thinking_text_chars
+    - tool_input_chars
+    - visible_text_chars
+    instrument: the transcript's reasoning measure (#1000/#1011), recomputed by scripts/agentic_observed.py
+      from the transcripts named on the bytes the record hashed, under the record's
+      own run_observed_until cut; every prior key reproduced exactly
+    identification:
+      sets_tried: 12
+      prior_keys: 5
+      discriminating_keys:
+      - bundle_lines_read
+      - duration_ms
+      - tool_uses
+      - total_tokens
+      best_other_reproduces: 1
+      best_other_reproduces_discriminating: 0
+    transcripts:
+    - agent-afanout-aireadi-rep1-92ae283927edabf1.jsonl
+    transcript_sha256:
+      agent-afanout-aireadi-rep1-92ae283927edabf1.jsonl: 27e406320a5ae61e0389f0f3b27794db44d0f9a784d371ad9a5d0d2c6fe20cf2
+    observer_sha256: 1bdeb4fde0bc28a63d9615acba9e53f70db027668086be35ceae8d12c369c0a8
+    bundle_basis:
+      source: git blob
+      path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+      commit: 9049904493393a6ce1db69b9fe0a855ce0db4435
+      md5: 0f3abb51a333555456bedd63891fcd99
+      matched_on:
+      - md5
+    recorded_by: d4d provenance extend-observed (#1010)
+    recorded_at: '2026-09-10T08:36:06+00:00'
+    basis_added: ' Of the transcript''s reasoning measure (#1000/#1011) the observation
+      carries assistant_turns, output_tokens, thinking_blocks, thinking_text_chars,
+      visible_text_chars, tool_input_chars, reasoning_tokens_estimate; comparable
+      in kind with the API path''s reasoning log, never to be averaged with it. reasoning_tokens_estimate
+      is output tokens minus a 4-chars-per-token estimate of the text and tool-call
+      payloads: a subtraction, an upper bound, not a measurement. No thinking_tokens:
+      the observation carries none, so the runtime''s own count is not measured for
+      this run. Of these, assistant_turns, output_tokens, reasoning_tokens_estimate,
+      thinking_blocks, thinking_text_chars, tool_input_chars, visible_text_chars were
+      added after the run, under run_observed_extended, which names the source.'
 schema:
   declared_version: 2.0.0
   declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
@@ -237,7 +300,7 @@ pair_consistency:
 report_claims:
   checked: true
   findings: []
-  claims_checked: 0
+  claims_checked: 1
   claims_unnamed: 0
   disposition_rows: 0
   rows_by_record:
@@ -248,14 +311,23 @@ report_claims:
     no_record_column: 0
     invalid: 0
   claims_core_cannot_hold: 0
-  instrument: 'v4 (#1122): `rows_by_record` tallies the dispositions rows by their
-    record column — `full`, `core`, `both`, `either` for an empty cell, `no_record_column`
-    for a table with no such column, `invalid` for anything else — so a `both` row
-    wrongly flipped to `full`, which the gate cannot see (a `full` row resolves against
-    the full record only), is countable from the block; v3 (#1022, #1046): a schema
-    claim that names its own scope — the core schema, the full schema, a class — is
-    resolved against that scope only, not against every class; v2 (#990): a finding
-    on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
+  snapshot_checked: false
+  snapshot_basis: null
+  prose_retention_claims: 1
+  removals_unrecorded: []
+  removals_unrecorded_count: null
+  instrument: 'v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
+    snapshot carried that the final full record does not, with no `removed` row or
+    removal sentence naming it, is `removal_not_recorded`; a prose retention claim
+    (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is
+    read like a retained row; v4 (#1122): `rows_by_record` tallies the dispositions
+    rows by their record column — `full`, `core`, `both`, `either` for an empty cell,
+    `no_record_column` for a table with no such column, `invalid` for anything else
+    — so a `both` row wrongly flipped to `full`, which the gate cannot see (a `full`
+    row resolves against the full record only), is countable from the block; v3 (#1022,
+    #1046): a schema claim that names its own scope — the core schema, the full schema,
+    a class — is resolved against that scope only, not against every class; v2 (#990):
+    a finding on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
     counts them'
   artifacts:
     report:
@@ -268,8 +340,8 @@ report_claims:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/AI_READI_d4d_core.yaml
       md5: d9b82b58cd749a8ca26fea9a761f55e9
   schema:
-    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
-    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
+    full_sha256: ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da
+    core_sha256: 7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449
   recorded_by: backfill_checks
 grounding:
   checked: true
