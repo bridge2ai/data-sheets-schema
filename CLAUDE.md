@@ -1392,8 +1392,11 @@ not wired into CI or the Makefile for that reason.
 
 `data_sheets_schema.schema_cache.load_yaml(path)` parses a YAML file once
 per process, keyed on its resolved path, mtime and size, and returns a
-deep copy. Read schemas and provenance records through it, never with a
-bare `yaml.safe_load(path.read_text())`. Why: the merged schema is 1.4 MB
+deep copy. Read schemas and provenance records through it rather than
+with a bare `yaml.safe_load(path.read_text())` — with one deliberate
+exception: a writer that reads a file back immediately after replacing it
+(`backfill_checks.apply`, the amend command) reads raw on purpose, and a
+reader inside the same function as the write should too. Why: the merged schema is 1.4 MB
 and was parsed from disk by three production paths on every call — seven
 times per record write — and `d4d runs check` parsed each provenance
 record about twenty times, once per status function. Measured on
