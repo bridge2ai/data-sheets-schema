@@ -28,7 +28,23 @@ passed. The current unchanged schema fingerprints and rendered lengths remain:
 | Dataset | a91bad8b8eaf7c34b147ff5970474342 | 43582 |
 | CoreDataset | dfb9f93caa70559638007035b1be9276 | 29991 |
 
+Review round 3 addressed #946's remaining check-time races and retained views.
+Four regressions demonstrated false success after merged/source/vocabulary
+changes, and one extra view and two digest-cache entries on each stale retry.
+The check now captures input bytes, rejects observed changes, and discards cached
+rebuilds if sources change during the check.
+
+Review round 4 found #1258: changing and restoring the merged file can defeat
+an end-of-check comparison. The independent comparison digest now comes from
+the preserved rebuild and a vocabulary snapshot, calculated in a short-lived
+Python process. The parent caches only up to 32 digest strings, keyed by content,
+displayed source and dependency versions. No temporary LinkML views remain in
+the generation process. Known and custom schema display paths are preserved.
+
+Review round 5 checked changed-then-restored files, custom relative/absolute
+paths, child failures and timeouts, cache isolation and repeated stale checks.
+All 97 focused tests passed. These checks do not lock external editors or promise
+that a file cannot change after a completed check; the generation inputs must
+remain stable for the run.
+
 No schema, vocabulary, generation artifact or prior evaluation was rewritten.
-The separate concurrent-write and repeated-stale-rebuild memory concerns in
-#946 remain open; this change does not claim to synchronize concurrent editors
-or free views retained by LinkML's method caches.

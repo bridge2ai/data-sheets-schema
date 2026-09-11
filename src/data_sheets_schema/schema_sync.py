@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -63,11 +64,13 @@ UNCHECKED = "unchecked"
 
 
 _REBUILT: dict[tuple, bytes] = {}
+_REBUILT_DIGESTS: dict[tuple, str] = {}
 
 
 def forget_rebuilds() -> None:
     """Drop every cached rebuild. `schema_cache.clear` calls this too."""
     _REBUILT.clear()
+    _REBUILT_DIGESTS.clear()
 
 
 def _generator_versions() -> tuple:
@@ -124,6 +127,43 @@ def _regenerate(source: Path, target: Path,
     return True, None
 
 
+def _rebuilt_fingerprint(class_name: str, path: Path, vocabulary: Path,
+                         source_name: str) -> str:
+    """Digest frozen rebuild bytes without retaining a LinkML view (#946).
+
+    Each check has a new temporary path. LinkML's method caches retain views
+    even after callers drop them, so repeated stale checks must not build
+    those views in the long-lived generation process. The child uses this
+    checkout's code and a vocabulary snapshot and exits after one digest.
+    Cache only the resulting strings under content hashes, including the
+    displayed source name. Unchanged successful checks reuse that result.
+    """
+    from data_sheets_schema.schema_view import content_key
+    key = (class_name, source_name, content_key(path)[1], content_key(vocabulary)[1],
+           _generator_versions())
+    if key in _REBUILT_DIGESTS:
+        return _REBUILT_DIGESTS[key]
+    code = (
+        "import sys\nfrom pathlib import Path\n"
+        "sys.path.insert(0, sys.argv[1])\n"
+        "from data_sheets_schema import schema_digest as d\n"
+        "d.VOCABULARY_PIN = Path(sys.argv[4])\n"
+        "inventory = d.build(sys.argv[2], Path(sys.argv[3]))\n"
+        "inventory.schema_path = sys.argv[5]\n"
+        "print(d.fingerprint(d.render(inventory)))\n")
+    result = subprocess.run(
+        [sys.executable, "-c", code, str(Path(__file__).resolve().parents[1]),
+         class_name, str(path.resolve()), str(vocabulary.resolve()), source_name],
+        capture_output=True, text=True, timeout=60)
+    value = result.stdout.strip()
+    if result.returncode or len(value) != 32 or any(c not in "0123456789abcdef" for c in value):
+        raise ValueError(f"rebuilt digest process failed: {(result.stderr or result.stdout).strip()[-300:]}")
+    if len(_REBUILT_DIGESTS) >= 32:
+        del _REBUILT_DIGESTS[next(iter(_REBUILT_DIGESTS))]
+    _REBUILT_DIGESTS[key] = value
+    return value
+
+
 def check_one(merged: Path, source: Path, class_name: str,
               marker: bool = False) -> dict[str, Any]:
     """Rebuild `merged` from `source` and compare."""
@@ -142,33 +182,32 @@ def check_one(merged: Path, source: Path, class_name: str,
         # Same filename, because the digest names the schema it came from and
         # a differing name would be a spurious difference.
         rebuilt = Path(tmp) / merged.name
-        ok, why = _regenerate(source, rebuilt, marker)
-        if not ok:
-            return {**out, "status": UNCHECKED, "reason": why}
-        same = rebuilt.read_bytes() == merged.read_bytes()
         try:
+            source_state = _source_state(source)
+            merged_bytes = merged.read_bytes()
+            vocabulary_bytes = schema_digest.VOCABULARY_PIN.read_bytes()
+            vocabulary = Path(tmp) / "vocabulary" / schema_digest.VOCABULARY_PIN.name
+            vocabulary.parent.mkdir()
+            vocabulary.write_bytes(vocabulary_bytes)
+            ok, why = _regenerate(source, rebuilt, marker)
+            if not ok:
+                return {**out, "status": UNCHECKED, "reason": why}
+            same = rebuilt.read_bytes() == merged_bytes
             live = schema_digest.fingerprint(
                 schema_digest.digest_text(class_name, merged))
-            # Identical bytes digest identically (the digest is a function of
-            # content — `DigestIsAFunctionOfContentTest`), so the rebuilt file
-            # is digested only when it differs. Digesting it every time built
-            # a SchemaView of a fresh temp path per check, pinned for the
-            # life of the process by linkml's method caches (#926) and kept
-            # again by the digest's own path-keyed caches. When the bytes
-            # match, `fresh` is still computed *uncached* from the merged
-            # file: `live` comes from a cache keyed on path alone, so after a
-            # `make regen-all` under a running process it can describe the
-            # schema that was on disk when the process first looked, and the
-            # "matches but its digest does not" verdict below is the only
-            # thing that reports it (#942). The uncached build goes through
-            # the content-keyed shared view: no new view unless the merged
-            # file itself changed, and no digest-cache entry either way.
-            if same:
-                fresh = schema_digest.fingerprint(schema_digest.render(
-                    schema_digest._build_uncached(class_name, merged)))
-            else:
-                fresh = schema_digest.fingerprint(
-                    schema_digest.digest_text(class_name, rebuilt))
+            # Compare against the preserved rebuild, not another read of the
+            # live merged file: a changed-then-restored file can defeat an
+            # end-of-check stability guard (#1258). No temporary views remain
+            # in this process, on either successful or failed retries (#946).
+            fresh = _rebuilt_fingerprint(class_name, rebuilt, vocabulary,
+                                         schema_digest._schema_name(class_name, merged))
+            source_changed = _source_state(source) != source_state
+            if source_changed:
+                forget_rebuilds()
+            if (merged.read_bytes() != merged_bytes or source_changed
+                    or schema_digest.VOCABULARY_PIN.read_bytes() != vocabulary_bytes):
+                return {**out, "status": UNCHECKED,
+                        "reason": "schema inputs changed during the sync check; retry with stable inputs"}
         except Exception as exc:                               # noqa: BLE001
             return {**out, "status": UNCHECKED,
                     "reason": f"digest could not be computed: {exc}"}

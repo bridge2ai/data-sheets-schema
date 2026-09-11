@@ -267,6 +267,12 @@ def _schema_path(class_name: str, schema_path: Path | None) -> Path:
     return resolve_schema(path)
 
 
+def _schema_name(class_name: str, path: Path) -> str:
+    """Stable displayed source for a known merged schema; caller's path otherwise."""
+    known = CLASS_SCHEMA.get(class_name)
+    return str(known) if known and path.name == Path(known).name else str(path)
+
+
 def _cache_key(class_name: str, path: Path) -> _CacheKey:
     # Preserve the caller's displayed path in custom-schema renders, while
     # also distinguishing the actual file after a cwd change. Use the same
@@ -326,9 +332,7 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
     # fingerprint is a function of the schema's content and not of where the
     # file happens to sit. The default path already rendered this string, so
     # no existing digest moves.
-    known = CLASS_SCHEMA.get(class_name)
-    named = str(known) if known and Path(path).name == Path(known).name \
-        else str(path)
+    named = _schema_name(class_name, path)
     digest = ClassDigest(class_name=class_name, schema_path=named)
 
     for slot in sv.class_induced_slots(class_name):
