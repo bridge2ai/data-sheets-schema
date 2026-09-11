@@ -1513,6 +1513,37 @@ steps need:
     cannot read, and names those behind the current one (0 today). Not a
     generation-path change.
 
+21. **Receipt coverage degree is an arm number, with its denominator
+    (#902, #831, #873, 2026-09-10).** The receipts block has carried
+    `slots.receiptable` and the #807 never/added split since those
+    revisions, but the cross-arm table printed only the count of leaves
+    without a receipt, which compares nothing: the denominator runs from
+    142 to 508 leaves within one arm. `scripts/arm_comparison.py` now
+    carries the denominator, the split and the snippet total as their own
+    rows, and writes a pooled per-arm section — pooled, not a mean of
+    per-record rates, which would weight a 142-leaf record like a
+    508-leaf one. Measured: the v6 agentic arm receipts 2,820 of 5,846
+    receiptable leaves (48.2%), the v7 API canaries 607 of 1,762 (34.4%),
+    the v7 production arm 1,385 of 3,905 (35.5%) and the v8 production
+    arm 2,310 of 4,094 (56.4%). So the v7 degree limit #902 reports from
+    the reviewers is real at arm level and v8 recovers past v6, and the
+    gap is overwhelmingly never-receipted (56.8% of receiptable leaves on
+    v7 production, 42.4% on v8) rather than added after the receipt
+    (7.8% and 1.2%) — the half the protocol could have closed, not the
+    half #742 says has no receipt route. Attribution: 33 of 859 snippets
+    not in the chunk cited on the v7 canaries (3.8%), 132 of 1,733 on v7
+    production (7.6%), 153 of 2,556 on v8 (6.0%), and 0 of 3,400 on the
+    v6 agentic arm, which names chunk ids from the manifest rather than
+    inferring them from marker lines; with the marker side checked
+    byte-for-byte (#873) the rate is the model mis-citing under the
+    `[cNNN]` protocol, usually one chunk early. Nothing is recomputed and
+    no record moves: this is a reading of blocks already on disk, and not
+    a generation-path change. The regeneration also absorbs the drift the
+    note had accumulated since 2026-09-08 — six rows moved by British
+    instrument v4 (amendment 18), report_claims v4 (#1122) and receipts
+    v2/v3 (amendments 15 and 17), none of them by this change, which
+    reproduces the previous without-a-receipt figures exactly.
+
 22. **The agentic arms carry the transcript's reasoning measure (#1010,
     2026-09-10).** `d4d provenance extend-observed` recomputed every one
     of the 24 agentic records' `run_observed` from its transcript on the
@@ -1595,7 +1626,7 @@ steps need:
     config roots.
 
 Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16,
-17, 20 and 22 are not; 15 and 17 are the receipts instrument's revisions and
+17 and 20 to 22 are not; 15 and 17 are the receipts instrument's revisions and
 17 classifies both; 18 changes the normaliser's rule table and is a
 generation-path change by that half); per the production rule none of them may land
 between a v8 canary and its fill.

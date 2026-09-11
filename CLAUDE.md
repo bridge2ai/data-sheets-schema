@@ -519,6 +519,24 @@ check` reports receipts blocks by instrument and names those behind the
 current one. v9 R8 still tells the model a
 landing-page label "needs a receipt like any other value" — the cost v2
 removes; #1147 rotates that sentence.
+**Coverage degree is a property of the arm** (#902), and the denominator
+is what makes it readable: receiptable populated leaves, which run from
+142 to 508 in one arm, so a bare without-a-receipt count compares
+nothing. Pooled per arm — the table
+`scripts/arm_comparison.py` writes into `notes/arm_comparison.md`, never a
+mean of per-record rates — the v6 agentic arm receipts 2,820 of 5,846
+leaves (48.2%), the v7 API canaries 607 of 1,762 (34.4%), the v7
+production arm 1,385 of 3,905 (35.5%) and the v8 production arm 2,310 of
+4,094 (56.4%): the v7 degree limit that eight of twelve production
+reviewers read as a rule-15 violation is real, and v8 recovers past v6.
+Zero `not_in_bundle` verdicts were returned anywhere on that arm, so what
+this measures is how far the receipt reaches, not whether the values are
+supported. The #807 split says which half of the gap the protocol could
+have closed: never-receipted dominates (56.8% of receiptable leaves on
+v7 production, 42.4% on v8) over leaves reconciliation or repair added
+after the receipt was written, which have no receipt route at all
+(7.8% and 1.2%, #742). It needs the phase-1 snapshot, so an agentic arm
+reports no split rather than a zero.
 Named non-checks: that `nothing_relevant` was true, and that a real snippet
 supports its value. `backfill-checks` writes a `receipts` block only where a
 receipt exists or the record claims one (#726). Every bundle kind a run may declare has a manifest (#725), so
@@ -614,8 +632,15 @@ chunk, unverified snippet, finding, or vacuous receipt (zero snippets over a
 non-empty bundle) is a regression against a floor of 0. A snippet that is
 verbatim in the bundle but in a chunk other than the one cited is
 `adjacent`/`elsewhere` — reported as "snippets in another chunk", never
-gated (#763; ~2% on the v7 API canaries): support holds, attribution
-precision is its own number. When false, the
+gated (#763): support holds, attribution precision is its own number.
+Pooled over an arm it is 3.8% on the five v7 API canaries (33 of 859
+snippets), 7.6% on the v7 production arm (132 of 1,733) and 6.0% on v8
+(153 of 2,556) — against 0 of 3,400 on the v6 agentic arm, which names
+chunk ids from the manifest it read instead of inferring them from the
+`[cNNN]` marker lines the API path inserts. The marker side was checked
+byte-for-byte on the CM4AI canary and sits correctly (#873), so the rate
+is a property of that protocol and of the model reading it, usually one
+chunk early, not of the receipt (#831). When false, the
 block is not a metric for that run: earlier arms and the API arm before v7
 (#710) wrote none, and "no receipt" from them is not a measurement.
 **Duplicate mapping keys** (#1029) are a validation failure read off the
@@ -1260,6 +1285,42 @@ make compare-evaluations
 | Evidence | None | Quotes, reasoning |
 
 See `notes/LLM_EVALUATION.md` and `notes/RUBRIC_AGENT_USAGE.md` for details.
+
+### Validating the evaluation artifacts (#833)
+
+```bash
+poetry run python scripts/validate_evaluation_schema.py
+```
+
+Walks **every** `*_evaluation.json` under `data/evaluation_llm/` at any
+depth and judges each against the schema its own `rubric` field names. It
+used to read `{rubric}_semantic/concatenated/*.json` only — 28 of the 204
+semantic artifacts, and never `label_aware/`, which is where every
+evaluation since 2026-08 lives and which `scripts/arm_comparison.py`
+reads; one schema-invalid artifact sat there unreported. Nothing runs the
+script in CI or the Makefile, so it is a check you invoke.
+
+Results are partitioned into **live** and **kept**: a directory whose name
+starts `_archive`, `superseded`, or a date is evidence of what an older
+instrument produced, and an invalid record there is reported and never
+rewritten to satisfy today's schema. A **superseded shape** — the
+pre-2026 `summary_scores`/`element_scores` contract — is likewise
+reported, not failed. Only a live invalid artifact makes the run exit
+non-zero. Today: 109 live valid, 12 live superseded, 9 live invalid, and
+40/8/24 kept; the presence-style `rubric10`/`rubric20` outputs (143 each)
+have no schema here and are counted as unjudged rather than skipped in
+silence.
+
+The 9 live invalid are one rubric10-semantic evaluation whose
+`semantic_analysis.issues_detected[].severity` says `info`, which the
+schema does not admit (the score beside it is intact, so the cross-arm
+table is unaffected), and 8 rubric20-semantic evaluations under
+`concatenated/` that still carry the `max_points: 84` shape #314
+identified and were never re-run or archived. Neither is edited: an
+evaluation is what the evaluator produced. **So the script exits
+non-zero on every run today**, and will until those nine are archived or
+re-run (#1200) — read the summary, not the exit code, until then. It is
+not wired into CI or the Makefile for that reason.
 
 ## Running Single Tests
 
