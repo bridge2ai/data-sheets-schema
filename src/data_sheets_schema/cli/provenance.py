@@ -1936,8 +1936,11 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
             raise click.ClickException(f"unknown block(s) {sorted(unknown)}; choose from {list(BLOCKS)}")
 
     # Built once. Each call loads two SchemaViews, which over 122 records is
-    # the difference between seconds and minutes.
+    # the difference between seconds and minutes. Both maps, together, so
+    # they describe one core schema (#994).
+    from data_sheets_schema.report_claims import declared_ranges
     declared = declared_slots()
+    ranges = declared_ranges()
     written = skipped = 0
     import yaml as _yaml
     from datetime import datetime, timezone
@@ -1947,7 +1950,7 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
     for p in paths:
         withheld: list[str] = []
         try:
-            blocks = compute(p, declared, only=wanted)
+            blocks = compute(p, declared, only=wanted, ranges=ranges)
             if "form" in blocks and overwrite:
                 # The audit trail of a form recompute (#907 review): the
                 # prior instrument note and British count are carried

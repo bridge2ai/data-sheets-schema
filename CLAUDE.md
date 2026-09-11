@@ -609,7 +609,18 @@ it (#961). A `both` row on a slot the core class does not declare
 instruction defines `both` as present in both — and the finding names
 the cause so the regate can fix the row (`claims_core_cannot_hold` counts
 those the full record does carry, apart from substantive contradictions;
-#990/#992); the block carries
+#990/#992). **A nested path is judged step by step** against the core
+class's declared ranges rather than at its root alone (#994, instrument
+**v6**): `resources[*].keywords` walks into `CoreDataset`, `creators[0].name`
+into `Creator`. Indexed, wildcard and implicit list paths use the same
+schema walk. A path that descends through a scalar, such as
+`keywords[0].anything`, violates the core schema's declared range and
+carries its own cause. It remains a finding, excluded from
+`claims_core_cannot_hold`; telling a schema-valid record to name `full`
+would not repair that path. Missing classes in a caller-supplied range
+map retain the root-only answer instead of being mistaken for scalars.
+All 277 checked blocks were recomputed under v6 in the same change.
+The block carries
 `instrument` from v2 (#996), from v4 (#1122) `rows_by_record` — the
 dispositions rows tallied by their record column (`full`, `core`, `both`,
 `either` for an empty cell, `no_record_column` for a table that has none —
