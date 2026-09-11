@@ -222,7 +222,6 @@ class TestCuratedIsNotAReference(unittest.TestCase):
             self.assertIsNone(rec["model"]["model"])
 
 
-@pytest.mark.corpus   # walks the committed corpus; the main-branch lane (#1203)
 class TestHashUnification(unittest.TestCase):
     """One algorithm for new records, both readable for old ones (#168).
 
@@ -306,6 +305,7 @@ class TestHashUnification(unittest.TestCase):
             self.assertEqual(out["sha256"], hashlib.sha256(b"stable").hexdigest())
             self.assertNotIn("md5", out)
 
+    @pytest.mark.corpus
     def test_the_corpus_carries_no_stale_verdicts_after_migration(self):
         """No *artifact*-stale verdicts — schema-pin staleness is lawful.
 
@@ -462,7 +462,6 @@ class TestOutputsDescribeRatherThanAssert(unittest.TestCase):
             self.skipTest("no derived records present")
 
 
-@pytest.mark.corpus   # walks the committed corpus; the main-branch lane (#1203)
 class TestTheEndOfRunGate(unittest.TestCase):
     """`d4d runs check` re-verifies rather than noting a hash is present."""
 
@@ -501,6 +500,7 @@ class TestTheEndOfRunGate(unittest.TestCase):
             self.assertEqual(r["drifted"], ["full"])
             self.assertIn("changed after provenance was recorded", r["reason"])
 
+    @pytest.mark.corpus
     def test_the_whole_corpus_passes_the_gate(self):
         from data_sheets_schema.runs import check_provenance, discover, is_complete
         failing = []

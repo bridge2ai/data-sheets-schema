@@ -1429,13 +1429,14 @@ poetry run pytest tests -m corpus                 # what merging will also run
 poetry run pytest tests -n auto                   # everything
 ```
 
-The eight corpus-walk classes carry the registered `corpus` marker: the
+The corpus-walking tests carry the registered `corpus` marker: the
 playbook-drift, URI-scheme, duplicate-key and scope walks, the schema
 straddle check, the hash-unification and end-of-run gates, and the
 instrument-manifest reproduction. **Mark a new test `corpus` when it
 iterates `data/d4d_concatenated` or spawns a whole-corpus CLI check**, so
 the fast lane stays fast; leave it unmarked when it builds its own
-fixture.
+fixture. In a class that mixes both kinds, mark only the individual
+corpus-walking methods so its fixture tests still run on pull requests.
 
 Measured on a 4-core machine, whole suite, 3,094 tests: 26 to 32 minutes
 before #1203, 15 minutes 19 seconds with the caches, **5 minutes 52

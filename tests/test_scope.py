@@ -205,7 +205,6 @@ class TestTheAliasesOfAnEntry(unittest.TestCase):
         self.assertIn("SENTINEL-42", block)
 
 
-@pytest.mark.corpus   # walks the committed corpus; the main-branch lane (#1203)
 class TestCheckingARecord(unittest.TestCase):
     def test_a_record_about_the_companion_cohort_is_caught(self):
         status, why = scope.check_record(
@@ -265,6 +264,7 @@ class TestCheckingARecord(unittest.TestCase):
         self.assertEqual("undeclared", status)
         self.assertIn("no scope declared", why)
 
+    @pytest.mark.corpus
     def test_the_whole_corpus_agrees_with_the_declaration(self):
         """329 records at the time of writing (full and core), none about the
         other cohort. The paragraph was belt-and-braces; this is the braces."""

@@ -58,36 +58,9 @@ jobs:
       - name: Install project
         run: poetry install --no-interaction
 
-      # -v: the log names each test as it starts, so a runner that dies
-      # mid-suite still says which test was running. `--durations` keeps the
-      # slowest tests visible so the next regression is seen, not felt.
-      # `make test` builds the merged schema before pytest, because
-      # `test-schema` depends on it; the runner's schema-sync gate then
-      # compares a freshly built file against a freshly built file. Running
-      # pytest directly skipped that and nine runner tests failed on
-      # "the merged schema is not built from the current source" — the
-      # committed merged schema does not reproduce byte-for-byte under the
-      # runner's own linkml, and `make` was quietly rebuilding it. Kept
-      # explicit here rather than inherited, so the dependency is visible;
-      # whether the committed file should reproduce is #1208.
-      # Forced, not `make full-schema`: that rule's prerequisites are the
-      # source files, so on a fresh checkout — where git gives every file
-      # the same mtime — it is a no-op on an existing merged schema, which
-      # is why `regen-all` has to `rm -f` first (Makefile, #521). Both
-      # merged schemas, because the runner's gate checks `Dataset` and
-      # `CoreDataset`.
-      - name: Rebuild both merged schemas from source
-        run: |
-          rm -f src/data_sheets_schema/schema/data_sheets_schema_all.yaml \
-                src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
-          make full-schema gen-core-schema
-          git --no-pager diff --stat -- src/data_sheets_schema/schema/ || true
-
-      # `-n auto` across the runner's cores. Measured on a 4-core machine with
-      # the #1203 caches: 15 min serial, 5 min 52 s on four workers, same
-      # 3,094 passing. `-v` names each test as it starts, so a runner that
-      # dies mid-suite still says which test was running; `--durations` keeps
-      # the slowest visible, so the next regression is seen rather than felt.
+      # The schema-generation tests build into temporary directories (#1208),
+      # so the parallel suite reads the committed schemas without rebuilding
+      # them first. Keep slow tests visible in the timing report.
       - name: Run the suite without the corpus walks
         run: poetry run pytest tests -v -p no:cacheprovider --durations=25 -n auto -m "not corpus"
 
