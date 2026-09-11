@@ -703,6 +703,32 @@ class TestExecuteOffline(unittest.TestCase):
             # every phase must be given a limit large enough for its artifact
             self.assertGreaterEqual(kw["max_tokens"], 12000)
 
+    def test_prefixed_route_caps_match_the_request_usage_and_provenance(self):
+        from unittest.mock import patch
+        settings = {**self.api._model_settings(), "name": "google/claude-opus-5-high"}
+        client = FakeClient()
+        self.api._client = lambda: client
+        s = spec(out_dir=self.out, condition="generic_v6")
+        with patch.object(self.api, "_model_settings", return_value=settings):
+            result = self.api.execute(s)
+        stored = yaml.safe_load(s.provenance_path.read_text())
+        for usage, request in zip(result["usage"], client.messages.calls, strict=True):
+            self.assertEqual(usage["max_tokens"], request["max_tokens"])
+            self.assertEqual(stored["model"]["max_tokens_by_phase"][usage["phase"]],
+                             request["max_tokens"])
+        self.assertEqual(result["usage"][0]["max_tokens"], 64000)
+
+    def test_all_phase_budgets_respect_the_selected_route(self):
+        from unittest.mock import patch
+        for model in ("google/claude-opus-5-high", "claude-opus-5"):
+            with patch.object(self.api, "_model_settings", return_value={"name": model}):
+                for condition in ("generic_v6", "generic_v7", "generic_v8", "generic_v9"):
+                    for phase, budget in self.api.PHASE_MAX_TOKENS.items():
+                        actual = self.api.phase_max_tokens(spec(condition=condition), phase, budget)
+                        self.assertLessEqual(actual, self.api.output_limit(model))
+                self.assertEqual(self.api.phase_max_tokens(spec(condition="generic_v6"), "unknown", 200000),
+                                 self.api.output_limit(model))
+
 
 class TestValidatorDrivenRepair(unittest.TestCase):
     """#356 option 1: the validator's findings drive a bounded shape repair.
@@ -728,6 +754,21 @@ class TestValidatorDrivenRepair(unittest.TestCase):
             p.write_text("id: x\ntitle: T\nname: n\ndescription: d\n"
                          "keywords: [original]\n", encoding="utf-8")
         return s
+
+    def test_repair_usage_uses_the_model_passed_to_the_request(self):
+        from unittest.mock import patch
+        s = self._spec_with_artifacts()
+        client = FakeClient()
+        usage = []
+        settings = {**self.settings, "name": "google/claude-opus-5-high"}
+        def findings(path, schema, cls):
+            return (["bad shape"] if "original" in path.read_text() else [], None)
+        with patch.object(self.api, "_validator_lines", side_effect=findings):
+            self.api._repair_invalid(s, client, settings, usage)
+        self.assertEqual(len(usage), 1)
+        self.assertEqual(usage[0]["phase"], "repair_full")
+        self.assertEqual(usage[0]["max_tokens"], 64000)
+        self.assertEqual(usage[0]["max_tokens"], client.messages.calls[0]["max_tokens"])
 
     def test_build_repair_puts_instruction_last_and_omits_bundle(self):
         from data_sheets_schema.api_runner import (

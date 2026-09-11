@@ -369,7 +369,9 @@ DERIVED_PHASES = frozenset({"core", "reconcile_core"})
 RECEIPT_PHASE_MAX_TOKENS = {"full": 128000}
 
 
-def phase_max_tokens(spec: "RunSpec", ph: str, default: int) -> int:
+def phase_max_tokens(spec: "RunSpec", ph: str, default: int, *,
+                     model: str | None = None) -> int:
+    value = PHASE_MAX_TOKENS.get(ph, default)
     if spec.condition in RECEIPT_CONDITIONS and ph in RECEIPT_PHASE_MAX_TOKENS:
         # Env-overridable (#777): three consecutive full-phase stalls on the
         # AI_READI v7 re-canary followed the raise to 128k, where two runs at
@@ -382,11 +384,10 @@ def phase_max_tokens(spec: "RunSpec", ph: str, default: int) -> int:
                 value = int(raw)
         except ValueError:
             pass
-        # Clamped here, where the record reads it, so api_usage and
-        # max_tokens_by_phase say what was sent rather than what was asked
-        # for (#779).
-        return min(value, output_limit(_model_settings()["name"]))
-    return PHASE_MAX_TOKENS.get(ph, default)
+    # Every phase and condition must report the cap actually sent, including
+    # non-receipt runs on prefixed routes (#1167). The sender also clamps, but
+    # that alone leaves the usage and provenance records overstating the cap.
+    return min(value, output_limit(model or _model_settings()["name"]))
 
 
 PHASE_MAX_TOKENS = {
@@ -1457,7 +1458,7 @@ def plan(spec: RunSpec) -> dict[str, Any]:
                               + ["report_regate: one regeneration of the report when its "
                                  "dispositions contradict the records (#929); the report "
                                  "request plus the report and the contradictions, output at "
-                                 f"most {PHASE_MAX_TOKENS.get('report', settings['max_tokens'])} tokens"]),
+                                 f"most {phase_max_tokens(spec, 'report', settings['max_tokens'], model=settings['name'])} tokens"]),
     }
 
 
@@ -3318,12 +3319,12 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             try:
                 resp = _call_with_retry(
                     client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
-                    max_tokens=PHASE_MAX_TOKENS.get(ph, DEFAULT_MAX_TOKENS),
+                    max_tokens=phase_max_tokens(spec, ph, DEFAULT_MAX_TOKENS, model=settings["name"]),
                     temperature=settings["temperature"],
                     system=req.system, messages=req.messages,
                     on_incomplete=lambda info, _ph=ph, _rnd=rnd, _st=attempt_started:
                         _record_incomplete_stream(spec, _ph, _rnd, _st, info, usage,
-                                                  max_tokens=PHASE_MAX_TOKENS.get(_ph, DEFAULT_MAX_TOKENS)))
+                                                  max_tokens=phase_max_tokens(spec, _ph, DEFAULT_MAX_TOKENS, model=settings["name"])))
             except Exception as exc:                   # noqa: BLE001
                 # A dead repair call must not take down a run that would
                 # otherwise report invalid-but-complete, as before repair
@@ -3346,7 +3347,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 "thinking_tokens": reasoning.thinking_tokens(resp),
                 "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
                 "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
-                "max_tokens": PHASE_MAX_TOKENS.get(ph, DEFAULT_MAX_TOKENS),
+                "max_tokens": phase_max_tokens(spec, ph, DEFAULT_MAX_TOKENS, model=settings["name"]),
                 "stop_reason": getattr(resp, "stop_reason", None),
             })
             if getattr(resp, "stop_reason", None) == "max_tokens":
@@ -3809,13 +3810,13 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
     try:
         resp = _call_with_retry(
             client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
-            max_tokens=PHASE_MAX_TOKENS.get("report", settings["max_tokens"]),
+            max_tokens=phase_max_tokens(spec, "report", settings["max_tokens"], model=settings["name"]),
             temperature=(settings["temperature"]
                          if settings["temperature_applies"] else None),
             system=req.system, messages=req.messages,
             on_incomplete=lambda info: _record_incomplete_stream(
                 spec, phase, 1, started, info, usage,
-                max_tokens=PHASE_MAX_TOKENS.get("report", settings["max_tokens"])))
+                max_tokens=phase_max_tokens(spec, "report", settings["max_tokens"], model=settings["name"])))
     except Exception:                                          # noqa: BLE001
         return False                # a stale report is better than none
     text = "".join(getattr(b, "text", "") for b in getattr(resp, "content", [])
@@ -3829,7 +3830,7 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
                   "input_tokens": getattr(resp.usage, "input_tokens", None),
                   "output_tokens": getattr(resp.usage, "output_tokens", None),
                   "thinking_tokens": reasoning.thinking_tokens(resp),
-                  "max_tokens": PHASE_MAX_TOKENS.get("report", settings["max_tokens"]),
+                  "max_tokens": phase_max_tokens(spec, "report", settings["max_tokens"], model=settings["name"]),
                   "cache_read": getattr(resp.usage,
                                         "cache_read_input_tokens", None),
                   "cache_write": getattr(resp.usage,
@@ -4156,13 +4157,13 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
         resp = _call_with_retry(
             client,
             model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
-            max_tokens=phase_max_tokens(spec, ph, settings["max_tokens"]),
+            max_tokens=phase_max_tokens(spec, ph, settings["max_tokens"], model=settings["name"]),
             temperature=settings["temperature"],
             system=req.system,
             messages=req.messages,
             on_incomplete=lambda info, _ph=ph, _at=attempt, _st=attempt_started:
                 _record_incomplete_stream(spec, _ph, _at, _st, info, usage,
-                                          max_tokens=phase_max_tokens(spec, _ph, settings["max_tokens"])))
+                                          max_tokens=phase_max_tokens(spec, _ph, settings["max_tokens"], model=settings["name"])))
 
         text = "".join(b.text for b in resp.content
                        if getattr(b, "type", "") == "text")
@@ -4193,7 +4194,7 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
             "thinking_tokens": reasoning.thinking_tokens(resp),
             "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
             "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
-            "max_tokens": phase_max_tokens(spec, ph, settings["max_tokens"]),
+            "max_tokens": phase_max_tokens(spec, ph, settings["max_tokens"], model=settings["name"]),
             "stop_reason": getattr(resp, "stop_reason", None),
         })
 
@@ -4202,7 +4203,7 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
         # ceiling that one attempt overran is not a fact about the phase, so
         # this is retried too rather than ending the run outright.
         truncated = getattr(resp, "stop_reason", None) == "max_tokens"
-        problem = (f"hit max_tokens ({phase_max_tokens(spec, ph, settings['max_tokens'])}); output "
+        problem = (f"hit max_tokens ({phase_max_tokens(spec, ph, settings['max_tokens'], model=settings['name'])}); output "
                    f"truncated" if truncated else None)
         if not truncated:
             try:
@@ -4629,11 +4630,11 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         # Through phase_max_tokens, so a receipt condition's raised `full`
         # budget is the one the record states — the same number api_usage
         # carries per call (#770).
-        "max_tokens_by_phase": {**{k: phase_max_tokens(spec, k, v) for k, v in PHASE_MAX_TOKENS.items()
+        "max_tokens_by_phase": {**{k: phase_max_tokens(spec, k, v, model=settings["name"]) for k, v in PHASE_MAX_TOKENS.items()
                                    if not (CORE_DERIVED and (k in DERIVED_PHASES or k == "repair_core"))},
                                 **({"full_readdress": min(READDRESS_MAX_TOKENS, output_limit(settings["name"]))}
                                    if spec.condition in RECEIPT_CONDITIONS else {}),
-                                "report_regate": PHASE_MAX_TOKENS.get("report", settings["max_tokens"])},
+                                "report_regate": phase_max_tokens(spec, "report", settings["max_tokens"], model=settings["name"])},
         # What the run sent, and what it was allowed to send. The second is
         # usually unknown, and #568 exists because that could not be told from
         # the record: AI-READI's reconcile_full ran at 249,015 tokens under a
