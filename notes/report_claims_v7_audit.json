@@ -1,0 +1,957 @@
+{
+  "date": "2026-09-11",
+  "base_commit": "acaa8c19e60b63974f2ebbd852eee5e23a71418f",
+  "instrument": "v7 (#1089, #1194, #1196): attributed schema claims, exact nested paths and record scopes, table positions, mixed list counts and removal suppression are distinguished; phase-1 snapshot bytes are pinned; v6 (#994): a `both` row's path is judged step by step against the core class's declared ranges rather than at its root alone, a `[*]` wildcard is a step's subscript rather than a step of its own, and `claims_core_cannot_hold` counts only a path the core cannot hold: one that descends through a scalar violates the core schema's declared range, carries its own cause and is excluded from that count; v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the snapshot carried that the final full record does not, with no `removed` row or removal sentence naming it, is `removal_not_recorded`; a prose retention claim (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is read like a retained row; v4 (#1122): `rows_by_record` tallies the dispositions rows by their record column \u2014 `full`, `core`, `both`, `either` for an empty cell, `no_record_column` for a table with no such column, `invalid` for anything else \u2014 so a `both` row wrongly flipped to `full`, which the gate cannot see (a `full` row resolves against the full record only), is countable from the block; v3 (#1022, #1046): a schema claim that names its own scope \u2014 the core schema, the full schema, a class \u2014 is resolved against that scope only, not against every class; v2 (#990): a finding on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold` counts them",
+  "checker_sha256": "b9fe445cc7539221fb88af06e49de9804459c1501ea188cb8914c32fa9809421",
+  "before": {
+    "checked_records": 277,
+    "findings_by_kind": {
+      "removal_not_performed": 41,
+      "false_schema_claim": 25,
+      "change_not_shown": 6,
+      "retention_not_shown": 9,
+      "removal_not_recorded": 3
+    },
+    "claims_checked": 1030,
+    "prose_retention_claims": 161,
+    "unrecorded_removals": 39,
+    "snapshot_checked": 86
+  },
+  "after": {
+    "checked_records": 277,
+    "findings_by_kind": {
+      "removal_not_performed": 41,
+      "false_schema_claim": 23,
+      "change_not_shown": 6,
+      "retention_not_shown": 10,
+      "removal_not_recorded": 3
+    },
+    "claims_checked": 1033,
+    "prose_retention_claims": 164,
+    "unrecorded_removals": 41,
+    "snapshot_checked": 86
+  },
+  "changed_measurements": {
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/AI_READI_provenance.yaml": {
+      "claims_checked": {
+        "before": 2,
+        "after": 3
+      },
+      "prose_retention_claims": {
+        "before": 2,
+        "after": 3
+      }
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/AI_READI_provenance.yaml": {
+      "removals_unrecorded": {
+        "before": [
+          "splits",
+          "subsets",
+          "file_collections",
+          "distribution_formats",
+          "distribution_dates",
+          "third_party_sharing",
+          "license_and_use_terms",
+          "ip_restrictions",
+          "regulatory_restrictions",
+          "maintainers",
+          "updates",
+          "version_access",
+          "retention_limit",
+          "related_datasets",
+          "external_resources"
+        ],
+        "after": [
+          "splits",
+          "subsets",
+          "file_collections",
+          "variables",
+          "distribution_formats",
+          "distribution_dates",
+          "third_party_sharing",
+          "license_and_use_terms",
+          "ip_restrictions",
+          "regulatory_restrictions",
+          "maintainers",
+          "updates",
+          "version_access",
+          "retention_limit",
+          "related_datasets",
+          "external_resources"
+        ]
+      },
+      "removals_unrecorded_count": {
+        "before": 15,
+        "after": 16
+      }
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/CM4AI_provenance.yaml": {
+      "findings": {
+        "before": [
+          {
+            "kind": "removal_not_performed",
+            "slot": "distributions",
+            "record": "either",
+            "detail": "report says removed; record has 10 entries",
+            "claim": "| `distributions` | **Removed** | Not declared anywhere in the schema. Its keys `path`, `md5` and `bytes` are likewise undeclared; checksums are carried by `DistributionFormat.checksum`, and per-file grouping by `FileCollection`. This block"
+          },
+          {
+            "kind": "removal_not_performed",
+            "slot": "distributions[*].conforms_to_standard",
+            "record": "either",
+            "detail": "report says removed; record has 1 entry",
+            "claim": "| `distributions[*].conforms_to_standard` | Removed with its parent | `conforms_to_standard` is declared on `Dataset`, `DataSubset` and `FileCollection`, not on a per-file object of undeclared class. The dataset-level `RO_CRATE` assertion i"
+          },
+          {
+            "kind": "false_schema_claim",
+            "slot": "distributions",
+            "scope": "unscoped",
+            "detail": "report says this is not a declared slot; it is declared on CoreDataset",
+            "claim": "Not declared anywhere in the schema. Its keys `path`, `md5` and `bytes` are likewise undeclared; checksums are carried by `DistributionFormat.checksum`, and per-file grouping by `FileCollection`. This block would have failed validation."
+          }
+        ],
+        "after": [
+          {
+            "kind": "removal_not_performed",
+            "slot": "distributions",
+            "record": "either",
+            "detail": "report says removed; record has 10 entries",
+            "claim": "| `distributions` | **Removed** | Not declared anywhere in the schema. Its keys `path`, `md5` and `bytes` are likewise undeclared; checksums are carried by `DistributionFormat.checksum`, and per-file grouping by `FileCollection`. This block"
+          },
+          {
+            "kind": "removal_not_performed",
+            "slot": "distributions[*].conforms_to_standard",
+            "record": "either",
+            "detail": "report says removed; record has 1 entry",
+            "claim": "| `distributions[*].conforms_to_standard` | Removed with its parent | `conforms_to_standard` is declared on `Dataset`, `DataSubset` and `FileCollection`, not on a per-file object of undeclared class. The dataset-level `RO_CRATE` assertion i"
+          },
+          {
+            "kind": "false_schema_claim",
+            "slot": "distributions",
+            "scope": "unscoped",
+            "detail": "report says this is not a declared slot; it is declared on CoreDataset",
+            "claim": "Not declared anywhere in the schema."
+          }
+        ]
+      }
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/CM4AI_provenance.yaml": {
+      "rows_by_record": {
+        "before": {
+          "full": 0,
+          "core": 0,
+          "both": 0,
+          "either": 0,
+          "no_record_column": 11,
+          "invalid": 0
+        },
+        "after": {
+          "full": 3,
+          "core": 1,
+          "both": 0,
+          "either": 0,
+          "no_record_column": 7,
+          "invalid": 0
+        }
+      }
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/VOICE_provenance.yaml": {
+      "claims_checked": {
+        "before": 2,
+        "after": 3
+      },
+      "prose_retention_claims": {
+        "before": 1,
+        "after": 2
+      }
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/VOICE_provenance.yaml": {
+      "findings": {
+        "before": [
+          {
+            "kind": "false_schema_claim",
+            "slot": "distributions",
+            "scope": "core",
+            "detail": "report says this is not a declared slot; it is declared on CoreDataset; the claim is scoped to the core schema",
+            "claim": "It does not appear in the supplied `CoreDataset` slot inventory; its objects used `path`, which the digest declares on `FileCollection` rather than on any distribution class; and its content duplicated `distribution_formats` while silently "
+          },
+          {
+            "kind": "false_schema_claim",
+            "slot": "notes",
+            "scope": "core",
+            "detail": "report says this is not a declared slot; it is declared on CoreDataset, CoreDistribution; the claim is scoped to the core schema",
+            "claim": "The audit found the core record had dropped `splits` and relocated its content to trailing `notes` prose, and that the core record's `source_caveats` asserted the core schema has no such slot \u2014 an assertion the digest does not support."
+          },
+          {
+            "kind": "false_schema_claim",
+            "slot": "source_caveats",
+            "scope": "core",
+            "detail": "report says this is not a declared slot; it is declared on CoreDataset, CoreDistribution; the claim is scoped to the core schema",
+            "claim": "The audit found the core record had dropped `splits` and relocated its content to trailing `notes` prose, and that the core record's `source_caveats` asserted the core schema has no such slot \u2014 an assertion the digest does not support."
+          }
+        ],
+        "after": [
+          {
+            "kind": "false_schema_claim",
+            "slot": "distributions",
+            "scope": "core",
+            "detail": "report says this is not a declared slot; it is declared on CoreDataset; the claim is scoped to the core schema",
+            "claim": "It does not appear in the supplied `CoreDataset` slot inventory; its objects used `path`, which the digest declares on `FileCollection` rather than on any distribution class; and its content duplicated `distribution_formats` while silently "
+          }
+        ]
+      }
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_provenance.yaml": {
+      "claims_checked": {
+        "before": 0,
+        "after": 1
+      },
+      "prose_retention_claims": {
+        "before": 0,
+        "after": 1
+      }
+    },
+    "data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_provenance.yaml": {
+      "removals_unrecorded": {
+        "before": [],
+        "after": [
+          "extension_mechanism"
+        ]
+      },
+      "removals_unrecorded_count": {
+        "before": 0,
+        "after": 1
+      }
+    },
+    "data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep2/CM4AI_provenance.yaml": {
+      "findings": {
+        "before": [],
+        "after": [
+          {
+            "kind": "retention_not_shown",
+            "slot": "created_by",
+            "record": "either",
+            "detail": "report says the value remains there; the either record does not carry it at the claimed path",
+            "claim": "1. **Aggregate size statements disagree.** The release declares `contentSize`    \"19.9 TB\" and `evi:totalContentSizeBytes` 21051331945400 (\u224821.05 TB decimal,    \u224819.15 TiB). Neither reading reconciles the two. The exact byte count is used f"
+          }
+        ]
+      }
+    },
+    "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_provenance.yaml": {
+      "findings": {
+        "before": [
+          {
+            "kind": "retention_not_shown",
+            "slot": "regulatory_restrictions.regulatory_restrictions",
+            "record": "either",
+            "detail": "report says the value remains there; neither record carries it, at that path or under that name anywhere",
+            "claim": "**`ethical_reviews[0].reviewing_organization` \u2014 removed (both).** The value \"CHoRUS Ethics pillar (Ethical and Trustworthy AI)\" was deleted; the workstream is not a reviewing body. `review_details` was trimmed to the two attested ethics act"
+          },
+          {
+            "kind": "removal_not_recorded",
+            "slot": "regulatory_restrictions",
+            "record": "full",
+            "detail": "the phase-1 record carried `regulatory_restrictions` (a value); the final record does not, and no Dispositions row and no removal statement names it \u2014 add a `removed` row for `regulatory_restrictions`",
+            "claim": ""
+          }
+        ],
+        "after": [
+          {
+            "kind": "retention_not_shown",
+            "slot": "regulatory_restrictions.regulatory_restrictions",
+            "record": "either",
+            "detail": "report says the value remains there; the either record does not carry it at the claimed path",
+            "claim": "**`ethical_reviews[0].reviewing_organization` \u2014 removed (both).** The value \"CHoRUS Ethics pillar (Ethical and Trustworthy AI)\" was deleted; the workstream is not a reviewing body. `review_details` was trimmed to the two attested ethics act"
+          },
+          {
+            "kind": "removal_not_recorded",
+            "slot": "regulatory_restrictions",
+            "record": "full",
+            "detail": "the phase-1 record carried `regulatory_restrictions` (a value); the final record does not, and no Dispositions row and no removal statement names it \u2014 add a `removed` row for `regulatory_restrictions`",
+            "claim": ""
+          }
+        ]
+      }
+    }
+  },
+  "refreshed_canaries": {
+    "data/d4d_concatenated/claudecode_api_core/2026-09-04_claude-opus-5-api-generic-v8_rep1/CM4AI_provenance.yaml": {
+      "status": "regressed",
+      "added_metrics": [
+        "duplicate keys"
+      ],
+      "before_basis": "verdict from this record's own check blocks against the per-project worst of '2026-09-01_claude-opus-5-api-generic-v7' with the gate's functions, including the #684 report basis ({'measured': 2, 'vacuous': 1, 'unchecked': 0})",
+      "after_basis": "verdict from this record's own check blocks against the per-project worst of '2026-09-01_claude-opus-5-api-generic-v7' with the gate's functions, including the #684 report basis ({'measured': 2, 'vacuous': 1, 'unchecked': 0})",
+      "annotation_bases": {
+        "disposition_basis": {
+          "status": "regressed",
+          "rows": [
+            {
+              "metric": "pair errors",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "report findings",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "ungrounded identifiers",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "resolver URLs in identifier slots",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "organisational fragments",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "undeclared prefixes",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "British spellings",
+              "run": 0,
+              "baseline_worst": 2
+            },
+            {
+              "metric": "chunks unreviewed",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "snippets unverified",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "addressing slips over tolerance",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "receipts vacuous",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "receipt findings",
+              "run": 1,
+              "baseline_worst": 0,
+              "regressed": true
+            }
+          ],
+          "blind": [],
+          "unbaselined": [],
+          "regressions": [
+            "receipt findings: 1 against a floor of 0"
+          ],
+          "recorded_at": "2026-09-03T18:49:26-07:00",
+          "annotation_sha256": "b31e8cfd54309564c0b9ea275f6e9cd48fd56c2c4074821f7cdead35d1f48836",
+          "stale": true,
+          "changed_fields": [
+            "rows"
+          ]
+        },
+        "prior_disposition_basis": {
+          "status": "regressed",
+          "rows": [
+            {
+              "metric": "pair errors",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "report findings",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "ungrounded identifiers",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "resolver URLs in identifier slots",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "organisational fragments",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "undeclared prefixes",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "British spellings",
+              "run": 0,
+              "baseline_worst": 2
+            },
+            {
+              "metric": "chunks unreviewed",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "snippets unverified",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "addressing slips over tolerance",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "receipts vacuous",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "receipt findings",
+              "run": 1,
+              "baseline_worst": 0,
+              "regressed": true
+            }
+          ],
+          "blind": [],
+          "unbaselined": [],
+          "regressions": [
+            "receipt findings: 1 against a floor of 0"
+          ],
+          "recorded_at": "2026-09-03T18:49:26-07:00",
+          "annotation_sha256": "982eb2512543fc3810bfc26e4eb63acc5a42e761d101fcd9a98fcbf6ee8cdd99",
+          "stale": true,
+          "changed_fields": [
+            "rows"
+          ]
+        },
+        "readings_basis": {
+          "status": "regressed",
+          "rows": [
+            {
+              "metric": "pair errors",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "report findings",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "ungrounded identifiers",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "resolver URLs in identifier slots",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "organisational fragments",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "undeclared prefixes",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "British spellings",
+              "run": 0,
+              "baseline_worst": 2
+            },
+            {
+              "metric": "chunks unreviewed",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "snippets unverified",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "addressing slips over tolerance",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "receipts vacuous",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "receipt findings",
+              "run": 1,
+              "baseline_worst": 0,
+              "regressed": true
+            }
+          ],
+          "blind": [],
+          "unbaselined": [],
+          "regressions": [
+            "receipt findings: 1 against a floor of 0"
+          ],
+          "recorded_at": "2026-09-03T18:49:26-07:00",
+          "annotation_sha256": "92b3a88cbbfb5ed4e5d73d787f11e148aebc4c9b05df9f220a7c955dcda7e8cb",
+          "stale": true,
+          "changed_fields": [
+            "rows"
+          ]
+        }
+      }
+    },
+    "data/d4d_concatenated/claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_provenance.yaml": {
+      "status": "regressed",
+      "added_metrics": [
+        "duplicate keys"
+      ],
+      "before_basis": "verdict from this record's own check blocks against the per-project worst of '2026-09-01_claude-opus-5-api-generic-v7' with the gate's functions, including the #684 report basis ({'measured': 2, 'vacuous': 1, 'unchecked': 0})",
+      "after_basis": "verdict from this record's own check blocks against the per-project worst of '2026-09-01_claude-opus-5-api-generic-v7' with the gate's functions, including the #684 report basis ({'measured': 2, 'vacuous': 1, 'unchecked': 0})",
+      "annotation_bases": {
+        "disposition_basis": {
+          "status": "regressed",
+          "rows": [
+            {
+              "metric": "pair errors",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "report findings",
+              "run": 0,
+              "baseline_worst": 0,
+              "baseline_basis": "floor 0: 3 baseline replicate(s) ran the report check and read no claim, none measured one (#684)"
+            },
+            {
+              "metric": "ungrounded identifiers",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "resolver URLs in identifier slots",
+              "run": 16,
+              "baseline_worst": 0,
+              "regressed": true
+            },
+            {
+              "metric": "organisational fragments",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "undeclared prefixes",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "British spellings",
+              "run": 2,
+              "baseline_worst": 2
+            },
+            {
+              "metric": "chunks unreviewed",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "snippets unverified",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "addressing slips over tolerance",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "receipts vacuous",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "receipt findings",
+              "run": 0,
+              "baseline_worst": 0
+            }
+          ],
+          "blind": [],
+          "unbaselined": [],
+          "regressions": [
+            "resolver URLs in identifier slots: 16 against a baseline worst of 0"
+          ],
+          "recorded_at": "2026-09-04T07:39:46+00:00",
+          "annotation_sha256": "4b7dc0d9e13b69aebc8f0f9ec770c3eb581802e7e281e3725decd4a5fda1fa32",
+          "stale": true,
+          "changed_fields": [
+            "rows"
+          ]
+        },
+        "readings_basis": {
+          "status": "regressed",
+          "rows": [
+            {
+              "metric": "pair errors",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "report findings",
+              "run": 0,
+              "baseline_worst": 0,
+              "baseline_basis": "floor 0: 3 baseline replicate(s) ran the report check and read no claim, none measured one (#684)"
+            },
+            {
+              "metric": "ungrounded identifiers",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "resolver URLs in identifier slots",
+              "run": 16,
+              "baseline_worst": 0,
+              "regressed": true
+            },
+            {
+              "metric": "organisational fragments",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "undeclared prefixes",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "British spellings",
+              "run": 2,
+              "baseline_worst": 2
+            },
+            {
+              "metric": "chunks unreviewed",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "snippets unverified",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "addressing slips over tolerance",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "receipts vacuous",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "receipt findings",
+              "run": 0,
+              "baseline_worst": 0
+            }
+          ],
+          "blind": [],
+          "unbaselined": [],
+          "regressions": [
+            "resolver URLs in identifier slots: 16 against a baseline worst of 0"
+          ],
+          "recorded_at": "2026-09-04T07:39:46+00:00",
+          "annotation_sha256": "11a3c26acc463cb06f06e8c08925fceda9f720a807f7e01ea74e607531286bf3",
+          "stale": true,
+          "changed_fields": [
+            "rows"
+          ]
+        }
+      }
+    },
+    "data/d4d_concatenated/claudecode_api_core/2026-09-04c_claude-opus-5-api-generic-v8_rep1/CM4AI_provenance.yaml": {
+      "status": "ok",
+      "added_metrics": [
+        "duplicate keys"
+      ],
+      "before_basis": "verdict from this record's own check blocks against the per-project worst of '2026-09-01_claude-opus-5-api-generic-v7' with the gate's functions, including the #684 report basis ({'measured': 2, 'vacuous': 1, 'unchecked': 0})",
+      "after_basis": "verdict from this record's own check blocks against the per-project worst of '2026-09-01_claude-opus-5-api-generic-v7' with the gate's functions, including the #684 report basis ({'measured': 2, 'vacuous': 1, 'unchecked': 0})",
+      "annotation_bases": {
+        "disposition_basis": {
+          "status": "ok",
+          "rows": [
+            {
+              "metric": "pair errors",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "report findings",
+              "run": 0,
+              "baseline_worst": 0,
+              "baseline_basis": "floor 0: 3 baseline replicate(s) ran the report check and read no claim, none measured one (#684)"
+            },
+            {
+              "metric": "ungrounded identifiers",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "resolver URLs in identifier slots",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "organisational fragments",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "undeclared prefixes",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "British spellings",
+              "run": 0,
+              "baseline_worst": 2
+            },
+            {
+              "metric": "chunks unreviewed",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "snippets unverified",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "addressing slips over tolerance",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "receipts vacuous",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "receipt findings",
+              "run": 0,
+              "baseline_worst": 0
+            }
+          ],
+          "blind": [],
+          "unbaselined": [],
+          "regressions": [],
+          "recorded_at": "2026-09-04T16:58:45+00:00",
+          "annotation_sha256": "392acaa64c31ccd0f5551633415b569fb395e45c0a59baf4e5a744fdb3e132fa",
+          "stale": true,
+          "changed_fields": [
+            "rows"
+          ]
+        },
+        "readings_basis": {
+          "status": "ok",
+          "rows": [
+            {
+              "metric": "pair errors",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "report findings",
+              "run": 0,
+              "baseline_worst": 0,
+              "baseline_basis": "floor 0: 3 baseline replicate(s) ran the report check and read no claim, none measured one (#684)"
+            },
+            {
+              "metric": "ungrounded identifiers",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "resolver URLs in identifier slots",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "organisational fragments",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "undeclared prefixes",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "British spellings",
+              "run": 0,
+              "baseline_worst": 2
+            },
+            {
+              "metric": "chunks unreviewed",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "snippets unverified",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "addressing slips over tolerance",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "receipts vacuous",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "receipt findings",
+              "run": 0,
+              "baseline_worst": 0
+            }
+          ],
+          "blind": [],
+          "unbaselined": [],
+          "regressions": [],
+          "recorded_at": "2026-09-04T16:58:45+00:00",
+          "annotation_sha256": "900d051d9317fa40b7ded32f88fc72aa3f23e4d864f0bfb268f1ffb3ebef7830",
+          "stale": true,
+          "changed_fields": [
+            "rows"
+          ]
+        }
+      }
+    },
+    "data/d4d_concatenated/claudecode_api_core/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_provenance.yaml": {
+      "status": "regressed",
+      "added_metrics": [
+        "duplicate keys"
+      ],
+      "before_basis": "verdict from this record's own check blocks against the per-project worst of '2026-09-01_claude-opus-5-api-generic-v7' with the gate's functions, including the #684 report basis ({'measured': 1, 'vacuous': 2, 'unchecked': 0})",
+      "after_basis": "verdict from this record's own check blocks against the per-project worst of '2026-09-01_claude-opus-5-api-generic-v7' with the gate's functions, including the #684 report basis ({'measured': 1, 'vacuous': 2, 'unchecked': 0})",
+      "annotation_bases": {
+        "readings_basis": {
+          "status": "regressed",
+          "rows": [
+            {
+              "metric": "pair errors",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "report findings",
+              "run": 5,
+              "baseline_worst": 0,
+              "baseline_basis": "floor 0: 3 baseline replicate(s) ran the report check and read no claim, none measured one (#684)",
+              "regressed": true
+            },
+            {
+              "metric": "ungrounded identifiers",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "resolver URLs in identifier slots",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "organisational fragments",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "undeclared prefixes",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "British spellings",
+              "run": 8,
+              "baseline_worst": 2,
+              "regressed": true
+            },
+            {
+              "metric": "chunks unreviewed",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "snippets unverified",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "addressing slips over tolerance",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "receipts vacuous",
+              "run": 0,
+              "baseline_worst": 0
+            },
+            {
+              "metric": "receipt findings",
+              "run": 0,
+              "baseline_worst": 0
+            }
+          ],
+          "blind": [],
+          "unbaselined": [],
+          "regressions": [
+            "report findings: 5 against a baseline worst of 0",
+            "British spellings: 8 against a baseline worst of 2"
+          ],
+          "recorded_at": "2026-09-04T17:33:12+00:00",
+          "annotation_sha256": "d05c89a62edfa38a6614d0434f9198fc25ec4c9e25593710b1f5397c791069db",
+          "stale": true,
+          "changed_fields": [
+            "rows"
+          ]
+        }
+      }
+    },
+    "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_provenance.yaml": {
+      "status": "ok",
+      "added_metrics": [],
+      "before_basis": "verdict from this record's own check blocks against the per-project worst of '2026-09-01_claude-opus-5-api-generic-v7' with the gate's functions, including the #684 report basis ({'measured': 0, 'vacuous': 3, 'unchecked': 0})",
+      "after_basis": "verdict from this record's own check blocks against the per-project worst of '2026-09-01_claude-opus-5-api-generic-v7' with the gate's functions, including the #684 report basis ({'measured': 1, 'vacuous': 2, 'unchecked': 0})",
+      "annotation_bases": {}
+    }
+  },
+  "codex_reviews": [
+    {
+      "issue": 1230,
+      "findings": 4,
+      "addressed": 4,
+      "artifact": "report_claims_v7_codex_review.md"
+    },
+    {
+      "issue": 1233,
+      "findings": 5,
+      "addressed": 5,
+      "artifact": "report_claims_v7_codex_followup.md"
+    }
+  ]
+}

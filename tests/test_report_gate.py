@@ -320,6 +320,9 @@ class TestTheRunnerGate(unittest.TestCase):
         self.assertEqual(d["report_claims"]["findings"], [])
         self.assertEqual(d["report_claims"]["claims_checked"], 1)
         self.assertTrue(d["report_claims"]["dispositions_expected"])
+        snapshot = d["report_claims"]["artifacts"]["phase1_snapshot"]
+        self.assertEqual(snapshot["state"], "usable")
+        self.assertEqual(snapshot["sha256"], hashlib.sha256(Path(snapshot["path"]).read_bytes()).hexdigest())
         regate = next(c for c in fake.calls if PHASE_INSTRUCTIONS["report_regate"] in
                       " ".join(p.get("text", "") for p in c["messages"][0]["content"]))
         blob = " ".join(p.get("text", "") for p in regate["messages"][0]["content"])

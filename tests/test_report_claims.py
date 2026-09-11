@@ -427,7 +427,7 @@ class ScopedSchemaClaimTest(Harness):
 
     def test_the_instrument_names_the_change(self):
         from data_sheets_schema.report_claims import REPORT_CLAIMS_INSTRUMENT
-        self.assertTrue(REPORT_CLAIMS_INSTRUMENT.startswith("v6"),
+        self.assertTrue(REPORT_CLAIMS_INSTRUMENT.startswith("v7"),
                         REPORT_CLAIMS_INSTRUMENT)
         self.assertIn("#994", REPORT_CLAIMS_INSTRUMENT)
         self.assertIn("#1122", REPORT_CLAIMS_INSTRUMENT)
@@ -927,11 +927,11 @@ class UnrecordedRemovalTest(Harness):
         self.assertEqual(b["prose_retention_claims"], 0)
         self.assertEqual(b["findings"], [])
 
-    def test_the_instrument_is_v6(self):
+    def test_the_instrument_is_v7(self):
         """The block names the current reading first and keeps every earlier
         one, so a block computed under either is readable from its own text."""
         b = self.check(self.TABLE, full={"keywords": ["a"]}, core={"keywords": ["a"]})
-        self.assertTrue(b["instrument"].startswith("v6 (#994)"))
+        self.assertTrue(b["instrument"].startswith("v7 (#1089, #1194, #1196)"))
         self.assertIn("v5 (#1054)", b["instrument"])
         self.assertIn("v4 (#1122)", b["instrument"])
 

@@ -2041,8 +2041,85 @@ steps need:
     the new class is not — widening it moves the assembly digest and is
     filed apart. Not a generation-path change.
 
+25. **report_claims v7 (#1089, #1194, #1196; 2026-09-11).** The
+    277 checked blocks were recomputed with `d4d provenance backfill-checks
+    --blocks report_claims --overwrite --execute`, after #1206, #1219,
+    #1221 and #1226 merged. The reader now distinguishes record-side
+    assertions from the report's own schema assertions; keeps complete
+    nested paths and prose record scopes; reads unbordered dispositions
+    tables and embedded record qualifiers; excludes table rows by source
+    position; counts entries across mixed list/scalar matches; and pins
+    the exact phase-1 snapshot bytes parsed (86 usable, 191 absent).
+
+    The instrument reads **83 findings**, versus 84 under v6: 41
+    `removal_not_performed`, 23 `false_schema_claim`, 6 `change_not_shown`,
+    10 `retention_not_shown`, and 3 `removal_not_recorded`. The two schema
+    findings removed are the quoted/disavowed `notes` and `source_caveats`
+    assertion on VOICE 2026-08-20b v5 rep1 (#1089). The added retention
+    finding is `created_by` on CM4AI crate-only 2026-07-28 rep2: the bare
+    declared root path is absent, although nested namesakes exist. That
+    old report can have intended the nested fields; the new reading
+    requires it to qualify that path and does not edit the historical text.
+
+    There are 1,033 claims checked (previously 1,030), including 164 prose
+    retention claims (161). The three newly read retention claims are
+    AI_READI schema2 2026-08-06 rep1, VOICE v4 rep3 and CHORUS v7 rep1.
+    There are **41 unrecorded removals listed**, versus 39: `variables`
+    on AI_READI schema2 2026-08-06 rep2 and `extension_mechanism` on AI_READI v7
+    rep3. The last verifies #1194's M2 residual: the snapshot contains it,
+    both final records lack it, and the report's full-retained/core-absent
+    wording must not suppress it. Neither of these two runs was asked for
+    a dispositions table, so these listings add no gated finding.
+
+    The removal-suppression harness tests every named slot against a
+    hypothetical removal, making latent errors visible even where the
+    real record kept the slot. Across 277 reports it reads 1,780 suppressed
+    names, versus 1,881: **0 gained, 101 lost**. The adjacent
+    `report_claims_v7_removal_diff.json` lists each change with the report
+    hash and baseline checker hash. This is a different measurement from
+    the 41 actual snapshot removals. Coordinated slot lists remain joined;
+    independent full/core predicates are separated. The Codex plugin review
+    (#1230) found and corrected four parser regressions: cross-sentence
+    attribution, unsupported table-row continuation, explicit full removal
+    with core-absence context, and separate retention predicates. Six lost
+    suppression names were restored, including CHORUS's stated `anomalies`
+    removal. CHORUS's explicit `known_biases` full removal is also
+    recognized again, restoring its prior listing count. The verbatim
+    review is retained beside these audit files.
+    The follow-up plugin review (#1233) also repaired independent
+    while/yet attribution, unfamiliar headers with separator rows,
+    retention next to an absence predicate, shared negation across
+    coordinated verbs, and active full removals with core-absence context.
+    Its counterexamples are regression cases; these repairs leave the
+    refreshed corpus totals and suppression totals unchanged.
+    Gerunds remain outside
+    the weak signal because the corpus uses them for hypothetical removals.
+
+    CHORUS's v7 production baseline now has **1 measured, 2 vacuous**
+    reports, rather than 0/3, on the newly read `data_governance` retention
+    claim. The 2026-09-04f CHORUS canary was re-derived with `d4d api
+    verdict`; its report row remains 0 against 0 and drops the all-vacuous
+    `baseline_basis` line. The same audit found four older canaries with
+    measured duplicate-key blocks but no matching gate row (#1229):
+    CM4AI 09-04/04b/04c and VOICE 04d. They were re-derived separately,
+    adding a measured zero duplicate-key row. **No status or existing
+    numeric row changes.** All five keep the complete former verdict
+    under `prior_verdict`. The four curator-annotated blocks also retain
+    their annotations with the original measurement bases and stale
+    markers supplied by #1201; no curator decision is silently renewed.
+
+    `report_claims_v7_audit.json` records the base commit, checker digest,
+    before/after aggregates, every changed measurement and all five
+    canary refreshes. The corpus test recomputes all 277 blocks and checks
+    the aggregate and exact stored results. Other provenance blocks,
+    generation outputs and semantic scores are preserved. The semantic
+    reference rescore remains pending: one Opus 5 rubric-agent canary,
+    then all 24 v7/v8 records under both semantic rubrics, with preamble,
+    check-echo and final definition pins after the remaining instrument
+    fixes. This amendment does not record a completed semantic rescore.
+
 Each of 2–5, 7–10, 11 and 12 is a generation-path change (13, 14, 15, 16,
-17 and 20 to 24 are not; 15 and 17 are the receipts instrument's revisions and
+17 and 20 to 25 are not; 15 and 17 are the receipts instrument's revisions and
 17 classifies both; 18 changes the normaliser's rule table and is a
 generation-path change by that half); per the production rule none of them may land
 between a v8 canary and its fill.
