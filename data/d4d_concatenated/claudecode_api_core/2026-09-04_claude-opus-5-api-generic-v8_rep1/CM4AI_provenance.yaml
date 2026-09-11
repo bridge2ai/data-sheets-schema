@@ -343,7 +343,7 @@ pair_consistency:
 report_claims:
   checked: true
   findings: []
-  claims_checked: 0
+  claims_checked: 1
   claims_unnamed: 0
   disposition_rows: 0
   rows_by_record:
@@ -354,14 +354,24 @@ report_claims:
     no_record_column: 0
     invalid: 0
   claims_core_cannot_hold: 0
-  instrument: 'v4 (#1122): `rows_by_record` tallies the dispositions rows by their
-    record column — `full`, `core`, `both`, `either` for an empty cell, `no_record_column`
-    for a table with no such column, `invalid` for anything else — so a `both` row
-    wrongly flipped to `full`, which the gate cannot see (a `full` row resolves against
-    the full record only), is countable from the block; v3 (#1022, #1046): a schema
-    claim that names its own scope — the core schema, the full schema, a class — is
-    resolved against that scope only, not against every class; v2 (#990): a finding
-    on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
+  snapshot_checked: true
+  snapshot_basis: 'no dispositions table expected: unrecorded removals listed, not
+    findings'
+  prose_retention_claims: 1
+  removals_unrecorded: []
+  removals_unrecorded_count: 0
+  instrument: 'v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
+    snapshot carried that the final full record does not, with no `removed` row or
+    removal sentence naming it, is `removal_not_recorded`; a prose retention claim
+    (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is
+    read like a retained row; v4 (#1122): `rows_by_record` tallies the dispositions
+    rows by their record column — `full`, `core`, `both`, `either` for an empty cell,
+    `no_record_column` for a table with no such column, `invalid` for anything else
+    — so a `both` row wrongly flipped to `full`, which the gate cannot see (a `full`
+    row resolves against the full record only), is countable from the block; v3 (#1022,
+    #1046): a schema claim that names its own scope — the core schema, the full schema,
+    a class — is resolved against that scope only, not against every class; v2 (#990):
+    a finding on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
     counts them'
   artifacts:
     report:
@@ -374,8 +384,8 @@ report_claims:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d_core.yaml
       md5: 189f33325bc784b3b101c805519b1028
   schema:
-    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
-    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
+    full_sha256: ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da
+    core_sha256: 7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449
   recorded_by: backfill_checks
 grounding:
   checked: true
@@ -1116,11 +1126,11 @@ canary:
   unbaselined: []
   regressions:
   - 'receipt findings: 1 against a floor of 0'
-  basis: 'offline write of the verdict the batch gate printed at 2026-09-04T01:38Z
-    and stopped on (`d4d api batch ... --canary-baseline 2026-09-01_claude-opus-5-api-generic-v7`;
-    the gate writes no block), recomputed from this record''s own check blocks against
-    the same baseline: the v7 production per-project worst across replicates, receipt
-    floors at 0 (#763/#891).'
+  basis: 'verdict from this record''s own check blocks against the per-project worst
+    of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions, including
+    the #684 report basis ({''measured'': 2, ''vacuous'': 1, ''unchecked'': 0})'
+  recorded_at: '2026-09-10T08:43:04+00:00'
+  recorded_by: d4d api verdict (offline)
   disposition: 'v8 defect (#952), decided by the plan owner on 2026-09-04: the single
     gated finding is one receipt entry addressed to `subject`, a name the schema has
     no slot for, for a value the record holds under `keywords` (''Medicine, Health
@@ -1132,8 +1142,6 @@ canary:
     is fixed and re-canaried. Every other gated metric equals or beats the v7 per-project
     worst (British spellings 0 vs 2). Full-phase output 31,207 of 128,000 (24%, #832).
     One repair round (11 findings, applied; the core re-derived and validates).'
-  recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-04
-  recorded_at: '2026-09-03T18:49:26-07:00'
   prior_disposition:
     disposition: 'retained with basis, the v7 precedent (#906/#920): the single gated
       finding is one receipt entry addressed to `subject`, a name the schema has no
@@ -1164,3 +1172,96 @@ canary:
     prediction_9_full_output_tokens: '31,207, against the v7 CM4AI accepted-attempt
       mean of 41,370 (26,766 / 31,044 / 66,300): -24.6%, outside the ±10% band — unfavourable
       in the direction of less output'
+  prior_verdict:
+    status: regressed
+    rows:
+    - metric: pair errors
+      run: 0
+      baseline_worst: 0
+    - metric: report findings
+      run: 0
+      baseline_worst: 0
+    - metric: ungrounded identifiers
+      run: 0
+      baseline_worst: 0
+    - metric: resolver URLs in identifier slots
+      run: 0
+      baseline_worst: 0
+    - metric: organisational fragments
+      run: 0
+      baseline_worst: 0
+    - metric: undeclared prefixes
+      run: 0
+      baseline_worst: 0
+    - metric: British spellings
+      run: 0
+      baseline_worst: 2
+    - metric: chunks unreviewed
+      run: 0
+      baseline_worst: 0
+    - metric: snippets unverified
+      run: 0
+      baseline_worst: 0
+    - metric: addressing slips over tolerance
+      run: 0
+      baseline_worst: 0
+    - metric: receipts vacuous
+      run: 0
+      baseline_worst: 0
+    - metric: receipt findings
+      run: 1
+      baseline_worst: 0
+      regressed: true
+    blind: []
+    unbaselined: []
+    regressions:
+    - 'receipt findings: 1 against a floor of 0'
+    basis: 'offline write of the verdict the batch gate printed at 2026-09-04T01:38Z
+      and stopped on (`d4d api batch ... --canary-baseline 2026-09-01_claude-opus-5-api-generic-v7`;
+      the gate writes no block), recomputed from this record''s own check blocks against
+      the same baseline: the v7 production per-project worst across replicates, receipt
+      floors at 0 (#763/#891).'
+    disposition: 'v8 defect (#952), decided by the plan owner on 2026-09-04: the single
+      gated finding is one receipt entry addressed to `subject`, a name the schema
+      has no slot for, for a value the record holds under `keywords` (''Medicine,
+      Health and Life Sciences'', the Dataverse subject line). The v8 receipt rule
+      says the slot is the record path the value fills, so this is a rule the model
+      broke in the same response that wrote the record — not the v7 retained-with-basis
+      pattern (#906/#920), which an earlier writing of this block applied and which
+      is withdrawn (kept below as prior_disposition). No fill and no further canary
+      until the defect is fixed and re-canaried. Every other gated metric equals or
+      beats the v7 per-project worst (British spellings 0 vs 2). Full-phase output
+      31,207 of 128,000 (24%, #832). One repair round (11 findings, applied; the core
+      re-derived and validates).'
+    recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-04
+    recorded_at: '2026-09-03T18:49:26-07:00'
+    prior_disposition:
+      disposition: 'retained with basis, the v7 precedent (#906/#920): the single
+        gated finding is one receipt entry addressed to `subject`, a name the schema
+        has no slot for, for a value the record holds under `keywords` (''Medicine,
+        Health and Life Sciences'', the Dataverse subject line) — a receipt-addressing
+        slip at phase 1 that carries no coverage credit (`slots.unresolved`), not
+        a prediction-1/2 metric of the v8 plan. Every other gated metric equals or
+        beats the v7 per-project worst (British spellings 0 vs 2). Full-phase output
+        31,207 of 128,000 (24%, #832). One repair round ran (11 findings, applied;
+        the core re-derived and validates). Whether the fill proceeds on this basis
+        is the plan owner''s call; the fill is not started.'
+      recorded_at: '2026-09-03T18:44:50-07:00'
+      commit: 48479d50
+      withdrawn: 'by the plan owner''s decision on 2026-09-04 (commit 7e7bf50b): a
+        v8 defect (#952). Kept here as #920 kept its prior verdict, so the record
+        carries the history rather than git alone.'
+    readings:
+      note: registered v8 predictions this record measures on its own (plan, 'Predictions,
+        registered'); n=1, none gated
+      prediction_2_grant_number: 'populated 2 (of 3 CM4AI award numbers in the bundle;
+        v7: 0 of 12) — favourable'
+      prediction_5_value_changed_after_receipt: '41 of 145 receipt paths = 28.3%,
+        against a predicted <10%; the three v7 CM4AI replicates: 17.0%, 17.4%, 7.9%
+        — unfavourable, worse than every v7 CM4AI replicate on the metric the plan
+        attributes to the digest (step A)'
+      prediction_6_receipt_coverage: 206 of 342 receiptable slots = 60.2%, against
+        a predicted >40% arm-wide — favourable
+      prediction_9_full_output_tokens: '31,207, against the v7 CM4AI accepted-attempt
+        mean of 41,370 (26,766 / 31,044 / 66,300): -24.6%, outside the ±10% band —
+        unfavourable in the direction of less output'

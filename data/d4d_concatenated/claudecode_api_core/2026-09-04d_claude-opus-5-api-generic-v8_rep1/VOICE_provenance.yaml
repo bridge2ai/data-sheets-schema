@@ -477,7 +477,7 @@ report_claims:
     claim: '| `collection_consents[0].consent_details` | retained | both | Audit found
       the five consent-scope negatives substantive: they define the permission granted.
       |'
-  claims_checked: 94
+  claims_checked: 97
   claims_unnamed: 0
   disposition_rows: 94
   rows_by_record:
@@ -488,14 +488,23 @@ report_claims:
     no_record_column: 0
     invalid: 0
   claims_core_cannot_hold: 5
-  instrument: 'v4 (#1122): `rows_by_record` tallies the dispositions rows by their
-    record column — `full`, `core`, `both`, `either` for an empty cell, `no_record_column`
-    for a table with no such column, `invalid` for anything else — so a `both` row
-    wrongly flipped to `full`, which the gate cannot see (a `full` row resolves against
-    the full record only), is countable from the block; v3 (#1022, #1046): a schema
-    claim that names its own scope — the core schema, the full schema, a class — is
-    resolved against that scope only, not against every class; v2 (#990): a finding
-    on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
+  snapshot_checked: true
+  snapshot_basis: 'dispositions table expected: unrecorded removals are findings'
+  prose_retention_claims: 3
+  removals_unrecorded: []
+  removals_unrecorded_count: 0
+  instrument: 'v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
+    snapshot carried that the final full record does not, with no `removed` row or
+    removal sentence naming it, is `removal_not_recorded`; a prose retention claim
+    (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is
+    read like a retained row; v4 (#1122): `rows_by_record` tallies the dispositions
+    rows by their record column — `full`, `core`, `both`, `either` for an empty cell,
+    `no_record_column` for a table with no such column, `invalid` for anything else
+    — so a `both` row wrongly flipped to `full`, which the gate cannot see (a `full`
+    row resolves against the full record only), is countable from the block; v3 (#1022,
+    #1046): a schema claim that names its own scope — the core schema, the full schema,
+    a class — is resolved against that scope only, not against every class; v2 (#990):
+    a finding on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
     counts them'
   artifacts:
     report:
@@ -508,8 +517,8 @@ report_claims:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_d4d_core.yaml
       md5: d97f152f4c16d20de1c568e7b76d41a8
   schema:
-    full_sha256: b9b31acad29e71a309af331741d42642c2750bcfc9900add6efec7d38813afdc
-    core_sha256: 3fb531767e6556cdb492145f0a2232b5b1894df1529ef578687bca7019ffa27d
+    full_sha256: ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da
+    core_sha256: 7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449
   recorded_by: backfill_checks
   dispositions_expected: true
 grounding:
@@ -934,8 +943,6 @@ canary:
   - metric: report findings
     run: 5
     baseline_worst: 0
-    baseline_basis: 'floor 0: 3 baseline replicate(s) ran the report check and read
-      no claim, none measured one (#684)'
     regressed: true
   - metric: ungrounded identifiers
     run: 0
@@ -973,12 +980,11 @@ canary:
   regressions:
   - 'report findings: 5 against a baseline worst of 0'
   - 'British spellings: 8 against a baseline worst of 2'
-  recorded_at: '2026-09-04T17:33:12+00:00'
-  recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-04
-  basis: 'offline write of the verdict the batch gate printed at 2026-09-04T17:3xZ
-    and stopped on, recomputed from this record''s own check blocks against the v7
-    production per-project worst with the gate''s functions, including the #684 report
-    basis (v7 VOICE: 3 vacuous, 0 measured → floor 0).'
+  basis: 'verdict from this record''s own check blocks against the per-project worst
+    of ''2026-09-01_claude-opus-5-api-generic-v7'' with the gate''s functions, including
+    the #684 report basis ({''measured'': 1, ''vacuous'': 2, ''unchecked'': 0})'
+  recorded_at: '2026-09-10T08:43:06+00:00'
+  recorded_by: d4d api verdict (offline)
   readings:
     note: registered v8 predictions this record measures on its own; n=1, none gated
     prediction_2_grant_number: populated 0
@@ -990,3 +996,68 @@ canary:
     mechanisms: 'full_readdress: 1 moved, 0 unresolved; report_regate: 18 contradictions
       before, 5 after; identifier form: 0 rewrites; mailto ids: 0 rewritten; resolver
       URLs 0; undeclared prefixes 0.'
+  prior_verdict:
+    status: regressed
+    rows:
+    - metric: pair errors
+      run: 0
+      baseline_worst: 0
+    - metric: report findings
+      run: 5
+      baseline_worst: 0
+      baseline_basis: 'floor 0: 3 baseline replicate(s) ran the report check and read
+        no claim, none measured one (#684)'
+      regressed: true
+    - metric: ungrounded identifiers
+      run: 0
+      baseline_worst: 0
+    - metric: resolver URLs in identifier slots
+      run: 0
+      baseline_worst: 0
+    - metric: organisational fragments
+      run: 0
+      baseline_worst: 0
+    - metric: undeclared prefixes
+      run: 0
+      baseline_worst: 0
+    - metric: British spellings
+      run: 8
+      baseline_worst: 2
+      regressed: true
+    - metric: chunks unreviewed
+      run: 0
+      baseline_worst: 0
+    - metric: snippets unverified
+      run: 0
+      baseline_worst: 0
+    - metric: addressing slips over tolerance
+      run: 0
+      baseline_worst: 0
+    - metric: receipts vacuous
+      run: 0
+      baseline_worst: 0
+    - metric: receipt findings
+      run: 0
+      baseline_worst: 0
+    blind: []
+    unbaselined: []
+    regressions:
+    - 'report findings: 5 against a baseline worst of 0'
+    - 'British spellings: 8 against a baseline worst of 2'
+    recorded_at: '2026-09-04T17:33:12+00:00'
+    recorded_by: canary.verdict, offline (the batch gate's own functions), 2026-09-04
+    basis: 'offline write of the verdict the batch gate printed at 2026-09-04T17:3xZ
+      and stopped on, recomputed from this record''s own check blocks against the
+      v7 production per-project worst with the gate''s functions, including the #684
+      report basis (v7 VOICE: 3 vacuous, 0 measured → floor 0).'
+    readings:
+      note: registered v8 predictions this record measures on its own; n=1, none gated
+      prediction_2_grant_number: populated 0
+      prediction_5_value_changed_after_receipt: 54 of 195 receipt paths = 27.7%, against
+        a predicted <10%
+      prediction_6_receipt_coverage: 187 of 343 = 54.5%, against a predicted >40%
+      prediction_9_full_output_tokens: '79,582 against the v7 VOICE accepted-attempt
+        mean of 76,159 ([73375, 74126, 80976]): +4.5%'
+      mechanisms: 'full_readdress: 1 moved, 0 unresolved; report_regate: 18 contradictions
+        before, 5 after; identifier form: 0 rewrites; mailto ids: 0 rewritten; resolver
+        URLs 0; undeclared prefixes 0.'

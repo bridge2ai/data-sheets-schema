@@ -584,8 +584,11 @@ and is still vacuous is blind — UNMEASURABLE, the receipt precedent; an
 earlier record's vacuous row is shown as unmeasured and not gated, so the
 arm that defined the gate still satisfies it. The baseline skips vacuous
 replicates; a baseline arm whose replicates ran the check and read no
-claim, none measuring one (`canary.report_basis`: the v7 production arm for
-CHORUS, CM4AI and VOICE; AI_READI measured 0 on rep3), is a floor of 0 with
+claim, none measuring one (`canary.report_basis`: under report_claims v4 the v7 production arm for
+CHORUS, CM4AI and VOICE, with AI_READI measuring 0 on rep3 — under v5 a
+prose retention claim is a claim, so the v7 arm measures 0 on some
+replicate for AI_READI (3 of 3), CM4AI (2) and VOICE (1), and **CHORUS
+alone stays all-vacuous**), is a floor of 0 with
 `baseline_basis` on the row, while a baseline whose checker never ran stays
 a missing baseline (#599). A report without the table is regenerated once
 like a contradiction; a rewrite that is truncated, drops the table or
@@ -597,7 +600,7 @@ instruction defines `both` as present in both — and the finding names
 the cause so the regate can fix the row (`claims_core_cannot_hold` counts
 those the full record does carry, apart from substantive contradictions;
 #990/#992); the block carries
-`instrument` from v2 (#996) and, from v4 (#1122), `rows_by_record` — the
+`instrument` from v2 (#996), from v4 (#1122) `rows_by_record` — the
 dispositions rows tallied by their record column (`full`, `core`, `both`,
 `either` for an empty cell, `no_record_column` for a table that has none —
 a report format that names no record, "not measurable" rather than "no
@@ -610,7 +613,35 @@ count, or the rate over the row total, is what a reader compares. Over the
 rows on slots the core cannot hold are all on the VOICE 2026-09-04d canary.
 The recorded tally is the post-regate reading, and the regate is the step
 that flips rows — `report_gate` carries `rows_by_record_before`/`_after` on
-runs made since #1122. Since #998 the report phase carries the core
+runs made since #1122. From v5 (#1054) the checker reads two more things: with the phase-1
+snapshot (`intermediate/{P}_full.yaml`) a populated top-level slot the
+final full record lacks is `removal_not_recorded` unless the report
+records the removal — an exact top-level name in a `removed` row or
+removal claim against the full record or no named record, or, for
+suppression only, the bare name in a sentence carrying a removal word —
+listed under `removals_unrecorded` and, where the run asked for the table
+(`inputs.dispositions_expected`, #961; a parsed table is not the test), a
+finding (three of nine v8 reviews had found one: CHORUS 04f rep2
+`regulatory_restrictions`, AI_READI 04g rep3 `content_warnings`, VOICE
+04f rep2 `data_governance`); on a run never asked for a table the
+removals are listed, not findings (`snapshot_basis`); and a paragraph
+saying a value "remains in" / "stays in" / "is kept in" a backticked slot
+path is a retention claim (not when negated, not on a class name),
+satisfied at that path in either record with a dotted step over a list
+read as `[*]`, or by a populated key of the leaf's name under the claim's
+root. A prose claim is a claim checked, so 70 reports that read no claim
+under v4 read one under v5, and the eleven canary blocks that quote a
+`report_basis` were re-derived with `d4d api verdict` where theirs had
+moved — ten blocks in all, each keeping its prior under `prior_verdict`;
+no status, no bar and no row moved, and five lost a `baseline_basis`
+line their baseline no longer earns. Run `d4d provenance
+recheck-validation` first where a record's `validation` block predates
+the duplicate-key instrument: a re-verdict computes from the record, so
+an unmeasured metric drops its row, and a gated floor then stops being
+reported. A re-verdict keeps the keys a person put in the block —
+`disposition`, `prior_disposition`, `readings` — at the top level
+rather than only inside `prior_verdict`. The v7 production arm reads 0 findings on
+all twelve either way. Since #998 the report phase carries the core
 class's top-level slot inventory (`core_inventory_block`) before its
 instruction, so the model can see which slots the core declares rather
 than infer it from the carried core record, where an empty slot and an

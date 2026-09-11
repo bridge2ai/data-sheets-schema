@@ -2539,15 +2539,20 @@ def report_claims_block(spec: RunSpec) -> dict[str, Any] | None:
         import yaml as _yaml
 
         from data_sheets_schema.report_claims import (check_report,
-                                                      declared_slots)
+                                                      declared_slots,
+                                                      phase1_snapshot_for)
         if not spec.report_path.exists():
             return {"checked": False, "reason": "no reconciliation report"}
         full = _yaml.safe_load(spec.full_path.read_text(encoding="utf-8")) \
             if spec.full_path.exists() else {}
         core = _yaml.safe_load(spec.core_path.read_text(encoding="utf-8")) \
             if spec.core_path.exists() else {}
+        # This runner always asks the report phase for the table (#929),
+        # and records the expectation on the record it writes (#961).
         out = check_report(spec.report_path, full or {}, core or {},
-                           declared_slots())
+                           declared_slots(),
+                           snapshot=phase1_snapshot_for(spec.core_path),
+                           dispositions_expected=True)
     except Exception as exc:                                       # noqa: BLE001
         return {"checked": False, "reason": str(exc)[:200]}
     from data_sheets_schema.provenance import (CORE_SCHEMA, FULL_SCHEMA, _md5,
