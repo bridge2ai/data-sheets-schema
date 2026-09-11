@@ -84,8 +84,8 @@ class TestSchemaCLI(unittest.TestCase):
             def __init__(self, schema_file):
                 self.schema_file = schema_file
 
-            def validate_file(self, d4d_file):
-                return True, []
+            def validate_d4d_yaml(self, d4d_file):
+                return True, ""
 
         fake_modules = build_module_tree("validator", D4DValidator=FakeValidator)
 
@@ -111,8 +111,8 @@ class TestSchemaCLI(unittest.TestCase):
             def __init__(self, schema_file):
                 self.schema_file = schema_file
 
-            def validate_file(self, d4d_file):
-                return False, ["missing required field", "bad enum value"]
+            def validate_d4d_yaml(self, d4d_file):
+                return False, "missing required field\nbad enum value\n"
 
         fake_modules = build_module_tree("validator", D4DValidator=FakeValidator)
 
@@ -134,6 +134,25 @@ class TestSchemaCLI(unittest.TestCase):
         self.assertIn("validation errors", result.output)
         self.assertIn("missing required field", result.output)
         self.assertIn("bad enum value", result.output)
+
+    def test_validate_reaches_the_real_validator(self):
+        """A fake with the CLI's invented method hid #1024."""
+        self.d4d_file.write_text(
+            "id: https://example.org/datasets/cli-test\nname: CLI test\n",
+            encoding="utf-8",
+        )
+        result = self.runner.invoke(cli, ["schema", "validate", str(self.d4d_file)])
+        self.assertEqual(result.exit_code, 0, msg=result.output)
+        self.assertIn("is valid", result.output)
+
+    def test_real_validation_failure_preserves_the_diagnostic(self):
+        self.d4d_file.write_text("name: Missing identifier\n", encoding="utf-8")
+        result = self.runner.invoke(cli, ["schema", "validate", str(self.d4d_file)])
+        self.assertEqual(result.exit_code, 1, msg=result.output)
+        self.assertIn("validation errors", result.output)
+        self.assertIn("id", result.output)
+        self.assertIn("required", result.output)
+        self.assertNotIn("Traceback", result.output)
 
 
 if __name__ == "__main__":

@@ -79,14 +79,13 @@ def validate(d4d_file, schema_file):
             schema_file = str(SCHEMA_FULL_PATH)
 
         validator = D4DValidator(schema_file)
-        is_valid, errors = validator.validate_file(d4d_file)
+        is_valid, output = validator.validate_d4d_yaml(d4d_file)
 
         if is_valid:
             click.echo(f"✓ {d4d_file} is valid!")
         else:
             click.echo(f"❌ {d4d_file} has validation errors:", err=True)
-            for error in errors:
-                click.echo(f"  - {error}", err=True)
+            click.echo(output.rstrip(), err=True)
             sys.exit(1)
 
     except FileNotFoundError as e:
