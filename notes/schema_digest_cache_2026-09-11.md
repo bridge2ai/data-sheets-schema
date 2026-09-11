@@ -63,3 +63,31 @@ Five snapshot regressions and four fitness regressions failed before the fixes.
 All 150 focused tests pass after them, including an edit between fitness context
 creation and prompt construction. The current full/core fingerprints and fitness
 schema context remain unchanged. A follow-up plugin review checks the fixes.
+
+The follow-up plugin review returned two further material findings, retained
+verbatim in `schema_cache_codex_followup_2026-09-11.txt`. Issue #1261 demonstrated
+that the generation digest deliberately truncates some nested ranges which the
+fitness judge sees in full. Fitness judgements now carry an additional SHA256
+of the complete captured slot specifications; their generation schema digest
+remains separate. The real `DataSubset.total_size_bytes` integer-to-decimal
+regression leaves the generation digest unchanged but refreshes the fitness
+prompt, context and persisted cache entry. Legacy entries without the complete
+specification identity remain on disk and cannot satisfy the new context.
+The separate dated fitness-cache amendment preserves #919's earlier decision.
+
+Issue #1262 demonstrated that the rebuild cache still trusted source sizes and
+timestamps. It now hashes captured source and imported-module bytes, including
+ignored files, and runs the generator against those same copies. Relative
+imports outside the source directory retain their layout. LinkML package imports
+remain tied to installed dependency versions; other non-relative imports fail
+the preflight as unchecked because their bytes cannot be attested by this local
+snapshot. The generator's temporary source filename is restored to the logical
+source name so committed merged schemas still reproduce byte for byte.
+
+Four source-snapshot regressions and the complete-fitness regression failed
+before these fixes. Further tests cover parent-relative imports, source paths
+with spaces and wrapped YAML, and retention/rejection of legacy cache entries.
+The combined targeted run passes all 153 tests. Both real repository schemas
+remain in sync, with the unchanged fingerprints and lengths above. The offline
+cache audit confirms all 1,441 historical fitness judgements remain unchanged
+and ineligible under the new context. A third plugin review checks these fixes.

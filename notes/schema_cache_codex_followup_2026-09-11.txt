@@ -1,0 +1,17 @@
+# Codex Adversarial Review
+
+Target: branch diff against origin/main
+Verdict: needs-attention
+
+Do not ship: fitness caches still conflate different specifications, and preflight can accept stale schemas. Both defects reproduced offline; 54 focused tests passed.
+
+Findings:
+- [high] Include the complete fitness specification in cache keys (src/data_sheets_schema/evidence_score.py:821-825)
+  The snapshot key hashes render(), which truncates nested ranges to 24 entries, while _render_slot_spec() includes every range. Against the committed schema, changing DataSubset.total_size_bytes from integer to decimal changed the fresh subsets specification, but left the context fingerprint unchanged and sc.spec() returning the old integer specification. Different fitness prompts therefore still share persisted judgement keys, allowing stale results to survive schema edits.
+  Recommendation: Key prompt and judgement caches on the complete captured fitness specification or untruncated inventory and vocabulary. Preserve the generation digest separately, and add a regression editing a truncated nested range.
+- [high] Check source contents before trusting cached rebuilds (src/data_sheets_schema/schema_sync.py:204-208)
+  The new stability guard uses _source_state(), whose tree_fingerprint contains only filenames, sizes and mtimes. In an in-memory warm-cache reproduction, a same-size source description edit preserving mtime changed the fresh source digest, yet check_one() returned in_sync. _regenerate() reused the old rebuild, and the independent fingerprint merely attested those old bytes. Generation can consequently proceed against a stale schema.
+  Recommendation: Use source and imported-module content hashes for rebuild keys and stability checks, and regenerate from the same captured bytes. Add a warm-cache regression preserving source size and mtime.
+
+Next steps:
+- Fix both cache identities and rerun the focused suite with the two adversarial regressions; keep evaluator and generation APIs disabled.

@@ -36,6 +36,10 @@ be discarded. There is nothing to preserve by continuing.
 
 from __future__ import annotations
 
+import functools
+import hashlib
+import os
+import re
 import shutil
 import subprocess
 import sys
@@ -87,32 +91,75 @@ def _generator_versions() -> tuple:
     return tuple(out)
 
 
+@functools.lru_cache(maxsize=128)
+def _source_imports(content: bytes) -> tuple[str, ...]:
+    import yaml
+    doc = yaml.safe_load(content) or {}
+    imports = doc.get("imports") or []
+    return (imports,) if isinstance(imports, str) else tuple(imports)
+
+
+def _source_snapshot(source: Path) -> tuple[tuple, dict[Path, bytes]]:
+    """Capture local source/import bytes once for both the key and generator.
+
+    Path.rglob includes ignored modules. Relative imports outside the source
+    directory are captured too, and copied with their relative layout intact.
+    LinkML package imports are covered by the installed dependency versions.
+    """
+    source_name = str(source)
+    source = source.resolve()
+    merged_names = {m.name for m, _s, _c, _k in MERGED_SCHEMAS}
+    files = {p.resolve(): p.read_bytes() for p in source.parent.rglob("*.yaml")
+             if p.name not in merged_names or p.resolve() == source}
+    if source not in files:
+        files[source] = source.read_bytes()
+    pending, visited = [source], set()
+    while pending:
+        path = pending.pop()
+        if path in visited:
+            continue
+        visited.add(path)
+        for name in _source_imports(files[path]):
+            if name.startswith("linkml:"):
+                continue
+            if ":" in name or Path(name).is_absolute():
+                raise ValueError(f"cannot snapshot non-relative schema import {name!r}")
+            dependency = (path.parent / (name + ".yaml")).resolve()
+            if dependency not in files:
+                files[dependency] = dependency.read_bytes()
+            pending.append(dependency)
+    state = (str(source), _generator_versions(),
+             tuple((str(p), hashlib.sha256(data).hexdigest()) for p, data in sorted(files.items())),
+             source_name)
+    return state, files
+
+
 def _source_state(source: Path) -> tuple:
-    """Everything the merged schema is derived from: the source, every
-    module beside it, and the generator that builds it. A rebuild is a pure
-    function of these, so a second rebuild inside one process, with none of
-    them changed, is the same bytes — and it was a five-second subprocess on
-    every record write and every runner test (#1203). A package upgraded
-    mid-process by another process is the one input this cannot see."""
-    from data_sheets_schema.schema_cache import tree_fingerprint
-    merged_names = tuple(m.name for m, _s, _c, _k in MERGED_SCHEMAS)
-    return (str(source.resolve()), _generator_versions(),
-            tree_fingerprint(source.parent, "*.yaml", exclude=merged_names))
+    """Source/module content hashes and installed generator versions (#1262)."""
+    return _source_snapshot(source)[0]
 
 
 def _regenerate(source: Path, target: Path,
-                marker: bool) -> tuple[bool, str | None]:
+                marker: bool, *, snapshot: tuple | None = None) -> tuple[bool, str | None]:
     """Run the same generation the Makefile runs. (ok, why not)"""
-    key = (_source_state(source), marker)
+    state, files = _source_snapshot(source) if snapshot is None else snapshot
+    key = (state, marker)
     cached = _REBUILT.get(key)
     if cached is not None:
         target.write_bytes(cached)
         return True, None
     try:
-        result = subprocess.run(
-            ["poetry", "run", "gen-linkml", "-o", str(target), "-f", "yaml",
-             str(source)],
-            capture_output=True, text=True, timeout=600)
+        with tempfile.TemporaryDirectory(prefix="d4d-schema-source-") as tmp:
+            base = Path(os.path.commonpath([str(p.parent) for p in files]))
+            for path, content in files.items():
+                copy = Path(tmp) / path.relative_to(base)
+                copy.parent.mkdir(parents=True, exist_ok=True)
+                copy.write_bytes(content)
+            captured_source = Path(tmp) / source.resolve().relative_to(base)
+            result = subprocess.run(
+                ["poetry", "run", "gen-linkml", "-o", str(target.resolve()), "-f", "yaml",
+                 str(captured_source)],
+                capture_output=True, text=True, timeout=600)
     except Exception as exc:                                   # noqa: BLE001
         return False, f"gen-linkml could not run: {exc}"
     if result.returncode != 0:
@@ -120,9 +167,16 @@ def _regenerate(source: Path, target: Path,
         return False, f"gen-linkml failed: {tail}"
     if not target.exists():
         return False, "gen-linkml wrote nothing"
-    if marker:
-        target.write_text("---\n" + target.read_text(encoding="utf-8"),
-                          encoding="utf-8")
+    # LinkML records its input filename. Preserve the logical source name the
+    # Makefile supplies, rather than leaking the temporary snapshot path into
+    # otherwise identical generated bytes.
+    import yaml
+    content = target.read_text(encoding="utf-8")
+    source_line = re.search(r"(?ms)^source_file:.*?(?=^\S|\Z)", content)
+    if source_line and yaml.safe_load(source_line.group()).get("source_file") == str(captured_source):
+        named = yaml.safe_dump({"source_file": str(source)}, sort_keys=False)
+        content = content[:source_line.start()] + named + content[source_line.end():]
+    target.write_text(("---\n" if marker else "") + content, encoding="utf-8")
     _REBUILT[key] = target.read_bytes()
     return True, None
 
@@ -183,13 +237,14 @@ def check_one(merged: Path, source: Path, class_name: str,
         # a differing name would be a spurious difference.
         rebuilt = Path(tmp) / merged.name
         try:
-            source_state = _source_state(source)
+            source_snapshot = _source_snapshot(source)
+            source_state = source_snapshot[0]
             merged_bytes = merged.read_bytes()
             vocabulary_bytes = schema_digest.VOCABULARY_PIN.read_bytes()
             vocabulary = Path(tmp) / "vocabulary" / schema_digest.VOCABULARY_PIN.name
             vocabulary.parent.mkdir()
             vocabulary.write_bytes(vocabulary_bytes)
-            ok, why = _regenerate(source, rebuilt, marker)
+            ok, why = _regenerate(source, rebuilt, marker, snapshot=source_snapshot)
             if not ok:
                 return {**out, "status": UNCHECKED, "reason": why}
             same = rebuilt.read_bytes() == merged_bytes

@@ -1,9 +1,11 @@
 """Fitness prompts and persisted contexts must describe the same instrument (#1259)."""
 
 import json
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+import yaml
 
 from data_sheets_schema import api_runner, schema_digest
 from data_sheets_schema.evidence_score import LLMSlotFitnessScorer
@@ -88,3 +90,47 @@ def test_change_between_context_and_prompt_uses_the_captured_instrument(scorer, 
     rate(sc)
     assert len(calls) == 2
     assert ("Enter a species." if part == "schema" else "1=other") in calls[1]
+
+
+def test_a_nested_range_omitted_from_generation_digest_still_invalidates_fitness(tmp_path, monkeypatch):
+    path = tmp_path / schema_digest.FULL_SCHEMA.name
+    doc = yaml.safe_load(schema_digest.FULL_SCHEMA.read_bytes())
+    path.write_text(yaml.safe_dump(doc, sort_keys=False))
+    calls = []
+
+    def fake(client, **kwargs):
+        calls.append(kwargs["messages"][0]["content"])
+        return SimpleNamespace(content=[SimpleNamespace(type="text", text='{"fitness":1,"reason":"offline"}')],
+                               stop_reason="end_turn", usage=None)
+
+    monkeypatch.setattr(api_runner, "_call_with_retry", fake)
+    cache = tmp_path / "fitness.jsonl"
+    sc = LLMSlotFitnessScorer(client=object(), model="offline-test", schema_path=path, cache_path=cache)
+    first = sc._context("offline-test")
+    sc(project="offline", slot="subsets", value=[{"total_size_bytes": 1}])
+    assert "total_size_bytes → integer" in calls[0]
+    doc["classes"]["DataSubset"]["attributes"]["total_size_bytes"]["range"] = "decimal"
+    path.write_text(yaml.safe_dump(doc, sort_keys=False))
+    second = sc._context("offline-test")
+    assert first.schema == second.schema  # The generation instrument deliberately omits this range.
+    assert first.fingerprint() != second.fingerprint()
+    sc(project="offline", slot="subsets", value=[{"total_size_bytes": 1}])
+    assert len(calls) == 2
+    assert "total_size_bytes → decimal" in calls[1]
+    entries = [json.loads(line) for line in cache.read_text().splitlines()]
+    assert entries[0]["schema"] == entries[1]["schema"]
+    assert entries[0]["specification"] != entries[1]["specification"]
+
+
+def test_legacy_judgement_without_complete_specification_is_retained_but_not_used(scorer):
+    sc, path, pin, calls, cache = scorer
+    context = sc._context("offline-test").as_entry()
+    context.pop("specification")
+    legacy = {**context, "slot": "subject", "value": json.dumps({"term": "TEST:1"}, sort_keys=True),
+              "fitness": 0, "failure": "form", "reason": "legacy"}
+    original = json.dumps(legacy) + "\n"
+    cache.write_text(original)
+    assert rate(sc).fitness == 1
+    assert len(calls) == 1
+    assert cache.read_text().startswith(original)
+    assert sc.cache_skipped == {"specification": 1}

@@ -29,7 +29,7 @@ def inputs(tmp_path):
 def test_a_merged_file_changed_after_comparison_cannot_pass(inputs, monkeypatch):
     merged, source = inputs
 
-    def regenerate(source, target, marker):
+    def regenerate(source, target, marker, **kwargs):
         target.write_bytes(merged.read_bytes())
         return True, None
 
@@ -53,7 +53,7 @@ def test_changed_then_restored_merged_bytes_cannot_attest_a_different_digest(inp
     wrong_digest_text = schema_digest.digest_text("Dataset", merged)
     merged.write_bytes(schema("alpha"))
 
-    def regenerate(source, target, marker):
+    def regenerate(source, target, marker, **kwargs):
         target.write_bytes(schema("alpha"))
         return True, None
 
@@ -79,7 +79,7 @@ def test_changed_then_restored_merged_bytes_cannot_attest_a_different_digest(inp
 def test_a_source_changed_during_regeneration_cannot_pass(inputs, monkeypatch):
     merged, source = inputs
 
-    def regenerate(source, target, marker):
+    def regenerate(source, target, marker, **kwargs):
         target.write_bytes(merged.read_bytes())
         source.write_bytes(schema("bravo"))
         return True, None
@@ -96,7 +96,7 @@ def test_a_vocabulary_changed_during_digesting_cannot_pass(inputs, tmp_path, mon
     pin.write_text("vocabularies: {}\n")
     monkeypatch.setattr(schema_digest, "VOCABULARY_PIN", pin)
 
-    def regenerate(source, target, marker):
+    def regenerate(source, target, marker, **kwargs):
         target.write_bytes(merged.read_bytes())
         return True, None
 
@@ -116,7 +116,7 @@ def test_a_vocabulary_changed_during_digesting_cannot_pass(inputs, tmp_path, mon
 def test_repeated_stale_checks_do_not_retain_more_views_or_digest_entries(inputs, monkeypatch):
     merged, source = inputs
 
-    def regenerate(source, target, marker):
+    def regenerate(source, target, marker, **kwargs):
         target.write_bytes(schema("bravo"))
         return True, None
 
@@ -147,7 +147,7 @@ def test_custom_schema_display_paths_still_compare_in_sync(inputs, monkeypatch, 
     merged.rename(custom)
     monkeypatch.chdir(custom.parent)
 
-    def regenerate(source, target, marker):
+    def regenerate(source, target, marker, **kwargs):
         target.write_bytes(custom.read_bytes())
         return True, None
 
@@ -162,7 +162,7 @@ def test_rebuild_digest_failure_blocks_generation(inputs, monkeypatch, failure):
     merged, source = inputs
     monkeypatch.setattr(schema_sync, "_REBUILT_DIGESTS", {})
 
-    def regenerate(source, target, marker):
+    def regenerate(source, target, marker, **kwargs):
         target.write_bytes(merged.read_bytes())
         return True, None
 

@@ -83,11 +83,10 @@ class JudgementContext:
     rubric: str               # digest of the system prompt actually sent
     corpus: str = ""          # bundle digest — grounding only
     schema: str = ""          # schema digest — fitness only
+    specification: str = ""   # SHA256 of complete fitness specifications (#1261)
 
     def fingerprint(self) -> str:
-        payload = json.dumps(
-            {"axis": self.axis, "model": self.model, "rubric": self.rubric,
-             "corpus": self.corpus, "schema": self.schema}, sort_keys=True)
+        payload = json.dumps(self.as_entry(), sort_keys=True)
         return hashlib.md5(payload.encode("utf-8")).hexdigest()[:16]
 
     def as_entry(self) -> dict[str, str]:
@@ -97,13 +96,16 @@ class JudgementContext:
         self-describing: a cache can be audited, and a mismatch can say *which*
         dimension moved instead of only that something did.
         """
-        return {"axis": self.axis, "model": self.model, "rubric": self.rubric,
-                "corpus": self.corpus, "schema": self.schema}
+        entry = {"axis": self.axis, "model": self.model, "rubric": self.rubric,
+                 "corpus": self.corpus, "schema": self.schema}
+        if self.specification:
+            entry["specification"] = self.specification
+        return entry
 
     @staticmethod
     def mismatch(entry: dict[str, Any], current: "JudgementContext") -> str | None:
         """Which dimension makes a stored entry unusable, if any."""
-        for fieldname in ("axis", "model", "rubric", "corpus", "schema"):
+        for fieldname in ("axis", "model", "rubric", "corpus", "schema", "specification"):
             if entry.get(fieldname, "") != getattr(current, fieldname):
                 return fieldname
         return None
@@ -823,12 +825,23 @@ class LLMSlotFitnessScorer:
         inventory = schema_digest.build(self.class_name, self.schema_path)
         vocabulary = schema_digest.vocabularies()
         schema = schema_digest.fingerprint(schema_digest.render(inventory, vocabulary=vocabulary))
-        return schema, inventory, vocabulary
+        # Generation deliberately truncates some ranges; the fitness judge
+        # sees all of them. Key its full specifications separately (#1261).
+        specifications = {s.name: _render_slot_spec(s.name, inventory, vocabulary)
+                          for s in inventory.slots}
+        specification = hashlib.sha256(json.dumps(
+            {"class": inventory.class_name, "slots": specifications},
+            sort_keys=True).encode("utf-8")).hexdigest()
+        return schema, inventory, vocabulary, specification
 
-    def _context(self, model: str, *, schema: str | None = None) -> "JudgementContext":
+    def _context(self, model: str, *, schema: str | None = None,
+                 specification: str | None = None) -> "JudgementContext":
+        if schema is None or specification is None:
+            captured = self._snapshot()
+            schema, specification = captured[0], captured[3]
         return JudgementContext(
             axis="fitness", model=model, rubric=digest_of(FITNESS_SYSTEM),
-            schema=self._snapshot()[0] if schema is None else schema)
+            schema=schema, specification=specification)
 
     def _load_cache(self, ctx: "JudgementContext") -> None:
         """Keep only entries produced under this exact context.
@@ -878,10 +891,11 @@ class LLMSlotFitnessScorer:
     def spec(self, slot: str) -> str:
         return self._spec_from_snapshot(slot, *self._snapshot())
 
-    def _spec_from_snapshot(self, slot: str, schema: str, inventory, vocabulary: dict) -> str:
-        if schema != self._spec_schema:
+    def _spec_from_snapshot(self, slot: str, schema: str, inventory, vocabulary: dict,
+                            specification: str) -> str:
+        if specification != self._spec_schema:
             self._specs.clear()
-            self._spec_schema = schema
+            self._spec_schema = specification
         if slot not in self._specs:
             self._specs[slot] = _render_slot_spec(slot, inventory, vocabulary)
         return self._specs[slot]
@@ -898,7 +912,7 @@ class LLMSlotFitnessScorer:
         # Capture once: an edit between context creation and prompt rendering
         # must not put a judgement under another instrument's key (#1259).
         snapshot = self._snapshot()
-        ctx = self._context(model, schema=snapshot[0])
+        ctx = self._context(model, schema=snapshot[0], specification=snapshot[3])
         self._load_cache(ctx)
 
         key = (ctx.fingerprint(), slot,

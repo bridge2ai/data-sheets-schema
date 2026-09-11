@@ -357,7 +357,7 @@ class TestJudgementContext(unittest.TestCase):
         base = self._ctx()
         for fieldname, other in (("axis", "grounding"), ("model", "m2"),
                                  ("rubric", "r2"), ("corpus", "c2"),
-                                 ("schema", "s2")):
+                                 ("schema", "s2"), ("specification", "s3")):
             with self.subTest(field=fieldname):
                 self.assertNotEqual(base.fingerprint(),
                                     self._ctx(**{fieldname: other}).fingerprint(),
