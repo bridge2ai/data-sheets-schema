@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-11",
+  "issue": 829,
+  "status": "definition and reporting boundary; no rescore yet",
+  "sha256": {
+    ".claude/agents/d4d-rubric10-semantic.md": "70a50310b9ec717981fc089d8fedb20ea8c3ca3b665870f8d1d2d2573c9fccdd",
+    ".claude/agents/d4d-rubric20-semantic.md": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+    "src/download/prompts/rubric10_semantic_schema.json": "5ac1989a60414d41f03383266535eee9963816d0d9b42bf5b90e1efe8d9d3dc2",
+    "src/download/prompts/rubric20_semantic_schema.json": "5ccdbd229471748fa1dde8074d904c0334c983741dd90c7e56f95b45b012f32b"
+  },
+  "pin_review_issue": 1246,
+  "runtime_review_issue": 1247
+}

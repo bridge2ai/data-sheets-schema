@@ -434,7 +434,8 @@ Return your evaluation as a **JSON object** with this EXACT structure:
   "evaluation_timestamp": "<ISO 8601 timestamp>",
   "model": {
     "name": "<the evaluating session's actual runtime model>",
-    "temperature": 0.0,
+    "temperature": null,
+    "temperature_note": "Not exposed by this runtime; no deterministic-score guarantee",
     "evaluation_type": "semantic_llm_judge"
   },
   "semantic_analysis": {
@@ -478,6 +479,7 @@ Return your evaluation as a **JSON object** with this EXACT structure:
     "excluded_max_points": 5,
     "adjusted_max_points": 83,
     "normalized_percentage": 86.7,
+    "fixed_percentage": 81.8,
     "questions_not_applicable": 1
   },
   "categories": [
@@ -786,7 +788,7 @@ semantic_analysis_summary:
 ### Additional Output Files
 
 1. **CSV Summary:** `all_scores.csv`
-   - Columns: project, method, file, total_score, excluded_max_points, adjusted_max_points, normalized_percentage, cat1_score, cat2_score, cat3_score, cat4_score, consistency_passed, consistency_failed, issues_detected
+   - Columns: project, method, file, total_score, excluded_max_points, adjusted_max_points, fixed_percentage, normalized_percentage, excluded_item_ids, cat1_score, cat2_score, cat3_score, cat4_score, consistency_passed, consistency_failed, issues_detected
 
 2. **Markdown Report:** `summary_report.md`
    - Executive summary with scoring tables
@@ -816,12 +818,18 @@ multiple evaluations may be fractional; they are not individual scores.
 
 1. **Encoding:** Set `applicable: false` and `score: null` for any question whose `Applies to` condition is not met. Do not emit `0` for these questions — a zero score penalizes datasheets for which the question is simply irrelevant.
 
-2. **Denominator rule:** Subtract the question's `max_score` from `max_points` to compute `adjusted_max_points`. Report `normalized_percentage = total_points / adjusted_max_points × 100`. This is the only percentage reported; it is comparable across datasheets regardless of how many questions are excluded.
+2. **Denominator rule:** Subtract the question's `max_score` from `max_points` to compute `adjusted_max_points`. Report `normalized_percentage = total_points / adjusted_max_points × 100`.
    - `excluded_max_points` = sum of `max_score` for all questions where `applicable: false`
    - `adjusted_max_points` = `max_points` − `excluded_max_points`
    - `normalized_percentage` = `total_points / adjusted_max_points × 100`
+   - `fixed_percentage` = `total_points / max_points × 100`
+   - Report both bases with their denominators and the identities of excluded items. A fixed-base percentage describes earned points against the whole rubric; it does not penalize N/A items in the adjusted score.
 
-3. **Batch aggregation:** Apply the same convention in the `EvaluationSummary`. Report `average_excluded_max_points`, `average_adjusted_max_points`, and `average_normalized_percentage` at the overall, method, and project levels so cross-file comparisons remain meaningful even when different datasheets trigger different N/A conditions (e.g., core vs. full-schema datasheets).
+3. **Batch aggregation:** Report both fixed and N/A-adjusted percentages, their maxima, and the excluded item identities for every record. Within each project, flag different adjusted maxima or different excluded items, even if the excluded point totals match. Do not rank or pool adjusted percentages across those applicability groups. Neither percentage alone establishes comparability; retain the evaluator model and instrument identity, and report within-group replicate counts and spread before interpreting small differences.
+
+### Comparing applicability
+
+Same-project comparisons must name the item identities whose applicability differs, because two evaluations can exclude the same number of points while omitting different evidence requirements.
 
 **NOTE:** Report the count of non-applicable questions in the `questions_not_applicable` field of `overall_score`.
 
@@ -884,12 +892,11 @@ The agent will iterate through files, evaluate each one, and save results.
 
 ## Reproducibility
 
-**This agent provides fully reproducible evaluations:**
-- Same D4D file → Same quality score every time
-- Temperature: 0.0 (fully deterministic)
-- Model: the evaluator pinned in this file's frontmatter, recorded as the session's actual runtime identity
-- Rubric: Version-controlled in `data/rubric/rubric20.txt`
-- All within Claude Code conversation
+Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.
+
+Record the actual runtime temperature only if it is exposed; otherwise use null and explain that the setting is unknown, without copying a numeric value from an example. Record the session's actual model identity and the definition digest, retain each repeated evaluation, and report its score bases and spread.
+
+The rubric text is version-controlled in `data/rubric/rubric20.txt`; the scoring rules also depend on this agent definition.
 
 **Optional: Batch Scripts for External Automation**
 
@@ -903,7 +910,6 @@ See `notes/RUBRIC_AGENT_USAGE.md` for comprehensive usage examples.
 
 ## Notes
 
-- **Temperature Setting:** 0.0 for fully deterministic, reproducible quality assessments
 - **Model:** the evaluator pinned in this file's frontmatter, recorded as the session's actual runtime identity
 - **Platform-Specific:** Some questions apply only to specific platforms (noted in "applies_to" field)
 - **Complement Rubric10:** Rubric20 provides more granular quality assessment than rubric10's hierarchical structure

@@ -2157,6 +2157,33 @@ until its two affected v7 records have been rescored; #1080 stays open for
 repeatability measurement and uncertainty-aware reporting. Final evaluator
 pins will be registered after the remaining comparison-instrument work.
 
+### Score comparison boundary (#829, #1243, #1244; 2026-09-11)
+
+Both semantic agents now request the fixed-base percentage (earned points over
+50 or 88) beside the N/A-adjusted percentage, both denominators, and excluded
+item identities. They no longer claim that adjusted percentages alone are
+comparable across differing applicability. Within a project, equal excluded
+point totals with different excluded items are also a mixed basis.
+
+The dedicated `scripts/report_semantic_comparison.py` reads explicitly named
+semantic evaluations and reports both bases, excluded items, evaluator and
+instrument identities, and exact evaluation hashes. It flags mixed or
+unspecified applicability and does not rank or pool scores. All three semantic
+HTML renderers use the same bases, preserve zero, and render N/A items.
+
+`notes/semantic_score_bases_2026-09-11.md` records all 48 prior production
+v7/v8 semantic evaluations on both bases. These remain earlier instruments'
+outputs, not reference rescores. None of their bytes was rewritten. The
+snapshot currently flags CHORUS rubric10's differing applicability. The
+schema's additive `fixed_percentage` field remains optional when reading
+historical outputs; current agent instructions require it for new outputs.
+
+This definition change precedes the reference canary. The definition and
+schema hashes are in `notes/semantic_comparison_boundary_2026-09-11.json`.
+The final runtime review (#1247) also removed the zero-temperature determinism claim; unexposed temperatures are recorded as null, and repeated judgements must be measured. No evaluator was run at this boundary. #1080's repeated measurements and
+#1062's two new ratings remain pending; historical mixed-instrument movements
+must not be reported as a measured same-instrument standard deviation.
+
 ### Reference rescore and fitness-cache decision (2026-09-11; #919, #1080, #1248)
 
 The approved reference cohort is both production arms, 24 full records and

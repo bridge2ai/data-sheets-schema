@@ -75,10 +75,13 @@
           "description": "Model identifier (e.g., claude-sonnet-4-5-20250929)"
         },
         "temperature": {
-          "type": "number",
+          "type": [
+            "number",
+            "null"
+          ],
           "minimum": 0.0,
           "maximum": 1.0,
-          "description": "Model temperature setting"
+          "description": "Actual runtime temperature, or null when the runtime does not expose it; a fixed temperature does not guarantee repeated scores."
         },
         "evaluation_type": {
           "type": "string",
@@ -121,12 +124,18 @@
           "type": "number",
           "minimum": 0,
           "maximum": 100,
-          "description": "total_points / adjusted_max_points x 100. The only percentage reported: comparable across records regardless of how many items are excluded."
+          "description": "total_points / adjusted_max_points x 100. Report alongside the fixed-base percentage and excluded items; different applicability does not establish comparability."
         },
         "questions_not_applicable": {
           "type": "integer",
           "minimum": 0,
           "description": "Count of questions marked applicable: false"
+        },
+        "fixed_percentage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "total_points / max_points x 100, before N/A exclusions. Required by the current agent instructions; optional here so preserved older evaluations remain readable."
         }
       }
     },
