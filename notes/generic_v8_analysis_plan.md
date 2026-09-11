@@ -620,7 +620,8 @@ Element 4 gate was fixed (#1060) and CM4AI moved; the measures now differ
 in how much v8 fell and where, not in whether it did.
 
 **The rubric10 half of this is provisional (#1080).** The instrument's own
-test-retest movement on an unchanged record is up to 8.7 points, which is
+observed movement on an unchanged record across a changed definition and
+denominator was 8.7 points, which is
 larger than three of the four rubric10 margins the verdicts rest on. The
 per-record observations stand; the project-level rubric10 verdicts and the
 causal reading below should be treated as indeterminate until the spread is
@@ -639,8 +640,8 @@ sub-element where rubric20 has a whole technical-documentation category
 of five questions. So rubric20 registers the thinning across three
 projects and rubric10 registers it on one, CM4AI, where it costs 4.3
 points; the difference between the instruments is sensitivity, not
-direction. Read against #1080's 8.7-point test-retest movement, that 4.3
-is inside the instrument's own noise, so the sensitivity claim is a
+direction. Read against #1080's 8.7-point mixed-instrument movement, that 4.3
+does not establish a change beyond evaluator uncertainty, so the sensitivity claim is a
 reading of the reviewers' reasons rather than a result the numbers
 establish on their own.
 That is the falsification test of prediction 8 answering in the
@@ -2155,6 +2156,40 @@ validation. New outputs will sit beside the prior scores. #1062 stays open
 until its two affected v7 records have been rescored; #1080 stays open for
 repeatability measurement and uncertainty-aware reporting. Final evaluator
 pins will be registered after the remaining comparison-instrument work.
+
+### Reference rescore and fitness-cache decision (2026-09-11; #919, #1080, #1248)
+
+The approved reference cohort is both production arms, 24 full records and
+both semantic rubric agents: 48 primary evaluations, with the one-record
+canary counted once. The full launch contract, dated pins, exact records and
+output paths will be registered in `notes/reference_rescore_2026-09-11/`
+before any call. Old scores remain beside the new instrument's outputs.
+
+The canary is CHORUS v7 rep1 with rubric10, in a fresh Opus 5 evaluator session.
+Every session receives the current `d4d agents preamble` and the exact pinned
+definition, verifies check-echo, records actual model and definition identity,
+and validates only its own output. The canary must pass all checks and be
+inspected before any remaining record is evaluated.
+
+For #1080, three independent rubric10 ratings of v7 rep1 are preregistered
+for each of the four projects. One is the primary rating; two additional
+ratings per project add eight evaluations, for 56 calls if every attempt
+succeeds. Report all scores, both bases, sample standard deviation and range,
+and flag applicability changes. Do not mistake spread among generation
+replicates for evaluator repeatability. Rubric20's evaluator repeatability
+remains unmeasured; its differences remain descriptive.
+
+The 8.7-point CHORUS movement in the earlier #1080 note occurred across a
+changed definition and denominator. It is evidence motivating this study,
+not an estimate of same-instrument standard deviation or a confidence bound.
+No small semantic score gap is sufficient to select runs until the repeat
+measurements and their scope are reported. Review metrics remain report-only
+under the separate #835 policy.
+
+For #919, retain the existing slot-fitness cache under its original context
+and do not use it as a common-instrument v7/v8 reference score. The audit and
+cost/comparability decision are in `notes/fitness_cache_decision_2026-09-11.md`
+and its JSON companion. No new fitness call is part of this semantic rescore.
 
 ## Decisions needed before step 3
 
