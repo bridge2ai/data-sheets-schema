@@ -1034,6 +1034,8 @@ class ProvenanceRecord:
             f"# record_version {RECORD_VERSION} — see src/data_sheets_schema/provenance.py\n"
             + dump_yaml(data),
             encoding="utf-8")
+        from data_sheets_schema.schema_cache import forget
+        forget(path)                               # a reader must not be served the bytes this just replaced (#1203)
         # Checked here, on the write path, not only by a command someone
         # remembers to run (#605). Reported rather than raised: the record is
         # already on disk and is the run's only account of itself, so losing it

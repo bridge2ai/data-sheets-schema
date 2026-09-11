@@ -44,6 +44,14 @@ RECORDED_BY = "backfill_checks"
 BLOCKS = ("pair_consistency", "report_claims", "grounding", "form", "receipts", "review")
 
 
+def _schema_sha(path):
+    """The schema's sha256, hashed once per process rather than once per
+    record: a full pass over the corpus hashed 1.4 MB up to 564 times
+    (#1204 review, S4)."""
+    from data_sheets_schema.schema_cache import sha256_of
+    return sha256_of(path) if path.exists() else None
+
+
 def _split_header(text: str) -> tuple[str, str]:
     """(leading comment lines, the rest).
 
@@ -150,8 +158,8 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
             # be told apart from one reached against a schema that has since
             # moved, which is precisely the question a reader asks of a
             # recomputed result.
-            "schema": {"full_sha256": _sha256(FULL_SCHEMA),
-                       "core_sha256": _sha256(CORE_SCHEMA)},
+            "schema": {"full_sha256": _schema_sha(FULL_SCHEMA),
+                       "core_sha256": _schema_sha(CORE_SCHEMA)},
             "recorded_by": RECORDED_BY}
 
     # --- report claims ----------------------------------------------------
@@ -190,8 +198,8 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
             "full": {"path": str(full), "md5": _md5(full) if full.exists() else None},
             "core": {"path": str(core), "md5": _md5(core) if core.exists() else None},
         }
-        block["schema"] = {"full_sha256": _sha256(FULL_SCHEMA),
-                           "core_sha256": _sha256(CORE_SCHEMA)}
+        block["schema"] = {"full_sha256": _schema_sha(FULL_SCHEMA),
+                           "core_sha256": _schema_sha(CORE_SCHEMA)}
         block["recorded_by"] = RECORDED_BY
         # The expectation is a fact about the run, not about the report:
         # carried on `inputs` (and on the recorded block) by the runner that
@@ -344,6 +352,8 @@ def apply(provenance: Path, blocks: dict[str, Any],
     provenance.write_text(
         header + yaml.safe_dump(record, sort_keys=False, allow_unicode=True),
         encoding="utf-8")
+    from data_sheets_schema.schema_cache import forget
+    forget(provenance)                             # a reader must not be served what this replaced (#1204 review, S1)
     return True
 
 

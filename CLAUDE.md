@@ -1388,6 +1388,31 @@ non-zero on every run today**, and will until those nine are archived or
 re-run (#1200) — read the summary, not the exit code, until then. It is
 not wired into CI or the Makefile for that reason.
 
+## One parse per file per process (#1203)
+
+`data_sheets_schema.schema_cache.load_yaml(path)` parses a YAML file once
+per process, keyed on its resolved path, mtime and size, and returns a
+deep copy. Read schemas and provenance records through it rather than
+with a bare `yaml.safe_load(path.read_text())` — with one deliberate
+exception: a writer that reads a file back immediately after replacing it
+(`backfill_checks.apply`, the amend command) reads raw on purpose, and a
+reader inside the same function as the write should too. Why: the merged schema is 1.4 MB
+and was parsed from disk by three production paths on every call — seven
+times per record write — and `d4d runs check` parsed each provenance
+record about twenty times, once per status function. Measured on
+2026-09-11: the runner test file 472 s → 146 s, the profiled runner test
+39 s → 18 s, `d4d runs check --strict` over 282 records 93 s → 24 s.
+`schema_sync._regenerate` keeps the rebuilt merged schema's bytes on a
+fingerprint of the whole schema source directory, so the sync gate no
+longer spawns `gen-linkml` on every record write. The key cannot see a
+rewrite of the same size inside one mtime tick, so `ProvenanceRecord.write`
+calls `schema_cache.forget`; a test that rewrites a file by hand and
+re-reads it in the same instant calls `schema_cache.clear()`. The residue
+in a runner test is `linkml-validate` on the records it just wrote, which
+is not cacheable. The remaining CI levers — one interpreter per pull
+request, `pytest-xdist`, the corpus-walk tests in their own lane — are
+listed on #1203.
+
 ## Running Single Tests
 
 ```bash
