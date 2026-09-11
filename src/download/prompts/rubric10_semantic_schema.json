@@ -108,22 +108,22 @@
       ],
       "properties": {
         "total_points": {
-          "type": "number",
+          "type": "integer",
           "minimum": 0,
           "description": "Points earned across applicable items"
         },
         "max_points": {
-          "type": "number",
+          "type": "integer",
           "const": 50,
           "description": "Maximum before N/A exclusions"
         },
         "excluded_max_points": {
-          "type": "number",
+          "type": "integer",
           "minimum": 0,
           "description": "Sum of max_score over items marked applicable: false"
         },
         "adjusted_max_points": {
-          "type": "number",
+          "type": "integer",
           "minimum": 0,
           "description": "max_points minus excluded_max_points"
         },
@@ -190,7 +190,7 @@
                 },
                 "score": {
                   "type": [
-                    "number",
+                    "integer",
                     "null"
                   ],
                   "enum": [
@@ -216,13 +216,13 @@
             }
           },
           "element_score": {
-            "type": "number",
+            "type": "integer",
             "minimum": 0,
             "maximum": 5,
             "description": "Sum of sub-element scores (0-5)"
           },
           "element_max": {
-            "type": "number",
+            "type": "integer",
             "minimum": 0,
             "maximum": 5,
             "description": "Points available for this element after N/A exclusions. Not a constant 5: the convention subtracts excluded sub-elements from the denominator, and records already carry element_max of 3."

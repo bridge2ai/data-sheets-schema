@@ -89,7 +89,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
    - **'Applies to' Logic:**
      - If `Applies to` condition is listed, check that relevant information was provided elsewhere
      - EXAMPLE: IF shared tools were not described in the document, question 11 is not applicable
-     - **Step 1 — Resolve all five trigger conditions before scoring any question:**
+     - **Step 1 — Resolve all four trigger conditions before scoring any question:**
 
        | Condition | Satisfied when… | Gates |
        |---|---|---|
@@ -97,14 +97,13 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
        | Datasets shared & available for reuse | `distribution_formats` populated OR `download_url`/`page` links to accessible data OR license explicitly permits reuse | Q10, Q17 |
        | Software tools produced as dataset output | `external_resources` references a code repository, OR `description`/`purposes` explicitly identifies software production as a dataset output — checked via Q2/Q7/Q14 fields only, never Q11's own fields | Q11 |
        | Data collection identified AND datasets shared | Collection fields populated (`acquisition_methods`, `collection_mechanisms`, `data_collectors`, or `collection_timeframes`) AND the datasets shared condition above is met | Q12, Q13 |
-       | Publication identified AND datasets shared | `citation` or `external_resources` includes at least one publication reference AND the datasets shared condition above is met | Q14 |
 
      - **Step 2 — Apply the N/A encoding convention:** If a condition is not met, set `applicable: false` and `score: null` for every question it gates. Do not emit `0`. Subtract the question's `max_score` from the denominator per the N/A Question Convention in the Scoring Summary section.
      - **Ambiguity rule:** When a condition is borderline (e.g., a dataset page exists but access requires approval), default to `applicable: true` and score based on what is documented. This prevents silent N/A inflation on datasets that are partially shared.
      - **Anti-circular rule:** A question's own scoring fields may not be the sole basis for excluding it. If the only reason to set `applicable: false` is the absence of the question's own fields, treat the question as `applicable: true` and score accordingly (receiving 0 if those fields are absent). Applicability must be evidenced by fields belonging to a *different* question. Emit `applicability_status` and `applicability_evidence` before scoring every conditional question to make this determination explicit and auditable.
      - EXAMPLE (applicable + scored): `distribution_formats` lists Parquet and TSV with a PhysioNet download URL → datasets shared condition is met → Q10 and Q17 are applicable and scored. Q20 (bias documentation) is not gated by sharing: a dataset that is never released still has documentable biases.
      - EXAMPLE (applicable + reported, not scored): `human_subject_research.involves_human_subjects=True` but the datasheet is a core/instrument-only record with no ethics fields populated → Q8 and Q9 are reported (flag the gap) but the condition is met so they remain applicable and receive a low score, not N/A.
-     - EXAMPLE (not applicable): No `distribution_formats`, no accessible URL, license is proprietary/internal-only → datasets shared condition is NOT met → Q10, Q11, Q12, Q13, Q14 and Q17 are all set to `applicable: false`, `score: null`, and excluded from the denominator. Q20 stays applicable and is scored.
+     - EXAMPLE (not applicable): No `distribution_formats`, no accessible URL, license is proprietary/internal-only → datasets shared condition is NOT met → Q10, Q12, Q13 and Q17 are all set to `applicable: false`, `score: null`, and excluded from the denominator. Q14 and Q20 stay applicable and are scored; Q11 follows its separate software-output condition.
 
 4. **Content Accuracy Assessment**
    - **Ethics Claims Plausibility:** Do `license_and_use_terms`, `ip_restrictions`, `data_protection_impacts`, and `participant_privacy.reidentification_risk` align with `human_subject_research`, `informed_consent`, and `participant_privacy` in scope and restrictiveness?
@@ -322,13 +321,13 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 **Fields:** `citation`, `external_resources`, `doi`
 
 **Scoring (numeric 0-5):**
-- **0:** No publications cited
-- **3:** One citation or external resource
-- **5:** Multiple references and dataset citation
+- **0:** No publication, external resource or dataset citation is documented.
+- **3:** At least one distinct citation or external resource is documented, but the 5-point condition is not met.
+- **5:** At least two distinct references are documented and a formal citation for this dataset is present.
 
-**Assessment:** Count publications, external resources, and check for formal dataset citation.
+**Assessment:** Use exactly 0, 3 or 5 for Q14. Non-publication external resources (for example, documentation pages or code repositories) count as references. Three such resources without a formal dataset citation earn 3, not 2 or 5. Repeated links to the same resource count once. A bare dataset DOI is one reference; a formal dataset citation additionally identifies the dataset by title and its authors or publishing organization.
 
-**Applies to:** Always report results of this question, but only score if publication was identified elsewhere and datasets were shared and available for reuse.
+**Applies to:** Always applicable, including an unshared dataset or one with no publication. Missing Q14 fields earn 0 and never exclude Q14 from the denominator (#697).
 
 ---
 
@@ -474,11 +473,11 @@ Return your evaluation as a **JSON object** with this EXACT structure:
     }
   },
   "overall_score": {
-    "total_points": 72.5,
+    "total_points": 72,
     "max_points": 88,
     "excluded_max_points": 5,
     "adjusted_max_points": 83,
-    "normalized_percentage": 87.3,
+    "normalized_percentage": 86.7,
     "questions_not_applicable": 1
   },
   "categories": [
@@ -549,7 +548,7 @@ Return your evaluation as a **JSON object** with this EXACT structure:
       "questions": [
         "... (questions 16-20)"
       ],
-      "category_score": 19.5,
+      "category_score": 19,
       "category_max": 21
     }
   ],
@@ -633,7 +632,7 @@ overall_performance:
   average_adjusted_max_points: 79.5
   average_normalized_percentage: 65.8
   best_score: 68.0
-  worst_score: 38.5
+  worst_score: 38
   best_performer:
     file: AI_READI_d4d.yaml
     method: claudecode_agent
@@ -646,10 +645,10 @@ overall_performance:
     file: CHORUS_d4d.yaml
     method: gpt5
     project: CHORUS
-    score: 38.5
+    score: 38
     excluded_max_points: 10
     adjusted_max_points: 78
-    normalized_percentage: 49.4
+    normalized_percentage: 48.7
 
 method_comparison:
   - method: claudecode_agent
@@ -799,6 +798,13 @@ semantic_analysis_summary:
    - Recommendations for improving semantic coherence
 
 ## Scoring Summary
+
+**Score resolution (#1062, #1232):** Numeric questions receive an integer
+from 0 through 5, using the question's stated bands; Q14 uses only 0, 3 or 5.
+Pass/fail questions receive 0 or 1. No half-points or other fractions are
+allowed. N/A remains null, never a fractional or zero substitute. Per-record
+question sums, category sums and total points are integers. Means over
+multiple evaluations may be fractional; they are not individual scores.
 
 **Maximum Possible Score:** 88 points (before N/A exclusions) — 17 numeric questions @5 each + 3 pass/fail @1 each.
 - **Structural Completeness (Q1-5):** 21 points max (4 numeric @5 each + Q5 pass/fail)

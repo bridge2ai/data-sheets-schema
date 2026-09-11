@@ -1,0 +1,586 @@
+{
+  "date": "2026-09-11",
+  "issues": [
+    697,
+    1062,
+    1080,
+    1232
+  ],
+  "before_sha256": {
+    ".claude/agents/d4d-rubric10-semantic.md": "05583702ef4a04b37cf2a650498cd749e872fe7f0118f963ef7b85d4c9db4dcd",
+    ".claude/agents/d4d-rubric20-semantic.md": "ad897411fda679b38a71f54b2880520ce93fef35fcc026f6780c2405b5c8a661",
+    "src/download/prompts/rubric10_semantic_schema.json": "ee87aed83f0fde83b69c2e74fa8d32a7f77e8b59c3905dbb21f7c2501050cb9b",
+    "src/download/prompts/rubric20_semantic_schema.json": "d4969994f755276c0ce4e42df75b34355e4e6f1d3d061e2c95c790847cbac547"
+  },
+  "after_sha256": {
+    ".claude/agents/d4d-rubric10-semantic.md": "08457d3bd8a4c291c52eaf95e5707099fb8d0643c14439f7375692e1c381b0c8",
+    ".claude/agents/d4d-rubric20-semantic.md": "72629881310cae9aa42b4277790b1985ec8307f211e8edef788b413243c96650",
+    "src/download/prompts/rubric10_semantic_schema.json": "69ed3acfc1db72f126108afcf06d25818a07a961d96d21409a99e6c92a9fd02d",
+    "src/download/prompts/rubric20_semantic_schema.json": "0424bff1abba4c94e747441351ece30ead2589827862a3ac105039c9a2d52109"
+  },
+  "existing_semantic_outputs_examined": 202,
+  "prior_outputs_incompatible_with_new_contract": [
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-09-01api_rep1_evaluation.json",
+      "sha256": "aca1dc11b4584fd9b9caebc21a01e390d80367c6988f0011aa011b46d756cab3",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'condition_met' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-09-01api_rep2_evaluation.json",
+      "sha256": "44cf4748b660f9a662fc0ff44348c08dd985494ef2980c9684fc780b634a572f",
+      "new_contract_errors": [
+        {
+          "path": [
+            "overall_score",
+            "total_points"
+          ],
+          "message": "84.5 is not of type 'integer'"
+        },
+        {
+          "path": [
+            "categories",
+            1,
+            "questions",
+            1,
+            "score"
+          ],
+          "message": "4.5 is not of type 'integer', 'null'"
+        },
+        {
+          "path": [
+            "categories",
+            1,
+            "category_score"
+          ],
+          "message": "20.5 is not of type 'integer'"
+        },
+        {
+          "path": [
+            "categories",
+            3,
+            "questions",
+            3,
+            "score"
+          ],
+          "message": "4.5 is not of type 'integer', 'null'"
+        },
+        {
+          "path": [
+            "categories",
+            3,
+            "questions",
+            4,
+            "score"
+          ],
+          "message": "4.5 is not of type 'integer', 'null'"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-09-01api_rep3_evaluation.json",
+      "sha256": "c2b7539d30f6c98973a8f4bb8f16084dcb11a51e71cee13f186800183b88d3bd",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'condition_met' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/CHORUS_2026-08-22c_rep3_evaluation.json",
+      "sha256": "e5095ce5f64340e272d424b0d7e3a0093c595cd22247499e349bc40a12a9cfb9",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'applicable_by_anti_circular_rule' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/CHORUS_2026-08-24agentic_rep1_evaluation.json",
+      "sha256": "d79ed1d7200bd4d32dab854153ad1cfe5f075d32b64210f53dfa2682bbd5c739",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "score"
+          ],
+          "message": "2 is not one of [0, 3, 5]"
+        },
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'applicable_by_anti_circular_rule' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/CHORUS_2026-08-28agentic_rep1_evaluation.json",
+      "sha256": "d3d81a85b678f9ef2dd4f63fb2569626a5dfa311a52e5f6315aa48114ef5fcb8",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "score"
+          ],
+          "message": "2 is not one of [0, 3, 5]"
+        },
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'applicable_by_anti_circular_rule' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/CHORUS_2026-08-28agentic_rep2_evaluation.json",
+      "sha256": "f059acb15f0d1f86099f462e78e2f3968a65f8d6a1fd1f32befdd252d897b7ae",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "score"
+          ],
+          "message": "1 is not one of [0, 3, 5]"
+        },
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'applicable_by_ambiguity_rule' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/CHORUS_2026-08-28agentic_rep3_evaluation.json",
+      "sha256": "811ac2d2f7091e6cd53dfae4381c738107497f93098a17c89d00eecda393d62d",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "score"
+          ],
+          "message": "None is not one of [0, 3, 5]"
+        },
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicable"
+          ],
+          "message": "False is not one of [True, 'true']"
+        },
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'not_applicable' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/CHORUS_2026-08-28api_rep1_evaluation.json",
+      "sha256": "5c803542a29286478a109ec31c42f6fafdfefca6d5e9f948831c4c20d27124d6",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "score"
+          ],
+          "message": "2 is not one of [0, 3, 5]"
+        },
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'applicable_by_anti_circular_rule' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/CHORUS_2026-08-28bapi_rep1_evaluation.json",
+      "sha256": "94afed54f1d0fd663e9569c80f930fa403da4fa410d05f1a8c588f5048e1b3cc",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'applicable_by_anti_circular_rule' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/CHORUS_2026-09-01api_rep2_evaluation.json",
+      "sha256": "338eb4cd9c61359f21cb04802bb93bd0b106b45e2c3ffeb6b4433333d135a0d1",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "score"
+          ],
+          "message": "2 is not one of [0, 3, 5]"
+        },
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'condition_not_met_but_anti_circular_rule_applied' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/CHORUS_2026-09-01api_rep3_evaluation.json",
+      "sha256": "48f653a3f5431482db1a52f2465c1142a3468702c917ea66b0430109ca3cab5d",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "score"
+          ],
+          "message": "2 is not one of [0, 3, 5]"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/CHORUS_2026-09-04fapi_rep2_evaluation.json",
+      "sha256": "c37fb5cee7ec4debcc87e95607bec5333de9115124ce04f6fd82cce303cdd034",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "score"
+          ],
+          "message": "2 is not one of [0, 3, 5]"
+        },
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'conditionally_applicable_anti_circular' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/CHORUS_2026-09-04fapi_rep3_evaluation.json",
+      "sha256": "fa87e4969ebeba731caf93604e4a8447b5f717fc0e0f60015a585b0fdde027f9",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'applicable_by_anti_circular_rule' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-08-24agentic_rep1_evaluation.json",
+      "sha256": "7f1cf7ef6da06f0074916ce1235657cd498465e484b1fbb6631da46843343dda",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "score"
+          ],
+          "message": "4 is not one of [0, 3, 5]"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-08-28agentic_rep2_evaluation.json",
+      "sha256": "72af77b11031c98cc5bde7916029e148e6630a9f11a5953a104acfdd9bf5d2c7",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "score"
+          ],
+          "message": "4 is not one of [0, 3, 5]"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-08-28agentic_rep3_evaluation.json",
+      "sha256": "dd9719bf20bcfc9c11e2ae614ca38fe36b048af99b554ebce156cd19d5f06b4d",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "score"
+          ],
+          "message": "4 is not one of [0, 3, 5]"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-09-01api_rep2_evaluation.json",
+      "sha256": "8e843b996bc7a411854c529c5f5b5e4ca728d039e2727207304e3fb0c9ad4189",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'condition_met' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-09-01api_rep3_evaluation.json",
+      "sha256": "610dcf9739b95e37eaf99fd00a24687844f14607b40cebb2ed98f4cdad5b4889",
+      "new_contract_errors": [
+        {
+          "path": [
+            "overall_score",
+            "total_points"
+          ],
+          "message": "83.5 is not of type 'integer'"
+        },
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'condition_met' is not one of ['always_applicable', 'applicable']"
+        },
+        {
+          "path": [
+            "categories",
+            3,
+            "questions",
+            4,
+            "score"
+          ],
+          "message": "4.5 is not of type 'integer', 'null'"
+        },
+        {
+          "path": [
+            "categories",
+            3,
+            "category_score"
+          ],
+          "message": "20.5 is not of type 'integer'"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-09-04fapi_rep2_evaluation.json",
+      "sha256": "95955eb6ea2584974da3e69b7ed1634b9e490128b49e7ae41fe2258bdf13357d",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "score"
+          ],
+          "message": "4 is not one of [0, 3, 5]"
+        },
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'condition_met' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-09-04fapi_rep3_evaluation.json",
+      "sha256": "e1e957aca289d7199e7a67e1738cc2e7942484f43cf54cc7666347d4f703ac03",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'condition_met' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/CHORUS_2026-09-01api_rep1_evaluation.json",
+      "sha256": "ee8e6bce8049a00ebae1f010af5ceeffc76d4de5755c4867d5fcc5ead0dbacd3",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'applicable_by_anti_circular_rule' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/CHORUS_2026-09-01api_rep2_evaluation.json",
+      "sha256": "4f9fd80a4589c287ce28e4b1c3a0a5bcee6b95ad2d2509f1261dafd7c10bd366",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "score"
+          ],
+          "message": "2 is not one of [0, 3, 5]"
+        },
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'applicable_by_anti_circular_rule' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/CHORUS_2026-09-01api_rep3_evaluation.json",
+      "sha256": "f8d366fa50b6c8fb60628527a28fc1c7499fb4d2f4a97e76267a8900c06032b3",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "applicability_status"
+          ],
+          "message": "'applicable_by_anti_circular_rule' is not one of ['always_applicable', 'applicable']"
+        }
+      ]
+    },
+    {
+      "path": "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/VOICE_2026-09-01api_rep1_evaluation.json",
+      "sha256": "d7e3086e4f1ff9fc8cfc0a8550aa4712dd8e8e2b30293653e27b1f18f2f82df8",
+      "new_contract_errors": [
+        {
+          "path": [
+            "categories",
+            2,
+            "questions",
+            3,
+            "score"
+          ],
+          "message": "4 is not one of [0, 3, 5]"
+        }
+      ]
+    }
+  ],
+  "existing_outputs_rewritten": false,
+  "reference_rescore": "pending final instrument freeze, one-record one-rubric Opus 5 canary, then 24 v7/v8 records under both semantic rubrics"
+}

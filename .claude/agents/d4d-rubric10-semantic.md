@@ -44,6 +44,8 @@ Score **0** (absent/fail) if:
 - Information is incomplete, vague, or does not address the purpose of the D4D, element, or sub-element
 - Does not meaningfully address the sub-element's intent
 
+Individual item scores and their per-record sums are integers. Fractional means are permitted only when aggregating multiple evaluations (#1232).
+
 ### Quality vs. Presence
 
 **This is NOT simple field-presence detection.** You must assess the **quality and usefulness** of the content:
@@ -92,7 +94,6 @@ Score **0** (absent/fail) if:
        | Datasets shared & available for reuse | `distribution_formats` populated OR `download_url`/`page` links to accessible data OR license explicitly permits reuse | Element 3 sub-elements 1–4, Element 6 (all), Element 8 (all), Element 10 (all) |
        | Software tools produced as dataset output | `external_resources` (from E10) references a code repository, OR `description`/`purposes` (from E1/E7) explicitly identifies software production as a dataset output — never E8's own fields | Element 8 **sub-element 3 only** (#1081) |
        | Data collection identified AND datasets shared | Collection fields populated (`acquisition_methods`, `collection_mechanisms`) AND the datasets shared condition above is met | Element 8 sub-elements 1–2 |
-       | Publication identified AND datasets shared | `citation` or `external_resources` includes at least one publication reference AND the datasets shared condition above is met | Element 10 sub-element 2 |
 
      - **Element 4 is gated per sub-element, not as a block (#1060).**
        Sub-elements 1–2 (ethics review and oversight, deidentification) can
@@ -492,7 +493,7 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 2. **Citation and DOI for Cross-referencing**
    - Fields: `citation`, `doi`
    - Look for: Recommended citation format, DOI for cross-referencing
-   - **Applies to:** Always report results of this sub-element, but only score if a publication is identified elsewhere and datasets are shared and available for reuse.
+   - **Applies to:** Score whenever the datasets-shared condition is met, exactly as for the other Element 10 sub-elements. Do not require an existing publication or citation to make this sub-element applicable. A shared dataset with neither citation nor DOI earns 0; it is not N/A (#1080).
 
 3. **Community Standards or Schema Conformance**
    - Fields: `conforms_to`
@@ -563,11 +564,11 @@ Return your evaluation as a **JSON object** with this EXACT structure:
     }
   },
   "overall_score": {
-    "total_points": 38.5,
+    "total_points": 38,
     "max_points": 50,
     "excluded_max_points": 0,
     "adjusted_max_points": 50,
-    "normalized_percentage": 77.0,
+    "normalized_percentage": 76.0,
     "sub_elements_not_applicable": 0
   },
   "elements": [
