@@ -82,13 +82,16 @@ def is_shallow():
 
 
 def _writing_commit(path):
-    """The last commit that touched this path, or None if git knows none.
+    """The last content-writing commit, following byte-identical renames.
 
-    Not "the commit that wrote these bytes": for a file modified but not yet
-    committed it names the previous commit, which is why `_dirty` is checked
-    before this is trusted (#1100).
+    An archive move must not attribute an old score to the agent in force
+    when it was archived (#1223). Only exact renames are followed: a move
+    that also changes the evaluation is an addition at the new path and
+    must use that commit's instrument. `_dirty` is checked before trusting
+    this history for bytes on disk (#1100).
     """
-    out = subprocess.run(["git", "log", "-1", "--format=%H", "--", str(path)],
+    out = subprocess.run(["git", "log", "--follow", "--find-renames=100%",
+                          "--diff-filter=AM", "-1", "--format=%H", "--", str(path)],
                          capture_output=True, text=True, cwd=ROOT).stdout.strip()
     return out or None
 

@@ -136,8 +136,8 @@ class TestEveryEvaluationNamesItsInstrument(InstrumentManifest):
                     self.assertNotEqual(entry["basis"], "recovered_by_time")
                     self.assertNotIn("evaluated_at", entry)
 
-    def test_a_recovered_instrument_is_the_agent_at_its_writing_commit(self):
-        """The property itself, recomputed from git rather than trusted."""
+    def test_recovered_commit_contains_the_evaluation_and_named_agent(self):
+        """Verify both artifacts in git, including scores archived later."""
         if _shallow():
             self.skipTest("shallow clone: no history to resolve against")
         for rubric, agent in AGENT_PATHS.items():
@@ -146,12 +146,24 @@ class TestEveryEvaluationNamesItsInstrument(InstrumentManifest):
                 if entry["basis"] != "recovered_from_commit":
                     continue
                 with self.subTest(rubric=rubric, evaluation=name):
-                    commit = subprocess.run(
-                        ["git", "log", "-1", "--format=%H", "--", str(base / name)],
-                        capture_output=True, text=True, cwd=ROOT).stdout.strip()
-                    self.assertTrue(commit.startswith(entry["recovered_from"]))
+                    commit = entry["recovered_from"]
+                    history = subprocess.run(
+                        ["git", "log", "--follow", "--find-renames=100%",
+                         "--format=%H", "--", str(base / name)],
+                        capture_output=True, text=True, cwd=ROOT, check=True).stdout
+                    self.assertTrue(any(c.startswith(commit) for c in history.split()))
+                    # Its historic path may differ. Match the actual JSON
+                    # blob against the rubric tree at the recovered commit.
+                    evaluation_blob = subprocess.run(
+                        ["git", "hash-object", str(base / name)],
+                        capture_output=True, text=True, cwd=ROOT, check=True).stdout.strip()
+                    tree_blobs = subprocess.run(
+                        ["git", "ls-tree", "-r", "--format=%(objectname)", commit,
+                         "--", str(base.relative_to(ROOT))],
+                        capture_output=True, text=True, cwd=ROOT, check=True).stdout.split()
+                    self.assertIn(evaluation_blob, tree_blobs)
                     blob = subprocess.run(["git", "show", f"{commit}:{agent}"],
-                                          capture_output=True, cwd=ROOT)
+                                          capture_output=True, cwd=ROOT, check=True)
                     self.assertEqual(
                         hashlib.sha256(blob.stdout).hexdigest(),
                         entry["instrument_sha256"])
