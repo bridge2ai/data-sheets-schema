@@ -1,0 +1,49 @@
+{
+  "recorded_at": "2026-09-12T23:16:05.336486+00:00",
+  "issue": 1354,
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "registration_sha256": "b0a02133382c51cd8ebaa480917bd1c8920f3c7cfece11deea0392c6d9f0cbad",
+  "previous_registration_sha256": "724f07cfec5aa26b33ed9f9d42542d383fabfc285a576a617992ce4c514e9cfd",
+  "pilot_job_id": "CM4AI_v7_rep2_r20_rating1",
+  "accepted_before_retry": 30,
+  "remaining_after_pilot": 25,
+  "original_failure_review": "notes/reference_rescore_2026-09-12_cborg_runtime/validation_wrapper_review_1354.json",
+  "original_failure_review_sha256": "617e2680c0cfa0dabc5123c3d7d7a455cf078edf483788fcaf50fc88a609d975",
+  "total_completed_evaluator_sessions_before_retry": 37,
+  "total_excluded_evaluator_sessions_before_retry": 7,
+  "known_terminal_cli_cost_before_retry_usd": 95.64469475,
+  "unpriced_excluded_sessions": [
+    {
+      "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep1_r10_rating1/2026-09-12T21-47-05.670729+00-00",
+      "job_id": "CHORUS_v8_rep1_r10_rating1",
+      "classification": "reviewed_900_second_timeout_before_write",
+      "evaluator_launched": true,
+      "accepted": false,
+      "cli_reported_cost_usd": null,
+      "cost_basis": "No terminal CLI result. Partial stream usage does not establish complete cost; this real session is unpriced, not free."
+    },
+    {
+      "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep2_r10_rating1/2026-09-12T21-52-57.419848+00-00",
+      "job_id": "CHORUS_v8_rep2_r10_rating1",
+      "classification": "reviewed_900_second_timeout_before_write",
+      "evaluator_launched": true,
+      "accepted": false,
+      "cli_reported_cost_usd": null,
+      "cost_basis": "No terminal CLI result. Partial stream usage does not establish complete cost; this real session is unpriced, not free."
+    }
+  ],
+  "cli_reported_total_cost_usd": null,
+  "cost_accounting_complete": false,
+  "session_accounting_complete": true,
+  "scoring_prompts_changed": 0,
+  "definitions_changed": 0,
+  "inputs_changed": 0,
+  "execution_settings_changed": false,
+  "acceptance_gates_changed": false,
+  "scheduler_sha256": "ef2e7f2c6ef17d8880a5e2884fb45ca8160a74d2f30825d030bad7ef32ab2d60",
+  "budget_cap_usd_per_attempt": 5,
+  "timeout_seconds": 1800,
+  "original_candidates_promoted": 0,
+  "model_calls_during_registration": 0,
+  "retry_limits": "Only this exact failed history is eligible for one fresh attempt. Independent pre-spend review and original-output pilot acceptance are required before the remaining 25. Any further failure stops launches and requires separate review."
+}

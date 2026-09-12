@@ -1,0 +1,132 @@
+{
+  "job_id": "CHORUS_v7_rep3_r10_rating1",
+  "started_at": "2026-09-12T22:37:00.155167+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "ffb3b59a919e4e30d0f17615b10ede8d79c221d2b4e3d7f267019c977c27f694",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "90bc2010147407e66842a5504cdd6b9883bc987263e313ff60a28ca4f4963881",
+  "evaluation_sha256": "1185a4adc9d3e53cae620043cefb437733e23c3cb3e6fe7774f6408d828a2e98",
+  "cli_result": {
+    "duration_api_ms": 542614,
+    "stop_reason": "end_turn",
+    "session_id": "b6867bc6-bfb0-4c7a-8623-f9531127fbaa",
+    "total_cost_usd": 2.6129082500000003,
+    "usage": {
+      "input_tokens": 312,
+      "cache_creation_input_tokens": 189406,
+      "cache_read_input_tokens": 498264,
+      "output_tokens": 43487,
+      "output_tokens_details": {
+        "thinking_tokens": 12131
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 189406
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 314,
+        "outputTokens": 43515,
+        "cacheReadInputTokens": 498264,
+        "cacheCreationInputTokens": 203893,
+        "webSearchRequests": 0,
+        "costUSD": 2.6129082500000003,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 12131,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01QrNdm1mLyVfvsh6iVNbu1H",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-5m2muc4w; echo \"---\"; find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "List working directory and locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01RiviPDRau1fDxgB3TjepEE",
+        "tool_input": {
+          "command": "date -u +\"%Y-%m-%dT%H:%M:%SZ\"; python3 -c \"import uuid;print(uuid.uuid4())\"; shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-5m2muc4w/input/record.yaml /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-5m2muc4w/data/rubric/rubric10.txt",
+          "description": "Get UTC timestamp, generate UUID, hash input and rubric files"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 14,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0).\n\n## Definition check\n\nThe section **\"Source rubric and schema paths (#158)\"** is present in my instructions, and it reads as I would expect of the current rules. The sentence beginning \"Read release-specific notes\", verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\n## Evaluation written\n\n`output_evaluation.json` \u2014 CHORUS, `claudecode_agent`, rep3. Validated with the exact command supplied: `VALID output_evaluation.json: rubric10-semantic`.\n\n**Score: 33 / 50 \u2014 fixed 66.0% (denominator 50), normalized 66.0% (adjusted denominator 50).** No sub-element was excluded (`sub_elements_not_applicable: 0`), so both bases coincide. All five trigger conditions resolved as *met*, each on evidence outside the gated element:\n\n- **Human subjects** \u2014 E1 `description` (\"critically ill patients\", adult/pediatric/neonatal ICU admissions) and keywords \u2192 all five Element 4 sub-elements applicable and scored, including 3\u20135.\n- **Governance** \u2014 E2 `confidentiality_level: restricted` (independently opens E4 s1\u2013s2).\n- **Datasets shared** \u2014 E2 `distribution_formats` (5 entries) plus `third_party_sharing.is_shared=true` \u2192 E3 s1\u20134, E6, E8, E10 all scored.\n- **Software output** \u2014 E10 `external_resources` names the chorus-ai code repository \u2192 E8 s3 scored.\n- **Collection identified** \u2014 E8 `acquisition_methods`/`collection_mechanisms` populated.\n\nElement scores: E1 3, E2 4, E3 3, E4 2, E5 4, E6 2, E7 5, E8 5, E9 3, E10 2.\n\nNotable judgements:\n- **E8 s4 = 1** under the #1082 threshold: OHNLP toolkit, chorus-mapping, chorus_waveform conversion scripts and UF-Geocoding/DeGauss all *produced or transformed the released data*. chorus-extract-upload (a), Azure/docker (b, c) and CHoRUSReports (d) were identified as excluded roles that neither add nor subtract. No versions given \u2014 flagged, not penalised.\n- **E10 s2 = 0, not N/A** (#1080): shared dataset with neither citation nor DOI.\n- **E2 s1 = 1 but E3 s1 = 0**: an access policy exists; reuse terms do not \u2014 the MIT/Apache terms are correctly scoped to software by the record itself.\n- **E9 s5 = 1 but E4 s1 = 0**: social-impact and ethics-programme analysis is documented; approval of *this dataset* by an oversight body is not.\n\nSemantic analysis: 14 issues (3 high, all human-subjects governance), 20 consistency checks passed / 7 failed / 7 warnings; grant `OT2OD032701` validates as NIH (OT2/OD/032701), DOI and RRID not present, `id` classified as a non-persistent fragment URI.",
+    "ttft_ms": 3239,
+    "type": "result",
+    "duration_ms": 544653,
+    "uuid": "a09dec83-d34b-40de-b1f9-89f9f464f2f1",
+    "ttft_stream_ms": 2390,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 2390,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_0152AvUmFEwNFpyyXNowGu95",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-12T22:46:05.664061+00:00"
+}

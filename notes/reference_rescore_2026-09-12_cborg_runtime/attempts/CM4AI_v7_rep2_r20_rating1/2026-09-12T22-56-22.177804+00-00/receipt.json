@@ -1,0 +1,11 @@
+{
+  "job_id": "CM4AI_v7_rep2_r20_rating1",
+  "started_at": "2026-09-12T22:56:22.177976+00:00",
+  "status": "incomplete",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "559bc77d6d0f531c4f37f84e6616c0b4072784e827d30ec3131d0a2e8ea0f680",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "error": "ValueError: evaluator did not successfully validate its exact output",
+  "completed_at": "2026-09-12T23:07:29.765961+00:00"
+}

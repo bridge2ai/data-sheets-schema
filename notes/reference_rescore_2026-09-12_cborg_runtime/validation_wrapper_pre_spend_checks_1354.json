@@ -1,0 +1,26 @@
+{
+  "verified_at": "2026-09-12T23:16:33.623761+00:00",
+  "issue": 1354,
+  "registration_sha256": "b0a02133382c51cd8ebaa480917bd1c8920f3c7cfece11deea0392c6d9f0cbad",
+  "unchanged_execution_keys": {
+    "manifest_sha256": true,
+    "scheduler": true,
+    "scheduler_sha256": true,
+    "workers": true,
+    "cli_executable_sha256": true,
+    "validator_status_extension": true,
+    "deadline_extension": true,
+    "timeout_failures": true,
+    "prelaunch_failures": true
+  },
+  "manifest_frozen_check": "passed",
+  "original_candidate": "still rejected and unpublished",
+  "pre_spend_guard": "blocked pending independent review",
+  "completed_attempt_and_controller_files": "filesystem walk including ignored files matches preservation pins",
+  "accepted_before_retry": 30,
+  "pending": 26,
+  "remaining_after_pilot": 25,
+  "known_terminal_cli_cost_usd": 95.64469475,
+  "unpriced_sessions": 2,
+  "provider_calls": 0
+}

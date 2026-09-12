@@ -1,0 +1,132 @@
+{
+  "job_id": "CHORUS_v8_rep3_r10_rating1",
+  "started_at": "2026-09-12T22:45:46.473964+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "8019cce6b58d9fdfedac94223230c90556ec176808a4ab9688d0702794a7918c",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "82963f6ea262f9cff93d4216ba18dacef48c4a6b7286445f83e195782e162759",
+  "evaluation_sha256": "52d940459ed4ff53dc521b19c3ddf6ba52fe6912692cfb8ac99c53ae2b892bb9",
+  "cli_result": {
+    "duration_api_ms": 633541,
+    "stop_reason": "end_turn",
+    "session_id": "0e772ea8-07cf-42db-8726-5e88073ea37b",
+    "total_cost_usd": 2.5745720000000003,
+    "usage": {
+      "input_tokens": 312,
+      "cache_creation_input_tokens": 151949,
+      "cache_read_input_tokens": 496154,
+      "output_tokens": 51021,
+      "output_tokens_details": {
+        "thinking_tokens": 17002
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 151949
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 314,
+        "outputTokens": 51049,
+        "cacheReadInputTokens": 496154,
+        "cacheCreationInputTokens": 167792,
+        "webSearchRequests": 0,
+        "costUSD": 2.5745720000000003,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 17002,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_016NJwvxWjtFSzRMpcA1zciJ",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-vh5pngv9; echo \"---\"; find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "List working directory and find agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01WfQ8rzQWRdz4eqcbsLKPHL",
+        "tool_input": {
+          "command": "date -u +\"%Y-%m-%dT%H:%M:%SZ\"; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get current UTC timestamp and generate a UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0).\n\n## Definition check\n\nThe section headed \u201cSource rubric and schema paths (#158)\u201d is present in my instructions, and the sentence beginning \u201cRead release-specific notes\u201d reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches the current rules (the dedicated `updates.update_details` slot, with the requirement that the notes carry actual release or derivation information), so I proceeded.\n\n## Evaluation written\n\n`output_evaluation.json` \u2014 CHORUS, `claudecode_api`, rubric10-semantic.\n\n**Score: 33 / 50 \u2014 fixed 66.0% (denominator 50), adjusted 66.0% (denominator 50).** No sub-element was excluded, so `sub_elements_not_applicable: 0`, `excluded_max_points: 0`, and the two bases coincide. All five trigger conditions resolved as *met* on other elements' evidence: human subjects (E1 description/keywords: intensive care admissions, patients with acute or critical illness), governance restrictions (E2 `confidentiality_level: restricted`, an applying constraint), datasets shared (five populated `distribution_formats`, `third_party_sharing.is_shared: true`), software output (E10 `external_resources` \u2192 github.com/chorus-ai, 28 repositories), and collection-plus-shared (E8 `acquisition_methods`/`collection_mechanisms`).\n\nElement scores: E1 3, E2 4, E3 3, E4 2, E5 4, E6 2, E7 5, E8 5, E9 3, E10 2.\n\nNotable judgements:\n- **E4 sub-4 (consent) = 0** and **sub-1 (IRB) = 0**: `involves_human_subjects: true` with no reviewing body, approval, or consent basis \u2014 the instrument's two explicit consistency checks both fail. `ethical_reviews` holds community focus groups, which answers E9 sub-5 (ethical review *plus social impact analysis*) but not the oversight question in E4.\n- **E8 sub-4 (software) = 1** under the #1059/#1082 threshold: OHNLP, OHDSI, chorus-mapping, chorus_waveform conversion scripts and DeGauss all transform data that is in the release. Excluded from the count as non-qualifying roles: chorus-extract-upload (packaging), chorus-container-apps/Azure (hosting), CHoRUSReports (validation), and privacy_scan_tool/CTP-deid, which the record itself declines to assert were applied.\n- **E10 sub-2 = 0, not N/A** (#1080): the datasets-shared condition is the only gate, and neither citation nor DOI exists.\n- **E6 sub-3 = 0 / sub-4 = 1**: the same `updates` field is forward-looking only \u2014 a maintenance plan (credited) with no retrospective change log or errata (not credited).\n\nSemantic analysis records 12 consistency checks passed, 4 failed, 5 warnings; `doi_format: not_present`, `grant_number_format: valid_nih` (OT2OD032701 parses correctly as OT2 + OD + serial), `rrid_format: not_present`, `url_validity: all_valid`, plus flags for the homepage-as-identifier duplication and the `mgh.havard.edu` contact typo.",
+    "ttft_ms": 3932,
+    "type": "result",
+    "duration_ms": 633886,
+    "uuid": "f920d1e8-ecb4-424c-884b-c695d81dd288",
+    "ttft_stream_ms": 2961,
+    "time_to_request_ms": 21,
+    "first_content_frame_ms": 2961,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_0158yZEcDHbTXYgkiUtRx25V",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-12T22:56:21.197304+00:00"
+}

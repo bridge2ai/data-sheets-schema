@@ -1,0 +1,13 @@
+{
+  "started_at": "2026-09-12T23:00:38.086425+00:00",
+  "extension": {
+    "path": "scripts/reference_rescore_cborg_deadline.py",
+    "sha256": "78afd486203eee78d18f479304a2dc7ca98425947beb5956d3c9538066b24dd2",
+    "timeout_seconds": 1800
+  },
+  "original_timeout_seconds": 900,
+  "timeout_seconds": 1800,
+  "timed_out": false,
+  "returncode": 0,
+  "completed_at": "2026-09-12T23:13:03.540177+00:00"
+}

@@ -1,0 +1,164 @@
+{
+  "job_id": "CHORUS_v8_rep3_r20_rating1",
+  "started_at": "2026-09-12T22:46:06.658666+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "bb97cf26d9e43317347d611c96e09a55c28ba8473ae40c922087b39381af2127",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "82963f6ea262f9cff93d4216ba18dacef48c4a6b7286445f83e195782e162759",
+  "evaluation_sha256": "8e952fc6f6c445a3b2af84320ec98bdbff40c849d43f593ca9c20f3d5778dbbd",
+  "cli_result": {
+    "duration_api_ms": 866439,
+    "stop_reason": "end_turn",
+    "session_id": "ac7b795d-b5f9-4f50-b126-994b92d7696d",
+    "total_cost_usd": 3.825470749999999,
+    "usage": {
+      "input_tokens": 321,
+      "cache_creation_input_tokens": 214411,
+      "cache_read_input_tokens": 976249,
+      "output_tokens": 75839,
+      "output_tokens_details": {
+        "thinking_tokens": 13465
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 214411
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 323,
+        "outputTokens": 75867,
+        "cacheReadInputTokens": 976249,
+        "cacheCreationInputTokens": 230249,
+        "webSearchRequests": 0,
+        "costUSD": 3.825470749999999,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 13465,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01D61Q1HwyvzZtKCnJj46pAn",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01RYeASJMib61H715cZbVGwy",
+        "tool_input": {
+          "command": "/bin/date -u +%Y-%m-%dT%H:%M:%SZ; /usr/bin/uuidgen",
+          "description": "Get UTC timestamp and generate UUID"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_017A9dwRGrbKNHwGKBWDzjWy",
+        "tool_input": {
+          "command": "/usr/bin/head -60 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-wmeg8yhb/data/rubric/rubric20.txt",
+          "description": "Read the start of the rubric text file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01JdBb7ojpFKqBbpcLjDhoE8",
+        "tool_input": {
+          "command": "python3 -c \"import datetime,uuid;print(datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'));print(uuid.uuid4())\"",
+          "description": "Print current UTC time and a random UUID"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_013Kd9ad43eQuzkCUbnX7PTC",
+        "tool_input": {
+          "command": "/usr/bin/stat -f '%Sm' -t '%Y-%m-%dT%H:%M:%SZ' /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-wmeg8yhb/input/record.yaml",
+          "description": "Show record file modification timestamp"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01YAYkg8hZvYPTd2jhhyUcWA",
+        "tool_input": {
+          "command": "poetry run python -c \"import datetime;print(datetime.datetime.now(datetime.timezone.utc).isoformat())\"",
+          "description": "Check poetry environment and print current UTC time"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_015gMWxyEGWicpqxuKw9urC6",
+        "tool_input": {
+          "command": "perl -i -pe 's/\\((\")\\.edu(\")\\)/(\\\\\".edu\\\\\")/g; s/A (\")\\.edu(\") email/A \\\\\".edu\\\\\" email/g' output_evaluation.json && grep -c '\\\\\".edu\\\\\"' output_evaluation.json",
+          "description": "Escape embedded quote characters in two evidence strings"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 20,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed with exit status 0.\n\n## Definition check\n\nThe \"Reproducibility\" section is present in my instructions and reads as expected of the current rules. The sentence beginning \"Repeatability must be\", verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\n## Evaluation written\n\n`output_evaluation.json` \u2014 CHORUS, `claudecode_api`, rep3. Validated: `VALID output_evaluation.json: rubric20-semantic`.\n\n**Score: 65 / 88 \u2014 fixed 73.9%, normalized 73.9%** (denominators identical: all four \"Applies to\" trigger conditions were satisfied, so `excluded_max_points: 0`, `adjusted_max_points: 88`, `questions_not_applicable: 0`). Every question carries `applicable: true`; no null scores.\n\n| Category | Score |\n|---|---|\n| Structural Completeness (Q1\u20135) | 19 / 21 |\n| Metadata Quality & Content (Q6\u201310) | 17 / 21 |\n| Technical Documentation (Q11\u201315) | 16 / 25 |\n| FAIRness & Accessibility (Q16\u201320) | 13 / 21 |\n\n**Applicability, resolved before scoring (anti-circular rule).** Each conditional question records `applicability_evidence` drawn from fields belonging to *other* questions: Q8/Q15 from description, keywords and collection_mechanisms; Q11 from external_resources' code repositories plus purposes' \"tools around artificial intelligence\"; Q10/Q17 from third_party_sharing and the access-review process, applying the ambiguity rule so approval-gated access counts as shared; Q12/Q13 from the populated collection fields plus that sharing condition. No question's own fields were used to exclude it.\n\n**What drove the score.** Strengths are real: tier-ranked source provenance with disclosed conflicts, per-modality standards conformance (OMOP/DICOM/WFDB/EDF+/OHNLP) that is technically correct, a valid NIH grant (OT2OD032701 parses correctly \u2014 OT2 activity code, OD institute), and a confidentiality architecture propagated consistently across nine fields.\n\nThe deductions are mostly semantic rather than presence-based. Sixteen issues are recorded, four of them high severity: `involves_human_subjects=true` with no named IRB and no informed consent or waiver; no known_biases field in a record titled \"\u2026for Equitable AI\"; and no version, version_access, errata or DOI for a dataset the record itself describes as growing from 50,000 toward 100,000 admissions. Consistency checks: 20 passed, 5 failed, 7 warnings. Note one cascade \u2014 the absent persistent identifier caps Q6, Q13, Q14 and Q19 together, and the absent demographics (Q15) makes the Q20 fairness analysis structurally impossible.\n\nTwo serialization notes, for transparency. The first write failed validation on unescaped quotes inside two evidence strings (`\".edu\"`); I fixed the escaping only \u2014 no judgement was altered to satisfy the validator. Second, `evaluation_timestamp` is `2026-09-12T15:46:06Z`, derived from the pinned record's filesystem timestamp because this sandbox denied the clock commands; treat it as session-dated rather than instant-accurate. Model recorded as `claude-opus-5` for both `name` and `evaluator_model` per the launcher's canonical identifier, `temperature: null`.",
+    "ttft_ms": 3482,
+    "type": "result",
+    "duration_ms": 869349,
+    "uuid": "4fa234ab-55b3-46e9-afc0-33e3c0233258",
+    "ttft_stream_ms": 2493,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 2493,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [],
+  "completed_at": "2026-09-12T23:00:36.885219+00:00"
+}

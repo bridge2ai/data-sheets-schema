@@ -1,0 +1,696 @@
+{
+  "rubric": "rubric10-semantic",
+  "version": "1.2",
+  "d4d_file": "data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml",
+  "project": "CM4AI",
+  "method": "claudecode_api",
+  "evaluation_timestamp": "2026-09-12T16:04:00Z",
+  "model": {
+    "name": "claude-opus-5",
+    "evaluator_model": "claude-opus-5",
+    "temperature": null,
+    "temperature_note": "Not exposed by this runtime; no deterministic-score guarantee",
+    "model_identity_note": "API/runtime identifier supplied by the launcher and verified against the retained runtime trace; not an identification of underlying weights.",
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "semantic_analysis": {
+    "issues_detected": [
+      {
+        "type": "consistency",
+        "severity": "medium",
+        "description": "Temporal ordering is internally contradictory: the dataset is issued 2026-06-17, yet three immunofluorescence archives carry issued: 2026-07-15, a month after the version publication date, and created_on is 2025-02-27, sixteen months before issuance. The record flags the file-date anomaly in source_caveats but supplies no resolution.",
+        "fields_involved": ["issued", "created_on", "file_collections.resources.issued", "distribution_dates", "source_caveats"],
+        "recommendation": "State explicitly whether the July 2026 immunofluorescence archives were added in a post-publication Dataverse revision, and record that revision in an errata or update entry."
+      },
+      {
+        "type": "correctness",
+        "severity": "medium",
+        "description": "Two upstream sources disagree on the release date (CM4AI portal: 'Released on: June 17, 2025'; UVA Dataverse: Publication Date 2026-06-17). The record adopts the Dataverse date and documents the conflict, which is good practice, but the dataset title ('June 2026') and the portal listing remain mutually inconsistent for any user arriving from the portal.",
+        "fields_involved": ["issued", "title", "source_caveats"],
+        "recommendation": "Retain the conflict note and additionally record which source was consulted on what date, so downstream users can re-verify."
+      },
+      {
+        "type": "completeness",
+        "severity": "high",
+        "description": "No variable-level metadata at all: variables, is_tabular, is_data_split and is_subpopulation are entirely absent, and the ten ZIP archives carry no per-file content description. A reuser cannot determine what columns, channels or matrices the archives contain without downloading them.",
+        "fields_involved": ["variables", "is_tabular", "subsets", "file_collections.resources"],
+        "recommendation": "Add variables entries (or a data dictionary reference) for the perturb-seq cell atlas matrix and the SEC-MS/AP-MS elution and interaction tables, and set is_tabular where applicable."
+      },
+      {
+        "type": "semantic_understanding",
+        "severity": "high",
+        "description": "Distribution format is declared only as the ZIP container (format: ZIP, media_type: application/zip) for all ten archives. ZIP is packaging, not a data format: the record never states whether the contents are mzML, TIFF/OME-TIFF, h5ad, MTX, FASTQ or CSV. This satisfies the distribution question but not the interoperability question.",
+        "fields_involved": ["distribution_formats.format", "distribution_formats.media_type", "file_collections.resources.format", "file_collections.resources.encoding"],
+        "recommendation": "Describe the internal file formats and character encoding of each archive alongside the ZIP container declaration."
+      },
+      {
+        "type": "content_accuracy",
+        "severity": "medium",
+        "description": "Reported sample magnitudes cannot be attributed to this release. The portal 'Data Insights' figures (53,788 images, 11,739 genes, 21.4 TB) are read by the record as cumulative project-wide holdings by inference, and the 523-protein figure conflicts with the 464-protein figure on the October 2025 release page. The record correctly declines to assert either for the June 2026 archives, leaving instance counts for this release unstated.",
+        "fields_involved": ["notes", "sampling_strategies.source_caveats", "instances", "file_collections.source_caveats"],
+        "recommendation": "Report per-release counts (images, targeted genes, proteins, cells) for the ten archives actually distributed here, or state that they are not published."
+      },
+      {
+        "type": "completeness",
+        "severity": "high",
+        "description": "No software that produced or transformed the distributed archives is named. The Cell Mapping Toolkit / CM4AI integration pipeline is named, but the record states the computed cell maps it produces are explicitly not included in this release; FAIRSCAPE is named for packaging, metadata and provenance-graph production. Neither answers what generated the SEC-MS, AP-MS, immunofluorescence or perturb-seq atlas products that are distributed.",
+        "fields_involved": ["external_resources", "preprocessing_strategies", "conforms_to"],
+        "recommendation": "Name and version the acquisition and processing software for each modality (e.g. mass-spectrometry search engine, image acquisition/segmentation pipeline, CellRanger or equivalent for the CRISPRi atlas)."
+      },
+      {
+        "type": "completeness",
+        "severity": "medium",
+        "description": "Preprocessing is documented only as an inference from archive names ('Inferred from the paired archive names ... the June 2026 release listing carries no per-file processing description'), and no cleaning, labeling, annotation-quality or imputation documentation exists. The atlas is known to be a processed product but not how it was processed.",
+        "fields_involved": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies", "annotation_analyses", "imputation_protocols"],
+        "recommendation": "Document the CRISPRi atlas processing pipeline (alignment, guide assignment, QC filtering, normalization) and state explicitly whether imputation was used."
+      },
+      {
+        "type": "consistency",
+        "severity": "low",
+        "description": "Governance is partly aspirational relative to the release as distributed: data_governance.notes reports a Data Access Committee as a planned arrangement in the preprint, while all ten archives are listed with public file access; and the commercial-licensing and copyright statements in ip_restrictions are drawn from the preprint and earlier release pages rather than from the June 2026 page, which states only CC BY-NC-SA 4.0.",
+        "fields_involved": ["data_governance.notes", "ip_restrictions", "ip_restrictions.source_caveats", "license_and_use_terms"],
+        "recommendation": "Confirm on the current release page whether the dual-licensing and Stanford/UCSF copyright carve-outs still apply to the June 2026 archives."
+      },
+      {
+        "type": "consistency",
+        "severity": "low",
+        "description": "Ethical review contact identity is reconciled across sources with a residual mismatch: Vardit Ravitsky is given affiliation University of Montreal while the contact email domain is thehastingscenter.org. The record discloses the mismatch rather than silently resolving it.",
+        "fields_involved": ["ethical_reviews.contact_person.affiliation", "ethical_reviews.contact_person.email", "ethical_reviews.source_caveats"],
+        "recommendation": "Record the affiliation associated with the governance role rather than the authorship affiliation, or note that both are current."
+      },
+      {
+        "type": "completeness",
+        "severity": "medium",
+        "description": "No errata and no version-level change log. updates describes only a forward-looking quarterly cadence; the one comparative statement ('adds AP-MS data for treated MDA-MB-468 ... which the October 2025 release did not include') sits in related_datasets.notes and describes a cross-DOI delta, not what changed between Dataverse versions of this DOI. The carried-forward '(2025-06-30)' description stamp and the differing MD5s for same-named October 2025 archives are exactly the kind of item an errata entry should carry.",
+        "fields_involved": ["errata", "updates.update_details", "related_datasets.notes", "source_caveats"],
+        "recommendation": "Add an errata list and a per-version change description covering the AP-MS addition, the July 2026 file additions, the checksum changes and the stale description stamp."
+      },
+      {
+        "type": "completeness",
+        "severity": "medium",
+        "description": "No downstream social impact analysis (future_use_impacts) and no conflict-of-interest statement, despite a named ethics team and an explicit ethics workstream in the project's stated purposes ('ethical, AI-ready datasets').",
+        "fields_involved": ["future_use_impacts", "ethical_reviews.review_details"],
+        "recommendation": "Record the substance of the ethics workstream's review — anticipated downstream impacts of cell-architecture models and mitigations — not only the contacts responsible for it."
+      },
+      {
+        "type": "content_accuracy",
+        "severity": "low",
+        "description": "sampling_strategies[1].is_sample: false is the record's own reading of 'expressed genome-scale' and 'whole-genome', which the record admits no source states in terms. A false flag asserted on inference is weaker evidence than the surrounding prose it rests on.",
+        "fields_involved": ["sampling_strategies.is_sample", "sampling_strategies.source_caveats"],
+        "recommendation": "Prefer leaving the boolean unset where the source does not support it, and retain the prose description."
+      }
+    ],
+    "semantic_insights": [
+      "DOI 10.18130/V3/HIGT4C is well formed and its prefix (10.18130) is the University of Virginia Dataverse/LibraData registrant, consistent with the page URL dataverse.lib.virginia.edu, the citation publisher string and version_access.latest_version_doi — four independent occurrences agree.",
+      "Both NIH award identifiers parse correctly against NIH activity-code structure: 1OT2OD032742-01 (OT2, Office of the Director, Bridge2AI Other Transaction) and 5U54HG012513-02 (U54, NHGRI, Bridge2AI Bridge Center), and the record cross-checks the first against RePORTER for PI, project period and award amount.",
+      "Cell-line provenance is given with Cellosaurus RRIDs (RRID:CVCL_0419 for MDA-MB-468, RRID:CVCL_B5P3 for KOLF2.1J) plus donor characteristics and source repositories, making the biological substrate independently verifiable.",
+      "The no-human-subjects determination is coherent across the record: description and collection_mechanisms describe cell culture and instrumentation rather than recruitment; direct_collection.is_direct is false with the explicit statement that data were not collected from individuals; human_subject_research, sensitive_elements and is_deidentified all agree.",
+      "The deidentification statement is appropriate to the data type: rather than invoking an inapplicable Safe Harbor or expert-determination workflow, it grounds the claim in the non-clinical tissue-culture origin and the inability to match samples to a subject with current knowledge.",
+      "License semantics are internally consistent: CC BY-NC-SA 4.0 prose, data_use_permission: no_commercial_use, and ip_restrictions requiring separate negotiation for commercial use all express the same restriction at three levels of formality.",
+      "total_file_count: 10 reconciles exactly against the file_collections tree (2 AP-MS + 3 IF + 2 SEC-MS + 1 atlas + 1 raw SRA + 1 metadata), and every resource carries a 32-hex MD5, supporting integrity verification on download.",
+      "The record separates what it observed from what it inferred throughout, using source_caveats at field level (acquisition_methods, sampling_strategies, data_collectors, ip_restrictions, file_collections) rather than asserting carried-forward detail from earlier releases as fact about these archives.",
+      "Known biases are typed (representation_bias) and tied to concrete affected_subsets — two cell lines with stated donor demographics — rather than stated as a generic disclaimer.",
+      "Release lineage is fully navigable: five releases are enumerated with their own DOIs and Dataverse version numbers, and the predecessor is linked with a typed is_new_version_of relationship."
+    ],
+    "consistency_checks": {
+      "passed": 17,
+      "failed": 2,
+      "warnings": 8
+    },
+    "correctness_validations": {
+      "doi_format": "valid_dataverse",
+      "grant_number_format": "valid_nih",
+      "rrid_format": "valid",
+      "url_validity": "all_valid",
+      "orcid_format": "valid",
+      "checksum_format": "valid",
+      "identifier_cross_reference": "consistent",
+      "temporal_ordering": "inconsistent"
+    }
+  },
+  "overall_score": {
+    "total_points": 39,
+    "max_points": 50,
+    "excluded_max_points": 3,
+    "adjusted_max_points": 47,
+    "normalized_percentage": 82.98,
+    "fixed_percentage": 78.0,
+    "sub_elements_not_applicable": 3
+  },
+  "elements": [
+    {
+      "id": 1,
+      "name": "Dataset Discovery and Identification",
+      "description": "Can a user or system discover and uniquely identify this dataset?",
+      "sub_elements": [
+        {
+          "name": "Persistent Identifier (DOI, RRID, or URI)",
+          "score": 1,
+          "evidence": "doi: 10.18130/V3/HIGT4C; id: doi:10.18130/V3/HIGT4C; version_access.latest_version_doi: doi:10.18130/V3/HIGT4C",
+          "quality_note": "A single persistent identifier is used consistently as the record id, the doi field, the latest-version pointer and inside the citation string. Predecessor releases carry their own DOIs (10.18130/V3/K7TGEM, /F3TD5R, /B35XWX), so the identifier scheme is applied across the release series rather than to this record alone.",
+          "semantic_validation": "Matches 10.XXXX/... ; prefix 10.18130 is the University of Virginia Dataverse (LibraData) registrant and agrees with the page host dataverse.lib.virginia.edu and the citation's stated publisher. Cellosaurus RRIDs for the two source cell lines are additionally well formed."
+        },
+        {
+          "name": "Dataset Title and Description Completeness",
+          "score": 1,
+          "evidence": "title: 'Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta)'; description: ~1,100 characters naming the three modalities, both cell lines, the treatment and differentiation conditions, the ten ZIP archives, the distribution channel, and the interim status",
+          "quality_note": "Well above the 200-character threshold and specific rather than promotional: it enumerates what is in the release (perturb-seq, SEC-MS, AP-MS, immunofluorescence, by cell line and condition) and, unusually, what is not ('computed cell maps are not included') and what is embargoed.",
+          "semantic_validation": "Description content matches the file_collections tree modality-for-modality; no claim in the description is contradicted by the file listing. The title's 'June 2026' is consistent with issued: 2026-06-17 under the adjudication recorded in source_caveats."
+        },
+        {
+          "name": "Keywords or Tags for Searchability",
+          "score": 1,
+          "evidence": "keywords: 30 terms including AP-MS, SEC-MS, perturb-seq, CRISPR/Cas9, MDA-MB-468, KOLF2.1J, paclitaxel, vorinostat, protein-protein interaction, subcellular imaging, Bridge2AI, CM4AI",
+          "quality_note": "Far exceeds the five-keyword expectation and spans four retrieval axes: assay/method, cell line, perturbagen, and programme. Synonym pairs are supplied deliberately (mass spectroscopy/SEC-MS, scRNAseq/single-cell RNA sequencing, NPC/neural progenitor cell), which materially helps discovery.",
+          "semantic_validation": "Every keyword is instantiated somewhere in the record's content; none is aspirational. 'Bridge2AI' and 'CM4AI' supply the programme context used elsewhere in this evaluation, read from keywords and funders rather than from the filename."
+        },
+        {
+          "name": "Landing Page and Resources (page, hierarchical resources)",
+          "score": 1,
+          "evidence": "page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C ; file_collections: six named collections containing ten resources with ids, names, formats, checksums and issue dates",
+          "quality_note": "Both halves of the sub-element are satisfied: a resolvable DOI-parameterised landing page, and a genuine hierarchy in which archives are grouped by modality (AP-MS, IF, SEC-MS, perturb-seq atlas, perturb-seq raw, metadata) with per-collection file_count and description.",
+          "semantic_validation": "The landing-page URL embeds the same persistent identifier declared in doi/id, so the two discovery routes resolve to one object. Collection ids are minted as fragment identifiers under the dataset DOI, a coherent local scheme."
+        },
+        {
+          "name": "Hierarchical Structure (parent datasets, relationships)",
+          "score": 1,
+          "evidence": "related_datasets: relationship_type: is_new_version_of, target_dataset: doi:10.18130/V3/K7TGEM, with a note explaining the delta; version_access.versions_available lists five releases with DOIs",
+          "quality_note": "The relationship is typed, points at a resolvable DOI, and is accompanied by substantive content about what the newer release adds. The five-release enumeration lets a user walk the whole series. No parent_datasets entry is given, but the release-series relationship is the meaningful structure here.",
+          "semantic_validation": "is_new_version_of is semantically correct for a quarterly release series where each release receives its own DOI; the target DOI shares the registrant prefix, consistent with sibling deposits in the same repository."
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 2,
+      "name": "Dataset Access and Retrieval",
+      "description": "Can the dataset and its associated resources be located, accessed, and downloaded?",
+      "sub_elements": [
+        {
+          "name": "Access Policy and IP Restrictions Defined",
+          "score": 1,
+          "evidence": "license_and_use_terms.license_terms: full CC BY-NC-SA 4.0 prose with attribution, non-commercial and share-alike conditions and a citation obligation; data_use_permission: no_commercial_use; contact_person: Trey Ideker (ORCID:0000-0002-1708-8454); ip_restrictions.restrictions: commercial use requires separate negotiation with UCSD/Stanford/UCSF; copyright held by the Regents of the University of California except raw spatial-proteomics images (Stanford)",
+          "quality_note": "Not a bare licence label: the terms are spelled out, the commercial pathway is named with the institutions to approach, and copyright is apportioned per data package. A user can determine both what they may do and whom to contact to do more.",
+          "semantic_validation": "The three statements are mutually consistent (NC licence, no_commercial_use enum, negotiated commercial licence). The record discloses that the IP detail comes from the preprint and earlier release pages rather than the June 2026 page — a provenance caveat, not a contradiction."
+        },
+        {
+          "name": "Regulatory Compliance and Confidentiality Classification",
+          "score": 1,
+          "evidence": "data_governance.committee_name: Data Governance Committee; data_governance.committee_contact: Jillian Parker, ORCID:0000-0003-4535-3486, jillianparker@health.ucsd.edu, UC San Diego; human_subject_research.regulatory_compliance: 'Human Subjects: No' and 'FDA Regulated: No'; confidential_elements.confidential_elements_present: true with embargo detail; sensitive_elements_present: false",
+          "quality_note": "The governance-contact limb of this sub-element is satisfied precisely: a named committee, a named contact with ORCID, institutional email and affiliation. Regulatory status is stated affirmatively in both directions (not human-subjects, not FDA-regulated), and confidentiality is classified at the component level via the embargo record.",
+          "semantic_validation": "No regulatory_restrictions block or confidentiality_level enum is present, so the classification is expressed in prose and in confidential_elements rather than in the schema's dedicated slots. HIPAA compliance is neither claimed nor needed, which is semantically correct for non-clinical cell-line data; an unexplained HIPAA claim here would have been the error."
+        },
+        {
+          "name": "Download URL or Platform Link Available",
+          "score": 1,
+          "evidence": "distribution_formats.notes: 'The dataset as a whole is too large to download as a single ZIP; individual files below the 1.9 GB web download limit may be selected from the files table, and the Dataverse Data Access API provides programmatic access. MD5 checksums are published for each archive.' page: the Dataverse dataset landing page",
+          "quality_note": "No download_url field is present, but the sub-element's stated scope admits platform access instructions, and what is given is unusually actionable: it warns that whole-dataset download will fail, states the per-file size ceiling that governs the web route, names the API route for the 4.6 GB image archives that exceed it, and points at the checksums needed to verify a transfer.",
+          "semantic_validation": "The instructions are consistent with the file sizes recorded in file_collections (three IF archives at 3.8-4.6 GB, all above the stated 1.9 GB web limit), so the guidance is not boilerplate — it correctly anticipates the failure mode this specific release presents. Scored 1 on that content; a dedicated download_url would still be preferable for machine access."
+        },
+        {
+          "name": "Distribution Formats and File Types Specified",
+          "score": 1,
+          "evidence": "distribution_formats: format: ZIP, media_type: application/zip; each of the ten resources carries format: ZIP, media_type: application/zip, compression: zip, file_type (data_file/metadata_file), md5 and issued",
+          "quality_note": "The distribution question — in what form does the repository hand the data over — is answered completely and per file, with a registered MIME type, a file-type role distinguishing the metadata archive from the nine data archives, and an integrity checksum for each.",
+          "semantic_validation": "application/zip is the correct IANA media type for the declared container, and compression: zip is consistent with it. The limitation is scope rather than correctness: the container is specified, the contents are not — assessed under Element 3 sub-element 2, where internal format matters for reuse."
+        },
+        {
+          "name": "Related Datasets and External Resources Linked",
+          "score": 1,
+          "evidence": "related_datasets: typed link to doi:10.18130/V3/K7TGEM; external_resources: five entries — the CM4AI preprint (doi 10.1101/2024.05.21.589311), the project portal https://cm4ai.org/, the CRISPRi Perturbation Atlas on Figshare, the Cell Mapping Toolkit on GitHub/Zenodo, and FAIRSCAPE at https://fairscape.github.io; raw_sources names four MassIVE deposits",
+          "quality_note": "Links span the full ecosystem a reuser needs: the methods publication, the project portal, the external repositories holding the raw mass-spectrometry and perturbation data, the processing toolkit and the packaging framework. Each carries a note stating what the resource is for.",
+          "semantic_validation": "Domains and identifier forms are all plausible and match the named services (bioRxiv DOI prefix 10.1101, github.io for FAIRSCAPE docs). The MassIVE deposits are described but not given as accession numbers, which weakens machine-resolvability without affecting the score."
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 3,
+      "name": "Data Reuse and Interoperability",
+      "description": "Is sufficient information provided to reuse and integrate the dataset with others?",
+      "sub_elements": [
+        {
+          "name": "License Terms Allow Reuse",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met on fields outside this sub-element: distribution_formats is populated, page resolves to a Dataverse record whose access route is documented, and the declared licence explicitly permits sharing and adaptation.",
+          "score": 1,
+          "evidence": "license: CC BY-NC-SA 4.0; license_and_use_terms.license_terms: 'Users are free to share and adapt the material provided they give appropriate credit ... may not use the material for commercial purposes ... must distribute contributions under the same license'",
+          "quality_note": "A named standard licence with its permissions and conditions restated, plus the attribution and citation obligation. Reuse is permitted for non-commercial research without further permission, which is the question this sub-element asks.",
+          "semantic_validation": "The share-alike and non-commercial conditions are correctly stated for CC BY-NC-SA 4.0, and the statement that no additional legal or technological restrictions may be applied matches the licence text. The parallel commercial-negotiation route in ip_restrictions is compatible with, not contradictory to, an NC licence."
+        },
+        {
+          "name": "Data Formats Are Standardized (encoding, format)",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Same datasets-shared evidence as sub-element 1: distribution_formats populated and a documented access route on the Dataverse landing page.",
+          "score": 0,
+          "evidence": "distribution_formats: format: ZIP, media_type: application/zip (identical for all ten resources); no encoding field on any resource; file_collections.source_caveats: 'the June 2026 file listing carries no per-file descriptions'",
+          "quality_note": "ZIP is a container, not a data format. The record never states what a reuser will find inside — whether the mass-spectrometry archives hold mzML or vendor-native files, whether the 4.6 GB image archives hold OME-TIFF or PNG, whether the perturb-seq atlas is h5ad, MTX or CSV. Character encoding is absent throughout. The interoperability question this sub-element asks therefore goes unanswered, even though the distribution question in Element 2 is answered well.",
+          "semantic_validation": "Distinct from Element 2 sub-element 4 by design: that item asks how the data is handed over (ZIP, application/zip, checksummed — answered), this one asks whether the data is in standardised, harmonisable form (unanswerable from the record). The record's own caveat that per-file descriptions are absent confirms the gap is real rather than an artefact of where evidence sits."
+        },
+        {
+          "name": "Schema or Ontology Conformance Stated",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Same datasets-shared evidence as sub-element 1.",
+          "score": 1,
+          "evidence": "conforms_to: 'RO-Crate packaging with provenance graphs and rich metadata, produced using the FAIRSCAPE framework'; conforms_to_standard: [RO_CRATE]; conforms_to_schema: https://w3id.org/bridge2ai/data-sheets-schema; conforms_to_class: Dataset; instances carry B2AI_SUBSTRATE and B2AI_TOPIC ontology codes",
+          "quality_note": "Conformance is stated at three levels — packaging standard (RO-Crate), metadata schema (the Bridge2AI data-sheets schema, by w3id URI), and controlled vocabulary for instance substrates and topics. A dedicated release metadata archive is distributed alongside the data, so the claim is backed by a deliverable.",
+          "semantic_validation": "RO-Crate is the appropriate packaging standard for the provenance-graph claim, and FAIRSCAPE is correctly characterised as the framework that produces it; the w3id URI is a persistent-identifier form appropriate for a schema reference. No domain data standard (e.g. mzML, OME, PSI-MI) is claimed, consistent with the unspecified internal formats noted above."
+        },
+        {
+          "name": "Variable Metadata with Identifiers Defined",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Same datasets-shared evidence as sub-element 1; the anti-circular rule is not engaged, since applicability rests on distribution_formats and page rather than on the absence of variables.",
+          "score": 0,
+          "evidence": "No variables field anywhere in the record; file_collections.resources carry identity and integrity metadata (id, name, format, md5) but no column, channel or field descriptions",
+          "quality_note": "There is no variable-level metadata of any kind: no data dictionary, no column names, no units, no identifier scheme for linking the SEC-MS elution profiles, AP-MS interactions and perturb-seq expression matrices to one another or to external resources. This is the clearest reuse gap in the record and is compounded by the absence of internal format documentation.",
+          "semantic_validation": "The gap is consequential precisely because the stated purpose is multimodal integration: known_limitations already concedes that the modalities interrogate incompletely overlapping protein sets, and without shared identifiers a reuser cannot determine the overlap themselves."
+        },
+        {
+          "name": "Use Guidance Provided (intended, prohibited uses)",
+          "score": 1,
+          "evidence": "intended_uses: four categories including 'AI-ready datasets to support research in functional genomics', 'AI model training', 'Analysis of cell architectural changes and interactions in the presence of specific disease processes, treatment conditions, or genetic perturbations'; prohibited_uses.prohibition_reason: 'not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval'; existing_uses cites a bioRxiv analysis with PMCID",
+          "quality_note": "Both directions are covered, and the prohibition is reasoned rather than asserted — it names the context (clinical decision-making, patient care) and the condition under which it could change (regulatory oversight and approval). The existing-use citation shows the intended uses are realised, not hypothetical.",
+          "semantic_validation": "The clinical prohibition is semantically appropriate and consistent with sensitive_elements ('data are non-clinical, deriving from tissue cultures') and with the absence of FDA regulation: the record restricts a use its data type cannot support. No discouraged_uses are given, a minor omission."
+        }
+      ],
+      "element_score": 3,
+      "element_max": 5
+    },
+    {
+      "id": 4,
+      "name": "Ethical Use and Privacy Safeguards",
+      "description": "Does the dataset provide clear information about consent, privacy, and ethical oversight?",
+      "sub_elements": [
+        {
+          "name": "IRB or Ethics Review and Data Protection Impact",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Human-subjects condition fails on external evidence: description (E1) names MDA-MB-468 and KOLF2.1J cell lines rather than participants; collection_mechanisms (E8) describes AP-MS, SEC-MS, confocal microscopy and CRISPRi screens rather than recruitment. The governance disjunct is met on E2 evidence: a named Data Governance Committee with a contact of record, and confidential_elements recording an active pre-publication embargo that constrains distribution of component datasets. Under #1060 that disjunct reaches sub-elements 1-2 only.",
+          "score": 1,
+          "evidence": "ethical_reviews: two named ethics contacts of record — Vardit Ravitsky (ORCID:0000-0002-7080-8801, ravitskyv@thehastingscenter.org) and Jean-Christophe Bélisle-Pipon (ORCID:0000-0002-8965-8153, jean-christophe_belisle-pipon@sfu.ca), both 'per the Data Governance and Ethics section of the release record'; data_governance.committee_name/committee_contact: Data Governance Committee, Jillian Parker (UC San Diego); human_subject_research.involves_human_subjects: false with regulatory_compliance 'Human Subjects: No', 'FDA Regulated: No'",
+          "quality_note": "For a dataset with no human participants, the meaningful oversight documentation is exactly this: an explicit human-subjects determination, a standing governance committee with a reachable contact, and named individuals accountable for ethics review — all with ORCIDs and institutional emails, so the accountability is verifiable rather than nominal. What is absent is any account of what the ethics review found or decided, and no data_protection_impacts assessment is recorded.",
+          "semantic_validation": "Consistency check passes: involves_human_subjects is false, so no IRB protocol number is expected and its absence is not a defect. The ethics contacts also appear in creators with matching ORCIDs, so the identities reconcile internally; the Ravitsky affiliation/email-domain mismatch is disclosed in source_caveats rather than papered over."
+        },
+        {
+          "name": "Deidentification Method Described",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Same determination as sub-element 1: human-subjects condition fails on E1/E8 evidence, governance disjunct met on E2 evidence (Data Governance Committee contact, embargoed components). Applicability is not read off is_deidentified itself.",
+          "score": 1,
+          "evidence": "is_deidentified.identifiable_elements_present: false; deidentification_details: 'The release record answers \"De-identified Samples: Yes\". The project preprint states that CM4AI data are non-clinical, from tissue cultures, and are considered to be de-identified as they cannot be matched, with current knowledge, to a human subject.'",
+          "quality_note": "The statement is reasoned and attributed to two sources rather than asserted as a flag, and it supplies the basis of the claim — non-clinical tissue-culture origin plus non-matchability under current knowledge, the latter appropriately hedged. Supporting provenance in raw_data_sources identifies both lines by Cellosaurus RRID with their donor descriptions, so a reader can assess the claim independently. No formal standard (Safe Harbor, expert determination, k-anonymity) is named, but none of those workflows applies to established commercial cell lines.",
+          "semantic_validation": "Method appropriateness check passes: invoking HIPAA Safe Harbor for cell-line data would have been the semantic error, and the record avoids it. The claim is consistent with sensitive_elements_present: false and with involves_human_subjects: false. The residual re-identification vector for cell lines — genomic profile matching — is not discussed, which is the hedge the record's 'with current knowledge' phrasing gestures at without analysing."
+        },
+        {
+          "name": "Privacy Protections and Re-identification Risk Assessment",
+          "applicable": false,
+          "applicability_status": "not_applicable",
+          "applicability_evidence": "No human participants on external evidence: description and keywords (E1) reference cell lines, cancer biology and assay methods with no participants, patients or clinical research; collection_mechanisms (E8) describes instrumentation, not recruitment; direct_collection independently states data were not collected from individuals. Per #1060 the governance disjunct does not reach this sub-element — a governance committee and an embargo are not participant signals.",
+          "score": null,
+          "evidence": "No participant_privacy or reidentification_risk fields; none expected, as the release contains no participant data",
+          "quality_note": "Excluded from the denominator. Scoring 0 here would measure the dataset's subject matter rather than the quality of its documentation: there are no participants whose privacy could be protected."
+        },
+        {
+          "name": "Informed Consent Obtained from Participants",
+          "applicable": false,
+          "applicability_status": "not_applicable",
+          "applicability_evidence": "Same external evidence as sub-element 3: no participants in description/keywords (E1) or collection_mechanisms (E8); direct_collection.collection_details states measurements were made on established cell lines obtained from ATCC and HipSci. The governance disjunct does not reach participant-facing sub-elements.",
+          "score": null,
+          "evidence": "No informed_consent field; the cell lines were obtained from third-party repositories (ATCC, HipSci) whose own donor consent governs upstream",
+          "quality_note": "Excluded from the denominator. Donor consent for MDA-MB-468 and KOLF2.1J is a matter for the originating repositories, not for this redistribution of derived measurements."
+        },
+        {
+          "name": "Vulnerable Populations and Compensation Documented",
+          "applicable": false,
+          "applicability_status": "not_applicable",
+          "applicability_evidence": "Same external evidence as sub-elements 3 and 4: no human participants identified in E1 description/keywords or E8 collection_mechanisms.",
+          "score": null,
+          "evidence": "No at_risk_populations or participant_compensation fields; no participants were enrolled or compensated",
+          "quality_note": "Excluded from the denominator. No at-risk population is enrolled; the donor characteristics that are disclosed (in known_biases and raw_data_sources) are treated as a representativeness matter and assessed under Element 9."
+        }
+      ],
+      "element_score": 2,
+      "element_max": 2
+    },
+    {
+      "id": 5,
+      "name": "Data Composition and Structure",
+      "description": "Can the dataset's structure, modality, and population be understood from metadata?",
+      "sub_elements": [
+        {
+          "name": "Cohort or Subpopulations Characteristics Described",
+          "score": 1,
+          "evidence": "known_biases.affected_subsets: 'MDA-MB-468, a triple negative breast cancer line established from a metastatic pleural effusion of a 51-year-old black female with metastatic mammary adenocarcinoma, and KOLF2.1J, an iPSC line derived from a healthy male Northern European donor'; raw_data_sources: both lines with RRIDs, characterisation status and source repositories; description: treatment arms (untreated / paclitaxel / vorinostat) and differentiation states (undifferentiated iPSC, NPC, neuron, cardiomyocyte)",
+          "quality_note": "The analogue of a cohort here is the set of cell lines, treatment arms and differentiation states, and all three are described concretely, with donor demographics for each line and the disease context that makes them relevant. A reuser can tell exactly which biological populations are represented and which are not.",
+          "semantic_validation": "No subpopulations slot and no subsets flags are populated, so the content sits in known_biases and raw_data_sources; it is specific and non-boilerplate, and the donor-level detail is what the sub-element is asking for. Credited on content, with the structural gap noted as a weakness."
+        },
+        {
+          "name": "Number of Instances or Samples Reported",
+          "score": 0,
+          "evidence": "instances: five entries giving instance_type, data_substrate and data_topic but no counts; notes reports project-level figures (1,374 protein interactions, 53,788 immunofluorescent images, 7,023 proteins, 11,739 genes, 21.4 TB) which source_caveats reads as cumulative project-wide holdings by inference, 'but that reading is an inference and the portal does not state it'; sampling_strategies.source_caveats declines to assert the 200-gene and 523-protein figures for this release",
+          "quality_note": "No count of instances is stated for the ten archives actually distributed here: not images, not cells, not proteins, not interactions. Only file-level counts (ten archives, sizes from 30.2 KB to 4.6 GB) are release-specific. The record is commendably honest that the available figures cannot be attributed to this release, but honesty about an absence does not supply the number.",
+          "semantic_validation": "The conflict the record surfaces — 523 proteins on the portal versus 464 on the October 2025 release page for same-named archives — confirms that no reliable per-release count exists in the sources, and that the differing MD5s mean the October figures cannot simply be carried over."
+        },
+        {
+          "name": "Variable-Level Metadata, Tabular Flag, and Data Splits",
+          "score": 0,
+          "evidence": "No variables, no is_tabular, no subsets.is_data_split, no subsets.is_subpopulation anywhere in the record",
+          "quality_note": "All four evidence routes for this sub-element are empty. Nothing describes the internal structure of any archive, whether any component is tabular, or whether any subset plays a training/test or subpopulation role — a notable omission for a release whose stated purpose is supplying AI-ready training data.",
+          "semantic_validation": "Consistent with the absence of internal format documentation found under Element 3: the record documents the release at package granularity throughout and never descends to the record or field level."
+        },
+        {
+          "name": "Data Topics or Conditions Represented",
+          "score": 1,
+          "evidence": "instances: five typed entries each with an ontology-coded substrate and topic — immunofluorescence confocal images (B2AI_SUBSTRATE:19 / B2AI_TOPIC:19), SEC-MS elution profiles (59/28), AP-MS interaction measurements (58/26), single-cell CRISPRi perturbation profiles (64/34), raw single-cell read sets (63/34); description gives the disease and perturbation context",
+          "quality_note": "Each modality is described in a sentence that states what the measurement is of and in which cells and condition, and is bound to controlled vocabulary codes on two axes. The conditions represented — triple-negative breast cancer with two drug perturbations, iPSC with lineage differentiation — are clear from description and keywords.",
+          "semantic_validation": "The five instance types map one-to-one onto the six file collections (the metadata archive aside), so the topical description and the distributed content agree. Substrate and topic codes are used consistently, with the two perturb-seq entries correctly sharing topic 34 while differing in substrate (processed profile versus raw read set)."
+        },
+        {
+          "name": "Data Quality, Anomalies, and Missing Data Documented",
+          "score": 1,
+          "evidence": "sampling_strategies: two entries — targeted selection of 100 chromatin modifiers and 100 metabolic enzymes in disease-relevant lines under perturbed and unperturbed conditions (is_sample: true, is_random: false), and expressed genome-scale CRISPRi in KOLF2.1J covering 11,739 targeted genes (is_sample: false) — each with source_caveats delimiting what the sources actually support",
+          "quality_note": "Sampling is documented substantively, including the non-random targeted design that shapes what the data can support, and the caveats tell a reuser which reported figures are release-specific and which are not. Against that, anomalies and missing_data_documentation are both absent: nothing addresses failed acquisitions, image or spectrum QC exclusions, or missing values in the atlas.",
+          "semantic_validation": "is_random: false is correct for a curated 200-gene target list, and the is_sample: false on the genome-scale entry is flagged by the record as its own inference from 'expressed genome-scale', which is the right level of hedging. Credited on the strength of the sampling documentation; the anomaly and missing-data limbs are unmet and are reflected in the recommendations."
+        }
+      ],
+      "element_score": 3,
+      "element_max": 5
+    },
+    {
+      "id": 6,
+      "name": "Data Provenance and Version Tracking",
+      "description": "Can a user determine dataset versions, update history, and provenance?",
+      "sub_elements": [
+        {
+          "name": "Dataset Version Number Provided",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met on distribution_formats, the documented Dataverse access route, and a licence permitting reuse.",
+          "score": 1,
+          "evidence": "version: '2.0'; status: Beta; citation ends 'University of Virginia Dataverse, V2'",
+          "quality_note": "A concrete version number that agrees with the version recorded in the citation string, and a maturity status (Beta) that is reinforced by the description's 'explicitly interim' framing. A user citing this release can pin exactly what they used.",
+          "semantic_validation": "Consistent across version, citation and version_access. Note that neighbouring releases carry Dataverse versions 2.1 and 1.4 under different DOIs, so version numbers are per-deposit rather than a project-wide sequence — the record's enumeration makes this legible rather than confusing."
+        },
+        {
+          "name": "Version Access Methods Documented",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Same datasets-shared evidence as sub-element 1.",
+          "score": 1,
+          "evidence": "version_access.latest_version_doi: doi:10.18130/V3/HIGT4C; versions_available: five entries (June 2026 /HIGT4C v2.0; October 2025 /K7TGEM v2.1; June 2025 /F3TD5R v2.1; March 2025 /B35XWX v1.4; May 2024); version_details: 'CM4AI issues quarterly data releases, each deposited in the University of Virginia Dataverse under its own DOI and separately versioned within Dataverse'",
+          "quality_note": "Prior versions are not merely mentioned but individually addressable: each is given with its DOI and its Dataverse version, and the governing convention is explained, so a user can retrieve any earlier release rather than only the current one.",
+          "semantic_validation": "The two-level scheme (release DOI plus in-Dataverse version) is described accurately and the latest-version pointer matches this record's own DOI. Only the May 2024 release lacks a DOI, a small gap in an otherwise complete lineage."
+        },
+        {
+          "name": "Change Descriptions and Errata Provided",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Same datasets-shared evidence as sub-element 1.",
+          "score": 0,
+          "evidence": "No errata field; updates.update_details is wholly forward-looking ('will be regularly updated and augmented through the end of the project in November 2026, with updates on a quarterly basis'); the only comparative statement is in related_datasets.notes: 'The June 2026 release adds AP-MS data for treated MDA-MB-468 breast cancer cells, which the October 2025 release did not include'",
+          "quality_note": "There is no change log for this version and no errata. The single delta sentence describes a difference against a separate deposit under a different DOI, not what changed between Dataverse v1 and v2 of this DOI. Meanwhile the record itself surfaces three items an errata entry should carry and does not: description text carried forward from earlier releases with a stale '(2025-06-30)' stamp, three image archives published a month after the version date, and MD5s that differ from same-named October 2025 archives without explanation.",
+          "semantic_validation": "Scored 0 on the change-documentation question specifically. The same discrepancy disclosures are credited under Element 9 sub-element 3, where the question is whether a user is warned of quality irregularities — a different question from whether the release documents its own changes and corrections."
+        },
+        {
+          "name": "Update Schedule or Frequency Indicated",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Same datasets-shared evidence as sub-element 1.",
+          "score": 1,
+          "evidence": "updates.frequency: 'Quarterly'; updates.update_details: 'The dataset will be regularly updated and augmented through the end of the project in November 2026, with updates on a quarterly basis. The CM4AI project portal states that CM4AI releases data quarterly, ensuring continuous updates to the cell maps and input data streams.'",
+          "quality_note": "Both a cadence and a horizon are given, with the end point tied to the project's conclusion. A user can judge both how often to re-check and when the series will stop growing.",
+          "semantic_validation": "The quarterly claim is corroborated by the observed release history in version_access (March 2025, June 2025, October 2025, June 2026), which is broadly quarterly with one gap — consistent rather than contradicted. The November 2026 project end also sits close to the NIH project period ending 2026-08-31 recorded in funders."
+        },
+        {
+          "name": "Provenance, Source Derivation, and Raw Data Sources",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Same datasets-shared evidence as sub-element 1.",
+          "score": 1,
+          "evidence": "raw_data_sources: MDA-MB-468 (RRID:CVCL_0419, from ATCC) and KOLF2.1J (RRID:CVCL_B5P3, from HipSci under MTA); raw_sources: five raw deposits (three MassIVE SEC-MS/AP-MS sets, plus the in-release cm4ai_perturb-seq_KOLF2_raw_sra.zip); acquisition_methods includes a was_inferred_derived entry stating the KOLF2.1J atlas is a processed product of the co-distributed raw sequence archive; conforms_to: RO-Crate packaging 'with provenance graphs'",
+          "quality_note": "Provenance runs from biological origin (named lines with RRIDs and their suppliers) through raw acquisition deposits (named repositories) to the derived product distributed here, with the derivation relationship stated explicitly for the atlas. A separate release metadata archive is distributed to carry the machine-readable provenance graphs.",
+          "semantic_validation": "No was_derived_from slot is used, but the source rubric admits raw_data_sources and derivation prose as evidence, and both are substantive. The derivation claim is honestly labelled as inferred from paired archive names rather than read from a stated pipeline — a provenance caveat that slightly weakens, but does not negate, the chain. Release-specific notes were read from updates.update_details and notes, as the mapping requires."
+        }
+      ],
+      "element_score": 4,
+      "element_max": 5
+    },
+    {
+      "id": 7,
+      "name": "Scientific Motivation and Funding Transparency",
+      "description": "Does the metadata clearly state why the dataset exists and who funded it?",
+      "sub_elements": [
+        {
+          "name": "Motivation or Purpose for Dataset Creation",
+          "score": 1,
+          "evidence": "purposes: three entries — machine-readable hierarchical maps of cell architecture as AI-Ready data from 100 chromatin modifiers and 100 metabolic enzymes; ethical, AI-ready datasets of cell architecture; mapping spatiotemporal architecture toward interpretable genotype-phenotype learning. addressing_gaps: two entries on the black-box problem in genotype-phenotype models and on the absence of AI-Ready properties in existing biomedical data",
+          "quality_note": "Motivation is stated at the level of a scientific problem, not a mission statement: the black-box character of genotype-phenotype prediction, and a definition of what AI-Ready requires (FAIR, known provenance, validated, machine-readable provenance graphs, explainable, ethically obtained). The purposes name the specific target sets and cell contexts, tying motivation to what was actually produced.",
+          "semantic_validation": "Purposes align with the funding source: a Bridge2AI Data Generation Project funded to produce AI-ready data states exactly that goal, satisfying the funding-alignment consistency check. The 100+100 target protein sets in purposes match the targeted sampling strategy recorded under Element 5."
+        },
+        {
+          "name": "Primary Research Objectives or Tasks",
+          "score": 1,
+          "evidence": "tasks: 'Interpretable genotype-phenotype learning, in which predictions are traced to multi-scale cell and tissue architecture rather than produced by an opaque model'; 'Development of \"visible\" machine learning systems, including visible neural networks built directly on knowledge maps of cell and tissue architecture'",
+          "quality_note": "Two concrete ML tasks with a stated architectural commitment (visible neural networks over cell-architecture maps), specific enough that a reader can judge whether their own task is in scope.",
+          "semantic_validation": "Tasks are consistent with intended_uses (AI model training, cellular process analysis) and with the known_limitations admission that the current release suits per-modality bioinformatics better than integrated analysis — the tasks are stated as project objectives, and the record does not overclaim that this interim release already achieves them."
+        },
+        {
+          "name": "Funding Sources and Mechanisms Listed",
+          "score": 1,
+          "evidence": "funders: grantor 'National Institutes of Health' with two awards and a note recording Trey Ideker (UC San Diego) as PI of the Bridge2AI CM4AI Data Generation Project per NIH RePORTER; grantor 'University of Virginia' with the Frederick Thomas Fund",
+          "quality_note": "Both the federal funder and the institutional fund are named, with the award mechanism identifiable from the activity codes (OT2 Other Transaction for the data generation project, U54 for the Bridge Center) and the responsible PI recorded. The verification source (NIH RePORTER) is cited.",
+          "semantic_validation": "Funding-logic check passes: the grantor is named and structured awards are supplied under funders.grants. The Frederick Thomas Fund is correctly represented as a named non-grant institutional fund with no numeric identifier, which is not a defect under the funding rule."
+        },
+        {
+          "name": "Grant IDs or Award Numbers Present",
+          "score": 1,
+          "evidence": "funders.grants: grant_number '1OT2OD032742-01' with a note recording the RePORTER core project number OT2OD032742, application 11211616, project number 3OT2OD032742-01S2 for FY2025, award amount 5,289,382 and project period 2022-09-01 to 2026-08-31; grant_number '5U54HG012513-02' (Bridge2AI Bridge Center)",
+          "quality_note": "Two fully specified award numbers including application type prefix, activity code, institute, serial and suffix, with the first cross-checked against an authoritative registry down to the supplement number and project period.",
+          "semantic_validation": "Both parse correctly against NIH structure: 1-OT2-OD-032742-01 (type 1, OT2 Other Transaction, Office of the Director) and 5-U54-HG-012513-02 (type 5 non-competing continuation, U54 cooperative agreement centre, NHGRI). Institute codes are semantically apt — OD for the trans-NIH Bridge2AI Common Fund programme, HG for the genomics-led Bridge Center. The recorded project period is consistent with the November 2026 project end stated in updates."
+        },
+        {
+          "name": "Creators and Acknowledgements Documented",
+          "score": 1,
+          "evidence": "creators: 47 named individuals, the large majority with ORCID identifiers and all with institutional affiliations spanning UCSD, UCSF, Stanford, University of Virginia, KTH, UAB, Yale, Simon Fraser, Montreal, Texas at Austin and Alabama; funders records institutional acknowledgement of the Frederick Thomas Fund; maintainers names the programme manager and website contact with emails",
+          "quality_note": "Attribution is exhaustive and machine-resolvable: ORCIDs make the contributor list disambiguable, affiliations make the multi-institution structure visible, and the maintainer entries give a live route for project inquiries beyond the authorship list.",
+          "semantic_validation": "The creator list reconciles with the citation string author-for-author, and with the separately named governance and ethics contacts (Parker, Ravitsky, Bélisle-Pipon) whose ORCIDs match their creator entries — an internal cross-reference that passes."
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 8,
+      "name": "Technical Transparency (Data Collection and Processing)",
+      "description": "Can data collection and processing steps be replicated or understood?",
+      "sub_elements": [
+        {
+          "name": "Collection Mechanisms and Settings Described",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Collection identified (acquisition_methods and collection_mechanisms populated) and datasets-shared condition met (distribution_formats, documented Dataverse access route, reuse-permitting licence).",
+          "score": 1,
+          "evidence": "collection_mechanisms: four entries — AP-MS 'performed on endogenously tagged cell lines'; SEC-MS 'for proteome-wide protein complex and interaction mapping'; ICC-IF 'using the Human Protein Atlas resource of antibodies, with automated fixation and permeabilization protocols established for the MDA-MB-468 and KOLF2 cell lines'; single-cell CRISPRi 'performed using the 10x Genomics 3'HT kit, with a CRISPR lentiviral library and cell lines expressing inducible dCas9'",
+          "quality_note": "Each of the four modalities gets a mechanism description with the distinguishing experimental detail a reader needs to judge comparability: endogenous tagging for AP-MS, the antibody resource and automated staining protocol for imaging, the specific 10x chemistry and the inducible dCas9 system for the screens.",
+          "semantic_validation": "Mechanisms map one-to-one onto the distributed modalities and use the terminology correctly (ICC-IF, dCas9 interference rather than knockout, size-exclusion chromatography upstream of MS). Settings are at protocol-family level; instrument models, acquisition parameters and timeframes are not given, which limits replication."
+        },
+        {
+          "name": "Data Acquisition Methods Listed",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Same as sub-element 1: collection identified in acquisition_methods/collection_mechanisms, datasets-shared condition met.",
+          "score": 1,
+          "evidence": "acquisition_methods: a primary-measurement entry (was_directly_observed: true, was_reported_by_subjects: false) covering AP-MS, SEC-MS, confocal immunofluorescence and single-cell CRISPR screens, and a derived entry (was_inferred_derived: true) for the KOLF2.1J atlas; raw_data_sources: both cell lines with RRIDs and suppliers; raw_sources: five raw deposits in MassIVE and the in-release SRA archive",
+          "quality_note": "Acquisition is documented on all three limbs the sub-element asks about — how measurements were made, what the material inputs were, and where the raw data underlying the released products can be obtained. The directly-observed and inferred-derived flags correctly separate primary measurement from downstream products.",
+          "semantic_validation": "was_reported_by_subjects: false is consistent with the no-human-participants determination. MassIVE is the appropriate repository for raw mass spectrometry and SRA-format archives for sequencing, so the external deposit targets are semantically correct; accession numbers are not given, which weakens retrievability."
+        },
+        {
+          "name": "Preprocessing, Cleaning, Labeling, and Annotation Quality",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Software-output condition met on E10/E1 evidence: external_resources references a code repository — 'Cell Mapping Toolkit / CM4AI data integration pipeline software, released under a BSD-3 open source license via GitHub, with production-ready tools archived in Zenodo'. Determined without reference to E8's own preprocessing fields.",
+          "score": 0,
+          "evidence": "preprocessing_strategies: a single entry stating that perturb-seq data are distributed both as a processed atlas and as raw sequence in separate archives, whose source_caveats reads 'Inferred from archive naming in the June 2026 file listing; that listing carries no per-file processing description'; no cleaning_strategies, labeling_strategies, annotation_analyses, machine_annotation_tools or imputation_protocols",
+          "quality_note": "The one preprocessing entry records that processing happened, not what it was — no alignment, guide assignment, QC filtering, normalisation, spectral search, image segmentation or annotation step is described for any modality, and the entry is explicitly an inference from two archive filenames. Four of the six evidence routes are entirely empty. The release therefore cannot be reproduced or audited at the processing level.",
+          "semantic_validation": "The record is transparent about the gap rather than concealing it, and correctly notes that the computed cell maps produced by self-supervised multimodal embedding and multi-resolution community detection are not part of this release. Transparency about missing documentation does not substitute for the documentation."
+        },
+        {
+          "name": "Software and Tools Documented",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Scored for every dataset meeting Element 8's datasets-shared condition that was processed at all; processing is established by acquisition_methods (a was_inferred_derived product) and preprocessing_strategies (a processed atlas distributed alongside its raw input). Per #1081 this sub-element is not gated on whether a repository is pointed at.",
+          "score": 0,
+          "evidence": "Software named in the record: 'Cell Mapping Toolkit / CM4AI data integration pipeline software ... via GitHub, with production-ready tools archived in Zenodo' (external_resources, notes: 'Software used to integrate CM4AI input data streams'); 'FAIRSCAPE AI-readiness framework, https://fairscape.github.io' (notes: 'Framework used to package CM4AI data, software, metadata and provenance graphs'); conforms_to: RO-Crate 'produced using the FAIRSCAPE framework'. No used_software on any preprocessing, cleaning, labeling or imputation entry; no machine_annotation_tools.",
+          "quality_note": "Nothing named here produced or transformed the data being distributed. The Cell Mapping Toolkit integrates input streams into computed cell maps, and the record states in two places that those maps are not included in this release — role (e), a pipeline whose outputs are not what is shipped. FAIRSCAPE is packaging and provenance-metadata production over an already-formed release — role (c). The 10x Genomics 3'HT kit is reagent chemistry, not software. So the reader cannot tell what generated the SEC-MS elution profiles, the AP-MS interaction tables, the immunofluorescence image products or the KOLF2.1J cell atlas that the ten archives actually contain.",
+          "semantic_validation": "Scored 0 under the #1059/#1082 threshold: software is prominently documented, with licences and archival DOIs, but occupies roles (c) and (e) rather than producing or transforming the released data. The GitHub and Zenodo pointers are to the publisher's toolkit rather than to a named per-modality processing tool with a version, so neither earns the point on its own."
+        },
+        {
+          "name": "External Standards, Resources, and Imputation Protocols",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met on distribution_formats, documented access route and reuse-permitting licence.",
+          "score": 1,
+          "evidence": "external_resources: the CM4AI methods preprint (doi 10.1101/2024.05.21.589311) cited as the reference for this dataset, the project portal cm4ai.org, the CRISPRi Perturbation Atlas on Figshare, the Cell Mapping Toolkit (BSD-3, GitHub/Zenodo) and FAIRSCAPE (MIT, https://fairscape.github.io); conforms_to: RO-Crate with provenance graphs; conforms_to_schema: https://w3id.org/bridge2ai/data-sheets-schema; existing_uses cites the perturbation-atlas preprint with PMCID PMC11580897",
+          "quality_note": "Standards and external documentation are both covered and each link carries a note explaining its role, so a reader knows which resource answers which question — methods from the preprint, packaging from FAIRSCAPE, integration code from the toolkit, raw data from Figshare and MassIVE.",
+          "semantic_validation": "The packaging standard (RO-Crate), the framework that implements it (FAIRSCAPE) and the distributed release metadata archive form a coherent set. imputation_protocols is absent and imputation is never addressed either way, which leaves one limb of the sub-element unanswered; the external-standards and external-resources limbs are met substantively."
+        }
+      ],
+      "element_score": 3,
+      "element_max": 5
+    },
+    {
+      "id": 9,
+      "name": "Dataset Evaluation and Limitations Disclosure",
+      "description": "Does the metadata communicate known risks, biases, or dataset limitations?",
+      "sub_elements": [
+        {
+          "name": "Known Limitations Documented",
+          "score": 1,
+          "evidence": "known_limitations: six typed entries — scope (interim release, not final form), coverage (no predicted cell maps; perturb-seq components under pre-publication embargo), integration (modalities interrogate incompletely overlapping protein sets; release best suited to per-modality rather than cross-modality analysis), methodological (meaningful analysis requires domain expertise)",
+          "quality_note": "Unusually candid and directly actionable: the record tells a prospective reuser that the headline deliverable (computed cell maps) is absent, that the multimodal integration the project is named for is not yet supportable from this release, and which components they cannot obtain at all. Each entry is typed.",
+          "semantic_validation": "Limitations are consistent with the rest of the record: the embargo limitation matches confidential_elements, the missing-cell-maps limitation matches preprocessing_strategies, and the integration limitation is corroborated by the absence of variable-level identifiers found under Element 3."
+        },
+        {
+          "name": "Biases Categorized Using Standard Taxonomy (RAI-aligned)",
+          "score": 1,
+          "evidence": "known_biases: bias_type 'representation_bias'; bias_description 'derived from commercially available de-identified human cell lines and do not represent all biological variants which may be seen in the population at large'; affected_subsets naming both lines with donor ancestry, sex, age and disease context",
+          "quality_note": "A taxonomy term is used rather than free prose, the mechanism of the bias is stated, and the affected scope is pinned to the two specific cell lines with the donor characteristics that generate the representativeness limit. That is enough for a reuser to reason about generalisability of any model trained on these data.",
+          "semantic_validation": "representation_bias is the correct category for a two-cell-line resource. Only one bias is recorded: no measurement, selection or annotation bias is discussed despite a targeted non-random 200-gene design and antibody-dependent imaging, both plausible sources. future_use_impacts is absent, so the RAI social-impact limb is unmet and is assessed under sub-element 5."
+        },
+        {
+          "name": "Data Anomalies and Quality Issues Noted",
+          "score": 1,
+          "evidence": "source_caveats (dataset level): the portal/Dataverse release-date conflict; three immunofluorescence archives with a file publication date of Jul 15, 2026 later than the 2026-06-17 version publication date; a trailing '(2025-06-30)' description stamp identical to that on two earlier releases, 'indicating description text carried forward between releases'; no per-file descriptions in the June 2026 listing. file_collections.source_caveats: the June 2026 image archives 'carry different MD5 checksums from the October 2025 archives of the same names'. sampling_strategies.source_caveats: 523 versus 464 protein counts in conflict across sources",
+          "quality_note": "These are concrete, release-specific irregularities a user genuinely needs: same-named archives whose contents differ from the previous release, files appearing a month after publication, and metadata text demonstrably stale. Each is localised to the affected archives or fields, so a user can act on them.",
+          "semantic_validation": "Credited on the quality-irregularity question. The anomalies field itself is empty and no data-level anomalies (outliers, failed acquisitions, artefacts within images or spectra) are documented — the disclosures concern the release and its metadata rather than the measurements. This is distinct from Element 6 sub-element 3, which asks for a change log and errata correcting these items and finds none."
+        },
+        {
+          "name": "Sensitive Content and Warnings Provided",
+          "score": 1,
+          "evidence": "sensitive_elements.sensitive_elements_present: false with sensitivity_details 'the dataset does not involve human subjects, that samples are de-identified, and that the data are not FDA regulated ... CM4AI data are non-clinical, deriving from tissue cultures'; confidential_elements.confidential_elements_present: true with the embargo detail on the two perturb-seq external links; prohibited_uses warns against clinical decision-making",
+          "quality_note": "The negative determination is explicit and reasoned across two sources rather than left blank, and it is paired with a positive confidentiality finding, so the record distinguishes 'nothing sensitive about the content' from 'some components are restricted'. The clinical-use warning supplies the one caution the content does warrant.",
+          "semantic_validation": "An explicit false flag with supporting rationale is meaningful documentation and is not treated as missing. The pairing is internally consistent: sensitive_elements false and confidential_elements true describe different properties and do not conflict."
+        },
+        {
+          "name": "Ethical Review and Social Impact Analysis",
+          "score": 0,
+          "evidence": "ethical_reviews: two entries whose review_details read, identically, 'Named ethical review contact for the release, per the Data Governance and Ethics section of the release record' — contacts only, no findings, no review process, no determination; no future_use_impacts field; no conflict-of-interest statement",
+          "quality_note": "The record identifies who is accountable for ethics but not what they reviewed or concluded, and there is no analysis of anticipated downstream social impacts or mitigations — notable for a project whose own purposes foreground 'ethical, AI-ready datasets' and which staffs a dedicated ethics team across two institutions.",
+          "semantic_validation": "Distinct from Element 4 sub-element 1, which asks whether ethical oversight and governance are documented and where named contacts with a standing committee are exactly the evidence sought; this sub-element additionally requires review substance, conflicts of interest and social-impact analysis, and all three are absent."
+        }
+      ],
+      "element_score": 4,
+      "element_max": 5
+    },
+    {
+      "id": 10,
+      "name": "Cross-Platform and Community Integration",
+      "description": "Does the dataset connect to wider data ecosystems, repositories, or standards?",
+      "sub_elements": [
+        {
+          "name": "Dataset Published on a Recognized Platform",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met on distribution_formats, the documented Dataverse access route and a reuse-permitting licence.",
+          "score": 1,
+          "evidence": "citation: '... University of Virginia Dataverse, V2'; page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C ; maintainers: 'Long term preservation is provided by the University of Virginia Dataverse (LibraData), supported by committed institutional funds'; distribution_formats.notes references the Dataverse Data Access API; notes records the deposit by Justin Niestroy on 2025-02-27",
+          "quality_note": "The hosting platform is identified four independent ways and is a recognised institutional Dataverse repository, with an explicit institutional preservation commitment behind it — the sustainability element this sub-element is ultimately about. No dedicated publisher slot is used, which is a structural gap rather than an informational one.",
+          "semantic_validation": "The DOI prefix 10.18130 belongs to the UVA Dataverse registrant and agrees with the landing-page host and the citation's publisher string, so the platform claim is corroborated by the identifier itself. The Dataverse collection notice recorded in notes ('under review for potential modification in compliance with Administration directives') is a flagged availability risk rather than a contradiction."
+        },
+        {
+          "name": "Citation and DOI for Cross-referencing",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Scored on the datasets-shared condition alone, as required by #1080; no existing publication or citation is treated as a precondition for applicability.",
+          "score": 1,
+          "evidence": "citation: full 47-author string with year 2026, title, https://doi.org/10.18130/V3/HIGT4C, 'University of Virginia Dataverse', and 'V2'; doi: 10.18130/V3/HIGT4C; license_and_use_terms requires that 'publications referencing this data or derived products should cite the related publication as well as the data collection itself'",
+          "quality_note": "All three components the rubric note asks of a Bridge2AI dataset are present: a formatted citation string, a resolvable DOI, and citation instructions embedded in the licence terms, including the dual obligation to cite both the methods publication and the deposit. The version marker in the citation makes the reference reproducible.",
+          "semantic_validation": "Citation year, title, publisher and version all agree with issued, title, page host and version elsewhere in the record. The DOI appears in https:// resolvable form in the citation and in bare form in doi, both well formed."
+        },
+        {
+          "name": "Community Standards or Schema Conformance",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Same datasets-shared evidence as sub-element 1.",
+          "score": 1,
+          "evidence": "conforms_to: 'RO-Crate packaging with provenance graphs and rich metadata, produced using the FAIRSCAPE framework'; conforms_to_standard: [RO_CRATE]; conforms_to_schema: https://w3id.org/bridge2ai/data-sheets-schema; conforms_to_class: Dataset; a release metadata archive is distributed as part of the deposit; instances use B2AI_SUBSTRATE/B2AI_TOPIC vocabularies",
+          "quality_note": "Conformance is claimed against genuine community standards — RO-Crate for packaging, a published w3id-identified metadata schema, and Bridge2AI controlled vocabularies — and is backed by a shipped metadata archive rather than left as an assertion.",
+          "semantic_validation": "RO-Crate and FAIRSCAPE are used in their correct relationship (framework producing crates), and the w3id URI form is appropriate for a persistent schema reference. No domain-specific community standard (PSI-MI for interactions, OME for imaging, MIAME-style reporting for the screens) is claimed, which is a missed integration opportunity rather than an error."
+        },
+        {
+          "name": "Outreach Materials and Documentation Links",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Same datasets-shared evidence as sub-element 1.",
+          "score": 1,
+          "evidence": "external_resources: the CM4AI project portal 'providing documentation, data release listings, tools and publications', the methods preprint, the FAIRSCAPE documentation site, and the Cell Mapping Toolkit repository; page: the Dataverse landing page; maintainers: named programme manager (snthaker@uab.edu) and website contact (zsembay8@uab.edu) for inquiries and site updates",
+          "quality_note": "Documentation routes are layered — a landing page for the deposit, a project portal for programme-level documentation and release history, a preprint for methods, and a code repository for tooling — and there are named humans to contact when those do not answer the question.",
+          "semantic_validation": "Each link is annotated with what it provides, so the set is navigable rather than a bare URL list. No tutorials, webinars or worked examples are cited, which is the outreach limb this record does not reach."
+        },
+        {
+          "name": "Related Datasets with Typed Relationships",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Same datasets-shared evidence as sub-element 1.",
+          "score": 1,
+          "evidence": "related_datasets: relationship_type 'is_new_version_of', target_dataset 'doi:10.18130/V3/K7TGEM', with a note identifying it as the immediately preceding release and stating the content delta; version_access.versions_available enumerates four further releases with DOIs; raw_sources and external_resources point at the MassIVE and Figshare deposits holding the corresponding raw data",
+          "quality_note": "The relationship is typed from a controlled vocabulary and resolves to a DOI, and the note explains what the relationship means in content terms. Beyond the formal link, the record connects the deposit to its raw-data counterparts in domain repositories, which is the cross-platform integration this element is about.",
+          "semantic_validation": "is_new_version_of is semantically correct for consecutive quarterly releases. Only the immediate predecessor is formally typed — the earlier three releases and the external raw deposits appear in prose fields rather than as typed relationships, so machine traversal of the full graph is not possible."
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    }
+  ],
+  "assessment": {
+    "strengths": [
+      "Exemplary source discipline: the record separates observation from inference field by field, using source_caveats on acquisition_methods, sampling_strategies, data_collectors, ip_restrictions and file_collections to say which statements come from the June 2026 release page and which are carried over from the preprint or earlier releases — and it declines to assert carried-over figures as facts about these archives.",
+      "Identifier integrity throughout: one DOI used consistently as id, doi, citation component and latest-version pointer; Cellosaurus RRIDs for both source cell lines; ORCIDs for the large majority of 47 creators and for every governance and ethics contact; MD5 checksums for all ten distributed archives.",
+      "Funding transparency verified against an authoritative registry, with two well-formed NIH awards (1OT2OD032742-01, 5U54HG012513-02), the PI, the FY2025 supplement number, the award amount and the project period recorded.",
+      "Candid limitations that materially affect reuse decisions: the release states that the computed cell maps — the project's headline deliverable — are not included, that components are under pre-publication embargo, and that cross-modality integration is not yet well supported because the modalities cover incompletely overlapping protein sets.",
+      "Complete and navigable release lineage: five releases enumerated with their own DOIs and Dataverse versions, a typed is_new_version_of link to the immediate predecessor, a stated quarterly cadence with a project end date, and an institutional long-term preservation commitment from UVA Dataverse/LibraData.",
+      "Coherent, data-type-appropriate ethics documentation: an explicit no-human-subjects determination corroborated by direct_collection, a deidentification rationale grounded in the non-clinical tissue-culture origin rather than an inapplicable HIPAA workflow, and a named governance committee and ethics contacts with institutional emails."
+    ],
+    "weaknesses": [
+      "No variable-level metadata at all — no variables, is_tabular or subset flags, and no data dictionary — so a reuser cannot discover columns, channels, units or the shared identifiers needed for the cross-modality integration the project exists to enable.",
+      "Format documentation stops at the ZIP container: all ten archives are declared as format ZIP / application/zip with no internal file formats and no character encoding, leaving the interoperability question unanswerable even though the distribution question is answered well.",
+      "No software that produced or transformed the distributed data is named: the toolkit that is documented produces the computed cell maps that the record says are not in this release, and FAIRSCAPE is documented for packaging and provenance metadata, so the processing provenance of what is actually shipped is unstated.",
+      "Processing is undocumented beyond an inference from two archive filenames: no alignment, guide assignment, QC filtering, normalisation, spectral search, segmentation, annotation-quality or imputation documentation exists for any modality.",
+      "No instance counts for this release: the available image, gene and protein figures are project-wide or come from an earlier release with conflicting values (523 versus 464 proteins) and differing checksums, so nothing quantifies what the ten archives contain.",
+      "No errata and no version-level change log, despite the record itself surfacing three errata-grade items — description text carried forward with a stale (2025-06-30) stamp, three image archives published a month after the version date, and same-named archives whose MD5s differ from the previous release.",
+      "Ethics documentation names accountable people but records no review substance, no conflicts of interest and no anticipated social-impact analysis, which is a conspicuous gap for a project that states ethical AI-readiness as an explicit purpose.",
+      "Temporal fields are internally inconsistent (created_on 2025-02-27, issued 2026-06-17, three files issued 2026-07-15) and an upstream portal/Dataverse date conflict remains unresolved, disclosed but not reconciled."
+    ],
+    "recommendations": [
+      "Publish a data dictionary and populate variables for each distributed product — the perturb-seq atlas matrix, the SEC-MS elution profiles and the AP-MS interaction tables — including the protein and gene identifier namespaces that allow the three modalities to be joined to one another and to external resources.",
+      "Declare the internal file formats and character encoding inside each ZIP (for example mzML or vendor-native for the mass-spectrometry archives, OME-TIFF for the images, h5ad or MTX for the atlas) alongside the existing container declaration, and restore the per-file descriptions that earlier release listings carried.",
+      "Name and version the software that produced each distributed product — search engine and parameters for AP-MS and SEC-MS, image acquisition and segmentation pipeline for the immunofluorescence archives, and the alignment, guide-assignment and QC pipeline for the KOLF2.1J atlas — attaching them via used_software on the corresponding preprocessing entries rather than only citing the integration toolkit and the packaging framework.",
+      "Add an errata list and a per-version change description covering the AP-MS addition relative to the previous release, the three archives published on 2026-07-15, the checksum changes against same-named October 2025 archives, and the stale (2025-06-30) description stamp; reconcile created_on, issued and the per-file issue dates, and state which upstream release date is authoritative.",
+      "Report release-specific counts — images, targeted genes, proteins and interactions in these ten archives — rather than leaving the reader with project-wide figures whose scope the record itself must infer, and resolve the 523-versus-464 protein discrepancy for the immunofluorescence archives.",
+      "Record the substance of the ethics workstream's review alongside its contacts: the review's scope and conclusions, any conflicts of interest, and a future_use_impacts analysis of anticipated downstream impacts of cell-architecture models with mitigations.",
+      "Document data-level quality control in anomalies and missing_data_documentation — failed acquisitions, excluded images or spectra, QC thresholds, missing values in the atlas — and state explicitly whether imputation was used, in imputation_protocols.",
+      "Supply resolvable accession numbers for the MassIVE and Figshare deposits and add typed related_datasets entries for the earlier releases and the external raw-data deposits, so the full provenance graph is machine-traversable rather than described in prose."
+    ]
+  },
+  "metadata": {
+    "evaluator_id": "7f3c1a92-5d84-4b6e-9c17-2ae0f6b83d41",
+    "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+    "instrument_kind": "agent_definition",
+    "rubric_hash": "e5f8b6beced5f62f6cc4b3dcf45f6e8cb1431d84f4649227831ef8ecfbf28ab7",
+    "input_sha256": "b14858313cb86f692a326c76764505a6d3c1f64a92ee452638eedd3636baba41",
+    "d4d_file_hash": "b14858313cb86f692a326c76764505a6d3c1f64a92ee452638eedd3636baba41",
+    "label": "2026-09-04g_claude-opus-5-api-generic-v8_rep1",
+    "excluded_item_ids": [
+      "E4.S3 Privacy Protections and Re-identification Risk Assessment",
+      "E4.S4 Informed Consent Obtained from Participants",
+      "E4.S5 Vulnerable Populations and Compensation Documented"
+    ],
+    "score_basis_note": "39/47 applicable points (82.98%) on the N/A-adjusted base; 39/50 (78.00%) on the fixed base. Three Element 4 participant-facing sub-elements are excluded because the record documents no human participants (E1 description and keywords name cell lines; E8 collection_mechanisms describes instrumentation; direct_collection states data were not collected from individuals). Element 4 sub-elements 1-2 remain applicable on the E2 governance disjunct and are scored. Neither percentage establishes comparability with an evaluation whose excluded item set differs."
+  }
+}
