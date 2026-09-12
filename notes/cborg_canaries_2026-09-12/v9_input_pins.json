@@ -1,0 +1,17 @@
+{
+  "registered_before_spend": true,
+  "source_commit": "0c9592373a63e79c1cedb65b9ae430289680b16a",
+  "pinned_files": {
+    "data/preprocessed/concatenated/CHORUS_preprocessed.txt": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c",
+    "src/download/prompts/d4d_generic_arm_prompt_v9.md": "a14c871598880ad490130be9ada71d67190488d3323b39d829441cbe7a67d051",
+    "src/data_sheets_schema/schema/data_sheets_schema_all.yaml": "ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da",
+    "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml": "7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449",
+    "src/data_sheets_schema/api_runner.py": "9f38722f8cb334a52abb46c181ada79b1bb3d8695b9c8205ed9709a652f83ee9",
+    ".github/workflows/d4d_assistant_deterministic.config": "0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91",
+    "data/preprocessed/source_manifest.yaml": "87641b3b0538f849a44918521c7b7d734646ad8fded11e5c2f0546327637cb04",
+    "data/preprocessed/concatenated/CHORUS_crate_only.txt": "4de5dfda961363be1a4f109933668f4abe9936514f5e990402858177660681dc",
+    "data/preprocessed/concatenated/CHORUS_preprocessed_with_crate.txt": "433e7cb6c9e9b109a4b6e810ab07b400c987420d6acecb7fd5dcbc5d8732c77a"
+  },
+  "planned_output_paths_absent": true,
+  "search_scope": "Direct filesystem existence checks include ignored paths."
+}

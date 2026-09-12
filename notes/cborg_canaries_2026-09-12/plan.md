@@ -49,3 +49,10 @@ env -u ANTHROPIC_API_KEY -u ANTHROPIC_AUTH_TOKEN d4d api batch --projects CHORUS
 The CBORG model catalogue lists `claude-opus-5`; its observed route is `vertex_ai/claude-opus-5`, with 1,000,000 input and 128,000 output token limits. These are pre-run catalogue observations, not a guarantee about the identity returned by a later request. Endpoint/auth setup follows [CBORG's Claude Code documentation](https://cborg.lbl.gov/tools_claudecode/).
 
 The new evaluation registration exactly matches both prior instrument definitions and all 24 input hashes. The generation batch dry-run resolves exactly one CHORUS job and makes no model calls. Offline provider-selection and inherited-runner tests are required before the paid canaries.
+
+
+## Pre-spend review passed
+
+Codex adversarial review approved published commit `0c9592373` with no supported P1/P2 findings. It independently verified all 36 pinned-file hashes, 258 preserved evaluations and 56 complete prompts. Offline tests: 161 passed. Canonical prompt check: all 15 pins passed. Live-provenance check: 277 records checked, 195 subject to the requirement, zero failing. The bundle audit passed for all rebuildable bundles and chunk manifests; unrelated bundle types without a reconstruction route remain explicitly unchecked.
+
+The separate v9 input pins and pre-run CHORUS baseline are recorded in `v9_input_pins.json` and `v9_baseline_before_run.json`. The seven gated baseline defect counts are zero; the baseline report basis is one measured replicate and two vacuous replicates. This review authorizes execution of the already user-approved canaries; it does not assert their live results.
