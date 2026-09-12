@@ -30,11 +30,10 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
-from linkml_runtime import SCHEMA_DIRECTORY, SchemaView
+from linkml_runtime import SchemaView
 from linkml_runtime.linkml_model.meta import SchemaDefinition
 from linkml_runtime.loaders import yaml_loader
-from linkml_runtime.utils.context_utils import map_import
-from data_sheets_schema.schema_snapshot import SchemaSnapshot, capture_schema
+from data_sheets_schema.schema_snapshot import SchemaSnapshot, capture_schema, resolve_import_path
 
 _VIEWS: dict[tuple[str, str], SchemaView] = {}
 
@@ -57,22 +56,25 @@ def shared_view(path: str | Path, *, content: bytes | None = None,
             del _VIEWS[stale]
         # Hash and parse the same bytes. Loading the path after hashing it
         # can permanently store a different revision under this key (#1260).
-        schemas = {}
-        for name, source, data in captured.sources:
+        frozen = {p: data for _name, p, data in captured.sources}
+
+        def parse(source):
+            data = frozen[source]
+            if isinstance(data, OSError):
+                raise data
             schema = yaml_loader.loads(data.decode("utf-8"), target_class=SchemaDefinition)
             schema.source_file = str(source)
-            schemas[name] = schema
-        view = SchemaView(next(iter(schemas.values())))
+            return schema
+
+        root = captured.sources[0][1]
+        view = SchemaView(parse(root))
         # Keep LinkML's lazy schema-map and namespace initialization order,
         # while satisfying every import from the captured bytes (#1270).
         def load_captured(imp, from_schema=None):
-            if from_schema is not None and from_schema is not view.schema:
-                raise ValueError("snapshot imports must be resolved from the root schema")
-            # This has a relevant side effect: prefixed imports initialize
-            # SchemaView's cached namespaces at the same point as load_import.
-            map_import({"linkml:": str(SCHEMA_DIRECTORY)}, view.namespaces, imp)
+            source = Path((from_schema or view.schema).source_file)
+            selected = resolve_import_path(imp, source, view.namespaces)
             try:
-                return schemas[str(imp)]
+                return parse(selected)
             except KeyError as exc:
                 raise ValueError(f"schema import {imp!r} is outside the captured closure") from exc
         view.load_import = load_captured
