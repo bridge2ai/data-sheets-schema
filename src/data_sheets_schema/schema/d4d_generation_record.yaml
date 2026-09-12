@@ -29,6 +29,14 @@ default_prefix: d4dgen
 default_range: string
 imports:
   - linkml:types
+annotations:
+  required_values_non_null: true
+
+# AnyBlock keeps interiors open. Required keys, including mode-specific
+# requirements, must nevertheless hold a non-null value (#614). The shared
+# record-schema compiler applies this annotation to the generated JSON Schema.
+# Export the complete contract with `d4d provenance record-schema`; generic
+# LinkML JSON Schema generation does not implement this repository annotation.
 
 classes:
 
