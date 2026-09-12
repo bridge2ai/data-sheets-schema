@@ -1,0 +1,14 @@
+{
+  "reviewed_at": "2026-09-12T19:09:34.842636+00:00",
+  "verdict": "approved",
+  "reviewed_commit": "664a29aae",
+  "registration_sha256": "8e88be5cf92ec001976e1656af5e8e2eae9f3a7133698e8a4e7bc74bd44f3bd6",
+  "review": "notes/reference_rescore_2026-09-12_cborg/batch_review_round3.md",
+  "review_sha256": "e13a964c0c2f29659b5f8b3bdc42e4f652839cf72acf2f498e9946b2be18651b",
+  "offline_validation": "11 scheduler tests passed; independent signal-boundary, worker-preflight and process-group draining probes passed; 309 hashes verified.",
+  "findings_resolved": [
+    1341,
+    1342
+  ],
+  "next_authorized_action": "One already-planned CHORUS v7 rep1 rubric10 rating2 through the four-worker controller with only that job queued. Review before any remaining jobs."
+}
