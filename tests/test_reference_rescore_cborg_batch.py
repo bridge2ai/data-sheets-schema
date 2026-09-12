@@ -134,3 +134,37 @@ def test_foreground_stop_drains_workers_and_retains_evidence(tmp_path, stop_sign
         if process.poll() is None:
             process.terminate()
             process.communicate(timeout=15)
+
+
+@pytest.mark.parametrize("stop_signal", [signal.SIGINT, signal.SIGTERM])
+def test_stop_during_launch_preparation_leaves_job_queued(tmp_path, monkeypatch, stop_signal):
+    monkeypatch.setattr(batch, "ROOT", tmp_path)
+
+    def prepare(job):
+        os.kill(os.getpid(), stop_signal)
+        return [sys.executable, "-c", "raise AssertionError('must not launch')"]
+
+    def forbidden_spawn(*args, **kwargs):
+        raise AssertionError("a worker started after the controller observed a stop")
+
+    monkeypatch.setattr(batch.subprocess, "Popen", forbidden_spawn)
+    result = batch.schedule(["a", "b"], prepare, tmp_path / "run")
+    assert result["status"] == "stopped" and result["stop_signal"] == stop_signal
+    assert result["not_launched"] == ["a", "b"] and result["completed"] == []
+    assert not any(json.loads(line)["event"] == "controller_error"
+                   for line in (tmp_path / "run/events.jsonl").read_text().splitlines())
+
+
+def test_worker_unblocks_inherited_launch_signals_before_preflight(monkeypatch):
+    def inspect_mask():
+        mask = signal.pthread_sigmask(signal.SIG_BLOCK, set())
+        assert not {signal.SIGINT, signal.SIGTERM}.intersection(mask)
+        raise ValueError("offline preflight reached")
+
+    monkeypatch.setattr(batch, "load_registered", inspect_mask)
+    previous = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGINT, signal.SIGTERM})
+    try:
+        with pytest.raises(ValueError, match="offline preflight reached"):
+            batch.main(["worker", "--phase", "pilot", "--job", "a"])
+    finally:
+        signal.pthread_sigmask(signal.SIG_SETMASK, previous)

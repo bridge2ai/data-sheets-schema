@@ -1,11 +1,11 @@
 {
-  "registered_at": "2026-09-12T19:05:00.789253+00:00",
+  "registered_at": "2026-09-12T18:59:56.129057+00:00",
   "reason": "One successful rating required 9.7 minutes. Use up to four isolated workers to finish the existing 56-rating scope, with a new one-rating scheduler canary before fan-out.",
   "previous_plan": "notes/reference_rescore_2026-09-12_cborg/registrations/plan-before-batch-amendment.md",
   "previous_plan_sha256": "0030d928692a85938eddc1b144e824549fd150854b77309732d859d43076bca0",
   "manifest_sha256": "e71b8805b7fde90b5e64e23ba1c1f346f2f17e33fe49df7c98c9e885aeec1501",
   "scheduler": "scripts/reference_rescore_cborg_batch.py",
-  "scheduler_sha256": "1225d0cc5c166a233f73d5f95bd128a2b08beb8ff5000f5b1a89174363c81657",
+  "scheduler_sha256": "f0d6e1f35f99d302a9eabcd81c159eed4cd2fd55bd3e4a1a0a21f7b82d9f24a5",
   "workers": 4,
   "pilot_job_id": "CHORUS_v7_rep1_r10_rating2",
   "pilot_scope": "One already planned rubric10 repeat rating, launched by the identical foreground Python controller, shell environment and four-worker scheduling mode used by the fill, with a queue containing only this job.",
@@ -28,10 +28,9 @@
     "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg/CHORUS_v7_rep1_r10_rating1_evaluation.json": "8b08357453730a468b3f47f8c0c0315d1ef30fe69ed937a0c95cbf2f9f9d8178"
   },
   "supersedes_registration": {
-    "path": "notes/reference_rescore_2026-09-12_cborg/registrations/batch-registration-before-stop-race-fix.json",
-    "sha256": "6710b7617fad0c71841b40da574c682f39aebe5e0bc05d17ebdaa70355326d16",
-    "reason": "#1342: prepare arguments before the stop check; serialize signal observation with dequeue/spawn using a short signal-mask critical section; workers unblock inherited stop signals before preflight. No scheduler model calls have occurred."
+    "path": "notes/reference_rescore_2026-09-12_cborg/registrations/batch-registration-before-interruption-fix.json",
+    "sha256": "f3879cf7499f8fdafdc1fc781bea3bd371d7fb1e08c074875884f285b047f997",
+    "reason": "#1341: isolate worker sessions from foreground SIGINT/SIGTERM; controller stops new launches, drains and records the stopped result. No scheduler model calls have occurred."
   },
-  "interrupt_policy": "SIGINT and SIGTERM request a controller stop without propagating to worker sessions; active workers retain their original runner timeout and finish with evidence. A forced SIGKILL or host loss remains outside graceful-drain guarantees.",
-  "launch_boundary": "A stop observed during preparation leaves the job queued. Signal delivery is deferred only through the short atomic launch decision, then observed by the controller; existing workers remain in separate sessions."
+  "interrupt_policy": "SIGINT and SIGTERM request a controller stop without propagating to worker sessions; active workers retain their original runner timeout and finish with evidence. A forced SIGKILL or host loss remains outside graceful-drain guarantees."
 }

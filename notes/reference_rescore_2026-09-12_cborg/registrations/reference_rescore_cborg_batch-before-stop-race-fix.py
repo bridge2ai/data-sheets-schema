@@ -185,30 +185,18 @@ def schedule(job_ids, command, run_dir, workers=4):
                 if failed and not active:
                     break
                 if pending and not failed and stop_signal is None and waiting_for_start is None and len(active) < workers:
-                    job_id = pending[0]
-                    argv = command(job_id)
-                    child_env = dict(os.environ)
-                    # Observe a stop during argument preparation before consuming
-                    # the job. Defer signal handling only across the short atomic
-                    # launch decision; workers unblock these inherited signals.
-                    stop_signals = {signal.SIGINT, signal.SIGTERM}
-                    previous_mask = signal.pthread_sigmask(signal.SIG_BLOCK, stop_signals)
-                    try:
-                        if stop_signal is None and not stop_signals.intersection(signal.sigpending()):
-                            process = subprocess.Popen(argv, cwd=ROOT, env=child_env,
-                                                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                                       start_new_session=True)
-                            pending.popleft()
-                            os.set_blocking(process.stdout.fileno(), False)
-                            info = {"job": job_id, "buffer": b"", "started": False, "eof": False,
-                                    "launched": time.monotonic(), "startup_timeout": False,
-                                    "log": (run_dir / f"{job_id}.txt").open("xb")}
-                            active[process] = info
-                            selector.register(process.stdout, selectors.EVENT_READ, process)
-                            waiting_for_start = process
-                            record("launched", job=job_id, pid=process.pid)
-                    finally:
-                        signal.pthread_sigmask(signal.SIG_SETMASK, previous_mask)
+                    job_id = pending.popleft()
+                    process = subprocess.Popen(command(job_id), cwd=ROOT, env=dict(os.environ),
+                                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                               start_new_session=True)
+                    os.set_blocking(process.stdout.fileno(), False)
+                    info = {"job": job_id, "buffer": b"", "started": False, "eof": False,
+                            "launched": time.monotonic(), "startup_timeout": False,
+                            "log": (run_dir / f"{job_id}.txt").open("xb")}
+                    active[process] = info
+                    selector.register(process.stdout, selectors.EVENT_READ, process)
+                    waiting_for_start = process
+                    record("launched", job=job_id, pid=process.pid)
                 for key, _ in selector.select(timeout=0.2):
                     process = key.data
                     info = active[process]
@@ -257,8 +245,6 @@ def main(argv=None):
     parser.add_argument("--job")
     parser.add_argument("--phase", choices=("pilot", "remaining"))
     args = parser.parse_args(argv)
-    if args.action == "worker":
-        signal.pthread_sigmask(signal.SIG_UNBLOCK, {signal.SIGINT, signal.SIGTERM})
     r, manifest, registration = load_registered()
     pilot = next(j for j in manifest["jobs"] if j["id"] == registration["pilot_job_id"])
     r.require_canary(manifest, pilot)

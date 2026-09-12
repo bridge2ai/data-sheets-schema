@@ -106,3 +106,13 @@ registration are archived unchanged; no model calls occurred under them.
 Offline process-group interruption tests cover candidate and receipt
 retention for all four active workers and non-launch of the fifth job.
 A forced kill or host loss is outside this graceful-drain guarantee.
+
+
+The second scheduler review verified graceful draining and found #1342:
+a stop observed while preparing launch arguments could still reach `Popen`.
+The corrected launch prepares arguments first and serializes stop handling
+with the short dequeue/spawn decision. A stopped job remains queued. Worker
+startup restores SIGINT/SIGTERM handling before any evaluator preflight.
+Deterministic preparation-boundary tests cover both signals, in addition to
+the four-worker evidence-retention tests. No scheduler model calls have
+occurred; the scoring manifest and all earlier artifacts remain unchanged.
