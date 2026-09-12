@@ -1,0 +1,11 @@
+{
+  "reviewed_at": "2026-09-12T20:02:52.897287+00:00",
+  "verdict": "approved",
+  "reviewed_commit": "cb7b0e00023bc1253d5371194bcf0d90c64bbaa9",
+  "registration_sha256": "4cbff2317c3527c1cc164fb243a5bf9d2fc8beaa326b0c4680eaa1fbd17236af",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "review": "notes/reference_rescore_2026-09-12_cborg_runtime/pre_spend_review_round8.md",
+  "review_sha256": "de4524889ca249dbb45b22f083b92f095b280e81186ce25daf45e37689245b2a",
+  "offline_validation": "184 runner/adapter/scheduler tests passed. Independent review verified all 56 exact-prefix prompts, unchanged definitions/inputs, 259 evaluation pins and 60 preliminary-file pins; runtime mismatch rejection and both gates remain intact.",
+  "next_authorized_action": "One new CHORUS v7 rep1 rubric10 primary rating through the four-worker controller, with only that job queued. Inspect and accept both canary gates before remaining55."
+}
