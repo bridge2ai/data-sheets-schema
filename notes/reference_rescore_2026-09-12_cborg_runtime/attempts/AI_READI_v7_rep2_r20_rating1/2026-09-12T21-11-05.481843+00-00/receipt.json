@@ -1,0 +1,124 @@
+{
+  "job_id": "AI_READI_v7_rep2_r20_rating1",
+  "started_at": "2026-09-12T21:11:05.482133+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "d2e1cc8b4d51d2ed69f9011a6bee45e69042b908fa723e9f107e76440716ba53",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "c56d8261656557a68a8d94045593dd5c6b1b408d84f6aa98af5745955ef67f61",
+  "evaluation_sha256": "a803649ca0d07c30ea1745f088e27e70ef4f53d5bafbe1f06d8d2589c2e20f44",
+  "cli_result": {
+    "duration_api_ms": 487448,
+    "stop_reason": "end_turn",
+    "session_id": "5ba80bb1-bfaf-4511-8197-7ccc3504eca2",
+    "total_cost_usd": 2.21761425,
+    "usage": {
+      "input_tokens": 356,
+      "cache_creation_input_tokens": 125710,
+      "cache_read_input_tokens": 508211,
+      "output_tokens": 38839,
+      "output_tokens_details": {
+        "thinking_tokens": 12610
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 125710
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 358,
+        "outputTokens": 38867,
+        "cacheReadInputTokens": 508211,
+        "cacheCreationInputTokens": 158407,
+        "webSearchRequests": 0,
+        "costUSD": 2.21761425,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 12610,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01VuWhxJSM4C1WYSmbHyGmFU",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-hwi3h07i/input/record.yaml 2>/dev/null",
+          "description": "Hash the input record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01CVaQPgQpBphiSgfmJ4XVgp",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get UTC timestamp and generate a UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Definition check passed. The \"Reproducibility\" section is present in my instructions, and its opening sentence reads, verbatim:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nEvaluation complete and validated (`VALID output_evaluation.json: rubric20-semantic`, exit 0).\n\n## Result: 83 / 88\n\n| Basis | Points | Denominator | Percentage |\n|---|---|---|---|\n| Fixed | 83 | 88 | 94.3% |\n| N/A-adjusted | 83 | 88 | 94.3% |\n\n`excluded_max_points: 0`, `questions_not_applicable: 0` \u2014 no question was excluded, so the two bases coincide.\n\n**Applicability (all four gates resolved on non-own fields, per the anti-circular rule):** human subjects met via `description`/`keywords`/`collection_mechanisms` \u2192 Q8, Q15 scored; datasets shared met via `distribution_formats` access URLs and a reuse-permitting licence \u2192 Q10, Q17 scored; software output met via `external_resources` \u2192 `https://github.com/AI-READI` \u2192 Q11 scored rather than excluded; collection-and-sharing met \u2192 Q12, Q13 scored.\n\n**Category scores:** Structural 20/21 \u00b7 Metadata 20/21 \u00b7 Technical 23/25 \u00b7 FAIRness 20/21.\n\n**Deductions (5 points):** Q1 = 4 (`parent_datasets` and `regulatory_restrictions.confidentiality_level` slots unpopulated, 12/14 \u2248 85.7%); Q8 = 4 (no data protection impact analysis exists); Q11 = 4 (conversion tooling unnamed \u2014 no software, version or repo for .fda/.sdt\u2192DICOM, XML\u2192WFDB, .FIT\u2192Open mHealth); Q13 = 4 (preservation committed only \"for the duration of the project\", version 2.0.0 inaccessible despite holding DOI 10.60775/fairhub.2, repository \"under review\" notice); Q20 = 4 (no AIO/CROISSANT identifiers, `selection_bias` unmitigated).\n\n**Semantic findings:** 9 issues (3 medium, 6 low); checks 24 passed / 3 failed / 6 warnings. The medium ones are the Washington University in St. Louis vs. University of Washington attribution conflict (ROR:01yc7t268 contradicts the IRB, RePORTER organisation, central lab and sensor development site), the \"NoDeIdentification\" vs. Safe Harbor contradiction, and the withdrawn-but-DOI-bearing version 2.0.0. Two verifications came out in the record's favour: the nine collection byte totals sum to within 419,614 bytes of `total_size_bytes` and the file counts differ by exactly 9 \u2014 matching the nine root CDS metadata files the notes enumerate \u2014 and every demographic marginal in `splits` and `subpopulations` reconciles exactly to 2,280.\n\nModel recorded as `claude-opus-5` for both `name` and `evaluator_model`, `temperature: null`; `instrument_sha256`, `rubric_hash`, `input_sha256` and `instrument_kind: agent_definition` set as supplied.",
+    "ttft_ms": 4264,
+    "type": "result",
+    "duration_ms": 487908,
+    "uuid": "38d40763-695a-45e5-9b38-598270e0b158",
+    "ttft_stream_ms": 2379,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 2827,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [],
+  "completed_at": "2026-09-12T21:19:14.737561+00:00"
+}
