@@ -1,0 +1,171 @@
+{
+  "job_id": "AI_READI_v8_rep1_r10_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T11:56:06.302584+00:00",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "metadata.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "metadata.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "4f09d95003ba1f3f5af5b611412126444f14acc1336410f0a962abd9c0f7f85f",
+  "evaluation_sha256": "a520c48326b07c23b93de15690c9bddf5630e238ff27e883292a9ee4f6afa232",
+  "cli_result": {
+    "duration_api_ms": 455247,
+    "stop_reason": "end_turn",
+    "session_id": "9f61e8ec-eefc-4968-bc27-44827f1d4737",
+    "total_cost_usd": 2.0368945,
+    "usage": {
+      "input_tokens": 14,
+      "cache_creation_input_tokens": 82160,
+      "cache_read_input_tokens": 468109,
+      "output_tokens": 38383,
+      "output_tokens_details": {
+        "thinking_tokens": 9110
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 82160,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1409,
+          "cache_read_input_tokens": 104783,
+          "cache_creation_input_tokens": 240,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 240
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 21520,
+        "outputTokens": 15,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.021595,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 14,
+        "outputTokens": 38383,
+        "cacheReadInputTokens": 468109,
+        "cacheCreationInputTokens": 82160,
+        "webSearchRequests": 0,
+        "costUSD": 2.0152995,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 9110,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01X2Jq6yLX2wah4vj9MdJKiq",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml 2>/dev/null; wc -l input/record.yaml 2>/dev/null",
+          "description": "Hash the input record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01Dz6gG2piQ9SC7E7jvED38k",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation output against its schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 9,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (`VALID output_evaluation.json: rubric10-semantic`, exit 0).\n\n## Definition check\n\nThe section headed **\u201cSource rubric and schema paths (#158)\u201d** is present in my instructions, and the sentence there reads, verbatim:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThat is the current instrument (sha256 `66ad623\u2026e34864`, recorded as `metadata.instrument_sha256`), so I proceeded.\n\n## Result \u2014 AI_READI, claudecode_api, rep1\n\n**49 / 50 points.** `fixed_percentage` 98.0 (denominator 50), `normalized_percentage` 98.0 (denominator 50). `excluded_max_points: 0`, `sub_elements_not_applicable: 0` \u2014 there are no `applicable: false` / `score: null` items in this record.\n\nAll five trigger conditions were resolved before scoring, each on evidence outside the gated element, and all five fired:\n\n- **Human subjects** \u2014 E1 `description` (\u201c2280 participants\u201d, \u201cindividuals with and without T2DM\u201d) and E8 `collection_mechanisms` \u2192 Element 4 sub-elements 1\u20135 all applicable and scored.\n- **Governance restrictions** \u2014 E2 `regulatory_restrictions.confidentiality_level: restricted` plus NIH GDS obligations (a constraint that applies, not a record that none does).\n- **Datasets shared** \u2014 `distribution_formats`, `page`, `third_party_sharing.is_shared: true`, reuse-permitting licence \u2192 E3 1\u20134, E6, E8, E10 all scored.\n- **Software output** \u2014 E10 `external_resources` names `https://github.com/AI-READI`; an organisation root is borderline, so the ambiguity rule made E8 sub-element 3 applicable rather than N/A.\n- **Collection + shared** \u2014 `acquisition_methods` and `collection_mechanisms` populated.\n\n**The single lost point: Element 8, sub-element 4 (Software and Tools).** Applicable under E8's datasets-shared gate \u2014 the record establishes the data were processed \u2014 and not gated on the repository pointer. Scored 0 because no software is named in a producing or transforming role: the `.fda`/`.sdt`\u2192DICOM and `.FIT`\u2192Open mHealth conversions and the OMOP mapping are described anonymously (\u201ctransformed into standard model formats\u201d, \u201ccombined automated and custom steps\u201d). The software that *is* named sits in excluded roles \u2014 REDCap and MoCA Duo are capture (a), FAIRhub/Azure hosting (b), RO-Crate/FAIRscape packaging (c), the OMOP Data Quality Dashboard validation (d). The GitHub organisation root identifies only the publisher and neither earns nor forfeits the point.\n\n**Ten issues detected** (3 medium, 7 low), 20 consistency checks passed / 3 failed / 7 warnings. The medium ones: the unnamed processing software; `is_tabular: false` against the record's own \u201ctabular data\u201d and its OMOP CSV tables; and the three-way unreconciled de-identification statement (FAIRhub \u201cNoDeIdentification\u201d vs RO-Crate deidentified vs HIPAA Safe Harbor). Notably, most of the low-severity conflicts \u2014 institutional attribution, licence naming, enrollment date, the nine-file/419,614-byte arithmetic gap \u2014 are **self-disclosed** in the record's `source_caveats`, which I credited as auditability rather than treating as concealed defects. Non-grant support (Microsoft cloud, RPB) correctly carries no grant block and was recorded as a passing check, not a gap. All three NIH awards validate against NIH syntax; DOI prefix `10.60775` corroborates the declared FAIRhub publisher.\n\nOutput written to `output_evaluation.json`, with `d4d_file` set to the provenance path (not `input/record.yaml`), model recorded as `claude-opus-5[1m]` in both `model.name` and `metadata.evaluator_model`, and `temperature: null`.",
+    "ttft_ms": 3089,
+    "type": "result",
+    "duration_ms": 456523,
+    "uuid": "27e05767-7e6a-4ea4-9d2c-e2443a71c1ea",
+    "ttft_stream_ms": 921,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 1426,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r10_rating1/2026-09-12T09-34-57.687223+00-00",
+  "original_receipt_sha256": "dbe6eab45368fffdab2fc716afb84d548cd17b8d02a9d5b0e2080a5e62a92542",
+  "transcript_sha256": "4991d63053fd4dd23ef4c8034d8da5e81091b66e7ba823dda11df8e82a4e1b52",
+  "user_prompt_sha256": "e858e65b93d8b059bed782649d973646b0c58b8e431570494570bd077d53d639",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "evaluated_at": "2026-09-12T09:34:57.687641+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

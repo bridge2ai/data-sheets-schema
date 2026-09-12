@@ -2507,3 +2507,17 @@ Fresh CHORUS v8 rep2 rubric20 and v8 rep3 rubric10 attempts run one at a time;
 both must pass before the other groups of at most four resume. The complete
 prompts, model, effort and $5 attempt cap are unchanged. All three unvalidated
 drafts remain excluded and preserved.
+
+### Reference accounting and partial-panel reporting amendment (2026-09-12; #1319–#1326)
+
+Both registered CHORUS canonical-path retries passed, bringing the fill to 23 accepted ratings from 26 evaluator sessions, with three unvalidated drafts preserved and excluded. Further calls paused for the interim review findings. PR #1321 repairs interrupted-attempt accounting, recovery evidence references, malformed artifacts, terminal usage evidence and premature applicability-stability claims. The additional Codex plugin review after five rounds approved `195ebac26a37b24bc80c0889f746314dde8f6ec9`; 141 focused tests plus the annotation-only follow-up's 16 accounting tests and actual Python 3.9.6 startup checks passed.
+
+Manifest SHA256 `99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f` records the reporting-only runner amendment. All runner code outside `report_results`, complete prompts, agent definitions, inputs, schemas, model, effort, budget and the 56-rating design are unchanged. The two main-worktree outputs were revalidated offline, and the original CHORUS canary was separately accepted. Its quoted definition remains `66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`. Evidence and preserved hashes are in `notes/reference_rescore_2026-09-11/reporting_audit_registration.json` and `reporting_audit_review_2026-09-12.md`.
+
+The other 21 accepted outputs on #1313 require offline revalidation before the 33 remaining ratings resume in groups of at most four. No score bytes were rewritten, no model calls occurred during this amendment, and all 202 prior evaluations remain unchanged. No generation or download occurred.
+
+### Reference fill revalidated after the reporting amendment (2026-09-12; #1248, #1321)
+
+All 23 accepted outputs and 219 earlier attempt files were verified unchanged. Twenty-one ratings received new offline receipts after the two main-worktree ratings were revalidated and the original canary separately accepted. The new audit certifies all 26 original evaluator sessions, complete terminal usage evidence and all 202 prior evaluations unchanged; three unvalidated drafts remain excluded. No evaluator call or score rewrite occurred during this amendment.
+
+The 33 remaining jobs and replacement execution helper are registered in `notes/reference_rescore_2026-09-11/fill_resumed_reporting_audit_2026-09-12.json`. Both individually required CHORUS retries already passed. The unchanged protocol resumes groups of at most four, $5 per attempt, no automatic retries, and a halt on further launches after any observed failure. The agent definitions, complete prompts, inputs and execution settings remain fixed. The current audit command is `python scripts/audit_reference_rescore.py`; the original dated helpers remain preserved as historical evidence.

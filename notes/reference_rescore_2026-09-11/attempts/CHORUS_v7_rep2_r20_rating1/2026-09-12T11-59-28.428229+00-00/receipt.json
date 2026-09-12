@@ -1,0 +1,170 @@
+{
+  "job_id": "CHORUS_v7_rep2_r20_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T11:59:28.428583+00:00",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]",
+    "metadata.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "metadata.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "d96b8b8fb1dbc2748fc5cfcab49aa2eb745a8bcd3c8e83978ca4226b93922379",
+  "evaluation_sha256": "724edf97fc739e03aa1003497c3b77fac98d1d81369271dd695dc5885a6c05f7",
+  "cli_result": {
+    "duration_api_ms": 452542,
+    "stop_reason": "end_turn",
+    "session_id": "906a63a6-34a8-49a4-966e-e9fb1ea3b8e9",
+    "total_cost_usd": 1.9070824999999998,
+    "usage": {
+      "input_tokens": 14,
+      "cache_creation_input_tokens": 78628,
+      "cache_read_input_tokens": 372197,
+      "output_tokens": 37032,
+      "output_tokens_details": {
+        "thinking_tokens": 8439
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 78628,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1396,
+          "cache_read_input_tokens": 98064,
+          "cache_creation_input_tokens": 210,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 210
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 8764,
+        "outputTokens": 14,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.008834,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 14,
+        "outputTokens": 37032,
+        "cacheReadInputTokens": 372197,
+        "cacheCreationInputTokens": 78628,
+        "webSearchRequests": 0,
+        "costUSD": 1.8982485,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 8439,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01JdcKnhDagR67UHq6M8wPD4",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-cxx8sof2/ 2>/dev/null; echo \"---\"; find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 8,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (`VALID output_evaluation.json: rubric20-semantic`, exit 0).\n\n## Definition check\n\nMy on-disk definition's **Reproducibility** section is present and reads as the current rules expect. The required sentence, verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nRecorded `instrument_sha256`: `9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3`.\n\n## Result \u2014 CHORUS, claudecode_agent, rep2\n\n**63 / 88 = 71.6%** (fixed and normalized coincide: `excluded_max_points` 0, `adjusted_max_points` 88, `questions_not_applicable` 0).\n\n| Category | Score |\n|---|---|\n| Structural Completeness (Q1\u20135) | 19 / 21 |\n| Metadata Quality & Content (Q6\u201310) | 16 / 21 |\n| Technical Documentation (Q11\u201315) | 16 / 25 |\n| FAIRness & Accessibility (Q16\u201320) | 12 / 21 |\n\n**All four conditional gates resolved as met**, each on fields belonging to *other* questions per the anti-circular rule \u2014 human subjects via `description`/`keywords`/`collection_mechanisms`; datasets-shared via `third_party_sharing.is_shared` + `existing_uses` + the Q9 access process; software-output via `external_resources` naming the chorus-ai code organization; collection-identified via the Q12 fields. Nothing was excluded from the denominator.\n\n**Where it scores well:** interoperability (Q10, 5/5 \u2014 five modalities each on its correct domain standard, with real cross-site OMOP harmonization machinery and clinically validated semantic mappings), funding (Q7, 5/5 \u2014 `OT2OD032701` validates against the NIH Other Transaction pattern and is corroborated by project number, application ID and RePORTER link), and textual provenance (Q19, 4/5 \u2014 entity-activity-agent lineage is reconstructible per modality).\n\n**Where it fails:** Q20 bias (1/5) \u2014 `known_biases` and `future_use_impacts` are both empty while the record repeatedly invokes bias and equity as project *themes*; Q8 ethics (2/5) \u2014 no IRB of record, no consent, no HIPAA posture, and the populated `ethical_reviews` entries name the consortium as its own reviewing organization, so field presence does not satisfy the IRB component; Q13 sustainability (2/5) \u2014 no version, no persistent ID, no accountable steward, commitment bounded by the award end date.\n\n12 semantic issues recorded (3 high, 7 medium, 2 low). Two worth flagging: `conforms_to_schema` points at the *datasheet's* schema rather than any data schema, a field-semantics mismatch; and vulnerable populations (PICU/NICU \u2014 minors and neonates) are named under `special_populations` while `at_risk_populations`, `informed_consent` and `participant_privacy` are all empty, so safeguards are missing exactly where the population is most vulnerable.\n\nOne note on how I weighed the record's style: it discloses its own gaps unusually well, adjudicating source conflicts in `source_caveats` and stating plainly what its sources do not contain. I credited that under strengths and in the semantic insights, but did not let it raise scores \u2014 the rubric measures documented content, not candor about its absence. That distinction is what keeps Q8 at 2 despite the record explicitly telling you the IRB is missing.",
+    "ttft_ms": 1617,
+    "type": "result",
+    "duration_ms": 455812,
+    "uuid": "27c80f47-3a76-4faf-bbd3-a81e4656258f",
+    "ttft_stream_ms": 927,
+    "time_to_request_ms": 18,
+    "first_content_frame_ms": 927,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep2_r20_rating1/2026-09-12T10-21-22.007907+00-00",
+  "original_receipt_sha256": "293ebe364435d60ec8827731f9391e2533f320c35d81ae4ffc2eef752f355b8d",
+  "transcript_sha256": "fd9a0c88a37f5760a4ad807502de21a0a2538853208e2589da0b9103e1d1a81f",
+  "user_prompt_sha256": "4be2a79c7e6877243ebee7f7fe05aeb84ae8bdf29bf4aa3cca1e071298a208ee",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "evaluated_at": "2026-09-12T10:21:22.008582+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

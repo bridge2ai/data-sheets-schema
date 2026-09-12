@@ -1,9 +1,8 @@
 {
-  "reported_at": "2026-09-12T11:09:49.742205+00:00",
-  "completed": 22,
+  "reported_at": "2026-09-12T11:59:33.345705+00:00",
+  "completed": 23,
   "planned": 56,
   "pending": [
-    "CHORUS_v8_rep3_r10_rating1",
     "CHORUS_v8_rep3_r20_rating1",
     "CM4AI_v7_rep1_r10_rating1",
     "CM4AI_v7_rep1_r20_rating1",
@@ -50,7 +49,7 @@
       "fixed_percentages": [
         98.0
       ],
-      "applicability_stable": true,
+      "applicability_stable": null,
       "adjusted_sample_sd": null,
       "fixed_sample_sd": null,
       "adjusted_range": null,
@@ -67,7 +66,7 @@
       "fixed_percentages": [
         70.0
       ],
-      "applicability_stable": true,
+      "applicability_stable": null,
       "adjusted_sample_sd": null,
       "fixed_sample_sd": null,
       "adjusted_range": null,
@@ -207,15 +206,17 @@
       "project": "CHORUS",
       "cohort": "v8",
       "rubric": "rubric10-semantic",
-      "records": 2,
+      "records": 3,
       "expected_records": 3,
       "adjusted_percentages": [
         64.0,
-        74.0
+        74.0,
+        68.0
       ],
       "fixed_percentages": [
         64.0,
-        74.0
+        74.0,
+        68.0
       ]
     },
     {

@@ -1,0 +1,186 @@
+{
+  "job_id": "CHORUS_v8_rep1_r10_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T11:59:30.420400+00:00",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]",
+    "metadata.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "metadata.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "f2a4d6229e5b4188a281727cb6723120e8ebbcfefe2883e6b1ada1c434bb0bb7",
+  "evaluation_sha256": "5c8200cc26f6be60bfadf61132d45d9fb065804536e382da06cdf9b2c494c322",
+  "cli_result": {
+    "duration_api_ms": 630508,
+    "stop_reason": "end_turn",
+    "session_id": "15623e94-7d9b-4f77-a2cc-2fa310bb7ca6",
+    "total_cost_usd": 2.3955450000000003,
+    "usage": {
+      "input_tokens": 18,
+      "cache_creation_input_tokens": 82037,
+      "cache_read_input_tokens": 520824,
+      "output_tokens": 52163,
+      "output_tokens_details": {
+        "thinking_tokens": 13428
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 82037,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1721,
+          "cache_read_input_tokens": 104589,
+          "cache_creation_input_tokens": 311,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 311
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 10528,
+        "outputTokens": 14,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.010598,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 18,
+        "outputTokens": 52163,
+        "cacheReadInputTokens": 520824,
+        "cacheCreationInputTokens": 82037,
+        "webSearchRequests": 0,
+        "costUSD": 2.384947,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 13428,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_017ARCJncFNfPTYGBFTgLYLW",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate the agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01TsAnjFpkP5o2H7Vs8u8u8i",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml",
+          "description": "Compute checksum of input record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_012vLMxJi8SPsFh5MoPmiHHG",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation output against its schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed with exit status 0: `VALID output_evaluation.json: rubric10-semantic`.\n\n## Instrument check (repeated as requested)\n\nThe section headed **\"Source rubric and schema paths (#158)\"** is present in my instructions. The sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis is the current rules text (dedicated `update_details` slot plus the anti-credit clause), so I proceeded. Recorded `metadata.instrument_sha256` = `66ad6231\u2026e34864`, `instrument_kind: agent_definition`.\n\n## Evaluation: CHORUS, claudecode_api, rep1\n\n**32 / 50 \u2014 fixed 64.0% (32/50), normalized 64.0% (32/50), 0 sub-elements N/A.**\n\nAll five trigger conditions resolved as satisfied from fields *outside* the gated sub-elements, so nothing was excluded and the two bases coincide:\n- **Human subjects** \u2014 E1 description/keywords (ICU/PICU/NICU admissions, critical care) and E8 collection mechanisms \u2192 Element 4 all five applicable, including 3\u20135.\n- **Governance** \u2014 E2 `confidentiality_level: restricted` plus two constraints that *apply*.\n- **Datasets shared** \u2014 five `distribution_formats` plus a documented controlled-access route (ambiguity rule: controlled access with a route counts as shared).\n- **Software output** \u2014 `external_resources` names the chorus-ai organization with 28 repositories \u2192 gates E8 sub-3 only.\n- **Collection + shared** \u2014 `acquisition_methods` and `collection_mechanisms` populated.\n\n| Element | Score |\n|---|---|\n| 1 Discovery | 3/5 |\n| 2 Access | 4/5 |\n| 3 Reuse | 3/5 |\n| 4 Ethics | 3/5 |\n| 5 Composition | 3/5 |\n| 6 Provenance/Version | 1/5 |\n| 7 Motivation/Funding | 5/5 |\n| 8 Technical transparency | 5/5 |\n| 9 Limitations | 3/5 |\n| 10 Community integration | 2/5 |\n\nNotable judgements, each stated in the artifact so they are auditable:\n- **E8 sub-4 = 1** under the #1082 threshold: software that *produced or transformed the released data* is named \u2014 OHNLP toolkit (note tokens), chorus-mapping (OMOP conversion), chorus_waveform scripts (WFDB release), CTP-deid/privacy_scan_tool. Hosting (Azure, container apps), validation (CHoRUSReports) and trainee analysis tooling (Jupyter, OHDSI) were identified as roles (b)/(d) and not relied on. Versions absent \u2192 flagged, not scored twice.\n- **E4 sub-1 = 0 while E9 sub-5 = 1** on the same `ethical_reviews` field, with the differing bars stated explicitly: no IRB/determination/DPIA for the collection, versus documented ethics-review activity and community engagement.\n- **E10 sub-2 = 0, not N/A** (#1080): shared dataset with neither citation nor DOI is an assessed failure.\n- **E6 = 1/5**: no version, version_access, errata or schedule; `updates.update_details` carries forward-looking status, and `notes` carries only website/disclaimer text, which was not credited.\n\nConsistency: 17 passed, 4 failed (missing IRB despite `involves_human_subjects=True`; absent `informed_consent`; de-identification without a standard alongside no HIPAA determination; \"publicly available\" versus no data licence), 10 warnings. Grant number OT2OD032701 validates as NIH (OT2 + OD + serial, corroborated by the RePORTER application ID in the linked URL); DOI, RRID, citation and version are all absent; one suspect email domain (`mgh.havard.edu`) and one schemeless URL.",
+    "ttft_ms": 2392,
+    "type": "result",
+    "duration_ms": 630924,
+    "uuid": "f2407d5f-1246-4c59-9fc5-92b2a76557f0",
+    "ttft_stream_ms": 1583,
+    "time_to_request_ms": 17,
+    "first_content_frame_ms": 1583,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r10_rating1/2026-09-12T10-21-34.529106+00-00",
+  "original_receipt_sha256": "d3fd20d44bbadd239e2c59dd019ed4b1ee0d8f029195bf03e1d8d5d8a9cacfcf",
+  "transcript_sha256": "08c7290e3ec68706be58290facc54c21402f9e9da9eb7b6fc28ffb8c55206d81",
+  "user_prompt_sha256": "c4f3ccd94a1a5963765d6277298fc983bfb27b8d3d898a148f03a35d76e65a5d",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "evaluated_at": "2026-09-12T10:21:34.529480+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

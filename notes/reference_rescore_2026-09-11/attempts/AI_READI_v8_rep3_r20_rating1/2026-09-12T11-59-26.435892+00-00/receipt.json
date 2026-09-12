@@ -1,0 +1,171 @@
+{
+  "job_id": "AI_READI_v8_rep3_r20_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T11:59:26.436242+00:00",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "01e3ef504db5ba6f21691c35fd0aa322661dd48f6d864cb38e053591b9763936",
+  "evaluation_sha256": "b6750680007cb277ff8ffe180fa67a736242d5065beab80029f2c4bb7405ba01",
+  "cli_result": {
+    "duration_api_ms": 495441,
+    "stop_reason": "end_turn",
+    "session_id": "bee26a51-91ae-4e08-9d28-fba930f0c420",
+    "total_cost_usd": 2.1854294999999997,
+    "usage": {
+      "input_tokens": 16,
+      "cache_creation_input_tokens": 89734,
+      "cache_read_input_tokens": 507337,
+      "output_tokens": 40478,
+      "output_tokens_details": {
+        "thinking_tokens": 9599
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 89734,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1217,
+          "cache_read_input_tokens": 109129,
+          "cache_creation_input_tokens": 251,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 251
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 22296,
+        "outputTokens": 19,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.022391,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 16,
+        "outputTokens": 40478,
+        "cacheReadInputTokens": 507337,
+        "cacheCreationInputTokens": 89734,
+        "webSearchRequests": 0,
+        "costUSD": 2.1630385,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 9599,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_0187ppiSvkmXkhGoPKig2u9J",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml 2>/dev/null; ls scripts 2>/dev/null",
+          "description": "Hash input record and list scripts"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01KxGZMpniggG9znTKkC2BwR",
+        "tool_input": {
+          "command": "python3 -c \"\nfc=[4515,7,2232,7969,56478,173721,93921,15245,2246]\nprint('file_count sum', sum(fc), '+9 =', sum(fc)+9, 'declared 356343')\ntb=[302931703,176182781,55625676514,1069466876718,1317625293027,1155908809724,174381046406,38313536220,4169006971]\nprint('bytes sum', sum(tb), 'declared 3815969779678', 'diff', 3815969779678-sum(tb))\nprint('race', 380+545+519+836, 'sex', 951+1329, 'dm', 776+560+686+258)\nprint('splits', 1576+352+352, 1576/2280, 352/2280)\n\"",
+          "description": "Verify internal arithmetic of record counts and sizes"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 10,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed with exit status 0 (`VALID output_evaluation.json: rubric20-semantic`).\n\n## Definition check\n\nThe Reproducibility section is present in my definition and reads as the current instrument requires. Verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\n## Result\n\n**AI_READI / claudecode_api / rep3 \u2014 81 / 88 points.** No question was excluded: all four \"Applies to\" trigger conditions resolved as met, so `excluded_max_points` is 0 and both denominators are 88. `fixed_percentage` = `normalized_percentage` = 92.0.\n\n| Category | Score | Max |\n|---|---|---|\n| Structural Completeness | 18 | 21 |\n| Metadata Quality & Content | 20 | 21 |\n| Technical Documentation | 23 | 25 |\n| FAIRness & Accessibility | 20 | 21 |\n\nApplicability was resolved before scoring, each conditional question citing fields belonging to a *different* question (human subjects from `description`/`keywords`/`collection_mechanisms`; software output from `external_resources`' GitHub organization; sharing from `third_party_sharing.is_shared` and `page`).\n\n**Where points were lost.** Q3 (3/5) \u2014 exactly seven keywords, one short of the threshold, and missing every keyword for OCT/OCTA, FLIO, wearables and environmental sensing despite each having its own file collection. Q1 (4/5) \u2014 `resources` and `parent_datasets` empty. Q8 (4/5) \u2014 no DPIA exists; the record documents this as an explicit project negative, which is honest but does not supply the artifact. Q11 (4/5) \u2014 the processing software layer is anonymous (no tool, version or repo for the `.fda`/`.sdt`\u2192DICOM or `.FIT`\u2192Open mHealth conversions), in sharp contrast to instrument-level acquisition detail. Q13 (4/5) \u2014 no errata, and v2.0.0 is \"no longer accessible\" behind a live DOI. Q19 (4/5) \u2014 substantial textual lineage with named agents, but `was_derived_from` and `parent_datasets` are empty so the reader must assemble it.\n\n**Semantic findings.** I verified the record's arithmetic by hand rather than accepting it: collection file counts sum to 356,334, exactly nine below `total_file_count` \u2014 and the record independently derives and names those nine root metadata files from that difference, labelling it as its own computation. Collection bytes sum to within 419,614 of `total_size_bytes`, attributable to those unsized files. All three demographic breakdowns and all three splits sum independently to 2,280. The bias documentation's claim about balanced validation/test partitions is confirmable against the record's own published split compositions.\n\nEleven issues were recorded, two counted as failed consistency checks: the `confidential_elements_present: false` / `sensitive_elements_present: true` contradiction, and `confidentiality_level: restricted` against a source value of \"HL7:2N (normal)\" \u2014 a substitution the record itself concedes \"on its face contradicts\" the source. Both are disclosed at field level, which is why they are reported rather than scored down further. The Washington University in St. Louis attribution is flagged as medium-severity content accuracy: the ROR resolves correctly, but every operational field (IRB, sites, central lab, custom sensor development) locates the study at the University of Washington.",
+    "ttft_ms": 2461,
+    "type": "result",
+    "duration_ms": 496447,
+    "uuid": "e6bc9f29-80d1-44fe-9b75-1ad68893bea3",
+    "ttft_stream_ms": 930,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 1295,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r20_rating1/2026-09-12T10-11-13.611621+00-00",
+  "original_receipt_sha256": "4b2a52d235a3eca108c9c0e1a8e129ad416ddd8654d99cd0f142c032d29411fc",
+  "transcript_sha256": "90adf36987dc17664ab0c26beb224a3ddeabbbbb1c3178ce8a24d729dc6c3386",
+  "user_prompt_sha256": "7fad4475a3d20a6fb9aec2176f15673311ac2254e0ddda6fa6ae8aeb18866983",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "evaluated_at": "2026-09-12T10:11:13.612056+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

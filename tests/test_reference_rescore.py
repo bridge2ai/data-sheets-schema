@@ -831,7 +831,10 @@ def test_existing_output_without_receipt_or_with_changed_bytes_cannot_resume(env
         runner.successful_receipt(manifest, job)
 
 
-def test_repeatability_report_separates_repeated_ratings_from_generation_records(environment, monkeypatch):
+@pytest.mark.parametrize("rating_count", [0, 1, 2, 3])
+@pytest.mark.parametrize("changed_applicability", [False, True])
+def test_repeatability_report_separates_repeated_ratings_from_generation_records(
+        environment, monkeypatch, rating_count, changed_applicability):
     root, manifest, job, doc = environment
     monkeypatch.syspath_prepend(str(REAL_ROOT / "scripts"))
     jobs = []
@@ -841,23 +844,29 @@ def test_repeatability_report_separates_repeated_ratings_from_generation_records
         jobs.append(j)
     manifest["jobs"] = jobs
     runner.write_json(runner.PLAN / "manifest.json", manifest)
-    for index, j in enumerate(jobs):
+    for index, j in enumerate(jobs[:rating_count]):
         d = copy.deepcopy(doc)
         # Score rows are independently attested by their receipts; this
         # fixture isolates aggregation of a known two-point spacing.
         d["overall_score"]["total_points"] = 40 + index
         d["overall_score"]["fixed_percentage"] = 80 + 2 * index
         d["overall_score"]["normalized_percentage"] = round(100 * (40 + index) / 48, 1)
+        if changed_applicability and index == 1:
+            # Equal denominators can conceal different excluded item identities.
+            first, second = d["elements"][7]["sub_elements"][::2][:2]
+            first["applicable"], second["applicable"] = second["applicable"], first["applicable"]
+            first["score"], second["score"] = second["score"], first["score"]
         runner.write_json(root / j["output"], d)
         runner.write_json(runner.PLAN / "attempts" / j["id"] / "one/receipt.json", {
             "status": "passed", "evaluation_sha256": runner.digest(root / j["output"]),
             "manifest_sha256": runner.digest(runner.PLAN / "manifest.json")})
     results = runner.report_results(manifest)
     chorus = next(r for r in results["repeatability"] if r["project"] == "CHORUS")
-    assert chorus["fixed_sample_sd"] == 2
-    assert chorus["fixed_range"] == 4
+    assert chorus["fixed_sample_sd"] == (2 if rating_count == 3 else None)
+    assert chorus["fixed_range"] == (4 if rating_count == 3 else None)
+    assert chorus["applicability_stable"] is (not changed_applicability if rating_count == 3 else None)
     primary = next(r for r in results["generation_replicates"] if r["project"] == "CHORUS"
                    and r["cohort"] == "v7" and r["rubric"] == "rubric10-semantic")
-    assert primary["records"] == 1
+    assert primary["records"] == min(rating_count, 1)
     ai_readi = next(r for r in results["repeatability"] if r["project"] == "AI_READI")
     assert ai_readi["fixed_sample_sd"] is None
