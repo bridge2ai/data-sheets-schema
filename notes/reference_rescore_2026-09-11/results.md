@@ -1,10 +1,12 @@
 # Reference rescore status — 2026-09-11
 
-Completed 27 of 56 planned evaluations.
+Completed 31 of 56 planned evaluations.
 
 # Semantic comparison: both score bases
 
 Fixed percentages use the full rubric maximum. N/A-adjusted percentages use the applicable maximum. Neither alone establishes comparable applicability or evaluator reliability. These are individual measurements; this report does not rank runs or average different instruments.
+
+- CM4AI / rubric20-semantic: mixed denominators or excluded items; do not rank or pool adjusted percentages across these bases.
 
 | Evaluation | Project | Rubric | Fixed base | N/A-adjusted base | Excluded items | Evaluator | Instrument SHA256 | Evaluation SHA256 |
 |---|---|---|---|---|---|---|---|---|
@@ -35,6 +37,10 @@ Fixed percentages use the full rubric maximum. N/A-adjusted percentages use the 
 | /private/tmp/d4d-reference-fill-2026-09-12/data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v7_rep1_r10_rating1_evaluation.json | CM4AI | rubric10-semantic | Fixed: 43/50 (86.0%) | N/A-adjusted: 43/47 (91.5%) | E4: Informed Consent Obtained from Participants, E4: Privacy Protections and Re-identification Risk Assessment, E4: Vulnerable Populations and Compensation Documented | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 0455fd2794cbd0701ad38824528047cdf873490d1bc8e25ade73340ec12a391b |
 | /private/tmp/d4d-reference-fill-2026-09-12/data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v7_rep1_r20_rating1_evaluation.json | CM4AI | rubric20-semantic | Fixed: 63/88 (71.6%) | N/A-adjusted: 63/78 (80.8%) | Q15, Q8 | claude-opus-5[1m] | 9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3 | 207f09df7a838920546385f07a7be69b5bf6a265cc6c5515deac0ebcb2cd65ec |
 | /private/tmp/d4d-reference-fill-2026-09-12/data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v7_rep2_r10_rating1_evaluation.json | CM4AI | rubric10-semantic | Fixed: 43/50 (86.0%) | N/A-adjusted: 43/47 (91.5%) | E4: Informed Consent Obtained from Participants, E4: Privacy Protections and Re-identification Risk Assessment, E4: Vulnerable Populations and Compensation Documented | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 61c7243d11d5d7f82079514cf94ca90cd97a6c88366cf839d8a441419a52b9b8 |
+| /private/tmp/d4d-reference-fill-2026-09-12/data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v7_rep2_r20_rating1_evaluation.json | CM4AI | rubric20-semantic | Fixed: 69/88 (78.4%) | N/A-adjusted: 69/78 (88.5%) | Q15, Q8 | claude-opus-5[1m] | 9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3 | 1d436cca091b8bcd54f29a81d46a3273a5b3400fe83dae89175207f968299fc5 |
+| /private/tmp/d4d-reference-fill-2026-09-12/data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v7_rep3_r10_rating1_evaluation.json | CM4AI | rubric10-semantic | Fixed: 42/50 (84.0%) | N/A-adjusted: 42/47 (89.4%) | E4: Informed Consent Obtained from Participants, E4: Privacy Protections and Re-identification Risk Assessment, E4: Vulnerable Populations and Compensation Documented | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 8c9534b1e5e90c4b50e164b6d30dfbbfc47d37d31653aff3030686feb16b0fd6 |
+| /private/tmp/d4d-reference-fill-2026-09-12/data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v7_rep3_r20_rating1_evaluation.json | CM4AI | rubric20-semantic | Fixed: 76/88 (86.4%) | N/A-adjusted: 76/88 (86.4%) | none | claude-opus-5[1m] | 9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3 | 7ae700f087e9676857b66bf213acc269f2569d5a9d0fb054c3ceda55b3d9d51b |
+| /private/tmp/d4d-reference-fill-2026-09-12/data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v8_rep1_r10_rating1_evaluation.json | CM4AI | rubric10-semantic | Fixed: 39/50 (78.0%) | N/A-adjusted: 39/47 (83.0%) | E4: Informed Consent Obtained from Participants, E4: Privacy Protections and Re-identification Risk Assessment, E4: Vulnerable Populations and Compensation Documented | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 6bf634df093349c5cb55ec5713b0f4555b2917c099949175ea96caf423882d68 |
 
 Rubric10 repeatability uses three independent ratings of one v7 record per project. Sample standard deviations and ranges are descriptive for those records and this exact instrument; they are not population uncertainty bounds. Changed applicability is flagged. Rubric20 repeatability remains unmeasured. Generation replicate spread is a separate quantity. These scores do not authorize canonical selection on small differences.
 
@@ -55,9 +61,9 @@ Rubric10 repeatability uses three independent ratings of one v7 record per proje
 | CHORUS | v7 | rubric20-semantic | 3/3 | [76.1, 71.6, 73.9] | [76.1, 71.6, 73.9] |
 | CHORUS | v8 | rubric10-semantic | 3/3 | [64.0, 74.0, 68.0] | [64.0, 74.0, 68.0] |
 | CHORUS | v8 | rubric20-semantic | 3/3 | [76.1, 79.5, 78.4] | [76.1, 79.5, 78.4] |
-| CM4AI | v7 | rubric10-semantic | 2/3 | [86.0, 86.0] | [91.5, 91.5] |
-| CM4AI | v7 | rubric20-semantic | 1/3 | [71.6] | [80.8] |
-| CM4AI | v8 | rubric10-semantic | 0/3 | [] | [] |
+| CM4AI | v7 | rubric10-semantic | 3/3 | [86.0, 86.0, 84.0] | [91.5, 91.5, 89.4] |
+| CM4AI | v7 | rubric20-semantic | 3/3 | [71.6, 78.4, 86.4] | [80.8, 88.5, 86.4] |
+| CM4AI | v8 | rubric10-semantic | 1/3 | [78.0] | [82.98] |
 | CM4AI | v8 | rubric20-semantic | 0/3 | [] | [] |
 | VOICE | v7 | rubric10-semantic | 0/3 | [] | [] |
 | VOICE | v7 | rubric20-semantic | 0/3 | [] | [] |

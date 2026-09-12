@@ -1,12 +1,8 @@
 {
-  "reported_at": "2026-09-12T12:13:58.329299+00:00",
-  "completed": 27,
+  "reported_at": "2026-09-12T12:25:02.158920+00:00",
+  "completed": 31,
   "planned": 56,
   "pending": [
-    "CM4AI_v7_rep2_r20_rating1",
-    "CM4AI_v7_rep3_r10_rating1",
-    "CM4AI_v7_rep3_r20_rating1",
-    "CM4AI_v8_rep1_r10_rating1",
     "CM4AI_v8_rep1_r20_rating1",
     "CM4AI_v8_rep2_r10_rating1",
     "CM4AI_v8_rep2_r20_rating1",
@@ -240,38 +236,48 @@
       "project": "CM4AI",
       "cohort": "v7",
       "rubric": "rubric10-semantic",
-      "records": 2,
+      "records": 3,
       "expected_records": 3,
       "adjusted_percentages": [
         91.5,
-        91.5
+        91.5,
+        89.4
       ],
       "fixed_percentages": [
         86.0,
-        86.0
+        86.0,
+        84.0
       ]
     },
     {
       "project": "CM4AI",
       "cohort": "v7",
       "rubric": "rubric20-semantic",
-      "records": 1,
+      "records": 3,
       "expected_records": 3,
       "adjusted_percentages": [
-        80.8
+        80.8,
+        88.5,
+        86.4
       ],
       "fixed_percentages": [
-        71.6
+        71.6,
+        78.4,
+        86.4
       ]
     },
     {
       "project": "CM4AI",
       "cohort": "v8",
       "rubric": "rubric10-semantic",
-      "records": 0,
+      "records": 1,
       "expected_records": 3,
-      "adjusted_percentages": [],
-      "fixed_percentages": []
+      "adjusted_percentages": [
+        82.98
+      ],
+      "fixed_percentages": [
+        78.0
+      ]
     },
     {
       "project": "CM4AI",

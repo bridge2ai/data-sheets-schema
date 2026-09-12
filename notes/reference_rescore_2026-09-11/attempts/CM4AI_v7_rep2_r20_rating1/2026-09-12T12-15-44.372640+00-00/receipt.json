@@ -1,0 +1,159 @@
+{
+  "job_id": "CM4AI_v7_rep2_r20_rating1",
+  "started_at": "2026-09-12T12:15:44.372999+00:00",
+  "status": "passed",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "user_prompt_sha256": "a78a2344261ea6b0171e4fad6744ec97775f3502d7e92369d6a7c52ecff9af73",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "af41bfae4fd0cea107b3468ad46e9a1a1599e297bfa5dd92739c48e6008f30b1",
+  "evaluation_sha256": "1d436cca091b8bcd54f29a81d46a3273a5b3400fe83dae89175207f968299fc5",
+  "cli_result": {
+    "duration_api_ms": 435187,
+    "stop_reason": "end_turn",
+    "session_id": "33bebce7-b4de-4144-9c30-73bbe806b73e",
+    "total_cost_usd": 1.9190405,
+    "usage": {
+      "input_tokens": 14,
+      "cache_creation_input_tokens": 80157,
+      "cache_read_input_tokens": 406213,
+      "output_tokens": 35813,
+      "output_tokens_details": {
+        "thinking_tokens": 7875
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 80157,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1290,
+          "cache_read_input_tokens": 99545,
+          "cache_creation_input_tokens": 258,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 258
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 18874,
+        "outputTokens": 19,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.018969,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 14,
+        "outputTokens": 35813,
+        "cacheReadInputTokens": 406213,
+        "cacheCreationInputTokens": 80157,
+        "webSearchRequests": 0,
+        "costUSD": 1.9000715000000001,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 7875,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01VESDWPzPThCmSuuMTXCFin",
+        "tool_input": {
+          "command": "ls /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-freenlc8; echo \"---\"; find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "List working dir and locate agent definition file"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 8,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (`VALID output_evaluation.json: rubric20-semantic`, exit 0).\n\n## Definition check\n\nThe \"Reproducibility\" section is present in my instructions, and its sentence reads, verbatim:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nThis matches the current instrument, so I proceeded. Recorded `instrument_sha256` = `9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3`, `instrument_kind` = `agent_definition`.\n\n## Result \u2014 CM4AI, claudecode_agent, rep2\n\n**69 points.** Fixed base 69/88 = **78.4%**; N/A-adjusted base 69/78 = **88.5%**; excluded items **Q8 and Q15** (10 points).\n\n| Category | Score | Max |\n|---|---|---|\n| Structural Completeness (Q1\u20135) | 18 | 21 |\n| Metadata Quality & Content (Q6\u201310) | 14 | 21 (16 adjusted) |\n| Technical Documentation (Q11\u201315) | 18 | 25 (20 adjusted) |\n| FAIRness & Accessibility (Q16\u201320) | 19 | 21 |\n\n**Applicability.** The four trigger conditions were resolved before scoring. The human-subjects condition fails on Q1\u2013Q3/Q12 evidence only \u2014 `description` names cell lines, the 29 keywords are assay/cell-line/AI terms, `collection_mechanisms` lists instruments and a pipetting robot, corroborated by `direct_collection.is_direct=false` \u2014 so Q8 and Q15 are `applicable:false`, `score:null`, reported not scored. Critically, Q8 and Q15 both have substantial content in their *own* fields (ethical reviews, deidentification, governance; subpopulations with donor demographics), which the anti-circular rule forbids using as the trigger. Sharing, software-output, and collection+sharing conditions all pass, so Q10/Q11/Q12/Q13/Q17 are scored.\n\n**Two failed consistency checks drove scoring.** Version numbering is non-monotonic \u2014 this June 2026 release is `2.0` while `version_access` records the earlier June 2025 and October 2025 releases as `2.1`; flagged rather than scored down under Q13, since `related_datasets` states supersession unambiguously and this reflects per-deposit Dataverse versioning. Second, `confidential_elements_present: true` (embargoed Perturb-seq depositions) sits alongside an absent `confidentiality_level` and a license that signals unrestricted reuse \u2014 this held Q9 at 4 and also cost Q1 one of its four missing fields.\n\n**Correctness validation was clean**: DOI prefix 10.18130 is UVA Dataverse and matches both the landing page and the ROR publisher; all three NIH awards are well formed including the `-01S2` supplement on core project OT2OD032742; RRIDs correctly use the Cellosaurus `CVCL_` namespace; temporal ordering holds. The record's `source_caveats` discipline \u2014 attributing conflicting cross-release figures, disclosing a disputed affiliation, refusing to convert rounded sizes into false byte counts \u2014 is a genuine quality signal noted in the insights.\n\nThe adjusted percentage is not comparable to an evaluation with different excluded items; both bases and the excluded IDs (8, 15) are recorded in the output. Temperature is `null` \u2014 this CLI does not expose it \u2014 and the runtime model `claude-opus-5[1m]` is recorded as both `name` and `evaluator_model`.",
+    "ttft_ms": 1559,
+    "type": "result",
+    "duration_ms": 437180,
+    "uuid": "2e67b6ff-6a66-4050-9461-4c768995ec28",
+    "ttft_stream_ms": 925,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 925,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T12:23:02.870330+00:00"
+}
