@@ -1,0 +1,140 @@
+{
+  "job_id": "CM4AI_v7_rep2_r20_rating1",
+  "started_at": "2026-09-12T23:21:52.389530+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "559bc77d6d0f531c4f37f84e6616c0b4072784e827d30ec3131d0a2e8ea0f680",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "af41bfae4fd0cea107b3468ad46e9a1a1599e297bfa5dd92739c48e6008f30b1",
+  "evaluation_sha256": "b0e22af2feab2fff686eea1bc702e62cf184b101c418930e72536bc5a91286e1",
+  "cli_result": {
+    "duration_api_ms": 555286,
+    "stop_reason": "end_turn",
+    "session_id": "e5d6f87c-3567-4417-aa2b-528ab35412d8",
+    "total_cost_usd": 2.24578425,
+    "usage": {
+      "input_tokens": 312,
+      "cache_creation_input_tokens": 110848,
+      "cache_read_input_tokens": 531791,
+      "output_tokens": 45048,
+      "output_tokens_details": {
+        "thinking_tokens": 16385
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 110848
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 314,
+        "outputTokens": 45076,
+        "cacheReadInputTokens": 531791,
+        "cacheCreationInputTokens": 136227,
+        "webSearchRequests": 0,
+        "costUSD": 2.24578425,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 16385,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01WLcAcs5bEvy2Scjckqppqc",
+        "tool_input": {
+          "command": "ls /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-3xslqzgh; echo \"---\"; find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01YBwA1vMgUfRFzuXjKK5r9P",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-3xslqzgh/input/record.yaml /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-3xslqzgh/data/rubric/*",
+          "description": "Compute hashes of record and rubric"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_012VYNgwzY4KMvuyRGMHZMS1",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; pwd; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get UTC timestamp, working directory, and a UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0). Evaluation complete.\n\n## Definition check\n\nThe Reproducibility section of my definition contains this sentence, quoted verbatim:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nThis is consistent with the current instrument, so I proceeded. Recorded `instrument_sha256` as `9d08b5f3\u20260e7dd3` with `instrument_kind: agent_definition`.\n\n## Result \u2014 CM4AI, claudecode_agent, rep2\n\n**64 points.** Fixed base 64/88 = **72.7%**; N/A-adjusted base 64/78 = **82.1%**, excluding **Q8 and Q15** (5 max points each).\n\n| Category | Score |\n|---|---|\n| Structural Completeness | 17/21 |\n| Metadata Quality & Content | 14/21 (Q8 excluded) |\n| Technical Documentation | 16/25 (Q15 excluded) |\n| FAIRness & Accessibility | 17/21 |\n\n**Applicability.** All four gates were resolved before scoring, from fields outside each gated question. The human-subjects condition fails: `description` describes interrogation of two human *cell lines*, `keywords` carry only assay/cell-line/compound terms, and `collection_mechanisms` describes mass spectrometers, confocal microscopy and a pipetting robot applied to cell culture \u2014 no recruitment. Q8 and Q15 are therefore `applicable: false, score: null`, reported but not scored. The exclusion is non-circular: it would hold even if every Q8/Q15 field were blank, and it is corroborated by `direct_collection.is_direct: false`. The other three gates all pass, so Q10, Q11, Q12, Q13 and Q17 are scored.\n\n**Semantic findings that moved scores** (21 checks passed, 2 failed, 5 warnings):\n\n- **Q13 5\u21924**: the version sequence is non-monotonic \u2014 this June 2026 release is `version: \"2.0\"` while the June 2025 and October 2025 releases it supersedes are both recorded as v2.1. That is a defect in exactly what Q13 measures.\n- **Q11 4\u21923**: every documented preprocessing strategy (node2vec, DenseNet-121, HiDeF, GSAI) describes cell-map construction, but the record states cell maps are *not in this release*; the processing actually applied to the shipped artifacts is undocumented.\n- **Q20 \u2192 3**: BiasTypeEnum terms are used correctly, but measurement bias is absent across four measurement modalities, and there is no fairness analysis or AIO mapping.\n- Also flagged medium: Perturb-seq archives are distributed at 30.2 KB / 73.3 KB while the corresponding depositions are declared embargoed \u2014 implausible sizes for the data they name, unexplained.\n\nValidated correct: DOI prefix 10.18130 \u2194 page \u2194 ROR publisher all agree; all three NIH grant numbers parse against NIH conventions with correct OT2/OD and U54/HG pairings; Cellosaurus RRIDs well formed; temporal ordering coherent. The record's disciplined `source_caveats` \u2014 refusing to attribute project-level portal figures or the Nature U2OS results to this release \u2014 is recorded as a positive insight.\n\nOutput written to `output_evaluation.json`; only that file was read back for validation.",
+    "ttft_ms": 3436,
+    "type": "result",
+    "duration_ms": 557520,
+    "uuid": "712eff88-0721-432e-9268-6ae92e106632",
+    "ttft_stream_ms": 2460,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 2460,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_016FHhaXRttu8gWjZdqUoSqY",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-12T23:31:10.724547+00:00"
+}

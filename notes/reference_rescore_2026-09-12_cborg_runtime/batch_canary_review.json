@@ -1,31 +1,29 @@
 {
-  "reviewed_at": "2026-09-12T22:35:43.147683+00:00",
-  "verdict": "approved",
-  "registration_sha256": "724f07cfec5aa26b33ed9f9d42542d383fabfc285a576a617992ce4c514e9cfd",
-  "job_id": "CHORUS_v8_rep1_r10_rating1",
-  "evaluation_sha256": "84d194e0e212bbd212b089480a77d9c86f260545d7b7d419e77ecafbed7ff06e",
-  "original_attempt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep1_r10_rating1/2026-09-12T22-22-17.411486+00-00",
+  "reviewed_at": "2026-09-12T23:37:57.717389+00:00",
+  "verdict": "pending_independent_review",
+  "registration_sha256": "b0a02133382c51cd8ebaa480917bd1c8920f3c7cfece11deea0392c6d9f0cbad",
+  "job_id": "CM4AI_v7_rep2_r20_rating1",
+  "evaluation_sha256": "b0e22af2feab2fff686eea1bc702e62cf184b101c418930e72536bc5a91286e1",
+  "original_attempt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T23-21-52.389234+00-00",
   "runtime_model": "claude-opus-5",
-  "review": "notes/reference_rescore_2026-09-12_cborg_runtime/deadline_pilot_review.md",
-  "review_sha256": "a28314399ce8e23592886354aa2ced52dbb45d91998e8bce8e0d580b249b7f92",
+  "review": "notes/reference_rescore_2026-09-12_cborg_runtime/validation_wrapper_pilot_review.md",
+  "review_sha256": "0401f30ce3b2d416e03f0f46b06a8be7c28e3409e3d9d6bdc534409dae2f067c",
   "score": {
-    "total_points": 34,
-    "max_points": 50,
-    "excluded_max_points": 0,
-    "adjusted_max_points": 50,
-    "normalized_percentage": 68.0,
-    "fixed_percentage": 68.0,
-    "sub_elements_not_applicable": 0,
-    "denominator_note": "normalized_percentage = 34/50 x 100 (adjusted basis, no exclusions); fixed_percentage = 34/50 x 100 (fixed basis). All five conditional gates resolved as satisfied: the datasets-shared condition is met (distribution_formats populated with five modality formats plus documented controlled-access route), the human-subjects condition is met (description and keywords describe hospital admissions of critically ill patients), the governance condition is met (regulatory_restrictions states applying constraints), the data-collection condition is met (acquisition_methods and collection_mechanisms populated), and the software-output condition is met (external_resources references the chorus-ai code repository organization). No sub-element is excluded, so the two bases coincide.",
-    "excluded_item_ids": []
+    "total_points": 64,
+    "max_points": 88,
+    "excluded_max_points": 10,
+    "adjusted_max_points": 78,
+    "normalized_percentage": 82.1,
+    "fixed_percentage": 72.7,
+    "questions_not_applicable": 2
   },
-  "original_successful_writes": 1,
-  "original_write_bytes": 101046,
-  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
   "check_echo_verified": true,
-  "source_aligned_item_identities": 50,
+  "original_successful_writes": 1,
+  "original_write_bytes": 73285,
+  "question_rationales_inspected": 20,
   "deadline_execution": {
-    "started_at": "2026-09-12T22:22:17.416172+00:00",
+    "started_at": "2026-09-12T23:21:52.393390+00:00",
     "extension": {
       "path": "scripts/reference_rescore_cborg_deadline.py",
       "sha256": "78afd486203eee78d18f479304a2dc7ca98425947beb5956d3c9538066b24dd2",
@@ -35,14 +33,44 @@
     "timeout_seconds": 1800,
     "timed_out": false,
     "returncode": 0,
-    "completed_at": "2026-09-12T22:32:08.173358+00:00"
+    "completed_at": "2026-09-12T23:31:10.128655+00:00"
   },
-  "cli_reported_cost_usd": 2.5445979999999997,
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_016FHhaXRttu8gWjZdqUoSqY",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "cli_reported_cost_usd": 2.24578425,
   "narrative_qualification": {
-    "path": "notes/reference_rescore_2026-09-12_cborg_runtime/canary_narrative_qualification.json",
-    "sha256": "ed889f3d8cfadcd8bdffe4323cb86b78bae4c0c504bda4f11388365c1a0b4118",
-    "issue": 1352
+    "path": "notes/reference_rescore_2026-09-12_cborg_runtime/cm4ai_pilot_narrative_qualification_1355.json",
+    "sha256": "67ebddb055797f5b50303f6681b7936a44d5dd2037972bb6e8762e3b68dac895",
+    "issue": 1355
   },
-  "remaining_jobs_permitted": 38,
-  "limits": "Mechanical acceptance does not adjudicate every semantic judgment. Retry finished before900seconds; longer-deadline necessity and workload capacity are not established by this one session. Two original interruption costs remain unknown."
+  "q19_inspection": {
+    "status": "requires_adjudication",
+    "assessment": "Q19 records 4/5 while crediting reconstructable textual entities, activities and laboratory agents, then withholds 5 because the graph is not explicitly expressed and collections lack was_generated_by. Its broader statement that acquisition-to-archive mapping is unavailable except through filenames overlooks file_collections.description: the IF archives explicitly name assay, cell line, treatment, lab and institution, and SEC-MS/AP-MS descriptions identify their assays and source material. These observations support a representation/field-placement flag under the frozen text-or-graph rule. The input does not necessarily provide all processing-run or raw-accession detail, so complete lineage and a replacement 5 are not certified. The additional non-monotonic-version objection overlooks the explicit separate-deposit/internal-version scope in version_access.version_details; that scoring qualification is separately recorded under issue 1355. Preserve and qualify the original Q19 and containing total.",
+    "evaluation_sha256": "b0e22af2feab2fff686eea1bc702e62cf184b101c418930e72536bc5a91286e1",
+    "input_sha256": "af41bfae4fd0cea107b3468ad46e9a1a1599e297bfa5dd92739c48e6008f30b1",
+    "q19": {
+      "id": 19,
+      "name": "Data Integrity, Provenance Graph, and Quality",
+      "applicable": true,
+      "applicability_status": "always_applicable",
+      "applicability_evidence": "",
+      "description": "Presence of version access, errata, update plans, source derivation, parent dataset linkages, missing data documentation, data split indicators, and provenance graph representation.",
+      "score_type": "numeric",
+      "score": 4,
+      "max_score": 5,
+      "score_label": "Well beyond version history, with a declared provenance graph, short of an explicit graph in the record",
+      "evidence": "was_derived_from: 'Multimodal experimental interrogation of the MDA-MB-468 breast cancer cell line and the KOLF2.1J induced pluripotent stem cell line and their differentiated derivatives, by AP-MS, SEC-MS, CRISPRi Perturb-seq, and immunofluorescence confocal microscopy.' Provenance packaging declared twice: description states 'CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework', and cm4ai_release_metadata.zip is described as 'comprising RO-Crate metadata and provenance graphs', with conforms_to 'RO-Crate' and conforms_to_standard [RO_CRATE]; distribution_formats notes that earlier releases 'exposed RO-Crate metadata as individual ro-crate-metadata.json files and HTML provenance graph renderings'; notes records FAIRSCAPE ARK persistent identifiers. raw_data_sources: four entries with source_type and destination repositories. version_access and updates as cited in Q13. related_datasets supplies release lineage by DOI. Per-file MD5 checksums on all ten archives. Absent: errata, parent_datasets, missing_data_documentation, splits / is_data_split.",
+      "quality_note": "Clearly exceeds the 3 band, which is version history alone: a provenance-graph artifact is declared and shipped as a release component, and the textual lineage supplies the three PROV roles in reconstructable form \u2014 entities (checksummed, DOI-addressed file collections), activities (four acquisition_methods and five preprocessing_strategies) and agents (named labs in data_collectors, 38 ORCID-identified creators, four maintainers). Integrity is independently supported by MD5 checksums.",
+      "semantic_analysis": "Held to 4 because the graph is asserted rather than expressed here. The record never wires specific activities to specific outputs \u2014 no collection carries a was_generated_by, and a reader cannot tell from this datasheet which acquisition produced which of the ten archives, even though the filenames imply it. Three quality slots are also empty: missing_data_documentation is absent although known_limitations concedes incompletely overlapping protein sets across modalities, and no data-split indicators are given for a dataset explicitly intended for model training. Version-history provenance is itself degraded by the non-monotonic version sequence flagged at Q13."
+    }
+  },
+  "remaining_jobs_permitted_after_independent_review_and_acceptance": 25,
+  "limits": "Retain a mechanically valid model measurement with explicit semantic qualifications. No replacement scores, underlying-weight verification or exhaustive source-fact certification. Two original timeout costs remain unknown."
 }

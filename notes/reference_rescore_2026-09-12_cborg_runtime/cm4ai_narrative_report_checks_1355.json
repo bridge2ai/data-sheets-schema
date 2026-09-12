@@ -1,0 +1,12 @@
+{
+  "verified_at": "2026-09-12T23:36:59.379611+00:00",
+  "issue": 1355,
+  "checks_passed": 12,
+  "source_sha256": "93c90475a3448144e708d35da93f0af0343d0ea697477fb287ba10d29c51e4ee",
+  "python39_syntax": "passed",
+  "existing_chorus_qualification_sha256": "ed889f3d8cfadcd8bdffe4323cb86b78bae4c0c504bda4f11388365c1a0b4118",
+  "new_qualification_sha256": "67ebddb055797f5b50303f6681b7936a44d5dd2037972bb6e8762e3b68dac895",
+  "provider_calls": 0,
+  "original_scores_changed": 0,
+  "checks": "Both real qualifications bind their original bytes; altered output/input quotes, input/output hashes, score, operator-change count, empty statements/cases, wrong manifest and wrong job rejected."
+}

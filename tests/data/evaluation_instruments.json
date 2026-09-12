@@ -1873,6 +1873,11 @@
      "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
      "instrument_commit": "59db6d0f"
     },
+    "reference_2026-09-12_cborg_runtime/CM4AI_v7_rep2_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
     "reference_2026-09-12_cborg_runtime/CM4AI_v7_rep3_r20_rating1_evaluation.json": {
      "basis": "recorded",
      "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",

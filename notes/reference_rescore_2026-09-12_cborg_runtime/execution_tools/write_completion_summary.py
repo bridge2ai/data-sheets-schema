@@ -71,6 +71,43 @@ def timestamp_qualification(r, manifest, writes, inventory):
                 "does not establish fabrication; approximations and timezone errors can also cause it.")}
 
 
+def read_narrative_qualification(r, manifest_sha, jobs, path):
+    import yaml
+
+    narrative = json.loads(path.read_bytes())
+    if narrative["manifest_sha256"] != manifest_sha or not narrative["cases"]:
+        raise ValueError("narrative qualification identifies another condition or has no cases")
+    for case in narrative["cases"]:
+        job = jobs[case["job_id"]]
+        if (case["output"] != job["output"] or case["input"] != job["input"]
+                or case["evaluation_sha256"] != r.digest(ROOT / job["output"])
+                or case["input_sha256"] != r.digest(ROOT / job["input"])):
+            raise ValueError("narrative qualification lacks matching source bytes")
+        original = json.loads((ROOT / job["output"]).read_bytes())
+        if (case["original_score_preserved"] != original["overall_score"]
+                or case["operator_score_changes"] != 0 or not case["statements"]):
+            raise ValueError("narrative qualification does not preserve the original score or statements")
+        for statement in case["statements"]:
+            value = original
+            for key in statement["pointer"]:
+                value = value[key]
+            if value != statement["original"]:
+                raise ValueError("narrative qualification does not quote the original statement")
+        if case.get("input_evidence"):
+            source = yaml.safe_load((ROOT / job["input"]).read_bytes())
+            for evidence in case["input_evidence"]:
+                value = source
+                for key in evidence["pointer"]:
+                    value = value[key]
+                if value != evidence["original"]:
+                    raise ValueError("narrative qualification does not quote the original input")
+    summary = {"source": path.name, "source_sha256": r.digest(path),
+               "scope": narrative["scope"], "qualification": narrative["qualification"],
+               "issue": narrative.get("issue"),
+               "affected_job_ids": [case["job_id"] for case in narrative["cases"]]}
+    return narrative, summary
+
+
 def main():
     if batch.PLAN != Path(__file__).resolve().parents[1]:
         raise ValueError("This dated helper requires its own registered condition; use the current condition helper or check out the recorded revision.")
@@ -130,27 +167,11 @@ def main():
     deadline_boundary = audit["execution_deadline_boundary"]
     if r.digest(ROOT / deadline_boundary["registration"]) != deadline_boundary["registration_sha256"]:
         raise ValueError("deadline-boundary registration changed after the audit")
-    narrative_path = plan / "canary_narrative_qualification.json"
-    narrative = json.loads(narrative_path.read_bytes())
-    if narrative["manifest_sha256"] != audit["manifest_sha256"]:
-        raise ValueError("narrative qualification identifies another condition")
     all_jobs = {j["id"]: j for j in manifest["jobs"]}
-    for case in narrative["cases"]:
-        job = all_jobs[case["job_id"]]
-        if (case["output"] != job["output"] or case["input"] != job["input"]
-                or case["evaluation_sha256"] != r.digest(ROOT / job["output"])
-                or case["input_sha256"] != r.digest(ROOT / job["input"])):
-            raise ValueError("narrative qualification lacks matching source bytes")
-        original = json.loads((ROOT / job["output"]).read_bytes())
-        for statement in case["statements"]:
-            value = original
-            for key in statement["pointer"]:
-                value = value[key]
-            if value != statement["original"]:
-                raise ValueError("narrative qualification does not quote the original statement")
-    narrative_qualification = {"source": narrative_path.name, "source_sha256": r.digest(narrative_path),
-                               "scope": narrative["scope"], "qualification": narrative["qualification"],
-                               "issue": narrative.get("issue")}
+    narrative, narrative_qualification = read_narrative_qualification(
+        r, audit["manifest_sha256"], all_jobs, plan / "canary_narrative_qualification.json")
+    cm4ai_narrative, cm4ai_qualification = read_narrative_qualification(
+        r, audit["manifest_sha256"], all_jobs, plan / "cm4ai_pilot_narrative_qualification_1355.json")
     banner = ("**Semantic inspection — Q19:** " + review["qualification"]
               + " See the [24-rating inspection](semantic_review.md).\n\n"
               + "**Execution boundary:** " + execution["qualification"]
@@ -161,6 +182,8 @@ def main():
               + "**Incomplete cost accounting:** " + audit["cost_qualification"] + "\n\n"
               + "**Evaluation prose:** " + narrative["qualification"]
               + " See [the original statements and interpretation](canary_narrative_qualification.json).\n\n"
+              + "**CM4AI pilot judgments:** " + cm4ai_narrative["qualification"]
+              + " See [the original statements and input evidence](cm4ai_pilot_narrative_qualification_1355.json).\n\n"
               + "**Evaluation timing:** " + timing["qualification"] + "\n\n")
     reports = [plan / name for name in ("results.json", "results.md", "completion_summary.md", "semantic_review.md")]
     before = {path: path.read_bytes() if path.exists() else None for path in reports}
@@ -174,6 +197,7 @@ def main():
         results["execution_permission_boundary"] = execution
         results["execution_deadline_boundary"] = deadline_boundary
         results["evaluation_narrative_qualification"] = narrative_qualification
+        results["additional_evaluation_narrative_qualifications"] = [cm4ai_qualification]
         results["evaluation_timestamp_qualification"] = timing
         results["cost_accounting"] = {key: audit[key] for key in (
             "cost_accounting_complete", "cli_reported_total_cost_usd", "known_terminal_cli_cost_usd",
