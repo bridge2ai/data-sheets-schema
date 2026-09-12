@@ -2613,3 +2613,8 @@ The user requested the 56-rating v7/v8 rescore through CBORG and separately auth
 ### CBORG Write-tool correction, before a fresh canary (2026-09-12; #1340)
 
 The first CBORG evaluator session completed but did not create an output: bare mode had removed the required Write tool. Its $2.433457 of CLI-reported usage and full failed trace remain recorded. A zero-inference local HTTP probe reproduced the missing tool and verified its restoration without bare mode. The new transport registration preserves all scoring prompts and instrument/input bytes, uses an isolated CLI configuration with explicit CBORG credentials, and requires the runtime tool/auth/version evidence. Only one fresh canary is permitted until reviewed; no prior score or failed payload is promoted. See the [dated registration](reference_rescore_2026-09-12_cborg/write_tool_fix_registration.json).
+
+
+### One v9 generation canary passed (2026-09-12)
+
+The CHORUS generic-v9 canary finished through CBORG at 18:26 UTC and passed all 13 registered gates. One bounded repair corrected five validation findings and the report was regenerated afterward. All eight chunks were reviewed, 125 of125 snippets verified, and115 of129 receiptable leaves have a receipt. The one no-token-overlap snippet and two single-leaf entry receipts remain reported; a source spot-check found no new contradiction in those cases. The full/core records, report, provenance, usage, receipts and phase snapshots are retained, with hashes and limits in [the canary review](cborg_canaries_2026-09-12/v9_canary_review.md). This completes the authorized single generation canary, with no download or v9 cohort expansion.

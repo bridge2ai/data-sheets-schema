@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "identity": {
+    "project": "CHORUS",
+    "label": "2026-09-12_claude-opus-5-api-generic-v9_rep1",
+    "method": "claudecode_api",
+    "condition": "generic_v9"
+  },
+  "generation_id": "68ab1dda25534e05a0cff67509a70ded",
+  "prior_generation_ids": [],
+  "accept_legacy": true,
+  "rows": [
+    {
+      "usage_id": "06b59665882441978b60743d10643f98",
+      "phase": "full",
+      "attempt": 1,
+      "started_at": "2026-09-12T18:10:46+00:00",
+      "seconds": 501.687,
+      "input_tokens": 9636,
+      "output_tokens": 46182,
+      "thinking_tokens": 32453,
+      "cache_read": 0,
+      "cache_write": 31703,
+      "max_tokens": 128000,
+      "stop_reason": "end_turn"
+    },
+    {
+      "usage_id": "eb9acfa8bf9a4ee1b4c89539ae340f70",
+      "phase": "audit",
+      "attempt": 1,
+      "started_at": "2026-09-12T18:19:11+00:00",
+      "seconds": 63.921,
+      "input_tokens": 17814,
+      "output_tokens": 4348,
+      "thinking_tokens": 0,
+      "cache_read": 0,
+      "cache_write": 31703,
+      "max_tokens": 24000,
+      "stop_reason": "end_turn"
+    },
+    {
+      "usage_id": "bf01cbcde48d48cba51bd1747a7f5b68",
+      "phase": "reconcile_full",
+      "attempt": 1,
+      "started_at": "2026-09-12T18:20:15+00:00",
+      "seconds": 118.996,
+      "input_tokens": 22057,
+      "output_tokens": 11573,
+      "thinking_tokens": 3502,
+      "cache_read": 31703,
+      "cache_write": 0,
+      "max_tokens": 96000,
+      "stop_reason": "end_turn"
+    },
+    {
+      "usage_id": "9b257817410a4685adc8ea5796883319",
+      "phase": "report",
+      "attempt": 1,
+      "started_at": "2026-09-12T18:22:14+00:00",
+      "seconds": 62.671,
+      "input_tokens": 44534,
+      "output_tokens": 5014,
+      "thinking_tokens": 0,
+      "cache_read": 31703,
+      "cache_write": 0,
+      "max_tokens": 24000,
+      "stop_reason": "end_turn"
+    },
+    {
+      "usage_id": "1b47d1197f1c400d92f60fd7103915ed",
+      "phase": "repair_full",
+      "attempt": 1,
+      "started_at": "2026-09-12T18:23:25+00:00",
+      "seconds": 75.002,
+      "input_tokens": 8914,
+      "output_tokens": 8198,
+      "thinking_tokens": 85,
+      "cache_read": 0,
+      "cache_write": 17406,
+      "max_tokens": 96000,
+      "stop_reason": "end_turn"
+    },
+    {
+      "usage_id": "b96a5daf16384b439dbb651b99219a9a",
+      "phase": "report_after_repair",
+      "attempt": 1,
+      "started_at": "2026-09-12T18:24:51+00:00",
+      "seconds": 67.619,
+      "input_tokens": 44563,
+      "output_tokens": 5401,
+      "thinking_tokens": 0,
+      "max_tokens": 24000,
+      "cache_read": 31703,
+      "cache_write": 0,
+      "stop_reason": "end_turn"
+    }
+  ]
+}
