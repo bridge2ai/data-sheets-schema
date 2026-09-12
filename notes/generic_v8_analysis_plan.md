@@ -2414,3 +2414,25 @@ model call was made during this amendment. Its quoted definition remains
 There are still 1/56 accepted ratings; the next execution must freshly retry
 AI_READI before continuing the remaining registered ratings. No generation or
 download occurred.
+
+### Reference model provenance amendment (2026-09-12; #1314, #1316)
+
+The fill paused at ten accepted ratings when a valid AI_READI v8 rep1 rubric10
+candidate declared its evaluator model in metadata. The reviewed runner now
+attests either supported location and revalidates retained ratings offline.
+The Codex follow-up approved commit
+`6edf543f5eede63d984126760d46f6356c9f1d7d`; 117 focused tests passed.
+
+Manifest SHA256
+`5e57093644d0a3485a9d1229a2087c8a5472578b33346213f4df6618686aa4e9`
+registers the runner-only amendment. Complete prompts, rubric definitions,
+schemas, all 24 existing records, the 56-rating design, execution settings and
+202 prior evaluations are unchanged. The original CHORUS canary was revalidated
+offline and separately accepted. Its evaluator-quoted definition remains
+`66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`.
+The retained AI_READI v8 rep1 rubric10 candidate was recovered without a new
+model call or score edit. The remaining previously accepted ratings on #1313
+must be revalidated under this registration before new calls resume.
+Evidence and hashes are recorded in
+`notes/reference_rescore_2026-09-11/model_provenance_registration.json` and
+`model_provenance_review_2026-09-12.md`. No generation or download occurred.

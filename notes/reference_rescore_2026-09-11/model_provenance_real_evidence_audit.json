@@ -1,0 +1,60 @@
+{
+  "checked_at": "2026-09-12T10:06:18.248603+00:00",
+  "runner_commit": "6edf543f5eede63d984126760d46f6356c9f1d7d",
+  "provisional_only": true,
+  "accepted_outputs_still_validate": [
+    {
+      "job": "CHORUS_v7_rep1_r10_rating1",
+      "sha256": "017f888bdccf12a04b62917e8fa08c39263cf45a5533fb349ca9eb075335199f",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T07-20-00.645660+00-00"
+    },
+    {
+      "job": "AI_READI_v7_rep1_r10_rating1",
+      "sha256": "9c5ba6db5dc1c9d7cc3871609acdae6dfbcb5be19b3542bd7d82cb6d9792909c",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T09-04-18.246187+00-00"
+    },
+    {
+      "job": "AI_READI_v7_rep1_r20_rating1",
+      "sha256": "cd1a539f23afc767b07aa493aa3a9ed7a75f793bbc05122678d9a7a3e4acf02b",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T09-11-58.143131+00-00"
+    },
+    {
+      "job": "AI_READI_v7_rep2_r10_rating1",
+      "sha256": "34744aa1eab9780d8ee2fbf24edc297296b5cb7698730bfbcc33ecade4f0e4eb",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T09-24-36.443700+00-00"
+    },
+    {
+      "job": "AI_READI_v7_rep2_r20_rating1",
+      "sha256": "3a7a90f9a98249fc64f2e4309a15215085c61df451368aeebfd80d2d83a19dad",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T09-24-40.465250+00-00"
+    },
+    {
+      "job": "AI_READI_v7_rep3_r10_rating1",
+      "sha256": "d37718bae2562ee82460ab16dedc05898c2f45f9c0abcc1ba4e27f5ca3552ff5",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T09-24-43.946094+00-00"
+    },
+    {
+      "job": "AI_READI_v7_rep3_r20_rating1",
+      "sha256": "5c0766bc4a54ab1cd017d6a1a5d36804a9c4960dfbc75a6412a1aa607548b868",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T09-24-48.941270+00-00"
+    },
+    {
+      "job": "AI_READI_v8_rep1_r20_rating1",
+      "sha256": "2267a7af9460609b11e6d9302de51e7633e987f9e7cbe3e751edf9e875517029",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r20_rating1/2026-09-12T09-35-01.802029+00-00"
+    },
+    {
+      "job": "AI_READI_v8_rep2_r10_rating1",
+      "sha256": "92dc704df17f482d5f6bd013c4ac6851984a46930c0fbacff2da913363bce3cf",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep2_r10_rating1/2026-09-12T09-35-05.428183+00-00"
+    },
+    {
+      "job": "AI_READI_v8_rep2_r20_rating1",
+      "sha256": "3a50e403ea0cd986e22a9e27254b64ad86a4f12999a001892dc910df929cc540",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep2_r20_rating1/2026-09-12T09-35-09.078994+00-00"
+    }
+  ],
+  "v8_candidate_passes": "a520c48326b07c23b93de15690c9bddf5630e238ff27e883292a9ee4f6afa232",
+  "old_unvalidated_draft_rejection": "evaluator did not successfully validate its exact output",
+  "model_calls": 0
+}
