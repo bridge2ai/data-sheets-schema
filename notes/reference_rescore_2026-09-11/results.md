@@ -1,6 +1,6 @@
 # Reference rescore status — 2026-09-11
 
-Completed 48 of 56 planned evaluations.
+Completed 52 of 56 planned evaluations.
 
 # Semantic comparison: both score bases
 
@@ -58,13 +58,17 @@ Fixed percentages use the full rubric maximum. N/A-adjusted percentages use the 
 | data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v8_rep2_r20_rating1_evaluation.json | VOICE | rubric20-semantic | Fixed: 81/88 (92.0%) | N/A-adjusted: 81/88 (92.0%) | none | claude-opus-5[1m] | 9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3 | 471b950d313466fb15aa64ea6e0bd3741ba1ebfc7a07428dd38a3fda3359dd5e |
 | data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v8_rep3_r10_rating1_evaluation.json | VOICE | rubric10-semantic | Fixed: 48/50 (96.0%) | N/A-adjusted: 48/50 (96.0%) | none | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 8cf8922f7e3037e31c205c54d71926b36a30fa1dec9c6825e823d671dc2d3b15 |
 | data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v8_rep3_r20_rating1_evaluation.json | VOICE | rubric20-semantic | Fixed: 81/88 (92.0%) | N/A-adjusted: 81/88 (92.0%) | none | claude-opus-5[1m] | 9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3 | d5ca09424a25d287a3a0b0c20f2dd54cc8bc4e36e5d79971e8f7c14b3d5bf8b8 |
+| data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v7_rep1_r10_rating2_evaluation.json | AI_READI | rubric10-semantic | Fixed: 49/50 (98.0%) | N/A-adjusted: 49/50 (98.0%) | none | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 6a2dbcd4710221943577b667f8a5ba6009dcdf0f4c2b2347d97822049c92b3f0 |
+| data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v7_rep1_r10_rating3_evaluation.json | AI_READI | rubric10-semantic | Fixed: 49/50 (98.0%) | N/A-adjusted: 49/50 (98.0%) | none | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | a6e8be2bf550cf02f909075f1fb762c31f84e6c99d2dcdd9b922a33426333d7a |
+| data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v7_rep1_r10_rating2_evaluation.json | CHORUS | rubric10-semantic | Fixed: 36/50 (72.0%) | N/A-adjusted: 36/50 (72.0%) | none | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 4880a5cb2b1adb53fed37aecfeb72475efd28a469e43502b34df9bb6a90d40f5 |
+| data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v7_rep1_r10_rating3_evaluation.json | CHORUS | rubric10-semantic | Fixed: 36/50 (72.0%) | N/A-adjusted: 36/50 (72.0%) | none | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 3158093809733a65e17afe4bb2279cb583748a9b97e8296697f2b5e0ba5cf47a |
 
 Rubric10 repeatability uses three independent ratings of one v7 record per project. Percentages and spread are computed from point totals and their denominators, so serialized percentage precision does not create apparent rating variation. Original evaluation files remain unchanged. Sample standard deviations and ranges are descriptive for those records and this exact instrument; they are not population uncertainty bounds. Changed applicability is flagged. Rubric20 repeatability remains unmeasured. Generation replicate spread is a separate quantity. These scores do not authorize canonical selection on small differences.
 
 | Project | Repeated ratings | Fixed percentages | Adjusted percentages | Fixed SD | Adjusted SD | Adjusted range | Stable applicability |
 |---|---|---|---|---|---|---|---|
-| AI_READI | 1/3 | [98.0] | [98.0] | unmeasured | unmeasured | unmeasured | unmeasured |
-| CHORUS | 1/3 | [70.0] | [70.0] | unmeasured | unmeasured | unmeasured | unmeasured |
+| AI_READI | 3/3 | [98.0, 98.0, 98.0] | [98.0, 98.0, 98.0] | 0.0 | 0.0 | 0.0 | True |
+| CHORUS | 3/3 | [70.0, 72.0, 72.0] | [70.0, 72.0, 72.0] | 1.1547005383792515 | 1.1547005383792515 | 2.0 | True |
 | CM4AI | 1/3 | [86.0] | [91.48936170212765] | unmeasured | unmeasured | unmeasured | unmeasured |
 | VOICE | 1/3 | [98.0] | [98.0] | unmeasured | unmeasured | unmeasured | unmeasured |
 
