@@ -20,7 +20,15 @@ def main():
         raise ValueError("This dated helper requires its own registered condition; use the current condition helper or check out the recorded revision.")
     r, manifest, registration = batch.load_registered()
     audit_module.r = r
-    audit = audit_module.audit_results(complete=False)
+    original_inventory = audit_module.inventory_attempts
+    audit_module.inventory_attempts = lambda root, plan, jobs: batch.inventory_with_prelaunch(
+        r, registration, original_inventory, root, plan, jobs)
+    try:
+        audit = audit_module.audit_results(complete=False)
+    finally:
+        audit_module.inventory_attempts = original_inventory
+    prelaunch = [batch.verify_prelaunch_failure(r, ROOT / rel, registration)
+                 for rel in registration.get("prelaunch_failures", {})]
     if (audit["status"] != "verified" or audit["accepted"] != audit["planned"] or audit["planned"] != 56
             or audit["unresolved_attempts"] or not audit["session_accounting_complete"]
             or not audit["cost_accounting_complete"]):
@@ -70,6 +78,8 @@ def main():
             # separately registered repair. Do not erase the controller record.
             audit.setdefault("controller_runs_with_worker_failures", []).append(str(result_path.relative_to(ROOT)))
     preliminary = json.loads((ROOT / "notes/reference_rescore_2026-09-12_cborg/preliminary_audit.json").read_bytes())
+    audit["verified_local_prelaunch_failures"] = prelaunch
+    audit["total_attempts_including_local_preflights"] = audit["actual_model_calls"] + len(prelaunch)
     audit.update({"preliminary_condition": {"path": "notes/reference_rescore_2026-09-12_cborg/preliminary_audit.json", "sessions": preliminary["actual_model_calls"], "accepted_canaries_retained_separately": preliminary["accepted"], "excluded_attempts": preliminary["excluded_original_attempts"], "cli_reported_cost_usd": preliminary["cli_reported_total_cost_usd"]}, "provider": "LBL CBORG", "transport_manifest_sha256": r.digest(r.PLAN / "manifest.json"),
                   "batch_registration_sha256": r.digest(batch.REGISTRATION),
                   "original_successful_write_bindings": len(written),

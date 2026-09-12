@@ -215,3 +215,93 @@ def test_registered_retry_rejects_missing_or_empty_history(tmp_path, monkeypatch
     shutil.rmtree(prior if keep_empty_parent else prior.parent)
     with pytest.raises(ValueError, match="history"):
         batch.pending_jobs(r, manifest, registration, "remaining")
+
+
+@pytest.fixture
+def prelaunch_case(tmp_path, monkeypatch):
+    monkeypatch.setattr(batch, 'ROOT', tmp_path)
+    monkeypatch.setattr(batch, 'PLAN', tmp_path / 'plan')
+    plan = tmp_path / 'plan'
+    source = plan / 'attempts' / 'a' / 'first'
+    source.mkdir(parents=True)
+    (tmp_path / 'scripts').mkdir()
+    (tmp_path / 'scripts/reference_rescore_cborg.py').write_text('reviewed adapter')
+    digest = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+    r = SimpleNamespace(digest=digest, job_prompt=lambda m, j: 'pinned prompt')
+    (plan / 'manifest.json').write_text(json.dumps({'jobs': [{'id': 'a'}]}))
+    (source / 'prompt.txt').write_text('pinned prompt')
+    (source / 'transcript.jsonl').write_bytes(b'')
+    (source / 'stderr.txt').write_text('Traceback: reviewed guard\nValueError: Claude Code version differs from the registered transport\n')
+    receipt = {'job_id': 'a', 'status': 'incomplete', 'exit_code': 1,
+               'manifest_sha256': digest(plan / 'manifest.json'),
+               'user_prompt_sha256': digest(source / 'prompt.txt'),
+               'started_at': '2026-09-12T20:03:10+00:00',
+               'completed_at': '2026-09-12T20:03:11+00:00'}
+    (source / 'receipt.json').write_text(json.dumps(receipt))
+    rel = str(source.relative_to(tmp_path))
+    files = {str(p.relative_to(tmp_path)): digest(p) for p in source.iterdir()}
+    registration = {'prelaunch_failures': {rel: {'reason': 'registered_cli_version_guard_before_execve',
+                    'adapter_sha256': digest(tmp_path / 'scripts/reference_rescore_cborg.py'), 'files': files}},
+                    'reviewed_retries': {'a': {'attempts': {rel: files}}}}
+    return r, source, registration
+
+
+def test_exact_reviewed_prelaunch_failure_allows_one_retry(prelaunch_case):
+    r, source, registration = prelaunch_case
+    batch.verify_reviewed_retry(r, {'id': 'a'}, registration, source.parent)
+    result = batch.verify_prelaunch_failure(r, source, registration)
+    assert result['evaluator_launched'] is False and result['model_calls'] == 0
+    (source.parent / 'another').mkdir()
+    with pytest.raises(ValueError, match='retry history changed'):
+        batch.verify_reviewed_retry(r, {'id': 'a'}, registration, source.parent)
+
+
+@pytest.mark.parametrize('change', ['missing', 'changed', 'extra', 'nonempty_trace', 'passed', 'wrong_error', 'adapter'])
+def test_ambiguous_or_changed_prelaunch_evidence_blocks(prelaunch_case, change):
+    r, source, registration = prelaunch_case
+    if change == 'missing':
+        (source / 'stderr.txt').unlink()
+    elif change == 'changed':
+        (source / 'prompt.txt').write_text('changed')
+    elif change == 'extra':
+        (source / 'candidate.json').write_text('{}')
+    elif change == 'adapter':
+        (batch.ROOT / 'scripts/reference_rescore_cborg.py').write_text('unreviewed control flow')
+    else:
+        if change == 'nonempty_trace':
+            path = source / 'transcript.jsonl'
+            path.write_text('{"type":"system","subtype":"init"}\n')
+        elif change == 'passed':
+            path = source / 'receipt.json'
+            record = json.loads(path.read_bytes()); record['status'] = 'passed'
+            path.write_text(json.dumps(record))
+        else:
+            path = source / 'stderr.txt'
+            path.write_text('Some other failure\n')
+        # Even a newly pinned hash cannot turn a model session or another error
+        # into this narrow pre-launch classification.
+        registration['prelaunch_failures'][str(source.relative_to(batch.ROOT))]['files'][str(path.relative_to(batch.ROOT))] = r.digest(path)
+    with pytest.raises(ValueError):
+        batch.verify_prelaunch_failure(r, source, registration)
+
+
+def test_prelaunch_inventory_preserves_other_unresolved_attempts(prelaunch_case):
+    r, source, registration = prelaunch_case
+    rel = str(source.relative_to(batch.ROOT))
+    other = {'source': 'plan/attempts/a/uncertain', 'reason': 'missing terminal cost'}
+    original = lambda *args: ({}, [{'source': rel, 'reason': 'no terminal cost'}, other])
+    sources, unresolved = batch.inventory_with_prelaunch(r, registration, original, batch.ROOT, batch.PLAN, {'a'})
+    assert sources == {} and unresolved == [other]
+    with pytest.raises(ValueError, match='original failed inventory'):
+        batch.inventory_with_prelaunch(r, registration, lambda *a: ({'a': [source]}, []), batch.ROOT, batch.PLAN, {'a'})
+
+
+def test_cli_binary_mismatch_stops_before_attempt(tmp_path, monkeypatch):
+    binary = tmp_path / 'claude'; binary.write_bytes(b'registered binary')
+    r = SimpleNamespace(digest=lambda p: hashlib.sha256(p.read_bytes()).hexdigest())
+    registration = {'cli_executable_sha256': r.digest(binary)}
+    monkeypatch.setattr(batch.shutil, 'which', lambda _: str(binary))
+    batch.verify_cli_executable(r, registration)
+    binary.write_bytes(b'auto-updated binary')
+    with pytest.raises(ValueError, match='registered CLI executable'):
+        batch.verify_cli_executable(r, registration)

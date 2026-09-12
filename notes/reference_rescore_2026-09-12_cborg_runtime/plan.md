@@ -31,6 +31,8 @@ failure stops new launches and active workers finish. No automatic retry.
 Use the project environment in the same foreground shell for both phases:
 
 ```bash
+export PATH="/private/tmp/d4d-cborg-pinned-bin:$PATH"
+export DISABLE_AUTOUPDATER=1
 python scripts/reference_rescore_cborg_batch.py pilot
 # Inspect the original output; write canary_review.md and batch_canary_review.json.
 python scripts/reference_rescore_cborg.py accept-canary
@@ -53,3 +55,18 @@ erratum remains separate and does not predetermine these results.
 The separate CHORUS v9 generation canary already passed its registered
 gates. No new v9 cohort, additional v9 generation or downloads are part
 of this rescore condition.
+
+## Registered CLI preflight repair (#1345)
+
+The first fresh-condition launch stopped locally because the default CLI
+symlink had advanced to 2.1.270. The frozen adapter rejected it before
+evaluator exec; its four original attempt files and controller result remain
+unchanged. A reviewed, exact-hash classification keeps this local failure
+separate from model-session accounting. It does not fabricate a terminal
+cost record or permit uncertain attempts to be ignored.
+
+The retained 2.1.269 binary is copied to the dedicated path above and pinned
+by SHA256 in the batch registration. The scheduler checks that hash before
+creating an attempt. The scoring manifest, all 56 prompts and both agent
+definitions are unchanged. One separately reviewed retry of the primary
+canary must pass and receive both acceptances before the remaining jobs run.

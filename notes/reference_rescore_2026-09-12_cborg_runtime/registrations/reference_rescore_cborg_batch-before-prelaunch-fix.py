@@ -2,7 +2,7 @@
 """Launch the registered CBORG ratings with a separately reviewed four-worker canary.
 
 This scheduler does not alter the frozen evaluator, prompts or manifest. Its
-pilot is the registered primary canary. Each worker runs the original
+pilot is an already planned repeat rating. Each worker runs the original
 isolated evaluator and retains its original attempt evidence.
 """
 from __future__ import annotations
@@ -16,7 +16,6 @@ import os
 from pathlib import Path
 import selectors
 import signal
-import shutil
 import subprocess
 import sys
 import time
@@ -137,69 +136,7 @@ def verify_reviewed_retry(r, job, registration, attempts):
         if (receipt.get("job_id") != job["id"] or receipt.get("status") != "incomplete"
                 or not receipt.get("completed_at") or not (path / "prompt.txt").is_file()):
             raise ValueError("retry requires a completed, excluded original attempt")
-        if rel in registration.get("prelaunch_failures", {}):
-            verify_prelaunch_failure(r, path, registration)
-        else:
-            audit.terminal_cost(audit.read_trace(path))
-
-
-def verify_prelaunch_failure(r, source, registration):
-    """Recognize only a reviewed, byte-pinned exit before evaluator exec (#1345).
-
-    An empty trace alone never establishes zero calls. The registered adapter
-    must still match the reviewed control flow and the exact version-guard
-    traceback, receipt and prompt must all remain present and unchanged.
-    """
-    from datetime import datetime
-
-    rel = str(source.relative_to(ROOT))
-    entry = registration.get("prelaunch_failures", {}).get(rel)
-    if not entry or entry.get("reason") != "registered_cli_version_guard_before_execve":
-        raise ValueError("missing reviewed pre-launch classification")
-    files = {str(p.relative_to(ROOT)): r.digest(p) for p in source.rglob("*") if p.is_file()}
-    required = {str(source.relative_to(ROOT) / name) for name in
-                ("receipt.json", "stderr.txt", "transcript.jsonl", "prompt.txt")}
-    if set(files) != required or files != entry.get("files"):
-        raise ValueError("pre-launch failure evidence changed or is incomplete")
-    if r.digest(ROOT / "scripts/reference_rescore_cborg.py") != entry.get("adapter_sha256"):
-        raise ValueError("pre-launch control-flow evidence changed")
-    receipt = json.loads((source / "receipt.json").read_bytes())
-    manifest = json.loads((PLAN / "manifest.json").read_bytes())
-    job = next(j for j in manifest["jobs"] if j["id"] == source.parent.name)
-    if (receipt.get("job_id") != job["id"] or receipt.get("status") != "incomplete"
-            or receipt.get("exit_code") != 1
-            or receipt.get("manifest_sha256") != r.digest(PLAN / "manifest.json")
-            or receipt.get("user_prompt_sha256") != r.digest(source / "prompt.txt")
-            or (source / "prompt.txt").read_bytes() != r.job_prompt(manifest, job).encode()
-            or (source / "transcript.jsonl").read_bytes()
-            or not (source / "stderr.txt").read_text().endswith(
-                'ValueError: Claude Code version differs from the registered transport\n')):
-        raise ValueError("evidence does not establish the reviewed pre-launch failure")
-    start = datetime.fromisoformat(receipt["started_at"])
-    end = datetime.fromisoformat(receipt["completed_at"])
-    if not start.tzinfo or not end.tzinfo or end < start:
-        raise ValueError("invalid pre-launch attempt timestamps")
-    return {"source": rel, "job_id": job["id"], "classification": entry["reason"],
-            "evaluator_launched": False, "model_calls": 0,
-            "cost_basis": "No evaluator exec occurred; not an inferred terminal model-cost record."}
-
-
-def inventory_with_prelaunch(r, registration, original_inventory, root, plan, job_ids):
-    """Keep verified local preflights separate from model-session accounting."""
-    sources, unresolved = original_inventory(root, plan, job_ids)
-    verified = {rel: verify_prelaunch_failure(r, ROOT / rel, registration)
-                for rel in registration.get("prelaunch_failures", {})}
-    inventoried = {str(p.relative_to(root)) for group in sources.values() for p in group}
-    if set(verified).intersection(inventoried) or not set(verified).issubset({x["source"] for x in unresolved}):
-        raise ValueError("pre-launch classification does not match the original failed inventory")
-    return sources, [entry for entry in unresolved if entry["source"] not in verified]
-
-
-def verify_cli_executable(r, registration):
-    expected = registration.get("cli_executable_sha256")
-    executable = shutil.which("claude")
-    if expected and (not executable or r.digest(Path(executable)) != expected):
-        raise ValueError("select the registered CLI executable before creating an attempt")
+        audit.terminal_cost(audit.read_trace(path))
 
 
 @contextmanager
@@ -374,7 +311,6 @@ def main(argv=None):
         raise ValueError("worker phase is required")
     if phase == "remaining":
         require_pilot(r, manifest, registration)
-    verify_cli_executable(r, registration)
     c.cborg_environment(dict(os.environ))
     if args.action == "worker":
         job = next(j for j in manifest["jobs"] if j["id"] == args.job)
