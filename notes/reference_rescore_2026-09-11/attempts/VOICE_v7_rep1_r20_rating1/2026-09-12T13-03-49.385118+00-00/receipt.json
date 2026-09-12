@@ -1,0 +1,175 @@
+{
+  "job_id": "VOICE_v7_rep1_r20_rating1",
+  "started_at": "2026-09-12T13:03:49.385473+00:00",
+  "status": "passed",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "user_prompt_sha256": "7ebb5a6c4e3cf855e4e1103db4733425be3e178fd07cd22377b3d5abb7994736",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "7660c4d93ccf05a12ebdd26c6c960e8f5d07455b3088cd3b2e909e95c802d048",
+  "evaluation_sha256": "a6868221ce443c3aa097e416ae55f36e71044e6b668a6c396921e553918c04b1",
+  "cli_result": {
+    "duration_api_ms": 472909,
+    "stop_reason": "end_turn",
+    "session_id": "eac3fd1d-2e9f-4be8-b796-80e44022e3bb",
+    "total_cost_usd": 2.1123735000000003,
+    "usage": {
+      "input_tokens": 18,
+      "cache_creation_input_tokens": 80205,
+      "cache_read_input_tokens": 609749,
+      "output_tokens": 39597,
+      "output_tokens_details": {
+        "thinking_tokens": 11341
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 80205,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1220,
+          "cache_read_input_tokens": 99532,
+          "cache_creation_input_tokens": 319,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 319
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 15349,
+        "outputTokens": 17,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.015434,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 18,
+        "outputTokens": 39597,
+        "cacheReadInputTokens": 609749,
+        "cacheCreationInputTokens": 80205,
+        "webSearchRequests": 0,
+        "costUSD": 2.0969395,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 11341,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_015VoJUWDrnUiBC5uKJ43arq",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-bayxnfoh 2>/dev/null; echo \"---\"; find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01Nvzf3mhSmu4SnqdWLHYN3q",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+          "description": "Validate evaluation output against schema"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01LtfDyNrSUKHW6o21aGQY9t",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+          "description": "Validate evaluation output against schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 11,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed.\n\n## Definition check\n\nThe \"Reproducibility\" section is present in my instructions and reads as expected for the current rules. The sentence beginning \"Repeatability must be\", quoted verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nI proceeded on that basis, recording the supplied sha256 as `instrument_sha256`.\n\n## Result\n\n`output_evaluation.json` written and validated:\n\n```\nVALID output_evaluation.json: rubric20-semantic\n```\n\n**Score: 81 / 88.** No question was excluded, so both bases coincide \u2014 `fixed_percentage` 92.05 (denominator 88) and `normalized_percentage` 92.05 (`adjusted_max_points` 88), with `excluded_max_points` 0 and `questions_not_applicable` 0.\n\n| Category | Score |\n|---|---|\n| Structural Completeness | 18 / 21 |\n| Metadata Quality & Content | 21 / 21 |\n| Technical Documentation | 23 / 25 |\n| FAIRness & Accessibility | 19 / 21 |\n\n**Applicability.** All four gated conditions resolved as met, so every conditional question was scored rather than excluded. Each of Q8, Q10, Q11, Q12, Q13, Q15 and Q17 carries `applicability_evidence` citing fields belonging to *other* questions, per the anti-circular rule \u2014 Q11's software condition, for instance, rests on `external_resources` naming three GitHub repositories, not on its own `preprocessing_strategies`. Q9, Q14, Q18, Q19 and Q20 are marked `always_applicable`.\n\n**Where points were lost.** Q3 (3) \u2014 four generic keywords, none naming the five disease cohorts the description enumerates. Q1 (4) \u2014 12 of 14 fields, `resources` and `parent_datasets` empty. Q11 (4) \u2014 excellent parameters but unpinned tool versions; \"Whisper Large\" names a model size, not a checkpoint. Q15 (4) \u2014 skew acknowledged repeatedly but never quantified. Q19 (4) \u2014 complete lineage in prose, but `was_derived_from` empty, so the central raw-audio\u2192features edge isn't traversable. Q20 (4) \u2014 correct bias typing, no ontology CURIEs, mitigation on one of four.\n\n**Notable semantic findings.** One consistency check failed: `collection_timeframes` states 12 months while its own caveat records a conflicting four-year IRB period, with no dates either way. Twelve issues were recorded overall (23 passed, 1 failed, 6 warnings). Identifier validation was clean throughout \u2014 PhysioNet, Health Data Nexus and Zenodo DOI prefixes each matched their platform, the NIH grant matched the activity-code pattern, and the RRID was correctly scoped to the hosting resource rather than misapplied to the dataset.\n\nTwo judgements are worth flagging as close calls, since both could reasonably fall a point either way. Q8 earned 5 despite `data_protection_impacts` being empty, because the DPIA substance is documented under `regulatory_restrictions` and `participant_privacy`, and the instrument directs scoring on content rather than field presence. Q17 earned 5 despite no `download_url`, because the record explains three times that no file endpoint exists under credentialed access \u2014 a more accurate description of PhysioNet gating than a populated URL would have been.",
+    "ttft_ms": 1491,
+    "type": "result",
+    "duration_ms": 475210,
+    "uuid": "055a1e64-a2eb-4050-9c74-9f370abef63f",
+    "ttft_stream_ms": 805,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 805,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T13:11:46.104733+00:00"
+}

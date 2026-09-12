@@ -1,0 +1,182 @@
+{
+  "job_id": "VOICE_v7_rep2_r10_rating1",
+  "started_at": "2026-09-12T13:03:52.871949+00:00",
+  "status": "passed",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "user_prompt_sha256": "3b6915b1d8eabae976e712882518e7d3e362fa97ca5efa92a7262e812c3b1673",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]",
+    "metadata.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "metadata.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "9b103567b3c018761b67ea065d6e6e7c336b1866ed5d161a36d890566e1e9459",
+  "evaluation_sha256": "28fdd56cf0ab2094c19add4a7c0f3f92abf8ee2fe5fe7e4cbec97f075b9e9da2",
+  "cli_result": {
+    "duration_api_ms": 525397,
+    "stop_reason": "end_turn",
+    "session_id": "372c6131-c902-4dd0-8aa3-eba88fed93e1",
+    "total_cost_usd": 2.266309,
+    "usage": {
+      "input_tokens": 18,
+      "cache_creation_input_tokens": 84001,
+      "cache_read_input_tokens": 631156,
+      "output_tokens": 43727,
+      "output_tokens_details": {
+        "thinking_tokens": 10145
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 84001,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1369,
+          "cache_read_input_tokens": 106399,
+          "cache_creation_input_tokens": 465,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 465
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 17371,
+        "outputTokens": 17,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.017456,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 18,
+        "outputTokens": 43727,
+        "cacheReadInputTokens": 631156,
+        "cacheCreationInputTokens": 84001,
+        "webSearchRequests": 0,
+        "costUSD": 2.248853,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 10145,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01PeVDfFCh4rATLFjDGfmm8q",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml 2>/dev/null; ls .claude/agents/ 2>/dev/null && shasum -a 256 .claude/agents/*.md 2>/dev/null",
+          "description": "Hash input and check agent definitions"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01LgySNLsCwdpU6pTcQeYP5M",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation output against its schema"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_013K6aovxHxB2BSAkGdqVtf5",
+        "tool_input": {
+          "command": "poetry --directory /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-idryp7fd run python /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-idryp7fd/scripts/validate_evaluation_schema.py --file /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-idryp7fd/output_evaluation.json --rubric rubric10-semantic",
+          "description": "Run the schema validator on the output file"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 11,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed: `VALID output_evaluation.json: rubric10-semantic` (exit 0).\n\n## Definition check (repeated as requested)\n\nFrom my instructions, section **\u201cSource rubric and schema paths (#158)\u201d**, verbatim:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis is the current instrument (dedicated `updates.update_details` mapping rather than a top-level `release_notes` slot), consistent with sha256 `66ad6231\u2026e34864`, which is recorded as `metadata.instrument_sha256`.\n\n## Result \u2014 VOICE, claudecode_agent, rep2\n\n**49 / 50** \u2014 `fixed_percentage` 98.0 (denominator 50), `normalized_percentage` 98.0 (adjusted denominator 50). No N/A exclusions: all five trigger conditions resolved as satisfied on evidence outside the gated elements, so `excluded_max_points` = 0 and both bases coincide.\n\n| Element | Score |\n|---|---|\n| 1 Discovery & Identification | 4/5 |\n| 2 Access & Retrieval | 5/5 |\n| 3 Reuse & Interoperability | 5/5 |\n| 4 Ethics & Privacy | 5/5 |\n| 5 Composition & Structure | 5/5 |\n| 6 Provenance & Versioning | 5/5 |\n| 7 Motivation & Funding | 5/5 |\n| 8 Technical Transparency | 5/5 |\n| 9 Limitations Disclosure | 5/5 |\n| 10 Cross-Platform Integration | 5/5 |\n\n**Applicability determinations** (each on another element's fields, per the anti-circular rule): human subjects met on E1 `description` (\u201c833 adult participants\u2026 consented to clinician review\u201d) and E8 `collection_mechanisms`, so all five of Element 4 are scored; governance independently met on E2 (`confidentiality_level: restricted`, Certificate of Confidentiality); datasets-shared met on `distribution_formats` + PhysioNet page + reuse-permitting license; software-output met on E10 `external_resources` repositories, opening E8 sub-element 3; E8 sub-element 4 scored under the #1081 rule on processing evidence, with b2aiprep v3.0.0 / senselab / sparc / ppgs / openSMILE / Praat / torchaudio meeting the transformation threshold rather than the capture or hosting roles.\n\n**The single failure** is E1.3: `keywords` has four generic terms (`health`, `biomarkers`, `bridge2ai`, `voice`) \u2014 below the five-term threshold and naming no method or condition, despite the record documenting 22 acoustic tasks, nine feature families and five disease cohorts.\n\n**Nine issues logged** (2 medium, 7 low), 22 consistency checks passed / 2 failed / 6 warnings. Notable: no `download_url` despite `is_shared: true` (credited on documented platform access instructions, but flagged); `is_tabular` unset for a substantially tabular release; `data_protection_impacts` denying any impact analysis while the record documents ethicist review, irreducible voice re-identification risk and a controlled-access memorandum; and `conforms_to_standard: BIDS` unqualified where `conforms_to` scopes BIDS away from the released Parquet files.\n\n**Correctness validations all clean**: DOI `10.13026/8xbn-nq66` (PhysioNet prefix matching the declared publisher and landing-page path), `OT2OD032720` plus well-formed supplement numbers `3OT2OD032720-01S1/-01S3`, `RRID:SCR_007345`, all URLs plausible, temporal ordering consistent, and participant arithmetic reconciling (306 + 136 + 391 = 833).",
+    "ttft_ms": 4284,
+    "type": "result",
+    "duration_ms": 526105,
+    "uuid": "8caaf61f-e41b-4e6e-867a-073ffb709955",
+    "ttft_stream_ms": 2186,
+    "time_to_request_ms": 18,
+    "first_content_frame_ms": 2715,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T13:12:40.339273+00:00"
+}
