@@ -14,6 +14,32 @@ sys.path[:0] = [str(Path(__file__).resolve().parents[1] / 'src')]
 import reference_rescore as r
 
 
+def read_trace(source: Path) -> list[dict]:
+    events = [json.loads(line) for line in (source / 'transcript.jsonl').read_text().splitlines() if line.strip()]
+    if any(not isinstance(event, dict) for event in events):
+        raise ValueError('stream event is not an object')
+    return events
+
+
+def verify_recovery_source(root: Path, source: Path, record: dict) -> None:
+    original = (root / record['recovered_from']).resolve()
+    if original.parent != source.parent.resolve() or original == source.resolve():
+        raise ValueError('recovery source must be this job\'s original attempt')
+    original_receipt = json.loads((original / 'receipt.json').read_bytes())
+    if (not isinstance(original_receipt, dict)
+            or original_receipt.get('job_id') != source.parent.name
+            or original_receipt.get('status') not in ('passed', 'incomplete')
+            or original_receipt.get('exit_code') != 0
+            or not (original / 'prompt.txt').is_file()):
+        raise ValueError('recovery source is not a completed original evaluator session')
+    for name, key in (('receipt.json', 'original_receipt_sha256'),
+                      ('transcript.jsonl', 'transcript_sha256'),
+                      ('prompt.txt', 'user_prompt_sha256'),
+                      ('candidate.json', 'evaluation_sha256')):
+        if r.digest(original / name) != record.get(key):
+            raise ValueError(f'recovery {name} hash does not match the original evidence')
+
+
 def inventory_attempts(root: Path, plan: Path, job_ids: set[str]) -> tuple[dict, list]:
     """Inventory directories, including ignored/unfinished attempts, before counting."""
     sources, unresolved = {}, []
@@ -28,18 +54,28 @@ def inventory_attempts(root: Path, plan: Path, job_ids: set[str]) -> tuple[dict,
         elif not receipt.is_file():
             reason = 'missing receipt; execution outcome and cost unknown'
         else:
-            record = json.loads(receipt.read_bytes())
-            if record.get('job_id') != job_id:
-                reason = 'receipt job identity does not match its directory'
-            elif (source / 'prompt.txt').is_file():
-                if not (source / 'transcript.jsonl').is_file():
-                    reason = 'missing original transcript'
-                else:
+            try:
+                record = json.loads(receipt.read_bytes())
+                if not isinstance(record, dict) or record.get('job_id') != job_id:
+                    raise ValueError('receipt job identity does not match its directory')
+                if (source / 'prompt.txt').is_file():
+                    read_trace(source)
+                    started = datetime.fromisoformat(record['started_at'])
+                    completed = datetime.fromisoformat(record['completed_at'])
+                    if not started.tzinfo or not completed.tzinfo or completed < started:
+                        raise ValueError('original session timestamps are invalid')
+                    if record.get('status') not in ('passed', 'incomplete'):
+                        raise ValueError('original session status is invalid')
                     sources.setdefault(job_id, []).append(source)
-            elif not (record.get('status') == 'passed'
-                      and record.get('model_calls_during_recovery') == 0
+                elif (record.get('status') == 'passed'
+                      and type(record.get('model_calls_during_recovery')) is int
+                      and record['model_calls_during_recovery'] == 0
                       and isinstance(record.get('recovered_from'), str)):
-                reason = 'missing original prompt or recovery evidence'
+                    verify_recovery_source(root, source, record)
+                else:
+                    raise ValueError('missing original prompt or recovery evidence')
+            except (OSError, ValueError, TypeError, KeyError) as exc:
+                reason = f'invalid attempt evidence ({type(exc).__name__}: {exc}); outcome and cost unresolved'
         if reason:
             unresolved.append({'job_id': job_id, 'source': str(source.relative_to(root)),
                                'reason': reason})
@@ -74,7 +110,7 @@ def audit_results(*, complete: bool = False) -> dict:
             assert p.read_bytes() == r.job_prompt(m, j).encode(), j['id']
             assert r.digest(p) == rec['user_prompt_sha256']
             assert rec['system_prompt_sha256'] == m['instruments'][j['rubric']]['definition_sha256']
-            trace = [json.loads(line) for line in (source / 'transcript.jsonl').read_text().splitlines() if line.strip()]
+            trace = read_trace(source)
             results = [e for e in trace if e.get('type') == 'result']
             cost = results[0].get('total_cost_usd') if len(results) == 1 else None
             calls.append({'job_id': j['id'], 'source': str(source.relative_to(root)),
@@ -122,6 +158,8 @@ def audit_results(*, complete: bool = False) -> dict:
         call['accepted_source'] = call['source'] in accepted_sources
     audit = {'audited_at': r.now(), 'manifest_sha256': r.digest(r.PLAN / 'manifest.json'),
              'unresolved_attempts': unresolved,
+             'session_accounting_complete': not unresolved,
+             'cost_accounting_complete': not unresolved and all(c['cli_reported_cost_usd'] is not None for c in calls),
              'accepted': len(ratings), 'planned': len(m['jobs']), 'actual_model_calls': len(calls),
              'model_call_unit': 'one isolated evaluator CLI session, which may contain multiple model/tool turns',
              'attempts_without_reported_cost': sum(c['cli_reported_cost_usd'] is None for c in calls),
