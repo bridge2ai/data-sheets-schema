@@ -74,13 +74,13 @@ Individual item scores and their per-record sums are integers. Fractional means 
 
 3. **Cross-Field Consistency Checking**
    - **Human Subjects Logic:**
-     - IF `human_subject_research=True` → EXPECT `ethics.irb_approval` populated
-     - IF `human_subject_research=True` → EXPECT `collection_process.consent` described
+     - IF `human_subject_research.involves_human_subjects=True` → EXPECT approval or oversight described in `human_subject_research.irb_approval` or `ethical_reviews`
+     - IF `human_subject_research.involves_human_subjects=True` → EXPECT `informed_consent` described
    - **Privacy Logic:**
-     - IF `is_deidentified=True` → EXPECT `deidentification_and_privacy.approach` specified
-     - IF `is_deidentified=True` → EXPECT `deidentification_and_privacy.examples_of_identifiers_removed` listed
+     - IF `is_deidentified` claims deidentification → EXPECT `is_deidentified.method` specified
+     - IF `is_deidentified` claims identifiers were removed → EXPECT `is_deidentified.identifiers_removed` listed
    - **Funding Logic:**
-     - IF `funders` present → EXPECT `funding_and_acknowledgements.funding.agency` matches
+     - IF `funders` present → EXPECT `funders.grantor` and `funders.grants` to identify consistent funding sources and awards
      - IF funding present → EXPECT `purposes` aligns with funding goals
    - **'Applies to' Logic:**
      - If an element or sub-element is only meaningful under a specific condition, check that the condition is satisfied before scoring it
@@ -90,7 +90,7 @@ Individual item scores and their per-record sums are integers. Fractional means 
        | Condition | Satisfied when… | Gates |
        |---|---|---|
        | Human subjects | `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment — never E4's own fields | Element 4 (all 5 sub-elements) |
-       | Governance restrictions | `regulatory_restrictions` or `confidentiality_level` (from E2) **state a governance constraint that applies** — E2 fields, not E4 fields, so non-circular. A block recording that no restriction applies is not a constraint: read what it says, not whether it is populated (#1060) | Element 4 **sub-elements 1–2 only** |
+       | Governance restrictions | `regulatory_restrictions` or `regulatory_restrictions.confidentiality_level` (from E2) **state a governance constraint that applies** — E2 fields, not E4 fields, so non-circular. A block recording that no restriction applies is not a constraint: read what it says, not whether it is populated (#1060) | Element 4 **sub-elements 1–2 only** |
        | Datasets shared & available for reuse | `distribution_formats` populated OR `download_url`/`page` links to accessible data OR license explicitly permits reuse | Element 3 sub-elements 1–4, Element 6 (all), Element 8 (all), Element 10 (all) |
        | Software tools produced as dataset output | `external_resources` (from E10) references a code repository, OR `description`/`purposes` (from E1/E7) explicitly identifies software production as a dataset output — never E8's own fields | Element 8 **sub-element 3 only** (#1081) |
        | Data collection identified AND datasets shared | Collection fields populated (`acquisition_methods`, `collection_mechanisms`) AND the datasets shared condition above is met | Element 8 sub-elements 1–2 |
@@ -122,7 +122,7 @@ Individual item scores and their per-record sums are integers. Fractional means 
 
      - **Anti-circular rule:** A sub-element's own scoring fields may not be the sole basis for excluding it. If the only reason to set `applicable: false` is the absence of the sub-element's own fields, treat it as `applicable: true` and score accordingly (receiving 0 if those fields are absent). Applicability must be evidenced by fields belonging to a *different* element. Emit `applicability_status` and `applicability_evidence` before scoring every conditional sub-element to make this determination explicit and auditable.
      - EXAMPLE (applicable + scored): `distribution_formats` lists Parquet and TSV with a PhysioNet download URL → datasets shared condition is met → Element 6, 8, and 10 sub-elements are applicable and scored.
-     - EXAMPLE (applicable + scored low): `human_subject_research.involves_human_subjects=True` but no IRB fields populated → Element 4 sub-elements are applicable (condition met) and receive a score of 0, flagged as a consistency gap.
+     - EXAMPLE (applicable + scored low): `description` identifies human participants but no ethics review is documented → Element 4 is applicable on E1 evidence; sub-element 1 receives 0 for missing oversight evidence, while the other sub-elements are assessed separately.
      - EXAMPLE (not applicable): No `distribution_formats`, no accessible URL, license is proprietary/internal-only → datasets shared condition is NOT met → Element 3 sub-elements 1–4, all of Element 6, all of Element 8, and all of Element 10 are set to `applicable: false`, `score: null`, and excluded from the denominator.
 
 4. **Content Accuracy Assessment**
@@ -156,6 +156,31 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
 
 **Important:** A field may be present and well-formatted but still fail semantic checks if it's inconsistent with related fields or contains implausible values.
 
+### Source rubric and schema paths (#158)
+
+Assess each sub-element against its own complete source-rubric scope, including governance contacts for regulatory compliance, split and subpopulation flags for variable metadata, imputation protocols for external resources, and social impacts for ethical review.
+
+The fifty item names below follow `data/rubric/rubric10.txt` exactly; their
+Fields declarations use paths reachable from Dataset in the current schema.
+An occurrence in another item's evidence list does not remove that evidence
+from the item to which the source rubric assigns it. Apply the existing
+semantic quality threshold and applicability rules to each item; the listed
+paths locate evidence rather than require every alternative representation
+to be populated. Explicit false flags can be meaningful documentation and
+must not be treated as missing merely because they are false.
+
+Several source field names describe concepts whose schema spelling has
+changed. An RRID can be the value of `id`; formats and media types belong to
+`distribution_formats` or files within `file_collections`, and encoding is a
+file attribute. Read release-specific notes from `updates.description` or
+`notes`, requiring actual release or derivation information rather than
+crediting unrelated notes. Vulnerable populations use `at_risk_populations`.
+Governance contacts use `data_governance.committee_contact`; the deprecated
+`regulatory_restrictions.governance_committee_contact` remains acceptable
+evidence in older records. Software evidence follows the processing-role
+threshold in Element 8 sub-element 4. These mappings preserve the source
+concepts without expecting absent top-level slots.
+
 ## Rubric10 Specification
 
 ### Element 1: Dataset Discovery and Identification
@@ -163,8 +188,8 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
 
 **Sub-elements:**
 1. **Persistent Identifier (DOI, RRID, or URI)**
-   - Fields: `doi`, `rrid`, `id`
-   - Look for: Properly formatted persistent identifiers (DOI, RRID, or unique dataset ID)
+   - Fields: `doi`, `id`
+   - Look for: Properly formatted persistent identifiers (DOI, RRID in `id`, or unique dataset ID)
    - **Semantic Check:**
      - DOI must match `10.XXXX/...` pattern
      - Prefix plausibility: `10.13026` (PhysioNet), `10.5281` (Zenodo), `10.18130` (Harvard Dataverse)
@@ -197,16 +222,16 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
    - Fields: `license_and_use_terms`, `ip_restrictions`
    - Look for: Clear access policy, IP-based restrictions, or licensing terms
 
-2. **Regulatory Restrictions and Confidentiality Level Specified**
-   - Fields: `regulatory_restrictions`, `confidentiality_level`, `regulatory_restrictions.hipaa_compliant`, `regulatory_restrictions.other_compliance`
-   - Look for: Export control restrictions, GDPR compliance, data sensitivity classification, HIPAA compliance status, other regulatory frameworks (CCPA, PIPEDA)
+2. **Regulatory Compliance and Confidentiality Classification**
+   - Fields: `regulatory_restrictions`, `regulatory_restrictions.confidentiality_level`, `regulatory_restrictions.hipaa_compliant`, `regulatory_restrictions.other_compliance`, `data_governance.committee_contact`, `regulatory_restrictions.governance_committee_contact`
+   - Look for: Export control restrictions, GDPR compliance, data sensitivity classification, HIPAA compliance status, other regulatory frameworks (CCPA, PIPEDA), and contact information for the responsible governance committee
 
 3. **Download URL or Platform Link Available**
    - Fields: `download_url`
    - Look for: Direct download links or platform access instructions
 
 4. **Distribution Formats and File Types Specified**
-   - Fields: `distribution_formats`, `format`, `media_type`
+   - Fields: `distribution_formats`, `distribution_formats.format`, `distribution_formats.media_type`, `file_collections.resources.format`, `file_collections.resources.media_type`
    - Look for: Specific file formats (TSV, Parquet, DICOM, etc.) and MIME types
 
 5. **Related Datasets and External Resources Linked**
@@ -225,7 +250,7 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
    - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 2. **Data Formats Are Standardized (encoding, format)**
-   - Fields: `format`, `encoding`
+   - Fields: `distribution_formats`, `file_collections`, `distribution_formats.format`, `file_collections.resources.format`, `file_collections.resources.encoding`
    - Look for: Use of standard formats (JSON, TSV, Parquet, DICOM, WFDB) and character encoding
    - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
@@ -267,7 +292,7 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 
 **Sub-elements:**
 1. **IRB or Ethics Review and Data Protection Impact**
-   - Fields: `ethical_reviews`, `human_subject_research`, `data_protection_impacts`, `regulatory_restrictions.governance_committee_contact`
+   - Fields: `ethical_reviews`, `human_subject_research`, `data_protection_impacts`, `data_governance.committee_contact`, `regulatory_restrictions.governance_committee_contact`
    - Look for: IRB approval details, institutional oversight, ethics review boards, data protection impact assessments (DPIAs), governance committee contacts
    - **Semantic Check:** If `human_subject_research.involves_human_subjects=True`, this MUST be populated
    - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment, OR `regulatory_restrictions`/`confidentiality_level` (from E2) state a governance constraint that applies. **A record that no restriction applies is not a constraint** (#1060) — read what the block says, not whether it is populated. Ethical oversight and deidentification can apply to a dataset with no human participants — donor-derived material, a data access committee, an ethics contact — which is why these two sub-elements carry the governance disjunct and sub-elements 3 to 5 do not. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
@@ -299,22 +324,22 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 
 **Sub-elements:**
 1. **Cohort or Subpopulations Characteristics Described**
-   - Fields: `subpopulations`, `DataSubset.is_subpopulation`
+   - Fields: `subpopulations`, `subsets.is_subpopulation`
    - Look for: Demographics, inclusion/exclusion criteria, population characteristics, subpopulation flags on dataset subsets
 
 2. **Number of Instances or Samples Reported**
-   - Fields: `instances`, `DataSubset.is_data_split`
+   - Fields: `instances`, `subsets.is_data_split`
    - Look for: Specific counts (e.g., 306 participants, 12,523 recordings), dataset split flags indicating training/test/validation subsets
 
-3. **Variable-Level Metadata and Tabular Flag**
-   - Fields: `variables`, `is_tabular`
-   - Look for: Variable/column descriptions, data dictionary, tabular data indicator
+3. **Variable-Level Metadata, Tabular Flag, and Data Splits**
+   - Fields: `variables`, `is_tabular`, `subsets.is_data_split`, `subsets.is_subpopulation`
+   - Look for: Variable/column descriptions, data dictionary, tabular data indicator, and documented split/subpopulation flags identifying the roles of dataset subsets
 
 4. **Data Topics or Conditions Represented**
    - Fields: `instances`
    - Look for: Disease conditions, phenotypes, topics covered in the dataset
 
-5. **Data Quality Issues and Anomalies Documented**
+5. **Data Quality, Anomalies, and Missing Data Documented**
    - Fields: `anomalies`, `sampling_strategies`, `missing_data_documentation`
    - Look for: Known data quality issues, anomalies, sampling methods, missing data patterns and handling strategies
 
@@ -344,8 +369,8 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
    - Look for: Update schedule, maintenance plan, update frequency
    - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
-5. **Provenance and Source Derivation Documented**
-   - Fields: `was_derived_from`, `release_notes`, `raw_data_sources`
+5. **Provenance, Source Derivation, and Raw Data Sources**
+   - Fields: `was_derived_from`, `updates.description`, `notes`, `raw_data_sources`
    - Look for: Source provenance, dataset derivation, release notes, raw data sources before preprocessing
    - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
@@ -401,10 +426,11 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
    - **Applies to:** Always report results of this sub-element, but only score if `external_resources` (from E10) references a code repository, OR `description` or `purposes` (from E1/E7) explicitly identifies software production as a dataset output. Do not use E8's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 4. **Software and Tools Documented**
-   - Fields: `used_software` (an attribute of any dataset property, range
-     `Software`) — the schema declares no `software_and_tools` slot, and the
-     name appears in no record; a rule written against it could never be
-     satisfied (#1081). Tooling named in `machine_annotation_tools`,
+   - Fields: `preprocessing_strategies.used_software`, `cleaning_strategies.used_software`, `labeling_strategies.used_software`, `imputation_protocols.used_software`, `machine_annotation_tools`, `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`, `imputation_protocols`, `external_resources`
+   - Evidence paths: Software can be attached through `used_software` on any
+     dataset property; the qualified paths above are examples. The schema
+     declares no top-level `software_and_tools` slot (#1081).
+     Tooling named in `machine_annotation_tools`,
      `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`,
      `imputation_protocols` or `external_resources`, including those slots'
      prose, is the alternative evidence, and any one of them carrying the
@@ -454,9 +480,9 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
      (#1081). Emit `applicability_status` and `applicability_evidence` before
      scoring.
 
-5. **External Standards and Resources Referenced**
-   - Fields: `external_resources`, `conforms_to`
-   - Look for: Published papers, standards documents, external documentation
+5. **External Standards, Resources, and Imputation Protocols**
+   - Fields: `external_resources`, `conforms_to`, `imputation_protocols`
+   - Look for: Published papers, standards documents, external documentation, and protocols explaining how missing values were imputed or explicitly documenting that imputation was not used
    - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 ---
@@ -481,9 +507,9 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
    - Fields: `sensitive_elements`, `content_warnings`
    - Look for: Sensitive content descriptions, content warnings
 
-5. **Ethical Review Details Including Conflicts**
-   - Fields: `ethical_reviews`
-   - Look for: Ethical review documentation, conflicts of interest
+5. **Ethical Review and Social Impact Analysis**
+   - Fields: `ethical_reviews`, `future_use_impacts`
+   - Look for: Ethical review documentation, conflicts of interest, and analysis of anticipated downstream social impacts and mitigations
 
 ---
 
