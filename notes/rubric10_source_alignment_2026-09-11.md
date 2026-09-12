@@ -57,9 +57,12 @@ the canary and repeatability ratings still have to be performed.
 This is an instrument revision, not evidence that earlier scores would be
 unchanged. The previous rubric10 definition SHA256 was
 `70a50310b9ec717981fc089d8fedb20ea8c3ca3b665870f8d1d2d2573c9fccdd`.
-The dated reference manifest must be re-registered after committing the
-new definition, with its new hash and a discriminating check-echo preamble.
-The previous manifest is retained byte-for-byte in its registrations directory.
+The dated reference manifest was re-registered after committing the
+new definition at `ed07f6952f16438acd9e2f4f9ebd6d9e4de545ab`, with its new
+hash and a discriminating check-echo preamble. The new definition SHA256 is
+`00b2f03d183d8f9105de8dc10346b2ee67d32376830243f1ec19348ceb8528db`.
+The previous manifest is retained byte-for-byte in its registrations directory;
+the current manifest and plan amendment name the new instrument and date.
 
 All 24 selected v7/v8 records, 202 prior evaluations, rubric20, rubric
 texts and output schemas are preserved. No old score is relabeled as a
@@ -76,6 +79,10 @@ an item's field while leaving it present elsewhere. They also reject a
 field mentioned only in an example. Before the fix, the new suite failed
 15 checks. Existing schema, semantic-contract, pin and reference-runner
 checks are included in the focused validation.
+
+The full evaluation test directory plus agent-pin and reference-runner tests
+passed 490 checks locally (excluding corpus walks), with one dependency
+deprecation warning.
 
 An offline challenge replay accepts the revised definition's full sentence,
 rejects the prior definition, and rejects copying only the preamble. This
