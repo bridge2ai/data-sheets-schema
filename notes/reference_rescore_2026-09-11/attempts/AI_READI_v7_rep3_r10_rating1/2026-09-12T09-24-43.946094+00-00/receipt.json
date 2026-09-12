@@ -1,0 +1,142 @@
+{
+  "job_id": "AI_READI_v7_rep3_r10_rating1",
+  "started_at": "2026-09-12T09:24:43.946437+00:00",
+  "status": "passed",
+  "manifest_sha256": "ed077e16f93635c571c8cc7992c696880b1e727ff766450ef03e52e43cbfb480",
+  "user_prompt_sha256": "ffe91bfd4f860846cd4405854e6442afbf0913d69ed4d66d315643c1516a4b62",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "d221e2b36c2a98ebe21f57bc72039e6b840323b37d5155053e592fe9fb247409",
+  "evaluation_sha256": "d37718bae2562ee82460ab16dedc05898c2f45f9c0abcc1ba4e27f5ca3552ff5",
+  "cli_result": {
+    "duration_api_ms": 498748,
+    "stop_reason": "end_turn",
+    "session_id": "7fa965bc-d548-4567-a137-3b583edd4377",
+    "total_cost_usd": 2.2457745000000005,
+    "usage": {
+      "input_tokens": 16,
+      "cache_creation_input_tokens": 91821,
+      "cache_read_input_tokens": 530861,
+      "output_tokens": 41436,
+      "output_tokens_details": {
+        "thinking_tokens": 8877
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 91821,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1333,
+          "cache_read_input_tokens": 114426,
+          "cache_creation_input_tokens": 258,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 258
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 26054,
+        "outputTokens": 20,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.026154,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 16,
+        "outputTokens": 41436,
+        "cacheReadInputTokens": 530861,
+        "cacheCreationInputTokens": 91821,
+        "webSearchRequests": 0,
+        "costUSD": 2.2196205000000004,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 8877,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01MJrEjA35HctjfjztT86WMP",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml 2>/dev/null; ls data/rubric 2>/dev/null; ls scripts 2>/dev/null",
+          "description": "Hash input record and list rubric files"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 10,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0).\n\n## Definition check\n\nThe section headed \u201cSource rubric and schema paths (#158)\u201d is present in my instructions and reads as expected of the current rules. The sentence beginning \u201cRead release-specific notes\u201d, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nInstrument digest recorded as `66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`, `instrument_kind: agent_definition`.\n\n## Result\n\n**49 / 50 \u2014 fixed 98.0% (denominator 50), normalized 98.0% (adjusted denominator 50).** No sub-element was excluded (`sub_elements_not_applicable: 0`, `excluded_max_points: 0`), so the two bases coincide.\n\nApplicability resolved from other elements' fields before scoring: human subjects met on E1 `description`/`keywords` and E8 `collection_mechanisms`; governance met on E2 `regulatory_restrictions`; datasets-shared met on E2 `distribution_formats` + accessible FAIRhub page; software-output met on E10 `external_resources` (AI-READI GitHub org) and E7 `purposes`. All 50 items therefore scored, each with `applicable`, `applicability_status` and `applicability_evidence` on the conditional ones.\n\n| Element | Score |\n|---|---|\n| 1 Discovery \u00b7 2 Access \u00b7 3 Reuse \u00b7 4 Ethics \u00b7 5 Composition | 5 / 5 each |\n| 6 Provenance \u00b7 7 Motivation | 5 / 5 each |\n| **8 Technical transparency** | **4 / 5** |\n| 9 Limitations \u00b7 10 Community | 5 / 5 each |\n\nThe single deduction is **E8 sub-element 4 (Software and Tools)**. The record describes the transformations that produced the release \u2014 `.fda`/`.sdt` \u2192 DICOM, `.FIT` \u2192 Open mHealth, ECG \u2192 WFDB \u2014 but names no tool for any of them, attaches no `used_software` to any strategy, and says only that processing \u201cmoved from custom or ad hoc \u2026 to automated plus custom\u201d. Every named piece of software sits in a non-qualifying role: REDCap and MoCA Duo (capture, role a), FAIRhub/Azure (hosting, b), RO-Crate/FAIRscape (metadata production, c), OMOP CDM Data Quality Dashboard (validation, d). `https://github.com/AI-READI` is an organisation root that identifies only the publisher, so it neither earns nor forfeits the point. Scored 0 because nothing was named in a producing or transforming role.\n\nNotable semantic findings recorded (9 issues): file-count arithmetic reconciles exactly (356,334 + 9 root files = 356,343) and every participant stratum sums to 2,280, but per-directory bytes fall 419,614 short of `total_size_bytes`; the accountable-organization conflict (Washington University in St. Louis as Licensor vs. University of Washington as IRB/PI) is asserted in both directions in different slots; `confidentiality_level` and `hipaa_compliant` are disclosed inferences rather than attestations; `variables` is self-declared a representative subset with no concept identifiers. DOI prefix 10.60775 validates as FAIRhub, `OT2OD032644` as NIH. Consistency checks: 26 passed, 3 failed, 5 warnings.\n\nOutput written to `output_evaluation.json`; `temperature: null` with the note that this CLI does not expose it; runtime model `claude-opus-5[1m]` recorded as both `model.name` and `evaluator_model`.",
+    "ttft_ms": 4945,
+    "type": "result",
+    "duration_ms": 499966,
+    "uuid": "6e78592f-fb37-4a03-9bfb-35dcd0218b0b",
+    "ttft_stream_ms": 1883,
+    "time_to_request_ms": 18,
+    "first_content_frame_ms": 2690,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T09:33:05.235199+00:00"
+}

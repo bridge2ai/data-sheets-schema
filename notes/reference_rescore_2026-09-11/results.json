@@ -1,12 +1,8 @@
 {
-  "reported_at": "2026-09-12T09:22:08.914580+00:00",
-  "completed": 3,
+  "reported_at": "2026-09-12T09:34:34.109485+00:00",
+  "completed": 7,
   "planned": 56,
   "pending": [
-    "AI_READI_v7_rep2_r10_rating1",
-    "AI_READI_v7_rep2_r20_rating1",
-    "AI_READI_v7_rep3_r10_rating1",
-    "AI_READI_v7_rep3_r20_rating1",
     "AI_READI_v8_rep1_r10_rating1",
     "AI_READI_v8_rep1_r20_rating1",
     "AI_READI_v8_rep2_r10_rating1",
@@ -124,12 +120,16 @@
       "project": "AI_READI",
       "cohort": "v7",
       "rubric": "rubric10-semantic",
-      "records": 1,
+      "records": 3,
       "expected_records": 3,
       "adjusted_percentages": [
+        98.0,
+        98.0,
         98.0
       ],
       "fixed_percentages": [
+        98.0,
+        98.0,
         98.0
       ]
     },
@@ -137,13 +137,17 @@
       "project": "AI_READI",
       "cohort": "v7",
       "rubric": "rubric20-semantic",
-      "records": 1,
+      "records": 3,
       "expected_records": 3,
       "adjusted_percentages": [
-        93.2
+        93.2,
+        95.5,
+        94.3
       ],
       "fixed_percentages": [
-        93.2
+        93.2,
+        95.5,
+        94.3
       ]
     },
     {
