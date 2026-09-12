@@ -220,6 +220,83 @@ def test_validation_must_follow_the_last_potential_mutation(timing, revalidate):
     assert runner.evaluator_validated(trace, "rubric10-semantic") is (revalidate == "passed")
 
 
+def denied_command_trace():
+    trace = events(valid_record())
+    args = {"command": 'poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic > /dev/null; echo "EXIT=$?"',
+            "description": "Confirm validator exit status"}
+    denial = [
+        {"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Bash",
+            "id": "denied", "input": args}]}},
+        {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "denied",
+            "is_error": True, "content": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: ..."}]}},
+    ]
+    trace = trace[:-1] + denial + trace[-1:]
+    trace[-1]["permission_denials"] = [{"tool_name": "Bash", "tool_use_id": "denied", "tool_input": copy.deepcopy(args)}]
+    return trace
+
+
+def test_proven_denial_preserves_validation_but_cannot_create_it():
+    trace = denied_command_trace()
+    assert runner.evaluator_validated(trace, "rubric10-semantic")
+    assert not runner.evaluator_validated(trace[2:], "rubric10-semantic")
+    # An executed command can mutate the file before returning an error.
+    mutation = [
+        {"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Bash",
+            "id": "executed", "input": {"command": "rewrite-output-then-fail"}}]}},
+        {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "executed",
+            "is_error": True, "content": "command failed after writing output"}]}},
+    ]
+    assert not runner.evaluator_validated(trace[:2] + mutation + trace[2:], "rubric10-semantic")
+
+
+@pytest.mark.parametrize("defect", [
+    "missing_terminal", "failed_terminal", "multiple_terminals", "missing_denials", "malformed_denials",
+    "different_id", "different_input", "different_tool", "successful_result", "missing_result",
+    "wrong_result_role", "execution_error", "nonboolean_error", "duplicate_use", "duplicate_result",
+    "duplicate_denial", "out_of_order_result",
+])
+def test_unproven_or_ambiguous_denials_do_not_preserve_validation(defect):
+    trace = denied_command_trace()
+    terminal, use, result = trace[-1], trace[2], trace[3]
+    record = terminal["permission_denials"][0]
+    block = result["message"]["content"][0]
+    if defect == "missing_terminal":
+        trace.pop()
+    elif defect == "failed_terminal":
+        terminal["is_error"] = True
+    elif defect == "multiple_terminals":
+        trace.append(copy.deepcopy(terminal))
+    elif defect == "missing_denials":
+        del terminal["permission_denials"]
+    elif defect == "malformed_denials":
+        terminal["permission_denials"] = "denied"
+    elif defect == "different_id":
+        record["tool_use_id"] = "someone-else"
+    elif defect == "different_input":
+        record["tool_input"]["command"] = "another command"
+    elif defect == "different_tool":
+        record["tool_name"] = "Write"
+    elif defect == "successful_result":
+        block["is_error"] = False
+    elif defect == "missing_result":
+        trace.remove(result)
+    elif defect == "wrong_result_role":
+        result["type"] = "assistant"
+    elif defect == "execution_error":
+        block["content"] = "command failed after writing output"
+    elif defect == "nonboolean_error":
+        block["is_error"] = 1
+    elif defect == "duplicate_use":
+        trace.insert(3, copy.deepcopy(use))
+    elif defect == "duplicate_result":
+        trace.insert(4, copy.deepcopy(result))
+    elif defect == "duplicate_denial":
+        terminal["permission_denials"].append(copy.deepcopy(record))
+    elif defect == "out_of_order_result":
+        trace[2:4] = [result, use]
+    assert not runner.evaluator_validated(trace, "rubric10-semantic")
+
+
 @pytest.mark.parametrize("command", [
     "poetry run python /other/scripts/validate_evaluation_schema.py --file /isolated/output_evaluation.json --rubric rubric10-semantic",
     "poetry run python /isolated/scripts/validate_evaluation_schema.py --file /other/output_evaluation.json --rubric rubric10-semantic",

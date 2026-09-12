@@ -222,10 +222,59 @@ def validator_output_path(command: str, rubric: str, directory: str | None) -> s
     return args[5] if args[3] in scripts and args[5] in outputs else None
 
 
+def denied_bash_calls(events: list[dict]) -> set[str]:
+    """Identify attempts the completed CLI proves were denied before execution."""
+    terminals = [(i, e) for i, e in enumerate(events) if e.get("type") == "result"]
+    if len(terminals) != 1:
+        return set()
+    terminal_index, terminal = terminals[0]
+    denials = terminal.get("permission_denials")
+    if (terminal.get("subtype") != "success" or terminal.get("is_error") is not False
+            or not isinstance(denials, list)):
+        return set()
+    uses, results, denied = {}, {}, {}
+    for index, event in enumerate(events):
+        message = event.get("message")
+        if not isinstance(message, dict) or not isinstance(message.get("content"), list):
+            continue
+        for block in message["content"]:
+            if not isinstance(block, dict):
+                continue
+            if event.get("type") == "assistant" and block.get("type") == "tool_use":
+                key = block.get("id")
+                if isinstance(key, str):
+                    uses.setdefault(key, []).append((index, block))
+            if event.get("type") == "user" and block.get("type") == "tool_result":
+                key = block.get("tool_use_id")
+                if isinstance(key, str):
+                    results.setdefault(key, []).append((index, block))
+    for denial in denials:
+        if isinstance(denial, dict) and isinstance(denial.get("tool_use_id"), str):
+            denied.setdefault(denial["tool_use_id"], []).append(denial)
+    proven = set()
+    for key, records in denied.items():
+        if len(records) != 1 or len(uses.get(key, [])) != 1 or len(results.get(key, [])) != 1:
+            continue
+        use_index, use = uses[key][0]
+        result_index, result = results[key][0]
+        denial = records[0]
+        content = result.get("content")
+        args = use.get("input")
+        if (use_index < result_index < terminal_index
+                and use.get("name") == denial.get("tool_name") == "Bash"
+                and isinstance(args, dict) and isinstance(args.get("command"), str)
+                and args == denial.get("tool_input") and result.get("is_error") is True
+                and isinstance(content, str)
+                and content.startswith("Permission to use Bash has been denied because Claude Code is running in don't ask mode.")):
+            proven.add(key)
+    return proven
+
+
 def evaluator_validated(events: list[dict], rubric: str) -> bool:
     directories = [e.get("cwd") for e in events if e.get("type") == "system" and e.get("subtype") == "init"]
     directory = directories[0] if len(directories) == 1 and isinstance(directories[0], str) else None
     calls = {}
+    denied = denied_bash_calls(events)
     pending_mutations = set()
     validated = False
     for event in events:
@@ -246,9 +295,10 @@ def evaluator_validated(events: list[dict], rubric: str) -> bool:
                 if output is not None:
                     if not pending_mutations:
                         calls[block["id"]] = f"VALID {output}: {rubric}"
-                elif name != "Read":
+                elif name != "Read" and block.get("id") not in denied:
                     # Write, Edit or an unrecognized command may change the
                     # output. Even a failed tool can have partially written it.
+                    # A proven permission denial did not execute the command.
                     pending_mutations.add(block["id"])
                     calls.clear()
                     validated = False
