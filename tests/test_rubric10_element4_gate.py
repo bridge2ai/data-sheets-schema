@@ -151,9 +151,11 @@ class TestTheSoftwareSubElementIsStatedOnce(unittest.TestCase):
     def setUp(self):
         self.text = AGENT.read_text(encoding="utf-8")
         self.flat = re.sub(r"\s+", " ", self.text)
-        start = self.text.index("4. **Software and Tools Documented**")
-        end = self.text.index("5. **External Standards and Resources Referenced**")
-        self.block = self.text[start:end]
+        element = self.text.split("### Element 8:", 1)[1].split("### Element 9:", 1)[0]
+        # The next item's source-aligned title changed in #158. Locate the
+        # numbered item within E8 so every software assertion still executes.
+        self.block = re.split(r"^4\. \*\*", element, flags=re.M)[1]
+        self.block = re.split(r"^5\. \*\*", self.block, flags=re.M)[0]
         self.block_flat = re.sub(r"\s+", " ", self.block)
 
     def _row(self, condition):

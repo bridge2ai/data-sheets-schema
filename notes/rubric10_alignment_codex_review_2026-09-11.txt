@@ -1,0 +1,17 @@
+# Codex Adversarial Review
+
+Target: branch diff against origin/main
+Verdict: needs-attention
+
+Hold: two semantic evidence-handling risks remain. Registration hashes and all 202 prior scores are intact. No evaluator ran or files changed.
+
+Findings:
+- [medium] Include the dedicated update-details field in release-note evidence (.claude/agents/d4d-rubric10-semantic.md:373-374)
+  E6.5 omits updates.update_details, the schema's dedicated update prose field. All 24 frozen inputs populate it; AI_READI v7 rep2 records concrete participant-count changes across releases there. An evaluator following the new locators can therefore miss genuine release history. The new test cannot detect this omission because ALIASES hard-codes the same incomplete mapping.
+  Recommendation: Add updates.update_details to E6.5, its mapping prose and ALIASES. Retain the release-specific content requirement and add a static fixture covering release history stored only there.
+- [medium] Make grant expectations conditional on grant funding (.claude/agents/d4d-rubric10-semantic.md:83)
+  The revised rule unconditionally expects funders.grants whenever funders exists. FundingMechanism explicitly permits resource support without grants: frozen AI_READI v7 rep3 documents donated cloud services and device loans. VOICE v7 rep2 also supplies NIH award numbers entirely in funder notes, which E7.4 explicitly accepts. These conflicting instructions can produce false consistency failures for otherwise valid funding evidence.
+  Recommendation: Check award consistency when grant funding is documented, accept the existing prose representation, and explicitly exempt non-grant support. Add static regression cases for both representations.
+
+Next steps:
+- Correct the mappings and consistency rule, then refresh the frozen definition hash and echo registration while preserving all prior scores.

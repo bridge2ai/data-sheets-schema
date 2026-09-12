@@ -1,7 +1,7 @@
 {
   "issue": 1248,
-  "registered_at": "2026-09-12T02:40:38.941527+00:00",
-  "definition_commit": "f7f235a9706a741f4a02c01211e4d5c948e89b0f",
+  "registered_at": "2026-09-11T22:38:28.150419+00:00",
+  "definition_commit": "202e4fdccbc5a863a4ddada902ab50d78f14631d",
   "requested_model": "claude-opus-5[1m]",
   "effort": "high",
   "temperature": null,
@@ -13,10 +13,10 @@
     "rubric10-semantic": {
       "agent": "d4d-rubric10-semantic",
       "definition": ".claude/agents/d4d-rubric10-semantic.md",
-      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "definition_sha256": "70a50310b9ec717981fc089d8fedb20ea8c3ca3b665870f8d1d2d2573c9fccdd",
       "rubric": "data/rubric/rubric10.txt",
       "schema": "src/download/prompts/rubric10_semantic_schema.json",
-      "preamble": "Before the task: your definition on disk is `d4d-rubric10-semantic.md`, sha256 `66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`.\n\nAn agent-definition edit does not always reach a subagent spawned afterwards (#1077), and when it does not, nothing in the output says so \u2014 the run silently applies the old rules. So, first, find the section headed \u201cSource rubric and schema paths (#158)\u201d in your own instructions, and quote back **verbatim and in full** the sentence there that begins \u201cRead release-specific notes\u201d. The rest of the sentence is deliberately not reproduced here: if it were, copying this prompt would pass the check and prove nothing.\n\nIf you cannot find that section, or it reads differently from what you would expect of the current rules, say so plainly and **stop rather than proceeding** \u2014 your definition is stale and any result would measure the previous instrument. Record the sha256 above as `instrument_sha256` in your output (#1099)."
+      "preamble": "Before the task: your definition on disk is `d4d-rubric10-semantic.md`, sha256 `70a50310b9ec717981fc089d8fedb20ea8c3ca3b665870f8d1d2d2573c9fccdd`.\n\nAn agent-definition edit does not always reach a subagent spawned afterwards (#1077), and when it does not, nothing in the output says so \u2014 the run silently applies the old rules. So, first, find the section headed \u201cReproducibility\u201d in your own instructions, and quote back **verbatim and in full** the sentence there that begins \u201cRepeatability must be\u201d. The rest of the sentence is deliberately not reproduced here: if it were, copying this prompt would pass the check and prove nothing.\n\nIf you cannot find that section, or it reads differently from what you would expect of the current rules, say so plainly and **stop rather than proceeding** \u2014 your definition is stale and any result would measure the previous instrument. Record the sha256 above as `instrument_sha256` in your output (#1099)."
     },
     "rubric20-semantic": {
       "agent": "d4d-rubric20-semantic",
@@ -814,7 +814,7 @@
     }
   ],
   "pinned_files": {
-    ".claude/agents/d4d-rubric10-semantic.md": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+    ".claude/agents/d4d-rubric10-semantic.md": "70a50310b9ec717981fc089d8fedb20ea8c3ca3b665870f8d1d2d2573c9fccdd",
     ".claude/agents/d4d-rubric20-semantic.md": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
     "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml": "dd656a3a6e8b6bc0f00a50c5d1a5e75c6d2eae8407866c2ba3d2cc3c63b8fdb5",
     "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml": "e5c0f47198cd20ea47158959f6cfb4d25648965eb8c063ac977e2b5b9aba355d",
@@ -1054,8 +1054,8 @@
     "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/VOICE_2026-09-01api_rep1_evaluation.json": "d7e3086e4f1ff9fc8cfc0a8550aa4712dd8e8e2b30293653e27b1f18f2f82df8"
   },
   "supersedes_registration": {
-    "path": "notes/reference_rescore_2026-09-11/registrations/manifest-before-rubric10-review-fixes.json",
-    "sha256": "9e7ab8eab9699bf7ad3e37c6a483e42af76a530ea714ff5f40fb6d0ba515a131",
-    "reason": "#1283/#1284 adversarial review: dedicated release history and non-grant/prose funding evidence; no evaluator process had started"
+    "path": "notes/reference_rescore_2026-09-11/registrations/manifest-before-portability-fix.json",
+    "sha256": "d998f8d656aecac592c661878f2269e604adfc4b676f2ce7a2672df4d8dc7d91",
+    "reason": "#1255: portable temporary directory; no evaluator process had started"
   }
 }

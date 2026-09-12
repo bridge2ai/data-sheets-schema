@@ -2204,12 +2204,13 @@ must not be reported as a measured same-instrument standard deviation.
 Original manifest registered at 2026-09-11T22:22:36.847937+00:00 from checkout `fe3d8e60355defbd35685e9668c0075a99b89859`.
 It is retained byte-for-byte under `notes/reference_rescore_2026-09-11/registrations/manifest-before-portability-fix.json`.
 
-The current registration at 2026-09-11T22:38:28.150419+00:00 pins checkout `202e4fdccbc5a863a4ddada902ab50d78f14631d`.
+The second registration at 2026-09-11T22:38:28.150419+00:00 pins checkout `202e4fdccbc5a863a4ddada902ab50d78f14631d`.
 Issue #1255 corrected the runner to use the platform temporary directory after Linux CI failed before launch.
 Only the runner source hash changed: all 24 inputs, both rubric definitions, schemas and texts,
 202 prior evaluations, and 56 planned ratings are identical. No evaluator had started under
-either registration. The current manifest records the superseded manifest path and SHA256.
-The evaluator must quote the definition identified by these SHA256 values:
+either registration. That manifest records the superseded manifest path and SHA256.
+It required the evaluator to quote the definitions identified by these SHA256 values;
+the rubric10 alignment amendment below supersedes this registration before execution:
 
 - rubric10-semantic: `70a50310b9ec717981fc089d8fedb20ea8c3ca3b665870f8d1d2d2573c9fccdd`
 - rubric20-semantic: `9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3`
@@ -2256,6 +2257,57 @@ For #919, retain the existing slot-fitness cache under its original context
 and do not use it as a common-instrument v7/v8 reference score. The audit and
 cost/comparability decision are in `notes/fitness_cache_decision_2026-09-11.md`
 and its JSON companion. No new fitness call is part of this semantic rescore.
+
+### Rubric10 source-alignment boundary (2026-09-11 Pacific; #158)
+
+The first #158 registration is dated **2026-09-12T02:30:35.023943+00:00**
+and pins the already committed definition at
+`ed07f6952f16438acd9e2f4f9ebd6d9e4de545ab`.
+Its rubric10-semantic definition SHA256 is
+`00b2f03d183d8f9105de8dc10346b2ee67d32376830243f1ec19348ceb8528db`.
+Rubric20 remains `9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3`.
+
+Four rubric10 items now include evidence assigned to them by the source
+rubric but formerly listed only elsewhere: governance contacts (E2.2),
+split/subpopulation flags (E5.3), imputation protocols (E8.5), and social
+impacts (E9.5). All six divergent headings now match the source. Current
+schema paths and the audit of semantic scope are documented in
+`notes/rubric10_source_alignment_2026-09-11.md`. This is a new instrument;
+prior scores do not establish what these revised items would earn.
+
+The previous manifest is preserved byte-for-byte as
+`notes/reference_rescore_2026-09-11/registrations/manifest-before-rubric10-alignment.json`.
+The new manifest links its SHA256 and records the reason for supersession.
+`rubric10_alignment_registration.json` records the preservation checks and
+offline check-echo replay. All 24 input records, 202 old evaluations, 56
+planned jobs, rubric texts, output schemas and rubric20 definition are
+unchanged. No earlier score was overwritten or relabeled.
+
+The regenerated preamble asks for a sentence unique to the revised
+definition. Offline verification accepts that sentence, rejects the old
+definition, and rejects a reply that only copies the preamble. A live
+evaluator still must quote and verify it and record this definition SHA.
+
+**Execution status at this boundary:** no records have been rescored, no
+attempt or canary acceptance exists, and repeatability remains unmeasured.
+The CHORUS v7 rep1 rubric10 canary, the 24-record/both-rubric cohort, and the
+eight additional rubric10 ratings remain as registered. The pending
+Anthropic destination/spend approval described above is unchanged.
+
+**Review correction at 2026-09-12T02:40:38.941527+00:00 (#1283/#1284).**
+The current reference registration pins committed definition
+`f7f235a9706a741f4a02c01211e4d5c948e89b0f`, rubric10 SHA256
+`66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`.
+Adversarial review added the dedicated release-history field
+`updates.update_details` and made funding consistency accept non-grant
+support and award numbers in funder prose. The preceding registration is
+preserved under `registrations/manifest-before-rubric10-review-fixes.json`;
+the current manifest links its hash. The preservation and offline echo
+checks are recorded in `rubric10_alignment_review_registration.json`.
+All 24 inputs, 202 prior evaluations, 56 jobs and the rubric20 instrument
+remain unchanged. The regenerated challenge rejects the previous definition
+and a preamble-only reply. No evaluator ran under either #158 registration;
+the quoted SHA still must be verified in the live canary.
 
 ## Decisions needed before step 3
 
