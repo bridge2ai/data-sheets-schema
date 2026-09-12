@@ -1,0 +1,20 @@
+# Codex Adversarial Review
+
+Target: branch diff against origin/main
+Verdict: needs-attention
+
+Do not ship: three offline reproductions expose unbounded view retention and incorrect or rejected schema loading. The 17 selected tests and 10 in-memory snapshot/fitness checks passed.
+
+Findings:
+- [high] Preserve cached views for distinct logical aliases (src/data_sheets_schema/schema_view.py:52-56)
+  Snapshot hashes distinguish logical aliases, but eviction groups them by resolved target. Alternating shared_view(p).all_classes() between this checkout's /tmp/... and /private/tmp/... paths eight times retained eight distinct views while _VIEWS contained only one. origin/main retained one view. LinkML's method caches keep evicted views alive, so unchanged alias callers repeatedly rebuild schemas and can exhaust memory during long runs.
+  Recommendation: Scope stale-entry eviction to the logical source path, allowing stable aliases to coexist while preserving transitive content identity. Test alternating aliases for view reuse and retained-view count.
+- [medium] Match LinkML's namespace state during import resolution (src/data_sheets_schema/schema_snapshot.py:49-59)
+  The snapshot recomputes namespaces for every prefixed import, whereas the installed SchemaView caches them at first use. Reproduced with imports [local:second, local:first]: root maps local to /old/, and /old/first.yaml remaps it to /new/. Direct SchemaView and the real LinkML generator select /old/second.yaml ('Enter a country.'); shared_view and build select /new/second.yaml ('Enter a species.'). Stable source files therefore produce different specifications through the new snapshot parser.
+  Recommendation: Resolve imports using LinkML's resolver against captured bytes, or reproduce its namespace initialization and caching semantics. Add a direct-versus-snapshot regression with an imported prefix override.
+- [medium] Accept LinkML's list-form prefix declarations (src/data_sheets_schema/schema_snapshot.py:36-38)
+  _metadata assumes prefixes is a mapping and calls .items(). A valid schema containing prefixes: [{prefix_prefix: example, prefix_reference: 'https://example.org/'}] loads successfully through LinkML, but shared_view raises AttributeError: 'list' object has no attribute 'items'. This also blocks build and digest_text, even when the schema has no imports.
+  Recommendation: Normalize captured metadata using LinkML's supported representations before extracting prefixes. Cover list-form prefixes in both root and imported schemas.
+
+Next steps:
+- Add the three reproductions as regressions, fix alias eviction and metadata resolution, and rerun the focused offline suite.

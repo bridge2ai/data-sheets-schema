@@ -1,0 +1,17 @@
+# Codex Adversarial Review
+
+Target: branch diff against origin/main
+Verdict: needs-attention
+
+Do not ship: schema edits can mislabel evaluation results, and changes during reads can permanently poison the new content-keyed caches.
+
+Findings:
+- [high] Refresh cached fitness prompts when the schema digest changes (src/data_sheets_schema/schema_digest.py:640-644)
+  The refreshed digest changes LLMSlotFitnessScorer._context(), but its spec() method caches prompts indefinitely by slot name (evidence_score.py:865–869). An offline reproduction changed a slot description from 'Enter a country.' to 'Enter a species.': the context fingerprint changed while the cached prompt still requested a country. __call__ subsequently uses that old prompt and stores its judgement under the new schema fingerprint, allowing incorrectly attributed results to persist across runs.
+  Recommendation: Key the scorer's slot specifications by the same schema/vocabulary revision as its judgement context. Add a regression that reuses one scorer across a schema edit and verifies both prompt and context refresh.
+- [high] Hash and parse the same byte snapshot (src/data_sheets_schema/schema_digest.py:313-317)
+  The cache key hashes the file before _build_uncached() rereads it. Reproduced with controlled in-memory reads: hash schema alpha, replace it with bravo before parsing, then restore alpha. Subsequent build() calls keep returning bravo under alpha's content hash. digest_text() and vocabularies() have the same separate-read defect. Restoring stable inputs therefore does not repair the cache; prompts remain incorrect and sync checks can remain blocked.
+  Recommendation: Read immutable schema and vocabulary snapshots, then derive both cache keys and parsed/rendered values from those exact bytes, including shared_view. Test replacements between hashing and parsing followed by restoration.
+
+Next steps:
+- Add the offline regressions above and rerun the focused digest, sync, and fitness-cache tests.

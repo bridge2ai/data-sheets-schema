@@ -1,0 +1,65 @@
+{
+  "registered_at": "2026-09-11T23:25:17.914642+00:00",
+  "issue": 1261,
+  "prior_decision": "notes/fitness_cache_decision_2026-09-11.json",
+  "prior_decision_sha256": "1a048d34a0e9f5464a7e66e6e1b6fea763b673f78994b5161e1f3060bdb62343",
+  "current_context": {
+    "axis": "fitness",
+    "model": "google/claude-opus-5-high",
+    "rubric": "6c5b10778ade",
+    "corpus": "",
+    "schema": "a91bad8b8eaf7c34b147ff5970474342",
+    "specification": "537e5536d3344b1d0a5e8f5e9a064a47ef0bfaebc3209e6004fb233acce4b42e"
+  },
+  "generation_digests": {
+    "Dataset": {
+      "md5": "a91bad8b8eaf7c34b147ff5970474342",
+      "characters": 43582
+    },
+    "CoreDataset": {
+      "md5": "dfb9f93caa70559638007035b1be9276",
+      "characters": 29991
+    }
+  },
+  "cache_audit": [
+    {
+      "path": "data/evaluation_llm/judgement_cache/AI_READI_fitness.jsonl",
+      "sha256": "dddd5570161b7ae3fe7ad648e4fc4db7f02757875af3b2d4d71e3a56298b1eeb",
+      "entries": 380,
+      "current_context_loaded": 0,
+      "current_context_skipped": {
+        "schema": 380
+      }
+    },
+    {
+      "path": "data/evaluation_llm/judgement_cache/CHORUS_fitness.jsonl",
+      "sha256": "41d984db9d0ace58d782157c53b2f78eac769c49188a037cd64f7d038eca76a7",
+      "entries": 293,
+      "current_context_loaded": 0,
+      "current_context_skipped": {
+        "schema": 293
+      }
+    },
+    {
+      "path": "data/evaluation_llm/judgement_cache/CM4AI_fitness.jsonl",
+      "sha256": "4c97afb04e418bfe2da7c84bb9117052f2e1716009d70dffae6e0d52b9c71077",
+      "entries": 354,
+      "current_context_loaded": 0,
+      "current_context_skipped": {
+        "schema": 354
+      }
+    },
+    {
+      "path": "data/evaluation_llm/judgement_cache/VOICE_fitness.jsonl",
+      "sha256": "d64cce858b5206229515c682755f745941fbaa1ac55a70ed7fb5479871f94ca4",
+      "entries": 414,
+      "current_context_loaded": 0,
+      "current_context_skipped": {
+        "schema": 414
+      }
+    }
+  ],
+  "new_fitness_calls": 0,
+  "old_cache_bytes_unchanged": true,
+  "empty_specification_context_fingerprint_unchanged": true
+}

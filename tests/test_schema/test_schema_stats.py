@@ -122,26 +122,26 @@ if __name__ == '__main__':
 class TestDigestBuildIsMemoised(unittest.TestCase):
     """Rebuilding cost ~0.5s per call and was paid once per distinct slot (#181).
 
-    Repeated calls must avoid the schema reader while returning equal content.
+    Repeated calls must reuse the parsed view and inventory while returning
+    equal content. Reading current bytes is required to detect schema edits.
     Object identity cannot establish this because callers receive copies
     (#528). A wall-clock speed ratio also depends on competing CI workers
     and failed despite a working cache (#1218).
     """
 
-    def test_a_repeated_build_does_not_reread_the_schema(self):
+    def test_a_repeated_build_reuses_the_view_and_inventory(self):
         from unittest import mock
 
-        from data_sheets_schema import schema_digest
+        from data_sheets_schema import schema_digest, schema_view
 
-        with mock.patch.dict(schema_digest._BUILD_CACHE, {}, clear=True), \
-                mock.patch.object(schema_digest, "shared_view",
-                                  wraps=schema_digest.shared_view) as reader:
+        with mock.patch.dict(schema_digest._BUILD_CACHE, {}, clear=True):
             expected = schema_digest.build("Dataset")
-            reader.assert_called_once()
-            reader.reset_mock()
-            for _ in range(10):
-                self.assertEqual(schema_digest.build("Dataset"), expected)
-            reader.assert_not_called()
+            with mock.patch.object(schema_digest, "_build_uncached",
+                                   side_effect=AssertionError("rebuilt an unchanged inventory")), \
+                    mock.patch.object(schema_view, "SchemaView",
+                                      side_effect=AssertionError("reparsed an unchanged view")):
+                for _ in range(10):
+                    self.assertEqual(schema_digest.build("Dataset"), expected)
 
     def test_repeated_builds_return_equal_content(self):
         """What a caller actually depends on, now that the objects differ."""

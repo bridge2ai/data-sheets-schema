@@ -74,12 +74,15 @@ class TestTheTextCacheIsSafe(unittest.TestCase):
     it needs no copy at all.
     """
 
-    def test_repeated_calls_are_free(self):
-        schema_digest.digest_text("Dataset")
-        start = time.perf_counter()
-        for _ in range(50):
-            schema_digest.digest_text("Dataset")
-        self.assertLess((time.perf_counter() - start) / 50, 0.001)
+    def test_repeated_calls_reuse_the_rendered_inventory(self):
+        # A fresh content hash is required on every lookup (#942); a 1 ms
+        # wall-clock ceiling incorrectly rejected that check (#1256).
+        from unittest.mock import patch
+        expected = schema_digest.digest_text("Dataset")
+        with patch.object(schema_digest, "build", side_effect=AssertionError("rebuilt")), \
+                patch.object(schema_digest, "render", side_effect=AssertionError("rerendered")):
+            for _ in range(10):
+                self.assertEqual(schema_digest.digest_text("Dataset"), expected)
 
     def test_it_agrees_with_an_uncached_render(self):
         """The cache must not be able to serve something `render` would not."""

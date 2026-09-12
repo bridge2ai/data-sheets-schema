@@ -26,7 +26,8 @@ from pathlib import Path
 from typing import Any
 
 from linkml_runtime import SchemaView
-from data_sheets_schema.schema_view import shared_view
+from data_sheets_schema.schema_view import content_key, shared_view
+from data_sheets_schema.schema_snapshot import SchemaSnapshot, capture_schema
 
 FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
 CORE_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml")
@@ -138,19 +139,23 @@ class NestedClass:
 VOCABULARY_PIN = Path(__file__).with_name("b2ai_registry_vocabularies.yaml")
 
 _VOCABULARIES: dict[str, dict[str, str]] | None = None
+_VOCABULARY_KEY: tuple[str, str] | None = None
 
 
-def vocabularies() -> dict[str, dict[str, str]]:
+def vocabularies(*, content: bytes | None = None) -> dict[str, dict[str, str]]:
     """The pinned registry vocabularies, keyed by `values_from` name."""
-    global _VOCABULARIES
-    if _VOCABULARIES is None:
+    global _VOCABULARIES, _VOCABULARY_KEY
+    data = VOCABULARY_PIN.read_bytes() if content is None else content
+    key = content_key(VOCABULARY_PIN, content=data)
+    if _VOCABULARIES is None or key != _VOCABULARY_KEY:
         import yaml as _yaml
-        doc = _yaml.safe_load(VOCABULARY_PIN.read_text(encoding="utf-8")) or {}
+        doc = _yaml.safe_load(data) or {}
         _VOCABULARIES = doc.get("vocabularies") or {}
-    return _VOCABULARIES
+        _VOCABULARY_KEY = key
+    return copy.deepcopy(_VOCABULARIES)
 
 
-def render_values_from(names: list[str]) -> str | None:
+def render_values_from(names: list[str], *, vocabulary: dict | None = None) -> str | None:
     """The permitted terms for a slot that declares `values_from` (#538).
 
     Rendered because nothing rendered it before. `data_topic` and
@@ -167,7 +172,9 @@ def render_values_from(names: list[str]) -> str | None:
     A `values_from` naming no pinned vocabulary renders nothing rather than
     guessing. Silence is the honest output when the terms are unknown.
     """
-    known = vocabularies()
+    if not names:
+        return None
+    known = vocabularies() if vocabulary is None else vocabulary
     parts = []
     for name in names:
         terms = known.get(name)
@@ -249,11 +256,44 @@ def _truncate(text: str | None, limit: int = DESCRIPTION_CHARS) -> str | None:
     return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
 
 
-_BUILD_CACHE: dict[tuple[str, str], "ClassDigest"] = {}
+_CacheKey = tuple[str, str, str, str, str]
+_BUILD_CACHE: dict[_CacheKey, "ClassDigest"] = {}
+
+
+def _schema_path(class_name: str, schema_path: Path | None) -> Path:
+    path = Path(schema_path) if schema_path else CLASS_SCHEMA.get(class_name)
+    if path is None:
+        raise ValueError(
+            f"No schema known for class {class_name!r}; pass schema_path "
+            f"explicitly. Known: {sorted(CLASS_SCHEMA)}")
+    return resolve_schema(path)
+
+
+def _schema_name(class_name: str, path: Path) -> str:
+    """Stable displayed source for a known merged schema; caller's path otherwise."""
+    known = CLASS_SCHEMA.get(class_name)
+    return str(known) if known and path.name == Path(known).name else str(path)
+
+
+def _cache_key(class_name: str, path: Path, snapshot: SchemaSnapshot) -> _CacheKey:
+    # Preserve the caller's displayed path in custom-schema renders, while
+    # also distinguishing the actual file after a cwd change. Use the same
+    # content hash as shared_view: size/mtime can collide on rewrites (#943).
+    # A view's first namespace use can select a different captured import.
+    # Its stable instance identity keeps an inventory from another selection
+    # from surviving view eviction and restoration under the same bytes (#1273).
+    view = shared_view(path, snapshot=snapshot)
+    return (class_name, str(path), *snapshot.key, view.uuid)
+
+
+def _drop_stale(cache: dict, key: tuple[str, ...]) -> None:
+    # Keep one revision for each class/source/display-path combination.
+    for stale in [k for k in cache if k[:3] == key[:3] and k != key]:
+        del cache[stale]
 
 
 def build(class_name: str, schema_path: Path | None = None) -> ClassDigest:
-    """Memoised on (class_name, schema_path); see _build_uncached.
+    """Memoised on class, resolved source and its bytes; see _build_uncached.
 
     Returns a **copy**. The cache used to hand out the stored object itself, so
     any caller that mutated the result — or its `nested` entries, or their
@@ -275,21 +315,28 @@ def build(class_name: str, schema_path: Path | None = None) -> ClassDigest:
     construction and `class_induced_slots` over the whole class, which is the
     expensive part this cache exists to avoid repeating.
     """
-    key = (class_name, str(schema_path or ""))
+    path = _schema_path(class_name, schema_path)
+    snapshot = capture_schema(path)
+    return copy.deepcopy(_build_cached(class_name, path, snapshot))
+
+
+def _build_cached(class_name: str, path: Path, snapshot: SchemaSnapshot) -> ClassDigest:
+    """Internal inventory from one snapshot; callers must copy before exposing it."""
+    key = _cache_key(class_name, path, snapshot)
     if key not in _BUILD_CACHE:
-        _BUILD_CACHE[key] = _build_uncached(class_name, schema_path)
-    return copy.deepcopy(_BUILD_CACHE[key])
+        fresh = _build_uncached(class_name, path, snapshot=snapshot)
+        _drop_stale(_BUILD_CACHE, key)
+        _BUILD_CACHE[key] = fresh
+    return _BUILD_CACHE[key]
 
 
-def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDigest:
+def _build_uncached(class_name: str, schema_path: Path | None = None, *,
+                    content: bytes | None = None,
+                    snapshot: SchemaSnapshot | None = None) -> ClassDigest:
     """Slot inventory for one target class."""
-    path = Path(schema_path) if schema_path else CLASS_SCHEMA.get(class_name)
-    if path is None:
-        raise ValueError(
-            f"No schema known for class {class_name!r}; pass schema_path "
-            f"explicitly. Known: {sorted(CLASS_SCHEMA)}")
-    path = resolve_schema(path)
-    sv = shared_view(path)
+    path = (Path(schema_path) if (content is not None or snapshot is not None) and schema_path is not None
+            else _schema_path(class_name, schema_path))
+    sv = shared_view(path, content=content, snapshot=snapshot)
     # The digest names the schema it came from, and that name is rendered into
     # the digest text — so an identical schema read from a different location
     # produced a different fingerprint. Verifying a digest by rebuilding the
@@ -300,9 +347,7 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
     # fingerprint is a function of the schema's content and not of where the
     # file happens to sit. The default path already rendered this string, so
     # no existing digest moves.
-    known = CLASS_SCHEMA.get(class_name)
-    named = str(known) if known and Path(path).name == Path(known).name \
-        else str(path)
+    named = _schema_name(class_name, path)
     digest = ClassDigest(class_name=class_name, schema_path=named)
 
     for slot in sv.class_induced_slots(class_name):
@@ -409,8 +454,9 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
     return digest
 
 
-def render(digest: ClassDigest) -> str:
+def render(digest: ClassDigest, *, vocabulary: dict | None = None) -> str:
     """Markdown rendering, sized for prompt injection."""
+    vocabulary = vocabularies() if vocabulary is None else vocabulary
     lines = [
         f"# Target class `{digest.class_name}` — slot inventory",
         "",
@@ -432,9 +478,9 @@ def render(digest: ClassDigest) -> str:
             shown = ", ".join(f"`{v}`" for v in s.enum_values)
             tail = f" (+{s.enum_truncated} more)" if s.enum_truncated else ""
             lines.append(f"Permitted: {shown}{tail}")
-        vocabulary = render_values_from(s.values_from)
-        if vocabulary:
-            lines.append(f"Draw from: {vocabulary}")
+        terms = render_values_from(s.values_from, vocabulary=vocabulary)
+        if terms:
+            lines.append(f"Draw from: {terms}")
         lines.append("")
 
     if digest.nested:
@@ -513,14 +559,14 @@ def render(digest: ClassDigest) -> str:
             # The registry vocabulary a nested attribute draws from (#538).
             # Here or nowhere, exactly as for the enums above.
             for slot_name, names in sorted(n.values_from.items()):
-                vocabulary = render_values_from(names)
-                if vocabulary:
-                    lines.append(f"    - `{slot_name}` draws from {vocabulary}")
+                terms = render_values_from(names, vocabulary=vocabulary)
+                if terms:
+                    lines.append(f"    - `{slot_name}` draws from {terms}")
         lines.append("")
     return "\n".join(lines)
 
 
-_TEXT_CACHE: dict[tuple[str, str], str] = {}
+_TEXT_CACHE: dict[tuple[str, ...], str] = {}
 
 
 #: digest -> the slot names that class had at that digest. Appended to, never
@@ -599,14 +645,23 @@ def digest_text(class_name: str, schema_path: Path | None = None) -> str:
     which costs ~1.7 ms. `digest_text` renders and discards, so it needs no
     copy at all — and it is on a hot path: `LLMSlotFitnessScorer._context`
     calls it once per judgement to compute the cache key, so the copy would
-    have been paid 1,441 times in a sweep for a value that never changes.
+    have been paid 1,441 times in a sweep for an unchanged schema.
 
     Caching the *string* is safe where caching the object was not: strings are
-    immutable, so there is nothing for a caller to mutate.
+    immutable, so there is nothing for a caller to mutate. Both caches still
+    check the source bytes on every call, so a regeneration or branch change
+    in the same process cannot leave the prompt and fingerprint stale (#942).
     """
-    key = (class_name, str(schema_path or ""))
+    path = _schema_path(class_name, schema_path)
+    snapshot = capture_schema(path)
+    vocabulary_bytes = VOCABULARY_PIN.read_bytes()
+    key = (*_cache_key(class_name, path, snapshot),
+           *content_key(VOCABULARY_PIN, content=vocabulary_bytes))
     if key not in _TEXT_CACHE:
-        _TEXT_CACHE[key] = render(build(class_name, schema_path))
+        fresh = render(_build_cached(class_name, path, snapshot),
+                       vocabulary=vocabularies(content=vocabulary_bytes))
+        _drop_stale(_TEXT_CACHE, key)
+        _TEXT_CACHE[key] = fresh
     return _TEXT_CACHE[key]
 
 

@@ -15,7 +15,8 @@ signal" rather than as a test failure.
 Every in-process construction site in this package takes its view from here
 instead (linkml's own validator builds views of its own; see
 ``provenance._record_validator`` for the one on the execute path). The key
-is the resolved path with a hash of the file's bytes — not size and mtime,
+is the logical absolute path with a hash of the captured root and transitive import
+bytes — not size and mtime,
 which a same-length rewrite within one timestamp tick can collide on (#943)
 — so a schema rewritten under a running process (``make regen-all``, the
 sync test that tampers with the merged file and restores it) gets a fresh
@@ -28,27 +29,60 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
+import yaml
 
 from linkml_runtime import SchemaView
+from linkml_runtime.linkml_model.meta import SchemaDefinition
+from linkml_runtime.utils.yamlutils import DupCheckYamlLoader
+from data_sheets_schema.schema_snapshot import SchemaSnapshot, capture_schema, resolve_import_path
 
 _VIEWS: dict[tuple[str, str], SchemaView] = {}
 
 
-def content_key(path: str | Path) -> tuple[str, str]:
+def content_key(path: str | Path, *, content: bytes | None = None) -> tuple[str, str]:
     """(resolved path, blake2b of the bytes) — what a view is keyed by."""
     p = Path(path).resolve()
-    return (str(p), hashlib.blake2b(p.read_bytes(), digest_size=16).hexdigest())
+    data = p.read_bytes() if content is None else content
+    return (str(p), hashlib.blake2b(data, digest_size=16).hexdigest())
 
 
-def shared_view(path: str | Path) -> SchemaView:
-    """The one ``SchemaView`` for the schema file at ``path``."""
-    key = content_key(path)
-    p = Path(key[0])
+def shared_view(path: str | Path, *, content: bytes | None = None,
+                snapshot: SchemaSnapshot | None = None) -> SchemaView:
+    """The shared view of captured root/import bytes at ``path`` (#1265)."""
+    captured = capture_schema(path, content=content) if snapshot is None else snapshot
+    key = captured.key
     view = _VIEWS.get(key)
     if view is None:
         for stale in [k for k in _VIEWS if k[0] == key[0]]:
             del _VIEWS[stale]
-        view = _VIEWS[key] = SchemaView(str(p))
+        # Hash and parse the same bytes. Loading the path after hashing it
+        # can permanently store a different revision under this key (#1260).
+        frozen = {p: data for _name, p, data in captured.sources}
+
+        def parse(source):
+            data = frozen[source]
+            if isinstance(data, OSError):
+                raise data
+            # LinkML's loads still guesses whether a string names a file.
+            # These bytes are already captured YAML, including one-line flow
+            # documents without a final newline (#1277).
+            schema = SchemaDefinition(**yaml.load(data.decode("utf-8"), Loader=DupCheckYamlLoader))
+            schema.source_file = str(source)
+            return schema
+
+        root = captured.sources[0][1]
+        view = SchemaView(parse(root))
+        # Keep LinkML's lazy schema-map and namespace initialization order,
+        # while satisfying every import from the captured bytes (#1270).
+        def load_captured(imp, from_schema=None):
+            source = Path((from_schema or view.schema).source_file)
+            selected = resolve_import_path(imp, source, view.namespaces)
+            try:
+                return parse(selected)
+            except KeyError as exc:
+                raise ValueError(f"schema import {imp!r} is outside the captured closure") from exc
+        view.load_import = load_captured
+        _VIEWS[key] = view
     return view
 
 
