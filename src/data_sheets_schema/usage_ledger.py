@@ -24,18 +24,27 @@ def exclusive_run(spec):
     # competing process lock a different inode at the same path.
     from filelock import FileLock, Timeout
 
-    path = spec.metadata_dir / f".{spec.project}_api_run.lock"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    lock = FileLock(path, timeout=0)
+    # Split and flat layouts can share a full/core record while storing their
+    # metadata elsewhere. Lock the actual files, including resolved aliases,
+    # in one order so partial overlap cannot bypass output ownership (#1298).
+    outputs = {path.resolve() for path in (spec.full_path, spec.core_path,
+                                          spec.report_path, spec.provenance_path)}
+    held = []
     try:
-        lock.acquire()
-    except Timeout as exc:
-        raise UsageLedgerError(f"an API run is already active in {spec.metadata_dir}; "
-                               "retry after it finishes") from exc
-    try:
+        for output in sorted(outputs):
+            path = output.with_name(f".{output.name}_api_run.lock")
+            path.parent.mkdir(parents=True, exist_ok=True)
+            lock = FileLock(path, timeout=0)
+            try:
+                lock.acquire()
+            except Timeout as exc:
+                raise UsageLedgerError(f"an API run is already active for {output}; "
+                                       "retry after it finishes") from exc
+            held.append(lock)
         yield
     finally:
-        lock.release()
+        for lock in reversed(held):
+            lock.release()
 
 
 def run_identity(spec) -> dict:

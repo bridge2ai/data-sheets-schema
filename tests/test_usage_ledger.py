@@ -258,16 +258,51 @@ def test_hard_process_exit_releases_output_exclusion(tmp_path):
     child = """
 import os, sys
 from pathlib import Path
-from types import SimpleNamespace
 from data_sheets_schema.usage_ledger import exclusive_run
-run = SimpleNamespace(project='CHORUS', metadata_dir=Path(sys.argv[1]))
-with exclusive_run(run):
+from tests.test_download.test_api_runner import spec
+with exclusive_run(spec(out_dir=Path(sys.argv[1]))):
     os._exit(23)
 """
     result = subprocess.run([sys.executable, "-c", child, str(tmp_path)],
                             capture_output=True, text=True, timeout=30)
     assert result.returncode == 23, result.stderr
     with ledger.exclusive_run(spec(out_dir=tmp_path)):
+        pass
+
+
+@pytest.mark.parametrize("shared_directory", ["full", "core"])
+def test_split_and_flat_layouts_cannot_overlap_in_either_direction(tmp_path, monkeypatch, shared_directory):
+    monkeypatch.setattr(api, "CONCAT_DIR", tmp_path)
+    split = spec(out_dir=None)
+    directory = split.full_path.parent if shared_directory == "full" else split.core_path.parent
+    flat = replace(split, out_dir=directory)
+    assert (split.full_path == flat.full_path if shared_directory == "full"
+            else split.core_path == flat.core_path)
+    for owner, contender in ((split, flat), (flat, split)):
+        with ledger.exclusive_run(owner):
+            client = FakeClient()
+            with pytest.raises(ledger.UsageLedgerError, match="already active"):
+                api.execute(contender, client=client)
+            assert client.messages.calls == []
+            assert not ledger.ledger_path(contender).exists()
+        # Failed acquisition must release files taken before the overlap.
+        with ledger.exclusive_run(contender):
+            pass
+
+
+def test_output_aliases_share_the_physical_file_lock(tmp_path):
+    owner = spec(out_dir=tmp_path / "original")
+    alias = spec(out_dir=tmp_path / "alias")
+    owner.out_dir.mkdir()
+    alias.out_dir.mkdir()
+    owner.full_path.write_text("record")
+    alias.full_path.symlink_to(owner.full_path)
+    with ledger.exclusive_run(owner):
+        client = FakeClient()
+        with pytest.raises(ledger.UsageLedgerError, match="already active"):
+            api.execute(alias, client=client)
+        assert client.messages.calls == []
+    with ledger.exclusive_run(alias):
         pass
 
 

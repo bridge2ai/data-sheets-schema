@@ -102,3 +102,9 @@ independent. Tests exercise overlapping execution before the first intent is
 written, all three contender cases, and a hard child-process exit.
 Existing source-inspection guards now inspect the execution body beneath the
 lock wrapper; their original assertions are retained.
+
+Round 6 found #1298: standard split and flat layouts can share a full record
+without sharing metadata. The exclusion now acquires the resolved full, core,
+report and provenance file locks in a deterministic order, releasing earlier
+acquisitions if any file is already owned. Tests cover both layout directions,
+shared core paths and a symlink alias to a shared physical output.
