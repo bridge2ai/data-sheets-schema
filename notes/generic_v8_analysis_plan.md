@@ -2529,3 +2529,7 @@ At 34 accepted ratings from 38 completed evaluator sessions, the CM4AI v8 rep3 r
 ### CM4AI arithmetic retry (2026-09-12; #1248, #1327)
 
 The isolated retry completed and passed the exact final schema validator, but its Element 6 total was 3 while the sub-elements summed to 4; its overall total was likewise inconsistent (39 reported, 40 from sub-elements). The arithmetic acceptance guard correctly rejected it. At 34 accepted ratings from 39 completed sessions, all five excluded drafts remain preserved. One further isolated retry is registered in `notes/reference_rescore_2026-09-11/cm4ai_v8_rep3_r10_retry2_registration_2026-09-12.json` under the same manifest, rubric10 definition SHA256, complete prompt and $5 cap. No scores, instrument files or acceptance rules were changed. The remaining groups resume only after this retry passes.
+
+### CM4AI isolated retry accepted (2026-09-12; #1248, #1327)
+
+The second fresh retry, started at 12:53:23 UTC, passed the complete registered acceptance checks. Its output SHA256 is `c47a3d865f5ecfa025b50d434e276c0b2a6d52c1b920917e35e56873b940affc`, and its quoted rubric10 definition remains `66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`. Both excluded CM4AI drafts and every file hash recorded before their retries were verified unchanged. This brings the fill to 35 accepted ratings; the remaining 21 jobs resume under the unchanged manifest in groups of at most four. No candidate was repaired by hand and no scoring or attestation rule changed.
