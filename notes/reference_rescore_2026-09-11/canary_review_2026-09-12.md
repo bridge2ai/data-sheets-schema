@@ -4,7 +4,8 @@ The CHORUS v7 rep1 rubric10 canary completed one evaluator session from
 2026-09-12T07:20:00Z to 07:28:54Z. Its original assessment is **35/50 (70.0%)**
 on both the fixed and adjusted bases, with no excluded sub-elements. This
 is one rating of an existing D4D, not a regenerated D4D or a repeatability
-measurement. The remaining 55 registered ratings have not been launched.
+measurement. At canary acceptance, the remaining 55 registered ratings had not
+been launched.
 
 ## Execution and instrument evidence
 
@@ -54,6 +55,14 @@ JSON contracts. The actual retained transcript and candidate passed check-echo,
 identity, schema, arithmetic, original-Write, and frozen-byte checks during
 offline recovery. Final review found no additional execution blocker for the
 registered evaluation protocol.
+
+The first PR CI run passed 3,445 tests and found one missing derived-index
+entry for the new evaluation. Regenerating
+`tests/data/evaluation_instruments.json` added the canary's recorded instrument
+and the two rubric10 definition versions introduced before it. All 12
+instrument-provenance tests then passed. Regenerate this index with
+`python scripts/instrument_provenance.py --write` when publishing further
+reference evaluations; the operation does not rewrite their scores.
 
 ## Assessment review and limits
 
