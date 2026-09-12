@@ -369,6 +369,28 @@ def test_proven_denial_of_exact_validator_preserves_prior_success():
     assert not runner.evaluator_validated(trace[2:], "rubric10-semantic")
 
 
+@pytest.mark.parametrize("error", [False, True])
+@pytest.mark.parametrize("batched", [False, True])
+@pytest.mark.parametrize("failure_first", [False, True])
+@pytest.mark.parametrize("fresh_validation", [False, True])
+def test_delayed_validation_cannot_restore_revoked_attestation(error, batched, failure_first, fresh_validation):
+    trace = denied_command_trace()
+    later = events(valid_record())[:2]
+    later[0]["message"]["content"][1]["id"] = "later-validator"
+    later[1]["message"]["content"][0].update(tool_use_id="later-validator", is_error=error,
+                                            content="INVALID output_evaluation.json: rubric10-semantic")
+    outcomes = [later[1], trace[1]] if failure_first else [trace[1], later[1]]
+    if batched:
+        outcomes = [{"type": "user", "message": {"content": [e["message"]["content"][0] for e in outcomes]}}]
+    pending = [trace[0], later[0]] + outcomes
+    if fresh_validation:
+        fresh = events(valid_record())[:2]
+        fresh[0]["message"]["content"][1]["id"] = "fresh-validator"
+        fresh[1]["message"]["content"][0]["tool_use_id"] = "fresh-validator"
+        pending.extend(fresh)
+    assert runner.evaluator_validated(pending + trace[2:], "rubric10-semantic") is fresh_validation
+
+
 @pytest.mark.parametrize("command", [
     "poetry run python /other/scripts/validate_evaluation_schema.py --file /isolated/output_evaluation.json --rubric rubric10-semantic",
     "poetry run python /isolated/scripts/validate_evaluation_schema.py --file /other/output_evaluation.json --rubric rubric10-semantic",

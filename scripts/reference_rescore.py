@@ -343,6 +343,7 @@ def evaluator_validated(events: list[dict], rubric: str) -> bool:
                 if block.get("is_error"):
                     if tool_id in validator_markers and tool_id not in denied:
                         validated = False
+                        calls.clear()
                     continue
                 content = block.get("content", "")
                 if not isinstance(content, str):
@@ -350,6 +351,7 @@ def evaluator_validated(events: list[dict], rubric: str) -> bool:
                 lines = [s.strip() for s in content.splitlines()]
                 if tool_id in validator_markers and validator_markers[tool_id] not in lines:
                     validated = False
+                    calls.clear()
                 elif not pending_mutations and expected in lines:
                     validated = True
     return validated and not pending_mutations
