@@ -12,7 +12,7 @@ The user requested “rescore with CBORG API” and separately approved adding a
 - Budget: the registered CLI maximum remains $5 per attempt. Original usage and excluded attempts will be retained; CLI-reported cost is not an independently reconciled CBORG invoice.
 - Canary: CHORUS v7 rep1, rubric10, rating1. It uses the same adapter, foreground shell environment, sequential launch mode and output locations as the fill. No remaining rating starts until exact output, schema, arithmetic, source-aligned item identities, runtime identity, quoted definition, final Write binding and an inspected review pass.
 - No automatic retries. A failed attempt stops new launches and is retained. A diagnosed retry is a fresh original measurement under its registered condition.
-- The initial fill plan was sequential. The dated scheduler amendment below supersedes that launch mode after a separate scheduler canary. The planned output paths are separate from every prior condition.
+- The fill remains sequential so the canary exercises the same launch/concurrency mode. The planned output paths are separate from every prior condition.
 - Rubric20 Q19 still allows complete textual provenance or a graph. The old semantic errata are preserved and do not prejudge the new measurements. Mechanical acceptance alone cannot make a score rubric-conformant; inspect new Q19 rationales before final manuscript interpretation.
 
 ## Generation registration
@@ -33,10 +33,7 @@ Run in the project Poetry environment, from the repository root. The CBORG key m
 python scripts/reference_rescore_cborg.py canary
 # Inspect the original output and trace; write the canary review before acceptance.
 python scripts/reference_rescore_cborg.py accept-canary
-python scripts/reference_rescore_cborg_batch.py pilot
-# Review its original output and scheduler evidence, then accept it.
-python scripts/reference_rescore_cborg_batch.py accept-pilot
-python scripts/reference_rescore_cborg_batch.py remaining
+python scripts/reference_rescore_cborg.py remaining
 python scripts/reference_rescore_cborg.py report
 python scripts/reference_rescore_cborg.py audit
 ```
@@ -66,32 +63,3 @@ The separate v9 input pins and pre-run CHORUS baseline are recorded in `v9_input
 The first CBORG canary ended without an output file after $2.433457 of CLI-reported usage. Its init advertised only Bash and Read: adding `--bare` removed Write from the available tool set. The evaluator's attempted shell writes were denied as intended. The failed attempt and original registration remain preserved, with no accepted rating.
 
 A real installed-CLI probe against a local rejecting HTTP server reproduced the missing Write tool with bare mode and verified Read/Write/Bash without it, using fake credentials and no model inference. The adapter now uses safe/restricted mode with a fresh CLI configuration directory, explicit CBORG credentials and startup identity/tool checks. The seven adapter tests pass. The scoring definitions, all 56 complete prompts, input bytes, schemas and five-dollar attempt control are unchanged. A fresh canary must pass before any fill; the denied shell payload will never be treated as an accepted evaluation. The original pre-spend review remains as the historical review of the earlier launch configuration.
-
-
-## Four-worker scheduler amendment — 2026-09-12
-
-The first successful evaluation canary is accepted at 35/50 (70.0% on both
-bases), with all 50 source item names and original Write bytes verified.
-Its CLI-reported cost is $2.80151575. The failed bare-mode attempt remains
-excluded. See the separately retained canary review and acceptance.
-
-The successful session took 9.7 minutes. To complete the authorized cohort
-with less elapsed time, `batch_registration.json` registers a four-worker
-controller without editing the frozen scoring manifest or executable.
-This supersedes the initial sequential fill plan, whose exact bytes are
-archived with their hash. It is an execution-condition amendment, not a
-new rubric or an added rating.
-
-Before fan-out, CHORUS v7 rep1 rubric10 rating2, already among the planned
-eight repeats, must run alone through this same controller with its worker
-limit still set to four. Review must verify the persisted original Write,
-explicit CBORG initialization, schema/echo/model gates and controller logs.
-Only matching reviewed acceptance opens the rest of the queue.
-
-The controller waits for each frozen runner's startup message before
-launching the next worker, so the shared canary gate is not contended. It
-retains each process's own workspace, stops new launches on an observed
-failure, drains in-flight sessions and refuses automatic retries. One pilot
-cannot establish provider rate-limit behavior under load, cross-item
-contention, repeatability or long-tail success. No additional v9 generation
-or download is part of this amendment.
