@@ -1,6 +1,6 @@
 # Reference rescore status — 2026-09-11
 
-Completed 23 of 56 planned evaluations.
+Completed 27 of 56 planned evaluations.
 
 # Semantic comparison: both score bases
 
@@ -31,6 +31,10 @@ Fixed percentages use the full rubric maximum. N/A-adjusted percentages use the 
 | /private/tmp/d4d-reference-fill-2026-09-12/data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v8_rep2_r10_rating1_evaluation.json | CHORUS | rubric10-semantic | Fixed: 37/50 (74.0%) | N/A-adjusted: 37/50 (74.0%) | none | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 3790c4b9f55c0be204475f8072e14030052ec926dda7a25615a712079f31deee |
 | /private/tmp/d4d-reference-fill-2026-09-12/data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v8_rep2_r20_rating1_evaluation.json | CHORUS | rubric20-semantic | Fixed: 70/88 (79.5%) | N/A-adjusted: 70/88 (79.5%) | none | claude-opus-5[1m] | 9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3 | 46922f2a3add284c0be1194fedccbe0e1783195ea775e0135262730f51b10923 |
 | /private/tmp/d4d-reference-fill-2026-09-12/data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v8_rep3_r10_rating1_evaluation.json | CHORUS | rubric10-semantic | Fixed: 34/50 (68.0%) | N/A-adjusted: 34/50 (68.0%) | none | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 35982dc653e2433f2a2a02cdf6b0e3bb8b83c8c1c0293151b55ae7c3d4df6fee |
+| /private/tmp/d4d-reference-fill-2026-09-12/data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v8_rep3_r20_rating1_evaluation.json | CHORUS | rubric20-semantic | Fixed: 69/88 (78.4%) | N/A-adjusted: 69/88 (78.4%) | none | claude-opus-5[1m] | 9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3 | 583f16dcb42fc208da2a95e23d5d4633609786396ea93352fd69519fc74f706b |
+| /private/tmp/d4d-reference-fill-2026-09-12/data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v7_rep1_r10_rating1_evaluation.json | CM4AI | rubric10-semantic | Fixed: 43/50 (86.0%) | N/A-adjusted: 43/47 (91.5%) | E4: Informed Consent Obtained from Participants, E4: Privacy Protections and Re-identification Risk Assessment, E4: Vulnerable Populations and Compensation Documented | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 0455fd2794cbd0701ad38824528047cdf873490d1bc8e25ade73340ec12a391b |
+| /private/tmp/d4d-reference-fill-2026-09-12/data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v7_rep1_r20_rating1_evaluation.json | CM4AI | rubric20-semantic | Fixed: 63/88 (71.6%) | N/A-adjusted: 63/78 (80.8%) | Q15, Q8 | claude-opus-5[1m] | 9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3 | 207f09df7a838920546385f07a7be69b5bf6a265cc6c5515deac0ebcb2cd65ec |
+| /private/tmp/d4d-reference-fill-2026-09-12/data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v7_rep2_r10_rating1_evaluation.json | CM4AI | rubric10-semantic | Fixed: 43/50 (86.0%) | N/A-adjusted: 43/47 (91.5%) | E4: Informed Consent Obtained from Participants, E4: Privacy Protections and Re-identification Risk Assessment, E4: Vulnerable Populations and Compensation Documented | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 61c7243d11d5d7f82079514cf94ca90cd97a6c88366cf839d8a441419a52b9b8 |
 
 Rubric10 repeatability uses three independent ratings of one v7 record per project. Sample standard deviations and ranges are descriptive for those records and this exact instrument; they are not population uncertainty bounds. Changed applicability is flagged. Rubric20 repeatability remains unmeasured. Generation replicate spread is a separate quantity. These scores do not authorize canonical selection on small differences.
 
@@ -38,7 +42,7 @@ Rubric10 repeatability uses three independent ratings of one v7 record per proje
 |---|---|---|---|---|---|---|---|
 | AI_READI | 1/3 | [98.0] | [98.0] | unmeasured | unmeasured | unmeasured | unmeasured |
 | CHORUS | 1/3 | [70.0] | [70.0] | unmeasured | unmeasured | unmeasured | unmeasured |
-| CM4AI | 0/3 | [] | [] | unmeasured | unmeasured | unmeasured | unmeasured |
+| CM4AI | 1/3 | [86.0] | [91.5] | unmeasured | unmeasured | unmeasured | unmeasured |
 | VOICE | 0/3 | [] | [] | unmeasured | unmeasured | unmeasured | unmeasured |
 
 | Project | Cohort | Rubric | Generation records | Fixed percentages | Adjusted percentages |
@@ -50,9 +54,9 @@ Rubric10 repeatability uses three independent ratings of one v7 record per proje
 | CHORUS | v7 | rubric10-semantic | 3/3 | [70.0, 62.0, 70.0] | [70.0, 62.0, 70.0] |
 | CHORUS | v7 | rubric20-semantic | 3/3 | [76.1, 71.6, 73.9] | [76.1, 71.6, 73.9] |
 | CHORUS | v8 | rubric10-semantic | 3/3 | [64.0, 74.0, 68.0] | [64.0, 74.0, 68.0] |
-| CHORUS | v8 | rubric20-semantic | 2/3 | [76.1, 79.5] | [76.1, 79.5] |
-| CM4AI | v7 | rubric10-semantic | 0/3 | [] | [] |
-| CM4AI | v7 | rubric20-semantic | 0/3 | [] | [] |
+| CHORUS | v8 | rubric20-semantic | 3/3 | [76.1, 79.5, 78.4] | [76.1, 79.5, 78.4] |
+| CM4AI | v7 | rubric10-semantic | 2/3 | [86.0, 86.0] | [91.5, 91.5] |
+| CM4AI | v7 | rubric20-semantic | 1/3 | [71.6] | [80.8] |
 | CM4AI | v8 | rubric10-semantic | 0/3 | [] | [] |
 | CM4AI | v8 | rubric20-semantic | 0/3 | [] | [] |
 | VOICE | v7 | rubric10-semantic | 0/3 | [] | [] |

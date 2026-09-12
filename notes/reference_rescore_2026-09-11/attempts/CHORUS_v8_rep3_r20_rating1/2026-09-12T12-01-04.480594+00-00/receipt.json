@@ -1,0 +1,175 @@
+{
+  "job_id": "CHORUS_v8_rep3_r20_rating1",
+  "started_at": "2026-09-12T12:01:04.480943+00:00",
+  "status": "passed",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "user_prompt_sha256": "452160c4c9c7effb353f536c341c3b4f74d918115052cbb6d15d843222baf2f2",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "82963f6ea262f9cff93d4216ba18dacef48c4a6b7286445f83e195782e162759",
+  "evaluation_sha256": "583f16dcb42fc208da2a95e23d5d4633609786396ea93352fd69519fc74f706b",
+  "cli_result": {
+    "duration_api_ms": 377917,
+    "stop_reason": "end_turn",
+    "session_id": "b8012552-ecdd-4bd6-be20-2e630374924e",
+    "total_cost_usd": 1.5404755000000003,
+    "usage": {
+      "input_tokens": 18,
+      "cache_creation_input_tokens": 56320,
+      "cache_read_input_tokens": 422469,
+      "output_tokens": 30189,
+      "output_tokens_details": {
+        "thinking_tokens": 5954
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 56320,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1203,
+          "cache_read_input_tokens": 75631,
+          "cache_creation_input_tokens": 335,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 335
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 11156,
+        "outputTokens": 14,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.011226,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 18,
+        "outputTokens": 30189,
+        "cacheReadInputTokens": 422469,
+        "cacheCreationInputTokens": 56320,
+        "webSearchRequests": 0,
+        "costUSD": 1.5292495000000002,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 5954,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01Up1hbDzHMVvfbyfmTBTQoY",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01GMaRjBRYuwBQrJvTPTS4yk",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml data/rubric/rubric20.txt scripts/validate_evaluation_schema.py",
+          "description": "Compute hashes of input and rubric"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_012jDtySZM7j4wij5dyRENWr",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+          "description": "Validate evaluation output against schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 11,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed: `VALID output_evaluation.json: rubric20-semantic` (exit 0).\n\n**Definition check.** The Reproducibility section is present in my instructions and reads as expected for the current instrument. Verbatim:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\n**Evaluation written** to `output_evaluation.json` for `data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_d4d.yaml` (CHORUS, claudecode_api), evaluator `claude-opus-5[1m]`, temperature `null` (not exposed by this CLI), `instrument_sha256` as supplied with `instrument_kind: agent_definition`.\n\n**Score: 69 / 88 \u2014 fixed 78.4% (denominator 88), normalized 78.4% (adjusted denominator 88).** No questions were excluded: `questions_not_applicable: 0`, `excluded_max_points: 0`, empty `excluded_item_ids`. All four conditional triggers resolved as met from non-circular evidence \u2014 human subjects from the description/keywords/collection_mechanisms (Q1\u2013Q3, Q12), datasets-shared from `distribution_formats` and `third_party_sharing.is_shared` under the ambiguity rule (controlled access still counts), software output from `external_resources` naming the 28-repository chorus-ai organization (Q14), and data-collection-plus-sharing from the populated collection fields.\n\nCategory totals: Structural Completeness 20/21, Metadata Quality 18/21, Technical Documentation 16/25, FAIRness 15/21.\n\nWhat drove the score:\n\n- **Strongest area** is standards binding \u2014 each of nine modalities tied to a named community standard (OMOP CDM with declared flowsheet extensions, OHNLP, DICOM, WFDB/PhysioNet, EDF+/Persyst), plus LinkML conformance and validated semantic mappings. Q10 earns 5, Q7 earns 5 on a well-formed NIH OT2 grant with full award identifiers.\n- **Weakest area** is Technical Documentation, held down by Q13 at 2: no `version`, `version_access`, `errata`, `doi` or `publisher` for a dataset the record itself describes as growing from 50,000 toward 100,000 admissions.\n- **Twelve semantic issues** recorded, four consistency checks failed: no persistent identifier despite active sharing; `involves_human_subjects=true` with no IRB named and `informed_consent` absent entirely; minors (PICU/NICU) included with no assent or guardian-permission procedures; de-identification claimed with no named standard and no `reidentification_risk` against waveform, imaging and DeGauss-geocoded location data.\n- **Notable quality of the record itself**: source disagreements (50,000 vs 45,000 admissions; 7,642 radiology admissions vs ~1,000 images) are surfaced at the affected instance with tiered provenance rather than silently reconciled, and the record labels its own inferences as its own. This transparency prevented lower scores on Q8, Q12 and Q15 but does not substitute for the absent content.\n\nOne correctness nit carried into the issues list: the maintainer address `cmccrary@mgh.havard.edu` appears misspelled, which the record notes is transcribed as printed.",
+    "ttft_ms": 2646,
+    "type": "result",
+    "duration_ms": 379074,
+    "uuid": "68bd7ef2-965f-4d38-8e62-e1ea39a451b4",
+    "ttft_stream_ms": 712,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 1063,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T12:07:24.844405+00:00"
+}
