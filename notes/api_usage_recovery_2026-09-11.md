@@ -73,3 +73,21 @@ requires their call IDs and recorded output counters to be covered by provenance
 Fresh execution also preserves the IDs of superseded generations in the ledger
 and provenance. Their retained log entries are historical; a later unknown
 generation still blocks completion when its ledger is missing.
+
+Round 4 found #1295: fresh execution from a portable completed record could
+lose its predecessor's history because the ledger had not been copied. The
+fresh boundary now combines matching provenance history with any existing
+ledger history. It does not import prior charges or another run's history.
+Tests cover fresh execution from a portable record, its subsequent no-call
+return, and repeated fresh boundaries with stale provenance.
+
+Round 4 also found #1296: a failed completed-response write left no durable
+evidence to stop a subsequent invocation from understating usage. Every paid
+call path now commits a pending identity before the request and resolves it
+atomically with the completed counters. Failure or process interruption in
+between leaves that marker, which blocks further calls and the completed-record
+exit until accounting is restored. Explicit fresh execution archives the
+uncertain generation without claiming to recover its counters. A reported
+transport error with no completed response clears the marker; partial usage
+continues to use the abandoned-stream journal. Tests cover all four call paths,
+the next invocation after storage recovers, interruption and explicit fresh.

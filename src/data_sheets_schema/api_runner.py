@@ -46,6 +46,8 @@ from data_sheets_schema import provenance, reasoning, schema_digest
 from data_sheets_schema.usage_ledger import (
     UsageLedgerError,
     append_usage as _append_usage,
+    begin_call as _begin_usage_call,
+    cancel_call as _cancel_usage_call,
     generation_id as _usage_generation,
     identity_is_foreign as _foreign_usage_identity,
     merge_usage as merge_completed_rows,
@@ -53,6 +55,7 @@ from data_sheets_schema.usage_ledger import (
     prior_generation_ids as _prior_usage_generations,
     prepare_usage as _prepare_usage,
     record_matches as _usage_record_matches,
+    require_resolved as _require_resolved_usage,
     run_identity as _usage_identity,
     same_generation as _same_usage_generation,
 )
@@ -1883,7 +1886,8 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
     recorded = False
     try:
         rreq = build_readdress(req, response_text, unresolved)
-        resp = _call_with_retry(client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"), max_tokens=cap_tokens,
+        resp, entry["usage_id"] = _call_with_usage(spec, "full_readdress", 1, started,
+                                client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"), max_tokens=cap_tokens,
                                 temperature=settings["temperature"],
                                 system=rreq.system, messages=rreq.messages,
                                 on_incomplete=lambda info: _record_incomplete_stream(
@@ -1912,6 +1916,8 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
         summary.update(apply_readdress(receipt, record, answers))
         summary["answers"] = len(answers)
         receipt_body = yaml.safe_dump(receipt, sort_keys=False, allow_unicode=True, width=10_000)
+    except UsageLedgerError:
+        raise
     except Exception as exc:                                   # noqa: BLE001
         summary["call_failed"] = f"{type(exc).__name__}: {str(exc)[:300]}"
     summary["still_unresolved"] = unresolved_receipt_slots(record, yaml.safe_load(receipt_body))
@@ -3353,14 +3359,17 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 timespec="seconds")
             attempt_t0 = time.monotonic()
             try:
-                resp = _call_with_retry(
-                    client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
+                resp, call_id = _call_with_usage(
+                    spec, ph, rnd, attempt_started, client,
+                    model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
                     max_tokens=phase_max_tokens(spec, ph, DEFAULT_MAX_TOKENS, model=settings["name"]),
                     temperature=settings["temperature"],
                     system=req.system, messages=req.messages,
                     on_incomplete=lambda info, _ph=ph, _rnd=rnd, _st=attempt_started:
                         _record_incomplete_stream(spec, _ph, _rnd, _st, info, usage,
                                                   max_tokens=phase_max_tokens(spec, _ph, DEFAULT_MAX_TOKENS, model=settings["name"])))
+            except UsageLedgerError:
+                raise
             except Exception as exc:                   # noqa: BLE001
                 # A dead repair call must not take down a run that would
                 # otherwise report invalid-but-complete, as before repair
@@ -3369,6 +3378,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                             "outcome": f"call failed: {exc}"})
                 break
             call_usage = _append_usage(spec, usage, {
+                "usage_id": call_id,
                 "phase": ph, "attempt": rnd,
                 "started_at": attempt_started,
                 "seconds": round(time.monotonic() - attempt_t0, 3),
@@ -3531,6 +3541,21 @@ def _attach_output_tokens_details(msg, details: dict[str, Any]) -> None:
         extra = getattr(usage, "model_extra", None)
         if isinstance(extra, dict):
             extra["output_tokens_details"] = details
+
+
+def _call_with_usage(spec: RunSpec, phase: str, attempt: int, started_at: str, client, **kwargs):
+    identifier = _begin_usage_call(spec, phase, attempt, started_at)
+    try:
+        response = _call_with_retry(client, **kwargs)
+    except UsageLedgerError:
+        raise
+    except Exception:
+        # A reported transport failure delivered no completed response. Its
+        # partial usage still belongs to the abandoned-stream journal. A
+        # process exit or interrupt instead retains the unresolved marker.
+        _cancel_usage_call(spec, identifier)
+        raise
+    return response, identifier
 
 
 def _call_with_retry(client, *, model, max_tokens, temperature, system, messages, on_incomplete=None,
@@ -3844,8 +3869,9 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
             {"type": "text", "text": REGATE_HEADERS[1] + listing},
             {"type": "text", "text": PHASE_INSTRUCTIONS["report_regate"]}])
     try:
-        resp = _call_with_retry(
-            client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
+        resp, call_id = _call_with_usage(
+            spec, phase, 1, started, client,
+            model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
             max_tokens=phase_max_tokens(spec, "report", settings["max_tokens"], model=settings["name"]),
             temperature=(settings["temperature"]
                          if settings["temperature_applies"] else None),
@@ -3853,9 +3879,11 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
             on_incomplete=lambda info: _record_incomplete_stream(
                 spec, phase, 1, started, info, usage,
                 max_tokens=phase_max_tokens(spec, "report", settings["max_tokens"], model=settings["name"])))
+    except UsageLedgerError:
+        raise
     except Exception:                                          # noqa: BLE001
         return False                # a stale report is better than none
-    call_usage = _append_usage(spec, usage, {"phase": phase, "attempt": 1, "started_at": started,
+    call_usage = _append_usage(spec, usage, {"usage_id": call_id, "phase": phase, "attempt": 1, "started_at": started,
                   "seconds": round(time.monotonic() - t0, 3),
                   "input_tokens": getattr(resp.usage, "input_tokens", None),
                   "output_tokens": getattr(resp.usage, "output_tokens", None),
@@ -4253,8 +4281,8 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
         attempt_started = datetime.now(timezone.utc).isoformat(
             timespec="seconds")
         attempt_t0 = time.monotonic()
-        resp = _call_with_retry(
-            client,
+        resp, call_id = _call_with_usage(
+            spec, ph, attempt, attempt_started, client,
             model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
             max_tokens=phase_max_tokens(spec, ph, settings["max_tokens"], model=settings["name"]),
             temperature=settings["temperature"],
@@ -4267,6 +4295,7 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
         # Durable before reasoning, parsing, snapshots or progress writes:
         # any of those can fail after the completed call was already billed.
         call_usage = _append_usage(spec, usage, {
+            "usage_id": call_id,
             "phase": ph,
             "attempt": attempt,
             "started_at": attempt_started,
@@ -4402,6 +4431,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     client = client or _client()
     usage: list[dict[str, Any]] = []
     generation = _usage_generation(spec) if resume else _prepare_usage(spec, resume=False)
+    if resume:
+        _require_resolved_usage(spec)
     skipped: list[str] = []
     carry: dict[str, str] = {}
 

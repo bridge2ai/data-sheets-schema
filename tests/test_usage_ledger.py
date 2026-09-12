@@ -119,7 +119,7 @@ def test_usage_is_durable_before_reasoning_processing_can_fail(tmp_path, monkeyp
     assert recovered[0]["input_tokens"] > 0
 
 
-def test_ledger_failure_does_not_trigger_another_paid_attempt(tmp_path, monkeypatch):
+def test_intent_persistence_failure_prevents_the_paid_call(tmp_path, monkeypatch):
     s = spec(out_dir=tmp_path)
 
     def fail(*args):
@@ -129,7 +129,89 @@ def test_ledger_failure_does_not_trigger_another_paid_attempt(tmp_path, monkeypa
     client = FakeClient()
     with pytest.raises(ledger.UsageLedgerError, match="disk failure"):
         api._generate_phase(s, "full", {}, client, api._model_settings(), [])
+    assert client.messages.calls == []
+
+
+@pytest.mark.parametrize("phase", ["full", "repair_full", "report_after_repair", "full_readdress"])
+def test_response_persistence_failure_blocks_the_next_invocation(tmp_path, monkeypatch, phase):
+    s = spec(out_dir=tmp_path)
+    body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+    s.full_path.write_text(body)
+    s.core_path.write_text(body)
+    client, usage, settings = FakeClient(), [], api._model_settings()
+    original_replace = ledger.os.replace
+
+    def fail_after_response(source, destination):
+        if client.messages.calls:
+            raise OSError("response storage failed")
+        return original_replace(source, destination)
+
+    with monkeypatch.context() as failing:
+        failing.setattr(ledger.os, "replace", fail_after_response)
+        with pytest.raises(ledger.UsageLedgerError, match="response storage failed"):
+            if phase == "full":
+                api._generate_phase(s, phase, {}, client, settings, usage)
+            elif phase == "repair_full":
+                failing.setattr(api, "_validator_lines", lambda *args: (["bad shape"], None))
+                api._repair_invalid(s, client, settings, usage)
+            elif phase == "report_after_repair":
+                carry = {key: body for key in api.PHASE_NEEDS["report"]}
+                api._regenerate_report(s, client, settings, usage, carry)
+            else:
+                from tests.test_download.test_receipt_readdress import _receipt
+                receipt = yaml.safe_dump(_receipt({"slot": "unknown_slot", "snippet": "a"}))
+                api._readdress_receipt(s, api.build_phase(s, "full", carry={}), body,
+                                      body, receipt, client, settings, usage)
+    before = ledger.ledger_path(s).read_bytes()
+    pending = json.loads(before)["pending_call"]
+    assert pending["phase"] == phase and pending["usage_id"]
+    assert len(client.messages.calls) == 1 and usage == []
+    # Restoring storage cannot turn the unresolved completed response into a
+    # new run with a silently smaller total, or permit a no-call success exit.
+    with pytest.raises(ledger.UsageLedgerError, match="unresolved accounting"):
+        api.execute(s, client=client)
     assert len(client.messages.calls) == 1
+    assert ledger.ledger_path(s).read_bytes() == before
+    # Explicit fresh is allowed, with the uncertain historical bytes retained.
+    ledger.prepare_usage(s, resume=False)
+    ledger.require_resolved(s)
+    assert any(path.read_bytes() == before for path in tmp_path.glob("*.previous-*.json"))
+
+
+def test_interrupt_before_response_accounting_remains_unresolved(tmp_path, monkeypatch):
+    s, client = spec(out_dir=tmp_path), FakeClient()
+
+    def interrupt(*args, **kwargs):
+        raise KeyboardInterrupt
+
+    with monkeypatch.context() as interrupted:
+        interrupted.setattr(api, "_append_usage", interrupt)
+        with pytest.raises(KeyboardInterrupt):
+            api._generate_phase(s, "full", {}, client, api._model_settings(), [])
+    with pytest.raises(ledger.UsageLedgerError, match="unresolved accounting"):
+        api.execute(s, client=client)
+    assert len(client.messages.calls) == 1
+
+
+def test_recovered_counters_resolve_the_same_pending_call(tmp_path):
+    s = spec(out_dir=tmp_path)
+    identifier = ledger.begin_call(s, "full", 1, "2026-09-11T00:00:00Z")
+    with pytest.raises(ledger.UsageLedgerError, match="unresolved accounting"):
+        ledger.begin_call(s, "audit", 1, "2026-09-11T00:00:01Z")
+    recovered = {**row(), "usage_id": identifier}
+    ledger.persist_usage(s, recovered)
+    ledger.require_resolved(s)
+    assert ledger.merge_usage(s, []) == [recovered]
+
+
+def test_reported_transport_failure_does_not_leave_a_completed_call_pending(tmp_path):
+    s = spec(out_dir=tmp_path)
+    client = FakeClient()
+    client.messages.fail_on = "full"
+    with pytest.raises(RuntimeError, match="boom"):
+        api._generate_phase(s, "full", {}, client, api._model_settings(), [])
+    ledger.require_resolved(s)
+    assert ledger.merge_usage(s, []) == []
 
 
 @pytest.mark.parametrize("phase", ["repair_full", "report_after_repair", "full_readdress"])
@@ -252,18 +334,24 @@ api.execute(spec(out_dir=Path(sys.argv[1])), client=FakeClient())
     assert len(client.messages.calls) == 3 and s.provenance_path.read_bytes() == previous
 
 
-def test_explicit_fresh_execution_does_not_import_previous_usage(tmp_path):
+@pytest.mark.parametrize("portable_prior", [False, True])
+def test_explicit_fresh_execution_does_not_import_previous_usage(tmp_path, portable_prior):
     from data_sheets_schema.run_telemetry import run_telemetry
     s = spec(out_dir=tmp_path)
     old = api.execute(s, client=FakeClient())["usage"]
     previous_generation = ledger.generation_id(s)
     # Even a stale progress file must not defeat an explicit fresh request.
     api._save_progress(s, list(api.PHASES), None)
+    if portable_prior:
+        ledger.ledger_path(s).unlink()
     new = api.execute(s, resume=False, client=FakeClient())["usage"]
     assert len(old) == len(new) == 4
     assert {r["usage_id"] for r in old}.isdisjoint(r["usage_id"] for r in new)
     archived = list(tmp_path.glob("*.previous-*.json"))
-    assert len(archived) == 1 and json.loads(archived[0].read_text())["rows"] == old
+    if portable_prior:
+        assert archived == []
+    else:
+        assert len(archived) == 1 and json.loads(archived[0].read_text())["rows"] == old
     assert yaml.safe_load(s.provenance_path.read_text())["run"]["prior_generation_ids"] == [previous_generation]
     entries = [json.loads(line) for line in api._reasoning_path(s).read_text().splitlines()]
     current_ids = {r["usage_id"] for r in new}
@@ -428,10 +516,26 @@ def test_new_identity_in_a_shared_directory_starts_its_own_generation(tmp_path, 
     with pytest.raises(Started):
         api.execute(current, client=FakeClient())
     assert ledger.generation_id(current) != generation
+    assert ledger.prior_generation_ids(current) == []
     assert json.loads(ledger.ledger_path(current).read_text())["accept_legacy"] is False
     assert ledger.ledger_path(old).read_bytes() == old_ledger
     assert api._abandoned_ledger(old).read_bytes() == journal
     assert api.merge_abandoned_rows(current, []) == []
+
+
+def test_fresh_boundary_combines_matching_record_and_ledger_history(tmp_path):
+    s = spec(out_dir=tmp_path)
+    generation = ledger.prepare_usage(s, resume=True)
+    prior = {"run": {**ledger.run_identity(s), "generation_id": "parent",
+                     "prior_generation_ids": ["ancestor"]}}
+    s.provenance_path.write_text(yaml.safe_dump(prior))
+    ledger.prepare_usage(s, resume=False)
+    assert ledger.prior_generation_ids(s) == ["ancestor", "parent", generation]
+    # Repeating fresh execution while provenance remains stale preserves the
+    # whole history without duplicating the IDs present in both sources.
+    current = ledger.generation_id(s)
+    ledger.prepare_usage(s, resume=False)
+    assert ledger.prior_generation_ids(s) == ["ancestor", "parent", generation, current]
 
 
 @pytest.mark.parametrize("known_owner", [True, False])
