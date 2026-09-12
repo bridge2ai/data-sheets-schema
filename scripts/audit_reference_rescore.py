@@ -169,7 +169,8 @@ def audit_results(*, complete: bool = False) -> dict:
     assert active == 0 and peak <= 4
     for name in ('model_provenance_registration.json', 'model_provenance_fill_preservation.json',
                  'canonical_validator_registration.json', 'canonical_validator_fill_preservation.json',
-                 'reporting_audit_registration.json', 'reporting_audit_fill_preservation.json'):
+                 'reporting_audit_registration.json', 'reporting_audit_fill_preservation.json',
+                 'percentage_denial_registration.json', 'percentage_denial_fill_preservation.json'):
         path = r.PLAN / name
         if not path.exists():
             if complete:

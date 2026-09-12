@@ -297,6 +297,31 @@ def test_unproven_or_ambiguous_denials_do_not_preserve_validation(defect):
     assert not runner.evaluator_validated(trace, "rubric10-semantic")
 
 
+@pytest.mark.parametrize("defect", [
+    "failed_then_duplicate_success", "success_then_duplicate_failure", "duplicate_use",
+    "unanswered_later_validator", "validator_result_after_terminal",
+])
+def test_denial_cannot_preserve_ambiguous_validator_evidence(defect):
+    trace = denied_command_trace()
+    if defect == "failed_then_duplicate_success":
+        success = copy.deepcopy(trace[1])
+        trace[1]["message"]["content"][0].update(is_error=True, content="schema validation failed")
+        trace.insert(-1, success)
+    elif defect == "success_then_duplicate_failure":
+        failure = copy.deepcopy(trace[1])
+        failure["message"]["content"][0].update(is_error=True, content="schema validation failed")
+        trace.insert(-1, failure)
+    elif defect == "duplicate_use":
+        trace.insert(1, copy.deepcopy(trace[0]))
+    elif defect == "unanswered_later_validator":
+        unanswered = copy.deepcopy(trace[0])
+        unanswered["message"]["content"][1]["id"] = "unanswered"
+        trace.insert(2, unanswered)
+    elif defect == "validator_result_after_terminal":
+        trace.append(trace.pop(1))
+    assert not runner.evaluator_validated(trace, "rubric10-semantic")
+
+
 @pytest.mark.parametrize("command", [
     "poetry run python /other/scripts/validate_evaluation_schema.py --file /isolated/output_evaluation.json --rubric rubric10-semantic",
     "poetry run python /isolated/scripts/validate_evaluation_schema.py --file /other/output_evaluation.json --rubric rubric10-semantic",

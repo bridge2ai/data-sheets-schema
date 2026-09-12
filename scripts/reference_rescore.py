@@ -273,6 +273,25 @@ def denied_bash_calls(events: list[dict]) -> set[str]:
 def evaluator_validated(events: list[dict], rubric: str) -> bool:
     directories = [e.get("cwd") for e in events if e.get("type") == "system" and e.get("subtype") == "init"]
     directory = directories[0] if len(directories) == 1 and isinstance(directories[0], str) else None
+    terminals = [i for i, e in enumerate(events) if e.get("type") == "result"]
+    if len(terminals) != 1:
+        return False
+    uses, results = {}, {}
+    for index, event in enumerate(events):
+        message = event.get("message")
+        if not isinstance(message, dict) or not isinstance(message.get("content"), list):
+            continue
+        for block in message["content"]:
+            if not isinstance(block, dict):
+                continue
+            if event.get("type") == "assistant" and block.get("type") == "tool_use":
+                key = block.get("id")
+                if isinstance(key, str):
+                    uses.setdefault(key, []).append(index)
+            if event.get("type") == "user" and block.get("type") == "tool_result":
+                key = block.get("tool_use_id")
+                if isinstance(key, str):
+                    results.setdefault(key, []).append(index)
     calls = {}
     denied = denied_bash_calls(events)
     pending_mutations = set()
@@ -293,8 +312,13 @@ def evaluator_validated(events: list[dict], rubric: str) -> bool:
                 output = (validator_output_path(args.get("command", ""), rubric, directory)
                           if name == "Bash" else None)
                 if output is not None:
+                    key = block.get("id")
+                    if (not isinstance(key, str) or len(uses.get(key, [])) != 1
+                            or len(results.get(key, [])) != 1
+                            or not uses[key][0] < results[key][0] < terminals[0]):
+                        return False  # Missing, duplicate or replayed validator evidence.
                     if not pending_mutations:
-                        calls[block["id"]] = f"VALID {output}: {rubric}"
+                        calls[key] = f"VALID {output}: {rubric}"
                 elif name != "Read" and block.get("id") not in denied:
                     # Write, Edit or an unrecognized command may change the
                     # output. Even a failed tool can have partially written it.
@@ -308,12 +332,13 @@ def evaluator_validated(events: list[dict], rubric: str) -> bool:
                     pending_mutations.remove(tool_id)
                     calls.clear()
                     validated = False
+                expected = calls.pop(tool_id, None)
                 if block.get("is_error"):
                     continue
                 content = block.get("content", "")
                 if not isinstance(content, str):
                     content = "\n".join(c.get("text", "") for c in content if isinstance(c, dict))
-                if not pending_mutations and calls.get(tool_id) in [s.strip() for s in content.splitlines()]:
+                if not pending_mutations and expected in [s.strip() for s in content.splitlines()]:
                     validated = True
     return validated and not pending_mutations
 

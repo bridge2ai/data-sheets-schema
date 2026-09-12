@@ -205,7 +205,8 @@ def test_complete_cohort_with_unresolved_terminal_usage_never_certifies(tmp_path
     (plan / "manifest.json").write_text(json.dumps(manifest))
     for name in ("model_provenance_registration", "model_provenance_fill_preservation",
                  "canonical_validator_registration", "canonical_validator_fill_preservation",
-                 "reporting_audit_registration", "reporting_audit_fill_preservation"):
+                 "reporting_audit_registration", "reporting_audit_fill_preservation",
+                 "percentage_denial_registration", "percentage_denial_fill_preservation"):
         (plan / f"{name}.json").write_text(json.dumps({"retained_attempt_files": {},
             "existing_outputs": {"evaluation0.json": audit.r.digest(tmp_path / "evaluation0.json")}}))
     baseline = audit.audit_results(complete=True)
