@@ -58,8 +58,14 @@ def main():
         "affected_job_ids": [c["job_id"] for c in flagged],
         "affected_evaluations": [c["output"] for c in flagged],
     }
+    execution = audit["execution_permission_boundary"]
+    if r.digest(ROOT / execution["registration"]) != execution["registration_sha256"]:
+        raise ValueError("execution-boundary registration changed after the audit")
     banner = ("**Semantic inspection — Q19:** " + review["qualification"]
-              + " See the [24-rating inspection](semantic_review.md).\n\n")
+              + " See the [24-rating inspection](semantic_review.md).\n\n"
+              + "**Execution boundary:** " + execution["qualification"]
+              + " Repeat panels spanning it: " + ", ".join(execution["repeat_panels_spanning_boundary"])
+              + ". See [the dated registration](validator_status_registration.json).\n\n")
     reports = [plan / name for name in ("results.json", "results.md", "completion_summary.md", "semantic_review.md")]
     before = {path: path.read_bytes() if path.exists() else None for path in reports}
     try:
@@ -69,6 +75,7 @@ def main():
             raise ValueError("reported cohort or repeat panel is incomplete")
         results["provider_condition"] = "LBL CBORG / 2026-09-12 with execution-metadata provenance; separate from preliminary and prior reference runs"
         results["semantic_qualification"] = qualification
+        results["execution_permission_boundary"] = execution
         r.write_json(plan / "results.json", results)
         text = (plan / "results.md").read_text().replace(str(ROOT) + "/", "")
         title, rest = text.split("\n", 1)

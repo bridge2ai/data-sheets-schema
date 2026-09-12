@@ -35,6 +35,43 @@ def main():
         raise ValueError("completion requires all 56 original ratings and complete attempt/usage accounting")
     batch.require_pilot(r, manifest, registration)
     written = [batch.verified_output(r, manifest, job) for job in manifest["jobs"]]
+    boundary_path = r.PLAN / "validator_status_registration.json"
+    boundary = json.loads(boundary_path.read_bytes())
+    earlier = boundary["accepted_outputs_preserved"]
+    before_jobs, after_jobs, status_jobs = [], [], []
+    import reference_rescore_cborg_validator_status as status
+    from datetime import datetime
+    for job, binding in zip(manifest["jobs"], written, strict=True):
+        receipt = r.successful_receipt(manifest, job)
+        source = ROOT / binding["original_attempt"]
+        events = audit_module.read_trace(source)
+        proofs = status.proven_status_calls(r, events, job["rubric"])
+        if job["output"] in earlier:
+            if (r.digest(ROOT / job["output"]) != earlier[job["output"]]
+                    or datetime.fromisoformat(receipt["completed_at"]) >= datetime.fromisoformat(boundary["recorded_at"])):
+                raise ValueError("pre-extension measurement does not match the registered boundary")
+            before_jobs.append(job["id"])
+        else:
+            if (datetime.fromisoformat(receipt["started_at"]) < datetime.fromisoformat(boundary["recorded_at"])
+                    or receipt.get("validator_exit_status_evidence") != proofs):
+                raise ValueError("post-extension receipt lacks its original validation evidence")
+            after_jobs.append(job["id"])
+        if proofs:
+            status_jobs.append(job["id"])
+    if len(before_jobs) != len(earlier) or len(before_jobs) != 5 or len(after_jobs) != 51:
+        raise ValueError("completed execution-boundary inventory differs from the registration")
+    panel_stages = {}
+    for job in manifest["jobs"]:
+        if job["rubric"] == "rubric10-semantic" and job["cohort"] == "v7" and job["generation_rep"] == 1:
+            panel_stages.setdefault(job["project"], set()).add("before" if job["id"] in before_jobs else "after")
+    audit["execution_permission_boundary"] = {
+        "registration": str(boundary_path.relative_to(ROOT)), "registration_sha256": r.digest(boundary_path),
+        "recorded_at": boundary["recorded_at"], "extension": boundary["execution_extension"],
+        "accepted_before_job_ids": before_jobs, "accepted_after_job_ids": after_jobs,
+        "accepted_status_echo_job_ids": status_jobs,
+        "repeat_panels_spanning_boundary": sorted(project for project, stages in panel_stages.items() if len(stages) > 1),
+        "qualification": "Five accepted ratings precede the validator-status permission extension and 51 follow it. Scoring prompts, definitions and inputs are unchanged, but execution permissions differ. Cohort comparisons and repeat panels spanning this boundary do not isolate permission effects; small differences cannot be attributed solely to generation version or evaluator variability.",
+    }
     preserved = {}
     for mapping in (registration["preserved_files"], registration["existing_outputs"]):
         for rel, sha in mapping.items():
