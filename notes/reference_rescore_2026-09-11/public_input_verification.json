@@ -8,5 +8,16 @@
   "local_blob_sha": "c70971457e150a36dd525e3b4f554dbd676cea1e",
   "size": 33560,
   "basis": "gh repo view visibility/isPrivate and gh api contents at main; local git hash-object matched exactly",
-  "approval_review": "Both execution requests were rejected before process creation. Public visibility and matching byte identity were verified between requests. The second review still required explicit authorization for the Anthropic Claude destination and paid evaluation; user approval was requested. No evaluator process or paid call has run."
+  "approval_review": "Both execution requests were rejected before process creation. Public visibility and matching byte identity were verified between requests. The second review still required explicit authorization for the Anthropic Claude destination and paid evaluation; user approval was requested. No evaluator process or paid call has run.",
+  "subsequent_execution": {
+    "date": "2026-09-12",
+    "approval": "Execution approval passed after the user requested proceeding to canaries.",
+    "attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T07-20-00.645660+00-00",
+    "budget_cap_usd": 5,
+    "cli_reported_cost_usd": 2.2204425000000003,
+    "initial_runner_status": "incomplete",
+    "offline_recovery_status": "passed",
+    "model_calls_during_recovery": 0,
+    "canary_accepted": true
+  }
 }

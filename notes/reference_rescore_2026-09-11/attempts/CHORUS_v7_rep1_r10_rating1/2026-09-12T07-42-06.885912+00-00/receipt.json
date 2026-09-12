@@ -1,0 +1,145 @@
+{
+  "job_id": "CHORUS_v7_rep1_r10_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T07:42:06.886276+00:00",
+  "manifest_sha256": "78dc05cada5a4905d8eabd2320ebcd0054d83e92d5611de93b4f98fc557f324a",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "e5c0f47198cd20ea47158959f6cfb4d25648965eb8c063ac977e2b5b9aba355d",
+  "evaluation_sha256": "017f888bdccf12a04b62917e8fa08c39263cf45a5533fb349ca9eb075335199f",
+  "cli_result": {
+    "duration_api_ms": 530377,
+    "stop_reason": "end_turn",
+    "session_id": "fd641843-01a6-47be-8190-50181406a935",
+    "total_cost_usd": 2.2204425000000003,
+    "usage": {
+      "input_tokens": 12,
+      "cache_creation_input_tokens": 95995,
+      "cache_read_input_tokens": 271239,
+      "output_tokens": 44590,
+      "output_tokens_details": {
+        "thinking_tokens": 12151
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 95995,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1227,
+          "cache_read_input_tokens": 95739,
+          "cache_creation_input_tokens": 256,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 256
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 9993,
+        "outputTokens": 14,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.010063,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 12,
+        "outputTokens": 44590,
+        "cacheReadInputTokens": 271239,
+        "cacheCreationInputTokens": 95995,
+        "webSearchRequests": 0,
+        "costUSD": 2.2103795,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 12151,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01Y1Sqpy61oZdmQRf1aswkef",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml 2>/dev/null; find . -name \"*.md\" -path \"*agents*\" 2>/dev/null | head",
+          "description": "Hash input record and locate agent definition"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 8,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0): `VALID output_evaluation.json: rubric10-semantic`.\n\n## Definition check\n\nThe section headed \"Source rubric and schema paths (#158)\" is present in my instructions, and its sentence reads verbatim:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches the current instrument (sha256 `66ad6231\u202634864`), so I proceeded.\n\n## Result \u2014 CHORUS, claudecode_agent, rep1\n\n**35 / 50 = 70.0%** on both bases. All five trigger conditions resolved as **met**, so `excluded_max_points: 0`, `adjusted_max_points: 50`, `sub_elements_not_applicable: 0` \u2014 `normalized_percentage` and `fixed_percentage` coincide only because nothing was excluded.\n\n| Element | Score |\n|---|---|\n| 1 Discovery | 3/5 |\n| 2 Access | 5/5 |\n| 3 Reuse | 4/5 |\n| 4 Ethics & Privacy | 2/5 |\n| 5 Composition | 3/5 |\n| 6 Provenance & Versioning | 2/5 |\n| 7 Motivation & Funding | 5/5 |\n| 8 Technical Transparency | 5/5 |\n| 9 Limitations | 4/5 |\n| 10 Community Integration | 2/5 |\n\n**Applicability resolution.** Human subjects met on E1 evidence (description: \"acute and critical care hospital admissions\", \"ICU, PICU, and NICU settings\") \u2014 Element 4 fully applicable, all five scored. Governance met independently on E2 (`confidentiality_level: restricted`). Datasets-shared met via `distribution_formats` plus `third_party_sharing.is_shared: true`; access requires approval, which the ambiguity rule resolves toward applicable. Software-output met on E10's GitHub organization reference, gating E8 sub-element 3. E10 sub-element 2 scored 0 rather than N/A per #1080.\n\n**What carries the score.** Element 8 is the record's strongest: processing-role software is named \u2014 OHNLP toolkit, DeGauss/UF-Geocoding, chorus_waveform conversion scripts, chorus-mapping, CTP-deid \u2014 all transforming the distributed data, not merely capturing or hosting it. The capture-role `chorus-extract-upload` and quality-role `CHoRUSReports` were noted but not relied on. Funding is verifiable in both forms of OT2OD032701 (valid NIH pattern) with a corroborating RePORTER link.\n\n**What costs it.** Two high-severity consistency failures in Element 4: `involves_human_subjects: true` with no IRB, ethics body, or approval identifier named \u2014 the record concedes this in its own caveats \u2014 and `informed_consent` absent entirely, not even a waiver. Separately, no DOI, version, version access, citation, or publisher: three sub-elements across Elements 6 and 10 score 0 for a dataset the record says is already supporting publications. Also no `variables`, no `anomalies`, no `missing_data_documentation`.\n\nConsistency checks: 15 passed, 4 failed, 5 warnings. 15 issues recorded with severities and field lists; `url_validity: some_invalid` (a scheme-less resource URL and an apparently misspelled contact domain reproduced as published).",
+    "ttft_ms": 2741,
+    "type": "result",
+    "duration_ms": 531985,
+    "uuid": "8620a746-96ef-40bb-a3f9-ea1635200f69",
+    "ttft_stream_ms": 749,
+    "time_to_request_ms": 25,
+    "first_content_frame_ms": 1107,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T07-20-00.645660+00-00",
+  "original_receipt_sha256": "d8e90326766c61200aa8335ff74a6cbd3a9c83ac3701b9320a24d3da86a6bb48",
+  "transcript_sha256": "ad8db7b4221bb40bc2c3a1924047efdf241724be8f13bf5e62d734cee59987a4",
+  "user_prompt_sha256": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "evaluated_at": "2026-09-12T07:20:00.646427+00:00",
+  "model_calls_during_recovery": 0
+}
