@@ -21,6 +21,8 @@ def test_provider_selection_ignores_inherited_direct_credentials():
         "CLAUDE_CODE_USE_BEDROCK": "1",
         "CLAUDE_CODE_USE_FOUNDRY": "1",
         "CLAUDE_CODE_OAUTH_TOKEN": "test-oauth-token",
+        "CLAUDE_CODE_SIMPLE": "1",
+        "CLAUDE_CONFIG_DIR": "/inherited/config",
         "PATH": "/test/bin",
     }
     selected = adapter.cborg_environment(original)
@@ -47,3 +49,45 @@ def test_new_provider_preserves_cohort_and_uses_new_output_locations():
     assert all("/reference_2026-09-12_cborg/" in j["output"] for j in jobs)
     assert runner.PLAN.name == "reference_rescore_2026-09-12_cborg"
     assert all((ROOT / j["input"]).is_file() for j in jobs)
+
+
+def test_actual_launcher_preserves_write_tool_and_uses_fresh_config(tmp_path, monkeypatch):
+    import os
+    import subprocess
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("CBORG_API_KEY", "test-cborg-key")
+    monkeypatch.setenv("CLAUDE_CONFIG_DIR", "/inherited/config")
+    monkeypatch.setenv("CLAUDE_CODE_SIMPLE", "1")
+    monkeypatch.setattr(adapter.shutil, "which", lambda _: "/fake/claude")
+    monkeypatch.setattr(subprocess, "check_output", lambda *a, **k: adapter.TRANSPORT["runtime_version"])
+    launched = {}
+
+    def capture(executable, args, env):
+        launched.update(executable=executable, args=args, env=env)
+        raise SystemExit(0)
+
+    monkeypatch.setattr(os, "execve", capture)
+    with pytest.raises(SystemExit):
+        adapter.route_evaluator(["--print", "--safe-mode", "--restricted", "--tools", "Read,Write,Bash"])
+    assert "--bare" not in launched["args"]
+    assert launched["args"][-1] == "Read,Write,Bash"
+    assert "CLAUDE_CODE_SIMPLE" not in launched["env"]
+    config = Path(launched["env"]["CLAUDE_CONFIG_DIR"])
+    assert config.parent == tmp_path and config.is_dir()
+    assert config.stat().st_mode & 0o077 == 0
+    assert launched["env"]["ANTHROPIC_API_KEY"] == "test-cborg-key"
+    assert launched["env"]["ANTHROPIC_BASE_URL"] == "https://api.cborg.lbl.gov"
+
+
+@pytest.mark.parametrize("change", [
+    {"tools": ["Bash", "Read"]},
+    {"apiKeySource": "oauth"},
+    {"claude_code_version": "different"},
+])
+def test_initialization_rejects_missing_write_or_wrong_auth_or_version(change):
+    init = {"type": "system", "subtype": "init", "tools": ["Bash", "Read", "Write"],
+            "apiKeySource": "ANTHROPIC_API_KEY", "claude_code_version": "2.1.269"}
+    adapter.verify_runtime_transport([init])
+    with pytest.raises(ValueError):
+        adapter.verify_runtime_transport([{**init, **change}])

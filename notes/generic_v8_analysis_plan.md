@@ -2608,3 +2608,8 @@ The second Codex review verified the qualifications, all 857 preserved files and
 ### CBORG provider condition and one v9 generation canary registered (2026-09-12)
 
 The user requested the 56-rating v7/v8 rescore through CBORG and separately authorized one v9 generation canary using existing source bundles. The completed prior reference scores and Q19 semantic errata remain untouched. The new evaluation instrument is byte-identical; transport isolation and output namespace change and are explicitly registered. The generation canary is one CHORUS generic-v9 baseline-arm job, with no download or production-cohort expansion. See [the dated plan](cborg_canaries_2026-09-12/plan.md) and [the new evaluation manifest](reference_rescore_2026-09-12_cborg/manifest.json). No model call has been made under this new registration yet.
+
+
+### CBORG Write-tool correction, before a fresh canary (2026-09-12; #1340)
+
+The first CBORG evaluator session completed but did not create an output: bare mode had removed the required Write tool. Its $2.433457 of CLI-reported usage and full failed trace remain recorded. A zero-inference local HTTP probe reproduced the missing tool and verified its restoration without bare mode. The new transport registration preserves all scoring prompts and instrument/input bytes, uses an isolated CLI configuration with explicit CBORG credentials, and requires the runtime tool/auth/version evidence. Only one fresh canary is permitted until reviewed; no prior score or failed payload is promoted. See the [dated registration](reference_rescore_2026-09-12_cborg/write_tool_fix_registration.json).

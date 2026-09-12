@@ -5,10 +5,10 @@ The user requested “rescore with CBORG API” and separately approved adding a
 ## Evaluation registration
 
 - Cohort: the same 24 public v7/v8 full D4Ds, both semantic rubrics; 48 primary ratings plus eight rubric10 repeat ratings (56 planned).
-- Manifest: `notes/reference_rescore_2026-09-12_cborg/manifest.json`; SHA256 `ab13d9e824a47a70ff741372e8ac6a7abc1873b0b487959b04f01bdd00f0ee54`.
+- Manifest: `notes/reference_rescore_2026-09-12_cborg/manifest.json`; SHA256 `e71b8805b7fde90b5e64e23ba1c1f346f2f17e33fe49df7c98c9e885aeec1501`.
 - Definitions, rubric text, schemas, complete scoring prompts and 24 input byte hashes match the prior registered instrument. The new manifest preserves 258 prior evaluation files.
 - Model selector: `claude-opus-5[1m]`, effort high, temperature unspecified. The accepted runtime must identify `claude-opus-5` with the same existing alias-evidence checks.
-- Transport: Claude Code 2.1.269 with the existing isolated runner through `https://api.cborg.lbl.gov`. The adapter uses `CBORG_API_KEY` in memory, selects the CBORG base URL explicitly, and clears inherited Anthropic model/auth overrides and alternate cloud-provider switches. Bare mode excludes keychain/OAuth discovery; safe/restricted modes and exact-validator tool permissions remain.
+- Transport: Claude Code 2.1.269 with the existing isolated runner through `https://api.cborg.lbl.gov`. The adapter uses `CBORG_API_KEY` in memory, selects the CBORG base URL explicitly, and clears inherited Anthropic model/auth overrides and alternate cloud-provider switches. A fresh CLI configuration directory lives inside each isolated workspace; safe/restricted modes and exact-validator tool permissions remain. Runtime acceptance requires the explicit API-key source and all required tools.
 - Budget: the registered CLI maximum remains $5 per attempt. Original usage and excluded attempts will be retained; CLI-reported cost is not an independently reconciled CBORG invoice.
 - Canary: CHORUS v7 rep1, rubric10, rating1. It uses the same adapter, foreground shell environment, sequential launch mode and output locations as the fill. No remaining rating starts until exact output, schema, arithmetic, source-aligned item identities, runtime identity, quoted definition, final Write binding and an inspected review pass.
 - No automatic retries. A failed attempt stops new launches and is retained. A diagnosed retry is a fresh original measurement under its registered condition.
@@ -56,3 +56,10 @@ The new evaluation registration exactly matches both prior instrument definition
 Codex adversarial review approved published commit `0c9592373` with no supported P1/P2 findings. It independently verified all 36 pinned-file hashes, 258 preserved evaluations and 56 complete prompts. Offline tests: 161 passed. Canonical prompt check: all 15 pins passed. Live-provenance check: 277 records checked, 195 subject to the requirement, zero failing. The bundle audit passed for all rebuildable bundles and chunk manifests; unrelated bundle types without a reconstruction route remain explicitly unchecked.
 
 The separate v9 input pins and pre-run CHORUS baseline are recorded in `v9_input_pins.json` and `v9_baseline_before_run.json`. The seven gated baseline defect counts are zero; the baseline report basis is one measured replicate and two vacuous replicates. This review authorizes execution of the already user-approved canaries; it does not assert their live results.
+
+
+## Write-tool correction before a fresh canary (#1340)
+
+The first CBORG canary ended without an output file after $2.433457 of CLI-reported usage. Its init advertised only Bash and Read: adding `--bare` removed Write from the available tool set. The evaluator's attempted shell writes were denied as intended. The failed attempt and original registration remain preserved, with no accepted rating.
+
+A real installed-CLI probe against a local rejecting HTTP server reproduced the missing Write tool with bare mode and verified Read/Write/Bash without it, using fake credentials and no model inference. The adapter now uses safe/restricted mode with a fresh CLI configuration directory, explicit CBORG credentials and startup identity/tool checks. The seven adapter tests pass. The scoring definitions, all 56 complete prompts, input bytes, schemas and five-dollar attempt control are unchanged. A fresh canary must pass before any fill; the denied shell payload will never be treated as an accepted evaluation. The original pre-spend review remains as the historical review of the earlier launch configuration.

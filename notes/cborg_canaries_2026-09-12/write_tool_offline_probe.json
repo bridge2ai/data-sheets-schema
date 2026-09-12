@@ -1,0 +1,70 @@
+{
+  "verification": "real CLI init and tool request against local rejecting server; no model inference",
+  "cases": [
+    {
+      "bare": true,
+      "exit_code": 1,
+      "tools": [
+        "Bash",
+        "Read"
+      ],
+      "api_key_source": "ANTHROPIC_API_KEY",
+      "cli_version": "2.1.269",
+      "local_requests": [
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": []
+        },
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [
+            "Bash",
+            "Read"
+          ]
+        },
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [
+            "Bash",
+            "Read"
+          ]
+        }
+      ],
+      "paid_model_calls": 0
+    },
+    {
+      "bare": false,
+      "exit_code": 1,
+      "tools": [
+        "Bash",
+        "Read",
+        "Write"
+      ],
+      "api_key_source": "ANTHROPIC_API_KEY",
+      "cli_version": "2.1.269",
+      "local_requests": [
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": []
+        },
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [
+            "Bash",
+            "Read",
+            "Write"
+          ]
+        },
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [
+            "Bash",
+            "Read",
+            "Write"
+          ]
+        }
+      ],
+      "paid_model_calls": 0
+    }
+  ]
+}

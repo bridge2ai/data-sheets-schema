@@ -1,7 +1,7 @@
 {
   "issue": 1248,
-  "registered_at": "2026-09-12T18:26:39.769139+00:00",
-  "definition_commit": "d70b60ac3c43bb8a7859edaa3da9f4973b2339ef",
+  "registered_at": "2026-09-12T18:01:55.257854+00:00",
+  "definition_commit": "96baf775b998a44478618a3e5e00fcd090b7beaf",
   "requested_model": "claude-opus-5[1m]",
   "effort": "high",
   "temperature": null,
@@ -848,7 +848,7 @@
     "scripts/validate_evaluation_schema.py": "dc2e540c4800950eb866914c72894cda668b9a92d41c5f05aa045ff17483652c",
     "src/download/prompts/rubric10_semantic_schema.json": "5ac1989a60414d41f03383266535eee9963816d0d9b42bf5b90e1efe8d9d3dc2",
     "src/download/prompts/rubric20_semantic_schema.json": "5ccdbd229471748fa1dde8074d904c0334c983741dd90c7e56f95b45b012f32b",
-    "scripts/reference_rescore_cborg.py": "fa17fba0318ee3849d6c0e25634b7d6166a4f94c032eaf13b3913d90031c68fc",
+    "scripts/reference_rescore_cborg.py": "9839a040a79b7701bbaedf900423ccc16f7af5aa059ff3541f855b45b01eb78a",
     "src/data_sheets_schema/agent_pin.py": "35d60bcc835ba0d77e3c3c531fe225b8825ff77f038a7cc499cfbcaa535ba962"
   },
   "prior_evaluations": {
@@ -1117,12 +1117,8 @@
     "credential_source": "CBORG_API_KEY",
     "runtime": "Claude Code via CBORG Anthropic-compatible API",
     "runtime_version": "2.1.269 (Claude Code)",
-    "additional_cli_flags": [],
-    "credential_isolation": "fresh .cborg-cli-config directory inside each isolated rating workspace",
-    "required_tools": [
-      "Bash",
-      "Read",
-      "Write"
+    "additional_cli_flags": [
+      "--bare"
     ],
     "environment": {
       "DISABLE_NON_ESSENTIAL_MODEL_CALLS": "1",
@@ -1136,10 +1132,5 @@
     "previous_registration_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
     "prior_measurements": "Preserved; do not pool or overwrite the earlier provider condition.",
     "semantic_limit": "Frozen rubric20 Q19 text-or-graph rule remains unchanged; mechanical acceptance is not semantic adjudication."
-  },
-  "supersedes_registration": {
-    "path": "notes/reference_rescore_2026-09-12_cborg/registrations/manifest-before-write-tool-fix.json",
-    "sha256": "ab13d9e824a47a70ff741372e8ac6a7abc1873b0b487959b04f01bdd00f0ee54",
-    "reason": "#1340: remove bare mode so Write remains available; retain isolated explicit CBORG API-key configuration. No score accepted under the previous transport."
   }
 }

@@ -23,9 +23,7 @@ TRANSPORT = {
     "credential_source": "CBORG_API_KEY",
     "runtime": "Claude Code via CBORG Anthropic-compatible API",
     "runtime_version": "2.1.269 (Claude Code)",
-    "additional_cli_flags": [],
-    "credential_isolation": "fresh .cborg-cli-config directory inside each isolated rating workspace",
-    "required_tools": ["Bash", "Read", "Write"],
+    "additional_cli_flags": ["--bare"],
     "environment": {
         "DISABLE_NON_ESSENTIAL_MODEL_CALLS": "1",
         "DISABLE_TELEMETRY": "1",
@@ -45,7 +43,6 @@ def cborg_environment(source: dict[str, str]) -> dict[str, str]:
             "CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CODE_USE_BEDROCK",
             "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_FOUNDRY",
             "CLAUDE_CODE_SUBAGENT_MODEL", "CLAUDECODE",
-            "CLAUDE_CODE_SIMPLE", "CLAUDE_CONFIG_DIR",
         }:
             env.pop(name)
     env.update(TRANSPORT["environment"])
@@ -62,27 +59,7 @@ def load_runner():
     runner.ROOT = ROOT
     runner.DATE = DATE
     runner.PLAN = ROOT / f"notes/reference_rescore_{DATE}"
-    validate = runner.validate_candidate
-
-    def validate_with_transport(path, job, manifest, events):
-        verify_runtime_transport(events)
-        return validate(path, job, manifest, events)
-
-    runner.validate_candidate = validate_with_transport
     return runner
-
-
-def verify_runtime_transport(events: list[dict]) -> None:
-    initializers = [e for e in events if e.get("type") == "system" and e.get("subtype") == "init"]
-    if len(initializers) != 1:
-        raise ValueError("missing or ambiguous evaluator initialization")
-    init = initializers[0]
-    if not set(TRANSPORT["required_tools"]).issubset(init.get("tools") or []):
-        raise ValueError("evaluator initialization is missing a required tool")
-    if init.get("apiKeySource") != "ANTHROPIC_API_KEY":
-        raise ValueError("evaluator did not select the explicit API key")
-    if init.get("claude_code_version") != TRANSPORT["runtime_version"].split()[0]:
-        raise ValueError("evaluator initialization has an unexpected CLI version")
 
 
 def freeze(runner):
@@ -111,13 +88,7 @@ def route_evaluator(args: list[str]) -> None:
     version = subprocess.check_output([executable, "--version"], env=env, text=True).strip()
     if version != TRANSPORT["runtime_version"]:
         raise ValueError("Claude Code version differs from the registered transport")
-    # --bare removes Write even when --tools explicitly requests it (#1340).
-    # Safe/restricted modes still suppress customizations and confine tools.
-    # The parent runner owns and removes this fresh temporary workspace.
-    config = Path.cwd() / ".cborg-cli-config"
-    config.mkdir(mode=0o700)
-    env["CLAUDE_CONFIG_DIR"] = str(config)
-    os.execve(executable, [executable, *args], env)
+    os.execve(executable, [executable, "--bare", *args], env)
 
 
 def main(argv=None) -> int:
