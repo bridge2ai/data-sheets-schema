@@ -10,6 +10,8 @@ import importlib.util
 import unittest
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "arm_comparison.py"
 
@@ -162,3 +164,45 @@ class Section(unittest.TestCase):
 
     def test_an_arm_with_no_measured_record_is_left_out_entirely(self):
         self.assertEqual(self._row([]), "")
+
+
+def test_report_cells_keep_unmeasured_zeros_out_of_the_mean():
+    m = _module()
+    reps = [{"report": 0, "claims_checked": 0},
+            {"report": 0, "claims_checked": 4},
+            {"report": 2, "claims_checked": 0}]
+    assert m.cell(reps, "report", "reps") == "1.0 ± 1.4 [0ᵘ,0,2] (n=2)"
+    assert m.cell(reps[:1], "report", "reps") == "– [0ᵘ]"
+    assert m.cell([{"report": None}], "report", "reps") == "– [–]"
+
+
+def test_check_detects_report_changes_without_overwriting_any_output(tmp_path, monkeypatch):
+    m = _module()
+    data = {k: {p: [] for p in m.PROJECTS} for k, *_ in m.ARMS}
+    data["v8prod"]["CHORUS"] = [{"report": 0, "claims_checked": 5}]
+    m.OUT_MD = tmp_path / "comparison.md"
+    original = m.render_markdown(data, {})
+    m.OUT_MD.write_text(original)
+    monkeypatch.setattr(m, "collect", lambda: data)
+    monkeypatch.setattr(m, "EVAL_DIRS", {})
+    monkeypatch.setattr(m, "write_figures", lambda *args: pytest.fail("check must not write figures"))
+    monkeypatch.setattr(m, "write_markdown", lambda *args: pytest.fail("check must not overwrite Markdown"))
+    monkeypatch.setattr("sys.argv", ["arm_comparison.py", "--check"])
+    assert m.main() == 0
+    data["v8prod"]["CHORUS"][0]["report"] = 2
+    assert m.main() == 1
+    assert m.OUT_MD.read_text() == original
+    m.OUT_MD.unlink()
+    assert m.main() == 1
+    assert not m.OUT_MD.exists()
+
+
+@pytest.mark.corpus
+def test_committed_comparison_matches_current_records():
+    """Catch changed report measurements that leave the published rows stale."""
+    m = _module()
+    data = m.collect()
+    scores = {rubric: {key: {p: m.rubric_scores(prefix, p, rubric) for p in m.PROJECTS}
+                      for key, _display, prefix, *_ in m.ARMS} for rubric in m.EVAL_DIRS}
+    assert m.OUT_MD.read_text(encoding="utf-8") == m.render_markdown(data, scores), (
+        "Run scripts/arm_comparison.py to refresh the committed table and figures")
