@@ -630,7 +630,7 @@ def report_results(manifest: dict) -> dict:
         signatures = {(d["overall_score"]["adjusted_max_points"], excluded_items(d)) for _, d in repeated}
         results["repeatability"].append({"project": project, "rubric": "rubric10-semantic",
             "ratings": len(values), "expected_ratings": 3, "adjusted_percentages": values,
-            "fixed_percentages": fixed, "applicability_stable": len(signatures) == 1 if values else None,
+            "fixed_percentages": fixed, "applicability_stable": len(signatures) == 1 if len(values) == 3 else None,
             "adjusted_sample_sd": statistics.stdev(values) if len(values) == 3 else None,
             "fixed_sample_sd": statistics.stdev(fixed) if len(fixed) == 3 else None,
             "adjusted_range": max(values) - min(values) if len(values) == 3 else None,
