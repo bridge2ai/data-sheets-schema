@@ -4,7 +4,7 @@
 **Semantic qualification — Q19:** 15 rubric20 rationales contain representation-related objections requiring adjudication under the frozen text-or-graph rule. Their Q19 values, recorded totals and summaries containing them are unadjudicated model measurements. Mechanical acceptance does not certify semantic adherence. No scores were corrected or rerated. See the [Q19 erratum](semantic_errata.md), including the full 24-rating inspection and its limits. Rubric10 repeatability is unaffected by this Q19 erratum.
 <!-- Q19 semantic qualification:end -->
 
-Recorded 2026-09-12T16:16:08.141918+00:00 for #1248, #1080, #1062, #1327, #1335 and #1336.
+Recorded 2026-09-12T16:28:44.321425+00:00 for #1248, #1080, #1062, #1327, #1335 and #1336.
 
 All 24 existing production D4Ds (v7 and v8, three generation replicates per project) now have both semantic rubric ratings: 48 primary ratings. Eight additional rubric10 ratings complete three independent ratings of v7 rep1 per project, for 56 accepted ratings. Each rating used its supplied D4D and pinned rubric resources in a fresh isolated session. No D4D generation or source download was performed.
 
