@@ -1,11 +1,11 @@
 {
-  "registered_at": "2026-09-12T19:28:03.318704+00:00",
+  "registered_at": "2026-09-12T19:21:31.683029+00:00",
   "reason": "One successful rating required 9.7 minutes. Use up to four isolated workers to finish the existing 56-rating scope, with a new one-rating scheduler canary before fan-out.",
   "previous_plan": "notes/reference_rescore_2026-09-12_cborg/registrations/plan-before-batch-amendment.md",
   "previous_plan_sha256": "0030d928692a85938eddc1b144e824549fd150854b77309732d859d43076bca0",
   "manifest_sha256": "e71b8805b7fde90b5e64e23ba1c1f346f2f17e33fe49df7c98c9e885aeec1501",
   "scheduler": "scripts/reference_rescore_cborg_batch.py",
-  "scheduler_sha256": "a70b897b408be2b019541b4b28f5a0f99c5181a1080988569ee638963f5cf8f5",
+  "scheduler_sha256": "dfdf97bf8c9a06b765e8d6a0a9a05908133e589a53105cd34abc39525caba46e",
   "workers": 4,
   "pilot_job_id": "CHORUS_v7_rep1_r10_rating2",
   "pilot_scope": "One already planned rubric10 repeat rating, launched by the identical foreground Python controller, shell environment and four-worker scheduling mode used by the fill, with a queue containing only this job.",
@@ -39,9 +39,9 @@
     "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg/CHORUS_v7_rep1_r10_rating1_evaluation.json": "8b08357453730a468b3f47f8c0c0315d1ef30fe69ed937a0c95cbf2f9f9d8178"
   },
   "supersedes_registration": {
-    "path": "notes/reference_rescore_2026-09-12_cborg/registrations/batch-registration-before-missing-history-fix.json",
-    "sha256": "9724ea71c524887cbff56eb4197c03ea0867746db32b75bc91ccacb863f21d37",
-    "reason": "#1344: require the registered failed history even when its parent is missing or empty. No further model calls have occurred."
+    "path": "notes/reference_rescore_2026-09-12_cborg/registrations/batch-registration-before-reviewed-retry-fix.json",
+    "sha256": "8e88be5cf92ec001976e1656af5e8e2eae9f3a7133698e8a4e7bc74bd44f3bd6",
+    "reason": "#1343: retain a rejected self-identification mismatch; authorize exactly one fresh original retry via an exact failed-history snapshot. Frozen prompts, instrument, model gate and budget stay unchanged."
   },
   "interrupt_policy": "SIGINT and SIGTERM request a controller stop without propagating to worker sessions; active workers retain their original runner timeout and finish with evidence. A forced SIGKILL or host loss remains outside graceful-drain guarantees.",
   "launch_boundary": "A stop observed during preparation leaves the job queued. Signal delivery is deferred only through the short atomic launch decision, then observed by the controller; existing workers remain in separate sessions.",

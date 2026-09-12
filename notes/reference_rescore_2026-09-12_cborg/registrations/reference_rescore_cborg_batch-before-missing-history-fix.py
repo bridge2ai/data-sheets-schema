@@ -109,7 +109,7 @@ def pending_jobs(r, manifest, registration, phase):
             verified_output(r, manifest, job)
             continue
         attempts = PLAN / "attempts" / job["id"]
-        if job["id"] in registration.get("reviewed_retries", {}) or (attempts.exists() and any(attempts.iterdir())):
+        if attempts.exists() and any(attempts.iterdir()):
             verify_reviewed_retry(r, job, registration, attempts)
         pending.append(job)
     return pending
@@ -123,8 +123,6 @@ def verify_reviewed_retry(r, job, registration, attempts):
     if not retry:
         raise ValueError(f"{job['id']} already has an attempt; inspect and register any retry separately")
     expected = retry["attempts"]
-    if not expected or not attempts.is_dir():
-        raise ValueError("reviewed retry history is missing or its registered inventory is empty")
     actual = {str(path.relative_to(ROOT)): path for path in attempts.iterdir()}
     if set(actual) != set(expected):
         raise ValueError("retry history changed; another attempt requires separate review")

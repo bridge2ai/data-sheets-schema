@@ -43,7 +43,7 @@ def main():
             preserved[rel] = sha
             current = json.loads((ROOT / rel).read_bytes())
     archives = r.PLAN / "registrations"
-    for stem in ("interruption", "stop-race", "reviewed-retry"):
+    for stem in ("interruption", "stop-race", "reviewed-retry", "missing-history"):
         prior = json.loads((archives / f"batch-registration-before-{stem}-fix.json").read_bytes())
         path = archives / f"reference_rescore_cborg_batch-before-{stem}-fix.py"
         if r.digest(path) != prior["scheduler_sha256"]:

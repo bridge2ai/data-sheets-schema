@@ -4,6 +4,7 @@ import hashlib
 import os
 from pathlib import Path
 import signal
+import shutil
 import subprocess
 from types import SimpleNamespace
 import sys
@@ -205,4 +206,12 @@ def test_reviewed_retry_refuses_changed_failed_evidence(tmp_path, monkeypatch):
 def test_reviewed_retry_requires_exclusion_and_complete_cost_evidence(tmp_path, monkeypatch, status, terminal, message):
     r, registration, prior, manifest = reviewed_failure(tmp_path, monkeypatch, status=status, terminal=terminal)
     with pytest.raises(ValueError, match=message):
+        batch.pending_jobs(r, manifest, registration, "remaining")
+
+
+@pytest.mark.parametrize("keep_empty_parent", [False, True])
+def test_registered_retry_rejects_missing_or_empty_history(tmp_path, monkeypatch, keep_empty_parent):
+    r, registration, prior, manifest = reviewed_failure(tmp_path, monkeypatch)
+    shutil.rmtree(prior if keep_empty_parent else prior.parent)
+    with pytest.raises(ValueError, match="history"):
         batch.pending_jobs(r, manifest, registration, "remaining")
