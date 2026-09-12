@@ -91,3 +91,14 @@ uncertain generation without claiming to recover its counters. A reported
 transport error with no completed response clears the marker; partial usage
 continues to use the abandoned-stream journal. Tests cover all four call paths,
 the next invocation after storage recovers, interruption and explicit fresh.
+
+Round 5 found #1297: overlapping invocations could both pass the pending check
+and overwrite one another's intent. Public execution now holds an exclusive
+process lock for the shared output directory and project, including fresh
+execution and different labels sharing flat output paths. A contender stops
+before reading or changing recovery state or sending a request. The lock is
+released on return and process exit; independent output directories remain
+independent. Tests exercise overlapping execution before the first intent is
+written, all three contender cases, and a hard child-process exit.
+Existing source-inspection guards now inspect the execution body beneath the
+lock wrapper; their original assertions are retained.

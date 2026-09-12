@@ -346,8 +346,8 @@ class ResumedBatchCanRegateTest(unittest.TestCase):
     def test_the_completed_run_path_returns_the_checks(self):
         import inspect
 
-        from data_sheets_schema.api_runner import execute
-        src = inspect.getsource(execute)
+        from data_sheets_schema.api_runner import _execute
+        src = inspect.getsource(_execute)
         head = src[:src.index("already_complete")]
         self.assertIn('"checks":', head)
 
@@ -356,8 +356,8 @@ class ResumedBatchCanRegateTest(unittest.TestCase):
         record asserted earlier would report a clean bill nobody checked."""
         import inspect
 
-        from data_sheets_schema.api_runner import execute
-        src = inspect.getsource(execute)
+        from data_sheets_schema.api_runner import _execute
+        src = inspect.getsource(_execute)
         head = src[:src.index("already_complete")]
         for fn in ("pair_consistency(spec)", "report_claims_block(spec)",
                    "grounding_block(spec)"):

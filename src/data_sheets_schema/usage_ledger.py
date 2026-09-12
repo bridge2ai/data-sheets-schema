@@ -1,6 +1,7 @@
 """Durable completed-call usage, independent of the final provenance (#656)."""
 from __future__ import annotations
 
+from contextlib import contextmanager
 import hashlib
 import json
 import os
@@ -13,6 +14,28 @@ import yaml
 
 class UsageLedgerError(OSError):
     """Past usage cannot be established; do not silently start more calls."""
+
+
+@contextmanager
+def exclusive_run(spec):
+    """One writer for shared artifacts, across processes and run identities."""
+    # filelock is already a locked main dependency, including its Windows
+    # implementation. Keep a stable sidecar: unlinking a held lock lets a
+    # competing process lock a different inode at the same path.
+    from filelock import FileLock, Timeout
+
+    path = spec.metadata_dir / f".{spec.project}_api_run.lock"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lock = FileLock(path, timeout=0)
+    try:
+        lock.acquire()
+    except Timeout as exc:
+        raise UsageLedgerError(f"an API run is already active in {spec.metadata_dir}; "
+                               "retry after it finishes") from exc
+    try:
+        yield
+    finally:
+        lock.release()
 
 
 def run_identity(spec) -> dict:

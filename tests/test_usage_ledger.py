@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 import yaml
@@ -212,6 +214,61 @@ def test_reported_transport_failure_does_not_leave_a_completed_call_pending(tmp_
         api._generate_phase(s, "full", {}, client, api._model_settings(), [])
     ledger.require_resolved(s)
     assert ledger.merge_usage(s, []) == []
+
+
+def test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch):
+    s = spec(out_dir=tmp_path)
+    entered, release = threading.Event(), threading.Event()
+    original = api._begin_usage_call
+
+    def pause_before_intent(run, *args):
+        if not entered.is_set():
+            entered.set()
+            assert release.wait(60), "concurrency test did not release the first run"
+        return original(run, *args)
+
+    monkeypatch.setattr(api, "_begin_usage_call", pause_before_intent)
+    active = FakeClient()
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(api.execute, s, client=active)
+        try:
+            assert entered.wait(60), "first run never reached the request boundary"
+            before = ledger.ledger_path(s).read_bytes()
+            for contender, resume in ((s, True), (s, False),
+                                      (replace(s, label="another_rep1"), True)):
+                client = FakeClient()
+                with pytest.raises(ledger.UsageLedgerError, match="already active"):
+                    api.execute(contender, resume=resume, client=client)
+                assert client.messages.calls == []
+                assert ledger.ledger_path(s).read_bytes() == before
+            assert not ledger.ledger_path(replace(s, label="another_rep1")).exists()
+            # Different output files do not share the exclusion.
+            other = spec(out_dir=tmp_path / "independent")
+            with ledger.exclusive_run(other):
+                pass
+        finally:
+            release.set()
+        result = future.result(timeout=60)
+    assert len(active.messages.calls) == len(result["usage"]) == 4
+    assert api.execute(s, client=active)["already_complete"]
+    assert len(active.messages.calls) == 4
+
+
+def test_hard_process_exit_releases_output_exclusion(tmp_path):
+    child = """
+import os, sys
+from pathlib import Path
+from types import SimpleNamespace
+from data_sheets_schema.usage_ledger import exclusive_run
+run = SimpleNamespace(project='CHORUS', metadata_dir=Path(sys.argv[1]))
+with exclusive_run(run):
+    os._exit(23)
+"""
+    result = subprocess.run([sys.executable, "-c", child, str(tmp_path)],
+                            capture_output=True, text=True, timeout=30)
+    assert result.returncode == 23, result.stderr
+    with ledger.exclusive_run(spec(out_dir=tmp_path)):
+        pass
 
 
 @pytest.mark.parametrize("phase", ["repair_full", "report_after_repair", "full_readdress"])

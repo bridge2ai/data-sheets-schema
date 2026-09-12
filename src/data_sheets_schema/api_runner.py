@@ -48,6 +48,7 @@ from data_sheets_schema.usage_ledger import (
     append_usage as _append_usage,
     begin_call as _begin_usage_call,
     cancel_call as _cancel_usage_call,
+    exclusive_run as _exclusive_run,
     generation_id as _usage_generation,
     identity_is_foreign as _foreign_usage_identity,
     merge_usage as merge_completed_rows,
@@ -4400,6 +4401,13 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     """
     if dry_run:
         return plan(spec)
+
+    with _exclusive_run(spec):
+        return _execute(spec, resume=resume, client=client)
+
+
+def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
+    """Execute while holding exclusive access to this run's output files."""
 
     # Before a token is spent. The digest this run is about to send, the schema
     # it validates against and the identity slots its pair check uses all come
