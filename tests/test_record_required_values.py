@@ -171,3 +171,21 @@ def test_validate_records_cannot_call_an_unavailable_validator_clean(tmp_path, m
     monkeypatch.setattr(provenance, "check_record", lambda data: ([], "validator unavailable"))
     result = CliRunner().invoke(cli, ["validate-records", "--strict"])
     assert result.exit_code == 1 and "validator unavailable" in result.output
+
+
+@pytest.mark.parametrize("broken", [
+    b"record_generated_at: 2026-99-11T00:00:00Z\n",
+    b"record_generated_at: \xff\n",
+])
+def test_validate_records_keeps_checking_after_scalar_or_encoding_errors(tmp_path, monkeypatch, broken):
+    monkeypatch.setattr(provenance, "CONCAT_DIR", tmp_path)
+    directory = tmp_path / "fixture_core/test_rep1"
+    directory.mkdir(parents=True)
+    (directory / "A_BROKEN_provenance.yaml").write_bytes(broken)
+    (directory / "B_NULL_provenance.yaml").write_text(yaml.safe_dump({**record(), "model": None}))
+    (directory / "C_GOOD_provenance.yaml").write_text(yaml.safe_dump(record()))
+    result = CliRunner().invoke(cli, ["validate-records", "--strict"])
+    assert result.exit_code == 1, result.output
+    assert "A_BROKEN_provenance.yaml" in result.output
+    assert "B_NULL_provenance.yaml" in result.output and "/model" in result.output
+    assert "3 record(s) checked, 2 failing" in result.output

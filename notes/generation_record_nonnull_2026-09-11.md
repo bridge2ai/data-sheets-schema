@@ -39,3 +39,5 @@ format checking; a newly added required block; schema-policy changes;
 captured source bytes; and CLI failure behavior. Existing corpus-conformance
 and recorder tests are included in validation. The Dataset schema and the
 reference evaluation instrument are not changed by this record contract.
+
+Codex review round 1 identified #1288: malformed YAML timestamps and invalid UTF-8 could escape the per-file CLI error boundary. The boundary now catches value-construction/decoding failures too; regressions verify that later invalid and valid records are checked and the final failure count is printed. All 78 affected record, recorder and CLI tests pass after this correction.

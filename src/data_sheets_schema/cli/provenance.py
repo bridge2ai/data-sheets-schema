@@ -2093,7 +2093,7 @@ def validate_records(strict, label):
     for p in paths:
         try:
             findings, failure = check_record(yaml.safe_load(p.read_text(encoding="utf-8")))
-        except (OSError, yaml.YAMLError) as exc:
+        except (OSError, ValueError, yaml.YAMLError) as exc:
             findings, failure = [], str(exc)
         if findings or failure:
             failed.append(p)
