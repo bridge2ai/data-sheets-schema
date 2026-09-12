@@ -1,12 +1,8 @@
 {
-  "reported_at": "2026-09-12T10:20:13.869720+00:00",
-  "completed": 15,
+  "reported_at": "2026-09-12T10:33:04.937395+00:00",
+  "completed": 19,
   "planned": 56,
   "pending": [
-    "CHORUS_v7_rep2_r20_rating1",
-    "CHORUS_v7_rep3_r10_rating1",
-    "CHORUS_v7_rep3_r20_rating1",
-    "CHORUS_v8_rep1_r10_rating1",
     "CHORUS_v8_rep1_r20_rating1",
     "CHORUS_v8_rep2_r10_rating1",
     "CHORUS_v8_rep2_r20_rating1",
@@ -180,38 +176,48 @@
       "project": "CHORUS",
       "cohort": "v7",
       "rubric": "rubric10-semantic",
-      "records": 2,
+      "records": 3,
       "expected_records": 3,
       "adjusted_percentages": [
         70.0,
-        62.0
+        62.0,
+        70.0
       ],
       "fixed_percentages": [
         70.0,
-        62.0
+        62.0,
+        70.0
       ]
     },
     {
       "project": "CHORUS",
       "cohort": "v7",
       "rubric": "rubric20-semantic",
-      "records": 1,
+      "records": 3,
       "expected_records": 3,
       "adjusted_percentages": [
-        76.1
+        76.1,
+        71.6,
+        73.9
       ],
       "fixed_percentages": [
-        76.1
+        76.1,
+        71.6,
+        73.9
       ]
     },
     {
       "project": "CHORUS",
       "cohort": "v8",
       "rubric": "rubric10-semantic",
-      "records": 0,
+      "records": 1,
       "expected_records": 3,
-      "adjusted_percentages": [],
-      "fixed_percentages": []
+      "adjusted_percentages": [
+        64.0
+      ],
+      "fixed_percentages": [
+        64.0
+      ]
     },
     {
       "project": "CHORUS",
