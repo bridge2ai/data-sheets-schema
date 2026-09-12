@@ -55,3 +55,21 @@ cannot be encoded, the usage row records `diagnostics_unavailable` and retains
 the call counters; the original receipt remains on disk. Tests cover dates,
 timestamps, non-string mapping keys, fresh interruptions before progress and
 after full/core progress, archived bytes and legacy recovery.
+
+Round 3 found #1293 (abandoned-only evidence could be excluded after losing its
+ledger) and #1294 (another label's provenance could falsely trigger the missing
+ledger guard). Recovery now checks ownership before adopting provenance or
+progress. New progress and abandoned entries carry the full run identity.
+Identified abandoned evidence is checked before either a new call or the
+completed-record exit; only charges already preserved exactly in that run's
+record permit portable completion without a ledger. Abandoned calls also get
+UUIDs, so repeated snapshot names cannot collapse distinct charges. Foreign
+progress survives a completed record's read-only return.
+
+The same missing-ledger boundary also covers identified reasoning left by a
+completed response before snapshots or progress could be saved. Reasoning entries
+carry generation and run identity as well as the call ID; portable completion
+requires their call IDs and recorded output counters to be covered by provenance.
+Fresh execution also preserves the IDs of superseded generations in the ledger
+and provenance. Their retained log entries are historical; a later unknown
+generation still blocks completion when its ledger is missing.

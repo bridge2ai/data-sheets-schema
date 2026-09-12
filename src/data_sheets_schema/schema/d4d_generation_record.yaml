@@ -506,6 +506,12 @@ classes:
           record. A forced fresh execution gets a new identity, so later resume
           cannot import the preceding generation's accounting (#1291). Absent
           on historical and non-API records.
+      prior_generation_ids:
+        description: >-
+          Generations explicitly superseded by fresh execution. Preserved in
+          the record so portable completion can distinguish their retained
+          journal entries from later calls whose accounting is missing.
+        multivalued: true
       arm:
         description: Which arm of the study, where one applies.
         required: true

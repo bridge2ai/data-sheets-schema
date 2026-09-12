@@ -13,20 +13,38 @@ class UsageLedgerError(OSError):
     """Past usage cannot be established; do not silently start more calls."""
 
 
-def _identity(spec) -> dict:
+def run_identity(spec) -> dict:
     return {key: getattr(spec, key) for key in ("project", "label", "method", "condition")}
+
+
+def identity_is_foreign(spec, identity, *, recorded: bool = False) -> bool:
+    """Use actual conflicting identity evidence, not a missing optional field."""
+    if not isinstance(identity, dict):
+        return False
+    expected = run_identity(spec)
+    if recorded and not spec.condition_stated:
+        expected.pop("condition")
+    return any(identity.get(key) is not None and identity[key] != value
+               for key, value in expected.items())
+
+
+def record_matches(spec, identity) -> bool:
+    return (isinstance(identity, dict)
+            and all(identity.get(key) == getattr(spec, key) for key in ("project", "method", "label"))
+            and not identity_is_foreign(spec, identity, recorded=True))
 
 
 def ledger_path(spec) -> Path:
     # Flat output directories may be reused for another label. Keep those
     # accounts separate, without putting an arbitrary label in a filename.
-    key = hashlib.sha256(json.dumps(_identity(spec), sort_keys=True).encode()).hexdigest()[:16]
+    key = hashlib.sha256(json.dumps(run_identity(spec), sort_keys=True).encode()).hexdigest()[:16]
     return spec.metadata_dir / f"{spec.project}_api_usage_{key}.json"
 
 
 def _empty(spec, *, accept_legacy: bool) -> dict:
-    return {"version": 1, "identity": _identity(spec),
-            "generation_id": uuid.uuid4().hex, "accept_legacy": accept_legacy, "rows": []}
+    return {"version": 1, "identity": run_identity(spec),
+            "generation_id": uuid.uuid4().hex, "prior_generation_ids": [],
+            "accept_legacy": accept_legacy, "rows": []}
 
 
 def _read(spec) -> dict:
@@ -38,11 +56,15 @@ def _read(spec) -> dict:
     except (OSError, ValueError) as exc:
         raise UsageLedgerError(f"cannot recover API usage from {path}: {exc}") from exc
     if (not isinstance(data, dict) or data.get("version") != 1
-            or data.get("identity") != _identity(spec) or not isinstance(data.get("rows"), list)):
+            or data.get("identity") != run_identity(spec) or not isinstance(data.get("rows"), list)):
         raise UsageLedgerError(f"invalid API usage ledger identity or version: {path}")
     if (not isinstance(data.get("generation_id"), str) or not data["generation_id"]
             or not isinstance(data.get("accept_legacy"), bool)):
         raise UsageLedgerError(f"invalid API usage generation identity: {path}")
+    prior = data.get("prior_generation_ids", [])
+    if (not isinstance(prior, list) or any(not isinstance(value, str) or not value for value in prior)
+            or len(set(prior)) != len(prior) or data["generation_id"] in prior):
+        raise UsageLedgerError(f"invalid API usage generation history: {path}")
     ids = []
     for row in data["rows"]:
         if not isinstance(row, dict) or not isinstance(row.get("usage_id"), str) or not row["usage_id"]:
@@ -60,6 +82,12 @@ def prepare_usage(spec, *, resume: bool) -> str:
         return _read(spec)["generation_id"]
     data = _empty(spec, accept_legacy=resume)
     if path.exists():
+        try:
+            previous = _read(spec)
+        except UsageLedgerError:
+            previous = None  # explicit fresh execution retains opaque bad bytes
+        if previous is not None:
+            data["prior_generation_ids"] = [*previous.get("prior_generation_ids", []), previous["generation_id"]]
         # Copy and sync before atomically replacing the live ledger. A crash
         # before replacement leaves the old generation active and recoverable.
         archive = path.with_name(f"{path.stem}.previous-{uuid.uuid4().hex}.json")
@@ -73,6 +101,10 @@ def prepare_usage(spec, *, resume: bool) -> str:
 
 def generation_id(spec) -> str | None:
     return _read(spec)["generation_id"] if ledger_path(spec).exists() else None
+
+
+def prior_generation_ids(spec) -> list[str]:
+    return list(_read(spec).get("prior_generation_ids", []))
 
 
 def same_generation(spec, identifier) -> bool:

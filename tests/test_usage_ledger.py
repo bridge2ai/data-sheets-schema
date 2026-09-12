@@ -53,6 +53,7 @@ def test_flat_output_identities_and_forced_fresh_runs_keep_accounts_separate(tmp
     new = ledger.append_usage(s, [], row())
     assert ledger.merge_usage(s, []) == [new]
     assert archives[0].read_bytes() == old_bytes
+    assert ledger.prior_generation_ids(s) == [json.loads(old_bytes)["generation_id"]]
 
 
 def test_failed_atomic_replace_keeps_the_previous_account(tmp_path, monkeypatch):
@@ -164,6 +165,8 @@ def test_auxiliary_calls_are_durable_before_later_processing_fails(tmp_path, mon
     assert recovered == current and len(recovered) == 1
     assert recovered[0]["phase"] == phase and recovered[0]["input_tokens"] > 0
     assert attempted_reasoning[0]["usage_id"] == recovered[0]["usage_id"]
+    assert attempted_reasoning[0]["generation_id"] == ledger.generation_id(s)
+    assert attempted_reasoning[0]["run_identity"] == ledger.run_identity(s)
 
 
 def test_resume_after_reasoning_failure_does_not_misattribute_the_retry(tmp_path, monkeypatch):
@@ -253,6 +256,7 @@ def test_explicit_fresh_execution_does_not_import_previous_usage(tmp_path):
     from data_sheets_schema.run_telemetry import run_telemetry
     s = spec(out_dir=tmp_path)
     old = api.execute(s, client=FakeClient())["usage"]
+    previous_generation = ledger.generation_id(s)
     # Even a stale progress file must not defeat an explicit fresh request.
     api._save_progress(s, list(api.PHASES), None)
     new = api.execute(s, resume=False, client=FakeClient())["usage"]
@@ -260,6 +264,7 @@ def test_explicit_fresh_execution_does_not_import_previous_usage(tmp_path):
     assert {r["usage_id"] for r in old}.isdisjoint(r["usage_id"] for r in new)
     archived = list(tmp_path.glob("*.previous-*.json"))
     assert len(archived) == 1 and json.loads(archived[0].read_text())["rows"] == old
+    assert yaml.safe_load(s.provenance_path.read_text())["run"]["prior_generation_ids"] == [previous_generation]
     entries = [json.loads(line) for line in api._reasoning_path(s).read_text().splitlines()]
     current_ids = {r["usage_id"] for r in new}
     expected = sum(e["reasoning_tokens_estimate"] or 0 for e in entries if e["usage_id"] in current_ids)
@@ -351,6 +356,11 @@ def test_legacy_partial_run_adopts_a_generation_without_losing_recorded_usage(tm
     del prior["run"]["generation_id"]
     for entry in prior["api_usage"]:
         entry.pop("usage_id")
+    reasoning = [json.loads(line) for line in api._reasoning_path(s).read_text().splitlines()]
+    for entry in reasoning:
+        for key in ("usage_id", "generation_id", "run_identity"):
+            entry.pop(key, None)
+    api._reasoning_path(s).write_text("\n".join(json.dumps(e) for e in reasoning) + "\n")
     old = prior["api_usage"]
     s.provenance_path.write_text(yaml.safe_dump(prior))
     ledger.ledger_path(s).unlink()
@@ -378,6 +388,129 @@ def test_fresh_generation_does_not_import_old_abandoned_stream_charges(tmp_path)
     api._record_incomplete_stream(s, "full", 1, "2026-09-11T00:01:00Z", {}, current)
     assert current[0]["generation_id"] != old_generation
     assert api.merge_abandoned_rows(s, []) == current
+
+
+@pytest.mark.parametrize("change,stale_progress", [
+    ({"label": "another_rep1"}, False), ({"label": "another_rep1"}, True),
+    ({"method": "another_method"}, False),
+    ({"condition": "tuned", "condition_mismatch_allowed": True}, False),
+])
+def test_new_identity_in_a_shared_directory_starts_its_own_generation(tmp_path, monkeypatch, change, stale_progress):
+    old = spec(out_dir=tmp_path)
+    generation = ledger.prepare_usage(old, resume=True)
+    prior_usage = []
+    ledger.append_usage(old, prior_usage, row())
+    prior = {"run": {**ledger.run_identity(old), "generation_id": generation}, "api_usage": prior_usage}
+    old.provenance_path.write_text(yaml.safe_dump(prior))
+    body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+    old.full_path.write_text(body)
+    old.core_path.write_text(body)
+    old.report_path.write_text("# Report\n")
+    api._record_incomplete_stream(old, "full", 1, "2026-09-11T00:00:00Z", {}, [])
+    journal = api._abandoned_ledger(old).read_bytes()
+    old_ledger = ledger.ledger_path(old).read_bytes()
+    if stale_progress:
+        api._save_progress(old, list(api.PHASES), None)
+        # Older progress carries the label/generation but no full identity.
+        data = json.loads(api._progress_path(old).read_text())
+        data.pop("run_identity", None)
+        api._progress_path(old).write_text(json.dumps(data))
+    current = replace(old, **change)
+
+    class Started(Exception):
+        pass
+
+    def start(run, phase, needed, client, settings, usage):
+        assert run == current and phase == "full" and usage == []
+        raise Started
+
+    monkeypatch.setattr(api, "_generate_phase", start)
+    with pytest.raises(Started):
+        api.execute(current, client=FakeClient())
+    assert ledger.generation_id(current) != generation
+    assert json.loads(ledger.ledger_path(current).read_text())["accept_legacy"] is False
+    assert ledger.ledger_path(old).read_bytes() == old_ledger
+    assert api._abandoned_ledger(old).read_bytes() == journal
+    assert api.merge_abandoned_rows(current, []) == []
+
+
+@pytest.mark.parametrize("known_owner", [True, False])
+def test_abandoned_only_state_with_no_ledger_cannot_silently_start_over(tmp_path, known_owner):
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    rows = []
+    api._record_incomplete_stream(s, "full", 1, "2026-09-11T00:00:00Z", {}, rows)
+    if not known_owner:
+        rows[0].pop("run_identity")
+        api._abandoned_ledger(s).write_text(json.dumps(rows[0]) + "\n")
+    ledger.ledger_path(s).unlink()
+    before = api._abandoned_ledger(s).read_bytes()
+    assert not s.provenance_path.exists() and not api._progress_path(s).exists()
+    client = FakeClient()
+    with pytest.raises(ledger.UsageLedgerError, match="abandoned.*ledger is missing"):
+        api.execute(s, client=client)
+    assert client.messages.calls == [] and not ledger.ledger_path(s).exists()
+    assert api._abandoned_ledger(s).read_bytes() == before
+
+
+def test_completed_record_covers_its_abandoned_rows_but_not_later_charges(tmp_path):
+    s = spec(out_dir=tmp_path)
+    ledger.prepare_usage(s, resume=True)
+    abandoned = []
+    # Same snapshot name and timestamp are not a call identity.
+    for _ in range(2):
+        api._record_incomplete_stream(s, "full", 1, "2026-09-11T00:00:00Z", {}, abandoned)
+    assert abandoned[0]["usage_id"] != abandoned[1]["usage_id"]
+    assert api.merge_abandoned_rows(s, []) == abandoned
+    result = api.execute(s, client=FakeClient())
+    assert all(result["usage"].count(entry) == 1 for entry in abandoned)
+    ledger.ledger_path(s).unlink()
+    # A portable completed record covers these exact charges. Foreign
+    # progress in the shared directory must survive this read-only exit.
+    other = {"label": "another_rep1", "generation_id": "other-generation", "completed": ["full"]}
+    api._progress_path(s).write_text(json.dumps(other))
+    progress_bytes = api._progress_path(s).read_bytes()
+    client = FakeClient()
+    assert api.execute(s, client=client)["already_complete"]
+    assert client.messages.calls == []
+    assert api._progress_path(s).read_bytes() == progress_bytes
+    api._progress_path(s).unlink()
+    # A later fresh invocation can fail before writing any progress or
+    # provenance. Its surviving charges must prevent returning the old record.
+    ledger.prepare_usage(s, resume=False)
+    later = []
+    api._record_incomplete_stream(s, "full", 1, "2026-09-11T00:01:00Z", {}, later)
+    ledger.ledger_path(s).unlink()
+    with pytest.raises(ledger.UsageLedgerError, match="abandoned.*ledger is missing"):
+        api.execute(s, client=client)
+    assert client.messages.calls == [] and not ledger.ledger_path(s).exists()
+
+
+def test_reasoning_only_state_requires_its_missing_usage_ledger(tmp_path, monkeypatch):
+    s, client = spec(out_dir=tmp_path), FakeClient()
+
+    def fail(*args):
+        raise OSError("snapshot failure")
+
+    with monkeypatch.context() as failing:
+        failing.setattr(api, "_snapshot", fail)
+        with pytest.raises(OSError, match="snapshot failure"):
+            api.execute(s, client=client)
+    saved = ledger.ledger_path(s).read_bytes()
+    reasoning_bytes = api._reasoning_path(s).read_bytes()
+    assert not api._progress_path(s).exists() and not s.provenance_path.exists()
+    ledger.ledger_path(s).unlink()
+    with pytest.raises(ledger.UsageLedgerError, match="reasoning.*ledger is missing"):
+        api.execute(s, client=client)
+    assert len(client.messages.calls) == 1
+    assert api._reasoning_path(s).read_bytes() == reasoning_bytes
+    assert not ledger.ledger_path(s).exists()
+    ledger.ledger_path(s).write_bytes(saved)
+    resumed = api.execute(s, client=client)
+    assert len(resumed["usage"]) == len(client.messages.calls) == 5
+    ledger.ledger_path(s).unlink()
+    assert api.execute(s, client=client)["already_complete"]
+    assert len(client.messages.calls) == 5
 
 
 @pytest.mark.parametrize("snippet", ["2026-09-11", "2026-09-11T01:02:03Z", "{2026-09-11: x}"])

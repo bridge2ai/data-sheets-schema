@@ -33,6 +33,7 @@ import os
 import re
 import subprocess
 import time
+import uuid
 from dataclasses import dataclass, field
 from functools import cached_property, lru_cache
 from datetime import datetime, timezone
@@ -46,9 +47,13 @@ from data_sheets_schema.usage_ledger import (
     UsageLedgerError,
     append_usage as _append_usage,
     generation_id as _usage_generation,
+    identity_is_foreign as _foreign_usage_identity,
     merge_usage as merge_completed_rows,
     persist_usage as _persist_usage,
+    prior_generation_ids as _prior_usage_generations,
     prepare_usage as _prepare_usage,
+    record_matches as _usage_record_matches,
+    run_identity as _usage_identity,
     same_generation as _same_usage_generation,
 )
 from data_sheets_schema.provenance import (
@@ -1898,7 +1903,7 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
         reasoning.append(_reasoning_path(spec),
                          {"phase": "full_readdress", "label": spec.label,
                           "project": spec.project, "model": settings["name"],
-                          "attempt": 1, "usage_id": entry["usage_id"], **cap.to_dict()})
+                          "attempt": 1, **_reasoning_usage(spec, entry), **cap.to_dict()})
         if getattr(resp, "stop_reason", None) == "max_tokens":
             # A cut-off list parses as a shorter list; `drop: tru` even
             # parses as a string. Nothing from a truncated answer is applied.
@@ -2197,6 +2202,11 @@ def _reasoning_path(spec: RunSpec) -> Path:
     return spec.metadata_dir / f"{spec.project}_reasoning.jsonl"
 
 
+def _reasoning_usage(spec: RunSpec, row: dict[str, Any]) -> dict[str, Any]:
+    return {"usage_id": row["usage_id"], "generation_id": _usage_generation(spec),
+            "run_identity": _usage_identity(spec)}
+
+
 def _load_progress(spec: RunSpec) -> dict[str, Any]:
     p = _progress_path(spec)
     if not p.exists():
@@ -2215,6 +2225,7 @@ def _save_progress(spec: RunSpec, completed: list[str],
     generation = _usage_generation(spec)
     if generation is not None:
         data["generation_id"] = generation
+        data["run_identity"] = _usage_identity(spec)
     if audit:
         data["Audit findings"] = audit
     # The bytes each completed phase was computed against (#601). Without them
@@ -3374,7 +3385,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                              {"phase": ph, "label": spec.label,
                               "project": spec.project,
                               "model": settings["name"],
-                              "attempt": rnd, "usage_id": call_usage["usage_id"], **cap.to_dict()})
+                              "attempt": rnd, **_reasoning_usage(spec, call_usage), **cap.to_dict()})
             if getattr(resp, "stop_reason", None) == "max_tokens":
                 log.append({"phase": ph, "round": rnd,
                             "outcome": "truncated; record left as it was"})
@@ -3861,7 +3872,7 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
     reasoning.append(_reasoning_path(spec),
                      {"phase": phase, "label": spec.label, "project": spec.project,
                       "model": settings["name"], "attempt": 1,
-                      "usage_id": call_usage["usage_id"], **cap.to_dict()})
+                      **_reasoning_usage(spec, call_usage), **cap.to_dict()})
     if getattr(resp, "stop_reason", None) == "max_tokens":
         return False                # a truncated report is not a report (#967)
     try:
@@ -4109,6 +4120,8 @@ def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: 
     path = _snapshot(spec, f"{spec.project}_{ph}_incomplete_attempt{attempt}_{n}.txt", body)
     snap_usage = info.get("usage") or {}
     row = {"phase": ph, "attempt": attempt, "transport_attempt": n,
+                  "usage_id": uuid.uuid4().hex,
+                  "run_identity": _usage_identity(spec),
                   # The retry ladder's own count (a rate limit before the cut
                   # advances it; the transport count does not).
                   "ladder_attempt": info.get("attempt"), "started_at": started_at,
@@ -4143,22 +4156,78 @@ def _abandoned_ledger(spec: RunSpec) -> Path:
     return spec.metadata_dir / f"{spec.project}_abandoned_attempts.jsonl"
 
 
-def merge_abandoned_rows(spec: RunSpec, usage: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Rows the ledger holds that `usage` does not (an earlier invocation's
-    drops, lost with its process), keyed by their snapshot path."""
+def _abandoned_rows(spec: RunSpec) -> list[dict[str, Any]]:
     ledger = _abandoned_ledger(spec)
     if not ledger.exists():
-        return usage
-    have = {u.get("snapshot") for u in usage if u.get("snapshot")}
+        return []
+    rows = []
     for line in ledger.read_text(encoding="utf-8").splitlines():
         try:
             row = json.loads(line)
         except json.JSONDecodeError:
             continue
-        if (isinstance(row, dict) and row.get("snapshot") and row["snapshot"] not in have
+        if isinstance(row, dict):
+            rows.append(row)
+    return rows
+
+
+def _unrecorded_abandoned(spec: RunSpec, prior: dict[str, Any]) -> bool:
+    """Identified charge evidence not already preserved in this run's record."""
+    recorded = prior.get("api_usage") or []
+    generation = (prior.get("run") or {}).get("generation_id")
+    superseded = ((prior.get("run") or {}).get("prior_generation_ids") or []) if generation else []
+    for row in _abandoned_rows(spec):
+        if row.get("generation_id") is None or _foreign_usage_identity(spec, row.get("run_identity")):
+            continue
+        if row["generation_id"] in superseded:
+            continue
+        # Exact row equality also checks the counters. A matching ID with
+        # different usage cannot establish that the surviving charge is saved.
+        if row.get("generation_id") != generation or row not in recorded:
+            return True
+    return False
+
+
+def _unrecorded_reasoning(spec: RunSpec, prior: dict[str, Any]) -> bool:
+    """A completed response may leave only its reasoning log after a failure."""
+    try:
+        entries = reasoning.read(_reasoning_path(spec))
+    except (OSError, ValueError) as exc:
+        raise UsageLedgerError(f"cannot establish surviving reasoning usage: {exc}") from exc
+    recorded = prior.get("api_usage") or []
+    generation = (prior.get("run") or {}).get("generation_id")
+    superseded = ((prior.get("run") or {}).get("prior_generation_ids") or []) if generation else []
+    for entry in entries:
+        if not isinstance(entry, dict) or entry.get("generation_id") is None:
+            continue
+        if _foreign_usage_identity(spec, entry.get("run_identity") or entry):
+            continue
+        if entry["generation_id"] in superseded:
+            continue
+        uid = entry.get("usage_id")
+        covered = (isinstance(uid, str) and bool(uid) and entry["generation_id"] == generation
+                   and any(isinstance(row, dict) and row.get("usage_id") == uid
+                           and row.get("phase") == entry.get("phase")
+                           and row.get("output_tokens") == entry.get("output_tokens")
+                           and row.get("stop_reason") == entry.get("stop_reason")
+                           for row in recorded))
+        if not covered:
+            return True
+    return False
+
+
+def merge_abandoned_rows(spec: RunSpec, usage: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Recover this generation's drops once; legacy rows use snapshot paths."""
+    def key(row):
+        uid = row.get("usage_id")
+        return ("usage_id", uid) if isinstance(uid, str) and uid else ("snapshot", row.get("snapshot"))
+    have = {key(u) for u in usage if u.get("snapshot")}
+    for row in _abandoned_rows(spec):
+        if (row.get("snapshot") and key(row) not in have
+                and not _foreign_usage_identity(spec, row.get("run_identity"))
                 and _same_usage_generation(spec, row.get("generation_id"))):
             usage.append(row)
-            have.add(row["snapshot"])
+            have.add(key(row))
     return usage
 
 
@@ -4219,7 +4288,7 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
         reasoning.append(_reasoning_path(spec),
                          {"phase": ph, "label": spec.label,
                           "project": spec.project, "model": settings["name"],
-                          "attempt": attempt, "usage_id": call_usage["usage_id"], **cap.to_dict()})
+                          "attempt": attempt, **_reasoning_usage(spec, call_usage), **cap.to_dict()})
 
         # A truncated record is worse than none: it validates as broken YAML
         # or, worse, as a shorter valid record. Never write it — but a
@@ -4346,13 +4415,23 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     prior_repair: list[dict[str, Any]] = []
     prior_matches = False
     prior_identifier = None
+    prior_record: dict[str, Any] = {}
+    foreign_prior = False
+    foreign_identifier = None
     if resume and spec.provenance_path.exists():
         try:
             prior = yaml.safe_load(
                 spec.provenance_path.read_text(encoding="utf-8")) or {}
             identity = prior.get("run") if isinstance(prior, dict) else None
-            prior_identifier = identity.get("generation_id") if isinstance(identity, dict) else None
-            prior_matches = _same_usage_generation(spec, prior_identifier)
+            foreign_prior = _foreign_usage_identity(spec, identity, recorded=True)
+            identifier = identity.get("generation_id") if isinstance(identity, dict) else None
+            if foreign_prior:
+                foreign_identifier = identifier
+            else:
+                prior_identifier = identifier
+            prior_matches = _usage_record_matches(spec, identity) and _same_usage_generation(spec, identifier)
+            if prior_matches:
+                prior_record = prior
             if prior_matches and _progress_path(spec).exists():
                 usage.extend(prior.get("api_usage") or [])
                 # Only this generation's repair history belongs here (#366,
@@ -4369,9 +4448,19 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # nothing in the file distinguishes them, so guessing would silently skip
     # reconciliation or redo it.
     progress = _load_progress(spec) if resume else {}
-    if not _same_usage_generation(spec, progress.get("generation_id")):
+    foreign_progress = (_foreign_usage_identity(spec, progress.get("run_identity"))
+                        or progress.get("label") not in (None, spec.label)
+                        or (foreign_prior and not progress.get("run_identity")
+                            and progress.get("generation_id") in (None, foreign_identifier)))
+    if foreign_progress or not _same_usage_generation(spec, progress.get("generation_id")):
         progress = {}
     done = set(progress.get("completed", []))
+    if generation is None and _unrecorded_abandoned(spec, prior_record):
+        raise UsageLedgerError("identified abandoned charges survive but their usage ledger is missing; "
+                               "restore the ledger before resuming")
+    if generation is None and _unrecorded_reasoning(spec, prior_record):
+        raise UsageLedgerError("identified reasoning survives but its usage ledger is missing; "
+                               "restore the ledger before resuming")
     # A *finished* run has no progress file — success deletes it — so resuming
     # found nothing and re-ran all six phases of work already paid for. The
     # artifacts on disk are the durable record of what completed; the progress
@@ -4395,7 +4484,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         if prior["ok"]:
             existing = yaml.safe_load(
                 spec.provenance_path.read_text(encoding="utf-8")) or {}
-            _progress_path(spec).unlink(missing_ok=True)
+            if not foreign_progress:
+                _progress_path(spec).unlink(missing_ok=True)
             # Re-validate rather than report a clean bill nobody checked.
             # Returning `[]` here asserted "no problems" about records this call
             # never looked at, so a run that had failed validation came back
@@ -4454,7 +4544,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         if progress.get("generation_id") is not None or prior_identifier is not None:
             raise UsageLedgerError("identified generation needs recovery but its usage ledger is missing; "
                                    "restore the ledger before resuming")
-        generation = _prepare_usage(spec, resume=True)
+        generation = _prepare_usage(spec, resume=not (foreign_prior or foreign_progress))
     carry: dict[str, str] = {}
     if "Audit findings" in progress:
         carry["Audit findings"] = progress["Audit findings"]
@@ -4718,6 +4808,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             "reason": settings["temperature_note"],
         }]
     rec.data["run"]["generation_id"] = generation
+    rec.data["run"]["prior_generation_ids"] = _prior_usage_generations(spec)
     rec.data["api_usage"] = merge_abandoned_rows(spec, merge_completed_rows(spec, usage))
     rec.data["phases_skipped"] = skipped or None
     rec.data["record_generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
