@@ -1,7 +1,8 @@
 {
-  "reported_at": "2026-09-12T11:56:06.575013+00:00",
+  "reported_at": "2026-09-12T14:03:54.729297+00:00",
   "completed": 2,
   "planned": 56,
+  "percentage_basis": "computed_from_point_totals_and_denominators",
   "pending": [
     "AI_READI_v7_rep1_r10_rating1",
     "AI_READI_v7_rep1_r20_rating1",

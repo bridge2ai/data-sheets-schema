@@ -1,7 +1,7 @@
 {
   "issue": 1248,
-  "registered_at": "2026-09-12T14:03:33.333089+00:00",
-  "definition_commit": "d8bb022ed2934d606a5ef15847bd5a1e3fc2b72c",
+  "registered_at": "2026-09-12T11:56:04.284090+00:00",
+  "definition_commit": "195ebac26a37b24bc80c0889f746314dde8f6ec9",
   "requested_model": "claude-opus-5[1m]",
   "effort": "high",
   "temperature": null,
@@ -844,7 +844,7 @@
     "data/rubric/rubric20.txt": "669490b61351353476ce7c1d4be9efb7da790da6499eb57078d1da0f06c0291b",
     "poetry.lock": "57a1c937b54e24a0450316bb5f1e82c3b1f5366dbbe156b3d1d5bf7ee81725fa",
     "pyproject.toml": "210e6e897d375a24e4a1ba67344e1b21e6cc2a4f6cd3104fcbe53c604d9d40ac",
-    "scripts/reference_rescore.py": "fb71398524d682dfac80f14b68b81b6859297fb0221947f0172e9ac4323d4650",
+    "scripts/reference_rescore.py": "31a108a66ecb2c18f848d9bcc303c40eb1bf42da8c374cdf513e4f2ceae5c68f",
     "scripts/validate_evaluation_schema.py": "dc2e540c4800950eb866914c72894cda668b9a92d41c5f05aa045ff17483652c",
     "src/download/prompts/rubric10_semantic_schema.json": "5ac1989a60414d41f03383266535eee9963816d0d9b42bf5b90e1efe8d9d3dc2",
     "src/download/prompts/rubric20_semantic_schema.json": "5ccdbd229471748fa1dde8074d904c0334c983741dd90c7e56f95b45b012f32b"
@@ -1054,8 +1054,8 @@
     "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/VOICE_2026-09-01api_rep1_evaluation.json": "d7e3086e4f1ff9fc8cfc0a8550aa4712dd8e8e2b30293653e27b1f18f2f82df8"
   },
   "supersedes_registration": {
-    "path": "notes/reference_rescore_2026-09-11/registrations/manifest-before-percentage-denial.json",
-    "sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
-    "reason": "Reporting derives percentages and spread from point totals (#1328); attestation preserves earlier validation only when matching CLI evidence proves a later Bash command was denied without execution (#1329), with unique ordered validator and mutation evidence and revocation after executed validator failures and only subsequently invoked validators may restore revoked attestation (#1331/#1332/#1333/#1334). Complete prompts, definitions, inputs, schemas, grading arithmetic, cohort, execution settings and budget unchanged."
+    "path": "notes/reference_rescore_2026-09-11/registrations/manifest-before-reporting-audit.json",
+    "sha256": "3ecc08aa6aed274737505e658743729dd1c293438ac8416df42b5c6b533533f6",
+    "reason": "Reporting-only incomplete-panel applicability fix (#1320); separate audit inventories interrupted attempts (#1319). Complete prompts, definitions, inputs, schemas, cohort, execution settings and budget unchanged."
   }
 }
