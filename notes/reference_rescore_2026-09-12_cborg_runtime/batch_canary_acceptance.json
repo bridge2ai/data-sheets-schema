@@ -1,8 +1,8 @@
 {
-  "accepted_at": "2026-09-12T22:35:43.737779+00:00",
-  "registration_sha256": "724f07cfec5aa26b33ed9f9d42542d383fabfc285a576a617992ce4c514e9cfd",
-  "job_id": "CHORUS_v8_rep1_r10_rating1",
-  "evaluation_sha256": "84d194e0e212bbd212b089480a77d9c86f260545d7b7d419e77ecafbed7ff06e",
-  "original_attempt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep1_r10_rating1/2026-09-12T22-22-17.411486+00-00",
+  "accepted_at": "2026-09-12T23:44:41.766237+00:00",
+  "registration_sha256": "b0a02133382c51cd8ebaa480917bd1c8920f3c7cfece11deea0392c6d9f0cbad",
+  "job_id": "CM4AI_v7_rep2_r20_rating1",
+  "evaluation_sha256": "b0e22af2feab2fff686eea1bc702e62cf184b101c418930e72536bc5a91286e1",
+  "original_attempt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T23-21-52.389234+00-00",
   "runtime_model": "claude-opus-5"
 }

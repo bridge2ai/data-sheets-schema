@@ -14,4 +14,4 @@ Q19 also requires representation-related adjudication under #1349: it asks for w
 
 The original failed 75/88 candidate remains excluded and unchanged. Its different applicability and score are not pooled with this rating or presented as a reproduced result. The audit now has 31 accepted ratings, seven excluded evaluator sessions and 38 completed evaluator sessions. The known terminal CLI subtotal is $97.89047900; the two older timeout costs remain unknown. All 259 prior evaluations are preserved.
 
-Independent review of this output and reporting disposition is required before approving the batch gate for the remaining 25 ratings. This review does not certify all semantic judgments, external identifiers, legal applicability or source-bundle facts.
+Independent Codex review round 18 approved this qualified retained measurement and report disposition; see [the review](pilot_review_round18.md). The batch gate is accepted only after that recorded approval. This review does not certify all semantic judgments, external identifiers, legal applicability or source-bundle facts.

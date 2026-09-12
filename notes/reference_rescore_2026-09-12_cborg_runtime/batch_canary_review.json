@@ -1,13 +1,13 @@
 {
-  "reviewed_at": "2026-09-12T23:37:57.717389+00:00",
-  "verdict": "pending_independent_review",
+  "reviewed_at": "2026-09-12T23:44:41.228085+00:00",
+  "verdict": "approved",
   "registration_sha256": "b0a02133382c51cd8ebaa480917bd1c8920f3c7cfece11deea0392c6d9f0cbad",
   "job_id": "CM4AI_v7_rep2_r20_rating1",
   "evaluation_sha256": "b0e22af2feab2fff686eea1bc702e62cf184b101c418930e72536bc5a91286e1",
   "original_attempt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T23-21-52.389234+00-00",
   "runtime_model": "claude-opus-5",
   "review": "notes/reference_rescore_2026-09-12_cborg_runtime/validation_wrapper_pilot_review.md",
-  "review_sha256": "0401f30ce3b2d416e03f0f46b06a8be7c28e3409e3d9d6bdc534409dae2f067c",
+  "review_sha256": "f5e5922153a2f2f86aba268403bbaf8715339342367840fe984f1387e55c4440",
   "score": {
     "total_points": 64,
     "max_points": 88,
@@ -71,6 +71,11 @@
       "semantic_analysis": "Held to 4 because the graph is asserted rather than expressed here. The record never wires specific activities to specific outputs \u2014 no collection carries a was_generated_by, and a reader cannot tell from this datasheet which acquisition produced which of the ten archives, even though the filenames imply it. Three quality slots are also empty: missing_data_documentation is absent although known_limitations concedes incompletely overlapping protein sets across modalities, and no data-split indicators are given for a dataset explicitly intended for model training. Version-history provenance is itself degraded by the non-monotonic version sequence flagged at Q13."
     }
   },
-  "remaining_jobs_permitted_after_independent_review_and_acceptance": 25,
-  "limits": "Retain a mechanically valid model measurement with explicit semantic qualifications. No replacement scores, underlying-weight verification or exhaustive source-fact certification. Two original timeout costs remain unknown."
+  "limits": "Retain a mechanically valid model measurement with explicit semantic qualifications. No replacement scores, underlying-weight verification or exhaustive source-fact certification. Two original timeout costs remain unknown.",
+  "independent_review": {
+    "path": "notes/reference_rescore_2026-09-12_cborg_runtime/pilot_review_round18.md",
+    "sha256": "f5fa287d0117957d429b5fc94d68ecd13e7e918f19d355631ed14307c3f8a7cb",
+    "reviewed_commit": "f62594fa10dc7b855b944056ca278d2207935405"
+  },
+  "remaining_jobs_permitted": 25
 }
