@@ -301,21 +301,29 @@ def validate_candidate(path: Path, job: dict, manifest: dict, events: list[dict]
         raise ValueError(f"unexpected runtime model identities: {sorted(models)}")
     runtime = next(iter(models))
     reported = doc["model"].get("name")
-    if doc["model"].get("evaluator_model") != reported:
-        raise ValueError("evaluator's two model identity fields disagree")
-    alias_evidence = None
-    if reported != runtime:
+    declarations = {f"{location}.evaluator_model": container["evaluator_model"]
+                    for location, container in (("model", doc["model"]), ("metadata", metadata))
+                    if container.get("evaluator_model") is not None}
+    if not declarations:
+        raise ValueError("evaluator did not declare evaluator_model")
+    aliases = {}
+    for field, identifier in {"model.name": reported, **declarations}.items():
+        if not isinstance(identifier, str):
+            raise ValueError(f"{field} is not a model identifier")
+        if identifier == runtime:
+            continue
         usage = results[0].get("modelUsage")
-        alias = usage.get(reported) if isinstance(usage, dict) else None
-        if (reported != MODEL or manifest["requested_model"] != MODEL or runtime != "claude-opus-5"
+        alias = usage.get(identifier) if isinstance(usage, dict) else None
+        if (identifier != MODEL or manifest["requested_model"] != MODEL or runtime != "claude-opus-5"
                 or not isinstance(alias, dict) or alias.get("canonicalModel") != runtime
                 or alias.get("contextWindow") != 1_000_000):
-            raise ValueError("evaluator's model identity disagrees with the runtime trace")
-        alias_evidence = {"reported_selector": reported, "canonical_model": runtime,
+            raise ValueError(f"{field} disagrees with the runtime trace")
+        aliases[field] = {"reported_selector": identifier, "canonical_model": runtime,
                           "context_window": alias["contextWindow"], "basis": "CLI result modelUsage"}
     if doc["model"].get("temperature") is not None:
         raise ValueError("this CLI does not expose temperature; do not invent it")
-    return {"runtime_model": runtime, "reported_model": reported, "model_alias_evidence": alias_evidence,
+    return {"runtime_model": runtime, "reported_model": reported, "model_alias_evidence": aliases.get("model.name"),
+            "evaluator_model_declarations": declarations, "model_identity_aliases": aliases,
             "check_echo": "passed",
             "definition_sha256": instrument["definition_sha256"],
             "input_sha256": metadata["input_sha256"], "evaluation_sha256": digest(path),
@@ -326,14 +334,20 @@ def require_canary(manifest: dict, job: dict) -> None:
     if job["id"] == manifest["canary_id"]:
         return
     with canary_lock():
-        acceptance = json.loads((PLAN / "canary_acceptance.json").read_bytes())
-        canary = next(j for j in manifest["jobs"] if j["id"] == manifest["canary_id"])
-        if (acceptance.get("manifest_sha256") != digest(PLAN / "manifest.json")
-                or acceptance.get("evaluation_sha256") != digest(ROOT / canary["output"])):
-            raise ValueError("canary acceptance does not match this manifest and evaluation")
-        receipt = successful_receipt(manifest, canary)
-        if acceptance.get("runtime_model") != receipt["runtime_model"]:
-            raise ValueError("canary acceptance does not match its runtime receipt")
+        _require_canary_locked(manifest)
+
+
+def _require_canary_locked(manifest: dict) -> dict:
+    """Check acceptance while the caller holds the shared canary/recovery lock."""
+    acceptance = json.loads((PLAN / "canary_acceptance.json").read_bytes())
+    canary = next(j for j in manifest["jobs"] if j["id"] == manifest["canary_id"])
+    if (acceptance.get("manifest_sha256") != digest(PLAN / "manifest.json")
+            or acceptance.get("evaluation_sha256") != digest(ROOT / canary["output"])):
+        raise ValueError("canary acceptance does not match this manifest and evaluation")
+    receipt = successful_receipt(manifest, canary)
+    if acceptance.get("runtime_model") != receipt["runtime_model"]:
+        raise ValueError("canary acceptance does not match its runtime receipt")
+    return acceptance
 
 
 def successful_receipt(manifest: dict, job: dict) -> dict:
@@ -452,12 +466,24 @@ def _run_job(manifest: dict, job: dict, claude: str) -> dict:
 def recover_canary(manifest: dict, source: Path) -> dict:
     """Revalidate a retained canary after a runner-only fix, without a model call."""
     with canary_lock():
-        return _recover_canary(manifest, source)
+        job = next(j for j in manifest["jobs"] if j["id"] == manifest["canary_id"])
+        return _recover_rating(manifest, job, source)
 
 
-def _recover_canary(manifest: dict, source: Path) -> dict:
+def recover_rating(manifest: dict, source: Path) -> dict:
+    """Revalidate a registered rating from its original CLI evidence, offline."""
+    with canary_lock():
+        original = json.loads((source / "receipt.json").read_bytes())
+        jobs = [j for j in manifest["jobs"] if j["id"] == original.get("job_id")]
+        if len(jobs) != 1:
+            raise ValueError("receipt does not identify one registered rating")
+        job = jobs[0]
+        acceptance = _require_canary_locked(manifest) if job["id"] != manifest["canary_id"] else None
+        return _recover_rating(manifest, job, source, acceptance)
+
+
+def _recover_rating(manifest: dict, job: dict, source: Path, acceptance: dict | None = None) -> dict:
     verify_frozen(manifest)
-    job = next(j for j in manifest["jobs"] if j["id"] == manifest["canary_id"])
     destination = ROOT / job["output"]
     manifest_sha = digest(PLAN / "manifest.json")
     if destination.exists():
@@ -465,10 +491,11 @@ def _recover_canary(manifest: dict, source: Path) -> dict:
                     for p in (PLAN / "attempts" / job["id"]).glob("*/receipt.json")]
         if any(r.get("status") == "passed" and r.get("manifest_sha256") == manifest_sha for r in receipts):
             raise ValueError("successful output already exists for this registration; never overwrite a rating")
-    original = json.loads((source / "receipt.json").read_bytes())
-    if (original.get("job_id") != job["id"] or original.get("status") != "incomplete"
+    original_bytes = (source / "receipt.json").read_bytes()
+    original = json.loads(original_bytes)
+    if (original.get("job_id") != job["id"] or original.get("status") not in ("incomplete", "passed")
             or original.get("exit_code") != 0):
-        raise ValueError("recovery requires this canary's incomplete, completed-CLI receipt")
+        raise ValueError("recovery requires this rating's original completed-CLI receipt")
     if original.get("manifest_sha256") != manifest_sha:
         previous, seen = manifest, {manifest_sha}
         while True:
@@ -497,7 +524,8 @@ def _recover_canary(manifest: dict, source: Path) -> dict:
             raise ValueError("recovery cannot cross an instrument, input, cohort, or execution change")
     instrument = manifest["instruments"][job["rubric"]]
     prompt_sha = hashlib.sha256(job_prompt(manifest, job).encode("utf-8")).hexdigest()
-    if (original.get("user_prompt_sha256") != digest(source / "prompt.txt")
+    prompt_bytes = (source / "prompt.txt").read_bytes()
+    if (original.get("user_prompt_sha256") != hashlib.sha256(prompt_bytes).hexdigest()
             or original["user_prompt_sha256"] != prompt_sha
             or original.get("system_prompt_sha256") != instrument["definition_sha256"]):
         raise ValueError("the retained attempt's prompts differ from the current registered prompts")
@@ -507,7 +535,7 @@ def _recover_canary(manifest: dict, source: Path) -> dict:
     trace_bytes = trace.read_bytes()
     existing_output = destination.exists()
     if existing_output and destination.read_bytes() != candidate_bytes:
-        raise ValueError("existing canary differs from the retained candidate; never overwrite a rating")
+        raise ValueError("existing rating differs from the retained candidate; never overwrite a rating")
     events = [json.loads(line) for line in trace_bytes.decode("utf-8").splitlines() if line.strip()]
     directories = [e.get("cwd") for e in events if e.get("type") == "system" and e.get("subtype") == "init"]
     if len(directories) != 1 or not isinstance(directories[0], str):
@@ -535,16 +563,20 @@ def _recover_canary(manifest: dict, source: Path) -> dict:
     if not completed_writes or completed_writes[-1] != candidate_bytes:
         raise ValueError("retained candidate does not match the evaluator's last successful Write")
     evidence = validate_candidate(candidate, job, manifest, events)
+    if acceptance is not None and evidence["runtime_model"] != acceptance["runtime_model"]:
+        raise ValueError("runtime model differs from the accepted canary")
     checked = subprocess.run([sys.executable, str(ROOT / "scripts/validate_evaluation_schema.py"),
                               "--file", str(candidate), "--rubric", job["rubric"]],
                              capture_output=True, text=True, cwd=ROOT)
     if checked.returncode:
         raise ValueError("exact-file validator failed during offline recovery")
     if (candidate.read_bytes() != candidate_bytes or trace.read_bytes() != trace_bytes
+            or (source / "receipt.json").read_bytes() != original_bytes
+            or (source / "prompt.txt").read_bytes() != prompt_bytes
             or evidence["evaluation_sha256"] != hashlib.sha256(candidate_bytes).hexdigest()):
-        raise ValueError("retained candidate or transcript changed during recovery")
+        raise ValueError("retained attempt changed during recovery")
     if existing_output and destination.read_bytes() != candidate_bytes:
-        raise ValueError("existing canary changed during recovery")
+        raise ValueError("existing rating changed during recovery")
     verify_frozen(manifest)
     attempt = PLAN / "attempts" / job["id"] / now().replace(":", "-")
     attempt.mkdir(parents=True)
@@ -640,8 +672,8 @@ def report_results(manifest: dict) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("freeze", "canary", "recover-canary", "accept-canary", "remaining", "report"))
-    parser.add_argument("--attempt", type=Path, help="retained attempt directory for recover-canary")
+    parser.add_argument("action", choices=("freeze", "canary", "recover-canary", "recover-rating", "accept-canary", "remaining", "report"))
+    parser.add_argument("--attempt", type=Path, help="original CLI attempt directory for offline recovery")
     parser.add_argument("--claude", default=shutil.which("claude"))
     args = parser.parse_args()
     if args.action == "freeze":
@@ -655,10 +687,11 @@ def main() -> int:
     if args.action == "accept-canary":
         accept_canary(manifest)
         return 0
-    if args.action == "recover-canary":
+    if args.action in ("recover-canary", "recover-rating"):
         if args.attempt is None:
-            parser.error("recover-canary requires --attempt")
-        receipt = recover_canary(manifest, args.attempt.resolve())
+            parser.error(f"{args.action} requires --attempt")
+        recovery = recover_canary if args.action == "recover-canary" else recover_rating
+        receipt = recovery(manifest, args.attempt.resolve())
         print(json.dumps({"job": receipt["job_id"], "status": receipt["status"],
                           "model_calls_during_recovery": receipt["model_calls_during_recovery"]}))
         return 0

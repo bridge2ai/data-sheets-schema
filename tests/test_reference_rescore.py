@@ -312,6 +312,45 @@ def test_cli_attested_context_selector_preserves_reported_and_runtime_identity(e
     assert json.loads((root / job["output"]).read_bytes())["model"] == doc["model"]
 
 
+@pytest.mark.parametrize("placement", ["metadata", "both"])
+@pytest.mark.parametrize("alias", [False, True])
+def test_evaluator_model_locations_are_attested_without_rewriting(environment, placement, alias):
+    root, manifest, job, doc = environment
+    doc["metadata"]["evaluator_model"] = runner.MODEL if alias else doc["model"]["name"]
+    if placement == "metadata":
+        del doc["model"]["evaluator_model"]
+    trace = events(doc)
+    if alias:
+        trace[-1]["modelUsage"] = {runner.MODEL: {"canonicalModel": "claude-opus-5", "contextWindow": 1_000_000}}
+    cli = fake_cli(root / "fake-claude", doc, trace)
+    receipt = runner.run_job(manifest, job, cli)
+    assert receipt["status"] == "passed", receipt
+    assert receipt["evaluator_model_declarations"]["metadata.evaluator_model"] == doc["metadata"]["evaluator_model"]
+    assert json.loads((root / job["output"]).read_bytes()) == doc
+    if alias:
+        assert receipt["model_identity_aliases"]["metadata.evaluator_model"]["canonical_model"] == "claude-opus-5"
+
+
+@pytest.mark.parametrize("defect", ["missing", "metadata_conflict", "model_conflict", "unattested_alias", "not_string"])
+def test_missing_or_conflicting_evaluator_model_declarations_fail(environment, defect):
+    root, manifest, job, doc = environment
+    doc["metadata"]["evaluator_model"] = doc["model"]["name"]
+    if defect == "missing":
+        del doc["model"]["evaluator_model"]
+        del doc["metadata"]["evaluator_model"]
+    elif defect == "metadata_conflict":
+        doc["metadata"]["evaluator_model"] = "another-model"
+    elif defect == "model_conflict":
+        doc["model"]["evaluator_model"] = "another-model"
+    elif defect == "unattested_alias":
+        doc["metadata"]["evaluator_model"] = runner.MODEL
+    else:
+        doc["metadata"]["evaluator_model"] = ["claude-opus-5"]
+    cli = fake_cli(root / "fake-claude", doc, events(doc))
+    assert runner.run_job(manifest, job, cli)["status"] == "incomplete"
+    assert not (root / job["output"]).exists()
+
+
 @pytest.mark.parametrize("defect", ["missing", "canonical", "context", "fields", "selector"])
 def test_model_alias_requires_matching_runtime_usage_evidence(environment, defect):
     root, manifest, job, doc = environment
@@ -326,7 +365,7 @@ def test_model_alias_requires_matching_runtime_usage_evidence(environment, defec
     elif defect == "context":
         alias["contextWindow"] = 200_000
     elif defect == "fields":
-        doc["model"]["evaluator_model"] = "claude-opus-5"
+        doc["model"]["evaluator_model"] = "another-model"
     else:
         doc["model"]["name"] = doc["model"]["evaluator_model"] = "unrecognized-selector"
         trace[-1]["modelUsage"]["unrecognized-selector"] = alias
@@ -386,6 +425,101 @@ def test_recovery_preserves_attempt_and_requires_separate_acceptance(retained_ca
     runner.require_canary(manifest, fill)
     with pytest.raises(ValueError, match="overwrite"):
         runner.recover_canary(manifest, source)
+
+
+@pytest.mark.parametrize("outcome", ["passed", "incomplete", "runtime_mismatch"])
+def test_noncanary_recovery_preserves_original_evidence_and_requires_reaccepted_canary(environment, monkeypatch, outcome):
+    root, manifest, canary, doc = environment
+    passed = outcome == "passed"
+    job = {**canary, "id": canary["id"].replace("rating1", "rating2"), "rating": 2,
+           "purpose": "repeatability", "output": canary["output"].replace("rating1", "rating2")}
+    manifest["jobs"].append(job)
+    runner.write_json(runner.PLAN / "manifest.json", manifest)
+    trace = events(doc)
+    trace[:0] = [
+        {"type": "system", "subtype": "init", "cwd": "/isolated"},
+        {"type": "assistant", "message": {"model": "claude-opus-5", "content": [
+            {"type": "tool_use", "name": "Write", "id": "write-output", "input": {
+                "file_path": "/isolated/output_evaluation.json", "content": json.dumps(doc)}}]}},
+        {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "write-output",
+            "content": "File created successfully"}]}},
+    ]
+    cli = fake_cli(root / "fake-claude", doc, trace)
+    assert runner.run_job(manifest, canary, cli)["status"] == "passed"
+    runner.accept_canary(manifest)
+    if outcome == "runtime_mismatch":
+        doc["model"]["name"] = doc["model"]["evaluator_model"] = runner.MODEL
+        trace[1]["message"]["content"][0]["input"]["content"] = json.dumps(doc)
+        for event in trace:
+            if event.get("type") == "assistant":
+                event["message"]["model"] = runner.MODEL
+        cli = fake_cli(root / "fake-claude", doc, trace)
+    with monkeypatch.context() as context:
+        if outcome == "incomplete":
+            def old_parser(*args):
+                raise ValueError("evaluator_model location rejected by old runner")
+            context.setattr(runner, "validate_candidate", old_parser)
+        receipt = runner.run_job(manifest, job, cli)
+    assert receipt["status"] == ("passed" if passed else "incomplete")
+    source = next((runner.PLAN / "attempts" / job["id"]).iterdir())
+    original_bytes = {p.name: p.read_bytes() for p in source.iterdir()}
+    canary_source = next((runner.PLAN / "attempts" / canary["id"]).iterdir())
+    archive = runner.PLAN / "registrations/before-model-location-fix.json"
+    archive.parent.mkdir()
+    shutil.copyfile(runner.PLAN / "manifest.json", archive)
+    updated = copy.deepcopy(manifest)
+    script = root / "scripts/reference_rescore.py"
+    script.write_bytes(script.read_bytes() + b"\n# Runner-only location amendment.\n")
+    updated["pinned_files"]["scripts/reference_rescore.py"] = runner.digest(script)
+    updated["supersedes_registration"] = {"path": str(archive.relative_to(root)), "sha256": runner.digest(archive)}
+    runner.write_json(runner.PLAN / "manifest.json", updated)
+    with pytest.raises(ValueError, match="canary acceptance"):
+        runner.recover_rating(updated, source)
+    with pytest.raises(ValueError, match="original completed-CLI receipt"):
+        runner.recover_canary(updated, source)
+    runner.recover_canary(updated, canary_source)
+    runner.accept_canary(updated)
+    destination = root / job["output"]
+    if outcome == "runtime_mismatch":
+        with pytest.raises(ValueError, match="runtime model differs"):
+            runner.recover_rating(updated, source)
+        assert not destination.exists()
+        assert {p.name: p.read_bytes() for p in source.iterdir()} == original_bytes
+        return
+    actual_open = Path.open
+
+    def preserve_existing_output(path, mode="r", *args, **kwargs):
+        if passed and path == destination and any(flag in mode for flag in "wax+"):
+            raise AssertionError("existing rating must not be opened for writing")
+        return actual_open(path, mode, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", preserve_existing_output)
+    recovered = runner.recover_rating(updated, source)
+    assert recovered["status"] == "passed"
+    assert recovered["preserved_existing_output"] is passed
+    assert recovered["model_calls_during_recovery"] == 0
+    assert {p.name: p.read_bytes() for p in source.iterdir()} == original_bytes
+    assert destination.read_bytes() == original_bytes["candidate.json"]
+    assert runner.successful_receipt(updated, job) == recovered
+    with pytest.raises(ValueError, match="already exists"):
+        runner.recover_rating(updated, source)
+
+
+@pytest.mark.parametrize("filename", ["receipt.json", "prompt.txt"])
+def test_recovery_rejects_changed_original_receipt_or_prompt(retained_canary, monkeypatch, filename):
+    root, manifest, job, source, _ = retained_canary
+    actual_run = runner.subprocess.run
+
+    def change_evidence_after_validation(*args, **kwargs):
+        completed = actual_run(*args, **kwargs)
+        p = source / filename
+        p.write_bytes(p.read_bytes() + b"\n")
+        return completed
+
+    monkeypatch.setattr(runner.subprocess, "run", change_evidence_after_validation)
+    with pytest.raises(ValueError, match="changed during recovery"):
+        runner.recover_canary(manifest, source)
+    assert not (root / job["output"]).exists()
 
 
 def test_later_runner_amendment_revalidates_the_existing_canary_without_rewriting(retained_canary, monkeypatch):
