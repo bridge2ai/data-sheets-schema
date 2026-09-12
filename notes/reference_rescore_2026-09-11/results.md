@@ -1,6 +1,6 @@
 # Reference rescore status — 2026-09-11
 
-Completed 52 of 56 planned evaluations.
+Completed 56 of 56 planned evaluations.
 
 # Semantic comparison: both score bases
 
@@ -62,6 +62,10 @@ Fixed percentages use the full rubric maximum. N/A-adjusted percentages use the 
 | data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v7_rep1_r10_rating3_evaluation.json | AI_READI | rubric10-semantic | Fixed: 49/50 (98.0%) | N/A-adjusted: 49/50 (98.0%) | none | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | a6e8be2bf550cf02f909075f1fb762c31f84e6c99d2dcdd9b922a33426333d7a |
 | data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v7_rep1_r10_rating2_evaluation.json | CHORUS | rubric10-semantic | Fixed: 36/50 (72.0%) | N/A-adjusted: 36/50 (72.0%) | none | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 4880a5cb2b1adb53fed37aecfeb72475efd28a469e43502b34df9bb6a90d40f5 |
 | data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v7_rep1_r10_rating3_evaluation.json | CHORUS | rubric10-semantic | Fixed: 36/50 (72.0%) | N/A-adjusted: 36/50 (72.0%) | none | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 3158093809733a65e17afe4bb2279cb583748a9b97e8296697f2b5e0ba5cf47a |
+| data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v7_rep1_r10_rating2_evaluation.json | CM4AI | rubric10-semantic | Fixed: 43/50 (86.0%) | N/A-adjusted: 43/47 (91.5%) | E4: Informed Consent Obtained from Participants, E4: Privacy Protections and Re-identification Risk Assessment, E4: Vulnerable Populations and Compensation Documented | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 2f79b40e1352b711f190a45af208c1aec754be2820976c677b1567812ce1c6c3 |
+| data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v7_rep1_r10_rating3_evaluation.json | CM4AI | rubric10-semantic | Fixed: 43/50 (86.0%) | N/A-adjusted: 43/47 (91.5%) | E4: Informed Consent Obtained from Participants, E4: Privacy Protections and Re-identification Risk Assessment, E4: Vulnerable Populations and Compensation Documented | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | db5446eca60d12f8623b8164daa688873dc6c7112bea99494e74bcc0c06f9cfe |
+| data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v7_rep1_r10_rating2_evaluation.json | VOICE | rubric10-semantic | Fixed: 49/50 (98.0%) | N/A-adjusted: 49/50 (98.0%) | none | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | fd47a5878eeb1ea3545a12fd7eae4a4287c6274ada30158a78d09b9821f3eb32 |
+| data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v7_rep1_r10_rating3_evaluation.json | VOICE | rubric10-semantic | Fixed: 49/50 (98.0%) | N/A-adjusted: 49/50 (98.0%) | none | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 241ea33f8bb00831541ef47f2c96b7fbe03c6ac520090e1753d6ffa6ef906464 |
 
 Rubric10 repeatability uses three independent ratings of one v7 record per project. Percentages and spread are computed from point totals and their denominators, so serialized percentage precision does not create apparent rating variation. Original evaluation files remain unchanged. Sample standard deviations and ranges are descriptive for those records and this exact instrument; they are not population uncertainty bounds. Changed applicability is flagged. Rubric20 repeatability remains unmeasured. Generation replicate spread is a separate quantity. These scores do not authorize canonical selection on small differences.
 
@@ -69,8 +73,8 @@ Rubric10 repeatability uses three independent ratings of one v7 record per proje
 |---|---|---|---|---|---|---|---|
 | AI_READI | 3/3 | [98.0, 98.0, 98.0] | [98.0, 98.0, 98.0] | 0.0 | 0.0 | 0.0 | True |
 | CHORUS | 3/3 | [70.0, 72.0, 72.0] | [70.0, 72.0, 72.0] | 1.1547005383792515 | 1.1547005383792515 | 2.0 | True |
-| CM4AI | 1/3 | [86.0] | [91.48936170212765] | unmeasured | unmeasured | unmeasured | unmeasured |
-| VOICE | 1/3 | [98.0] | [98.0] | unmeasured | unmeasured | unmeasured | unmeasured |
+| CM4AI | 3/3 | [86.0, 86.0, 86.0] | [91.48936170212765, 91.48936170212765, 91.48936170212765] | 0.0 | 0.0 | 0.0 | True |
+| VOICE | 3/3 | [98.0, 98.0, 98.0] | [98.0, 98.0, 98.0] | 0.0 | 0.0 | 0.0 | True |
 
 | Project | Cohort | Rubric | Generation records | Fixed percentages | Adjusted percentages |
 |---|---|---|---|---|---|

@@ -1,0 +1,172 @@
+{
+  "job_id": "VOICE_v7_rep1_r10_rating3",
+  "started_at": "2026-09-12T15:44:02.320229+00:00",
+  "status": "passed",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "user_prompt_sha256": "465c09de7c6e0a276cecc509291c132903a854845af5dbaa0555a322aef20dec",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "7660c4d93ccf05a12ebdd26c6c960e8f5d07455b3088cd3b2e909e95c802d048",
+  "evaluation_sha256": "241ea33f8bb00831541ef47f2c96b7fbe03c6ac520090e1753d6ffa6ef906464",
+  "cli_result": {
+    "duration_api_ms": 471568,
+    "stop_reason": "end_turn",
+    "session_id": "549601a5-b884-4771-bf8e-54a539acf248",
+    "total_cost_usd": 2.031571,
+    "usage": {
+      "input_tokens": 18,
+      "cache_creation_input_tokens": 75935,
+      "cache_read_input_tokens": 551404,
+      "output_tokens": 39240,
+      "output_tokens_details": {
+        "thinking_tokens": 9446
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 75935,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1150,
+          "cache_read_input_tokens": 98507,
+          "cache_creation_input_tokens": 291,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 291
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 15344,
+        "outputTokens": 17,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.015429,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 18,
+        "outputTokens": 39240,
+        "cacheReadInputTokens": 551404,
+        "cacheCreationInputTokens": 75935,
+        "webSearchRequests": 0,
+        "costUSD": 2.016142,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 9446,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01QCNXjrvfaEvZaw5YdhXXni",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-d1ri_hb9/input/record.yaml 2>/dev/null; ls /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-d1ri_hb9/input 2>/dev/null"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_016RqJnNZj48MjDA52Y1Z9Vj",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; uuidgen"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01MwEE8uHaMdn8u29rpZJifK",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\""
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 11,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "**Definition check \u2014 passed.** The section \"Source rubric and schema paths (#158)\" is present in my instructions, and the sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThat matches the current rules (it is the mapping that replaces the source rubric's absent `release_notes` slot), so I proceeded.\n\n## Evaluation complete\n\n`output_evaluation.json` written and validated:\n\n```\nVALID output_evaluation.json: rubric10-semantic\n```\n\n**Score: 49 / 50 \u2014 fixed 98.0% (denominator 50), normalized 98.0% (adjusted denominator 50).** No sub-element was excluded: all five trigger conditions resolve as met on evidence outside the gated elements \u2014 human subjects and collection from the E1 description and E8 `collection_mechanisms`; governance from E2 `confidentiality_level: restricted` plus the Certificate of Confidentiality in `other_compliance`; datasets-shared from `distribution_formats` and the versioned PhysioNet landing page; software-output from the E10 `external_resources` code repositories (gating E8 sub-element 3 only). E8 sub-element 4 was scored, not gated, per #1081.\n\n**The single 0** is Element 1 sub-element 3: four keywords (`health, biomarkers, bridge2ai, voice`), below the \u22655 expectation and covering neither the conditions nor the methods the description establishes.\n\n**Element 8 sub-element 4 (#1059/#1082):** scored 1. Evidence carried by `preprocessing_strategies` prose, `machine_annotation_tools` and `external_resources` \u2014 sparc, openSMILE, Parselmouth/Praat, ppgs, Whisper Large and b2aiprep each produced a specific released feature family or converted waveforms into the distributed Parquet files. The capture software (tablet app, reproschema-ui, REDCap) and hosting platforms (PhysioNet, Synapse) fall in roles (a) and (b) and neither earned nor forfeited the point.\n\n**Ten issues recorded** (2 failed checks, 6 warnings, 17 passed): thin keywords; variable metadata covering four feature columns with no phenotype table columns; empty canonical slots whose substance sits in prose (`publisher`, `download_url`, `is_tabular`, `data_protection_impacts`, `imputation_protocols`, `was_derived_from`); the unresolved 12-month vs four-year collection window; and two boolean flags (`identifiable_elements_present`, `confidential_elements_present`) that read more absolutely than the surrounding narrative. Grant identifiers `OT2OD032720` and `3OT2OD032720-01S1` validate against NIH patterns; DOI prefix 10.13026 is PhysioNet's and matches the stated host; `RRID:SCR_007345` is well formed.\n\nProvenance recorded as supplied, with `instrument_sha256` `66ad6231\u2026e34864`, `instrument_kind: agent_definition`, and `temperature: null` (not exposed by this CLI). Runtime model `claude-opus-5[1m]` recorded as both `name` and `evaluator_model`.",
+    "ttft_ms": 3176,
+    "type": "result",
+    "duration_ms": 472040,
+    "uuid": "197bcb60-97f0-4477-afb9-087209b4ac69",
+    "ttft_stream_ms": 948,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 1461,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T15:51:55.677500+00:00"
+}

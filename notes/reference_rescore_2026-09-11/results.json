@@ -1,14 +1,9 @@
 {
-  "reported_at": "2026-09-12T15:42:29.908845+00:00",
-  "completed": 52,
+  "reported_at": "2026-09-12T15:57:24.733897+00:00",
+  "completed": 56,
   "planned": 56,
   "percentage_basis": "computed_from_point_totals_and_denominators",
-  "pending": [
-    "CM4AI_v7_rep1_r10_rating2",
-    "CM4AI_v7_rep1_r10_rating3",
-    "VOICE_v7_rep1_r10_rating2",
-    "VOICE_v7_rep1_r10_rating3"
-  ],
+  "pending": [],
   "repeatability": [
     {
       "project": "AI_READI",
@@ -55,36 +50,44 @@
     {
       "project": "CM4AI",
       "rubric": "rubric10-semantic",
-      "ratings": 1,
+      "ratings": 3,
       "expected_ratings": 3,
       "adjusted_percentages": [
+        91.48936170212765,
+        91.48936170212765,
         91.48936170212765
       ],
       "fixed_percentages": [
+        86.0,
+        86.0,
         86.0
       ],
-      "applicability_stable": null,
-      "adjusted_sample_sd": null,
-      "fixed_sample_sd": null,
-      "adjusted_range": null,
-      "fixed_range": null
+      "applicability_stable": true,
+      "adjusted_sample_sd": 0.0,
+      "fixed_sample_sd": 0.0,
+      "adjusted_range": 0.0,
+      "fixed_range": 0.0
     },
     {
       "project": "VOICE",
       "rubric": "rubric10-semantic",
-      "ratings": 1,
+      "ratings": 3,
       "expected_ratings": 3,
       "adjusted_percentages": [
+        98.0,
+        98.0,
         98.0
       ],
       "fixed_percentages": [
+        98.0,
+        98.0,
         98.0
       ],
-      "applicability_stable": null,
-      "adjusted_sample_sd": null,
-      "fixed_sample_sd": null,
-      "adjusted_range": null,
-      "fixed_range": null
+      "applicability_stable": true,
+      "adjusted_sample_sd": 0.0,
+      "fixed_sample_sd": 0.0,
+      "adjusted_range": 0.0,
+      "fixed_range": 0.0
     }
   ],
   "generation_replicates": [

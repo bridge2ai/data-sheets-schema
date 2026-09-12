@@ -936,6 +936,16 @@
      "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
      "instrument_commit": "f7f235a9"
     },
+    "reference_2026-09-11/CM4AI_v7_rep1_r10_rating2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/CM4AI_v7_rep1_r10_rating3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
     "reference_2026-09-11/CM4AI_v7_rep2_r10_rating1_evaluation.json": {
      "basis": "recorded",
      "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
@@ -962,6 +972,16 @@
      "instrument_commit": "f7f235a9"
     },
     "reference_2026-09-11/VOICE_v7_rep1_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/VOICE_v7_rep1_r10_rating2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/VOICE_v7_rep1_r10_rating3_evaluation.json": {
      "basis": "recorded",
      "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
      "instrument_commit": "f7f235a9"
