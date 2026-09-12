@@ -1,0 +1,46 @@
+{
+  "recorded_at": "2026-09-12T14:43:55.047986+00:00",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "controller_sha256": "8e462c23b29c4b20a21a33afb678577dccd1739b632223356251b170f27530b6",
+  "launched_group": [
+    "VOICE_v8_rep1_r20_rating1",
+    "VOICE_v8_rep2_r10_rating1",
+    "VOICE_v8_rep2_r20_rating1",
+    "VOICE_v8_rep3_r10_rating1"
+  ],
+  "preflight_failures": [
+    {
+      "job_id": "VOICE_v8_rep1_r20_rating1",
+      "controller_log_sha256": "a6bd6dd97e7799e03ee0c4c507cec5c10cff91d6199f7a280a8ddebbfd5c72a1",
+      "failure": "another canary operation is in progress",
+      "before_attempt_creation": true,
+      "evaluator_cli_sessions": 0
+    },
+    {
+      "job_id": "VOICE_v8_rep2_r10_rating1",
+      "controller_log_sha256": "a6bd6dd97e7799e03ee0c4c507cec5c10cff91d6199f7a280a8ddebbfd5c72a1",
+      "failure": "another canary operation is in progress",
+      "before_attempt_creation": true,
+      "evaluator_cli_sessions": 0
+    },
+    {
+      "job_id": "VOICE_v8_rep2_r20_rating1",
+      "controller_log_sha256": "a6bd6dd97e7799e03ee0c4c507cec5c10cff91d6199f7a280a8ddebbfd5c72a1",
+      "failure": "another canary operation is in progress",
+      "before_attempt_creation": true,
+      "evaluator_cli_sessions": 0
+    }
+  ],
+  "sole_started_evaluator": "VOICE_v8_rep3_r10_rating1",
+  "disposition": "Let the already started evaluator finish; the controller stops this group. Resume pending jobs only after recording the outcome. Wait for each runner Starting marker before launching the next job, so canary preflight is serialized while evaluator sessions may overlap up to four.",
+  "scoring_instrument_unchanged": true,
+  "model_calls_for_three_preflight_failures": 0,
+  "original_controller_and_logs": "retained locally unchanged; hashes recorded here",
+  "settled_at": "2026-09-12T14:46:03.105292+00:00",
+  "sole_started_evaluator_result": "passed",
+  "controller_exit_code": 1,
+  "controller_stopped_without_later_launches": true,
+  "accepted_after": 44,
+  "original_evaluator_cli_sessions_after": 50,
+  "cli_reported_total_cost_usd_after": 110.1551835
+}

@@ -1,0 +1,182 @@
+{
+  "job_id": "VOICE_v8_rep3_r10_rating1",
+  "started_at": "2026-09-12T14:36:38.473009+00:00",
+  "status": "passed",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "user_prompt_sha256": "78dea75fc0f1769613b04e3aa8871abb4cf048d32461b1583746ef66ee19d0eb",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]",
+    "metadata.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "metadata.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "ba8876a62b15682af22bae93fe16f4ee6d229afca706435d4595064ad1d8b55c",
+  "evaluation_sha256": "8cf8922f7e3037e31c205c54d71926b36a30fa1dec9c6825e823d671dc2d3b15",
+  "cli_result": {
+    "duration_api_ms": 522878,
+    "stop_reason": "end_turn",
+    "session_id": "1ac96aae-084a-4309-a22e-ee076df8b63e",
+    "total_cost_usd": 2.296307,
+    "usage": {
+      "input_tokens": 18,
+      "cache_creation_input_tokens": 87547,
+      "cache_read_input_tokens": 611948,
+      "output_tokens": 43768,
+      "output_tokens_details": {
+        "thinking_tokens": 10557
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 87547,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1380,
+          "cache_read_input_tokens": 110040,
+          "cache_creation_input_tokens": 370,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 370
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 20498,
+        "outputTokens": 15,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.020572999999999998,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 18,
+        "outputTokens": 43768,
+        "cacheReadInputTokens": 611948,
+        "cacheCreationInputTokens": 87547,
+        "webSearchRequests": 0,
+        "costUSD": 2.275734,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 10557,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01UG4aMtygYSdDmYgjo8HjcA",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml data/rubric/rubric10.txt",
+          "description": "Hash input and rubric"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01SWLphZT5L8hTqkSbnVqFU4",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ && shasum -a 256 input/record.yaml data/rubric/rubric10.txt 2>&1 | head -5",
+          "description": "Get UTC timestamp and verify file hashes"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01HuyB5KHxkVoxZTSHAsoCUt",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation output against its schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed: `VALID output_evaluation.json: rubric10-semantic` (exit 0).\n\n## Definition check\n\nThe section **\u201cSource rubric and schema paths (#158)\u201d** is present in my instructions. The sentence beginning \u201cRead release-specific notes\u201d reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches the current instrument (dedicated `updates.update_details` slot, no top-level `release_notes`), so I proceeded. Recorded `instrument_sha256` = `66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`, `instrument_kind` = `agent_definition`.\n\n## Result \u2014 VOICE, claudecode_api, rep3\n\n**48 / 50 = 96.0%** on both bases (`normalized_percentage` 48/50, `fixed_percentage` 48/50). `excluded_max_points: 0`, `sub_elements_not_applicable: 0`.\n\nAll five trigger conditions resolved as **met**, each on evidence from a different element than the one gated:\n- *Human subjects* \u2014 E1 description (833 participants, five clinical sites, clinician-confirmed diagnosis) and E8 `collection_mechanisms` \u2192 Element 4 fully applicable, all five sub-elements scored.\n- *Governance* \u2014 E2 DTUA restrictions and `confidentiality_level: restricted` (a constraint that applies, not a record that none does).\n- *Datasets shared* \u2014 `distribution_formats.access_urls` to the PhysioNet 3.1.0 release, `general_research_use`.\n- *Software output* \u2014 E10 `external_resources` names b2aiprep and SenseLab repositories \u2192 E8 sub-element 3 applicable.\n- *Collection identified + shared* \u2192 E8 sub-elements 1\u20132 applicable.\n\nElement scores: E1 4/5, E2 5/5, E3 5/5, E4 5/5, E5 5/5, E6 5/5, E7 5/5, E8 5/5, E9 5/5, E10 4/5.\n\n**The two zeros:**\n- **E1.3 Keywords** \u2014 only four broad terms (`health, biomarkers, bridge2ai, voice`), below the five-term threshold and covering no modality, method or disease term, despite the description and subsets supplying ample vocabulary.\n- **E10.3 Community standards conformance** \u2014 `conforms_to` is deliberately empty; `source_caveats` explains that BIDS 1.9.0 belongs to the sibling raw-audio distribution. Principled disclosure, but the sub-element asks whether conformance is stated, and it is not. E3.3 scored 1 because its field list also includes `conforms_to_schema`, which is populated \u2014 the scores differ because the field lists differ, and I said so in that item's `semantic_validation`.\n\n**E8.4 Software** scored 1 on the production-and-transformation limb: b2aiprep (pinned to 3.0.0), SenseLab, torchaudio, openSMILE, Praat/Parselmouth, sparc, ppgs, Whisper Large, each tied to the released artifact it produced. The tablet capture app and PhysioNet/Synapse hosting were disregarded per excluded roles (a) and (b); they neither earned nor forfeited the point.\n\nEleven semantic issues recorded (2 medium-completeness, 1 medium content-accuracy, 8 low), consistency checks 20 passed / 1 failed / 6 warnings. The single failed check is the tension between `identifiable_elements_present: false` and the acknowledged residual re-identification risk with k<2 not achieved.\n\n`temperature` is `null` with the note that this CLI does not expose it; `model.name` and `metadata.evaluator_model` both record `claude-opus-5[1m]`. I could not compute `shasum` locally (the command was denied), so the input and rubric hashes are the values you supplied.",
+    "ttft_ms": 4088,
+    "type": "result",
+    "duration_ms": 523133,
+    "uuid": "e276a813-67b1-46cb-91c3-52f63652626a",
+    "ttft_stream_ms": 988,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 1381,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T14:45:22.853636+00:00"
+}
