@@ -1,0 +1,79 @@
+{
+  "registered_at": "2026-09-12T10:59:39.835626+00:00",
+  "manifest_sha256": "3ecc08aa6aed274737505e658743729dd1c293438ac8416df42b5c6b533533f6",
+  "runner_commit": "e64379a61f288cec3662766bc8b8b8bbddf43040",
+  "accepted_count_before": 21,
+  "remaining_job_ids": [
+    "CHORUS_v8_rep2_r20_rating1",
+    "CHORUS_v8_rep3_r10_rating1",
+    "CHORUS_v8_rep3_r20_rating1",
+    "CM4AI_v7_rep1_r10_rating1",
+    "CM4AI_v7_rep1_r20_rating1",
+    "CM4AI_v7_rep2_r10_rating1",
+    "CM4AI_v7_rep2_r20_rating1",
+    "CM4AI_v7_rep3_r10_rating1",
+    "CM4AI_v7_rep3_r20_rating1",
+    "CM4AI_v8_rep1_r10_rating1",
+    "CM4AI_v8_rep1_r20_rating1",
+    "CM4AI_v8_rep2_r10_rating1",
+    "CM4AI_v8_rep2_r20_rating1",
+    "CM4AI_v8_rep3_r10_rating1",
+    "CM4AI_v8_rep3_r20_rating1",
+    "VOICE_v7_rep1_r10_rating1",
+    "VOICE_v7_rep1_r20_rating1",
+    "VOICE_v7_rep2_r10_rating1",
+    "VOICE_v7_rep2_r20_rating1",
+    "VOICE_v7_rep3_r10_rating1",
+    "VOICE_v7_rep3_r20_rating1",
+    "VOICE_v8_rep1_r10_rating1",
+    "VOICE_v8_rep1_r20_rating1",
+    "VOICE_v8_rep2_r10_rating1",
+    "VOICE_v8_rep2_r20_rating1",
+    "VOICE_v8_rep3_r10_rating1",
+    "VOICE_v8_rep3_r20_rating1",
+    "AI_READI_v7_rep1_r10_rating2",
+    "AI_READI_v7_rep1_r10_rating3",
+    "CHORUS_v7_rep1_r10_rating2",
+    "CHORUS_v7_rep1_r10_rating3",
+    "CM4AI_v7_rep1_r10_rating2",
+    "CM4AI_v7_rep1_r10_rating3",
+    "VOICE_v7_rep1_r10_rating2",
+    "VOICE_v7_rep1_r10_rating3"
+  ],
+  "fresh_retries_before_fill": [
+    "CHORUS_v8_rep2_r20_rating1",
+    "CHORUS_v8_rep3_r10_rating1"
+  ],
+  "retry_concurrency": 1,
+  "resume_groups_only_after_both_retries_pass": true,
+  "max_concurrent_sessions": 4,
+  "budget_cap_usd_per_attempt": 5,
+  "remaining_attempt_caps_usd": 175,
+  "automatic_retries": false,
+  "stop_new_launches_on_failure": true,
+  "let_inflight_finish": true,
+  "excluded_original_attempts": [
+    {
+      "job_id": "CHORUS_v8_rep2_r20_rating1",
+      "attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r20_rating1/2026-09-12T10-34-08.427493+00-00",
+      "receipt_sha256": "2c32080dbc09b6cd296a6eeb21e45e02531d08c2a61dae80ace6e31bbd46c27e",
+      "candidate_sha256": "fa4d09b6e980b7ba02261515433103bb6d38899107ca4635c3de28a9c5c21045",
+      "reason": "No successful evaluator-side validation; excluded from reference scores."
+    },
+    {
+      "job_id": "CHORUS_v8_rep3_r10_rating1",
+      "attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r10_rating1/2026-09-12T10-34-11.987974+00-00",
+      "receipt_sha256": "4d9f077cbba41695221a4bd2885ebb114c3fd508e0560ffb3d4d01a914a0b45d",
+      "candidate_sha256": "c2d174ae66df084f81f520c8a903eb22da790ed2f6a0d8525574116efbe6aca6",
+      "reason": "No successful evaluator-side validation; excluded from reference scores."
+    }
+  ],
+  "helper_path": "notes/reference_rescore_2026-09-11/execution_tools/run_registered_job_canonical_validator.py",
+  "helper_sha256": "9a07e5cde4912fdeb8a15244bacedd87fc31d017458c025b7f69a21b4c7e9589",
+  "audit_helper_sha256": "094945a5be4d951792882077b91c4f1865f8123a6aecdd3a01a49e5dc2008274",
+  "instrument_definition_sha256": {
+    "rubric10-semantic": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+    "rubric20-semantic": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3"
+  },
+  "complete_prompts_unchanged": true
+}

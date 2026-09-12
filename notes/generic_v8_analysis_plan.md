@@ -2471,3 +2471,39 @@ The 45 remaining job IDs and replacement execution helper are registered in
 The original helper and scheduling record remain preserved. The same limit of
 four independent sessions, $5 per attempt, and a halt on any observed failure
 applies. The original unvalidated AI_READI v7 draft remains excluded.
+
+### Canonical validator path amendment (2026-09-12; #1317)
+
+The fill stopped at 21 accepted ratings after CHORUS v8 rep2 rubric20 and
+v8 rep3 rubric10 failed evaluator-side validation. Their drafts remain excluded.
+The latter exposed a macOS temporary-directory alias mismatch in the absolute
+validator permission prefix. Resolve the isolated directory before constructing
+paths and permissions; retain the exact-command restriction.
+
+The independent Codex review approved commit
+`e64379a61f288cec3662766bc8b8b8bbddf43040`; 118 focused tests passed. Manifest
+SHA256 `3ecc08aa6aed274737505e658743729dd1c293438ac8416df42b5c6b533533f6`
+registers the runner-only change. Complete prompts, instrument definitions,
+schemas, input bytes, the 56-rating design and execution settings are unchanged.
+The original CHORUS canary was revalidated offline and separately accepted;
+its quoted definition remains
+`66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`.
+The two existing main-branch outputs were preserved and revalidated without
+model calls. Nineteen more accepted ratings on #1313 require the same offline
+revalidation before the two failed CHORUS jobs are retried individually.
+Detailed evidence is in
+`notes/reference_rescore_2026-09-11/canonical_validator_review_2026-09-12.md`
+and `canonical_validator_registration.json`. No generation or download occurred.
+
+### Reference fill revalidated after the path fix (2026-09-12; #1248, #1317)
+
+All 21 accepted outputs and 165 retained attempt files were verified unchanged.
+Nineteen ratings received new offline receipts after the two main-branch
+ratings were revalidated and the original canary separately accepted. No model
+call occurred during this revalidation. The 35 remaining job IDs and replacement
+execution helper are recorded in
+`notes/reference_rescore_2026-09-11/fill_resumed_canonical_validator_2026-09-12.json`.
+Fresh CHORUS v8 rep2 rubric20 and v8 rep3 rubric10 attempts run one at a time;
+both must pass before the other groups of at most four resume. The complete
+prompts, model, effort and $5 attempt cap are unchanged. All three unvalidated
+drafts remain excluded and preserved.

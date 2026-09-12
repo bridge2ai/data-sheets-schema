@@ -1,0 +1,219 @@
+{
+  "job_id": "CHORUS_v8_rep1_r20_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T10:57:38.171160+00:00",
+  "manifest_sha256": "3ecc08aa6aed274737505e658743729dd1c293438ac8416df42b5c6b533533f6",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "f2a4d6229e5b4188a281727cb6723120e8ebbcfefe2883e6b1ada1c434bb0bb7",
+  "evaluation_sha256": "6d7e0b946c7b9ed313062bda361e8c2c8ec38814705e4118799696aef4b73e94",
+  "cli_result": {
+    "duration_api_ms": 774813,
+    "stop_reason": "end_turn",
+    "session_id": "1c9757fe-ba42-4ee8-9dcc-b29740d00bcc",
+    "total_cost_usd": 3.4518935,
+    "usage": {
+      "input_tokens": 40,
+      "cache_creation_input_tokens": 103013,
+      "cache_read_input_tokens": 1504071,
+      "output_tokens": 66357,
+      "output_tokens_details": {
+        "thinking_tokens": 10611
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 103013,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1277,
+          "cache_read_input_tokens": 122463,
+          "cache_creation_input_tokens": 196,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 196
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 10533,
+        "outputTokens": 14,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.010603000000000001,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 40,
+        "outputTokens": 66357,
+        "cacheReadInputTokens": 1504071,
+        "cacheCreationInputTokens": 103013,
+        "webSearchRequests": 0,
+        "costUSD": 3.4412904999999996,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 10611,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01BKAErNLPKZoePUmyej6Na6",
+        "tool_input": {
+          "command": "ls /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-627_i15a; echo \"---\"; find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "List working directory and locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_017sGYVUmqzVzSgoovidSnc5",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-627_i15a/; echo \"=== hash of input ===\"; shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-627_i15a/input/record.yaml",
+          "description": "List top-level directory and hash the input record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_0126MhEeWmQGJL3SmKNSrvNf",
+        "tool_input": {
+          "command": "date -u +\"%Y-%m-%dT%H:%M:%SZ\"; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get UTC timestamp and generate a UUID"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_0192zd49f2RdoJXUf5rWk223",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation output against its schema"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01XAt7tThPM39NzVPHkp6npT",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation output against its schema"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01LYBJcsdA5toHQunifDdyj4",
+        "tool_input": {
+          "command": "poetry run python fix_q20_description.py",
+          "description": "Insert the missing description key into the Q20 object"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_015gYmkjnHrY41tzmGNq8qTa",
+        "tool_input": {
+          "command": "poetry run python fix_q20_description.py",
+          "description": "Apply the Q20 description insertion"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_016eTG3f1NXGNCssW4WGUm6p",
+        "tool_input": {
+          "command": "python3 fix_q20_description.py && poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
+          "description": "Apply the fix and re-run schema validation"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 23,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed. Evaluation complete.\n\n## Definition check\n\nThe \"Reproducibility\" section is present in my instructions and reads as expected of the current instrument. The sentence beginning \"Repeatability must be\", verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nIt names both the evaluator model *and* the definition as things that must be held fixed, and disclaims the fixed/zero-temperature guarantee \u2014 so my definition is current, not the pre-#1077 vintage. Recorded `instrument_sha256` as `9d08b5f3\u20260e7dd3`.\n\n## Result \u2014 CHORUS, claudecode_api, rep1\n\n**67 / 88 points.** Both bases are equal at **76.1%** (fixed denominator 88; adjusted denominator 88), because **no question was excluded** \u2014 `excluded_max_points: 0`, `questions_not_applicable: 0`.\n\nAll four trigger conditions resolved as met, each on evidence outside the gated question's own fields (anti-circular rule):\n- **Human subjects** (gates Q8, Q15) \u2014 met via `description`, `keywords`, `collection_mechanisms`.\n- **Datasets shared** (gates Q10, Q17) \u2014 met via `distribution_formats` (5 formats) and `data_governance.access_review_process`.\n- **Software output** (gates Q11) \u2014 met via `external_resources` naming the 28-repository chorus-ai GitHub organization.\n- **Collection + shared** (gates Q12, Q13) \u2014 met via all four collection fields plus the sharing condition.\n\n| Category | Score |\n|---|---|\n| Structural Completeness | 19 / 21 |\n| Metadata Quality & Content | 17 / 21 |\n| Technical Documentation | 17 / 25 |\n| FAIRness & Accessibility | 14 / 21 |\n\nHighest: Q7 funding (5) and Q12 collection protocol (5). Lowest: Q13 versioning/sustainability (2) and Q20 bias documentation (2). Semantic analysis logged 11 issues (20 consistency checks passed, 4 failed, 8 warnings); grant number OT2OD032701 validates as well-formed NIH, DOI and RRID are absent, and one external resource lacks a URI scheme.\n\nTwo judgements worth flagging as non-mechanical. **Q19 scored 4 despite absent versioning** \u2014 this record inverts the 3-band's assumption by having lineage without version history, and entity/activity/agent are all recoverable from text, which the rubric accepts. **Q8 held at 3 with no IRB** \u2014 the band nominally reads \"IRB + deidentification\", but deidentification, privacy, at-risk identification and sensitivity classification are all substantive here, offsetting the missing IRB rather than dropping below the band; the missing DPIA, HIPAA determination and `informed_consent` prevent any rise above it.\n\n## One process note\n\nThe first validation run failed: `'description' is a required property` at Q20. That was a serialization omission on my part \u2014 the key was dropped when I wrote the file \u2014 not a judgement. `Edit` is disabled this session and the Bash permission layer repeatedly refused to execute a small fix script, so I rewrote the file via `Write` with the `description` restored and **every score, label, evidence string and note unchanged**. Nothing was altered to satisfy the validator.\n\nLeftover artifact: `fix_q20_description.py` remains in the working directory, unexecuted. It has no bearing on the output and can be deleted.",
+    "ttft_ms": 2474,
+    "type": "result",
+    "duration_ms": 777984,
+    "uuid": "074d749a-f68a-41a4-8eaf-ee3772a0271a",
+    "ttft_stream_ms": 1842,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 1842,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T10-34-00.487246+00-00",
+  "original_receipt_sha256": "5931fdfab1154997b86f61c990496fdcbbaa0f7f42ee2ab5e75732be16a19fda",
+  "transcript_sha256": "c7a9aa0d1fb926d3a44dccf6a61f8d0ef5f3d179f29af2d1b467ff22743ed1c6",
+  "user_prompt_sha256": "14fce7d6f0a5cd1713275169fea0ea8deba33ba4ab6133f64a73b68e7e482775",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "evaluated_at": "2026-09-12T10:34:00.487631+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

@@ -37,7 +37,9 @@ for j in m['jobs']:
         results = [e for e in trace if e.get('type') == 'result']
         cost = results[0].get('total_cost_usd') if len(results) == 1 else None
         calls.append({'job_id': j['id'], 'source': str(source.relative_to(root)),
-                      'status': rec['status'], 'cli_reported_cost_usd': cost})
+                      'status': rec['status'], 'original_error': rec.get('error'),
+                      'evaluator_validation_succeeded': r.evaluator_validated(trace, j['rubric']),
+                      'cli_reported_cost_usd': cost})
         intervals.extend([(datetime.fromisoformat(rec['started_at']), 1),
                           (datetime.fromisoformat(rec['completed_at']), -1)])
         candidate = source / 'candidate.json'
@@ -63,14 +65,19 @@ for _, change in sorted(intervals):
     active += change
     peak = max(peak, active)
 assert active == 0 and peak <= 4
-for name in ('model_provenance_registration.json', 'model_provenance_fill_preservation.json'):
+for name in ('model_provenance_registration.json', 'model_provenance_fill_preservation.json',
+             'canonical_validator_registration.json', 'canonical_validator_fill_preservation.json'):
     record = json.loads((r.PLAN / name).read_bytes())
     for rel, sha in {**record['retained_attempt_files'], **record['existing_outputs']}.items():
         assert r.digest(root / rel) == sha, rel
+accepted_sources = {row['original_attempt'] for row in ratings}
+for call in calls:
+    call['accepted_source'] = call['source'] in accepted_sources
 audit = {'audited_at': r.now(), 'manifest_sha256': r.digest(r.PLAN / 'manifest.json'),
          'accepted': len(ratings), 'planned': len(m['jobs']), 'actual_model_calls': len(calls),
          'model_call_unit': 'one isolated evaluator CLI session, which may contain multiple model/tool turns',
          'attempts_without_reported_cost': sum(c['cli_reported_cost_usd'] is None for c in calls),
+         'excluded_original_attempts': sum(not c['accepted_source'] for c in calls),
          'cli_reported_total_cost_usd': round(sum(c['cli_reported_cost_usd'] or 0 for c in calls), 8),
          'peak_completed_session_concurrency': peak, 'prior_evaluations_unchanged': len(m['prior_evaluations']),
          'rubric10_source_aligned_headings_verified': True, 'ratings': ratings, 'original_calls': calls}
