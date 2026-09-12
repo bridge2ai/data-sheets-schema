@@ -1,0 +1,30 @@
+{
+  "registered_at": "2026-09-12T14:25:13.896367+00:00",
+  "issue": 1335,
+  "job_id": "VOICE_v8_rep1_r10_rating1",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "runner_commit": "d8bb022ed2934d606a5ef15847bd5a1e3fc2b72c",
+  "input_sha256": "6ad8a47eab05cc4fe6015485d79d8601bc26a03c90d2c86711c1ff511a13030f",
+  "prior_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-14-57.243736+00-00",
+  "prior_candidate_sha256": "862c4c31b10e7abc392a53a62f4602d93ce457d0a6233a1180f1f76ade0324d7",
+  "retained_attempt_files": {
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-14-57.243736+00-00/transcript.jsonl": "22ae21ae0478701fc187d7d09d20ef0fc77159a7e4ed3fea5ef799f0f28d4932",
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-14-57.243736+00-00/candidate.json": "862c4c31b10e7abc392a53a62f4602d93ce457d0a6233a1180f1f76ade0324d7",
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-14-57.243736+00-00/prompt.txt": "2be9569fbc73c8787410b1cf1aa787a0a8b56f368ed5fd5bc27bf77283d6bb01",
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-14-57.243736+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-14-57.243736+00-00/receipt.json": "8e516b3bcc2b5a4604794cfafc29428c9b1a1d1b1c8f62e26b723bb56f6b27e7"
+  },
+  "prior_attempt_disposition": "preserved and excluded: total47 disagrees with item sum48",
+  "retry_count_authorized_here": 1,
+  "budget_cap_usd_per_attempt": 5,
+  "fresh_isolated_session": true,
+  "complete_prompt_unchanged": true,
+  "model_settings_unchanged": true,
+  "automatic_retries": false,
+  "accepted_before": 42,
+  "original_cli_sessions_before": 48,
+  "excluded_original_attempts_before": 6,
+  "cli_reported_total_cost_usd_before": 105.672661,
+  "resume_remaining_groups_only_after_retry_passes": true
+}

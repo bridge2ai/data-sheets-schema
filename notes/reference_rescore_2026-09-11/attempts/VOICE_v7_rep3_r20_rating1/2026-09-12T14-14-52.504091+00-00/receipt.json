@@ -1,0 +1,166 @@
+{
+  "job_id": "VOICE_v7_rep3_r20_rating1",
+  "started_at": "2026-09-12T14:14:52.504445+00:00",
+  "status": "passed",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "user_prompt_sha256": "02a9deddc6a3fe89e28a37151752ac890eb43e7dd8488db83274d308aaf52f5e",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]",
+    "metadata.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "metadata.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "48a64a4e950a1ed59daf3d4efed662513451e2a0d192fd0b381031684efe2275",
+  "evaluation_sha256": "565b7751f15d63670ca3479df0fcc4d35c55d360909c2b10c43dcdb4a27f7e4b",
+  "cli_result": {
+    "duration_api_ms": 417507,
+    "stop_reason": "end_turn",
+    "session_id": "662e636b-a95a-46f7-9086-2b10de3ccda4",
+    "total_cost_usd": 1.936183,
+    "usage": {
+      "input_tokens": 14,
+      "cache_creation_input_tokens": 83426,
+      "cache_read_input_tokens": 430064,
+      "output_tokens": 34611,
+      "output_tokens_details": {
+        "thinking_tokens": 7134
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 83426,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1254,
+          "cache_read_input_tokens": 102813,
+          "cache_creation_input_tokens": 259,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 259
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 21471,
+        "outputTokens": 15,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.021546,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 14,
+        "outputTokens": 34611,
+        "cacheReadInputTokens": 430064,
+        "cacheCreationInputTokens": 83426,
+        "webSearchRequests": 0,
+        "costUSD": 1.914637,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 7134,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01UHkewdzToqADrLUGwX93N6",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-3ciremot; find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 8,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (`VALID output_evaluation.json: rubric20-semantic`, exit 0).\n\n## Definition check\n\nThe \"Reproducibility\" section is present in my instructions and reads as expected of the current rules. The sentence beginning \"Repeatability must be\", verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nRecorded `instrument_sha256` as `9d08b5f3\u20265a0e7dd3` with `instrument_kind: agent_definition`.\n\n## Evaluation written: `output_evaluation.json`\n\n**82 / 88.** No question was excluded, so both bases coincide: `fixed_percentage` 93.2 (denominator 88) and `normalized_percentage` 93.2 (`adjusted_max_points` 88, `excluded_max_points` 0, `questions_not_applicable` 0).\n\n| Category | Score |\n|---|---|\n| Structural Completeness | 18 / 21 |\n| Metadata Quality & Content | 20 / 21 |\n| Technical Documentation | 25 / 25 |\n| FAIRness & Accessibility | 19 / 21 |\n\n**Applicability.** All four conditional gates resolved as *applicable*, each on fields belonging to a different question per the anti-circular rule: Q8/Q15 on human-participant evidence in `description` and `collection_mechanisms`; Q10/Q12/Q13/Q17 on `distribution_formats` with PhysioNet and Synapse access URLs plus `third_party_sharing.is_shared`; Q11 on the three code repositories in `external_resources`. Since nothing is N/A, no `score: null` entries appear \u2014 every item carries an integer.\n\n**Points not awarded.** Q1 = 4 (11/14 mandatory slots; `variables`, `resources`, `parent_datasets` empty). Q3 = 3 (four keywords for ~50 conditions). Q8 = 4, Q19 = 4, Q20 = 4.\n\n**Semantic findings that moved scores.** Two consistency failures: `at_risk_groups_included: false` against the record's own dementia/MCI/ALS/schizophrenia cohorts, and `data_protection_impacts` asserting an analysis its own `source_caveats` records the healthsheet as denying \u2014 together costing Q8 one point. Q19 lost a point because `was_derived_from` and `parent_datasets` are empty, so a complete prose lineage is not bound into an entity-activity-agent structure. Q20 lost a point for absent AIO mappings and a fairness analysis with no disparity measures.\n\n**Correctness validations all passed:** PhysioNet prefix 10.13026 and Zenodo 10.5281 used correctly, NIH `OT2OD032720` and its `-01S1`/`-01S3` supplements valid, `RRID:SCR_007345` well formed, all URLs plausible, version chronology consistent with `issued`. Two malformed grant strings in `funders.notes` are logged low-severity because the record itself identifies them as corrupted source renderings rather than asserting them.\n\nOne judgement worth flagging for your reading: this record repeatedly discloses unfavourable facts about itself (an adverse AI-readiness self-assessment, no k-anonymity, unaudited transcription models, unresolved same-rank source conflicts). I credited that disclosure as documentation quality where the rubric asks about documentation, and scored the underlying gaps where the rubric asks about substance \u2014 the demographic breakdown and file sizes are genuinely absent, not merely disclosed as absent.",
+    "ttft_ms": 1378,
+    "type": "result",
+    "duration_ms": 419955,
+    "uuid": "30f5daae-1cd2-4216-9da9-77da6fc19bb7",
+    "ttft_stream_ms": 863,
+    "time_to_request_ms": 21,
+    "first_content_frame_ms": 1203,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T14:21:53.755640+00:00"
+}
