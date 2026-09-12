@@ -6,6 +6,7 @@ An attempt without a receipt has unknown outcome/cost and blocks completion.
 """
 import argparse
 import json
+from math import isfinite
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -19,6 +20,16 @@ def read_trace(source: Path) -> list[dict]:
     if any(not isinstance(event, dict) for event in events):
         raise ValueError('stream event is not an object')
     return events
+
+
+def terminal_cost(events: list[dict]) -> int | float:
+    results = [event for event in events if event.get('type') == 'result']
+    if len(results) != 1:
+        raise ValueError('missing or ambiguous terminal result/cost evidence')
+    cost = results[0].get('total_cost_usd')
+    if type(cost) not in (int, float) or not isfinite(cost) or cost < 0:
+        raise ValueError('missing or invalid terminal cost evidence')
+    return cost
 
 
 def verify_recovery_source(root: Path, source: Path, record: dict) -> None:
@@ -59,7 +70,7 @@ def inventory_attempts(root: Path, plan: Path, job_ids: set[str]) -> tuple[dict,
                 if not isinstance(record, dict) or record.get('job_id') != job_id:
                     raise ValueError('receipt job identity does not match its directory')
                 if (source / 'prompt.txt').is_file():
-                    read_trace(source)
+                    terminal_cost(read_trace(source))
                     started = datetime.fromisoformat(record['started_at'])
                     completed = datetime.fromisoformat(record['completed_at'])
                     if not started.tzinfo or not completed.tzinfo or completed < started:
@@ -74,7 +85,7 @@ def inventory_attempts(root: Path, plan: Path, job_ids: set[str]) -> tuple[dict,
                     verify_recovery_source(root, source, record)
                 else:
                     raise ValueError('missing original prompt or recovery evidence')
-            except (OSError, ValueError, TypeError, KeyError) as exc:
+            except (OSError, ValueError, TypeError, KeyError, OverflowError) as exc:
                 reason = f'invalid attempt evidence ({type(exc).__name__}: {exc}); outcome and cost unresolved'
         if reason:
             unresolved.append({'job_id': job_id, 'source': str(source.relative_to(root)),
@@ -124,8 +135,7 @@ def audit_results(*, complete: bool = False) -> dict:
             assert r.digest(p) == rec['user_prompt_sha256']
             assert rec['system_prompt_sha256'] == m['instruments'][j['rubric']]['definition_sha256']
             trace = read_trace(source)
-            results = [e for e in trace if e.get('type') == 'result']
-            cost = results[0].get('total_cost_usd') if len(results) == 1 else None
+            cost = terminal_cost(trace)
             calls.append({'job_id': j['id'], 'source': str(source.relative_to(root)),
                           'status': rec['status'], 'original_error': rec.get('error'),
                           'evaluator_validation_succeeded': r.evaluator_validated(trace, j['rubric']),
@@ -181,6 +191,8 @@ def audit_results(*, complete: bool = False) -> dict:
              'peak_completed_session_concurrency': peak, 'prior_evaluations_unchanged': len(m['prior_evaluations']),
              'rubric10_source_aligned_headings_verified': True, 'ratings': ratings, 'original_calls': calls}
     if complete:
+        if not audit['session_accounting_complete'] or not audit['cost_accounting_complete']:
+            raise ValueError('completion requires complete session and cost accounting')
         if len(ratings) != len(m['jobs']) or len(ratings) != 56:
             raise ValueError('completion requires all 56 registered ratings')
         r.write_json(r.PLAN / 'completion_audit.json', audit)

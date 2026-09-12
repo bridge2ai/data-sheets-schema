@@ -2,6 +2,7 @@
 import importlib.util
 import json
 import shutil
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import sys
 
@@ -18,7 +19,7 @@ spec.loader.exec_module(audit)
 def original_attempt(source):
     source.mkdir(parents=True)
     (source / "prompt.txt").write_text("original registered prompt")
-    (source / "transcript.jsonl").write_text('{"type":"result"}\n')
+    (source / "transcript.jsonl").write_text('{"type":"result","total_cost_usd":1.0}\n')
     (source / "candidate.json").write_text('{"score":1}\n')
     (source / "receipt.json").write_text(json.dumps({
         "job_id": source.parent.name, "status": "passed", "exit_code": 0,
@@ -167,3 +168,70 @@ def test_interim_audit_returns_unresolved_accounting_before_receipt_selection(tm
     assert json.loads(capsys.readouterr().out)["status"] == "unresolved"
     with pytest.raises(ValueError, match="unresolved attempt evidence"):
         audit.audit_results(complete=True)
+
+
+@pytest.mark.parametrize("terminal", [None, {"type": "result"},
+                                     {"type": "result", "total_cost_usd": float("nan")},
+                                     {"type": "result", "total_cost_usd": True}])
+def test_complete_cohort_with_unresolved_terminal_usage_never_certifies(tmp_path, monkeypatch, capsys, terminal):
+    """Exercise full accounting; scoring gates have their own real-validator tests."""
+    plan = tmp_path / "plan"
+    monkeypatch.setattr(audit.r, "ROOT", tmp_path)
+    monkeypatch.setattr(audit.r, "PLAN", plan)
+    monkeypatch.setattr(audit.r, "verify_frozen", lambda manifest: None)
+    monkeypatch.setattr(audit.r, "require_canary", lambda manifest, job: None)
+    monkeypatch.setattr(audit.r, "job_prompt", lambda manifest, job: "original registered prompt")
+    monkeypatch.setattr(audit.r, "successful_receipt", lambda manifest, job: {
+        "evaluation_sha256": audit.r.digest(tmp_path / job["output"])})
+    monkeypatch.setattr(audit.r, "validate_candidate", lambda path, *args: {
+        "evaluation_sha256": audit.r.digest(path), "definition_sha256": "definition"})
+    doc = {"elements": [{"id": i, "name": f"element{i}", "sub_elements": [
+        {"name": f"item{i}.{j}"} for j in range(5)]} for i in range(10)], "overall_score": {}}
+    (tmp_path / "rubric.txt").write_text(" ".join(s["name"] for e in doc["elements"] for s in e["sub_elements"]))
+    manifest = {"jobs": [], "canary_id": "job00", "prior_evaluations": {}, "instruments": {
+        "rubric10-semantic": {"definition_sha256": "definition", "rubric": "rubric.txt"}}}
+    for i in range(56):
+        job = {"id": f"job{i:02}", "output": f"evaluation{i}.json", "rubric": "rubric10-semantic"}
+        manifest["jobs"].append(job)
+        source = plan / "attempts" / job["id"] / "original"
+        original_attempt(source)
+        (source / "candidate.json").write_text(json.dumps(doc))
+        (tmp_path / job["output"]).write_bytes((source / "candidate.json").read_bytes())
+        receipt = json.loads((source / "receipt.json").read_text())
+        start = datetime(2026, 9, 12, tzinfo=timezone.utc) + timedelta(minutes=2 * i)
+        receipt.update(started_at=start.isoformat(), completed_at=(start + timedelta(minutes=1)).isoformat(),
+                       user_prompt_sha256=audit.r.digest(source / "prompt.txt"), system_prompt_sha256="definition")
+        (source / "receipt.json").write_text(json.dumps(receipt))
+    (plan / "manifest.json").write_text(json.dumps(manifest))
+    for name in ("model_provenance_registration", "model_provenance_fill_preservation",
+                 "canonical_validator_registration", "canonical_validator_fill_preservation",
+                 "reporting_audit_registration", "reporting_audit_fill_preservation"):
+        (plan / f"{name}.json").write_text(json.dumps({"retained_attempt_files": {},
+            "existing_outputs": {"evaluation0.json": audit.r.digest(tmp_path / "evaluation0.json")}}))
+    baseline = audit.audit_results(complete=True)
+    assert baseline["accepted"] == baseline["actual_model_calls"] == 56
+    completion_before = (plan / "completion_audit.json").read_bytes()
+    failed = plan / "attempts/job00/timeout"
+    original_attempt(failed)
+    receipt = json.loads((failed / "receipt.json").read_text())
+    receipt.update(status="incomplete", error="TimeoutExpired", user_prompt_sha256=audit.r.digest(failed / "prompt.txt"),
+                   system_prompt_sha256="definition")
+    receipt.pop("exit_code")
+    (failed / "receipt.json").write_text(json.dumps(receipt))
+    events = [{"type": "assistant", "message": {"content": []}}]
+    if terminal is not None:
+        events.append(terminal)
+    (failed / "transcript.jsonl").write_text("\n".join(json.dumps(e) for e in events) + "\n")
+    result = audit.audit_results(complete=False)
+    assert result["status"] == "unresolved"
+    assert result["cli_reported_total_cost_usd"] is None
+    assert len(result["inventoried_original_attempts"]) == 56
+    assert "terminal" in result["unresolved_attempts"][0]["reason"]
+    with pytest.raises(ValueError, match="unresolved attempt evidence.*terminal"):
+        audit.audit_results(complete=True)
+    assert (plan / "completion_audit.json").read_bytes() == completion_before
+    monkeypatch.setattr(sys, "argv", ["audit_reference_rescore.py"])
+    with pytest.raises(SystemExit) as error:
+        audit.main()
+    assert error.value.code == 1
+    assert json.loads(capsys.readouterr().out)["status"] == "unresolved"
