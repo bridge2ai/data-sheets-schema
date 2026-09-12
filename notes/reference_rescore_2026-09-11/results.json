@@ -1,10 +1,9 @@
 {
-  "reported_at": "2026-09-12T14:25:14.150480+00:00",
-  "completed": 42,
+  "reported_at": "2026-09-12T14:35:40.593723+00:00",
+  "completed": 43,
   "planned": 56,
   "percentage_basis": "computed_from_point_totals_and_denominators",
   "pending": [
-    "VOICE_v8_rep1_r10_rating1",
     "VOICE_v8_rep1_r20_rating1",
     "VOICE_v8_rep2_r10_rating1",
     "VOICE_v8_rep2_r20_rating1",
@@ -332,10 +331,14 @@
       "project": "VOICE",
       "cohort": "v8",
       "rubric": "rubric10-semantic",
-      "records": 0,
+      "records": 1,
       "expected_records": 3,
-      "adjusted_percentages": [],
-      "fixed_percentages": []
+      "adjusted_percentages": [
+        94.0
+      ],
+      "fixed_percentages": [
+        94.0
+      ]
     },
     {
       "project": "VOICE",

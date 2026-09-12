@@ -1,0 +1,182 @@
+{
+  "job_id": "VOICE_v8_rep1_r10_rating1",
+  "started_at": "2026-09-12T14:26:49.082105+00:00",
+  "status": "passed",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "user_prompt_sha256": "2be9569fbc73c8787410b1cf1aa787a0a8b56f368ed5fd5bc27bf77283d6bb01",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]",
+    "metadata.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "metadata.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "6ad8a47eab05cc4fe6015485d79d8601bc26a03c90d2c86711c1ff511a13030f",
+  "evaluation_sha256": "8fac08134f0808ba9ff6fa3f59181d9bd6130e71fef30d46c2b1fa36acceef9f",
+  "cli_result": {
+    "duration_api_ms": 499089,
+    "stop_reason": "end_turn",
+    "session_id": "23dc464a-956d-45ce-85be-da1f2f847c8a",
+    "total_cost_usd": 2.1862155,
+    "usage": {
+      "input_tokens": 18,
+      "cache_creation_input_tokens": 83185,
+      "cache_read_input_tokens": 565877,
+      "output_tokens": 42138,
+      "output_tokens_details": {
+        "thinking_tokens": 8791
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 83185,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1187,
+          "cache_read_input_tokens": 105641,
+          "cache_creation_input_tokens": 407,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 407
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 17812,
+        "outputTokens": 15,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.017887,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 18,
+        "outputTokens": 42138,
+        "cacheReadInputTokens": 565877,
+        "cacheCreationInputTokens": 83185,
+        "webSearchRequests": 0,
+        "costUSD": 2.1683285,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 8791,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01CLqQj4K7m7x8TktKKZn7Q5",
+        "tool_input": {
+          "command": "ls /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-_hrve3ek; echo \"---\"; find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "List working dir and find agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01RqsnfhYmBYiP6CjPi5GCRv",
+        "tool_input": {
+          "command": "grep -n -i \"download_url\\|is_tabular\\|conforms_to\\|imputation\\|annotation_analyses\\|used_software\\|is_data_split\\|is_subpopulation\\|encoding\" input/record.yaml; echo \"EXIT:$?\"; shasum -a 256 input/record.yaml",
+          "description": "Check specific schema fields and hash the record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_013pZd6EnhBsRGNUZnkL7Z6j",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation output against its schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed.\n\n## Definition check\n\nThe section **\"Source rubric and schema paths (#158)\"** is present in my active instructions, and the sentence beginning \"Read release-specific notes\" reads verbatim:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches the current instrument (the dedicated `updates.update_details` slot rather than a top-level `release_notes`, with the anti-crediting condition). I proceeded, and recorded `instrument_sha256` as `66ad6231\u202634864` with `instrument_kind: agent_definition`.\n\n## Result\n\n`output_evaluation.json` written and validated: `VALID \u2026 rubric10-semantic` (exit 0).\n\n**47 / 50 \u2014 fixed 94.0% (\u00f750), normalized 94.0% (\u00f750).** All 50 sub-elements applicable; `excluded_max_points: 0`, so the two bases coincide and no `applicable: false` / `score: null` entries appear.\n\nGate resolutions, each on other elements' evidence:\n- **Human subjects** \u2014 met via E1 `description` (833 adult participants, clinician-validated diagnoses) and E8 `collection_mechanisms`. All five Element 4 sub-elements applicable and scored; the governance disjunct (E2 `confidentiality_level: restricted`) was independently satisfied but not needed for 3\u20135.\n- **Datasets shared** \u2014 met via E2 `distribution_formats` with PhysioNet `access_urls` plus resolvable `page`. Opens E3 1\u20134, E6, E8, E10.\n- **Software output** (E8 s3 only) \u2014 met via E10 `external_resources` GitHub repositories.\n- **E8 s4** scored on the processing threshold, not on a repository pointer: b2aiprep 3.0.0 \"generated this release\", SenseLab, openSMILE, Praat, parselmouth, torchaudio, sparc, ppgs, Whisper Large all sit in producing/transforming roles. REDCap and the tablet app (role a) and PhysioNet/Synapse (role b) neither added nor subtracted.\n\nThe three lost points: **E1 s3** (four generic keywords, none naming a condition, modality or method); **E3 s3** and **E10 s3** (no data-level conformance \u2014 `conforms_to` absent, `conforms_to_schema` describes the datasheet's own schema, and the record explicitly declines to assert a standard for this release).\n\nTwo consistency failures recorded: the dangling `version_access.latest_version_doi` (`10.13026/37yb-1t42`, matching nothing else in the record), and the `conforms_to_schema` semantic mismatch. Five warnings, including the HIPAA compliant/DTUA-PII tension and the absent DPIA, all of which the record itself flags in `source_caveats` rather than conceals.\n\nOne procedural note: `cd` into the working directory was blocked by the sandbox, so I invoked the same script and arguments by absolute path instead of as the literal relative-path command.",
+    "ttft_ms": 1609,
+    "type": "result",
+    "duration_ms": 500952,
+    "uuid": "72239356-63c4-4f78-a073-67b32ec59166",
+    "ttft_stream_ms": 923,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 923,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T14:35:11.369916+00:00"
+}
