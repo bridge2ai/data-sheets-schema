@@ -1,0 +1,11 @@
+{
+  "job_id": "CHORUS_v8_rep3_r10_rating1",
+  "started_at": "2026-09-12T10:34:11.988307+00:00",
+  "status": "incomplete",
+  "manifest_sha256": "5e57093644d0a3485a9d1229a2087c8a5472578b33346213f4df6618686aa4e9",
+  "user_prompt_sha256": "a753ac71d65674f61f3bc70c0174ae3ab4b8356c1905fccf2cca9b8fd5849d1a",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "error": "ValueError: evaluator did not successfully validate its exact output",
+  "completed_at": "2026-09-12T10:43:20.073993+00:00"
+}
