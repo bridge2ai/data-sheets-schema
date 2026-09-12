@@ -870,3 +870,64 @@ def test_repeatability_report_separates_repeated_ratings_from_generation_records
     assert primary["records"] == min(rating_count, 1)
     ai_readi = next(r for r in results["repeatability"] if r["project"] == "AI_READI")
     assert ai_readi["fixed_sample_sd"] is None
+
+
+@pytest.mark.parametrize("different_scores", [False, True])
+def test_repeatability_ignores_serialized_percentage_precision(environment, monkeypatch, different_scores):
+    root, manifest, job, doc = environment
+    monkeypatch.syspath_prepend(str(REAL_ROOT / "scripts"))
+    jobs = [{**job, "id": f"rating{rating}", "rating": rating,
+             "purpose": "primary" if rating == 1 else "repeatability", "output": f"rating{rating}.json"}
+            for rating in (1, 2, 3)]
+    manifest["jobs"] = jobs
+    runner.write_json(runner.PLAN / "manifest.json", manifest)
+    preserved = {}
+    for index, j in enumerate(jobs):
+        d = copy.deepcopy(doc)
+        points = 43 + index if different_scores else 43
+        applicable = [s for e in d["elements"] for s in e["sub_elements"] if s["score"] is not None]
+        for sub in applicable[:48 - points]:
+            sub["score"] = 0
+        for element in d["elements"]:
+            element["element_score"] = sum(s["score"] or 0 for s in element["sub_elements"])
+        percentage = 100 * points / 48
+        d["overall_score"].update(total_points=points, fixed_percentage=2 * points,
+                                  normalized_percentage=round(percentage, index + 1) if index < 2 else percentage)
+        runner.check_arithmetic(d)
+        runner.write_json(root / j["output"], d)
+        preserved[j["output"]] = runner.digest(root / j["output"])
+        runner.write_json(runner.PLAN / "attempts" / j["id"] / "one/receipt.json", {
+            "status": "passed", "evaluation_sha256": preserved[j["output"]],
+            "manifest_sha256": runner.digest(runner.PLAN / "manifest.json")})
+    results = runner.report_results(manifest)
+    repeated = next(r for r in results["repeatability"] if r["project"] == job["project"])
+    assert repeated["adjusted_sample_sd"] == pytest.approx(100 / 48 if different_scores else 0)
+    assert repeated["adjusted_range"] == pytest.approx(200 / 48 if different_scores else 0)
+    assert repeated["fixed_sample_sd"] == pytest.approx(2 if different_scores else 0)
+    assert repeated["fixed_range"] == pytest.approx(4 if different_scores else 0)
+    primary = next(r for r in results["generation_replicates"] if r["project"] == job["project"]
+                   and r["cohort"] == "v7" and r["rubric"] == job["rubric"])
+    assert primary["adjusted_percentages"] == pytest.approx([100 * 43 / 48])
+    assert {rel: runner.digest(root / rel) for rel in preserved} == preserved
+
+
+def test_primary_rubric20_derives_both_percentage_bases(environment, monkeypatch):
+    root, manifest, job, _ = environment
+    monkeypatch.syspath_prepend(str(REAL_ROOT / "scripts"))
+    job["rubric"] = "rubric20-semantic"
+    doc = valid_record(20)
+    doc["project"] = job["project"]
+    runner.check_arithmetic(doc)
+    manifest["jobs"] = [job]
+    runner.write_json(runner.PLAN / "manifest.json", manifest)
+    runner.write_json(root / job["output"], doc)
+    preserved = runner.digest(root / job["output"])
+    runner.write_json(runner.PLAN / "attempts" / job["id"] / "one/receipt.json", {
+        "status": "passed", "evaluation_sha256": preserved,
+        "manifest_sha256": runner.digest(runner.PLAN / "manifest.json")})
+    results = runner.report_results(manifest)
+    primary = next(r for r in results["generation_replicates"] if r["project"] == job["project"]
+                   and r["cohort"] == "v7" and r["rubric"] == job["rubric"])
+    assert primary["fixed_percentages"] == pytest.approx([100 * 83 / 88])
+    assert primary["adjusted_percentages"] == [100.0]  # Five N/A points: 83/83, not 83/88.
+    assert runner.digest(root / job["output"]) == preserved

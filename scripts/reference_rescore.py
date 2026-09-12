@@ -609,7 +609,7 @@ def accept_canary(manifest: dict) -> None:
 
 
 def report_results(manifest: dict) -> dict:
-    from data_sheets_schema.semantic_comparison import excluded_items
+    from data_sheets_schema.semantic_comparison import excluded_items, score_bases
     from report_semantic_comparison import report
 
     verify_frozen(manifest)
@@ -621,12 +621,14 @@ def report_results(manifest: dict) -> dict:
         receipt = successful_receipt(manifest, job)
         complete.append((job, json.loads((ROOT / job["output"]).read_bytes()), receipt))
     results = {"reported_at": now(), "completed": len(complete), "planned": len(manifest["jobs"]),
+               "percentage_basis": "computed_from_point_totals_and_denominators",
                "pending": pending, "repeatability": [], "generation_replicates": []}
     for project in PROJECTS:
         repeated = [(j, d) for j, d, _ in complete if j["project"] == project and j["cohort"] == "v7"
                     and j["generation_rep"] == 1 and j["rubric"] == "rubric10-semantic"]
-        values = [d["overall_score"]["normalized_percentage"] for _, d in repeated]
-        fixed = [d["overall_score"]["fixed_percentage"] for _, d in repeated]
+        bases = [score_bases(d, 50) for _, d in repeated]
+        values = [b.adjusted_percentage for b in bases]
+        fixed = [b.fixed_percentage for b in bases]
         signatures = {(d["overall_score"]["adjusted_max_points"], excluded_items(d)) for _, d in repeated}
         results["repeatability"].append({"project": project, "rubric": "rubric10-semantic",
             "ratings": len(values), "expected_ratings": 3, "adjusted_percentages": values,
@@ -640,15 +642,19 @@ def report_results(manifest: dict) -> dict:
                 primary = sorted([(j, d) for j, d, _ in complete if j["project"] == project
                                   and j["cohort"] == cohort and j["rubric"] == rubric
                                   and j["purpose"] == "primary"], key=lambda row: row[0]["generation_rep"])
+                bases = [score_bases(d, 50 if rubric == "rubric10-semantic" else 88) for _, d in primary]
                 results["generation_replicates"].append({"project": project, "cohort": cohort, "rubric": rubric,
                     "records": len(primary), "expected_records": 3,
-                    "adjusted_percentages": [d["overall_score"]["normalized_percentage"] for _, d in primary],
-                    "fixed_percentages": [d["overall_score"]["fixed_percentage"] for _, d in primary]})
+                    "adjusted_percentages": [b.adjusted_percentage for b in bases],
+                    "fixed_percentages": [b.fixed_percentage for b in bases]})
     paths = [ROOT / j["output"] for j, _, _ in complete]
     text = f"# Reference rescore status — {DATE}\n\nCompleted {len(complete)} of {len(manifest['jobs'])} planned evaluations.\n\n"
     if paths:
         text += report(paths) + "\n"
     text += ("Rubric10 repeatability uses three independent ratings of one v7 record per project. "
+             "Percentages and spread are computed from point totals and their denominators, "
+             "so serialized percentage precision does not create apparent rating variation. "
+             "Original evaluation files remain unchanged. "
              "Sample standard deviations and ranges are descriptive for those records and this exact instrument; "
              "they are not population uncertainty bounds. Changed applicability is flagged. "
              "Rubric20 repeatability remains unmeasured. Generation replicate spread is a separate quantity. "
