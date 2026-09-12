@@ -1,0 +1,11 @@
+{
+  "job_id": "CM4AI_v8_rep3_r10_rating1",
+  "started_at": "2026-09-12T12:42:37.138995+00:00",
+  "status": "incomplete",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "user_prompt_sha256": "d0994de159dc1680319d6c9f1ac70cc0c482508249f0e8ab657c52e90d8b3109",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "error": "ValueError: element score or denominator disagrees with its sub-elements",
+  "completed_at": "2026-09-12T12:51:38.311506+00:00"
+}
