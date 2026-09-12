@@ -408,7 +408,7 @@ def _run_job(manifest: dict, job: dict, claude: str) -> dict:
     receipt["system_prompt_sha256"] = instrument["definition_sha256"]
     try:
         with tempfile.TemporaryDirectory(prefix="d4d-reference-") as temp:
-            isolated = Path(temp)
+            isolated = Path(temp).resolve()
             copy_paths = [instrument["rubric"], instrument["schema"], "scripts/validate_evaluation_schema.py",
                           "pyproject.toml", "poetry.lock"]
             for rel in copy_paths:

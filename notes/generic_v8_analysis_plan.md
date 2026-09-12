@@ -2436,3 +2436,26 @@ must be revalidated under this registration before new calls resume.
 Evidence and hashes are recorded in
 `notes/reference_rescore_2026-09-11/model_provenance_registration.json` and
 `model_provenance_review_2026-09-12.md`. No generation or download occurred.
+
+### Canonical validator path amendment (2026-09-12; #1317)
+
+The fill stopped at 21 accepted ratings after CHORUS v8 rep2 rubric20 and
+v8 rep3 rubric10 failed evaluator-side validation. Their drafts remain excluded.
+The latter exposed a macOS temporary-directory alias mismatch in the absolute
+validator permission prefix. Resolve the isolated directory before constructing
+paths and permissions; retain the exact-command restriction.
+
+The independent Codex review approved commit
+`e64379a61f288cec3662766bc8b8b8bbddf43040`; 118 focused tests passed. Manifest
+SHA256 `3ecc08aa6aed274737505e658743729dd1c293438ac8416df42b5c6b533533f6`
+registers the runner-only change. Complete prompts, instrument definitions,
+schemas, input bytes, the 56-rating design and execution settings are unchanged.
+The original CHORUS canary was revalidated offline and separately accepted;
+its quoted definition remains
+`66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`.
+The two existing main-branch outputs were preserved and revalidated without
+model calls. Nineteen more accepted ratings on #1313 require the same offline
+revalidation before the two failed CHORUS jobs are retried individually.
+Detailed evidence is in
+`notes/reference_rescore_2026-09-11/canonical_validator_review_2026-09-12.md`
+and `canonical_validator_registration.json`. No generation or download occurred.

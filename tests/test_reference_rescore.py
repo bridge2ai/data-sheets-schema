@@ -124,9 +124,13 @@ def environment(tmp_path, monkeypatch):
     return tmp_path, manifest, job, doc
 
 
-def fake_cli(path, doc, trace, failure=False, run_validator=False):
+def fake_cli(path, doc, trace, failure=False, run_validator=False, check_validator_permissions=False):
     path.write_text(f"#!{sys.executable}\nimport json,sys,shlex,subprocess\nfrom pathlib import Path\n" +
                     f"assert Path.cwd().parent == Path({str(path.parent / 'temporary')!r})\n" +
+                    ("allowed=sys.argv[sys.argv.index('--allowedTools')+1:sys.argv.index('--system-prompt')]\n"
+                     "assert 'Bash(poetry run python scripts/validate_evaluation_schema.py:*)' in allowed\n"
+                     "assert 'Bash(poetry run python '+str(Path.cwd()/'scripts/validate_evaluation_schema.py')+':*)' in allowed, 'canonical validator permission missing'\n"
+                     if check_validator_permissions else "") +
                     ("print('Weekly quota exhausted')\nsys.exit(1)\n" if failure else
                      "prompt=sys.stdin.read()\nassert Path('input/record.yaml').read_text() in prompt\n" +
                      f"Path('output_evaluation.json').write_text({json.dumps(doc)!r})\n" +
@@ -161,6 +165,21 @@ def test_equivalent_own_file_validator_paths_attest_the_rating(environment, scri
         f"poetry run python {script} --file {output} --rubric rubric10-semantic")
     trace.insert(0, {"type": "system", "subtype": "init", "cwd": "__ISOLATED__"})
     cli = fake_cli(root / "fake-claude", doc, trace, run_validator=True)
+    receipt = runner.run_job(manifest, job, cli)
+    assert receipt["status"] == "passed", receipt
+
+
+def test_symlinked_temporary_root_grants_the_runtime_canonical_validator_path(environment, monkeypatch):
+    root, manifest, job, doc = environment
+    alias = root / "temporary-alias"
+    alias.symlink_to(root / "temporary", target_is_directory=True)
+    monkeypatch.setattr(runner.tempfile, "tempdir", str(alias))
+    trace = events(doc)
+    trace[0]["message"]["content"][1]["input"]["command"] = (
+        "poetry run python __ISOLATED__/scripts/validate_evaluation_schema.py "
+        "--file __ISOLATED__/output_evaluation.json --rubric rubric10-semantic")
+    trace.insert(0, {"type": "system", "subtype": "init", "cwd": "__ISOLATED__"})
+    cli = fake_cli(root / "fake-claude", doc, trace, run_validator=True, check_validator_permissions=True)
     receipt = runner.run_job(manifest, job, cli)
     assert receipt["status"] == "passed", receipt
 
