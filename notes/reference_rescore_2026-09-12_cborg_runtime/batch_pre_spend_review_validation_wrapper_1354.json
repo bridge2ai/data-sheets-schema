@@ -1,0 +1,13 @@
+{
+  "reviewed_at": "2026-09-12T23:21:44.955164+00:00",
+  "verdict": "approved",
+  "registration_sha256": "b0a02133382c51cd8ebaa480917bd1c8920f3c7cfece11deea0392c6d9f0cbad",
+  "reviewed_commit": "b50b03a34a64fc10f4d580740e67444519185cf3",
+  "review_report": "notes/reference_rescore_2026-09-12_cborg_runtime/pre_spend_review_round17.md",
+  "review_report_sha256": "e9cd974b791921e1536e5cf194cc3b3f32cdb94c9454dde7bc61b3ceefa74b72",
+  "reviewer": "Independent Codex plugin adversarial review, round 17",
+  "scope": "One fresh CM4AI_v7_rep2_r20_rating1 pilot under unchanged scoring and execution settings. Inspect its original output before accepting the batch gate for the remaining 25.",
+  "remaining_launch_authorized_by_this_record": false,
+  "findings": [],
+  "limits": "Approval covers retry registration and preserved evidence, not semantic certification or completed cohort. Two original timeout costs remain unknown."
+}
