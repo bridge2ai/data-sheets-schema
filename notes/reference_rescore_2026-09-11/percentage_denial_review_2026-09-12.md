@@ -19,3 +19,9 @@ Codex review of `6353b219ad64888d1117f3e9085984bc7f89fba6` found conflicting val
 The completion audit also requires the forthcoming `percentage_denial_registration.json` and `percentage_denial_fill_preservation.json` records and verifies all their retained file hashes. Its 16 accounting tests pass with the extended preservation roster. No new reference rating has started and the existing registration remains active pending final review and amendment.
 
 Post-fix validation: all 168 focused checks pass. A read-only replay of all 38 accepted original candidates passes the amended full candidate checks; no output or receipt was written and no evaluator call occurred. The unaccepted VOICE candidate also passes separately. Actual Python 3.9.6 imports of both runner and audit modules and a denied-call helper invocation pass without dependency stubs.
+
+## Round 2 findings and resolution (#1332, #1333)
+
+The second review reproduced overlapping mutations with duplicate IDs and a later executed validator failure that left an earlier success active. Potentially mutating calls now require unique ordered uses/results, and orphan or malformed tool-result identities fail closed. Executed validator errors and missing success markers revoke validation; a subsequent genuine successful validator can restore it. Proven nonexecution denials of an exact validator preserve only an already established success.
+
+Ten additional cases cover duplicate Write/Bash IDs, orphan or missing result IDs, distinct validator failures with or without subsequent revalidation, and proven denial of an exact validator. Five of these initially reproduced false acceptance; the expanded suite now passes all 178 focused checks. All 39 retained candidates (38 accepted plus unaccepted VOICE) again pass the complete candidate checks in a read-only replay, without calls, receipts, score edits or acceptance changes.

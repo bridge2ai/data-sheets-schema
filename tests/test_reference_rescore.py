@@ -322,6 +322,53 @@ def test_denial_cannot_preserve_ambiguous_validator_evidence(defect):
     assert not runner.evaluator_validated(trace, "rubric10-semantic")
 
 
+@pytest.mark.parametrize("tool", ["Write", "Bash"])
+def test_duplicate_mutation_ids_cannot_hide_a_completion_after_validation(tool):
+    trace = denied_command_trace()
+    def write(value):
+        args = {"file_path": "/isolated/output_evaluation.json", "content": value} if tool == "Write" else {"command": f"write-{value}"}
+        return {"type": "assistant", "message": {"content": [
+            {"type": "tool_use", "name": tool, "id": "write", "input": args}]}}
+    result = {"type": "user", "message": {"content": [
+        {"type": "tool_result", "tool_use_id": "write", "content": "File updated successfully"}]}}
+    trace = [write("A"), write("B"), result] + trace[:2] + [copy.deepcopy(result)] + trace[2:]
+    assert not runner.evaluator_validated(trace, "rubric10-semantic")
+
+
+@pytest.mark.parametrize("identifier", ["unrecorded-call", None, ""])
+def test_orphan_tool_result_cannot_certify_validation(identifier):
+    trace = denied_command_trace()
+    trace.insert(2, {"type": "user", "message": {"content": [
+        {"type": "tool_result", "tool_use_id": identifier, "content": "File updated successfully"}]}})
+    assert not runner.evaluator_validated(trace, "rubric10-semantic")
+
+
+@pytest.mark.parametrize("error", [False, True])
+@pytest.mark.parametrize("revalidate", [False, True])
+def test_later_executed_validator_failure_requires_new_success(error, revalidate):
+    trace = denied_command_trace()
+    failed = events(valid_record())[:2]
+    failed[0]["message"]["content"][1]["id"] = "later-validator"
+    failed[1]["message"]["content"][0].update(tool_use_id="later-validator", is_error=error,
+                                             content="INVALID output_evaluation.json: rubric10-semantic")
+    trace = trace[:2] + failed + trace[2:]
+    if revalidate:
+        fresh = events(valid_record())[:2]
+        fresh[0]["message"]["content"][1]["id"] = "fresh-validator"
+        fresh[1]["message"]["content"][0]["tool_use_id"] = "fresh-validator"
+        trace = trace[:-1] + fresh + trace[-1:]
+    assert runner.evaluator_validated(trace, "rubric10-semantic") is revalidate
+
+
+def test_proven_denial_of_exact_validator_preserves_prior_success():
+    trace = denied_command_trace()
+    args = trace[2]["message"]["content"][0]["input"]
+    args["command"] = "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic"
+    trace[-1]["permission_denials"][0]["tool_input"] = copy.deepcopy(args)
+    assert runner.evaluator_validated(trace, "rubric10-semantic")
+    assert not runner.evaluator_validated(trace[2:], "rubric10-semantic")
+
+
 @pytest.mark.parametrize("command", [
     "poetry run python /other/scripts/validate_evaluation_schema.py --file /isolated/output_evaluation.json --rubric rubric10-semantic",
     "poetry run python /isolated/scripts/validate_evaluation_schema.py --file /other/output_evaluation.json --rubric rubric10-semantic",

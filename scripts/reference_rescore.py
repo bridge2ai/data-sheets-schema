@@ -286,13 +286,18 @@ def evaluator_validated(events: list[dict], rubric: str) -> bool:
                 continue
             if event.get("type") == "assistant" and block.get("type") == "tool_use":
                 key = block.get("id")
-                if isinstance(key, str):
-                    uses.setdefault(key, []).append(index)
+                if not isinstance(key, str) or not key:
+                    return False
+                uses.setdefault(key, []).append(index)
             if event.get("type") == "user" and block.get("type") == "tool_result":
                 key = block.get("tool_use_id")
-                if isinstance(key, str):
-                    results.setdefault(key, []).append(index)
+                if not isinstance(key, str) or not key:
+                    return False
+                results.setdefault(key, []).append(index)
+    if any(key not in uses for key in results):
+        return False  # A result without its invocation cannot establish what executed.
     calls = {}
+    validator_markers = {}
     denied = denied_bash_calls(events)
     pending_mutations = set()
     validated = False
@@ -311,14 +316,16 @@ def evaluator_validated(events: list[dict], rubric: str) -> bool:
                 args = block.get("input") or {}
                 output = (validator_output_path(args.get("command", ""), rubric, directory)
                           if name == "Bash" else None)
-                if output is not None:
-                    key = block.get("id")
+                key = block.get("id")
+                if name != "Read":
                     if (not isinstance(key, str) or len(uses.get(key, [])) != 1
                             or len(results.get(key, [])) != 1
                             or not uses[key][0] < results[key][0] < terminals[0]):
-                        return False  # Missing, duplicate or replayed validator evidence.
+                        return False  # Ambiguous validator or potentially mutating call.
+                if output is not None:
+                    validator_markers[key] = f"VALID {output}: {rubric}"
                     if not pending_mutations:
-                        calls[key] = f"VALID {output}: {rubric}"
+                        calls[key] = validator_markers[key]
                 elif name != "Read" and block.get("id") not in denied:
                     # Write, Edit or an unrecognized command may change the
                     # output. Even a failed tool can have partially written it.
@@ -334,11 +341,16 @@ def evaluator_validated(events: list[dict], rubric: str) -> bool:
                     validated = False
                 expected = calls.pop(tool_id, None)
                 if block.get("is_error"):
+                    if tool_id in validator_markers and tool_id not in denied:
+                        validated = False
                     continue
                 content = block.get("content", "")
                 if not isinstance(content, str):
                     content = "\n".join(c.get("text", "") for c in content if isinstance(c, dict))
-                if not pending_mutations and expected in [s.strip() for s in content.splitlines()]:
+                lines = [s.strip() for s in content.splitlines()]
+                if tool_id in validator_markers and validator_markers[tool_id] not in lines:
+                    validated = False
+                elif not pending_mutations and expected in lines:
                     validated = True
     return validated and not pending_mutations
 
