@@ -1,5 +1,6 @@
 """Offline tests of the paid-batch launch and retention boundaries."""
 import json
+import hashlib
 import os
 from pathlib import Path
 import signal
@@ -168,3 +169,40 @@ def test_worker_unblocks_inherited_launch_signals_before_preflight(monkeypatch):
             batch.main(["worker", "--phase", "pilot", "--job", "a"])
     finally:
         signal.pthread_sigmask(signal.SIG_SETMASK, previous)
+
+
+def reviewed_failure(tmp_path, monkeypatch, *, status="incomplete", terminal=True):
+    monkeypatch.setattr(batch, "ROOT", tmp_path)
+    monkeypatch.setattr(batch, "PLAN", tmp_path)
+    prior = tmp_path / "attempts/a/old"
+    prior.mkdir(parents=True)
+    (prior / "receipt.json").write_text(json.dumps({"job_id": "a", "status": status, "completed_at": "2026-09-12T19:19:00+00:00"}))
+    (prior / "prompt.txt").write_text("frozen prompt")
+    (prior / "transcript.jsonl").write_text(json.dumps({"type": "result", "total_cost_usd": 1.0}) + "\n" if terminal else "")
+    r = SimpleNamespace(digest=lambda p: hashlib.sha256(p.read_bytes()).hexdigest())
+    registration = {"reviewed_retries": {"a": {"attempts": {
+        str(prior.relative_to(tmp_path)): {str(p.relative_to(tmp_path)): r.digest(p) for p in prior.iterdir()}}}}}
+    return r, registration, prior, {"jobs": [{"id": "a", "output": "missing.json"}]}
+
+
+def test_reviewed_retry_is_invalidated_by_any_new_attempt(tmp_path, monkeypatch):
+    r, registration, prior, manifest = reviewed_failure(tmp_path, monkeypatch)
+    assert batch.pending_jobs(r, manifest, registration, "remaining") == manifest["jobs"]
+    (prior.parent / ".new-unfinished-attempt").mkdir()
+    with pytest.raises(ValueError, match="history changed"):
+        batch.pending_jobs(r, manifest, registration, "remaining")
+
+
+def test_reviewed_retry_refuses_changed_failed_evidence(tmp_path, monkeypatch):
+    r, registration, prior, manifest = reviewed_failure(tmp_path, monkeypatch)
+    (prior / "prompt.txt").write_text("edited prompt")
+    with pytest.raises(ValueError, match="bytes changed"):
+        batch.pending_jobs(r, manifest, registration, "remaining")
+
+
+@pytest.mark.parametrize("status,terminal,message", [
+    ("passed", True, "completed, excluded"), ("incomplete", False, "terminal result")])
+def test_reviewed_retry_requires_exclusion_and_complete_cost_evidence(tmp_path, monkeypatch, status, terminal, message):
+    r, registration, prior, manifest = reviewed_failure(tmp_path, monkeypatch, status=status, terminal=terminal)
+    with pytest.raises(ValueError, match=message):
+        batch.pending_jobs(r, manifest, registration, "remaining")

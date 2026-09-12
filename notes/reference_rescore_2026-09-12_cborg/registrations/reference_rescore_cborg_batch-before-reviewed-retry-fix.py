@@ -110,31 +110,9 @@ def pending_jobs(r, manifest, registration, phase):
             continue
         attempts = PLAN / "attempts" / job["id"]
         if attempts.exists() and any(attempts.iterdir()):
-            verify_reviewed_retry(r, job, registration, attempts)
+            raise ValueError(f"{job['id']} already has an attempt; inspect and register any retry separately")
         pending.append(job)
     return pending
-
-
-def verify_reviewed_retry(r, job, registration, attempts):
-    """Allow only the exact failed history inspected before a single fresh retry."""
-    import audit_reference_rescore as audit
-
-    retry = registration.get("reviewed_retries", {}).get(job["id"])
-    if not retry:
-        raise ValueError(f"{job['id']} already has an attempt; inspect and register any retry separately")
-    expected = retry["attempts"]
-    actual = {str(path.relative_to(ROOT)): path for path in attempts.iterdir()}
-    if set(actual) != set(expected):
-        raise ValueError("retry history changed; another attempt requires separate review")
-    for rel, path in actual.items():
-        files = {str(p.relative_to(ROOT)): r.digest(p) for p in path.rglob("*") if p.is_file()}
-        if files != expected[rel]:
-            raise ValueError("reviewed failed-attempt bytes changed")
-        receipt = json.loads((path / "receipt.json").read_bytes())
-        if (receipt.get("job_id") != job["id"] or receipt.get("status") != "incomplete"
-                or not receipt.get("completed_at") or not (path / "prompt.txt").is_file()):
-            raise ValueError("retry requires a completed, excluded original attempt")
-        audit.terminal_cost(audit.read_trace(path))
 
 
 @contextmanager
@@ -288,14 +266,12 @@ def main(argv=None):
         print(json.dumps({"workers": registration["workers"], "pilot": pilot["id"],
                           "remaining": [j["id"] for j in pending_jobs(r, manifest, registration, "remaining")]}))
         return 0
-    require_review(r, registration.get("pre_spend_review", "batch_pre_spend_review.json"),
-                   "registration_sha256", r.digest(REGISTRATION))
-    pilot_launch = PLAN / registration.get("pilot_launch_record", "batch_canary_launch.json")
+    require_review(r, "batch_pre_spend_review.json", "registration_sha256", r.digest(REGISTRATION))
     if args.action == "accept-pilot":
         with batch_lock():
             output = verified_output(r, manifest, pilot)
             require_review(r, "batch_canary_review.json", "evaluation_sha256", output["evaluation_sha256"])
-            launch = json.loads(pilot_launch.read_bytes())
+            launch = json.loads((PLAN / "batch_canary_launch.json").read_bytes())
             result = json.loads((ROOT / launch["run_dir"] / "result.json").read_bytes())
             if (launch["registration_sha256"] != r.digest(REGISTRATION) or result["status"] != "passed"
                     or result["completed"] != [{"job_id": pilot["id"], "exit_code": 0}]
@@ -327,7 +303,7 @@ def main(argv=None):
             raise ValueError("pilot already completed; inspect it before acceptance")
         run_dir = PLAN / "batch_runs" / (r.now().replace(":", "-") + "_" + phase)
         if phase == "pilot":
-            with pilot_launch.open("x") as handle:
+            with (PLAN / "batch_canary_launch.json").open("x") as handle:
                 json.dump({"registered_at": r.now(), "registration_sha256": r.digest(REGISTRATION),
                            "run_dir": str(run_dir.relative_to(ROOT))}, handle, indent=2)
                 handle.write("\n")

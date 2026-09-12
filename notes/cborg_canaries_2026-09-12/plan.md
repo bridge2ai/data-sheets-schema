@@ -116,3 +116,17 @@ startup restores SIGINT/SIGTERM handling before any evaluator preflight.
 Deterministic preparation-boundary tests cover both signals, in addition to
 the four-worker evidence-retention tests. No scheduler model calls have
 occurred; the scoring manifest and all earlier artifacts remain unchanged.
+
+
+## Scheduler pilot identity rejection and one reviewed retry (#1343)
+
+The first scheduler pilot completed a CLI session but its JSON named Opus
+4.5 while its runtime trace and CLI canonical identity named Opus 5. The
+unchanged identity gate rejected it; its attempted 34/50 and $2.4216595 of
+CLI usage are retained and excluded. No other rating launched. The prior
+scheduler registration, code, launch record and approval are archived or
+retained unchanged. A separate registration allows exactly one fresh
+original retry against the precise hashed failed-attempt history. An
+additional attempt, changed evidence, missing terminal usage or a successful
+prior receipt invalidates the retry gate. This does not change prompts,
+definitions, inputs, model identity criteria or the 56-rating scope.
