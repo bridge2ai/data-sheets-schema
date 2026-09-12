@@ -2382,3 +2382,35 @@ cohort; the other 55 ratings remain pending, and repeatability is unmeasured.
 This is an evaluation canary. No D4D regeneration or source download occurred.
 A new `generic_v9` generation condition has a working offline CHORUS plan but
 requires its own generation canary before any new cohort is produced.
+
+### Reference runner forms and final-output attestation (2026-09-12; #1307–#1312)
+
+The first fill attempt, AI_READI v7 rep1 rubric10, stopped at 08:14:10Z. Its
+correct label was in schema-supported `metadata.label`, and its own absolute
+validator command was denied. It never completed evaluator-side validation;
+its original draft, prompt, trace and incomplete receipt remain preserved and
+excluded from the reference scores. No other fill rating ran at this boundary.
+
+The runner now accepts consistent label placement and exact own-file validator
+path forms, binds success messages to the supplied output path, serializes
+canary recovery/acceptance, and requires validation after the final potentially
+mutating tool operation. Adversarial findings were filed and fixed as #1308,
+#1309, #1310 and #1312. The final Codex follow-up approved commit
+`1134e5e7e094bdd3333fbe6b5553fb24e6545e7d`; 101 focused offline tests passed.
+
+The new runner-only registration is manifest SHA256
+`ed077e16f93635c571c8cc7992c696880b1e727ff766450ef03e52e43cbfb480`.
+Both complete evaluator prompts and definitions, all inputs, the cohort,
+schemas, model, effort, budget and 202 prior evaluations are unchanged.
+Previous registrations, acceptance and all twelve earlier attempt files are
+retained with hashes in `runtime_forms_registration.json`.
+
+The original CHORUS canary was revalidated offline at 09:00:35Z and separately
+re-accepted under the new registration. No score bytes were rewritten and no
+model call was made during this amendment. Its quoted definition remains
+`66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`, and its
+35/50 assessment is unchanged. The detailed review is
+`notes/reference_rescore_2026-09-11/runtime_forms_review_2026-09-12.md`.
+There are still 1/56 accepted ratings; the next execution must freshly retry
+AI_READI before continuing the remaining registered ratings. No generation or
+download occurred.
