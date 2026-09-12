@@ -16,7 +16,7 @@ Rubric10 repeatability uses three independent ratings of one v7 record per proje
 | Project | Repeated ratings | Fixed percentages | Adjusted percentages | Fixed SD | Adjusted SD | Adjusted range | Stable applicability |
 |---|---|---|---|---|---|---|---|
 | AI_READI | 0/3 | [] | [] | unmeasured | unmeasured | unmeasured | unmeasured |
-| CHORUS | 1/3 | [70.0] | [70.0] | unmeasured | unmeasured | unmeasured | True |
+| CHORUS | 1/3 | [70.0] | [70.0] | unmeasured | unmeasured | unmeasured | unmeasured |
 | CM4AI | 0/3 | [] | [] | unmeasured | unmeasured | unmeasured | unmeasured |
 | VOICE | 0/3 | [] | [] | unmeasured | unmeasured | unmeasured | unmeasured |
 

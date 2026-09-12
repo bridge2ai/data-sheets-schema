@@ -1,5 +1,5 @@
 {
-  "reported_at": "2026-09-12T10:54:14.300518+00:00",
+  "reported_at": "2026-09-12T11:56:06.575013+00:00",
   "completed": 2,
   "planned": 56,
   "pending": [
@@ -83,7 +83,7 @@
       "fixed_percentages": [
         70.0
       ],
-      "applicability_stable": true,
+      "applicability_stable": null,
       "adjusted_sample_sd": null,
       "fixed_sample_sd": null,
       "adjusted_range": null,
