@@ -2048,11 +2048,22 @@ def backfill_context(execute, label):
         click.echo("Nothing was changed. Re-run with --execute to write.")
 
 
+@provenance.command("record-schema")
+def record_schema():
+    """Print the complete generation-record JSON Schema, including null rules."""
+    import json
+
+    from data_sheets_schema.provenance import record_schema_path
+    from data_sheets_schema.record_schema import compile_record_schema
+
+    click.echo(json.dumps(compile_record_schema(record_schema_path()), indent=2))
+
+
 @provenance.command("validate-records")
 @click.option('--strict', is_flag=True, help='exit 1 if any record fails')
 @click.option('--label', default=None, help='restrict to one run label')
 def validate_records(strict, label):
-    """Validate generation records against their own LinkML schema.
+    """Validate generation records against the shared record contract.
 
     This repository schematises metadata about datasets, and its own generation
     metadata was a hand-built dictionary that nothing could check — 25
@@ -2064,17 +2075,13 @@ def validate_records(strict, label):
     describes the pipeline, not a dataset, so importing it would move the
     `Dataset` digest a generation arm is frozen against.
     """
-    import subprocess
     import sys
+    import yaml
 
-    from data_sheets_schema.provenance import CONCAT_DIR, record_schema_path
+    from data_sheets_schema.provenance import CONCAT_DIR, check_record
 
-    # Resolved, not hardcoded (#620). Run from outside the repo root the
-    # literal path does not exist and `linkml-validate` exits non-zero on every
-    # record, reporting a clean corpus as entirely failing. Loud rather than
-    # silent, so not the #618 failure mode — but #618 fixed the gate and left
-    # the command it was written about still holding the literal.
-    schema = record_schema_path()
+    # The same validator and packaged-schema resolution as the runtime gate
+    # (#614/#620), including non-null required values and validator failures.
     paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
     if label:
         paths = [p for p in paths if p.parts[-2] == label]
@@ -2084,19 +2091,23 @@ def validate_records(strict, label):
 
     failed = []
     for p in paths:
-        r = subprocess.run(
-            ["poetry", "run", "linkml-validate", "-s", str(schema),
-             "-C", "GenerationRecord", str(p)],
-            capture_output=True, text=True)
-        if r.returncode != 0:
+        try:
+            data = yaml.safe_load(p.read_text(encoding="utf-8"))
+        except Exception as exc:  # noqa: BLE001
+            # PyYAML scalar constructors can raise KeyError, AttributeError,
+            # ValueError, etc., not only YAMLError. Isolate file loading as the
+            # old per-record subprocess did; interrupts still propagate.
+            findings, failure = [], f"{type(exc).__name__}: {exc}"
+        else:
+            findings, failure = check_record(data)
+        if findings or failure:
             failed.append(p)
             click.echo(f"   ❌ {p.parts[-2][:38]:38} {p.name}")
-            for line in (r.stdout + r.stderr).splitlines():
-                if "[ERROR]" in line:
-                    click.echo(f"      {line.split(']')[-1].strip()[:110]}")
+            for line in ([failure] if failure else findings):
+                click.echo(f"      {line[:110]}")
 
     click.echo(f"\n{len(paths)} record(s) checked, {len(failed)} failing")
     if not failed:
-        click.echo("Every generation record conforms to its schema.")
+        click.echo("Every matched generation record conforms to its schema.")
     if strict and failed:
         sys.exit(1)
