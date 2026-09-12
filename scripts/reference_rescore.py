@@ -226,6 +226,8 @@ def evaluator_validated(events: list[dict], rubric: str) -> bool:
     directories = [e.get("cwd") for e in events if e.get("type") == "system" and e.get("subtype") == "init"]
     directory = directories[0] if len(directories) == 1 and isinstance(directories[0], str) else None
     calls = {}
+    pending_mutations = set()
+    validated = False
     for event in events:
         role = event.get("type")
         if role not in ("assistant", "user"):
@@ -236,17 +238,34 @@ def evaluator_validated(events: list[dict], rubric: str) -> bool:
         for block in message["content"]:
             if not isinstance(block, dict):
                 continue
-            if role == "assistant" and block.get("type") == "tool_use" and block.get("name") == "Bash":
-                output = validator_output_path(block.get("input", {}).get("command", ""), rubric, directory)
+            if role == "assistant" and block.get("type") == "tool_use":
+                name = block.get("name")
+                args = block.get("input") or {}
+                output = (validator_output_path(args.get("command", ""), rubric, directory)
+                          if name == "Bash" else None)
                 if output is not None:
-                    calls[block["id"]] = f"VALID {output}: {rubric}"
-            if role == "user" and block.get("type") == "tool_result" and not block.get("is_error"):
+                    if not pending_mutations:
+                        calls[block["id"]] = f"VALID {output}: {rubric}"
+                elif name != "Read":
+                    # Write, Edit or an unrecognized command may change the
+                    # output. Even a failed tool can have partially written it.
+                    pending_mutations.add(block["id"])
+                    calls.clear()
+                    validated = False
+            if role == "user" and block.get("type") == "tool_result":
+                tool_id = block.get("tool_use_id")
+                if tool_id in pending_mutations:
+                    pending_mutations.remove(tool_id)
+                    calls.clear()
+                    validated = False
+                if block.get("is_error"):
+                    continue
                 content = block.get("content", "")
                 if not isinstance(content, str):
                     content = "\n".join(c.get("text", "") for c in content if isinstance(c, dict))
-                if calls.get(block.get("tool_use_id")) in [s.strip() for s in content.splitlines()]:
-                    return True
-    return False
+                if not pending_mutations and calls.get(tool_id) in [s.strip() for s in content.splitlines()]:
+                    validated = True
+    return validated and not pending_mutations
 
 
 def validate_candidate(path: Path, job: dict, manifest: dict, events: list[dict]) -> dict:

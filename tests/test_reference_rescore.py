@@ -179,6 +179,28 @@ def test_validator_receipt_must_name_the_exact_command_output(command_output, re
     assert not runner.evaluator_validated(trace, "rubric10-semantic")
 
 
+@pytest.mark.parametrize("timing", ["after", "overlapping"])
+@pytest.mark.parametrize("revalidate", ["missing", "failed", "passed"])
+def test_validation_must_follow_the_last_potential_mutation(timing, revalidate):
+    trace = events(valid_record())
+    write = [
+        {"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Write",
+            "id": "rewrite", "input": {"file_path": "/isolated/output_evaluation.json", "content": "{}"}}]}},
+        {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "rewrite",
+            "content": "File updated successfully"}]}},
+    ]
+    if timing == "after":
+        trace = trace[:2] + write + trace[2:]
+    else:
+        trace = write[:1] + trace[:2] + write[1:] + trace[2:]
+    if revalidate != "missing":
+        fresh = events(valid_record(), validator_success=revalidate == "passed")[:2]
+        fresh[0]["message"]["content"][1]["id"] = "fresh-validation"
+        fresh[1]["message"]["content"][0]["tool_use_id"] = "fresh-validation"
+        trace = trace[:-1] + fresh + trace[-1:]
+    assert runner.evaluator_validated(trace, "rubric10-semantic") is (revalidate == "passed")
+
+
 @pytest.mark.parametrize("command", [
     "poetry run python /other/scripts/validate_evaluation_schema.py --file /isolated/output_evaluation.json --rubric rubric10-semantic",
     "poetry run python /isolated/scripts/validate_evaluation_schema.py --file /other/output_evaluation.json --rubric rubric10-semantic",
@@ -523,6 +545,25 @@ def test_recovery_rejects_valid_json_changed_since_the_evaluator_wrote_it(retain
     doc["elements"][0]["sub_elements"][0]["quality_note"] = "Assessment changed after the evaluator completed."
     runner.write_json(path, doc)
     with pytest.raises(ValueError, match="evaluator.*Write"):
+        runner.recover_canary(manifest, source)
+    assert not (root / job["output"]).exists()
+
+
+def test_recovery_rejects_the_last_write_when_only_an_earlier_version_was_validated(retained_canary):
+    root, manifest, job, source, _ = retained_canary
+    path = source / "candidate.json"
+    doc = json.loads(path.read_bytes())
+    doc["elements"][0]["sub_elements"][0]["quality_note"] = "Revised after validation."
+    runner.write_json(path, doc)
+    trace_path = source / "transcript.jsonl"
+    trace = [json.loads(line) for line in trace_path.read_text().splitlines()]
+    later = copy.deepcopy(trace[1:3])
+    later[0]["message"]["content"][0]["id"] = "revised-output"
+    later[0]["message"]["content"][0]["input"]["content"] = path.read_text()
+    later[1]["message"]["content"][0]["tool_use_id"] = "revised-output"
+    trace = trace[:-1] + later + trace[-1:]
+    trace_path.write_text("\n".join(json.dumps(e) for e in trace) + "\n")
+    with pytest.raises(ValueError, match="did not successfully validate"):
         runner.recover_canary(manifest, source)
     assert not (root / job["output"]).exists()
 
