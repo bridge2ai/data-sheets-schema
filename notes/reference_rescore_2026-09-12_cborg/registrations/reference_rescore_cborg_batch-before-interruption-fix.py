@@ -15,7 +15,6 @@ import json
 import os
 from pathlib import Path
 import selectors
-import signal
 import subprocess
 import sys
 import time
@@ -138,12 +137,6 @@ def schedule(job_ids, command, run_dir, workers=4):
     waiting_for_start = None
     failed = False
     completed = []
-    stop_signal = None
-
-    def request_stop(signum, frame):
-        nonlocal stop_signal
-        stop_signal = signum
-
     run_dir.mkdir(parents=True, exist_ok=False)
     with (run_dir / "events.jsonl").open("x") as events:
         def record(kind, **fields):
@@ -152,23 +145,16 @@ def schedule(job_ids, command, run_dir, workers=4):
             events.flush()
             print(json.dumps(event), flush=True)
 
-        previous_handlers = {sig: signal.signal(sig, request_stop) for sig in (signal.SIGINT, signal.SIGTERM)}
-        interruption_recorded = False
         try:
             while pending or active:
-                if stop_signal is not None:
-                    failed = True
-                    if not interruption_recorded:
-                        record("interrupted", signal=stop_signal, action="stop new launches; drain active workers")
-                        interruption_recorded = True
                 # Observe all exits before considering another launch.
                 for process, info in list(active.items()):
                     code = process.poll()
                     if code is not None and code != 0:
                         failed = True
+                    if code is not None and not info["started"]:
+                        failed = True
                     if code is not None and info["eof"]:
-                        if not info["started"]:
-                            failed = True
                         record("finished", job=info["job"], exit_code=code)
                         completed.append({"job_id": info["job"], "exit_code": code})
                         info["log"].close()
@@ -184,11 +170,10 @@ def schedule(job_ids, command, run_dir, workers=4):
                         record("startup_timeout", job=info["job"], action="stop new launches; drain active workers")
                 if failed and not active:
                     break
-                if pending and not failed and stop_signal is None and waiting_for_start is None and len(active) < workers:
+                if pending and not failed and waiting_for_start is None and len(active) < workers:
                     job_id = pending.popleft()
                     process = subprocess.Popen(command(job_id), cwd=ROOT, env=dict(os.environ),
-                                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                               start_new_session=True)
+                                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                     os.set_blocking(process.stdout.fileno(), False)
                     info = {"job": job_id, "buffer": b"", "started": False, "eof": False,
                             "launched": time.monotonic(), "startup_timeout": False,
@@ -215,28 +200,20 @@ def schedule(job_ids, command, run_dir, workers=4):
                             if waiting_for_start is process:
                                 waiting_for_start = None
                             record("started", job=info["job"], active_workers=len(active))
-        except BaseException as exc:
-            failed = True
-            record("controller_error", error=f"{type(exc).__name__}: {exc}",
-                   action="stop new launches; drain active workers")
+            result = {"status": "stopped" if failed else "passed", "completed": completed,
+                      "not_launched": list(pending), "workers": workers}
+            (run_dir / "result.json").write_text(json.dumps(result, indent=2) + "\n")
+            return result
         finally:
             # Even an operator interruption or controller exception must not
             # strand a paid evaluator whose original runner owns its timeout.
             for process, info in active.items():
                 os.set_blocking(process.stdout.fileno(), True)
                 info["log"].write(process.stdout.read())
-                code = process.wait()
-                record("finished", job=info["job"], exit_code=code, drained_after_controller_error=True)
-                completed.append({"job_id": info["job"], "exit_code": code})
+                process.wait()
                 info["log"].close()
                 process.stdout.close()
             selector.close()
-            for sig, handler in previous_handlers.items():
-                signal.signal(sig, handler)
-        result = {"status": "stopped" if failed or stop_signal is not None else "passed", "completed": completed,
-                  "not_launched": list(pending), "workers": workers, "stop_signal": stop_signal}
-        (run_dir / "result.json").write_text(json.dumps(result, indent=2) + "\n")
-        return result
 
 
 def main(argv=None):

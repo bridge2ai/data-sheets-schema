@@ -1,8 +1,12 @@
 """Offline tests of the paid-batch launch and retention boundaries."""
 import json
+import os
 from pathlib import Path
+import signal
+import subprocess
 from types import SimpleNamespace
 import sys
+import time
 
 import pytest
 
@@ -13,11 +17,13 @@ import reference_rescore_cborg_batch as batch
 def fake_command(tmp_path, *, failing=False):
     worker = tmp_path / "fake_worker.py"
     worker.write_text(
-        "import sys,time\n"
+        "import pathlib,sys,time\n"
         "job=sys.argv[1]\n"
         "time.sleep(0.08)\n"
         "print(f'Starting {job} (offline)',flush=True)\n"
-        + ("time.sleep(0.3 if job=='a' else 0.6)\n" if failing else "time.sleep(0.4)\n")
+        "pathlib.Path('ready_'+job).touch()\n"
+        "while len(list(pathlib.Path('.').glob('ready_*')))<4:time.sleep(0.02)\n"
+        + ("if job!='a':\n while '\"exit_code\": 1' not in pathlib.Path('run/events.jsonl').read_text():time.sleep(0.02)\n" if failing else "")
         + ("sys.exit(1 if job=='a' else 0)\n" if failing else "")
     )
     return lambda job: [sys.executable, str(worker), job]
@@ -80,3 +86,51 @@ def test_pilot_acceptance_binds_the_output_and_registration(tmp_path, monkeypatc
     r = SimpleNamespace(digest=lambda p: "current-registration")
     with pytest.raises(ValueError, match="acceptance differs"):
         batch.require_pilot(r, {"jobs": [{"id": "pilot"}]}, {"pilot_job_id": "pilot"})
+
+
+@pytest.mark.parametrize("stop_signal", [signal.SIGINT, signal.SIGTERM])
+def test_foreground_stop_drains_workers_and_retains_evidence(tmp_path, stop_signal):
+    worker = tmp_path / "worker.py"
+    worker.write_text(
+        "from pathlib import Path\nimport sys,time\n"
+        "job=sys.argv[1];p=Path(job);p.mkdir()\n"
+        "print(f'Starting {job} (offline)',flush=True)\n"
+        "(p/'started').touch()\n"
+        "while not Path('release').exists():time.sleep(0.02)\n"
+        "(p/'candidate.json').write_text('original candidate')\n"
+        "(p/'receipt.json').write_text('completed receipt')\n"
+    )
+    controller = tmp_path / "controller.py"
+    controller.write_text(
+        f"import sys\nsys.path.insert(0,{str(Path(batch.__file__).parent)!r})\n"
+        "from pathlib import Path\nimport reference_rescore_cborg_batch as b\n"
+        "b.ROOT=Path.cwd()\n"
+        "r=b.schedule(list('abcde'),lambda j:[sys.executable,'worker.py',j],Path('run'))\n"
+        "raise SystemExit(0 if r['status']=='passed' else 1)\n"
+    )
+    process = subprocess.Popen([sys.executable, str(controller)], cwd=tmp_path,
+                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
+    try:
+        deadline = time.monotonic() + 15
+        while len(list(tmp_path.glob("*/started"))) < 4:
+            assert process.poll() is None
+            assert time.monotonic() < deadline
+            time.sleep(0.02)
+        os.killpg(process.pid, stop_signal)
+        (tmp_path / "release").touch()
+        output, _ = process.communicate(timeout=15)
+        assert process.returncode == 1, output.decode()
+        result = json.loads((tmp_path / "run/result.json").read_text())
+        assert result["status"] == "stopped" and result["stop_signal"] == stop_signal
+        assert result["not_launched"] == ["e"]
+        assert len(result["completed"]) == 4
+        assert all(row["exit_code"] == 0 for row in result["completed"])
+        for job in "abcd":
+            assert (tmp_path / job / "candidate.json").read_text() == "original candidate"
+            assert (tmp_path / job / "receipt.json").read_text() == "completed receipt"
+        assert not (tmp_path / "e").exists()
+    finally:
+        (tmp_path / "release").touch(exist_ok=True)
+        if process.poll() is None:
+            process.terminate()
+            process.communicate(timeout=15)

@@ -95,3 +95,14 @@ failure, drains in-flight sessions and refuses automatic retries. One pilot
 cannot establish provider rate-limit behavior under load, cross-item
 contention, repeatability or long-tail success. No additional v9 generation
 or download is part of this amendment.
+
+
+The first scheduler review found #1341: shared foreground process groups
+could interrupt workers before their original runner wrote receipts. The
+corrected scheduler gives each worker a separate session and handles
+controller SIGINT/SIGTERM as a request to stop new launches and drain. The
+stopped controller result is retained. The initial scheduler and its
+registration are archived unchanged; no model calls occurred under them.
+Offline process-group interruption tests cover candidate and receipt
+retention for all four active workers and non-launch of the fifth job.
+A forced kill or host loss is outside this graceful-drain guarantee.
