@@ -1,9 +1,8 @@
 {
-  "reported_at": "2026-09-12T10:57:39.297014+00:00",
-  "completed": 21,
+  "reported_at": "2026-09-12T11:09:49.742205+00:00",
+  "completed": 22,
   "planned": 56,
   "pending": [
-    "CHORUS_v8_rep2_r20_rating1",
     "CHORUS_v8_rep3_r10_rating1",
     "CHORUS_v8_rep3_r20_rating1",
     "CM4AI_v7_rep1_r10_rating1",
@@ -223,13 +222,15 @@
       "project": "CHORUS",
       "cohort": "v8",
       "rubric": "rubric20-semantic",
-      "records": 1,
+      "records": 2,
       "expected_records": 3,
       "adjusted_percentages": [
-        76.1
+        76.1,
+        79.5
       ],
       "fixed_percentages": [
-        76.1
+        76.1,
+        79.5
       ]
     },
     {
