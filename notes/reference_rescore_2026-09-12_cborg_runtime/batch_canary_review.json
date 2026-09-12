@@ -1,23 +1,48 @@
 {
-  "reviewed_at": "2026-09-12T21:20:52.810893+00:00",
+  "reviewed_at": "2026-09-12T22:35:43.147683+00:00",
   "verdict": "approved",
-  "evaluation_sha256": "a803649ca0d07c30ea1745f088e27e70ef4f53d5bafbe1f06d8d2589c2e20f44",
-  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
-  "registration_sha256": "ff4ab3b919a6824c08fcb3f0150a6a7afc3e850559208447851ab7f545fe9d6f",
-  "review": "notes/reference_rescore_2026-09-12_cborg_runtime/validator_status_pilot_review.md",
-  "review_sha256": "3f0d8ac2d0cd9edcec13e14e5eafe8cdefaef7e35f8a4ea020899ad6b802788e",
-  "source_question_headings_equal": 20,
-  "original_write_binding": "one successful absolute original Write",
-  "final_score": {
-    "total_points": 83,
-    "max_points": 88,
+  "registration_sha256": "724f07cfec5aa26b33ed9f9d42542d383fabfc285a576a617992ce4c514e9cfd",
+  "job_id": "CHORUS_v8_rep1_r10_rating1",
+  "evaluation_sha256": "84d194e0e212bbd212b089480a77d9c86f260545d7b7d419e77ecafbed7ff06e",
+  "original_attempt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep1_r10_rating1/2026-09-12T22-22-17.411486+00-00",
+  "runtime_model": "claude-opus-5",
+  "review": "notes/reference_rescore_2026-09-12_cborg_runtime/deadline_pilot_review.md",
+  "review_sha256": "a28314399ce8e23592886354aa2ced52dbb45d91998e8bce8e0d580b249b7f92",
+  "score": {
+    "total_points": 34,
+    "max_points": 50,
     "excluded_max_points": 0,
-    "adjusted_max_points": 88,
-    "normalized_percentage": 94.3,
-    "fixed_percentage": 94.3,
-    "questions_not_applicable": 0
+    "adjusted_max_points": 50,
+    "normalized_percentage": 68.0,
+    "fixed_percentage": 68.0,
+    "sub_elements_not_applicable": 0,
+    "denominator_note": "normalized_percentage = 34/50 x 100 (adjusted basis, no exclusions); fixed_percentage = 34/50 x 100 (fixed basis). All five conditional gates resolved as satisfied: the datasets-shared condition is met (distribution_formats populated with five modality formats plus documented controlled-access route), the human-subjects condition is met (description and keywords describe hospital admissions of critically ill patients), the governance condition is met (regulatory_restrictions states applying constraints), the data-collection condition is met (acquisition_methods and collection_mechanisms populated), and the software-output condition is met (external_resources references the chorus-ai code repository organization). No sub-element is excluded, so the two bases coincide.",
+    "excluded_item_ids": []
   },
-  "validator_used": "canonical exact own-file command; successful VALID result after Write",
-  "status_echo_proof_used": false,
-  "scope": "Execution/instrument acceptance and recorded semantic inspection; no replacement scores or external source/legal verification."
+  "original_successful_writes": 1,
+  "original_write_bytes": 101046,
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "check_echo_verified": true,
+  "source_aligned_item_identities": 50,
+  "deadline_execution": {
+    "started_at": "2026-09-12T22:22:17.416172+00:00",
+    "extension": {
+      "path": "scripts/reference_rescore_cborg_deadline.py",
+      "sha256": "78afd486203eee78d18f479304a2dc7ca98425947beb5956d3c9538066b24dd2",
+      "timeout_seconds": 1800
+    },
+    "original_timeout_seconds": 900,
+    "timeout_seconds": 1800,
+    "timed_out": false,
+    "returncode": 0,
+    "completed_at": "2026-09-12T22:32:08.173358+00:00"
+  },
+  "cli_reported_cost_usd": 2.5445979999999997,
+  "narrative_qualification": {
+    "path": "notes/reference_rescore_2026-09-12_cborg_runtime/canary_narrative_qualification.json",
+    "sha256": "ed889f3d8cfadcd8bdffe4323cb86b78bae4c0c504bda4f11388365c1a0b4118",
+    "issue": 1352
+  },
+  "remaining_jobs_permitted": 38,
+  "limits": "Mechanical acceptance does not adjudicate every semantic judgment. Retry finished before900seconds; longer-deadline necessity and workload capacity are not established by this one session. Two original interruption costs remain unknown."
 }

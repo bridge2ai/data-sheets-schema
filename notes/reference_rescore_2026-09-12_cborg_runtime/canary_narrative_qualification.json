@@ -1,0 +1,51 @@
+{
+  "recorded_at": "2026-09-12T22:34:00.237582+00:00",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "scope": "Two licensing statements in the CHORUS v8 rep1 rubric10 retry-canary narrative. This is a targeted interpretation check, not adjudication of all scores or all evaluation prose.",
+  "qualification": "Evaluation narratives describe model judgments about the supplied documentation and are not verified facts about the underlying datasets. The CHORUS retry canary overstates missing license information as absence of a governing license and alleges conflation despite an explicit software/data distinction in the input. Keep its original score and prose, and do not repeat those statements as dataset facts. Other narrative claims remain unadjudicated.",
+  "cases": [
+    {
+      "job_id": "CHORUS_v8_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v8_rep1_r10_rating1_evaluation.json",
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml",
+      "evaluation_sha256": "84d194e0e212bbd212b089480a77d9c86f260545d7b7d419e77ecafbed7ff06e",
+      "input_sha256": "f2a4d6229e5b4188a281727cb6723120e8ebbcfefe2883e6b1ada1c434bb0bb7",
+      "statements": [
+        {
+          "pointer": [
+            "elements",
+            2,
+            "sub_elements",
+            0,
+            "quality_note"
+          ],
+          "original": "No license governs the data. The one licensing instrument mentioned is an unpublished agreement embedded in a training-program registration form, so a prospective reuser cannot determine redistribution rights, derivative-work rights, publication conditions or attribution requirements. The record is commendably explicit that this is absent, but the sub-element asks whether reuse terms are stated, and they are not.",
+          "assessment": "The input documents a signed licensing agreement under a named training-program access route and says the sources do not name a data license. The statement that no license governs the data is stronger than the supplied evidence. This does not establish that the original0 score for unspecified reuse terms should change."
+        },
+        {
+          "pointer": [
+            "semantic_analysis",
+            "issues_detected",
+            7,
+            "description"
+          ],
+          "original": "license_and_use_terms conflates two distinct objects: the MIT License applies to the chorus-ai code, while no license is named for the data. The access terms recorded are those of one route (the AIM-AHEAD training program registration), not a general data use agreement, so reuse permissions for the dataset itself remain unstated.",
+          "assessment": "license_and_use_terms.source_caveats explicitly distinguishes the MIT software license from the unnamed data license and scopes the access terms to the training route. The allegation that the input conflates the two is unsupported by that text."
+        }
+      ],
+      "original_score_preserved": {
+        "total_points": 34,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 68.0,
+        "fixed_percentage": 68.0,
+        "sub_elements_not_applicable": 0,
+        "denominator_note": "normalized_percentage = 34/50 x 100 (adjusted basis, no exclusions); fixed_percentage = 34/50 x 100 (fixed basis). All five conditional gates resolved as satisfied: the datasets-shared condition is met (distribution_formats populated with five modality formats plus documented controlled-access route), the human-subjects condition is met (description and keywords describe hospital admissions of critically ill patients), the governance condition is met (regulatory_restrictions states applying constraints), the data-collection condition is met (acquisition_methods and collection_mechanisms populated), and the software-output condition is met (external_resources references the chorus-ai code repository organization). No sub-element is excluded, so the two bases coincide.",
+        "excluded_item_ids": []
+      },
+      "operator_score_changes": 0
+    }
+  ],
+  "issue": 1352
+}

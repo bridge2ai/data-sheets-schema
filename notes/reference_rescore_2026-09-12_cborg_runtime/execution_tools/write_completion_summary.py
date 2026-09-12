@@ -71,6 +71,27 @@ def main():
     deadline_boundary = audit["execution_deadline_boundary"]
     if r.digest(ROOT / deadline_boundary["registration"]) != deadline_boundary["registration_sha256"]:
         raise ValueError("deadline-boundary registration changed after the audit")
+    narrative_path = plan / "canary_narrative_qualification.json"
+    narrative = json.loads(narrative_path.read_bytes())
+    if narrative["manifest_sha256"] != audit["manifest_sha256"]:
+        raise ValueError("narrative qualification identifies another condition")
+    all_jobs = {j["id"]: j for j in manifest["jobs"]}
+    for case in narrative["cases"]:
+        job = all_jobs[case["job_id"]]
+        if (case["output"] != job["output"] or case["input"] != job["input"]
+                or case["evaluation_sha256"] != r.digest(ROOT / job["output"])
+                or case["input_sha256"] != r.digest(ROOT / job["input"])):
+            raise ValueError("narrative qualification lacks matching source bytes")
+        original = json.loads((ROOT / job["output"]).read_bytes())
+        for statement in case["statements"]:
+            value = original
+            for key in statement["pointer"]:
+                value = value[key]
+            if value != statement["original"]:
+                raise ValueError("narrative qualification does not quote the original statement")
+    narrative_qualification = {"source": narrative_path.name, "source_sha256": r.digest(narrative_path),
+                               "scope": narrative["scope"], "qualification": narrative["qualification"],
+                               "issue": narrative.get("issue")}
     banner = ("**Semantic inspection — Q19:** " + review["qualification"]
               + " See the [24-rating inspection](semantic_review.md).\n\n"
               + "**Execution boundary:** " + execution["qualification"]
@@ -78,7 +99,9 @@ def main():
               + ". See [the dated registration](validator_status_registration.json).\n\n"
               + "**Execution deadline:** " + deadline_boundary["qualification"]
               + " See [the deadline registration](deadline_registration_1351.json).\n\n"
-              + "**Incomplete cost accounting:** " + audit["cost_qualification"] + "\n\n")
+              + "**Incomplete cost accounting:** " + audit["cost_qualification"] + "\n\n"
+              + "**Evaluation prose:** " + narrative["qualification"]
+              + " See [the original statements and interpretation](canary_narrative_qualification.json).\n\n")
     reports = [plan / name for name in ("results.json", "results.md", "completion_summary.md", "semantic_review.md")]
     before = {path: path.read_bytes() if path.exists() else None for path in reports}
     try:
@@ -90,6 +113,7 @@ def main():
         results["semantic_qualification"] = qualification
         results["execution_permission_boundary"] = execution
         results["execution_deadline_boundary"] = deadline_boundary
+        results["evaluation_narrative_qualification"] = narrative_qualification
         results["cost_accounting"] = {key: audit[key] for key in (
             "cost_accounting_complete", "cli_reported_total_cost_usd", "known_terminal_cli_cost_usd",
             "unpriced_excluded_sessions", "cost_qualification")}
