@@ -37,14 +37,6 @@ def load_registered():
             or registration["workers"] != 4
             or manifest["transport"] != c.TRANSPORT):
         raise ValueError("batch registration does not match the frozen execution files")
-    extension = registration.get("validator_status_extension")
-    if extension:
-        import reference_rescore_cborg_validator_status as status
-        if (extension.get("path") != "scripts/reference_rescore_cborg_validator_status.py"
-                or extension.get("sha256") != r.digest(ROOT / extension["path"])
-                or extension.get("permission_rules") != list(status.PERMISSION_RULES)):
-            raise ValueError("validator status extension differs from its registration")
-        status.enable(r)
     r.verify_frozen(manifest)
     return r, manifest, registration
 
@@ -393,9 +385,7 @@ def main(argv=None):
             raise ValueError("pilot phase accepts only its registered rating")
         if job not in pending_jobs(r, {**manifest, "jobs": [job]}, registration, phase):
             raise ValueError("worker job is already completed")
-        extension = registration.get("validator_status_extension")
-        executable = extension["path"] if extension else "scripts/reference_rescore_cborg.py"
-        receipt = r.run_job(manifest, job, str(ROOT / executable))
+        receipt = r.run_job(manifest, job, str(ROOT / "scripts/reference_rescore_cborg.py"))
         if receipt["status"] != "passed":
             return 1
         verified_output(r, manifest, job)

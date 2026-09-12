@@ -1,0 +1,131 @@
+{
+  "job_id": "AI_READI_v7_rep2_r10_rating1",
+  "started_at": "2026-09-12T20:32:34.115166+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "d1a70c3b5b4c322750f8112cb8e700472922c29b2214e7e68017e71fd2290033",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "c56d8261656557a68a8d94045593dd5c6b1b408d84f6aa98af5745955ef67f61",
+  "evaluation_sha256": "2233821f3fa7f9d8890b1029fca33fd8c52d0e3600d63f83fe4654a2d56bfb13",
+  "cli_result": {
+    "duration_api_ms": 587628,
+    "stop_reason": "end_turn",
+    "session_id": "79c6eaf1-9695-41d9-b633-bc6d225031cc",
+    "total_cost_usd": 2.90573025,
+    "usage": {
+      "input_tokens": 380,
+      "cache_creation_input_tokens": 176805,
+      "cache_read_input_tokens": 872653,
+      "output_tokens": 46295,
+      "output_tokens_details": {
+        "thinking_tokens": 14707
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 176805
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 382,
+        "outputTokens": 46323,
+        "cacheReadInputTokens": 872653,
+        "cacheCreationInputTokens": 209507,
+        "webSearchRequests": 0,
+        "costUSD": 2.90573025,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 14707,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01RYcPe8dgMrbnqsVtzsyM7E",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-if2z6ipq 2>/dev/null; find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/proc/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01WjVRyL26mVQ6cxiKpdPnTE",
+        "tool_input": {
+          "command": "ls scripts data/rubric && shasum -a 256 input/record.yaml data/rubric/rubric10.txt",
+          "description": "List scripts and rubric, hash inputs"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01BeHEA3pB26Y5W7fFVndzpx",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml",
+          "description": "Hash the input record"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 15,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed with exit status 0.\n\n## Definition check\n\nThe section headed \"Source rubric and schema paths (#158)\" is present in my instructions, and it reads as expected of the current rules. The sentence beginning \"Read release-specific notes\", verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nRecorded `instrument_sha256`: `66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`.\n\n## Result\n\n**49 / 50 applicable points \u2014 98.0% on both bases** (fixed denominator 50, adjusted denominator 50, 0 sub-elements excluded).\n\nNo sub-element was marked N/A. Both gating conditions fired on other elements' evidence: datasets-shared on E2 (`distribution_formats` with access endpoint plus a reuse-permitting license), and human subjects on E1's description (\"2,280 adult participants\") and E8's `collection_mechanisms`. Element 8 sub-element 4 was scored as applicable per #1081, independently of the repository pointer.\n\n**The single point lost is Element 8 sub-element 4, \"Software and Tools Documented.\"** This was the discriminating judgement. The release passed through heavy transformation \u2014 `.fda`/`.sdt`\u2192DICOM, XML\u2192WFDB, `.FIT`\u2192Open mHealth, REDCap\u2192OMOP CDM, environmental\u2192NASA ASCII, plus watermarking \u2014 and every one of those steps is described agentlessly. No `used_software` is attached to any of the seven preprocessing or three cleaning strategies. The software the record *does* name falls entirely in the excluded roles: REDCap and MoCA Duo are capture (a), FAIRhub on Azure is hosting (b), and the OMOP Data Quality Dashboard is validation (d). The `https://github.com/AI-READI` link is an organisation root, which the threshold says neither earns nor forfeits the point.\n\nTwo items worth flagging beyond the score:\n\n- **Institutional attribution (medium, content_accuracy).** ROR:01yc7t268 is Washington University in St. Louis, asserted as both the PI's affiliation and the accountable organization \u2014 while the IRB, the NIH awardee organization, the central lab and the sensor's build site are all the University of Washington. The record discloses the conflict but resolves it by source tier rather than plausibility, so it propagates what looks like an upstream FAIRhub conflation. E7 sub-element 5 still scores 1, since creators are identified and caveated.\n- **Arithmetic verification passed unusually cleanly.** All four split marginals reconcile exactly to the subpopulation totals (2,280 each way); subcrate file counts sum to 356,334 against a declared 356,343, the gap being precisely the nine root metadata files; the byte residual of 419,614 is explained in a source caveat. 28 consistency checks passed, 2 failed, 8 warnings.\n\nOutput written to `output_evaluation.json` with all 50 items, evidence, `applicability_status`/`applicability_evidence` on every conditional sub-element, both percentages with denominators, `temperature: null`, and `claude-opus-5` as both `name` and `evaluator_model`.",
+    "ttft_ms": 3255,
+    "type": "result",
+    "duration_ms": 586632,
+    "uuid": "08b7a578-2c4f-41f0-a158-855439b00fb5",
+    "ttft_stream_ms": 2278,
+    "time_to_request_ms": 21,
+    "first_content_frame_ms": 2279,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T20:42:21.563229+00:00"
+}

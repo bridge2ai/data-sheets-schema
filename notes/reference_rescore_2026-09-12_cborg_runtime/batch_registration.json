@@ -1,12 +1,12 @@
 {
-  "registered_at": "2026-09-12T20:11:54.794064+00:00",
-  "reason": "Fresh 56-rating condition with one original canary through the same four-worker controller as the fill. Execution identity is supplied as provenance; the strict returned-model gate is unchanged.",
+  "registered_at": "2026-09-12T21:01:51.225193+00:00",
+  "reason": "Preserve the fresh 56-rating scoring condition and five accepted outputs; register the exact validator-status execution extension and one reviewed retry pilot after two validator denials (#1347).",
   "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
   "scheduler": "scripts/reference_rescore_cborg_batch.py",
-  "scheduler_sha256": "b295f14591bf8333923f5da7cec5ea14c0dfab1aeccf17de3680e5552a313877",
+  "scheduler_sha256": "1c7dd53efa6edf21ca0e0afc1c693d1dbfb242489704d1c133c0c780c19a7190",
   "workers": 4,
-  "pilot_job_id": "CHORUS_v7_rep1_r10_rating1",
-  "pilot_scope": "The primary CHORUS v7 rep1 rubric10 rating1 is both the instrument canary and the scheduler canary. Queue exactly this one job with the same four-worker limit and foreground environment; accept both gates after reviewing the original output.",
+  "pilot_job_id": "AI_READI_v7_rep2_r20_rating1",
+  "pilot_scope": "Queue only AI_READI_v7_rep2_r20_rating1 as a fresh retry through the same four-worker controller. Review its original output and accept the new batch gate before the remaining50; the original CHORUS instrument canary acceptance stays intact.",
   "preserved_files": {
     "notes/reference_rescore_2026-09-12_cborg/.gitignore": "0ae10e879540b1f928937677f14df31e35f44b9ce8f1a0d331a406e90031389b",
     "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-10-04.833451+00-00/prompt.txt": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
@@ -80,18 +80,86 @@
     "notes/reference_rescore_2026-09-12_cborg_runtime/pre_spend_review_round8.md": "de4524889ca249dbb45b22f083b92f095b280e81186ce25daf45e37689245b2a",
     "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/batch-registration-before-effective-path-fix.json": "a2bfd0bb09699f3eee29c4ff32cf6d3e7f3258bddeb88768f00629e43c4c00a6",
     "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/reference_rescore_cborg_batch-before-effective-path-fix.py": "a912d46ac65b2782dc948efd33a16ac386b9e3bf27140f76069dcb9e78c023c2",
-    "notes/reference_rescore_2026-09-12_cborg_runtime/pre_spend_review_round9.md": "051920fdff56ce12ba5877cb900cef4aa978baf5ec301b702c42aba69935c160"
+    "notes/reference_rescore_2026-09-12_cborg_runtime/pre_spend_review_round9.md": "051920fdff56ce12ba5877cb900cef4aa978baf5ec301b702c42aba69935c160",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/before_validator_status/batch_canary_review.json": "f5f812eddd68765b62405834be896590da4f3935310ab69d901d5b770a336f70",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/before_validator_status/batch_canary_acceptance.json": "71d0aa35d66e4c0f282d7ba2debdddffa11f9011a8127bcee470fe4842ca926a",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/batch-registration-before-validator-status-fix.json": "deb2499bd10871f6147df4a115ae416c26d55153767c26bd561d793d80860907",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/reference_rescore_cborg_batch-before-validator-status-fix.py": "b295f14591bf8333923f5da7cec5ea14c0dfab1aeccf17de3680e5552a313877",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/validator_denial_review.json": "0738d277009f5b8ec546ef12f9005437047a971539e0aecff9be00461002496a",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/validator_status_permission_probe.json": "5273c72dd4a24693dc317a2fc78be8c902b43fc82f17ab09960600a7d4fa609b",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/canary_acceptance.json": "523882c854962d66230d267058f9d976cbeeadd454d1c7bbedbb8c0478c5d5fa",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/canary_review.md": "c68cd4823fe04efde81c6b6c9adb535276ce0aac88aa010c5d75897316f0d38f",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/canary_audit.json": "ff30589182e5d2826658e3f4ea58b24979f2660618325353b5bce8987b400a6f",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_canary_launch_cli_pin.json": "0353d0c4fc4a5748da56d08ed814b5a79947fb46ef26b1bc0530420b60d9d465",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_pre_spend_review_cli_pin.json": "12b8599be7d5bee204c7a76991cee48c1f791a58dd9fb843e35f2d5697b31324",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/pre_spend_review_round10.md": "d89d686089b8bb3edef3a847adf78cbe8dadab95fa2568542a12178999695e9e",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T20-41-08.312392+00-00/transcript.jsonl": "e7bbbc2479142c0b4e233e812923238c288758fcfe2ac3b0f1528377c3b13b08",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T20-41-08.312392+00-00/candidate.json": "abe88d9f64c85fa6de2dd828e1e0a5d28ed870ba4ec2ed8a0a2cbc98c831f099",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T20-41-08.312392+00-00/prompt.txt": "be9e18da9bf9c5195a38c2d9b5ccf40f1b260ac9cc45499fdddb0f21020f029a",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T20-41-08.312392+00-00/validation.txt": "1743cfabb538273b4a64abb8907f043375fa18048f81f0dc3fbac52b2c2f7a60",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T20-41-08.312392+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T20-41-08.312392+00-00/receipt.json": "e9ff037c51daed765690eeaede656f605e74c4980948041ff12b4a10f808eee3",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00/transcript.jsonl": "24a879efecfc736f738b128374139d99f34551fd12cc102ca7c7f172676fdb8a",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00/candidate.json": "85399fbad8384fa5472d97b5dbc99bc40d8d312cbeeaeffcc90f8e44b6289a86",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00/prompt.txt": "d2e1cc8b4d51d2ed69f9011a6bee45e69042b908fa723e9f107e76440716ba53",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00/receipt.json": "eaf683be0d4cef4b75587fbbfd81b67426fba20812fe4c8bc8b70ac93b0ff446",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-15-31.516182+00-00/transcript.jsonl": "b9813f9a27658db2eaf1ccee96878c63df01a103e906ce49a11bc20c065cd5b3",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-15-31.516182+00-00/candidate.json": "b5ecb9d31a6a73d1f71e46f70617390ff62d63a84c5abd5d794afa9110755366",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-15-31.516182+00-00/prompt.txt": "ff0196e807c8ec4835939296a9fdf1312942f9c639efd03fc48ca2fe6b6e360c",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-15-31.516182+00-00/validation.txt": "d39aff4c11868156bdc18c0ad6335702736aa12e7f2dda5dd288addb126adc6c",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-15-31.516182+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-15-31.516182+00-00/receipt.json": "47b6032e74c4f3fcea7e137cae11f7c417850d9f6c1bef217defd9fc6b48506b",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T20-32-33.254113+00-00/transcript.jsonl": "dcfed9ea716728e2839cbd8b5ab8b5bd50c51dc98f59f1b31a7d5aacc27a929e",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T20-32-33.254113+00-00/candidate.json": "2f9de22877fbfe1cc1e785790c9042ba864d0f08aebcff6b395bc33772353cd2",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T20-32-33.254113+00-00/prompt.txt": "c41b8291ae3c2158f3ab2fccff6feb6c697595265a09aa395b8af1808840e221",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T20-32-33.254113+00-00/validation.txt": "b745402a4015ac2751f07b1e21fdc007133c77be11591fb664d176c8e710c41e",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T20-32-33.254113+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T20-32-33.254113+00-00/receipt.json": "438cd663d375dbc38d17435da3699daa3f61bbbd9961b0fc3eca3774833f4579",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00/transcript.jsonl": "b396841b61e61f0a4378c5b04e2596e34f01a5f25f98ee3740a875d81a95d6de",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00/candidate.json": "5cd5c32de48a1d7da4ae4d053c59d929ec32a212f4f662bf64873769afaf2b7c",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00/prompt.txt": "de9530b69f159b671119ab4bb40fcd4283def9627c32bc2ec0b03e4affde5124",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00/receipt.json": "748667cc07f7a3cd9d157b45a230367fa1491f8d74d6bf55357057b5c7812d68",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T20-32-34.114984+00-00/transcript.jsonl": "fa69deaa6d109d046e6729bbd075b3a11d857f32bae4b765b4120dca3990996c",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T20-32-34.114984+00-00/candidate.json": "2233821f3fa7f9d8890b1029fca33fd8c52d0e3600d63f83fe4654a2d56bfb13",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T20-32-34.114984+00-00/prompt.txt": "d1a70c3b5b4c322750f8112cb8e700472922c29b2214e7e68017e71fd2290033",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T20-32-34.114984+00-00/validation.txt": "e2479b64b18cb7b98e689f8d155b3caf467423359598fa8df8eb65840e75b125",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T20-32-34.114984+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T20-32-34.114984+00-00/receipt.json": "bbbdc639a84ec6c3ecdafadeb7f9c7a8298846d15e1bcca9cd49097ff789ac9b",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T20-32-32.402466+00-00/transcript.jsonl": "3ffb5f9be4556a5d7cf67f7ab1dbc8e2a5ca0fee627e7f99e3ce28bab9f87cc0",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T20-32-32.402466+00-00/candidate.json": "f948eb177bbd79adfe237b0082c82219395ee996eb0870365bc0c0e25ad99df1",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T20-32-32.402466+00-00/prompt.txt": "5637a34291ff0d80c1f356204bd48e8f739dd28906a0086bedc40720f1ae6c3a",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T20-32-32.402466+00-00/validation.txt": "4048026e24aa966d1a0e086dbf018c56907e126d1443ac29a5cd0c3ec6c6659c",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T20-32-32.402466+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T20-32-32.402466+00-00/receipt.json": "224d65e4a345dcfea8650d5cdd4e01033511ea2193c50b54b472fb9775a421cf",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T20-32-31.567742+00-00_remaining/AI_READI_v7_rep2_r20_rating1.txt": "f233cadc95cc07628c75b0dd3eb7ca2386f65c5a44801d53fd26ddeeb6547203",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T20-32-31.567742+00-00_remaining/result.json": "f3dd79e2196fe8d1bd7f8ef0316f53db3544495d1b6f346410dadc2bb9e2d205",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T20-32-31.567742+00-00_remaining/AI_READI_v7_rep1_r10_rating1.txt": "f77179f79c83131995a4168d3ab28f39f6abec0ee475d18693e53cd77df58c8d",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T20-32-31.567742+00-00_remaining/AI_READI_v7_rep3_r20_rating1.txt": "82d6340f834d84c088c68e3ad297e2d49ee63593dd4c86f87386e3ff060a609f",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T20-32-31.567742+00-00_remaining/AI_READI_v7_rep3_r10_rating1.txt": "3991960a66c2e555aa516b7117b3732164e997a954b940a21029f77c4f56d9b6",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T20-32-31.567742+00-00_remaining/AI_READI_v7_rep1_r20_rating1.txt": "fdaf2f00634967c0722ee37a26baca88f34ee8a8865e1452b9161cde9067d759",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T20-32-31.567742+00-00_remaining/events.jsonl": "b817c298d741e5ee4c375ea7900f8a53a9f25adff97a4334b3ee62db3aa60d74",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T20-32-31.567742+00-00_remaining/AI_READI_v7_rep2_r10_rating1.txt": "e8846a64bf27d020989842042bc624718b6c6e056e9e923c59a352c322a623ad",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T20-15-30.889761+00-00_pilot/result.json": "ab02ac7f2f4cce9d91862848784ac4c51a231c03b1bea59eb4bcaed163c03f47",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T20-15-30.889761+00-00_pilot/events.jsonl": "3fe0ec590cc7f764f58e701909cb45ddbc2d63eb9f85207119f15347875f9806",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T20-15-30.889761+00-00_pilot/CHORUS_v7_rep1_r10_rating1.txt": "f253d58e579b21674fb738abe878ee37142b776815688981926740fc027cc907"
   },
   "existing_outputs": {
-    "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg/CHORUS_v7_rep1_r10_rating1_evaluation.json": "8b08357453730a468b3f47f8c0c0315d1ef30fe69ed937a0c95cbf2f9f9d8178"
+    "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg/CHORUS_v7_rep1_r10_rating1_evaluation.json": "8b08357453730a468b3f47f8c0c0315d1ef30fe69ed937a0c95cbf2f9f9d8178",
+    "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v7_rep1_r10_rating1_evaluation.json": "b5ecb9d31a6a73d1f71e46f70617390ff62d63a84c5abd5d794afa9110755366",
+    "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep1_r10_rating1_evaluation.json": "f948eb177bbd79adfe237b0082c82219395ee996eb0870365bc0c0e25ad99df1",
+    "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep1_r20_rating1_evaluation.json": "2f9de22877fbfe1cc1e785790c9042ba864d0f08aebcff6b395bc33772353cd2",
+    "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep2_r10_rating1_evaluation.json": "2233821f3fa7f9d8890b1029fca33fd8c52d0e3600d63f83fe4654a2d56bfb13",
+    "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep3_r10_rating1_evaluation.json": "abe88d9f64c85fa6de2dd828e1e0a5d28ed870ba4ec2ed8a0a2cbc98c831f099"
   },
   "limits": "One canary cannot measure rate limits under load or repeatability. No automatic retries; stop new launches and drain active workers on failure. No further v9 generation or downloads.",
   "supersedes_registration": {
-    "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/batch-registration-before-effective-path-fix.json",
-    "sha256": "a2bfd0bb09699f3eee29c4ff32cf6d3e7f3258bddeb88768f00629e43c4c00a6"
+    "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/batch-registration-before-validator-status-fix.json",
+    "sha256": "deb2499bd10871f6147df4a115ae416c26d55153767c26bd561d793d80860907"
   },
-  "pre_spend_review": "batch_pre_spend_review_cli_pin.json",
-  "pilot_launch_record": "batch_canary_launch_cli_pin.json",
+  "pre_spend_review": "batch_pre_spend_review_validator_status.json",
+  "pilot_launch_record": "batch_canary_launch_validator_status.json",
   "cli_executable_sha256": "c942e1228b93cb4d52183b3dfbc77f28264f35aa947acd9c0853d029164cf450",
   "cli_executable_selection": {
     "version": "2.1.269 (Claude Code)",
@@ -127,6 +195,39 @@
           "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/receipt.json": "a8d93315e8c72b157e04f9d8edab67f08a3426148863ee77a74ff0640f9af221"
         }
       }
+    },
+    "AI_READI_v7_rep2_r20_rating1": {
+      "reason": "#1347: a completed session never executed the canonical validator; keep its candidate excluded and permit one fresh retry under the reviewed exact-status extension.",
+      "attempts": {
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00": {
+          "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00/transcript.jsonl": "24a879efecfc736f738b128374139d99f34551fd12cc102ca7c7f172676fdb8a",
+          "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00/candidate.json": "85399fbad8384fa5472d97b5dbc99bc40d8d312cbeeaeffcc90f8e44b6289a86",
+          "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00/prompt.txt": "d2e1cc8b4d51d2ed69f9011a6bee45e69042b908fa723e9f107e76440716ba53",
+          "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00/receipt.json": "eaf683be0d4cef4b75587fbbfd81b67426fba20812fe4c8bc8b70ac93b0ff446"
+        }
+      }
+    },
+    "AI_READI_v7_rep3_r20_rating1": {
+      "reason": "#1347: a completed session never executed the canonical validator; keep its candidate excluded and permit one fresh retry under the reviewed exact-status extension.",
+      "attempts": {
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00": {
+          "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00/transcript.jsonl": "b396841b61e61f0a4378c5b04e2596e34f01a5f25f98ee3740a875d81a95d6de",
+          "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00/candidate.json": "5cd5c32de48a1d7da4ae4d053c59d929ec32a212f4f662bf64873769afaf2b7c",
+          "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00/prompt.txt": "de9530b69f159b671119ab4bb40fcd4283def9627c32bc2ec0b03e4affde5124",
+          "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00/receipt.json": "748667cc07f7a3cd9d157b45a230367fa1491f8d74d6bf55357057b5c7812d68"
+        }
+      }
     }
+  },
+  "validator_status_extension": {
+    "path": "scripts/reference_rescore_cborg_validator_status.py",
+    "sha256": "0608a52ba4a4406ba3d6c7517a361221d80e5c0efe016f40fcb550f9b870b3cb",
+    "permission_rules": [
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(echo \"exit=$?\")"
+    ],
+    "proof": "Only a successful exact own-file validator command followed by the literal EXIT=$? or exit=$? echo, a matching VALID marker and a final zero status may be treated as equivalent to canonical validation. Original transcripts are unchanged; proof is added to the receipt. Denied and ambiguous calls remain invalid."
   }
 }

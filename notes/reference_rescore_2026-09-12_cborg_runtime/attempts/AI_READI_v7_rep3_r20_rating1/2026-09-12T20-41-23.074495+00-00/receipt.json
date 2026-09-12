@@ -1,0 +1,11 @@
+{
+  "job_id": "AI_READI_v7_rep3_r20_rating1",
+  "started_at": "2026-09-12T20:41:23.074645+00:00",
+  "status": "incomplete",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "de9530b69f159b671119ab4bb40fcd4283def9627c32bc2ec0b03e4affde5124",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "error": "ValueError: evaluator did not successfully validate its exact output",
+  "completed_at": "2026-09-12T20:50:30.271644+00:00"
+}

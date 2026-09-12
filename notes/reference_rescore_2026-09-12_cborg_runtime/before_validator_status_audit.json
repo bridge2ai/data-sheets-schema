@@ -1,0 +1,171 @@
+{
+  "audited_at": "2026-09-12T21:01:51.200120+00:00",
+  "status": "verified",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "unresolved_attempts": [],
+  "session_accounting_complete": true,
+  "cost_accounting_complete": true,
+  "accepted": 5,
+  "planned": 56,
+  "actual_model_calls": 7,
+  "model_call_unit": "one isolated evaluator CLI session, which may contain multiple model/tool turns",
+  "attempts_without_reported_cost": 0,
+  "excluded_original_attempts": 2,
+  "cli_reported_total_cost_usd": 21.2424065,
+  "peak_completed_session_concurrency": 4,
+  "prior_evaluations_unchanged": 259,
+  "rubric10_source_aligned_headings_verified": true,
+  "ratings": [
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v7_rep1_r10_rating1_evaluation.json",
+      "evaluation_sha256": "b5ecb9d31a6a73d1f71e46f70617390ff62d63a84c5abd5d794afa9110755366",
+      "original_attempt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-15-31.516182+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 34,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 68.0,
+        "fixed_percentage": 68.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "No sub-element was excluded: the human-subjects, governance, datasets-shared, software-output and collection conditions are all met, so the fixed base (34/50) and the N/A-adjusted base (34/50) coincide."
+      }
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep1_r10_rating1_evaluation.json",
+      "evaluation_sha256": "f948eb177bbd79adfe237b0082c82219395ee996eb0870365bc0c0e25ad99df1",
+      "original_attempt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T20-32-32.402466+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 49,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 98.0,
+        "fixed_percentage": 98.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "normalized_percentage = 49/50 x 100; fixed_percentage = 49/50 x 100. No sub-element was excluded: the human-subjects, governance, datasets-shared, software-output and data-collection conditions are all satisfied, so both bases coincide."
+      }
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "2f9de22877fbfe1cc1e785790c9042ba864d0f08aebcff6b395bc33772353cd2",
+      "original_attempt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T20-32-33.254113+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 82,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 93.2,
+        "fixed_percentage": 93.2,
+        "questions_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "AI_READI_v7_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep2_r10_rating1_evaluation.json",
+      "evaluation_sha256": "2233821f3fa7f9d8890b1029fca33fd8c52d0e3600d63f83fe4654a2d56bfb13",
+      "original_attempt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T20-32-34.114984+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 49,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 98.0,
+        "fixed_percentage": 98.0,
+        "sub_elements_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "AI_READI_v7_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep3_r10_rating1_evaluation.json",
+      "evaluation_sha256": "abe88d9f64c85fa6de2dd828e1e0a5d28ed870ba4ec2ed8a0a2cbc98c831f099",
+      "original_attempt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T20-41-08.312392+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 49,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 98.0,
+        "fixed_percentage": 98.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "normalized_percentage = 49/50 x 100 (adjusted base); fixed_percentage = 49/50 x 100 (fixed base). The two bases coincide because all five trigger conditions were satisfied and no sub-element was excluded."
+      }
+    }
+  ],
+  "original_calls": [
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-15-31.516182+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 3.6787935,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T20-32-32.402466+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.8376474999999997,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T20-32-33.254113+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.75538425,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v7_rep2_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T20-32-34.114984+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.90573025,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v7_rep2_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00",
+      "status": "incomplete",
+      "original_error": "ValueError: evaluator did not successfully validate its exact output",
+      "evaluator_validation_succeeded": false,
+      "cli_reported_cost_usd": 2.3643259999999997,
+      "accepted_source": false
+    },
+    {
+      "job_id": "AI_READI_v7_rep3_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T20-41-08.312392+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 3.2048832500000004,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v7_rep3_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00",
+      "status": "incomplete",
+      "original_error": "ValueError: evaluator did not successfully validate its exact output",
+      "evaluator_validation_succeeded": false,
+      "cli_reported_cost_usd": 3.49564175,
+      "accepted_source": false
+    }
+  ]
+}

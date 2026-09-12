@@ -76,7 +76,7 @@ canary must pass and receive both acceptances before the remaining jobs run.
 The canary was accepted on 2026-09-12 after its original final Write scored
 34/50 (68%), with the recorded definition digest and check-echo verified.
 See [the inspected result](canary_review.md) and both acceptance records.
-The remaining 55 were launched only after that evidence was published.
+The remaining 55 were queued only after that evidence was published. Six jobs started before the controller stopped on a validator denial; see the execution amendment below.
 
 For this condition's complete audit, use the dated helper below. It applies
 the reviewed local pre-launch classification, preserves uncertain attempts
@@ -90,4 +90,46 @@ python notes/reference_rescore_2026-09-12_cborg_runtime/execution_tools/audit_co
 # Complete the evidence-backed 24-rating Q19 inspection in semantic_review.json.
 python notes/reference_rescore_2026-09-12_cborg_runtime/execution_tools/write_completion_summary.py
 python scripts/instrument_provenance.py --write
+```
+
+## Validator-status execution amendment (#1347)
+
+The stopped fill finished with five accepted ratings in this condition and
+two excluded evaluator sessions. Both excluded rubric20 sessions appended
+a literal exit-status echo to the exact-file validator command; the CLI
+denied the compound command and neither session successfully validated.
+Their original candidates (both 83/88), prompts, traces and receipts remain
+unchanged and excluded. Seven evaluator sessions cost $21.24240650 in
+CLI-reported usage, including $5.85996775 for these two exclusions. The
+separate local pre-launch failure still has zero evaluator sessions.
+
+The registered extension permits only the two literal status echoes and
+accepts an equivalent validator command only with a matching VALID marker,
+a final zero status, a successful original tool result and the frozen
+Write/validation ordering checks. It changes no scoring prompt, definition,
+input, candidate or original transcript. Each accepted use records its
+original command and status proof in the receipt. Execution permissions
+changed at this boundary; unchanged prompts alone do not establish identical
+model behaviour. The registration pins the extension, all five accepted
+outputs, both complete failed histories and prior controller evidence.
+
+Offline validation passed 212 tests and six native-CLI probes against a
+scripted local endpoint. Both failed original traces remain rejected; all
+five accepted original traces still pass. No provider calls were made in
+these checks. See validator_status_registration.json and the retained probe.
+
+After independent review, run only AI_READI_v7_rep2_r20_rating1 as a new
+batch pilot. Review its actual output before accepting this batch gate.
+The primary CHORUS instrument acceptance remains unchanged; its earlier
+batch review and acceptance are archived. After the new pilot passes,
+50 jobs remain, including one explicitly registered retry of rep3 rubric20.
+The controller still stops new launches on an observed failure, drains
+active workers and refuses any unregistered further retry.
+
+```bash
+python scripts/reference_rescore_cborg_batch.py pilot
+# Inspect the retry's original Write, validation proof and semantic judgments.
+# Write the new batch_canary_review.json; retain the original canary acceptance.
+python scripts/reference_rescore_cborg_batch.py accept-pilot
+python scripts/reference_rescore_cborg_batch.py remaining
 ```
