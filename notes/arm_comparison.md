@@ -36,10 +36,10 @@ Arms: **v4 API (2026-08-13)** — `2026-08-13_claude-opus-5-api-generic-v4_rep{1
 | pair errors | CHORUS | 3.0 ± 3.0 [6,0,3] worst 6 | 1.0 ± 1.0 [1,0,2] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] |
 | pair errors | CM4AI | 6.0 ± 3.0 [6,9,3] worst 9 | 6.0 ± 2.6 [4,5,9] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | – | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] |
 | pair errors | VOICE | 6.3 ± 2.5 [9,4,6] worst 9 | 5.7 ± 1.2 [7,5,5] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | – | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] |
-| report findings | AI_READI | 1.7 ± 0.6 [2,1,2] worst 2 | 1.0 [0ᵘ,1,0ᵘ] (n=1) | – [0ᵘ,0ᵘ,0ᵘ] | – [0ᵘ,0ᵘ,0ᵘ] | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 [0ᵘ,0ᵘ,0] (n=1) | 0.0 ± 0.0 [0,0,0] |
-| report findings | CHORUS | – [0ᵘ,0ᵘ,0ᵘ] | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 [0ᵘ,0ᵘ,0] (n=1) | – [0ᵘ,0ᵘ,0ᵘ] | – [0ᵘ,0ᵘ] | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 ± 0.0 [0,0,0] |
-| report findings | CM4AI | 3.3 ± 0.6 [3,3,4] worst 4 | 1.0 [1,0ᵘ,0ᵘ] (n=1) | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 [0ᵘ,0ᵘ,0] (n=1) | – | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 ± 0.0 [0,0,0] |
-| report findings | VOICE | 2.0 ± 0.0 [2,2,2] worst 2 | 1.0 ± 0.0 [0ᵘ,1,1] (n=2) | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 [0ᵘ,0,0ᵘ] (n=1) | – | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 ± 0.0 [0,0,0] |
+| report findings | AI_READI | 1.7 ± 0.6 [2,1,2] worst 2 | 0.5 ± 0.7 [0,1,0ᵘ] (n=2) | 0.0 [0,0ᵘ,0ᵘ] (n=1) | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 [0ᵘ,0,0ᵘ] (n=1) | 0.0 ± 0.0 [0,0,0] | 0.3 ± 0.6 [0,0,1] |
+| report findings | CHORUS | 0.0 [0,0ᵘ,0ᵘ] (n=1) worst 0 | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0ᵘ,0] (n=2) | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 ± 0.0 [0,0] | 0.0 [0,0ᵘ,0ᵘ] (n=1) | 0.7 ± 1.2 [0,2,0] |
+| report findings | CM4AI | 3.3 ± 0.6 [3,3,4] worst 4 | 0.5 ± 0.7 [1,0ᵘ,0] (n=2) | 0.0 [0ᵘ,0ᵘ,0] (n=1) | 0.0 [0ᵘ,0ᵘ,0] (n=1) | – | 0.0 ± 0.0 [0ᵘ,0,0] (n=2) | 0.0 ± 0.0 [0,0,0] |
+| report findings | VOICE | 1.7 ± 0.6 [2,1,2] worst 2 | 0.7 ± 0.6 [0,1,1] | – [0ᵘ,0ᵘ,0ᵘ] | 0.0 [0ᵘ,0,0ᵘ] (n=1) | – | 0.0 [0,0ᵘ,0ᵘ] (n=1) | 0.3 ± 0.6 [0,1,0] |
 | minted fragments (reported) | AI_READI | 14.7 ± 2.1 [17,14,13] worst 17 | 9.0 ± 7.8 [0,13,14] | 10.3 ± 6.7 [16,3,12] | 10.7 ± 2.1 [10,13,9] | 5.7 ± 6.4 [1,3,13] | 4.0 ± 6.9 [0,0,12] | 18.0 ± 4.6 [19,22,13] |
 | minted fragments (reported) | CHORUS | 0.0 ± 0.0 [0,0,0] worst 0 | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0] | 0.0 ± 0.0 [0,0,0] | 0.0 ± 0.0 [0,0,0] |
 | minted fragments (reported) | CM4AI | 4.0 ± 6.9 [12,0,0] worst 12 | 13.7 ± 3.2 [15,10,16] | 49.3 ± 6.7 [42,55,51] | 39.0 ± 20.8 [51,15,51] | – | 14.7 ± 4.0 [17,10,17] | 23.3 ± 6.4 [16,26,28] |
@@ -140,4 +140,4 @@ The never/added split (#807) says which half of the gap the protocol could have 
 | CM4AI | – | 70/78 (89.7%, 22c/rep1) | 66/78 (84.6%, rep2) | 73/88 (83.0%, rep1); 68/78 (87.2%, rep2); 68/78 (87.2%, rep3) | – | 76/88 (86.4%, rep1); 75/88 (85.2%, rep2); 76/88 (86.4%, rep3) | 67/88 (76.1%, 04g/rep1); 70/88 (79.5%, 04g/rep2); 69/88 (78.4%, 04g/rep3) |
 | VOICE | – | 81/88 (92.0%, 22c/rep2) | 78/88 (88.6%, rep1) | 80/88 (90.9%, rep1); 78/88 (88.6%, rep2); 80/88 (90.9%, rep3) | – | 80/88 (90.9%, rep1); 80/88 (90.9%, rep2); 83.5/88 (94.9%, rep3) | 79/88 (89.8%, 04f/rep1); 76/88 (86.4%, 04f/rep2); 80/88 (90.9%, 04f/rep3) |
 
-Evaluator model(s) recorded: claude-fable-5, claude-opus-5[1m]. Scores are shown as points / adjusted maximum after N/A exclusions; raw points are comparable within a rubric, percentages are denominator-sensitive. No gold standard exists (#177); the rubrics are not domain-neutral (#627); rubric20's N/A convention is #155's.
+Evaluator model(s) recorded: claude-fable-5, claude-opus-5[1m]. Scores are shown as points / adjusted maximum after N/A exclusions; comparison requires the same evaluator, definition and applicability basis; raw points alone do not establish comparability. These historical scores are not results from the newly registered reference rescore. No gold standard exists (#177); the rubrics are not domain-neutral (#627); rubric20's N/A convention is #155's.
