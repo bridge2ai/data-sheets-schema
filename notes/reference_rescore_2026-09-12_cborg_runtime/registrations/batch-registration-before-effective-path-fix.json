@@ -1,9 +1,9 @@
 {
-  "registered_at": "2026-09-12T20:11:54.794064+00:00",
+  "registered_at": "2026-09-12T20:06:05.573682+00:00",
   "reason": "Fresh 56-rating condition with one original canary through the same four-worker controller as the fill. Execution identity is supplied as provenance; the strict returned-model gate is unchanged.",
   "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
   "scheduler": "scripts/reference_rescore_cborg_batch.py",
-  "scheduler_sha256": "b295f14591bf8333923f5da7cec5ea14c0dfab1aeccf17de3680e5552a313877",
+  "scheduler_sha256": "a912d46ac65b2782dc948efd33a16ac386b9e3bf27140f76069dcb9e78c023c2",
   "workers": 4,
   "pilot_job_id": "CHORUS_v7_rep1_r10_rating1",
   "pilot_scope": "The primary CHORUS v7 rep1 rubric10 rating1 is both the instrument canary and the scheduler canary. Queue exactly this one job with the same four-worker limit and foreground environment; accept both gates after reviewing the original output.",
@@ -77,18 +77,15 @@
     "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T20-03-09.540687+00-00_pilot/CHORUS_v7_rep1_r10_rating1.txt": "81c4d2d4887d0fc7ebd3a3b157e62e1383b1bfa475127f7b4d4cadc5e74c7b5b",
     "notes/reference_rescore_2026-09-12_cborg_runtime/batch_canary_launch.json": "8cc8833593d3653be64bc811b74250d2dfa4c46ac1c92547e8474ee6d1af00dc",
     "notes/reference_rescore_2026-09-12_cborg_runtime/batch_pre_spend_review.json": "700a3ed9cd670c893c2aef641e56b0d2e57ac41d92de5be8a3227645e3f50c17",
-    "notes/reference_rescore_2026-09-12_cborg_runtime/pre_spend_review_round8.md": "de4524889ca249dbb45b22f083b92f095b280e81186ce25daf45e37689245b2a",
-    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/batch-registration-before-effective-path-fix.json": "a2bfd0bb09699f3eee29c4ff32cf6d3e7f3258bddeb88768f00629e43c4c00a6",
-    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/reference_rescore_cborg_batch-before-effective-path-fix.py": "a912d46ac65b2782dc948efd33a16ac386b9e3bf27140f76069dcb9e78c023c2",
-    "notes/reference_rescore_2026-09-12_cborg_runtime/pre_spend_review_round9.md": "051920fdff56ce12ba5877cb900cef4aa978baf5ec301b702c42aba69935c160"
+    "notes/reference_rescore_2026-09-12_cborg_runtime/pre_spend_review_round8.md": "de4524889ca249dbb45b22f083b92f095b280e81186ce25daf45e37689245b2a"
   },
   "existing_outputs": {
     "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg/CHORUS_v7_rep1_r10_rating1_evaluation.json": "8b08357453730a468b3f47f8c0c0315d1ef30fe69ed937a0c95cbf2f9f9d8178"
   },
   "limits": "One canary cannot measure rate limits under load or repeatability. No automatic retries; stop new launches and drain active workers on failure. No further v9 generation or downloads.",
   "supersedes_registration": {
-    "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/batch-registration-before-effective-path-fix.json",
-    "sha256": "a2bfd0bb09699f3eee29c4ff32cf6d3e7f3258bddeb88768f00629e43c4c00a6"
+    "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/batch-registration-before-prelaunch-fix.json",
+    "sha256": "4cbff2317c3527c1cc164fb243a5bf9d2fc8beaa326b0c4680eaa1fbd17236af"
   },
   "pre_spend_review": "batch_pre_spend_review_cli_pin.json",
   "pilot_launch_record": "batch_canary_launch_cli_pin.json",
@@ -100,8 +97,7 @@
     "environment": {
       "DISABLE_AUTOUPDATER": "1"
     },
-    "reason": "Default CLI symlink advanced to 2.1.270; explicit retained binary preserves the registered runtime.",
-    "prelaunch_check": "Resolve and hash using the frozen runner effective PATH: Python executable directory prepended to inherited PATH. Reject a shadowing binary before attempt creation (#1346)."
+    "reason": "Default CLI symlink advanced to 2.1.270; explicit retained binary preserves the registered runtime."
   },
   "prelaunch_failures": {
     "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00": {

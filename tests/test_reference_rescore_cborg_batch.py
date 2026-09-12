@@ -300,8 +300,24 @@ def test_cli_binary_mismatch_stops_before_attempt(tmp_path, monkeypatch):
     binary = tmp_path / 'claude'; binary.write_bytes(b'registered binary')
     r = SimpleNamespace(digest=lambda p: hashlib.sha256(p.read_bytes()).hexdigest())
     registration = {'cli_executable_sha256': r.digest(binary)}
-    monkeypatch.setattr(batch.shutil, 'which', lambda _: str(binary))
+    monkeypatch.setattr(batch.shutil, 'which', lambda _, **kwargs: str(binary))
     batch.verify_cli_executable(r, registration)
     binary.write_bytes(b'auto-updated binary')
     with pytest.raises(ValueError, match='registered CLI executable'):
         batch.verify_cli_executable(r, registration)
+
+
+def test_interpreter_directory_cannot_shadow_the_pinned_cli(tmp_path, monkeypatch):
+    selected = tmp_path / 'pinned'; selected.mkdir()
+    interpreter = tmp_path / 'python-bin'; interpreter.mkdir()
+    cli = selected / 'claude'; cli.write_bytes(b'registered binary'); cli.chmod(0o755)
+    shadow = interpreter / 'claude'; shadow.write_bytes(b'different binary'); shadow.chmod(0o755)
+    r = SimpleNamespace(digest=lambda p: hashlib.sha256(p.read_bytes()).hexdigest())
+    registration = {'cli_executable_sha256': r.digest(cli)}
+    monkeypatch.setenv('PATH', str(selected))
+    monkeypatch.setattr(batch.sys, 'executable', str(interpreter / 'python'))
+    assert shutil.which('claude') == str(cli)
+    with pytest.raises(ValueError, match='registered CLI executable'):
+        batch.verify_cli_executable(r, registration)
+    shadow.unlink()
+    batch.verify_cli_executable(r, registration)

@@ -197,10 +197,7 @@ def inventory_with_prelaunch(r, registration, original_inventory, root, plan, jo
 
 def verify_cli_executable(r, registration):
     expected = registration.get("cli_executable_sha256")
-    # Match the frozen runner's environment before it creates the attempt.
-    # Otherwise a claude in the Python directory could shadow the checked one.
-    effective_path = str(Path(sys.executable).parent) + os.pathsep + os.environ.get("PATH", "")
-    executable = shutil.which("claude", path=effective_path)
+    executable = shutil.which("claude")
     if expected and (not executable or r.digest(Path(executable)) != expected):
         raise ValueError("select the registered CLI executable before creating an attempt")
 
