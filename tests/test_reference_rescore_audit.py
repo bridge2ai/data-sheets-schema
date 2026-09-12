@@ -126,3 +126,44 @@ def test_malformed_failure_artifacts_do_not_hide_a_successful_retry(tmp_path, mo
     monkeypatch.setattr(audit.r, "PLAN", plan)
     with pytest.raises(ValueError, match="unresolved attempt evidence.*interrupted"):
         audit.audit_results(complete=True)
+
+
+def test_interim_audit_returns_unresolved_accounting_before_receipt_selection(tmp_path, monkeypatch, capsys):
+    plan = tmp_path / "plan"
+    original = plan / "attempts/job/interrupted"
+    original_attempt(original)
+    (original / "receipt.json").write_text('{"job_id":')
+    retry = original.with_name("retry")
+    original_attempt(retry)
+    output = tmp_path / "evaluation.json"
+    output.write_bytes((retry / "candidate.json").read_bytes())
+    manifest = {"jobs": [{"id": "job", "output": "evaluation.json"}, {"id": "pending"}],
+                "canary_id": "job", "pinned_files": {}, "prior_evaluations": {}, "instruments": {}}
+    (plan / "manifest.json").write_text(json.dumps(manifest))
+    acceptance = {"manifest_sha256": audit.r.digest(plan / "manifest.json"),
+                  "evaluation_sha256": audit.r.digest(output), "runtime_model": "claude-opus-5"}
+    receipt = json.loads((retry / "receipt.json").read_text())
+    receipt.update(acceptance)
+    (retry / "receipt.json").write_text(json.dumps(receipt))
+    (plan / "canary_acceptance.json").write_text(json.dumps(acceptance))
+    monkeypatch.setattr(audit.r, "ROOT", tmp_path)
+    monkeypatch.setattr(audit.r, "PLAN", plan)
+    # Exercise the real downstream selector: this is the failure the interim
+    # accounting must avoid, rather than weakening the uniqueness gate.
+    with pytest.raises(json.JSONDecodeError):
+        audit.r.require_canary(manifest, manifest["jobs"][1])
+    result = audit.audit_results(complete=False)
+    assert result["status"] == "unresolved"
+    assert result["inventoried_original_attempts"] == ["plan/attempts/job/retry"]
+    assert result["accepted"] is None
+    assert result["actual_model_calls"] is None
+    assert result["cli_reported_total_cost_usd"] is None
+    assert not result["session_accounting_complete"]
+    assert len(result["unresolved_attempts"]) == 1
+    monkeypatch.setattr(sys, "argv", ["audit_reference_rescore.py"])
+    with pytest.raises(SystemExit) as error:
+        audit.main()
+    assert error.value.code == 1
+    assert json.loads(capsys.readouterr().out)["status"] == "unresolved"
+    with pytest.raises(ValueError, match="unresolved attempt evidence"):
+        audit.audit_results(complete=True)

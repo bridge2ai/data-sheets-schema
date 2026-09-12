@@ -86,8 +86,21 @@ def audit_results(*, complete: bool = False) -> dict:
     root = r.ROOT
     m = json.loads((r.PLAN / 'manifest.json').read_bytes())
     sources, unresolved = inventory_attempts(root, r.PLAN, {j['id'] for j in m['jobs']})
-    if complete and unresolved:
-        raise ValueError('unresolved attempt evidence: ' + json.dumps(unresolved))
+    if unresolved:
+        if complete:
+            raise ValueError('unresolved attempt evidence: ' + json.dumps(unresolved))
+        # A malformed receipt can hide a duplicate successful receipt. Return
+        # the inventory without calling acceptance/uniqueness gates that
+        # cannot certify this evidence, and without inventing partial totals.
+        return {'audited_at': r.now(), 'status': 'unresolved',
+                'manifest_sha256': r.digest(r.PLAN / 'manifest.json'),
+                'unresolved_attempts': unresolved,
+                'inventoried_original_attempts': sorted(str(p.relative_to(root))
+                                                       for group in sources.values() for p in group),
+                'session_accounting_complete': False, 'cost_accounting_complete': False,
+                'accepted': None, 'planned': len(m['jobs']), 'actual_model_calls': None,
+                'cli_reported_total_cost_usd': None,
+                'acceptance_verification': 'deferred until unresolved evidence is addressed'}
     r.verify_frozen(m)
     r.require_canary(m, next(j for j in m['jobs'] if j['id'] != m['canary_id']))
     canary = next(j for j in m['jobs'] if j['id'] == m['canary_id'])
@@ -156,7 +169,7 @@ def audit_results(*, complete: bool = False) -> dict:
     accepted_sources = {row['original_attempt'] for row in ratings}
     for call in calls:
         call['accepted_source'] = call['source'] in accepted_sources
-    audit = {'audited_at': r.now(), 'manifest_sha256': r.digest(r.PLAN / 'manifest.json'),
+    audit = {'audited_at': r.now(), 'status': 'verified', 'manifest_sha256': r.digest(r.PLAN / 'manifest.json'),
              'unresolved_attempts': unresolved,
              'session_accounting_complete': not unresolved,
              'cost_accounting_complete': not unresolved and all(c['cli_reported_cost_usd'] is not None for c in calls),
@@ -180,6 +193,8 @@ def main() -> None:
     args = parser.parse_args()
     audit = audit_results(complete=args.complete)
     print(json.dumps({k: v for k, v in audit.items() if k not in ('ratings', 'original_calls')}, indent=2))
+    if audit['unresolved_attempts']:
+        raise SystemExit(1)
 
 
 if __name__ == '__main__':
