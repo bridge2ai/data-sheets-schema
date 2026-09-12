@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import functools
 import hashlib
+import json
 import os
 import re
 import shutil
@@ -46,6 +47,7 @@ import sys
 import tempfile
 from pathlib import Path
 from typing import Any
+from linkml_runtime import SCHEMA_DIRECTORY, URI_TO_LOCAL
 
 #: (merged artifact, source it is generated from, digest class, leading `---`)
 #:
@@ -104,7 +106,8 @@ def _source_snapshot(source: Path) -> tuple[tuple, dict[Path, bytes]]:
 
     Path.rglob includes ignored modules. Relative imports outside the source
     directory are captured too, and copied with their relative layout intact.
-    LinkML package imports are covered by the installed dependency versions.
+    LinkML package imports are captured too; dependency versions also remain
+    part of the key because generator behavior depends on them.
     """
     source_name = str(source)
     source = Path(os.path.abspath(source))
@@ -121,10 +124,14 @@ def _source_snapshot(source: Path) -> tuple[tuple, dict[Path, bytes]]:
         visited.add(path)
         for name in _source_imports(files[path]):
             if name.startswith("linkml:"):
-                continue
-            if ":" in name or Path(name).is_absolute():
+                dependency = SCHEMA_DIRECTORY / (name.split(":", 1)[1] + ".yaml")
+            elif name + ".yaml" in URI_TO_LOCAL:
+                dependency = Path(URI_TO_LOCAL[name + ".yaml"])
+            elif ":" in name or Path(name).is_absolute():
                 raise ValueError(f"cannot snapshot non-relative schema import {name!r}")
-            dependency = Path(os.path.abspath(path.parent / (name + ".yaml")))
+            else:
+                dependency = path.parent / (name + ".yaml")
+            dependency = Path(os.path.abspath(dependency))
             if dependency not in files:
                 files[dependency] = dependency.read_bytes()
             pending.append(dependency)
@@ -156,9 +163,31 @@ def _regenerate(source: Path, target: Path,
                 copy.parent.mkdir(parents=True, exist_ok=True)
                 copy.write_bytes(content)
             captured_source = Path(tmp) / Path(os.path.abspath(source)).relative_to(base)
+            # Both CURIE and official-URL imports read the captured package
+            # bytes, rather than reopening the installed files after hashing.
+            package_map = {}
+            for path in files:
+                if path.is_relative_to(SCHEMA_DIRECTORY):
+                    copy = Path(tmp) / path.relative_to(base)
+                    package_map[str(path)] = str(copy)
+                    for uri, local in URI_TO_LOCAL.items():
+                        if Path(local) == path:
+                            package_map[uri] = str(copy)
+            mapping = Path(tmp) / "snapshot-package-map.json"
+            mapping.write_text(json.dumps(package_map), encoding="utf-8")
+            # gen-linkml discards --importmap when it creates its second view.
+            # Route both views through the runtime loader's local map, only in
+            # this child process. Installed package files remain untouched.
+            code = (
+                "import json, sys\n"
+                "from linkml_runtime import URI_TO_LOCAL\n"
+                "with open(sys.argv[1], encoding='utf-8') as stream:\n"
+                "    URI_TO_LOCAL.update(json.load(stream))\n"
+                "from linkml.generators.linkmlgen import cli\n"
+                "cli(args=sys.argv[2:], prog_name='gen-linkml')\n")
             result = subprocess.run(
-                ["poetry", "run", "gen-linkml", "-o", str(target.resolve()), "-f", "yaml",
-                 str(captured_source)],
+                [sys.executable, "-c", code, str(mapping), "-o", str(target.resolve()),
+                 "-f", "yaml", str(captured_source)],
                 capture_output=True, text=True, timeout=600)
     except Exception as exc:                                   # noqa: BLE001
         return False, f"gen-linkml could not run: {exc}"

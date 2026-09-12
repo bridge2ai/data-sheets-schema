@@ -256,7 +256,7 @@ def _truncate(text: str | None, limit: int = DESCRIPTION_CHARS) -> str | None:
     return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
 
 
-_CacheKey = tuple[str, str, str, str]
+_CacheKey = tuple[str, str, str, str, str]
 _BUILD_CACHE: dict[_CacheKey, "ClassDigest"] = {}
 
 
@@ -279,7 +279,11 @@ def _cache_key(class_name: str, path: Path, snapshot: SchemaSnapshot) -> _CacheK
     # Preserve the caller's displayed path in custom-schema renders, while
     # also distinguishing the actual file after a cwd change. Use the same
     # content hash as shared_view: size/mtime can collide on rewrites (#943).
-    return (class_name, str(path), *snapshot.key)
+    # A view's first namespace use can select a different captured import.
+    # Its stable instance identity keeps an inventory from another selection
+    # from surviving view eviction and restoration under the same bytes (#1273).
+    view = shared_view(path, snapshot=snapshot)
+    return (class_name, str(path), *snapshot.key, view.uuid)
 
 
 def _drop_stale(cache: dict, key: tuple[str, ...]) -> None:

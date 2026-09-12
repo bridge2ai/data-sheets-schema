@@ -1,0 +1,17 @@
+# Codex Adversarial Review
+
+Target: branch diff against origin/main
+Verdict: needs-attention
+
+Do not ship: two reproduced LinkML compatibility regressions remain. Stable-alias reuse and 17 focused offline tests passed.
+
+Findings:
+- [medium] Honor namespace initialization when selecting captured imports (src/data_sheets_schema/schema_view.py:73-75)
+  With imports [local:second, first], let the root map local to /old/ and first.yaml override it to /new/. Calling namespaces() before induced_slot() makes direct LinkML select /old/second.yaml. The captured view reports the same /old/ namespace but returns /new/second.yaml's specification. Reproduced as country versus species descriptions. The resolver result here is discarded, so this supported call order silently selects a different schema.
+  Recommendation: Select captured bytes using the view's actual namespace state and include that selection in cache identity. Add a direct-versus-captured regression that initializes namespaces before loading imports.
+- [medium] Recognize locally mapped LinkML URLs before rejecting imports (src/data_sheets_schema/schema_snapshot.py:62-65)
+  imports: [https://w3id.org/linkml/types] succeeds with direct SchemaView while network connections are blocked: LinkML's URI_TO_LOCAL maps it to the installed types.yaml. capture_schema instead raises 'cannot capture remote schema import', breaking shared_view and digest consumers for a dependency available entirely offline. The source-snapshot preflight also rejects this spelling.
+  Recommendation: Apply LinkML's URI_TO_LOCAL mappings before remote-import rejection in both snapshot paths, and bind the mapped dependencies to captured package bytes. Test URL and CURIE spellings.
+
+Next steps:
+- Add both reproductions as regressions and rerun the focused offline suite. Temporary-file tests could not run in this read-only sandbox.

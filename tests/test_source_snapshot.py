@@ -139,3 +139,36 @@ def test_snapshot_matches_direct_generation_for_supported_source_paths(tmp_path,
     rebuilt = tmp_path / "rebuilt.yaml"
     assert schema_sync._regenerate(source, rebuilt, False) == (True, None)
     assert rebuilt.read_bytes() == direct.read_bytes()
+
+
+@pytest.mark.parametrize("spelling", ["linkml:types", "https://w3id.org/linkml/types"])
+def test_package_import_spellings_match_direct_generation(tmp_path, spelling):
+    source = tmp_path / "source.yaml"
+    source.write_text(source_text("country") + f"imports: [{spelling}]\n")
+    direct, rebuilt = tmp_path / "direct.yaml", tmp_path / "rebuilt.yaml"
+    subprocess.run(["poetry", "run", "gen-linkml", "-f", "yaml", "-o", str(direct), str(source)],
+                   check=True, capture_output=True, text=True)
+    assert schema_sync._regenerate(source, rebuilt, False) == (True, None)
+    assert rebuilt.read_bytes() == direct.read_bytes()
+
+
+@pytest.mark.parametrize("spelling", ["linkml:types", "https://w3id.org/linkml/types"])
+def test_generator_uses_captured_package_bytes(tmp_path, monkeypatch, spelling):
+    import yaml
+    from linkml_runtime import LINKML_TYPES
+    package = Path(LINKML_TYPES).resolve()
+    doc = yaml.safe_load(package.read_bytes())
+    description = "This description exists only in the captured package snapshot."
+    doc["types"]["string"]["description"] = description
+    captured = yaml.safe_dump(doc, sort_keys=False).encode()
+    read = Path.read_bytes
+
+    def capture_package(path):
+        return captured if path.resolve() == package else read(path)
+
+    monkeypatch.setattr(Path, "read_bytes", capture_package)
+    source = tmp_path / "source.yaml"
+    source.write_text(source_text("country") + f"imports: [{spelling}]\n")
+    rebuilt = tmp_path / "rebuilt.yaml"
+    assert schema_sync._regenerate(source, rebuilt, False) == (True, None)
+    assert yaml.safe_load(rebuilt.read_bytes())["types"]["string"]["description"] == description

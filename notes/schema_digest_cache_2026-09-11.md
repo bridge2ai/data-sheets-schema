@@ -79,7 +79,8 @@ Issue #1262 demonstrated that the rebuild cache still trusted source sizes and
 timestamps. It now hashes captured source and imported-module bytes, including
 ignored files, and runs the generator against those same copies. Relative
 imports outside the source directory retain their layout. LinkML package imports
-remain tied to installed dependency versions; other non-relative imports fail
+were initially tied to installed dependency versions (the fifth plugin round
+below also captures and binds their bytes); other non-relative imports fail
 the preflight as unchecked because their bytes cannot be attested by this local
 snapshot. The generator's temporary source filename is restored to the logical
 source name so committed merged schemas still reproduce byte for byte.
@@ -122,3 +123,30 @@ All 185 focused tests passed, followed by 38 affected view/import/sync/fitness
 tests after the final lazy-loader adjustment. A fifth plugin review checks the
 complete branch before merge. No current generation digest, fitness instrument
 hash or historical measurement changed in this compatibility round.
+
+The fifth plugin review is retained in
+`schema_cache_codex_fifth_2026-09-11.txt`. Issue #1273 reproduced a caller that
+initializes namespaces before loading imports: a relative module's prefix
+override could then select a different local file. Snapshots now capture both
+supported namespace initialization orders and select the captured bytes using
+the view's actual resolver state. An unavailable unselected alternative does
+not reject a valid import closure. Inventory keys also include the stable view
+identity so eviction and restoration cannot reuse another selection's inventory.
+
+Issue #1274 reproduced an official LinkML URL available entirely offline via
+`URI_TO_LOCAL`. Both snapshot paths now recognize these package aliases and hash
+the actual package bytes. The source preflight routes package reads to the
+captured files inside its generator subprocess. This is necessary because the
+installed `gen-linkml` drops its supplied import map when creating a second
+view. The subprocess uses the current Python environment whose dependency
+versions were captured; installed files and parent-process mappings are unchanged.
+
+Four compatibility regressions failed before these fixes. Further behavioral
+checks demonstrated and fixed the discarded import map by giving the capture
+modified package bytes without editing the installed file. Direct-versus-captured
+checks cover both namespace orders, view eviction and restoration, missing
+unselected files, and URL/CURIE package spellings. All 24 import compatibility
+tests pass. The combined cache, fitness, preflight and provenance checks pass
+all 183 tests. Both real schemas regenerate exactly, and generation digests,
+the complete fitness hash and all historical fitness cache bytes remain fixed.
+A sixth plugin review checks the complete branch.
