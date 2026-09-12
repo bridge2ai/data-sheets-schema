@@ -57,12 +57,13 @@ the canary and repeatability ratings still have to be performed.
 This is an instrument revision, not evidence that earlier scores would be
 unchanged. The previous rubric10 definition SHA256 was
 `70a50310b9ec717981fc089d8fedb20ea8c3ca3b665870f8d1d2d2573c9fccdd`.
-The dated reference manifest was re-registered after committing the
+The first alignment manifest was registered after committing the
 new definition at `ed07f6952f16438acd9e2f4f9ebd6d9e4de545ab`, with its new
 hash and a discriminating check-echo preamble. The new definition SHA256 is
 `00b2f03d183d8f9105de8dc10346b2ee67d32376830243f1ec19348ceb8528db`.
 The previous manifest is retained byte-for-byte in its registrations directory;
-the current manifest and plan amendment name the new instrument and date.
+the plan retains that instrument boundary. The review correction below
+supersedes this initial alignment registration before any evaluation.
 
 All 24 selected v7/v8 records, 202 prior evaluations, rubric20, rubric
 texts and output schemas are preserved. No old score is relabeled as a
@@ -98,3 +99,11 @@ funder descriptions/notes; donated cloud services and device loans do not
 require a grant number. The affected alignment, pin and runner tests passed
 114 checks after these corrections. The verbatim review is retained in
 `notes/rubric10_alignment_codex_review_2026-09-11.txt`.
+
+The current reference manifest pins the corrected definition commit
+`f7f235a9706a741f4a02c01211e4d5c948e89b0f` with SHA256
+`66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`.
+Its registration is dated `2026-09-12T02:40:38.941527+00:00`; the previous
+alignment manifest is archived byte-for-byte before replacement. The new
+offline echo replay and unchanged-input checks are recorded in
+`notes/reference_rescore_2026-09-11/rubric10_alignment_review_registration.json`.

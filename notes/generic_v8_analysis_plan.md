@@ -2245,7 +2245,7 @@ and its JSON companion. No new fitness call is part of this semantic rescore.
 
 ### Rubric10 source-alignment boundary (2026-09-11 Pacific; #158)
 
-The current reference registration is dated **2026-09-12T02:30:35.023943+00:00**
+The first #158 registration is dated **2026-09-12T02:30:35.023943+00:00**
 and pins the already committed definition at
 `ed07f6952f16438acd9e2f4f9ebd6d9e4de545ab`.
 Its rubric10-semantic definition SHA256 is
@@ -2278,6 +2278,21 @@ attempt or canary acceptance exists, and repeatability remains unmeasured.
 The CHORUS v7 rep1 rubric10 canary, the 24-record/both-rubric cohort, and the
 eight additional rubric10 ratings remain as registered. The pending
 Anthropic destination/spend approval described above is unchanged.
+
+**Review correction at 2026-09-12T02:40:38.941527+00:00 (#1283/#1284).**
+The current reference registration pins committed definition
+`f7f235a9706a741f4a02c01211e4d5c948e89b0f`, rubric10 SHA256
+`66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`.
+Adversarial review added the dedicated release-history field
+`updates.update_details` and made funding consistency accept non-grant
+support and award numbers in funder prose. The preceding registration is
+preserved under `registrations/manifest-before-rubric10-review-fixes.json`;
+the current manifest links its hash. The preservation and offline echo
+checks are recorded in `rubric10_alignment_review_registration.json`.
+All 24 inputs, 202 prior evaluations, 56 jobs and the rubric20 instrument
+remain unchanged. The regenerated challenge rejects the previous definition
+and a preamble-only reply. No evaluator ran under either #158 registration;
+the quoted SHA still must be verified in the live canary.
 
 ## Decisions needed before step 3
 

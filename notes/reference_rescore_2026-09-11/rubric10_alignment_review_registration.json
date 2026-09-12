@@ -1,0 +1,28 @@
+{
+  "issues": [
+    158,
+    1283,
+    1284
+  ],
+  "registered_at": "2026-09-12T02:40:38.941527+00:00",
+  "definition_commit": "f7f235a9706a741f4a02c01211e4d5c948e89b0f",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "prior_definition_sha256": "00b2f03d183d8f9105de8dc10346b2ee67d32376830243f1ec19348ceb8528db",
+  "manifest_sha256": "127d789d8ed668f20bc364afe2a71f8d18edfe724e1496009e22ad7735e38c79",
+  "prior_manifest_sha256": "9e7ab8eab9699bf7ad3e37c6a483e42af76a530ea714ff5f40fb6d0ba515a131",
+  "changed_pinned_files": [
+    ".claude/agents/d4d-rubric10-semantic.md"
+  ],
+  "prior_evaluations_preserved": 202,
+  "inputs_preserved": 24,
+  "jobs_unchanged": 56,
+  "rubric20_instrument_unchanged": true,
+  "offline_echo_check": {
+    "current_definition_passed": true,
+    "previous_definition_rejected": true,
+    "preamble_only_rejected": true,
+    "live_evaluator_started": false
+  },
+  "no_existing_attempts_or_outputs": true,
+  "inventory_includes_ignored_files": true
+}
