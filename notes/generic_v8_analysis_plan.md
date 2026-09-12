@@ -2437,3 +2437,37 @@ running sessions are allowed to finish. There are no automatic retries.
 This scheduling step changes no instrument, prompt, input or model setting.
 Repeatability remains unmeasured until the registered repeated ratings finish.
 No generation or downloads are part of this fill.
+
+### Reference model provenance amendment (2026-09-12; #1314, #1316)
+
+The fill paused at ten accepted ratings when a valid AI_READI v8 rep1 rubric10
+candidate declared its evaluator model in metadata. The reviewed runner now
+attests either supported location and revalidates retained ratings offline.
+The Codex follow-up approved commit
+`6edf543f5eede63d984126760d46f6356c9f1d7d`; 117 focused tests passed.
+
+Manifest SHA256
+`5e57093644d0a3485a9d1229a2087c8a5472578b33346213f4df6618686aa4e9`
+registers the runner-only amendment. Complete prompts, rubric definitions,
+schemas, all 24 existing records, the 56-rating design, execution settings and
+202 prior evaluations are unchanged. The original CHORUS canary was revalidated
+offline and separately accepted. Its evaluator-quoted definition remains
+`66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`.
+The retained AI_READI v8 rep1 rubric10 candidate was recovered without a new
+model call or score edit. The remaining previously accepted ratings on #1313
+must be revalidated under this registration before new calls resume.
+Evidence and hashes are recorded in
+`notes/reference_rescore_2026-09-11/model_provenance_registration.json` and
+`model_provenance_review_2026-09-12.md`. No generation or download occurred.
+
+### Reference fill revalidated and resumed (2026-09-12; #1248, #1314)
+
+All ten previously accepted outputs and 73 retained attempt files were verified
+unchanged. Nine ratings received new offline receipts after the CHORUS canary
+was separately re-accepted; the retained AI_READI v8 rep1 rubric10 candidate
+adds the eleventh accepted rating. No model calls occurred during revalidation.
+The 45 remaining job IDs and replacement execution helper are registered in
+`notes/reference_rescore_2026-09-11/parallel_fill_resumed_model_provenance_2026-09-12.json`.
+The original helper and scheduling record remain preserved. The same limit of
+four independent sessions, $5 per attempt, and a halt on any observed failure
+applies. The original unvalidated AI_READI v7 draft remains excluded.

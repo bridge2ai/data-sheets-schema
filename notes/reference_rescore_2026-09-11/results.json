@@ -1,9 +1,8 @@
 {
-  "reported_at": "2026-09-12T09:52:47.491030+00:00",
-  "completed": 10,
+  "reported_at": "2026-09-12T10:09:50.161361+00:00",
+  "completed": 11,
   "planned": 56,
   "pending": [
-    "AI_READI_v8_rep1_r10_rating1",
     "AI_READI_v8_rep3_r10_rating1",
     "AI_READI_v8_rep3_r20_rating1",
     "CHORUS_v7_rep1_r20_rating1",
@@ -151,12 +150,14 @@
       "project": "AI_READI",
       "cohort": "v8",
       "rubric": "rubric10-semantic",
-      "records": 1,
+      "records": 2,
       "expected_records": 3,
       "adjusted_percentages": [
+        98.0,
         98.0
       ],
       "fixed_percentages": [
+        98.0,
         98.0
       ]
     },

@@ -1,7 +1,7 @@
 {
   "issue": 1248,
-  "registered_at": "2026-09-12T10:07:14.858355+00:00",
-  "definition_commit": "6edf543f5eede63d984126760d46f6356c9f1d7d",
+  "registered_at": "2026-09-12T09:00:32.941210+00:00",
+  "definition_commit": "1134e5e7e094bdd3333fbe6b5553fb24e6545e7d",
   "requested_model": "claude-opus-5[1m]",
   "effort": "high",
   "temperature": null,
@@ -844,7 +844,7 @@
     "data/rubric/rubric20.txt": "669490b61351353476ce7c1d4be9efb7da790da6499eb57078d1da0f06c0291b",
     "poetry.lock": "57a1c937b54e24a0450316bb5f1e82c3b1f5366dbbe156b3d1d5bf7ee81725fa",
     "pyproject.toml": "210e6e897d375a24e4a1ba67344e1b21e6cc2a4f6cd3104fcbe53c604d9d40ac",
-    "scripts/reference_rescore.py": "75aaf0194c5cc7e94d792bcd589d226f10d93d0ad13a44766f92f77922e37eb8",
+    "scripts/reference_rescore.py": "7d4003ff0cec8470c9cdeb5247f1cbf58601a3f03440cc44d944999dccb29187",
     "scripts/validate_evaluation_schema.py": "dc2e540c4800950eb866914c72894cda668b9a92d41c5f05aa045ff17483652c",
     "src/download/prompts/rubric10_semantic_schema.json": "5ac1989a60414d41f03383266535eee9963816d0d9b42bf5b90e1efe8d9d3dc2",
     "src/download/prompts/rubric20_semantic_schema.json": "5ccdbd229471748fa1dde8074d904c0334c983741dd90c7e56f95b45b012f32b"
@@ -1054,8 +1054,8 @@
     "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/VOICE_2026-09-01api_rep1_evaluation.json": "d7e3086e4f1ff9fc8cfc0a8550aa4712dd8e8e2b30293653e27b1f18f2f82df8"
   },
   "supersedes_registration": {
-    "path": "notes/reference_rescore_2026-09-11/registrations/manifest-before-model-provenance.json",
-    "sha256": "ed077e16f93635c571c8cc7992c696880b1e727ff766450ef03e52e43cbfb480",
-    "reason": "Runner-only model provenance locations and offline rating revalidation with unconditional receipt uniqueness (#1314, #1316); complete prompts, definitions, inputs, schemas, cohort, execution settings and budget unchanged."
+    "path": "notes/reference_rescore_2026-09-11/registrations/manifest-before-runtime-forms.json",
+    "sha256": "78dc05cada5a4905d8eabd2320ebcd0054d83e92d5611de93b4f98fc557f324a",
+    "reason": "Runner-only label/validator path forms, serialized canary revalidation and final-output attestation (#1307\u2013#1310, #1312); complete prompts, instruments, inputs, cohort and budget unchanged."
   }
 }
