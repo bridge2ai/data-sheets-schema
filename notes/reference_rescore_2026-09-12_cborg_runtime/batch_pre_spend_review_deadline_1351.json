@@ -1,0 +1,13 @@
+{
+  "reviewed_at": "2026-09-12T22:22:00.967124+00:00",
+  "verdict": "approved",
+  "registration_sha256": "724f07cfec5aa26b33ed9f9d42542d383fabfc285a576a617992ce4c514e9cfd",
+  "reviewed_commit": "88dcfb14cc0311e0a16741d3da0b086276d90985",
+  "review_report": "notes/reference_rescore_2026-09-12_cborg_runtime/pre_spend_review_round14.md",
+  "review_report_sha256": "7739b1ebae09c621a0b607c8e98f06fccbb34269ba074b71f39a189fa0b484c1",
+  "reviewer": "Independent Codex plugin adversarial review, round14",
+  "scope": "One fresh CHORUS_v8_rep1_r10_rating1 retry pilot using the registered deadline extension. Review and accept its original output before remaining38. All four exact newly failed histories are preserved; no automatic retries.",
+  "remaining_launch_authorized_by_this_record": false,
+  "findings": [],
+  "limits": "Independent18 in-memory checks and Python3.9 syntax checks; local232-test coverage is separate. Two original timeout costs remain unknown."
+}
