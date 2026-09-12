@@ -1,11 +1,8 @@
 {
-  "reported_at": "2026-09-12T12:25:02.158920+00:00",
-  "completed": 31,
+  "reported_at": "2026-09-12T12:41:46.981576+00:00",
+  "completed": 34,
   "planned": 56,
   "pending": [
-    "CM4AI_v8_rep1_r20_rating1",
-    "CM4AI_v8_rep2_r10_rating1",
-    "CM4AI_v8_rep2_r20_rating1",
     "CM4AI_v8_rep3_r10_rating1",
     "CM4AI_v8_rep3_r20_rating1",
     "VOICE_v7_rep1_r10_rating1",
@@ -270,23 +267,31 @@
       "project": "CM4AI",
       "cohort": "v8",
       "rubric": "rubric10-semantic",
-      "records": 1,
+      "records": 2,
       "expected_records": 3,
       "adjusted_percentages": [
-        82.98
+        82.98,
+        87.2
       ],
       "fixed_percentages": [
-        78.0
+        78.0,
+        82.0
       ]
     },
     {
       "project": "CM4AI",
       "cohort": "v8",
       "rubric": "rubric20-semantic",
-      "records": 0,
+      "records": 2,
       "expected_records": 3,
-      "adjusted_percentages": [],
-      "fixed_percentages": []
+      "adjusted_percentages": [
+        81.8,
+        79.5
+      ],
+      "fixed_percentages": [
+        81.8,
+        70.5
+      ]
     },
     {
       "project": "VOICE",
