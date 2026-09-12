@@ -124,13 +124,18 @@ def environment(tmp_path, monkeypatch):
     return tmp_path, manifest, job, doc
 
 
-def fake_cli(path, doc, trace, failure=False):
-    path.write_text(f"#!{sys.executable}\nimport json,sys\nfrom pathlib import Path\n" +
+def fake_cli(path, doc, trace, failure=False, run_validator=False):
+    path.write_text(f"#!{sys.executable}\nimport json,sys,shlex,subprocess\nfrom pathlib import Path\n" +
                     f"assert Path.cwd().parent == Path({str(path.parent / 'temporary')!r})\n" +
                     ("print('Weekly quota exhausted')\nsys.exit(1)\n" if failure else
                      "prompt=sys.stdin.read()\nassert Path('input/record.yaml').read_text() in prompt\n" +
                      f"Path('output_evaluation.json').write_text({json.dumps(doc)!r})\n" +
-                     f"print({chr(10).join(json.dumps(e) for e in trace)!r}.replace('__ISOLATED__', str(Path.cwd())))\n"))
+                     f"trace=json.loads({json.dumps(trace)!r}.replace('__ISOLATED__', str(Path.cwd())))\n" +
+                     ("command=trace[1]['message']['content'][1]['input']['command']\n"
+                      "validated=subprocess.run(shlex.split(command),text=True,capture_output=True)\n"
+                      "assert validated.returncode==0, validated.stdout+validated.stderr\n"
+                      "trace[2]['message']['content'][0]['content']=validated.stdout\n" if run_validator else "") +
+                     "print('\\n'.join(json.dumps(e) for e in trace))\n"))
     path.chmod(0o755)
     return str(path)
 
@@ -155,9 +160,23 @@ def test_equivalent_own_file_validator_paths_attest_the_rating(environment, scri
     trace[0]["message"]["content"][1]["input"]["command"] = (
         f"poetry run python {script} --file {output} --rubric rubric10-semantic")
     trace.insert(0, {"type": "system", "subtype": "init", "cwd": "__ISOLATED__"})
-    cli = fake_cli(root / "fake-claude", doc, trace)
+    cli = fake_cli(root / "fake-claude", doc, trace, run_validator=True)
     receipt = runner.run_job(manifest, job, cli)
     assert receipt["status"] == "passed", receipt
+
+
+@pytest.mark.parametrize("command_output,receipt_output", [
+    ("/isolated/output_evaluation.json", "output_evaluation.json"),
+    ("output_evaluation.json", "/isolated/output_evaluation.json"),
+    ("/isolated/output_evaluation.json", "/other/output_evaluation.json"),
+])
+def test_validator_receipt_must_name_the_exact_command_output(command_output, receipt_output):
+    trace = events(valid_record())
+    trace[0]["message"]["content"][1]["input"]["command"] = (
+        f"poetry run python scripts/validate_evaluation_schema.py --file {command_output} --rubric rubric10-semantic")
+    trace[1]["message"]["content"][0]["content"] = f"VALID {receipt_output}: rubric10-semantic"
+    trace.insert(0, {"type": "system", "subtype": "init", "cwd": "/isolated"})
+    assert not runner.evaluator_validated(trace, "rubric10-semantic")
 
 
 @pytest.mark.parametrize("command", [
@@ -390,6 +409,60 @@ def test_revalidation_cannot_treat_ambiguous_current_receipts_as_a_new_amendment
     with pytest.raises(ValueError, match="already exists"):
         runner.recover_canary(manifest, source)
     assert sorted((runner.PLAN / "attempts" / job["id"]).glob("*/receipt.json")) == before
+
+
+def test_overlapping_recovery_and_acceptance_cannot_publish_ambiguous_receipts(retained_canary, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Event
+
+    root, manifest, job, source, original_bytes = retained_canary
+    runner.recover_canary(manifest, source)
+    runner.accept_canary(manifest)
+    archive = runner.PLAN / "registrations/before-overlapping-recovery.json"
+    shutil.copyfile(runner.PLAN / "manifest.json", archive)
+    updated = copy.deepcopy(manifest)
+    script = root / "scripts/reference_rescore.py"
+    script.write_bytes(script.read_bytes() + b"\n# Next runner-only amendment.\n")
+    updated["pinned_files"]["scripts/reference_rescore.py"] = runner.digest(script)
+    updated["supersedes_registration"] = {"path": str(archive.relative_to(root)), "sha256": runner.digest(archive)}
+    runner.write_json(runner.PLAN / "manifest.json", updated)
+    entered, release = Event(), Event()
+    actual_validate = runner.validate_candidate
+
+    def pause_inside_recovery(*args):
+        entered.set()
+        assert release.wait(timeout=10), "test did not release recovery"
+        return actual_validate(*args)
+
+    with monkeypatch.context() as context, ThreadPoolExecutor(max_workers=1) as pool:
+        context.setattr(runner, "validate_candidate", pause_inside_recovery)
+        pending = pool.submit(runner.recover_canary, updated, source)
+        try:
+            assert entered.wait(timeout=5), "recovery did not reach validation"
+            for operation in (
+                lambda: runner.recover_canary(updated, source),
+                lambda: runner.accept_canary(updated),
+                lambda: runner.require_canary(updated, {**job, "id": "another-record"}),
+                lambda: runner.run_job(updated, job, "must-not-start"),
+            ):
+                with pytest.raises(ValueError, match="canary operation is in progress"):
+                    operation()
+        finally:
+            release.set()
+        receipt = pending.result(timeout=5)
+    assert runner.successful_receipt(updated, job) == receipt
+    assert (root / job["output"]).read_bytes() == original_bytes["candidate.json"]
+    runner.accept_canary(updated)
+    runner.require_canary(updated, {**job, "id": "another-record"})
+
+
+def test_fill_rechecks_receipt_uniqueness_after_canary_acceptance(retained_canary):
+    _, manifest, job, source, _ = retained_canary
+    receipt = runner.recover_canary(manifest, source)
+    runner.accept_canary(manifest)
+    runner.write_json(runner.PLAN / "attempts" / job["id"] / "duplicate/receipt.json", receipt)
+    with pytest.raises(ValueError, match="no unique successful receipt"):
+        runner.require_canary(manifest, {**job, "id": "another-record"})
 
 
 @pytest.mark.parametrize("defect", ["budget", "instrument", "archive", "registration", "prompt", "validator", "model", "candidate"])

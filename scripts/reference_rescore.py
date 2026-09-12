@@ -8,7 +8,9 @@ canary. Failed attempts and all previous evaluations are retained.
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager, nullcontext
 from datetime import datetime, timezone
+import fcntl
 import hashlib
 import json
 import math
@@ -41,6 +43,23 @@ def write_json(path: Path, value: dict) -> None:
 
 def now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+@contextmanager
+def canary_lock():
+    """Keep canary publication, revalidation and acceptance mutually exclusive."""
+    PLAN.mkdir(parents=True, exist_ok=True)
+    # Keep the inode: unlinking a lock file would let another process lock a
+    # different inode under the same name while this one remains held.
+    with (PLAN / ".canary.lock").open("a") as handle:
+        try:
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise ValueError("another canary operation is in progress") from None
+        try:
+            yield
+        finally:
+            fcntl.flock(handle, fcntl.LOCK_UN)
 
 
 def cohort_jobs() -> list[dict]:
@@ -184,29 +203,29 @@ def transcript_evidence(events: list[dict]) -> tuple[str, set[str]]:
     return "\n".join(text), models
 
 
-def validator_command_matches(command: str, rubric: str, directory: str | None) -> bool:
-    """Recognize only our exact validator arguments, in relative or own absolute form."""
+def validator_output_path(command: str, rubric: str, directory: str | None) -> str | None:
+    """Return the exact output argument of a recognized own-file validator call."""
     if not isinstance(command, str):
-        return False
+        return None
     try:
         args = shlex.split(command)
     except ValueError:
-        return False
+        return None
     if (len(args) != 8 or args[:3] != ["poetry", "run", "python"]
             or args[4] != "--file" or args[6:] != ["--rubric", rubric]):
-        return False
+        return None
     scripts = {"scripts/validate_evaluation_schema.py"}
     outputs = {"output_evaluation.json"}
     if directory is not None and Path(directory).is_absolute():
         scripts.add(str(Path(directory) / "scripts/validate_evaluation_schema.py"))
         outputs.add(str(Path(directory) / "output_evaluation.json"))
-    return args[3] in scripts and args[5] in outputs
+    return args[5] if args[3] in scripts and args[5] in outputs else None
 
 
 def evaluator_validated(events: list[dict], rubric: str) -> bool:
     directories = [e.get("cwd") for e in events if e.get("type") == "system" and e.get("subtype") == "init"]
     directory = directories[0] if len(directories) == 1 and isinstance(directories[0], str) else None
-    calls, succeeded = set(), set()
+    calls = {}
     for event in events:
         role = event.get("type")
         if role not in ("assistant", "user"):
@@ -217,16 +236,17 @@ def evaluator_validated(events: list[dict], rubric: str) -> bool:
         for block in message["content"]:
             if not isinstance(block, dict):
                 continue
-            if (role == "assistant" and block.get("type") == "tool_use" and block.get("name") == "Bash"
-                    and validator_command_matches(block.get("input", {}).get("command", ""), rubric, directory)):
-                calls.add(block["id"])
+            if role == "assistant" and block.get("type") == "tool_use" and block.get("name") == "Bash":
+                output = validator_output_path(block.get("input", {}).get("command", ""), rubric, directory)
+                if output is not None:
+                    calls[block["id"]] = f"VALID {output}: {rubric}"
             if role == "user" and block.get("type") == "tool_result" and not block.get("is_error"):
                 content = block.get("content", "")
                 if not isinstance(content, str):
                     content = "\n".join(c.get("text", "") for c in content if isinstance(c, dict))
-                if f"VALID output_evaluation.json: {rubric}" in [s.strip() for s in content.splitlines()]:
-                    succeeded.add(block.get("tool_use_id"))
-    return bool(calls & succeeded)
+                if calls.get(block.get("tool_use_id")) in [s.strip() for s in content.splitlines()]:
+                    return True
+    return False
 
 
 def validate_candidate(path: Path, job: dict, manifest: dict, events: list[dict]) -> dict:
@@ -286,11 +306,15 @@ def validate_candidate(path: Path, job: dict, manifest: dict, events: list[dict]
 def require_canary(manifest: dict, job: dict) -> None:
     if job["id"] == manifest["canary_id"]:
         return
-    acceptance = json.loads((PLAN / "canary_acceptance.json").read_bytes())
-    canary = next(j for j in manifest["jobs"] if j["id"] == manifest["canary_id"])
-    if (acceptance.get("manifest_sha256") != digest(PLAN / "manifest.json")
-            or acceptance.get("evaluation_sha256") != digest(ROOT / canary["output"])):
-        raise ValueError("canary acceptance does not match this manifest and evaluation")
+    with canary_lock():
+        acceptance = json.loads((PLAN / "canary_acceptance.json").read_bytes())
+        canary = next(j for j in manifest["jobs"] if j["id"] == manifest["canary_id"])
+        if (acceptance.get("manifest_sha256") != digest(PLAN / "manifest.json")
+                or acceptance.get("evaluation_sha256") != digest(ROOT / canary["output"])):
+            raise ValueError("canary acceptance does not match this manifest and evaluation")
+        receipt = successful_receipt(manifest, canary)
+        if acceptance.get("runtime_model") != receipt["runtime_model"]:
+            raise ValueError("canary acceptance does not match its runtime receipt")
 
 
 def successful_receipt(manifest: dict, job: dict) -> dict:
@@ -330,6 +354,11 @@ def job_prompt(manifest: dict, job: dict) -> str:
 
 
 def run_job(manifest: dict, job: dict, claude: str) -> dict:
+    with canary_lock() if job["id"] == manifest["canary_id"] else nullcontext():
+        return _run_job(manifest, job, claude)
+
+
+def _run_job(manifest: dict, job: dict, claude: str) -> dict:
     verify_frozen(manifest)
     require_canary(manifest, job)
     destination = ROOT / job["output"]
@@ -403,6 +432,11 @@ def run_job(manifest: dict, job: dict, claude: str) -> dict:
 
 def recover_canary(manifest: dict, source: Path) -> dict:
     """Revalidate a retained canary after a runner-only fix, without a model call."""
+    with canary_lock():
+        return _recover_canary(manifest, source)
+
+
+def _recover_canary(manifest: dict, source: Path) -> dict:
     verify_frozen(manifest)
     job = next(j for j in manifest["jobs"] if j["id"] == manifest["canary_id"])
     destination = ROOT / job["output"]
@@ -513,14 +547,15 @@ def recover_canary(manifest: dict, source: Path) -> dict:
 
 
 def accept_canary(manifest: dict) -> None:
-    verify_frozen(manifest)
-    job = next(j for j in manifest["jobs"] if j["id"] == manifest["canary_id"])
-    path = ROOT / job["output"]
-    receipt = successful_receipt(manifest, job)
-    write_json(PLAN / "canary_acceptance.json", {
-        "accepted_at": now(), "canary_id": job["id"], "evaluation_sha256": digest(path),
-        "manifest_sha256": digest(PLAN / "manifest.json"), "runtime_model": receipt["runtime_model"],
-        "basis": "exact-file, arithmetic, identity and check-echo checks passed; operator reviewed the canary"})
+    with canary_lock():
+        verify_frozen(manifest)
+        job = next(j for j in manifest["jobs"] if j["id"] == manifest["canary_id"])
+        path = ROOT / job["output"]
+        receipt = successful_receipt(manifest, job)
+        write_json(PLAN / "canary_acceptance.json", {
+            "accepted_at": now(), "canary_id": job["id"], "evaluation_sha256": digest(path),
+            "manifest_sha256": digest(PLAN / "manifest.json"), "runtime_model": receipt["runtime_model"],
+            "basis": "exact-file, arithmetic, identity and check-echo checks passed; operator reviewed the canary"})
 
 
 def report_results(manifest: dict) -> dict:
