@@ -130,7 +130,7 @@ def fake_cli(path, doc, trace, failure=False):
                     ("print('Weekly quota exhausted')\nsys.exit(1)\n" if failure else
                      "prompt=sys.stdin.read()\nassert Path('input/record.yaml').read_text() in prompt\n" +
                      f"Path('output_evaluation.json').write_text({json.dumps(doc)!r})\n" +
-                     f"print({chr(10).join(json.dumps(e) for e in trace)!r})\n"))
+                     f"print({chr(10).join(json.dumps(e) for e in trace)!r}.replace('__ISOLATED__', str(Path.cwd())))\n"))
     path.chmod(0o755)
     return str(path)
 
@@ -142,6 +142,76 @@ def test_invalid_or_unmatched_validator_receipt_is_rejected():
     trace = events(valid_record())
     trace[1]["message"]["content"][0]["tool_use_id"] = "another-call"
     assert not runner.evaluator_validated(trace, "rubric10-semantic")
+
+
+@pytest.mark.parametrize("script,output", [
+    ("scripts/validate_evaluation_schema.py", "__ISOLATED__/output_evaluation.json"),
+    ("__ISOLATED__/scripts/validate_evaluation_schema.py", "output_evaluation.json"),
+    ("__ISOLATED__/scripts/validate_evaluation_schema.py", "__ISOLATED__/output_evaluation.json"),
+])
+def test_equivalent_own_file_validator_paths_attest_the_rating(environment, script, output):
+    root, manifest, job, doc = environment
+    trace = events(doc)
+    trace[0]["message"]["content"][1]["input"]["command"] = (
+        f"poetry run python {script} --file {output} --rubric rubric10-semantic")
+    trace.insert(0, {"type": "system", "subtype": "init", "cwd": "__ISOLATED__"})
+    cli = fake_cli(root / "fake-claude", doc, trace)
+    receipt = runner.run_job(manifest, job, cli)
+    assert receipt["status"] == "passed", receipt
+
+
+@pytest.mark.parametrize("command", [
+    "poetry run python /other/scripts/validate_evaluation_schema.py --file /isolated/output_evaluation.json --rubric rubric10-semantic",
+    "poetry run python /isolated/scripts/validate_evaluation_schema.py --file /other/output_evaluation.json --rubric rubric10-semantic",
+    "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
+    'poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo "EXIT=$?"',
+    "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic > /tmp/other",
+    "poetry run python /isolated/$UNTRUSTED/../scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
+    "poetry run python 'scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
+    None,
+])
+def test_other_files_or_extra_shell_commands_do_not_attest_validation(command):
+    trace = events(valid_record())
+    trace[0]["message"]["content"][1]["input"]["command"] = command
+    trace.insert(0, {"type": "system", "subtype": "init", "cwd": "/isolated"})
+    assert not runner.evaluator_validated(trace, "rubric10-semantic")
+
+
+def test_absolute_validator_needs_a_unique_recorded_working_directory():
+    trace = events(valid_record())
+    trace[0]["message"]["content"][1]["input"]["command"] = (
+        "poetry run python /isolated/scripts/validate_evaluation_schema.py "
+        "--file /isolated/output_evaluation.json --rubric rubric10-semantic")
+    assert not runner.evaluator_validated(trace, "rubric10-semantic")
+    trace[:0] = [{"type": "system", "subtype": "init", "cwd": p} for p in ("/isolated", "/other")]
+    assert not runner.evaluator_validated(trace, "rubric10-semantic")
+
+
+@pytest.mark.parametrize("placement", ["metadata", "both"])
+def test_matching_metadata_label_is_accepted_without_rewriting(environment, placement):
+    root, manifest, job, doc = environment
+    doc["metadata"]["label"] = doc["label"]
+    if placement == "metadata":
+        del doc["label"]
+    cli = fake_cli(root / "fake-claude", doc, events(doc))
+    receipt = runner.run_job(manifest, job, cli)
+    assert receipt["status"] == "passed", receipt
+    assert json.loads((root / job["output"]).read_bytes()) == doc
+
+
+@pytest.mark.parametrize("defect", ["top", "metadata", "missing"])
+def test_missing_or_conflicting_labels_never_publish_a_rating(environment, defect):
+    root, manifest, job, doc = environment
+    doc["metadata"]["label"] = doc["label"]
+    if defect == "missing":
+        del doc["label"]
+        del doc["metadata"]["label"]
+    else:
+        (doc if defect == "top" else doc["metadata"])["label"] = "another-run"
+    cli = fake_cli(root / "fake-claude", doc, events(doc))
+    receipt = runner.run_job(manifest, job, cli)
+    assert receipt["status"] == "incomplete"
+    assert not (root / job["output"]).exists()
 
 
 def test_exact_poetry_validator_command_runs_in_isolated_environment(environment):
@@ -275,6 +345,51 @@ def test_recovery_preserves_attempt_and_requires_separate_acceptance(retained_ca
     runner.require_canary(manifest, fill)
     with pytest.raises(ValueError, match="overwrite"):
         runner.recover_canary(manifest, source)
+
+
+def test_later_runner_amendment_revalidates_the_existing_canary_without_rewriting(retained_canary, monkeypatch):
+    root, manifest, job, source, original_bytes = retained_canary
+    runner.recover_canary(manifest, source)
+    runner.accept_canary(manifest)
+    destination = root / job["output"]
+    old_acceptance = (runner.PLAN / "canary_acceptance.json").read_bytes()
+    archive = runner.PLAN / "registrations/previous-runner-amendment.json"
+    shutil.copyfile(runner.PLAN / "manifest.json", archive)
+    updated = copy.deepcopy(manifest)
+    script = root / "scripts/reference_rescore.py"
+    script.write_bytes(script.read_bytes() + b"\n# Second runner-only amendment fixture.\n")
+    updated["pinned_files"]["scripts/reference_rescore.py"] = runner.digest(script)
+    updated["supersedes_registration"] = {"path": str(archive.relative_to(root)), "sha256": runner.digest(archive)}
+    runner.write_json(runner.PLAN / "manifest.json", updated)
+    actual_open = Path.open
+
+    def never_rewrite_output(path, mode="r", *args, **kwargs):
+        if path == destination and any(flag in mode for flag in "wax+"):
+            raise AssertionError("the existing canary must never be opened for writing")
+        return actual_open(path, mode, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", never_rewrite_output)
+    receipt = runner.recover_canary(updated, source)
+    assert receipt["status"] == "passed" and receipt["preserved_existing_output"]
+    assert receipt["model_calls_during_recovery"] == 0
+    assert destination.read_bytes() == original_bytes["candidate.json"]
+    assert {p.name: p.read_bytes() for p in source.iterdir()} == original_bytes
+    assert (runner.PLAN / "canary_acceptance.json").read_bytes() == old_acceptance
+    with pytest.raises(ValueError, match="canary acceptance"):
+        runner.require_canary(updated, {**job, "id": "another-record"})
+    runner.accept_canary(updated)
+    runner.require_canary(updated, {**job, "id": "another-record"})
+
+
+def test_revalidation_cannot_treat_ambiguous_current_receipts_as_a_new_amendment(retained_canary):
+    root, manifest, job, source, _ = retained_canary
+    receipt = runner.recover_canary(manifest, source)
+    duplicate = runner.PLAN / "attempts" / job["id"] / "duplicate/receipt.json"
+    runner.write_json(duplicate, receipt)
+    before = sorted((runner.PLAN / "attempts" / job["id"]).glob("*/receipt.json"))
+    with pytest.raises(ValueError, match="already exists"):
+        runner.recover_canary(manifest, source)
+    assert sorted((runner.PLAN / "attempts" / job["id"]).glob("*/receipt.json")) == before
 
 
 @pytest.mark.parametrize("defect", ["budget", "instrument", "archive", "registration", "prompt", "validator", "model", "candidate"])

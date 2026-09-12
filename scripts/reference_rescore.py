@@ -14,6 +14,7 @@ import json
 import math
 import os
 from pathlib import Path
+import shlex
 import shutil
 import statistics
 import subprocess
@@ -183,9 +184,28 @@ def transcript_evidence(events: list[dict]) -> tuple[str, set[str]]:
     return "\n".join(text), models
 
 
+def validator_command_matches(command: str, rubric: str, directory: str | None) -> bool:
+    """Recognize only our exact validator arguments, in relative or own absolute form."""
+    if not isinstance(command, str):
+        return False
+    try:
+        args = shlex.split(command)
+    except ValueError:
+        return False
+    if (len(args) != 8 or args[:3] != ["poetry", "run", "python"]
+            or args[4] != "--file" or args[6:] != ["--rubric", rubric]):
+        return False
+    scripts = {"scripts/validate_evaluation_schema.py"}
+    outputs = {"output_evaluation.json"}
+    if directory is not None and Path(directory).is_absolute():
+        scripts.add(str(Path(directory) / "scripts/validate_evaluation_schema.py"))
+        outputs.add(str(Path(directory) / "output_evaluation.json"))
+    return args[3] in scripts and args[5] in outputs
+
+
 def evaluator_validated(events: list[dict], rubric: str) -> bool:
-    expected = ("poetry run python scripts/validate_evaluation_schema.py "
-                f"--file output_evaluation.json --rubric {rubric}")
+    directories = [e.get("cwd") for e in events if e.get("type") == "system" and e.get("subtype") == "init"]
+    directory = directories[0] if len(directories) == 1 and isinstance(directories[0], str) else None
     calls, succeeded = set(), set()
     for event in events:
         role = event.get("type")
@@ -198,7 +218,7 @@ def evaluator_validated(events: list[dict], rubric: str) -> bool:
             if not isinstance(block, dict):
                 continue
             if (role == "assistant" and block.get("type") == "tool_use" and block.get("name") == "Bash"
-                    and block.get("input", {}).get("command", "").strip() == expected):
+                    and validator_command_matches(block.get("input", {}).get("command", ""), rubric, directory)):
                 calls.add(block["id"])
             if role == "user" and block.get("type") == "tool_result" and not block.get("is_error"):
                 content = block.get("content", "")
@@ -216,10 +236,13 @@ def validate_candidate(path: Path, job: dict, manifest: dict, events: list[dict]
     jsonschema.validate(doc, json.loads((ROOT / instrument["schema"]).read_bytes()))
     check_arithmetic(doc)
     for key, expected in (("rubric", job["rubric"]), ("project", job["project"]),
-                          ("method", job["method"]), ("label", job["label"]), ("d4d_file", job["input"])):
+                          ("method", job["method"]), ("d4d_file", job["input"])):
         if doc.get(key) != expected:
             raise ValueError(f"output {key} does not identify this job")
     metadata = doc.get("metadata") or {}
+    labels = [value for value in (doc.get("label"), metadata.get("label")) if value is not None]
+    if not labels or any(value != job["label"] for value in labels):
+        raise ValueError("output label does not identify this job consistently")
     if metadata.get("instrument_sha256") != instrument["definition_sha256"]:
         raise ValueError("evaluator did not report the pinned definition SHA")
     if metadata.get("instrument_kind") != "agent_definition":
@@ -338,6 +361,7 @@ def run_job(manifest: dict, job: dict, claude: str) -> dict:
                        "--output-format", "stream-json", "--verbose", "--permission-mode", "dontAsk",
                        "--tools", "Read,Write,Bash", "--allowedTools", "Read", "Write",
                        "Bash(poetry run python scripts/validate_evaluation_schema.py:*)",
+                       f"Bash(poetry run python {isolated / 'scripts/validate_evaluation_schema.py'}:*)",
                        "--system-prompt", (ROOT / instrument["definition"]).read_text()]
             env = {**os.environ, "VIRTUAL_ENV": sys.prefix,
                    "PATH": str(Path(sys.executable).parent) + os.pathsep + os.environ.get("PATH", "")}
@@ -382,23 +406,34 @@ def recover_canary(manifest: dict, source: Path) -> dict:
     verify_frozen(manifest)
     job = next(j for j in manifest["jobs"] if j["id"] == manifest["canary_id"])
     destination = ROOT / job["output"]
+    manifest_sha = digest(PLAN / "manifest.json")
     if destination.exists():
-        raise ValueError("successful output already exists; never overwrite a rating")
+        receipts = [json.loads(p.read_bytes())
+                    for p in (PLAN / "attempts" / job["id"]).glob("*/receipt.json")]
+        if any(r.get("status") == "passed" and r.get("manifest_sha256") == manifest_sha for r in receipts):
+            raise ValueError("successful output already exists for this registration; never overwrite a rating")
     original = json.loads((source / "receipt.json").read_bytes())
     if (original.get("job_id") != job["id"] or original.get("status") != "incomplete"
             or original.get("exit_code") != 0):
         raise ValueError("recovery requires this canary's incomplete, completed-CLI receipt")
-    manifest_sha = digest(PLAN / "manifest.json")
     if original.get("manifest_sha256") != manifest_sha:
-        superseded = manifest.get("supersedes_registration") or {}
-        if superseded.get("sha256") != original.get("manifest_sha256"):
-            raise ValueError("attempt does not belong to the superseded registration")
-        archive = ROOT / superseded["path"]
-        if digest(archive) != superseded["sha256"]:
-            raise ValueError("superseded registration bytes changed")
-        previous = json.loads(archive.read_bytes())
+        previous, seen = manifest, {manifest_sha}
+        while True:
+            superseded = previous.get("supersedes_registration") or {}
+            sha, rel = superseded.get("sha256"), superseded.get("path")
+            if not isinstance(sha, str) or not isinstance(rel, str) or sha in seen:
+                raise ValueError("attempt does not belong to the registered supersession history")
+            seen.add(sha)
+            archive = ROOT / rel
+            if digest(archive) != sha:
+                raise ValueError("superseded registration bytes changed")
+            previous = json.loads(archive.read_bytes())
+            if sha == original.get("manifest_sha256"):
+                break
 
         def contract(value):
+            if "scripts/reference_rescore.py" not in value["pinned_files"]:
+                raise ValueError("recovery requires the registered runner pin")
             comparable = {k: v for k, v in value.items()
                           if k not in ("registered_at", "definition_commit", "supersedes_registration")}
             comparable["pinned_files"] = {**value["pinned_files"],
@@ -417,6 +452,9 @@ def recover_canary(manifest: dict, source: Path) -> dict:
     trace = source / "transcript.jsonl"
     candidate_bytes = candidate.read_bytes()
     trace_bytes = trace.read_bytes()
+    existing_output = destination.exists()
+    if existing_output and destination.read_bytes() != candidate_bytes:
+        raise ValueError("existing canary differs from the retained candidate; never overwrite a rating")
     events = [json.loads(line) for line in trace_bytes.decode("utf-8").splitlines() if line.strip()]
     directories = [e.get("cwd") for e in events if e.get("type") == "system" and e.get("subtype") == "init"]
     if len(directories) != 1 or not isinstance(directories[0], str):
@@ -452,6 +490,8 @@ def recover_canary(manifest: dict, source: Path) -> dict:
     if (candidate.read_bytes() != candidate_bytes or trace.read_bytes() != trace_bytes
             or evidence["evaluation_sha256"] != hashlib.sha256(candidate_bytes).hexdigest()):
         raise ValueError("retained candidate or transcript changed during recovery")
+    if existing_output and destination.read_bytes() != candidate_bytes:
+        raise ValueError("existing canary changed during recovery")
     verify_frozen(manifest)
     attempt = PLAN / "attempts" / job["id"] / now().replace(":", "-")
     attempt.mkdir(parents=True)
@@ -462,10 +502,12 @@ def recover_canary(manifest: dict, source: Path) -> dict:
                "original_receipt_sha256": digest(source / "receipt.json"),
                "transcript_sha256": digest(trace), "user_prompt_sha256": prompt_sha,
                "system_prompt_sha256": instrument["definition_sha256"],
-               "evaluated_at": original["started_at"], "model_calls_during_recovery": 0}
+               "evaluated_at": original["started_at"], "model_calls_during_recovery": 0,
+               "preserved_existing_output": existing_output}
     destination.parent.mkdir(parents=True, exist_ok=True)
-    with destination.open("xb") as out:
-        out.write(candidate_bytes)
+    if not existing_output:
+        with destination.open("xb") as out:
+            out.write(candidate_bytes)
     write_json(attempt / "receipt.json", receipt)
     return receipt
 
