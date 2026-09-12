@@ -42,6 +42,12 @@ from typing import Any
 import yaml
 
 from data_sheets_schema import provenance, reasoning, schema_digest
+from data_sheets_schema.usage_ledger import (
+    append_usage as _append_usage,
+    merge_usage as merge_completed_rows,
+    persist_usage as _persist_usage,
+    prepare_usage as _prepare_usage,
+)
 from data_sheets_schema.provenance import (
     DETERMINISTIC_CONFIG,
     load_generation_config,
@@ -1841,7 +1847,8 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
     `_call_with_retry` like any call); whatever goes wrong — a transport
     failure, an unusable answer, a parse error — leaves the receipt as the
     model wrote it for the gate to count, and never fails a full phase that
-    has already succeeded (#955).
+    has already succeeded (#955). A usage persistence failure remains fatal:
+    continuing could spend more while losing the accounting (#656).
     """
     try:
         token = _REWRITE_LOG.set(None)                       # a resolution, not a write
@@ -1865,6 +1872,7 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
                                "moved": [], "dropped": [], "rejected": [], "emptied": []}
     entry: dict[str, Any] = {"phase": "full_readdress", "attempt": 1, "started_at": started,
                              "max_tokens": cap_tokens}
+    recorded = False
     try:
         rreq = build_readdress(req, response_text, unresolved)
         resp = _call_with_retry(client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"), max_tokens=cap_tokens,
@@ -1872,12 +1880,6 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
                                 system=rreq.system, messages=rreq.messages,
                                 on_incomplete=lambda info: _record_incomplete_stream(
                                     spec, "full_readdress", 1, started, info, usage, max_tokens=cap_tokens))
-        text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
-        cap = reasoning.capture(resp)
-        reasoning.append(_reasoning_path(spec),
-                         {"phase": "full_readdress", "label": spec.label,
-                          "project": spec.project, "model": settings["name"],
-                          "attempt": 1, **cap.to_dict()})
         entry.update({
             "input_tokens": getattr(resp.usage, "input_tokens", None),
             "output_tokens": getattr(resp.usage, "output_tokens", None),
@@ -1885,6 +1887,15 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
             "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
             "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
             "stop_reason": getattr(resp, "stop_reason", None)})
+        entry["seconds"] = round(time.monotonic() - t0, 3)
+        _append_usage(spec, usage, entry)
+        recorded = True
+        text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
+        cap = reasoning.capture(resp)
+        reasoning.append(_reasoning_path(spec),
+                         {"phase": "full_readdress", "label": spec.label,
+                          "project": spec.project, "model": settings["name"],
+                          "attempt": 1, **cap.to_dict()})
         if getattr(resp, "stop_reason", None) == "max_tokens":
             # A cut-off list parses as a shorter list; `drop: tru` even
             # parses as a string. Nothing from a truncated answer is applied.
@@ -1898,7 +1909,10 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
     summary["still_unresolved"] = unresolved_receipt_slots(record, yaml.safe_load(receipt_body))
     entry["seconds"] = round(time.monotonic() - t0, 3)
     entry["readdress"] = summary
-    usage.append(entry)
+    if recorded:
+        _persist_usage(spec, entry)
+    else:
+        _append_usage(spec, usage, entry)
     print(f"   receipt re-addressed: {len(summary['moved'])} moved, "
           f"{len(summary['dropped'])} dropped, {len(summary['rejected'])} rejected, "
           f"{len(summary['still_unresolved'])} still unresolved"
@@ -3332,13 +3346,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 log.append({"phase": ph, "round": rnd,
                             "outcome": f"call failed: {exc}"})
                 break
-            cap = reasoning.capture(resp)
-            reasoning.append(_reasoning_path(spec),
-                             {"phase": ph, "label": spec.label,
-                              "project": spec.project,
-                              "model": settings["name"],
-                              "attempt": rnd, **cap.to_dict()})
-            usage.append({
+            _append_usage(spec, usage, {
                 "phase": ph, "attempt": rnd,
                 "started_at": attempt_started,
                 "seconds": round(time.monotonic() - attempt_t0, 3),
@@ -3350,6 +3358,12 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 "max_tokens": phase_max_tokens(spec, ph, DEFAULT_MAX_TOKENS, model=settings["name"]),
                 "stop_reason": getattr(resp, "stop_reason", None),
             })
+            cap = reasoning.capture(resp)
+            reasoning.append(_reasoning_path(spec),
+                             {"phase": ph, "label": spec.label,
+                              "project": spec.project,
+                              "model": settings["name"],
+                              "attempt": rnd, **cap.to_dict()})
             if getattr(resp, "stop_reason", None) == "max_tokens":
                 log.append({"phase": ph, "round": rnd,
                             "outcome": "truncated; record left as it was"})
@@ -3819,13 +3833,7 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
                 max_tokens=phase_max_tokens(spec, "report", settings["max_tokens"], model=settings["name"])))
     except Exception:                                          # noqa: BLE001
         return False                # a stale report is better than none
-    text = "".join(getattr(b, "text", "") for b in getattr(resp, "content", [])
-                   if getattr(b, "type", None) == "text")
-    cap = reasoning.capture(resp)
-    reasoning.append(_reasoning_path(spec),
-                     {"phase": phase, "label": spec.label, "project": spec.project,
-                      "model": settings["name"], "attempt": 1, **cap.to_dict()})
-    usage.append({"phase": phase, "attempt": 1, "started_at": started,
+    _append_usage(spec, usage, {"phase": phase, "attempt": 1, "started_at": started,
                   "seconds": round(time.monotonic() - t0, 3),
                   "input_tokens": getattr(resp.usage, "input_tokens", None),
                   "output_tokens": getattr(resp.usage, "output_tokens", None),
@@ -3836,6 +3844,12 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
                   "cache_write": getattr(resp.usage,
                                          "cache_creation_input_tokens", None),
                   "stop_reason": getattr(resp, "stop_reason", None)})
+    text = "".join(getattr(b, "text", "") for b in getattr(resp, "content", [])
+                   if getattr(b, "type", None) == "text")
+    cap = reasoning.capture(resp)
+    reasoning.append(_reasoning_path(spec),
+                     {"phase": phase, "label": spec.label, "project": spec.project,
+                      "model": settings["name"], "attempt": 1, **cap.to_dict()})
     if getattr(resp, "stop_reason", None) == "max_tokens":
         return False                # a truncated report is not a report (#967)
     try:
@@ -4165,26 +4179,9 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
                 _record_incomplete_stream(spec, _ph, _at, _st, info, usage,
                                           max_tokens=phase_max_tokens(spec, _ph, settings["max_tokens"], model=settings["name"])))
 
-        text = "".join(b.text for b in resp.content
-                       if getattr(b, "type", "") == "text")
-        # The response as delivered, held before `split_receipt` rebinds
-        # `text` to the pre-marker half on a receipt condition (#1048 review):
-        # the unusable snapshot must carry the whole body, or on exactly the
-        # failure it exists for — "the text after the receipt marker is not a
-        # receipt" — it would drop the text after the marker and hash a
-        # string that was never delivered.
-        response_text = text
-
-        # Written before the checks below, so a phase that dies of
-        # max_tokens still leaves the record showing where its budget went —
-        # that is exactly the case where the thinking share is the diagnosis.
-        cap = reasoning.capture(resp)
-        reasoning.append(_reasoning_path(spec),
-                         {"phase": ph, "label": spec.label,
-                          "project": spec.project, "model": settings["name"],
-                          "attempt": attempt, **cap.to_dict()})
-
-        usage.append({
+        # Durable before reasoning, parsing, snapshots or progress writes:
+        # any of those can fail after the completed call was already billed.
+        _append_usage(spec, usage, {
             "phase": ph,
             "attempt": attempt,
             "started_at": attempt_started,
@@ -4197,6 +4194,16 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
             "max_tokens": phase_max_tokens(spec, ph, settings["max_tokens"], model=settings["name"]),
             "stop_reason": getattr(resp, "stop_reason", None),
         })
+
+        text = "".join(b.text for b in resp.content
+                       if getattr(b, "type", "") == "text")
+        # Preserve the entire delivered body before split_receipt (#1048).
+        response_text = text
+        cap = reasoning.capture(resp)
+        reasoning.append(_reasoning_path(spec),
+                         {"phase": ph, "label": spec.label,
+                          "project": spec.project, "model": settings["name"],
+                          "attempt": attempt, **cap.to_dict()})
 
         # A truncated record is worse than none: it validates as broken YAML
         # or, worse, as a shorter valid record. Never write it — but a
@@ -4253,11 +4260,11 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
             # attempt's reasoning estimate. The basename, not #1017's
             # `str(path)` under `snapshot`: `merge_abandoned_rows` dedups on
             # `snapshot`, and these rows are not abandoned attempts to merge
-            # from the ledger. The snapshot file itself is written at once, so
-            # on the MAX_ATTEMPTS raise — no record written, this row lost with
-            # it — the file and its self-describing header survive.
+            # from that ledger. The snapshot and completed-usage ledger both
+            # survive a MAX_ATTEMPTS raise before final provenance (#656).
             own_row["unusable_reason"] = (problem.splitlines() or [""])[0][:120]
             own_row["unusable_snapshot"] = kept.name
+            _persist_usage(spec, own_row)
         if attempt == MAX_ATTEMPTS:
             raise RuntimeError(
                 f"phase {ph!r} produced no usable output in "
@@ -4309,6 +4316,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     settings = _model_settings()
     client = client or _client()
     usage: list[dict[str, Any]] = []
+    _prepare_usage(spec, resume=resume)
     skipped: list[str] = []
     carry: dict[str, str] = {}
 
@@ -4320,7 +4328,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # the progress file too: without resume state this is a from-scratch
     # regeneration, and a dead run's accounting does not belong on it.
     prior_repair: list[dict[str, Any]] = []
-    if spec.provenance_path.exists() and _progress_path(spec).exists():
+    if resume and spec.provenance_path.exists() and _progress_path(spec).exists():
         try:
             prior = yaml.safe_load(
                 spec.provenance_path.read_text(encoding="utf-8")) or {}
@@ -4332,6 +4340,9 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             prior_repair = list(prior.get("repair") or [])
         except yaml.YAMLError:
             pass
+
+    if resume:
+        merge_completed_rows(spec, usage)
 
     # Resume from an explicit progress file rather than inferring from
     # artifacts. A `full` record on disk may be pre- or post-reconciliation and
@@ -4679,7 +4690,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             "value": None,
             "reason": settings["temperature_note"],
         }]
-    rec.data["api_usage"] = merge_abandoned_rows(spec, usage)
+    rec.data["api_usage"] = merge_abandoned_rows(spec, merge_completed_rows(spec, usage))
     rec.data["phases_skipped"] = skipped or None
     rec.data["record_generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
