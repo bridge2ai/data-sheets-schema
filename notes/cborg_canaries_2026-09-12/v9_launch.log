@@ -1,0 +1,24 @@
+📦 1 runs — 1 projects x 1 replicates, arm=baseline, condition=generic_v9
+   CHORUS    2026-09-12_claude-opus-5-api-generic-v9_rep1 ~ 134,781 tok
+   TOTAL                                                  ~ 134,781 input tokens (uncached)
+
+[1/1] CHORUS 2026-09-12_claude-opus-5-api-generic-v9_rep1
+   ✓ in=147,518 out=80,716 cache_read=95,109
+     pair errors=0  report findings=0  ungrounded identifiers=0  resolver URLs in identifier slots=0  organisational fragments=0  undeclared prefixes=0  British spellings=0  minted fragments=0  GC label variants=0  snippets unattesting (below the floors)=0  snippets bearing on no token of their value=1  entry receipts overlapping one leaf=2  chunks unreviewed=0  snippets unverified=0  snippets not in the chunk cited=0
+        pair errors              0 vs baseline worst 0
+        report findings          0 vs baseline worst 0
+        ungrounded identifiers   0 vs baseline worst 0
+        resolver URLs in identifier slots 0 vs baseline worst 0
+        organisational fragments 0 vs baseline worst 0
+        undeclared prefixes      0 vs baseline worst 0
+        British spellings        0 vs baseline worst 0
+        chunks unreviewed        0 vs baseline worst 0
+        snippets unverified      0 vs baseline worst 0
+        addressing slips over tolerance 0 vs baseline worst 0
+        receipts vacuous         0 vs baseline worst 0
+        receipt findings         0 vs baseline worst 0
+        duplicate keys           0 vs baseline worst 0
+     canary ok — fanning out
+
+1 succeeded, 0 failed
+tokens: 147,518 in, 80,716 out
