@@ -141,3 +141,17 @@ def test_official_package_imports_work_without_network(tmp_path, monkeypatch, sp
     direct = SchemaView(str(root)).get_type("string")
     assert schema_view.shared_view(root).get_type("string").uri == direct.uri
     assert schema_digest.build("Dataset", root).slots[0].range == "string"
+
+
+@pytest.mark.parametrize("location", ["root", "import"])
+def test_flow_yaml_without_final_newline_is_parsed_as_captured_content(tmp_path, location):
+    root = tmp_path / "root.yaml"
+    if location == "import":
+        (tmp_path / "base.yaml").write_text("{id: urn:example:base, name: base, classes: {Dataset: {}}}")
+        root.write_text("id: urn:example:root\nname: root\nimports: [base]\n")
+    else:
+        root.write_text("{id: urn:example:root, name: root, classes: {Dataset: {}}}")
+    expected = list(SchemaView(str(root)).all_classes())
+    assert expected == ["Dataset"]
+    assert list(schema_view.shared_view(root).all_classes()) == expected
+    assert schema_digest.build("Dataset", root).slots == []

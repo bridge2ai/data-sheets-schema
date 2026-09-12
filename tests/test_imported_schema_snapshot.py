@@ -57,17 +57,17 @@ def test_transitive_import_is_parsed_from_the_bytes_hashed(imported, monkeypatch
 def test_import_edit_when_linkml_starts_parsing_cannot_change_the_snapshot(imported, monkeypatch, consumer):
     root, base = imported
     original = base.read_bytes()
-    load = schema_view.yaml_loader.loads
+    load = schema_view.yaml.load
     changed = False
 
-    def edit_after_capture(*args, **kwargs):
+    def edit_after_capture(stream, Loader, *args, **kwargs):
         nonlocal changed
-        if not changed:
+        if Loader is schema_view.DupCheckYamlLoader and not changed:
             changed = True
             base.write_bytes(original.replace(b"country", b"species"))
-        return load(*args, **kwargs)
+        return load(stream, Loader, *args, **kwargs)
 
-    monkeypatch.setattr(schema_view.yaml_loader, "loads", edit_after_capture)
+    monkeypatch.setattr(schema_view.yaml, "load", edit_after_capture)
     first = read(root, consumer)
     assert changed and "country" in first
     base.write_bytes(original)

@@ -29,10 +29,11 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
+import yaml
 
 from linkml_runtime import SchemaView
 from linkml_runtime.linkml_model.meta import SchemaDefinition
-from linkml_runtime.loaders import yaml_loader
+from linkml_runtime.utils.yamlutils import DupCheckYamlLoader
 from data_sheets_schema.schema_snapshot import SchemaSnapshot, capture_schema, resolve_import_path
 
 _VIEWS: dict[tuple[str, str], SchemaView] = {}
@@ -62,7 +63,10 @@ def shared_view(path: str | Path, *, content: bytes | None = None,
             data = frozen[source]
             if isinstance(data, OSError):
                 raise data
-            schema = yaml_loader.loads(data.decode("utf-8"), target_class=SchemaDefinition)
+            # LinkML's loads still guesses whether a string names a file.
+            # These bytes are already captured YAML, including one-line flow
+            # documents without a final newline (#1277).
+            schema = SchemaDefinition(**yaml.load(data.decode("utf-8"), Loader=DupCheckYamlLoader))
             schema.source_file = str(source)
             return schema
 
