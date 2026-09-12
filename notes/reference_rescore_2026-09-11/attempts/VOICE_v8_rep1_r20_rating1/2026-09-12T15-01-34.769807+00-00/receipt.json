@@ -1,0 +1,11 @@
+{
+  "job_id": "VOICE_v8_rep1_r20_rating1",
+  "started_at": "2026-09-12T15:01:34.770092+00:00",
+  "status": "incomplete",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "user_prompt_sha256": "893273e3cc43f1a23996f70950e41a8d560145ce190299e04c6e9d32ef51e0b6",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "error": "ValueError: evaluator did not successfully validate its exact output",
+  "completed_at": "2026-09-12T15:09:27.628642+00:00"
+}

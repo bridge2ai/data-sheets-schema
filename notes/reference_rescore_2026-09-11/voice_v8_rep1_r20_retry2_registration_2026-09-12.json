@@ -1,0 +1,40 @@
+{
+  "registered_at": "2026-09-12T15:12:23.675635+00:00",
+  "issue": 1336,
+  "job_id": "VOICE_v8_rep1_r20_rating1",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "runner_commit": "d8bb022ed2934d606a5ef15847bd5a1e3fc2b72c",
+  "input_sha256": "6ad8a47eab05cc4fe6015485d79d8601bc26a03c90d2c86711c1ff511a13030f",
+  "prior_attempts": [
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T14-47-49.624967+00-00",
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-01-34.769807+00-00"
+  ],
+  "retained_attempt_files": {
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T14-47-49.624967+00-00/transcript.jsonl": "49655492c8d7757f14b90d3331d44fd182613f081689cfcb9c344c65b16818a8",
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T14-47-49.624967+00-00/candidate.json": "a0ebce67c662869f201de7923fca4c11c0225e1bcfe1e607bd78c94589303fd8",
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T14-47-49.624967+00-00/prompt.txt": "893273e3cc43f1a23996f70950e41a8d560145ce190299e04c6e9d32ef51e0b6",
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T14-47-49.624967+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T14-47-49.624967+00-00/receipt.json": "a7d16dbb20d1b9569bd3ae9605c7203984063413672bc1fe31086607de248eb4",
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-01-34.769807+00-00/transcript.jsonl": "29abdd79e3485b64189d0495400c7a8bb7df181361f13b3e61dcf4ec11aa082d",
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-01-34.769807+00-00/candidate.json": "31f17945093a6a9b6fbea6138b674b5aa47ce7b355c9d2ab56b437eb5df7d800",
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-01-34.769807+00-00/prompt.txt": "893273e3cc43f1a23996f70950e41a8d560145ce190299e04c6e9d32ef51e0b6",
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-01-34.769807+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-01-34.769807+00-00/receipt.json": "d7e80118753be37c1ea7a0795442e671c33578341a8e665876e5e2d1d377214c"
+  },
+  "prior_attempt_dispositions": [
+    "executed helper Write after successful validator; no later validator",
+    "only attempted validator appended semicolon echo EXIT; CLI denied it before execution"
+  ],
+  "retry_count_authorized_here": 1,
+  "budget_cap_usd_per_attempt": 5,
+  "fresh_isolated_session": true,
+  "complete_prompt_unchanged": true,
+  "model_settings_unchanged": true,
+  "automatic_retries": false,
+  "accepted_before": 47,
+  "original_cli_sessions_before": 55,
+  "excluded_original_attempts_before": 8,
+  "cli_reported_total_cost_usd_before": 120.4592925,
+  "resume_repeatability_only_after_retry_passes": true
+}
