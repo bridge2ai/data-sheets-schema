@@ -1,0 +1,190 @@
+{
+  "job_id": "VOICE_v8_rep1_r20_rating1",
+  "started_at": "2026-09-12T15:13:26.051188+00:00",
+  "status": "passed",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "user_prompt_sha256": "893273e3cc43f1a23996f70950e41a8d560145ce190299e04c6e9d32ef51e0b6",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]",
+    "metadata.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "metadata.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "6ad8a47eab05cc4fe6015485d79d8601bc26a03c90d2c86711c1ff511a13030f",
+  "evaluation_sha256": "1bce9f23f11a2c0466fab8f729a8374753b40e2d5b6947da46d435770c4f6bc7",
+  "cli_result": {
+    "duration_api_ms": 485905,
+    "stop_reason": "end_turn",
+    "session_id": "0b39c375-0a86-42c1-8ff2-045e0451a93a",
+    "total_cost_usd": 2.1655699999999998,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 83208,
+      "cache_read_input_tokens": 674446,
+      "output_tokens": 39131,
+      "output_tokens_details": {
+        "thinking_tokens": 11660
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 83208,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1204,
+          "cache_read_input_tokens": 102402,
+          "cache_creation_input_tokens": 452,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 452
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 17817,
+        "outputTokens": 15,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.017891999999999998,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 20,
+        "outputTokens": 39131,
+        "cacheReadInputTokens": 674446,
+        "cacheCreationInputTokens": 83208,
+        "webSearchRequests": 0,
+        "costUSD": 2.147678,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 11660,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_016cYmZQUvxxsefG51YuytzY",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-cehwkpvl/input/record.yaml 2>/dev/null",
+          "description": "Hash the input record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01C3GaPoNMQ3taCWeXTcA8DA",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get current UTC timestamp and a UUID"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01ArAXT3cEZXsNg9iWUn2wEx",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+          "description": "Validate evaluation JSON against schema"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01QtYgsasWaF6C5MPVjDpFJj",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic > /dev/null; echo \"EXIT=$?\"",
+          "description": "Check validator exit status"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "**Definition quote (Reproducibility section, verbatim):**\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nThe section is present and reads as the current instrument (sha256 `9d08b5f3\u20260e7dd3`), so I proceeded.\n\n## Evaluation complete \u2014 `output_evaluation.json`\n\nValidation run exactly as specified: `VALID output_evaluation.json: rubric20-semantic` (exit 0).\n\n**Score: 80 / 88 \u2014 fixed 90.9% (denominator 88), normalized 90.9% (adjusted denominator 88).** No question was excluded, so the two bases coincide; `excluded_max_points` 0, `questions_not_applicable` 0, `excluded_item_ids` empty.\n\n| Category | Score |\n|---|---|\n| Structural Completeness (Q1\u20135) | 17 / 21 |\n| Metadata Quality & Content (Q6\u201310) | 20 / 21 |\n| Technical Documentation (Q11\u201315) | 23 / 25 |\n| FAIRness & Accessibility (Q16\u201320) | 20 / 21 |\n\n**Applicability.** All four gated conditions were resolved on fields belonging to *other* questions, per the anti-circular rule, and each is recorded with `applicability_status` and `applicability_evidence`: human subjects (Q8, Q15) from `description`/`keywords`/`collection_mechanisms`; datasets shared (Q10, Q17) from `distribution_formats.access_urls`, the research-permitting licence and `third_party_sharing`; software output (Q11) from `external_resources` code repositories (b2aiprep, senselab) and `extension_mechanism.contribution_url`; collection-plus-shared (Q12, Q13) from `description` and `direct_collection`.\n\n**Points deducted, with reasons.** Q3 (3) \u2014 four generic keywords; condition coverage exists but only as prose inside a collection description. Q4 (3) \u2014 exactly three formats/media types, the counting band's ceiling, despite outstanding per-file enumeration. Q10 (4) \u2014 `conforms_to_schema` names the datasheet's own LinkML schema, not a data-level standard, which the record honestly declines to assert. Q13 (4) \u2014 `latest_version_doi` (`10.13026/37yb-1t42`) matches no enumerated version and is the one uncaveated identifier inconsistency. Q15 and Q20 (4 each) \u2014 no demographic distributions, so the declared representation skew is unquantifiable and fairness analysis stays qualitative.\n\n**Semantic analysis:** 9 issues (2 failed consistency checks \u2014 the unresolved latest-version DOI, and `hipaa_compliant: compliant` against the DTUA's own \"not covered under HIPAA\"; 6 warnings), 25 checks passed, 12 positive insights. Correctness validations: DOI `valid_physionet` (10.13026), grant `valid_nih` (OT2OD032720 parses as an OT2/OD award), RRID `valid` (SCR_007345), URLs `all_valid`.\n\nProvenance values, `d4d_file`, the three hashes, `instrument_kind: agent_definition`, `temperature: null`, and the runtime model (`claude-opus-5[1m]`, as both `name` and `evaluator_model`) are recorded as instructed.",
+    "ttft_ms": 3574,
+    "type": "result",
+    "duration_ms": 487062,
+    "uuid": "b2529e12-8321-41c9-985e-bccce99c6acf",
+    "ttft_stream_ms": 2074,
+    "time_to_request_ms": 17,
+    "first_content_frame_ms": 2545,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T15:21:34.510352+00:00"
+}

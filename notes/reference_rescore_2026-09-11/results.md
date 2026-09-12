@@ -1,6 +1,6 @@
 # Reference rescore status — 2026-09-11
 
-Completed 47 of 56 planned evaluations.
+Completed 48 of 56 planned evaluations.
 
 # Semantic comparison: both score bases
 
@@ -53,6 +53,7 @@ Fixed percentages use the full rubric maximum. N/A-adjusted percentages use the 
 | data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v7_rep3_r10_rating1_evaluation.json | VOICE | rubric10-semantic | Fixed: 48/50 (96.0%) | N/A-adjusted: 48/50 (96.0%) | none | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 109f96773aab98f430ac1fd17ed873fa01aeab133d145b8624515b7d0dbe6bea |
 | data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep3_r20_rating1_evaluation.json | VOICE | rubric20-semantic | Fixed: 82/88 (93.2%) | N/A-adjusted: 82/88 (93.2%) | none | claude-opus-5[1m] | 9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3 | 565b7751f15d63670ca3479df0fcc4d35c55d360909c2b10c43dcdb4a27f7e4b |
 | data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v8_rep1_r10_rating1_evaluation.json | VOICE | rubric10-semantic | Fixed: 47/50 (94.0%) | N/A-adjusted: 47/50 (94.0%) | none | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 8fac08134f0808ba9ff6fa3f59181d9bd6130e71fef30d46c2b1fa36acceef9f |
+| data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v8_rep1_r20_rating1_evaluation.json | VOICE | rubric20-semantic | Fixed: 80/88 (90.9%) | N/A-adjusted: 80/88 (90.9%) | none | claude-opus-5[1m] | 9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3 | 1bce9f23f11a2c0466fab8f729a8374753b40e2d5b6947da46d435770c4f6bc7 |
 | data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v8_rep2_r10_rating1_evaluation.json | VOICE | rubric10-semantic | Fixed: 48/50 (96.0%) | N/A-adjusted: 48/50 (96.0%) | none | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | ee49eeae5b5cf2b206639ab0f8f891b7107f580586e146c4db0a42aed20a11bb |
 | data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v8_rep2_r20_rating1_evaluation.json | VOICE | rubric20-semantic | Fixed: 81/88 (92.0%) | N/A-adjusted: 81/88 (92.0%) | none | claude-opus-5[1m] | 9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3 | 471b950d313466fb15aa64ea6e0bd3741ba1ebfc7a07428dd38a3fda3359dd5e |
 | data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v8_rep3_r10_rating1_evaluation.json | VOICE | rubric10-semantic | Fixed: 48/50 (96.0%) | N/A-adjusted: 48/50 (96.0%) | none | claude-opus-5[1m] | 66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864 | 8cf8922f7e3037e31c205c54d71926b36a30fa1dec9c6825e823d671dc2d3b15 |
@@ -84,4 +85,4 @@ Rubric10 repeatability uses three independent ratings of one v7 record per proje
 | VOICE | v7 | rubric10-semantic | 3/3 | [98.0, 98.0, 96.0] | [98.0, 98.0, 96.0] |
 | VOICE | v7 | rubric20-semantic | 3/3 | [92.04545454545455, 90.9090909090909, 93.18181818181819] | [92.04545454545455, 90.9090909090909, 93.18181818181819] |
 | VOICE | v8 | rubric10-semantic | 3/3 | [94.0, 96.0, 96.0] | [94.0, 96.0, 96.0] |
-| VOICE | v8 | rubric20-semantic | 2/3 | [92.04545454545455, 92.04545454545455] | [92.04545454545455, 92.04545454545455] |
+| VOICE | v8 | rubric20-semantic | 3/3 | [90.9090909090909, 92.04545454545455, 92.04545454545455] | [90.9090909090909, 92.04545454545455, 92.04545454545455] |

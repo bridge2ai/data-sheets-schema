@@ -1,10 +1,9 @@
 {
-  "reported_at": "2026-09-12T15:00:08.208867+00:00",
-  "completed": 47,
+  "reported_at": "2026-09-12T15:23:12.896856+00:00",
+  "completed": 48,
   "planned": 56,
   "percentage_basis": "computed_from_point_totals_and_denominators",
   "pending": [
-    "VOICE_v8_rep1_r20_rating1",
     "AI_READI_v7_rep1_r10_rating2",
     "AI_READI_v7_rep1_r10_rating3",
     "CHORUS_v7_rep1_r10_rating2",
@@ -344,13 +343,15 @@
       "project": "VOICE",
       "cohort": "v8",
       "rubric": "rubric20-semantic",
-      "records": 2,
+      "records": 3,
       "expected_records": 3,
       "adjusted_percentages": [
+        90.9090909090909,
         92.04545454545455,
         92.04545454545455
       ],
       "fixed_percentages": [
+        90.9090909090909,
         92.04545454545455,
         92.04545454545455
       ]
