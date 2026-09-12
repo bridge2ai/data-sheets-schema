@@ -1,0 +1,8 @@
+{
+  "accepted_at": "2026-09-12T20:31:19.927235+00:00",
+  "registration_sha256": "deb2499bd10871f6147df4a115ae416c26d55153767c26bd561d793d80860907",
+  "job_id": "CHORUS_v7_rep1_r10_rating1",
+  "evaluation_sha256": "b5ecb9d31a6a73d1f71e46f70617390ff62d63a84c5abd5d794afa9110755366",
+  "original_attempt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-15-31.516182+00-00",
+  "runtime_model": "claude-opus-5"
+}
