@@ -11,7 +11,7 @@ from data_sheets_schema.api_runner import (
     PHASE_NEEDS,
     RunSpec,
     _audit_is_well_formed,
-    execute,
+    _execute,
 )
 
 
@@ -66,12 +66,12 @@ class ReportAfterRepairTest(unittest.TestCase):
     """
 
     def test_the_report_is_regenerated_only_when_repair_changed_bytes(self):
-        src = inspect.getsource(execute)
+        src = inspect.getsource(_execute)
         self.assertIn("if after != before:", src)
         self.assertIn("_regenerate_report(", src)
 
     def test_it_records_that_it_did_and_which_records_moved(self):
-        src = inspect.getsource(execute)
+        src = inspect.getsource(_execute)
         self.assertIn("report_regenerated_after_repair", src)
 
     def test_it_reads_the_repaired_records_from_disk(self):

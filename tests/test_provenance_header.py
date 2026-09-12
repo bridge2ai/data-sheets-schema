@@ -190,7 +190,7 @@ class TestEveryArtifactWriteIsStamped(unittest.TestCase):
     two files and the model re-emits the prompt's header with them."""
 
     def test_every_full_or_core_write_in_the_runner_is_preceded_by_the_stamp(self):
-        """`_repair_invalid` and `execute` are the only functions that write a
+        """`_repair_invalid` and `_execute` are the only functions that write a
         full or core artifact (the review's ignore-independent scan found
         `:3027`, `:3111`, `:4153` and nothing else; `_snapshot` writes
         intermediates). Each write of a record body there is preceded by the
@@ -201,7 +201,7 @@ class TestEveryArtifactWriteIsStamped(unittest.TestCase):
         import re as _re
         from data_sheets_schema import api_runner
         seen = 0
-        for fn in (api_runner._repair_invalid, api_runner.execute):
+        for fn in (api_runner._repair_invalid, api_runner._execute):
             src = inspect.getsource(fn)
             for m in _re.finditer(r"(spec\.core_path|spec\.full_path|path|target)\.write_text\((\w+)", src):
                 var = m.group(2)

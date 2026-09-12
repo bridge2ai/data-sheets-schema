@@ -289,6 +289,9 @@ class ThroughThePhaseLoop(unittest.TestCase):
         self.assertIn(hashlib.sha256(body.encode()).hexdigest(), snap)
 
         self.assertEqual(len(usage), MAX_ATTEMPTS)
+        from data_sheets_schema.usage_ledger import merge_usage
+        self.assertEqual(merge_usage(s, []), usage,
+                         "durable usage must preserve each unusable attempt and its outcome")
         for row in usage:
             self.assertIn("unusable_reason", row)
             self.assertIn("unusable_snapshot", row)

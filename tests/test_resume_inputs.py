@@ -72,7 +72,7 @@ class DeclaredInputsTest(unittest.TestCase):
         import inspect
 
         from data_sheets_schema import api_runner
-        source = inspect.getsource(api_runner.execute)
+        source = inspect.getsource(api_runner._execute)
         for key in ("Original full record", "Original core record"):
             self.assertEqual(
                 source.count(f'carry["{key}"] = '), 1,
@@ -97,8 +97,8 @@ class ResumeGuardTest(unittest.TestCase):
     def _source(self):
         import inspect
 
-        from data_sheets_schema.api_runner import execute
-        return inspect.getsource(execute)
+        from data_sheets_schema.api_runner import _execute
+        return inspect.getsource(_execute)
 
     def test_a_missing_declared_input_stops_the_phase(self):
         src = self._source()
@@ -200,5 +200,5 @@ class InvalidationBoundsTest(unittest.TestCase):
         every older run."""
         import inspect
 
-        from data_sheets_schema.api_runner import execute
-        self.assertIn("recorded is not None", inspect.getsource(execute))
+        from data_sheets_schema.api_runner import _execute
+        self.assertIn("recorded is not None", inspect.getsource(_execute))

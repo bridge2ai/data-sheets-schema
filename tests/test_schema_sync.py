@@ -163,8 +163,8 @@ class GateTest(unittest.TestCase):
         """
         import inspect
 
-        from data_sheets_schema.api_runner import execute
-        source = inspect.getsource(execute)
+        from data_sheets_schema.api_runner import _execute
+        source = inspect.getsource(_execute)
         self.assertIn("schema_sync", source)
         # Before the client is built, or the check is decoration.
         self.assertLess(source.index("schema_sync"), source.index("_client()"))

@@ -122,14 +122,15 @@ class TestTheRequestStatesThinking(unittest.TestCase):
     def test_every_call_site_in_the_runner_passes_the_thinking_settings(self):
         """Only `_generate_phase` runs on the offline fixture (review finding
         6). Derived, not enumerated (round 2, note 4): every
-        `_call_with_retry(` occurrence in the module — the definition
-        excluded — must carry both kwargs, so a fifth site or a second call
-        inside a listed function cannot slip through."""
+        `_call_with_usage(` or direct `_call_with_retry(` occurrence in the
+        module must carry both kwargs. Definitions and the transparent
+        accounting wrapper (which forwards **kwargs) are excluded."""
         import inspect
         import re
         from data_sheets_schema import api_runner
         src = inspect.getsource(api_runner)
-        calls = [m for m in re.finditer(r"_call_with_retry\(", src)
+        src = src.replace(inspect.getsource(api_runner._call_with_usage), "", 1)
+        calls = [m for m in re.finditer(r"_call_with_(?:retry|usage)\(", src)
                  if not src[max(0, m.start() - 4):m.start()].endswith("def ")]
         self.assertGreaterEqual(len(calls), 4)
         for m in calls:

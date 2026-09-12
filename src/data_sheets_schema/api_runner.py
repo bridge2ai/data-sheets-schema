@@ -33,6 +33,7 @@ import os
 import re
 import subprocess
 import time
+import uuid
 from dataclasses import dataclass, field
 from functools import cached_property, lru_cache
 from datetime import datetime, timezone
@@ -42,6 +43,23 @@ from typing import Any
 import yaml
 
 from data_sheets_schema import provenance, reasoning, schema_digest
+from data_sheets_schema.usage_ledger import (
+    UsageLedgerError,
+    append_usage as _append_usage,
+    begin_call as _begin_usage_call,
+    cancel_call as _cancel_usage_call,
+    exclusive_run as _exclusive_run,
+    generation_id as _usage_generation,
+    identity_is_foreign as _foreign_usage_identity,
+    merge_usage as merge_completed_rows,
+    persist_usage as _persist_usage,
+    prior_generation_ids as _prior_usage_generations,
+    prepare_usage as _prepare_usage,
+    record_matches as _usage_record_matches,
+    require_resolved as _require_resolved_usage,
+    run_identity as _usage_identity,
+    same_generation as _same_usage_generation,
+)
 from data_sheets_schema.provenance import (
     DETERMINISTIC_CONFIG,
     load_generation_config,
@@ -1841,7 +1859,8 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
     `_call_with_retry` like any call); whatever goes wrong — a transport
     failure, an unusable answer, a parse error — leaves the receipt as the
     model wrote it for the gate to count, and never fails a full phase that
-    has already succeeded (#955).
+    has already succeeded (#955). A usage persistence failure remains fatal:
+    continuing could spend more while losing the accounting (#656).
     """
     try:
         token = _REWRITE_LOG.set(None)                       # a resolution, not a write
@@ -1865,19 +1884,15 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
                                "moved": [], "dropped": [], "rejected": [], "emptied": []}
     entry: dict[str, Any] = {"phase": "full_readdress", "attempt": 1, "started_at": started,
                              "max_tokens": cap_tokens}
+    recorded = False
     try:
         rreq = build_readdress(req, response_text, unresolved)
-        resp = _call_with_retry(client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"), max_tokens=cap_tokens,
+        resp, entry["usage_id"] = _call_with_usage(spec, "full_readdress", 1, started,
+                                client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"), max_tokens=cap_tokens,
                                 temperature=settings["temperature"],
                                 system=rreq.system, messages=rreq.messages,
                                 on_incomplete=lambda info: _record_incomplete_stream(
                                     spec, "full_readdress", 1, started, info, usage, max_tokens=cap_tokens))
-        text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
-        cap = reasoning.capture(resp)
-        reasoning.append(_reasoning_path(spec),
-                         {"phase": "full_readdress", "label": spec.label,
-                          "project": spec.project, "model": settings["name"],
-                          "attempt": 1, **cap.to_dict()})
         entry.update({
             "input_tokens": getattr(resp.usage, "input_tokens", None),
             "output_tokens": getattr(resp.usage, "output_tokens", None),
@@ -1885,6 +1900,15 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
             "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
             "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
             "stop_reason": getattr(resp, "stop_reason", None)})
+        entry["seconds"] = round(time.monotonic() - t0, 3)
+        _append_usage(spec, usage, entry)
+        recorded = True
+        text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
+        cap = reasoning.capture(resp)
+        reasoning.append(_reasoning_path(spec),
+                         {"phase": "full_readdress", "label": spec.label,
+                          "project": spec.project, "model": settings["name"],
+                          "attempt": 1, **_reasoning_usage(spec, entry), **cap.to_dict()})
         if getattr(resp, "stop_reason", None) == "max_tokens":
             # A cut-off list parses as a shorter list; `drop: tru` even
             # parses as a string. Nothing from a truncated answer is applied.
@@ -1893,12 +1917,22 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
         summary.update(apply_readdress(receipt, record, answers))
         summary["answers"] = len(answers)
         receipt_body = yaml.safe_dump(receipt, sort_keys=False, allow_unicode=True, width=10_000)
+    except UsageLedgerError:
+        raise
     except Exception as exc:                                   # noqa: BLE001
         summary["call_failed"] = f"{type(exc).__name__}: {str(exc)[:300]}"
     summary["still_unresolved"] = unresolved_receipt_slots(record, yaml.safe_load(receipt_body))
     entry["seconds"] = round(time.monotonic() - t0, 3)
-    entry["readdress"] = summary
-    usage.append(entry)
+    try:
+        # SafeLoader can produce dates and other native values in snippets.
+        # Optional diagnostics must not abort a completed paid phase (#1292).
+        entry["readdress"] = json.loads(json.dumps(summary, default=str))
+    except (TypeError, ValueError, RecursionError) as exc:
+        entry["readdress"] = {"diagnostics_unavailable": f"{type(exc).__name__}: {exc}"}
+    if recorded:
+        _persist_usage(spec, entry)
+    else:
+        _append_usage(spec, usage, entry)
     print(f"   receipt re-addressed: {len(summary['moved'])} moved, "
           f"{len(summary['dropped'])} dropped, {len(summary['rejected'])} rejected, "
           f"{len(summary['still_unresolved'])} still unresolved"
@@ -2175,6 +2209,11 @@ def _reasoning_path(spec: RunSpec) -> Path:
     return spec.metadata_dir / f"{spec.project}_reasoning.jsonl"
 
 
+def _reasoning_usage(spec: RunSpec, row: dict[str, Any]) -> dict[str, Any]:
+    return {"usage_id": row["usage_id"], "generation_id": _usage_generation(spec),
+            "run_identity": _usage_identity(spec)}
+
+
 def _load_progress(spec: RunSpec) -> dict[str, Any]:
     p = _progress_path(spec)
     if not p.exists():
@@ -2190,6 +2229,10 @@ def _save_progress(spec: RunSpec, completed: list[str],
     p = _progress_path(spec)
     p.parent.mkdir(parents=True, exist_ok=True)
     data: dict[str, Any] = {"completed": completed, "label": spec.label}
+    generation = _usage_generation(spec)
+    if generation is not None:
+        data["generation_id"] = generation
+        data["run_identity"] = _usage_identity(spec)
     if audit:
         data["Audit findings"] = audit
     # The bytes each completed phase was computed against (#601). Without them
@@ -3317,14 +3360,17 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 timespec="seconds")
             attempt_t0 = time.monotonic()
             try:
-                resp = _call_with_retry(
-                    client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
+                resp, call_id = _call_with_usage(
+                    spec, ph, rnd, attempt_started, client,
+                    model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
                     max_tokens=phase_max_tokens(spec, ph, DEFAULT_MAX_TOKENS, model=settings["name"]),
                     temperature=settings["temperature"],
                     system=req.system, messages=req.messages,
                     on_incomplete=lambda info, _ph=ph, _rnd=rnd, _st=attempt_started:
                         _record_incomplete_stream(spec, _ph, _rnd, _st, info, usage,
                                                   max_tokens=phase_max_tokens(spec, _ph, DEFAULT_MAX_TOKENS, model=settings["name"])))
+            except UsageLedgerError:
+                raise
             except Exception as exc:                   # noqa: BLE001
                 # A dead repair call must not take down a run that would
                 # otherwise report invalid-but-complete, as before repair
@@ -3332,13 +3378,8 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 log.append({"phase": ph, "round": rnd,
                             "outcome": f"call failed: {exc}"})
                 break
-            cap = reasoning.capture(resp)
-            reasoning.append(_reasoning_path(spec),
-                             {"phase": ph, "label": spec.label,
-                              "project": spec.project,
-                              "model": settings["name"],
-                              "attempt": rnd, **cap.to_dict()})
-            usage.append({
+            call_usage = _append_usage(spec, usage, {
+                "usage_id": call_id,
                 "phase": ph, "attempt": rnd,
                 "started_at": attempt_started,
                 "seconds": round(time.monotonic() - attempt_t0, 3),
@@ -3350,6 +3391,12 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 "max_tokens": phase_max_tokens(spec, ph, DEFAULT_MAX_TOKENS, model=settings["name"]),
                 "stop_reason": getattr(resp, "stop_reason", None),
             })
+            cap = reasoning.capture(resp)
+            reasoning.append(_reasoning_path(spec),
+                             {"phase": ph, "label": spec.label,
+                              "project": spec.project,
+                              "model": settings["name"],
+                              "attempt": rnd, **_reasoning_usage(spec, call_usage), **cap.to_dict()})
             if getattr(resp, "stop_reason", None) == "max_tokens":
                 log.append({"phase": ph, "round": rnd,
                             "outcome": "truncated; record left as it was"})
@@ -3495,6 +3542,21 @@ def _attach_output_tokens_details(msg, details: dict[str, Any]) -> None:
         extra = getattr(usage, "model_extra", None)
         if isinstance(extra, dict):
             extra["output_tokens_details"] = details
+
+
+def _call_with_usage(spec: RunSpec, phase: str, attempt: int, started_at: str, client, **kwargs):
+    identifier = _begin_usage_call(spec, phase, attempt, started_at)
+    try:
+        response = _call_with_retry(client, **kwargs)
+    except UsageLedgerError:
+        raise
+    except Exception:
+        # A reported transport failure delivered no completed response. Its
+        # partial usage still belongs to the abandoned-stream journal. A
+        # process exit or interrupt instead retains the unresolved marker.
+        _cancel_usage_call(spec, identifier)
+        raise
+    return response, identifier
 
 
 def _call_with_retry(client, *, model, max_tokens, temperature, system, messages, on_incomplete=None,
@@ -3808,8 +3870,9 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
             {"type": "text", "text": REGATE_HEADERS[1] + listing},
             {"type": "text", "text": PHASE_INSTRUCTIONS["report_regate"]}])
     try:
-        resp = _call_with_retry(
-            client, model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
+        resp, call_id = _call_with_usage(
+            spec, phase, 1, started, client,
+            model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
             max_tokens=phase_max_tokens(spec, "report", settings["max_tokens"], model=settings["name"]),
             temperature=(settings["temperature"]
                          if settings["temperature_applies"] else None),
@@ -3817,15 +3880,11 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
             on_incomplete=lambda info: _record_incomplete_stream(
                 spec, phase, 1, started, info, usage,
                 max_tokens=phase_max_tokens(spec, "report", settings["max_tokens"], model=settings["name"])))
+    except UsageLedgerError:
+        raise
     except Exception:                                          # noqa: BLE001
         return False                # a stale report is better than none
-    text = "".join(getattr(b, "text", "") for b in getattr(resp, "content", [])
-                   if getattr(b, "type", None) == "text")
-    cap = reasoning.capture(resp)
-    reasoning.append(_reasoning_path(spec),
-                     {"phase": phase, "label": spec.label, "project": spec.project,
-                      "model": settings["name"], "attempt": 1, **cap.to_dict()})
-    usage.append({"phase": phase, "attempt": 1, "started_at": started,
+    call_usage = _append_usage(spec, usage, {"usage_id": call_id, "phase": phase, "attempt": 1, "started_at": started,
                   "seconds": round(time.monotonic() - t0, 3),
                   "input_tokens": getattr(resp.usage, "input_tokens", None),
                   "output_tokens": getattr(resp.usage, "output_tokens", None),
@@ -3836,6 +3895,13 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
                   "cache_write": getattr(resp.usage,
                                          "cache_creation_input_tokens", None),
                   "stop_reason": getattr(resp, "stop_reason", None)})
+    text = "".join(getattr(b, "text", "") for b in getattr(resp, "content", [])
+                   if getattr(b, "type", None) == "text")
+    cap = reasoning.capture(resp)
+    reasoning.append(_reasoning_path(spec),
+                     {"phase": phase, "label": spec.label, "project": spec.project,
+                      "model": settings["name"], "attempt": 1,
+                      **_reasoning_usage(spec, call_usage), **cap.to_dict()})
     if getattr(resp, "stop_reason", None) == "max_tokens":
         return False                # a truncated report is not a report (#967)
     try:
@@ -4083,6 +4149,8 @@ def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: 
     path = _snapshot(spec, f"{spec.project}_{ph}_incomplete_attempt{attempt}_{n}.txt", body)
     snap_usage = info.get("usage") or {}
     row = {"phase": ph, "attempt": attempt, "transport_attempt": n,
+                  "usage_id": uuid.uuid4().hex,
+                  "run_identity": _usage_identity(spec),
                   # The retry ladder's own count (a rate limit before the cut
                   # advances it; the transport count does not).
                   "ladder_attempt": info.get("attempt"), "started_at": started_at,
@@ -4098,6 +4166,9 @@ def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: 
                   "cache_read": snap_usage.get("cache_read_input_tokens"),
                   "cache_write": snap_usage.get("cache_creation_input_tokens"),
                   "snapshot": str(path)}
+    generation = _usage_generation(spec)
+    if generation is not None:
+        row["generation_id"] = generation
     usage.append(row)
     # Persisted at once (#1038 second pass): a run whose every retry fails
     # never reaches the record write, and the row would be lost with it.
@@ -4114,21 +4185,78 @@ def _abandoned_ledger(spec: RunSpec) -> Path:
     return spec.metadata_dir / f"{spec.project}_abandoned_attempts.jsonl"
 
 
-def merge_abandoned_rows(spec: RunSpec, usage: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Rows the ledger holds that `usage` does not (an earlier invocation's
-    drops, lost with its process), keyed by their snapshot path."""
+def _abandoned_rows(spec: RunSpec) -> list[dict[str, Any]]:
     ledger = _abandoned_ledger(spec)
     if not ledger.exists():
-        return usage
-    have = {u.get("snapshot") for u in usage if u.get("snapshot")}
+        return []
+    rows = []
     for line in ledger.read_text(encoding="utf-8").splitlines():
         try:
             row = json.loads(line)
         except json.JSONDecodeError:
             continue
-        if isinstance(row, dict) and row.get("snapshot") and row["snapshot"] not in have:
+        if isinstance(row, dict):
+            rows.append(row)
+    return rows
+
+
+def _unrecorded_abandoned(spec: RunSpec, prior: dict[str, Any]) -> bool:
+    """Identified charge evidence not already preserved in this run's record."""
+    recorded = prior.get("api_usage") or []
+    generation = (prior.get("run") or {}).get("generation_id")
+    superseded = ((prior.get("run") or {}).get("prior_generation_ids") or []) if generation else []
+    for row in _abandoned_rows(spec):
+        if row.get("generation_id") is None or _foreign_usage_identity(spec, row.get("run_identity")):
+            continue
+        if row["generation_id"] in superseded:
+            continue
+        # Exact row equality also checks the counters. A matching ID with
+        # different usage cannot establish that the surviving charge is saved.
+        if row.get("generation_id") != generation or row not in recorded:
+            return True
+    return False
+
+
+def _unrecorded_reasoning(spec: RunSpec, prior: dict[str, Any]) -> bool:
+    """A completed response may leave only its reasoning log after a failure."""
+    try:
+        entries = reasoning.read(_reasoning_path(spec))
+    except (OSError, ValueError) as exc:
+        raise UsageLedgerError(f"cannot establish surviving reasoning usage: {exc}") from exc
+    recorded = prior.get("api_usage") or []
+    generation = (prior.get("run") or {}).get("generation_id")
+    superseded = ((prior.get("run") or {}).get("prior_generation_ids") or []) if generation else []
+    for entry in entries:
+        if not isinstance(entry, dict) or entry.get("generation_id") is None:
+            continue
+        if _foreign_usage_identity(spec, entry.get("run_identity") or entry):
+            continue
+        if entry["generation_id"] in superseded:
+            continue
+        uid = entry.get("usage_id")
+        covered = (isinstance(uid, str) and bool(uid) and entry["generation_id"] == generation
+                   and any(isinstance(row, dict) and row.get("usage_id") == uid
+                           and row.get("phase") == entry.get("phase")
+                           and row.get("output_tokens") == entry.get("output_tokens")
+                           and row.get("stop_reason") == entry.get("stop_reason")
+                           for row in recorded))
+        if not covered:
+            return True
+    return False
+
+
+def merge_abandoned_rows(spec: RunSpec, usage: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Recover this generation's drops once; legacy rows use snapshot paths."""
+    def key(row):
+        uid = row.get("usage_id")
+        return ("usage_id", uid) if isinstance(uid, str) and uid else ("snapshot", row.get("snapshot"))
+    have = {key(u) for u in usage if u.get("snapshot")}
+    for row in _abandoned_rows(spec):
+        if (row.get("snapshot") and key(row) not in have
+                and not _foreign_usage_identity(spec, row.get("run_identity"))
+                and _same_usage_generation(spec, row.get("generation_id"))):
             usage.append(row)
-            have.add(row["snapshot"])
+            have.add(key(row))
     return usage
 
 
@@ -4154,8 +4282,8 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
         attempt_started = datetime.now(timezone.utc).isoformat(
             timespec="seconds")
         attempt_t0 = time.monotonic()
-        resp = _call_with_retry(
-            client,
+        resp, call_id = _call_with_usage(
+            spec, ph, attempt, attempt_started, client,
             model=settings["name"], thinking=settings.get("thinking"), effort=settings.get("effort"),
             max_tokens=phase_max_tokens(spec, ph, settings["max_tokens"], model=settings["name"]),
             temperature=settings["temperature"],
@@ -4165,26 +4293,10 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
                 _record_incomplete_stream(spec, _ph, _at, _st, info, usage,
                                           max_tokens=phase_max_tokens(spec, _ph, settings["max_tokens"], model=settings["name"])))
 
-        text = "".join(b.text for b in resp.content
-                       if getattr(b, "type", "") == "text")
-        # The response as delivered, held before `split_receipt` rebinds
-        # `text` to the pre-marker half on a receipt condition (#1048 review):
-        # the unusable snapshot must carry the whole body, or on exactly the
-        # failure it exists for — "the text after the receipt marker is not a
-        # receipt" — it would drop the text after the marker and hash a
-        # string that was never delivered.
-        response_text = text
-
-        # Written before the checks below, so a phase that dies of
-        # max_tokens still leaves the record showing where its budget went —
-        # that is exactly the case where the thinking share is the diagnosis.
-        cap = reasoning.capture(resp)
-        reasoning.append(_reasoning_path(spec),
-                         {"phase": ph, "label": spec.label,
-                          "project": spec.project, "model": settings["name"],
-                          "attempt": attempt, **cap.to_dict()})
-
-        usage.append({
+        # Durable before reasoning, parsing, snapshots or progress writes:
+        # any of those can fail after the completed call was already billed.
+        call_usage = _append_usage(spec, usage, {
+            "usage_id": call_id,
             "phase": ph,
             "attempt": attempt,
             "started_at": attempt_started,
@@ -4197,6 +4309,16 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
             "max_tokens": phase_max_tokens(spec, ph, settings["max_tokens"], model=settings["name"]),
             "stop_reason": getattr(resp, "stop_reason", None),
         })
+
+        text = "".join(b.text for b in resp.content
+                       if getattr(b, "type", "") == "text")
+        # Preserve the entire delivered body before split_receipt (#1048).
+        response_text = text
+        cap = reasoning.capture(resp)
+        reasoning.append(_reasoning_path(spec),
+                         {"phase": ph, "label": spec.label,
+                          "project": spec.project, "model": settings["name"],
+                          "attempt": attempt, **_reasoning_usage(spec, call_usage), **cap.to_dict()})
 
         # A truncated record is worse than none: it validates as broken YAML
         # or, worse, as a shorter valid record. Never write it — but a
@@ -4253,11 +4375,11 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
             # attempt's reasoning estimate. The basename, not #1017's
             # `str(path)` under `snapshot`: `merge_abandoned_rows` dedups on
             # `snapshot`, and these rows are not abandoned attempts to merge
-            # from the ledger. The snapshot file itself is written at once, so
-            # on the MAX_ATTEMPTS raise — no record written, this row lost with
-            # it — the file and its self-describing header survive.
+            # from that ledger. The snapshot and completed-usage ledger both
+            # survive a MAX_ATTEMPTS raise before final provenance (#656).
             own_row["unusable_reason"] = (problem.splitlines() or [""])[0][:120]
             own_row["unusable_snapshot"] = kept.name
+            _persist_usage(spec, own_row)
         if attempt == MAX_ATTEMPTS:
             raise RuntimeError(
                 f"phase {ph!r} produced no usable output in "
@@ -4279,6 +4401,13 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     """
     if dry_run:
         return plan(spec)
+
+    with _exclusive_run(spec):
+        return _execute(spec, resume=resume, client=client)
+
+
+def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
+    """Execute while holding exclusive access to this run's output files."""
 
     # Before a token is spent. The digest this run is about to send, the schema
     # it validates against and the identity slots its pair check uses all come
@@ -4309,6 +4438,9 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     settings = _model_settings()
     client = client or _client()
     usage: list[dict[str, Any]] = []
+    generation = _usage_generation(spec) if resume else _prepare_usage(spec, resume=False)
+    if resume:
+        _require_resolved_usage(spec)
     skipped: list[str] = []
     carry: dict[str, str] = {}
 
@@ -4320,25 +4452,54 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # the progress file too: without resume state this is a from-scratch
     # regeneration, and a dead run's accounting does not belong on it.
     prior_repair: list[dict[str, Any]] = []
-    if spec.provenance_path.exists() and _progress_path(spec).exists():
+    prior_matches = False
+    prior_identifier = None
+    prior_record: dict[str, Any] = {}
+    foreign_prior = False
+    foreign_identifier = None
+    if resume and spec.provenance_path.exists():
         try:
             prior = yaml.safe_load(
                 spec.provenance_path.read_text(encoding="utf-8")) or {}
-            usage.extend(prior.get("api_usage") or [])
-            # The repair log is seeded for the same reason as usage (#366):
-            # AI-READI rep1's record showed one repair round where eight had
-            # run, because the second invocation overwrote the convergence
-            # story its predecessor recorded.
-            prior_repair = list(prior.get("repair") or [])
+            identity = prior.get("run") if isinstance(prior, dict) else None
+            foreign_prior = _foreign_usage_identity(spec, identity, recorded=True)
+            identifier = identity.get("generation_id") if isinstance(identity, dict) else None
+            if foreign_prior:
+                foreign_identifier = identifier
+            else:
+                prior_identifier = identifier
+            prior_matches = _usage_record_matches(spec, identity) and _same_usage_generation(spec, identifier)
+            if prior_matches:
+                prior_record = prior
+            if prior_matches and _progress_path(spec).exists():
+                usage.extend(prior.get("api_usage") or [])
+                # Only this generation's repair history belongs here (#366,
+                # #1291); a fresh run may still have its predecessor's file.
+                prior_repair = list(prior.get("repair") or [])
         except yaml.YAMLError:
             pass
+
+    if resume:
+        merge_completed_rows(spec, usage)
 
     # Resume from an explicit progress file rather than inferring from
     # artifacts. A `full` record on disk may be pre- or post-reconciliation and
     # nothing in the file distinguishes them, so guessing would silently skip
     # reconciliation or redo it.
     progress = _load_progress(spec) if resume else {}
+    foreign_progress = (_foreign_usage_identity(spec, progress.get("run_identity"))
+                        or progress.get("label") not in (None, spec.label)
+                        or (foreign_prior and not progress.get("run_identity")
+                            and progress.get("generation_id") in (None, foreign_identifier)))
+    if foreign_progress or not _same_usage_generation(spec, progress.get("generation_id")):
+        progress = {}
     done = set(progress.get("completed", []))
+    if generation is None and _unrecorded_abandoned(spec, prior_record):
+        raise UsageLedgerError("identified abandoned charges survive but their usage ledger is missing; "
+                               "restore the ledger before resuming")
+    if generation is None and _unrecorded_reasoning(spec, prior_record):
+        raise UsageLedgerError("identified reasoning survives but its usage ledger is missing; "
+                               "restore the ledger before resuming")
     # A *finished* run has no progress file — success deletes it — so resuming
     # found nothing and re-ran all six phases of work already paid for. The
     # artifacts on disk are the durable record of what completed; the progress
@@ -4353,7 +4514,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     #
     # So a run already carrying provenance that matches this spec, and whose
     # artifact hashes still verify, is returned exactly as it was found.
-    if (resume and not done and spec.provenance_path.exists()
+    if (resume and not done and prior_matches and spec.provenance_path.exists()
             and all(_artifact_path(spec, a).exists()
                     for a in ("full", "core", "report"))):
         from data_sheets_schema.runs import check_provenance
@@ -4362,7 +4523,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         if prior["ok"]:
             existing = yaml.safe_load(
                 spec.provenance_path.read_text(encoding="utf-8")) or {}
-            _progress_path(spec).unlink(missing_ok=True)
+            if not foreign_progress:
+                _progress_path(spec).unlink(missing_ok=True)
             # Re-validate rather than report a clean bill nobody checked.
             # Returning `[]` here asserted "no problems" about records this call
             # never looked at, so a run that had failed validation came back
@@ -4417,6 +4579,11 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
                                 "core": str(spec.core_path),
                                 "report": str(spec.report_path),
                                 "provenance": str(spec.provenance_path)}}
+    if generation is None:
+        if progress.get("generation_id") is not None or prior_identifier is not None:
+            raise UsageLedgerError("identified generation needs recovery but its usage ledger is missing; "
+                                   "restore the ledger before resuming")
+        generation = _prepare_usage(spec, resume=not (foreign_prior or foreign_progress))
     carry: dict[str, str] = {}
     if "Audit findings" in progress:
         carry["Audit findings"] = progress["Audit findings"]
@@ -4679,7 +4846,9 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             "value": None,
             "reason": settings["temperature_note"],
         }]
-    rec.data["api_usage"] = merge_abandoned_rows(spec, usage)
+    rec.data["run"]["generation_id"] = generation
+    rec.data["run"]["prior_generation_ids"] = _prior_usage_generations(spec)
+    rec.data["api_usage"] = merge_abandoned_rows(spec, merge_completed_rows(spec, usage))
     rec.data["phases_skipped"] = skipped or None
     rec.data["record_generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
