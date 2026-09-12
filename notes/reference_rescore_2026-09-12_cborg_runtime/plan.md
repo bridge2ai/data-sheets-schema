@@ -70,3 +70,24 @@ by SHA256 in the batch registration. The scheduler checks that hash before
 creating an attempt. The scoring manifest, all 56 prompts and both agent
 definitions are unchanged. One separately reviewed retry of the primary
 canary must pass and receive both acceptances before the remaining jobs run.
+
+## Accepted canary and completion checks
+
+The canary was accepted on 2026-09-12 after its original final Write scored
+34/50 (68%), with the recorded definition digest and check-echo verified.
+See [the inspected result](canary_review.md) and both acceptance records.
+The remaining 55 were launched only after that evidence was published.
+
+For this condition's complete audit, use the dated helper below. It applies
+the reviewed local pre-launch classification, preserves uncertain attempts
+as blockers, and checks scheduler snapshots from both CBORG conditions.
+Then inspect all 24 new rubric20 Q19 objects and write `semantic_review.json`
+with the original evidence and dispositions before rendering the tables.
+The reporter verifies the inspection and every audited measurement hash.
+
+```bash
+python notes/reference_rescore_2026-09-12_cborg_runtime/execution_tools/audit_completion.py
+# Complete the evidence-backed 24-rating Q19 inspection in semantic_review.json.
+python notes/reference_rescore_2026-09-12_cborg_runtime/execution_tools/write_completion_summary.py
+python scripts/instrument_provenance.py --write
+```

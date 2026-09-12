@@ -53,12 +53,16 @@ def main():
             preserved[rel] = sha
             current = json.loads((ROOT / rel).read_bytes())
     archives = ROOT / "notes/reference_rescore_2026-09-12_cborg/registrations"
-    for stem in ("interruption", "stop-race", "reviewed-retry", "missing-history"):
-        prior = json.loads((archives / f"batch-registration-before-{stem}-fix.json").read_bytes())
-        path = archives / f"reference_rescore_cborg_batch-before-{stem}-fix.py"
-        if r.digest(path) != prior["scheduler_sha256"]:
-            raise ValueError(f"archived scheduler changed: {path}")
-        preserved[str(path.relative_to(ROOT))] = r.digest(path)
+    snapshots = 0
+    for directory in (archives, r.PLAN / "registrations"):
+        for registration_path in sorted(directory.glob("batch-registration-before-*-fix.json")):
+            stem = registration_path.stem.removeprefix("batch-registration-before-").removesuffix("-fix")
+            prior = json.loads(registration_path.read_bytes())
+            path = directory / f"reference_rescore_cborg_batch-before-{stem}-fix.py"
+            if r.digest(path) != prior["scheduler_sha256"]:
+                raise ValueError(f"archived scheduler changed: {path}")
+            preserved[str(path.relative_to(ROOT))] = r.digest(path)
+            snapshots += 1
     original = json.loads((archives / "manifest-before-write-tool-fix.json").read_bytes())
     path = archives / "reference_rescore_cborg-before-write-tool-fix.py"
     if r.digest(path) != original["pinned_files"]["scripts/reference_rescore_cborg.py"]:
@@ -80,6 +84,7 @@ def main():
     preliminary = json.loads((ROOT / "notes/reference_rescore_2026-09-12_cborg/preliminary_audit.json").read_bytes())
     audit["verified_local_prelaunch_failures"] = prelaunch
     audit["total_attempts_including_local_preflights"] = audit["actual_model_calls"] + len(prelaunch)
+    audit["archived_scheduler_snapshots_verified"] = snapshots
     audit.update({"preliminary_condition": {"path": "notes/reference_rescore_2026-09-12_cborg/preliminary_audit.json", "sessions": preliminary["actual_model_calls"], "accepted_canaries_retained_separately": preliminary["accepted"], "excluded_attempts": preliminary["excluded_original_attempts"], "cli_reported_cost_usd": preliminary["cli_reported_total_cost_usd"]}, "provider": "LBL CBORG", "transport_manifest_sha256": r.digest(r.PLAN / "manifest.json"),
                   "batch_registration_sha256": r.digest(batch.REGISTRATION),
                   "original_successful_write_bindings": len(written),
