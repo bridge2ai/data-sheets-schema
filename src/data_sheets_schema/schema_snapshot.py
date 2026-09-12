@@ -8,6 +8,7 @@ refused: an uncaptured dependency cannot establish a reusable cache identity.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from collections.abc import Callable
 import functools
 import hashlib
 import json
@@ -32,8 +33,14 @@ class SchemaSnapshot:
 def _metadata(content: bytes) -> tuple:
     doc = yaml.safe_load(content) or {}
     # Let the installed metamodel normalize its supported mapping/list forms.
-    schema = SchemaDefinition(**{k: doc[k] for k in
-        ("id", "name", "imports", "prefixes", "default_curi_maps") if k in doc})
+    fields = {k: doc[k] for k in
+        ("id", "name", "imports", "prefixes", "default_curi_maps") if k in doc}
+    # gen-linkml's raw loader derives an omitted name from the schema ID.
+    # Metadata discovery must admit the same source documents. The actual
+    # view parser still applies its installed SchemaDefinition contract.
+    if not fields.get("name") and fields.get("id"):
+        fields["name"] = str(fields["id"]).replace("#", "/").rsplit("/", 1)[-1]
+    schema = SchemaDefinition(**fields)
     prefixes = tuple((str(p.prefix_prefix), str(p.prefix_reference)) for p in schema.prefixes.values())
     return str(schema.name), tuple(schema.imports), prefixes, tuple(schema.default_curi_maps)
 
@@ -48,19 +55,26 @@ def resolve_import_path(name, source: Path, namespaces) -> Path:
     return Path(os.path.abspath(imported if imported.is_absolute() else source.parent / imported))
 
 
-def capture_schema(path: str | Path, *, content: bytes | None = None) -> SchemaSnapshot:
+def capture_schema(path: str | Path, *, content: bytes | None = None,
+                   read_bytes: Callable[[Path], bytes] | None = None,
+                   namespace_orders: tuple[bool, ...] | None = None,
+                   strict: bool = False) -> SchemaSnapshot:
     """Capture both supported namespace-initialization orders (#1273).
 
     Callers can initialize namespaces before loading imports, or allow the first
     prefixed import to do it. Capture the union without reading any file twice;
     the view later selects bytes using its actual namespace state. An unavailable
     alternative is recorded and fails only if that alternative is selected.
+    The source preflight supplies its existing byte capture and requests the
+    generator's default traversal alone, with errors raised before generation.
     """
+    read = read_bytes or Path.read_bytes
     root = Path(os.path.abspath(path))
-    files = {root: root.read_bytes() if content is None else content}
+    files = {root: read(root) if content is None else content}
     root_meta = _metadata(files[root])
     names = {root: root_meta[0]}
-    for early in ((False, True) if root_meta[1] else (False,)):
+    orders = namespace_orders if namespace_orders is not None else ((False, True) if root_meta[1] else (False,))
+    for early in orders:
         metadata = {root_meta[0]: root_meta}
 
         @functools.lru_cache(maxsize=1)
@@ -85,7 +99,7 @@ def capture_schema(path: str | Path, *, content: bytes | None = None) -> SchemaS
                 source = root if name == root_meta[0] else resolve_import_path(name, root, namespaces)
                 if source not in files:
                     try:
-                        files[source] = source.read_bytes()
+                        files[source] = read(source)
                     except OSError as exc:
                         files[source] = exc
                     names[source] = name
@@ -100,6 +114,8 @@ def capture_schema(path: str | Path, *, content: bytes | None = None) -> SchemaS
                         imp = os.path.normpath(str(Path(name).parent / imp))
                     pending.append(imp)
         except (OSError, ValueError, TypeError, yaml.YAMLError):
+            if strict:
+                raise
             # A failed alternate traversal must not reject a valid one. The
             # selected loader below still raises on those captured bytes/errors.
             pass

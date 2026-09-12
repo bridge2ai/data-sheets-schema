@@ -1,0 +1,20 @@
+# Codex Adversarial Review
+
+Target: branch diff against origin/main
+Verdict: needs-attention
+
+Do not ship: reproduced false in_sync acceptance and two LinkML compatibility regressions. Eighteen existing offline checks passed; files remain unchanged.
+
+Findings:
+- [high] Package path aliases bypass captured bytes (src/data_sheets_schema/schema_sync.py:172-175)
+  For imports: [linkml:./types], also linkml:../schema/types, capture normalizes the package path but URI_TO_LOCAL matches the generator's unnormalized spelling literally. The replacement misses, reopening the live package. With the real generator and in-memory I/O, a simulated package change followed by restoration poisoned _REBUILT: check_one returned in_sync, while clearing the cache produced different merged bytes.
+  Recommendation: Redirect package reads through normalization-aware lookup at the loader boundary. Add changed-and-restored package-byte regressions for ./ and ../ import spellings.
+- [medium] Resolve namespace aliases before rejecting package imports (src/data_sheets_schema/schema_sync.py:125-131)
+  With prefixes: {lm: 'https://w3id.org/linkml/'} and imports: [lm:types], direct SchemaView and shared_view load installed types.yaml with sockets blocked. However, _source_snapshot raises "cannot snapshot non-relative schema import 'lm:types'", causing preflight to block generation. Testing the raw CURIE before namespace expansion rejects an entirely local package dependency.
+  Recommendation: Apply LinkML namespace resolution before URI_TO_LOCAL lookup and remote-import rejection, then capture and redirect the resolved package files.
+- [medium] Parse captured YAML without filename heuristics (src/data_sheets_schema/schema_view.py:65)
+  The valid document {id: urn:example:root, name: root, classes: {Dataset: {}}}, without a trailing newline, loads through direct SchemaView. shared_view instead raises FileNotFoundError naming the document text as a path. LinkML's loads method still applies filename/content detection, so passing decoded bytes does not guarantee literal parsing. This breaks supported root and imported schemas and their digest consumers.
+  Recommendation: Parse text directly with LinkML's DupCheckYamlLoader before constructing SchemaDefinition. Cover flow-style root and imported documents without final newlines.
+
+Next steps:
+- Add these reproductions and rerun the focused suite in a writable offline test environment.

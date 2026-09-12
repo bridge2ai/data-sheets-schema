@@ -36,7 +36,6 @@ be discarded. There is nothing to preserve by continuing.
 
 from __future__ import annotations
 
-import functools
 import hashlib
 import json
 import os
@@ -47,7 +46,8 @@ import sys
 import tempfile
 from pathlib import Path
 from typing import Any
-from linkml_runtime import SCHEMA_DIRECTORY, URI_TO_LOCAL
+from linkml_runtime import URI_TO_LOCAL
+from data_sheets_schema.schema_snapshot import capture_schema
 
 #: (merged artifact, source it is generated from, digest class, leading `---`)
 #:
@@ -93,14 +93,6 @@ def _generator_versions() -> tuple:
     return tuple(out)
 
 
-@functools.lru_cache(maxsize=128)
-def _source_imports(content: bytes) -> tuple[str, ...]:
-    import yaml
-    doc = yaml.safe_load(content) or {}
-    imports = doc.get("imports") or []
-    return (imports,) if isinstance(imports, str) else tuple(imports)
-
-
 def _source_snapshot(source: Path) -> tuple[tuple, dict[Path, bytes]]:
     """Capture local source/import bytes once for both the key and generator.
 
@@ -116,25 +108,15 @@ def _source_snapshot(source: Path) -> tuple[tuple, dict[Path, bytes]]:
              if p.name not in merged_names or Path(os.path.abspath(p)) == source}
     if source not in files:
         files[source] = source.read_bytes()
-    pending, visited = [source], set()
-    while pending:
-        path = pending.pop()
-        if path in visited:
-            continue
-        visited.add(path)
-        for name in _source_imports(files[path]):
-            if name.startswith("linkml:"):
-                dependency = SCHEMA_DIRECTORY / (name.split(":", 1)[1] + ".yaml")
-            elif name + ".yaml" in URI_TO_LOCAL:
-                dependency = Path(URI_TO_LOCAL[name + ".yaml"])
-            elif ":" in name or Path(name).is_absolute():
-                raise ValueError(f"cannot snapshot non-relative schema import {name!r}")
-            else:
-                dependency = path.parent / (name + ".yaml")
-            dependency = Path(os.path.abspath(dependency))
-            if dependency not in files:
-                files[dependency] = dependency.read_bytes()
-            pending.append(dependency)
+    def read(path):
+        if path not in files:
+            files[path] = path.read_bytes()
+        return files[path]
+    # gen-linkml creates a fresh view and traverses imports before callers can
+    # initialize namespaces. Use that same resolver and the same captured
+    # bytes, including namespace aliases for local packages (#1276).
+    capture_schema(source, content=files[source], read_bytes=read,
+                   namespace_orders=(False,), strict=True)
     state = (str(source), _generator_versions(),
              tuple((str(p), str(p.resolve()), hashlib.sha256(data).hexdigest()) for p, data in sorted(files.items())),
              source_name)
@@ -163,26 +145,35 @@ def _regenerate(source: Path, target: Path,
                 copy.parent.mkdir(parents=True, exist_ok=True)
                 copy.write_bytes(content)
             captured_source = Path(tmp) / Path(os.path.abspath(source)).relative_to(base)
-            # Both CURIE and official-URL imports read the captured package
-            # bytes, rather than reopening the installed files after hashing.
-            package_map = {}
+            # Relative and namespace-resolved imports read captured files,
+            # including package CURIEs and official URL aliases.
+            captured_map = {}
             for path in files:
-                if path.is_relative_to(SCHEMA_DIRECTORY):
-                    copy = Path(tmp) / path.relative_to(base)
-                    package_map[str(path)] = str(copy)
-                    for uri, local in URI_TO_LOCAL.items():
-                        if Path(local) == path:
-                            package_map[uri] = str(copy)
+                copy = Path(tmp) / path.relative_to(base)
+                captured_map[str(path)] = str(copy)
+                for uri, local in URI_TO_LOCAL.items():
+                    if Path(local) == path:
+                        captured_map[uri] = str(copy)
             mapping = Path(tmp) / "snapshot-package-map.json"
-            mapping.write_text(json.dumps(package_map), encoding="utf-8")
+            mapping.write_text(json.dumps(captured_map), encoding="utf-8")
             # gen-linkml discards --importmap when it creates its second view.
             # Route both views through the runtime loader's local map, only in
-            # this child process. Installed package files remain untouched.
+            # this child process. Normalize equivalent ./ and ../ spellings at
+            # lookup (#1275); installed package files remain untouched.
             code = (
-                "import json, sys\n"
-                "from linkml_runtime import URI_TO_LOCAL\n"
+                "import json, os, sys\n"
+                "import linkml_runtime\n"
+                "from linkml_runtime.loaders import loader_root\n"
+                "class CapturedPaths(dict):\n"
+                "    def key(self, value):\n"
+                "        return value if '://' in value else os.path.normpath(value)\n"
+                "    def __contains__(self, value):\n"
+                "        return super().__contains__(self.key(value))\n"
+                "    def __getitem__(self, value):\n"
+                "        return super().__getitem__(self.key(value))\n"
                 "with open(sys.argv[1], encoding='utf-8') as stream:\n"
-                "    URI_TO_LOCAL.update(json.load(stream))\n"
+                "    captured = CapturedPaths(json.load(stream))\n"
+                "linkml_runtime.URI_TO_LOCAL = loader_root.URI_TO_LOCAL = captured\n"
                 "from linkml.generators.linkmlgen import cli\n"
                 "cli(args=sys.argv[2:], prog_name='gen-linkml')\n")
             result = subprocess.run(

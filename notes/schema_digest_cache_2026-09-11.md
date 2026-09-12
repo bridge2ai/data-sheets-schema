@@ -150,3 +150,39 @@ tests pass. The combined cache, fitness, preflight and provenance checks pass
 all 183 tests. Both real schemas regenerate exactly, and generation digests,
 the complete fitness hash and all historical fitness cache bytes remain fixed.
 A sixth plugin review checks the complete branch.
+
+The sixth plugin review is retained in
+`schema_cache_codex_sixth_2026-09-11.txt`. All three findings are addressed.
+Equivalent `linkml:./types` and `linkml:../schema/types` spellings bypassed
+literal package mapping and could poison a rebuild cache (#1275). The isolated
+generator now normalizes paths at its loader lookup, binding namespace-resolved
+local files as well as installed packages to the captured copies.
+
+The source preflight now uses the same captured namespace traversal as schema
+views, with the generator's default initialization order and strict errors.
+This supports local aliases such as `lm:types` after prefix expansion (#1276)
+and avoids a separate, divergent import resolver. Captured YAML is parsed
+directly with LinkML's duplicate-checking loader before constructing the schema,
+so a one-line flow document without a newline cannot be guessed to be a filename
+(#1277). The existing edit-during-parse regression still exercises actual LinkML
+parsing, using the new literal parser entry point.
+
+Nine regressions failed against the reviewed revision. All 51 focused snapshot
+and import checks pass after the fixes, including real changed-and-restored
+package inputs, prefix override generation and flow-style roots/imports.
+The final local review checked the named reproductions, shared resolver ordering,
+loader lookup normalization, duplicate-checking parser semantics and isolation of
+the child process. No finding from the six plugin reviews remains unresolved.
+
+The final compatibility run also preserves the generator's inference of an
+omitted source name from its ID. CI found #1278: the memoization test counted
+calls to the shared cache accessor, which now also supplies the view identity.
+The corrected guard forbids constructing a new view or rebuilding an unchanged
+inventory after warmup; it permits the byte reads required for freshness.
+All 60 affected compatibility/cache/statistics checks pass. Both real schemas
+regenerate exactly, with the same full/core generation digests and complete
+fitness hash; all historical fitness cache files remain byte-identical.
+
+Final combined validation: 206 cache, import, preflight, fitness, statistics and
+provenance tests passed. No further code change followed this run. CI must pass
+on the committed revision before the branch is merged.

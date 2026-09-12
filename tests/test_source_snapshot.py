@@ -141,10 +141,12 @@ def test_snapshot_matches_direct_generation_for_supported_source_paths(tmp_path,
     assert rebuilt.read_bytes() == direct.read_bytes()
 
 
-@pytest.mark.parametrize("spelling", ["linkml:types", "https://w3id.org/linkml/types"])
+@pytest.mark.parametrize("spelling", ["linkml:types", "https://w3id.org/linkml/types",
+                                      "linkml:./types", "linkml:../schema/types", "lm:types"])
 def test_package_import_spellings_match_direct_generation(tmp_path, spelling):
     source = tmp_path / "source.yaml"
-    source.write_text(source_text("country") + f"imports: [{spelling}]\n")
+    source.write_text(source_text("country") + "prefixes: {lm: https://w3id.org/linkml/}\n"
+                      + f"imports: [{spelling}]\n")
     direct, rebuilt = tmp_path / "direct.yaml", tmp_path / "rebuilt.yaml"
     subprocess.run(["poetry", "run", "gen-linkml", "-f", "yaml", "-o", str(direct), str(source)],
                    check=True, capture_output=True, text=True)
@@ -152,7 +154,8 @@ def test_package_import_spellings_match_direct_generation(tmp_path, spelling):
     assert rebuilt.read_bytes() == direct.read_bytes()
 
 
-@pytest.mark.parametrize("spelling", ["linkml:types", "https://w3id.org/linkml/types"])
+@pytest.mark.parametrize("spelling", ["linkml:types", "https://w3id.org/linkml/types",
+                                      "linkml:./types", "linkml:../schema/types", "lm:types"])
 def test_generator_uses_captured_package_bytes(tmp_path, monkeypatch, spelling):
     import yaml
     from linkml_runtime import LINKML_TYPES
@@ -168,7 +171,54 @@ def test_generator_uses_captured_package_bytes(tmp_path, monkeypatch, spelling):
 
     monkeypatch.setattr(Path, "read_bytes", capture_package)
     source = tmp_path / "source.yaml"
-    source.write_text(source_text("country") + f"imports: [{spelling}]\n")
+    source.write_text(source_text("country") + "prefixes: {lm: https://w3id.org/linkml/}\n"
+                      + f"imports: [{spelling}]\n")
     rebuilt = tmp_path / "rebuilt.yaml"
     assert schema_sync._regenerate(source, rebuilt, False) == (True, None)
     assert yaml.safe_load(rebuilt.read_bytes())["types"]["string"]["description"] == description
+
+
+@pytest.mark.parametrize("spelling", ["linkml:./types", "linkml:../schema/types"])
+def test_gate_detects_restoration_after_capturing_changed_package_bytes(tmp_path, monkeypatch, spelling):
+    import yaml
+    from linkml_runtime import LINKML_TYPES
+    package = Path(LINKML_TYPES).resolve()
+    doc = yaml.safe_load(package.read_bytes())
+    doc["types"]["string"]["description"] = "Changed package description captured before restoration."
+    changed = yaml.safe_dump(doc, sort_keys=False).encode()
+    read = Path.read_bytes
+    monkeypatch.setattr(Path, "read_bytes", lambda p: changed if p.resolve() == package else read(p))
+    source = tmp_path / "source.yaml"
+    source.write_text(source_text("country") + f"imports: [{spelling}]\n")
+    merged = tmp_path / "data_sheets_schema_all.yaml"
+    assert schema_sync._regenerate(source, merged, False) == (True, None)
+    # Restore the package's original bytes as seen by the parent. The installed
+    # file was never edited. A rebuild that reopened it instead of its capture
+    # would now falsely agree with this baseline and report in_sync.
+    monkeypatch.setattr(Path, "read_bytes", read)
+    row = schema_sync.check_one(merged, source, "Dataset")
+    try:
+        assert row["status"] == schema_sync.STALE, row
+    finally:
+        if "rebuilt_at" in row:
+            shutil.rmtree(Path(row["rebuilt_at"]).parent)
+
+
+def test_source_prefix_override_matches_direct_generation(tmp_path):
+    from tests.test_schema_snapshot_compatibility import selection_root
+    source = selection_root(tmp_path)
+    direct, rebuilt = tmp_path / "direct.yaml", tmp_path / "rebuilt.yaml"
+    subprocess.run(["poetry", "run", "gen-linkml", "-f", "yaml", "-o", str(direct), str(source)],
+                   check=True, capture_output=True, text=True)
+    assert schema_sync._regenerate(source, rebuilt, False) == (True, None)
+    assert rebuilt.read_bytes() == direct.read_bytes()
+
+
+def test_source_name_inferred_by_the_generator_is_preserved(tmp_path):
+    source = tmp_path / "source.yaml"
+    source.write_text(source_text("country").replace("name: source\n", ""))
+    direct, rebuilt = tmp_path / "direct.yaml", tmp_path / "rebuilt.yaml"
+    subprocess.run(["poetry", "run", "gen-linkml", "-f", "yaml", "-o", str(direct), str(source)],
+                   check=True, capture_output=True, text=True)
+    assert schema_sync._regenerate(source, rebuilt, False) == (True, None)
+    assert rebuilt.read_bytes() == direct.read_bytes()
