@@ -1,8 +1,8 @@
 {
-  "accepted_at": "2026-09-12T11:56:05.524737+00:00",
+  "accepted_at": "2026-09-12T10:54:13.357297+00:00",
   "canary_id": "CHORUS_v7_rep1_r10_rating1",
   "evaluation_sha256": "017f888bdccf12a04b62917e8fa08c39263cf45a5533fb349ca9eb075335199f",
-  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "manifest_sha256": "3ecc08aa6aed274737505e658743729dd1c293438ac8416df42b5c6b533533f6",
   "runtime_model": "claude-opus-5",
   "basis": "exact-file, arithmetic, identity and check-echo checks passed; operator reviewed the canary"
 }
