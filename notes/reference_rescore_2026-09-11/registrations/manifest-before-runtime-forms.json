@@ -1,7 +1,7 @@
 {
   "issue": 1248,
-  "registered_at": "2026-09-12T09:00:32.941210+00:00",
-  "definition_commit": "1134e5e7e094bdd3333fbe6b5553fb24e6545e7d",
+  "registered_at": "2026-09-12T07:41:59.738701+00:00",
+  "definition_commit": "6c7b4b43ccf355d11f1b4d6f53cad5bda37ef75f",
   "requested_model": "claude-opus-5[1m]",
   "effort": "high",
   "temperature": null,
@@ -844,7 +844,7 @@
     "data/rubric/rubric20.txt": "669490b61351353476ce7c1d4be9efb7da790da6499eb57078d1da0f06c0291b",
     "poetry.lock": "57a1c937b54e24a0450316bb5f1e82c3b1f5366dbbe156b3d1d5bf7ee81725fa",
     "pyproject.toml": "210e6e897d375a24e4a1ba67344e1b21e6cc2a4f6cd3104fcbe53c604d9d40ac",
-    "scripts/reference_rescore.py": "7d4003ff0cec8470c9cdeb5247f1cbf58601a3f03440cc44d944999dccb29187",
+    "scripts/reference_rescore.py": "a483c1da3c4b000405b13723d35b96469958558b733ff484b37fb73bc057ad89",
     "scripts/validate_evaluation_schema.py": "dc2e540c4800950eb866914c72894cda668b9a92d41c5f05aa045ff17483652c",
     "src/download/prompts/rubric10_semantic_schema.json": "5ac1989a60414d41f03383266535eee9963816d0d9b42bf5b90e1efe8d9d3dc2",
     "src/download/prompts/rubric20_semantic_schema.json": "5ccdbd229471748fa1dde8074d904c0334c983741dd90c7e56f95b45b012f32b"
@@ -1054,8 +1054,8 @@
     "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/VOICE_2026-09-01api_rep1_evaluation.json": "d7e3086e4f1ff9fc8cfc0a8550aa4712dd8e8e2b30293653e27b1f18f2f82df8"
   },
   "supersedes_registration": {
-    "path": "notes/reference_rescore_2026-09-11/registrations/manifest-before-runtime-forms.json",
-    "sha256": "78dc05cada5a4905d8eabd2320ebcd0054d83e92d5611de93b4f98fc557f324a",
-    "reason": "Runner-only label/validator path forms, serialized canary revalidation and final-output attestation (#1307\u2013#1310, #1312); complete prompts, instruments, inputs, cohort and budget unchanged."
+    "path": "notes/reference_rescore_2026-09-11/registrations/manifest-before-canary-runtime-fixes.json",
+    "sha256": "127d789d8ed668f20bc364afe2a71f8d18edfe724e1496009e22ad7735e38c79",
+    "reason": "#1303/#1304/#1305: runner-only transcript parsing, CLI-attested model alias, and offline recovery fixes after one completed canary attempt; scoring definitions, complete prompts, inputs, cohort, and budget remain byte-identical"
   }
 }

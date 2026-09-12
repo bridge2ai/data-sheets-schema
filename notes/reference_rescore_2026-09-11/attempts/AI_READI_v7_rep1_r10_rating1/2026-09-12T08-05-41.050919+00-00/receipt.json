@@ -1,0 +1,11 @@
+{
+  "job_id": "AI_READI_v7_rep1_r10_rating1",
+  "started_at": "2026-09-12T08:05:41.051326+00:00",
+  "status": "incomplete",
+  "manifest_sha256": "78dc05cada5a4905d8eabd2320ebcd0054d83e92d5611de93b4f98fc557f324a",
+  "user_prompt_sha256": "2903d9b53ac82e60ad0dce7056a1a32ac1df2e3ca1033810d94b69619f4a14b5",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "error": "ValueError: output label does not identify this job",
+  "completed_at": "2026-09-12T08:14:10.369578+00:00"
+}
