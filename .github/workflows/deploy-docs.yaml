@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
 
+# Both documentation workflows publish the same branch. Acquire the group
+# before checkout so each publisher sees the previous deployment's commit.
+concurrency:
+  group: documentation-gh-pages
+  cancel-in-progress: false
+
 jobs:
   build-docs:
     runs-on: ubuntu-latest
