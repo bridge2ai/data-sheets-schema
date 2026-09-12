@@ -41,7 +41,9 @@ def main():
     before_jobs, after_jobs, status_jobs = [], [], []
     import reference_rescore_cborg_validator_status as status
     from datetime import datetime
-    for job, binding in zip(manifest["jobs"], written, strict=True):
+    if len(manifest["jobs"]) != len(written):
+        raise ValueError("original Write inventory differs from the manifest")
+    for job, binding in zip(manifest["jobs"], written):
         receipt = r.successful_receipt(manifest, job)
         source = ROOT / binding["original_attempt"]
         events = audit_module.read_trace(source)

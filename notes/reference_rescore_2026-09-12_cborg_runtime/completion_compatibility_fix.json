@@ -1,0 +1,12 @@
+{
+  "recorded_at": "2026-09-12T21:18:18.576847+00:00",
+  "issue": 1348,
+  "change": "Replace zip(strict=True) with an explicit equal-length guard and plain zip for supported Python3.9. Reporting only; no evaluator, prompt, input or original output changed.",
+  "helper": "notes/reference_rescore_2026-09-12_cborg_runtime/execution_tools/audit_completion.py",
+  "helper_sha256": "ccefb5a8c900f9ba07e1ff030168e4fe58f063edab23ab13b2c543732120fce4",
+  "validation": [
+    "Python3.9.6:56 committed manifest jobs pair correctly;55/57 bindings reject",
+    "Python3.13.12: same checks pass"
+  ],
+  "limits": "Full completion audit waits for all56 accepted original measurements; this only verifies the changed inventory guard and iterator."
+}
