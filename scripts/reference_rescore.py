@@ -486,11 +486,10 @@ def _recover_rating(manifest: dict, job: dict, source: Path, acceptance: dict | 
     verify_frozen(manifest)
     destination = ROOT / job["output"]
     manifest_sha = digest(PLAN / "manifest.json")
-    if destination.exists():
-        receipts = [json.loads(p.read_bytes())
-                    for p in (PLAN / "attempts" / job["id"]).glob("*/receipt.json")]
-        if any(r.get("status") == "passed" and r.get("manifest_sha256") == manifest_sha for r in receipts):
-            raise ValueError("successful output already exists for this registration; never overwrite a rating")
+    receipts = [json.loads(p.read_bytes())
+                for p in (PLAN / "attempts" / job["id"]).glob("*/receipt.json")]
+    if any(r.get("status") == "passed" and r.get("manifest_sha256") == manifest_sha for r in receipts):
+        raise ValueError("successful receipt already exists for this registration; never overwrite or duplicate a rating")
     original_bytes = (source / "receipt.json").read_bytes()
     original = json.loads(original_bytes)
     if (original.get("job_id") != job["id"] or original.get("status") not in ("incomplete", "passed")

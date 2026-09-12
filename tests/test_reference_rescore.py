@@ -503,6 +503,12 @@ def test_noncanary_recovery_preserves_original_evidence_and_requires_reaccepted_
     assert runner.successful_receipt(updated, job) == recovered
     with pytest.raises(ValueError, match="already exists"):
         runner.recover_rating(updated, source)
+    receipts = {p: p.read_bytes() for p in (runner.PLAN / "attempts" / job["id"]).glob("*/receipt.json")}
+    destination.unlink()
+    with pytest.raises(ValueError, match="already exists"):
+        runner.recover_rating(updated, source)
+    assert not destination.exists()
+    assert {p: p.read_bytes() for p in (runner.PLAN / "attempts" / job["id"]).glob("*/receipt.json")} == receipts
 
 
 @pytest.mark.parametrize("filename", ["receipt.json", "prompt.txt"])
@@ -565,6 +571,18 @@ def test_revalidation_cannot_treat_ambiguous_current_receipts_as_a_new_amendment
     with pytest.raises(ValueError, match="already exists"):
         runner.recover_canary(manifest, source)
     assert sorted((runner.PLAN / "attempts" / job["id"]).glob("*/receipt.json")) == before
+
+
+@pytest.mark.parametrize("entrypoint", [runner.recover_canary, runner.recover_rating])
+def test_missing_output_does_not_allow_duplicate_current_registration_receipts(retained_canary, entrypoint):
+    root, manifest, job, source, _ = retained_canary
+    runner.recover_canary(manifest, source)
+    receipts = {p: p.read_bytes() for p in (runner.PLAN / "attempts" / job["id"]).glob("*/receipt.json")}
+    (root / job["output"]).unlink()
+    with pytest.raises(ValueError, match="already exists"):
+        entrypoint(manifest, source)
+    assert not (root / job["output"]).exists()
+    assert {p: p.read_bytes() for p in (runner.PLAN / "attempts" / job["id"]).glob("*/receipt.json")} == receipts
 
 
 def test_overlapping_recovery_and_acceptance_cannot_publish_ambiguous_receipts(retained_canary, monkeypatch):
