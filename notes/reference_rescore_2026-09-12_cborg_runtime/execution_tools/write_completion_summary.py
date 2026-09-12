@@ -5,12 +5,70 @@ ratings and generation-replicate summaries; this wrapper attaches the dated
 semantic qualification before publishing derived manuscript tables.
 """
 from pathlib import Path
+from datetime import datetime
 import json
 import sys
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path[:0] = [str(ROOT / "src"), str(ROOT / "scripts")]
 import reference_rescore_cborg_batch as batch
+
+
+def timestamp_qualification(r, manifest, writes, inventory):
+    """Retain model timestamps while binding execution timing to audited receipts."""
+    bindings = {entry["job_id"]: entry for entry in writes["ratings"]}
+    jobs = manifest["jobs"]
+    if (len(bindings) != len(writes["ratings"]) or len(jobs) != len(bindings)
+            or set(bindings) != {job["id"] for job in jobs}):
+        raise ValueError("timestamp inspection requires every original Write binding")
+    cases = []
+    for job in jobs:
+        binding = bindings[job["id"]]
+        output = ROOT / job["output"]
+        source = ROOT / binding["original_attempt"]
+        if source.resolve().parent != (r.PLAN / "attempts" / job["id"]).resolve():
+            raise ValueError("timestamp source is outside this job's original attempts")
+        receipt_path = source / "receipt.json"
+        receipt_rel = str(receipt_path.relative_to(ROOT))
+        output_sha = r.digest(output)
+        receipt_sha = r.digest(receipt_path)
+        if (inventory.get(job["output"]) != output_sha
+                or binding["evaluation_sha256"] != output_sha
+                or inventory.get(receipt_rel) != receipt_sha):
+            raise ValueError("timestamp source differs from the audited measurement bytes")
+        receipt = json.loads(receipt_path.read_bytes())
+        if (receipt.get("status") != "passed" or receipt.get("job_id") != job["id"]
+                or receipt.get("evaluation_sha256") != output_sha):
+            raise ValueError("timestamp source is not the matching successful receipt")
+        started = datetime.fromisoformat(receipt["started_at"].replace("Z", "+00:00"))
+        completed = datetime.fromisoformat(receipt["completed_at"].replace("Z", "+00:00"))
+        if started.utcoffset() is None or completed.utcoffset() is None or completed < started:
+            raise ValueError("launcher receipt lacks a valid timezone-aware execution interval")
+        original = json.loads(output.read_bytes()).get("evaluation_timestamp")
+        relation = "missing_unparseable_or_timezone_unspecified"
+        if isinstance(original, str):
+            try:
+                timestamp = datetime.fromisoformat(original.replace("Z", "+00:00"))
+                if timestamp.utcoffset() is not None:
+                    relation = ("within_receipt_interval" if started <= timestamp <= completed
+                                else "outside_receipt_interval")
+            except ValueError:
+                pass
+        cases.append({"job_id": job["id"], "output": job["output"],
+                      "evaluation_sha256": output_sha, "model_evaluation_timestamp": original,
+                      "relation_to_receipt_interval": relation, "receipt": receipt_rel,
+                      "receipt_sha256": receipt_sha, "started_at": receipt["started_at"],
+                      "completed_at": receipt["completed_at"]})
+    outside = sum(case["relation_to_receipt_interval"] == "outside_receipt_interval" for case in cases)
+    incomparable = sum(case["relation_to_receipt_interval"] == "missing_unparseable_or_timezone_unspecified" for case in cases)
+    return {"issue": 1353, "related_issue": 667, "cases": cases,
+            "outside_receipt_interval": outside, "not_comparable": incomparable,
+            "qualification": ("Execution times and condition boundaries use launcher receipt started_at/completed_at, "
+                "with original receipt hashes recorded in results.json. Model-written evaluation_timestamp values "
+                "remain unchanged and are not independently verified, including values inside the recorded interval. "
+                f"Of {len(cases)} accepted ratings, {outside} metadata timestamps lie outside their session intervals "
+                f"and {incomparable} cannot be compared as timezone-aware timestamps. An interval mismatch alone "
+                "does not establish fabrication; approximations and timezone errors can also cause it.")}
 
 
 def main():
@@ -36,6 +94,7 @@ def main():
     for rel, sha in inventory.items():
         if r.digest(ROOT / rel) != sha:
             raise ValueError(f"measurement changed after audit: {rel}")
+    timing = timestamp_qualification(r, manifest, writes, inventory)
     review = json.loads((plan / "semantic_review.json").read_bytes())
     if (review["manifest_sha256"] != audit["manifest_sha256"]
             or review["definition_sha256"] != manifest["instruments"]["rubric20-semantic"]["definition_sha256"]):
@@ -101,7 +160,8 @@ def main():
               + " See [the deadline registration](deadline_registration_1351.json).\n\n"
               + "**Incomplete cost accounting:** " + audit["cost_qualification"] + "\n\n"
               + "**Evaluation prose:** " + narrative["qualification"]
-              + " See [the original statements and interpretation](canary_narrative_qualification.json).\n\n")
+              + " See [the original statements and interpretation](canary_narrative_qualification.json).\n\n"
+              + "**Evaluation timing:** " + timing["qualification"] + "\n\n")
     reports = [plan / name for name in ("results.json", "results.md", "completion_summary.md", "semantic_review.md")]
     before = {path: path.read_bytes() if path.exists() else None for path in reports}
     try:
@@ -114,6 +174,7 @@ def main():
         results["execution_permission_boundary"] = execution
         results["execution_deadline_boundary"] = deadline_boundary
         results["evaluation_narrative_qualification"] = narrative_qualification
+        results["evaluation_timestamp_qualification"] = timing
         results["cost_accounting"] = {key: audit[key] for key in (
             "cost_accounting_complete", "cli_reported_total_cost_usd", "known_terminal_cli_cost_usd",
             "unpriced_excluded_sessions", "cost_qualification")}
