@@ -1,0 +1,11 @@
+{
+  "job_id": "CHORUS_v8_rep1_r20_rating1",
+  "started_at": "2026-09-12T21:47:30.078871+00:00",
+  "status": "incomplete",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "caf753dbdb3a2f60543933f56c90551b85d90e834cb10679212d92f94a3b18a2",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "error": "ValueError: output label does not identify this job consistently",
+  "completed_at": "2026-09-12T21:55:39.952414+00:00"
+}

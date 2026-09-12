@@ -45,9 +45,6 @@ def load_registered():
                 or extension.get("permission_rules") != list(status.PERMISSION_RULES)):
             raise ValueError("validator status extension differs from its registration")
         status.enable(r)
-    if registration.get("deadline_extension"):
-        import reference_rescore_cborg_deadline as deadline
-        deadline.enable(r, registration)
     r.verify_frozen(manifest)
     return r, manifest, registration
 
@@ -150,9 +147,6 @@ def verify_reviewed_retry(r, job, registration, attempts):
             raise ValueError("retry requires a completed, excluded original attempt")
         if rel in registration.get("prelaunch_failures", {}):
             verify_prelaunch_failure(r, path, registration)
-        elif rel in registration.get("timeout_failures", {}):
-            import reference_rescore_cborg_deadline as deadline
-            deadline.verify_timeout_failure(r, path, registration)
         else:
             audit.terminal_cost(audit.read_trace(path))
 

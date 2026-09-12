@@ -1,0 +1,132 @@
+{
+  "job_id": "CHORUS_v7_rep3_r20_rating1",
+  "started_at": "2026-09-12T21:44:17.256611+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "a409c07ff9c8aa2a9bad5906f57c2ac5daf6574ede7f734bd9416381d1525aa3",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "90bc2010147407e66842a5504cdd6b9883bc987263e313ff60a28ca4f4963881",
+  "evaluation_sha256": "43a228dea6b422492527832d6227aac6ce3bae93b479765fa14dbfb2273e11a6",
+  "cli_result": {
+    "duration_api_ms": 515757,
+    "stop_reason": "end_turn",
+    "session_id": "bfcfa4c3-2cb9-4dac-9fa3-6ca91d3e9c17",
+    "total_cost_usd": 2.4869075,
+    "usage": {
+      "input_tokens": 315,
+      "cache_creation_input_tokens": 184280,
+      "cache_read_input_tokens": 505520,
+      "output_tokens": 39584,
+      "output_tokens_details": {
+        "thinking_tokens": 11108
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 184280
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 317,
+        "outputTokens": 39612,
+        "cacheReadInputTokens": 505520,
+        "cacheCreationInputTokens": 198762,
+        "webSearchRequests": 0,
+        "costUSD": 2.4869075,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 11108,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_018StJBgriMwWiGiDQSnmfFm",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-78l94pxw && find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "List working directory and find agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01UA3yqUkH2SoT15traxqZaf",
+        "tool_input": {
+          "command": "date -u +\"%Y-%m-%dT%H:%M:%SZ\"; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get current UTC timestamp and generate a UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "**Definition check \u2014 passed.** The \"Reproducibility\" section is present in my instructions and reads as expected. Quoted verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nI could not independently verify the sha256 of the definition on disk (no `.claude/agents/` tree exists in this working directory \u2014 only `data/rubric`, `input`, `scripts`, `src`), so the supplied digest is recorded as given rather than confirmed.\n\n## Evaluation complete \u2014 CHORUS, claudecode_agent, rep3\n\n**Validation:** `VALID output_evaluation.json: rubric20-semantic`, exit 0.\n\n**Score: 67/88 = 76.1%** (fixed and normalized coincide \u2014 all 20 questions resolved as applicable, `excluded_max_points: 0`).\n\n| Category | Score |\n|---|---|\n| Structural Completeness | 19/21 |\n| Metadata Quality & Content | 18/21 |\n| Technical Documentation | 16/25 |\n| FAIRness & Accessibility | 14/21 |\n\n**Applicability.** No question was excluded. Each conditional gate was resolved on fields outside the question's own scoring set, per the anti-circular rule: Q8/Q15 on `description` and `collection_mechanisms` (critically ill patients, ICU/PICU/NICU admissions); Q11 on `external_resources`' chorus-ai GitHub reference; Q10/Q12/Q13/Q17 on `third_party_sharing.is_shared: true` plus populated `distribution_formats`. Access requires approval, which the ambiguity rule directs toward `applicable: true`.\n\n**Shape of the record.** Technically excellent, ethically thin. Standards work is the strongest dimension \u2014 five modalities each on the correct community standard, explicit schema URI, admission-level cross-modal linkage (Q10 = 5) \u2014 and the funding block validates cleanly (OT2OD032701 matches NIH activity/institute/digit structure, RePORTER path matches the stated application ID). Against that, the human-subjects protections are absent as a block: no `human_subject_research` determination, no IRB, no consent or waiver, and `at_risk_populations` empty despite `subpopulations` itself naming neonatal and pediatric admissions. That last one is a genuine internal contradiction, not merely a missing field.\n\nThree further scored findings worth surfacing: no versioning at all for a release the record says is actively growing (Q13 = 2); `known_biases` entirely empty while a selection-bias statement with mitigation already sits under `known_limitations`, so the content exists but not where a RAI consumer reads it (Q20 = 2); and no demographics of any kind despite demographics being held as an OMOP data type (Q15 = 3).\n\nI did not penalize the record for its extensive `source_caveats`. They are correct practice \u2014 the gaps are attributed to the source bundle rather than papered over \u2014 but disclosure documents an absence without supplying the missing protection, so the gaps still scored.\n\n**Recorded:** 15 semantic issues (3 high, all human-subjects related), 20 consistency checks passed / 6 failed / 7 warnings; `doi_format: not_present`, `grant_number_format: valid_nih`, `url_validity: some_invalid` (one schemeless external URL; a published contact email carries an apparent upstream domain typo transcribed \"as published\"). Model recorded as `claude-opus-5` for both `name` and `evaluator_model`, `temperature: null`.",
+    "ttft_ms": 2872,
+    "type": "result",
+    "duration_ms": 518314,
+    "uuid": "ca8e4714-795e-4faf-98a9-dee4bcf86994",
+    "ttft_stream_ms": 1894,
+    "time_to_request_ms": 21,
+    "first_content_frame_ms": 1894,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01QYpW2hhGdbw8nWKQzDJVQn",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-12T21:52:56.413808+00:00"
+}

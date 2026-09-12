@@ -1,0 +1,26 @@
+{
+  "scope": "Exact observed message IDs only; response headers, credentials and unrelated rows omitted.",
+  "results": [
+    {
+      "request_id": "msg_vrtx_011CezHBtS9eXw9gPgnLyDqU",
+      "http_status": 200,
+      "returned_rows": 0,
+      "matching_rows": []
+    },
+    {
+      "request_id": "msg_vrtx_011CezHTNm9e4wsz4xftcZH2",
+      "http_status": 200,
+      "returned_rows": 0,
+      "matching_rows": []
+    },
+    {
+      "request_id": "msg_vrtx_011CezJ75f4Gg2cYi5As2zwC",
+      "http_status": 200,
+      "returned_rows": 0,
+      "matching_rows": []
+    }
+  ],
+  "recorded_at": "2026-09-12T22:12:50.346388+00:00",
+  "job_id": "CHORUS_v8_rep1_r10_rating1",
+  "interpretation": "Only three exact observed IDs from this first timed-out trace were queried. No matching rows returned. This does not imply zero usage or complete provider-side search; both timed-out session costs remain unknown."
+}

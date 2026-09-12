@@ -133,3 +133,11 @@ python scripts/reference_rescore_cborg_batch.py pilot
 python scripts/reference_rescore_cborg_batch.py accept-pilot
 python scripts/reference_rescore_cborg_batch.py remaining
 ```
+
+## Deadline boundary and retained exclusions (#1350/#1351)
+
+At 2026-09-12T22:12:54.831584+00:00, all workers drained with17 accepted ratings and6 retained excluded evaluator sessions:4 have terminal costs,2 timed out before any Write and have unknown cost. All23 actual evaluator sessions are inventoried separately from the one zero-call local preflight. Known terminal CLI estimates total $57.13448075; a full expenditure total is unknown. The provider lookup contains only three exact message IDs from the first timeout and returned no entries.
+
+The separately hashed execution extension increases the evaluator deadline from900 to1800seconds, preserving the $5 CLI cap and all56 full prompts, definitions, inputs, CLI, permissions and model identifiers. It retains any future timeout candidate before temporary-directory removal, without accepting it. The unchanged frozen audit remains strict by default. This dated accounting wrapper recognizes only the two reviewed byte-pinned timeout histories, reports their costs as null, and rejects every other unresolved attempt. Measurement/session completion can be reported with this explicit cost limitation.
+
+After independent review, run only CHORUS_v8_rep1_r10_rating1 as the fresh deadline retry pilot. Inspect its original output and execution evidence, then accept the new batch gate before the remaining38 ratings. The four new failures are eligible for one fresh retry each; no original candidate is edited or promoted. Both execution boundaries must qualify comparisons and repeat panels.

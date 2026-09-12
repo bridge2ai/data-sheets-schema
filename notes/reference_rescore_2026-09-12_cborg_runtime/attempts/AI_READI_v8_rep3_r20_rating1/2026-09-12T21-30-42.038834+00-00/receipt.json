@@ -1,0 +1,132 @@
+{
+  "job_id": "AI_READI_v8_rep3_r20_rating1",
+  "started_at": "2026-09-12T21:30:42.039012+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "bd3b595f002b656ceeb7c4552e0fb6708cb709768d61687aa1a39b5196ae7f05",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "01e3ef504db5ba6f21691c35fd0aa322661dd48f6d864cb38e053591b9763936",
+  "evaluation_sha256": "eeb9f97b0889a300a2601a4353028cc0298223b1de5f88d997ba5306ec559db3",
+  "cli_result": {
+    "duration_api_ms": 512580,
+    "stop_reason": "end_turn",
+    "session_id": "79275761-f473-40e2-988b-14f9c2daa323",
+    "total_cost_usd": 2.6341065,
+    "usage": {
+      "input_tokens": 308,
+      "cache_creation_input_tokens": 194776,
+      "cache_read_input_tokens": 392638,
+      "output_tokens": 41058,
+      "output_tokens_details": {
+        "thinking_tokens": 12302
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 194776
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 310,
+        "outputTokens": 41088,
+        "cacheReadInputTokens": 392638,
+        "cacheCreationInputTokens": 225446,
+        "webSearchRequests": 0,
+        "costUSD": 2.6341065,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 12302,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01Wm1tH8496Beru9KbchCbtp",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20; echo \"---PWD---\"; pwd; ls -la",
+          "description": "Locate agent definition file and list working directory"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_012doo6b7Jba9cG8k4gGibSb",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-guk5g7yg/input/record.yaml",
+          "description": "Compute checksum of input record"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 11,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "**Definition check \u2014 the sentence from my Reproducibility section, verbatim and in full:**\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nThis matches what I expect of the current instrument (it binds repeatability to the *definition* as well as the model, consistent with the #1077 two-hash rationale earlier in the same file), so I proceeded.\n\n**Evaluation complete and validated** (`VALID output_evaluation.json: rubric20-semantic`, exit 0).\n\n## Result: 83 / 88\n\n| Basis | Score | Denominator |\n|---|---|---|\n| Fixed | 94.3% | 88 (whole rubric) |\n| N/A-adjusted | 94.3% | 88 (adjusted) |\n\n`excluded_max_points: 0`, `questions_not_applicable: 0`, excluded item ids: **none**. All four trigger conditions resolved as met, each on fields belonging to *other* questions per the anti-circular rule:\n\n- **Human subjects** (gates Q8, Q15) \u2014 from `description`/`keywords`/`collection_mechanisms`, not from the ethics fields themselves.\n- **Datasets shared** (gates Q10, Q17) \u2014 `distribution_formats`, FAIRhub page/access URL, `third_party_sharing.is_shared`.\n- **Software output** (gates Q11) \u2014 `external_resources` cites `https://github.com/AI-READI`, so Q11 is scored rather than excluded.\n- **Collection + shared** (gates Q12, Q13) \u2014 collection fields populated and sharing condition met.\n\n### Points not awarded (5)\n- **Q1 = 4** \u2014 12/14 fields (85.7%); `resources` and `parent_datasets` empty.\n- **Q3 = 3** \u2014 7 keywords, one short of the band; OCT, OCTA, FLIO, wearables and environmental sensing are unkeyworded despite being most of the release.\n- **Q11 = 4** \u2014 comprehensive strategies, but no preparation software is named anywhere; the .fda/.sdt\u2192DICOM and .FIT\u2192mHealth conversions are unreproducible from the record.\n- **Q19 = 4** \u2014 lineage narrated at strategy level; no `was_derived_from`, no errata, and the declared RO-Crate isn't used to carry the entity\u2013activity\u2013agent graph.\n\n### Semantic analysis\n26 consistency checks passed, 3 failed, 8 warnings. The arithmetic independently reconciles: collection file counts sum to nine short of `total_file_count` (matching the nine root metadata files), collection bytes land within 419,614 bytes of `total_size_bytes`, and every demographic stratification sums to 2,280 both within the cohort and across splits. Identifiers validate \u2014 three well-formed NIH grant numbers, an ORCID passing the MOD 11-2 checksum, a consistently used DOI prefix.\n\nThe three failures: `confidentiality_level: restricted` is the record's own substitution contradicting the sole sourced value and sits beside `confidential_elements_present: false`; the de-identification method is under-determined across three conflicting sources; `is_sample: false` contradicts the non-probability recruitment described in the same object. Each is disclosed by the record itself, which is why Q9 was not reduced \u2014 the disclosure preserves the field's usability \u2014 but the de-identification ambiguity is the one place where an unresolved conflict genuinely impairs a reuser's risk assessment.",
+    "ttft_ms": 4089,
+    "type": "result",
+    "duration_ms": 513462,
+    "uuid": "2455fbd0-1649-4051-a633-34afc88b800a",
+    "ttft_stream_ms": 3113,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 3113,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01NN7VBU7R2icxvXVGg8vpvR",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-12T21:39:16.333556+00:00"
+}

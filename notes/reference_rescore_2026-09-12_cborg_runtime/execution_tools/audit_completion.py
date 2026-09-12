@@ -13,26 +13,19 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path[:0] = [str(ROOT / "src"), str(ROOT / "scripts")]
 import audit_reference_rescore as audit_module
 import reference_rescore_cborg_batch as batch
+import reference_rescore_cborg_deadline as deadline
 
 
 def main():
     if batch.PLAN != Path(__file__).resolve().parents[1]:
         raise ValueError("This dated helper requires its own registered condition; use the current condition helper or check out the recorded revision.")
     r, manifest, registration = batch.load_registered()
-    audit_module.r = r
-    original_inventory = audit_module.inventory_attempts
-    audit_module.inventory_attempts = lambda root, plan, jobs: batch.inventory_with_prelaunch(
-        r, registration, original_inventory, root, plan, jobs)
-    try:
-        audit = audit_module.audit_results(complete=False)
-    finally:
-        audit_module.inventory_attempts = original_inventory
+    audit = deadline.accounted_audit(r, registration)
     prelaunch = [batch.verify_prelaunch_failure(r, ROOT / rel, registration)
                  for rel in registration.get("prelaunch_failures", {})]
     if (audit["status"] != "verified" or audit["accepted"] != audit["planned"] or audit["planned"] != 56
-            or audit["unresolved_attempts"] or not audit["session_accounting_complete"]
-            or not audit["cost_accounting_complete"]):
-        raise ValueError("completion requires all 56 original ratings and complete attempt/usage accounting")
+            or audit["unresolved_attempts"] or not audit["session_accounting_complete"]):
+        raise ValueError("completion requires all 56 original ratings and accounted session outcomes")
     batch.require_pilot(r, manifest, registration)
     written = [batch.verified_output(r, manifest, job) for job in manifest["jobs"]]
     boundary_path = r.PLAN / "validator_status_registration.json"
@@ -73,6 +66,34 @@ def main():
         "accepted_status_echo_job_ids": status_jobs,
         "repeat_panels_spanning_boundary": sorted(project for project, stages in panel_stages.items() if len(stages) > 1),
         "qualification": "Five accepted ratings precede the validator-status permission extension and 51 follow it. Scoring prompts, definitions and inputs are unchanged, but execution permissions differ. Cohort comparisons and repeat panels spanning this boundary do not isolate permission effects; small differences cannot be attributed solely to generation version or evaluator variability.",
+    }
+    deadline_path = r.PLAN / "deadline_registration_1351.json"
+    deadline_boundary = json.loads(deadline_path.read_bytes())
+    earlier_deadline = deadline_boundary["accepted_outputs_preserved"]
+    deadline_before, deadline_after = [], []
+    for job, binding in zip(manifest["jobs"], written):
+        receipt = r.successful_receipt(manifest, job)
+        if job["output"] in earlier_deadline:
+            if (r.digest(ROOT / job["output"]) != earlier_deadline[job["output"]]
+                    or datetime.fromisoformat(receipt["completed_at"]) >= datetime.fromisoformat(deadline_boundary["recorded_at"])):
+                raise ValueError("pre-deadline measurement differs from the registered boundary")
+            deadline_before.append(job["id"])
+        else:
+            source = ROOT / binding["original_attempt"]
+            proof = json.loads((source / "execution_deadline.json").read_bytes())
+            if (datetime.fromisoformat(receipt["started_at"]) < datetime.fromisoformat(deadline_boundary["recorded_at"])
+                    or proof["extension"] != registration["deadline_extension"]
+                    or proof["timeout_seconds"] != deadline.SECONDS or proof["timed_out"] is not False
+                    or proof["returncode"] != 0):
+                raise ValueError("post-deadline measurement lacks matching execution evidence")
+            deadline_after.append(job["id"])
+    if len(deadline_before) != len(earlier_deadline) or len(deadline_before) != 17 or len(deadline_after) != 39:
+        raise ValueError("completed deadline-boundary inventory differs from registration")
+    audit["execution_deadline_boundary"] = {
+        "registration": str(deadline_path.relative_to(ROOT)), "registration_sha256": r.digest(deadline_path),
+        "recorded_at": deadline_boundary["recorded_at"],
+        "accepted_before_job_ids": deadline_before, "accepted_after_job_ids": deadline_after,
+        "qualification": "Seventeen accepted ratings precede the execution deadline increase from 900 to 1800 seconds; 39 follow it. Scoring prompts, definitions, inputs and the $5 CLI cap are unchanged. This execution boundary can affect completion/selection, so cohort and repeat comparisons do not isolate generation-version or evaluator effects.",
     }
     preserved = {}
     for mapping in (registration["preserved_files"], registration["existing_outputs"]):
@@ -131,7 +152,7 @@ def main():
                   "v9_generated_records": v9["generated_records"],
                   "v9_model_requests": v9["model_requests"],
                   "v9_catalogue_price_estimate_usd": v9["catalogue_price_estimate_usd"],
-                  "cost_basis": "Evaluation CLI list-price estimates include excluded sessions. Generation uses observed CBORG catalogue rates. Neither is a reconciled invoice; review-tool usage is outside these figures."})
+                  "cost_basis": "The known evaluation CLI subtotal includes priced excluded sessions and omits explicitly unpriced interruptions; total expenditure is unknown. Generation uses observed CBORG catalogue rates. Neither is a reconciled invoice; review-tool usage is outside these figures."})
     r.write_json(r.PLAN / "completion_audit.json", audit)
     r.write_json(r.PLAN / "final_written_output_audit.json", {
         "verified_at": r.now(), "manifest_sha256": audit["manifest_sha256"], "accepted": len(written),

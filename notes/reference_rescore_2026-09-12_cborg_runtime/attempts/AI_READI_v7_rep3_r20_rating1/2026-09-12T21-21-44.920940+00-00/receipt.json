@@ -1,0 +1,148 @@
+{
+  "job_id": "AI_READI_v7_rep3_r20_rating1",
+  "started_at": "2026-09-12T21:21:44.921053+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "de9530b69f159b671119ab4bb40fcd4283def9627c32bc2ec0b03e4affde5124",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "d221e2b36c2a98ebe21f57bc72039e6b840323b37d5155053e592fe9fb247409",
+  "evaluation_sha256": "3839068ada7e6483de6b40fe5a8d5ac028a1de4ee7f187bb363a123fde5e5713",
+  "cli_result": {
+    "duration_api_ms": 851800,
+    "stop_reason": "end_turn",
+    "session_id": "d0394454-1b5e-4871-8b6f-feb05e1118b4",
+    "total_cost_usd": 2.9832785,
+    "usage": {
+      "input_tokens": 314,
+      "cache_creation_input_tokens": 210944,
+      "cache_read_input_tokens": 596639,
+      "output_tokens": 43206,
+      "output_tokens_details": {
+        "thinking_tokens": 12543
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 210944
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 318,
+        "outputTokens": 43237,
+        "cacheReadInputTokens": 715252,
+        "cacheCreationInputTokens": 246902,
+        "webSearchRequests": 0,
+        "costUSD": 2.9832785,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 12543,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_012KysMSjsE4va6tVzYDKjsM",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-8uv8decr/ 2>/dev/null; echo \"---\"; find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01FP7snC7Lcn6SuXkioj3X1d",
+        "tool_input": {
+          "command": "python3 -c \"import datetime,uuid; print(datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')); print(uuid.uuid4())\"",
+          "description": "Generate timestamp and UUID"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_0176HvgvXCfnF1rpHBJ6af6w",
+        "tool_input": {
+          "command": "python3 -c \"\nimport hashlib\nprint(hashlib.sha256(open('input/record.yaml','rb').read()).hexdigest())\nprint(hashlib.sha256(open('data/rubric/rubric20.txt','rb').read()).hexdigest())\n\"",
+          "description": "Compute record and rubric hashes"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01MpKEXFHX3CzNZ1MvcxSscb",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; uuidgen",
+          "description": "Get UTC timestamp and generate UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 16,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed with exit status 0.\n\n**Definition quote**, verbatim from the \"Reproducibility\" section of my instructions:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nThe section is present and reads as expected of the current rules, so I proceeded.\n\n## Result\n\n`output_evaluation.json` written and validated (`VALID output_evaluation.json: rubric20-semantic`, exit 0).\n\n**Score: 85 / 88** \u2014 fixed 96.6% (denominator 88), normalized 96.6% (adjusted denominator 88). No question excluded, so the two bases coincide.\n\n| Category | Score |\n|---|---|\n| Structural Completeness (Q1\u20135) | 20 / 21 |\n| Metadata Quality & Content (Q6\u201310) | 21 / 21 |\n| Technical Documentation (Q11\u201315) | 24 / 25 |\n| FAIRness & Accessibility (Q16\u201320) | 20 / 21 |\n\nDeductions: **Q1 = 4** (12 of 14 enumerated fields; `resources` and `parent_datasets` empty), **Q11 = 4** (conversions described by input/output format but no converter name, version or repo path), **Q18 = 4** (`discouraged_uses` empty with its substance supplied nowhere else, and social-impact analysis confined to re-identification).\n\n**Applicability.** All four trigger conditions were resolved before scoring, each on fields outside the gated question's own set per the anti-circular rule: human subjects from `description`/`keywords`/`collection_mechanisms` (gates Q8, Q15); datasets shared from `page`, `distribution_formats.access_urls`, `third_party_sharing.is_shared` (Q10, Q17); software output from `external_resources` referencing `https://github.com/AI-READI` (Q11); collection-plus-shared (Q12, Q13). Zero N/A, `excluded_max_points: 0`.\n\n**Semantic findings.** I recomputed every quantitative claim rather than accepting it. The file-count arithmetic reconciles exactly (356,334 + 9 root files = 356,343), the nine directory byte totals sum to precisely the figure the record states, with exactly the disclosed 419,614-byte residual, and all cohort, split and cross-split demographic tables reconcile to 2,280 without a discrepancy. Grant `OT2OD032644` parses as a valid NIH OT2/OD award matching its stated Bridge2AI programme; DOI prefixes are registrar-consistent (10.60775 FAIRhub, 10.5281 Zenodo, 10.1038, 10.1136). Ten issues recorded: 27 checks passed, 3 failed, 8 warnings. The three failures are the byte residual, the contradictory `sensitive_elements` booleans, and the empty `data_protection_impacts`.\n\nTwo judgement calls worth surfacing, since they cut opposite ways on superficially similar gaps. Q8 keeps 5 despite the empty `data_protection_impacts` because that field's substance is delivered by two other fields the same question names \u2014 `participant_privacy.reidentification_risk` and `future_use_impacts`. Q18 drops to 4 because `discouraged_uses` has no substitute anywhere: `prohibited_uses` states what is forbidden, not what is permitted but unwise, and this cohort is deliberately balanced rather than population-representative, which is precisely the misuse a discouraged-use note should catch.\n\nProvenance recorded as instructed: `instrument_sha256` `9d08b5f3\u20260e7dd3` with `instrument_kind: agent_definition`, the supplied `rubric_hash` and `input_sha256`, `d4d_file` set to the `data/d4d_concatenated/...` path rather than the temporary input, `temperature: null`, and `claude-opus-5` as both `model.name` and `model.evaluator_model`.",
+    "ttft_ms": 3381,
+    "type": "result",
+    "duration_ms": 853513,
+    "uuid": "46d28e4a-ec82-49a1-a526-393288bfc4d2",
+    "ttft_stream_ms": 2405,
+    "time_to_request_ms": 26,
+    "first_content_frame_ms": 2405,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_019G9PFiKRWjG5faUFQgRDA8",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-12T21:35:59.456680+00:00"
+}

@@ -16,15 +16,22 @@ import reference_rescore_cborg_batch as batch
 def main():
     if batch.PLAN != Path(__file__).resolve().parents[1]:
         raise ValueError("This dated helper requires its own registered condition; use the current condition helper or check out the recorded revision.")
-    r, manifest, _ = batch.load_registered()
+    r, manifest, registration = batch.load_registered()
     plan = r.PLAN
     audit = json.loads((plan / "completion_audit.json").read_bytes())
     writes = json.loads((plan / "final_written_output_audit.json").read_bytes())
     if (audit["status"] != "verified" or audit["accepted"] != audit["planned"] or audit["planned"] != 56
             or writes["accepted"] != 56 or audit["manifest_sha256"] != r.digest(plan / "manifest.json")
             or writes["manifest_sha256"] != audit["manifest_sha256"] or audit["unresolved_attempts"]
-            or not audit["session_accounting_complete"] or not audit["cost_accounting_complete"]):
-        raise ValueError("complete original measurements and usage evidence are required before reporting")
+            or not audit["session_accounting_complete"]
+            or audit["batch_registration_sha256"] != r.digest(batch.REGISTRATION)):
+        raise ValueError("complete original measurements and matching session evidence are required before reporting")
+    import reference_rescore_cborg_deadline as deadline
+    current = deadline.accounted_audit(r, registration)
+    for field in ("accepted", "actual_model_calls", "cost_accounting_complete", "cli_reported_total_cost_usd",
+                  "known_terminal_cli_cost_usd", "unpriced_excluded_sessions", "cost_qualification"):
+        if current.get(field) != audit.get(field):
+            raise ValueError("session/cost evidence changed after the audit")
     inventory = json.loads((plan / "measurement_file_hashes.json").read_bytes())["files"]
     for rel, sha in inventory.items():
         if r.digest(ROOT / rel) != sha:
@@ -61,11 +68,17 @@ def main():
     execution = audit["execution_permission_boundary"]
     if r.digest(ROOT / execution["registration"]) != execution["registration_sha256"]:
         raise ValueError("execution-boundary registration changed after the audit")
+    deadline_boundary = audit["execution_deadline_boundary"]
+    if r.digest(ROOT / deadline_boundary["registration"]) != deadline_boundary["registration_sha256"]:
+        raise ValueError("deadline-boundary registration changed after the audit")
     banner = ("**Semantic inspection — Q19:** " + review["qualification"]
               + " See the [24-rating inspection](semantic_review.md).\n\n"
               + "**Execution boundary:** " + execution["qualification"]
               + " Repeat panels spanning it: " + ", ".join(execution["repeat_panels_spanning_boundary"])
-              + ". See [the dated registration](validator_status_registration.json).\n\n")
+              + ". See [the dated registration](validator_status_registration.json).\n\n"
+              + "**Execution deadline:** " + deadline_boundary["qualification"]
+              + " See [the deadline registration](deadline_registration_1351.json).\n\n"
+              + "**Incomplete cost accounting:** " + audit["cost_qualification"] + "\n\n")
     reports = [plan / name for name in ("results.json", "results.md", "completion_summary.md", "semantic_review.md")]
     before = {path: path.read_bytes() if path.exists() else None for path in reports}
     try:
@@ -76,6 +89,10 @@ def main():
         results["provider_condition"] = "LBL CBORG / 2026-09-12 with execution-metadata provenance; separate from preliminary and prior reference runs"
         results["semantic_qualification"] = qualification
         results["execution_permission_boundary"] = execution
+        results["execution_deadline_boundary"] = deadline_boundary
+        results["cost_accounting"] = {key: audit[key] for key in (
+            "cost_accounting_complete", "cli_reported_total_cost_usd", "known_terminal_cli_cost_usd",
+            "unpriced_excluded_sessions", "cost_qualification")}
         r.write_json(plan / "results.json", results)
         text = (plan / "results.md").read_text().replace(str(ROOT) + "/", "")
         title, rest = text.split("\n", 1)
@@ -85,7 +102,7 @@ def main():
         (plan / "results.md").write_text(title + "\n\n" + banner + rest.lstrip("\n"))
         lines = ["# CBORG reference rescore completion — 2026-09-12", "", banner.rstrip(), "",
                  "Completed **56 accepted ratings** of the 24 existing v7/v8 D4Ds: 48 primary ratings across both semantic rubrics and eight additional rubric10 ratings. All original scores remain unchanged; this provider condition is separate from the earlier reference run.", "",
-                 f"The [completion audit](completion_audit.json) accounts for {audit['actual_model_calls']} evaluator CLI sessions, including {audit['excluded_original_attempts']} retained excluded attempts in this completed condition. The separate preliminary condition used {audit['preliminary_condition']['sessions']} sessions and ${audit['preliminary_condition']['cli_reported_cost_usd']:.8f}, retaining one accepted canary and three excluded attempts; none is pooled into these 56 ratings. All {audit['prior_evaluations_unchanged']} prior evaluations retain their hashes, all 56 accepted outputs match their original successful Writes, and peak completed-session concurrency was {audit['peak_completed_session_concurrency']}. CLI-reported usage totals **${audit['cli_reported_total_cost_usd']:.8f}**. A session may contain multiple model/tool turns; this is not a count of HTTP requests or a reconciled invoice. Review-tool usage is outside this figure.", "",
+                 f"The [completion audit](completion_audit.json) accounts for {audit['actual_model_calls']} evaluator CLI sessions, including {audit['excluded_original_attempts']} retained excluded attempts in this completed condition. The separate preliminary condition used {audit['preliminary_condition']['sessions']} sessions and ${audit['preliminary_condition']['cli_reported_cost_usd']:.8f}, retaining one accepted canary and three excluded attempts; none is pooled into these 56 ratings. All {audit['prior_evaluations_unchanged']} prior evaluations retain their hashes, all 56 accepted outputs match their original successful Writes, and peak completed-session concurrency was {audit['peak_completed_session_concurrency']}. The known terminal CLI subtotal is **${audit['known_terminal_cli_cost_usd']:.8f}**; it excludes the two unpriced interrupted sessions and is not a complete expenditure total. A session may contain multiple model/tool turns; this is not a count of HTTP requests or a reconciled invoice. Review-tool usage is outside this figure.", "",
                  f"The audit separately retains {len(audit['verified_local_prelaunch_failures'])} verified local pre-launch failure(s). These stopped at the registered CLI version guard before evaluator exec, produced no model-session cost record and are not counted as evaluator sessions.", "",
                  "The runtime trace identifies `claude-opus-5`, requested through CBORG as `claude-opus-5[1m]` at high effort with temperature unspecified. Definitions, inputs, complete prompts and schemas are pinned by the [manifest](manifest.json). Every accepted rating passed identity, check-echo, arithmetic, schema and original-output checks. All rubric10 headings match the source rubric.", "",
                  f"Rubric10 definition: `{manifest['instruments']['rubric10-semantic']['definition_sha256']}`. Rubric20 definition: `{manifest['instruments']['rubric20-semantic']['definition_sha256']}`.", "",
