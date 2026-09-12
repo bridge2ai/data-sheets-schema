@@ -46,9 +46,38 @@ def test_new_provider_preserves_cohort_and_uses_new_output_locations():
     assert len({j["input"] for j in jobs}) == 24
     assert sum(j["purpose"] == "primary" for j in jobs) == 48
     assert jobs[0]["id"] == "CHORUS_v7_rep1_r10_rating1"
-    assert all("/reference_2026-09-12_cborg/" in j["output"] for j in jobs)
-    assert runner.PLAN.name == "reference_rescore_2026-09-12_cborg"
+    assert all("/reference_2026-09-12_cborg_runtime/" in j["output"] for j in jobs)
+    assert runner.PLAN.name == "reference_rescore_2026-09-12_cborg_runtime"
     assert all((ROOT / j["input"]).is_file() for j in jobs)
+
+
+def test_execution_metadata_preserves_scoring_prompt_and_stays_outside_record():
+    import json
+    import reference_rescore as original
+
+    manifest = json.loads((ROOT / "notes/reference_rescore_2026-09-12_cborg/manifest.json").read_bytes())
+    manifest["transport"] = adapter.TRANSPORT
+    runner = adapter.load_runner()
+    for job in runner.cohort_jobs():
+        prompt = runner.job_prompt(manifest, job)
+        prefix = original.job_prompt(manifest, job)
+        assert prompt.startswith(prefix)
+        suffix = prompt[len(prefix):]
+        assert prefix.rstrip().endswith("</record>")
+        assert '"model.name": "claude-opus-5"' in suffix
+        assert '"model.evaluator_model": "claude-opus-5"' in suffix
+        assert "independently check" in suffix
+        assert prompt.startswith(manifest["instruments"][job["rubric"]]["preamble"])
+
+
+def test_identity_metadata_comes_from_registration_not_record_contents():
+    import json
+
+    manifest = json.loads((ROOT / "notes/reference_rescore_2026-09-12_cborg/manifest.json").read_bytes())
+    manifest["transport"] = {**adapter.TRANSPORT, "runtime_model_identifier": "test-configured-identifier"}
+    runner = adapter.load_runner()
+    prompt = runner.job_prompt(manifest, runner.cohort_jobs()[0])
+    assert '"model.name": "test-configured-identifier"' in prompt.split("Execution metadata supplied by the launcher", 1)[1]
 
 
 def test_actual_launcher_preserves_write_tool_and_uses_fresh_config(tmp_path, monkeypatch):

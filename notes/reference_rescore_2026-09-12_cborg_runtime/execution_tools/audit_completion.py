@@ -44,7 +44,7 @@ def main():
             seen.add(rel)
             preserved[rel] = sha
             current = json.loads((ROOT / rel).read_bytes())
-    archives = r.PLAN / "registrations"
+    archives = ROOT / "notes/reference_rescore_2026-09-12_cborg/registrations"
     for stem in ("interruption", "stop-race", "reviewed-retry", "missing-history"):
         prior = json.loads((archives / f"batch-registration-before-{stem}-fix.json").read_bytes())
         path = archives / f"reference_rescore_cborg_batch-before-{stem}-fix.py"
@@ -69,7 +69,8 @@ def main():
             # A stopped or failed launch remains in the audit even after a
             # separately registered repair. Do not erase the controller record.
             audit.setdefault("controller_runs_with_worker_failures", []).append(str(result_path.relative_to(ROOT)))
-    audit.update({"provider": "LBL CBORG", "transport_manifest_sha256": r.digest(r.PLAN / "manifest.json"),
+    preliminary = json.loads((ROOT / "notes/reference_rescore_2026-09-12_cborg/preliminary_audit.json").read_bytes())
+    audit.update({"preliminary_condition": {"path": "notes/reference_rescore_2026-09-12_cborg/preliminary_audit.json", "sessions": preliminary["actual_model_calls"], "accepted_canaries_retained_separately": preliminary["accepted"], "excluded_attempts": preliminary["excluded_original_attempts"], "cli_reported_cost_usd": preliminary["cli_reported_total_cost_usd"]}, "provider": "LBL CBORG", "transport_manifest_sha256": r.digest(r.PLAN / "manifest.json"),
                   "batch_registration_sha256": r.digest(batch.REGISTRATION),
                   "original_successful_write_bindings": len(written),
                   "pre_batch_and_generation_preservation_hashes_verified": len(preserved),

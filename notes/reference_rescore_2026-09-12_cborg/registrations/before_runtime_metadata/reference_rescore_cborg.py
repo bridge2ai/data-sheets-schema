@@ -16,7 +16,7 @@ import shutil
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-DATE = "2026-09-12_cborg_runtime"
+DATE = "2026-09-12_cborg"
 TRANSPORT = {
     "provider": "LBL CBORG",
     "base_url": "https://api.cborg.lbl.gov",
@@ -26,8 +26,6 @@ TRANSPORT = {
     "additional_cli_flags": [],
     "credential_isolation": "fresh .cborg-cli-config directory inside each isolated rating workspace",
     "required_tools": ["Bash", "Read", "Write"],
-    "runtime_model_identifier": "claude-opus-5",
-    "output_model_identity_basis": "Configured API identifier, independently checked against returned CLI/runtime evidence; not model self-identification of weights.",
     "environment": {
         "DISABLE_NON_ESSENTIAL_MODEL_CALLS": "1",
         "DISABLE_TELEMETRY": "1",
@@ -65,30 +63,12 @@ def load_runner():
     runner.DATE = DATE
     runner.PLAN = ROOT / f"notes/reference_rescore_{DATE}"
     validate = runner.validate_candidate
-    scoring_prompt = runner.job_prompt
-
-    def prompt_with_execution_metadata(manifest, job):
-        identity = manifest["transport"]["runtime_model_identifier"]
-        return scoring_prompt(manifest, job) + (
-            "\nExecution metadata supplied by the launcher (outside the record):\n"
-            "The model fields in this evaluation identify the configured API/runtime identifier. "
-            "They are execution provenance, not an introspective claim about underlying model weights. "
-            "Use the supplied canonical identifier for model.name and model.evaluator_model; "
-            "do not substitute a remembered training identity or the record's generator identity. "
-            "The retained runtime trace will independently check these values and reject any actual route mismatch.\n"
-            + json.dumps({"provider": manifest["transport"]["provider"],
-                          "requested_selector": manifest["requested_model"],
-                          "model.name": identity, "model.evaluator_model": identity,
-                          "model.model_identity_note": "API/runtime identifier supplied by the launcher and verified against the retained runtime trace; not an identification of underlying weights."}, indent=2)
-            + "\nAll scoring criteria, evidence requirements and the definition check above remain unchanged.\n"
-        )
 
     def validate_with_transport(path, job, manifest, events):
         verify_runtime_transport(events)
         return validate(path, job, manifest, events)
 
     runner.validate_candidate = validate_with_transport
-    runner.job_prompt = prompt_with_execution_metadata
     return runner
 
 
@@ -108,12 +88,11 @@ def verify_runtime_transport(events: list[dict]) -> None:
 def freeze(runner):
     manifest = runner.freeze()
     manifest["transport"] = TRANSPORT
-    manifest["issue"] = 1343
     manifest["condition_boundary"] = {
-        "reason": "#1343: use configured and returned API/runtime identifiers for provenance after two preliminary sessions self-identified differently. The scoring definitions stay fixed; all 56 prompts receive identical execution metadata in a fresh output condition.",
-        "previous_registration": "notes/reference_rescore_2026-09-12_cborg/manifest.json",
-        "previous_registration_sha256": runner.digest(ROOT / "notes/reference_rescore_2026-09-12_cborg/manifest.json"),
-        "prior_measurements": "Preserved; the one accepted preliminary canary and all failed attempts remain separate and are not counted among this condition's 56 ratings.",
+        "reason": "User requested a separate rescore through the CBORG API on 2026-09-12.",
+        "previous_registration": "notes/reference_rescore_2026-09-11/manifest.json",
+        "previous_registration_sha256": runner.digest(ROOT / "notes/reference_rescore_2026-09-11/manifest.json"),
+        "prior_measurements": "Preserved; do not pool or overwrite the earlier provider condition.",
         "semantic_limit": "Frozen rubric20 Q19 text-or-graph rule remains unchanged; mechanical acceptance is not semantic adjudication.",
     }
     for rel in ("scripts/reference_rescore_cborg.py", "src/data_sheets_schema/agent_pin.py"):

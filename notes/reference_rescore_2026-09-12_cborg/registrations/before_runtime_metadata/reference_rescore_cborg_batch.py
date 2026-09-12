@@ -23,7 +23,7 @@ import time
 import reference_rescore_cborg as c
 
 ROOT = c.ROOT
-PLAN = ROOT / f"notes/reference_rescore_{c.DATE}"
+PLAN = ROOT / "notes/reference_rescore_2026-09-12_cborg"
 REGISTRATION = PLAN / "batch_registration.json"
 
 

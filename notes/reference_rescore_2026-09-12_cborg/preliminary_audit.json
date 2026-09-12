@@ -1,0 +1,75 @@
+{
+  "audited_at": "2026-09-12T19:48:45.591514+00:00",
+  "status": "verified",
+  "manifest_sha256": "e71b8805b7fde90b5e64e23ba1c1f346f2f17e33fe49df7c98c9e885aeec1501",
+  "unresolved_attempts": [],
+  "session_accounting_complete": true,
+  "cost_accounting_complete": true,
+  "accepted": 1,
+  "planned": 56,
+  "actual_model_calls": 4,
+  "model_call_unit": "one isolated evaluator CLI session, which may contain multiple model/tool turns",
+  "attempts_without_reported_cost": 0,
+  "excluded_original_attempts": 3,
+  "cli_reported_total_cost_usd": 10.2673605,
+  "peak_completed_session_concurrency": 1,
+  "prior_evaluations_unchanged": 258,
+  "rubric10_source_aligned_headings_verified": true,
+  "ratings": [
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg/CHORUS_v7_rep1_r10_rating1_evaluation.json",
+      "evaluation_sha256": "8b08357453730a468b3f47f8c0c0315d1ef30fe69ed937a0c95cbf2f9f9d8178",
+      "original_attempt": "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-35-24.172466+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 35,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 70.0,
+        "fixed_percentage": 70.0,
+        "sub_elements_not_applicable": 0,
+        "denominator_note": "fixed_percentage = 35/50 x 100 = 70.0; normalized_percentage = 35/50 x 100 = 70.0. All five trigger conditions are satisfied, so no sub-element is excluded and the two bases coincide. Excluded item identities: none."
+      }
+    }
+  ],
+  "original_calls": [
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-10-04.833451+00-00",
+      "status": "incomplete",
+      "original_error": "ValueError: CLI failed or produced no evaluation; inspect the retained transcript",
+      "evaluator_validation_succeeded": false,
+      "cli_reported_cost_usd": 2.433457,
+      "accepted_source": false
+    },
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-35-24.172466+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.80151575,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating2",
+      "source": "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00",
+      "status": "incomplete",
+      "original_error": "ValueError: model.name disagrees with the runtime trace",
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.4216595,
+      "accepted_source": false
+    },
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating2",
+      "source": "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-32-36.629853+00-00",
+      "status": "incomplete",
+      "original_error": "ValueError: model.name disagrees with the runtime trace",
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.6107282500000006,
+      "accepted_source": false
+    }
+  ]
+}

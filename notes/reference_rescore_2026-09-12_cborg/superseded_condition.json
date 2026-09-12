@@ -1,0 +1,15 @@
+{
+  "recorded_at": "2026-09-12T19:53:53.446374+00:00",
+  "status": "superseded before cohort fill",
+  "next_condition": "notes/reference_rescore_2026-09-12_cborg_runtime",
+  "next_manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "reason": "API/runtime identifiers are execution provenance. Two evaluators self-identified as Opus 4.5 despite request/context/route metadata naming Opus 5. The new prompt provides the configured identifier and preserves independent runtime verification. No scoring criterion changes.",
+  "completed_cli_sessions": 4,
+  "accepted_canaries_retained_separately": 1,
+  "excluded_attempts": 3,
+  "cli_reported_cost_usd": 10.2673605,
+  "measurements_unchanged": true,
+  "planned_jobs_never_launched": 54,
+  "planned_jobs_without_accepted_output": 55,
+  "distinct_jobs_attempted": 2
+}

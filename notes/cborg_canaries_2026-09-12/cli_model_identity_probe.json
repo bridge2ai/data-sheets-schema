@@ -1,0 +1,66 @@
+{
+  "verification": "Actual installed CLI request to a local rejecting server; synthetic input and key. Only model-identity excerpts and hashes retained here, not full CLI system context or HTTP headers.",
+  "cli_version": "2.1.269",
+  "cases": [
+    {
+      "selector": "claude-opus-5[1m]",
+      "matching_requests": [
+        {
+          "request_model": "claude-opus-5",
+          "tools": [
+            "Bash",
+            "Read",
+            "Write"
+          ],
+          "identity_context": [
+            "You are powered by the model named Opus 5 (1M context). The exact model ID is claude-opus-5[1m]. Assistant knowledge cutoff is May 2026."
+          ],
+          "request_context_sha256": "6f0f5b5ef5e8a906cd56a7590fd0de3ec5ea1cebc81dab32dae74d9b1526bf5f"
+        },
+        {
+          "request_model": "claude-opus-5",
+          "tools": [
+            "Bash",
+            "Read",
+            "Write"
+          ],
+          "identity_context": [
+            "You are powered by the model named Opus 5 (1M context). The exact model ID is claude-opus-5[1m]. Assistant knowledge cutoff is May 2026."
+          ],
+          "request_context_sha256": "6f0f5b5ef5e8a906cd56a7590fd0de3ec5ea1cebc81dab32dae74d9b1526bf5f"
+        }
+      ],
+      "paid_model_calls": 0
+    },
+    {
+      "selector": "claude-opus-5",
+      "matching_requests": [
+        {
+          "request_model": "claude-opus-5",
+          "tools": [
+            "Bash",
+            "Read",
+            "Write"
+          ],
+          "identity_context": [
+            "You are powered by the model named Opus 5. The exact model ID is claude-opus-5. Assistant knowledge cutoff is May 2026."
+          ],
+          "request_context_sha256": "883426abcc8ff1b6c6beec63572326c4b2ad64a9391cbbda8e73202db92dabba"
+        },
+        {
+          "request_model": "claude-opus-5",
+          "tools": [
+            "Bash",
+            "Read",
+            "Write"
+          ],
+          "identity_context": [
+            "You are powered by the model named Opus 5. The exact model ID is claude-opus-5. Assistant knowledge cutoff is May 2026."
+          ],
+          "request_context_sha256": "883426abcc8ff1b6c6beec63572326c4b2ad64a9391cbbda8e73202db92dabba"
+        }
+      ],
+      "paid_model_calls": 0
+    }
+  ]
+}

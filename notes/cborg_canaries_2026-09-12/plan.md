@@ -1,5 +1,7 @@
 # CBORG rescore and v9 generation canary — 2026-09-12
 
+**Current evaluation condition:** [CBORG with execution-metadata provenance](../reference_rescore_2026-09-12_cborg_runtime/plan.md). The preliminary condition below was superseded before fill after four CLI sessions; all original evidence remains on disk. The separate v9 generation canary is complete.
+
 The user requested “rescore with CBORG API” and separately approved adding a v9 generation canary using existing source bundles. This is a new provider condition beside the completed September 11 reference run. Earlier evaluations, failed attempts and semantic errata remain unchanged.
 
 ## Evaluation registration

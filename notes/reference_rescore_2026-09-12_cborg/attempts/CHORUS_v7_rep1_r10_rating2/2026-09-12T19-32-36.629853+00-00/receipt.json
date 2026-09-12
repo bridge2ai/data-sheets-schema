@@ -1,0 +1,11 @@
+{
+  "job_id": "CHORUS_v7_rep1_r10_rating2",
+  "started_at": "2026-09-12T19:32:36.630121+00:00",
+  "status": "incomplete",
+  "manifest_sha256": "e71b8805b7fde90b5e64e23ba1c1f346f2f17e33fe49df7c98c9e885aeec1501",
+  "user_prompt_sha256": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "error": "ValueError: model.name disagrees with the runtime trace",
+  "completed_at": "2026-09-12T19:41:49.798577+00:00"
+}
