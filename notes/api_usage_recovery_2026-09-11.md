@@ -39,3 +39,19 @@ the usage ID in reasoning entries. Telemetry matches identified calls by phase
 and ID; unmatched calls have no reasoning estimate. Positional matching remains
 only for legacy rows and entries without IDs. Identified reasoning from a prior
 forced-fresh run is also excluded from the current record's reasoning total.
+
+Round 2 found #1291 (a fresh run's later resume re-imported the old provenance)
+and #1292 (YAML-native receipt dates could fail JSON serialization). A durable
+generation ID now links ledger, progress and provenance. A fresh boundary is
+committed by atomic ledger replacement after syncing an archived copy; the old
+ledger remains active if replacement fails. Earlier-generation progress,
+provenance and abandoned-stream rows cannot be imported into a fresh generation.
+Legacy partial runs can adopt an identity without losing their recorded usage.
+A finished portable record still takes the no-call exit without a ledger;
+unfinished identified progress with a missing ledger stops before spending.
+
+Receipt diagnostic values are normalized for JSON. If optional diagnostics
+cannot be encoded, the usage row records `diagnostics_unavailable` and retains
+the call counters; the original receipt remains on disk. Tests cover dates,
+timestamps, non-string mapping keys, fresh interruptions before progress and
+after full/core progress, archived bytes and legacy recovery.

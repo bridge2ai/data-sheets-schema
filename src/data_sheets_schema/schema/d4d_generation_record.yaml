@@ -500,6 +500,12 @@ classes:
       label:
         description: "The run label; `_rep{N}` names the replicate."
         required: true
+      generation_id:
+        description: >-
+          Durable API generation identity shared by usage, progress and this
+          record. A forced fresh execution gets a new identity, so later resume
+          cannot import the preceding generation's accounting (#1291). Absent
+          on historical and non-API records.
       arm:
         description: Which arm of the study, where one applies.
         required: true

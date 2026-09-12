@@ -44,7 +44,10 @@ def test_flat_output_identities_and_forced_fresh_runs_keep_accounts_separate(tmp
         assert ledger.ledger_path(other) != ledger.ledger_path(s)
         assert ledger.merge_usage(other, []) == []
     ledger.prepare_usage(s, resume=False)
-    assert not ledger.ledger_path(s).exists()
+    fresh = json.loads(ledger.ledger_path(s).read_text())
+    assert fresh["rows"] == []
+    assert fresh["generation_id"] != json.loads(old_bytes)["generation_id"]
+    assert fresh["accept_legacy"] is False
     archives = list(tmp_path.glob("*.previous-*.json"))
     assert len(archives) == 1 and archives[0].read_bytes() == old_bytes
     new = ledger.append_usage(s, [], row())
@@ -66,9 +69,15 @@ def test_failed_atomic_replace_keeps_the_previous_account(tmp_path, monkeypatch)
         ledger.append_usage(s, current, row())
     assert ledger.ledger_path(s).read_bytes() == before
     assert len(current) == 1 and not list(tmp_path.glob(".*.tmp"))
+    # Starting fresh must not remove the active ledger before the replacement
+    # succeeds; an interruption at that boundary still belongs to the old run.
+    with pytest.raises(ledger.UsageLedgerError, match="disk failure"):
+        ledger.prepare_usage(s, resume=False)
+    assert ledger.ledger_path(s).read_bytes() == before
 
 
-@pytest.mark.parametrize("damage", ["invalid-json", "identity", "version", "missing-id", "duplicate-id"])
+@pytest.mark.parametrize("damage", ["invalid-json", "identity", "version", "missing-id", "duplicate-id",
+                                   "generation", "legacy-policy"])
 def test_corrupt_accounts_fail_before_any_more_model_calls(tmp_path, damage):
     s = spec(out_dir=tmp_path)
     ledger.append_usage(s, [], row())
@@ -82,6 +91,10 @@ def test_corrupt_accounts_fail_before_any_more_model_calls(tmp_path, damage):
         del data["rows"][0]["usage_id"]
     elif damage == "duplicate-id":
         data["rows"].append(data["rows"][0])
+    elif damage == "generation":
+        data["generation_id"] = None
+    elif damage == "legacy-policy":
+        data["accept_legacy"] = "false"
     path.write_text("{" if damage == "invalid-json" else json.dumps(data))
     client = FakeClient()
     with pytest.raises(ledger.UsageLedgerError):
@@ -214,6 +227,13 @@ api.execute(spec(out_dir=Path(sys.argv[1])), client=FakeClient())
     assert completed_phase in json.loads(api._progress_path(s).read_text())["completed"]
     completed = ledger.merge_usage(s, [])
     assert len(completed) == 1 and completed[0]["phase"] == "full"
+    saved_ledger = ledger.ledger_path(s).read_bytes()
+    ledger.ledger_path(s).unlink()
+    blocked = FakeClient()
+    with pytest.raises(ledger.UsageLedgerError, match="ledger is missing"):
+        api.execute(s, client=blocked)
+    assert blocked.messages.calls == []
+    ledger.ledger_path(s).write_bytes(saved_ledger)
     client = FakeClient()
     resumed = api.execute(s, client=client)
     assert "full" in resumed["skipped"]
@@ -245,6 +265,144 @@ def test_explicit_fresh_execution_does_not_import_previous_usage(tmp_path):
     expected = sum(e["reasoning_tokens_estimate"] or 0 for e in entries if e["usage_id"] in current_ids)
     assert expected > 0
     assert run_telemetry(tmp_path, s.project)["total_reasoning_tokens_estimate"] == expected
+    # A finished portable record is sufficient for the no-call exit even if
+    # its recovery ledger is not copied alongside it.
+    ledger.ledger_path(s).unlink()
+    complete = FakeClient()
+    assert api.execute(s, client=complete)["already_complete"]
+    assert complete.messages.calls == [] and not ledger.ledger_path(s).exists()
+    api._save_progress(s, list(api.PHASES), None)
+    # Even legacy-shaped progress must not erase an identity retained in
+    # provenance and turn a missing journal into a new generation.
+    assert "generation_id" not in json.loads(api._progress_path(s).read_text())
+    with pytest.raises(ledger.UsageLedgerError, match="ledger is missing"):
+        api.execute(s, client=complete)
+    assert complete.messages.calls == []
+
+
+@pytest.mark.parametrize("stage,legacy_prior", [
+    ("before_progress", False), ("full", False), ("core", False), ("full", True),
+])
+def test_interrupted_fresh_generation_cannot_recover_previous_charges(tmp_path, stage, legacy_prior):
+    s = spec(out_dir=tmp_path)
+    old = api.execute(s, client=FakeClient())["usage"]
+    old_ids = {r["usage_id"] for r in old}
+    old_generation = ledger.generation_id(s)
+    api._save_progress(s, list(api.PHASES), None)
+    if legacy_prior:
+        prior = yaml.safe_load(s.provenance_path.read_text())
+        del prior["run"]["generation_id"]
+        s.provenance_path.write_text(yaml.safe_dump(prior))
+        progress = json.loads(api._progress_path(s).read_text())
+        del progress["generation_id"]
+        api._progress_path(s).write_text(json.dumps(progress))
+        reasoning = [json.loads(line) for line in api._reasoning_path(s).read_text().splitlines()]
+        for entry in reasoning:
+            entry.pop("usage_id")
+        api._reasoning_path(s).write_text("\n".join(json.dumps(e) for e in reasoning) + "\n")
+    old_provenance = s.provenance_path.read_bytes()
+    root = Path(__file__).resolve().parents[1]
+    code = """
+import os, sys
+from pathlib import Path
+from data_sheets_schema import api_runner as api
+from tests.test_download.test_api_runner import FakeClient, spec
+save, generate = api._save_progress, api._generate_phase
+def exit_after_progress(run, completed, audit):
+    save(run, completed, audit)
+    if sys.argv[2] in completed:
+        os._exit(23)
+def exit_before_progress(*args, **kwargs):
+    if sys.argv[2] == 'before_progress':
+        os._exit(23)
+    return generate(*args, **kwargs)
+api._save_progress = exit_after_progress
+api._generate_phase = exit_before_progress
+api.execute(spec(out_dir=Path(sys.argv[1])), resume=False, client=FakeClient())
+"""
+    environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
+    killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), stage],
+                            cwd=root, env=environment, capture_output=True, text=True, timeout=90)
+    assert killed.returncode == 23, killed.stdout + killed.stderr
+    assert s.provenance_path.read_bytes() == old_provenance
+    generation = ledger.generation_id(s)
+    assert generation != old_generation
+    if stage != "before_progress":
+        assert json.loads(api._progress_path(s).read_text())["generation_id"] == generation
+    client = FakeClient()
+    resumed = api.execute(s, client=client)
+    assert len(resumed["usage"]) == 4
+    assert old_ids.isdisjoint(r["usage_id"] for r in resumed["usage"])
+    assert len(client.messages.calls) == (4 if stage == "before_progress" else 3)
+    assert yaml.safe_load(s.provenance_path.read_text())["run"]["generation_id"] == generation
+    archives = list(tmp_path.glob("*.previous-*.json"))
+    assert len(archives) == 1 and json.loads(archives[0].read_text())["rows"] == old
+    from data_sheets_schema.run_telemetry import run_telemetry
+    current_ids = {r["usage_id"] for r in resumed["usage"]}
+    reasoning = [json.loads(line) for line in api._reasoning_path(s).read_text().splitlines()]
+    expected = sum(e["reasoning_tokens_estimate"] or 0 for e in reasoning if e.get("usage_id") in current_ids)
+    assert run_telemetry(tmp_path, s.project)["total_reasoning_tokens_estimate"] == expected
+
+
+def test_legacy_partial_run_adopts_a_generation_without_losing_recorded_usage(tmp_path):
+    s = spec(out_dir=tmp_path)
+    api.execute(s, client=FakeClient())
+    prior = yaml.safe_load(s.provenance_path.read_text())
+    del prior["run"]["generation_id"]
+    for entry in prior["api_usage"]:
+        entry.pop("usage_id")
+    old = prior["api_usage"]
+    s.provenance_path.write_text(yaml.safe_dump(prior))
+    ledger.ledger_path(s).unlink()
+    api._save_progress(s, list(api.PHASES), None)
+    assert "generation_id" not in json.loads(api._progress_path(s).read_text())
+    client = FakeClient()
+    resumed = api.execute(s, client=client)
+    assert client.messages.calls == [] and resumed["usage"] == old
+    final = yaml.safe_load(s.provenance_path.read_text())
+    assert final["run"]["generation_id"] == ledger.generation_id(s)
+
+
+def test_fresh_generation_does_not_import_old_abandoned_stream_charges(tmp_path):
+    s = spec(out_dir=tmp_path)
+    old_generation = ledger.prepare_usage(s, resume=True)
+    old = []
+    api._record_incomplete_stream(s, "full", 1, "2026-09-11T00:00:00Z", {}, old)
+    assert old[0]["generation_id"] == old_generation
+    assert api.merge_abandoned_rows(s, []) == old
+    before = api._abandoned_ledger(s).read_bytes()
+    ledger.prepare_usage(s, resume=False)
+    assert api.merge_abandoned_rows(s, []) == []
+    assert api._abandoned_ledger(s).read_bytes() == before
+    current = []
+    api._record_incomplete_stream(s, "full", 1, "2026-09-11T00:01:00Z", {}, current)
+    assert current[0]["generation_id"] != old_generation
+    assert api.merge_abandoned_rows(s, []) == current
+
+
+@pytest.mark.parametrize("snippet", ["2026-09-11", "2026-09-11T01:02:03Z", "{2026-09-11: x}"])
+def test_yaml_native_receipt_diagnostics_do_not_abort_a_paid_phase(tmp_path, snippet):
+    from tests.test_download.test_receipt_readdress import _ReceiptFake
+
+    class NativeSnippet(_ReceiptFake):
+        def create(self, **kw):
+            result = super().create(**kw)
+            result.content[0].text = result.content[0].text.replace(
+                'snippet: "Medicine, Health and Life Sciences"', f"snippet: {snippet}")
+            return result
+
+    client = FakeClient()
+    client.messages = NativeSnippet()
+    s, current = spec(out_dir=tmp_path, condition="generic_v7"), []
+    body = api._generate_phase(s, "full", {}, client, api._model_settings(), current)
+    assert yaml.safe_load(body)["id"] == "x"
+    assert [r["phase"] for r in current] == ["full", "full_readdress"]
+    assert ledger.merge_usage(s, []) == current
+    diagnostic = current[1]["readdress"]
+    if snippet.startswith("{"):
+        assert "diagnostics_unavailable" in diagnostic
+    else:
+        assert diagnostic["unresolved_before"][0]["snippet"] == str(yaml.safe_load(snippet))
 
 
 def test_mixed_logs_match_ids_without_shifting_legacy_entries(tmp_path):

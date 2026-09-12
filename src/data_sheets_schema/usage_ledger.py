@@ -24,10 +24,15 @@ def ledger_path(spec) -> Path:
     return spec.metadata_dir / f"{spec.project}_api_usage_{key}.json"
 
 
+def _empty(spec, *, accept_legacy: bool) -> dict:
+    return {"version": 1, "identity": _identity(spec),
+            "generation_id": uuid.uuid4().hex, "accept_legacy": accept_legacy, "rows": []}
+
+
 def _read(spec) -> dict:
     path = ledger_path(spec)
     if not path.exists():
-        return {"version": 1, "identity": _identity(spec), "rows": []}
+        return _empty(spec, accept_legacy=True)
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
@@ -35,6 +40,9 @@ def _read(spec) -> dict:
     if (not isinstance(data, dict) or data.get("version") != 1
             or data.get("identity") != _identity(spec) or not isinstance(data.get("rows"), list)):
         raise UsageLedgerError(f"invalid API usage ledger identity or version: {path}")
+    if (not isinstance(data.get("generation_id"), str) or not data["generation_id"]
+            or not isinstance(data.get("accept_legacy"), bool)):
+        raise UsageLedgerError(f"invalid API usage generation identity: {path}")
     ids = []
     for row in data["rows"]:
         if not isinstance(row, dict) or not isinstance(row.get("usage_id"), str) or not row["usage_id"]:
@@ -45,11 +53,34 @@ def _read(spec) -> dict:
     return data
 
 
-def prepare_usage(spec, *, resume: bool) -> None:
-    """A forced fresh generation preserves the previous account separately."""
+def prepare_usage(spec, *, resume: bool) -> str:
+    """Establish the generation boundary before any call can be made (#1291)."""
     path = ledger_path(spec)
-    if not resume and path.exists():
-        path.rename(path.with_name(f"{path.stem}.previous-{uuid.uuid4().hex}.json"))
+    if resume and path.exists():
+        return _read(spec)["generation_id"]
+    data = _empty(spec, accept_legacy=resume)
+    if path.exists():
+        # Copy and sync before atomically replacing the live ledger. A crash
+        # before replacement leaves the old generation active and recoverable.
+        archive = path.with_name(f"{path.stem}.previous-{uuid.uuid4().hex}.json")
+        with archive.open("xb") as out:
+            out.write(path.read_bytes())
+            out.flush()
+            os.fsync(out.fileno())
+    _write(spec, data)
+    return data["generation_id"]
+
+
+def generation_id(spec) -> str | None:
+    return _read(spec)["generation_id"] if ledger_path(spec).exists() else None
+
+
+def same_generation(spec, identifier) -> bool:
+    if not ledger_path(spec).exists():
+        return True  # a completed portable record needs no recovery journal
+    data = _read(spec)
+    return (identifier == data["generation_id"]
+            or (identifier is None and data["accept_legacy"]))
 
 
 def persist_usage(spec, row: dict) -> None:
@@ -64,6 +95,10 @@ def persist_usage(spec, row: dict) -> None:
             break
     else:
         rows.append(row)
+    _write(spec, data)
+
+
+def _write(spec, data: dict) -> None:
     path = ledger_path(spec)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = None
@@ -71,13 +106,13 @@ def persist_usage(spec, row: dict) -> None:
         with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
                                          prefix=f".{path.stem}.", suffix=".tmp", delete=False) as out:
             temporary = Path(out.name)
-            json.dump(data, out, ensure_ascii=False, indent=2)
+            json.dump(data, out, ensure_ascii=True, indent=2)
             out.write("\n")
             out.flush()
             os.fsync(out.fileno())
         os.replace(temporary, path)
     except (OSError, ValueError, TypeError) as exc:
-        raise UsageLedgerError(f"could not persist API usage for {row.get('phase')}: {exc}") from exc
+        raise UsageLedgerError(f"could not persist API usage: {exc}") from exc
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)

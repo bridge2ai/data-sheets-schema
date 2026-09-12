@@ -43,10 +43,13 @@ import yaml
 
 from data_sheets_schema import provenance, reasoning, schema_digest
 from data_sheets_schema.usage_ledger import (
+    UsageLedgerError,
     append_usage as _append_usage,
+    generation_id as _usage_generation,
     merge_usage as merge_completed_rows,
     persist_usage as _persist_usage,
     prepare_usage as _prepare_usage,
+    same_generation as _same_usage_generation,
 )
 from data_sheets_schema.provenance import (
     DETERMINISTIC_CONFIG,
@@ -1908,7 +1911,12 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
         summary["call_failed"] = f"{type(exc).__name__}: {str(exc)[:300]}"
     summary["still_unresolved"] = unresolved_receipt_slots(record, yaml.safe_load(receipt_body))
     entry["seconds"] = round(time.monotonic() - t0, 3)
-    entry["readdress"] = summary
+    try:
+        # SafeLoader can produce dates and other native values in snippets.
+        # Optional diagnostics must not abort a completed paid phase (#1292).
+        entry["readdress"] = json.loads(json.dumps(summary, default=str))
+    except (TypeError, ValueError, RecursionError) as exc:
+        entry["readdress"] = {"diagnostics_unavailable": f"{type(exc).__name__}: {exc}"}
     if recorded:
         _persist_usage(spec, entry)
     else:
@@ -2204,6 +2212,9 @@ def _save_progress(spec: RunSpec, completed: list[str],
     p = _progress_path(spec)
     p.parent.mkdir(parents=True, exist_ok=True)
     data: dict[str, Any] = {"completed": completed, "label": spec.label}
+    generation = _usage_generation(spec)
+    if generation is not None:
+        data["generation_id"] = generation
     if audit:
         data["Audit findings"] = audit
     # The bytes each completed phase was computed against (#601). Without them
@@ -4113,6 +4124,9 @@ def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: 
                   "cache_read": snap_usage.get("cache_read_input_tokens"),
                   "cache_write": snap_usage.get("cache_creation_input_tokens"),
                   "snapshot": str(path)}
+    generation = _usage_generation(spec)
+    if generation is not None:
+        row["generation_id"] = generation
     usage.append(row)
     # Persisted at once (#1038 second pass): a run whose every retry fails
     # never reaches the record write, and the row would be lost with it.
@@ -4141,7 +4155,8 @@ def merge_abandoned_rows(spec: RunSpec, usage: list[dict[str, Any]]) -> list[dic
             row = json.loads(line)
         except json.JSONDecodeError:
             continue
-        if isinstance(row, dict) and row.get("snapshot") and row["snapshot"] not in have:
+        if (isinstance(row, dict) and row.get("snapshot") and row["snapshot"] not in have
+                and _same_usage_generation(spec, row.get("generation_id"))):
             usage.append(row)
             have.add(row["snapshot"])
     return usage
@@ -4317,7 +4332,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     settings = _model_settings()
     client = client or _client()
     usage: list[dict[str, Any]] = []
-    _prepare_usage(spec, resume=resume)
+    generation = _usage_generation(spec) if resume else _prepare_usage(spec, resume=False)
     skipped: list[str] = []
     carry: dict[str, str] = {}
 
@@ -4329,16 +4344,20 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # the progress file too: without resume state this is a from-scratch
     # regeneration, and a dead run's accounting does not belong on it.
     prior_repair: list[dict[str, Any]] = []
-    if resume and spec.provenance_path.exists() and _progress_path(spec).exists():
+    prior_matches = False
+    prior_identifier = None
+    if resume and spec.provenance_path.exists():
         try:
             prior = yaml.safe_load(
                 spec.provenance_path.read_text(encoding="utf-8")) or {}
-            usage.extend(prior.get("api_usage") or [])
-            # The repair log is seeded for the same reason as usage (#366):
-            # AI-READI rep1's record showed one repair round where eight had
-            # run, because the second invocation overwrote the convergence
-            # story its predecessor recorded.
-            prior_repair = list(prior.get("repair") or [])
+            identity = prior.get("run") if isinstance(prior, dict) else None
+            prior_identifier = identity.get("generation_id") if isinstance(identity, dict) else None
+            prior_matches = _same_usage_generation(spec, prior_identifier)
+            if prior_matches and _progress_path(spec).exists():
+                usage.extend(prior.get("api_usage") or [])
+                # Only this generation's repair history belongs here (#366,
+                # #1291); a fresh run may still have its predecessor's file.
+                prior_repair = list(prior.get("repair") or [])
         except yaml.YAMLError:
             pass
 
@@ -4350,6 +4369,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # nothing in the file distinguishes them, so guessing would silently skip
     # reconciliation or redo it.
     progress = _load_progress(spec) if resume else {}
+    if not _same_usage_generation(spec, progress.get("generation_id")):
+        progress = {}
     done = set(progress.get("completed", []))
     # A *finished* run has no progress file — success deletes it — so resuming
     # found nothing and re-ran all six phases of work already paid for. The
@@ -4365,7 +4386,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     #
     # So a run already carrying provenance that matches this spec, and whose
     # artifact hashes still verify, is returned exactly as it was found.
-    if (resume and not done and spec.provenance_path.exists()
+    if (resume and not done and prior_matches and spec.provenance_path.exists()
             and all(_artifact_path(spec, a).exists()
                     for a in ("full", "core", "report"))):
         from data_sheets_schema.runs import check_provenance
@@ -4429,6 +4450,11 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
                                 "core": str(spec.core_path),
                                 "report": str(spec.report_path),
                                 "provenance": str(spec.provenance_path)}}
+    if generation is None:
+        if progress.get("generation_id") is not None or prior_identifier is not None:
+            raise UsageLedgerError("identified generation needs recovery but its usage ledger is missing; "
+                                   "restore the ledger before resuming")
+        generation = _prepare_usage(spec, resume=True)
     carry: dict[str, str] = {}
     if "Audit findings" in progress:
         carry["Audit findings"] = progress["Audit findings"]
@@ -4691,6 +4717,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             "value": None,
             "reason": settings["temperature_note"],
         }]
+    rec.data["run"]["generation_id"] = generation
     rec.data["api_usage"] = merge_abandoned_rows(spec, merge_completed_rows(spec, usage))
     rec.data["phases_skipped"] = skipped or None
     rec.data["record_generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")

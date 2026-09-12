@@ -524,8 +524,10 @@ def run_telemetry(run_dir: Path, project: str) -> dict[str, Any] | None:
     # Identified entries from an older forced-fresh run may remain in the
     # append-only log. Count only those matched to this record. Preserve the
     # legacy total, including historical calls absent from old api_usage.
+    legacy_relevant = (not (prov.get("run") or {}).get("generation_id")
+                       or any("usage_id" not in r and not r.get("outcome") for r in rows))
     reasoning_total = sum(e.get("reasoning_tokens_estimate") or 0
-                          for e in reasoning if "usage_id" not in e)
+                          for e in reasoning if legacy_relevant and "usage_id" not in e)
     reasoning_total += sum(e.get("reasoning_tokens_estimate") or 0
                            for e in matched_reasoning.values())
     cost = (total["input_tokens"] * RATE_INPUT
