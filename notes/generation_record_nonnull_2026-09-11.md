@@ -41,3 +41,10 @@ and recorder tests are included in validation. The Dataset schema and the
 reference evaluation instrument are not changed by this record contract.
 
 Codex review round 1 identified #1288: malformed YAML timestamps and invalid UTF-8 could escape the per-file CLI error boundary. The boundary now catches value-construction/decoding failures too; regressions verify that later invalid and valid records are checked and the final failure count is printed. All 78 affected record, recorder and CLI tests pass after this correction.
+
+Round 2 extended #1288 with explicitly tagged malformed booleans and timestamps,
+whose PyYAML constructors raise `KeyError` and `AttributeError`. File reading and
+YAML construction now have a general exception boundary; validation is outside
+that boundary, and process interrupts still propagate. The regression covers all
+four malformed inputs followed by another invalid record and a valid record.
+The review's 1,716 mutation probes found no additional runtime/export disagreement.

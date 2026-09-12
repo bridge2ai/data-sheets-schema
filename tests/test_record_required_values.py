@@ -176,6 +176,8 @@ def test_validate_records_cannot_call_an_unavailable_validator_clean(tmp_path, m
 @pytest.mark.parametrize("broken", [
     b"record_generated_at: 2026-99-11T00:00:00Z\n",
     b"record_generated_at: \xff\n",
+    b"model: !!bool nope\n",
+    b"record_generated_at: !!timestamp nope\n",
 ])
 def test_validate_records_keeps_checking_after_scalar_or_encoding_errors(tmp_path, monkeypatch, broken):
     monkeypatch.setattr(provenance, "CONCAT_DIR", tmp_path)

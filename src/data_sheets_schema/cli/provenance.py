@@ -2092,9 +2092,14 @@ def validate_records(strict, label):
     failed = []
     for p in paths:
         try:
-            findings, failure = check_record(yaml.safe_load(p.read_text(encoding="utf-8")))
-        except (OSError, ValueError, yaml.YAMLError) as exc:
-            findings, failure = [], str(exc)
+            data = yaml.safe_load(p.read_text(encoding="utf-8"))
+        except Exception as exc:  # noqa: BLE001
+            # PyYAML scalar constructors can raise KeyError, AttributeError,
+            # ValueError, etc., not only YAMLError. Isolate file loading as the
+            # old per-record subprocess did; interrupts still propagate.
+            findings, failure = [], f"{type(exc).__name__}: {exc}"
+        else:
+            findings, failure = check_record(data)
         if findings or failure:
             failed.append(p)
             click.echo(f"   ❌ {p.parts[-2][:38]:38} {p.name}")
