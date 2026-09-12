@@ -21,7 +21,8 @@ SOURCE = yaml.safe_load((ROOT / "data/rubric/rubric10.txt").read_text())[
 
 # These are concept-preserving schema mappings, not waivers for missing items.
 # RRIDs use Dataset.id; release notes must describe the release in updates or
-# notes. Software is attached to a processing property, never Dataset itself.
+# notes, including the dedicated update_details slot. Software is attached to
+# a processing property, never Dataset itself.
 ALIASES = {
     "rrid": {"id"},
     "confidentiality_level": {"regulatory_restrictions.confidentiality_level"},
@@ -35,7 +36,7 @@ ALIASES = {
     "vulnerable_populations": {"at_risk_populations"},
     "is_data_split": {"subsets.is_data_split"},
     "is_subpopulation": {"subsets.is_subpopulation"},
-    "release_notes": {"updates.description", "notes"},
+    "release_notes": {"updates.update_details", "updates.description", "notes"},
     "software_and_tools": {"preprocessing_strategies.used_software",
                            "cleaning_strategies.used_software",
                            "labeling_strategies.used_software",
@@ -134,6 +135,33 @@ def test_cross_field_rules_use_reachable_paths():
              if re.fullmatch(r"[a-z_]+(?:\.[a-z_]+)+(?:=True)?", token)}
     assert paths
     assert all(resolves(path) for path in paths), paths
+
+
+def test_release_history_only_in_the_dedicated_update_field_is_located():
+    """#1283: aliases must find real evidence, not merely resolve in a schema."""
+    record = {"updates": {"update_details": "Version 2 adds 400 participants to the version 1 release."}}
+    fields = items(AGENT.read_text())[6, 5]["fields"]
+    found = []
+    for path in fields:
+        value = record
+        for part in path.split("."):
+            value = value.get(part) if isinstance(value, dict) else None
+        if value is not None:
+            found.append(value)
+    assert found == [record["updates"]["update_details"]]
+
+
+def test_funding_rule_accepts_prose_awards_and_non_grant_support():
+    """#1284: test the prompt contract; this is not a model-scoring result."""
+    rule = AGENT.read_text().split("**Funding Logic:**", 1)[1].split("**'Applies to' Logic:**", 1)[0]
+    assert "IF `funders` describes grant funding" in rule
+    assert "structured awards and prose awards are alternative representations" in rule
+    for path in ("funders.grants", "funders.description", "funders.notes"):
+        assert f"`{path}`" in rule and resolves(path)
+    assert "Non-grant support" in rule
+    assert "does not require a grant number" in rule
+    assert "donated cloud services or device loans" in rule
+    assert "IF `funders` present" not in rule
 
 
 def test_rubric20_question_names_still_match_the_source():

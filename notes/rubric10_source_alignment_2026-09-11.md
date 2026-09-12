@@ -36,7 +36,7 @@ or an instruction to award a point merely for field presence.
 | `vulnerable_populations` | `at_risk_populations` |
 | `reidentification_risk` | `participant_privacy.reidentification_risk` |
 | `DataSubset.is_data_split`, `DataSubset.is_subpopulation` | `subsets.is_data_split`, `subsets.is_subpopulation` |
-| `release_notes` | Release-specific `updates.description` or `notes`; unrelated notes do not qualify |
+| `release_notes` | Release-specific `updates.update_details`, `updates.description` or `notes`; unrelated notes do not qualify |
 | `software_and_tools`, bare `used_software` | Software attached to processing properties, or the existing named-tool evidence alternatives under E8.4 |
 
 Ten previous Fields entries could not resolve from Dataset (including
@@ -87,3 +87,14 @@ deprecation warning.
 An offline challenge replay accepts the revised definition's full sentence,
 rejects the prior definition, and rejects copying only the preamble. This
 tests the stale-definition guard; it is not a live evaluator result.
+
+**Adversarial review**
+
+The first Codex plugin review found two issues, filed as #1283 and #1284.
+E6.5 now names the dedicated `updates.update_details` field, with a fixture
+where that is the sole source of release history. Funding consistency is
+conditional on grant funding and accepts structured awards or awards in
+funder descriptions/notes; donated cloud services and device loans do not
+require a grant number. The affected alignment, pin and runner tests passed
+114 checks after these corrections. The verbatim review is retained in
+`notes/rubric10_alignment_codex_review_2026-09-11.txt`.

@@ -80,7 +80,8 @@ Individual item scores and their per-record sums are integers. Fractional means 
      - IF `is_deidentified` claims deidentification → EXPECT `is_deidentified.method` specified
      - IF `is_deidentified` claims identifiers were removed → EXPECT `is_deidentified.identifiers_removed` listed
    - **Funding Logic:**
-     - IF `funders` present → EXPECT `funders.grantor` and `funders.grants` to identify consistent funding sources and awards
+     - IF `funders` describes grant funding → compare `funders.grantor` with awards documented in `funders.grants`, `funders.description` or `funders.notes`; structured awards and prose awards are alternative representations
+     - Non-grant support (for example, donated cloud services or device loans) does not require a grant number; do not flag an absent `funders.grants` block for that support
      - IF funding present → EXPECT `purposes` aligns with funding goals
    - **'Applies to' Logic:**
      - If an element or sub-element is only meaningful under a specific condition, check that the condition is satisfied before scoring it
@@ -172,9 +173,10 @@ must not be treated as missing merely because they are false.
 Several source field names describe concepts whose schema spelling has
 changed. An RRID can be the value of `id`; formats and media types belong to
 `distribution_formats` or files within `file_collections`, and encoding is a
-file attribute. Read release-specific notes from `updates.description` or
-`notes`, requiring actual release or derivation information rather than
-crediting unrelated notes. Vulnerable populations use `at_risk_populations`.
+file attribute. Read release-specific notes from the dedicated
+`updates.update_details` field, `updates.description` or `notes`, requiring
+actual release or derivation information rather than crediting unrelated
+notes. Vulnerable populations use `at_risk_populations`.
 Governance contacts use `data_governance.committee_contact`; the deprecated
 `regulatory_restrictions.governance_committee_contact` remains acceptable
 evidence in older records. Software evidence follows the processing-role
@@ -370,7 +372,7 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
    - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 5. **Provenance, Source Derivation, and Raw Data Sources**
-   - Fields: `was_derived_from`, `updates.description`, `notes`, `raw_data_sources`
+   - Fields: `was_derived_from`, `updates.update_details`, `updates.description`, `notes`, `raw_data_sources`
    - Look for: Source provenance, dataset derivation, release notes, raw data sources before preprocessing
    - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
