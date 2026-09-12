@@ -125,8 +125,10 @@ def test_auxiliary_calls_are_durable_before_later_processing_fails(tmp_path, mon
     s.full_path.write_text(body)
     s.core_path.write_text(body)
     client, current, settings = FakeClient(), [], api._model_settings()
+    attempted_reasoning = []
 
-    def fail(*args):
+    def fail(path, entry):
+        attempted_reasoning.append(entry)
         raise OSError("reasoning disk failure")
 
     monkeypatch.setattr(api.reasoning, "append", fail)
@@ -148,6 +150,43 @@ def test_auxiliary_calls_are_durable_before_later_processing_fails(tmp_path, mon
     recovered = ledger.merge_usage(s, [])
     assert recovered == current and len(recovered) == 1
     assert recovered[0]["phase"] == phase and recovered[0]["input_tokens"] > 0
+    assert attempted_reasoning[0]["usage_id"] == recovered[0]["usage_id"]
+
+
+def test_resume_after_reasoning_failure_does_not_misattribute_the_retry(tmp_path, monkeypatch):
+    from data_sheets_schema.run_telemetry import run_telemetry
+    s, client = spec(out_dir=tmp_path), FakeClient()
+    create = client.messages.create
+
+    def response(**kw):
+        result = create(**kw)
+        if "# full\n" in result.content[0].text:
+            result.usage.output_tokens = 1000 if len(client.messages.calls) == 1 else 2000
+        return result
+
+    monkeypatch.setattr(client.messages, "create", response)
+
+    def fail(*args):
+        raise OSError("reasoning disk failure")
+
+    with monkeypatch.context() as failing:
+        failing.setattr(api.reasoning, "append", fail)
+        with pytest.raises(OSError, match="reasoning disk failure"):
+            api.execute(s, client=client)
+    interrupted = ledger.merge_usage(s, [])[0]
+    assert interrupted["output_tokens"] == 1000
+    assert not s.provenance_path.exists() and not api._reasoning_path(s).exists()
+    resumed = api.execute(s, client=client)
+    assert len(resumed["usage"]) == 5
+    entries = [json.loads(line) for line in api._reasoning_path(s).read_text().splitlines()]
+    assert {r["usage_id"] for r in entries} == {r["usage_id"] for r in resumed["usage"][1:]}
+    telemetry = run_telemetry(tmp_path, s.project)
+    full = next(p for p in telemetry["phases"] if p["phase"] == "full")["attempts"]
+    assert [r["output_tokens"] for r in full] == [1000, 2000]
+    assert "reasoning_tokens_estimate" not in full[0]
+    accepted_reasoning = next(e for e in entries if e["phase"] == "full")
+    assert full[1]["reasoning_tokens_estimate"] == accepted_reasoning["reasoning_tokens_estimate"]
+    assert full[1]["reasoning_tokens_estimate"] > 1800
 
 
 @pytest.mark.parametrize("completed_phase", ["full", "core"])
@@ -191,6 +230,7 @@ api.execute(spec(out_dir=Path(sys.argv[1])), client=FakeClient())
 
 
 def test_explicit_fresh_execution_does_not_import_previous_usage(tmp_path):
+    from data_sheets_schema.run_telemetry import run_telemetry
     s = spec(out_dir=tmp_path)
     old = api.execute(s, client=FakeClient())["usage"]
     # Even a stale progress file must not defeat an explicit fresh request.
@@ -200,3 +240,28 @@ def test_explicit_fresh_execution_does_not_import_previous_usage(tmp_path):
     assert {r["usage_id"] for r in old}.isdisjoint(r["usage_id"] for r in new)
     archived = list(tmp_path.glob("*.previous-*.json"))
     assert len(archived) == 1 and json.loads(archived[0].read_text())["rows"] == old
+    entries = [json.loads(line) for line in api._reasoning_path(s).read_text().splitlines()]
+    current_ids = {r["usage_id"] for r in new}
+    expected = sum(e["reasoning_tokens_estimate"] or 0 for e in entries if e["usage_id"] in current_ids)
+    assert expected > 0
+    assert run_telemetry(tmp_path, s.project)["total_reasoning_tokens_estimate"] == expected
+
+
+def test_mixed_logs_match_ids_without_shifting_legacy_entries(tmp_path):
+    from data_sheets_schema.run_telemetry import run_telemetry
+    rows = [row(), {**row(), "usage_id": "missing"},
+            {**row(), "usage_id": "accepted"}, row(),
+            {**row(), "phase": "audit", "usage_id": "wrong-phase"}]
+    (tmp_path / "P_provenance.yaml").write_text(yaml.safe_dump({"api_usage": rows}))
+    entries = [{"phase": "full", "reasoning_tokens_estimate": 1},
+               {"phase": "full", "usage_id": "old-run", "reasoning_tokens_estimate": 900},
+               {"phase": "full", "usage_id": "accepted", "reasoning_tokens_estimate": 30},
+               {"phase": "full", "usage_id": "wrong-phase", "reasoning_tokens_estimate": 800},
+               {"phase": "full", "reasoning_tokens_estimate": 2}]
+    (tmp_path / "P_reasoning.jsonl").write_text("\n".join(json.dumps(e) for e in entries))
+    result = run_telemetry(tmp_path, "P")
+    full = next(p for p in result["phases"] if p["phase"] == "full")["attempts"]
+    assert [r.get("reasoning_tokens_estimate") for r in full] == [1, None, 30, 2]
+    audit = next(p for p in result["phases"] if p["phase"] == "audit")["attempts"]
+    assert "reasoning_tokens_estimate" not in audit[0]
+    assert result["total_reasoning_tokens_estimate"] == 33

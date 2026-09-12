@@ -15,9 +15,9 @@ Evidence honesty rules, mirrored in the schema:
 * ``invocations`` is derived from gaps between recorded timestamps and is
   absent for legacy runs — repair-round numbering alone cannot distinguish a
   resumed invocation from a second artifact's rounds.
-* Attempts join to reasoning entries by (phase, order of appearance), not by
-  attempt number: both files accumulate across invocations, so numbers repeat
-  while order is preserved.
+* Current attempts join to reasoning by phase and durable usage ID (#1290).
+  A recovered call may have no reasoning entry. Legacy entries without IDs
+  retain the phase/occurrence join; attempt numbers repeat across invocations.
 * The ``repair_rounds`` outcomes come from the provenance repair block,
   seeded across invocations since #366; every repair *call* also appears
   under ``phases`` from the cumulative usage rows.
@@ -457,12 +457,19 @@ def run_telemetry(run_dir: Path, project: str) -> dict[str, Any] | None:
     rows = prov.get("api_usage") or []
     reasoning = _reasoning_entries(run_dir / f"{project}_reasoning.jsonl")
 
-    # Join by (phase, occurrence index): both logs accumulate across
-    # invocations in the same order, so numbers repeat while order holds.
+    # Recovery can leave usage without reasoning (#1290), so new calls need
+    # their durable identity. Only unidentified legacy entries participate in
+    # the positional join; neither side may borrow an identified entry.
+    by_usage_id: dict[tuple[str, str], dict[str, Any]] = {}
     by_phase_reasoning: dict[str, list[dict[str, Any]]] = {}
     for e in reasoning:
-        by_phase_reasoning.setdefault(e.get("phase", ""), []).append(e)
+        uid = e.get("usage_id")
+        if isinstance(uid, str) and uid:
+            by_usage_id[(e.get("phase", ""), uid)] = e
+        elif "usage_id" not in e:
+            by_phase_reasoning.setdefault(e.get("phase", ""), []).append(e)
     seen_per_phase: dict[str, int] = {}
+    matched_reasoning: dict[tuple[str, str], dict[str, Any]] = {}
 
     phases: dict[str, dict[str, Any]] = {}
     for row in rows:
@@ -473,10 +480,16 @@ def run_telemetry(run_dir: Path, project: str) -> dict[str, Any] | None:
             phases.setdefault(ph, {"phase": ph, "attempts": []})
             phases[ph]["attempts"].append(_attempt(row, None))
             continue
-        idx = seen_per_phase.get(ph, 0)
-        seen_per_phase[ph] = idx + 1
-        entries = by_phase_reasoning.get(ph, [])
-        entry = entries[idx] if idx < len(entries) else None
+        if "usage_id" in row:
+            uid = row["usage_id"]
+            entry = by_usage_id.get((ph, uid)) if isinstance(uid, str) and uid else None
+            if entry is not None:
+                matched_reasoning[(ph, uid)] = entry
+        else:
+            idx = seen_per_phase.get(ph, 0)
+            seen_per_phase[ph] = idx + 1
+            entries = by_phase_reasoning.get(ph, [])
+            entry = entries[idx] if idx < len(entries) else None
         phases.setdefault(ph, {"phase": ph, "attempts": []})
         phases[ph]["attempts"].append(_attempt(row, entry))
 
@@ -508,8 +521,13 @@ def run_telemetry(run_dir: Path, project: str) -> dict[str, Any] | None:
     total = {k: sum(r.get(k) or 0 for r in rows)
              for k in ("input_tokens", "output_tokens",
                        "cache_read", "cache_write")}
+    # Identified entries from an older forced-fresh run may remain in the
+    # append-only log. Count only those matched to this record. Preserve the
+    # legacy total, including historical calls absent from old api_usage.
     reasoning_total = sum(e.get("reasoning_tokens_estimate") or 0
-                          for e in reasoning)
+                          for e in reasoning if "usage_id" not in e)
+    reasoning_total += sum(e.get("reasoning_tokens_estimate") or 0
+                           for e in matched_reasoning.values())
     cost = (total["input_tokens"] * RATE_INPUT
             + total["cache_write"] * RATE_CACHE_WRITE
             + total["cache_read"] * RATE_CACHE_READ

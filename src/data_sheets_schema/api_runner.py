@@ -1895,7 +1895,7 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
         reasoning.append(_reasoning_path(spec),
                          {"phase": "full_readdress", "label": spec.label,
                           "project": spec.project, "model": settings["name"],
-                          "attempt": 1, **cap.to_dict()})
+                          "attempt": 1, "usage_id": entry["usage_id"], **cap.to_dict()})
         if getattr(resp, "stop_reason", None) == "max_tokens":
             # A cut-off list parses as a shorter list; `drop: tru` even
             # parses as a string. Nothing from a truncated answer is applied.
@@ -3346,7 +3346,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 log.append({"phase": ph, "round": rnd,
                             "outcome": f"call failed: {exc}"})
                 break
-            _append_usage(spec, usage, {
+            call_usage = _append_usage(spec, usage, {
                 "phase": ph, "attempt": rnd,
                 "started_at": attempt_started,
                 "seconds": round(time.monotonic() - attempt_t0, 3),
@@ -3363,7 +3363,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                              {"phase": ph, "label": spec.label,
                               "project": spec.project,
                               "model": settings["name"],
-                              "attempt": rnd, **cap.to_dict()})
+                              "attempt": rnd, "usage_id": call_usage["usage_id"], **cap.to_dict()})
             if getattr(resp, "stop_reason", None) == "max_tokens":
                 log.append({"phase": ph, "round": rnd,
                             "outcome": "truncated; record left as it was"})
@@ -3833,7 +3833,7 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
                 max_tokens=phase_max_tokens(spec, "report", settings["max_tokens"], model=settings["name"])))
     except Exception:                                          # noqa: BLE001
         return False                # a stale report is better than none
-    _append_usage(spec, usage, {"phase": phase, "attempt": 1, "started_at": started,
+    call_usage = _append_usage(spec, usage, {"phase": phase, "attempt": 1, "started_at": started,
                   "seconds": round(time.monotonic() - t0, 3),
                   "input_tokens": getattr(resp.usage, "input_tokens", None),
                   "output_tokens": getattr(resp.usage, "output_tokens", None),
@@ -3849,7 +3849,8 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
     cap = reasoning.capture(resp)
     reasoning.append(_reasoning_path(spec),
                      {"phase": phase, "label": spec.label, "project": spec.project,
-                      "model": settings["name"], "attempt": 1, **cap.to_dict()})
+                      "model": settings["name"], "attempt": 1,
+                      "usage_id": call_usage["usage_id"], **cap.to_dict()})
     if getattr(resp, "stop_reason", None) == "max_tokens":
         return False                # a truncated report is not a report (#967)
     try:
@@ -4181,7 +4182,7 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
 
         # Durable before reasoning, parsing, snapshots or progress writes:
         # any of those can fail after the completed call was already billed.
-        _append_usage(spec, usage, {
+        call_usage = _append_usage(spec, usage, {
             "phase": ph,
             "attempt": attempt,
             "started_at": attempt_started,
@@ -4203,7 +4204,7 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
         reasoning.append(_reasoning_path(spec),
                          {"phase": ph, "label": spec.label,
                           "project": spec.project, "model": settings["name"],
-                          "attempt": attempt, **cap.to_dict()})
+                          "attempt": attempt, "usage_id": call_usage["usage_id"], **cap.to_dict()})
 
         # A truncated record is worse than none: it validates as broken YAML
         # or, worse, as a shorter valid record. Never write it — but a

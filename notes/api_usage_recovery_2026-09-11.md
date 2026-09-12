@@ -32,3 +32,10 @@ This change records future calls. It cannot recover usage that was lost by a
 historical process, and it does not claim that an in-flight response interrupted
 before the runner receives final usage is a completed call. It changes no prompt,
 rubric or score and makes no live API calls as part of validation.
+
+Codex review round 1 found #1290: recovering a call before its reasoning append
+could shift the old positional telemetry join. All four call sites now include
+the usage ID in reasoning entries. Telemetry matches identified calls by phase
+and ID; unmatched calls have no reasoning estimate. Positional matching remains
+only for legacy rows and entries without IDs. Identified reasoning from a prior
+forced-fresh run is also excluded from the current record's reasoning total.
