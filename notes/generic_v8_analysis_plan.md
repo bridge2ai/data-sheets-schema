@@ -2415,6 +2415,29 @@ There are still 1/56 accepted ratings; the next execution must freshly retry
 AI_READI before continuing the remaining registered ratings. No generation or
 download occurred.
 
+### Reference fill resumed (2026-09-12; #1248)
+
+After the reviewed runner was registered and the unchanged CHORUS canary was
+re-accepted, a fresh AI_READI v7 rep1 rubric10 rating passed at 09:11:57Z,
+49/50 (98.0%), quoting definition
+`66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`.
+The same record's first rubric20 rating passed at 09:20:53Z, 82/88 (93.2%),
+quoting definition
+`9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3`.
+Neither rating excludes an item. Both completed their own exact-file
+validation and passed the runner's identity, check-echo, schema, arithmetic
+and frozen-byte checks. The earlier failed AI_READI draft remains excluded.
+
+There are now three accepted ratings. The remaining 53 registered job IDs
+are recorded before execution in
+`notes/reference_rescore_2026-09-11/parallel_fill_start_2026-09-12.json`.
+They may run in groups of at most four fresh isolated sessions, each capped
+at $5; no further job is launched after an observed failure, and any already
+running sessions are allowed to finish. There are no automatic retries.
+This scheduling step changes no instrument, prompt, input or model setting.
+Repeatability remains unmeasured until the registered repeated ratings finish.
+No generation or downloads are part of this fill.
+
 ### Reference model provenance amendment (2026-09-12; #1314, #1316)
 
 The fill paused at ten accepted ratings when a valid AI_READI v8 rep1 rubric10
@@ -2436,6 +2459,18 @@ must be revalidated under this registration before new calls resume.
 Evidence and hashes are recorded in
 `notes/reference_rescore_2026-09-11/model_provenance_registration.json` and
 `model_provenance_review_2026-09-12.md`. No generation or download occurred.
+
+### Reference fill revalidated and resumed (2026-09-12; #1248, #1314)
+
+All ten previously accepted outputs and 73 retained attempt files were verified
+unchanged. Nine ratings received new offline receipts after the CHORUS canary
+was separately re-accepted; the retained AI_READI v8 rep1 rubric10 candidate
+adds the eleventh accepted rating. No model calls occurred during revalidation.
+The 45 remaining job IDs and replacement execution helper are registered in
+`notes/reference_rescore_2026-09-11/parallel_fill_resumed_model_provenance_2026-09-12.json`.
+The original helper and scheduling record remain preserved. The same limit of
+four independent sessions, $5 per attempt, and a halt on any observed failure
+applies. The original unvalidated AI_READI v7 draft remains excluded.
 
 ### Canonical validator path amendment (2026-09-12; #1317)
 
@@ -2460,6 +2495,19 @@ Detailed evidence is in
 `notes/reference_rescore_2026-09-11/canonical_validator_review_2026-09-12.md`
 and `canonical_validator_registration.json`. No generation or download occurred.
 
+### Reference fill revalidated after the path fix (2026-09-12; #1248, #1317)
+
+All 21 accepted outputs and 165 retained attempt files were verified unchanged.
+Nineteen ratings received new offline receipts after the two main-branch
+ratings were revalidated and the original canary separately accepted. No model
+call occurred during this revalidation. The 35 remaining job IDs and replacement
+execution helper are recorded in
+`notes/reference_rescore_2026-09-11/fill_resumed_canonical_validator_2026-09-12.json`.
+Fresh CHORUS v8 rep2 rubric20 and v8 rep3 rubric10 attempts run one at a time;
+both must pass before the other groups of at most four resume. The complete
+prompts, model, effort and $5 attempt cap are unchanged. All three unvalidated
+drafts remain excluded and preserved.
+
 ### Reference accounting and partial-panel reporting amendment (2026-09-12; #1319–#1326)
 
 Both registered CHORUS canonical-path retries passed, bringing the fill to 23 accepted ratings from 26 evaluator sessions, with three unvalidated drafts preserved and excluded. Further calls paused for the interim review findings. PR #1321 repairs interrupted-attempt accounting, recovery evidence references, malformed artifacts, terminal usage evidence and premature applicability-stability claims. The additional Codex plugin review after five rounds approved `195ebac26a37b24bc80c0889f746314dde8f6ec9`; 141 focused tests plus the annotation-only follow-up's 16 accounting tests and actual Python 3.9.6 startup checks passed.
@@ -2467,6 +2515,24 @@ Both registered CHORUS canonical-path retries passed, bringing the fill to 23 ac
 Manifest SHA256 `99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f` records the reporting-only runner amendment. All runner code outside `report_results`, complete prompts, agent definitions, inputs, schemas, model, effort, budget and the 56-rating design are unchanged. The two main-worktree outputs were revalidated offline, and the original CHORUS canary was separately accepted. Its quoted definition remains `66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`. Evidence and preserved hashes are in `notes/reference_rescore_2026-09-11/reporting_audit_registration.json` and `reporting_audit_review_2026-09-12.md`.
 
 The other 21 accepted outputs on #1313 require offline revalidation before the 33 remaining ratings resume in groups of at most four. No score bytes were rewritten, no model calls occurred during this amendment, and all 202 prior evaluations remain unchanged. No generation or download occurred.
+
+### Reference fill revalidated after the reporting amendment (2026-09-12; #1248, #1321)
+
+All 23 accepted outputs and 219 earlier attempt files were verified unchanged. Twenty-one ratings received new offline receipts after the two main-worktree ratings were revalidated and the original canary separately accepted. The new audit certifies all 26 original evaluator sessions, complete terminal usage evidence and all 202 prior evaluations unchanged; three unvalidated drafts remain excluded. No evaluator call or score rewrite occurred during this amendment.
+
+The 33 remaining jobs and replacement execution helper are registered in `notes/reference_rescore_2026-09-11/fill_resumed_reporting_audit_2026-09-12.json`. Both individually required CHORUS retries already passed. The unchanged protocol resumes groups of at most four, $5 per attempt, no automatic retries, and a halt on further launches after any observed failure. The agent definitions, complete prompts, inputs and execution settings remain fixed. The current audit command is `python scripts/audit_reference_rescore.py`; the original dated helpers remain preserved as historical evidence.
+
+### CM4AI final-attestation retry (2026-09-12; #1248)
+
+At 34 accepted ratings from 38 completed evaluator sessions, the CM4AI v8 rep3 rubric10 draft passed the exact schema validator but then attempted a denied compound shell command. The registered final-attestation rule treats that later Bash attempt as a potential mutation and requires a subsequent exact validation. The original candidate and all evidence remain preserved and excluded. One fresh retry is registered in `notes/reference_rescore_2026-09-11/cm4ai_v8_rep3_r10_retry_registration_2026-09-12.json`; it runs alone and must pass before the remaining groups resume. This is an execution retry under the unchanged manifest `99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f`, prompts and rubric10 definition `66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`, with a $5 attempt cap. No score was edited and no attestation rule was relaxed. All 202 prior evaluations remain unchanged; no generation or download occurred.
+
+### CM4AI arithmetic retry (2026-09-12; #1248, #1327)
+
+The isolated retry completed and passed the exact final schema validator, but its Element 6 total was 3 while the sub-elements summed to 4; its overall total was likewise inconsistent (39 reported, 40 from sub-elements). The arithmetic acceptance guard correctly rejected it. At 34 accepted ratings from 39 completed sessions, all five excluded drafts remain preserved. One further isolated retry is registered in `notes/reference_rescore_2026-09-11/cm4ai_v8_rep3_r10_retry2_registration_2026-09-12.json` under the same manifest, rubric10 definition SHA256, complete prompt and $5 cap. No scores, instrument files or acceptance rules were changed. The remaining groups resume only after this retry passes.
+
+### CM4AI isolated retry accepted (2026-09-12; #1248, #1327)
+
+The second fresh retry, started at 12:53:23 UTC, passed the complete registered acceptance checks. Its output SHA256 is `c47a3d865f5ecfa025b50d434e276c0b2a6d52c1b920917e35e56873b940affc`, and its quoted rubric10 definition remains `66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`. Both excluded CM4AI drafts and every file hash recorded before their retries were verified unchanged. This brings the fill to 35 accepted ratings; the remaining 21 jobs resume under the unchanged manifest in groups of at most four. No candidate was repaired by hand and no scoring or attestation rule changed.
 
 ### Reference percentage and attestation amendment (2026-09-12; #1328–#1334)
 
@@ -2479,3 +2545,61 @@ The already accepted fresh CM4AI score remains selected, with its earlier drafts
 The original CHORUS canary has now been revalidated offline and separately accepted under this registration. The existing AI_READI v8 rep1 rubric10 output was then revalidated. Both outputs and all 31 earlier main-worktree attempt files remain unchanged; no evaluator call occurred. The other 36 accepted outputs and the retained VOICE candidate on #1313 still require offline revalidation after adoption.
 
 Published host-validation and report paths are repository-relative; original host logs are retained locally. This presentation change does not alter evaluator transcripts, evaluation bytes or receipt hashes.
+
+### Reference fill resumes after percentage/attestation amendment (2026-09-12)
+
+The results branch adopted PR #1330 and revalidated all 38 existing accepted outputs under manifest `36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a`, preserving their bytes and all 370 earlier attempt files. The original VOICE v7 rep1 rubric10 candidate was recovered after its final-Write, schema, arithmetic, identity, check-echo and amended attestation checks passed. There are now 39 accepted ratings from the same 44 original CLI sessions, with five excluded attempts and CLI-reported usage of $97.428248. No new evaluator call occurred during the amendment. Both earlier CM4AI drafts stay excluded; the already accepted fresh rating is unchanged.
+
+The 17 remaining registered ratings resume in groups of at most four, with the unchanged $5 per-attempt cap, no automatic retries, and no new launches after a failed group. The dated schedule and portable helper hash are in `fill_resumed_percentage_denial_2026-09-12.json`; `percentage_denial_after_audit.json` records the verified checkpoint. Evaluation definitions and all 202 prior evaluations remain unchanged.
+
+### VOICE v8 rep1 rubric10 arithmetic retry (2026-09-12; #1335)
+
+The next group yielded three accepted VOICE ratings and one excluded draft: 42 accepted from 48 CLI sessions, six excluded attempts, and $105.672661 CLI-reported usage. The excluded v8 rep1 rubric10 draft reports 47/50 although its item and element sums are48; the arithmetic guard correctly rejected it. Candidate SHA256 is `862c4c31b10e7abc392a53a62f4602d93ce457d0a6233a1180f1f76ade0324d7`. All four sessions finished and no later group started.
+
+`voice_v8_rep1_r10_retry_registration_2026-09-12.json` preregisters one fresh isolated retry under the same manifest `36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a`, definition `66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`, complete prompt and $5 cap. The original draft and its evidence remain unchanged and excluded. The remaining 13 ratings resume only after this retry passes all registered checks. No instrument or source-code change is needed.
+
+The registered VOICE retry passed all checks: 47/50 fixed, 47/50 adjusted; output SHA256 `8fac08134f0808ba9ff6fa3f59181d9bd6130e71fef30d46c2b1fa36acceef9f`. The original arithmetic-invalid draft remains byte-for-byte unchanged and excluded. There are now 43 accepted ratings from 49 original CLI sessions, six excluded attempts, and $107.8588765 CLI-reported usage. `voice_v8_rep1_r10_after_audit.json` verifies the checkpoint. The remaining 13 registered ratings now resume in the original groups of at most four, with an audit between groups and a stop after any failed group.
+
+### Reference startup sequencing (2026-09-12)
+
+Simultaneous controller startup caused three Python helpers to exit at the nonblocking canary preflight lock before creating attempt directories or invoking an evaluator. VOICE v8 rep3 rubric10 started and passed; the controller then stopped without later launches. The three preflight errors add zero evaluator sessions or model usage. Their unchanged local controller/log hashes and before-invocation evidence are recorded in `concurrent_startup_preflight_2026-09-12.json`.
+
+The idle audit now verifies 44 accepted ratings from 50 original evaluator CLI sessions, six excluded attempts and $110.1551835 CLI-reported usage. The remaining 12 jobs are registered in `fill_resumed_staggered_startup_2026-09-12.json`. Each helper is launched separately and must emit its Starting marker, after releasing the canary preflight lock, before the next starts. Evaluator sessions may then overlap up to four. No instrument, input, prompt, runner or model setting changed; the prior simultaneous controller is retired.
+
+### Final primary-rating retry (2026-09-12; #1336)
+
+Staggered startup succeeded for all four jobs. Three passed, leaving 47 accepted ratings from 54 original evaluator CLI sessions, seven excluded attempts and $118.4714345 CLI-reported usage. VOICE v8 rep1 rubric20 validated its 80/88 output, then wrote `fix_typo.py` without another validator; the frozen attestation rule rejected that later executed Write. Candidate SHA256 `a0ebce67c662869f201de7923fca4c11c0225e1bcfe1e607bd78c94589303fd8` and all original evidence remain unchanged and excluded.
+
+`voice_v8_rep1_r20_retry_registration_2026-09-12.json` registers one fresh isolated retry under the same manifest `36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a`, rubric20 definition `9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3`, full prompt, model settings and $5 cap. The rule and candidate remain untouched. The eight repeatability ratings wait until this final primary rating passes.
+
+The first fresh retry for #1336 also remains excluded. Its only attempted validator appended `; echo "EXIT=$?"` to the exact required command, so the CLI denied execution. The final reply said it had tried the command verbatim, but the retained tool input disproves that claim. No successful validator occurred. Candidate SHA256 is `31f17945093a6a9b6fbea6138b674b5aa47ce7b355c9d2ab56b437eb5df7d800`; the candidate and full trace remain unchanged.
+
+`voice_v8_rep1_r20_retry2_registration_2026-09-12.json` registers one further fresh isolated retry under the unchanged manifest, complete prompt, agent definition, permission rules and $5 cap. Both earlier drafts remain preserved and excluded. The audit verifies 47 accepted outputs, 55 original CLI sessions, eight excluded attempts and $120.4592925 CLI-reported usage. The repeated-rating panel remains paused.
+
+### Primary reference set complete; repeatability panel starts (2026-09-12)
+
+The second registered fresh retry for #1336 passed, with 80/88 fixed points and output SHA256 `1bce9f23f11a2c0466fab8f729a8374753b40e2d5b6947da46d435770c4f6bc7`. Both earlier drafts remain unchanged and excluded. All 24 existing v7/v8 records now have both semantic rubrics: 48 accepted primary ratings. The audit accounts for 56 original evaluator CLI sessions, eight excluded attempts and $122.6248625 CLI-reported usage. All 202 prior evaluations remain unchanged.
+
+The eight extra rubric10 ratings were selected and registered before the canary. They now start in two groups of four with the same complete prompts as their respective primary ratings, the same definition `66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`, and the unchanged model/settings. This completes three independent ratings of v7 rep1 per project. Startup is sequential through the canary preflight marker; evaluator sessions may overlap up to four. See `primary_completion_audit.json` and `repeatability_started_2026-09-12.json`. No new D4D generation or download occurs.
+
+### Pinned reference rescore completed (2026-09-12; #1248, #1080, #1062)
+
+Post-review qualification (#1337): 15 rubric20 Q19 rationales are flagged in the [semantic erratum](reference_rescore_2026-09-11/semantic_errata.md). Their recorded totals and summaries containing them require adjudication before being treated as rubric-conformant scores. Completion below denotes recorded measurements passing the mechanical gates, not a semantic certification.
+
+The completion audit at 15:57:19Z verifies all 56 registered ratings: both semantic rubrics on all 24 existing v7/v8 records, plus two additional rubric10 ratings of v7 rep1 for each project. All 64 original evaluator CLI sessions have terminal usage evidence; eight excluded attempts remain preserved. CLI-reported usage is $142.2503625, including excluded attempts and auxiliary CLI-model usage, with no more than four concurrent sessions. This is a session count, not an API-request count, and excludes Codex review usage. All 202 prior evaluations remain unchanged. The original successful evaluator Write, retained candidate and accepted output have identical bytes for every accepted rating.
+
+The final manifest SHA256 is `36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a`, registered runner commit `d8bb022ed2934d606a5ef15847bd5a1e3fc2b72c`. The evaluators quoted rubric10 definition `66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864` and rubric20 definition `9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3`. Each accepted rating passed the check-echo, runtime/model, exact-file schema, arithmetic and final-attestation checks. The complete input/rating list and hashes are recorded in the [manifest](reference_rescore_2026-09-11/manifest.json) and [completion audit](reference_rescore_2026-09-11/completion_audit.json).
+
+The three rubric10 ratings have stable applicability within every project. CHORUS scores are 70%, 72% and 72%, with sample SD 1.1547005383792515 percentage points and range 2; the other three records have zero observed total-score spread. The two 72% CHORUS ratings nevertheless differ on four individual item scores. These are descriptive observations on one v7 record per project, not a population reliability estimate. The historical mixed-instrument 8.7-point movement is not a same-instrument variance estimate. Rubric20 repeatability remains unmeasured; generation-replicate spread is reported separately. No historical prediction verdict or canonical selection is changed on the basis of small score gaps.
+
+The two fractional historical rubric20 artifacts remain unchanged; their fresh reference ratings are AI_READI v7 rep2 at 84/88 and VOICE v7 rep3 at 82/88. All 24 new rubric20 ratings use integer question bands. The [completion summary](reference_rescore_2026-09-11/completion_summary.md) links the repeatability results, both score bases, input audit and output Write audit. No D4D was regenerated or source downloaded. A new D4D version would require its own generation canary; this completion concerns the manuscript reference evaluation.
+
+### Post-measurement semantic qualification (2026-09-12; #1337)
+
+The first final Codex review of published result `79f628202f64453250d6047b53e0eeba8fe4b524` confirmed coverage, statistics, accounting, preservation and original-Write binding, but identified two VOICE Q19 judgments that penalize textual provenance permitted by the frozen rule. The subsequent inspection read all 24 Q19 score labels, quality notes and semantic analyses. Fifteen rationales contain representation-related objections; several also cite content, identifier, versioning or quality gaps that are not adjudicated here. The two original VOICE findings additionally have explicit supplied-input evidence contradicting the representation objection. The inspection's scope and per-record evidence are retained in [semantic_errata.json](reference_rescore_2026-09-11/semantic_errata.json).
+
+This is a dated reporting qualification of the original model measurements. It changes no instrument, input, score, candidate, prompt, transcript, receipt or numeric statistic and makes no new evaluator call. No corrected Q19 value or total is inferred. The affected individual totals, both relevant fractional-rating replacements and seven generation-replicate rows are visibly qualified; rubric10 repeatability is unaffected. Unflagged Q19 entries and other questions are not certified correct. A later semantic adjudication or rerating would be a separate recorded act, not an overwrite of these measurements. The reproducible qualified-report command is `python notes/reference_rescore_2026-09-11/execution_tools/qualify_reference_results.py --rebuild` from the repository root.
+
+### Qualified-report rebuild failure handling (2026-09-12; #1338)
+
+The second Codex review verified the qualifications, all 857 preserved files and unchanged numeric results, then reproduced a failed rebuild that removed the report caveats. The report helper now validates errata, hashes and completion evidence before writing, and restores the previous four-report set after a later caught exception. Five regressions cover missing or malformed errata, a failed or interrupted rebuild, and a qualification failure with a previously absent file. Both metadata regressions fail on the published old helper and pass after the correction. Normal rebuilding, byte-idempotent qualification and preservation of all measurements and numeric/qualification metadata pass; evidence is in [qualified_rebuild_validation_2026-09-12.md](reference_rescore_2026-09-11/qualified_rebuild_validation_2026-09-12.md). The frozen runner, instrument, original measurements and scoring rules remain unchanged, with no new evaluator call.

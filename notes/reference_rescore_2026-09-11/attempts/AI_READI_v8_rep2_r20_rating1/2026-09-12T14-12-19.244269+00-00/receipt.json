@@ -1,0 +1,195 @@
+{
+  "job_id": "AI_READI_v8_rep2_r20_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T14:12:19.244644+00:00",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "225e5fd96d9599600b8fa789943bec45e46f5a9b6d2f78c2da809111e27ab2b8",
+  "evaluation_sha256": "3a50e403ea0cd986e22a9e27254b64ad86a4f12999a001892dc910df929cc540",
+  "cli_result": {
+    "duration_api_ms": 535593,
+    "stop_reason": "end_turn",
+    "session_id": "a1736366-2437-4103-befe-01137888bffc",
+    "total_cost_usd": 2.401513,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 91705,
+      "cache_read_input_tokens": 705464,
+      "output_tokens": 44174,
+      "output_tokens_details": {
+        "thinking_tokens": 11621
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 91705,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1168,
+          "cache_read_input_tokens": 111060,
+          "cache_creation_input_tokens": 291,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 291
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 27196,
+        "outputTokens": 17,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.027281,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 20,
+        "outputTokens": 44174,
+        "cacheReadInputTokens": 705464,
+        "cacheCreationInputTokens": 91705,
+        "webSearchRequests": 0,
+        "costUSD": 2.374232,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 11621,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01EeYBu9Edf6c1R8hAHnuaLN",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-wqwt81z0; find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "List working directory and locate agent definition"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_019vcR8bTcaTtncLbsAyjUdw",
+        "tool_input": {
+          "command": "shasum -a 256 data/rubric/rubric20.txt input/record.yaml",
+          "description": "Compute hashes of rubric and record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01NVBo5npwLhNBZj9x8km2gr",
+        "tool_input": {
+          "command": "python3 -c \"import uuid,datetime;print(uuid.uuid4());print(datetime.datetime.now().astimezone().isoformat())\"",
+          "description": "Generate evaluator UUID and current timestamp"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_013PcLJUi8Qtj5gvUTuyc6gn",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; python3 -c \"import uuid; print(uuid.uuid4())\"",
+          "description": "Get current UTC timestamp and a random UUID"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01HjpkqFUQLcfDhiAxUrLccZ",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+          "description": "Validate evaluation output against the rubric20-semantic schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0, `VALID output_evaluation.json: rubric20-semantic`).\n\n## Definition check\n\nThe \"Reproducibility\" section is present in my instructions, and the sentence beginning \"Repeatability must be\" reads, verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nThis matches what I would expect of the current rules, so I proceeded. `instrument_sha256` recorded as `9d08b5f3\u20260e7dd3`, `instrument_kind: agent_definition`.\n\n## Result\n\n**83 / 88 points.** Both percentages are 94.3% \u2014 all four \"Applies to\" trigger conditions resolved as met, so no question was excluded, `excluded_max_points` is 0, `adjusted_max_points` is 88, and the fixed and normalized bases coincide. `questions_not_applicable: 0`; no `score: null` entries were emitted, so every item carries an integer score with `applicable: true`.\n\n| Category | Score |\n|---|---|\n| Structural Completeness | 20 / 21 |\n| Metadata Quality & Content | 21 / 21 |\n| Technical Documentation | 23 / 25 |\n| FAIRness & Accessibility | 19 / 21 |\n\nPoints came off at Q3 (7 keywords, top of the 3\u20137 band, one short of the \u22658 anchor and omitting OCT/OCTA/FLIO/OMOP/salutogenesis), Q11 (strategies thorough but no converter named, no repo tag, no REDCap version), Q13 and Q19 and Q20.\n\nApplicability was decided non-circularly and the evidence is recorded per question: Q8 and Q15 off `description`/`keywords`/`collection_mechanisms`; Q11 off `external_resources` referencing `github.com/AI-READI`; Q10/Q17 and Q12/Q13 off `third_party_sharing.is_shared` and the FAIRhub access URLs. No question's own fields were used to gate it.\n\nSemantic analysis found 12 issues (30 checks passed, 3 failed, 10 warnings). Three findings drove score reductions:\n\n- **De-identification contradiction** \u2014 `deIdentType \"NoDeIdentification\"` carried alongside `deIdentHIPAA true` and an asserted Safe Harbor stripping. Weighed at Q8 but did not displace the 5, since the surrounding prose makes actual practice clear and the contradiction is upstream.\n- **Two of three minted DOIs no longer resolve** \u2014 v1.0.0 and v2.0.0 are stated to be no longer accessible through FAIRhub. This is the main reason Q13 sits at 4.\n- **Institutional split** \u2014 Washington University in St. Louis (Licensor, accountable org) vs University of Washington (IRB protocol STUDY00016228, `hsdrely@uw.edu`).\n\nVerification worth noting: I independently re-computed the record's arithmetic. File counts close exactly (356,334 datatype + 9 root = 356,343), and every demographic column reconciles in both directions across the three splits. The record's own disclosed 419,614-byte size shortfall is arithmetically correct as stated \u2014 it detected and reported a discrepancy against itself rather than publishing the headline figure silently.\n\nOutput at `output_evaluation.json`, with provenance values, hashes, and `temperature: null` set exactly as specified.",
+    "ttft_ms": 1751,
+    "type": "result",
+    "duration_ms": 538195,
+    "uuid": "3b402cc6-b648-4ce0-a2b7-7612cf34163d",
+    "ttft_stream_ms": 1154,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 1154,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep2_r20_rating1/2026-09-12T09-35-09.078994+00-00",
+  "original_receipt_sha256": "dc2bee6178c85cbd71a9737ecbe0baea9e6756db11c866d253e7ff5a7771d6a1",
+  "transcript_sha256": "7ece3fab2ce6a4734054882cd2ed25692a8327885b43a9fc24ad0628b66e26cf",
+  "user_prompt_sha256": "a23a507c6c107e2085ebfa651e76fa216d0aa3ac2fbaf09a93a9afa494a0312a",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "evaluated_at": "2026-09-12T09:35:09.079463+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

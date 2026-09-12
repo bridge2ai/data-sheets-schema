@@ -1,0 +1,179 @@
+{
+  "job_id": "CHORUS_v7_rep1_r20_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T14:12:21.279843+00:00",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "e5c0f47198cd20ea47158959f6cfb4d25648965eb8c063ac977e2b5b9aba355d",
+  "evaluation_sha256": "475ebf0cc55da19e4b7df6c6bf57c0b7d5311c6f42ff6a66b8b2de9eee0c2f7f",
+  "cli_result": {
+    "duration_api_ms": 432532,
+    "stop_reason": "end_turn",
+    "session_id": "47946e25-4bb0-4ca6-9231-88d78347e652",
+    "total_cost_usd": 1.904518,
+    "usage": {
+      "input_tokens": 22,
+      "cache_creation_input_tokens": 71996,
+      "cache_read_input_tokens": 575110,
+      "output_tokens": 35473,
+      "output_tokens_details": {
+        "thinking_tokens": 7645
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 71996,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1089,
+          "cache_read_input_tokens": 91414,
+          "cache_creation_input_tokens": 228,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 228
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 9998,
+        "outputTokens": 14,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.010068,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 22,
+        "outputTokens": 35473,
+        "cacheReadInputTokens": 575110,
+        "cacheCreationInputTokens": 71996,
+        "webSearchRequests": 0,
+        "costUSD": 1.89445,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 7645,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01T9ML1mbuRgv3fVQgBEKVyv",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-skqgvciq; find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01JUNy988CwR4xLxnRuDqhAZ",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml; ls data/rubric scripts src 2>/dev/null",
+          "description": "Verify input hash and list rubric/scripts"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01Mc8ovDAD9VpPdkrgbgJs6b",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation output against its schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed. Here is the definition quote and the result.\n\n## Definition check\n\nThe \"Reproducibility\" section is present in my instructions and reads as expected of the current rules. The sentence beginning \"Repeatability must be\", verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\n## Evaluation complete\n\n`output_evaluation.json` written and validated: `VALID output_evaluation.json: rubric20-semantic` (exit 0).\n\n**Score: 67 / 88.** No question was excluded, so `excluded_max_points: 0`, `adjusted_max_points: 88`, and both bases coincide at **76.1%** (`fixed_percentage` = `normalized_percentage` = 67/88). `questions_not_applicable: 0`, `excluded_item_ids: []`.\n\n| Category | Score | Max |\n|---|---|---|\n| Structural Completeness (Q1\u20135) | 18 | 21 |\n| Metadata Quality & Content (Q6\u201310) | 18 | 21 |\n| Technical Documentation (Q11\u201315) | 16 | 25 |\n| FAIRness & Accessibility (Q16\u201320) | 15 | 21 |\n\n**Applicability.** All four trigger conditions resolved before scoring; every conditional question came out applicable, so there are no `null` scores. Human subjects (gates Q8, Q15) was evidenced from `description`, `keywords` and `collection_mechanisms` \u2014 never Q8's or Q15's own fields. Software output (gates Q11) was evidenced from `external_resources` naming the chorus-ai GitHub organization, not from Q11's strategy fields. Datasets-shared (gates Q10, Q17, and with collection Q12/Q13) is approval-gated rather than open, which is exactly the borderline case the ambiguity rule resolves toward `applicable: true`. Each decision is recorded in `applicability_status` and `applicability_evidence`.\n\n**Where semantic analysis moved scores.** Eleven issues detected (14 consistency checks passed, 5 failed, 6 warnings). The two that cost the most: `involves_human_subjects: true` with PICU and NICU cohorts but no named IRB, no approval identifier and no `informed_consent` field at all held Q8 to 3; and the total absence of `version`, `version_access`, `errata`, `doi` and `citation` on a record that labels itself \"partially released\" and growing put Q13 below the 3 band at 2. Q20 was held at 3 by a consistency failure rather than an absence \u2014 `known_limitations.representativeness_limitation` describes a selection bias that `known_biases` does not carry forward. Grant OT2OD032701 validates against the NIH pattern; no DOI or RRID is present; one external resource lacks a URL scheme and the primary maintainer email domain is a misspelling of harvard.edu, so `url_validity` is `some_invalid`.\n\nThe record's own `source_caveats` are candid about several of these gaps. I treated that candour as documentation hygiene, which it is, and not as coverage of the missing content, which it is not.",
+    "ttft_ms": 1865,
+    "type": "result",
+    "duration_ms": 435451,
+    "uuid": "efc99183-6e4f-4bb8-b53a-295040483bec",
+    "ttft_stream_ms": 853,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 853,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r20_rating1/2026-09-12T10-11-17.769243+00-00",
+  "original_receipt_sha256": "0594e7aa7a5379e804251d55f7fbfc048a7292b6943ea69a80011df47f71223f",
+  "transcript_sha256": "1f9bc3e97d10961139c19498094a0c84a7f299aa0600b366a550dc9cd0401c95",
+  "user_prompt_sha256": "18866735910ef701a114788e651cbb789d38c754dc323147941c65c41a6e468f",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "evaluated_at": "2026-09-12T10:11:17.769639+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

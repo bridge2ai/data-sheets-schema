@@ -1,0 +1,167 @@
+{
+  "job_id": "CHORUS_v7_rep1_r10_rating3",
+  "started_at": "2026-09-12T15:26:14.502380+00:00",
+  "status": "passed",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "user_prompt_sha256": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "e5c0f47198cd20ea47158959f6cfb4d25648965eb8c063ac977e2b5b9aba355d",
+  "evaluation_sha256": "3158093809733a65e17afe4bb2279cb583748a9b97e8296697f2b5e0ba5cf47a",
+  "cli_result": {
+    "duration_api_ms": 607231,
+    "stop_reason": "end_turn",
+    "session_id": "9c568685-4914-4b46-a388-411ff3375504",
+    "total_cost_usd": 2.255609,
+    "usage": {
+      "input_tokens": 14,
+      "cache_creation_input_tokens": 80661,
+      "cache_read_input_tokens": 355452,
+      "output_tokens": 50445,
+      "output_tokens_details": {
+        "thinking_tokens": 12730
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 80661,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1118,
+          "cache_read_input_tokens": 103274,
+          "cache_creation_input_tokens": 250,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 250
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 9993,
+        "outputTokens": 17,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.010078,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 14,
+        "outputTokens": 50445,
+        "cacheReadInputTokens": 355452,
+        "cacheCreationInputTokens": 80661,
+        "webSearchRequests": 0,
+        "costUSD": 2.2455310000000006,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 12730,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01T48kMP5fdQ4HiYRdpAPBf4",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01E3XE8rZDaUPFW9qx1QiZa5",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml",
+          "description": "Hash the input record"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 11,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0).\n\n## Definition check\n\nThe section headed \"Source rubric and schema paths (#158)\" is present in my instructions, and the sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis is the current wording \u2014 the #158 mapping to the dedicated `updates.update_details` slot, with the guard against crediting unrelated `notes` content. I applied it in Element 6 sub-element 5 (crediting `raw_data_sources` provenance) and sub-elements 3\u20134 (reading `updates.update_details` as a forward roadmap, not a change log, and declining to credit the record's unrelated `notes` block about the site banner and funding statement).\n\n## Result\n\n**CHORUS / claudecode_agent \u2014 36/50**, `fixed_percentage` 72.0 (\u00f750), `normalized_percentage` 72.0 (\u00f750). All five trigger conditions resolved as **satisfied** from fields outside the gated sub-elements, so nothing is excluded and the two bases coincide (`sub_elements_not_applicable: 0`).\n\nElement scores: E1 3, E2 4, E3 4, E4 3, E5 4, E6 2, E7 5, E8 5, E9 4, E10 2.\n\nNotable applicability determinations, each evidenced non-circularly:\n- **Element 4 all five applicable** \u2014 the human-subjects condition fires on E1 (`description`: \"50,000 patient admissions from ICU, PICU, and NICU settings\") and E8 collection mechanisms, so sub-elements 3\u20135 apply on participant evidence, not on the governance disjunct.\n- **E8 sub-element 4 applicable and scored 1** (#1081) \u2014 not gated on the repository pointer. Under the #1059/#1082 threshold the record names software that *transformed the released data*: OHNLP toolkit (tokens that are released), `chorus_waveform` conversion scripts (released WFDB/EDF+), DeGauss/UF-Geocoding (released OMOP Location entities), `chorus-mapping`, `CTP-deid`. `chorus-extract-upload` (role a/c) and `CHoRUSReports` (role d) were correctly not relied upon.\n- **E10 sub-element 2 applicable and scored 0** (#1080) \u2014 a shared dataset with neither citation nor DOI earns 0, not N/A.\n\nThe record's dominant strength is end-to-end technical provenance and verifiable funding (award `OT2OD032701` validates as a well-formed NIH Common Fund OT2 identifier, with the RePORTER project ID matching the stated application ID). Its dominant weakness is a wholly undocumented human-subjects authorisation chain \u2014 no IRB, approval identifier, DPIA, consent or consent waiver \u2014 compounded by the absence of any persistent identifier, publisher, citation or version tracking. The record is unusually candid about these gaps, which I credited in the assessment but did not let substitute for the missing content.",
+    "ttft_ms": 1324,
+    "type": "result",
+    "duration_ms": 609612,
+    "uuid": "e6e4cb5c-aefa-4e15-ae78-0d9b40d4054b",
+    "ttft_stream_ms": 991,
+    "time_to_request_ms": 21,
+    "first_content_frame_ms": 991,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T15:36:25.411880+00:00"
+}

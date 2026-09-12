@@ -1,0 +1,159 @@
+{
+  "job_id": "CHORUS_v7_rep2_r10_rating1",
+  "started_at": "2026-09-12T10:11:23.211222+00:00",
+  "status": "passed",
+  "manifest_sha256": "5e57093644d0a3485a9d1229a2087c8a5472578b33346213f4df6618686aa4e9",
+  "user_prompt_sha256": "eece7b151956c2909711d54e4b4f50dd729fd08e1ba134e2c2c84cc7fde155ed",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "d96b8b8fb1dbc2748fc5cfcab49aa2eb745a8bcd3c8e83978ca4226b93922379",
+  "evaluation_sha256": "e31cd946faa8e638c1aa40ea01d9b740440353e90f807182665d2ffb60e4bb80",
+  "cli_result": {
+    "duration_api_ms": 447599,
+    "stop_reason": "end_turn",
+    "session_id": "17934551-7373-4df1-bee9-ff5efa337764",
+    "total_cost_usd": 1.6174425,
+    "usage": {
+      "input_tokens": 10,
+      "cache_creation_input_tokens": 56136,
+      "cache_read_input_tokens": 214637,
+      "output_tokens": 37595,
+      "output_tokens_details": {
+        "thinking_tokens": 10184
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 56136,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1151,
+          "cache_read_input_tokens": 78790,
+          "cache_creation_input_tokens": 209,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 209
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 8759,
+        "outputTokens": 16,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.008839,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 10,
+        "outputTokens": 37595,
+        "cacheReadInputTokens": 214637,
+        "cacheCreationInputTokens": 56136,
+        "webSearchRequests": 0,
+        "costUSD": 1.6086034999999999,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 10184,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_012it6JzNJb1YFieGZWqWnks",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-cwh2q73_ 2>/dev/null; echo \"---\"; find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 6,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed: `VALID output_evaluation.json: rubric10-semantic`.\n\n## Definition check\n\nThe section \"Source rubric and schema paths (#158)\" is present in my loaded instructions, and the sentence reads, verbatim:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches the current instrument, so I proceeded. Recorded `instrument_sha256` as `66ad6231\u2026e34864`, `instrument_kind: agent_definition`.\n\n## Result \u2014 CHORUS, claudecode_agent rep2\n\n**31 / 50 = 62.0%** on both bases. No sub-element was excluded, so `fixed_percentage` and `normalized_percentage` share the denominator 50 (`excluded_max_points: 0`, `adjusted_max_points: 50`, `sub_elements_not_applicable: 0`).\n\nApplicability determinations, each made from other elements' evidence:\n- **Datasets-shared** \u2014 met (five populated `distribution_formats`, `third_party_sharing.is_shared=true`, documented access route). Access-by-approval resolved toward applicable under the ambiguity rule. Element 3 sub-elements 1\u20134, all of Element 6, 8 and 10 scored.\n- **Human subjects** \u2014 met on E1 `description` (\"50,000 patient admissions from ICU, PICU, and NICU\") and E8 `collection_mechanisms`. All five Element 4 sub-elements applicable; none excluded on the governance disjunct alone.\n- **Software output** (E8 sub-element 3) \u2014 met via `external_resources` \u2192 github.com/chorus-ai. E8 sub-element 4 scored independently of that pointer, per #1081.\n\nElement scores: E1 3, E2 4, E3 3, E4 2, E5 2, E6 2, **E7 5, E8 5**, E9 3, E10 2.\n\nThe record's technical and funding documentation is strong \u2014 per-modality provenance from source system through named conversion tooling, a verifiable NIH award (OT2OD032701 passes the format check with corroborating RePORTER data), and unusually disciplined source-conflict handling. E8 sub-element 4 scored 1 on the processing-role threshold: OHNLP tokenization, `chorus_waveform` conversion scripts and CTP-deid transform the data actually released; `chorus-extract-upload` (capture), `chorus-container-apps` (hosting) and `CHoRUSReports` (validation) were identified as excluded roles and not relied on.\n\nThe losses cluster in three places: human-subjects documentation (no IRB of record, `informed_consent` absent entirely, no re-identification risk assessment \u2014 three failed consistency checks against `involves_human_subjects=true`); versioning and citability (no `version`, `doi`, `citation`, `publisher` or `download_url` for a dataset trainees are expected to publish from); and composition (no demographics, no `variables`, no `known_biases`) \u2014 which leaves the \"for Equitable AI\" framing without supporting evidence. Consistency tally: 12 passed, 3 failed, 6 warnings; 12 issues recorded across consistency, correctness, semantic-understanding and content-accuracy types.\n\nOutput is at `output_evaluation.json`, with `d4d_file` set to the provided source path rather than the temporary input.",
+    "ttft_ms": 1331,
+    "type": "result",
+    "duration_ms": 449849,
+    "uuid": "119adccb-d963-49d2-9cf4-7a8a12cc7764",
+    "ttft_stream_ms": 760,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 760,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T10:18:54.380464+00:00"
+}

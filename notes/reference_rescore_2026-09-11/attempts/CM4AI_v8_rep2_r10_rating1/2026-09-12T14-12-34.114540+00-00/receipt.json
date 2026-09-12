@@ -1,0 +1,187 @@
+{
+  "job_id": "CM4AI_v8_rep2_r10_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T14:12:34.114904+00:00",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "9fce395dfcba6684dbf183e6c5cf2acc7b6b656c2f76b4ba519974025ca80200",
+  "evaluation_sha256": "451d2764d3691498060bc4d626b607154bf6f2ed0916263ae556b0241b1c872d",
+  "cli_result": {
+    "duration_api_ms": 534341,
+    "stop_reason": "end_turn",
+    "session_id": "1086b9d7-c800-40a4-a99e-b32612465662",
+    "total_cost_usd": 2.2124470000000005,
+    "usage": {
+      "input_tokens": 22,
+      "cache_creation_input_tokens": 78692,
+      "cache_read_input_tokens": 640096,
+      "output_tokens": 43618,
+      "output_tokens_details": {
+        "thinking_tokens": 12773
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 78692,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1438,
+          "cache_read_input_tokens": 101194,
+          "cache_creation_input_tokens": 361,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 361
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 14824,
+        "outputTokens": 19,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.014919,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 22,
+        "outputTokens": 43618,
+        "cacheReadInputTokens": 640096,
+        "cacheCreationInputTokens": 78692,
+        "webSearchRequests": 0,
+        "costUSD": 2.197528,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 12773,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01HCAbYM783zgSqpid4rejik",
+        "tool_input": {
+          "command": "find . -name \"*.md\" -path \"*agents*\" -exec shasum -a 256 {} \\; 2>/dev/null; ls .claude/agents 2>/dev/null",
+          "description": "Find agent definition files and hashes"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_017gjU3k2TFEerMz1M63kr97",
+        "tool_input": {
+          "command": "ls -R data scripts src | head -40 && shasum -a 256 data/rubric/* input/record.yaml",
+          "description": "List rubric, scripts, source dirs and hashes"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01Kw3HnpSefTEQgdMdkHKq8X",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get timestamp and generate an evaluator id"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_0161NihD7HvrcRBeSqF8YAix",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation output against its schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed: `VALID output_evaluation.json: rubric10-semantic` (exit 0).\n\n## Definition check\n\nThe section \"Source rubric and schema paths (#158)\" is present in my instructions, and the sentence beginning \"Read release-specific notes\" reads verbatim:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThat is the current mapping (it replaces the deprecated top-level `release_notes` slot), so I proceeded. `instrument_sha256` recorded as given.\n\n## Result \u2014 CM4AI, claudecode_api, rep2\n\n**41 / 47 applicable = 87.2 % (adjusted); 41 / 50 = 82.0 % (fixed).** Three sub-elements N/A.\n\n| El | Score | El | Score |\n|---|---|---|---|\n| 1 Discovery | 5/5 | 6 Provenance/versions | 5/5 |\n| 2 Access | 5/5 | 7 Motivation/funding | 5/5 |\n| 3 Reuse | 3/5 | 8 Technical transparency | 3/5 |\n| 4 Ethics | **2/2** | 9 Limitations | 4/5 |\n| 5 Composition | 4/5 | 10 Community integration | 5/5 |\n\n**Applicability determinations (all made from other elements' fields):**\n- **Human-subjects condition fails** on E1 (`description`/`keywords` name MDA-MB-468 and KOLF2.1J cell lines) and E8 (`collection_mechanisms` = pipetting robot, CRISPR library, 10x 3\u2032HT kit; `direct_collection.is_direct: false`). So E4.3\u20134.5 (participant privacy, consent, vulnerable populations/compensation) are `applicable: false`, `score: null` \u2014 the three excluded points.\n- **Governance disjunct holds** on E2 evidence (`data_governance` committee + emailable contact + access-review process; `ip_restrictions` commercial-licence negotiation), so E4.1\u20134.2 are scored, and both earned the point. This is exactly the #1060 \"donor-derived material, data access committee, ethics contact\" case.\n- **Datasets-shared** met (ZIP `distribution_formats` with access URLs, Dataverse page, CC BY-NC-SA) \u2192 E3.1\u20133.4, E6, E8, E10 all scored.\n- **Software-output condition** met via E10 `external_resources` (github.com/idekerlab/cellmaps_pipeline) \u2192 E8.3 scored, and scored **0**: every processing slot is empty.\n\n**Notable zeros.** E8.4 (software) scored 0 under the #1082 role threshold: the 10x kit and pipetting robot are capture (a), NDEx/Dataverse hosting (b), FAIRSCAPE metadata packaging (c), and MuSIC/Cell Mapping Toolkit/IMP fall under (e) \u2014 the record itself says computed cell maps are not in this release. Nothing that produced or transformed the distributed files is named. E3.2 scored 0 despite E2.4 scoring 1: ZIP + `application/zip` specifies the distribution format but tells a reuser nothing about harmonization, and no `encoding` appears anywhere. E3.4, E5.5 and E9.3 are outright absences (`variables`, `anomalies`, `missing_data_documentation`).\n\n**Verified correctness:** DOI prefix 10.18130 = UVA Dataverse and agrees across `id`/`doi`/`citation`/`latest_version_doi`; both NIH awards parse (1OT2OD032742-01, 5U54HG012513-02); Cellosaurus RRIDs well-formed; the ten per-file byte values sum *exactly* to `total_size_bytes` (12,601,718,300) and per-collection counts to 10. Three failed consistency checks: the erratum names June 2025 as its own predecessor, version 2.0 sits below the earlier releases' 2.1, and a derived cell atlas ships with no processing documentation.",
+    "ttft_ms": 3288,
+    "type": "result",
+    "duration_ms": 535110,
+    "uuid": "236ca714-4836-4501-a0fd-67e40382bb5c",
+    "ttft_stream_ms": 1355,
+    "time_to_request_ms": 18,
+    "first_content_frame_ms": 1844,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep2_r10_rating1/2026-09-12T12-26-10.913494+00-00",
+  "original_receipt_sha256": "0d3fb1f8467399924aeab19d9ce4c598a21988a5bc0f245532abed88ff3e1980",
+  "transcript_sha256": "33094483b5c11dd9292d7d73e5ee03c70c4a19201ebd4dd6959014c5724bdd65",
+  "user_prompt_sha256": "85fa989c3238a0bc174ee9a85aebbe50e1c66837325f38b147edfa2ac0a53849",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "evaluated_at": "2026-09-12T12:26:10.913848+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

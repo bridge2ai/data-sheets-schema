@@ -1,0 +1,165 @@
+{
+  "job_id": "CM4AI_v8_rep3_r10_rating1",
+  "started_at": "2026-09-12T12:53:23.084728+00:00",
+  "status": "passed",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "user_prompt_sha256": "d0994de159dc1680319d6c9f1ac70cc0c482508249f0e8ab657c52e90d8b3109",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "e3311d40121521b83f803ad969395396f63b7446fed36c1f55416379d0f16800",
+  "evaluation_sha256": "c47a3d865f5ecfa025b50d434e276c0b2a6d52c1b920917e35e56873b940affc",
+  "cli_result": {
+    "duration_api_ms": 565124,
+    "stop_reason": "end_turn",
+    "session_id": "fe20bb9a-1d14-472d-9e09-762a5453a562",
+    "total_cost_usd": 2.1218690000000002,
+    "usage": {
+      "input_tokens": 10,
+      "cache_creation_input_tokens": 76724,
+      "cache_read_input_tokens": 265940,
+      "output_tokens": 48179,
+      "output_tokens_details": {
+        "thinking_tokens": 14986
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 76724,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1363,
+          "cache_read_input_tokens": 99375,
+          "cache_creation_input_tokens": 212,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 212
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 17039,
+        "outputTokens": 19,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.017134,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 10,
+        "outputTokens": 48179,
+        "cacheReadInputTokens": 265940,
+        "cacheCreationInputTokens": 76724,
+        "webSearchRequests": 0,
+        "costUSD": 2.1047350000000002,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 14986,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01WgMhiaaP8d2aunP4BDHGq9",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-qblts6ej/ 2>/dev/null; echo \"---\"; find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01RhZDRijuc8CG4CQU7YSmB5",
+        "tool_input": {
+          "command": "ls -la ~/.claude/agents/ 2>/dev/null; echo \"---\"; ls /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-qblts6ej/.claude/agents/ 2>/dev/null"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 7,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0): `VALID output_evaluation.json: rubric10-semantic`.\n\n## Definition check\n\nThe section headed \"Source rubric and schema paths (#158)\" is present in my instructions, and the sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThe surrounding section also carries the RRID-as-`id` mapping, `at_risk_populations`, `data_governance.committee_contact`, and the processing-role threshold pointer for Element 8 sub-element 4 \u2014 consistent with the current instrument, so I proceeded.\n\n## Result: CM4AI, claudecode_api rep3\n\n**40 points.** Fixed basis 40/50 = **80.0%**; N/A-adjusted basis 40/47 = **85.11%**. Three sub-elements excluded: **4.3, 4.4, 4.5**.\n\n| El | Score | El | Score |\n|---|---|---|---|\n| 1 Discovery | 5/5 | 6 Provenance | 4/5 |\n| 2 Access | 5/5 | 7 Motivation/Funding | 5/5 |\n| 3 Reuse | 3/5 | 8 Technical | 3/5 |\n| 4 Ethics | 2/2 | 9 Limitations | 4/5 |\n| 5 Composition | 4/5 | 10 Cross-platform | 5/5 |\n\n**Applicability.** The human-subjects condition fails on E1/E8 evidence \u2014 the description names cell lines only, `collection_mechanisms` describe instrumented assays, and `direct_collection` states data were not collected from individuals \u2014 so 4.3\u20134.5 are `applicable: false` with `score: null`. The governance disjunct is met on E2 evidence (`no_commercial_use` licence terms plus the Data Access Committee in `ip_restrictions`), so 4.1 and 4.2 remain scored, both earning 1. `regulatory_restrictions` records only that no restriction applies, which per #1060 is not itself a constraint, so the disjunct rests on the applicable access/IP constraints.\n\n**Where it lost points.** The two clearest failures are in Element 8: no software that produced or transformed the released data is named (the Cell Mapping Toolkit and MuSIC produce cell maps the record itself says are not in this release \u2014 role (e); FAIRSCAPE is packaging \u2014 role (c); NDEx/Cytoscape are serving \u2014 role (b)), and six archives are typed `processed_data` with every processing slot empty. Beyond that: format documentation stops at the ZIP container (3.2), no `variables` at all (3.4), no instance or sample counts (5.2), no `anomalies` (9.3), and no changelog or errata for a Beta release on a quarterly cadence (6.3).\n\n**Consistency checks:** 20 passed, 2 failed, 7 warnings. The substantive failures are the processed-data-without-processing contradiction and the description claiming MDA-MB-468 perturb-seq data that no file collection delivers and that `known_limitations` records as embargoed. DOI prefix 10.18130 correctly matches the UVA Dataverse publisher, and both NIH awards validate structurally and institutionally (`1OT2OD032742-01` as OT2/OD, correct for Bridge2AI; `5U54HG012513-02` as U54/HG).\n\nNotably, several gaps trace to the record's own source discipline rather than carelessness \u2014 `source_caveats` explicitly declines to promote cumulative project totals into release-level slots, which is why 5.2 fails despite the figures being available upstream.\n\nOutput written to `output_evaluation.json` with `instrument_sha256` `66ad6231\u2026`, `instrument_kind: agent_definition`, `temperature: null`, and both `model.name` and `model.evaluator_model` recorded as `claude-opus-5[1m]`.",
+    "ttft_ms": 2044,
+    "type": "result",
+    "duration_ms": 567592,
+    "uuid": "d1ded6cd-73cf-440a-b3eb-46bf8a9f1636",
+    "ttft_stream_ms": 1532,
+    "time_to_request_ms": 24,
+    "first_content_frame_ms": 1532,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T13:02:52.000311+00:00"
+}

@@ -1,0 +1,190 @@
+{
+  "job_id": "CHORUS_v7_rep1_r10_rating2",
+  "started_at": "2026-09-12T15:26:10.560325+00:00",
+  "status": "passed",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "user_prompt_sha256": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]",
+    "metadata.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "metadata.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "e5c0f47198cd20ea47158959f6cfb4d25648965eb8c063ac977e2b5b9aba355d",
+  "evaluation_sha256": "4880a5cb2b1adb53fed37aecfeb72475efd28a469e43502b34df9bb6a90d40f5",
+  "cli_result": {
+    "duration_api_ms": 586144,
+    "stop_reason": "end_turn",
+    "session_id": "a57c431b-83fc-4d4b-b8ba-853cc53fd28e",
+    "total_cost_usd": 2.464948,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 91235,
+      "cache_read_input_tokens": 662520,
+      "output_tokens": 48447,
+      "output_tokens_details": {
+        "thinking_tokens": 12247
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 91235,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1122,
+          "cache_read_input_tokens": 113711,
+          "cache_creation_input_tokens": 387,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 387
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 9993,
+        "outputTokens": 14,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.010063,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 20,
+        "outputTokens": 48447,
+        "cacheReadInputTokens": 662520,
+        "cacheCreationInputTokens": 91235,
+        "webSearchRequests": 0,
+        "costUSD": 2.4548850000000004,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 12247,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01DK42E7ZgL1PoFa2YxnsrLv",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01RSGqUqunRJJoPX79bZYKAp",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-achuqmf6/input/record.yaml",
+          "description": "Hash the input record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01UHiTtn3UWXJxjzKGLN7i8W",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation output against the schema"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01D5bzZDyZzTJzAnvF5A5tR5",
+        "tool_input": {
+          "command": "poetry run --directory /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-achuqmf6 python /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-achuqmf6/scripts/validate_evaluation_schema.py --file /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-achuqmf6/output_evaluation.json --rubric rubric10-semantic",
+          "description": "Validate the evaluation output against the schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed: `VALID output_evaluation.json: rubric10-semantic` (exit 0).\n\n## Definition check (repeated as required)\n\nThe section headed \"Source rubric and schema paths (#158)\" is present in my instructions. The sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches the current rules, so I proceeded. Recorded `instrument_sha256` = `66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`, `instrument_kind` = `agent_definition`.\n\n## Result: CHORUS, claudecode_agent, generic-v7 rep1 \u2014 36/50\n\n| Basis | Score | Denominator |\n|---|---|---|\n| fixed_percentage | 72.0 | 50 |\n| normalized_percentage | 72.0 | 50 (adjusted) |\n\n`excluded_max_points` = 0, `sub_elements_not_applicable` = 0. **All five trigger conditions resolved as met**, so nothing is N/A and the two bases coincide:\n- Human subjects \u2014 from E1 (`description`: ICU/PICU/NICU patient admissions)\n- Governance restrictions \u2014 from E2 (`confidentiality_level: restricted`, an applicable constraint)\n- Datasets shared \u2014 `distribution_formats` \u00d75, `third_party_sharing.is_shared: true`\n- Software output \u2014 `external_resources` \u2192 github.com/chorus-ai\n- Collection + shared \u2014 `acquisition_methods`, `collection_mechanisms`\n\nElement scores: E1 3, E2 5, E3 4, E4 2, E5 4, E6 2, E7 5, E8 5, E9 4, E10 2.\n\n**Strongest:** Element 8 (5/5) \u2014 an unbroken source-to-artifact chain per modality, with transformation software named at the step it performs (OHNLP toolkit \u2192 released note tokens, `chorus_waveform` \u2192 released WFDB/EDF+, DeGauss/UF-Geocoding \u2192 released OMOP Location entities). That clears the #1082 processing-role threshold via the `preprocessing_strategies` slot; validation-role (`CHoRUSReports`) and capture-role (`chorus-extract-upload`) software was not needed. Element 7 also 5/5 \u2014 `OT2OD032701` validates as NIH OT2/OD/serial.\n\n**Weakest:** Element 4 (2/5) and Elements 6 and 10 (2/5 each). `involves_human_subjects: true` with no IRB, no approval identifier, no consent in any form (not even a waiver), and empty `at_risk_populations` despite PICU/NICU records \u2014 two high-severity consistency failures. No DOI, version, publisher, or citation, so the dataset cannot be cited or versioned despite intended uses that require both.\n\n15 issues detected (5 consistency failures, 8 warnings, 18 checks passed). The record's transparency about its own gaps is noted throughout as creditable but not score-substituting \u2014 I scored what is documented, not what is honestly conceded to be absent.",
+    "ttft_ms": 1542,
+    "type": "result",
+    "duration_ms": 588798,
+    "uuid": "0eede223-b935-433c-acab-3e9e391da5ed",
+    "ttft_stream_ms": 918,
+    "time_to_request_ms": 22,
+    "first_content_frame_ms": 918,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T15:36:00.741459+00:00"
+}

@@ -1,0 +1,187 @@
+{
+  "job_id": "AI_READI_v8_rep3_r10_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T11:59:25.775915+00:00",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "01e3ef504db5ba6f21691c35fd0aa322661dd48f6d864cb38e053591b9763936",
+  "evaluation_sha256": "347c5fa4c46454f1fc097da0c570f709feb855f4708779a73b84908810a0a10d",
+  "cli_result": {
+    "duration_api_ms": 494791,
+    "stop_reason": "end_turn",
+    "session_id": "87c8703b-5cd4-4ec3-bf58-90bdc91126a9",
+    "total_cost_usd": 2.2877415,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 87037,
+      "cache_read_input_tokens": 727481,
+      "output_tokens": 41246,
+      "output_tokens_details": {
+        "thinking_tokens": 10933
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 87037,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1256,
+          "cache_read_input_tokens": 109508,
+          "cache_creation_input_tokens": 392,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 392
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 22291,
+        "outputTokens": 18,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.022380999999999998,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 20,
+        "outputTokens": 41246,
+        "cacheReadInputTokens": 727481,
+        "cacheCreationInputTokens": 87037,
+        "webSearchRequests": 0,
+        "costUSD": 2.2653605,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 10933,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01DNsaCYptqkpevhnYK5C898",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-tx7y1ppc; echo \"---\"; find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "List working directory and locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01WGkPh2F7RqnTrKnEXmRWeh",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml data/rubric/rubric10.txt",
+          "description": "Compute checksums of input record and rubric"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01DzvBNqELtQ3ZVVm7Bh33vt",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation output against its schema"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01Qzt2eeCcgK7icBPrNAUbJ2",
+        "tool_input": {
+          "command": "poetry run python /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-tx7y1ppc/scripts/validate_evaluation_schema.py --file /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-tx7y1ppc/output_evaluation.json --rubric rubric10-semantic",
+          "description": "Validate evaluation JSON against rubric10-semantic schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0): `VALID output_evaluation.json: rubric10-semantic`.\n\n## Definition check\n\nThe section headed **\"Source rubric and schema paths (#158)\"** is present in my loaded instructions and reads as expected of the current rules (it carries the #1060, #1079, #1081 and #1082 provisions downstream). The sentence beginning \"Read release-specific notes\", quoted verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nRecorded `instrument_sha256` as `66ad6231\u20264864` with `instrument_kind: agent_definition`. Note: the definition file itself is not on disk in this sandbox (only `input/`, `data/rubric/`, `scripts/`, `src/download/prompts/`), so I could not independently recompute that digest; I recorded the supplied value as instructed. `shasum` was also blocked, so the input and rubric hashes are the supplied values.\n\n## Result\n\n**49 / 50** \u2014 `fixed_percentage` 98.0 (denominator 50), `normalized_percentage` 98.0 (denominator 50). No N/A exclusions: all five applicability conditions resolve as satisfied, so all 50 sub-elements are scored and `excluded_max_points` is 0. The software-output condition (gating E8 sub-element 3 only) was borderline \u2014 `external_resources` gives the GitHub *organisation* root rather than a named repository \u2014 and the ambiguity rule resolved it to applicable.\n\n**The single scored failure is Element 8 sub-element 4, Software and Tools.** Applicable under #1081 \u2014 the release was demonstrably processed, and gating the item on a repository pointer would let the record's silence excuse it from the question. Under the #1059/#1082 threshold it scores 0: the record says `.fda`, `.sdt` and `.FIT` exports \"were converted\" to DICOM and Open mHealth and that v3.0.0 \"was produced by a combination of automated and custom processing\", naming no converter, package or version. Every named piece of software sits in a non-qualifying role \u2014 REDCap and MoCA Duo (capture, a), FAIRhub on Azure (hosting, b), RO-Crate 1.2 (packaging, c), the OMOP CDM Data Quality Dashboard (validation, d).\n\nEverything else scored 1. The record is strong on the checks that can be falsified: the nine collection file counts plus nine root metadata files reach `total_file_count` exactly; every demographic distribution and the three split sizes each sum to 2,280; the three NIH awards match activity-code grammar; the DOI prefix 10.60775 is FAIRhub's and resolves consistently across five slots. Consistency tally 20 passed / 2 failed / 7 warnings.\n\nThe two failures are both places where the record's transparency outruns its structured values: `confidentiality_level: restricted` is, by the record's own admission, a substitution that \"on its face contradicts\" the only sourced level (HL7:2N \"normal\"); and the deidentification method is left as an unresolved three-way conflict between \"no de-identification was necessary\", \"deidentified: true\" and \"HIPAA Safe Harbor stripping\" \u2014 claims that differ in fact, not just in wording. Both are disclosed rather than concealed, which is why they cost warnings and issue entries rather than points.",
+    "ttft_ms": 2511,
+    "type": "result",
+    "duration_ms": 496951,
+    "uuid": "fd5490d8-8cbf-474b-b619-4c48187a3b5c",
+    "ttft_stream_ms": 1765,
+    "time_to_request_ms": 69,
+    "first_content_frame_ms": 1766,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r10_rating1/2026-09-12T10-11-09.605326+00-00",
+  "original_receipt_sha256": "77e28d6a28b69bc5e92e9428ab9d01962658656151c22807c17d24bd741d6cde",
+  "transcript_sha256": "6404c180c6602389d777511164c4b41f5c562867ecdd741a2f7aec7a2cec846b",
+  "user_prompt_sha256": "737abc97340bbceec9130f132d48af5a797e051f0d447eb5cf87c166cfc6cd20",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "evaluated_at": "2026-09-12T10:11:09.605738+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

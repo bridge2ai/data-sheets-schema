@@ -1,0 +1,163 @@
+{
+  "job_id": "AI_READI_v7_rep1_r20_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T11:59:20.482194+00:00",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "dd656a3a6e8b6bc0f00a50c5d1a5e75c6d2eae8407866c2ba3d2cc3c63b8fdb5",
+  "evaluation_sha256": "cd1a539f23afc767b07aa493aa3a9ed7a75f793bbc05122678d9a7a3e4acf02b",
+  "cli_result": {
+    "duration_api_ms": 531299,
+    "stop_reason": "end_turn",
+    "session_id": "075c21ce-0d35-4c42-91ff-aa7214edb807",
+    "total_cost_usd": 2.5336364999999996,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 113033,
+      "cache_read_input_tokens": 585797,
+      "output_tokens": 43430,
+      "output_tokens_details": {
+        "thinking_tokens": 12601
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 113033,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1377,
+          "cache_read_input_tokens": 115076,
+          "cache_creation_input_tokens": 212,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 212
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 24443,
+        "outputTokens": 23,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.024558,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 20,
+        "outputTokens": 43430,
+        "cacheReadInputTokens": 585797,
+        "cacheCreationInputTokens": 113033,
+        "webSearchRequests": 0,
+        "costUSD": 2.5090784999999998,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 12601,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_016wNGSZEE4ek42p3JGsL6rL",
+        "tool_input": {
+          "command": "ls -la && ls data/rubric 2>/dev/null && ls scripts 2>/dev/null && shasum -a 256 input/record.yaml",
+          "description": "List working directory and hash input record"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 10,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed. Evaluation complete.\n\n## Definition quote (verbatim, from the \"Reproducibility\" section of my instructions)\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nThat sentence matches the current instrument, so I proceeded rather than stopping.\n\n## Result\n\n`output_evaluation.json` written and validated: `VALID output_evaluation.json: rubric20-semantic` (exit 0).\n\n**Score: 82 / 88 \u2014 fixed 93.2% (denominator 88), normalized 93.2% (adjusted denominator 88).** No questions were excluded (`excluded_max_points: 0`, `questions_not_applicable: 0`), so both bases coincide here.\n\nAll four trigger conditions resolved to *satisfied*, each on fields belonging to a different question than the one being gated (anti-circular rule):\n\n| Condition | Evidence source | Gates |\n|---|---|---|\n| Human subjects | `description` (2,280 participants), `keywords`, `collection_mechanisms` | Q8, Q15 \u2192 applicable |\n| Datasets shared | `page`, `third_party_sharing.is_shared`, `license_and_use_terms` | Q10, Q17 \u2192 applicable |\n| Software output | `external_resources` \u2192 `github.com/AI-READI`; `purposes` (blueprint) | Q11 \u2192 applicable |\n| Collection + shared | `acquisition_methods`/`collection_mechanisms`/`data_collectors`/`collection_timeframes` + sharing | Q12, Q13 \u2192 applicable |\n\n| Category | Score |\n|---|---|\n| Structural Completeness | 20 / 21 |\n| Metadata Quality & Content | 20 / 21 |\n| Technical Documentation | 23 / 25 |\n| FAIRness & Accessibility | 19 / 21 |\n\nPoints deducted at Q1 (12/14 named fields, 85.7% \u2014 below the 90% band), Q8, Q11, Q13, Q18, Q20.\n\n**Two consistency checks failed**, both affecting Q8:\n1. `is_deidentified.method` records `NoDeIdentification` (\"no identifiers were collected, so no active de-identification was necessary\") while `participant_privacy.anonymization_method` says PHI \"was removed \u2026 via the Safe Harbor method\" \u2014 mutually exclusive, and uncaveated in a record that caveats six other conflicts.\n2. `sensitive_elements_present`/`confidential_elements_present` are both `false` despite released retinal DICOM, CGM traces and wearable heart-rate/sleep/stress data.\n\nSix warnings (confidentiality-level mapping, absent DPIA, absent `future_use_impacts`, the withdrawn v2.0.0 DOI still targeted by `related_datasets`, the 4%-vs-10% longitudinal conflict, the accountable-organization conflict). Twenty-four checks passed, including exact reconciliation of the ten `file_count` values to `total_file_count` (356,343), byte totals to within the unsized metadata collection, and every demographic stratum and split subtotal to 2,280.\n\nCorrectness validation: DOI formats valid and sequential across versions; NIH grant numbers valid (`OT2OD032644`, `P30DK035816`, `UL1TR003096`); ORCID, ROR and NCT identifiers well formed; no RRID present; temporal ordering valid.\n\nProvenance values, `instrument_sha256` `9d08b5f3\u2026`, `rubric_hash` `669490b6\u2026`, `input_sha256`/`d4d_file_hash` `dd656a3a\u2026`, `instrument_kind: agent_definition`, `temperature: null`, and model recorded as `claude-opus-5[1m]` for both `name` and `evaluator_model` are all as specified; `d4d_file` is the supplied source path, not `input/record.yaml`.",
+    "ttft_ms": 2795,
+    "type": "result",
+    "duration_ms": 533850,
+    "uuid": "dac6f497-2072-4f07-9c8b-ee853c76c58a",
+    "ttft_stream_ms": 986,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 986,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T09-11-58.143131+00-00",
+  "original_receipt_sha256": "bb683ef0fb68a4ef13af3ea4b1bb9701ebcad24bc7d99219d903a25e00612485",
+  "transcript_sha256": "4bb0e4454e6b3849bf2f6a32a74a2ece360704fe9a35e88f58a56f51a0c79763",
+  "user_prompt_sha256": "d665529a7705444f11d673228273e25315e5984901c5ca4ed79dae85021dca34",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "evaluated_at": "2026-09-12T09:11:58.143304+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

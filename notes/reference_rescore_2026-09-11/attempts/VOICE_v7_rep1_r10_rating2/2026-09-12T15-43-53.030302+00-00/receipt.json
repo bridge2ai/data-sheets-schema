@@ -1,0 +1,191 @@
+{
+  "job_id": "VOICE_v7_rep1_r10_rating2",
+  "started_at": "2026-09-12T15:43:53.030652+00:00",
+  "status": "passed",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "user_prompt_sha256": "465c09de7c6e0a276cecc509291c132903a854845af5dbaa0555a322aef20dec",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "metadata.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "metadata.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "7660c4d93ccf05a12ebdd26c6c960e8f5d07455b3088cd3b2e909e95c802d048",
+  "evaluation_sha256": "fd47a5878eeb1ea3545a12fd7eae4a4287c6274ada30158a78d09b9821f3eb32",
+  "cli_result": {
+    "duration_api_ms": 787894,
+    "stop_reason": "end_turn",
+    "session_id": "2d4bdf49-1b4c-4d61-9f65-fd94c9f71296",
+    "total_cost_usd": 3.3385765,
+    "usage": {
+      "input_tokens": 24,
+      "cache_creation_input_tokens": 108400,
+      "cache_read_input_tokens": 912855,
+      "output_tokens": 71304,
+      "output_tokens_details": {
+        "thinking_tokens": 10890
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 108400,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1395,
+          "cache_read_input_tokens": 131003,
+          "cache_creation_input_tokens": 260,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 260
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 15344,
+        "outputTokens": 17,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.015429,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 24,
+        "outputTokens": 71304,
+        "cacheReadInputTokens": 912855,
+        "cacheCreationInputTokens": 108400,
+        "webSearchRequests": 0,
+        "costUSD": 3.3231475,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 10890,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01XnWnQFzqX7T964WUeCVpwE",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01M4QgRmpHhEstoMNkRLZu5R",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml data/rubric/rubric10.txt && wc -l input/record.yaml",
+          "description": "Hash input record and rubric"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01PYwPQY4CVuHRCYaL2JgbxU",
+        "tool_input": {
+          "command": "python3 - <<'EOF'\nimport json,io\np=\"output_evaluation.json\"\ns=open(p,encoding=\"utf-8\").read()\nassert \"prior\u6559\u80b2 use\" in s\ns=s.replace(\"prior\u6559\u80b2 use\",\"prior educational use\")\nopen(p,\"w\",encoding=\"utf-8\").write(s)\nd=json.load(open(p))\nprint(sum(e[\"element_score\"] for e in d[\"elements\"]), d[\"overall_score\"][\"total_points\"])\nEOF",
+          "description": "Fix stray characters and check score sum"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01MLf1znLV6ivDZiLA4W4ieA",
+        "tool_input": {
+          "command": "perl -CSD -pi -e 's/prior\\x{6559}\\x{80B2} use/prior educational use/g' output_evaluation.json && grep -c \"prior educational use\" output_evaluation.json",
+          "description": "Replace stray characters with correct wording"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01Daf8YrKdD1ggCHfuybnnvq",
+        "tool_input": {
+          "command": "python3 -c \"import io,sys; p='output_evaluation.json'; s=io.open(p,encoding='utf-8').read(); n=s.replace(u'prior\u6559\u80b2 use','prior educational use'); io.open(p,'w',encoding='utf-8').write(n); print('replaced', s!=n)\"",
+          "description": "Correct a stray word in the evaluation text"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 14,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Definition check passed. The section \"Source rubric and schema paths (#158)\" is present in my instructions, and the sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThe surrounding section also carries the current mappings (RRID as `id`, `at_risk_populations`, `data_governance.committee_contact`, the processing-role threshold in Element 8 sub-element 4), so the instrument is the current one and I proceeded.\n\n## Evaluation complete\n\n**`output_evaluation.json`** written and validated:\n\n```\nVALID output_evaluation.json: rubric10-semantic\n```\n\n**Score: 49 / 50**\n- `fixed_percentage` 98.0 (denominator 50, the whole rubric)\n- `normalized_percentage` 98.0 (denominator `adjusted_max_points` 50)\n- `excluded_max_points` 0, `sub_elements_not_applicable` 0, `excluded_item_ids` []\n\nNo sub-element was excluded, so the two bases coincide. Every conditional sub-element (E3 1\u20134, all of E4, E6, E8, E10) carries an explicit `applicable: true` with `applicability_status` and `applicability_evidence` drawn from a *different* element, per the anti-circular rule \u2014 human subjects from the E1 description and E8 collection mechanisms, datasets-shared from E2 distribution formats and landing page, the E8 sub-element 3 software-output condition from E10 external resources.\n\n**The single 0 \u2014 Element 1, keywords.** Four broad terms (`health, biomarkers, bridge2ai, voice`): below the five-keyword threshold, and naming no modality beyond voice, no cohort condition, no method and no standard. The description is richly specific; the index layer is not.\n\n**Notable judgements:**\n- **E8 sub-element 4 (software)** scored 1 on the processing-role threshold: `b2aiprep` is named as the library that converted the raw waveforms into the distributed Parquet and phenotype files, with sparc, openSMILE, Parselmouth/Praat, ppgs and Whisper Large each tied to a feature family that actually appears in `distribution_formats`. The capture application, REDCap and the hosting platforms are documented too but the point does not rest on them. Per #1081 this item was not gated on the repository pointer.\n- **E10 sub-element 2 (citation/DOI)** scored on the datasets-shared condition alone, not on a publication existing (#1080).\n- **E2 sub-element 3 and E10 sub-element 1** scored 1 despite empty `download_url` and `publisher` slots: platform access instructions and the PhysioNet identification are corroborated from citation, page, maintainers, third_party_sharing and the DOI registrant prefix. Both empty slots are recorded as a low-severity completeness issue rather than silently credited.\n\nEight semantic issues detected (0 hard consistency failures, 6 warnings): sparse keywords, thin variable coverage, the empty canonical slots, the malformed footer grant rendering the record itself discloses, the 12-month-versus-four-year collection window, and `confidential_elements_present: false` against a Certificate of Confidentiality. The last three are tensions the record surfaces itself with a stated source-ranking rationale, which I weighted as transparency rather than error.\n\nModel recorded as `claude-opus-5[1m]` in both `model.name` and `metadata.evaluator_model`; `temperature: null` with the note that this runtime does not expose it. Provenance values, `input_sha256`, `instrument_sha256` (`66ad6231\u2026`, kind `agent_definition`) and `rubric_hash` set as supplied.\n\nOne process note: the sandbox denied all file-modifying shell commands, so a stray two-character typo in an Element 10 quality note had to be corrected by rewriting the file through Write rather than an in-place edit. No judgement, score or evidence changed in that rewrite \u2014 only the word \"educational\" was restored \u2014 and the output was re-validated afterwards.",
+    "ttft_ms": 3373,
+    "type": "result",
+    "duration_ms": 790033,
+    "uuid": "f979ca53-883d-477c-a130-a34c3d5a1cb8",
+    "ttft_stream_ms": 1123,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 1585,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T15:57:04.423536+00:00"
+}

@@ -1,0 +1,25 @@
+{
+  "registered_at": "2026-09-12T15:23:12.641135+00:00",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "primary_complete": 48,
+  "records_with_both_rubrics": 24,
+  "remaining_job_ids": [
+    "AI_READI_v7_rep1_r10_rating2",
+    "AI_READI_v7_rep1_r10_rating3",
+    "CHORUS_v7_rep1_r10_rating2",
+    "CHORUS_v7_rep1_r10_rating3",
+    "CM4AI_v7_rep1_r10_rating2",
+    "CM4AI_v7_rep1_r10_rating3",
+    "VOICE_v7_rep1_r10_rating2",
+    "VOICE_v7_rep1_r10_rating3"
+  ],
+  "design": "Previously preregistered eight additional rubric10 ratings: two fresh independent ratings per project of the same v7rep1record. The primary rating counts once, giving three per project.",
+  "complete_prompts_identical_to_respective_primary_ratings": true,
+  "max_concurrent_sessions": 4,
+  "budget_cap_usd_per_attempt": 5,
+  "automatic_retries": false,
+  "startup": "Wait for each Starting marker before the next launch.",
+  "stop_after_failed_group": true,
+  "rubric20_repeatability": "unmeasured"
+}

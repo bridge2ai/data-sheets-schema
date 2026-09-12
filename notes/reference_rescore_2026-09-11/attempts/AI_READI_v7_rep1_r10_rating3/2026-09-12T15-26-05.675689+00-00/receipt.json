@@ -1,0 +1,175 @@
+{
+  "job_id": "AI_READI_v7_rep1_r10_rating3",
+  "started_at": "2026-09-12T15:26:05.676041+00:00",
+  "status": "passed",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "user_prompt_sha256": "2903d9b53ac82e60ad0dce7056a1a32ac1df2e3ca1033810d94b69619f4a14b5",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "dd656a3a6e8b6bc0f00a50c5d1a5e75c6d2eae8407866c2ba3d2cc3c63b8fdb5",
+  "evaluation_sha256": "a6e8be2bf550cf02f909075f1fb762c31f84e6c99d2dcdd9b922a33426333d7a",
+  "cli_result": {
+    "duration_api_ms": 596195,
+    "stop_reason": "end_turn",
+    "session_id": "d087d345-20cf-457b-b3ed-72f5d90346de",
+    "total_cost_usd": 3.0747824999999995,
+    "usage": {
+      "input_tokens": 22,
+      "cache_creation_input_tokens": 133098,
+      "cache_read_input_tokens": 956079,
+      "output_tokens": 49645,
+      "output_tokens_details": {
+        "thinking_tokens": 11940
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 133098,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1480,
+          "cache_read_input_tokens": 155707,
+          "cache_creation_input_tokens": 254,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 254
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 24438,
+        "outputTokens": 18,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.024528,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 22,
+        "outputTokens": 49645,
+        "cacheReadInputTokens": 956079,
+        "cacheCreationInputTokens": 133098,
+        "webSearchRequests": 0,
+        "costUSD": 3.0502544999999994,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 11940,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01EaEBp8HmnzmZQfti6aiPvs",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-bga3xqpf; find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "List working directory and locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01Cz4vcFyn9hsBf6Cuk7rhmu",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml data/rubric/rubric10.txt",
+          "description": "Compute hashes of record and rubric"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_0137226CsiGTDaJQnqBkKJ4T",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation output against its schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "## Definition check\n\nThe section **\u201cSource rubric and schema paths (#158)\u201d** is present in my instructions. The sentence beginning \u201cRead release-specific notes\u201d reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches the current instrument, so I proceeded. Recorded `instrument_sha256` as `66ad6231\u2026e34864`.\n\n## Validation\n\n```\nVALID output_evaluation.json: rubric10-semantic\n```\nExit status 0. **Complete.**\n\n## Result\n\n**49 / 50 \u2014 fixed 98.0% (denominator 50), normalized 98.0% (denominator 50).** All five trigger conditions were met, so nothing was excluded and the two bases coincide (`excluded_max_points: 0`, `sub_elements_not_applicable: 0`, `excluded_item_ids: []`).\n\n| Element | Score |\n|---|---|\n| 1 Discovery \u00b7 2 Access \u00b7 3 Reuse \u00b7 4 Ethics \u00b7 5 Composition | 5/5 each |\n| 6 Provenance \u00b7 7 Motivation | 5/5 each |\n| **8 Technical Transparency** | **4/5** |\n| 9 Limitations \u00b7 10 Integration | 5/5 each |\n\n**Applicability determinations** (each made from other elements' fields, never the sub-element's own):\n- **Human subjects** \u2014 met on E1 (`description`: 2,280 participants; diabetes keywords) and E8 (`collection_mechanisms`: REDCap recruitment, screening, e-consent). Element 4 scored in full, all five sub-elements.\n- **Governance** \u2014 met on E2 independently, though not needed to open E4 sub-elements 1\u20132 here.\n- **Datasets shared**, **collection identified**, **software output** \u2014 all met, so E3, E6, E8 and E10 are fully scored.\n\n**The one failure \u2014 E8.4, Software and Tools.** No software is named for anything that produced or transformed the distributed data. The record states that .fda/.sdt images were converted to DICOM, .FIT/.csv wearable exports mapped to Open mHealth, .xml ECGs mapped to WFDB, and REDCap exports mapped to OMOP CDM tables \u2014 four substantial transformations, none attributed to a tool. The software that *is* named sits in excluded roles: REDCap as capture and e-consent interface (a), the OMOP Data Quality Dashboard as validation of released data (d), FAIRhub and Azure as hosting (b), and the clinical/wearable devices as instrumentation (a). The `github.com/AI-READI` pointer is an organisation account root, which per the threshold neither earns nor forfeits the point. I weighed REDCap carefully, since it appears in `cleaning_strategies`, but its corrections are source data-entry QC rather than the pipeline that produced the released artifacts.\n\n**Two consistency failures** (scored 1 on content, reported as issues): `is_deidentified.method` says no de-identification was necessary while `identifiers_removed` enumerates removals and `participant_privacy` names HIPAA Safe Harbor; and both sensitivity flags are false against a \u201crestricted\u201d level, BAA-grade storage terms and an acknowledged re-identification risk. Twenty consistency checks passed, including exact arithmetic \u2014 collection file counts sum to precisely 356,343, bytes reconcile to `total_size_bytes`, and every subpopulation distribution sums to 2,280.\n\nEight warnings are recorded rather than scored against: empty `download_url` slot (access URL is present, but only inside `access_review_process` prose), absent `committee_contact`, unused `future_use_impacts` and `data_protection_impacts`, unused `was_derived_from`, undeclared character encoding, and two disclosed same-tier source conflicts the record declines to resolve.\n\nModel recorded as `claude-opus-5[1m]` for both `name` and `evaluator_model`; `temperature: null` with a note that this runtime does not expose it.",
+    "ttft_ms": 1872,
+    "type": "result",
+    "duration_ms": 598770,
+    "uuid": "2ed94df5-a9aa-458a-a1db-eaf0c0dfc98e",
+    "ttft_stream_ms": 1129,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 1129,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T15:36:05.745885+00:00"
+}

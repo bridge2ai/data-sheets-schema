@@ -1,0 +1,182 @@
+{
+  "job_id": "CM4AI_v7_rep2_r10_rating1",
+  "started_at": "2026-09-12T12:01:32.268551+00:00",
+  "status": "passed",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "user_prompt_sha256": "827b8dbe85348de4479c8063321b63b724313f3c7d25ac9e98604651641313ef",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]",
+    "metadata.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "metadata.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "af41bfae4fd0cea107b3468ad46e9a1a1599e297bfa5dd92739c48e6008f30b1",
+  "evaluation_sha256": "61c7243d11d5d7f82079514cf94ca90cd97a6c88366cf839d8a441419a52b9b8",
+  "cli_result": {
+    "duration_api_ms": 503404,
+    "stop_reason": "end_turn",
+    "session_id": "26075721-2a5d-4191-9917-44af137173c5",
+    "total_cost_usd": 2.1506075000000004,
+    "usage": {
+      "input_tokens": 16,
+      "cache_creation_input_tokens": 81497,
+      "cache_read_input_tokens": 563837,
+      "output_tokens": 41387,
+      "output_tokens_details": {
+        "thinking_tokens": 8886
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 81497,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1359,
+          "cache_read_input_tokens": 104027,
+          "cache_creation_input_tokens": 333,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 333
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 18869,
+        "outputTokens": 19,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.018964,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 16,
+        "outputTokens": 41387,
+        "cacheReadInputTokens": 563837,
+        "cacheCreationInputTokens": 81497,
+        "webSearchRequests": 0,
+        "costUSD": 2.1316435000000005,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 8886,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01XKqkARF6CsyBe7RtD3PcGz",
+        "tool_input": {
+          "command": "ls /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-4esqbpf7; echo \"---\"; find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_0132eFUDzbFTe3rmNHQQ9UEF",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation output against its schema"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01TuGhToAcJFUqCg1whK8eCf",
+        "tool_input": {
+          "command": "poetry run --directory /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-4esqbpf7 python /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-4esqbpf7/scripts/validate_evaluation_schema.py --file /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-4esqbpf7/output_evaluation.json --rubric rubric10-semantic",
+          "description": "Validate output against the rubric10-semantic schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 11,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "**Definition check \u2014 passed.** The section headed \"Source rubric and schema paths (#158)\" is present in my instructions, and the sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThat matches the current rules (dedicated `updates.update_details` slot, with the guard against crediting unrelated notes), so I proceeded. Recorded `instrument_sha256` as `66ad6231\u2026e34864`.\n\n**Validation:** `VALID output_evaluation.json: rubric10-semantic` (exit 0).\n\n## Result \u2014 CM4AI June 2026 Data Release (Beta)\n\n**43 / 47 applicable = 91.5% normalized; 43 / 50 = 86.0% fixed.** 3 sub-elements N/A.\n\n| El | Score | El | Score |\n|---|---|---|---|\n| 1 Discovery | 5/5 | 6 Provenance/Version | 4/5 |\n| 2 Access | 5/5 | 7 Motivation/Funding | 5/5 |\n| 3 Reuse | 4/5 | 8 Technical Transparency | 4/5 |\n| 4 Ethics | 2/2 | 9 Limitations | 5/5 |\n| 5 Composition | 4/5 | 10 Community Integration | 5/5 |\n\n**Applicability.** The human-subjects condition fails on Element 1 and 8 evidence \u2014 the description names MDA-MB-468 and KOLF2.1J cell lines, collection mechanisms describe mass spectrometers and pipetting robots rather than recruitment, and `direct_collection.is_direct=false` states data were not collected from individuals. So E4 sub-elements 3\u20135 (participant privacy, consent, vulnerable populations) are `applicable:false`, `score:null`, denominator 47. Sub-elements 1\u20132 *are* scored, on the governance disjunct: `regulatory_restrictions.governance_committee_contact` names Jillian Parker and the licence imposes an applying commercial-use constraint. Both earned their point \u2014 named ethics reviewers with institutional addresses, a Data Access Committee with a stated remit, and a de-identification claim argued from non-derivability rather than a misapplied clinical technique.\n\n**The four lost points.**\n- **8.4 Software (0).** The record names plenty of software and still leaves the question unanswered. node2vec, DenseNet-121, HiDeF, GPT-4/GSAI and `cellmaps_pipeline` produce cell maps that `known_limitations` says are *not in this release* \u2014 role (e). FAIRSCAPE packages the release into RO-Crate \u2014 role (c). The 10x kit is capture \u2014 role (a). Nothing names what produced the seven distributed processed archives.\n- **3.4 / 5.3 Variables (0, 0).** `variables` is absent entirely; `is_tabular: false` is the lone structural signal, and is itself doubtful given the distributed AP-MS/SEC-MS tables.\n- **6.3 Change descriptions (0).** No errata; `updates.update_details` carries cadence, not change content, and the only change narrative in the record belongs to a *predecessor* release in `related_datasets` notes \u2014 unrelated notes, not creditable here.\n\n**One failed consistency check:** version `2.0` regresses against the `2.1` recorded for both the June 2025 and October 2025 predecessors. Correctness validations all pass otherwise \u2014 DOI prefix 10.18130 matches the UVA Dataverse publisher and ROR, the three NIH awards parse cleanly (OT2/OD for Bridge2AI, U54/HG for the Bridge Center), and both cell-line RRIDs are well-formed Cellosaurus IDs.\n\nOutput at `output_evaluation.json`.",
+    "ttft_ms": 1583,
+    "type": "result",
+    "duration_ms": 505421,
+    "uuid": "9d783806-1e6c-476d-8dec-dab4b3506eb1",
+    "ttft_stream_ms": 954,
+    "time_to_request_ms": 21,
+    "first_content_frame_ms": 954,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T12:09:59.006072+00:00"
+}

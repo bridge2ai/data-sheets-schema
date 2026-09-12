@@ -1,0 +1,179 @@
+{
+  "job_id": "AI_READI_v7_rep1_r10_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T11:59:19.816315+00:00",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "dd656a3a6e8b6bc0f00a50c5d1a5e75c6d2eae8407866c2ba3d2cc3c63b8fdb5",
+  "evaluation_sha256": "9c5ba6db5dc1c9d7cc3871609acdae6dfbcb5be19b3542bd7d82cb6d9792909c",
+  "cli_result": {
+    "duration_api_ms": 454901,
+    "stop_reason": "end_turn",
+    "session_id": "2852ebd4-df68-4ac8-8dab-a4923bc3a93b",
+    "total_cost_usd": 2.1605575,
+    "usage": {
+      "input_tokens": 18,
+      "cache_creation_input_tokens": 86609,
+      "cache_read_input_tokens": 682529,
+      "output_tokens": 37143,
+      "output_tokens_details": {
+        "thinking_tokens": 8281
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 86609,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1250,
+          "cache_read_input_tokens": 109154,
+          "cache_creation_input_tokens": 318,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 318
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 24438,
+        "outputTokens": 20,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.024538,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 18,
+        "outputTokens": 37143,
+        "cacheReadInputTokens": 682529,
+        "cacheCreationInputTokens": 86609,
+        "webSearchRequests": 0,
+        "costUSD": 2.1360195,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 8281,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01J4gJytz5dQ6Ti84cWRehZt",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml 2>/dev/null; ls -R . | head -50",
+          "description": "Hash input record and show tree"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01MdvtrrLJ6FTP7nJn33sy7K",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation output against its schema"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01NBe4gyHhpDSNdaRyjn98vS",
+        "tool_input": {
+          "command": "poetry run python /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-tsz_rcza/scripts/validate_evaluation_schema.py --file /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-tsz_rcza/output_evaluation.json --rubric rubric10-semantic",
+          "description": "Validate the evaluation JSON against the rubric10-semantic schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 11,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed: `VALID output_evaluation.json: rubric10-semantic` (exit 0).\n\n## Definition check (quoted verbatim)\n\nThe section \"Source rubric and schema paths (#158)\" is present in my instructions, and the sentence beginning \"Read release-specific notes\" reads:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches the current instrument (sha256 `66ad6231\u2026e34864`, recorded as `metadata.instrument_sha256`), so I proceeded.\n\n## Result \u2014 AI_READI, claudecode_agent, generic-v7 rep1\n\n**49 / 50 points.** `fixed_percentage` 98.0 (denominator 50), `normalized_percentage` 98.0 (adjusted denominator 50). `excluded_max_points` 0, `sub_elements_not_applicable` 0 \u2014 no item was N/A, so the two bases coincide.\n\nApplicability resolved from other elements before scoring: datasets-shared is met (distribution_formats, resolvable FAIRhub access page, `is_shared: true`), human subjects is met on E1's description of 2,280 participants and E8's recruitment/consent mechanisms, governance is met on E2's NIH GDS obligations, collection is identified, and E10's `external_resources` references the AI-READI GitHub repository \u2014 so Elements 3, 4, 6, 8 and 10 are all scored in full.\n\n**The single 0 is Element 8 sub-element 4, Software and Tools.** Under the processing-role threshold, no software that produced or transformed the released data is named: `.fda`/`.sdt`\u2192DICOM, `.FIT`\u2192Open mHealth, `.xml`\u2192WFDB and REDCap\u2192OMOP are attributed only to \"a combination of automated and custom processing\". The software that *is* named falls in excluded roles \u2014 REDCap and MoCA Duo (capture, role a), FAIRhub and Azure (hosting, role b), the OMOP Data Quality Dashboard (validation, role d) \u2014 and the GitHub link is an organization root, which under the threshold neither earns nor forfeits the point.\n\nTen issues recorded. The one failed consistency check is the deidentification contradiction: `is_deidentified.method` says \"NoDeIdentification \u2026 no active de-identification was necessary\" while `participant_privacy` reports HIPAA Safe Harbor removal of PHI and `identifiers_removed` enumerates removals. The point is still earned because the substance a reuser needs is present; the defect is that the record leaves this pair unreconciled, unlike the six source conflicts it does declare. Lower-severity flags cover the empty `download_url`, the absent DPIA and `future_use_impacts`, the \"restricted\" confidentiality enum mapped from \"HL7:2N (normal)\", the missing `data_governance.committee_contact`, and the disclosed WashU/UW and 4%/10% source conflicts.\n\nNotable verified consistency: the ten file collections sum to exactly 356,343 files (matching `total_file_count`) and their bytes to within 419,614 of `total_size_bytes` \u2014 the unsized root metadata files; and every cohort, split and stratum count reconciles both across strata and against the 2,280 total.\n\nWritten to `output_evaluation.json`, with `d4d_file` set to the provenance input path, `temperature: null`, and `claude-opus-5[1m]` recorded as both model name and evaluator model.",
+    "ttft_ms": 5025,
+    "type": "result",
+    "duration_ms": 458009,
+    "uuid": "c827f537-d218-4a13-a466-81ddb85932da",
+    "ttft_stream_ms": 2919,
+    "time_to_request_ms": 31,
+    "first_content_frame_ms": 3288,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T09-04-18.246187+00-00",
+  "original_receipt_sha256": "c00d38f37c27a5703abe0602360f7d076a90dbd8aed761f54d05a39d5f1e9054",
+  "transcript_sha256": "457e6185ed8079feecafae9e56cb78e1354082c55ca654df1ccfd73e24c78624",
+  "user_prompt_sha256": "2903d9b53ac82e60ad0dce7056a1a32ac1df2e3ca1033810d94b69619f4a14b5",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "evaluated_at": "2026-09-12T09:04:18.247430+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

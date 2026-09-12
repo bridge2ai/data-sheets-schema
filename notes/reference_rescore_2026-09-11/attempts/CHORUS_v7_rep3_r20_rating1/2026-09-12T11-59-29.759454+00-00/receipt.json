@@ -1,0 +1,187 @@
+{
+  "job_id": "CHORUS_v7_rep3_r20_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T11:59:29.759788+00:00",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "90bc2010147407e66842a5504cdd6b9883bc987263e313ff60a28ca4f4963881",
+  "evaluation_sha256": "1e8649d0741894deb8bd49f649cc2b86f3f9edefac63c4ffe357edd04f2d23de",
+  "cli_result": {
+    "duration_api_ms": 507073,
+    "stop_reason": "end_turn",
+    "session_id": "803c5593-acb8-4055-b23f-fd261160c211",
+    "total_cost_usd": 1.997013,
+    "usage": {
+      "input_tokens": 22,
+      "cache_creation_input_tokens": 67806,
+      "cache_read_input_tokens": 532134,
+      "output_tokens": 41703,
+      "output_tokens_details": {
+        "thinking_tokens": 13963
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 67806,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1394,
+          "cache_read_input_tokens": 87216,
+          "cache_creation_input_tokens": 236,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 236
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 10116,
+        "outputTokens": 17,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.010201,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 22,
+        "outputTokens": 41703,
+        "cacheReadInputTokens": 532134,
+        "cacheCreationInputTokens": 67806,
+        "webSearchRequests": 0,
+        "costUSD": 1.986812,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 13963,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01EQJzQ39qYN1dteJ2okiHPN",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-i6mlfq1_ && find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "List working directory and locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01DEmrKxiCdZiPHu9LuUgh91",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml data/rubric/* 2>/dev/null; ls scripts src data/rubric",
+          "description": "Hash record and rubric files, list directories"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01KPM44yFqt7KtQTM4NrgYiN",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml",
+          "description": "Compute hash of the input record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01L5cahA5EqYeijSBuReDzNF",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation output against its schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 17,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed with exit status 0.\n\n## Staleness check\n\nThe **Reproducibility** section is present in my instructions, and the sentence beginning \"Repeatability must be\" reads, verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nThis matches the current instrument, so I proceeded.\n\n## Evaluation written and validated\n\n`output_evaluation.json` \u2014 validated: `VALID output_evaluation.json: rubric20-semantic`\n\n**Score: 65/88 \u2014 fixed_percentage 73.9 (denominator 88), normalized_percentage 73.9 (adjusted denominator 88)**\n\nBoth bases coincide because **no question was excluded**: `excluded_max_points: 0`, `questions_not_applicable: 0`. All four conditional gates resolved as *met*, each evidenced from fields outside the gated question per the anti-circular rule:\n\n| Gate | Resolved from | Gates |\n|---|---|---|\n| Human subjects | `description` (ICU/PICU/NICU patients), `keywords`, `collection_mechanisms` | Q8, Q15 \u2192 applicable |\n| Datasets shared | `third_party_sharing.is_shared`, 5 `distribution_formats`, `access_review_process` | Q10, Q17 \u2192 applicable |\n| Software output | `external_resources` \u2192 `github.com/chorus-ai` code repo | Q11 \u2192 applicable |\n| Collection + shared | populated collection fields + sharing evidence | Q12, Q13 \u2192 applicable |\n\nCategory scores: Structural 19/21 \u00b7 Metadata 17/21 \u00b7 Technical 16/25 \u00b7 FAIRness 13/21\n\n**Where points were lost.** The record documents standards, collection protocol and funding unusually well, but three high-severity consistency failures drive the result: a patient-level ICU cohort with `human_subject_research` unpopulated and no IRB or consent (Q8=3); `at_risk_populations` empty despite named pediatric and neonatal strata (Q8, Q15); and `known_biases` entirely absent from a dataset keyworded \"AI-ready\" and titled \"for Equitable AI\" (Q20=2). Q13 scored 2 \u2014 below its own 3-band \u2014 because that band needs a version number *and* a persistent ID and both are absent; the only versioning present belongs to the software packages, not the data.\n\n**Credit where the record is unusually disciplined.** It tier-ranks conflicting sources and records both release figures, marks fields deliberately unpopulated rather than filling them speculatively, and correctly scopes the MIT/Apache software licences away from the data. That transparency is why several scores sit at 3 rather than lower \u2014 though disclosing an absence does not supply the missing protection, which is how I scored it.\n\nTwo verification notes: grant `OT2OD032701` validates against the NIH pattern and is internally consistent with application ID 10472824 and the cited RePORTER URL; no DOI, RRID or version exists anywhere, so findability rests on a project-domain fragment URI. I also flagged a probable typo in a published contact domain (`mgh.havard.edu`), which the record itself reproduces \"as published.\"\n\nRecorded model identity: `claude-opus-5[1m]` as both `name` and `evaluator_model`; `temperature: null` (not exposed by this CLI). I used the provided provenance values and hashes verbatim, and read no other evaluation.\n\nOne environment note: `shasum` was blocked by the sandbox, so I could not independently recompute the input or instrument digests \u2014 I recorded the hashes you supplied as instructed, having confirmed the file at `input/record.yaml` (621 lines) matches the pinned record, including the field absences the evaluation turns on.",
+    "ttft_ms": 1514,
+    "type": "result",
+    "duration_ms": 509627,
+    "uuid": "86cc34d4-0dfb-408d-9ab3-5bdb06276b9f",
+    "ttft_stream_ms": 706,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 706,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep3_r20_rating1/2026-09-12T10-21-30.227209+00-00",
+  "original_receipt_sha256": "f3cff9328cf1a9807b36499f487df120569d0ded5dcd7ecbeed000f0f8ef958e",
+  "transcript_sha256": "d813e7d065aae617c7c8150e291802ce73d8a7a1ffc49bbf5be58da650573f65",
+  "user_prompt_sha256": "82d62d5072bfcfbf015cbcd9d2226f8618db5036cdd97d3db17323c92f2bb027",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "evaluated_at": "2026-09-12T10:21:30.227660+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

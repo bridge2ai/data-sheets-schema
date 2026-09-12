@@ -1,0 +1,179 @@
+{
+  "job_id": "CHORUS_v8_rep3_r10_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T11:59:33.093764+00:00",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "82963f6ea262f9cff93d4216ba18dacef48c4a6b7286445f83e195782e162759",
+  "evaluation_sha256": "35982dc653e2433f2a2a02cdf6b0e3bb8b83c8c1c0293151b55ae7c3d4df6fee",
+  "cli_result": {
+    "duration_api_ms": 586763,
+    "stop_reason": "end_turn",
+    "session_id": "c71a4e94-f21d-4fb8-a7a5-c66d0f543aa8",
+    "total_cost_usd": 2.351198,
+    "usage": {
+      "input_tokens": 22,
+      "cache_creation_input_tokens": 80427,
+      "cache_read_input_tokens": 598884,
+      "output_tokens": 49445,
+      "output_tokens_details": {
+        "thinking_tokens": 13554
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 80427,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1393,
+          "cache_read_input_tokens": 103040,
+          "cache_creation_input_tokens": 250,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 250
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 11151,
+        "outputTokens": 20,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.011250999999999999,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 22,
+        "outputTokens": 49445,
+        "cacheReadInputTokens": 598884,
+        "cacheCreationInputTokens": 80427,
+        "webSearchRequests": 0,
+        "costUSD": 2.339947,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 13554,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01Y1ZPkCUqieJnZqGeqgpJpg",
+        "tool_input": {
+          "command": "ls /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-tvriwt8n; echo \"---\"; find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01HGmPC9vcqikULXV9NHyHY8",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-tvriwt8n/data/rubric/rubric10.txt /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-tvriwt8n/input/record.yaml",
+          "description": "Compute hashes of rubric and record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01JAceoBTdGQetsSktzmQZFT",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+          "description": "Validate evaluation JSON against schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (`VALID output_evaluation.json: rubric10-semantic`, exit 0).\n\n## Definition check\n\nThe section **\u201cSource rubric and schema paths (#158)\u201d** is present in my instructions and current. The sentence beginning \u201cRead release-specific notes\u201d reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThat is the current form (dedicated `update_details` slot, with the anti-credit clause), so I proceeded. I applied it at Element 6 sub-element 3: `updates.update_details` carries genuine release-state information (which modalities are in the enclave, in process, or planned, dated August 2025), so it scored 1, while sub-element 4 scored 0 because no frequency or schedule is stated.\n\n## Result \u2014 CHORUS, claudecode_api, rep3\n\n**34 / 50 \u2014 68.0% on both bases** (fixed 34/50; normalized 34/50). All five trigger conditions resolved as **met**, so nothing was excluded: `excluded_max_points: 0`, `adjusted_max_points: 50`, `sub_elements_not_applicable: 0`. No `null` scores were emitted; every conditional sub-element carries `applicable: true` with `applicability_status` and `applicability_evidence` drawn from a *different* element (E1/E8 for human subjects, E2 for governance and sharing, E10 for the code-repository pointer).\n\n| El | Score | El | Score |\n|---|---|---|---|\n| 1 Discovery | 3 | 6 Provenance/Version | 2 |\n| 2 Access | 4 | 7 Motivation/Funding | **5** |\n| 3 Reuse | 3 | 8 Technical Transparency | **5** |\n| 4 Ethics/Privacy | 3 | 9 Limitations | 3 |\n| 5 Composition | 4 | 10 Community Integration | 2 |\n\n**Strongest:** funding (OT2OD032701 parses correctly as an NIH OT2 award through OD, corroborated across three fields with application ID and project period) and technical transparency (modality-specific collection, five raw sources, named processing software \u2014 OHNLP, OHDSI stack, chorus-mapping, chorus_waveform scripts, DeGauss/UF-Geocoding \u2014 all in producing/transforming roles, so E8.4 scored 1 under the #1059/#1082 threshold; chorus-container-apps, chorus-extract-upload and CHoRUSReports were identified as roles b/c/d and neither added nor subtracted).\n\n**Weakest:** identification and citability \u2014 no DOI, no version, no version access, no citation, no publisher, `id` duplicating `page`; and ethics oversight \u2014 `involves_human_subjects: true` with no IRB, no approval or waiver, no DPIA (E4.1 = 0) and `informed_consent` entirely absent (E4.4 = 0), including for the PICU/NICU minors the record confirms are present. E4.2, 4.3 and 4.5 scored 1 on concrete mechanisms (OHNLP tokenization, notes retained on-site, enclave-only access, affirmative identification of the vulnerable population).\n\nConsistency: 18 passed, 4 failed, 8 warnings; 12 issues recorded. Correctness: `grant_number_format: valid_nih`; `doi_format`/`rrid_format`: `not_present`; `identifier_persistence: not_persistent`; a flagged typo in the maintainer address (`mgh.havard.edu`, transcribed as printed).\n\nOutput written to `output_evaluation.json` with the pinned provenance values, `d4d_file` set to the `data/d4d_concatenated/...` path, `temperature: null`, and `claude-opus-5[1m]` recorded as both `model.name` and `model.evaluator_model`.",
+    "ttft_ms": 1601,
+    "type": "result",
+    "duration_ms": 588821,
+    "uuid": "ab92b5f4-e747-4a7d-b753-b1485cc812f9",
+    "ttft_stream_ms": 856,
+    "time_to_request_ms": 18,
+    "first_content_frame_ms": 856,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r10_rating1/2026-09-12T11-13-49.423296+00-00",
+  "original_receipt_sha256": "34cf2b06432d46fea21f45191bc503e0a6fbdfbef5931ff921a5991d299bd332",
+  "transcript_sha256": "2ad0c5c927f545bdb627780ceac39b1c611bfef20d7bff3a2aa82b9a3beebeaa",
+  "user_prompt_sha256": "a753ac71d65674f61f3bc70c0174ae3ab4b8356c1905fccf2cca9b8fd5849d1a",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "evaluated_at": "2026-09-12T11:13:49.423611+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

@@ -1,0 +1,187 @@
+{
+  "job_id": "CM4AI_v8_rep3_r20_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T14:12:36.149165+00:00",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "e3311d40121521b83f803ad969395396f63b7446fed36c1f55416379d0f16800",
+  "evaluation_sha256": "9ef4d1acce6bd9eb822d17343406ff424ae1dfbeaa503db89247f4c656e1f9c2",
+  "cli_result": {
+    "duration_api_ms": 517761,
+    "stop_reason": "end_turn",
+    "session_id": "fb5fba42-032d-4cf9-bd1f-9b8468fd3885",
+    "total_cost_usd": 2.55373,
+    "usage": {
+      "input_tokens": 22,
+      "cache_creation_input_tokens": 106324,
+      "cache_read_input_tokens": 850832,
+      "output_tokens": 41913,
+      "output_tokens_details": {
+        "thinking_tokens": 12690
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 106324,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1216,
+          "cache_read_input_tokens": 125603,
+          "cache_creation_input_tokens": 367,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 367
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 17044,
+        "outputTokens": 19,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.017139,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 22,
+        "outputTokens": 41913,
+        "cacheReadInputTokens": 850832,
+        "cacheCreationInputTokens": 106324,
+        "webSearchRequests": 0,
+        "costUSD": 2.536591,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 12690,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01Tm7A33HsdnhF7iFVobHw1h",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-_yp7up2u; find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_016miapbWPcjcyxd66yPHCwK",
+        "tool_input": {
+          "command": "ls -la ~/.claude/agents/ 2>/dev/null; ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-_yp7up2u/.claude/agents/ 2>/dev/null",
+          "description": "Look for agent definition directories"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01BhhNg2dqymPJpN1Zj231rj",
+        "tool_input": {
+          "command": "python3 -c \"import datetime,uuid;print(datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'));print(uuid.uuid4())\"",
+          "description": "Get current UTC timestamp and a UUID"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01Qqb2JpFrzEVgx9fidnJK2V",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+          "description": "Validate evaluation output against schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 14,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0): `VALID output_evaluation.json: rubric20-semantic`.\n\n## Definition check\n\nThe \"Reproducibility\" section is present in my loaded definition. The sentence beginning \"Repeatability must be\", quoted verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nRecorded `instrument_sha256` = `9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3`, `instrument_kind` = `agent_definition`.\n\n## Evaluation result \u2014 CM4AI, claudecode_api, rep3\n\n**68 / 88 = 77.3%** on both bases. All four \"Applies to\" conditions resolved as **met**, so `excluded_max_points: 0`, `adjusted_max_points: 88`, and `normalized_percentage == fixed_percentage`. No excluded items; `questions_not_applicable: 0`.\n\n| Category | Score |\n|---|---|\n| Structural Completeness | 16 / 21 |\n| Metadata Quality & Content | 18 / 21 |\n| Technical Documentation | 18 / 25 |\n| FAIRness & Accessibility | 16 / 21 |\n\n**Applicability determinations** (each evidenced from fields outside the question's own scoring set, per the anti-circular rule):\n- **Q8/Q15 (human subjects)** \u2014 borderline: `description`/`keywords` evidence human-derived material in a disease context, `collection_mechanisms` show only in-vitro assays with no recruitment. Ambiguity rule \u2192 `applicable: true`, scored 4 and 3.\n- **Q10/Q17 (shared)**, **Q11 (software output**, via the `cellmaps_pipeline` GitHub reference in `external_resources`**)**, **Q12/Q13 (collection + shared)** \u2014 all met and scored.\n\n**Load-bearing judgements.** Q4 scored 2: only `application/zip` is declared, which is the rubric's 0 anchor for type variety, lifted because all ten archives are named, sized, checksummed and role-typed. Q11 scored 2: all seven strategy fields are empty while six archives are labelled `processed_data`, and the well-documented MuSIC pipeline produces the cell maps the record says are *not* in this release. Q14 scored 5 (0/3/5 only): formal dataset citation plus three distinct DOI-bearing references with discriminating relationship types.\n\n**Semantic analysis**: 14 issues (4 consistency checks failed, 21 passed, 6 warnings). The two high-severity findings are the non-monotonic version series (a 2026 release numbered 2.0 succeeding two 2.1 releases) and the undocumented raw\u2192processed transformation. Identifier validation was clean: DOI prefix 10.18130 matches the declared UVA Dataverse publisher, `1OT2OD032742-01` parses as a valid NIH OT2 award, reference DOIs match bioRxiv and Springer Nature registrars, and ORCIDs cross-reference correctly between `creators`, `ethical_reviews` and `data_governance`.\n\nTemperature is recorded as `null` (not exposed by this CLI); runtime model `claude-opus-5[1m]` recorded as both `model.name` and `model.evaluator_model`.",
+    "ttft_ms": 1559,
+    "type": "result",
+    "duration_ms": 520812,
+    "uuid": "6e6b714a-901d-4e85-81cf-6196dd425bef",
+    "ttft_stream_ms": 869,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 869,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r20_rating1/2026-09-12T13-03-41.815986+00-00",
+  "original_receipt_sha256": "e44c6e2a5c3949d76467dbd0c03a19650593a90e432160e17d04358546011ba8",
+  "transcript_sha256": "94b52daec88fef7c1cbf3b2ef39d5c4441ae5f5298a43df3aa21402a7b895058",
+  "user_prompt_sha256": "a81179d1899d959b11f3baef72ef963629d44aa52f30f7333cd614e7554bd731",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "evaluated_at": "2026-09-12T13:03:41.816295+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

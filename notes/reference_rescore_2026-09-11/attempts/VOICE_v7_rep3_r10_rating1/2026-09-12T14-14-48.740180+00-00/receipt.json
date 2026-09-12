@@ -1,0 +1,182 @@
+{
+  "job_id": "VOICE_v7_rep3_r10_rating1",
+  "started_at": "2026-09-12T14:14:48.740547+00:00",
+  "status": "passed",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "user_prompt_sha256": "f2f6ce02dff3b716c1a68d85ecbdbc763f11588332760d9a0e562de21b68f444",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]",
+    "metadata.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "metadata.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "48a64a4e950a1ed59daf3d4efed662513451e2a0d192fd0b381031684efe2275",
+  "evaluation_sha256": "109f96773aab98f430ac1fd17ed873fa01aeab133d145b8624515b7d0dbe6bea",
+  "cli_result": {
+    "duration_api_ms": 400181,
+    "stop_reason": "end_turn",
+    "session_id": "e5c2fb33-9378-4371-9b2f-b27e4d6291ca",
+    "total_cost_usd": 2.1087870000000004,
+    "usage": {
+      "input_tokens": 16,
+      "cache_creation_input_tokens": 99150,
+      "cache_read_input_tokens": 510992,
+      "output_tokens": 33606,
+      "output_tokens_details": {
+        "thinking_tokens": 6394
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 99150,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1429,
+          "cache_read_input_tokens": 100953,
+          "cache_creation_input_tokens": 452,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 452
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 21466,
+        "outputTokens": 19,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.021561,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 16,
+        "outputTokens": 33606,
+        "cacheReadInputTokens": 510992,
+        "cacheCreationInputTokens": 99150,
+        "webSearchRequests": 0,
+        "costUSD": 2.0872260000000002,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 6394,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01DUD4dR7gfskWLKEkBFQKcm",
+        "tool_input": {
+          "command": "ls -la ~/.claude/agents/ 2>/dev/null; ls -la .claude/agents/ 2>/dev/null",
+          "description": "Look for agent definition files"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01SCo8Z4KcvPSn1VRif3A5zN",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml data/rubric/rubric10.txt; ls scripts; ls src",
+          "description": "Hash inputs and list scripts"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_018kU9QJzmzJ9kn4H8pukn4U",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+          "description": "Validate evaluation JSON against schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 11,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "**Definition check \u2014 passed.** The section headed \"Source rubric and schema paths (#158)\" is present in my active instructions, and the sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis is the current-rules form (it names the dedicated `updates.update_details` field rather than a top-level `release_notes` slot, which the rubric text at `data/rubric/rubric10.txt` still lists but the schema does not provide). I proceeded.\n\n**Evaluation written and validated.**\n\n`output_evaluation.json` \u2014 validator output: `VALID .../output_evaluation.json: rubric10-semantic` (exit 0).\n\n## Result\n\n| | |\n|---|---|\n| total_points | **48** |\n| max_points (fixed denominator) | 50 \u2192 **fixed_percentage 96.0** |\n| adjusted_max_points | 50 \u2192 **normalized_percentage 96.0** |\n| excluded_max_points / sub_elements_not_applicable | 0 / 0 |\n\nAll five applicability conditions resolved as **met** before scoring, each on evidence from a different element: human subjects (E1 description \"833 adult participants\", E8 collection_mechanisms), governance (E2 `confidentiality_level: restricted`, Certificate of Confidentiality \u2014 an applicable constraint, not a record that none applies), datasets shared (distribution_formats + PhysioNet/Synapse access_urls), software-as-output (E10 external_resources \u2192 b2aiprep/senselab repos), collection identified. Hence no N/A exclusions and the two percentage bases coincide.\n\nElement scores: E1 **4**, E2 5, E3 **4**, E4 5, E5 5, E6 5, E7 5, E8 5, E9 5, E10 5.\n\n**The two points lost**\n- **E1.3 Keywords** \u2014 four terms (`voice, health, biomarkers, bridge2ai`), below the \u22655 expectation and naming no condition, task, feature family or standard despite the record describing all of them at length.\n- **E3.4 Variable metadata** \u2014 no `variables` block; column-level metadata is deferred entirely to the shipped JSON data dictionaries. (E5.3 still scored 1: it bundles split/subpopulation flags, which *are* documented explicitly on every subset, with the data-dictionary structure.)\n\n**E8.4 Software** scored 1 under the #1082 role threshold: torchaudio, sparc, ppgs, openSMILE, Parselmouth/Praat and b2aiprep 3.0.0 are named as the software that *produced the distributed features*, not capture, hosting, packaging or validation-only tooling. E10.2 scored on the datasets-shared gate alone per #1080.\n\n**Semantic findings:** 7 issues (1 medium consistency \u2014 `at_risk_groups_included: false` against enrolled dementia/MCI/acute-psychiatric cohorts; 1 medium completeness \u2014 absent `variables`/`is_tabular`; plus the DPIA \"No\" tension, corrupted grant renderings in `funders.notes`, thin keywords, unreconciled recording totals, empty `download_url`). Consistency checks 18 passed / 1 failed / 3 warnings. DOI prefix 10.13026 valid for the declared PhysioNet publisher; NIH `OT2OD032720` and supplement forms parse correctly; `RRID:SCR_007345` well-formed (platform RRID, per PhysioNet convention).\n\nModel recorded as `claude-opus-5[1m]` for both `name` and `evaluator_model`; `temperature: null` with the note that this CLI does not expose it. Provenance, `instrument_sha256` (`66ad6231\u2026`, kind `agent_definition`), `rubric_hash` and `input_sha256` recorded as supplied.",
+    "ttft_ms": 2655,
+    "type": "result",
+    "duration_ms": 401811,
+    "uuid": "453820fe-fe67-4783-b5f1-cda8a60e1629",
+    "ttft_stream_ms": 838,
+    "time_to_request_ms": 18,
+    "first_content_frame_ms": 1267,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T14:21:31.870754+00:00"
+}

@@ -851,12 +851,162 @@
      "instrument_sha256": "4dd2536f7e131b5f1238cbd1713c6d60d123a6a3ffbe609e17775869c27ca4ac",
      "instrument_commit": "10db82f4"
     },
+    "reference_2026-09-11/AI_READI_v7_rep1_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/AI_READI_v7_rep1_r10_rating2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/AI_READI_v7_rep1_r10_rating3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/AI_READI_v7_rep2_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/AI_READI_v7_rep3_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
     "reference_2026-09-11/AI_READI_v8_rep1_r10_rating1_evaluation.json": {
      "basis": "recorded",
      "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
      "instrument_commit": "f7f235a9"
     },
+    "reference_2026-09-11/AI_READI_v8_rep2_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/AI_READI_v8_rep3_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
     "reference_2026-09-11/CHORUS_v7_rep1_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/CHORUS_v7_rep1_r10_rating2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/CHORUS_v7_rep1_r10_rating3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/CHORUS_v7_rep2_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/CHORUS_v7_rep3_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/CHORUS_v8_rep1_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/CHORUS_v8_rep2_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/CHORUS_v8_rep3_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/CM4AI_v7_rep1_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/CM4AI_v7_rep1_r10_rating2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/CM4AI_v7_rep1_r10_rating3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/CM4AI_v7_rep2_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/CM4AI_v7_rep3_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/CM4AI_v8_rep1_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/CM4AI_v8_rep2_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/CM4AI_v8_rep3_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/VOICE_v7_rep1_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/VOICE_v7_rep1_r10_rating2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/VOICE_v7_rep1_r10_rating3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/VOICE_v7_rep2_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/VOICE_v7_rep3_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/VOICE_v8_rep1_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/VOICE_v8_rep2_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
+    },
+    "reference_2026-09-11/VOICE_v8_rep3_r10_rating1_evaluation.json": {
      "basis": "recorded",
      "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
      "instrument_commit": "f7f235a9"
@@ -1452,6 +1602,126 @@
      "basis": "recorded",
      "instrument_sha256": "3f706fd04938039efe8b2f9c7b8d6a7ce18d29eeedb442eb2b0871a3d2ef8762",
      "instrument_commit": "5163e862"
+    },
+    "reference_2026-09-11/AI_READI_v7_rep1_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/AI_READI_v7_rep2_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/AI_READI_v7_rep3_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/AI_READI_v8_rep1_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/AI_READI_v8_rep2_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/AI_READI_v8_rep3_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/CHORUS_v7_rep1_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/CHORUS_v7_rep2_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/CHORUS_v7_rep3_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/CHORUS_v8_rep1_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/CHORUS_v8_rep2_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/CHORUS_v8_rep3_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/CM4AI_v7_rep1_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/CM4AI_v7_rep2_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/CM4AI_v7_rep3_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/CM4AI_v8_rep1_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/CM4AI_v8_rep2_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/CM4AI_v8_rep3_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/VOICE_v7_rep1_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/VOICE_v7_rep2_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/VOICE_v7_rep3_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/VOICE_v8_rep1_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/VOICE_v8_rep2_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
+    },
+    "reference_2026-09-11/VOICE_v8_rep3_r20_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+     "instrument_commit": "59db6d0f"
     }
    }
   }

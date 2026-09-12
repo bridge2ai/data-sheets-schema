@@ -1,0 +1,559 @@
+{
+  "rubric": "rubric20-semantic",
+  "version": "1.0",
+  "d4d_file": "data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/VOICE_d4d.yaml",
+  "project": "VOICE",
+  "method": "claudecode_api",
+  "evaluation_timestamp": "2026-09-12T15:00:00Z",
+  "model": {
+    "name": "claude-opus-5[1m]",
+    "evaluator_model": "claude-opus-5[1m]",
+    "temperature": null,
+    "temperature_note": "Not exposed by this runtime; no deterministic-score guarantee",
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "semantic_analysis": {
+    "issues_detected": [
+      {
+        "type": "consistency",
+        "severity": "medium",
+        "description": "is_deidentified.identifiable_elements_present is false, but regulatory_restrictions.other_compliance states 'The data is Personally Identifiable Information as defined in OMB Memorandum M-07-16', and participant_privacy.reidentification_risk states 'K-anonymization at k greater than or equal to two is not achieved in the released tables'. A boolean asserting no identifiable elements sits in tension with both statements; the record does not explicitly scope the PII claim to the underlying (unreleased) collection.",
+        "fields_involved": [
+          "is_deidentified.identifiable_elements_present",
+          "regulatory_restrictions.other_compliance",
+          "participant_privacy.reidentification_risk"
+        ],
+        "recommendation": "Scope the boolean explicitly to the released feature/phenotype tables and state in deidentification_details that the PII designation and the Certificate of Confidentiality attach to the underlying identifiable collection held at each site."
+      },
+      {
+        "type": "consistency",
+        "severity": "medium",
+        "description": "confidential_elements.confidential_elements_present is false while regulatory_restrictions.other_compliance records that 'The data is covered under a Certificate of Confidentiality'. The record flags this itself in a source_caveat, which limits but does not remove the contradiction at field level.",
+        "fields_involved": [
+          "confidential_elements.confidential_elements_present",
+          "confidential_elements.source_caveats",
+          "regulatory_restrictions.other_compliance"
+        ],
+        "recommendation": "Either set the flag true with a scope note, or move the Certificate of Confidentiality statement into confidentiality_details so the boolean and the narrative agree without requiring the caveat."
+      },
+      {
+        "type": "completeness",
+        "severity": "medium",
+        "description": "variables documents only four fields (participant_id, session_id, task_name, n_frames) for a release whose phenotype folder contains dozens of tables (demographics, confounders, diagnosis per condition, thirteen named questionnaire instruments). Column-level semantics are delegated entirely to the per-file JSON data dictionaries, which are described but not enumerated in the record.",
+        "fields_involved": [
+          "variables",
+          "file_collections",
+          "file_collections.description"
+        ],
+        "recommendation": "Add representative VariableMetadata entries for the principal phenotype domains (demographics, diagnosis, questionnaire scores) or link each table's JSON data dictionary explicitly as a resource."
+      },
+      {
+        "type": "completeness",
+        "severity": "medium",
+        "description": "Only four keywords are supplied (health, biomarkers, bridge2ai, voice). None of the four disease cohorts, the modalities (speech, cough, breath), the feature families (spectrogram, MFCC, posteriorgram) or the audiomics framing appear as keywords, despite being richly documented in description and subsets.",
+        "fields_involved": [
+          "keywords",
+          "description",
+          "subsets"
+        ],
+        "recommendation": "Expand keywords to at least eight terms drawn from the cohorts, modalities and feature families already described."
+      },
+      {
+        "type": "completeness",
+        "severity": "low",
+        "description": "No data_protection_impacts entry and no total_size_bytes / total_file_count. The absent DPIA is explained in source_caveats ('no analysis of the potential impact of the dataset and its use on data subjects has been conducted'); file sizes are simply not stated, though per-feature record counts (28,640 to 32,522) and participant count (833) are.",
+        "fields_involved": [
+          "data_protection_impacts",
+          "total_size_bytes",
+          "total_file_count",
+          "source_caveats"
+        ],
+        "recommendation": "Record byte sizes per file_collection, and record the DPIA absence as an explicit data_protection_impacts statement rather than only in the free-text caveat."
+      },
+      {
+        "type": "correctness",
+        "severity": "low",
+        "description": "Award identifiers disagree across cited sources (3OT2OD032720-01S1, 3OT2OD032720-01S3, 1OT2OD032720-01, and a garbled '3Tf-OTOD03272001S2'). All well-formed variants match NIH supplement syntax and share the valid core project number OT2OD032720; the discrepancy is disclosed in funders.source_caveats rather than silently resolved.",
+        "fields_involved": [
+          "funders.grants.grant_number",
+          "funders.source_caveats"
+        ],
+        "recommendation": "Verify the award that funded this specific release against NIH RePORTER and designate one identifier as authoritative, retaining the others as variants."
+      },
+      {
+        "type": "consistency",
+        "severity": "low",
+        "description": "relationships records two incompatible source statements: the healthsheet answer 'No, they are unrelated' against the release notes describing repeated sessions nested within participants. The record preserves both and names the conflict, which is appropriate curation, but leaves the machine-readable relationship ambiguous.",
+        "fields_involved": [
+          "relationships.relationship_details",
+          "relationships.source_caveats",
+          "variables.session_id"
+        ],
+        "recommendation": "State the nesting (participant -> session -> recording) as the operative relationship for this release and record the healthsheet answer as a superseded source statement."
+      },
+      {
+        "type": "semantic_understanding",
+        "severity": "low",
+        "description": "version_access.latest_version_doi records 10.13026/37yb-1t42, which version_details describes as the version-independent DOI 'resolving to the latest version'. The field name implies the DOI of the newest version (which is 10.13026/8xbn-nq66 for 3.1.0), so the field name and the value denote different concepts.",
+        "fields_involved": [
+          "version_access.latest_version_doi",
+          "version_access.version_details",
+          "doi"
+        ],
+        "recommendation": "Rename or annotate the value as the concept (version-independent) DOI to distinguish it from the current version DOI."
+      },
+      {
+        "type": "content_accuracy",
+        "severity": "low",
+        "description": "Recording totals are unreconciled: the project documentation's approximately 61,937 voice-derived recordings for version 3.0 against per-feature counts of 28,640 to 32,522 for 3.1.0. The record declines to reconcile and says so, so no incorrect figure is asserted, but a user cannot derive a single recording total from the datasheet.",
+        "fields_involved": [
+          "anomalies.anomaly_details",
+          "file_collections.resources.description",
+          "source_caveats"
+        ],
+        "recommendation": "State the number of unique recordings in the release explicitly, separately from per-feature retained counts."
+      },
+      {
+        "type": "semantic_understanding",
+        "severity": "low",
+        "description": "conforms_to_schema points at the data-sheets-schema (the schema of this metadata record), not at a data-level standard for the release; conforms_to is deliberately left unasserted because BIDS conformance belongs to the controlled-access raw audio distribution. Data-level structure therefore rests on per-file JSON dictionaries rather than a named community standard. Noted as a scoping limit, not deducted from Q10, because standard formats, ontology-coded topics/substrates and documented join keys independently satisfy the top band.",
+        "fields_involved": [
+          "conforms_to_schema",
+          "source_caveats",
+          "related_datasets"
+        ],
+        "recommendation": "If the feature/phenotype layout follows a reusable convention, name it; otherwise state explicitly that the release defines its own layout documented by sidecar dictionaries."
+      },
+      {
+        "type": "completeness",
+        "severity": "low",
+        "description": "collection_timeframes gives only 'a period of twelve months' with a caveat that the statement accompanies an earlier documentation version and may not describe the window for the 833 participants released here. No absolute start or end date is recorded for collection, though release dates are precise.",
+        "fields_involved": [
+          "collection_timeframes.timeframe_details",
+          "collection_timeframes.source_caveats",
+          "distribution_dates.release_dates"
+        ],
+        "recommendation": "Record the first and last collection dates (at year or month resolution, consistent with the de-identification policy) for the participants in this release."
+      },
+      {
+        "type": "completeness",
+        "severity": "low",
+        "description": "Demographic sub-populations are identified by axis (age, gender, sex, ethnicity, socioeconomic status) and characterized qualitatively as uneven and entangled with site and disorder, but no counts or distributions are given for any axis or cohort, which limits the fairness analysis a user can perform before download.",
+        "fields_involved": [
+          "subpopulations.distribution",
+          "subsets",
+          "known_biases"
+        ],
+        "recommendation": "Add aggregate counts per cohort and per principal demographic axis, at a granularity compatible with the de-identification policy."
+      }
+    ],
+    "semantic_insights": [
+      "DOI 10.13026/8xbn-nq66 uses the PhysioNet prefix (10.13026), which matches the declared publisher and landing page https://physionet.org/content/b2ai-voice/3.1.0/ - identifier, registrar and host are mutually consistent.",
+      "Every cited external DOI prefix resolves to a plausible registrar for its stated venue: 10.5281 (Zenodo archives), 10.21437 (ISCA/Interspeech), 10.3389 (Frontiers), 10.1001 (JAMA Network), 10.57764 (Health Data Nexus), 10.13026 (sibling PhysioNet releases).",
+      "RRID:SCR_007345 in the citation is well-formed under the RRID:SCR_NNNNNN pattern and is used to identify the hosting resource, not misapplied as a dataset identifier.",
+      "Grant numbers follow NIH syntax correctly: core project OT2OD032720 (OT2 activity code, OD institute), supplements 3OT2OD032720-01S1 and -01S3, and the maintainer grants U24EB037545 and R01EB030362 for the PhysioNet platform.",
+      "Cross-field human-subjects logic holds end to end: involves_human_subjects=true is matched by three ethical_reviews (USF single IRB, Canadian REBs, consortium ethics working group), a five-part informed_consent block with withdrawal mechanism, collection_consents, collection_notifications and consent_revocations.",
+      "Deidentification method is appropriate to the data type and is reasoned rather than asserted: HIPAA Safe Harbor plus removal of indirect and highly sensitive elements, with the explicit statement that voice cannot be fully de-identified, which is given as the reason raw waveforms are withheld to controlled access - the method matches the stated residual risk and the two-tier access design.",
+      "Restrictiveness is coherent across governance fields: confidentiality_level 'restricted', hipaa_compliant 'compliant', registered access for features and controlled access (DACO review, DUA, institutional DUTA) for raw audio, with matching prohibited_uses against re-identification.",
+      "Temporal ordering is consistent: award period 2022-09-01 to 2026-11-30, five successive releases from 2025-01-17 to 2026-05-01, and issued 2026-05-01 equal to the final release date for version 3.1.0.",
+      "Processing lineage is complete enough to reconstruct: raw WAV -> monaural 16 kHz with Butterworth anti-aliasing -> named transforms with parameters (25 ms window, 10 ms hop, 400-point FFT, 60 Mel bins) -> named tools with a version (b2aiprep 3.0.0, torchaudio, sparc, ppgs, openSMILE, Praat/Parselmouth, Whisper Large) -> named parquet/TSV artifacts with per-file record counts.",
+      "Bias documentation uses the schema's BiasTypeEnum values (selection_bias, representation_bias, measurement_bias, annotation_bias) rather than free text, and one entry links affected_subsets by subset id, making the bias-to-cohort mapping machine-traceable.",
+      "The record repeatedly distinguishes this release from adjacent artifacts it could have been conflated with (pediatric cohort, controlled-access raw audio, Health Data Nexus v1.0), and routes each to related_datasets with a typed relationship rather than absorbing it into the description.",
+      "Aspirational figures are explicitly withheld from dataset content: the 10,000 and 30,000 participant targets are recorded as goals in source_caveats against the 833 participants actually released, avoiding an inflated size claim.",
+      "Cross-dataset integration is operationally specified: joins across feature, metadata and phenotype files by participant_id, session_id and task_name, with every data file paired to a JSON data dictionary sharing its file stem."
+    ],
+    "consistency_checks": {
+      "passed": 16,
+      "failed": 2,
+      "warnings": 6
+    },
+    "correctness_validations": {
+      "doi_format": "valid_physionet",
+      "grant_number_format": "valid_nih",
+      "rrid_format": "valid",
+      "url_validity": "all_valid",
+      "temporal_ordering": "valid",
+      "identifier_landing_page_match": "valid",
+      "bias_taxonomy_terms": "valid_biastypeenum",
+      "ontology_term_syntax": "valid_b2ai_curie"
+    }
+  },
+  "overall_score": {
+    "total_points": 81,
+    "max_points": 88,
+    "excluded_max_points": 0,
+    "adjusted_max_points": 88,
+    "normalized_percentage": 92.0,
+    "fixed_percentage": 92.0,
+    "questions_not_applicable": 0
+  },
+  "categories": [
+    {
+      "name": "Structural Completeness",
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "applicable": true,
+          "applicability_status": "always_applicable",
+          "applicability_evidence": "",
+          "description": "Proportion of mandatory schema fields populated (id, title, description, keywords, license).",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Very good - approximately 86% of listed fields populated, one thin",
+          "evidence": "Populated: id 'doi:10.13026/8xbn-nq66'; title 'Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information'; description (~1,900 chars); keywords (4); license_and_use_terms ('Bridge2AI Voice Registered Access License', data_use_permission general_research_use); doi 10.13026/8xbn-nq66; page https://physionet.org/content/b2ai-voice/3.1.0/; creators (15 named plus consortium, with affiliations); purposes (4); instances (2 types, 833 participants); resources (11 nested under file_collections); variables (4); regulatory_restrictions.confidentiality_level 'restricted'. Absent as a top-level field: parent_datasets (derivation is instead carried by was_derived_from and related_datasets relationship_type 'derives_from').",
+          "quality_note": "Twelve of fourteen listed fields carry substantive content and most are unusually detailed. Held below 5 on two grounds: parent_datasets is unpopulated, and variables enumerates only four join/shape keys for a release whose phenotype folder holds dozens of tables and thirteen named questionnaire instruments, so field presence overstates column-level coverage.",
+          "semantic_analysis": "Field content matches field meaning throughout - id and doi agree, page resolves to the version named in the title, and confidentiality_level 'restricted' is consistent with the registered-access license rather than contradicting it. The variables gap is a coverage shortfall, not a semantic error: the record correctly states that per-file JSON dictionaries carry column semantics."
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "applicable": true,
+          "applicability_status": "always_applicable",
+          "applicability_evidence": "",
+          "description": "Whether narrative fields (description, purposes) have meaningful content length.",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": ">200 chars",
+          "evidence": "description runs approximately 1,900 characters and names participant count (833), five clinical sites, four disease cohorts plus controls, the acquisition protocol, the exact contents of the 3.1.0 release (spectrograms, Mel spectrograms, MFCCs, articulatory and posteriorgram features, static acoustic features, audio quality metrics, per-recording metadata, phenotype tables) and the withholding of raw waveforms. purposes has four responses, each roughly 200-300 characters ('To introduce and standardize the field of audiomics by developing new standards of acoustic and voice data collection and analysis...').",
+          "quality_note": "Both narrative fields far exceed the 200-character band, and the length is carrying information rather than padding - the description alone answers what, who, how many, from where, and what is excluded.",
+          "semantic_analysis": "Length is matched by specificity: the description is falsifiable at nearly every clause (833 participants, five sites, named feature families). No filler or restatement of the title."
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "applicable": true,
+          "applicability_status": "always_applicable",
+          "applicability_evidence": "",
+          "description": "Number of unique keywords provided to describe dataset topic coverage.",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "3-7 keywords",
+          "evidence": "keywords: health, biomarkers, bridge2ai, voice. Four unique terms, none duplicated.",
+          "quality_note": "Four keywords sit squarely in the middle band. The set is also the least informative part of the record: it omits every disease cohort (voice disorders, respiratory, neurological, mood/psychiatric), every modality beyond voice (speech, breath, cough), and every feature family, all of which are documented elsewhere in the same file.",
+          "semantic_analysis": "The keywords are semantically correct but generic, and they under-describe the content relative to the description and subsets. This is a discoverability gap rather than an accuracy problem - a search for 'Parkinson', 'cough' or 'spectrogram' would not match this record's keyword index despite all three being central to the dataset."
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "applicable": true,
+          "applicability_status": "always_applicable",
+          "applicability_evidence": "",
+          "description": "Number of distribution formats and file type diversity.",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Upper end of the 2-3 file types band, on exceptional enumeration",
+          "evidence": "Three distinct formats in the release: Apache Parquet (nine dense feature files), tab-separated text (static_features.tsv, audio_quality_metrics.tsv, all phenotype tables, media_type text/tab-separated-values) and JSON (a data dictionary sharing the file stem of every data file). file_collections enumerates three collections (features, metadata, phenotype), with eleven individually named resources carrying dimensions and retained record counts (torchaudio_spectrogram.parquet, 201 by T, 29,278 recordings; sparc_ema.parquet, T by 12, 28,640; ppgs.parquet, 40 by T, 29,289). total_file_count is absent. WAV appears only under raw_data_sources for the unreleased audio.",
+          "quality_note": "Three file types places this in the 2-3 band, but the enumeration quality is at the top of the scale: files are named, dimensioned, counted and paired with dictionaries, and the phenotype folder's subfolder structure and instrument list are spelled out. Scored 4 to credit that enumeration without claiming a fourth format the release does not have.",
+          "semantic_analysis": "Format variety is honestly bounded - the record does not count WAV toward this release, correctly attributing it to the controlled-access distribution. Parquet for per-frame tensors and TSV for recording-level summaries is an appropriate format choice for the data shapes described, so the limited variety reflects a coherent design rather than an omission."
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "applicable": true,
+          "applicability_status": "always_applicable",
+          "applicability_evidence": "",
+          "description": "Presence of file size or instance count metadata.",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass - instance and record counts found",
+          "evidence": "instances: counts 833 (Human participant). Per-file retained counts throughout file_collections.resources: 29,278 recordings for spectrograms, Mel spectrograms and MFCCs; 32,522 for torchaudio pitch; 28,640 for sparc_ema; 31,855 loudness; 31,872 periodicity and sparc pitch; 29,289 ppgs. subsets lists five cohorts with is_subpopulation true and is_data_split false; splits records that no predefined splits are provided. No total_size_bytes and no file_collections.total_bytes.",
+          "quality_note": "Passes on counts rather than bytes. The counts are granular enough to estimate volume per feature family, and the record explains why counts differ between families, but a user cannot learn the download size from this datasheet.",
+          "semantic_analysis": "Counts are internally consistent with the anomalies entry explaining the 28,640-to-32,522 range as feature-generation failures. The unreconciled ~61,937 figure from earlier documentation is flagged rather than mixed in, so the counts presented are not contaminated by the discrepancy."
+        }
+      ],
+      "category_score": 17,
+      "category_max": 21
+    },
+    {
+      "name": "Metadata Quality & Content",
+      "questions": [
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "applicable": true,
+          "applicability_status": "always_applicable",
+          "applicability_evidence": "",
+          "description": "Presence of unique identifiers such as DOI, RRID, or persistent URLs.",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass - multiple persistent identifiers",
+          "evidence": "doi: 10.13026/8xbn-nq66; id: doi:10.13026/8xbn-nq66; page: https://physionet.org/content/b2ai-voice/3.1.0/; publisher: https://physionet.org/; per-version DOIs in version_access.version_details (1.1 = 10.13026/249v-w155, 3.0.0 = 10.13026/k81f-qr68, 3.1.0 = 10.13026/8xbn-nq66, 10.13026/37yb-1t42 for the latest version); RRID:SCR_007345 in the citation.",
+          "quality_note": "Well above the pass threshold: a version DOI, a version-independent DOI, a landing page, a publisher URI and an RRID, with DOIs also recorded for sibling and predecessor datasets.",
+          "semantic_analysis": "The 10.13026 prefix is PhysioNet's and agrees with the publisher and landing page; RRID:SCR_007345 is well-formed and identifies the host resource. The only blemish is the naming of latest_version_doi for what version_details describes as a version-independent DOI, recorded as a low-severity issue."
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "applicable": true,
+          "applicability_status": "always_applicable",
+          "applicability_evidence": "",
+          "description": "Presence of funding sources, grants, creator affiliations, and institutional sponsors.",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Funders with grants + creators with affiliations",
+          "evidence": "funders: grantor 'National Institutes of Health Common Fund, through the Bridge2AI program' with three grants - OT2OD032720 (core project, awarded to the University of South Florida, project period 2022-09-01 to 2026-11-30, FY2025 award 4,660,942 US dollars), 3OT2OD032720-01S1 (cited by the PhysioNet releases) and 3OT2OD032720-01S3 (RePORTER application 11376382). creators: fifteen named individuals plus the consortium, each with a role description and an institutional affiliation (USF Health Morsani, Weill Cornell, Vanderbilt, MIT, Toronto, Sinai Health, Florida, OHSU, WashU, Simon Fraser, The Hastings Center, Hospital for Sick Children), with two principal_investigator entries carrying their own ids and affiliations. maintainers records the platform's separate support (U24EB037545, R01EB030362).",
+          "quality_note": "Top band comfortably: named grantor, multiple award numbers with roles and amounts, a stated project period, and affiliations on essentially every creator. The record also states what it cannot resolve rather than picking silently.",
+          "semantic_analysis": "All well-formed award identifiers match NIH syntax and share the core project number OT2OD032720, so the disagreement between sources is over which supplement funded the release, not over whether the funding is real. purposes align with the stated Bridge2AI Precision Public Health aim named in the description, satisfying the funding-to-purpose consistency check. The garbled '3Tf-OTOD03272001S2' is quoted as a source artifact, not asserted as an identifier."
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Q1-Q3 and Q12 fields carry the human-subjects signal independently of Q8's own fields: description states 'voice, speech, breath and cough recordings of 833 adult participants enrolled at five clinical sites'; collection_mechanisms describes in-clinic tablet-based collection with a headset; data_collectors describes research teams and clinicians running sessions with participants.",
+          "description": "Comprehensive ethics coverage including IRB approval, deidentification, privacy protections, informed consent, participant compensation, and vulnerable population safeguards.",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Comprehensive human subjects protections documented",
+          "evidence": "ethical_reviews: three reviewing organizations (USF IRB under single-IRB with subsite approvals; Canadian REBs at Mount Sinai, SickKids and Toronto with copies filed to USF; consortium ethics working group publishing a memorandum justifying controlled access for raw audio). human_subject_research: involves_human_subjects true, named board, HIPAA compliance, identifiable data in password-protected REDCap and NIH STRIDES cloud storage, adults 18-120 only. informed_consent: consent_obtained true, four consent modalities including video-recorded consent used to verify voice provenance, storage for at least five years, scope covering EHR access and onward sharing with the two-tier access explanation, and a withdrawal mechanism stating that recordings cannot be removed once collection completes. participant_compensation: 40 USD under 90 minutes, 80 USD over, capped at 120 USD across three sessions, introduced by amendment August 2023. participant_privacy: anonymization_method, privacy_techniques, reidentification_risk and data_linkage. is_deidentified: HIPAA Safe Harbor plus removal of indirect and highly sensitive elements, with an enumerated identifiers_removed list. at_risk_populations, regulatory_restrictions.hipaa_compliant 'compliant', other_compliance (Certificate of Confidentiality, OMB M-07-16), data_governance contact DACO@b2ai-voice.org.",
+          "quality_note": "Every protection area in the field list is populated with operational specifics rather than assurances - dollar amounts, retention periods, consent modalities, the named board, and the reason raw audio is withheld. data_protection_impacts is the one gap, and it is documented as a fact about the project ('no analysis of the potential impact of the dataset and its use on data subjects has been conducted') rather than left silent, which is why it does not pull the score below the top band.",
+          "semantic_analysis": "Passes both human-subjects consistency checks (true implies ethical_reviews and informed_consent populated) and both privacy checks (deidentification method documented, participant_privacy protections listed). The deidentification method is appropriate to the data type and self-aware about its limits: the record states voice cannot be fully de-identified and derives the controlled-access tier from that, matching the restrictiveness of license_and_use_terms and the acknowledged reidentification_risk. Two field-level contradictions are recorded as issues - identifiable_elements_present false against the OMB M-07-16 PII designation, and confidential_elements_present false against the Certificate of Confidentiality - both plausibly scope errors between released and underlying data rather than false claims, and both flagged by the record's own caveats. at_risk_populations declines to classify the cognitively impaired and psychiatric cohorts, recording that the bundle makes no statement; that is honest under-determination, though it leaves a substantive vulnerability question open."
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements and Governance Documentation",
+          "applicable": true,
+          "applicability_status": "always_applicable",
+          "applicability_evidence": "",
+          "description": "Whether access policy, license, IP restrictions, regulatory restrictions, and confidentiality level are clearly defined.",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "License + restrictions + confidentiality classification",
+          "evidence": "license_and_use_terms: named license, PhysioNet credentialing and signature of the Bridge2AI Voice Registered Access Agreement, duplication permitted for the research project, sale prohibited, Fort Lauderdale Agreement respected, no fees; data_use_permission general_research_use; note that commercial and non-commercial research are both permitted and the consent imposes no geographic, disease-area or methods restriction. ip_restrictions: six enumerated clauses covering non-transfer of rights, no IP claims on the data, no blocking use of downstream conclusions, permitted downstream IP subject to non-obstructive licensing, no resale, and no warranty against third-party rights. regulatory_restrictions: no export controls, a DTUA with the USF Board of Trustees requiring safeguards, named authorized persons, a prohibition on contacting data subjects without IRB and provider approval, and five-business-day breach notification; hipaa_compliant 'compliant'; confidentiality_level 'restricted'; other_compliance covering the Certificate of Confidentiality, OMB M-07-16 and PhysioNet requirements. data_governance: DACO, accountable organization, a two-tier access_review_process and a two-year agreement term with termination conditions.",
+          "quality_note": "All three components of the top band are present and each is specific enough to act on: a prospective user can tell what they must sign, who decides, what they may not do, and when the agreement lapses.",
+          "semantic_analysis": "Restrictiveness is coherent across the governance fields and matches the human-subjects posture: 'restricted' confidentiality, registered access for derived features and DACO-reviewed controlled access for raw audio, with prohibited_uses barring re-identification. The IP clauses are mutually consistent (downstream rights permitted, obstruction of access prohibited) and consistent with the stated Open Science commitment. No claim here exceeds what the ethics and consent fields support."
+        },
+        {
+          "id": 10,
+          "name": "Interoperability, Standardization, and Cross-Platform Integration",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "The datasets-shared condition is met on fields outside Q10's scoring set: distribution_formats carries access_urls to https://physionet.org/content/b2ai-voice/3.1.0/, license_and_use_terms grants general_research_use under a registered-access agreement, and third_party_sharing.is_shared is true.",
+          "description": "Presence of standard formats, ontologies, schema conformance, cross-platform dataset linkages with typed relationships, and dataset integration capability.",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Standard formats + schema/ontology compliance + integration capability",
+          "evidence": "distribution_formats: Apache Parquet ('an open-source column-oriented data file format') and tab-delimited text with JSON data dictionaries. conforms_to_schema: https://w3id.org/bridge2ai/data-sheets-schema with conforms_to_class Dataset. Ontology terms used as CURIEs on instances: data_topic B2AI_TOPIC:36, data_substrate B2AI_SUBSTRATE:69; labeling uses 'Bridge2AI protocols and ICD-10 codes'. external_resources: six, including the REDCap data dictionary repository archived on Zenodo, b2aiprep, SenseLab, the documentation site with a Zenodo DOI, and FHIR profiles for voice as a biomarker. related_datasets: seven entries with typed relationships (is_supplemented_by, derives_from, is_new_version_of, is_described_by, is_documented_by, is_referenced_by) spanning PhysioNet, Synapse, Health Data Nexus and Zenodo. Integration: joins by participant_id, session_id and task_name are stated in relationships and variables, and 'Every data file is accompanied by a JSON data dictionary sharing its file stem'.",
+          "quality_note": "All three components of the top band are satisfied by distinct evidence: open column-oriented and text formats, ontology-coded topics and substrates plus ICD-10 and FHIR alignment, and an operational integration story with named join keys and per-file machine-readable dictionaries. Typed cross-platform linkage is unusually complete for a record of this kind.",
+          "semantic_analysis": "One scoping limit is worth naming without deducting: conforms_to_schema describes this metadata record's own schema, not a data-level standard, and conforms_to is deliberately left unasserted because BIDS conformance belongs to the raw audio distribution - the record explains this in source_caveats rather than over-claiming. Data-level structure therefore rests on sidecar dictionaries. The independent evidence for ontology use, standard formats and documented integration keys still meets the top band, and the restraint on BIDS is a correctness virtue rather than a gap."
+        }
+      ],
+      "category_score": 21,
+      "category_max": 21
+    },
+    {
+      "name": "Technical Documentation",
+      "questions": [
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "The software-output condition is met on Q14's field: external_resources references code repositories - b2aiprep at https://github.com/sensein/b2aiprep, SenseLab at https://github.com/sensein/senselab, the REDCap dictionary at https://github.com/eipm/bridge2ai-redcap and the documentation site source at https://github.com/eipm/bridge2ai-docs. extension_mechanism.contribution_url points at the same b2aiprep repository. Determined without reference to Q11's own preprocessing/cleaning/labeling fields.",
+          "description": "Mentions of preprocessing, cleaning, and labeling strategies with software tools used in data preparation, including annotation quality, imputation, and missing data documentation.",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Comprehensive strategies with software versions/URLs",
+          "evidence": "preprocessing_strategies: five entries with exact parameters - monaural conversion and 16 kHz resampling with a Butterworth anti-aliasing filter; STFT spectrograms at 25 ms window, 10 ms hop, 400-point FFT, downsampled by two in time; sixty MFCCs and a 60-bin Mel spectrogram; sparc articulatory kinematics at 50 Hz and posteriorgrams at 100 Hz; openSMILE, Parselmouth and Praat for prosodic measures; Whisper Large for transcription with transcripts removed before release. cleaning_strategies: states no cleaning-motivated preprocessing and no exclusions, describing instead an audit protocol (missingness tables, distribution and outlier checks, schema checks on categorical responses, silence and duration metrics, produced-versus-intended passage comparison) run with b2aiprep and SenseLab. labeling_strategies: clinician diagnosis with annotations_per_item 1, data_annotation_protocol citing Bridge2AI protocols and ICD-10, annotator_demographics, and a recommendation that new labeling processes be described alongside any model release. machine_annotation_tools: eight named tools with per-tool descriptions, 'this release was generated with b2aiprep version 3.0.0', and a caveat that off-the-shelf models were not audited so no accuracy figures exist. missing_data_documentation: patterns, causes and handling ('No imputation was performed').",
+          "quality_note": "Top band on every component - named tools, a pipeline version, repository URLs in external_resources, numeric processing parameters, and an explicit statement of what quality control was and was not performed. The absence of imputation_protocols is correct rather than missing, since the record states no imputation occurred.",
+          "semantic_analysis": "Tool-to-artifact mapping is coherent: torchaudio outputs match the torchaudio_*.parquet files, sparc outputs match sparc_ema/loudness/periodicity/pitch, ppgs matches ppgs.parquet, and openSMILE/Praat match static_features.tsv. Processing parameters stated in preprocessing_strategies agree with the dimensions given in the file resources (60 Mel bins with 60 by T MFCCs, 100 Hz posteriorgrams with 40 by T). The admission that transcription models were not audited is a transparency gain, not a deficiency, and is consistent with the withdrawal of free-speech transcripts from the release."
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Collection is identified and datasets are shared: acquisition_methods, collection_mechanisms, data_collectors and collection_timeframes are all populated, and sharing is evidenced outside Q12 by distribution_formats.access_urls, third_party_sharing.is_shared true and the registered-access license.",
+          "description": "Description completeness of data collection mechanisms, acquisition methods, data collectors, and collection timeframes.",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Very good - full methods and collectors, weak timeframe",
+          "evidence": "acquisition_methods: all four flags set with details distinguishing directly observed audio, subject-reported questionnaires, derived features and clinician-verified diagnoses against gold standards. collection_mechanisms: three entries - the custom Bridge2AI-Voice tablet application hosting acoustic tasks and surveys; hardware named to the model (iPad 9th/10th generation and iPad Air 5th generation, Avid AE-36 microphone via an Apple dongle, distinct devices per site); and REDCap for clinical and multimodal capture with an open-source export library. direct_collection: is_direct true, in clinic, with a trained research assistant. data_collectors: two role entries covering research teams (medical, graduate and undergraduate students) and co-investigator clinicians supplying and validating diagnoses. sampling_strategies: non-probability purposive recruitment from high volume expert clinics defined as seeing more than fifty patients a month in a disease category, with is_random false and is_representative false. raw_data_sources: three sources with formats and access routes. collection_timeframes: 'collected over a period of twelve months', with a caveat that this accompanies an earlier documentation version and may not describe the window for the 833 participants in this release.",
+          "quality_note": "Methods, instruments, hardware and collectors are documented to a level that would support replication of the protocol. Held at 4 solely because the timeframe component of the top band is unresolved: no absolute start or end date is given for this release's collection, and the one duration figure is disclaimed by the record itself.",
+          "semantic_analysis": "Collection details are consistent with downstream claims - per-site iPads support the measurement_bias entry about device-diagnosis confounding, and the headset distance caveat in anomalies matches the recording hardware description. The record also excludes remote collection from the mechanisms on the stated ground that the documentation says it did not occur for the released data despite IRB approval, which is a correct distinction between approved and realized methods. Similarly, sampling_strategies.notes lists additional approved recruitment routes while declining to attest which supplied these 833 participants - under-determination recorded rather than invented."
+        },
+        {
+          "id": 13,
+          "name": "Version History, Maintenance, and Sustainability",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Same condition as Q12: collection fields are populated and sharing is evidenced by distribution_formats.access_urls, third_party_sharing.is_shared true and the registered-access license terms.",
+          "description": "Presence of version information, version access methods, errata, update plans, release notes with dates, and data sustainability indicators.",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Comprehensive versioning + full sustainability documentation",
+          "evidence": "version: 3.1.0. version_access: five versions listed with per-version DOIs and a version-independent DOI, and version_details narrating what each release changed (1.1 added MFCCs; 2.0 added 136 participants and reprocessed spectrograms; 2.0.1 corrected authorship; 3.0.0 added 391 participants, split the phenotype file and added articulatory and posteriorgram features; 3.1.0 fixed broken parquet files, added audio quality metrics and per-recording metadata, back-filled validated diagnoses), plus a policy that older versions remain hosted subject to the publishers' right to remove access. errata: enumerated corrections per release, with a note that a changelog is published with the dataset metadata. updates: semi-annual frequency, notification via platform news items and standard channels, static versions rather than dynamic updates. distribution_dates: five dated releases from 2025-01-17 to 2026-05-01. maintainers: three, with roles and a contact address. publisher PhysioNet, a domain-appropriate biomedical repository, itself supported under U24EB037545 and R01EB030362. retention_limit and extension_mechanism document post-publication commitments.",
+          "quality_note": "All four sustainability indicators are present - persistent identifiers per version, a governance plan through DACO and the release team, a domain-appropriate repository, and named institutional preservation funding - on top of a complete versioning record with dated releases and per-version change notes.",
+          "semantic_analysis": "Version history is internally consistent: the five release dates in distribution_dates align one-to-one with the five versions in version_access, issued equals the 3.1.0 release date, and the errata entries match the changes narrated in version_details. Temporal ordering across collection, processing and publication holds. Worth noting for the reader: the record reports the consortium's own AI-readiness self-assessment at 50 per cent on sustainability; that self-score concerns the underlying resource's criteria, while this question scores the documentation of maintenance and sustainability, which is thorough. The tension is reported, not scored against."
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "applicable": true,
+          "applicability_status": "always_applicable",
+          "applicability_evidence": "",
+          "description": "Presence of formal citations or external resources with DOI-linked references.",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Two or more distinct references plus a formal dataset citation",
+          "evidence": "citation: a formal dataset citation naming authors, title, version, publisher and DOI - 'Bensoussan, Y., Sigaras, A., Rameau, A., ... Ghosh, S. (2026). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 3.1.0). PhysioNet. RRID:SCR_007345. https://doi.org/10.13026/8xbn-nq66'. Distinct further references: Rameau et al. (2024) Interspeech, doi 10.21437/Interspeech.2024-1926 (is_documented_by, the protocol paper); Moothedan et al. (2025) Front Digit Health 7:1514971, doi 10.3389/fdgth.2025.1514971 (is_referenced_by, the app feasibility study); Bensoussan et al. (2024) JAMA Otolaryngol Head Neck Surg 150(4):283-284, doi 10.1001/jamaoto.2023.4807 (is_referenced_by, the audiomics statement); plus six external_resources including two Zenodo-archived repositories.",
+          "quality_note": "Far beyond the top band: a formal dataset citation identifying title, authors and publisher, three DOI-bearing journal references with volume and page detail, and six distinct external resources, none duplicated.",
+          "semantic_analysis": "Every publication DOI prefix matches its stated venue (10.21437 ISCA, 10.3389 Frontiers, 10.1001 JAMA Network), and each reference is typed by its actual relationship rather than lumped together - the protocol paper as is_documented_by, commentary and feasibility work as is_referenced_by. The feasibility study's note that it contributed no audio data to this dataset prevents a reader from wrongly treating it as a data source."
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Same human-subjects signal as Q8, taken from Q1-Q3 and Q12 fields: description states '833 adult participants enrolled at five clinical sites in the United States and Canada'; keywords include 'health' and 'biomarkers'; collection_mechanisms describes in-clinic tablet collection from participants.",
+          "description": "Inclusion of human subjects, demographic diversity, or subgroup details.",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Very good - detailed criteria and subgroups, demographics qualitative only",
+          "evidence": "instances: 833 human participants with label_description explaining how diagnostic labels were produced, plus a recording-level instance type; three missing_information entries. subpopulations: identification by age, gender, sex, ethnicity and socioeconomic status from a detailed demographic questionnaire; distribution described as uneven, a non-probability sample from five sites, with groups less trusting of the medical system or less proximal to sites under-recruited and demographics entangled with disorder and device. subsets: five cohorts, each with enumerated inclusion diagnoses and gold standard validation methods (voice disorders with laryngoscopy and stroboscopy; respiratory with spirometry and CT; neurological restricted to ages over 44 and under 85 with MRI and p-tau; mood/psychiatric with EHR, psychiatrist diagnosis and medication history; controls defined by exclusion). at_risk_populations: enrollment restricted to 18 years and older, pediatric participants under a separate protocol. known_limitations records English fluency as an eligibility requirement.",
+          "quality_note": "Inclusion and exclusion criteria are documented at the top of the scale, cohort by cohort, with validation evidence per diagnosis. Held at 4 because demographic detail is purely qualitative: no counts or proportions are given for any cohort or for any demographic axis, so a user cannot assess representation numerically before requesting access.",
+          "semantic_analysis": "The subgroup structure is semantically coherent with the rest of the record - the five subsets match the four cohorts plus controls named in the description, the neurological age window is narrower than the overall 18-120 range as the disease targets require, and is_data_split false with is_subpopulation true correctly distinguishes cohorts from ML splits. The candid statement that demographic composition, disorder and device are entangled is a substantive representation disclosure, but it describes the skew without quantifying it."
+        }
+      ],
+      "category_score": 23,
+      "category_max": 25
+    },
+    {
+      "name": "FAIRness & Accessibility",
+      "questions": [
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "applicable": true,
+          "applicability_status": "always_applicable",
+          "applicability_evidence": "",
+          "description": "Dataset includes persistent URLs for access and documentation.",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass - multiple persistent links",
+          "evidence": "page https://physionet.org/content/b2ai-voice/3.1.0/; distribution_formats.access_urls to the same landing page; doi 10.13026/8xbn-nq66 and per-version DOIs; external_resources URLs to https://github.com/eipm/bridge2ai-redcap, https://zenodo.org/records/14989503, https://github.com/sensein/b2aiprep, https://github.com/sensein/senselab, https://docs.b2ai-voice.org/, https://zenodo.org/doi/10.5281/zenodo.13834653 and https://www.b2aivoicescholars.org/; raw audio at https://www.synapse.org/Synapse:syn72370534/.",
+          "quality_note": "Well past the pass threshold, with two of the code resources marked archival:true and carrying Zenodo DOIs rather than only mutable repository links.",
+          "semantic_analysis": "All URLs are structurally valid and their domains match their described roles (physionet.org for the release, zenodo.org for archives, synapse.org for controlled-access audio, github.com for code). The archival flag distinguishes DOI-backed snapshots from live repositories, which is the distinction persistence actually turns on."
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met on fields outside Q17: third_party_sharing.is_shared true with a description of broad distribution through a publishing platform, and data_governance.access_review_process describing registration and approval routes.",
+          "description": "Describes how users can obtain the dataset (download, DUA, login).",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Fully defined access path (platform, login, policy)",
+          "evidence": "distribution_formats: 'Access requires a PhysioNet account, credentialing, and signature of the Bridge2AI Voice Registered Access Agreement; no additional training is required', with access_urls https://physionet.org/content/b2ai-voice/3.1.0/. data_governance.access_review_process sets out both tiers: registration and identity confirmation plus agreement signature for the featurized data; and for raw audio a Data Access Request Form, a Data Use Agreement, DACO review, and an institutionally signed Data Use and Transfer Agreement, initiated by emailing DACO@b2ai-voice.org, with delivery through Synapse at https://www.synapse.org/Synapse:syn72370534/. license_and_use_terms states no fees are associated with the restrictions.",
+          "quality_note": "Every element of the top band is explicit: platform, credentialing step, the named agreement, who reviews, how to initiate, what is delivered where, and the absence of fees or training requirements. A prospective user can execute this without contacting anyone for clarification.",
+          "semantic_analysis": "The two access tiers are consistently described wherever they appear - in the description, is_deidentified, participant_privacy, raw_data_sources, third_party_sharing and data_governance - and the tier assignment follows from the stated re-identification reasoning rather than being asserted arbitrarily. No download_url field is present, which is correct for a gated release: the landing page is the access route and the record says so."
+        },
+        {
+          "id": 18,
+          "name": "Reusability, Use Guidance, and Social Impact",
+          "applicable": true,
+          "applicability_status": "always_applicable",
+          "applicability_evidence": "",
+          "description": "License is clearly defined with explicit use guidance including intended uses, prohibited uses, discouraged uses, and social impact analysis with risk identification and mitigation.",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "License + comprehensive use guidance + social impact analysis with mitigation",
+          "evidence": "license_and_use_terms with data_use_permission general_research_use. intended_uses: two categories with usage_notes and examples (AI pretraining, fine-tuning, benchmarking and validation; clinical research into screening, diagnosis and monitoring; cohort selection from phenotype features). prohibited_uses: three, each with a prohibition_reason - re-identification attempts, uses that could foreseeably cause harm or stigmatization to participants, families, communities or populations, and IP protections that would restrict access to the data or its conclusions. discouraged_uses: hiring decisions, insurance premium adjustment and surveillance, with the stated rationale of preventing discriminatory outcomes based on health conditions or voice characteristics. future_use_impacts: skews by disorder category, site and demographics, with the warning that models may not generalize to absent populations, languages or recording conditions, and instruction to consider the multivariate distribution. known_biases carry mitigation_strategy entries; known_limitations carry scope_impact and recommended_mitigation.",
+          "quality_note": "Top band on all three components. The use guidance is unusually operational - prohibitions carry reasons rather than bare rules, and the discouraged non-research applications name the specific harms anticipated. Social impact analysis is distributed across future_use_impacts, prohibited_uses rationales, known_biases mitigations and known_limitations, and together these identify risks and state what a user should do about them.",
+          "semantic_analysis": "Use guidance is consistent with consent scope and license: the record states consent does not restrict commercial use, methods development or research type, and intended_uses correspondingly permits commercial research - a case where permissions and consent were reconciled rather than defaulted to the most restrictive reading. The anti-IP-obstruction prohibition matches the Fort Lauderdale commitment in the license terms. The generalization warning in future_use_impacts is the same claim as the representativeness limitation, stated consistently in both places."
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity, Provenance Graph, and Quality",
+          "applicable": true,
+          "applicability_status": "always_applicable",
+          "applicability_evidence": "",
+          "description": "Presence of version access, errata, update plans, source derivation, parent dataset linkages, missing data documentation, data split indicators, and provenance graph representation.",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Full provenance with lineage and derivation paths",
+          "evidence": "was_derived_from: raw voice, speech, breath and cough audio plus questionnaire responses from ReproSchema-UI or REDCap, collected prospectively from consented participants. related_datasets relationship_type 'derives_from' names the specific upstream artifact (the controlled-access raw audio collection, Synapse syn72370534, BIDS 1.9.0 layout) and 'is_new_version_of' names the Health Data Nexus v1.0 predecessor with its DOI. raw_data_sources: three typed sources (primary prospective collection, electronic data capture system, retrospective EHR extraction) with formats and access routes. Lineage entities, activities and agents are all identified: WAV waveforms and REDCap exports as entities; resampling, STFT, articulatory coding, posteriorgram generation, feature extraction and transcription as activities with parameters; the consortium, named clinicians, research teams, and b2aiprep version 3.0.0 and SenseLab as agents; and the named parquet/TSV artifacts as output entities. version_access, errata and updates supply the version-change layer; missing_data_documentation gives patterns, causes and handling; splits records that no predefined splits exist with guidance to construct them; subsets carry is_data_split false; cleaning_strategies documents the audit protocol and version 3.1.0 adds per-recording audio quality metrics.",
+          "quality_note": "Above the version-history-only band: the record supports a complete derivation path from consented participant through raw waveform and named processing step to each released file, with the processing agent versioned. Quality is separately evidenced by the audit protocol and the new audio quality metrics file.",
+          "semantic_analysis": "Provenance is expressed as text rather than a W3C PROV-O graph, which the rubric permits when lineage is complete, and it is: each output file can be traced to a tool, parameters and an upstream entity. Derivation claims are consistent with the exclusions - transcripts and free-speech-derived dense features are stated as withheld in both is_deidentified and known_limitations, and the per-feature record shortfalls are explained in anomalies. parent_datasets is unpopulated as a field, but its content is carried by was_derived_from and the typed derives_from relationship, so the lineage is not actually broken."
+        },
+        {
+          "id": 20,
+          "name": "Bias Documentation and Responsible AI Alignment",
+          "applicable": true,
+          "applicability_status": "always_applicable",
+          "applicability_evidence": "",
+          "description": "Metadata documents known biases using standardized taxonomies aligned with CROISSANT RAI standards, and includes fairness analysis.",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Very good - schema taxonomy applied, fairness analysis qualitative",
+          "evidence": "known_biases: four entries typed with schema enum values - selection_bias (recruitment from high volume expert clinics on the basis of existing diagnosis by non-probability sampling, with a mitigation strategy of shifting to remote collection and controlling more variables, and affected_subsets linking four cohort ids); representation_bias (skews by disorder, site and demographics, under-recruitment of groups with less trust in medicine or AI, mitigated by advising users to consider the multivariate distribution); measurement_bias (distinct iPads per site confounded with per-site disorder screening, plus variable headset distance); annotation_bias (single labeler per instance, varying diagnostic practice between clinicians and sites). future_use_impacts records the same skews as a downstream risk. Supporting fairness context in subpopulations.distribution, sampling_strategies.why_not_representative and known_limitations.representativeness_limitation.",
+          "quality_note": "Bias categorization is systematic and uses the schema's controlled vocabulary, and the four types identified are the right ones for this collection design. Held at 4 on two counts: no AIO mappings or CROISSANT RAI term identifiers are given, and the fairness analysis is entirely qualitative - with no demographic counts anywhere in the record, a user cannot quantify the representation skew the biases describe or evaluate subgroup balance.",
+          "semantic_analysis": "Each bias is traceable to a documented cause elsewhere in the record rather than asserted generically: measurement_bias matches the per-site iPad detail in collection_mechanisms and the headset caveat in anomalies, selection_bias matches sampling_strategies (is_random false, is_representative false), annotation_bias matches labeling_strategies annotations_per_item 1. Only two of four biases carry a mitigation_strategy, and both mitigations are prospective or advisory rather than applied to this release, which is honest but limits their value to a current user. affected_subsets is populated on one entry only, so the bias-to-cohort mapping is partial."
+        }
+      ],
+      "category_score": 20,
+      "category_max": 21
+    }
+  ],
+  "assessment": {
+    "strengths": [
+      "Ethics and governance documentation is operational rather than declarative: named IRB and Canadian REBs, four consent modalities including video consent used to verify voice provenance, compensation stated to the dollar and capped, retention periods for identifiable linkage tables, breach notification within five business days, and a named access committee with a contact address.",
+      "The two-tier access design is reasoned from a correct premise - that voice cannot be fully de-identified - and that reasoning is carried consistently through deidentification, privacy, raw data sources, sharing and governance fields rather than asserted once.",
+      "Processing provenance is complete enough to reconstruct: named tools with a pipeline version (b2aiprep 3.0.0), numeric parameters (16 kHz, 25 ms window, 10 ms hop, 400-point FFT, 60 Mel bins), and each output file traceable to the tool that produced it with its dimensions and retained record count.",
+      "Version history is exemplary: five releases with dates, per-version DOIs, per-version change notes, errata, a semi-annual update cadence, an older-version support policy, and a domain-appropriate repository with named preservation funding.",
+      "Source conflicts are disclosed rather than silently resolved - award identifiers, recording totals, enrollment targets, name spellings and the relationships contradiction are each recorded with their competing sources and the reason for the choice made.",
+      "Reuse guidance is complete and internally coherent: intended, prohibited and discouraged uses each with rationale, reconciled against a consent scope that the record correctly reads as permitting commercial and methods-development research."
+    ],
+    "weaknesses": [
+      "Only four generic keywords, omitting every disease cohort, modality and feature family documented elsewhere in the same record - the weakest link in an otherwise strong findability profile.",
+      "variables enumerates just four join and shape keys for a release containing dozens of phenotype tables and thirteen named questionnaire instruments, leaving column-level semantics entirely to unenumerated sidecar dictionaries.",
+      "No demographic counts or proportions anywhere: sub-population axes and skews are described qualitatively, so neither representation nor the documented biases can be assessed numerically before access is requested.",
+      "Two boolean fields contradict narrative statements elsewhere - identifiable_elements_present false against the OMB M-07-16 PII designation, and confidential_elements_present false against the Certificate of Confidentiality - most likely scope errors between released and underlying data.",
+      "No byte sizes or total file count, and the collection window for this release is unresolved, with the single twelve-month figure disclaimed by the record itself.",
+      "Bias mitigation is partial: two of four biases carry mitigation strategies, both prospective or advisory, and affected_subsets is populated on one entry only. No AIO or CROISSANT RAI term identifiers are given for the bias types."
+    ],
+    "recommendations": [
+      "Expand keywords to at least eight terms drawn from content already present - voice disorders, Parkinson's disease, cognitive impairment, depression, cough, spectrogram, MFCC, audiomics.",
+      "Add aggregate demographic and per-cohort counts at a granularity consistent with the de-identification policy, so that the documented selection and representation biases can be quantified by a prospective user.",
+      "Scope the two privacy booleans explicitly to the released feature and phenotype tables, and state in deidentification_details that the PII designation and Certificate of Confidentiality attach to the underlying identifiable collection held at each site.",
+      "Record total_size_bytes per file_collection and a single count of unique recordings in the release, stated separately from the per-feature retained counts.",
+      "Record the first and last collection dates for the participants in this release, replacing the disclaimed twelve-month figure.",
+      "Add representative VariableMetadata entries for the principal phenotype domains, or link each table's JSON data dictionary as an enumerated resource.",
+      "Add mitigation_strategy and affected_subsets to the measurement_bias and annotation_bias entries, and map each bias type to its AIO or CROISSANT RAI identifier.",
+      "Record the absent data protection impact assessment as an explicit data_protection_impacts statement rather than only within the free-text source_caveats."
+    ]
+  },
+  "metadata": {
+    "evaluator_id": "b7f3a1c2-5d84-4e19-9a3f-6c2e81d40b57",
+    "instrument_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+    "instrument_kind": "agent_definition",
+    "rubric_hash": "669490b61351353476ce7c1d4be9efb7da790da6499eb57078d1da0f06c0291b",
+    "d4d_file_hash": "ba8876a62b15682af22bae93fe16f4ee6d229afca706435d4595064ad1d8b55c",
+    "input_sha256": "ba8876a62b15682af22bae93fe16f4ee6d229afca706435d4595064ad1d8b55c",
+    "label": "2026-09-04f_claude-opus-5-api-generic-v8_rep3",
+    "evaluator_model": "claude-opus-5[1m]",
+    "score_basis_note": "No question was excluded; adjusted_max_points equals max_points (88), so the fixed and normalized percentages coincide at 92.0. Excluded item ids: none."
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "registered_at": "2026-09-12T14:46:03.104741+00:00",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "runner_commit": "d8bb022ed2934d606a5ef15847bd5a1e3fc2b72c",
+  "accepted_count_before": 44,
+  "remaining_job_ids": [
+    "VOICE_v8_rep1_r20_rating1",
+    "VOICE_v8_rep2_r10_rating1",
+    "VOICE_v8_rep2_r20_rating1",
+    "VOICE_v8_rep3_r20_rating1",
+    "AI_READI_v7_rep1_r10_rating2",
+    "AI_READI_v7_rep1_r10_rating3",
+    "CHORUS_v7_rep1_r10_rating2",
+    "CHORUS_v7_rep1_r10_rating3",
+    "CM4AI_v7_rep1_r10_rating2",
+    "CM4AI_v7_rep1_r10_rating3",
+    "VOICE_v7_rep1_r10_rating2",
+    "VOICE_v7_rep1_r10_rating3"
+  ],
+  "groups": [
+    [
+      "VOICE_v8_rep1_r20_rating1",
+      "VOICE_v8_rep2_r10_rating1",
+      "VOICE_v8_rep2_r20_rating1",
+      "VOICE_v8_rep3_r20_rating1"
+    ],
+    [
+      "AI_READI_v7_rep1_r10_rating2",
+      "AI_READI_v7_rep1_r10_rating3",
+      "CHORUS_v7_rep1_r10_rating2",
+      "CHORUS_v7_rep1_r10_rating3"
+    ],
+    [
+      "CM4AI_v7_rep1_r10_rating2",
+      "CM4AI_v7_rep1_r10_rating3",
+      "VOICE_v7_rep1_r10_rating2",
+      "VOICE_v7_rep1_r10_rating3"
+    ]
+  ],
+  "max_concurrent_sessions": 4,
+  "budget_cap_usd_per_attempt": 5,
+  "remaining_attempt_caps_usd": 60,
+  "automatic_retries": false,
+  "stop_new_launches_on_failure": true,
+  "let_inflight_finish": true,
+  "startup": "Launch each job separately; require its runner Starting marker before launching the next job. The marker follows release of the canary preflight lock.",
+  "execution_helper": "notes/reference_rescore_2026-09-11/execution_tools/run_registered_job_percentage_denial.py",
+  "execution_helper_sha256": "8fdad286c19f477777630083a3d6fae0ef18eaf7eef67e6a2dfd2d698e436f1a",
+  "complete_prompts_and_settings_unchanged": true,
+  "preflight_failures_with_zero_evaluator_calls": [
+    "VOICE_v8_rep1_r20_rating1",
+    "VOICE_v8_rep2_r10_rating1",
+    "VOICE_v8_rep2_r20_rating1"
+  ]
+}

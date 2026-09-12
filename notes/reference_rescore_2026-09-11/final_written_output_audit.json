@@ -1,0 +1,345 @@
+{
+  "verified_at": "2026-09-12T15:57:24.345337+00:00",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "accepted": 56,
+  "verification": "Every final output and retained candidate exactly matches the last successful absolute Write at the original isolated runtime output path.",
+  "model_calls_during_verification": 0,
+  "ratings": [
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v7_rep1_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T07-20-00.645660+00-00",
+      "evaluation_sha256": "017f888bdccf12a04b62917e8fa08c39263cf45a5533fb349ca9eb075335199f"
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v7_rep1_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T09-04-18.246187+00-00",
+      "evaluation_sha256": "9c5ba6db5dc1c9d7cc3871609acdae6dfbcb5be19b3542bd7d82cb6d9792909c"
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v7_rep1_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T09-11-58.143131+00-00",
+      "evaluation_sha256": "cd1a539f23afc767b07aa493aa3a9ed7a75f793bbc05122678d9a7a3e4acf02b"
+    },
+    {
+      "job_id": "AI_READI_v7_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v7_rep2_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T09-24-36.443700+00-00",
+      "evaluation_sha256": "34744aa1eab9780d8ee2fbf24edc297296b5cb7698730bfbcc33ecade4f0e4eb"
+    },
+    {
+      "job_id": "AI_READI_v7_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v7_rep2_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T09-24-40.465250+00-00",
+      "evaluation_sha256": "3a7a90f9a98249fc64f2e4309a15215085c61df451368aeebfd80d2d83a19dad"
+    },
+    {
+      "job_id": "AI_READI_v7_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v7_rep3_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T09-24-43.946094+00-00",
+      "evaluation_sha256": "d37718bae2562ee82460ab16dedc05898c2f45f9c0abcc1ba4e27f5ca3552ff5"
+    },
+    {
+      "job_id": "AI_READI_v7_rep3_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v7_rep3_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T09-24-48.941270+00-00",
+      "evaluation_sha256": "5c0766bc4a54ab1cd017d6a1a5d36804a9c4960dfbc75a6412a1aa607548b868"
+    },
+    {
+      "job_id": "AI_READI_v8_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v8_rep1_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r10_rating1/2026-09-12T09-34-57.687223+00-00",
+      "evaluation_sha256": "a520c48326b07c23b93de15690c9bddf5630e238ff27e883292a9ee4f6afa232"
+    },
+    {
+      "job_id": "AI_READI_v8_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v8_rep1_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r20_rating1/2026-09-12T09-35-01.802029+00-00",
+      "evaluation_sha256": "2267a7af9460609b11e6d9302de51e7633e987f9e7cbe3e751edf9e875517029"
+    },
+    {
+      "job_id": "AI_READI_v8_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v8_rep2_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep2_r10_rating1/2026-09-12T09-35-05.428183+00-00",
+      "evaluation_sha256": "92dc704df17f482d5f6bd013c4ac6851984a46930c0fbacff2da913363bce3cf"
+    },
+    {
+      "job_id": "AI_READI_v8_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v8_rep2_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep2_r20_rating1/2026-09-12T09-35-09.078994+00-00",
+      "evaluation_sha256": "3a50e403ea0cd986e22a9e27254b64ad86a4f12999a001892dc910df929cc540"
+    },
+    {
+      "job_id": "AI_READI_v8_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v8_rep3_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r10_rating1/2026-09-12T10-11-09.605326+00-00",
+      "evaluation_sha256": "347c5fa4c46454f1fc097da0c570f709feb855f4708779a73b84908810a0a10d"
+    },
+    {
+      "job_id": "AI_READI_v8_rep3_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v8_rep3_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r20_rating1/2026-09-12T10-11-13.611621+00-00",
+      "evaluation_sha256": "b6750680007cb277ff8ffe180fa67a736242d5065beab80029f2c4bb7405ba01"
+    },
+    {
+      "job_id": "CHORUS_v7_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v7_rep1_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r20_rating1/2026-09-12T10-11-17.769243+00-00",
+      "evaluation_sha256": "475ebf0cc55da19e4b7df6c6bf57c0b7d5311c6f42ff6a66b8b2de9eee0c2f7f"
+    },
+    {
+      "job_id": "CHORUS_v7_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v7_rep2_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep2_r10_rating1/2026-09-12T10-11-23.210817+00-00",
+      "evaluation_sha256": "e31cd946faa8e638c1aa40ea01d9b740440353e90f807182665d2ffb60e4bb80"
+    },
+    {
+      "job_id": "CHORUS_v7_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v7_rep2_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep2_r20_rating1/2026-09-12T10-21-22.007907+00-00",
+      "evaluation_sha256": "724edf97fc739e03aa1003497c3b77fac98d1d81369271dd695dc5885a6c05f7"
+    },
+    {
+      "job_id": "CHORUS_v7_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v7_rep3_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep3_r10_rating1/2026-09-12T10-21-26.301953+00-00",
+      "evaluation_sha256": "057cbf21314a2dad0091df94a10cb0fec242fdb6f8d8745775623507b7a1139b"
+    },
+    {
+      "job_id": "CHORUS_v7_rep3_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v7_rep3_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep3_r20_rating1/2026-09-12T10-21-30.227209+00-00",
+      "evaluation_sha256": "1e8649d0741894deb8bd49f649cc2b86f3f9edefac63c4ffe357edd04f2d23de"
+    },
+    {
+      "job_id": "CHORUS_v8_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v8_rep1_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r10_rating1/2026-09-12T10-21-34.529106+00-00",
+      "evaluation_sha256": "5c8200cc26f6be60bfadf61132d45d9fb065804536e382da06cdf9b2c494c322"
+    },
+    {
+      "job_id": "CHORUS_v8_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v8_rep1_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T10-34-00.487246+00-00",
+      "evaluation_sha256": "6d7e0b946c7b9ed313062bda361e8c2c8ec38814705e4118799696aef4b73e94"
+    },
+    {
+      "job_id": "CHORUS_v8_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v8_rep2_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r10_rating1/2026-09-12T10-34-04.212789+00-00",
+      "evaluation_sha256": "3790c4b9f55c0be204475f8072e14030052ec926dda7a25615a712079f31deee"
+    },
+    {
+      "job_id": "CHORUS_v8_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v8_rep2_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r20_rating1/2026-09-12T11-01-48.594901+00-00",
+      "evaluation_sha256": "46922f2a3add284c0be1194fedccbe0e1783195ea775e0135262730f51b10923"
+    },
+    {
+      "job_id": "CHORUS_v8_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v8_rep3_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r10_rating1/2026-09-12T11-13-49.423296+00-00",
+      "evaluation_sha256": "35982dc653e2433f2a2a02cdf6b0e3bb8b83c8c1c0293151b55ae7c3d4df6fee"
+    },
+    {
+      "job_id": "CHORUS_v8_rep3_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v8_rep3_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r20_rating1/2026-09-12T12-01-04.480594+00-00",
+      "evaluation_sha256": "583f16dcb42fc208da2a95e23d5d4633609786396ea93352fd69519fc74f706b"
+    },
+    {
+      "job_id": "CM4AI_v7_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v7_rep1_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating1/2026-09-12T12-01-23.560480+00-00",
+      "evaluation_sha256": "0455fd2794cbd0701ad38824528047cdf873490d1bc8e25ade73340ec12a391b"
+    },
+    {
+      "job_id": "CM4AI_v7_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v7_rep1_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r20_rating1/2026-09-12T12-01-28.560393+00-00",
+      "evaluation_sha256": "207f09df7a838920546385f07a7be69b5bf6a265cc6c5515deac0ebcb2cd65ec"
+    },
+    {
+      "job_id": "CM4AI_v7_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v7_rep2_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep2_r10_rating1/2026-09-12T12-01-32.268119+00-00",
+      "evaluation_sha256": "61c7243d11d5d7f82079514cf94ca90cd97a6c88366cf839d8a441419a52b9b8"
+    },
+    {
+      "job_id": "CM4AI_v7_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v7_rep2_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T12-15-44.372640+00-00",
+      "evaluation_sha256": "1d436cca091b8bcd54f29a81d46a3273a5b3400fe83dae89175207f968299fc5"
+    },
+    {
+      "job_id": "CM4AI_v7_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v7_rep3_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep3_r10_rating1/2026-09-12T12-15-48.452760+00-00",
+      "evaluation_sha256": "8c9534b1e5e90c4b50e164b6d30dfbbfc47d37d31653aff3030686feb16b0fd6"
+    },
+    {
+      "job_id": "CM4AI_v7_rep3_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v7_rep3_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep3_r20_rating1/2026-09-12T12-15-51.905429+00-00",
+      "evaluation_sha256": "7ae700f087e9676857b66bf213acc269f2569d5a9d0fb054c3ceda55b3d9d51b"
+    },
+    {
+      "job_id": "CM4AI_v8_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v8_rep1_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep1_r10_rating1/2026-09-12T12-16-00.522098+00-00",
+      "evaluation_sha256": "6bf634df093349c5cb55ec5713b0f4555b2917c099949175ea96caf423882d68"
+    },
+    {
+      "job_id": "CM4AI_v8_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v8_rep1_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep1_r20_rating1/2026-09-12T12-26-07.176275+00-00",
+      "evaluation_sha256": "67e52b1efa9357a760eed1f27d1e7aea512ba857a4a38c071a0dfcbd02eea281"
+    },
+    {
+      "job_id": "CM4AI_v8_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v8_rep2_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep2_r10_rating1/2026-09-12T12-26-10.913494+00-00",
+      "evaluation_sha256": "451d2764d3691498060bc4d626b607154bf6f2ed0916263ae556b0241b1c872d"
+    },
+    {
+      "job_id": "CM4AI_v8_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v8_rep2_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep2_r20_rating1/2026-09-12T12-26-16.697843+00-00",
+      "evaluation_sha256": "7f1516a971b75642eb0b0199ff8302a67fe0e19a4bdb8a5f841e49eb2bbcd004"
+    },
+    {
+      "job_id": "CM4AI_v8_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v8_rep3_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r10_rating1/2026-09-12T12-53-23.084438+00-00",
+      "evaluation_sha256": "c47a3d865f5ecfa025b50d434e276c0b2a6d52c1b920917e35e56873b940affc"
+    },
+    {
+      "job_id": "CM4AI_v8_rep3_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v8_rep3_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r20_rating1/2026-09-12T13-03-41.815986+00-00",
+      "evaluation_sha256": "9ef4d1acce6bd9eb822d17343406ff424ae1dfbeaa503db89247f4c656e1f9c2"
+    },
+    {
+      "job_id": "VOICE_v7_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v7_rep1_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating1/2026-09-12T13-03-45.829464+00-00",
+      "evaluation_sha256": "43693e5aaea65a050e71cadd2c8202f92b1e3544d480e9315108ab51e36349ac"
+    },
+    {
+      "job_id": "VOICE_v7_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep1_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r20_rating1/2026-09-12T13-03-49.385118+00-00",
+      "evaluation_sha256": "a6868221ce443c3aa097e416ae55f36e71044e6b668a6c396921e553918c04b1"
+    },
+    {
+      "job_id": "VOICE_v7_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v7_rep2_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep2_r10_rating1/2026-09-12T13-03-52.871518+00-00",
+      "evaluation_sha256": "28fdd56cf0ab2094c19add4a7c0f3f92abf8ee2fe5fe7e4cbec97f075b9e9da2"
+    },
+    {
+      "job_id": "VOICE_v7_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep2_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep2_r20_rating1/2026-09-12T14-14-33.051912+00-00",
+      "evaluation_sha256": "419e582c71eef8b4b813aa16b40d2dec40db8634d88d3c57dfc7e5487eaca1ab"
+    },
+    {
+      "job_id": "VOICE_v7_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v7_rep3_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep3_r10_rating1/2026-09-12T14-14-48.740180+00-00",
+      "evaluation_sha256": "109f96773aab98f430ac1fd17ed873fa01aeab133d145b8624515b7d0dbe6bea"
+    },
+    {
+      "job_id": "VOICE_v7_rep3_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep3_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep3_r20_rating1/2026-09-12T14-14-52.504091+00-00",
+      "evaluation_sha256": "565b7751f15d63670ca3479df0fcc4d35c55d360909c2b10c43dcdb4a27f7e4b"
+    },
+    {
+      "job_id": "VOICE_v8_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v8_rep1_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-26-49.081797+00-00",
+      "evaluation_sha256": "8fac08134f0808ba9ff6fa3f59181d9bd6130e71fef30d46c2b1fa36acceef9f"
+    },
+    {
+      "job_id": "VOICE_v8_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v8_rep1_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-13-26.050899+00-00",
+      "evaluation_sha256": "1bce9f23f11a2c0466fab8f729a8374753b40e2d5b6947da46d435770c4f6bc7"
+    },
+    {
+      "job_id": "VOICE_v8_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v8_rep2_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep2_r10_rating1/2026-09-12T14-47-53.778431+00-00",
+      "evaluation_sha256": "ee49eeae5b5cf2b206639ab0f8f891b7107f580586e146c4db0a42aed20a11bb"
+    },
+    {
+      "job_id": "VOICE_v8_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v8_rep2_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep2_r20_rating1/2026-09-12T14-47-58.594993+00-00",
+      "evaluation_sha256": "471b950d313466fb15aa64ea6e0bd3741ba1ebfc7a07428dd38a3fda3359dd5e"
+    },
+    {
+      "job_id": "VOICE_v8_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v8_rep3_r10_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep3_r10_rating1/2026-09-12T14-36-38.472626+00-00",
+      "evaluation_sha256": "8cf8922f7e3037e31c205c54d71926b36a30fa1dec9c6825e823d671dc2d3b15"
+    },
+    {
+      "job_id": "VOICE_v8_rep3_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v8_rep3_r20_rating1_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep3_r20_rating1/2026-09-12T14-48-03.495134+00-00",
+      "evaluation_sha256": "d5ca09424a25d287a3a0b0c20f2dd54cc8bc4e36e5d79971e8f7c14b3d5bf8b8"
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r10_rating2",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v7_rep1_r10_rating2_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating2/2026-09-12T15-25-37.530014+00-00",
+      "evaluation_sha256": "6a2dbcd4710221943577b667f8a5ba6009dcdf0f4c2b2347d97822049c92b3f0"
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r10_rating3",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v7_rep1_r10_rating3_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating3/2026-09-12T15-26-05.675689+00-00",
+      "evaluation_sha256": "a6e8be2bf550cf02f909075f1fb762c31f84e6c99d2dcdd9b922a33426333d7a"
+    },
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating2",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v7_rep1_r10_rating2_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T15-26-10.559978+00-00",
+      "evaluation_sha256": "4880a5cb2b1adb53fed37aecfeb72475efd28a469e43502b34df9bb6a90d40f5"
+    },
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating3",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v7_rep1_r10_rating3_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating3/2026-09-12T15-26-14.501987+00-00",
+      "evaluation_sha256": "3158093809733a65e17afe4bb2279cb583748a9b97e8296697f2b5e0ba5cf47a"
+    },
+    {
+      "job_id": "CM4AI_v7_rep1_r10_rating2",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v7_rep1_r10_rating2_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating2/2026-09-12T15-43-31.385599+00-00",
+      "evaluation_sha256": "2f79b40e1352b711f190a45af208c1aec754be2820976c677b1567812ce1c6c3"
+    },
+    {
+      "job_id": "CM4AI_v7_rep1_r10_rating3",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v7_rep1_r10_rating3_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating3/2026-09-12T15-43-40.990679+00-00",
+      "evaluation_sha256": "db5446eca60d12f8623b8164daa688873dc6c7112bea99494e74bcc0c06f9cfe"
+    },
+    {
+      "job_id": "VOICE_v7_rep1_r10_rating2",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v7_rep1_r10_rating2_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating2/2026-09-12T15-43-53.030302+00-00",
+      "evaluation_sha256": "fd47a5878eeb1ea3545a12fd7eae4a4287c6274ada30158a78d09b9821f3eb32"
+    },
+    {
+      "job_id": "VOICE_v7_rep1_r10_rating3",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v7_rep1_r10_rating3_evaluation.json",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating3/2026-09-12T15-44-02.319887+00-00",
+      "evaluation_sha256": "241ea33f8bb00831541ef47f2c96b7fbe03c6ac520090e1753d6ffa6ef906464"
+    }
+  ]
+}

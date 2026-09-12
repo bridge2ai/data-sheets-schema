@@ -1,0 +1,179 @@
+{
+  "job_id": "CHORUS_v8_rep2_r20_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T11:59:32.424767+00:00",
+  "manifest_sha256": "99b90d260a2ad1a1d7859050181c74ab80bb2dc670f5f7eb96e40bbffcac838f",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "960c3500b4c6b43bd1eb1a17508148529a021c7ee3205c81aa19b021f75aa943",
+  "evaluation_sha256": "46922f2a3add284c0be1194fedccbe0e1783195ea775e0135262730f51b10923",
+  "cli_result": {
+    "duration_api_ms": 416772,
+    "stop_reason": "end_turn",
+    "session_id": "9da62dfd-ff2e-44c5-8a09-7559fa428b1e",
+    "total_cost_usd": 1.6839029999999997,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 60129,
+      "cache_read_input_tokens": 427196,
+      "output_tokens": 34317,
+      "output_tokens_details": {
+        "thinking_tokens": 9095
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 60129,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1057,
+          "cache_read_input_tokens": 79577,
+          "cache_creation_input_tokens": 198,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 198
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 10910,
+        "outputTokens": 16,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.01099,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 20,
+        "outputTokens": 34317,
+        "cacheReadInputTokens": 427196,
+        "cacheCreationInputTokens": 60129,
+        "webSearchRequests": 0,
+        "costUSD": 1.6729129999999999,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 9095,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01WY83FGAWwayJ9EC4tuxJEp",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_016NRxC5kmpKhjbPhDsm92nB",
+        "tool_input": {
+          "command": "find data scripts src -type f | head -50 && echo --- && shasum -a 256 input/record.yaml",
+          "description": "List repo files and hash input record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01Umka9fd2kyPebyrHuN32Jx",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-iurkqmgl/input/record.yaml",
+          "description": "Hash the input record"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0): `VALID output_evaluation.json: rubric20-semantic`.\n\n## Definition check\n\nThe sentence from the **Reproducibility** section of my instructions, verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nThis matches the current contract, so I proceeded. Instrument recorded as `9d08b5f3\u20260e7dd3` (`instrument_kind: agent_definition`).\n\n## Result \u2014 CHORUS, claudecode_api, rep2\n\n**70 / 88** \u2014 `fixed_percentage` 79.5 (denominator 88, whole rubric) and `normalized_percentage` 79.5 (denominator `adjusted_max_points` 88). The two bases coincide: **no question was excluded**, `questions_not_applicable: 0`.\n\nEvery conditional gate resolved *applicable* on non-circular evidence from other questions' fields:\n- **Human subjects** (Q8, Q15) \u2014 `description` \"ICU, PICU and NICU settings\", `keywords` critical care, `collection_mechanisms` site extracts of clinical records.\n- **Datasets shared** (Q10, Q17; with Q12/Q13) \u2014 `distribution_formats` populated, `third_party_sharing.is_shared: true`, `distribution_dates` availability to approved users. Approval-gated access held applicable under the ambiguity rule.\n- **Software output** (Q11) \u2014 Q14's `external_resources` names the chorus-ai GitHub organization with 28 repositories.\n\n| Category | Score |\n|---|---|\n| Structural Completeness | 19 / 21 |\n| Metadata Quality & Content | 18 / 21 |\n| Technical Documentation | 16 / 25 |\n| FAIRness & Accessibility | 17 / 21 |\n\nNotable scored judgements: **Q8 = 3** (deidentification and privacy solid, but no IRB named and `informed_consent` absent despite `involves_human_subjects: true`); **Q13 = 2** (released dataset with no version, no `version_access`, no persistent identifier, no preservation plan past 2026-11-30); **Q14 = 3** (three distinct external resources, no formal dataset citation, no DOI); **Q10 = 5** (OMOP harmonization across 14 sites with validated mappings is demonstrated integration capability).\n\nSemantic analysis logged 10 issues (14 checks passed, 4 failed, 6 warnings). Grant `OT2OD032701` validates as NIH format; DOI and RRID not present; `url_validity: some_invalid` (`www.bridge2ai.org/chorus` lacks a scheme). The record's extensive `source_caveats` \u2014 disclosing conflicting admission counts, a misspelled contact domain, and an unparseable source table \u2014 raised its evidentiary trustworthiness and is cited as a strength, though disclosed absences were still scored as absences.",
+    "ttft_ms": 1534,
+    "type": "result",
+    "duration_ms": 419084,
+    "uuid": "722094f4-f854-4324-aa20-ae73ed60ebc2",
+    "ttft_stream_ms": 902,
+    "time_to_request_ms": 17,
+    "first_content_frame_ms": 902,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r20_rating1/2026-09-12T11-01-48.594901+00-00",
+  "original_receipt_sha256": "9e7d3f8efbb186e418482daeb65cf8003729d31f150675f1dcf85822e141c896",
+  "transcript_sha256": "15cdf6c089e0f13e8b760a05777cf20e02ebd636cc776b432ea81a3280a4d730",
+  "user_prompt_sha256": "87cdbd23ef3cfabcdc27b4c39a1a02852317116f17786a7078ddda9a3bcf6441",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "evaluated_at": "2026-09-12T11:01:48.595190+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

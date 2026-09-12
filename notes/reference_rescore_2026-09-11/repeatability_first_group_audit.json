@@ -1,0 +1,1467 @@
+{
+  "audited_at": "2026-09-12T15:42:22.718678+00:00",
+  "status": "verified",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "unresolved_attempts": [],
+  "session_accounting_complete": true,
+  "cost_accounting_complete": true,
+  "accepted": 52,
+  "planned": 56,
+  "actual_model_calls": 60,
+  "model_call_unit": "one isolated evaluator CLI session, which may contain multiple model/tool turns",
+  "attempts_without_reported_cost": 0,
+  "excluded_original_attempts": 8,
+  "cli_reported_total_cost_usd": 132.6268075,
+  "peak_completed_session_concurrency": 4,
+  "prior_evaluations_unchanged": 202,
+  "rubric10_source_aligned_headings_verified": true,
+  "ratings": [
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v7_rep1_r10_rating1_evaluation.json",
+      "evaluation_sha256": "017f888bdccf12a04b62917e8fa08c39263cf45a5533fb349ca9eb075335199f",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T07-20-00.645660+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 35,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 70.0,
+        "fixed_percentage": 70.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "All five trigger conditions resolved as met, so no sub-element is excluded. normalized_percentage = 35/50; fixed_percentage = 35/50. The two bases coincide only because nothing was excluded."
+      }
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v7_rep1_r10_rating1_evaluation.json",
+      "evaluation_sha256": "9c5ba6db5dc1c9d7cc3871609acdae6dfbcb5be19b3542bd7d82cb6d9792909c",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T09-04-18.246187+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 49,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 98.0,
+        "fixed_percentage": 98.0,
+        "sub_elements_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v7_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "cd1a539f23afc767b07aa493aa3a9ed7a75f793bbc05122678d9a7a3e4acf02b",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T09-11-58.143131+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 82,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 93.2,
+        "fixed_percentage": 93.2,
+        "questions_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "AI_READI_v7_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v7_rep2_r10_rating1_evaluation.json",
+      "evaluation_sha256": "34744aa1eab9780d8ee2fbf24edc297296b5cb7698730bfbcc33ecade4f0e4eb",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T09-24-36.443700+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 49,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 98.0,
+        "fixed_percentage": 98.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "normalized_percentage = 49/50; fixed_percentage = 49/50. All five trigger conditions were satisfied on evidence external to the gated sub-elements, so no sub-element was excluded and the two bases coincide."
+      }
+    },
+    {
+      "job_id": "AI_READI_v7_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v7_rep2_r20_rating1_evaluation.json",
+      "evaluation_sha256": "3a7a90f9a98249fc64f2e4309a15215085c61df451368aeebfd80d2d83a19dad",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T09-24-40.465250+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 84,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 95.5,
+        "fixed_percentage": 95.5,
+        "questions_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "AI_READI_v7_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v7_rep3_r10_rating1_evaluation.json",
+      "evaluation_sha256": "d37718bae2562ee82460ab16dedc05898c2f45f9c0abcc1ba4e27f5ca3552ff5",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T09-24-43.946094+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 49,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 98.0,
+        "fixed_percentage": 98.0,
+        "sub_elements_not_applicable": 0,
+        "denominator_note": "normalized_percentage uses adjusted_max_points = 50; fixed_percentage uses max_points = 50. No sub-element was excluded, so the two bases coincide and no excluded item identities are reported.",
+        "excluded_item_ids": []
+      }
+    },
+    {
+      "job_id": "AI_READI_v7_rep3_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v7_rep3_r20_rating1_evaluation.json",
+      "evaluation_sha256": "5c0766bc4a54ab1cd017d6a1a5d36804a9c4960dfbc75a6412a1aa607548b868",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T09-24-48.941270+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 83,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 94.3,
+        "fixed_percentage": 94.3,
+        "questions_not_applicable": 0,
+        "denominator_note": "No question's 'Applies to' condition failed, so the adjusted denominator equals the fixed denominator (88) and the two percentages coincide. Excluded item ids: none."
+      }
+    },
+    {
+      "job_id": "AI_READI_v8_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v8_rep1_r10_rating1_evaluation.json",
+      "evaluation_sha256": "a520c48326b07c23b93de15690c9bddf5630e238ff27e883292a9ee4f6afa232",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r10_rating1/2026-09-12T09-34-57.687223+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 49,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 98.0,
+        "fixed_percentage": 98.0,
+        "sub_elements_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "AI_READI_v8_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v8_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "2267a7af9460609b11e6d9302de51e7633e987f9e7cbe3e751edf9e875517029",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r20_rating1/2026-09-12T09-35-01.802029+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 83,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 94.3,
+        "fixed_percentage": 94.3,
+        "questions_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "AI_READI_v8_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v8_rep2_r10_rating1_evaluation.json",
+      "evaluation_sha256": "92dc704df17f482d5f6bd013c4ac6851984a46930c0fbacff2da913363bce3cf",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep2_r10_rating1/2026-09-12T09-35-05.428183+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 49,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 98.0,
+        "fixed_percentage": 98.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "No sub-element was excluded, so the fixed base (49/50) and the N/A-adjusted base (49/50) coincide. Comparability with another record still requires matching evaluator model, instrument digest and excluded item identities."
+      }
+    },
+    {
+      "job_id": "AI_READI_v8_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v8_rep2_r20_rating1_evaluation.json",
+      "evaluation_sha256": "3a50e403ea0cd986e22a9e27254b64ad86a4f12999a001892dc910df929cc540",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep2_r20_rating1/2026-09-12T09-35-09.078994+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 83,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 94.3,
+        "fixed_percentage": 94.3,
+        "questions_not_applicable": 0,
+        "denominator_note": "normalized_percentage = 83/88 x 100 (adjusted denominator 88, no exclusions); fixed_percentage = 83/88 x 100 (fixed denominator 88). All four 'Applies to' trigger conditions are met, so no question is excluded and the two bases coincide. excluded_item_ids: none."
+      }
+    },
+    {
+      "job_id": "AI_READI_v8_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v8_rep3_r10_rating1_evaluation.json",
+      "evaluation_sha256": "347c5fa4c46454f1fc097da0c570f709feb855f4708779a73b84908810a0a10d",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r10_rating1/2026-09-12T10-11-09.605326+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 49,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 98.0,
+        "fixed_percentage": 98.0,
+        "sub_elements_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "AI_READI_v8_rep3_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v8_rep3_r20_rating1_evaluation.json",
+      "evaluation_sha256": "b6750680007cb277ff8ffe180fa67a736242d5065beab80029f2c4bb7405ba01",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r20_rating1/2026-09-12T10-11-13.611621+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 81,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 92.0,
+        "fixed_percentage": 92.0,
+        "questions_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "CHORUS_v7_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v7_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "475ebf0cc55da19e4b7df6c6bf57c0b7d5311c6f42ff6a66b8b2de9eee0c2f7f",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r20_rating1/2026-09-12T10-11-17.769243+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 67,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 76.1,
+        "fixed_percentage": 76.1,
+        "questions_not_applicable": 0,
+        "denominator_note": "normalized_percentage = 67/88 x 100; fixed_percentage = 67/88 x 100. No question was excluded, so the two bases coincide and excluded_item_ids is empty.",
+        "excluded_item_ids": []
+      }
+    },
+    {
+      "job_id": "CHORUS_v7_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v7_rep2_r10_rating1_evaluation.json",
+      "evaluation_sha256": "e31cd946faa8e638c1aa40ea01d9b740440353e90f807182665d2ffb60e4bb80",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep2_r10_rating1/2026-09-12T10-11-23.210817+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 31,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 62.0,
+        "fixed_percentage": 62.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "No sub-element was excluded. The datasets-shared condition is met (distribution_formats populated across five modalities; third_party_sharing.is_shared=true; a documented controlled-access route), so Element 3 sub-elements 1-4, all of Element 6, all of Element 8 and all of Element 10 are applicable; under the ambiguity rule, access-by-approval counts as shared. The human-subjects condition is met on E1 and E8 evidence, so all five Element 4 sub-elements are applicable. fixed_percentage and normalized_percentage therefore share the denominator 50."
+      }
+    },
+    {
+      "job_id": "CHORUS_v7_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v7_rep2_r20_rating1_evaluation.json",
+      "evaluation_sha256": "724edf97fc739e03aa1003497c3b77fac98d1d81369271dd695dc5885a6c05f7",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep2_r20_rating1/2026-09-12T10-21-22.007907+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 63,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 71.6,
+        "fixed_percentage": 71.6,
+        "questions_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "CHORUS_v7_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v7_rep3_r10_rating1_evaluation.json",
+      "evaluation_sha256": "057cbf21314a2dad0091df94a10cb0fec242fdb6f8d8745775623507b7a1139b",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep3_r10_rating1/2026-09-12T10-21-26.301953+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 35,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 70.0,
+        "fixed_percentage": 70.0,
+        "sub_elements_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "CHORUS_v7_rep3_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v7_rep3_r20_rating1_evaluation.json",
+      "evaluation_sha256": "1e8649d0741894deb8bd49f649cc2b86f3f9edefac63c4ffe357edd04f2d23de",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep3_r20_rating1/2026-09-12T10-21-30.227209+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 65,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 73.9,
+        "fixed_percentage": 73.9,
+        "questions_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "CHORUS_v8_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v8_rep1_r10_rating1_evaluation.json",
+      "evaluation_sha256": "5c8200cc26f6be60bfadf61132d45d9fb065804536e382da06cdf9b2c494c322",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r10_rating1/2026-09-12T10-21-34.529106+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 32,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 64.0,
+        "fixed_percentage": 64.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "normalized_percentage = 32/50 x 100; fixed_percentage = 32/50 x 100. All five trigger conditions were satisfied, so no sub-element was excluded and the two bases coincide. Comparable only to evaluations from the same evaluator model and instrument with the same excluded-item set (here, empty)."
+      }
+    },
+    {
+      "job_id": "CHORUS_v8_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v8_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "6d7e0b946c7b9ed313062bda361e8c2c8ec38814705e4118799696aef4b73e94",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T10-34-00.487246+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 67,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 76.1,
+        "fixed_percentage": 76.1,
+        "questions_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "CHORUS_v8_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v8_rep2_r10_rating1_evaluation.json",
+      "evaluation_sha256": "3790c4b9f55c0be204475f8072e14030052ec926dda7a25615a712079f31deee",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r10_rating1/2026-09-12T10-34-04.212789+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 37,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 74.0,
+        "fixed_percentage": 74.0,
+        "sub_elements_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "CHORUS_v8_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v8_rep2_r20_rating1_evaluation.json",
+      "evaluation_sha256": "46922f2a3add284c0be1194fedccbe0e1783195ea775e0135262730f51b10923",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r20_rating1/2026-09-12T11-01-48.594901+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 70,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 79.5,
+        "fixed_percentage": 79.5,
+        "questions_not_applicable": 0,
+        "denominator_note": "normalized_percentage = 70/88 (adjusted_max_points, no exclusions); fixed_percentage = 70/88 (max_points). Excluded item ids: none \u2014 every conditional question's trigger condition was satisfied on non-circular evidence, so the two bases coincide for this record."
+      }
+    },
+    {
+      "job_id": "CHORUS_v8_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v8_rep3_r10_rating1_evaluation.json",
+      "evaluation_sha256": "35982dc653e2433f2a2a02cdf6b0e3bb8b83c8c1c0293151b55ae7c3d4df6fee",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r10_rating1/2026-09-12T11-13-49.423296+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 34,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 68.0,
+        "fixed_percentage": 68.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "All five trigger conditions resolved as met, so no sub-element was excluded. normalized_percentage = 34/50 x 100 and fixed_percentage = 34/50 x 100 coincide at 68.0."
+      }
+    },
+    {
+      "job_id": "CHORUS_v8_rep3_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v8_rep3_r20_rating1_evaluation.json",
+      "evaluation_sha256": "583f16dcb42fc208da2a95e23d5d4633609786396ea93352fd69519fc74f706b",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r20_rating1/2026-09-12T12-01-04.480594+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 69,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 78.4,
+        "fixed_percentage": 78.4,
+        "questions_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "CM4AI_v7_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v7_rep1_r10_rating1_evaluation.json",
+      "evaluation_sha256": "0455fd2794cbd0701ad38824528047cdf873490d1bc8e25ade73340ec12a391b",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating1/2026-09-12T12-01-23.560480+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 43,
+        "max_points": 50,
+        "excluded_max_points": 3,
+        "adjusted_max_points": 47,
+        "normalized_percentage": 91.5,
+        "fixed_percentage": 86.0,
+        "sub_elements_not_applicable": 3
+      }
+    },
+    {
+      "job_id": "CM4AI_v7_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v7_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "207f09df7a838920546385f07a7be69b5bf6a265cc6c5515deac0ebcb2cd65ec",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r20_rating1/2026-09-12T12-01-28.560393+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 63,
+        "max_points": 88,
+        "excluded_max_points": 10,
+        "adjusted_max_points": 78,
+        "normalized_percentage": 80.8,
+        "fixed_percentage": 71.6,
+        "questions_not_applicable": 2,
+        "excluded_item_ids": [
+          8,
+          15
+        ],
+        "denominator_note": "normalized_percentage = 63/78 (adjusted base, excluding Q8 and Q15 at 5 points each); fixed_percentage = 63/88 (whole-rubric base). Neither base alone establishes comparability with another record."
+      }
+    },
+    {
+      "job_id": "CM4AI_v7_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v7_rep2_r10_rating1_evaluation.json",
+      "evaluation_sha256": "61c7243d11d5d7f82079514cf94ca90cd97a6c88366cf839d8a441419a52b9b8",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep2_r10_rating1/2026-09-12T12-01-32.268119+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 43,
+        "max_points": 50,
+        "excluded_max_points": 3,
+        "adjusted_max_points": 47,
+        "normalized_percentage": 91.5,
+        "fixed_percentage": 86.0,
+        "sub_elements_not_applicable": 3,
+        "excluded_item_ids": [
+          "4.3 Privacy Protections and Re-identification Risk Assessment",
+          "4.4 Informed Consent Obtained from Participants",
+          "4.5 Vulnerable Populations and Compensation Documented"
+        ],
+        "denominator_note": "normalized_percentage = 43/47 x 100 (N/A-adjusted basis); fixed_percentage = 43/50 x 100 (whole-rubric basis). Comparable only to evaluations of the same evaluator, instrument and excluded-item set."
+      }
+    },
+    {
+      "job_id": "CM4AI_v7_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v7_rep2_r20_rating1_evaluation.json",
+      "evaluation_sha256": "1d436cca091b8bcd54f29a81d46a3273a5b3400fe83dae89175207f968299fc5",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T12-15-44.372640+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 69,
+        "max_points": 88,
+        "excluded_max_points": 10,
+        "adjusted_max_points": 78,
+        "normalized_percentage": 88.5,
+        "fixed_percentage": 78.4,
+        "questions_not_applicable": 2
+      }
+    },
+    {
+      "job_id": "CM4AI_v7_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v7_rep3_r10_rating1_evaluation.json",
+      "evaluation_sha256": "8c9534b1e5e90c4b50e164b6d30dfbbfc47d37d31653aff3030686feb16b0fd6",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep3_r10_rating1/2026-09-12T12-15-48.452760+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 42,
+        "max_points": 50,
+        "excluded_max_points": 3,
+        "adjusted_max_points": 47,
+        "normalized_percentage": 89.4,
+        "fixed_percentage": 84.0,
+        "sub_elements_not_applicable": 3,
+        "denominator_note": "normalized_percentage = 42/47 x 100 (adjusted base); fixed_percentage = 42/50 x 100 (whole-rubric base). Excluded items: Element 4 sub-element 3 (Privacy Protections and Re-identification Risk Assessment), Element 4 sub-element 4 (Informed Consent Obtained from Participants), Element 4 sub-element 5 (Vulnerable Populations and Compensation Documented). The two bases are not interchangeable and neither alone establishes comparability with a record having different excluded items."
+      }
+    },
+    {
+      "job_id": "CM4AI_v7_rep3_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v7_rep3_r20_rating1_evaluation.json",
+      "evaluation_sha256": "7ae700f087e9676857b66bf213acc269f2569d5a9d0fb054c3ceda55b3d9d51b",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep3_r20_rating1/2026-09-12T12-15-51.905429+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 76,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 86.4,
+        "fixed_percentage": 86.4,
+        "questions_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "CM4AI_v8_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v8_rep1_r10_rating1_evaluation.json",
+      "evaluation_sha256": "6bf634df093349c5cb55ec5713b0f4555b2917c099949175ea96caf423882d68",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep1_r10_rating1/2026-09-12T12-16-00.522098+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 39,
+        "max_points": 50,
+        "excluded_max_points": 3,
+        "adjusted_max_points": 47,
+        "normalized_percentage": 82.98,
+        "fixed_percentage": 78.0,
+        "sub_elements_not_applicable": 3,
+        "excluded_item_ids": [
+          "4.3",
+          "4.4",
+          "4.5"
+        ]
+      }
+    },
+    {
+      "job_id": "CM4AI_v8_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v8_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "67e52b1efa9357a760eed1f27d1e7aea512ba857a4a38c071a0dfcbd02eea281",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep1_r20_rating1/2026-09-12T12-26-07.176275+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 72,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 81.8,
+        "fixed_percentage": 81.8,
+        "questions_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "CM4AI_v8_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v8_rep2_r10_rating1_evaluation.json",
+      "evaluation_sha256": "451d2764d3691498060bc4d626b607154bf6f2ed0916263ae556b0241b1c872d",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep2_r10_rating1/2026-09-12T12-26-10.913494+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 41,
+        "max_points": 50,
+        "excluded_max_points": 3,
+        "adjusted_max_points": 47,
+        "normalized_percentage": 87.2,
+        "fixed_percentage": 82.0,
+        "sub_elements_not_applicable": 3,
+        "excluded_item_ids": [
+          "4.3 Privacy Protections and Re-identification Risk Assessment",
+          "4.4 Informed Consent Obtained from Participants",
+          "4.5 Vulnerable Populations and Compensation Documented"
+        ],
+        "denominator_note": "normalized_percentage = 41/47 x 100 = 87.2 (adjusted base, three participant-facing Element 4 sub-elements excluded). fixed_percentage = 41/50 x 100 = 82.0 (whole-rubric base). The two bases are not interchangeable, and neither on its own establishes comparability with an evaluation whose excluded item identities differ."
+      }
+    },
+    {
+      "job_id": "CM4AI_v8_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v8_rep2_r20_rating1_evaluation.json",
+      "evaluation_sha256": "7f1516a971b75642eb0b0199ff8302a67fe0e19a4bdb8a5f841e49eb2bbcd004",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep2_r20_rating1/2026-09-12T12-26-16.697843+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 62,
+        "max_points": 88,
+        "excluded_max_points": 10,
+        "adjusted_max_points": 78,
+        "normalized_percentage": 79.5,
+        "fixed_percentage": 70.5,
+        "questions_not_applicable": 2,
+        "excluded_item_ids": [
+          8,
+          15
+        ],
+        "denominator_note": "normalized_percentage = 62/78 x 100 (adjusted base, Q8 and Q15 excluded); fixed_percentage = 62/88 x 100 (full-rubric base). Neither base alone establishes comparability with another record; compare only against records with the same excluded item identities."
+      }
+    },
+    {
+      "job_id": "CM4AI_v8_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CM4AI_v8_rep3_r10_rating1_evaluation.json",
+      "evaluation_sha256": "c47a3d865f5ecfa025b50d434e276c0b2a6d52c1b920917e35e56873b940affc",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r10_rating1/2026-09-12T12-53-23.084438+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 40,
+        "max_points": 50,
+        "excluded_max_points": 3,
+        "adjusted_max_points": 47,
+        "normalized_percentage": 85.11,
+        "fixed_percentage": 80.0,
+        "sub_elements_not_applicable": 3,
+        "excluded_item_ids": [
+          "4.3",
+          "4.4",
+          "4.5"
+        ],
+        "denominator_note": "normalized_percentage = 40/47 x 100 (N/A-adjusted basis); fixed_percentage = 40/50 x 100 (whole-rubric basis). Excluded items are Element 4 sub-elements 3, 4 and 5 (participant privacy and re-identification risk, informed consent, vulnerable populations and compensation), which ask about participants this dataset has none of; Element 4 sub-elements 1 and 2 remain applicable and scored on the governance condition."
+      }
+    },
+    {
+      "job_id": "CM4AI_v8_rep3_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v8_rep3_r20_rating1_evaluation.json",
+      "evaluation_sha256": "9ef4d1acce6bd9eb822d17343406ff424ae1dfbeaa503db89247f4c656e1f9c2",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r20_rating1/2026-09-12T13-03-41.815986+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 68,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 77.3,
+        "fixed_percentage": 77.3,
+        "questions_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "VOICE_v7_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v7_rep1_r10_rating1_evaluation.json",
+      "evaluation_sha256": "43693e5aaea65a050e71cadd2c8202f92b1e3544d480e9315108ab51e36349ac",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating1/2026-09-12T13-03-45.829464+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 49,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 98.0,
+        "fixed_percentage": 98.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "normalized_percentage denominator = adjusted_max_points = 50; fixed_percentage denominator = max_points = 50. No sub-element was excluded: all five applicability conditions are met for this record, so the two bases coincide."
+      }
+    },
+    {
+      "job_id": "VOICE_v7_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "a6868221ce443c3aa097e416ae55f36e71044e6b668a6c396921e553918c04b1",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r20_rating1/2026-09-12T13-03-49.385118+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 81,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 92.05,
+        "fixed_percentage": 92.05,
+        "questions_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "VOICE_v7_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v7_rep2_r10_rating1_evaluation.json",
+      "evaluation_sha256": "28fdd56cf0ab2094c19add4a7c0f3f92abf8ee2fe5fe7e4cbec97f075b9e9da2",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep2_r10_rating1/2026-09-12T13-03-52.871518+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 49,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 98.0,
+        "fixed_percentage": 98.0,
+        "sub_elements_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "VOICE_v7_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep2_r20_rating1_evaluation.json",
+      "evaluation_sha256": "419e582c71eef8b4b813aa16b40d2dec40db8634d88d3c57dfc7e5487eaca1ab",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep2_r20_rating1/2026-09-12T14-14-33.051912+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 80,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 90.9,
+        "fixed_percentage": 90.9,
+        "questions_not_applicable": 0,
+        "denominator_note": "normalized_percentage = 80/88 x 100; fixed_percentage = 80/88 x 100. No question was excluded, so the two bases coincide and excluded_item_ids is empty."
+      }
+    },
+    {
+      "job_id": "VOICE_v7_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v7_rep3_r10_rating1_evaluation.json",
+      "evaluation_sha256": "109f96773aab98f430ac1fd17ed873fa01aeab133d145b8624515b7d0dbe6bea",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep3_r10_rating1/2026-09-12T14-14-48.740180+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 48,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 96.0,
+        "fixed_percentage": 96.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "normalized_percentage uses adjusted_max_points = 50; fixed_percentage uses max_points = 50. All five applicability conditions are met for this record, so the two bases coincide and no sub-element is excluded."
+      }
+    },
+    {
+      "job_id": "VOICE_v7_rep3_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep3_r20_rating1_evaluation.json",
+      "evaluation_sha256": "565b7751f15d63670ca3479df0fcc4d35c55d360909c2b10c43dcdb4a27f7e4b",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep3_r20_rating1/2026-09-12T14-14-52.504091+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 82,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 93.2,
+        "fixed_percentage": 93.2,
+        "questions_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "VOICE_v8_rep1_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v8_rep1_r10_rating1_evaluation.json",
+      "evaluation_sha256": "8fac08134f0808ba9ff6fa3f59181d9bd6130e71fef30d46c2b1fa36acceef9f",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-26-49.081797+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 47,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 94.0,
+        "fixed_percentage": 94.0,
+        "sub_elements_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "VOICE_v8_rep1_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v8_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "1bce9f23f11a2c0466fab8f729a8374753b40e2d5b6947da46d435770c4f6bc7",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-13-26.050899+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 80,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 90.9,
+        "fixed_percentage": 90.9,
+        "questions_not_applicable": 0,
+        "denominator_note": "normalized_percentage = 80 / 88 (adjusted) x 100; fixed_percentage = 80 / 88 (full rubric) x 100. No question was excluded, so the two bases coincide and excluded_item_ids is empty."
+      }
+    },
+    {
+      "job_id": "VOICE_v8_rep2_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v8_rep2_r10_rating1_evaluation.json",
+      "evaluation_sha256": "ee49eeae5b5cf2b206639ab0f8f891b7107f580586e146c4db0a42aed20a11bb",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep2_r10_rating1/2026-09-12T14-47-53.778431+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 48,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 96.0,
+        "fixed_percentage": 96.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "normalized_percentage uses adjusted_max_points 50; fixed_percentage uses max_points 50. All five applicability conditions are met for this record, so no sub-element is excluded and the two bases coincide. Comparison with a record having a different adjusted maximum or different excluded items is not licensed by either percentage alone."
+      }
+    },
+    {
+      "job_id": "VOICE_v8_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v8_rep2_r20_rating1_evaluation.json",
+      "evaluation_sha256": "471b950d313466fb15aa64ea6e0bd3741ba1ebfc7a07428dd38a3fda3359dd5e",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep2_r20_rating1/2026-09-12T14-47-58.594993+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 81,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 92.0,
+        "fixed_percentage": 92.0,
+        "questions_not_applicable": 0,
+        "denominator_note": "fixed_percentage = 81/88 (full rubric maximum); normalized_percentage = 81/88 (adjusted maximum). All four 'Applies to' trigger conditions are satisfied by this record, so no question is excluded and the two bases coincide. Excluded item identities: none.",
+        "excluded_item_ids": []
+      }
+    },
+    {
+      "job_id": "VOICE_v8_rep3_r10_rating1",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v8_rep3_r10_rating1_evaluation.json",
+      "evaluation_sha256": "8cf8922f7e3037e31c205c54d71926b36a30fa1dec9c6825e823d671dc2d3b15",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep3_r10_rating1/2026-09-12T14-36-38.472626+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 48,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 96.0,
+        "fixed_percentage": 96.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "No sub-element was excluded: all five trigger conditions resolved as met on evidence from elements other than the gated ones. normalized_percentage = 48/50 x 100; fixed_percentage = 48/50 x 100. The two bases coincide because excluded_max_points is 0."
+      }
+    },
+    {
+      "job_id": "VOICE_v8_rep3_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v8_rep3_r20_rating1_evaluation.json",
+      "evaluation_sha256": "d5ca09424a25d287a3a0b0c20f2dd54cc8bc4e36e5d79971e8f7c14b3d5bf8b8",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep3_r20_rating1/2026-09-12T14-48-03.495134+00-00",
+      "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+      "overall_score": {
+        "total_points": 81,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 92.0,
+        "fixed_percentage": 92.0,
+        "questions_not_applicable": 0
+      }
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r10_rating2",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v7_rep1_r10_rating2_evaluation.json",
+      "evaluation_sha256": "6a2dbcd4710221943577b667f8a5ba6009dcdf0f4c2b2347d97822049c92b3f0",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating2/2026-09-12T15-25-37.530014+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 49,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 98.0,
+        "fixed_percentage": 98.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "No sub-element was excluded: all five trigger conditions resolved as satisfied on evidence external to the gated elements, so normalized_percentage (49/50) and fixed_percentage (49/50) share the same denominator."
+      }
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r10_rating3",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v7_rep1_r10_rating3_evaluation.json",
+      "evaluation_sha256": "a6e8be2bf550cf02f909075f1fb762c31f84e6c99d2dcdd9b922a33426333d7a",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating3/2026-09-12T15-26-05.675689+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 49,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 98.0,
+        "fixed_percentage": 98.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "normalized_percentage = 49/50 x 100; fixed_percentage = 49/50 x 100. All five trigger conditions were met, so no sub-element was excluded and the two bases coincide. Comparability to another evaluation still requires the same evaluator model and instrument digest."
+      }
+    },
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating2",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v7_rep1_r10_rating2_evaluation.json",
+      "evaluation_sha256": "4880a5cb2b1adb53fed37aecfeb72475efd28a469e43502b34df9bb6a90d40f5",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T15-26-10.559978+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 36,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 72.0,
+        "fixed_percentage": 72.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "All five trigger conditions are satisfied for this record, so no sub-element is excluded. fixed_percentage = 36/50 x 100 = 72.0; normalized_percentage = 36/50 x 100 = 72.0. The two bases coincide only because excluded_max_points is 0; they remain distinct quantities."
+      }
+    },
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating3",
+      "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v7_rep1_r10_rating3_evaluation.json",
+      "evaluation_sha256": "3158093809733a65e17afe4bb2279cb583748a9b97e8296697f2b5e0ba5cf47a",
+      "original_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating3/2026-09-12T15-26-14.501987+00-00",
+      "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+      "overall_score": {
+        "total_points": 36,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 72.0,
+        "fixed_percentage": 72.0,
+        "sub_elements_not_applicable": 0,
+        "excluded_item_ids": [],
+        "denominator_note": "fixed_percentage = 36/50 x 100 = 72.0; normalized_percentage = 36/50 x 100 = 72.0. All five trigger conditions are satisfied, so no sub-element is excluded and the two bases coincide. This record is comparable only with other records that also exclude nothing, evaluated by the same evaluator model and instrument."
+      }
+    }
+  ],
+  "original_calls": [
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T07-20-00.645660+00-00",
+      "status": "incomplete",
+      "original_error": "AttributeError: 'str' object has no attribute 'get'",
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.2204425000000003,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T08-05-41.050919+00-00",
+      "status": "incomplete",
+      "original_error": "ValueError: output label does not identify this job",
+      "evaluator_validation_succeeded": false,
+      "cli_reported_cost_usd": 2.430136,
+      "accepted_source": false
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T09-04-18.246187+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.1605575,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T09-11-58.143131+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.5336364999999996,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v7_rep2_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T09-24-36.443700+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.341187,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v7_rep2_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T09-24-40.465250+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.205724,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v7_rep3_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T09-24-43.946094+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.2457745000000005,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v7_rep3_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T09-24-48.941270+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.4163765,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v8_rep1_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r10_rating1/2026-09-12T09-34-57.687223+00-00",
+      "status": "incomplete",
+      "original_error": "ValueError: evaluator's two model identity fields disagree",
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.0368945,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v8_rep1_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r20_rating1/2026-09-12T09-35-01.802029+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.3632560000000002,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v8_rep2_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep2_r10_rating1/2026-09-12T09-35-05.428183+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.5155654999999997,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v8_rep2_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep2_r20_rating1/2026-09-12T09-35-09.078994+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.401513,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v8_rep3_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r10_rating1/2026-09-12T10-11-09.605326+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.2877415,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v8_rep3_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep3_r20_rating1/2026-09-12T10-11-13.611621+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.1854294999999997,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CHORUS_v7_rep1_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r20_rating1/2026-09-12T10-11-17.769243+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 1.904518,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CHORUS_v7_rep2_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep2_r10_rating1/2026-09-12T10-11-23.210817+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 1.6174425,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CHORUS_v7_rep2_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep2_r20_rating1/2026-09-12T10-21-22.007907+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 1.9070824999999998,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CHORUS_v7_rep3_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep3_r10_rating1/2026-09-12T10-21-26.301953+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.1119345,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CHORUS_v7_rep3_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep3_r20_rating1/2026-09-12T10-21-30.227209+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 1.997013,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CHORUS_v8_rep1_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r10_rating1/2026-09-12T10-21-34.529106+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.3955450000000003,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CHORUS_v8_rep1_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T10-34-00.487246+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 3.4518935,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CHORUS_v8_rep2_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r10_rating1/2026-09-12T10-34-04.212789+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.3552445,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CHORUS_v8_rep2_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r20_rating1/2026-09-12T10-34-08.427493+00-00",
+      "status": "incomplete",
+      "original_error": "ValueError: evaluator did not successfully validate its exact output",
+      "evaluator_validation_succeeded": false,
+      "cli_reported_cost_usd": 1.9720935,
+      "accepted_source": false
+    },
+    {
+      "job_id": "CHORUS_v8_rep2_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep2_r20_rating1/2026-09-12T11-01-48.594901+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 1.6839029999999997,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CHORUS_v8_rep3_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r10_rating1/2026-09-12T10-34-11.987974+00-00",
+      "status": "incomplete",
+      "original_error": "ValueError: evaluator did not successfully validate its exact output",
+      "evaluator_validation_succeeded": false,
+      "cli_reported_cost_usd": 2.3967120000000004,
+      "accepted_source": false
+    },
+    {
+      "job_id": "CHORUS_v8_rep3_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r10_rating1/2026-09-12T11-13-49.423296+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.351198,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CHORUS_v8_rep3_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v8_rep3_r20_rating1/2026-09-12T12-01-04.480594+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 1.5404755000000003,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CM4AI_v7_rep1_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r10_rating1/2026-09-12T12-01-23.560480+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.4432705000000006,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CM4AI_v7_rep1_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep1_r20_rating1/2026-09-12T12-01-28.560393+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.5399335,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CM4AI_v7_rep2_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep2_r10_rating1/2026-09-12T12-01-32.268119+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.1506075000000004,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CM4AI_v7_rep2_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T12-15-44.372640+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 1.9190405,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CM4AI_v7_rep3_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep3_r10_rating1/2026-09-12T12-15-48.452760+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.268673,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CM4AI_v7_rep3_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v7_rep3_r20_rating1/2026-09-12T12-15-51.905429+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.271923,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CM4AI_v8_rep1_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep1_r10_rating1/2026-09-12T12-16-00.522098+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 1.9107074999999998,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CM4AI_v8_rep1_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep1_r20_rating1/2026-09-12T12-26-07.176275+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 1.7742049999999998,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CM4AI_v8_rep2_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep2_r10_rating1/2026-09-12T12-26-10.913494+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.2124470000000005,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CM4AI_v8_rep2_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep2_r20_rating1/2026-09-12T12-26-16.697843+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 1.8656335000000002,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CM4AI_v8_rep3_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r10_rating1/2026-09-12T12-26-20.307075+00-00",
+      "status": "incomplete",
+      "original_error": "ValueError: evaluator did not successfully validate its exact output",
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.6371214999999997,
+      "accepted_source": false
+    },
+    {
+      "job_id": "CM4AI_v8_rep3_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r10_rating1/2026-09-12T12-42-37.138735+00-00",
+      "status": "incomplete",
+      "original_error": "ValueError: element score or denominator disagrees with its sub-elements",
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.2857509999999994,
+      "accepted_source": false
+    },
+    {
+      "job_id": "CM4AI_v8_rep3_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r10_rating1/2026-09-12T12-53-23.084438+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.1218690000000002,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CM4AI_v8_rep3_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep3_r20_rating1/2026-09-12T13-03-41.815986+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.55373,
+      "accepted_source": true
+    },
+    {
+      "job_id": "VOICE_v7_rep1_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r10_rating1/2026-09-12T13-03-45.829464+00-00",
+      "status": "incomplete",
+      "original_error": "ValueError: evaluator did not successfully validate its exact output",
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.065363,
+      "accepted_source": true
+    },
+    {
+      "job_id": "VOICE_v7_rep1_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep1_r20_rating1/2026-09-12T13-03-49.385118+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.1123735000000003,
+      "accepted_source": true
+    },
+    {
+      "job_id": "VOICE_v7_rep2_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep2_r10_rating1/2026-09-12T13-03-52.871518+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.266309,
+      "accepted_source": true
+    },
+    {
+      "job_id": "VOICE_v7_rep2_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep2_r20_rating1/2026-09-12T14-14-33.051912+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.295639,
+      "accepted_source": true
+    },
+    {
+      "job_id": "VOICE_v7_rep3_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep3_r10_rating1/2026-09-12T14-14-48.740180+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.1087870000000004,
+      "accepted_source": true
+    },
+    {
+      "job_id": "VOICE_v7_rep3_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/VOICE_v7_rep3_r20_rating1/2026-09-12T14-14-52.504091+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 1.936183,
+      "accepted_source": true
+    },
+    {
+      "job_id": "VOICE_v8_rep1_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-14-57.243736+00-00",
+      "status": "incomplete",
+      "original_error": "ValueError: overall score or denominator disagrees with its items",
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 1.903804,
+      "accepted_source": false
+    },
+    {
+      "job_id": "VOICE_v8_rep1_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r10_rating1/2026-09-12T14-26-49.081797+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.1862155,
+      "accepted_source": true
+    },
+    {
+      "job_id": "VOICE_v8_rep1_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T14-47-49.624967+00-00",
+      "status": "incomplete",
+      "original_error": "ValueError: evaluator did not successfully validate its exact output",
+      "evaluator_validation_succeeded": false,
+      "cli_reported_cost_usd": 2.248899,
+      "accepted_source": false
+    },
+    {
+      "job_id": "VOICE_v8_rep1_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-01-34.769807+00-00",
+      "status": "incomplete",
+      "original_error": "ValueError: evaluator did not successfully validate its exact output",
+      "evaluator_validation_succeeded": false,
+      "cli_reported_cost_usd": 1.987858,
+      "accepted_source": false
+    },
+    {
+      "job_id": "VOICE_v8_rep1_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep1_r20_rating1/2026-09-12T15-13-26.050899+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.1655699999999998,
+      "accepted_source": true
+    },
+    {
+      "job_id": "VOICE_v8_rep2_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep2_r10_rating1/2026-09-12T14-47-53.778431+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.0357564999999997,
+      "accepted_source": true
+    },
+    {
+      "job_id": "VOICE_v8_rep2_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep2_r20_rating1/2026-09-12T14-47-58.594993+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.151305,
+      "accepted_source": true
+    },
+    {
+      "job_id": "VOICE_v8_rep3_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep3_r10_rating1/2026-09-12T14-36-38.472626+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.296307,
+      "accepted_source": true
+    },
+    {
+      "job_id": "VOICE_v8_rep3_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-11/attempts/VOICE_v8_rep3_r20_rating1/2026-09-12T14-48-03.495134+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 1.8802905,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r10_rating2",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating2/2026-09-12T15-25-37.530014+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.2066054999999998,
+      "accepted_source": true
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r10_rating3",
+      "source": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v7_rep1_r10_rating3/2026-09-12T15-26-05.675689+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 3.0747824999999995,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating2",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T15-26-10.559978+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.464948,
+      "accepted_source": true
+    },
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating3",
+      "source": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating3/2026-09-12T15-26-14.501987+00-00",
+      "status": "passed",
+      "original_error": null,
+      "evaluator_validation_succeeded": true,
+      "cli_reported_cost_usd": 2.255609,
+      "accepted_source": true
+    }
+  ]
+}
