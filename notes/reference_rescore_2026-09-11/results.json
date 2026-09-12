@@ -1,9 +1,8 @@
 {
-  "reported_at": "2026-09-11T22:38:41.850839+00:00",
-  "completed": 0,
+  "reported_at": "2026-09-12T07:44:05.063677+00:00",
+  "completed": 1,
   "planned": 56,
   "pending": [
-    "CHORUS_v7_rep1_r10_rating1",
     "AI_READI_v7_rep1_r10_rating1",
     "AI_READI_v7_rep1_r20_rating1",
     "AI_READI_v7_rep2_r10_rating1",
@@ -77,11 +76,15 @@
     {
       "project": "CHORUS",
       "rubric": "rubric10-semantic",
-      "ratings": 0,
+      "ratings": 1,
       "expected_ratings": 3,
-      "adjusted_percentages": [],
-      "fixed_percentages": [],
-      "applicability_stable": null,
+      "adjusted_percentages": [
+        70.0
+      ],
+      "fixed_percentages": [
+        70.0
+      ],
+      "applicability_stable": true,
       "adjusted_sample_sd": null,
       "fixed_sample_sd": null,
       "adjusted_range": null,
@@ -155,10 +158,14 @@
       "project": "CHORUS",
       "cohort": "v7",
       "rubric": "rubric10-semantic",
-      "records": 0,
+      "records": 1,
       "expected_records": 3,
-      "adjusted_percentages": [],
-      "fixed_percentages": []
+      "adjusted_percentages": [
+        70.0
+      ],
+      "fixed_percentages": [
+        70.0
+      ]
     },
     {
       "project": "CHORUS",

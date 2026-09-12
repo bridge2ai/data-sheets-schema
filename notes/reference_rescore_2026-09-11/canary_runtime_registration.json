@@ -1,0 +1,21 @@
+{
+  "registered_at": "2026-09-12T07:41:59.738701+00:00",
+  "runner_commit": "6c7b4b43ccf355d11f1b4d6f53cad5bda37ef75f",
+  "previous_manifest_sha256": "127d789d8ed668f20bc364afe2a71f8d18edfe724e1496009e22ad7735e38c79",
+  "manifest_sha256": "78dc05cada5a4905d8eabd2320ebcd0054d83e92d5611de93b4f98fc557f324a",
+  "runner_sha256_before": "80137e8593d6c222a5fc8d23c6511b794d2784974f584269e536b59725027282",
+  "runner_sha256_after": "a483c1da3c4b000405b13723d35b96469958558b733ff484b37fb73bc057ad89",
+  "canary_attempt": "notes/reference_rescore_2026-09-11/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T07-20-00.645660+00-00",
+  "retained_files": {
+    "candidate.json": "017f888bdccf12a04b62917e8fa08c39263cf45a5533fb349ca9eb075335199f",
+    "prompt.txt": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+    "receipt.json": "d8e90326766c61200aa8335ff74a6cbd3a9c83ac3701b9320a24d3da86a6bb48",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "transcript.jsonl": "ad8db7b4221bb40bc2c3a1924047efdf241724be8f13bf5e62d734cee59987a4"
+  },
+  "pinned_files_unchanged_except_runner": true,
+  "prior_evaluations_verified": 202,
+  "complete_canary_prompt_unchanged": true,
+  "focused_checks_passed": 70,
+  "model_calls_during_registration": 0
+}

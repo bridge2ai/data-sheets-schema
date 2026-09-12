@@ -2350,3 +2350,35 @@ the quoted SHA still must be verified in the live canary.
   API-runtime records and the 90 agentic ones under `claudecode_agent`
   keep separate canonicals; migrating the historical labels is a filed
   follow-up, not a corpus rewrite inside this chain.
+
+### Reference canary execution and runner-only recovery (2026-09-12; #1303–#1305)
+
+After the user's request to proceed to canaries, execution approval passed for
+the registered CHORUS v7 rep1 rubric10 session, capped at $5. The evaluator ran
+from 07:20:00Z to 07:28:54Z and returned 35/50 (70.0%) on both bases, with no
+excluded items. Its metadata quotes definition SHA256
+`66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`, and its
+transcript correctly echoes the revised release-history instruction.
+
+The CLI completed successfully, but the runner initially rejected a diagnostic
+message shape (#1303) and then its attested model selector alias (#1304).
+The reviewed recovery also binds the candidate to the original successful Write
+at the actual output path (#1305). The runner-only amendment pins commit
+`6c7b4b43ccf355d11f1b4d6f53cad5bda37ef75f`; the superseded registration and
+original incomplete attempt are retained. Complete evaluator prompts, inputs,
+rubrics, definitions, schemas, budget, and all 202 prior scores are unchanged.
+Offline recovery published the original candidate bytes without another model
+call. The CLI reports $2.2204425 for the single evaluator session.
+
+The exact record is
+`data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml`.
+Review, instrument and input hashes, interpretation limits, and the recovery
+evidence are recorded in
+`notes/reference_rescore_2026-09-11/canary_review_2026-09-12.md` and
+`canary_runtime_registration.json`. Acceptance is recorded separately after
+operator review. Only this existing record has been rated in the reference
+cohort; the other 55 ratings remain pending, and repeatability is unmeasured.
+
+This is an evaluation canary. No D4D regeneration or source download occurred.
+A new `generic_v9` generation condition has a working offline CHORUS plan but
+requires its own generation canary before any new cohort is produced.

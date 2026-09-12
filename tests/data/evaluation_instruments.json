@@ -97,6 +97,16 @@
      "sha256": "70a50310b9ec717981fc089d8fedb20ea8c3ca3b665870f8d1d2d2573c9fccdd",
      "first_seen": "2026-09-11T15:12:31-07:00",
      "commit": "59db6d0f"
+    },
+    {
+     "sha256": "00b2f03d183d8f9105de8dc10346b2ee67d32376830243f1ec19348ceb8528db",
+     "first_seen": "2026-09-11T19:30:01-07:00",
+     "commit": "ed07f695"
+    },
+    {
+     "sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "first_seen": "2026-09-11T19:40:38-07:00",
+     "commit": "f7f235a9"
     }
    ],
    "evaluations": {
@@ -840,6 +850,11 @@
      "recovered_from": "4795ab99",
      "instrument_sha256": "4dd2536f7e131b5f1238cbd1713c6d60d123a6a3ffbe609e17775869c27ca4ac",
      "instrument_commit": "10db82f4"
+    },
+    "reference_2026-09-11/CHORUS_v7_rep1_r10_rating1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+     "instrument_commit": "f7f235a9"
     }
    }
   },

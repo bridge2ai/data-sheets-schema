@@ -1,0 +1,749 @@
+{
+  "rubric": "rubric10-semantic",
+  "version": "1.2",
+  "d4d_file": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml",
+  "project": "CHORUS",
+  "method": "claudecode_agent",
+  "label": "2026-09-01_claude-opus-5-api-generic-v7_rep1",
+  "evaluation_timestamp": "2026-09-12T00:25:00Z",
+  "model": {
+    "name": "claude-opus-5[1m]",
+    "evaluator_model": "claude-opus-5[1m]",
+    "temperature": null,
+    "temperature_note": "Not exposed by this runtime; no deterministic-score guarantee",
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "applicability_conditions": {
+    "human_subjects": {
+      "status": "met",
+      "evidence": "E1 description: 'multicenter, multimodal, high-resolution, controlled-access dataset of acute and critical care hospital admissions'; '50,000 patient admissions from ICU, PICU, and NICU settings'. E1 keywords include 'critical care', 'electronic health record', 'clinical notes'. E8 collection_mechanisms describe extraction from hospital EHR/PACS/EEG systems for patient admissions.",
+      "gates": "Element 4, all five sub-elements"
+    },
+    "governance_restrictions": {
+      "status": "met",
+      "evidence": "E2 regulatory_restrictions.confidentiality_level: 'restricted'; regulatory_restrictions states 'Access to all data modalities is controlled and conditional on a signed licensing agreement' — an applying constraint, not a record that none applies.",
+      "gates": "Element 4 sub-elements 1-2 (already opened by the human-subjects condition)"
+    },
+    "datasets_shared": {
+      "status": "met",
+      "evidence": "distribution_formats populated with five modality-specific entries (OMOP CDM tables, OHNLP schema, DICOM, WFDB, EDF+/Persyst); third_party_sharing.is_shared: true with 'made available to users outside the contributing hospitals under controlled access ... after a licensing agreement is signed'. Access requires approval, which the ambiguity rule resolves toward applicable.",
+      "gates": "Element 3 sub-elements 1-4, Element 6 (all), Element 8 (all), Element 10 (all)"
+    },
+    "software_output": {
+      "status": "met",
+      "evidence": "E10 external_resources: 'https://github.com/chorus-ai - the CHoRUS GitHub organization, housing 28 repositories of software and tooling for clinical data, validated semantic mappings, standard operating protocols'.",
+      "gates": "Element 8 sub-element 3"
+    },
+    "collection_and_shared": {
+      "status": "met",
+      "evidence": "acquisition_methods (5 entries) and collection_mechanisms (5 entries) are populated, and the datasets-shared condition above is met.",
+      "gates": "Element 8 sub-elements 1-2"
+    }
+  },
+  "semantic_analysis": {
+    "issues_detected": [
+      {
+        "type": "consistency",
+        "severity": "high",
+        "description": "human_subject_research.involves_human_subjects=true for a cohort of 50,000 critically ill hospital admissions including PICU and NICU patients, but no IRB, ethics committee, waiver, or approval identifier is named anywhere. The record's own ethical_reviews.source_caveats concedes: 'The bundle names no IRB, ethics committee, or approval identifier, and does not state that any body performed a formal ethical review of the dataset.'",
+        "fields_involved": ["human_subject_research", "ethical_reviews", "data_protection_impacts"],
+        "recommendation": "Add ethical_reviews entries naming the reviewing IRB(s) of record for the data acquisition sites, the approval or waiver-of-consent determination numbers, and whether a single-IRB reliance agreement governs the 14 contributing hospitals."
+      },
+      {
+        "type": "consistency",
+        "severity": "high",
+        "description": "involves_human_subjects=true but the informed_consent field is entirely absent. For retrospective EHR extraction a waiver of consent is the expected disposition, yet neither a waiver nor any consent procedure is documented, leaving the legal basis for the release unstated.",
+        "fields_involved": ["human_subject_research", "informed_consent"],
+        "recommendation": "Add informed_consent documenting the waiver of informed consent (or HIPAA authorization waiver) obtained for retrospective extraction, the approving body, and any site-level variation."
+      },
+      {
+        "type": "correctness",
+        "severity": "high",
+        "description": "A dataset described as released and shared under a licensing agreement carries no DOI, no version identifier, and no recommended citation. The record acknowledges this: 'The bundle gives no release date, DOI, version identifier, or recommended citation for the dataset.' A shared dataset that cannot be cited or version-pinned cannot support reproducible reuse.",
+        "fields_involved": ["doi", "version", "citation", "version_access"],
+        "recommendation": "Mint a DOI for the current release, assign a version string to the 50,000-admission build, and publish a recommended citation and version access policy."
+      },
+      {
+        "type": "correctness",
+        "severity": "medium",
+        "description": "The only identifier is id: 'https://chorus4ai.org/#dataset', a fragment on the project's own web domain. This is a resolvable URI but not a persistent identifier issued by a registrar (no DOI 10.XXXX/... pattern, no RRID:SCR_/AB_ pattern, no ARK or Handle), so it carries no persistence guarantee independent of the project website.",
+        "fields_involved": ["id", "doi"],
+        "recommendation": "Register a DOI (e.g. through DataCite via the hosting institution) and, if applicable, an RRID, and record them alongside the existing URI."
+      },
+      {
+        "type": "consistency",
+        "severity": "medium",
+        "description": "confidentiality_level is 'restricted' and the dataset consists of US hospital PHI, but regulatory_restrictions records no hipaa_compliant status and no other_compliance frameworks. HIPAA is the governing framework for this data type and its status is left unstated.",
+        "fields_involved": ["regulatory_restrictions", "regulatory_restrictions.confidentiality_level"],
+        "recommendation": "State the HIPAA compliance status of the release (limited data set vs de-identified under Safe Harbor or Expert Determination) and any state-level frameworks that apply to contributing sites."
+      },
+      {
+        "type": "content_accuracy",
+        "severity": "medium",
+        "description": "is_deidentified.method describes concrete techniques (OHNLP tokenization, local note retention, image de-identification, 'transformation ... using approaches that limit re-identification') but names no de-identification standard and, per its own caveat, 'does not state whether identifiable elements remain present in the released dataset'. For PHI this leaves the deidentification claim unverifiable against a standard.",
+        "fields_involved": ["is_deidentified", "is_deidentified.method"],
+        "recommendation": "State whether the release is de-identified under HIPAA Safe Harbor, Expert Determination, or is a limited data set retaining dates and geography, and list the identifier categories removed or retained per modality."
+      },
+      {
+        "type": "consistency",
+        "severity": "medium",
+        "description": "participant_privacy.reidentification_risk restates mitigation ('transforms data using approaches that limit re-identification') rather than assessing residual risk, and no data_protection_impacts assessment accompanies a restricted-confidentiality PHI release that includes waveforms, imaging, and geocoded location.",
+        "fields_involved": ["participant_privacy.reidentification_risk", "data_protection_impacts"],
+        "recommendation": "Add an explicit residual re-identification risk assessment (including the high-dimensional waveform, imaging, and geocoded-location modalities) and a data protection impact assessment."
+      },
+      {
+        "type": "completeness",
+        "severity": "medium",
+        "description": "No variables field is present. For a release of 1.6 billion OMOP rows plus flowsheet extensions, no variable-level metadata or data dictionary is provided; OMOP CDM conformance is asserted but the extensions used for nursing flowsheets are not specified at the field level.",
+        "fields_involved": ["variables", "conforms_to"],
+        "recommendation": "Publish a data dictionary or variable manifest, including the OMOP extension tables and columns used for high-frequency nursing flowsheet documentation."
+      },
+      {
+        "type": "completeness",
+        "severity": "medium",
+        "description": "No anomalies and no missing_data_documentation are recorded. Missingness is the dominant quality concern for multi-site retrospective EHR and telemetry data (gaps in waveform capture, uneven flowsheet documentation), and none is characterized. sampling_strategies is partly forward-looking ('Federated access will enable sampling methods') rather than descriptive of the released build.",
+        "fields_involved": ["anomalies", "missing_data_documentation", "sampling_strategies"],
+        "recommendation": "Document known anomalies (telemetry dropouts, site-specific coding artifacts) and missing-data patterns per modality and site, and distinguish realized sampling from planned federated sampling."
+      },
+      {
+        "type": "content_accuracy",
+        "severity": "medium",
+        "description": "Two sources disagree on dataset scale and the record transparently preserves the conflict without resolving it: 50,000 admissions (tier-2 website) versus 'over 45K unique admissions' as of August 2025 (tier-4 webinar), and 7,642 admissions with radiology data versus 1000 images available. The imaging figures are also in incommensurable units.",
+        "fields_involved": ["instances", "source_caveats", "known_limitations"],
+        "recommendation": "Record a dated, single-source-of-truth count per modality for the current release, with the as-of date attached to each figure."
+      },
+      {
+        "type": "correctness",
+        "severity": "medium",
+        "description": "The maintainer contact email is reproduced as 'cmccrary@mgh.havard.edu'; the domain appears misspelled ('havard' for 'harvard') and the address as published is unusable. The record flags this as a source typo rather than correcting it.",
+        "fields_involved": ["maintainers"],
+        "recommendation": "Verify and correct the program manager contact address, or supply a verified institutional alias for maintenance contact."
+      },
+      {
+        "type": "correctness",
+        "severity": "low",
+        "description": "An external resource is recorded as 'www.bridge2ai.org/chorus' without a URL scheme, so it is not a resolvable URI as written.",
+        "fields_involved": ["external_resources"],
+        "recommendation": "Record the resource with an https:// scheme."
+      },
+      {
+        "type": "semantic_understanding",
+        "severity": "medium",
+        "description": "collection_timeframes gives the NIH award period (2022-09-01 to 2026-11-30) rather than the clinical period the admissions are drawn from. The record itself notes the substitution; the temporal coverage of the retrospective data therefore remains unknown, which bears directly on drift and practice-pattern interpretation.",
+        "fields_involved": ["collection_timeframes"],
+        "recommendation": "State the admission date range covered by the extracted clinical data, separately from the funding period."
+      },
+      {
+        "type": "semantic_understanding",
+        "severity": "low",
+        "description": "A single OTHER term in conforms_to_standard stands for three distinct standards (EDF+, Persyst, OHNLP schema), and the WFDB entry covers a schema the source describes as extended rather than plain WFDB. The enumerated conformance is therefore coarser than the prose conforms_to statement.",
+        "fields_involved": ["conforms_to_standard", "conforms_to"],
+        "recommendation": "Where the enum cannot express a standard, pair each OTHER entry with a named free-text qualifier so conformance stays machine-readable."
+      },
+      {
+        "type": "completeness",
+        "severity": "medium",
+        "description": "No publisher is recorded and no repository or enclave link is given. The data reside in an unnamed 'cloud enclave' / Bridge2AI Clinical Care Cloud reachable only by emailing two individuals, so there is no platform record binding the dataset to a recognized archive.",
+        "fields_involved": ["publisher", "download_url"],
+        "recommendation": "Name the hosting platform or enclave and give its access portal URL, alongside the existing email request route."
+      }
+    ],
+    "semantic_insights": [
+      "The description is unusually specific and internally coherent: nine named modalities are each tied to a source system (EHR, PACS, bedside monitors/gateway, hospital EEG databases) and to a release format (OMOP CDM, DICOM, WFDB, EDF+/Persyst, OHNLP tokens), and distribution_formats, conforms_to, acquisition_methods, and raw_data_sources all agree on that mapping.",
+      "Grant number OT2OD032701 matches the NIH pattern [activity code OT2][institute OD][serial 032701], and the funder block independently corroborates it with project number 1OT2OD032701-01, application ID 10472824, award amount, awardee institution, and project period 2022-09-01 to 2026-11-30 — a rare level of funding verifiability.",
+      "The site-wide funding statement quoted in notes ('funded by the NIH under award number OT2OD032701') matches the funders block, so the award identifier is consistent across two independent source locations.",
+      "Processing-role software is named concretely rather than gestured at: the OHNLP toolkit tokenizes the released note artifacts, DeGauss/UF-Geocoding geocodes OMOP Location entities, chorus_waveform conversion scripts produce the released WFDB and EDF+ waveforms, and CTP-deid and privacy_scan_tool perform de-identification — all transformations of the distributed data, not merely capture or hosting.",
+      "The record is disciplined about provenance of its own claims: source_caveats at the dataset, creator, instance, timeframe, governance, and deidentification levels distinguish tier-2 website figures from tier-4 webinar figures and mark where the bundle is silent rather than inventing content.",
+      "Limitations are substantive and modality-specific rather than generic — uneven modality readiness with an August 2025 date, the partial 50,000-of-100,000 build, the fact that raw narrative text is never centralized, and the academic-center case-mix constraint of 14 contributing hospitals.",
+      "The clinical-notes architecture is described with the precision a reuser needs: notes remain local at contributing sites and only OHNLP tokens are centralized, which is consistently reflected in raw_data_sources.access_details, confidential_elements, participant_privacy, and the integration_limitation entry.",
+      "Temporal claims are internally consistent: the August 2025 readiness snapshot falls inside the 2022-09-01 to 2026-11-30 award period, and the 'partially released' status agrees with the in-process imaging de-identification and EEG extraction.",
+      "A sequestered holdout test set is documented in splits and is coherently linked to the external-validation intended use and to future_use_impacts — split documentation of a kind most datasheets omit."
+    ],
+    "consistency_checks": {
+      "passed": 15,
+      "failed": 4,
+      "warnings": 5
+    },
+    "correctness_validations": {
+      "doi_format": "not_present",
+      "grant_number_format": "valid_nih",
+      "rrid_format": "not_present",
+      "url_validity": "some_invalid",
+      "identifier_persistence": "non_persistent_uri",
+      "temporal_consistency": "valid",
+      "version_identifier": "not_present"
+    }
+  },
+  "overall_score": {
+    "total_points": 35,
+    "max_points": 50,
+    "excluded_max_points": 0,
+    "adjusted_max_points": 50,
+    "normalized_percentage": 70.0,
+    "fixed_percentage": 70.0,
+    "sub_elements_not_applicable": 0,
+    "excluded_item_ids": [],
+    "denominator_note": "All five trigger conditions resolved as met, so no sub-element is excluded. normalized_percentage = 35/50; fixed_percentage = 35/50. The two bases coincide only because nothing was excluded."
+  },
+  "elements": [
+    {
+      "id": 1,
+      "name": "Dataset Discovery and Identification",
+      "description": "Can a user or system discover and uniquely identify this dataset?",
+      "sub_elements": [
+        {
+          "name": "Persistent Identifier (DOI, RRID, or URI)",
+          "score": 0,
+          "evidence": "id: https://chorus4ai.org/#dataset. No doi field. source_caveats: 'The bundle gives no release date, DOI, version identifier, or recommended citation for the dataset.'",
+          "quality_note": "The sole identifier is a fragment URI on the project's own website. It resolves today but carries no registrar-backed persistence, no version binding, and nothing that survives a site reorganisation — the banner in notes announcing that the repository is 'under review for potential modification' makes that fragility concrete rather than theoretical.",
+          "semantic_validation": "DOI pattern 10.XXXX/... : absent. RRID pattern RRID:SCR_/AB_ : absent. ARK/Handle: absent. The URI is syntactically valid but fails the persistence test the sub-element exists to check."
+        },
+        {
+          "name": "Dataset Title and Description Completeness",
+          "score": 1,
+          "evidence": "title: 'Bridge2AI: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI'; description ~1,900 characters naming 14 contributing hospitals of 20 academic centers, nine modalities, per-modality standards (OMOP, OHNLP, DICOM, WFDB, EDF+/Persyst), 50,000 admissions, 1.6 billion OMOP rows, 7,642 admissions with radiology, 23 Tb of waveform data, and the holdout test set.",
+          "quality_note": "Far beyond the 200-character threshold and, more importantly, dense with specifics a reuser can act on: which modality is in which format, which are still in process as of August 2025, and where clinical notes physically reside. Title identifies both the program and the consortium.",
+          "semantic_validation": "Description content is semantically consistent with keywords, distribution_formats, instances, and acquisition_methods; no claim in it contradicts a structured field."
+        },
+        {
+          "name": "Keywords or Tags for Searchability",
+          "score": 1,
+          "evidence": "keywords: critical care; acute illness; critical illness; electronic health record; OMOP Common Data Model; waveform telemetry; electroencephalography; imaging; clinical notes; social determinants of health; multimodality; AI-ready data set; Bridge2AI (13 terms).",
+          "quality_note": "Well above the five-term bar and spread across the axes a searcher would use: clinical domain, modality, standard, data property, and funding program. 'Bridge2AI' correctly situates the dataset in its program without relying on filename or external context.",
+          "semantic_validation": "Every keyword is corroborated by content elsewhere in the record; none is aspirational or unsupported."
+        },
+        {
+          "name": "Landing Page and Resources (page, hierarchical resources)",
+          "score": 1,
+          "evidence": "page: https://chorus4ai.org/ ; external_resources describes it as 'the public-facing CHoRUS project webpage, with pages on the team, project overview, tools, data acquisition, standards, community engagement, ethics, the dataset, and learning resources'.",
+          "quality_note": "A real landing page with an enumerated site structure, so a reader knows what they will find there. No nested resources block, but the page alone satisfies the sub-element.",
+          "semantic_validation": "URL well-formed with scheme and plausible project domain. Noted caveat: notes records a site-wide banner about the repository being under review for modification, which bears on durability."
+        },
+        {
+          "name": "Hierarchical Structure (parent datasets, relationships)",
+          "score": 0,
+          "evidence": "No parent_datasets field. No related_datasets field. The description situates CHoRUS as 'one of four data generation projects in the NIH Common Fund's Bridge2AI program' but no dataset-level relationship is expressed.",
+          "quality_note": "The three sibling Bridge2AI data generation projects, the per-site contributions from 14 hospitals, and the sequestered holdout set are all natural parent/child or typed relationships, and none is recorded. A consumer cannot traverse from this record to any other dataset.",
+          "semantic_validation": "Prose programme membership is not a typed dataset relationship; scored on the structured relationship fields, which are absent."
+        }
+      ],
+      "element_score": 3,
+      "element_max": 5
+    },
+    {
+      "id": 2,
+      "name": "Dataset Access and Retrieval",
+      "description": "Can the dataset and its associated resources be located, accessed, and downloaded?",
+      "sub_elements": [
+        {
+          "name": "Access Policy and IP Restrictions Defined",
+          "score": 1,
+          "evidence": "license_and_use_terms.license_terms: 'Every data modality is released under controlled access rather than an open license. Users must sign a licensing agreement before gaining access to the dataset, and access through the AIM-AHEAD training program additionally requires a \".edu\" email address.' notes clarifies that 'The MIT License stated for the chorus-ai GitHub organization, and the Apache-2.0 license shown on some individual repositories such as Chorus_SOP, govern the CHoRUS software repositories and not the dataset itself.'",
+          "quality_note": "A clear and unambiguous access policy, and the explicit disambiguation of software licences from data terms is precisely the confusion this field usually leaves unresolved. The terms of the signed agreement itself are not reproduced, which limits how much a prospective user can evaluate in advance.",
+          "semantic_validation": "Consistent with confidentiality_level 'restricted', with third_party_sharing.is_shared true under controlled access, and with confidential_elements — no field claims openness anywhere."
+        },
+        {
+          "name": "Regulatory Compliance and Confidentiality Classification",
+          "score": 1,
+          "evidence": "regulatory_restrictions.confidentiality_level: restricted; regulatory_restrictions: 'Access to all data modalities is controlled and conditional on a signed licensing agreement' and 'The project establishes a legal framework for collecting data at scale and analyzes the existing legal and regulatory landscape to manage privacy and bias'. data_governance.committee_contact: Jared Houghtaling.",
+          "quality_note": "Sensitivity classification is explicit and a named governance contact is supplied. The second restriction entry is programmatic rather than a binding constraint, and HIPAA status — the framework that actually governs this data — is never stated, so the classification is present but not complete.",
+          "semantic_validation": "hipaa_compliant and other_compliance are absent despite US hospital PHI; recorded as a medium-severity warning rather than a failure, since confidentiality_level plus a governance contact meet the sub-element's core requirement."
+        },
+        {
+          "name": "Download URL or Platform Link Available",
+          "score": 1,
+          "evidence": "No download_url field. data_governance.access_review_process: 'General route: requests for access are directed to dbold@emory.edu or jared.houghtaling@tuftsmedicine.org. Training-program route: participants ... complete a registration form with name, email, and institution and must sign a licensing agreement included in the registration form before gaining access to the dataset; once access is granted and compute is provisioned, an email is sent.'",
+          "quality_note": "Credited on the sub-element's explicit alternative of platform access instructions. Two distinct, named routes with responsible contacts, prerequisites, and the provisioning sequence give a user an actionable path to the data, which is what a controlled-access dataset can offer in place of a download link. It falls short of a link: the enclave hosting the data is never named with a URL, and there is no portal a user can reach unaided.",
+          "semantic_validation": "Access route is consistent with license_and_use_terms and third_party_sharing. Weakness recorded separately as a completeness issue against publisher/download_url."
+        },
+        {
+          "name": "Distribution Formats and File Types Specified",
+          "score": 1,
+          "evidence": "distribution_formats: 'OMOP Common Data Model tables' (with extensions for nursing flowsheets), 'OHNLP open source schema' (tokenized notes), 'DICOM' (imaging from PACS), 'WFDB' (telemetry, 'a PhysioNet schema extended'), 'EDF+ and Persyst' (EEG).",
+          "quality_note": "Five entries, each naming a specific domain-standard format and stating which modality it carries — a reuser can tell in advance what tooling each modality will require. No media types or encodings are given, but the formats themselves are unambiguous.",
+          "semantic_validation": "Formats match acquisition_methods and raw_data_sources per modality with no contradiction; the flagged qualifiers ('extended', OHNLP schema) are candidly marked rather than glossed."
+        },
+        {
+          "name": "Related Datasets and External Resources Linked",
+          "score": 1,
+          "evidence": "external_resources: https://chorus4ai.org/ (project webpage with enumerated sections); https://github.com/chorus-ai ('28 repositories of software and tooling for clinical data, validated semantic mappings, standard operating protocols for data contributing sites'); https://reporter.nih.gov/project-details/10472824 (NIH RePORTER record for OT2OD032701); www.bridge2ai.org/chorus.",
+          "quality_note": "Four distinct and substantive resources covering documentation, code, and funding provenance, each with a description of what it contains rather than a bare URL. related_datasets is absent, but the field set is satisfied by external_resources.",
+          "semantic_validation": "Three of four URLs well-formed; the fourth lacks a scheme and is recorded as a low-severity correctness issue. The RePORTER link resolves to the same award ID given in funders."
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 3,
+      "name": "Data Reuse and Interoperability",
+      "description": "Is sufficient information provided to reuse and integrate the dataset with others?",
+      "sub_elements": [
+        {
+          "name": "License Terms Allow Reuse",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met: distribution_formats populated with five modality-specific entries and third_party_sharing.is_shared true ('made available to users outside the contributing hospitals under controlled access ... after a licensing agreement is signed').",
+          "score": 1,
+          "evidence": "license_and_use_terms.license_terms: controlled access rather than an open licence, signed licensing agreement required, '.edu' email required for the training-program route; notes separates the MIT/Apache-2.0 software licences from the data terms.",
+          "quality_note": "Reuse is permitted and the conditions on it are stated plainly enough for a prospective reuser to judge whether they qualify. What is missing is the content of the agreement: no named licence instrument, no statement of permitted downstream uses, redistribution, or publication conditions, so the terms are knowable only after signing.",
+          "semantic_validation": "Consistent with regulatory_restrictions and confidential_elements; the restrictiveness of the licence matches the sensitivity of the PHI it governs, so no over- or under-claiming is detected."
+        },
+        {
+          "name": "Data Formats Are Standardized (encoding, format)",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met (see sub-element 1).",
+          "score": 1,
+          "evidence": "distribution_formats entries name OMOP CDM tables, OHNLP open source schema, DICOM, WFDB, EDF+ and Persyst; conforms_to elaborates 'imaging conforms to DICOM; waveform telemetry conforms to WFDB ... EEG conforms to EDF+ and Persyst'.",
+          "quality_note": "Every modality is released in the recognised community standard for that modality, which is the strongest possible answer to this sub-element. Character encoding is never stated and the OMOP extensions for nursing flowsheets are not specified, so byte-level interoperability still requires contact with the project.",
+          "semantic_validation": "Formats are semantically appropriate to their data types (DICOM for PACS imaging, WFDB for physiologic waveforms, EDF+/Persyst for EEG); no mismatch between claimed format and modality."
+        },
+        {
+          "name": "Schema or Ontology Conformance Stated",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met (see sub-element 1).",
+          "score": 1,
+          "evidence": "conforms_to: 'Structured EHR data conform to the OMOP Common Data Model (with extensions for nursing flowsheets); imaging conforms to DICOM; waveform telemetry conforms to WFDB ... tokenized clinical notes conform to the OHNLP open source schema.' conforms_to_standard: [OMOP_CDM, DICOM, WFDB, OTHER]; conforms_to_schema: https://w3id.org/bridge2ai/data-sheets-schema; conforms_to_class: Dataset.",
+          "quality_note": "Conformance is stated both in prose and as enumerated terms, and the record is honest about where the enumeration is lossy. OMOP conformance in particular makes the structured EHR portion integrable with the wider OHDSI ecosystem without bespoke mapping.",
+          "semantic_validation": "One OTHER term standing for three standards (EDF+, Persyst, OHNLP) is a machine-readability loss recorded as a low-severity issue; the prose statement is unambiguous, so the sub-element's purpose is met."
+        },
+        {
+          "name": "Variable Metadata with Identifiers Defined",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met (see sub-element 1); applicability rests on E2 distribution and E1 description evidence, not on the absence of this sub-element's own field.",
+          "score": 0,
+          "evidence": "No variables field anywhere in the record. instances entries carry data_substrate and data_topic ontology codes (B2AI_SUBSTRATE:37, B2AI_TOPIC:9, and so on) but these classify whole modalities, not variables.",
+          "quality_note": "For 1.6 billion OMOP rows plus nursing-flowsheet extensions, no data dictionary, column list, or variable identifier is provided. OMOP conformance defines the base tables by reference, but the extensions the record itself flags as non-standard are exactly where a reuser needs variable-level documentation and gets none.",
+          "semantic_validation": "The substrate/topic codes are valid ontology references but operate at the wrong granularity to satisfy variable-level metadata."
+        },
+        {
+          "name": "Use Guidance Provided (intended, prohibited uses)",
+          "score": 1,
+          "evidence": "intended_uses: three categories — ML/AI model development for acute and critical care (with examples 'Prediction of complications and deterioration in critically ill patients', 'Measurement of treatment response'), external validation against the holdout set, and training/workforce development within the Bridge2AI Clinical Care Collaborative Cloud. existing_uses records training activities and the AIM-AHEAD Cohort 2 programme for up to 30 trainees.",
+          "quality_note": "Intended uses are specific, categorised, and illustrated with concrete tasks, and existing_uses corroborates them with an actual programme. prohibited_uses and discouraged_uses are both absent, which for a controlled-access PHI dataset is a real gap — re-identification attempts and clinical deployment without validation are the obvious prohibitions and neither is stated.",
+          "semantic_validation": "intended_uses align with tasks and purposes; the external-validation use is consistent with the holdout set documented in splits."
+        }
+      ],
+      "element_score": 4,
+      "element_max": 5
+    },
+    {
+      "id": 4,
+      "name": "Ethical Use and Privacy Safeguards",
+      "description": "Does the dataset provide clear information about consent, privacy, and ethical oversight?",
+      "sub_elements": [
+        {
+          "name": "IRB or Ethics Review and Data Protection Impact",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Human-subjects condition met on E1 evidence: description states the dataset comprises 'acute and critical care hospital admissions' and '50,000 patient admissions from ICU, PICU, and NICU settings'; keywords include 'critical care' and 'electronic health record'. The governance condition is independently met on E2 evidence (confidentiality_level 'restricted'; access conditional on a signed licensing agreement).",
+          "score": 0,
+          "evidence": "ethical_reviews lists two entries with reviewing_organization 'CHoRUS consortium', describing 'community-facing ethics focus groups to determine what data is appropriate for public sharing' and patient-focused work on 'the ethical and legal approaches used to manage privacy and bias'. Its own source_caveats states: 'The bundle names no IRB, ethics committee, or approval identifier, and does not state that any body performed a formal ethical review of the dataset.' human_subject_research.source_caveats repeats: 'The bundle names no IRB, ethics review board, or approval number.' No data_protection_impacts field.",
+          "quality_note": "What is documented is ethics research activity conducted by the project, not oversight of this dataset. A reuser cannot learn which body approved the retrospective extraction of 50,000 admissions from 14 hospitals, under what determination, or whether a single-IRB reliance arrangement covers the sites. data_governance.committee_contact names an individual, but the record explicitly declines to claim he chairs or sits on any access body. The sub-element's purpose — evidence of oversight — is unmet.",
+          "semantic_validation": "Consistency check FAILED: involves_human_subjects=true requires ethics oversight to be populated, and the content present does not constitute oversight. The record is candid about the gap rather than concealing it, which affects the recommendation but not the score."
+        },
+        {
+          "name": "Deidentification Method Described",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Human-subjects condition met on E1 description and keywords (see sub-element 1); governance condition independently met on E2 regulatory_restrictions and confidentiality_level 'restricted'.",
+          "score": 1,
+          "evidence": "is_deidentified.method: 'Tokenization of unstructured electronic health record text using the OHNLP toolkit, retention of clinical notes at the local site with only tokens released, de-identification of imaging (in process for the larger cohort as of August 2025), and transformation of data using approaches that limit re-identification.' deidentification_details adds that 1000 images were available with de-identification in process for a larger cohort as of August 2025.",
+          "quality_note": "Method is described per modality with named mechanisms and named tooling (OHNLP tokenization, local note retention, imaging de-identification, and the CTP-deid and privacy_scan_tool components recorded under participant_privacy), which is well past boilerplate and tells a reuser what was actually done to each data type. It stops short of a named standard, and its own caveat concedes it 'does not state whether identifiable elements remain present in the released dataset' — recorded as a medium-severity content-accuracy issue rather than a failure, since concrete per-modality methods are present.",
+          "semantic_validation": "Methods are appropriate to their data types: tokenization for free text, local retention for the un-releasable narrative, DICOM de-identification for imaging. Absence of a Safe Harbor / Expert Determination designation for PHI is flagged."
+        },
+        {
+          "name": "Privacy Protections and Re-identification Risk Assessment",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Human-subjects condition met on E1 evidence (description: 'acute and critical care hospital admissions', 'ICU, PICU, and NICU settings'; keywords 'critical care', 'clinical notes') and on E8 collection_mechanisms describing extraction of patient records from hospital EHR, PACS, and EEG systems. Participants exist, so the sub-element has a subject matter.",
+          "score": 1,
+          "evidence": "participant_privacy.privacy_techniques: 'Tokenization of unstructured EHR text; Local retention of clinical notes at contributing sites, with only tokens centralized; A privacy scan tool for medical records, maintained in the privacy_scan_tool repository; A de-identification component maintained in the CTP-deid repository'. reidentification_risk: 'The project transforms data using approaches that limit re-identification, and patient-focused ethics and legal work determines the approaches used to manage privacy.'",
+          "quality_note": "Four concrete protections, two of them tied to named code repositories a reuser could inspect, and the architectural decision to never centralise raw notes is a substantive privacy control rather than a claim. The explicit risk assessment half of the sub-element is not met: reidentification_risk restates mitigation instead of assessing residual risk, and says nothing about the high-dimensional waveform, imaging, and geocoded-location modalities that carry the greatest re-identification exposure.",
+          "semantic_validation": "Consistency warning: data_protection_impacts is absent despite restricted-confidentiality PHI, and the record's own caveat notes CTP-deid is listed 'without a description'. Scored 1 because protections and mitigations — the bulk of the look-for — are specific and verifiable."
+        },
+        {
+          "name": "Informed Consent Obtained from Participants",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Human-subjects condition met on E1 description and keywords and on E8 collection_mechanisms (extraction of patient records from hospital systems). Applicability determined from E1/E8 fields, not from the absence of informed_consent itself.",
+          "score": 0,
+          "evidence": "No informed_consent field. direct_collection.is_direct: false, 'clinical data are extracted from hospital clinical systems ... at data contributing sites rather than gathered directly from patients for research purposes'. human_subject_research.involves_human_subjects: true with no consent or waiver recorded.",
+          "quality_note": "Retrospective extraction would ordinarily proceed under a waiver of informed consent and HIPAA authorization, and that is very likely what happened — but nothing in the record says so. Neither a consent procedure, a waiver, the body that granted it, nor any site-level variation is documented, so the legal basis on which 50,000 patients' records including neonatal and pediatric ICU admissions were assembled is entirely unstated.",
+          "semantic_validation": "Consistency check FAILED: involves_human_subjects=true with no consent documentation of any kind, not even a negative determination."
+        },
+        {
+          "name": "Vulnerable Populations and Compensation Documented",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Human-subjects condition met on E1 evidence (description names ICU, PICU, and NICU admissions) and E8 collection_mechanisms; participants exist, and the record itself identifies special populations among them.",
+          "score": 0,
+          "evidence": "No at_risk_populations field and no participant_compensation field. human_subject_research.special_populations records: 'The cohort consists of acutely and critically ill hospital patients, and the released admissions include pediatric intensive care (PICU) and neonatal intensive care (NICU) patients.'",
+          "quality_note": "Credited by content rather than slot, the special_populations entry does identify the vulnerable groups, and identifying neonates, children, and critically ill adults who cannot consent is genuinely informative. But the sub-element asks for protections and compensation, and neither appears: no additional safeguards for pediatric or neonatal records, no assent or parental-permission arrangements, no statement that compensation is inapplicable to retrospective extraction. Identification without safeguards leaves the sub-element's purpose unmet.",
+          "semantic_validation": "Cross-check: PICU/NICU inclusion is corroborated by the description and subpopulations, so the vulnerability is real and consistently reported; what is missing is the protective response to it."
+        }
+      ],
+      "element_score": 2,
+      "element_max": 5
+    },
+    {
+      "id": 5,
+      "name": "Data Composition and Structure",
+      "description": "Can the dataset's structure, modality, and population be understood from metadata?",
+      "sub_elements": [
+        {
+          "name": "Cohort or Subpopulations Characteristics Described",
+          "score": 1,
+          "evidence": "subpopulations: 'Admissions in the current release are drawn from adult intensive care (ICU), pediatric intensive care (PICU), and neonatal intensive care (NICU) settings' and 'Demographics are captured as one of the nine data modalities and standardized to the OMOP Common Data Model; social determinants of health and contextual factors such as geographic distance to the nearest hospital are acquired alongside them.'",
+          "quality_note": "The cohort is defined by care setting across three distinct age strata, which is the operative cohort definition for critical care data, and the record states that SDOH and geographic context travel with the demographics. What is absent is any distribution: no counts or proportions by age, sex, race, or site, and no inclusion/exclusion criteria, so a reuser can tell who is in scope but not in what proportion.",
+          "semantic_validation": "Consistent with human_subject_research.special_populations and with the description's 'ICU, PICU, and NICU settings'; no conflicting cohort statement anywhere."
+        },
+        {
+          "name": "Number of Instances or Samples Reported",
+          "score": 1,
+          "evidence": "instances: 'Patient admission from ICU, PICU, and NICU' counts 50000; 'Row of EHR data in the OMOP Common Data Model' counts 1600000000; 'Admission with radiology data' counts 7642; waveform telemetry with note '23 Tb of waveform data'; plus EEG waveform and tokenized clinical note entries.",
+          "quality_note": "Counts are given per instance type with units, at several orders of magnitude, and each contested figure carries a source_caveats entry naming the conflicting source and explaining which value was recorded and why. That is stronger reporting than an uncontested single number would have been.",
+          "semantic_validation": "Counts are internally coherent (7,642 radiology admissions is a plausible subset of 50,000 total admissions; 1.6 billion OMOP rows is plausible for 50,000 critical care admissions). The 50,000 vs 45K and 7,642 vs 1000 source conflicts are recorded as a medium-severity content-accuracy issue, not as a scoring failure, since both are disclosed."
+        },
+        {
+          "name": "Variable-Level Metadata, Tabular Flag, and Data Splits",
+          "score": 0,
+          "evidence": "is_tabular: false. splits: 'The dataset provisions a holdout test set, sequestered from the released data and accessible for external validation of models'. No variables field.",
+          "quality_note": "Two of the four components are present and meaningful — the tabular flag is set and the holdout split is documented with its purpose, which many datasheets omit entirely. The central component is missing: there is no variable or column documentation of any kind for a multimodal release built on extended OMOP tables, so the structure of the data cannot be understood at field level from this record. The holdout set is also described without size, selection rule, or access mechanism.",
+          "semantic_validation": "is_tabular: false is semantically appropriate for a release dominated by waveforms, imaging, and note tokens, even though the OMOP portion is itself tabular — a defensible whole-dataset judgement."
+        },
+        {
+          "name": "Data Topics or Conditions Represented",
+          "score": 1,
+          "evidence": "instances entries carry data_topic codes B2AI_TOPIC:4, B2AI_TOPIC:9, B2AI_TOPIC:15, B2AI_TOPIC:37 (twice), B2AI_TOPIC:32 and data_substrate codes B2AI_SUBSTRATE:37, :11, :49, :43; description enumerates nine data types: 'demographics, medication administration, procedures, nursing flowsheets, diagnoses, clinical notes, imaging, waveform telemetry, and EEG waveform'.",
+          "quality_note": "Topic coverage is expressed twice over — as ontology-coded topic and substrate terms on each instance type, and as an enumerated modality list in prose. The clinical subject matter is stated at the level of acute and critical illness rather than specific diagnoses or phenotypes, so a reuser looking for particular conditions must still ask.",
+          "semantic_validation": "Substrate codes are used consistently across modalities (the same B2AI_SUBSTRATE:49 for both telemetry and EEG waveforms, B2AI_SUBSTRATE:43 for note tokens); no code is applied to a semantically mismatched instance type."
+        },
+        {
+          "name": "Data Quality, Anomalies, and Missing Data Documented",
+          "score": 0,
+          "evidence": "No anomalies field. No missing_data_documentation field. sampling_strategies: 'Sampling at scale across data contributing centers to ensure comprehensive sets of patient conditions and clinical treatment strategies' (is_sample: true) and 'Federated access will enable sampling methods to ensure a balanced and diverse cohort'.",
+          "quality_note": "Two of the three fields are entirely absent, and the third is largely forward-looking — the second sampling entry is in the future tense and describes a capability yet to be enabled rather than how the released 50,000 admissions were selected. For multi-site retrospective EHR, telemetry, and flowsheet data, missingness and capture gaps are the dominant quality concern, and no anomaly, dropout pattern, or completeness figure is documented for any modality. The characterization reports mentioned under cleaning_strategies are a quality process, not a disclosure of what the process found.",
+          "semantic_validation": "Consistency warning: known_limitations documents coverage and scope gaps but no data quality findings, so no other field compensates for the absence here."
+        }
+      ],
+      "element_score": 3,
+      "element_max": 5
+    },
+    {
+      "id": 6,
+      "name": "Data Provenance and Version Tracking",
+      "description": "Can a user determine dataset versions, update history, and provenance?",
+      "sub_elements": [
+        {
+          "name": "Dataset Version Number Provided",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met: distribution_formats populated and third_party_sharing.is_shared true under controlled access after a signed licensing agreement.",
+          "score": 0,
+          "evidence": "No version field. status: 'partially released'. source_caveats: 'The bundle gives no release date, DOI, version identifier, or recommended citation for the dataset.'",
+          "quality_note": "A dataset actively growing toward 100,000 admissions, with modality readiness changing between snapshots, has no version string at all. Two analyses run months apart against 'the CHoRUS dataset' cannot be distinguished, which defeats reproducibility for exactly the moving target this record describes.",
+          "semantic_validation": "The 'partially released' status is a lifecycle stage, not a version identifier, and does not substitute for one."
+        },
+        {
+          "name": "Version Access Methods Documented",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met (see sub-element 1).",
+          "score": 0,
+          "evidence": "No version_access field. maintainers notes that 'Versions, maintainers, and other metadata about the CHoRUS software packages that support the dataset are tracked on the package status page compiled in the chorus-developer repository.'",
+          "quality_note": "The only versioning infrastructure described tracks the software packages, explicitly not the dataset. Nothing states whether earlier builds remain retrievable, whether the enclave is updated in place, or how a user would request the state of the data as of a given date — a pressing question given the August 2025 snapshot language throughout.",
+          "semantic_validation": "Software package versioning is correctly scoped in the record to software, so it cannot be credited here without misreading the field's own statement."
+        },
+        {
+          "name": "Change Descriptions and Errata Provided",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met (see sub-element 1).",
+          "score": 1,
+          "evidence": "updates.update_details: 'The released dataset is being expanded toward an anticipated final dataset of 100,000 patient admissions covering 9 data modalities from 14 contributing hospitals. As of August 2025, de-identification of a larger imaging cohort and extraction of EEG waveforms were in process, and published metadata schemas were planned but not yet available for clinical notes, imaging, and EEG.'",
+          "quality_note": "Read as release-specific information rather than as unrelated prose, this is a dated statement of what is changing and which modalities are incomplete — actionable for anyone planning imaging, EEG, or note-token analyses, and corroborated by the coverage_limitation entry. It is a forward-looking status note rather than a change log: no errata, and no record of what differed between any two past releases.",
+          "semantic_validation": "The August 2025 date is consistent with the award period and with the source_caveats discussion of the tier-4 webinar snapshot; no temporal contradiction."
+        },
+        {
+          "name": "Update Schedule or Frequency Indicated",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met (see sub-element 1).",
+          "score": 0,
+          "evidence": "updates contains only update_details (quoted above). No cadence, no next-release date, no maintenance commitment, no end-of-support statement. The award period 2022-09-01 to 2026-11-30 appears under collection_timeframes, not as a release schedule.",
+          "quality_note": "A user is told the dataset will roughly double but not when, how often releases occur, or what happens after the award ends in November 2026 — a live question given the notes banner stating the repository is 'under review for potential modification in compliance with Administration directives'.",
+          "semantic_validation": "No field elsewhere supplies a schedule; the extension_mechanism describes contribution workflows for sites, not release frequency."
+        },
+        {
+          "name": "Provenance, Source Derivation, and Raw Data Sources",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met (see sub-element 1).",
+          "score": 1,
+          "evidence": "raw_data_sources: six entries, each with source_description, source_type, and raw_data_format — hospital EHR ('Site-specific source formats subsequently mapped to the OMOP Common Data Model'), unstructured notes ('Free text, extracted and tokenized with the OHNLP toolkit', with access_details 'Notes are stored locally at the contributing site; only tokens are made available centrally'), hospital PACS (DICOM), bedside monitoring infrastructure (WFDB), hospital EEG database (EDF+ and Persyst), and contextual/geospatial SDOH data linked to OMOP Location entities.",
+          "quality_note": "The strongest provenance documentation in the record: every released modality is traced back to the originating hospital system and its pre-processing format, and the notes entry additionally records the access constraint that follows from the source arrangement. was_derived_from is absent as a structured field, but raw_data_sources answers the sub-element's question fully.",
+          "semantic_validation": "raw_data_sources corresponds one-to-one with acquisition_methods and distribution_formats; each source format maps coherently to its release format through a documented preprocessing step."
+        }
+      ],
+      "element_score": 2,
+      "element_max": 5
+    },
+    {
+      "id": 7,
+      "name": "Scientific Motivation and Funding Transparency",
+      "description": "Does the metadata clearly state why the dataset exists and who funded it?",
+      "sub_elements": [
+        {
+          "name": "Motivation or Purpose for Dataset Creation",
+          "score": 1,
+          "evidence": "purposes: four responses including 'Meet the need of generating data for ML/AI applications aimed at characterizing acute and critical care illness, predicting complications, and measuring treatment response' and 'Develop a publicly available, AI-ready critical care dataset while ensuring the methods promote privacy, accountability, and clinical benefit'. addressing_gaps adds three, including 'Multi-modal EHR, waveform, imaging, and text data are not harmonized; unified standards and validated semantic mappings are developed to make them interoperable.'",
+          "quality_note": "Motivation is stated at both the clinical and infrastructural level, and addressing_gaps articulates the specific deficiency in existing critical care data that the dataset responds to. This is scientific rationale rather than mission-statement boilerplate.",
+          "semantic_validation": "Purposes align with tasks, intended_uses, and the funding programme's stated aims; the harmonization gap is consistent with the conforms_to and preprocessing_strategies content that answers it."
+        },
+        {
+          "name": "Primary Research Objectives or Tasks",
+          "score": 1,
+          "evidence": "tasks: 'Characterizing acute and critical care illness'; 'Predicting complications and clinical deterioration among patients with acute or critical illness'; 'Measuring treatment response'; 'External validation of AI/ML models against a sequestered holdout test set, to aid marketplace adoption'; 'Labeling data with targets important for prediction using a visualization and annotation environment'.",
+          "quality_note": "Five tasks spanning descriptive, predictive, and validation work, each phrased concretely enough to be recognisable as an ML problem statement. The external-validation task is distinctive and ties directly to the documented holdout set.",
+          "semantic_validation": "Tasks are consistent with intended_uses and with splits; no task requires data the record says is unavailable, except that note-dependent tasks are constrained by the token-only architecture, which known_limitations acknowledges."
+        },
+        {
+          "name": "Funding Sources and Mechanisms Listed",
+          "score": 1,
+          "evidence": "funders.grantor: 'National Institutes of Health (NIH) Common Fund'; notes: 'Awarded under the NIH Common Fund's Bridge2AI program. Project number 1OT2OD032701-01, core project number OT2OD032701, application ID 10472824, awarded to Massachusetts General Hospital, fiscal year 2022, award amount USD 5,880,300, project period 2022-09-01 to 2026-11-30.'",
+          "quality_note": "Both the agency and the funding mechanism (Common Fund OT2 other-transaction award under Bridge2AI) are identified, with the awardee institution, fiscal year, amount, and period. The independent funding statement quoted in notes from the project website corroborates the award number.",
+          "semantic_validation": "Consistent with purposes — a Common Fund data generation award matches a dataset whose stated purpose is generating AI-ready data — and with creators' MGH affiliation as awardee institution."
+        },
+        {
+          "name": "Grant IDs or Award Numbers Present",
+          "score": 1,
+          "evidence": "funders.grants: id 'https://reporter.nih.gov/project-details/10472824', name 'OT2OD032701'; notes gives project number '1OT2OD032701-01' and application ID 10472824.",
+          "quality_note": "The award number is given in both core and full application forms, linked to its RePORTER record, and independently repeated in the site funding statement quoted in notes — a reader can verify it without leaving the datasheet.",
+          "semantic_validation": "NIH format VALID: OT2 (Common Fund other-transaction activity code) + OD (Office of the Director) + 032701 serial, with the 1...-01 prefix/suffix convention correctly applied to the full project number. Registrar and mechanism are mutually plausible: OD is the correct institute for a Common Fund award."
+        },
+        {
+          "name": "Creators and Acknowledgements Documented",
+          "score": 1,
+          "evidence": "creators: six named principal investigators with affiliations — Eric S. Rosenthal (Massachusetts General Hospital), Azra Bihorac (University of Florida), Xiaoqian Jiang (UTHealth Houston), Yulia Strekalova (University of Florida), Parisa Rashidi (University of Florida), Manlik Kwong (Tufts University) — each with a source_caveats recording where the attribution came from.",
+          "quality_note": "Named individuals with institutional affiliations and explicit provenance for each attribution, including the note that Rosenthal is 'Named as principal investigator on NIH RePORTER for application ID 10472824'. The record is candid that CRediT-style contribution roles are not available, which is a limitation of the source rather than of the documentation.",
+          "semantic_validation": "Affiliations are consistent with the awardee institution (MGH) and with the data_governance and maintainers contacts at Tufts and Emory; no creator is attributed a role the sources do not support."
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 8,
+      "name": "Technical Transparency (Data Collection and Processing)",
+      "description": "Can data collection and processing steps be replicated or understood?",
+      "sub_elements": [
+        {
+          "name": "Collection Mechanisms and Settings Described",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Collection-and-shared condition met: acquisition_methods and collection_mechanisms are populated, and the datasets-shared condition is satisfied by distribution_formats and third_party_sharing.is_shared true.",
+          "score": 1,
+          "evidence": "collection_mechanisms: 'Bedside physiologic monitors together with hospital gateway/middleware supply waveform telemetry'; 'Hospital picture archiving and communication systems (PACS) supply imaging'; 'Hospital EEG databases supply EEG waveform recordings'; 'The OHNLP toolkit is used to extract and tokenize unstructured clinical notes'; 'The chorus-extract-upload Python tool in the chorus-ai GitHub organization provides tools to create and upload a CHoRUS Data Extract at contributing sites.'",
+          "quality_note": "Each modality's collection path is named down to the system class, and the site-side extraction tooling is identified by repository. data_collectors adds that site managers follow step-by-step SOPs published in Chorus_SOP that 'have undergone an internal validation and review process' — enough for another site to understand, and largely replicate, the mechanism.",
+          "semantic_validation": "Mechanisms correspond one-to-one with acquisition_methods and raw_data_sources; settings (ICU/PICU/NICU, 14 hospitals) are consistent with the cohort described in subpopulations."
+        },
+        {
+          "name": "Data Acquisition Methods Listed",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Collection-and-shared condition met (see sub-element 1).",
+          "score": 1,
+          "evidence": "acquisition_methods: five entries, each with was_directly_observed: true, covering retrospective structured EHR extraction ('medication administration with dosing time-stamped upon each infusion change or dose administration, procedures documented by providers, high-frequency nursing flowsheet documentation'), telemetry via gateway/middleware in WFDB, PACS imaging in DICOM, EEG in EDF+ and Persyst with extraction 'still in process as of August 2025', and note extraction/tokenization via the OHNLP toolkit with local retention.",
+          "quality_note": "Acquisition is described at a granularity that distinguishes, for instance, event-level infusion timestamps from flowsheet documentation — the sort of detail that determines whether a temporal model is feasible. Readiness caveats are attached where a modality is incomplete rather than asserted uniformly.",
+          "semantic_validation": "was_directly_observed: true is defensible for instrument- and system-captured clinical data; it does not conflict with direct_collection.is_direct: false, which correctly distinguishes system extraction from research-purpose collection from patients."
+        },
+        {
+          "name": "Preprocessing, Cleaning, Labeling, and Annotation Quality",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Software-output condition met on E10 evidence: external_resources references 'https://github.com/chorus-ai - the CHoRUS GitHub organization, housing 28 repositories of software and tooling for clinical data, validated semantic mappings, standard operating protocols'. Determined from E10, not from E8's own fields.",
+          "score": 1,
+          "evidence": "preprocessing_strategies: OMOP standardization with flowsheet extensions; OHNLP tokenization into the OHNLP open source schema; transformation 'using approaches that limit re-identification'; waveform preparation via 'the waveform conversion scripts and documentation in the chorus_waveform and chorus_waveform_resources repositories'; geocoding of 'OMOP Location entities ... via DeGauss using the open source UF-Geocoding code, a fork of bihorac-LAB/Exposome'. cleaning_strategies: characterization reports returned to sites via the CHoRUSReports repository, and validated semantic mappings 'in the chorus-mapping repository under an associated clinical validation standard operating procedure'. labeling_strategies: a visualization and annotation environment for labeling prediction targets.",
+          "quality_note": "Preprocessing and cleaning are documented with named repositories a reuser could inspect, and the cleaning loop — characterization reports returned to contributing sites so they can resolve extract issues — is a genuine quality mechanism rather than an assertion. Labeling is the weakest strand: an annotation environment is mentioned with no labeling protocol, annotator qualifications, or agreement statistics, and annotation_analyses, machine_annotation_tools, and imputation_protocols are all absent.",
+          "semantic_validation": "Preprocessing steps map coherently onto the released formats (tokenization to OHNLP schema, conversion to WFDB/EDF+, OMOP mapping for structured data); no step is described that contradicts a stated distribution format."
+        },
+        {
+          "name": "Software and Tools Documented",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met, and the record documents extensive processing of the released data (preprocessing_strategies, cleaning_strategies, is_deidentified). Per the applicability rule this sub-element is scored for any dataset that was processed at all and is not gated on whether a repository pointer exists.",
+          "score": 1,
+          "evidence": "Evidence carried by preprocessing_strategies prose and participant_privacy prose. Named processing-role software: the OHNLP toolkit (extracts and tokenizes the note tokens that are the released artifact); 'DeGauss using the open source UF-Geocoding code, a fork of bihorac-LAB/Exposome' (geocodes OMOP Location entities in the release); 'the waveform conversion scripts and documentation in the chorus_waveform and chorus_waveform_resources repositories' (produce the released WFDB and EDF+ waveforms); 'A de-identification component maintained in the CTP-deid repository' and 'A privacy scan tool for medical records, maintained in the privacy_scan_tool repository' (transform the data before release); chorus-mapping (validated semantic mappings applied to source data).",
+          "quality_note": "A reader can tell what software produced and transformed the distributed data: conversion, tokenization, geocoding, mapping, and de-identification tooling are each named, and most are tied to an identifiable repository within the chorus-ai organization. No version numbers, release tags, or software DOIs are given, which is what the look-for asks for and would strengthen the evidence, but the threshold is disclosure of the tooling and it is met several times over.",
+          "semantic_validation": "Role check: chorus-extract-upload is capture/upload tooling (role a) and CHoRUSReports is quality assessment (role d), neither of which would earn the point alone; the score rests on the transformation-role software named above. The chorus-ai organization root alone would be a publisher-level pointer and is not relied on."
+        },
+        {
+          "name": "External Standards, Resources, and Imputation Protocols",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met (see Element 8 sub-element 1).",
+          "score": 1,
+          "evidence": "external_resources: project webpage, the chorus-ai GitHub organization with 28 repositories including SOPs and validated semantic mappings, the NIH RePORTER record, and the bridge2ai.org/chorus contact page. conforms_to names OMOP CDM, DICOM, WFDB, EDF+, Persyst, and the OHNLP open source schema. extension_mechanism points to https://github.com/chorus-ai with contribution and issue-reporting workflows.",
+          "quality_note": "External standards are named per modality and the supporting documentation — SOPs, mapping repositories, discussion forums for sites encountering extract problems — is linked rather than merely referenced. imputation_protocols is absent, and the record never states whether missing values were imputed at all, which for multi-site flowsheet and telemetry data is a substantive silence recorded under the missing-data issue.",
+          "semantic_validation": "Standards cited are the recognised ones for their modalities and are used consistently across conforms_to, conforms_to_standard, and distribution_formats."
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 9,
+      "name": "Dataset Evaluation and Limitations Disclosure",
+      "description": "Does the metadata communicate known risks, biases, or dataset limitations?",
+      "sub_elements": [
+        {
+          "name": "Known Limitations Documented",
+          "score": 1,
+          "evidence": "known_limitations: four typed entries — coverage_limitation (uneven modality availability, 1000 images with de-identification in process, EEG extraction in process, metadata only planned for notes/imaging/EEG, with recommended_mitigation 'Confirm current modality availability with the CHoRUS data access contacts before planning analyses'); scope_limitation (50,000 of an anticipated 100,000 admissions); integration_limitation (notes not centralized, only OHNLP tokens available, 'which constrains analyses requiring raw narrative text'); representativeness_limitation (14 academic hospitals, 'the cohort reflects the case mix and practice patterns of those participating academic centers').",
+          "quality_note": "Each limitation is categorised, described in terms of its consequence for analysis, and one carries an actionable mitigation. These are the limitations that would actually derail a reuse plan, stated plainly rather than hedged.",
+          "semantic_validation": "Limitations are consistent with instances counts, updates.update_details, and the description's account of note architecture; the record does not contradict its own limitations elsewhere."
+        },
+        {
+          "name": "Biases Categorized Using Standard Taxonomy (RAI-aligned)",
+          "score": 1,
+          "evidence": "known_biases: bias_type 'representation_bias', with bias_description noting that 'The project treats cohort balance and diversity as an open risk to be managed' and mitigation_strategy 'Federated access will enable sampling methods to ensure a balanced and diverse cohort, and sampling at scale is designed to capture comprehensive sets of patient conditions and clinical treatment strategies.' future_use_impacts records anticipated downstream effects.",
+          "quality_note": "A taxonomy term is used and paired with a mitigation strategy, which meets the sub-element. The substance is thinner than the form: the entry describes bias as a risk the project intends to manage rather than reporting any measured imbalance, and the concrete representativeness concern — 14 academic centers' case mix — appears only under known_limitations, not as a categorised bias. No demographic or site-level skew is quantified.",
+          "semantic_validation": "representation_bias is the semantically correct category for the concern described; the mitigation is forward-looking ('will enable'), consistent with the same future-tense framing in sampling_strategies."
+        },
+        {
+          "name": "Data Anomalies and Quality Issues Noted",
+          "score": 0,
+          "evidence": "No anomalies field. cleaning_strategies mentions that 'Characterization reports are produced and returned to sites following their data submissions, using the CHoRUSReports repository, so that contributing sites can identify and resolve issues in their extracts', but no finding from that process is reported.",
+          "quality_note": "A quality assessment process is described without any of its results. Nothing is said about outliers, telemetry dropouts, implausible physiologic values, site-specific coding artifacts, duplicate admissions, or clock synchronisation across modalities — all expected in multi-site critical care data, and all unreported. A reuser is given a mechanism but no disclosure.",
+          "semantic_validation": "No other field supplies anomaly content; known_limitations covers coverage, scope, integration, and representativeness, none of which is a data quality finding."
+        },
+        {
+          "name": "Sensitive Content and Warnings Provided",
+          "score": 1,
+          "evidence": "sensitive_elements: sensitive_elements_present: true with 'The dataset comprises hospital clinical records of critically ill patients, including demographics, diagnoses, medication administration, procedures, nursing flowsheets, clinical note tokens, radiology images, telemetry and EEG waveforms, social determinants of health, and contextual geographic factors such as distance to the nearest hospital.' confidential_elements: confidential_elements_present: true, all nine modalities under controlled access, notes retained locally, 'community-facing ethics focus groups are used to determine what data is appropriate for public sharing'.",
+          "quality_note": "The sensitivity inventory is enumerated element by element rather than asserted generically, and it correctly flags the least obvious exposures — geocoded distance to nearest hospital and SDOH — alongside the expected clinical ones. Confidentiality is documented separately with the handling consequence for each class. No content_warnings field, which matters less for clinical records than for media data.",
+          "semantic_validation": "Sensitivity claims are consistent with confidentiality_level 'restricted', with the controlled-access licence, and with the privacy techniques described under participant_privacy — the restrictiveness matches the stated sensitivity."
+        },
+        {
+          "name": "Ethical Review and Social Impact Analysis",
+          "score": 1,
+          "evidence": "ethical_reviews: 'The project performs community-facing ethics focus groups to determine what data is appropriate for public sharing, and evaluates community perspectives on clinical care AI to find ways to increase trustworthiness of provenance and privacy in AI. Ethics is one of the project's three pillars', and a second entry on patient-focused determination of 'the ethical and legal approaches used to manage privacy and bias while accounting for social determinants of health'. future_use_impacts: sequestered holdout datasets for external validation 'to aid marketplace adoption of AI-developed models for implementation in acute and critical care, and to catalyze the biomedical research and expertise necessary to promote the patient-focused deployment of AI'.",
+          "quality_note": "Scored on this sub-element's own question — documented ethics work and anticipated downstream impact — rather than on oversight, which Element 4 assesses separately and where the same content fails. Community-facing focus groups determining what is appropriate to share, and an explicit account of how the holdout set is meant to affect clinical AI adoption, constitute real ethics and social-impact engagement. The impact analysis is one-sided: only benefits are anticipated, with no discussion of potential harms from deployed critical care models or of equity effects despite 'Equitable AI' in the title.",
+          "semantic_validation": "future_use_impacts is consistent with tasks and splits (the holdout set exists and is described elsewhere). The absence of any named review body is recorded as a high-severity issue against Element 4 sub-element 1, not double-counted here."
+        }
+      ],
+      "element_score": 4,
+      "element_max": 5
+    },
+    {
+      "id": 10,
+      "name": "Cross-Platform and Community Integration",
+      "description": "Does the dataset connect to wider data ecosystems, repositories, or standards?",
+      "sub_elements": [
+        {
+          "name": "Dataset Published on a Recognized Platform",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met: distribution_formats populated and third_party_sharing.is_shared true under controlled access.",
+          "score": 0,
+          "evidence": "No publisher field. created_by: 'CHoRUS Consortium'. description states 'OMOP and telemetry data sit in a cloud enclave'; intended_uses references 'the Bridge2AI AI/ML for Clinical Care Collaborative Cloud'. No repository, archive, or portal is named as the publishing platform.",
+          "quality_note": "The data live in an unnamed project-operated enclave reachable only by emailing two named individuals. No recognised archive — PhysioNet, Dataverse, Zenodo, an institutional repository — is involved, so there is no third-party custodian, no platform-level persistence commitment, and nothing a discovery system could index. The 'under review for potential modification' banner quoted in notes makes the absence of an independent custodian more consequential, not less.",
+          "semantic_validation": "The consortium's own compute cloud is a hosting environment for analysis rather than a publishing platform in the sense this sub-element checks; crediting it would conflate access provisioning with publication."
+        },
+        {
+          "name": "Citation and DOI for Cross-referencing",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met (see sub-element 1). Per the rule that this sub-element is scored whenever the datasets-shared condition holds, the absence of a citation or DOI is a score of 0 and not a reason to mark it not applicable.",
+          "score": 0,
+          "evidence": "No citation field. No doi field. source_caveats: 'The bundle gives no release date, DOI, version identifier, or recommended citation for the dataset.'",
+          "quality_note": "A dataset already in use for training and publications — existing_uses records that 'Datasets are being used for training activities and publications' — provides no way to cite it. Publications using it cannot credit a versioned, resolvable artifact, and no citation count or reuse tracking is possible. The NIH RePORTER link cites the award, not the data.",
+          "semantic_validation": "Consistency check FAILED: the record documents active third-party use and simultaneously documents that no citation mechanism exists."
+        },
+        {
+          "name": "Community Standards or Schema Conformance",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met (see sub-element 1).",
+          "score": 1,
+          "evidence": "conforms_to names the OMOP Common Data Model (with flowsheet extensions), DICOM, WFDB, EDF+, Persyst, and the OHNLP open source schema; conforms_to_standard enumerates OMOP_CDM, DICOM, WFDB, OTHER; conforms_to_schema: https://w3id.org/bridge2ai/data-sheets-schema.",
+          "quality_note": "Conformance to the dominant community standard for each modality is stated explicitly, and OMOP conformance in particular connects the structured portion to the OHDSI ecosystem and its existing analytic tooling. The record also describes validated semantic mappings maintained in a public repository, which is what makes the conformance claim checkable.",
+          "semantic_validation": "Standards are correctly matched to modalities. The single OTHER term covering EDF+, Persyst, and OHNLP is a machine-readability loss the record itself discloses, recorded as a low-severity issue."
+        },
+        {
+          "name": "Outreach Materials and Documentation Links",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met (see sub-element 1).",
+          "score": 1,
+          "evidence": "page: https://chorus4ai.org/ ; external_resources describes the site's sections including 'community engagement, ethics, the dataset, and learning resources' and the GitHub organization's 'standard operating protocols for data contributing sites'. intended_uses documents 'hands-on AI/ML coursework, canonical Jupyter Notebooks, and OHDSI/OMOP instruction'; existing_uses documents the AIM-AHEAD Bridge2AI for Clinical Care Training Program (Cohort 2) for up to 30 trainees.",
+          "quality_note": "Documentation and outreach are unusually well evidenced: a landing page with a learning-resources section, published SOPs, canonical notebooks, OHDSI/OMOP instruction, and a named training programme with an enrolment figure. A newcomer has a clear path into both the data and the community around it.",
+          "semantic_validation": "Outreach claims are corroborated across intended_uses, existing_uses, and external_resources; the training programme is also the access route documented in data_governance, so the claims interlock rather than standing alone."
+        },
+        {
+          "name": "Related Datasets with Typed Relationships",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "Datasets-shared condition met (see sub-element 1).",
+          "score": 0,
+          "evidence": "No related_datasets field. The description names CHoRUS as 'one of four data generation projects in the NIH Common Fund's Bridge2AI program' and splits describes a sequestered holdout set, but neither is expressed as a typed dataset relationship.",
+          "quality_note": "The holdout test set is a textbook 'is part of' or 'is version of' relationship to the released data and is left untyped; the three sibling Bridge2AI datasets and the per-hospital contributions are equally natural typed links. Without them the dataset is a terminal node — no machine can traverse from it to anything else in the ecosystem.",
+          "semantic_validation": "Programme membership stated in prose is not a typed relationship; scored against the structured field, which is absent."
+        }
+      ],
+      "element_score": 2,
+      "element_max": 5
+    }
+  ],
+  "assessment": {
+    "strengths": [
+      "Technical transparency is the record's standout: every modality is traced from its originating hospital system through a named processing tool to a named release format, with OHNLP tokenization, DeGauss/UF-Geocoding, chorus_waveform conversion scripts, chorus-mapping, CTP-deid, and privacy_scan_tool all identified by repository (Element 8, 5/5).",
+      "Funding transparency is complete and independently verifiable — NIH Common Fund award OT2OD032701 in both core and full project-number forms, application ID 10472824, awardee institution, USD 5,880,300, and the 2022-09-01 to 2026-11-30 period, corroborated by the site funding statement quoted in notes (Element 7, 5/5).",
+      "Instance reporting is quantitative and multi-scale — 50,000 admissions, 1.6 billion OMOP rows, 7,642 admissions with radiology, 23 Tb of waveforms — with each contested figure carrying an explicit source_caveats entry naming the conflicting source and the resolution taken.",
+      "Format and standards conformance is stated per modality using the recognised community standard for each (OMOP CDM, DICOM, WFDB, EDF+/Persyst, OHNLP schema), making the structured portion integrable with the OHDSI ecosystem.",
+      "Limitations are typed, consequence-oriented, and honest about incompleteness — uneven modality readiness with an August 2025 date, the 50,000-of-100,000 partial build, the token-only note architecture that 'constrains analyses requiring raw narrative text', and the academic-center case-mix constraint.",
+      "raw_data_sources documents all six source streams with source type, pre-processing format, and, for clinical notes, the access constraint that follows from keeping them local — full provenance back to the originating systems.",
+      "The record is disciplined about the provenance of its own claims, marking where sources disagree and where the bundle is silent rather than filling gaps with plausible invention."
+    ],
+    "weaknesses": [
+      "Human subjects research is affirmed for 50,000 critically ill patients including PICU and NICU admissions, yet no IRB, ethics committee, waiver, or approval identifier is named, and the informed_consent field is entirely absent — the two highest-severity gaps in the record (Element 4, 2/5).",
+      "The dataset is unidentifiable and uncitable: no DOI, no version string, no version access policy, and no recommended citation, despite existing_uses recording that the data are already supporting publications (Element 6 sub-elements 1-2 and Element 10 sub-element 2 all score 0).",
+      "No publisher or repository is recorded and no enclave URL is given, so the data have no third-party custodian and no platform-level persistence commitment — a concern sharpened by the site banner announcing the repository is 'under review for potential modification'.",
+      "No variables field and no data dictionary for 1.6 billion OMOP rows, including the nursing-flowsheet extensions the record itself flags as non-standard, so field-level structure is undocumented.",
+      "Data quality disclosure is absent: no anomalies and no missing_data_documentation for multi-site retrospective EHR, flowsheet, and telemetry data where missingness and capture gaps are the dominant quality concern; the characterization-report process is described but none of its findings.",
+      "HIPAA compliance status is never stated for US hospital PHI, the deidentification method names no standard (Safe Harbor or Expert Determination), and reidentification_risk restates mitigation rather than assessing residual risk, with no data protection impact assessment.",
+      "Vulnerable populations are identified (PICU/NICU, critically ill adults who cannot consent) with no corresponding protections, assent or parental-permission arrangements, or compensation statement.",
+      "No related_datasets and no parent_datasets: the sequestered holdout set, the three sibling Bridge2AI data generation projects, and the per-hospital contributions are all untyped, leaving the record a terminal node in the ecosystem.",
+      "Bias treatment is categorised but forward-looking — 'Federated access will enable sampling methods' — with no measured demographic or site-level imbalance reported, and future_use_impacts anticipates only benefits with no discussion of potential harms from deployed critical care models.",
+      "The published maintainer contact address 'cmccrary@mgh.havard.edu' is unusable as written, and the collection timeframe reports the NIH award period rather than the clinical coverage period of the admissions."
+    ],
+    "recommendations": [
+      "Document ethical oversight: name the IRB(s) of record for the data acquisition sites, the approval or waiver determinations and their identifiers, and whether a single-IRB reliance agreement governs the 14 contributing hospitals.",
+      "Add informed_consent recording the waiver of consent and HIPAA authorization obtained for retrospective extraction, the granting body, and any site-level variation — even a documented waiver is far better than silence on the legal basis for the release.",
+      "Mint a DOI, assign a version string to the current 50,000-admission build, publish a recommended citation, and state a version access policy covering whether prior builds remain retrievable.",
+      "Name the hosting platform or enclave with a portal URL and record a publisher, or deposit a de-identified subset with a recognised archive so the dataset acquires an independent custodian and persistence commitment.",
+      "Publish a data dictionary covering the OMOP tables in use and, in particular, the extension tables and columns added for high-frequency nursing flowsheet documentation.",
+      "Add anomalies and missing_data_documentation reporting what the site characterization reports actually found: telemetry dropout rates, flowsheet completeness by site, implausible-value handling, and cross-modality clock alignment.",
+      "State the HIPAA disposition of the release (Safe Harbor, Expert Determination, or limited data set), list identifier categories removed or retained per modality, and add a residual re-identification risk assessment covering the waveform, imaging, and geocoded-location modalities.",
+      "Record protections for the pediatric and neonatal cohorts explicitly, and state that participant compensation is inapplicable to retrospective extraction rather than leaving the field empty.",
+      "Express typed relationships in related_datasets for the sequestered holdout set, the sibling Bridge2AI data generation datasets, and the contributing-site extracts.",
+      "Add prohibited_uses covering re-identification attempts and unvalidated clinical deployment, and extend future_use_impacts to anticipated harms and equity effects consistent with the 'Equitable AI' framing in the title.",
+      "Report the clinical admission date range covered by the data, separately from the NIH award period, and correct or replace the misspelled maintainer contact address."
+    ]
+  },
+  "metadata": {
+    "evaluator_id": "7b3c9f2e-4a61-4d88-9c0f-2e51d7a6b934",
+    "instrument_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+    "instrument_kind": "agent_definition",
+    "rubric_hash": "e5f8b6beced5f62f6cc4b3dcf45f6e8cb1431d84f4649227831ef8ecfbf28ab7",
+    "input_sha256": "e5c0f47198cd20ea47158959f6cfb4d25648965eb8c063ac977e2b5b9aba355d",
+    "d4d_file_hash": "e5c0f47198cd20ea47158959f6cfb4d25648965eb8c063ac977e2b5b9aba355d",
+    "label": "2026-09-01_claude-opus-5-api-generic-v7_rep1",
+    "evaluator_model": "claude-opus-5[1m]",
+    "instrument_note": "instrument_sha256 identifies the scoring rules (agent definition); rubric_hash identifies the rubric text at data/rubric/rubric10.txt. The two differ because scoring rules have changed across revisions the rubric text does not record."
+  }
+}
