@@ -2533,3 +2533,21 @@ The isolated retry completed and passed the exact final schema validator, but it
 ### CM4AI isolated retry accepted (2026-09-12; #1248, #1327)
 
 The second fresh retry, started at 12:53:23 UTC, passed the complete registered acceptance checks. Its output SHA256 is `c47a3d865f5ecfa025b50d434e276c0b2a6d52c1b920917e35e56873b940affc`, and its quoted rubric10 definition remains `66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`. Both excluded CM4AI drafts and every file hash recorded before their retries were verified unchanged. This brings the fill to 35 accepted ratings; the remaining 21 jobs resume under the unchanged manifest in groups of at most four. No candidate was repaired by hand and no scoring or attestation rule changed.
+
+### Reference percentage and attestation amendment (2026-09-12; #1328–#1334)
+
+The reference fill paused at 38 accepted ratings from 44 original CLI sessions. The VOICE v7 rep1 rubric10 draft passed its exact validator but was rejected after a later explicitly denied command. PR #1330 corrects that attestation false rejection and derives percentage spread from points and denominators. Four Codex plugin rounds resolved ambiguous validator/mutation evidence, contradictory failures and delayed validator results. The fourth round approved source commit `d8bb022ed2934d606a5ef15847bd5a1e3fc2b72c`, with 31,171 ordering checks; 194 focused local tests and actual Python 3.9.6 startup checks pass.
+
+Manifest SHA256 `36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a` registers the amendment. Complete grading prompts, the rubric10 definition `66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`, rubric20 definition `9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3`, inputs, schemas, arithmetic and execution settings are unchanged. Existing scores remain untouched; all 202 prior evaluations remain unchanged. Registration and preserved hashes are in `notes/reference_rescore_2026-09-11/percentage_denial_registration.json`. The original canary must be revalidated and separately accepted before other offline recoveries. The 38-output fill preservation record and baseline audit are already published on #1313.
+
+The already accepted fresh CM4AI score remains selected, with its earlier drafts preserved and excluded. The original VOICE draft may be recovered only after all amended checks pass, without a new evaluator call. No generation or source download occurred. The remaining fill resumes only after the new registration and offline revalidation are adopted.
+
+The original CHORUS canary has now been revalidated offline and separately accepted under this registration. The existing AI_READI v8 rep1 rubric10 output was then revalidated. Both outputs and all 31 earlier main-worktree attempt files remain unchanged; no evaluator call occurred. The other 36 accepted outputs and the retained VOICE candidate on #1313 still require offline revalidation after adoption.
+
+Published host-validation and report paths are repository-relative; original host logs are retained locally. This presentation change does not alter evaluator transcripts, evaluation bytes or receipt hashes.
+
+### Reference fill resumes after percentage/attestation amendment (2026-09-12)
+
+The results branch adopted PR #1330 and revalidated all 38 existing accepted outputs under manifest `36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a`, preserving their bytes and all 370 earlier attempt files. The original VOICE v7 rep1 rubric10 candidate was recovered after its final-Write, schema, arithmetic, identity, check-echo and amended attestation checks passed. There are now 39 accepted ratings from the same 44 original CLI sessions, with five excluded attempts and CLI-reported usage of $97.428248. No new evaluator call occurred during the amendment. Both earlier CM4AI drafts stay excluded; the already accepted fresh rating is unchanged.
+
+The 17 remaining registered ratings resume in groups of at most four, with the unchanged $5 per-attempt cap, no automatic retries, and no new launches after a failed group. The dated schedule and portable helper hash are in `fill_resumed_percentage_denial_2026-09-12.json`; `percentage_denial_after_audit.json` records the verified checkpoint. Evaluation definitions and all 202 prior evaluations remain unchanged.

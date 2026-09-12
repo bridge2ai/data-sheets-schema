@@ -222,10 +222,83 @@ def validator_output_path(command: str, rubric: str, directory: str | None) -> s
     return args[5] if args[3] in scripts and args[5] in outputs else None
 
 
+def denied_bash_calls(events: list[dict]) -> set[str]:
+    """Identify attempts the completed CLI proves were denied before execution."""
+    terminals = [(i, e) for i, e in enumerate(events) if e.get("type") == "result"]
+    if len(terminals) != 1:
+        return set()
+    terminal_index, terminal = terminals[0]
+    denials = terminal.get("permission_denials")
+    if (terminal.get("subtype") != "success" or terminal.get("is_error") is not False
+            or not isinstance(denials, list)):
+        return set()
+    uses, results, denied = {}, {}, {}
+    for index, event in enumerate(events):
+        message = event.get("message")
+        if not isinstance(message, dict) or not isinstance(message.get("content"), list):
+            continue
+        for block in message["content"]:
+            if not isinstance(block, dict):
+                continue
+            if event.get("type") == "assistant" and block.get("type") == "tool_use":
+                key = block.get("id")
+                if isinstance(key, str):
+                    uses.setdefault(key, []).append((index, block))
+            if event.get("type") == "user" and block.get("type") == "tool_result":
+                key = block.get("tool_use_id")
+                if isinstance(key, str):
+                    results.setdefault(key, []).append((index, block))
+    for denial in denials:
+        if isinstance(denial, dict) and isinstance(denial.get("tool_use_id"), str):
+            denied.setdefault(denial["tool_use_id"], []).append(denial)
+    proven = set()
+    for key, records in denied.items():
+        if len(records) != 1 or len(uses.get(key, [])) != 1 or len(results.get(key, [])) != 1:
+            continue
+        use_index, use = uses[key][0]
+        result_index, result = results[key][0]
+        denial = records[0]
+        content = result.get("content")
+        args = use.get("input")
+        if (use_index < result_index < terminal_index
+                and use.get("name") == denial.get("tool_name") == "Bash"
+                and isinstance(args, dict) and isinstance(args.get("command"), str)
+                and args == denial.get("tool_input") and result.get("is_error") is True
+                and isinstance(content, str)
+                and content.startswith("Permission to use Bash has been denied because Claude Code is running in don't ask mode.")):
+            proven.add(key)
+    return proven
+
+
 def evaluator_validated(events: list[dict], rubric: str) -> bool:
     directories = [e.get("cwd") for e in events if e.get("type") == "system" and e.get("subtype") == "init"]
     directory = directories[0] if len(directories) == 1 and isinstance(directories[0], str) else None
+    terminals = [i for i, e in enumerate(events) if e.get("type") == "result"]
+    if len(terminals) != 1:
+        return False
+    uses, results = {}, {}
+    for index, event in enumerate(events):
+        message = event.get("message")
+        if not isinstance(message, dict) or not isinstance(message.get("content"), list):
+            continue
+        for block in message["content"]:
+            if not isinstance(block, dict):
+                continue
+            if event.get("type") == "assistant" and block.get("type") == "tool_use":
+                key = block.get("id")
+                if not isinstance(key, str) or not key:
+                    return False
+                uses.setdefault(key, []).append(index)
+            if event.get("type") == "user" and block.get("type") == "tool_result":
+                key = block.get("tool_use_id")
+                if not isinstance(key, str) or not key:
+                    return False
+                results.setdefault(key, []).append(index)
+    if any(key not in uses for key in results):
+        return False  # A result without its invocation cannot establish what executed.
     calls = {}
+    validator_markers = {}
+    denied = denied_bash_calls(events)
     pending_mutations = set()
     validated = False
     for event in events:
@@ -243,12 +316,20 @@ def evaluator_validated(events: list[dict], rubric: str) -> bool:
                 args = block.get("input") or {}
                 output = (validator_output_path(args.get("command", ""), rubric, directory)
                           if name == "Bash" else None)
+                key = block.get("id")
+                if name != "Read":
+                    if (not isinstance(key, str) or len(uses.get(key, [])) != 1
+                            or len(results.get(key, [])) != 1
+                            or not uses[key][0] < results[key][0] < terminals[0]):
+                        return False  # Ambiguous validator or potentially mutating call.
                 if output is not None:
+                    validator_markers[key] = f"VALID {output}: {rubric}"
                     if not pending_mutations:
-                        calls[block["id"]] = f"VALID {output}: {rubric}"
-                elif name != "Read":
+                        calls[key] = validator_markers[key]
+                elif name != "Read" and block.get("id") not in denied:
                     # Write, Edit or an unrecognized command may change the
                     # output. Even a failed tool can have partially written it.
+                    # A proven permission denial did not execute the command.
                     pending_mutations.add(block["id"])
                     calls.clear()
                     validated = False
@@ -258,12 +339,20 @@ def evaluator_validated(events: list[dict], rubric: str) -> bool:
                     pending_mutations.remove(tool_id)
                     calls.clear()
                     validated = False
+                expected = calls.pop(tool_id, None)
                 if block.get("is_error"):
+                    if tool_id in validator_markers and tool_id not in denied:
+                        validated = False
+                        calls.clear()
                     continue
                 content = block.get("content", "")
                 if not isinstance(content, str):
                     content = "\n".join(c.get("text", "") for c in content if isinstance(c, dict))
-                if not pending_mutations and calls.get(tool_id) in [s.strip() for s in content.splitlines()]:
+                lines = [s.strip() for s in content.splitlines()]
+                if tool_id in validator_markers and validator_markers[tool_id] not in lines:
+                    validated = False
+                    calls.clear()
+                elif not pending_mutations and expected in lines:
                     validated = True
     return validated and not pending_mutations
 
@@ -609,7 +698,7 @@ def accept_canary(manifest: dict) -> None:
 
 
 def report_results(manifest: dict) -> dict:
-    from data_sheets_schema.semantic_comparison import excluded_items
+    from data_sheets_schema.semantic_comparison import excluded_items, score_bases
     from report_semantic_comparison import report
 
     verify_frozen(manifest)
@@ -621,12 +710,14 @@ def report_results(manifest: dict) -> dict:
         receipt = successful_receipt(manifest, job)
         complete.append((job, json.loads((ROOT / job["output"]).read_bytes()), receipt))
     results = {"reported_at": now(), "completed": len(complete), "planned": len(manifest["jobs"]),
+               "percentage_basis": "computed_from_point_totals_and_denominators",
                "pending": pending, "repeatability": [], "generation_replicates": []}
     for project in PROJECTS:
         repeated = [(j, d) for j, d, _ in complete if j["project"] == project and j["cohort"] == "v7"
                     and j["generation_rep"] == 1 and j["rubric"] == "rubric10-semantic"]
-        values = [d["overall_score"]["normalized_percentage"] for _, d in repeated]
-        fixed = [d["overall_score"]["fixed_percentage"] for _, d in repeated]
+        bases = [score_bases(d, 50) for _, d in repeated]
+        values = [b.adjusted_percentage for b in bases]
+        fixed = [b.fixed_percentage for b in bases]
         signatures = {(d["overall_score"]["adjusted_max_points"], excluded_items(d)) for _, d in repeated}
         results["repeatability"].append({"project": project, "rubric": "rubric10-semantic",
             "ratings": len(values), "expected_ratings": 3, "adjusted_percentages": values,
@@ -640,15 +731,19 @@ def report_results(manifest: dict) -> dict:
                 primary = sorted([(j, d) for j, d, _ in complete if j["project"] == project
                                   and j["cohort"] == cohort and j["rubric"] == rubric
                                   and j["purpose"] == "primary"], key=lambda row: row[0]["generation_rep"])
+                bases = [score_bases(d, 50 if rubric == "rubric10-semantic" else 88) for _, d in primary]
                 results["generation_replicates"].append({"project": project, "cohort": cohort, "rubric": rubric,
                     "records": len(primary), "expected_records": 3,
-                    "adjusted_percentages": [d["overall_score"]["normalized_percentage"] for _, d in primary],
-                    "fixed_percentages": [d["overall_score"]["fixed_percentage"] for _, d in primary]})
+                    "adjusted_percentages": [b.adjusted_percentage for b in bases],
+                    "fixed_percentages": [b.fixed_percentage for b in bases]})
     paths = [ROOT / j["output"] for j, _, _ in complete]
     text = f"# Reference rescore status — {DATE}\n\nCompleted {len(complete)} of {len(manifest['jobs'])} planned evaluations.\n\n"
     if paths:
         text += report(paths) + "\n"
     text += ("Rubric10 repeatability uses three independent ratings of one v7 record per project. "
+             "Percentages and spread are computed from point totals and their denominators, "
+             "so serialized percentage precision does not create apparent rating variation. "
+             "Original evaluation files remain unchanged. "
              "Sample standard deviations and ranges are descriptive for those records and this exact instrument; "
              "they are not population uncertainty bounds. Changed applicability is flagged. "
              "Rubric20 repeatability remains unmeasured. Generation replicate spread is a separate quantity. "

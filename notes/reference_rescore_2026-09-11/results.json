@@ -1,9 +1,9 @@
 {
-  "reported_at": "2026-09-12T13:15:57.144493+00:00",
-  "completed": 38,
+  "reported_at": "2026-09-12T14:12:38.437557+00:00",
+  "completed": 39,
   "planned": 56,
+  "percentage_basis": "computed_from_point_totals_and_denominators",
   "pending": [
-    "VOICE_v7_rep1_r10_rating1",
     "VOICE_v7_rep2_r20_rating1",
     "VOICE_v7_rep3_r10_rating1",
     "VOICE_v7_rep3_r20_rating1",
@@ -63,7 +63,7 @@
       "ratings": 1,
       "expected_ratings": 3,
       "adjusted_percentages": [
-        91.5
+        91.48936170212765
       ],
       "fixed_percentages": [
         86.0
@@ -77,10 +77,14 @@
     {
       "project": "VOICE",
       "rubric": "rubric10-semantic",
-      "ratings": 0,
+      "ratings": 1,
       "expected_ratings": 3,
-      "adjusted_percentages": [],
-      "fixed_percentages": [],
+      "adjusted_percentages": [
+        98.0
+      ],
+      "fixed_percentages": [
+        98.0
+      ],
       "applicability_stable": null,
       "adjusted_sample_sd": null,
       "fixed_sample_sd": null,
@@ -113,14 +117,14 @@
       "records": 3,
       "expected_records": 3,
       "adjusted_percentages": [
-        93.2,
-        95.5,
-        94.3
+        93.18181818181819,
+        95.45454545454545,
+        94.31818181818181
       ],
       "fixed_percentages": [
-        93.2,
-        95.5,
-        94.3
+        93.18181818181819,
+        95.45454545454545,
+        94.31818181818181
       ]
     },
     {
@@ -147,14 +151,14 @@
       "records": 3,
       "expected_records": 3,
       "adjusted_percentages": [
-        94.3,
-        94.3,
-        92.0
+        94.31818181818181,
+        94.31818181818181,
+        92.04545454545455
       ],
       "fixed_percentages": [
-        94.3,
-        94.3,
-        92.0
+        94.31818181818181,
+        94.31818181818181,
+        92.04545454545455
       ]
     },
     {
@@ -181,14 +185,14 @@
       "records": 3,
       "expected_records": 3,
       "adjusted_percentages": [
-        76.1,
-        71.6,
-        73.9
+        76.13636363636364,
+        71.5909090909091,
+        73.86363636363636
       ],
       "fixed_percentages": [
-        76.1,
-        71.6,
-        73.9
+        76.13636363636364,
+        71.5909090909091,
+        73.86363636363636
       ]
     },
     {
@@ -215,14 +219,14 @@
       "records": 3,
       "expected_records": 3,
       "adjusted_percentages": [
-        76.1,
-        79.5,
-        78.4
+        76.13636363636364,
+        79.54545454545455,
+        78.4090909090909
       ],
       "fixed_percentages": [
-        76.1,
-        79.5,
-        78.4
+        76.13636363636364,
+        79.54545454545455,
+        78.4090909090909
       ]
     },
     {
@@ -232,9 +236,9 @@
       "records": 3,
       "expected_records": 3,
       "adjusted_percentages": [
-        91.5,
-        91.5,
-        89.4
+        91.48936170212765,
+        91.48936170212765,
+        89.36170212765957
       ],
       "fixed_percentages": [
         86.0,
@@ -249,14 +253,14 @@
       "records": 3,
       "expected_records": 3,
       "adjusted_percentages": [
-        80.8,
-        88.5,
-        86.4
+        80.76923076923077,
+        88.46153846153847,
+        86.36363636363636
       ],
       "fixed_percentages": [
-        71.6,
-        78.4,
-        86.4
+        71.5909090909091,
+        78.4090909090909,
+        86.36363636363636
       ]
     },
     {
@@ -266,9 +270,9 @@
       "records": 3,
       "expected_records": 3,
       "adjusted_percentages": [
-        82.98,
-        87.2,
-        85.11
+        82.97872340425532,
+        87.23404255319149,
+        85.1063829787234
       ],
       "fixed_percentages": [
         78.0,
@@ -283,26 +287,28 @@
       "records": 3,
       "expected_records": 3,
       "adjusted_percentages": [
-        81.8,
-        79.5,
-        77.3
+        81.81818181818181,
+        79.48717948717949,
+        77.27272727272727
       ],
       "fixed_percentages": [
-        81.8,
-        70.5,
-        77.3
+        81.81818181818181,
+        70.45454545454545,
+        77.27272727272727
       ]
     },
     {
       "project": "VOICE",
       "cohort": "v7",
       "rubric": "rubric10-semantic",
-      "records": 1,
+      "records": 2,
       "expected_records": 3,
       "adjusted_percentages": [
+        98.0,
         98.0
       ],
       "fixed_percentages": [
+        98.0,
         98.0
       ]
     },
@@ -313,10 +319,10 @@
       "records": 1,
       "expected_records": 3,
       "adjusted_percentages": [
-        92.05
+        92.04545454545455
       ],
       "fixed_percentages": [
-        92.05
+        92.04545454545455
       ]
     },
     {

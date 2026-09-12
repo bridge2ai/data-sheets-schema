@@ -1,0 +1,177 @@
+{
+  "job_id": "CM4AI_v8_rep2_r20_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T14:12:34.798937+00:00",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]",
+    "metadata.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "metadata.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "9fce395dfcba6684dbf183e6c5cf2acc7b6b656c2f76b4ba519974025ca80200",
+  "evaluation_sha256": "7f1516a971b75642eb0b0199ff8302a67fe0e19a4bdb8a5f841e49eb2bbcd004",
+  "cli_result": {
+    "duration_api_ms": 428767,
+    "stop_reason": "end_turn",
+    "session_id": "e94b5fb0-979e-4483-8f25-172d25d4db5a",
+    "total_cost_usd": 1.8656335000000002,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 74362,
+      "cache_read_input_tokens": 496789,
+      "output_tokens": 34344,
+      "output_tokens_details": {
+        "thinking_tokens": 8863
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 74362,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1145,
+          "cache_read_input_tokens": 93808,
+          "cache_creation_input_tokens": 200,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 200
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 14829,
+        "outputTokens": 18,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.014919,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 20,
+        "outputTokens": 34344,
+        "cacheReadInputTokens": 496789,
+        "cacheCreationInputTokens": 74362,
+        "webSearchRequests": 0,
+        "costUSD": 1.8507144999999998,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 8863,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01HhhmBPPxRDAzzFLNDFnd3f",
+        "tool_input": {
+          "command": "shasum -a 256 data/rubric/rubric20.txt input/record.yaml && wc -l data/rubric/rubric20.txt input/record.yaml scripts/validate_evaluation_schema.py"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01WuG63XmrWatXZvqH1KnVWT",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-yw3tyatl/data/rubric/rubric20.txt /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-yw3tyatl/input/record.yaml",
+          "description": "Hash rubric and record files"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 10,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (`VALID output_evaluation.json: rubric20-semantic`, exit 0).\n\n**Definition quote (Reproducibility section, verbatim):**\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nMy instructions contain that section and it reads as expected of the current rules, so I proceeded. Note: `.claude/agents/d4d-rubric20-semantic.md` is not present in this working directory (only `data/rubric`, `scripts`, `src`, `input`), and hashing commands were denied by the sandbox, so I recorded the supplied sha256 as `instrument_sha256` without independently recomputing it.\n\n## Result \u2014 CM4AI, claudecode_api, rep2\n\n| | |\n|---|---|\n| total_points | **62** |\n| fixed_percentage | **70.5%** (62/88) |\n| normalized_percentage | **79.5%** (62/78) |\n| excluded_max_points | 10 (items **Q8, Q15**) |\n| questions_not_applicable | 2 |\n\n**Category sums:** Structural 17/21 \u00b7 Metadata 14/21 (applicable 16) \u00b7 Technical 15/25 (applicable 20) \u00b7 FAIRness 16/21.\n\n**Per-item:** Q1 4, Q2 5, Q3 5, Q4 2, Q5 pass, Q6 pass, Q7 5, Q8 N/A, Q9 4, Q10 4, Q11 2, Q12 4, Q13 4, Q14 5, Q15 N/A, Q16 pass, Q17 4, Q18 4, Q19 4, Q20 3.\n\n**Applicability.** Q8/Q15 set `applicable:false`, `score:null` on non-Q8/Q15 evidence only (description and keywords name cell lines; `collection_mechanisms` describes robotic fixation and a 10x kit; `direct_collection.is_direct=false` states data were \"not collected directly from human subjects\"; `raw_data_sources` sources both lines from ATCC/HipSci). The determination is near the boundary \u2014 `raw_data_sources` carries donor descriptors \u2014 and that reasoning is recorded as a semantic_understanding issue rather than hidden. Q11 was **kept applicable** under the anti-circular rule: `external_resources` (a Q14 field) references code repositories (cellmaps_pipeline, FAIRSCAPE, IMP), so its own empty strategy fields could not exclude it; it scored 2 instead.\n\n**Notable judgements.** Q4 held to 2 \u2014 ten files are enumerated with checksums, but the only declared format is ZIP, so a multi-modal release documents no internal format. Q13 reduced 5\u21924 for two defects inside its own scored fields: a self-referential erratum, and a version string regressing 2.1 \u2192 2.0 across releases. Q18/Q20 are capped by the absent `future_use_impacts`. Consistency checks: 18 passed, 3 failed, 6 warnings; identifier validations all clean (Dataverse DOI prefix, two well-formed NIH awards, Cellosaurus RRIDs, ORCIDs, ROR).",
+    "ttft_ms": 2662,
+    "type": "result",
+    "duration_ms": 430926,
+    "uuid": "35017027-7dc6-4c3e-8109-1314b1f27372",
+    "ttft_stream_ms": 889,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 1399,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep2_r20_rating1/2026-09-12T12-26-16.697843+00-00",
+  "original_receipt_sha256": "25e58011b0a1e8b7c38e4996a3c94c9dabd6f39f1bc23eee8eb6a43aa24bf160",
+  "transcript_sha256": "dae03bc19e68a5a5a83ee01b814f707a567ee1d62e5928181763fefec230276b",
+  "user_prompt_sha256": "8bb298d92bed9ad2fb2655b00697d5ba49a83e1168b56721f85dfc8893ec31a8",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "evaluated_at": "2026-09-12T12:26:16.698391+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

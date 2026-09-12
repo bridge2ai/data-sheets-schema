@@ -220,6 +220,177 @@ def test_validation_must_follow_the_last_potential_mutation(timing, revalidate):
     assert runner.evaluator_validated(trace, "rubric10-semantic") is (revalidate == "passed")
 
 
+def denied_command_trace():
+    trace = events(valid_record())
+    args = {"command": 'poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic > /dev/null; echo "EXIT=$?"',
+            "description": "Confirm validator exit status"}
+    denial = [
+        {"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Bash",
+            "id": "denied", "input": args}]}},
+        {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "denied",
+            "is_error": True, "content": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: ..."}]}},
+    ]
+    trace = trace[:-1] + denial + trace[-1:]
+    trace[-1]["permission_denials"] = [{"tool_name": "Bash", "tool_use_id": "denied", "tool_input": copy.deepcopy(args)}]
+    return trace
+
+
+def test_proven_denial_preserves_validation_but_cannot_create_it():
+    trace = denied_command_trace()
+    assert runner.evaluator_validated(trace, "rubric10-semantic")
+    assert not runner.evaluator_validated(trace[2:], "rubric10-semantic")
+    # An executed command can mutate the file before returning an error.
+    mutation = [
+        {"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Bash",
+            "id": "executed", "input": {"command": "rewrite-output-then-fail"}}]}},
+        {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "executed",
+            "is_error": True, "content": "command failed after writing output"}]}},
+    ]
+    assert not runner.evaluator_validated(trace[:2] + mutation + trace[2:], "rubric10-semantic")
+
+
+@pytest.mark.parametrize("defect", [
+    "missing_terminal", "failed_terminal", "multiple_terminals", "missing_denials", "malformed_denials",
+    "different_id", "different_input", "different_tool", "successful_result", "missing_result",
+    "wrong_result_role", "execution_error", "nonboolean_error", "duplicate_use", "duplicate_result",
+    "duplicate_denial", "out_of_order_result",
+])
+def test_unproven_or_ambiguous_denials_do_not_preserve_validation(defect):
+    trace = denied_command_trace()
+    terminal, use, result = trace[-1], trace[2], trace[3]
+    record = terminal["permission_denials"][0]
+    block = result["message"]["content"][0]
+    if defect == "missing_terminal":
+        trace.pop()
+    elif defect == "failed_terminal":
+        terminal["is_error"] = True
+    elif defect == "multiple_terminals":
+        trace.append(copy.deepcopy(terminal))
+    elif defect == "missing_denials":
+        del terminal["permission_denials"]
+    elif defect == "malformed_denials":
+        terminal["permission_denials"] = "denied"
+    elif defect == "different_id":
+        record["tool_use_id"] = "someone-else"
+    elif defect == "different_input":
+        record["tool_input"]["command"] = "another command"
+    elif defect == "different_tool":
+        record["tool_name"] = "Write"
+    elif defect == "successful_result":
+        block["is_error"] = False
+    elif defect == "missing_result":
+        trace.remove(result)
+    elif defect == "wrong_result_role":
+        result["type"] = "assistant"
+    elif defect == "execution_error":
+        block["content"] = "command failed after writing output"
+    elif defect == "nonboolean_error":
+        block["is_error"] = 1
+    elif defect == "duplicate_use":
+        trace.insert(3, copy.deepcopy(use))
+    elif defect == "duplicate_result":
+        trace.insert(4, copy.deepcopy(result))
+    elif defect == "duplicate_denial":
+        terminal["permission_denials"].append(copy.deepcopy(record))
+    elif defect == "out_of_order_result":
+        trace[2:4] = [result, use]
+    assert not runner.evaluator_validated(trace, "rubric10-semantic")
+
+
+@pytest.mark.parametrize("defect", [
+    "failed_then_duplicate_success", "success_then_duplicate_failure", "duplicate_use",
+    "unanswered_later_validator", "validator_result_after_terminal",
+])
+def test_denial_cannot_preserve_ambiguous_validator_evidence(defect):
+    trace = denied_command_trace()
+    if defect == "failed_then_duplicate_success":
+        success = copy.deepcopy(trace[1])
+        trace[1]["message"]["content"][0].update(is_error=True, content="schema validation failed")
+        trace.insert(-1, success)
+    elif defect == "success_then_duplicate_failure":
+        failure = copy.deepcopy(trace[1])
+        failure["message"]["content"][0].update(is_error=True, content="schema validation failed")
+        trace.insert(-1, failure)
+    elif defect == "duplicate_use":
+        trace.insert(1, copy.deepcopy(trace[0]))
+    elif defect == "unanswered_later_validator":
+        unanswered = copy.deepcopy(trace[0])
+        unanswered["message"]["content"][1]["id"] = "unanswered"
+        trace.insert(2, unanswered)
+    elif defect == "validator_result_after_terminal":
+        trace.append(trace.pop(1))
+    assert not runner.evaluator_validated(trace, "rubric10-semantic")
+
+
+@pytest.mark.parametrize("tool", ["Write", "Bash"])
+def test_duplicate_mutation_ids_cannot_hide_a_completion_after_validation(tool):
+    trace = denied_command_trace()
+    def write(value):
+        args = {"file_path": "/isolated/output_evaluation.json", "content": value} if tool == "Write" else {"command": f"write-{value}"}
+        return {"type": "assistant", "message": {"content": [
+            {"type": "tool_use", "name": tool, "id": "write", "input": args}]}}
+    result = {"type": "user", "message": {"content": [
+        {"type": "tool_result", "tool_use_id": "write", "content": "File updated successfully"}]}}
+    trace = [write("A"), write("B"), result] + trace[:2] + [copy.deepcopy(result)] + trace[2:]
+    assert not runner.evaluator_validated(trace, "rubric10-semantic")
+
+
+@pytest.mark.parametrize("identifier", ["unrecorded-call", None, ""])
+def test_orphan_tool_result_cannot_certify_validation(identifier):
+    trace = denied_command_trace()
+    trace.insert(2, {"type": "user", "message": {"content": [
+        {"type": "tool_result", "tool_use_id": identifier, "content": "File updated successfully"}]}})
+    assert not runner.evaluator_validated(trace, "rubric10-semantic")
+
+
+@pytest.mark.parametrize("error", [False, True])
+@pytest.mark.parametrize("revalidate", [False, True])
+def test_later_executed_validator_failure_requires_new_success(error, revalidate):
+    trace = denied_command_trace()
+    failed = events(valid_record())[:2]
+    failed[0]["message"]["content"][1]["id"] = "later-validator"
+    failed[1]["message"]["content"][0].update(tool_use_id="later-validator", is_error=error,
+                                             content="INVALID output_evaluation.json: rubric10-semantic")
+    trace = trace[:2] + failed + trace[2:]
+    if revalidate:
+        fresh = events(valid_record())[:2]
+        fresh[0]["message"]["content"][1]["id"] = "fresh-validator"
+        fresh[1]["message"]["content"][0]["tool_use_id"] = "fresh-validator"
+        trace = trace[:-1] + fresh + trace[-1:]
+    assert runner.evaluator_validated(trace, "rubric10-semantic") is revalidate
+
+
+def test_proven_denial_of_exact_validator_preserves_prior_success():
+    trace = denied_command_trace()
+    args = trace[2]["message"]["content"][0]["input"]
+    args["command"] = "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic"
+    trace[-1]["permission_denials"][0]["tool_input"] = copy.deepcopy(args)
+    assert runner.evaluator_validated(trace, "rubric10-semantic")
+    assert not runner.evaluator_validated(trace[2:], "rubric10-semantic")
+
+
+@pytest.mark.parametrize("error", [False, True])
+@pytest.mark.parametrize("batched", [False, True])
+@pytest.mark.parametrize("failure_first", [False, True])
+@pytest.mark.parametrize("fresh_validation", [False, True])
+def test_delayed_validation_cannot_restore_revoked_attestation(error, batched, failure_first, fresh_validation):
+    trace = denied_command_trace()
+    later = events(valid_record())[:2]
+    later[0]["message"]["content"][1]["id"] = "later-validator"
+    later[1]["message"]["content"][0].update(tool_use_id="later-validator", is_error=error,
+                                            content="INVALID output_evaluation.json: rubric10-semantic")
+    outcomes = [later[1], trace[1]] if failure_first else [trace[1], later[1]]
+    if batched:
+        outcomes = [{"type": "user", "message": {"content": [e["message"]["content"][0] for e in outcomes]}}]
+    pending = [trace[0], later[0]] + outcomes
+    if fresh_validation:
+        fresh = events(valid_record())[:2]
+        fresh[0]["message"]["content"][1]["id"] = "fresh-validator"
+        fresh[1]["message"]["content"][0]["tool_use_id"] = "fresh-validator"
+        pending.extend(fresh)
+    assert runner.evaluator_validated(pending + trace[2:], "rubric10-semantic") is fresh_validation
+
+
 @pytest.mark.parametrize("command", [
     "poetry run python /other/scripts/validate_evaluation_schema.py --file /isolated/output_evaluation.json --rubric rubric10-semantic",
     "poetry run python /isolated/scripts/validate_evaluation_schema.py --file /other/output_evaluation.json --rubric rubric10-semantic",
@@ -870,3 +1041,64 @@ def test_repeatability_report_separates_repeated_ratings_from_generation_records
     assert primary["records"] == min(rating_count, 1)
     ai_readi = next(r for r in results["repeatability"] if r["project"] == "AI_READI")
     assert ai_readi["fixed_sample_sd"] is None
+
+
+@pytest.mark.parametrize("different_scores", [False, True])
+def test_repeatability_ignores_serialized_percentage_precision(environment, monkeypatch, different_scores):
+    root, manifest, job, doc = environment
+    monkeypatch.syspath_prepend(str(REAL_ROOT / "scripts"))
+    jobs = [{**job, "id": f"rating{rating}", "rating": rating,
+             "purpose": "primary" if rating == 1 else "repeatability", "output": f"rating{rating}.json"}
+            for rating in (1, 2, 3)]
+    manifest["jobs"] = jobs
+    runner.write_json(runner.PLAN / "manifest.json", manifest)
+    preserved = {}
+    for index, j in enumerate(jobs):
+        d = copy.deepcopy(doc)
+        points = 43 + index if different_scores else 43
+        applicable = [s for e in d["elements"] for s in e["sub_elements"] if s["score"] is not None]
+        for sub in applicable[:48 - points]:
+            sub["score"] = 0
+        for element in d["elements"]:
+            element["element_score"] = sum(s["score"] or 0 for s in element["sub_elements"])
+        percentage = 100 * points / 48
+        d["overall_score"].update(total_points=points, fixed_percentage=2 * points,
+                                  normalized_percentage=round(percentage, index + 1) if index < 2 else percentage)
+        runner.check_arithmetic(d)
+        runner.write_json(root / j["output"], d)
+        preserved[j["output"]] = runner.digest(root / j["output"])
+        runner.write_json(runner.PLAN / "attempts" / j["id"] / "one/receipt.json", {
+            "status": "passed", "evaluation_sha256": preserved[j["output"]],
+            "manifest_sha256": runner.digest(runner.PLAN / "manifest.json")})
+    results = runner.report_results(manifest)
+    repeated = next(r for r in results["repeatability"] if r["project"] == job["project"])
+    assert repeated["adjusted_sample_sd"] == pytest.approx(100 / 48 if different_scores else 0)
+    assert repeated["adjusted_range"] == pytest.approx(200 / 48 if different_scores else 0)
+    assert repeated["fixed_sample_sd"] == pytest.approx(2 if different_scores else 0)
+    assert repeated["fixed_range"] == pytest.approx(4 if different_scores else 0)
+    primary = next(r for r in results["generation_replicates"] if r["project"] == job["project"]
+                   and r["cohort"] == "v7" and r["rubric"] == job["rubric"])
+    assert primary["adjusted_percentages"] == pytest.approx([100 * 43 / 48])
+    assert {rel: runner.digest(root / rel) for rel in preserved} == preserved
+
+
+def test_primary_rubric20_derives_both_percentage_bases(environment, monkeypatch):
+    root, manifest, job, _ = environment
+    monkeypatch.syspath_prepend(str(REAL_ROOT / "scripts"))
+    job["rubric"] = "rubric20-semantic"
+    doc = valid_record(20)
+    doc["project"] = job["project"]
+    runner.check_arithmetic(doc)
+    manifest["jobs"] = [job]
+    runner.write_json(runner.PLAN / "manifest.json", manifest)
+    runner.write_json(root / job["output"], doc)
+    preserved = runner.digest(root / job["output"])
+    runner.write_json(runner.PLAN / "attempts" / job["id"] / "one/receipt.json", {
+        "status": "passed", "evaluation_sha256": preserved,
+        "manifest_sha256": runner.digest(runner.PLAN / "manifest.json")})
+    results = runner.report_results(manifest)
+    primary = next(r for r in results["generation_replicates"] if r["project"] == job["project"]
+                   and r["cohort"] == "v7" and r["rubric"] == job["rubric"])
+    assert primary["fixed_percentages"] == pytest.approx([100 * 83 / 88])
+    assert primary["adjusted_percentages"] == [100.0]  # Five N/A points: 83/83, not 83/88.
+    assert runner.digest(root / job["output"]) == preserved

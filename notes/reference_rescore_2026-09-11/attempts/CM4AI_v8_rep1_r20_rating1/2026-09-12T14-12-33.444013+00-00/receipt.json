@@ -1,0 +1,176 @@
+{
+  "job_id": "CM4AI_v8_rep1_r20_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T14:12:33.444462+00:00",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "b14858313cb86f692a326c76764505a6d3c1f64a92ee452638eedd3636baba41",
+  "evaluation_sha256": "67e52b1efa9357a760eed1f27d1e7aea512ba857a4a38c071a0dfcbd02eea281",
+  "cli_result": {
+    "duration_api_ms": 426460,
+    "stop_reason": "end_turn",
+    "session_id": "502ff423-7c36-4acd-bd1e-efe72ef3e0c3",
+    "total_cost_usd": 1.7742049999999998,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 64270,
+      "cache_read_input_tokens": 515924,
+      "output_tokens": 34346,
+      "output_tokens_details": {
+        "thinking_tokens": 8905
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 64270,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1345,
+          "cache_read_input_tokens": 83516,
+          "cache_creation_input_tokens": 400,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 400
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 14698,
+        "outputTokens": 19,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.014792999999999999,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 20,
+        "outputTokens": 34346,
+        "cacheReadInputTokens": 515924,
+        "cacheCreationInputTokens": 64270,
+        "webSearchRequests": 0,
+        "costUSD": 1.759412,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 8905,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01ELM4tPJvTxoj4ua2g6souf",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml 2>/dev/null; find . -name \"*.md\" -path \"*agents*\" 2>/dev/null | head; ls data/rubric 2>/dev/null"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01CcCGzAku1339g6eU5p98Kg",
+        "tool_input": {
+          "command": "grep -n \"Applies to\\|Question 1[0-9]\\|Question [1-9]\" /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-bpe92ln5/data/rubric/rubric20.txt | head -50; python3 -c \"import uuid;print(uuid.uuid4())\""
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01GPUtLb7pd7t6GrPyp7EwMp",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\""
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0): `VALID output_evaluation.json: rubric20-semantic`.\n\n**Definition check.** The Reproducibility section is present in my instructions and matches the current contract. Verbatim:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\n**Evaluation written** to `output_evaluation.json` for `data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml` (CM4AI, `claudecode_api`).\n\n| | |\n|---|---|\n| total_points | **72** |\n| max_points (fixed base) | 88 \u2192 **fixed_percentage 81.8%** |\n| excluded_max_points | 0 \u2192 adjusted_max_points 88 \u2192 **normalized_percentage 81.8%** |\n| questions_not_applicable | 0 (no excluded item ids) |\n\nCategory sums: Structural 17/21 \u00b7 Metadata 19/21 \u00b7 Technical 20/25 \u00b7 FAIRness 16/21.\n\n**Applicability.** No question was excluded. The four gated conditions each resolved on fields outside the gated question's own scoring set: sharing is evidenced by the resolvable Dataverse page, publication dates and the statement that all ten archives have public file access (gates Q10, Q12, Q13, Q17); the software condition is met by `external_resources` naming the Cell Mapping Toolkit GitHub/Zenodo repositories and FAIRSCAPE (gates Q11); the human-subjects condition is borderline \u2014 human-donor-derived cell lines with donor demographics in `description`/`keywords`/`raw_data_sources`, but no enrolled participants \u2014 so under the ambiguity rule Q8 and Q15 are **applicable and scored** (4 and 3) rather than set to N/A.\n\n**Scoring drivers.** Top marks for keyword diversity, narrative length, funding, governance, version/sustainability documentation and citations. The largest deductions: Q4 (2/5 \u2014 a single ZIP container media type, though enumeration of ten checksummed archives is excellent), Q20 (3/5 \u2014 one bias category, no AIO/CROISSANT mapping, empty `future_use_impacts`), Q11 (3/5 \u2014 one packaging-level preprocessing entry, no tool versions), Q15 (3/5 \u2014 donor-level demographics but no subpopulation structure).\n\n**Semantic findings** (16 passed / 2 failed / 6 warnings). Two failures: temporal ordering (three IF archives issued 2026-07-15, after the v2.0 publication date of 2026-06-17, plus an unresolved portal/Dataverse 2025-vs-2026 conflict), and an asserted RO-Crate PROV graph that is not instantiated (`was_derived_from` and `parent_datasets` empty; the sole derivation claim inferred from filenames). Validations: DOI prefix 10.18130 registrar-consistent with the UVA Dataverse landing page and citation; NIH numbers `1OT2OD032742-01` and `5U54HG012513-02` well-formed; RRIDs correctly in the Cellosaurus `CVCL_` namespace rather than `SCR_`/`AB_`; URLs structurally valid (not network-resolved). The record's field-level `source_caveats` discipline \u2014 including refusing to carry forward protein counts once MD5 checksums diverged \u2014 was credited as a genuine strength, not treated as a defect.\n\n`model.name` and `model.evaluator_model` both record this session's runtime model, `claude-opus-5[1m]`; `temperature` is `null` (this CLI does not expose it). Metadata carries the pinned `instrument_sha256`, `instrument_kind: agent_definition`, `rubric_hash` and `input_sha256`.",
+    "ttft_ms": 2879,
+    "type": "result",
+    "duration_ms": 427548,
+    "uuid": "ac94d9bd-1afa-4c6a-aa37-8a2b58c45856",
+    "ttft_stream_ms": 1177,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 1656,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/CM4AI_v8_rep1_r20_rating1/2026-09-12T12-26-07.176275+00-00",
+  "original_receipt_sha256": "0f73311943cc9609abe5e34b81055704d5d4de08014a8cb6fd249ab8f864e911",
+  "transcript_sha256": "01809715e4a68c1ae5e0ed2d1aa348269e67aa7f196481655f0efeaad99da3cb",
+  "user_prompt_sha256": "461263b0c9b9f29d9140a3511fd91e413abe48fc3a60c333961aa02899ae80ac",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "evaluated_at": "2026-09-12T12:26:07.176617+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}

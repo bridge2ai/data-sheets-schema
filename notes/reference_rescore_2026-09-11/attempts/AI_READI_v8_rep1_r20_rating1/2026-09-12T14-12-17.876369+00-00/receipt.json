@@ -1,0 +1,186 @@
+{
+  "job_id": "AI_READI_v8_rep1_r20_rating1",
+  "status": "passed",
+  "completed_at": "2026-09-12T14:12:17.876854+00:00",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]",
+    "metadata.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "metadata.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "4f09d95003ba1f3f5af5b611412126444f14acc1336410f0a962abd9c0f7f85f",
+  "evaluation_sha256": "2267a7af9460609b11e6d9302de51e7633e987f9e7cbe3e751edf9e875517029",
+  "cli_result": {
+    "duration_api_ms": 521608,
+    "stop_reason": "end_turn",
+    "session_id": "66e5beec-c649-4ea4-816f-27948c8f7420",
+    "total_cost_usd": 2.3632560000000002,
+    "usage": {
+      "input_tokens": 26,
+      "cache_creation_input_tokens": 90482,
+      "cache_read_input_tokens": 779992,
+      "output_tokens": 41867,
+      "output_tokens_details": {
+        "thinking_tokens": 12366
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 90482,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1269,
+          "cache_read_input_tokens": 109931,
+          "cache_creation_input_tokens": 197,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 197
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 21525,
+        "outputTokens": 22,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.021634999999999998,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 26,
+        "outputTokens": 41867,
+        "cacheReadInputTokens": 779992,
+        "cacheCreationInputTokens": 90482,
+        "webSearchRequests": 0,
+        "costUSD": 2.341621,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 12366,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01NEh7yzu4393BpVjFvUFgyy",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-q6vnh_bb; find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01DdUSnhyJvWuaGUSCxdarjB",
+        "tool_input": {
+          "command": "ls -R data scripts input src | head -50; shasum -a 256 input/record.yaml data/rubric/* 2>/dev/null",
+          "description": "Inspect directories and hashes"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01R4PrdEP91W7ZAWT6fWJUW4",
+        "tool_input": {
+          "command": "uuidgen",
+          "description": "Generate evaluator UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "**Definition check \u2014 passed.** The \"Reproducibility\" section is present in my instructions, and the sentence beginning \"Repeatability must be\" reads, verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nThat matches the current instrument, so I proceeded. Recorded `instrument_sha256` as `9d08b5f3\u20265a0e7dd3` with `instrument_kind: agent_definition`.\n\n## Result\n\n`output_evaluation.json` written and validated: `VALID output_evaluation.json: rubric20-semantic`.\n\n**Score: 83 / 88 \u2014 fixed 94.3% (denominator 88), normalized 94.3% (denominator 88).** No question was excluded; all four trigger conditions were satisfied, so `excluded_max_points: 0`, `questions_not_applicable: 0`, and no `score: null` entries exist.\n\nApplicability was resolved before scoring, on non-self fields per the anti-circular rule: human subjects (via `description`/`keywords`/`collection_mechanisms`) gates Q8/Q15 in; sharing (via `page`, `third_party_sharing`, licence) gates Q10/Q17 in; the `github.com/AI-READI` entry in `external_resources` gates Q11 in; collection-plus-sharing gates Q12/Q13 in.\n\nCategory scores: Structural 19/21, Metadata 20/21, Technical 24/25, FAIRness 20/21.\n\nWhere points were lost, and why \u2014 each is a semantic finding rather than a missing field:\n\n- **Q3 = 3** \u2014 exactly seven keywords, one short of the \u22658 band. A count item, so I applied the band rather than rewarding the near-miss; the record documents OCT, OCTA, wearables and salutogenesis elsewhere but does not surface them for search.\n- **Q8 = 4** \u2014 `data_protection_impacts` is empty and re-identification risk is a single qualitative sentence, while `is_deidentified` carries three incompatible statements (FAIRhub \"NoDeIdentification\", HIPAA Safe Harbor, RO-Crate \"deidentified\") beneath `hipaa_compliant: compliant`. Compounded by `sensitive_elements_present: false` for retinal imaging, CGM and wearable physiology.\n- **Q11 = 4** \u2014 strategies are comprehensive, but no tool carries a version and the GitHub link is untied to specific code, so the release cannot be re-derived from the raw exports.\n- **Q18 = 4** \u2014 `future_use_impacts` claims no anticipated unfair treatment, while the record's own `known_limitations.scope_impact` says derived models may not generalise to unreached populations. The social-impact field understates a harm the same document establishes.\n\nTwelve issues logged (3 consistency failures, 6 warnings, 25 checks passed). Correctness validation was clean: the FAIRhub DOI prefix corroborates publisher and landing page, all three NIH grant numbers are format-valid with RePORTER corroboration, and ORCID/ROR/NCT/publication DOIs all validate. Four participant arithmetic checks close exactly on 2280.\n\nOne note in the record's favour that I recorded rather than penalised: its `source_caveats` reports the file-count and byte totals as unreconciled, but the arithmetic actually closes \u2014 the nine-file shortfall is exactly the nine root-level metadata files it enumerates. I flagged that as a low-severity overstatement, not a defect.",
+    "ttft_ms": 1431,
+    "type": "result",
+    "duration_ms": 523591,
+    "uuid": "eef80d0f-4307-4ccb-b68d-550dbbf5edb6",
+    "ttft_stream_ms": 853,
+    "time_to_request_ms": 22,
+    "first_content_frame_ms": 853,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "recovered_from": "notes/reference_rescore_2026-09-11/attempts/AI_READI_v8_rep1_r20_rating1/2026-09-12T09-35-01.802029+00-00",
+  "original_receipt_sha256": "61afb471c5936636f75bdf51be094d944871b0c64782df3f006687b3c05ee1ed",
+  "transcript_sha256": "299a2c33c708fb916130c0ed919f1c84350103cfbdd1ff19d0b43a8f016a9e97",
+  "user_prompt_sha256": "f30f5ef785c52af941db1b22e3a727f125dd8bd542e6ab9aa8121eceaacfcf9f",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "evaluated_at": "2026-09-12T09:35:01.802418+00:00",
+  "model_calls_during_recovery": 0,
+  "preserved_existing_output": true
+}
