@@ -1,6 +1,10 @@
 # Pinned v7/v8 reference rescore completion
 
-Recorded 2026-09-12T15:57:32.602211+00:00 for #1248, #1080, #1062, #1327, #1335 and #1336.
+<!-- Q19 semantic qualification:start -->
+**Semantic qualification — Q19:** 15 rubric20 rationales contain representation-related objections requiring adjudication under the frozen text-or-graph rule. Their Q19 values, recorded totals and summaries containing them are unadjudicated model measurements. Mechanical acceptance does not certify semantic adherence. No scores were corrected or rerated. See the [Q19 erratum](semantic_errata.md), including the full 24-rating inspection and its limits. Rubric10 repeatability is unaffected by this Q19 erratum.
+<!-- Q19 semantic qualification:end -->
+
+Recorded 2026-09-12T16:16:08.141918+00:00 for #1248, #1080, #1062, #1327, #1335 and #1336.
 
 All 24 existing production D4Ds (v7 and v8, three generation replicates per project) now have both semantic rubric ratings: 48 primary ratings. Eight additional rubric10 ratings complete three independent ratings of v7 rep1 per project, for 56 accepted ratings. Each rating used its supplied D4D and pinned rubric resources in a fresh isolated session. No D4D generation or source download was performed.
 
@@ -36,7 +40,7 @@ The historical files remain unchanged. Their replacements are independent rating
 
 | Record | Historical total | Historical fractional questions | Fresh reference total | Fresh evaluation |
 |---|---|---|---|---|
-| AI_READI v7 rep2 | 84.5/88 | Q7=4.5, Q19=4.5, Q20=4.5 | 84/88 fixed; 84/88 adjusted | [AI_READI_v7_rep2_r20_rating1](../../data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v7_rep2_r20_rating1_evaluation.json) |
-| VOICE v7 rep3 | 83.5/88 | Q20=4.5 | 82/88 fixed; 82/88 adjusted | [VOICE_v7_rep3_r20_rating1](../../data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep3_r20_rating1_evaluation.json) |
+| AI_READI v7 rep2 [Q19 erratum](semantic_errata.md) | 84.5/88 | Q7=4.5, Q19=4.5, Q20=4.5 | 84/88 fixed; 84/88 adjusted | [AI_READI_v7_rep2_r20_rating1](../../data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v7_rep2_r20_rating1_evaluation.json) |
+| VOICE v7 rep3 [Q19 erratum](semantic_errata.md) | 83.5/88 | Q20=4.5 | 82/88 fixed; 82/88 adjusted | [VOICE_v7_rep3_r20_rating1](../../data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep3_r20_rating1_evaluation.json) |
 
 This completion covers the registered manuscript reference evaluation. It does not certify a new generation release, resolve the separate general-user packaging and vocabulary issues, or change historical prediction verdicts on the basis of small score gaps.

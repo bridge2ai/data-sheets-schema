@@ -1,0 +1,1126 @@
+{
+  "recorded_at": "2026-09-12T16:13:26.192615+00:00",
+  "issue": 1337,
+  "reviewed_measurement_commit": "79f628202f64453250d6047b53e0eeba8fe4b524",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "rule_path": ".claude/agents/d4d-rubric20-semantic.md",
+  "rule_line": 396,
+  "scope": "All 24 accepted rubric20 Q19 score labels, quality notes and semantic analyses were read for representation-based objections. Input field locations are linked for follow-up. This is a rationale inspection, not a complete semantic adjudication or rerating.",
+  "rule": "Complete textual provenance and a W3C PROV-O graph are both permitted. A structured serialization, typed derivation field or programmatic traversal is not required solely as a representation preference. Missing substantive relationships or other Q19 content can still matter.",
+  "qualification": "Treat flagged Q19 values, recorded totals and summaries containing them as unadjudicated model measurements. Mechanical acceptance does not establish semantic adherence. No point adjustment, corrected total, new instrument or new evaluator call is made. Unflagged entries are not certified correct.",
+  "ratings_inspected": 24,
+  "ratings_requiring_adjudication": 15,
+  "observations": [
+    {
+      "job_id": "VOICE_v7_rep3_r20_rating1",
+      "input_lines": [
+        722,
+        731
+      ],
+      "observation": "The machine_annotation_tools descriptions map named software to generated feature families."
+    },
+    {
+      "job_id": "VOICE_v7_rep3_r20_rating1",
+      "input_lines": [
+        780,
+        782
+      ],
+      "observation": "The acquisition description links all distributed features to standardized audio through b2aiprep."
+    },
+    {
+      "job_id": "VOICE_v7_rep1_r20_rating1",
+      "input_lines": [
+        935,
+        938
+      ],
+      "observation": "The external resource description identifies b2aiprep as converting raw waveforms to Parquet features and merging source data into phenotype files."
+    }
+  ],
+  "cases": [
+    {
+      "job_id": "AI_READI_v7_rep1_r20_rating1",
+      "project": "AI_READI",
+      "cohort": "v7",
+      "generation_rep": 1,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v7_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "cd1a539f23afc767b07aa493aa3a9ed7a75f793bbc05122678d9a7a3e4acf02b",
+      "q19_line": 427,
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml",
+      "input_sha256": "dd656a3a6e8b6bc0f00a50c5d1a5e75c6d2eae8407866c2ba3d2cc3c63b8fdb5",
+      "input_fields": [
+        {
+          "field": "data_collectors",
+          "line": 199
+        },
+        {
+          "field": "acquisition_methods",
+          "line": 228
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 251
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 961
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 991
+        },
+        {
+          "field": "external_resources",
+          "line": 1550
+        }
+      ],
+      "q19_score": 5,
+      "recorded_total_points": 82,
+      "status": "not_flagged_by_this_inspection",
+      "assessment": "No representation-based deduction was identified in this Q19 rationale inspection. This does not certify lineage completeness, the assigned score, other questions or external source truth.",
+      "q19_score_label": "Full provenance in text: entity-activity-agent relationships, processing lineage and derivation paths",
+      "q19_quality_note": "The 5-point band is met on all three of its stated components, expressed as text, which the rubric explicitly accepts in place of a serialized PROV-O graph. The lineage is complete rather than illustrative: each of the nine raw sources can be traced from the instrument that produced it, through the named conversion and the QC step, to the directory it occupies in the release, and the agents responsible at each stage are identified by role with their authority over the data stated. Quality documentation reinforces integrity with physically grounded anomaly causes and a documented missing-data regime.",
+      "q19_semantic_analysis": "The provenance account reconciles with every other part of the record: the nine raw sources correspond one-to-one with the nine collection mechanisms and the nine datatype file_collections, and each declared target format matches the conforms_to_standard value for its collection. Version lineage is coherent, with the is_new_version_of relationships matching the version_access history. Two gaps are worth recording without moving the score: was_derived_from and parent_datasets are not populated as fields, their content being carried by raw_data_sources and related_datasets instead; and no checksums or fixity values are published, so file counts and byte totals are the only integrity handles for a 3.82 TB transfer. Those totals do at least reconcile internally to the byte, which is itself an integrity signal."
+    },
+    {
+      "job_id": "AI_READI_v7_rep2_r20_rating1",
+      "project": "AI_READI",
+      "cohort": "v7",
+      "generation_rep": 2,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v7_rep2_r20_rating1_evaluation.json",
+      "evaluation_sha256": "3a7a90f9a98249fc64f2e4309a15215085c61df451368aeebfd80d2d83a19dad",
+      "q19_line": 423,
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_d4d.yaml",
+      "input_sha256": "c56d8261656557a68a8d94045593dd5c6b1b408d84f6aa98af5745955ef67f61",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 534
+        },
+        {
+          "field": "data_collectors",
+          "line": 581
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 622
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 890
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 933
+        },
+        {
+          "field": "external_resources",
+          "line": 1483
+        }
+      ],
+      "q19_score": 4,
+      "recorded_total_points": 84,
+      "status": "requires_adjudication",
+      "assessment": "The Q19 rationale objects to narrative, untyped or non-machine-traversable lineage. Some rationales also cite content, identifier, versioning or quality gaps; those claims are not adjudicated here. The representation objection requires qualification under the frozen text-or-graph rule. No corrected score is inferred.",
+      "q19_score_label": "Very Good - derivation paths and lineage documented, not an explicit graph",
+      "q19_quality_note": "Well beyond the version-history level that would score 3: derivation paths are stated per data type and processing lineage is traceable from device-native export through conversion to released format. It falls short of 5 because the entity, activity and agent facts are distributed across four sections with no field linking them, and there is no was_derived_from slot -- the graph must be assembled by the reader rather than read off.",
+      "q19_semantic_analysis": "Provenance here is textual, which the rubric accepts, and the text is complete enough that a full lineage can be reconstructed for every modality. What is missing is the relational structure: nothing states which agent performed which conversion on which entity. Data integrity is independently corroborated by the exact reconciliation of file counts and byte totals against the subcrate enumeration, and the record's candour about the absence of external audit is noted as a quality signal rather than a deduction."
+    },
+    {
+      "job_id": "AI_READI_v7_rep3_r20_rating1",
+      "project": "AI_READI",
+      "cohort": "v7",
+      "generation_rep": 3,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v7_rep3_r20_rating1_evaluation.json",
+      "evaluation_sha256": "5c0766bc4a54ab1cd017d6a1a5d36804a9c4960dfbc75a6412a1aa607548b868",
+      "q19_line": 427,
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml",
+      "input_sha256": "d221e2b36c2a98ebe21f57bc72039e6b840323b37d5155053e592fe9fb247409",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 810
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 825
+        },
+        {
+          "field": "data_collectors",
+          "line": 910
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 986
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 1043
+        },
+        {
+          "field": "external_resources",
+          "line": 1403
+        }
+      ],
+      "q19_score": 4,
+      "recorded_total_points": 83,
+      "status": "requires_adjudication",
+      "assessment": "The Q19 rationale objects to narrative, untyped or non-machine-traversable lineage. Some rationales also cite content, identifier, versioning or quality gaps; those claims are not adjudicated here. The representation objection requires qualification under the frozen text-or-graph rule. No corrected score is inferred.",
+      "q19_score_label": "Well beyond version history, short of a complete derivation graph in typed fields",
+      "q19_quality_note": "Substantially more than the band-3 description of version history alone. A reader can trace each released directory back to a named device export, through a named conversion, to a named standard, under named responsible agents (site data managers, site PIs approving edits, the central project team, the UW NORC laboratory, the UAB biorepository). What is missing is the typed representation: derivation lives in prose across raw_data_sources and preprocessing_strategies rather than in was_derived_from or parent_datasets edges, and the RO-Crate that would carry FAIRscape provenance is referenced without its content being transcribed. Held at 4.",
+      "q19_semantic_analysis": "Assessed against the rubric's allowance that provenance may be text rather than PROV-O, the entity-activity-agent triad is largely recoverable: entities are the device-native exports and the released standardized files, activities are the conversions, the OMOP mapping, the Safe Harbor stripping and the two QC stages, agents are the site and central personnel named in data_collectors and cleaning_strategies. Cross-version lineage is carried by related_datasets is_new_version_of rather than parent_datasets, which is semantically equivalent but not the field the question names. Integrity is further supported by the anomalies block, which documents known quality defects per device candidly (Optomed image variability without dilation, FLIO movement sensitivity and end-of-visit fatigue, Garmin charging gaps), and by the disclosure that raw pre-standardization data are retained but not shared \u2014 so the lineage terminates at a stated boundary rather than trailing off."
+    },
+    {
+      "job_id": "AI_READI_v8_rep1_r20_rating1",
+      "project": "AI_READI",
+      "cohort": "v8",
+      "generation_rep": 1,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v8_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "2267a7af9460609b11e6d9302de51e7633e987f9e7cbe3e751edf9e875517029",
+      "q19_line": 442,
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml",
+      "input_sha256": "4f09d95003ba1f3f5af5b611412126444f14acc1336410f0a962abd9c0f7f85f",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 564
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 579
+        },
+        {
+          "field": "data_collectors",
+          "line": 657
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 727
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 760
+        },
+        {
+          "field": "external_resources",
+          "line": 1299
+        }
+      ],
+      "q19_score": 5,
+      "recorded_total_points": 83,
+      "status": "not_flagged_by_this_inspection",
+      "assessment": "No representation-based deduction was identified in this Q19 rationale inspection. This does not certify lineage completeness, the assigned score, other questions or external source truth.",
+      "q19_score_label": "Full lineage with entity, activity and agent relationships and derivation paths",
+      "q19_quality_note": "The 5-band asks for entity-activity-agent relationships, processing lineage and derivation paths; all three are present, in text as the rubric permits, and are corroborated by machine-readable RO-Crate/FAIRscape packaging. Version history alone would have earned 3 \u2014 this goes materially beyond it by tracing each modality from its device-native format through named transformations approved by named roles.",
+      "q19_semantic_analysis": "The lineage is verifiable internally rather than merely asserted: every raw format listed in raw_data_sources has a corresponding conversion target in preprocessing_strategies and a matching conforms_to_standard on the destination collection, so the chain closes for each modality. Integrity documentation is unusually candid, recording data losses, device failures and the deliberate use of multiple imaging devices per measure with the warning that device and protocol differences must be accounted for. The gap is expressive rather than substantive: derivation is recoverable by reading narrative fields but is not carried in the typed was_derived_from and parent_datasets slots, logged as a low-severity completeness note."
+    },
+    {
+      "job_id": "AI_READI_v8_rep2_r20_rating1",
+      "project": "AI_READI",
+      "cohort": "v8",
+      "generation_rep": 2,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v8_rep2_r20_rating1_evaluation.json",
+      "evaluation_sha256": "3a50e403ea0cd986e22a9e27254b64ad86a4f12999a001892dc910df929cc540",
+      "q19_line": 444,
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml",
+      "input_sha256": "225e5fd96d9599600b8fa789943bec45e46f5a9b6d2f78c2da809111e27ab2b8",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 566
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 581
+        },
+        {
+          "field": "data_collectors",
+          "line": 692
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 786
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 830
+        },
+        {
+          "field": "external_resources",
+          "line": 1583
+        }
+      ],
+      "q19_score": 4,
+      "recorded_total_points": 83,
+      "status": "requires_adjudication",
+      "assessment": "The Q19 rationale objects to narrative, untyped or non-machine-traversable lineage. Some rationales also cite content, identifier, versioning or quality gaps; those claims are not adjudicated here. The representation objection requires qualification under the frozen text-or-graph rule. No corrected score is inferred.",
+      "q19_score_label": "Substantially beyond version history; lineage complete in prose but not graph-traversable at artifact level",
+      "q19_quality_note": "Clearly exceeds the 3-point anchor of version history alone: derivation from the parent study, typed version lineage, raw-to-processed transformation paths and a named agent for each processing activity are all present, as is a reference to a FAIRSCAPE provenance package. Held at 4 because the 5-point anchor asks for a full provenance graph: no field links a specific derived artifact to the specific raw input and activity that produced it, the RO-Crate that would carry those edges is described as distributed outside the release and is absent from the nine root metadata files, and no errata mechanism is recorded.",
+      "q19_semantic_analysis": "Read across fields, the entity-activity-agent triad is recoverable and correct \u2014 raw device exports (entities) are transformed by named conversions and OMOP/DICOM mapping (activities) performed by site coordinators, site data managers, site principal investigators and the central project team (agents), with authority boundaries stated, notably that editing occurred 'only under the guidance and approval of the site principal investigator'. Integrity signals are unusually strong on the quality side: REDCap range checks at entry, a data-manager sign-off before upload, an internal PII review, and dqd_omop.json enabling 3,500+ OMOP quality checks by the reuser. Integrity is also demonstrated rather than asserted through arithmetic that closes \u2014 file counts reconcile exactly to 356,343 \u2014 and through the disclosure of the one figure that does not, the 419,614-byte size gap. Raw data retention is handled candidly: raw exports are preserved but not shared because they are unmapped and 'may accidentally include personal health information ... for example in free text fields', which is a sound reason and leaves the lineage's first hop documented but unreachable."
+    },
+    {
+      "job_id": "AI_READI_v8_rep3_r20_rating1",
+      "project": "AI_READI",
+      "cohort": "v8",
+      "generation_rep": 3,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v8_rep3_r20_rating1_evaluation.json",
+      "evaluation_sha256": "b6750680007cb277ff8ffe180fa67a736242d5065beab80029f2c4bb7405ba01",
+      "q19_line": 435,
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml",
+      "input_sha256": "01e3ef504db5ba6f21691c35fd0aa322661dd48f6d864cb38e053591b9763936",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 662
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 678
+        },
+        {
+          "field": "data_collectors",
+          "line": 774
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 865
+        },
+        {
+          "field": "external_resources",
+          "line": 1423
+        }
+      ],
+      "q19_score": 4,
+      "recorded_total_points": 81,
+      "status": "requires_adjudication",
+      "assessment": "The Q19 rationale objects to narrative, untyped or non-machine-traversable lineage. Some rationales also cite content, identifier, versioning or quality gaps; those claims are not adjudicated here. The representation objection requires qualification under the frozen text-or-graph rule. No corrected score is inferred.",
+      "q19_score_label": "Substantial textual lineage with agents and processing steps, short of a complete derivation graph",
+      "q19_quality_note": "This sits clearly above the version-history-only anchor. The rubric accepts prose provenance, and what is here is a real processing lineage with identifiable entities (raw device exports, converted standard-format files, the packaged release), activities (conversion, terminology mapping, QC, PII review, packaging) and agents (named site and central roles), plus derivation paths to two prior versions and one derived subset. It falls short of the top band because the lineage must be assembled by the reader from four separate fields rather than being expressed as a graph, the two schema slots built for derivation (`was_derived_from`, `parent_datasets`) are empty, no errata mechanism exists, and the step-to-step mapping is not explicit \u2014 the reader cannot tell which activity produced which collection, or which agent authorized which transformation.",
+      "q19_semantic_analysis": "Integrity is independently supported by the arithmetic reconciliation noted under Q5: file counts and byte totals cross-check against per-collection figures, which is direct evidence that the release is internally accounted for. The RO-Crate 1.2 packaging is provenance-capable and, if it carries the relationships in machine-readable form, the underlying artifact may exceed what this record exposes \u2014 but the record does not assert that, so it is not credited. The v3.0.0 removal of Snellen acuity variables is correctly surfaced under known_limitations as an integration_limitation, which is the kind of breaking-change disclosure errata would otherwise carry."
+    },
+    {
+      "job_id": "CHORUS_v7_rep1_r20_rating1",
+      "project": "CHORUS",
+      "cohort": "v7",
+      "generation_rep": 1,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v7_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "475ebf0cc55da19e4b7df6c6bf57c0b7d5311c6f42ff6a66b8b2de9eee0c2f7f",
+      "q19_line": 431,
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml",
+      "input_sha256": "e5c0f47198cd20ea47158959f6cfb4d25648965eb8c063ac977e2b5b9aba355d",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 216
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 240
+        },
+        {
+          "field": "data_collectors",
+          "line": 251
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 372
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 405
+        },
+        {
+          "field": "external_resources",
+          "line": 612
+        }
+      ],
+      "q19_score": 4,
+      "recorded_total_points": 67,
+      "status": "requires_adjudication",
+      "assessment": "The Q19 rationale objects to narrative, untyped or non-machine-traversable lineage. Some rationales also cite content, identifier, versioning or quality gaps; those claims are not adjudicated here. The representation objection requires qualification under the frozen text-or-graph rule. No corrected score is inferred.",
+      "q19_score_label": "Textual provenance with lineage and agents; version history and missingness absent",
+      "q19_quality_note": "Lineage is genuinely traceable: for each of the five modalities a reader can follow source system to extraction activity to standardization activity to released format, with the performing agents and the governing SOPs named. That is a complete derivation path expressed in text, which the rubric accepts on equal footing with a PROV-O graph, and it exceeds the 3 band - which describes version history without lineage - by inversion. Held at 4 rather than 5 because the integrity half of the question is largely unanswered: no version_access, no errata channel, no missing_data_documentation despite known_limitations confirming modality availability is uneven, and no structured was_derived_from or parent_datasets linkage. Data quality assurance is real but one-directional, consisting of characterization reports returned to sites with no report of residual quality after correction.",
+      "q19_semantic_analysis": "Mapped to W3C PROV-O, the record supplies all three node types and the edges between them: entities (source EHR/PACS/monitor/EEG records, intermediate extracts, released OMOP/DICOM/WFDB/EDF+/OHNLP artifacts), activities (extraction, standardization, tokenization, waveform conversion, geocoding, characterization, semantic mapping validation), and agents (contributing hospitals, site data managers, the consortium). What is missing is the formal expression and, more consequentially, the temporal binding - no derivation is dated or versioned, so the lineage describes how the data were made but not which instance of them any user holds. The absence of missing_data_documentation is the sharpest inconsistency in this question: known_limitations.coverage_limitation states that imaging de-identification and EEG extraction were in process and that metadata was unpublished for notes, imaging, and EEG, which is a description of systematic missingness that the dedicated field leaves unrecorded."
+    },
+    {
+      "job_id": "CHORUS_v7_rep2_r20_rating1",
+      "project": "CHORUS",
+      "cohort": "v7",
+      "generation_rep": 2,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v7_rep2_r20_rating1_evaluation.json",
+      "evaluation_sha256": "724edf97fc739e03aa1003497c3b77fac98d1d81369271dd695dc5885a6c05f7",
+      "q19_line": 433,
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml",
+      "input_sha256": "d96b8b8fb1dbc2748fc5cfcab49aa2eb745a8bcd3c8e83978ca4226b93922379",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 211
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 217
+        },
+        {
+          "field": "data_collectors",
+          "line": 233
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 253
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 272
+        },
+        {
+          "field": "machine_annotation_tools",
+          "line": 298
+        },
+        {
+          "field": "external_resources",
+          "line": 453
+        }
+      ],
+      "q19_score": 4,
+      "recorded_total_points": 63,
+      "status": "requires_adjudication",
+      "assessment": "The Q19 rationale objects to narrative, untyped or non-machine-traversable lineage. Some rationales also cite content, identifier, versioning or quality gaps; those claims are not adjudicated here. The representation objection requires qualification under the frozen text-or-graph rule. No corrected score is inferred.",
+      "q19_score_label": "Very good \u2014 near-complete textual lineage from source to release, but no derivation fields and no version history",
+      "q19_quality_note": "The rubric accepts textual provenance, and the entity-activity-agent triad is genuinely reconstructible here: entities (hospital EHR, PACS, bedside monitors, EEG database, notes), activities (extraction, OMOP mapping, tokenization, deidentification, waveform conversion, characterization), and agents (named contributing sites and consortium sub-teams) are each documented, with derivation paths traceable per modality from source system to released format. Scored 4 rather than 5 because the dedicated derivation fields (was_derived_from, parent_datasets) are empty, the lineage is narrative rather than graph-structured or machine-readable, and the version-history component of the field set is entirely absent.",
+      "q19_semantic_analysis": "Lineage completeness is the record's strength: every one of the five released distribution_formats can be traced back through a preprocessing strategy to a named raw_data_source and forward to its access posture, and the modality accounting closes consistently across raw_data_sources, collection_mechanisms, instances and distribution_formats. The notes pathway is documented with unusual care, including the fact that the source entity never leaves the contributing site and only the tokenized derivative enters the enclave, which is exactly the derivation detail a provenance consumer needs. Two deficits keep it from 5. First, the provenance is not addressable: with no was_derived_from, no parent_datasets, no identifiers on the source entities, and no version on the output, the lineage cannot be resolved to specific artifacts, so it documents a process rather than the origin of a particular release. Second, integrity and quality signals are thin: no errata, no missing_data_documentation, and no anomalies, despite high-frequency flowsheet and waveform data where gaps and sensor dropout are intrinsic. The holdout split is described in prose but subsets.is_data_split is not set, so the split is not machine-detectable."
+    },
+    {
+      "job_id": "CHORUS_v7_rep3_r20_rating1",
+      "project": "CHORUS",
+      "cohort": "v7",
+      "generation_rep": 3,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v7_rep3_r20_rating1_evaluation.json",
+      "evaluation_sha256": "1e8649d0741894deb8bd49f649cc2b86f3f9edefac63c4ffe357edd04f2d23de",
+      "q19_line": 430,
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_d4d.yaml",
+      "input_sha256": "90bc2010147407e66842a5504cdd6b9883bc987263e313ff60a28ca4f4963881",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 229
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 239
+        },
+        {
+          "field": "data_collectors",
+          "line": 264
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 286
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 312
+        },
+        {
+          "field": "machine_annotation_tools",
+          "line": 345
+        },
+        {
+          "field": "external_resources",
+          "line": 587
+        }
+      ],
+      "q19_score": 3,
+      "recorded_total_points": 65,
+      "status": "requires_adjudication",
+      "assessment": "The Q19 rationale objects to narrative, untyped or non-machine-traversable lineage. Some rationales also cite content, identifier, versioning or quality gaps; those claims are not adjudicated here. The representation objection requires qualification under the frozen text-or-graph rule. No corrected score is inferred.",
+      "q19_score_label": "Substantive textual processing lineage, without versioning or derivation linkage",
+      "q19_quality_note": "Scored at the 3-band by a different route than the band describes. Version history \u2014 the band's nominal content \u2014 is almost wholly absent: no version_access, no errata, no version identifier. What compensates is a genuine textual lineage: source entities, transforming activities and responsible agents are each identifiable and connected per modality. The 5-band is not reached because derivation paths are not expressed as linkages (was_derived_from and parent_datasets are both empty), no integrity artefacts such as checksums or manifests appear, and missing-data documentation is absent.",
+      "q19_semantic_analysis": "Assessed against W3C PROV-O in the textual form the rubric permits: entities are identifiable (source EHR records, PACS images, monitor telemetry, EEG recordings, the tokenized and OMOP-mapped enclave tables), activities are named (extraction, OHNLP tokenization, OMOP semantic mapping, imaging de-identification, waveform conversion, DeGauss geocoding), and agents are attributed (14 contributing sites, site data managers, clinical collaborators, named tools). What is missing is the linkage layer: no field connects the released dataset to its antecedents as typed derivations, so the graph must be reconstructed by a reader rather than traversed. The absence of missing_data_documentation is a quality gap with real analytic consequence for ICU data, where flowsheet and waveform missingness is pervasive and often informative, and it is compounded by the acknowledged partial-modality release."
+    },
+    {
+      "job_id": "CHORUS_v8_rep1_r20_rating1",
+      "project": "CHORUS",
+      "cohort": "v8",
+      "generation_rep": 1,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v8_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "6d7e0b946c7b9ed313062bda361e8c2c8ec38814705e4118799696aef4b73e94",
+      "q19_line": 428,
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml",
+      "input_sha256": "f2a4d6229e5b4188a281727cb6723120e8ebbcfefe2883e6b1ada1c434bb0bb7",
+      "input_fields": [
+        {
+          "field": "data_collectors",
+          "line": 110
+        },
+        {
+          "field": "acquisition_methods",
+          "line": 299
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 316
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 347
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 365
+        },
+        {
+          "field": "external_resources",
+          "line": 551
+        }
+      ],
+      "q19_score": 4,
+      "recorded_total_points": 67,
+      "status": "requires_adjudication",
+      "assessment": "The Q19 rationale objects to narrative, untyped or non-machine-traversable lineage. Some rationales also cite content, identifier, versioning or quality gaps; those claims are not adjudicated here. The representation objection requires qualification under the frozen text-or-graph rule. No corrected score is inferred.",
+      "q19_score_label": "Substantial textual lineage with agents and activities, but no versioning or typed derivation links",
+      "q19_quality_note": "The lineage half of this question is strong. A reader can reconstruct, for every modality, the originating entity (hospital EHR, PACS, bedside monitor, EEG database), the activities applied (extraction, semantic mapping to OMOP, tokenization, waveform conversion, de-identification, characterization reporting) and the agents responsible (site data managers under Chorus_SOP, the named sub-teams, the named repositories) \u2014 entity, activity and agent are all recoverable from text, which the rubric accepts in place of a PROV-O serialization. The integrity half is nearly empty: no version_access, no errata, no parent_datasets, and no formal derivation links tying a specific released artifact to specific inputs. Quality control is evidenced by the characterization-report loop and mapping validation rather than by any reported metric.",
+      "q19_semantic_analysis": "This record inverts the usual failure mode the 3-band describes \u2014 it has provenance without version history rather than version history without provenance, which is why it scores above 3 despite the missing versioning apparatus. The lineage is consistent at every hand-off: each raw_data_source's native format matches the acquisition method, which matches a preprocessing step, which matches the distributed format. Derivation is asserted rather than identified, however: nothing carries an identifier linking the released OMOP collection to a particular site extract or mapping version, so the graph is readable but not traversable. missing_information on the imaging and note instances supplies real gap documentation despite the dedicated field being empty."
+    },
+    {
+      "job_id": "CHORUS_v8_rep2_r20_rating1",
+      "project": "CHORUS",
+      "cohort": "v8",
+      "generation_rep": 2,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v8_rep2_r20_rating1_evaluation.json",
+      "evaluation_sha256": "46922f2a3add284c0be1194fedccbe0e1783195ea775e0135262730f51b10923",
+      "q19_line": 420,
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml",
+      "input_sha256": "960c3500b4c6b43bd1eb1a17508148529a021c7ee3205c81aa19b021f75aa943",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 170
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 180
+        },
+        {
+          "field": "data_collectors",
+          "line": 194
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 221
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 249
+        },
+        {
+          "field": "external_resources",
+          "line": 658
+        }
+      ],
+      "q19_score": 4,
+      "recorded_total_points": 70,
+      "status": "requires_adjudication",
+      "assessment": "The Q19 rationale objects to narrative, untyped or non-machine-traversable lineage. Some rationales also cite content, identifier, versioning or quality gaps; those claims are not adjudicated here. The representation objection requires qualification under the frozen text-or-graph rule. No corrected score is inferred.",
+      "q19_score_label": "Strong textual lineage and derivation paths; no version history, errata or missing-data documentation",
+      "q19_quality_note": "The record supplies what the 5-band calls a provenance graph in textual form: entities (source EHR, PACS, monitor gateways, EEG databases), activities (extraction, tokenization, OMOP mapping, waveform conversion, geocoding, de-identification) and agents (contributing hospitals, site data managers, the consortium), chained into per-modality derivation paths. It is held at 4 because the integrity half of the question is largely unmet \u2014 no version_access, no errata mechanism, no parent_datasets linkage, and no missing-data documentation for a resource built from high-frequency flowsheets and continuous waveforms where missingness is a first-order analytic concern.",
+      "q19_semantic_analysis": "Lineage is traceable end to end per modality and the relationships are inferable, but they are narrative rather than typed: nothing expresses derivation as a machine-readable relation, parent_datasets is empty, and related_datasets is absent, so the graph exists only in prose. Quality reporting is real but one-directional \u2014 characterization reports flow back to sites, yet no resulting quality metrics, anomaly records or completeness statistics are reported to users. The record is candid that imaging de-identification and EEG extraction were in process, which is itself provenance information about state."
+    },
+    {
+      "job_id": "CHORUS_v8_rep3_r20_rating1",
+      "project": "CHORUS",
+      "cohort": "v8",
+      "generation_rep": 3,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v8_rep3_r20_rating1_evaluation.json",
+      "evaluation_sha256": "583f16dcb42fc208da2a95e23d5d4633609786396ea93352fd69519fc74f706b",
+      "q19_line": 432,
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_d4d.yaml",
+      "input_sha256": "82963f6ea262f9cff93d4216ba18dacef48c4a6b7286445f83e195782e162759",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 268
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 274
+        },
+        {
+          "field": "data_collectors",
+          "line": 299
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 328
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 346
+        },
+        {
+          "field": "machine_annotation_tools",
+          "line": 382
+        },
+        {
+          "field": "external_resources",
+          "line": 661
+        }
+      ],
+      "q19_score": 4,
+      "recorded_total_points": 69,
+      "status": "requires_adjudication",
+      "assessment": "The Q19 rationale objects to narrative, untyped or non-machine-traversable lineage. Some rationales also cite content, identifier, versioning or quality gaps; those claims are not adjudicated here. The representation objection requires qualification under the frozen text-or-graph rule. No corrected score is inferred.",
+      "q19_score_label": "Strong textual lineage with identifiable entities, activities and agents; no version history or derivation identifiers",
+      "q19_quality_note": "The rubric accepts textual provenance, and the text here does supply entity\u2013activity\u2013agent structure and a complete derivation path per modality, plus quality feedback loops. Held to 4 because the lineage is narrative only: no was_derived_from links, no parent_datasets, and no version history or errata to anchor it in time.",
+      "q19_semantic_analysis": "Read as a graph, the record yields for each modality a source entity, a named activity (extraction, OMOP mapping, tokenization, WFDB conversion, DeGauss geocoding), a responsible agent (site, sub-team, or named repository) and a resulting entity in the enclave \u2014 that is the substance of PROV-O expressed in prose. What is missing is the anchoring: nothing identifies a specific derived artifact, so lineage cannot be traced to a particular release. Combined with the total absence of versioning (see Q13), the provenance is reconstructible in principle but not verifiable against any released object. The dated August 2025 quality snapshot and the site-return characterization reports are genuine integrity evidence and carry the score above the version-history-only band."
+    },
+    {
+      "job_id": "CM4AI_v7_rep1_r20_rating1",
+      "project": "CM4AI",
+      "cohort": "v7",
+      "generation_rep": 1,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v7_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "207f09df7a838920546385f07a7be69b5bf6a265cc6c5515deac0ebcb2cd65ec",
+      "q19_line": 458,
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_d4d.yaml",
+      "input_sha256": "4ed78cb10f8d8d5b18f601ea82e38f7ab620a1fa05bc81977d9fa944ab0d47f9",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 445
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 472
+        },
+        {
+          "field": "data_collectors",
+          "line": 490
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 736
+        },
+        {
+          "field": "machine_annotation_tools",
+          "line": 773
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 798
+        },
+        {
+          "field": "external_resources",
+          "line": 958
+        }
+      ],
+      "q19_score": 4,
+      "recorded_total_points": 63,
+      "status": "requires_adjudication",
+      "assessment": "The Q19 rationale objects to narrative, untyped or non-machine-traversable lineage. Some rationales also cite content, identifier, versioning or quality gaps; those claims are not adjudicated here. The representation objection requires qualification under the frozen text-or-graph rule. No corrected score is inferred.",
+      "q19_score_label": "Version history plus textual lineage and file-level integrity, short of a represented provenance graph",
+      "q19_quality_note": "Above the 3-point band, which describes version history alone: this record adds real lineage in prose (deposition archive \u2192 pipeline; component data \u2192 MassIVE, SRA, Figshare), agent attribution to named laboratories, and per-file MD5 integrity. It does not reach 5 because the provenance graph is pointed at rather than represented \u2014 was_derived_from and parent_datasets are both empty, so no derivation path is expressed in the record itself.",
+      "q19_semantic_analysis": "Entity-activity-agent material is genuinely present but distributed across slots that were not designed to carry a graph: entities in raw_data_sources and file_collections, activities in acquisition_methods (SEC-MS, AP-MS, ICC-IF, Perturb-seq), agents in data_collectors (Krogan lab UCSF, Lundberg Lab Stanford, UCSD). A reader can reconstruct lineage; a machine cannot traverse it, because the two slots that would encode derivation edges are unpopulated while the PROV-O content is asserted to live inside a downloadable ZIP. Integrity itself is the strongest element here \u2014 checksums for every artifact plus a DOI-versioned release chain. Two quality gaps bear on this question: missing_data_documentation is absent even though known_limitations concedes that the modalities 'interrogate sets of proteins which incompletely overlap', and the description's claim to include MDA-MB-468 Perturb-seq data is contradicted by the embargo and by the manifest, which is an integrity defect in the record's account of its own contents."
+    },
+    {
+      "job_id": "CM4AI_v7_rep2_r20_rating1",
+      "project": "CM4AI",
+      "cohort": "v7",
+      "generation_rep": 2,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v7_rep2_r20_rating1_evaluation.json",
+      "evaluation_sha256": "1d436cca091b8bcd54f29a81d46a3273a5b3400fe83dae89175207f968299fc5",
+      "q19_line": 417,
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_d4d.yaml",
+      "input_sha256": "af41bfae4fd0cea107b3468ad46e9a1a1599e297bfa5dd92739c48e6008f30b1",
+      "input_fields": [
+        {
+          "field": "raw_data_sources",
+          "line": 595
+        },
+        {
+          "field": "acquisition_methods",
+          "line": 628
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 660
+        },
+        {
+          "field": "data_collectors",
+          "line": 677
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 731
+        },
+        {
+          "field": "machine_annotation_tools",
+          "line": 773
+        },
+        {
+          "field": "external_resources",
+          "line": 1113
+        }
+      ],
+      "q19_score": 5,
+      "recorded_total_points": 69,
+      "status": "not_flagged_by_this_inspection",
+      "assessment": "No representation-based deduction was identified in this Q19 rationale inspection. This does not certify lineage completeness, the assigned score, other questions or external source truth.",
+      "q19_score_label": "Full provenance with entity-activity-agent relationships, processing lineage and derivation paths",
+      "q19_quality_note": "This exceeds the 3-band (version history alone) on the rubric's own distinction: entity, activity and agent are each identifiable and linkable, the processing lineage is ordered and explicit, and derivation paths run in both directions \u2014 upstream to the cell lines and repository depositions, downstream to superseded releases. Integrity is independently supported by per-file MD5 checksums.",
+      "q19_semantic_analysis": "Provenance is expressed as text in this record while pointing to machine-readable RO-Crate/FAIRSCAPE graphs in the deposited metadata package, which the rubric accepts as long as lineage is complete \u2014 and it is traceable end to end here: cell line, to instrument and generating laboratory, to processed archive with checksum, to DOI-identified release, to the prior release it supersedes. Two gaps were weighed: parent_datasets is empty (functionally substituted by typed related_datasets links) and missing_data_documentation is absent, though known_limitations does record that modality protein sets 'incompletely overlap'. Neither displaces the top band, since both the relationship structure and the lineage the band names are present. The record also notes that FAIRSCAPE persistent identifiers use the ARK scheme with DOIs as a future supplement, which is a further provenance-identifier detail."
+    },
+    {
+      "job_id": "CM4AI_v7_rep3_r20_rating1",
+      "project": "CM4AI",
+      "cohort": "v7",
+      "generation_rep": 3,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v7_rep3_r20_rating1_evaluation.json",
+      "evaluation_sha256": "7ae700f087e9676857b66bf213acc269f2569d5a9d0fb054c3ceda55b3d9d51b",
+      "q19_line": 423,
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CM4AI_d4d.yaml",
+      "input_sha256": "206c62821db4d7dc688ccff5de23020294dca149aa36de7682cafdfd9a083ad6",
+      "input_fields": [
+        {
+          "field": "external_resources",
+          "line": 448
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 530
+        },
+        {
+          "field": "acquisition_methods",
+          "line": 565
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 588
+        },
+        {
+          "field": "data_collectors",
+          "line": 619
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 675
+        }
+      ],
+      "q19_score": 4,
+      "recorded_total_points": 76,
+      "status": "requires_adjudication",
+      "assessment": "The Q19 rationale objects to narrative, untyped or non-machine-traversable lineage. Some rationales also cite content, identifier, versioning or quality gaps; those claims are not adjudicated here. The representation objection requires qualification under the frozen text-or-graph rule. No corrected score is inferred.",
+      "q19_score_label": "Very Good - provenance graph documented as packaged, derivation fields unpopulated",
+      "q19_quality_note": "Clearly beyond the 3 band, which is version history alone: the record documents a real provenance graph mechanism and supplies, in prose, the entity-activity-agent triples (cell line or raw file, assay, producing laboratory) and derivation paths (ATCC/HipSci line to assay to archive to repository deposit). Held at 4 because the graph is described as residing in the RO-Crates rather than instantiated in the datasheet, and the schema's own derivation slots - was_derived_from and parent_datasets - are empty, so the lineage is reconstructable by a human reader but not machine-traversable from this record.",
+      "q19_semantic_analysis": "The distinction the question draws between version history and provenance is exactly the distinction this record straddles. Its version history is excellent and would alone earn 3; what lifts it is that EVI/PROV-style lineage is genuinely described and that agents, activities and entities are separately identified across data_collectors, acquisition_methods and raw_data_sources. Integrity signalling is also present and used analytically: source_caveats reports that the June 2026 image archives 'report the same file sizes as those in the October 2025 release but different MD5 checksums, indicating the archives were regenerated', and draws the correct inference of not carrying over the older per-file protein counts. Checksums themselves are not recorded in the datasheet."
+    },
+    {
+      "job_id": "CM4AI_v8_rep1_r20_rating1",
+      "project": "CM4AI",
+      "cohort": "v8",
+      "generation_rep": 1,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v8_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "67e52b1efa9357a760eed1f27d1e7aea512ba857a4a38c071a0dfcbd02eea281",
+      "q19_line": 421,
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml",
+      "input_sha256": "b14858313cb86f692a326c76764505a6d3c1f64a92ee452638eedd3636baba41",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 248
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 274
+        },
+        {
+          "field": "data_collectors",
+          "line": 291
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 362
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 400
+        },
+        {
+          "field": "external_resources",
+          "line": 410
+        }
+      ],
+      "q19_score": 4,
+      "recorded_total_points": 72,
+      "status": "not_flagged_by_this_inspection",
+      "assessment": "No representation-based deduction was identified in this Q19 rationale inspection. This does not certify lineage completeness, the assigned score, other questions or external source truth.",
+      "q19_score_label": "Version history plus partial lineage and file-level integrity; no instantiated provenance graph",
+      "q19_quality_note": "Above the version-history band: entities (archives, raw deposits, source lines), activities (four assays, packaging) and agents (four named institutions, named maintainers) are all identifiable, and integrity is checkable per file via MD5. Below the top band because the relationships between those elements are not instantiated \u2014 was_derived_from and parent_datasets are empty, the one derivation claim (raw SRA to cell atlas) is inferred from filenames by the record's own admission, and the PROV graph is asserted to live inside the RO-Crates rather than being exposed here.",
+      "q19_semantic_analysis": "The record's disciplined use of source_caveats is itself provenance metadata of a high order: it distinguishes what the June 2026 listing states from what is carried over from the preprint and earlier releases, and it uses differing MD5 checksums as evidence that same-named IF archives are not the same objects. That is a stronger integrity argument than most datasheets make. Against it stands the temporal inconsistency (files issued after the version publication date; a portal/Dataverse year conflict) and the absence of errata, both of which bear directly on lineage trustworthiness."
+    },
+    {
+      "job_id": "CM4AI_v8_rep2_r20_rating1",
+      "project": "CM4AI",
+      "cohort": "v8",
+      "generation_rep": 2,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v8_rep2_r20_rating1_evaluation.json",
+      "evaluation_sha256": "7f1516a971b75642eb0b0199ff8302a67fe0e19a4bdb8a5f841e49eb2bbcd004",
+      "q19_line": 427,
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/CM4AI_d4d.yaml",
+      "input_sha256": "9fce395dfcba6684dbf183e6c5cf2acc7b6b656c2f76b4ba519974025ca80200",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 642
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 660
+        },
+        {
+          "field": "data_collectors",
+          "line": 671
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 690
+        },
+        {
+          "field": "external_resources",
+          "line": 733
+        }
+      ],
+      "q19_score": 4,
+      "recorded_total_points": 62,
+      "status": "not_flagged_by_this_inspection",
+      "assessment": "No representation-based deduction was identified in this Q19 rationale inspection. This does not certify lineage completeness, the assigned score, other questions or external source truth.",
+      "q19_score_label": "Very good \u2014 substantially beyond version history, short of a full processing-lineage graph",
+      "q19_quality_note": "Clearly above the 3 band, which is version history alone: entities (checksummed files), activities (four acquisition methods, three collection mechanisms) and agents (two named laboratories, three maintainers) are all identifiable in text, and the cross-release derivation path is explicit and typed. Not 5 because no lineage connects a specific activity to a specific released archive \u2014 which laboratory run and which processing produced cm4ai_mass-spec_KOLF2.zip is not traceable \u2014 and because missing_data_documentation and was_derived_from are absent.",
+      "q19_semantic_analysis": "Integrity evidence is a real strength: file-level MD5s plus the observation in source_caveats that the June 2026 immunofluorescence archives 'carry different MD5 checksums from those of the October 2025 release, so they are not the same files' is provenance reasoning performed on the checksums rather than merely recorded alongside them. The record also refuses to carry a prior release's content description onto files it cannot verify, and documents a superseded protein count (563 vs 464) with the ranking rule used to choose between them \u2014 quality documentation well above the norm, even though it does not amount to a PROV-O graph."
+    },
+    {
+      "job_id": "CM4AI_v8_rep3_r20_rating1",
+      "project": "CM4AI",
+      "cohort": "v8",
+      "generation_rep": 3,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v8_rep3_r20_rating1_evaluation.json",
+      "evaluation_sha256": "9ef4d1acce6bd9eb822d17343406ff424ae1dfbeaa503db89247f4c656e1f9c2",
+      "q19_line": 454,
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/CM4AI_d4d.yaml",
+      "input_sha256": "e3311d40121521b83f803ad969395396f63b7446fed36c1f55416379d0f16800",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 711
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 731
+        },
+        {
+          "field": "data_collectors",
+          "line": 747
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 790
+        },
+        {
+          "field": "external_resources",
+          "line": 979
+        }
+      ],
+      "q19_score": 4,
+      "recorded_total_points": 68,
+      "status": "requires_adjudication",
+      "assessment": "The Q19 rationale objects to narrative, untyped or non-machine-traversable lineage. Some rationales also cite content, identifier, versioning or quality gaps; those claims are not adjudicated here. The representation objection requires qualification under the frozen text-or-graph rule. No corrected score is inferred.",
+      "q19_score_label": "Version history plus source lineage and fixity, short of a full provenance graph",
+      "q19_quality_note": "More than version history alone, which is why this exceeds the 3 anchor: per-file MD5 fixity for all ten archives, upstream source locations per modality, and a typed version chain with resolvable DOIs together give real integrity and lineage evidence. Not 5 because no provenance graph is instantiated \u2014 was_derived_from and parent_datasets are both empty, and no entity-activity-agent relationship links any archive to the activity that produced it.",
+      "q19_semantic_analysis": "The provenance capability is asserted at framework level and absent at record level: notes describes ARK identifiers and EVI evidence graphs, and conforms_to claims RO-Crate provenance packaging, but source_caveats concedes that the RO-Crate claim is carried from the preprint and earlier releases rather than restated for this one, so the graph that would carry the lineage is not demonstrably present. The materials for a graph are all here in unlinked form \u2014 raw_data_sources holds the entities, acquisition_methods and data_collectors hold the activities and agents, file_collections holds the outputs \u2014 but nothing joins them, so lineage must be reconstructed by a reader rather than traversed by a machine. Quality documentation is also one-sided: fixity is excellent while missing_data_documentation and errata are entirely absent."
+    },
+    {
+      "job_id": "VOICE_v7_rep1_r20_rating1",
+      "project": "VOICE",
+      "cohort": "v7",
+      "generation_rep": 1,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "a6868221ce443c3aa097e416ae55f36e71044e6b668a6c396921e553918c04b1",
+      "q19_line": 442,
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_d4d.yaml",
+      "input_sha256": "7660c4d93ccf05a12ebdd26c6c960e8f5d07455b3088cd3b2e909e95c802d048",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 237
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 257
+        },
+        {
+          "field": "data_collectors",
+          "line": 285
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 333
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 362
+        },
+        {
+          "field": "machine_annotation_tools",
+          "line": 401
+        },
+        {
+          "field": "external_resources",
+          "line": 925
+        }
+      ],
+      "q19_score": 4,
+      "recorded_total_points": 81,
+      "status": "requires_adjudication",
+      "assessment": "Original review finding: Q19 penalizes permitted textual provenance. VOICE rep3 additionally denies activity/entity/agent bindings that are explicit in the supplied record. No corrected score is inferred.",
+      "q19_score_label": "Version history plus substantial textual processing lineage, short of a full provenance graph",
+      "q19_quality_note": "Clearly above the 3-band, which is version history alone: entities, activities and agents are all identifiable in text, and the rubric expressly accepts textual provenance. Held below 5 because the derivation is narrated rather than expressed as linked provenance, so the lineage cannot be traversed programmatically.",
+      "q19_semantic_analysis": "The elements of a W3C PROV-O style account are recoverable - entities are the raw waveforms, the phenotype exports and the derived feature tables; activities are the named transformation steps with their parameters; agents are b2aiprep as generating software, the clinicians as labelling agents and the research teams as collecting agents. What is missing is the typing: the single most important derivation edge in this dataset, that the released Parquet and TSV features were derived from the controlled-access raw audio, exists only as prose, while was_derived_from and parent_datasets sit empty and related_datasets types only the sibling and prior-version links. Data quality documentation is a real strength here and was weighed in favour of the score: the cleaning audit protocol, the disclosure that some audio files could not generate features and are absent from the bundled Parquet, the erratum recording broken Parquet files in version 3.0.0, and the anomalies entries on cross-site configuration drift together give an integrity picture that is unusually candid."
+    },
+    {
+      "job_id": "VOICE_v7_rep2_r20_rating1",
+      "project": "VOICE",
+      "cohort": "v7",
+      "generation_rep": 2,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep2_r20_rating1_evaluation.json",
+      "evaluation_sha256": "419e582c71eef8b4b813aa16b40d2dec40db8634d88d3c57dfc7e5487eaca1ab",
+      "q19_line": 429,
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d.yaml",
+      "input_sha256": "9b103567b3c018761b67ea065d6e6e7c336b1866ed5d161a36d890566e1e9459",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 376
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 392
+        },
+        {
+          "field": "data_collectors",
+          "line": 411
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 454
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 470
+        },
+        {
+          "field": "machine_annotation_tools",
+          "line": 543
+        },
+        {
+          "field": "external_resources",
+          "line": 1048
+        }
+      ],
+      "q19_score": 5,
+      "recorded_total_points": 80,
+      "status": "not_flagged_by_this_inspection",
+      "assessment": "No representation-based deduction was identified in this Q19 rationale inspection. This does not certify lineage completeness, the assigned score, other questions or external source truth.",
+      "q19_score_label": "Excellent - complete lineage in text form with entity, activity and agent relationships",
+      "q19_quality_note": "The rubric accepts text or graph representation provided lineage is complete, and lineage here is complete in the sense PROV-O requires: for each released column a reader can name the source entity, the activity that produced it, the agent that performed the activity, and the parameters used. That is materially more than the version history which defines the 3-band, and it is why this scores 5 rather than 3. parent_datasets is unpopulated, but the ancestral links it would carry are present as typed related_datasets entries and in raw_data_sources.",
+      "q19_semantic_analysis": "Provenance is corroborated by quality documentation rather than standing alone: the variables' quality_notes explain which records are absent and why ('Absent for recordings that contain free speech, for sensitive records and for audio checks'), and that explanation matches missing_data_documentation.missing_data_causes, the deidentification account, and the differing per-feature record counts in instances.notes. Four independent fields tell the same story about the same absences, which is the mark of a lineage record derived from the actual pipeline. Not serialised as RDF PROV-O, which the rubric expressly does not require."
+    },
+    {
+      "job_id": "VOICE_v7_rep3_r20_rating1",
+      "project": "VOICE",
+      "cohort": "v7",
+      "generation_rep": 3,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep3_r20_rating1_evaluation.json",
+      "evaluation_sha256": "565b7751f15d63670ca3479df0fcc4d35c55d360909c2b10c43dcdb4a27f7e4b",
+      "q19_line": 444,
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/VOICE_d4d.yaml",
+      "input_sha256": "48a64a4e950a1ed59daf3d4efed662513451e2a0d192fd0b381031684efe2275",
+      "input_fields": [
+        {
+          "field": "preprocessing_strategies",
+          "line": 657
+        },
+        {
+          "field": "machine_annotation_tools",
+          "line": 711
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 737
+        },
+        {
+          "field": "acquisition_methods",
+          "line": 765
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 784
+        },
+        {
+          "field": "data_collectors",
+          "line": 834
+        },
+        {
+          "field": "external_resources",
+          "line": 883
+        }
+      ],
+      "q19_score": 4,
+      "recorded_total_points": 82,
+      "status": "requires_adjudication",
+      "assessment": "Original review finding: Q19 penalizes permitted textual provenance. VOICE rep3 additionally denies activity/entity/agent bindings that are explicit in the supplied record. No corrected score is inferred.",
+      "q19_score_label": "Very Good - lineage well beyond version history, but expressed as prose rather than as an entity-activity-agent structure",
+      "q19_quality_note": "This is materially more than the 3-band, which is version history alone: origins, processing lineage and derivation paths are all documented, and data quality is separately evidenced through the audit protocol and anomalies. It falls short of the 5-band because the two dedicated provenance fields are empty and the lineage is recoverable only by reading across preprocessing_strategies, raw_data_sources and related_datasets rather than from a structured entity-activity-agent representation.",
+      "q19_semantic_analysis": "The rubric accepts text or W3C PROV-O graph form provided the lineage is complete, and the text here does name the three PROV-O roles in substance \u2014 entities (raw WAV at Synapse syn72370534, the nine Parquet feature files, the phenotype tables), activities (resampling, STFT, feature extraction, de-identification, BIDS conversion) and agents (b2aiprep v3.0.0, the named tool set, research teams and clinicians). What is missing is the binding between them: no field states which activity produced which entity under which agent, and with was_derived_from empty the derivation is machine-readable only through the related_datasets edge. One point is deducted for that gap, which is also recorded as a low-severity consistency issue."
+    },
+    {
+      "job_id": "VOICE_v8_rep1_r20_rating1",
+      "project": "VOICE",
+      "cohort": "v8",
+      "generation_rep": 1,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v8_rep1_r20_rating1_evaluation.json",
+      "evaluation_sha256": "1bce9f23f11a2c0466fab8f729a8374753b40e2d5b6947da46d435770c4f6bc7",
+      "q19_line": 416,
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml",
+      "input_sha256": "6ad8a47eab05cc4fe6015485d79d8601bc26a03c90d2c86711c1ff511a13030f",
+      "input_fields": [
+        {
+          "field": "data_collectors",
+          "line": 275
+        },
+        {
+          "field": "acquisition_methods",
+          "line": 291
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 305
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 426
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 445
+        },
+        {
+          "field": "machine_annotation_tools",
+          "line": 496
+        },
+        {
+          "field": "external_resources",
+          "line": 954
+        }
+      ],
+      "q19_score": 5,
+      "recorded_total_points": 80,
+      "status": "not_flagged_by_this_inspection",
+      "assessment": "No representation-based deduction was identified in this Q19 rationale inspection. This does not certify lineage completeness, the assigned score, other questions or external source truth.",
+      "q19_score_label": "Complete lineage in text form: entities, activities, agents and derivation paths",
+      "q19_quality_note": "The lineage is complete and traversable in text form, which the rubric accepts as equivalent to a graph when it supplies full lineage: for any released file a reader can name the source entity, the transforming activity with its parameters, the software agent that performed it and the release in which it changed. Integrity and quality are supported by per-recording QC metrics and a documented audit, and errata record concrete corrections including the 3.1.0 Parquet repair and diagnosis back-fill.",
+      "q19_semantic_analysis": "Derivation paths resolve per file rather than in aggregate \u2014 sparc_ema.parquet traces to the SPARC package and to the 16 kHz standardized waveform, ppgs.parquet to the ppgs package at 100 Hz, static_features.tsv to openSMILE/Praat/parselmouth \u2014 so entity-activity-agent relationships are recoverable without a formal PROV-O serialization. parent_datasets is empty, but the derives_from relationship carries the same information with a typed relation and a resolvable accession, so the absence does not break the chain. One residual limitation: the raw-audio entity is identified by Synapse accession only, since no DOI exists for it, which the record states explicitly."
+    },
+    {
+      "job_id": "VOICE_v8_rep2_r20_rating1",
+      "project": "VOICE",
+      "cohort": "v8",
+      "generation_rep": 2,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v8_rep2_r20_rating1_evaluation.json",
+      "evaluation_sha256": "471b950d313466fb15aa64ea6e0bd3741ba1ebfc7a07428dd38a3fda3359dd5e",
+      "q19_line": 519,
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_d4d.yaml",
+      "input_sha256": "0766cb45aa40e3557eb0501fd4883cedbaf7462f6c2f59099c05dac4b3d59aea",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 195
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 208
+        },
+        {
+          "field": "data_collectors",
+          "line": 236
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 397
+        },
+        {
+          "field": "machine_annotation_tools",
+          "line": 449
+        },
+        {
+          "field": "external_resources",
+          "line": 1024
+        }
+      ],
+      "q19_score": 5,
+      "recorded_total_points": 81,
+      "status": "not_flagged_by_this_inspection",
+      "assessment": "No representation-based deduction was identified in this Q19 rationale inspection. This does not certify lineage completeness, the assigned score, other questions or external source truth.",
+      "q19_score_label": "Full provenance graph with entity-activity-agent relationships, processing lineage, and derivation paths",
+      "q19_quality_note": "Lineage is complete in the textual form the question permits: source entities are identified and resolvable, each transformation is named with its parameters and its executing software, and human and institutional agents are attributed to specific roles. Derivation paths extend beyond this release to its predecessor version, its concept record, its companion cohort and its raw source, each by resolvable identifier. Integrity and quality evidence (errata, audit protocol, per-recording quality metrics, missingness table) is present rather than promised.",
+      "q19_semantic_analysis": "The entity-activity-agent triad resolves without inference: entities are the Synapse waveforms and REDCap exports, the standardized 16 kHz audio and the nine feature tensors; activities are resampling, filtering, STFT and each extraction step with stated parameters; agents are b2aiprep 3.0.0, senselab, the named third-party tools, site clinicians and research teams, and the consortium. No W3C PROV-O serialization is offered, which the rubric expressly does not require. Provenance also explains observable properties of the data rather than standing apart from it: the unequal per-feature record counts follow from documented withholding rules and extraction failures, and the 3.1.0 errata about broken Parquet files and back-filled diagnoses tell a reuser what changed since 3.0.0. The absence of recommended splits is a documented design decision, not a gap, and the record says so twice."
+    },
+    {
+      "job_id": "VOICE_v8_rep3_r20_rating1",
+      "project": "VOICE",
+      "cohort": "v8",
+      "generation_rep": 3,
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v8_rep3_r20_rating1_evaluation.json",
+      "evaluation_sha256": "d5ca09424a25d287a3a0b0c20f2dd54cc8bc4e36e5d79971e8f7c14b3d5bf8b8",
+      "q19_line": 486,
+      "input": "data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/VOICE_d4d.yaml",
+      "input_sha256": "ba8876a62b15682af22bae93fe16f4ee6d229afca706435d4595064ad1d8b55c",
+      "input_fields": [
+        {
+          "field": "acquisition_methods",
+          "line": 710
+        },
+        {
+          "field": "collection_mechanisms",
+          "line": 730
+        },
+        {
+          "field": "data_collectors",
+          "line": 754
+        },
+        {
+          "field": "raw_data_sources",
+          "line": 792
+        },
+        {
+          "field": "preprocessing_strategies",
+          "line": 824
+        },
+        {
+          "field": "machine_annotation_tools",
+          "line": 883
+        },
+        {
+          "field": "external_resources",
+          "line": 1250
+        }
+      ],
+      "q19_score": 5,
+      "recorded_total_points": 81,
+      "status": "not_flagged_by_this_inspection",
+      "assessment": "No representation-based deduction was identified in this Q19 rationale inspection. This does not certify lineage completeness, the assigned score, other questions or external source truth.",
+      "q19_score_label": "Full provenance with lineage and derivation paths",
+      "q19_quality_note": "Above the version-history-only band: the record supports a complete derivation path from consented participant through raw waveform and named processing step to each released file, with the processing agent versioned. Quality is separately evidenced by the audit protocol and the new audio quality metrics file.",
+      "q19_semantic_analysis": "Provenance is expressed as text rather than a W3C PROV-O graph, which the rubric permits when lineage is complete, and it is: each output file can be traced to a tool, parameters and an upstream entity. Derivation claims are consistent with the exclusions - transcripts and free-speech-derived dense features are stated as withheld in both is_deidentified and known_limitations, and the per-feature record shortfalls are explained in anomalies. parent_datasets is unpopulated as a field, but its content is carried by was_derived_from and the typed derives_from relationship, so the lineage is not actually broken."
+    }
+  ]
+}

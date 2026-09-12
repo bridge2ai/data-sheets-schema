@@ -1,6 +1,7 @@
 """Write the dated completion record after the registered 56-rating audit.
 
 Run from the repository root after the complete audit, report and Write audit.
+For the qualified manuscript report, use qualify_reference_results.py --rebuild.
 """
 import hashlib
 import json
