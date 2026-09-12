@@ -1,0 +1,175 @@
+{
+  "job_id": "VOICE_v8_rep2_r20_rating1",
+  "started_at": "2026-09-12T14:47:58.595395+00:00",
+  "status": "passed",
+  "manifest_sha256": "36e5b2233a37a1fbe68614caf13c7621c03d6a606e2287d893c572df17bbab4a",
+  "user_prompt_sha256": "d875704618c538dcead68490a3f8428735b5871562f864f7f77a29d6a34e4d82",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5[1m]",
+  "model_alias_evidence": {
+    "reported_selector": "claude-opus-5[1m]",
+    "canonical_model": "claude-opus-5",
+    "context_window": 1000000,
+    "basis": "CLI result modelUsage"
+  },
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5[1m]"
+  },
+  "model_identity_aliases": {
+    "model.name": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    },
+    "model.evaluator_model": {
+      "reported_selector": "claude-opus-5[1m]",
+      "canonical_model": "claude-opus-5",
+      "context_window": 1000000,
+      "basis": "CLI result modelUsage"
+    }
+  },
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "0766cb45aa40e3557eb0501fd4883cedbaf7462f6c2f59099c05dac4b3d59aea",
+  "evaluation_sha256": "471b950d313466fb15aa64ea6e0bd3741ba1ebfc7a07428dd38a3fda3359dd5e",
+  "cli_result": {
+    "duration_api_ms": 538851,
+    "stop_reason": "end_turn",
+    "session_id": "293daf34-4aa8-40da-9275-c1f75b96cbfc",
+    "total_cost_usd": 2.151305,
+    "usage": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 75103,
+      "cache_read_input_tokens": 552996,
+      "output_tokens": 44245,
+      "output_tokens_details": {
+        "thinking_tokens": 11174
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 75103,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1405,
+          "cache_read_input_tokens": 94505,
+          "cache_creation_input_tokens": 244,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 244
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 17467,
+        "outputTokens": 17,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.017551999999999998,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5[1m]": {
+        "inputTokens": 20,
+        "outputTokens": 44245,
+        "cacheReadInputTokens": 552996,
+        "cacheCreationInputTokens": 75103,
+        "webSearchRequests": 0,
+        "costUSD": 2.133753,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 11174,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01D7Zbbg6G2EGJppskHweDkc",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml data/rubric/rubric20.txt",
+          "description": "Compute hashes of input and rubric"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_017X4cuWQNNXak2QJtcChrwP",
+        "tool_input": {
+          "command": "python3 -c \"\nimport hashlib,sys\nfor p in ['input/record.yaml','data/rubric/rubric20.txt']:\n    print(p, hashlib.sha256(open(p,'rb').read()).hexdigest())\n\"",
+          "description": "Compute file digests with Python"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_01MT3LVf4gFuhUvSYV1yDGLV",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation JSON against its schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 14,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed: `VALID output_evaluation.json: rubric20-semantic` (exit 0).\n\n## Definition check\n\nMy instructions do contain a **Reproducibility** section, and it reads as I would expect of the current rules \u2014 repeatability scoped to unchanged records under *both* the same evaluator model and the same definition, with the explicit caveat that a fixed temperature buys no determinism. Quoted verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nThe instrument digest `9d08b5f3\u20260e7dd3` is recorded as `metadata.instrument_sha256` with `instrument_kind: agent_definition`. (Note: the definition file itself is not present in this working directory \u2014 only `input/`, `data/rubric/`, `scripts/` and `src/` were staged \u2014 so I verified currency against my loaded instructions, which is what actually governs the run.)\n\n## Result\n\n**81 / 88 points \u2014 92.0%** on both bases.\n\n- `fixed_percentage` = 81/88 = 92.0 (full rubric maximum)\n- `normalized_percentage` = 81/88 = 92.0 (adjusted maximum)\n- `excluded_max_points` = 0, `questions_not_applicable` = 0, `excluded_item_ids` = []\n\nAll four trigger conditions resolved as **satisfied**, each from fields outside the gated question (anti-circular rule), so no item is N/A and the two percentage bases coincide:\n\n| Condition | Evidence (foreign fields) | Gates |\n|---|---|---|\n| Human subjects | `description` \"833 adult participants recruited across five sites\"; `collection_mechanisms`/`data_collectors` | Q8, Q15 |\n| Datasets shared | `distribution_formats` access_urls \u2192 PhysioNet 3.1.0; `general_research_use` | Q10, Q17 |\n| Software output | `external_resources` \u2192 4 GitHub repos (b2aiprep, senselab, eipm\u00d72) | Q11 |\n| Collection + shared | collection fields populated \u2227 shared condition | Q12, Q13 |\n\nCategory scores: Structural 17/21 \u00b7 Metadata 20/21 \u00b7 Technical 23/25 \u00b7 FAIRness 21/21.\n\nPoints lost: Q3 keywords (3 \u2014 only four generic terms), Q4 file types (3 \u2014 three types, no `total_file_count`), Q10 interoperability (4 \u2014 no data-level schema asserted; `conforms_to` deliberately empty), Q12 collection (4 \u2014 twelve-month duration with no dates, carried from earlier-release docs), Q15 representation (4 \u2014 833 never decomposed by sex, age, race or cohort).\n\nSemantic analysis: 23 consistency checks passed, **2 failed**, 8 warnings; 14 issues recorded. The two failures are both inherited source conflicts the record itself surfaces rather than conceals \u2014 `confidential_elements_present: false` against a Certificate of Confidentiality and OMB M-07-16 PII language, and the `sensitive_elements` inventory against the 3.0.0 removal account, which the record labels \"not fully consistent.\" Correctness validations all clean: PhysioNet DOI prefix 10.13026 corroborating the declared publisher, NIH-conformant `OT2OD032720` (plus `U24EB037545`, `R01EB030362`), well-formed `RRID:SCR_007345` correctly scoped to PhysioNet rather than the dataset, all URLs valid, temporal ordering consistent, and HIPAA Safe Harbor plus waveform withholding appropriate to voice as a biometric.\n\nTemperature recorded as `null` with a note that the setting is unknown, not assumed; runtime model `claude-opus-5[1m]` recorded as both `name` and `evaluator_model`. No other evaluation was read.",
+    "ttft_ms": 2470,
+    "type": "result",
+    "duration_ms": 540436,
+    "uuid": "d97ada9b-8b0f-4f4c-b414-0bf7a7282528",
+    "ttft_stream_ms": 1657,
+    "time_to_request_ms": 18,
+    "first_content_frame_ms": 1657,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T14:57:00.314769+00:00"
+}
