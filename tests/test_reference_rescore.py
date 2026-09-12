@@ -162,7 +162,11 @@ def test_exact_poetry_validator_command_runs_in_isolated_environment(environment
 def test_successful_canary_preserves_old_scores_and_gates_the_fill(environment):
     root, manifest, job, doc = environment
     old = (root / "prior_evaluation.json").read_bytes()
-    cli = fake_cli(root / "fake-claude", doc, events(doc))
+    trace = events(doc)
+    trace.insert(1, {"type": "system", "subtype": "permission_denied",
+                     "message": "Permission to use Bash has been denied"})
+    trace.insert(2, {"type": "user", "message": {"content": "An ordinary text message"}})
+    cli = fake_cli(root / "fake-claude", doc, trace)
     receipt = runner.run_job(manifest, job, cli)
     assert receipt["status"] == "passed", receipt
     assert (root / "prior_evaluation.json").read_bytes() == old
@@ -174,6 +178,192 @@ def test_successful_canary_preserves_old_scores_and_gates_the_fill(environment):
     assert runner.successful_receipt(manifest, job)["evaluation_sha256"] == runner.digest(root / job["output"])
     with pytest.raises(ValueError, match="overwrite"):
         runner.run_job(manifest, job, cli)
+
+
+@pytest.mark.parametrize("index,role", [(0, "system"), (0, "user"), (1, "system"), (1, "assistant")])
+def test_diagnostic_or_wrong_role_cannot_attest_validation(index, role):
+    trace = events(valid_record())
+    trace[index]["type"] = role
+    assert not runner.evaluator_validated(trace, "rubric10-semantic")
+
+
+def test_cli_attested_context_selector_preserves_reported_and_runtime_identity(environment):
+    root, manifest, job, doc = environment
+    doc["model"]["name"] = doc["model"]["evaluator_model"] = runner.MODEL
+    trace = events(doc)
+    trace[-1]["modelUsage"] = {runner.MODEL: {"canonicalModel": "claude-opus-5", "contextWindow": 1_000_000}}
+    cli = fake_cli(root / "fake-claude", doc, trace)
+    receipt = runner.run_job(manifest, job, cli)
+    assert receipt["status"] == "passed", receipt
+    assert receipt["runtime_model"] == "claude-opus-5"
+    assert receipt["reported_model"] == runner.MODEL
+    assert receipt["model_alias_evidence"]["basis"] == "CLI result modelUsage"
+    assert json.loads((root / job["output"]).read_bytes())["model"] == doc["model"]
+
+
+@pytest.mark.parametrize("defect", ["missing", "canonical", "context", "fields", "selector"])
+def test_model_alias_requires_matching_runtime_usage_evidence(environment, defect):
+    root, manifest, job, doc = environment
+    doc["model"]["name"] = doc["model"]["evaluator_model"] = runner.MODEL
+    alias = {"canonicalModel": "claude-opus-5", "contextWindow": 1_000_000}
+    trace = events(doc)
+    trace[-1]["modelUsage"] = {runner.MODEL: alias}
+    if defect == "missing":
+        del trace[-1]["modelUsage"]
+    elif defect == "canonical":
+        alias["canonicalModel"] = "another-model"
+    elif defect == "context":
+        alias["contextWindow"] = 200_000
+    elif defect == "fields":
+        doc["model"]["evaluator_model"] = "claude-opus-5"
+    else:
+        doc["model"]["name"] = doc["model"]["evaluator_model"] = "unrecognized-selector"
+        trace[-1]["modelUsage"]["unrecognized-selector"] = alias
+    cli = fake_cli(root / "fake-claude", doc, trace)
+    receipt = runner.run_job(manifest, job, cli)
+    assert receipt["status"] == "incomplete"
+    assert not (root / job["output"]).exists()
+
+
+@pytest.fixture
+def retained_canary(environment, monkeypatch):
+    root, manifest, job, doc = environment
+    trace = events(doc)
+    trace[:0] = [
+        {"type": "system", "subtype": "init", "cwd": "/isolated"},
+        {"type": "assistant", "message": {"model": "claude-opus-5", "content": [
+            {"type": "tool_use", "name": "Write", "id": "write-output", "input": {
+                "file_path": "/isolated/output_evaluation.json", "content": json.dumps(doc)}}]}},
+        {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "write-output",
+            "content": "File created successfully"}]}},
+    ]
+    cli = fake_cli(root / "fake-claude", doc, trace)
+
+    def old_parser(*args):
+        raise AttributeError("'str' object has no attribute 'get'")
+
+    with monkeypatch.context() as context:
+        context.setattr(runner, "evaluator_validated", old_parser)
+        failed = runner.run_job(manifest, job, cli)
+    assert failed["status"] == "incomplete"
+    source = next((runner.PLAN / "attempts" / job["id"]).iterdir())
+    original_bytes = {p.name: p.read_bytes() for p in source.iterdir()}
+    archive = runner.PLAN / "registrations/previous.json"
+    archive.parent.mkdir()
+    shutil.copyfile(runner.PLAN / "manifest.json", archive)
+    updated = copy.deepcopy(manifest)
+    script = root / "scripts/reference_rescore.py"
+    script.write_bytes(script.read_bytes() + b"\n# Offline runner amendment fixture.\n")
+    updated["pinned_files"]["scripts/reference_rescore.py"] = runner.digest(script)
+    updated["supersedes_registration"] = {"path": str(archive.relative_to(root)),
+                                         "sha256": runner.digest(archive), "reason": "runner parser fix"}
+    runner.write_json(runner.PLAN / "manifest.json", updated)
+    return root, updated, job, source, original_bytes
+
+
+def test_recovery_preserves_attempt_and_requires_separate_acceptance(retained_canary):
+    root, manifest, job, source, original_bytes = retained_canary
+    recovered = runner.recover_canary(manifest, source)
+    assert recovered["status"] == "passed" and recovered["model_calls_during_recovery"] == 0
+    assert {p.name: p.read_bytes() for p in source.iterdir()} == original_bytes
+    assert (root / job["output"]).read_bytes() == original_bytes["candidate.json"]
+    assert runner.successful_receipt(manifest, job) == recovered
+    fill = {**job, "id": "another-record"}
+    with pytest.raises(FileNotFoundError):
+        runner.require_canary(manifest, fill)
+    runner.accept_canary(manifest)
+    runner.require_canary(manifest, fill)
+    with pytest.raises(ValueError, match="overwrite"):
+        runner.recover_canary(manifest, source)
+
+
+@pytest.mark.parametrize("defect", ["budget", "instrument", "archive", "registration", "prompt", "validator", "model", "candidate"])
+def test_recovery_rejects_changed_contract_or_unattested_candidate(retained_canary, defect):
+    root, manifest, job, source, _ = retained_canary
+    if defect == "budget":
+        manifest["budget_cap_usd_per_attempt"] = 6
+    elif defect == "instrument":
+        manifest["instruments"][job["rubric"]]["definition_sha256"] = "0" * 64
+    elif defect == "archive":
+        (root / manifest["supersedes_registration"]["path"]).write_text("{}")
+    elif defect == "registration":
+        receipt = json.loads((source / "receipt.json").read_bytes())
+        receipt["manifest_sha256"] = "0" * 64
+        runner.write_json(source / "receipt.json", receipt)
+    elif defect == "prompt":
+        (source / "prompt.txt").write_text("different prompt")
+    elif defect in ("validator", "model"):
+        path = source / "transcript.jsonl"
+        trace = [json.loads(line) for line in path.read_text().splitlines()]
+        if defect == "validator":
+            trace = [e for e in trace if e["type"] != "user"]
+        else:
+            next(e for e in trace if e["type"] == "assistant")["message"]["model"] = "another-model"
+        path.write_text("\n".join(json.dumps(e) for e in trace) + "\n")
+    else:
+        path = source / "candidate.json"
+        doc = json.loads(path.read_bytes())
+        doc["overall_score"]["total_points"] -= 1
+        runner.write_json(path, doc)
+    runner.write_json(runner.PLAN / "manifest.json", manifest)
+    with pytest.raises(ValueError):
+        runner.recover_canary(manifest, source)
+    assert not (root / job["output"]).exists()
+    assert not (runner.PLAN / "canary_acceptance.json").exists()
+
+
+def test_recovery_rejects_candidate_changed_after_validation(retained_canary, monkeypatch):
+    root, manifest, job, source, _ = retained_canary
+    actual_run = runner.subprocess.run
+
+    def mutate_after_validation(*args, **kwargs):
+        completed = actual_run(*args, **kwargs)
+        path = source / "candidate.json"
+        path.write_bytes(path.read_bytes() + b"\n")
+        return completed
+
+    monkeypatch.setattr(runner.subprocess, "run", mutate_after_validation)
+    with pytest.raises(ValueError, match="changed during recovery"):
+        runner.recover_canary(manifest, source)
+    assert not (root / job["output"]).exists()
+
+
+def test_recovery_rejects_valid_json_changed_since_the_evaluator_wrote_it(retained_canary):
+    root, manifest, job, source, _ = retained_canary
+    path = source / "candidate.json"
+    doc = json.loads(path.read_bytes())
+    doc["elements"][0]["sub_elements"][0]["quality_note"] = "Assessment changed after the evaluator completed."
+    runner.write_json(path, doc)
+    with pytest.raises(ValueError, match="evaluator.*Write"):
+        runner.recover_canary(manifest, source)
+    assert not (root / job["output"]).exists()
+
+
+@pytest.mark.parametrize("defect", ["missing", "failed", "unrelated", "sibling", "later_write", "cwd"])
+def test_recovery_requires_the_last_successful_output_write(retained_canary, defect):
+    root, manifest, job, source, _ = retained_canary
+    path = source / "transcript.jsonl"
+    trace = [json.loads(line) for line in path.read_text().splitlines()]
+    if defect == "missing":
+        trace = trace[:1] + trace[3:]
+    elif defect == "failed":
+        trace[2]["message"]["content"][0]["is_error"] = True
+    elif defect == "unrelated":
+        trace[1]["message"]["content"][0]["input"]["file_path"] = "/isolated/another.json"
+    elif defect == "sibling":
+        trace[1]["message"]["content"][0]["input"]["file_path"] = "/isolated/nested/output_evaluation.json"
+    elif defect == "cwd":
+        trace[0]["cwd"] = "/another-run"
+    else:
+        later = copy.deepcopy(trace[1:3])
+        later[0]["message"]["content"][0]["id"] = "later-write"
+        later[0]["message"]["content"][0]["input"]["content"] = "{}"
+        later[1]["message"]["content"][0]["tool_use_id"] = "later-write"
+        trace.extend(later)
+    path.write_text("\n".join(json.dumps(e) for e in trace) + "\n")
+    with pytest.raises(ValueError, match="evaluator.*Write"):
+        runner.recover_canary(manifest, source)
+    assert not (root / job["output"]).exists()
 
 
 def test_failed_attempt_cannot_unlock_fill_or_create_a_live_rating(environment):
