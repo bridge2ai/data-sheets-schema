@@ -1,10 +1,8 @@
 {
-  "reported_at": "2026-09-12T09:01:19.556620+00:00",
-  "completed": 1,
+  "reported_at": "2026-09-12T09:22:08.914580+00:00",
+  "completed": 3,
   "planned": 56,
   "pending": [
-    "AI_READI_v7_rep1_r10_rating1",
-    "AI_READI_v7_rep1_r20_rating1",
     "AI_READI_v7_rep2_r10_rating1",
     "AI_READI_v7_rep2_r20_rating1",
     "AI_READI_v7_rep3_r10_rating1",
@@ -63,11 +61,15 @@
     {
       "project": "AI_READI",
       "rubric": "rubric10-semantic",
-      "ratings": 0,
+      "ratings": 1,
       "expected_ratings": 3,
-      "adjusted_percentages": [],
-      "fixed_percentages": [],
-      "applicability_stable": null,
+      "adjusted_percentages": [
+        98.0
+      ],
+      "fixed_percentages": [
+        98.0
+      ],
+      "applicability_stable": true,
       "adjusted_sample_sd": null,
       "fixed_sample_sd": null,
       "adjusted_range": null,
@@ -122,19 +124,27 @@
       "project": "AI_READI",
       "cohort": "v7",
       "rubric": "rubric10-semantic",
-      "records": 0,
+      "records": 1,
       "expected_records": 3,
-      "adjusted_percentages": [],
-      "fixed_percentages": []
+      "adjusted_percentages": [
+        98.0
+      ],
+      "fixed_percentages": [
+        98.0
+      ]
     },
     {
       "project": "AI_READI",
       "cohort": "v7",
       "rubric": "rubric20-semantic",
-      "records": 0,
+      "records": 1,
       "expected_records": 3,
-      "adjusted_percentages": [],
-      "fixed_percentages": []
+      "adjusted_percentages": [
+        93.2
+      ],
+      "fixed_percentages": [
+        93.2
+      ]
     },
     {
       "project": "AI_READI",

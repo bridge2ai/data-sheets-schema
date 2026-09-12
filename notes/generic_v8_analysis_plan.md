@@ -2414,3 +2414,26 @@ model call was made during this amendment. Its quoted definition remains
 There are still 1/56 accepted ratings; the next execution must freshly retry
 AI_READI before continuing the remaining registered ratings. No generation or
 download occurred.
+
+### Reference fill resumed (2026-09-12; #1248)
+
+After the reviewed runner was registered and the unchanged CHORUS canary was
+re-accepted, a fresh AI_READI v7 rep1 rubric10 rating passed at 09:11:57Z,
+49/50 (98.0%), quoting definition
+`66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`.
+The same record's first rubric20 rating passed at 09:20:53Z, 82/88 (93.2%),
+quoting definition
+`9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3`.
+Neither rating excludes an item. Both completed their own exact-file
+validation and passed the runner's identity, check-echo, schema, arithmetic
+and frozen-byte checks. The earlier failed AI_READI draft remains excluded.
+
+There are now three accepted ratings. The remaining 53 registered job IDs
+are recorded before execution in
+`notes/reference_rescore_2026-09-11/parallel_fill_start_2026-09-12.json`.
+They may run in groups of at most four fresh isolated sessions, each capped
+at $5; no further job is launched after an observed failure, and any already
+running sessions are allowed to finish. There are no automatic retries.
+This scheduling step changes no instrument, prompt, input or model setting.
+Repeatability remains unmeasured until the registered repeated ratings finish.
+No generation or downloads are part of this fill.
