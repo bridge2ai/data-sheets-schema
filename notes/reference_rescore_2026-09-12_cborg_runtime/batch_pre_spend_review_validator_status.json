@@ -1,0 +1,13 @@
+{
+  "reviewed_at": "2026-09-12T21:10:52.181367+00:00",
+  "verdict": "approved",
+  "reviewed_commit": "e91f2faa4f513bb359a177e857fbbd0b2118936c",
+  "registration_sha256": "ff4ab3b919a6824c08fcb3f0150a6a7afc3e850559208447851ab7f545fe9d6f",
+  "review": "notes/reference_rescore_2026-09-12_cborg_runtime/pre_spend_review_round11.md",
+  "review_sha256": "e257d6e5f3d884e2505725cb52d4d7dbfdfa008ce134147459345ee63a5d8929",
+  "findings_resolved": [
+    1347
+  ],
+  "offline_validation": "212 tests passed; six native-CLI permission probes via a scripted synthetic local endpoint; independent adversarial denial, ambiguity and Write-ordering checks passed. Five accepted original outputs remain intact; both failed candidates remain excluded.",
+  "next_authorized_action": "One fresh AI_READI_v7_rep2_r20_rating1 retry pilot only; inspect its original output and accept the batch gate before remaining50. Original CHORUS instrument acceptance is unchanged."
+}
