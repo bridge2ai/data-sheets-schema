@@ -929,23 +929,24 @@ def _record_validator(schema: Path):
     locked linkml builds two SchemaViews inside it — pinned for the life of
     the process by their own method caches (#926) — so every
     ``check_record`` cost ~1.7 MB it never gave back. Keyed like
-    ``schema_view.shared_view``: the file's bytes, so an edited record
-    schema gets a fresh validator.
+    ``schema_view.content_key``: the root file's bytes, so an edited record
+    schema gets a fresh validator. Compilation uses the bytes that were keyed.
     """
     from linkml.validator import Validator
-    from linkml.validator.plugins import JsonschemaValidationPlugin
+    from data_sheets_schema.record_schema import RecordValidationPlugin, compile_record_schema
 
     from data_sheets_schema.schema_view import content_key
-    key = content_key(schema)
+    content = schema.read_bytes()
+    key = content_key(schema, content=content)
     validator = _VALIDATORS.get(key)
     if validator is None:
         _VALIDATORS.clear()
-        # The same plugins `linkml.validator.validate` installs: closed
-        # JSON-schema validation, which is what enforces the record schema's
-        # mode rules — a bare `Validator(schema)` validates open and reported
-        # a live record with no `model` as clean.
+        # Closed validation plus the schema's required-values policy (#614).
+        # The CLI and standalone JSON export use this same compiled contract;
+        # raw LinkML's Any range admits null even when a key is required.
         validator = _VALIDATORS[key] = Validator(
-            str(schema), validation_plugins=[JsonschemaValidationPlugin(closed=True)])
+            str(schema), validation_plugins=[RecordValidationPlugin(
+                compile_record_schema(schema, content=content))])
     return validator
 
 
@@ -959,9 +960,8 @@ def record_conformance(data: dict[str, Any]) -> list[str]:
 
     Kept for the narrow case of asking what is wrong with a record already
     known to be checkable — chiefly tests, which assert on findings. The
-    justification given when this was split out named `d4d provenance
-    validate-records` as a caller; that command shells out to `linkml-validate`
-    and has never called this (#620).
+    CLI validation uses `check_record` directly so validator failures remain
+    distinct from a conforming record (#614/#620).
     """
     return check_record(data)[0]
 
