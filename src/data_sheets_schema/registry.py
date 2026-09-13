@@ -47,6 +47,10 @@ AUTO = object()
 def manifest_declared_unused(value: str | None) -> bool:
     """Recognize the complete header sentinel, never words inside a path."""
     value = re.sub(r"^\s*#?\s*Source manifest:\s*", "", value or "", flags=re.I)
+    # Retain the complete historical single-source-arm declaration. Matching
+    # an arbitrary `not used` prefix would also classify ordinary paths.
+    if value.strip().lower() == "not used; this arm declares its single source bundle explicitly":
+        return True
     return re.fullmatch(r"not used(?:\s*\([^\n]*\))?\s*", value.strip(), re.I) is not None
 
 

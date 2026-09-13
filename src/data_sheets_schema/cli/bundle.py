@@ -26,10 +26,12 @@ def bundle():
                    "manifest is written beside it as `<stem>_chunks.yaml`")
 @click.option("--check", is_flag=True,
               help="rebuild each manifest under its recorded rule and compare; write nothing")
+@click.option("--chunk-manifest", type=click.Path(path_type=Path, dir_okay=False),
+              help="with --check and one --bundle: validate this exact selected mapping under its declared rule")
 @click.option("--strict", is_flag=True, help="with --check: exit 1 on stale or missing")
 @click.option("--max-lines", type=click.IntRange(min=1), default=None, help="override the rule's line bound")
 @click.option("--max-bytes", type=click.IntRange(min=1), default=None, help="override the rule's byte bound")
-def chunk(manifest, project, bundles, check, strict, max_lines, max_bytes):
+def chunk(manifest, project, bundles, check, chunk_manifest, strict, max_lines, max_bytes):
     """Write a chunk manifest for each bundle.
 
     A study bundle's manifest is `data/preprocessed/chunks/{PROJECT}_chunks.yaml`;
@@ -45,6 +47,23 @@ def chunk(manifest, project, bundles, check, strict, max_lines, max_bytes):
     """
     from data_sheets_schema.chunking import (DEFAULT_RULE, manifest_status_for,
                                               project_bundles, write_manifest_for)
+
+    if chunk_manifest is not None:
+        if not check or len(bundles) != 1 or project or max_lines is not None or max_bytes is not None:
+            raise click.UsageError("--chunk-manifest requires --check and exactly one --bundle, without --project or rule overrides")
+        import yaml
+        from data_sheets_schema.chunking import canonical_name, validate_manifest_mapping
+        selected_bundle = Path(bundles[0])
+        try:
+            mapping = yaml.safe_load(chunk_manifest.read_bytes())
+            validate_manifest_mapping(mapping, selected_bundle.read_bytes(), canonical_name(selected_bundle))
+        except (OSError, ValueError, yaml.YAMLError) as exc:
+            click.echo(f"   ❌ unreadable {chunk_manifest}: {exc}")
+            if strict:
+                raise click.exceptions.Exit(1)
+        else:
+            click.echo(f"   ✓ current {chunk_manifest}: {mapping['chunk_count']} canonical chunks under the selected rule")
+        return
 
     targets: list[tuple[str, list[Path]]] = []
     if bundles:
