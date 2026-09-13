@@ -1172,7 +1172,7 @@ def validate_cmd(method, project, label, recheck, dry_run):
     """
     import yaml as _yaml
     from data_sheets_schema.api_runner import (
-        RunSpec, validate_outputs, validation_block,
+        ValidationInputs, validate_outputs, validation_block,
     )
     from data_sheets_schema.provenance import (
         ProvenanceRecord, record_path_for,
@@ -1192,9 +1192,10 @@ def validate_cmd(method, project, label, recheck, dry_run):
         for proj in run.projects:
             if project and proj != project:
                 continue
-            if not is_complete(run.method, run.label, proj):
+            corpus_dir = run.path.parent.parent
+            if not is_complete(run.method, run.label, proj, corpus_dir):
                 continue
-            status = validation_status(run.method, run.label, proj)
+            status = validation_status(run.method, run.label, proj, corpus_dir)
             # STALE is *not* re-validated by default (#657 review). It
             # conflates two situations, and the default action is wrong for
             # both: a verdict whose schema pin predates a deliberate schema
@@ -1207,21 +1208,21 @@ def validate_cmd(method, project, label, recheck, dry_run):
             # a deliberate act naming its scope.
             if not recheck and status != UNVERIFIED:
                 continue
-            targets.append((run.method, run.label, proj))
+            targets.append((run.method, run.label, proj, corpus_dir))
 
     click.echo(f"🔍 {len(targets)} run(s) to validate")
     if dry_run:
-        for m, l, p in targets:
+        for m, l, p, _ in targets:
             click.echo(f"   {p:9} {m:34} {l}")
         return
 
     passed = failed = norec = 0
-    for m, l, p in targets:
-        spec = RunSpec(project=p, arm="", method=m,
-                       bundle=Path("data/preprocessed/concatenated") /
-                              f"{p}_preprocessed.txt", label=l)
+    for m, l, p, corpus_dir in targets:
+        spec = ValidationInputs(
+            full_path=corpus_dir / m / l / f"{p}_d4d.yaml",
+            core_path=corpus_dir / f"{m}_core" / l / f"{p}_d4d_core.yaml")
         problems = validate_outputs(spec)
-        rec = record_path_for(p, m, l)
+        rec = record_path_for(p, m, l, corpus_dir)
         icon = "✓" if not problems else "❌"
         click.echo(f"   {icon} {p:9} {l}")
         for q in problems:

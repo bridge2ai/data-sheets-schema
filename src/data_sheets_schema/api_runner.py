@@ -2687,7 +2687,14 @@ def keep_recorded_algorithms(new: dict, prior: dict) -> dict:
     return out
 
 
-def validation_block(spec: RunSpec, problems: list[dict[str, str]],
+@dataclass(frozen=True)
+class ValidationInputs:
+    """Existing artifacts selected for validation, independent of generation inputs."""
+    full_path: Path
+    core_path: Path
+
+
+def validation_block(spec: RunSpec | ValidationInputs, problems: list[dict[str, str]],
                      recorded_by: str = "api_runner.execute",
                      prior: dict[str, Any] | None = None) -> dict[str, Any]:
     """The validation verdict, bound to the exact bytes it was reached on.
@@ -2849,7 +2856,7 @@ def _validator_lines(path: Path, schema: str,
     return lines, None
 
 
-def validate_outputs(spec: RunSpec) -> list[dict[str, str]]:
+def validate_outputs(spec: RunSpec | ValidationInputs) -> list[dict[str, str]]:
     """LinkML-validate both records, returning problems rather than raising.
 
     Returned so the caller can record the outcome in provenance before deciding
