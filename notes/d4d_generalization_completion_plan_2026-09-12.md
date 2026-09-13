@@ -332,3 +332,21 @@ the scoring target rather than being replaced by its children. Address it
 before the next evaluation review. The #1457 installed-workflow completion
 is being prepared in a separate worktree, retaining the prescribed merge
 order and the no-new-measurement boundary.
+
+## Generation review round 20 — 2026-09-13
+
+Round 19 CI is green. Its independent review finds #1554: backfill must not
+obstruct an interrupted API generation. The revised backfill shares output
+locks and defers active journals; resume recovers an older reconstruction
+only with independently bound runtime evidence. All 150 focused recovery,
+compatibility and publication checks pass. Require revised-head CI and
+independent approval before merge.
+
+Evaluation round 6 fixes #1555, an import failure on the declared minimum
+Python 3.9, after round 5 confirms the dataset-versus-collection scope rules.
+Actual Python 3.9 module-import checks and 217 runtime checks pass; its review
+and full CI are running. The installed-workflow follow-up #1457 moves reusable
+evaluation and rendering into the package and will verify the complete
+workflow in a clean environment. Claude continues profile and packaging
+reviews. Preserve generation → evaluation → profiles → packaging merge order,
+both generation arms, all evaluation styles and the no-new-measurement boundary.

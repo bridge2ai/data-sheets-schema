@@ -20,6 +20,14 @@ class UsageLedgerError(OSError):
 @contextmanager
 def exclusive_run(spec):
     """One writer for shared artifacts, across processes and run identities."""
+    with exclusive_outputs((spec.full_path, spec.core_path,
+                            spec.report_path, spec.provenance_path)):
+        yield
+
+
+@contextmanager
+def exclusive_outputs(paths):
+    """Use the API writer's locks when maintaining one or more output files."""
     # filelock is already a locked main dependency, including its Windows
     # implementation. Keep a stable sidecar: unlinking a held lock lets a
     # competing process lock a different inode at the same path.
@@ -28,8 +36,7 @@ def exclusive_run(spec):
     # Split and flat layouts can share a full/core record while storing their
     # metadata elsewhere. Lock the actual files, including resolved aliases,
     # in one order so partial overlap cannot bypass output ownership (#1298).
-    outputs = {path.resolve() for path in (spec.full_path, spec.core_path,
-                                          spec.report_path, spec.provenance_path)}
+    outputs = {path.resolve() for path in paths}
     held = []
     try:
         for output in sorted(outputs):
@@ -46,6 +53,16 @@ def exclusive_run(spec):
     finally:
         for lock in reversed(held):
             lock.release()
+
+
+def recovery_files(directory: Path, project: str) -> list[Path]:
+    """API journals that generic provenance reconstruction cannot replace."""
+    progress = directory / f"{project}_api_progress.json"
+    found = [progress] if progress.exists() or progress.is_symlink() else []
+    if directory.is_dir():
+        pattern = re.compile(re.escape(project) + r"_api_usage_[0-9a-f]{16}\.json")
+        found.extend(path for path in directory.iterdir() if pattern.fullmatch(path.name))
+    return sorted(found)
 
 
 def run_identity(spec) -> dict:

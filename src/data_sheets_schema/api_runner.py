@@ -4811,6 +4811,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     generation = _usage_generation(spec) if resume else _prepare_usage(spec, resume=False)
     if resume:
         _require_resolved_usage(spec)
+    progress = _load_progress(spec) if resume else {}
     skipped: list[str] = []
     carry: dict[str, str] = {}
 
@@ -4839,6 +4840,18 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             else:
                 prior_identifier = identifier
             prior_matches = _usage_record_matches(spec, identity) and _same_usage_generation(spec, identifier)
+            if (prior_matches and generation is not None and identifier is None
+                    and prior.get("record_mode") == "reconstructed"):
+                # Generic backfill cannot supersede observed generation-bound
+                # inputs. Older backfill could publish during an interruption.
+                from data_sheets_schema.usage_ledger import recorded_inputs
+                current = spec.input_identity()
+                bound_progress = (
+                    progress.get("generation_id") == generation
+                    and _usage_record_matches(spec, progress.get("run_identity"))
+                    and progress.get("input_identity") == current)
+                if recorded_inputs(spec) == current or bound_progress:
+                    prior_matches = False
             if prior_matches:
                 _require_recorded_inputs(spec, prior)
                 prior_record = prior
@@ -4857,7 +4870,6 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # artifacts. A `full` record on disk may be pre- or post-reconciliation and
     # nothing in the file distinguishes them, so guessing would silently skip
     # reconciliation or redo it.
-    progress = _load_progress(spec) if resume else {}
     foreign_progress = (_foreign_usage_identity(spec, progress.get("run_identity"))
                         or progress.get("label") not in (None, spec.label)
                         or (foreign_prior and not progress.get("run_identity")
