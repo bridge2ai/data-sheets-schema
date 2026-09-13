@@ -720,7 +720,7 @@ def check_cmd(method, label, project, strict):
     # — a drifted record is still usable, it just cannot be re-derived from the
     # path it names, and a gate would collapse that distinction.
     from data_sheets_schema.runs import (
-        BUNDLE_ABSENT, BUNDLE_CURRENT, BUNDLE_DRIFTED, BUNDLE_UNRECORDED,
+        BUNDLE_ABSENT, BUNDLE_CURRENT, BUNDLE_DRIFTED, BUNDLE_UNRECORDED, BUNDLE_UNRESOLVED,
         bundle_drift_detail,
     )
     drift: collections.Counter = collections.Counter()
@@ -927,6 +927,9 @@ def check_cmd(method, label, project, strict):
                    "not consistent.")
 
     stale = drift[BUNDLE_DRIFTED] + drift[BUNDLE_ABSENT]
+    if drift[BUNDLE_UNRESOLVED]:
+        click.echo(f"\nⓘ  {drift[BUNDLE_UNRESOLVED]} record(s) name relative input bundles "
+                   "with no known corpus owner; whether their bytes still match is unknown.")
     if stale:
         click.echo(f"\nⓘ  {stale} record(s) name an input bundle whose bytes "
                    f"have since changed ({drift[BUNDLE_CURRENT]} still match, "

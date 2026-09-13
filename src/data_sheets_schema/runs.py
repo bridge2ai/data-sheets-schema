@@ -1237,6 +1237,7 @@ def _prompt_files_drifted(record: dict) -> bool | None:
 
 BUNDLE_CURRENT, BUNDLE_DRIFTED = "current", "drifted"
 BUNDLE_ABSENT, BUNDLE_UNRECORDED = "absent", "unrecorded"
+BUNDLE_UNRESOLVED = "unresolved"
 
 
 def bundle_drift(method: str, label: str, project: str,
@@ -1257,7 +1258,7 @@ def bundle_drift(method: str, label: str, project: str,
     strips were correct. The defect is that the corpus absorbed a corpus-wide
     input change with no report.
 
-    Four outcomes, kept distinct because they license different actions:
+    Five outcomes, kept distinct because they license different actions:
 
     - ``current``    — the file still hashes to what the record pinned.
     - ``drifted``    — it does not. The record stays usable and stops being
@@ -1265,6 +1266,8 @@ def bundle_drift(method: str, label: str, project: str,
     - ``absent``     — the path no longer exists at all.
     - ``unrecorded`` — no ``bundle_md5``, so there is nothing to compare. A
       different claim from ``current`` and never counted as one.
+    - ``unresolved`` — a relative path has no known record owner; no caller
+      directory can establish whether its bytes match (#1750).
 
     Scope note. Callers iterating ``discover()`` see 158 runs against 162
     provenance records on disk. The four extra are the ``guarded-union``
@@ -1300,7 +1303,7 @@ def bundle_drift_detail(method: str, label: str, project: str,
     # it in, so it cannot outlive the invocation that built it.
     import hashlib
 
-    from data_sheets_schema.provenance import record_path_for
+    from data_sheets_schema.provenance import record_path_for, resolve_record_input
     path = record_path_for(project, method, label, concat_dir)
     if not path.exists():
         return BUNDLE_UNRECORDED, "no provenance record", None
@@ -1311,7 +1314,9 @@ def bundle_drift_detail(method: str, label: str, project: str,
     if not recorded or not declared:
         return BUNDLE_UNRECORDED, "no bundle hash recorded", declared
 
-    bundle = Path(declared)
+    bundle = resolve_record_input(Path(declared), path)
+    if bundle is None:
+        return BUNDLE_UNRESOLVED, f"cannot resolve {declared}: record owner is unknown", declared
     if not bundle.exists():
         return BUNDLE_ABSENT, f"{declared} does not exist", declared
 
