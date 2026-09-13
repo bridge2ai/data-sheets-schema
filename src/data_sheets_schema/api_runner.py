@@ -556,6 +556,7 @@ class RunSpec:
         requires a freshly validated spec; this object is only for replay.
         """
         spec = cls(project=project, method=method, label=label,
+                   profile="replay",          # skip live selection (#1468); cleared below
                    arm=recorded.get("arm", ""), bundle=Path(recorded.get("bundle", "")),
                    condition=recorded["condition"],
                    render_version=recorded.get("render_version", 1),
@@ -598,9 +599,15 @@ class RunSpec:
                     if path.is_file() else None}
 
         chunks = (self.chunk_manifest or manifest_for(self.bundle)) if self.bundle else None
+        # The instrument is an input too (#1460): a resumed run under
+        # another profile would render another digest for its remaining
+        # phases and record only that one.
+        digest = (schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=self.profile_obj))
+                  if self.profile else None)
         return {"bundle": entry(self.bundle),
                 "source_manifest": entry(self.manifest) if self.manifest_used else None,
                 "chunks": entry(chunks),
+                "profile": {"name": self.profile, "digest_md5": digest},
                 "instruction": {"render_version": self.render_version,
                                 "spec": self.render_spec(),
                                 "sha256": hashlib.sha256(self.instruction.encode()).hexdigest()}}
@@ -841,7 +848,11 @@ def resolve_prompt(spec: RunSpec) -> str:
             command = match.group(1)
             for key, value in subs.items():
                 command = command.replace(key, shlex.quote(value))
-            command += " --manifest " + shlex.quote(str(spec.manifest) if spec.manifest_used else "none")
+            # The manifest that was *selected*, even when the arm's header
+            # declares its context blocks unused: the recorder selects the
+            # profile from it, and the header still governs what the input
+            # block attests (#1461). `none` means none was selected.
+            command += " --manifest " + shlex.quote(str(spec.manifest) if spec.manifest is not None else "none")
             if spec.chunk_manifest is not None:
                 command += " --chunk-manifest " + shlex.quote(str(spec.chunk_manifest))
             return command
@@ -4723,6 +4734,20 @@ def _require_recorded_inputs(spec: RunSpec, record: dict[str, Any]) -> None:
         if changed:
             raise UsageLedgerError(f"generation input identity changed for {name}; restore the "
                                    "recorded inputs or use --no-resume for an explicit new generation")
+    # The instrument (#1460): a record that names its digest — every record
+    # since #426 — and its profile must be resumed under the same ones.
+    schema_block = record.get("schema") or {}
+    recorded_digest = schema_block.get("digest_md5")
+    if recorded_digest and recorded_digest != current["profile"]["digest_md5"]:
+        raise UsageLedgerError("generation instrument changed: the record's schema digest "
+                               f"{recorded_digest} is not this run's {current['profile']['digest_md5']} "
+                               f"(profile {current['profile']['name']}); restore the recorded "
+                               "profile and schema or use --no-resume for an explicit new generation")
+    recorded_profile = schema_block.get("profile")
+    if recorded_profile and recorded_profile != current["profile"]["name"]:
+        raise UsageLedgerError(f"generation profile changed: the record was made under {recorded_profile}, "
+                               f"this run resolves {current['profile']['name']}; restore it or use "
+                               "--no-resume for an explicit new generation")
     instruction = ((record.get("prompts") or {}).get("request") or {}).get("sha256")
     if instruction is not None and instruction != current["instruction"]["sha256"]:
         raise UsageLedgerError("generation instruction identity changed; restore the recorded renderer "
@@ -4746,7 +4771,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     _rewrites: list[dict[str, Any]] = []
     _rewrite_token = _REWRITE_LOG.set(_rewrites)
     from data_sheets_schema.schema_sync import blocking, check as _schema_check
-    stale = blocking(_schema_check())
+    stale = blocking(_schema_check(profile=spec.profile_obj))     # this run's instrument (#1463)
     if stale:
         detail = "; ".join(f"{r['class']}: {r.get('reason', r['status'])}"
                            for r in stale)

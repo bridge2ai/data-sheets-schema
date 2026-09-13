@@ -67,6 +67,9 @@ class Profile:
     #: The healthsheet-only arm's upstream record and bundle name.
     healthsheet_record: Path | None = None
     healthsheet_bundle: str | None = None
+    #: The dataset that record describes — written into the bundle's
+    #: header as its identity (#1464).
+    healthsheet_project: str | None = None
 
     @property
     def pin_path(self) -> Path | None:
@@ -93,6 +96,7 @@ BRIDGE2AI = Profile(
     agreement_projects=("AI_READI", "CHORUS", "CM4AI", "VOICE"),
     healthsheet_record=Path("data/raw/AI_READI/fairhub_api_dataset_3_2026-07-27.json"),
     healthsheet_bundle="AI_READI_healthsheet_only.txt",
+    healthsheet_project="AI_READI",
 )
 
 NEUTRAL = Profile(name="neutral")
@@ -139,15 +143,48 @@ def declared_profile(manifest: Path | str | None) -> str | None:
 def default_manifest() -> Path | None:
     """The manifest a caller that selected none is read against, decided
     when asked rather than when imported (#1439): the working directory's
-    default manifest if there is one, else the checkout's when this package
-    is imported from a checkout — so a script run from `tests/` in the
-    study's checkout still sees the study's — else none."""
+    default manifest if there is one, else the nearest ancestor's (an
+    installed package run from a subdirectory of the user's project, #1467
+    — the way git finds a repository), else the checkout's when this
+    package is imported from a checkout — so a script run from `tests/` in
+    the study's checkout still sees the study's — else none."""
     rel = Path(DEFAULT_MANIFEST)
     if rel.exists():
         return rel
+    here = Path.cwd().resolve()
+    for ancestor in here.parents:
+        if (ancestor / rel).exists():
+            return ancestor / rel
     if _CHECKOUT_ROOT is not None and (_CHECKOUT_ROOT / rel).exists():
         return _CHECKOUT_ROOT / rel
     return None
+
+
+def _shown(path: Path) -> str:
+    """How a basis names a manifest: repository-relative for one under the
+    checkout, so the same file reads the same from any directory and no
+    local path reaches a record (#1466, cf. #398); as given otherwise."""
+    p = Path(path)
+    if _CHECKOUT_ROOT is not None:
+        try:
+            return p.resolve().relative_to(_CHECKOUT_ROOT.resolve()).as_posix()
+        except (ValueError, OSError):
+            pass
+    return p.as_posix()
+
+
+def _stamp(path: Path) -> str:
+    """Twelve hex characters of the manifest's sha256, so one basis string
+    never names two manifests (#1466)."""
+    import hashlib
+    try:
+        return hashlib.sha256(Path(path).read_bytes()).hexdigest()[:12]
+    except OSError:
+        return "unreadable"
+
+
+def basis_for(kind: str, manifest: Path) -> str:
+    return f"{kind}:{_shown(manifest)}@{_stamp(manifest)}"
 
 
 def select_profile(manifest: Path | str | None | Any = "default") -> Selection:
@@ -167,12 +204,23 @@ def select_profile(manifest: Path | str | None | Any = "default") -> Selection:
     if manifest is None:
         return Selection(NEUTRAL, "no manifest")
     name = declared_profile(manifest)
-    return Selection(profile_named(name) if name else NEUTRAL, f"{basis}:{Path(manifest).as_posix()}")
+    return Selection(profile_named(name) if name else NEUTRAL, basis_for(basis, Path(manifest)))
 
 
 def active_profile(manifest: Path | str | None | Any = "default") -> Profile:
     """`select_profile(manifest).profile` — for callers that need no basis."""
     return select_profile(manifest).profile
+
+
+def for_record(record: dict[str, Any] | None) -> Profile:
+    """The profile a *record's* readers use (#1462): the one its `schema`
+    block states, else the ambient one — a record that predates profiles
+    was made under the study's, which is the ambient one in the study's
+    checkout. Evaluation, review packs and backfills read this, never the
+    environment alone, so a historical record keeps its instrument when the
+    environment changes."""
+    name = ((record or {}).get("schema") or {}).get("profile") if isinstance(record, dict) else None
+    return profile_named(str(name)) if name else active_profile()
 
 
 def arm_projects_for(arm: str, profile: Profile | None = None) -> list[str] | None:
