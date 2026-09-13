@@ -147,3 +147,9 @@ pending. Reprioritize newly discovered blockers before new paid work.
   is `recorded_by: backfill_checks`; all 15 canary artifact hashes match.
   Corpus totals now include 278 checked records and 1,058 checked claims;
   the old test expects 277 and 1,033. No new model call or download occurred.
+- 2026-09-12: PR #1362 implements #1361. Independent review found #1363:
+  accepting an absent origin marker without a per-record expectation could
+  recast a historical backfill as an original-run check. The correction pins
+  all 278 checked provenance paths and their original markers from the merged
+  baseline, rejects origin changes and membership changes, and leaves the
+  original records unchanged. CI and review must pass on this correction.
