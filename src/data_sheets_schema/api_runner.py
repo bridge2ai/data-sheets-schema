@@ -509,12 +509,12 @@ class RunSpec:
             self.manifest = Path(self.manifest)
         if self.chunk_manifest is not None:
             self.chunk_manifest = Path(self.chunk_manifest)
-        elif self.render_version >= 4 and self.runtime == "Claude Code":
+        elif self.render_version >= 4 and self.is_agentic:
             # The agentic playbook reads a chunk mapping even when discovery
             # chose it. Freeze that path for instruction replay (#1507).
             from data_sheets_schema.chunking import manifest_for
             self.chunk_manifest = manifest_for(self.bundle)
-        if self.render_version >= 4 and self.runtime == "Claude Code":
+        if self.render_version >= 4 and self.is_agentic:
             self._agentic_artifact_paths = {
                 "full": str(self.full_path), "core": str(self.core_path),
                 "receipt": str(self.report_path.parent / f"{self.project}_coverage_receipt.yaml")}
@@ -528,6 +528,11 @@ class RunSpec:
             return ("# Source manifest: not used (no manifest selected; "
                     "the bundle was passed explicitly)")
         return f"# Source manifest: {manifest}"
+
+    @property
+    def is_agentic(self) -> bool:
+        """Whether the runtime follows the shared agentic playbook."""
+        return self.runtime in {"Claude Code", "Codex CLI"}
 
     @classmethod
     def from_render_spec(cls, recorded: dict[str, Any], *, project: str,
@@ -907,7 +912,7 @@ def resolve_prompt(spec: RunSpec) -> str:
                  "Before Phase 2 and before provenance exists, use this receipt-check command "
                  "for the selected inputs when following d4d-full-core.md:\n\n"
                  + shlex.join(args) + "\n")
-    if spec.render_version >= 4 and spec.runtime == "Claude Code":
+    if spec.render_version >= 4 and spec.is_agentic:
         body += agentic_selected_inputs(spec)
 
     # v1 hardcodes `# Generated: 2026-07-28` where every neighbouring header

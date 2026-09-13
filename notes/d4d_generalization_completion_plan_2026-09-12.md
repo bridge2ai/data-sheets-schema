@@ -316,3 +316,19 @@ boundary hashes are verified. Claude continues the profile and packaging
 branches; retain generation → evaluation → profiles → packaging merge order.
 Both generation arms and all evaluation styles stay in scope. No source
 downloads, production generation or new ratings are launched.
+
+## Generation review round 19 — 2026-09-13
+
+Round 18 confirms the selected priority/scope fixes and finds #1538: Codex CLI
+must receive the same selected-input playbook controls as Claude Code.
+A shared runtime predicate now governs path freezing and rendering.
+Both runtime variants run the behavioral checks; 76 tests pass after six
+Codex regressions reproduce on the preceding head. Require full CI and
+independent approval before merge.
+
+Evaluation round 4 confirms preservation and finds one remaining scoring
+scope defect: an explicitly declared Dataset with resources must remain
+the scoring target rather than being replaced by its children. Address it
+before the next evaluation review. The #1457 installed-workflow completion
+is being prepared in a separate worktree, retaining the prescribed merge
+order and the no-new-measurement boundary.
