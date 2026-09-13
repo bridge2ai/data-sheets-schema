@@ -13,8 +13,8 @@ from data_sheets_schema.cli import cli
 from tests.test_generation_manifest_identity import external
 
 
-@pytest.fixture
-def selected(external, monkeypatch, tmp_path):
+@pytest.fixture(params=["Claude Code", "Codex CLI"])
+def selected(external, monkeypatch, tmp_path, request):
     monkeypatch.setattr(socket.socket, "connect", lambda *a, **k: pytest.fail("network forbidden"))
     monkeypatch.setattr(api, "CONCAT_DIR", tmp_path / "outputs")
     data = yaml.safe_load(external.manifest.read_bytes())
@@ -26,7 +26,7 @@ def selected(external, monkeypatch, tmp_path):
         {**chunking.DEFAULT_RULE, "max_lines": 3, "version": "2-custom"})))
     # A usable default sidecar must never hide failure to select the custom map.
     external.chunk_manifest.unlink()
-    return replace(external, chunk_manifest=custom, runtime="Claude Code", condition="generic_v9",
+    return replace(external, chunk_manifest=custom, runtime=request.param, condition="generic_v9",
                    out_dir=None, method="external_agent", label="synthetic label")
 
 
