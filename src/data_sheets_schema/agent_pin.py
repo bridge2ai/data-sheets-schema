@@ -147,8 +147,9 @@ def _usable(lines):
 
 
 def _git(*args, cwd: Path | None = None) -> str:
+    from data_sheets_schema.resources import git_env
     return subprocess.run(["git", *args], capture_output=True, text=True,
-                          cwd=cwd or REPO).stdout
+                          cwd=cwd or REPO, env=git_env()).stdout      # no borrowed GIT_DIR (#1728)
 
 
 def _history_root(path: Path) -> Path:
