@@ -169,3 +169,23 @@ profile parent as #1700 and still awaits integration.
 
 The committed packaging-parent integration at 4c1898617 is now included.
 Its merge changes no files relative to the tested installed implementation.
+
+## Integrated review round 11 — 2026-09-13
+
+The round-10 installed validator head b5e41e6ce passed independent Codex
+review and CI. The packaging corrections through 53359f583 and profile
+corrections through PR #1737 are now integrated. They include distribution
+RECORD verification, shared Git environment isolation, vocabulary errors,
+complete resume identity pins and malformed strict-audit diagnostics. The
+legacy batch validator still owns its repository corpus and schemas; explicit
+file evaluation remains caller-selected.
+
+The packaging and installed-resource lane passed 158 tests with one skip,
+with fresh-wheel checks enabled. The combined profile/installed-validator
+lane passed 42 checks. The original completion audit was rerun read-only and
+still verifies the registered 56 ratings, 259 earlier evaluations and all
+450 preservation hashes. The JSON pins the integrated implementation and
+dependency commits. Both generation arms and all listed evaluation styles
+remain covered by the plan; no new production measurements were made.
+
+The integrated head proceeds to independent review and exact-head CI.
