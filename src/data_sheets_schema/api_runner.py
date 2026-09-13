@@ -3860,10 +3860,13 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             # repair applied on 87 API records (61%). Unstamped here, the
             # false header came back on the majority of runs (#1027 review).
             body = stamp_provenance_header(body, settings)
+            # Classify the input that produced these findings before the
+            # repaired output changes its readability (#1747).
+            repaired_from_class = _finding_class(errors, path)
             path.write_text(body, encoding="utf-8")
             _snapshot(spec, f"{spec.project}_{ph}_r{rnd}.yaml", body)
             applied_from = len(errors)
-            applied_class = _finding_class(errors, path)
+            applied_class = repaired_from_class
             log.append({"phase": ph, "round": rnd, "outcome": "applied",
                         "findings": len(errors)})
     return log
