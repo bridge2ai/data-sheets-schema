@@ -844,7 +844,10 @@ def artifact_root(record: Path) -> Path | None:
     absolute = record.absolute()
     for parent in absolute.parents:
         if parent.parts[-2:] == ("data", "d4d_concatenated"):
-            return parent.parent.parent
+            tail = absolute.relative_to(parent).parts
+            if (len(tail) == 3 and tail[0].endswith("_core")
+                    and tail[2].endswith("_provenance.yaml")):
+                return parent.parent.parent
     return None if record.is_absolute() else Path.cwd()
 
 
@@ -861,7 +864,10 @@ def verify_entry(entry: dict[str, Any], *, record: Path | None = None) -> bool |
     elif Path(path).is_absolute():
         resolved = Path(path)
     elif record is not None:
-        owner = artifact_root(record)
+        # A flat override can itself sit inside the conventional directory.
+        # Its non-corpus pin must not acquire the containing corpus's base.
+        owner = (artifact_root(record) if Path(path).parts[:2] == ("data", "d4d_concatenated")
+                 else None if Path(record).is_absolute() else Path.cwd())
         if owner is None:
             return None
         resolved = owner / Path(path)
@@ -1354,6 +1360,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                  condition_source_paths: list[str] | None = None,
                  condition_mismatch_allowed: bool = False,
                  manifest: Path | None | object = AUTO,
+                 selected_manifest: Path | None | object = AUTO,
                  chunk_manifest: Path | None = None,
                  manifest_basis: str | None = None) -> ProvenanceRecord:
     """Assemble a provenance record for one project-run.
@@ -1375,6 +1382,10 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     #1395). ``chunk_manifest`` is the chunk manifest the run was given
     explicitly, when discovery beside the bundle is not how it found one
     (#1299).
+    ``selected_manifest`` keeps the run's selected corpus namespace separate
+    from consumed context: an arm may use that namespace for paths/chunk
+    names while declaring its manifest context unused. Omitted, it follows
+    ``manifest`` for compatibility with direct callers.
     """
     # Taken from the caller when it knows, reconstructed only when it does not.
     # A run with `--out-dir` writes flat into that directory, and rebuilding the
@@ -1383,7 +1394,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     # class as the declared-bundle defect: a path assumed rather than derived
     # from the spec that already knew it (#604).
     from data_sheets_schema.corpus import root, relative_to_root
-    owner = root() if manifest is AUTO else root(manifest)
+    namespace = manifest if selected_manifest is AUTO else selected_manifest
+    owner = root() if namespace is AUTO else root(namespace)
     if concat_dir == CONCAT_DIR:
         concat_dir = relative_to_root(concat_dir, owner)
     base = method[:-5] if method.endswith("_core") else method
@@ -1426,7 +1438,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         # bytes (#707) — only when one exists for exactly this md5; a manifest
         # of some other version of the bundle would attest the wrong file.
         from data_sheets_schema.chunking import chunks_input
-        inputs["chunks"] = chunks_input(bundle, inputs["bundle_md5"], manifest=chunk_manifest)
+        inputs["chunks"] = chunks_input(bundle, inputs["bundle_md5"], manifest=chunk_manifest,
+                                         source_manifest=None if namespace is AUTO else namespace)
     elif bundle:
         inputs["bundle_md5"] = None
         inputs["chunks"] = None      # nothing anchors chunk ids to unverified bytes (#716)

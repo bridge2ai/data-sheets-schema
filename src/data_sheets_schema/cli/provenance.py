@@ -452,6 +452,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                        receipt_expected=receipt_expected,
                        condition=condition,                  # the launcher's own claim (#1094)
                        manifest=selected, manifest_basis=manifest_basis,
+                       selected_manifest=selected_manifest,
                        chunk_manifest=Path(chunk_manifest) if chunk_manifest else None)
     if phases_skipped:
         known = _known_phases()

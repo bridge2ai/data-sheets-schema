@@ -187,6 +187,11 @@ class RecordGateTest(unittest.TestCase):
         if not src.exists():
             self.skipTest("v4 CHORUS record not present in this checkout")
         rec = yaml.safe_load(src.read_text(encoding="utf-8"))
+        # This test moves the record outside its corpus. Keep the original
+        # artifact identities explicit in the copy; its new flat address
+        # cannot establish the old relative paths' base (#1646).
+        for entry in rec["validation"]["artifacts"].values():
+            entry["path"] = str(Path(entry["path"]).resolve())
         rec["pair_consistency"] = {
             "ran": True, "consistent": False, "errors": 6,
             "artifacts": {"full": {"path": "x", "md5": "y"},

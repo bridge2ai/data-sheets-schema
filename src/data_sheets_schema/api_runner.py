@@ -1536,7 +1536,8 @@ def source_ranking_block(project: str,
     return "\n".join(lines)
 
 
-def chunk_marked_bundle(bundle: Path, manifest: Path | None = None) -> tuple[str, str]:
+def chunk_marked_bundle(bundle: Path, manifest: Path | None = None, *,
+                        source_manifest: Path | None = None) -> tuple[str, str]:
     """The bundle's text with a `[cNNN]` marker line opening each chunk of
     its manifest (#710), and the manifest's md5.
 
@@ -1551,7 +1552,7 @@ def chunk_marked_bundle(bundle: Path, manifest: Path | None = None) -> tuple[str
 
     from data_sheets_schema.chunking import load_manifest, manifest_for
     raw = bundle.read_bytes()
-    mpath = Path(manifest) if manifest is not None else manifest_for(bundle)   # any bundle kind (#725)
+    mpath = Path(manifest) if manifest is not None else manifest_for(bundle, source_manifest=source_manifest)
     if not mpath.exists():
         raise RuntimeError(f"no chunk manifest for {bundle} (expected {mpath}); "
                            f"run `d4d bundle chunk --bundle {bundle}`")
@@ -1561,7 +1562,7 @@ def chunk_marked_bundle(bundle: Path, manifest: Path | None = None) -> tuple[str
                            "run `d4d bundle chunk`")
     from data_sheets_schema.chunking import canonical_name, validate_manifest_mapping
     try:
-        validate_manifest_mapping(m, raw, canonical_name(bundle))
+        validate_manifest_mapping(m, raw, canonical_name(bundle, source_manifest=source_manifest))
     except (TypeError, ValueError) as exc:
         raise RuntimeError(f"invalid chunk manifest {mpath}: {exc}") from exc
     lines = raw.decode("utf-8", errors="ignore").split("\n")
@@ -1659,7 +1660,7 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     digest = schema_digest.digest_text(cls, profile=spec.profile_obj)
     receipted = spec.condition in RECEIPT_CONDITIONS
     if receipted:
-        bundle_text, bundle_md5 = chunk_marked_bundle(spec.bundle, spec.chunk_manifest)
+        bundle_text, bundle_md5 = chunk_marked_bundle(spec.bundle, spec.chunk_manifest, source_manifest=spec.manifest)
         bundle_head = (BUNDLE_HEAD.format(bundle=spec.bundle)
                        + BUNDLE_MD5_LINE.format(md5=bundle_md5)
                        + CHUNK_MARKER_NOTE)
@@ -5364,6 +5365,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         # default for a bundle it did not declare, and none for an arm whose
         # header declares the manifest unused (#621, #1299).
         manifest=spec.manifest if spec.manifest_used else None,
+        selected_manifest=spec.manifest,
         manifest_basis=(None if spec.manifest_used else
                         "no source manifest was consulted: the arm's header declares "
                         f"it unused ({spec.manifest_line.lstrip('# ').strip()})"),

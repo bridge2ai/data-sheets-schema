@@ -113,3 +113,27 @@ checkout ownership. The dated implementation pins are refreshed.
 
 No production input, output, rating or historical attribution was rewritten.
 The next independent review and exact-head CI remain merge gates.
+
+## Review round 5 — 2026-09-13
+
+The round-4 findings are #1644 and #1645. Conventional record ownership now
+requires the actual method_core/label/provenance layout and corpus-relative
+artifact pins. A legacy flat override nested below data/d4d_concatenated
+cannot acquire an ancestor's duplicate files. Unknown absolute flat-record
+bases remain unverifiable. Chunk discovery and chunk-name validation now
+receive the same selected source-manifest namespace. Recording keeps that
+namespace separate from consumed context, including crate-only and
+healthsheet arms whose source-manifest context is unused.
+
+All six original reproductions fail before the fixes. The expanded corpus,
+chunk, manifest-identity, backfill and pair-gate lane passes 85 checks,
+including consumed and unused context with selected symlink aliases. The CI
+fixture correction is #1646: an in-memory copy of a historical provenance
+record now keeps its original artifact locations when moved outside its
+corpus. The historical on-disk record is unchanged.
+
+All seven fresh-wheel workflows pass on these fixes (122.21 seconds), with
+only declared runtime dependencies and fake-provider fixtures. All 60
+historical renderer controls match. The read-only preservation audit verifies
+56 accepted ratings, 259 prior evaluations and 450 preservation hashes.
+The next independent review and exact-head CI remain required before merge.
