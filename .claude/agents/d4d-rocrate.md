@@ -3,7 +3,7 @@ name: d4d-rocrate
 description: |
   Transform RO-Crate JSON-LD metadata (from fairscape-cli) into D4D YAML datasheets.
   Examples:
-    - "Convert CM4AI RO-Crate to D4D"
+    - "Convert this RO-Crate to D4D"
     - "Generate D4D from fairscape-cli output"
     - "Transform ro-crate-metadata.json to D4D YAML"
     - "Map RO-Crate to datasheet format"
@@ -116,10 +116,12 @@ poetry add pyyaml linkml-runtime linkml
 ```bash
 # Transform RO-Crate to D4D
 poetry run python .claude/agents/scripts/rocrate_to_d4d.py \
-  --input data/raw/CM4AI/ro-crate-metadata.json \
-  --output data/d4d_concatenated/rocrate/CM4AI_d4d.yaml \
+  --input data/raw/<PROJECT>/ro-crate-metadata.json \
+  --output data/d4d_concatenated/rocrate/<PROJECT>_d4d.yaml \
   --mapping "data/ro-crate_mapping/D4D - RO-Crate - RAI Mappings.xlsx - Class Alignment.tsv"
 ```
+
+`<PROJECT>` is a project the selected source manifest declares (`d4d download list-projects`).
 
 ### With Validation
 
@@ -146,24 +148,24 @@ poetry run python .claude/agents/scripts/rocrate_to_d4d.py \
 
 ## Usage Examples
 
-### Example 1: Transform CM4AI RO-Crate
+### Example 1: Transform a project's RO-Crate
 
-**Scenario:** You have CM4AI fairscape-cli output and want a D4D datasheet.
+**Scenario:** You have fairscape-cli output for a project and want a D4D datasheet.
 
 ```bash
 # Step 1: Locate RO-Crate file
-ls data/raw/CM4AI/
+ls data/raw/<PROJECT>/
 # → ro-crate-metadata.json
 
 # Step 2: Transform to D4D
 poetry run python .claude/agents/scripts/rocrate_to_d4d.py \
-  --input data/raw/CM4AI/ro-crate-metadata.json \
-  --output data/d4d_concatenated/rocrate/CM4AI_d4d.yaml \
+  --input data/raw/<PROJECT>/ro-crate-metadata.json \
+  --output data/d4d_concatenated/rocrate/<PROJECT>_d4d.yaml \
   --mapping "data/ro-crate_mapping/D4D - RO-Crate - RAI Mappings.xlsx - Class Alignment.tsv" \
   --validate
 
 # Step 3: Review output
-cat data/d4d_concatenated/rocrate/CM4AI_d4d.yaml
+cat data/d4d_concatenated/rocrate/<PROJECT>_d4d.yaml
 cat data/d4d_concatenated/rocrate/transformation_report.txt
 ```
 
@@ -172,7 +174,7 @@ cat data/d4d_concatenated/rocrate/transformation_report.txt
 ✓ Loaded 83 FAIRSCAPE-covered mappings
 ✓ Parsed RO-Crate with 156 flattened properties
 ✓ Successfully mapped 78/83 fields
-✓ D4D YAML saved: CM4AI_d4d.yaml
+✓ D4D YAML saved: <PROJECT>_d4d.yaml
 ✓ Transformation report saved
 ✓ Validation passed - D4D YAML is valid against schema
 ```
@@ -208,13 +210,13 @@ poetry run linkml-validate \
 ```bash
 # Generate from RO-Crate
 poetry run python .claude/agents/scripts/rocrate_to_d4d.py \
-  --input data/raw/VOICE/ro-crate-metadata.json \
-  --output data/test/VOICE_from_rocrate.yaml \
+  --input data/raw/<PROJECT>/ro-crate-metadata.json \
+  --output data/test/<PROJECT>_from_rocrate.yaml \
   --mapping mapping.tsv
 
-# Compare with existing D4D
-diff data/test/VOICE_from_rocrate.yaml \
-     data/d4d_concatenated/curated/VOICE_curated.yaml
+# Compare with an existing D4D record of the same project
+diff data/test/<PROJECT>_from_rocrate.yaml \
+     data/d4d_concatenated/<METHOD>/<PROJECT>_d4d.yaml
 
 # Identify gaps
 cat data/test/transformation_report.txt
@@ -381,7 +383,7 @@ poetry run linkml-validate \
 
 ```bash
 # Organize outputs by project and date
-PROJECT=CM4AI
+PROJECT=<PROJECT>          # a project the selected manifest declares
 DATE=$(date +%Y%m%d)
 OUTPUT_DIR=data/d4d_concatenated/rocrate/${PROJECT}_${DATE}
 

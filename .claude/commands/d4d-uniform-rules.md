@@ -69,8 +69,8 @@ to every project:
   must be left exactly as written.
 
   **Where no declared prefix fits, never invent one.** A prefix the schema does
-  not declare resolves to nothing, so do not mint `b2ai-voice:` or similar
-  (#531). Hang the identifier off one the evidence supplies — see the fragment
+  not declare resolves to nothing, so do not mint a prefix named after the
+  dataset or its programme (#531). Hang the identifier off one the evidence supplies — see the fragment
   rule below — and where no fragment is possible either, a resolvable URL is the
   better answer. Check the schema's `prefixes:` block rather than guessing.
 

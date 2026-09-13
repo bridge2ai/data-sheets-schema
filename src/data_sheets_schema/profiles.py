@@ -144,11 +144,21 @@ def declared_profile(manifest: Path | str | None) -> str | None:
         return None
     from data_sheets_schema.schema_cache import load_yaml
     try:
-        data = load_yaml(p) or {}
+        data = load_yaml(p)
     except Exception as exc:                                   # noqa: BLE001 — yaml or OS; the file is named (#1586)
         raise ValueError(f"manifest {p} could not be read: {exc}") from None
-    value = data.get("profile") if isinstance(data, dict) else None
-    return str(value) if value else None
+    if data is None:
+        return None                                            # an empty document declares nothing
+    if not isinstance(data, dict):
+        # The registry refuses this file; the digest must not read it as
+        # an undeclared profile and switch instruments (#1610).
+        raise ValueError(f"manifest {p} is not a mapping")
+    value = data.get("profile")
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"manifest {p} declares profile {value!r}, which is not a profile name")
+    return value.strip()
 
 
 def default_manifest() -> Path | None:

@@ -1052,3 +1052,155 @@ class TestRoundSeven(_Clean):
             with self.assertRaises(ValueError) as caught:
                 select_profile(m)
             self.assertIn("m.yaml", str(caught.exception))
+
+
+class TestRoundEight(_Clean):
+    """The Codex round-5 findings (#1606–#1611)."""
+
+    def _recorder(self, args, env):
+        """The recorder from the checkout root with its writes captured —
+        the record's `build_record` keywords and nothing on disk."""
+        import click.testing
+        from data_sheets_schema import provenance as pv
+        from data_sheets_schema.cli import provenance as prov_cli
+        with mock.patch.dict(os.environ, env, clear=False):
+            for k in ("D4D_PROFILE",):
+                if k not in env:
+                    os.environ.pop(k, None)
+            rec = mock.Mock(data={}, validation_carried=None)
+            with mock.patch.object(pv, "build_record", return_value=rec) as build, \
+                    mock.patch.object(prov_cli, "_inline_checks"):
+                r = click.testing.CliRunner().invoke(prov_cli.provenance, ["record", *args])
+        return r, (build.call_args.kwargs if build.call_args else None)
+
+    def test_the_saved_spec_carries_the_stated_profile(self):
+        """#1606: under `--condition` the saved render spec re-renders the
+        instruction that was sent, under the profile the record states — and
+        a recorder whose own environment is invalid still records it."""
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        from data_sheets_schema.cli.api import ARMS
+        bundle = ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt"
+        label = "2026-09-13_x-claudecode-generic-v9_rep1"
+        os.environ["D4D_PROFILE"] = "neutral"
+        spec = RunSpec(project="CHORUS", method=ARMS["baseline"][1], arm=ARMS["baseline"][0], bundle=bundle,
+                       label=label, condition="generic_v9", runtime="Claude Code", provider="Anthropic")
+        sent = resolve_prompt(spec)
+        os.environ.pop("D4D_PROFILE")
+        args = ["--project", "CHORUS", "--method", spec.method, "--label", label, "--input-bundle", str(bundle),
+                "--manifest", str(spec.manifest), "--profile", "neutral", "--condition", "generic_v9",
+                "--runtime", "Claude Code", "--provider", "Anthropic", "--phase", "generate_full"]
+        r, kw = self._recorder(args, {})
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertEqual(kw["profile"].name, "neutral")
+        self.assertTrue(kw["profile"].basis.startswith("rendered instruction (this process would select bridge2ai"))
+        saved = kw["prompt_request_spec"]
+        self.assertEqual((saved["profile"], saved["profile_basis"]), ("neutral", kw["profile"].basis))
+        replay = RunSpec.from_render_spec(saved, project="CHORUS", method=spec.method, label=label)
+        self.assertEqual(resolve_prompt(replay), sent)                    # the gate would read `match`
+        r, kw = self._recorder(args, {"D4D_PROFILE": "typo"})           # an invalid ambient selection
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertEqual(kw["profile"].name, "neutral")
+        self.assertIn("could not select one", kw["profile"].basis)
+
+    def test_backfill_spec_reconstructs_the_single_source_arms(self):
+        """#1607: an arm with its own "not used" header, whose record names no
+        manifest as consumed, still re-renders — the selected manifest is tried."""
+        import hashlib
+        import click.testing
+        import yaml
+        from data_sheets_schema import provenance as pv
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        from data_sheets_schema.cli import provenance as prov_cli
+        from data_sheets_schema.cli.api import ARMS
+        label = "2026-09-13_x-claudecode-generic-v9_rep1"
+        for arm, project in (("crate_only", "CHORUS"), ("healthsheet", "AI_READI")):
+            display, method, pattern, header = ARMS[arm]
+            bundle = ROOT / "data/preprocessed/concatenated" / pattern.format(p=project)
+            if not bundle.exists():
+                self.skipTest(f"no {bundle.name} bundle")
+            spec = RunSpec(project=project, arm=display, method=method, bundle=bundle, label=label,
+                           condition="generic_v9", runtime="Claude Code", provider="Anthropic",
+                           run_date="2026-09-13", manifest_line=header)
+            self.assertFalse(spec.manifest_used); self.assertIsNotNone(spec.manifest)   # selected, not consumed
+            record = {"record_generated_at": "2026-09-13T12:00:00Z", "model": {"provider": "Anthropic"},
+                      "schema": {"profile": spec.profile, "profile_basis": spec.profile_basis},
+                      "inputs": {"bundle_path": str(bundle), "source_manifest": {"path": None},
+                                 **({"chunks": {"path": str(spec.chunk_manifest)}} if spec.chunk_manifest else {})},
+                      "prompts": {"request": {"sha256": hashlib.sha256(resolve_prompt(spec).encode()).hexdigest()}}}
+            with tempfile.TemporaryDirectory() as d:
+                path = Path(d) / f"{project}_provenance.yaml"
+                path.write_text(yaml.safe_dump(record), encoding="utf-8")
+                with mock.patch.object(pv, "record_path_for", return_value=path):
+                    r = click.testing.CliRunner().invoke(prov_cli.provenance, [
+                        "backfill-spec", "--project", project, "--method", method, "--label", label,
+                        "--condition", "generic_v9", "--runtime", "Claude Code", "--arm", arm])
+            self.assertEqual(r.exit_code, 0, f"{arm}: {r.output}")
+            self.assertIn("re-renders to the recorded hash", r.output)
+
+    def test_a_missing_attestation_is_an_instrument_boundary(self):
+        """#1608: a failure with a complete-specification hash never takes a
+        label cached without one, and the loader refuses a mixed population."""
+        import json
+        from data_sheets_schema.form_defects import FormFailure, FormSubtypeClassifier, load_form_failures
+        from data_sheets_schema.profiles import BRIDGE2AI
+        study = "cd3c79f2c62f11675d5ce2c1df96b88e"
+        fresh = FormFailure(project="P", slot="instances", value="[]", reason="wrong kind", fitness=0.0,
+                            schema=study, specification="b" * 64)
+        legacy = FormSubtypeClassifier(client=object(), model="offline-test", schema=study, specification="",
+                                       profile=BRIDGE2AI, offline=True)
+        legacy._memo[fresh.key] = ("other", "cached before the specification was recorded")
+        with self.assertRaises(ValueError):
+            legacy(fresh)
+        # A failure with no attestation at all is legacy — read like one with
+        # no schema, stamped rather than refused — so the attested classifier
+        # serves it (its key carries the reason hash).
+        old = FormFailure(project="P", slot="instances", value="[]", reason="wrong kind", fitness=0.0,
+                          schema=study, specification="")
+        attested = FormSubtypeClassifier(client=object(), model="offline-test", schema=study,
+                                         specification="b" * 64, profile=BRIDGE2AI, offline=True)
+        attested._memo[old.key + ":" + __import__("hashlib").sha256(b"wrong kind").hexdigest()] = ("other", "x")
+        self.assertEqual(attested(old), ("other", "x"))
+        with tempfile.TemporaryDirectory() as d:
+            rows = [{"failure": "form", "rubric": "r", "model": "m", "slot": "instances", "value": "[]",
+                     "reason": "wrong kind", "fitness": 0.0, "schema": study, **({"specification": "b" * 64} if s else {})}
+                    for s in (False, True)]
+            (Path(d) / "P_fitness.jsonl").write_text("\n".join(json.dumps(r) for r in rows) + "\n", encoding="utf-8")
+            with self.assertRaises(ValueError):
+                load_form_failures(Path(d))
+            (Path(d) / "P_fitness.jsonl").write_text(json.dumps(rows[0]) + "\n", encoding="utf-8")
+            self.assertEqual(len(load_form_failures(Path(d))), 1)       # one population loads
+
+    def test_a_profiles_own_digest_is_never_a_disagreement(self):
+        """#1609"""
+        from data_sheets_schema import schema_digest
+        from data_sheets_schema.provenance import _profile_digest_disagreement
+        with mock.patch.object(schema_digest, "digest_text", return_value="the same bytes"):
+            same = schema_digest.fingerprint("the same bytes")
+            self.assertIsNone(_profile_digest_disagreement({"schema": {"profile": "bridge2ai", "digest_md5": same}}))
+            self.assertIsNone(_profile_digest_disagreement({"schema": {"profile": "neutral", "digest_md5": same}}))
+
+    def test_a_malformed_manifest_is_refused_not_read_as_neutral(self):
+        """#1610"""
+        from data_sheets_schema.profiles import declared_profile, select_profile
+        with tempfile.TemporaryDirectory() as d:
+            m = Path(d) / "m.yaml"
+            m.write_text("- a\n- b\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "not a mapping"):
+                declared_profile(m)
+            with self.assertRaises(ValueError):
+                select_profile(m)
+            m.write_text("profile: []\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "not a profile name"):
+                declared_profile(m)
+            m.write_text("", encoding="utf-8")
+            self.assertIsNone(declared_profile(m))                       # an empty document declares nothing
+            m.write_text("projects: {}\n", encoding="utf-8")
+            self.assertIsNone(declared_profile(m))
+
+    def test_the_utility_agents_name_no_study_project(self):
+        """#1611: the executable examples a user copies name no study project."""
+        import re
+        for rel in (".claude/agents/d4d-rocrate.md", ".claude/agents/d4d-mapper.md", ".claude/agents/d4d-validator.md"):
+            text = (ROOT / rel).read_text(encoding="utf-8")
+            self.assertIsNone(re.search(r"\b(AI_READI|CHORUS|CM4AI|VOICE)\b", text), rel)
+        self.assertNotIn("b2ai-voice", (ROOT / ".claude/commands/d4d-uniform-rules.md").read_text(encoding="utf-8"))

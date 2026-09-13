@@ -92,7 +92,7 @@ poetry run linkml-tr map-data \
   --source-schema src/data_sheets_schema/schema/data_sheets_schema_all.yaml \
   --target-schema target_schema.yaml \
   --transformer-specification mapping.yaml \
-  data/d4d_concatenated/claudecode/VOICE_d4d.yaml
+  data/d4d_concatenated/<METHOD>/<PROJECT>_d4d.yaml
 ```
 
 ## Common Mapping Patterns
@@ -289,7 +289,7 @@ poetry run linkml-tr map-data \
   --source-schema src/data_sheets_schema/schema/data_sheets_schema_all.yaml \
   --target-schema simple_schema.yaml \
   --transformer-specification mapping.yaml \
-  data/d4d_concatenated/claudecode/VOICE_d4d.yaml \
+  data/d4d_concatenated/<METHOD>/<PROJECT>_d4d.yaml \
   -o transformed.yaml
 
 # 4. Validate result
