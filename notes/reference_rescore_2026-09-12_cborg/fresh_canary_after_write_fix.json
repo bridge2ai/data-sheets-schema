@@ -1,0 +1,14 @@
+{
+  "registered_at": "2026-09-12T18:33:42.796725+00:00",
+  "issue": 1340,
+  "manifest_sha256": "e71b8805b7fde90b5e64e23ba1c1f346f2f17e33fe49df7c98c9e885aeec1501",
+  "reviewed_runner_commit": "e7d0e13aac007feb4030027aba062a024e37cfd3",
+  "canary_id": "CHORUS_v7_rep1_r10_rating1",
+  "prior_failed_sessions": 1,
+  "prior_cli_reported_cost_usd": 2.433457,
+  "scope": "One fresh CBORG canary; no remaining evaluation job before accepted review.",
+  "offline_tests": "165 passed",
+  "real_cli_probe": "Write is advertised without bare mode; fake credentials and local rejecting endpoint, no model inference.",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "budget_cap_usd_per_attempt": 5
+}

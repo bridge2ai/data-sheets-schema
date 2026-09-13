@@ -1,0 +1,131 @@
+{
+  "job_id": "AI_READI_v7_rep3_r10_rating1",
+  "started_at": "2026-09-12T20:41:08.312579+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "be9e18da9bf9c5195a38c2d9b5ccf40f1b260ac9cc45499fdddb0f21020f029a",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "d221e2b36c2a98ebe21f57bc72039e6b840323b37d5155053e592fe9fb247409",
+  "evaluation_sha256": "abe88d9f64c85fa6de2dd828e1e0a5d28ed870ba4ec2ed8a0a2cbc98c831f099",
+  "cli_result": {
+    "duration_api_ms": 590411,
+    "stop_reason": "end_turn",
+    "session_id": "633261bc-9f3c-4af8-91bb-6d8952a5d740",
+    "total_cost_usd": 3.2048832500000004,
+    "usage": {
+      "input_tokens": 370,
+      "cache_creation_input_tokens": 221366,
+      "cache_read_input_tokens": 814659,
+      "output_tokens": 47509,
+      "output_tokens_details": {
+        "thinking_tokens": 13264
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 221366
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 372,
+        "outputTokens": 47537,
+        "cacheReadInputTokens": 814659,
+        "cacheCreationInputTokens": 257163,
+        "webSearchRequests": 0,
+        "costUSD": 3.2048832500000004,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 13264,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01WskpnWoqiNtbiB6k7tLtPr",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-ltk4l7_c; find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01PYVkSapaAeFmJX1w77FKxz",
+        "tool_input": {
+          "command": "shasum -a 256 data/rubric/rubric10.txt input/record.yaml",
+          "description": "Compute hashes of rubric and input record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01QcxEEiR51dbzHZSeCDBaCc",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+          "description": "Validate the evaluation output against its schema"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 14,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (`VALID output_evaluation.json: rubric10-semantic`, exit 0).\n\n## Definition check\n\nThe section headed \"Source rubric and schema paths (#158)\" is present in my instructions and reads as expected of the current rules. The sentence beginning \"Read release-specific notes\", verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nTwo notes on provenance, since I could not verify everything myself: the agent definition is not present on this workspace's disk (only `data/rubric`, `scripts`, `src/download/prompts` and `input` exist), so the check was performed against my active instructions rather than a file; and the sandbox denied `shasum`, so I recorded the three supplied hashes without independently recomputing them.\n\n## Result: 49/50\n\nBoth bases coincide \u2014 **fixed 98.0% (49/50)** and **normalized 98.0% (49/50)** \u2014 because all five trigger conditions resolved as satisfied, so `excluded_max_points` is 0 and no sub-element is N/A. I resolved each condition from fields outside the gated sub-elements before scoring: human subjects from the description's \"2,280 adults\" and E8's REDCap recruitment; datasets-shared from populated `distribution_formats` with FAIRhub access URLs; data-collection from `acquisition_methods`/`collection_mechanisms`. The software-output condition (gating E8 sub-element 3 only) was borderline \u2014 `external_resources` points at a GitHub *organisation* root, not a named repository \u2014 so I applied the ambiguity rule and scored it rather than inflating N/A.\n\n**The single 0 is Element 8 sub-element 4, software and tools.** This is applicable regardless of the repository pointer (#1081), and it fails on the #1082 threshold: the record describes the transformations that produced the released data in the passive voice \u2014 \".fda and .sdt files *are converted* to DICOM, .FIT files *are converted* to Open mHealth\" \u2014 naming no tool, version or repository. Every tool it does name sits in an excluded role: REDCap and MoCA Duo are capture (a), FAIRhub/Azure hosting (b), RO-Crate metadata production (c), and the OMOP CDM Data Quality Dashboard validation (d) \u2014 the last is prominent and specific (3,500+ checks) but checked the released data rather than producing it.\n\nJudgements worth flagging as contestable, both recorded with reasoning in the output rather than hidden in a bare score:\n\n- **E3.4 (variable metadata) scored 1, not 0.** The criterion says \"with Identifiers Defined\" and the record defines none, and the inventory is explicitly eight variables out of a much larger set. I scored 1 on the strength of the OMOP CDM one-to-one table mapping as the operative linkage mechanism plus genuinely detailed measurement techniques \u2014 and logged the reservation as a medium-severity completeness issue.\n- **E2.3 (download URL) scored 1** on `distribution_formats.access_urls` and access instructions, though no `download_url` slot exists.\n\nThe record's dominant characteristic is disclosure discipline: eleven numbered source conflicts, derived values flagged as derived, and unreconciled conflicts left visibly open. I treated that as documentation quality, not as noise \u2014 but it does not rescue E8.4, and I did not let it. Two arithmetic facts separate: the file-count gap (356,343 vs 356,334) is fully reconciled to nine root metadata files; the 419,614-byte total gap is not, and is the second consistency failure.\n\nOutput is at `output_evaluation.json` with all 50 items, evidence quotes, `applicability_status`/`applicability_evidence` on every conditional sub-element, both percentage bases with denominators, and the supplied provenance values.",
+    "ttft_ms": 3074,
+    "type": "result",
+    "duration_ms": 591403,
+    "uuid": "83f46e15-b3ab-447e-8d1c-dec93e1159aa",
+    "ttft_stream_ms": 2102,
+    "time_to_request_ms": 24,
+    "first_content_frame_ms": 2102,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T20:51:00.624878+00:00"
+}

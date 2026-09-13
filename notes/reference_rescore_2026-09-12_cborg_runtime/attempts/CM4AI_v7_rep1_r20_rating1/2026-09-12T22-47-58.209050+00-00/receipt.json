@@ -1,0 +1,132 @@
+{
+  "job_id": "CM4AI_v7_rep1_r20_rating1",
+  "started_at": "2026-09-12T22:47:58.209241+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "587d62fbc87dd688a79f16f7937805e7d779819694273344349973a09f92e7b5",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "4ed78cb10f8d8d5b18f601ea82e38f7ab620a1fa05bc81977d9fa944ab0d47f9",
+  "evaluation_sha256": "b3b32ffa0b6d5d119177308cb90d59bece05202e64b9e58144489d91ed63d1a3",
+  "cli_result": {
+    "duration_api_ms": 953069,
+    "stop_reason": "end_turn",
+    "session_id": "4ecfd489-6e86-4758-9bba-501f4b09fb1a",
+    "total_cost_usd": 2.368653,
+    "usage": {
+      "input_tokens": 311,
+      "cache_creation_input_tokens": 170995,
+      "cache_read_input_tokens": 472215,
+      "output_tokens": 35351,
+      "output_tokens_details": {
+        "thinking_tokens": 11068
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 170995
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 315,
+        "outputTokens": 35388,
+        "cacheReadInputTokens": 545756,
+        "cacheCreationInputTokens": 193520,
+        "webSearchRequests": 0,
+        "costUSD": 2.368653,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 11068,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01Rd52TVRHpwtzoaGXbmjHE8",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml 2>/dev/null; ls data/rubric 2>/dev/null; ls scripts 2>/dev/null",
+          "description": "Hash input record and list rubric/scripts"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01Nz2Rdd3vxmJh6rW9BSjGCc",
+        "tool_input": {
+          "command": "/usr/bin/python3 -c \"import uuid,datetime;print(uuid.uuid4());print(datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds').replace('+00:00','Z'))\"",
+          "description": "Generate UUID and timestamp"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "**Definition check \u2014 Reproducibility section, verbatim:**\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nThe section is present and reads as expected of the current rules (evaluator-model-and-definition scoping, the fixed/zero-temperature caveat), so I proceeded; `instrument_sha256` is recorded as `9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3`.\n\n**Validation:** `VALID output_evaluation.json: rubric20-semantic`, exit 0.\n\n## Result \u2014 CM4AI, claudecode_agent, rep1\n\n**75 / 88 points. No question was excluded**, so `fixed_percentage` and `normalized_percentage` are both **85.2%** over the same denominator of 88 (`excluded_max_points: 0`, `adjusted_max_points: 88`, `questions_not_applicable: 0`).\n\n| Category | Score |\n|---|---|\n| Structural Completeness (Q1\u20135) | 18 / 21 |\n| Metadata Quality & Content (Q6\u201310) | 19 / 21 |\n| Technical Documentation (Q11\u201315) | 20 / 25 |\n| FAIRness & Accessibility (Q16\u201320) | 18 / 21 |\n\n**Applicability decisions (anti-circular, evidenced from other questions' fields):**\n- Q8/Q15 (human subjects): human-derived cell lines named in `description`/`keywords` with no participant recruitment in `collection_mechanisms` \u2014 genuinely borderline, so the ambiguity rule kept both **applicable and scored** (4 each) rather than silently N/A.\n- Q10/Q17 (shared data): evidenced by the Dataverse landing page, reuse licence and ten published file collections, not by their own format fields.\n- Q11 (software output): evidenced by `external_resources` code repositories (cellmaps_pipeline, FAIRSCAPE, IMP).\n- Q12/Q13: both limbs resolved; the sharing limb from Q6/Q16/Q9 fields.\n\n**Semantic findings that moved scores:** the version-ordering contradiction (a June 2026 release labelled 2.0 superseding 2.1 predecessors) held Q13 at 4; preprocessing documenting the MuSIC map pipeline the release explicitly excludes cut Q11 from 4 to 3; unresolvable external deposits (MassIVE/SRA/Figshare named without accessions) held Q10 and Q19 at 4. Nine issues are recorded with severities; consistency checks 16 passed / 3 failed / 5 warnings. Format validations: DOI `valid_dataverse` (10.18130 matches publisher ROR:0153tk833), grants `valid_nih` (1OT2OD032742-01, 5U54HG012513-02), RRIDs `valid` (Cellosaurus `CVCL_` namespace), URLs `all_valid`.\n\nOutput is at `output_evaluation.json`, with `d4d_file` set to the supplied source path and model recorded as `claude-opus-5` for both `name` and `evaluator_model`, `temperature: null`.",
+    "ttft_ms": 4135,
+    "type": "result",
+    "duration_ms": 954137,
+    "uuid": "e3d9b349-98f7-4a39-b545-62958992ae2b",
+    "ttft_stream_ms": 2251,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 2718,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01Fj4rogCFwt9UtwQxoRCmnU",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-12T23:03:53.171839+00:00"
+}

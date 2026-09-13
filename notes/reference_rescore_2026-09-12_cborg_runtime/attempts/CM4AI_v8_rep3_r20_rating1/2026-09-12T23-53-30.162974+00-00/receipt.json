@@ -1,0 +1,124 @@
+{
+  "job_id": "CM4AI_v8_rep3_r20_rating1",
+  "started_at": "2026-09-12T23:53:30.163149+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "356923c982ff76906c37b0f270b8f5645aa4e7b18261aeefc8089982ac60fb2e",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "e3311d40121521b83f803ad969395396f63b7446fed36c1f55416379d0f16800",
+  "evaluation_sha256": "1da34cd91d5e2d756533c113568cb0c20935a1f85682d3a01c7db04f01aa2b23",
+  "cli_result": {
+    "duration_api_ms": 493202,
+    "stop_reason": "end_turn",
+    "session_id": "3d9d106b-7d47-4bde-a9cc-393e681c3587",
+    "total_cost_usd": 2.2369404999999998,
+    "usage": {
+      "input_tokens": 317,
+      "cache_creation_input_tokens": 138400,
+      "cache_read_input_tokens": 498516,
+      "output_tokens": 39186,
+      "output_tokens_details": {
+        "thinking_tokens": 8924
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 138400
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 319,
+        "outputTokens": 39214,
+        "cacheReadInputTokens": 498516,
+        "cacheCreationInputTokens": 160918,
+        "webSearchRequests": 0,
+        "costUSD": 2.2369404999999998,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 8924,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01Jh9oscRnKMKQcz7ZU4ZYQN",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-qnozkwxy 2>/dev/null; echo \"---\"; find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "List working directory and find agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01MetWHtiSg33PAzZajpkemx",
+        "tool_input": {
+          "command": "date -u +\"%Y-%m-%dT%H:%M:%SZ\"; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get current UTC timestamp and generate a UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 14,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0): `VALID output_evaluation.json: rubric20-semantic`.\n\n## Definition check\n\nThe Reproducibility section of my active definition, quoted verbatim:\n\n> **Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.**\n\nThis matches the current instrument, so I proceeded. Recorded `instrument_sha256` as supplied, with `instrument_kind: agent_definition`. (Note: the definition file itself is not present on disk in this sandbox \u2014 only `input/`, `data/rubric/`, `scripts/` and `src/download/prompts/` are \u2014 so I verified the section from the active instructions rather than by re-hashing the file.)\n\n## Result \u2014 CM4AI, claudecode_api, rep3\n\n**69 / 88 points.** No question met an exclusion condition, so both bases coincide: `fixed_percentage` 78.4 (denominator 88) and `normalized_percentage` 78.4 (adjusted denominator 88), `questions_not_applicable: 0`, `excluded_item_ids: []`.\n\n| Category | Score |\n|---|---|\n| Structural Completeness | 16 / 21 |\n| Metadata Quality & Content | 18 / 21 |\n| Technical Documentation | 19 / 25 |\n| FAIRness & Accessibility | 16 / 21 |\n\n**Applicability decisions** (all `applicable: true`, each evidenced from a *different* question's fields per the anti-circular rule):\n- **Q8/Q15** (human subjects) \u2014 borderline: human-derived cell lines with a named donor phenotype but no participants. Ambiguity rule \u2192 scored, not excluded.\n- **Q11** (software output) \u2014 triggered by Q14's `external_resources` (github.com/idekerlab/cellmaps_pipeline, FAIRSCAPE, IMP), *not* by its own empty strategy fields. It scored 2 as a result.\n- **Q10/Q12/Q13/Q17** (shared/collected) \u2014 triggered by populated `distribution_formats`, published `file_collections` and a reuse-permitting licence.\n\n**Semantic findings that moved scores** (13 issues logged):\n- Q11 = 2 \u2014 all seven processing fields empty while seven of ten archives are labelled `processed_data`: the record asserts processing and documents none. The MuSIC pipeline in `notes` builds the cell maps this release explicitly *excludes*.\n- Q4 = 2 \u2014 ZIP is a container; four distinct data substrates, one declared format, no internal formats anywhere.\n- Q13 = 5 despite a real defect: version `2.0` is *lower* than the `2.1` its own `version_access` records for both predecessors. Flagged, but sustainability documentation is complete on all four indicators.\n- Q10 = 4 \u2014 `conforms_to_standard: RO_CRATE` is asserted unqualified while `conforms_to` concedes the release page never restates the packaging.\n- Q20 = 3 \u2014 `sampling_strategies` and `known_limitations` each describe a bias that `known_biases` does not categorize.\n\nCorrectness validations all passed: DOI prefix 10.18130 matches the declared UVA Dataverse publisher; `1OT2OD032742-01` and `5U54HG012513-02` validate as NIH; 10 well-formed MD5s; URLs structurally valid. The record's `source_caveats` \u2014 tiering its sources and refusing to promote project-level counts into release-level totals \u2014 is its strongest quality signal.",
+    "ttft_ms": 2529,
+    "type": "result",
+    "duration_ms": 494980,
+    "uuid": "728b2556-498a-41b3-aee1-35ecdb7c77e5",
+    "ttft_stream_ms": 2071,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 2528,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [],
+  "completed_at": "2026-09-13T00:01:46.004805+00:00"
+}

@@ -1,0 +1,140 @@
+{
+  "job_id": "CM4AI_v7_rep1_r10_rating1",
+  "started_at": "2026-09-12T22:46:07.508668+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "f75897506db5218bdbaafa1b5f8d95171fcb8778f01ae3866a7afa5fd19ebfac",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5",
+    "metadata.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "4ed78cb10f8d8d5b18f601ea82e38f7ab620a1fa05bc81977d9fa944ab0d47f9",
+  "evaluation_sha256": "819b91702ad9b12f5ca1e8219565d442fc91ba071efb628019ced9919c2144af",
+  "cli_result": {
+    "duration_api_ms": 479969,
+    "stop_reason": "end_turn",
+    "session_id": "8a57a2dc-c86e-4e29-a16c-aac4afd0d22c",
+    "total_cost_usd": 2.1677677500000003,
+    "usage": {
+      "input_tokens": 308,
+      "cache_creation_input_tokens": 124348,
+      "cache_read_input_tokens": 509698,
+      "output_tokens": 39739,
+      "output_tokens_details": {
+        "thinking_tokens": 10053
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 124348
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 310,
+        "outputTokens": 39765,
+        "cacheReadInputTokens": 509698,
+        "cacheCreationInputTokens": 146759,
+        "webSearchRequests": 0,
+        "costUSD": 2.1677677500000003,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 10053,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01UPaS27kPZst4HCKFJ8SFVp",
+        "tool_input": {
+          "command": "shasum -a 256 data/rubric/rubric10.txt input/record.yaml; wc -l data/rubric/rubric10.txt",
+          "description": "Hash rubric and record files"
+        }
+      },
+      {
+        "tool_name": "Read",
+        "tool_use_id": "toolu_vrtx_01KeEZo5j3QKhsmj73MHFrTP",
+        "tool_input": {
+          "file_path": "/Users/marcin/d4d-eval/data/rubric/rubric10.txt"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_011dd6tLrizMDz7w6nYcVzxa",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get UTC timestamp and generate a UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 14,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "**Definition check \u2014 passed.** The section headed \u201cSource rubric and schema paths (#158)\u201d is present in my instructions, and the sentence beginning \u201cRead release-specific notes\u201d reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches the current instrument (the one that also carries the per-sub-element Element 4 gate #1060, the #1082 software threshold and the #1081 applicability rule), so I proceeded.\n\n**Evaluation written and validated.**\n\n```\npoetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic\nVALID output_evaluation.json: rubric10-semantic   (exit 0)\n```\n\n## Result: 43 points\n\n| Basis | Score | Denominator |\n|---|---|---|\n| Adjusted (N/A-excluded) | **91.49 %** | 43 / 47 |\n| Fixed (whole rubric) | **86.0 %** | 43 / 50 |\n\nExcluded (`applicable: false`, `score: null`): **E4.3** participant privacy, **E4.4** informed consent, **E4.5** vulnerable populations/compensation \u2014 3 items, 3 points.\n\n**Per element:** E1 5/5 \u00b7 E2 5/5 \u00b7 E3 4/5 \u00b7 E4 2/2 \u00b7 E5 5/5 \u00b7 E6 4/5 \u00b7 E7 5/5 \u00b7 E8 4/5 \u00b7 E9 4/5 \u00b7 E10 5/5\n\n### Key judgements\n- **Element 4 gated per sub-element.** The human-subjects condition fails on *external* evidence (E1 description names MDA-MB-468 and KOLF2.1J cell lines, not participants; E8 collection mechanisms describe SEC-MS/AP-MS/ICC-IF/CRISPRi instruments, not recruitment), so 3\u20135 are N/A. The governance disjunct succeeds on E2 evidence (`regulatory_restrictions.governance_committee_contact`, commercial-use constraint in `ip_restrictions`), so 1\u20132 are scored \u2014 both earn 1 (named Data Access Committee and two ethics contacts; deidentification rationale semantically appropriate for tissue-culture material, where citing HIPAA Safe Harbor would have been the wrong answer).\n- **E8.4 software = 0**, the one contentious call. The record names tooling prominently (node2vec, DenseNet-121, HiDeF, GPT-4/GSAI, Cell Mapping Toolkit, FAIRSCAPE, IMP) \u2014 but `known_limitations` states outright that the predicted cell maps those tools produce are *not in this release* (role e), FAIRSCAPE only packages the RO-Crate (role c), the 10x kit is capture (role a), Dataverse is hosting (role b). Nothing names what produced the distributed SEC-MS/AP-MS archives or the `processed_data` Perturb-seq atlas.\n- Other zeros: **E3.4** (`variables` absent \u2014 scored, not excused, per the anti-circular rule), **E6.3** (no errata, no per-release change description), **E9.3** (no `anomalies`).\n\n10 semantic issues recorded, incl. the version-ordering contradiction (this 2026 release is \"2.0\" while the 2025 releases are listed at \"2.1\"), the preprocessing-vs-release-contents mismatch, and the empty `download_url` slot. Grant numbers validate as NIH-conformant; DOI prefix 10.18130 matches the UVA Dataverse publisher and access domain.",
+    "ttft_ms": 3602,
+    "type": "result",
+    "duration_ms": 479596,
+    "uuid": "497007e5-b6fe-4eee-9267-effc219ddefa",
+    "ttft_stream_ms": 1698,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 2142,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01WszoNiFsKfZ5KQVisMJjZW",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-12T22:54:07.964709+00:00"
+}

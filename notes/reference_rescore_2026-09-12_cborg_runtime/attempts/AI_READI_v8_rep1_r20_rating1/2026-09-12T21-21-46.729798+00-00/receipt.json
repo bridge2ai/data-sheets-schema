@@ -1,0 +1,140 @@
+{
+  "job_id": "AI_READI_v8_rep1_r20_rating1",
+  "started_at": "2026-09-12T21:21:46.729949+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "42c81fa3adec4976378b0d79de92a2374be0a9ab5762b20000416386728bc634",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "4f09d95003ba1f3f5af5b611412126444f14acc1336410f0a962abd9c0f7f85f",
+  "evaluation_sha256": "2fc9e55cddda9c8814d7ea2d3ad9fffa4e8c7598511e72a746b119b3bedfe24e",
+  "cli_result": {
+    "duration_api_ms": 528070,
+    "stop_reason": "end_turn",
+    "session_id": "068fd94e-b532-4039-aae4-afa35e881758",
+    "total_cost_usd": 3.0155149999999997,
+    "usage": {
+      "input_tokens": 366,
+      "cache_creation_input_tokens": 247845,
+      "cache_read_input_tokens": 448625,
+      "output_tokens": 42245,
+      "output_tokens_details": {
+        "thinking_tokens": 12601
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 247845
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 368,
+        "outputTokens": 42273,
+        "cacheReadInputTokens": 448625,
+        "cacheCreationInputTokens": 277206,
+        "webSearchRequests": 0,
+        "costUSD": 3.0155149999999997,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 12601,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01SHBY7wQyrjxiKDAMzCZPPU",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20; echo \"---CWD---\"; pwd; ls -la",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01GbKdAWB2Bk5LcMGRLpFZUt",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-_7_n_wbn/data/rubric/; shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-_7_n_wbn/data/rubric/* /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-_7_n_wbn/input/record.yaml",
+          "description": "List rubric files and compute hashes"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01VDgXEJ9aoYoTbfmHyJ3Dts",
+        "tool_input": {
+          "command": "date -u +\"%Y-%m-%dT%H:%M:%SZ\"; uuidgen",
+          "description": "Get UTC timestamp and generate a UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0).\n\n## Definition check\n\nThe Reproducibility section is present in my loaded definition and reads as current. The sentence beginning \"Repeatability must be\", verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nOne transparency note on the check: this sandbox was provisioned with only `data/rubric/rubric20.txt`, `scripts/validate_evaluation_schema.py`, the schema, and `input/record.yaml` \u2014 there is no `.claude/agents/` directory, so I could not recompute the sha256 of the definition file on disk. I verified the section against my loaded instructions and recorded the supplied digest as `instrument_sha256` as directed.\n\n## Result\n\n`output_evaluation.json` written and validated: **82 / 88**, both bases equal at **93.2%** (`fixed_percentage` = `normalized_percentage` = 82/88), because **no question's \"Applies to\" condition failed** \u2014 `excluded_max_points: 0`, `questions_not_applicable: 0`, `excluded_item_ids: []`.\n\nApplicability was resolved before scoring for all six conditional questions, each on fields belonging to a *different* question per the anti-circular rule:\n\n- **Q8/Q15** (human subjects) \u2014 evidenced from `description`, `keywords`, `collection_mechanisms`, not from ethics or subpopulation fields.\n- **Q11** (software output) \u2014 evidenced from `external_resources`, which links `https://github.com/AI-READI`, not from `preprocessing_strategies`.\n- **Q10/Q17** (shared) and **Q12/Q13** (collection + shared) \u2014 evidenced from `distribution_formats`, resolvable FAIRhub pages, and reuse-permitting license terms.\n\nCategory scores: Structural 20/21, Metadata 20/21, Technical 23/25, FAIRness 19/21.\n\nThe record is strong \u2014 device-level collection protocol across 21 mechanisms, modality-correct standards conformance, and population arithmetic where every partition (splits, diabetes groups, sex, race/ethnicity) sums exactly to 2280. Scoring deductions rest mainly on semantic findings rather than absent fields:\n\n- **High severity:** `sensitive_elements_present: false` for retinal imaging, CGM and wearable biometrics that the same record gates behind verified-ID login, license assent and watermarking while conceding re-identification risk; and an institutional attribution (WUSTL vs. University of Washington) that is contested *within the structured fields*, not just in prose.\n- **Medium:** `is_deidentified` asserting both Safe Harbor stripping and FAIRhub's \"NoDeIdentification\"; `future_use_impacts` denying anticipated unfair treatment while `known_limitations` anticipates exactly that generalization failure; empty `was_derived_from`/`parent_datasets` despite a complete prose lineage.\n\nConsistency checks: 20 passed, 5 failed, 10 warnings. Identifier validation was clean throughout \u2014 DOI prefixes match their claimed registrars, and all three NIH grant numbers are well-formed.\n\nTwo caveats worth flagging: the runtime clock was unreachable, so `evaluation_timestamp` derives from the session working-tree timestamp (noted in metadata), and per the independence rule I read no other evaluation \u2014 only the record, the rubric text, the schema, and my own output for serialization checking.",
+    "ttft_ms": 3413,
+    "type": "result",
+    "duration_ms": 529585,
+    "uuid": "c50bd5e2-c2f3-447d-a233-c96efb272e8a",
+    "ttft_stream_ms": 2437,
+    "time_to_request_ms": 24,
+    "first_content_frame_ms": 2437,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01L4D9zbFqMCKYriJBLM1Ztz",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-12T21:30:37.157814+00:00"
+}

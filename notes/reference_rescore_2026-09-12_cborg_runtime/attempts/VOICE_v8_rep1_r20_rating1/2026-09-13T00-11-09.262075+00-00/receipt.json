@@ -1,0 +1,140 @@
+{
+  "job_id": "VOICE_v8_rep1_r20_rating1",
+  "started_at": "2026-09-13T00:11:09.262356+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "d64f8b3f94c3e437e007a07ada9c6465a09719606c79ea08f5a93ca7bd12a7d7",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "6ad8a47eab05cc4fe6015485d79d8601bc26a03c90d2c86711c1ff511a13030f",
+  "evaluation_sha256": "cbf9cd3c0930953db2e328a8a81316e2240d439d86ec99240537e54002c23f54",
+  "cli_result": {
+    "duration_api_ms": 491318,
+    "stop_reason": "end_turn",
+    "session_id": "ec72a564-2a11-4b64-ba10-4d21899073e4",
+    "total_cost_usd": 2.759144,
+    "usage": {
+      "input_tokens": 311,
+      "cache_creation_input_tokens": 223340,
+      "cache_read_input_tokens": 470602,
+      "output_tokens": 39135,
+      "output_tokens_details": {
+        "thinking_tokens": 10557
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 223340
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 313,
+        "outputTokens": 39162,
+        "cacheReadInputTokens": 471708,
+        "cacheCreationInputTokens": 246828,
+        "webSearchRequests": 0,
+        "costUSD": 2.759144,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 10557,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_018etAXLqrGojfsNbnSnwmEw",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate the agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01QuamGGMRKkkAgkwp9WdfYF",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml data/rubric/* 2>/dev/null",
+          "description": "Compute hashes of record and rubric files"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01EeTX7r1tuMndkAAJ42Teaj",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get current UTC timestamp and generate a UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0).\n\n## Definition check\n\nThe Reproducibility section is present in my instructions, and its sentence reads, verbatim:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nThis is consistent with the current instrument (it conditions repeatability on both evaluator model *and* definition, and disclaims determinism even at fixed/zero temperature), so I proceeded. `instrument_sha256` recorded as `9d08b5f3\u20260e7dd3`.\n\n## Result\n\n**VOICE / claudecode_api \u2014 78/88 = 88.6%** (fixed and normalized coincide; `excluded_max_points: 0`, `adjusted_max_points: 88`, `questions_not_applicable: 0`).\n\nAll four conditional triggers resolved as **met**, each on fields belonging to a different question per the anti-circular rule:\n- **Human subjects** (Q8, Q15) \u2014 `description`'s \"833 adult participants\", `keywords`, `collection_mechanisms`.\n- **Datasets shared** (Q10, Q17) \u2014 `page`, `access_urls` on every format, reuse-permitting licence.\n- **Software output** (Q11) \u2014 `external_resources` names four GitHub repositories; `extension_mechanism.contribution_url` independently.\n- **Collection + shared** (Q12, Q13) \u2014 collection fields populated plus the sharing limb.\n\nCategory scores: Structural 18/21, Metadata 19/21, Technical 22/25, FAIRness 19/21.\n\nScores below maximum, with reasons: Q3 keywords 3 (only four generic terms); Q4 formats 4 (exactly three formats, lifted by exceptional per-file enumeration); Q8 ethics 4 (record states no DPIA was conducted); Q10 interop 4 (no data-level standard asserted); Q11 tools 4 (versions pinned only for b2aiprep); Q13 versioning 4; Q15 human subjects 4 (no demographic figures); Q18 4 (social-impact half thin); Q20 4 (no AIO mappings, qualitative fairness only).\n\nTwo consistency checks failed. The load-bearing one: `version_access.latest_version_doi` is `doi:10.13026/37yb-1t42`, which matches no entry in the record's own `versions_available`, is not the top-level DOI, and is not the 3.0.0 or pediatric DOI \u2014 a pointing error in exactly the field used to locate the current release. The second is the disclosed HIPAA tension (`hipaa_compliant: compliant` against the quoted DTUA text \"not covered under HIPAA, FERPA, or similar laws\"); because the record flags it rather than concealing it, I logged it as a content-accuracy issue rather than deducting twice for it.\n\nWorth noting as a distinguishing feature of this record: it discloses negative findings against interest (no DPIA, k-anonymity not achieved, transcription models unaudited, v1.1 files unretrievable, BIDS conformance deliberately *not* carried over from a differing layout). That candour raised confidence in the claims I could not otherwise verify, and I said so in the insights rather than rewarding it with score inflation.\n\nOutput at `output_evaluation.json`; model recorded as `claude-opus-5` for both `name` and `evaluator_model`, `temperature: null`.",
+    "ttft_ms": 2359,
+    "type": "result",
+    "duration_ms": 494145,
+    "uuid": "8dc53709-45ef-4233-9e05-025edf9813ff",
+    "ttft_stream_ms": 1385,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 1385,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01WtjGbFyh25z6pNmUL1FjLP",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-13T00:19:24.281387+00:00"
+}

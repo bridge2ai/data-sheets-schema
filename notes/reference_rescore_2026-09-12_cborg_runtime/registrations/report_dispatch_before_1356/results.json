@@ -1,0 +1,1251 @@
+{
+  "reported_at": "2026-09-13T00:53:35.304526+00:00",
+  "completed": 56,
+  "planned": 56,
+  "percentage_basis": "computed_from_point_totals_and_denominators",
+  "pending": [],
+  "repeatability": [
+    {
+      "project": "AI_READI",
+      "rubric": "rubric10-semantic",
+      "ratings": 3,
+      "expected_ratings": 3,
+      "adjusted_percentages": [
+        98.0,
+        98.0,
+        98.0
+      ],
+      "fixed_percentages": [
+        98.0,
+        98.0,
+        98.0
+      ],
+      "applicability_stable": true,
+      "adjusted_sample_sd": 0.0,
+      "fixed_sample_sd": 0.0,
+      "adjusted_range": 0.0,
+      "fixed_range": 0.0
+    },
+    {
+      "project": "CHORUS",
+      "rubric": "rubric10-semantic",
+      "ratings": 3,
+      "expected_ratings": 3,
+      "adjusted_percentages": [
+        68.0,
+        70.0,
+        68.0
+      ],
+      "fixed_percentages": [
+        68.0,
+        70.0,
+        68.0
+      ],
+      "applicability_stable": true,
+      "adjusted_sample_sd": 1.1547005383792515,
+      "fixed_sample_sd": 1.1547005383792515,
+      "adjusted_range": 2.0,
+      "fixed_range": 2.0
+    },
+    {
+      "project": "CM4AI",
+      "rubric": "rubric10-semantic",
+      "ratings": 3,
+      "expected_ratings": 3,
+      "adjusted_percentages": [
+        91.48936170212765,
+        91.48936170212765,
+        91.48936170212765
+      ],
+      "fixed_percentages": [
+        86.0,
+        86.0,
+        86.0
+      ],
+      "applicability_stable": true,
+      "adjusted_sample_sd": 0.0,
+      "fixed_sample_sd": 0.0,
+      "adjusted_range": 0.0,
+      "fixed_range": 0.0
+    },
+    {
+      "project": "VOICE",
+      "rubric": "rubric10-semantic",
+      "ratings": 3,
+      "expected_ratings": 3,
+      "adjusted_percentages": [
+        98.0,
+        98.0,
+        96.0
+      ],
+      "fixed_percentages": [
+        98.0,
+        98.0,
+        96.0
+      ],
+      "applicability_stable": true,
+      "adjusted_sample_sd": 1.1547005383792515,
+      "fixed_sample_sd": 1.1547005383792515,
+      "adjusted_range": 2.0,
+      "fixed_range": 2.0
+    }
+  ],
+  "generation_replicates": [
+    {
+      "project": "AI_READI",
+      "cohort": "v7",
+      "rubric": "rubric10-semantic",
+      "records": 3,
+      "expected_records": 3,
+      "adjusted_percentages": [
+        98.0,
+        98.0,
+        98.0
+      ],
+      "fixed_percentages": [
+        98.0,
+        98.0,
+        98.0
+      ]
+    },
+    {
+      "project": "AI_READI",
+      "cohort": "v7",
+      "rubric": "rubric20-semantic",
+      "records": 3,
+      "expected_records": 3,
+      "adjusted_percentages": [
+        93.18181818181819,
+        94.31818181818181,
+        96.5909090909091
+      ],
+      "fixed_percentages": [
+        93.18181818181819,
+        94.31818181818181,
+        96.5909090909091
+      ]
+    },
+    {
+      "project": "AI_READI",
+      "cohort": "v8",
+      "rubric": "rubric10-semantic",
+      "records": 3,
+      "expected_records": 3,
+      "adjusted_percentages": [
+        98.0,
+        98.0,
+        98.0
+      ],
+      "fixed_percentages": [
+        98.0,
+        98.0,
+        98.0
+      ]
+    },
+    {
+      "project": "AI_READI",
+      "cohort": "v8",
+      "rubric": "rubric20-semantic",
+      "records": 3,
+      "expected_records": 3,
+      "adjusted_percentages": [
+        93.18181818181819,
+        93.18181818181819,
+        94.31818181818181
+      ],
+      "fixed_percentages": [
+        93.18181818181819,
+        93.18181818181819,
+        94.31818181818181
+      ]
+    },
+    {
+      "project": "CHORUS",
+      "cohort": "v7",
+      "rubric": "rubric10-semantic",
+      "records": 3,
+      "expected_records": 3,
+      "adjusted_percentages": [
+        68.0,
+        60.0,
+        66.0
+      ],
+      "fixed_percentages": [
+        68.0,
+        60.0,
+        66.0
+      ]
+    },
+    {
+      "project": "CHORUS",
+      "cohort": "v7",
+      "rubric": "rubric20-semantic",
+      "records": 3,
+      "expected_records": 3,
+      "adjusted_percentages": [
+        75.0,
+        72.72727272727273,
+        76.13636363636364
+      ],
+      "fixed_percentages": [
+        75.0,
+        72.72727272727273,
+        76.13636363636364
+      ]
+    },
+    {
+      "project": "CHORUS",
+      "cohort": "v8",
+      "rubric": "rubric10-semantic",
+      "records": 3,
+      "expected_records": 3,
+      "adjusted_percentages": [
+        68.0,
+        72.0,
+        66.0
+      ],
+      "fixed_percentages": [
+        68.0,
+        72.0,
+        66.0
+      ]
+    },
+    {
+      "project": "CHORUS",
+      "cohort": "v8",
+      "rubric": "rubric20-semantic",
+      "records": 3,
+      "expected_records": 3,
+      "adjusted_percentages": [
+        76.13636363636364,
+        77.27272727272727,
+        73.86363636363636
+      ],
+      "fixed_percentages": [
+        76.13636363636364,
+        77.27272727272727,
+        73.86363636363636
+      ]
+    },
+    {
+      "project": "CM4AI",
+      "cohort": "v7",
+      "rubric": "rubric10-semantic",
+      "records": 3,
+      "expected_records": 3,
+      "adjusted_percentages": [
+        91.48936170212765,
+        91.48936170212765,
+        89.36170212765957
+      ],
+      "fixed_percentages": [
+        86.0,
+        86.0,
+        84.0
+      ]
+    },
+    {
+      "project": "CM4AI",
+      "cohort": "v7",
+      "rubric": "rubric20-semantic",
+      "records": 3,
+      "expected_records": 3,
+      "adjusted_percentages": [
+        85.22727272727273,
+        82.05128205128206,
+        89.77272727272727
+      ],
+      "fixed_percentages": [
+        85.22727272727273,
+        72.72727272727273,
+        89.77272727272727
+      ]
+    },
+    {
+      "project": "CM4AI",
+      "cohort": "v8",
+      "rubric": "rubric10-semantic",
+      "records": 3,
+      "expected_records": 3,
+      "adjusted_percentages": [
+        82.97872340425532,
+        87.23404255319149,
+        85.1063829787234
+      ],
+      "fixed_percentages": [
+        78.0,
+        82.0,
+        80.0
+      ]
+    },
+    {
+      "project": "CM4AI",
+      "cohort": "v8",
+      "rubric": "rubric20-semantic",
+      "records": 3,
+      "expected_records": 3,
+      "adjusted_percentages": [
+        79.54545454545455,
+        82.05128205128206,
+        78.4090909090909
+      ],
+      "fixed_percentages": [
+        79.54545454545455,
+        72.72727272727273,
+        78.4090909090909
+      ]
+    },
+    {
+      "project": "VOICE",
+      "cohort": "v7",
+      "rubric": "rubric10-semantic",
+      "records": 3,
+      "expected_records": 3,
+      "adjusted_percentages": [
+        98.0,
+        98.0,
+        96.0
+      ],
+      "fixed_percentages": [
+        98.0,
+        98.0,
+        96.0
+      ]
+    },
+    {
+      "project": "VOICE",
+      "cohort": "v7",
+      "rubric": "rubric20-semantic",
+      "records": 3,
+      "expected_records": 3,
+      "adjusted_percentages": [
+        92.04545454545455,
+        90.9090909090909,
+        93.18181818181819
+      ],
+      "fixed_percentages": [
+        92.04545454545455,
+        90.9090909090909,
+        93.18181818181819
+      ]
+    },
+    {
+      "project": "VOICE",
+      "cohort": "v8",
+      "rubric": "rubric10-semantic",
+      "records": 3,
+      "expected_records": 3,
+      "adjusted_percentages": [
+        98.0,
+        96.0,
+        96.0
+      ],
+      "fixed_percentages": [
+        98.0,
+        96.0,
+        96.0
+      ]
+    },
+    {
+      "project": "VOICE",
+      "cohort": "v8",
+      "rubric": "rubric20-semantic",
+      "records": 3,
+      "expected_records": 3,
+      "adjusted_percentages": [
+        88.63636363636364,
+        87.5,
+        90.9090909090909
+      ],
+      "fixed_percentages": [
+        88.63636363636364,
+        87.5,
+        90.9090909090909
+      ]
+    }
+  ],
+  "provider_condition": "LBL CBORG / 2026-09-12 with execution-metadata provenance; separate from preliminary and prior reference runs",
+  "semantic_qualification": {
+    "source": "semantic_review.json",
+    "scope": "Inspect all 24 accepted rubric20 Q19 objects in this CBORG condition against their own frozen input records, focusing on the frozen rule allowing complete textual provenance or PROV-O. This is not a full semantic re-evaluation or external-source fact check.",
+    "interpretation": "9 of 24 original Q19 rationales require adjudication because they add representation or field-placement requirements despite the frozen text-or-graph rule. Their containing recorded totals are qualified. No original score, candidate or rationale is edited and no replacement score is assigned. Unflagged cases are not certified correct; other substantive completeness concerns remain unadjudicated. Do not use small differences in these qualified totals to select generation runs.",
+    "issue": 1349,
+    "affected_job_ids": [
+      "AI_READI_v8_rep1_r20_rating1",
+      "AI_READI_v8_rep3_r20_rating1",
+      "CHORUS_v7_rep1_r20_rating1",
+      "CHORUS_v8_rep1_r20_rating1",
+      "CHORUS_v8_rep2_r20_rating1",
+      "CM4AI_v7_rep2_r20_rating1",
+      "CM4AI_v8_rep1_r20_rating1",
+      "CM4AI_v8_rep2_r20_rating1",
+      "CM4AI_v8_rep3_r20_rating1"
+    ],
+    "affected_evaluations": [
+      "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v8_rep1_r20_rating1_evaluation.json",
+      "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v8_rep3_r20_rating1_evaluation.json",
+      "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v7_rep1_r20_rating1_evaluation.json",
+      "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v8_rep1_r20_rating1_evaluation.json",
+      "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v8_rep2_r20_rating1_evaluation.json",
+      "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v7_rep2_r20_rating1_evaluation.json",
+      "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v8_rep1_r20_rating1_evaluation.json",
+      "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v8_rep2_r20_rating1_evaluation.json",
+      "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v8_rep3_r20_rating1_evaluation.json"
+    ]
+  },
+  "execution_permission_boundary": {
+    "registration": "notes/reference_rescore_2026-09-12_cborg_runtime/validator_status_registration.json",
+    "registration_sha256": "1512d700f4bfc83bb2665d20796151ee068bb562f5fe2e84d80d85d78a4b61ca",
+    "recorded_at": "2026-09-12T21:01:51.233964+00:00",
+    "extension": {
+      "path": "scripts/reference_rescore_cborg_validator_status.py",
+      "sha256": "0608a52ba4a4406ba3d6c7517a361221d80e5c0efe016f40fcb550f9b870b3cb",
+      "permission_rules": [
+        "Bash(echo \"EXIT=$?\")",
+        "Bash(echo \"exit=$?\")"
+      ],
+      "proof": "Only a successful exact own-file validator command followed by the literal EXIT=$? or exit=$? echo, a matching VALID marker and a final zero status may be treated as equivalent to canonical validation. Original transcripts are unchanged; proof is added to the receipt. Denied and ambiguous calls remain invalid."
+    },
+    "accepted_before_job_ids": [
+      "CHORUS_v7_rep1_r10_rating1",
+      "AI_READI_v7_rep1_r10_rating1",
+      "AI_READI_v7_rep1_r20_rating1",
+      "AI_READI_v7_rep2_r10_rating1",
+      "AI_READI_v7_rep3_r10_rating1"
+    ],
+    "accepted_after_job_ids": [
+      "AI_READI_v7_rep2_r20_rating1",
+      "AI_READI_v7_rep3_r20_rating1",
+      "AI_READI_v8_rep1_r10_rating1",
+      "AI_READI_v8_rep1_r20_rating1",
+      "AI_READI_v8_rep2_r10_rating1",
+      "AI_READI_v8_rep2_r20_rating1",
+      "AI_READI_v8_rep3_r10_rating1",
+      "AI_READI_v8_rep3_r20_rating1",
+      "CHORUS_v7_rep1_r20_rating1",
+      "CHORUS_v7_rep2_r10_rating1",
+      "CHORUS_v7_rep2_r20_rating1",
+      "CHORUS_v7_rep3_r10_rating1",
+      "CHORUS_v7_rep3_r20_rating1",
+      "CHORUS_v8_rep1_r10_rating1",
+      "CHORUS_v8_rep1_r20_rating1",
+      "CHORUS_v8_rep2_r10_rating1",
+      "CHORUS_v8_rep2_r20_rating1",
+      "CHORUS_v8_rep3_r10_rating1",
+      "CHORUS_v8_rep3_r20_rating1",
+      "CM4AI_v7_rep1_r10_rating1",
+      "CM4AI_v7_rep1_r20_rating1",
+      "CM4AI_v7_rep2_r10_rating1",
+      "CM4AI_v7_rep2_r20_rating1",
+      "CM4AI_v7_rep3_r10_rating1",
+      "CM4AI_v7_rep3_r20_rating1",
+      "CM4AI_v8_rep1_r10_rating1",
+      "CM4AI_v8_rep1_r20_rating1",
+      "CM4AI_v8_rep2_r10_rating1",
+      "CM4AI_v8_rep2_r20_rating1",
+      "CM4AI_v8_rep3_r10_rating1",
+      "CM4AI_v8_rep3_r20_rating1",
+      "VOICE_v7_rep1_r10_rating1",
+      "VOICE_v7_rep1_r20_rating1",
+      "VOICE_v7_rep2_r10_rating1",
+      "VOICE_v7_rep2_r20_rating1",
+      "VOICE_v7_rep3_r10_rating1",
+      "VOICE_v7_rep3_r20_rating1",
+      "VOICE_v8_rep1_r10_rating1",
+      "VOICE_v8_rep1_r20_rating1",
+      "VOICE_v8_rep2_r10_rating1",
+      "VOICE_v8_rep2_r20_rating1",
+      "VOICE_v8_rep3_r10_rating1",
+      "VOICE_v8_rep3_r20_rating1",
+      "AI_READI_v7_rep1_r10_rating2",
+      "AI_READI_v7_rep1_r10_rating3",
+      "CHORUS_v7_rep1_r10_rating2",
+      "CHORUS_v7_rep1_r10_rating3",
+      "CM4AI_v7_rep1_r10_rating2",
+      "CM4AI_v7_rep1_r10_rating3",
+      "VOICE_v7_rep1_r10_rating2",
+      "VOICE_v7_rep1_r10_rating3"
+    ],
+    "accepted_status_echo_job_ids": [
+      "AI_READI_v7_rep3_r20_rating1",
+      "AI_READI_v8_rep1_r10_rating1",
+      "AI_READI_v8_rep1_r20_rating1",
+      "AI_READI_v8_rep2_r20_rating1",
+      "AI_READI_v8_rep3_r10_rating1",
+      "AI_READI_v8_rep3_r20_rating1",
+      "CHORUS_v7_rep1_r20_rating1",
+      "CHORUS_v7_rep3_r10_rating1",
+      "CHORUS_v7_rep3_r20_rating1",
+      "CHORUS_v8_rep1_r10_rating1",
+      "CHORUS_v8_rep2_r10_rating1",
+      "CHORUS_v8_rep3_r10_rating1",
+      "CM4AI_v7_rep1_r10_rating1",
+      "CM4AI_v7_rep1_r20_rating1",
+      "CM4AI_v7_rep2_r10_rating1",
+      "CM4AI_v7_rep2_r20_rating1",
+      "CM4AI_v7_rep3_r10_rating1",
+      "CM4AI_v7_rep3_r20_rating1",
+      "CM4AI_v8_rep1_r20_rating1",
+      "CM4AI_v8_rep2_r10_rating1",
+      "CM4AI_v8_rep2_r20_rating1",
+      "VOICE_v7_rep1_r20_rating1",
+      "VOICE_v7_rep2_r10_rating1",
+      "VOICE_v7_rep2_r20_rating1",
+      "VOICE_v7_rep3_r10_rating1",
+      "VOICE_v8_rep1_r10_rating1",
+      "VOICE_v8_rep1_r20_rating1",
+      "VOICE_v8_rep2_r10_rating1",
+      "VOICE_v8_rep3_r10_rating1",
+      "VOICE_v8_rep3_r20_rating1",
+      "CHORUS_v7_rep1_r10_rating2",
+      "CM4AI_v7_rep1_r10_rating2",
+      "CM4AI_v7_rep1_r10_rating3",
+      "VOICE_v7_rep1_r10_rating2",
+      "VOICE_v7_rep1_r10_rating3"
+    ],
+    "repeat_panels_spanning_boundary": [
+      "AI_READI",
+      "CHORUS"
+    ],
+    "qualification": "Five accepted ratings precede the validator-status permission extension and 51 follow it. Scoring prompts, definitions and inputs are unchanged, but execution permissions differ. Cohort comparisons and repeat panels spanning this boundary do not isolate permission effects; small differences cannot be attributed solely to generation version or evaluator variability."
+  },
+  "execution_deadline_boundary": {
+    "registration": "notes/reference_rescore_2026-09-12_cborg_runtime/deadline_registration_1351.json",
+    "registration_sha256": "4a5b67b280bb56fd6db2e9d1db1c987493b28a684c040fa68668ea74b2e41e0c",
+    "recorded_at": "2026-09-12T22:12:54.829915+00:00",
+    "accepted_before_job_ids": [
+      "CHORUS_v7_rep1_r10_rating1",
+      "AI_READI_v7_rep1_r10_rating1",
+      "AI_READI_v7_rep1_r20_rating1",
+      "AI_READI_v7_rep2_r10_rating1",
+      "AI_READI_v7_rep2_r20_rating1",
+      "AI_READI_v7_rep3_r10_rating1",
+      "AI_READI_v7_rep3_r20_rating1",
+      "AI_READI_v8_rep1_r10_rating1",
+      "AI_READI_v8_rep1_r20_rating1",
+      "AI_READI_v8_rep2_r10_rating1",
+      "AI_READI_v8_rep2_r20_rating1",
+      "AI_READI_v8_rep3_r10_rating1",
+      "AI_READI_v8_rep3_r20_rating1",
+      "CHORUS_v7_rep1_r20_rating1",
+      "CHORUS_v7_rep2_r10_rating1",
+      "CHORUS_v7_rep2_r20_rating1",
+      "CHORUS_v7_rep3_r20_rating1"
+    ],
+    "accepted_after_job_ids": [
+      "CHORUS_v7_rep3_r10_rating1",
+      "CHORUS_v8_rep1_r10_rating1",
+      "CHORUS_v8_rep1_r20_rating1",
+      "CHORUS_v8_rep2_r10_rating1",
+      "CHORUS_v8_rep2_r20_rating1",
+      "CHORUS_v8_rep3_r10_rating1",
+      "CHORUS_v8_rep3_r20_rating1",
+      "CM4AI_v7_rep1_r10_rating1",
+      "CM4AI_v7_rep1_r20_rating1",
+      "CM4AI_v7_rep2_r10_rating1",
+      "CM4AI_v7_rep2_r20_rating1",
+      "CM4AI_v7_rep3_r10_rating1",
+      "CM4AI_v7_rep3_r20_rating1",
+      "CM4AI_v8_rep1_r10_rating1",
+      "CM4AI_v8_rep1_r20_rating1",
+      "CM4AI_v8_rep2_r10_rating1",
+      "CM4AI_v8_rep2_r20_rating1",
+      "CM4AI_v8_rep3_r10_rating1",
+      "CM4AI_v8_rep3_r20_rating1",
+      "VOICE_v7_rep1_r10_rating1",
+      "VOICE_v7_rep1_r20_rating1",
+      "VOICE_v7_rep2_r10_rating1",
+      "VOICE_v7_rep2_r20_rating1",
+      "VOICE_v7_rep3_r10_rating1",
+      "VOICE_v7_rep3_r20_rating1",
+      "VOICE_v8_rep1_r10_rating1",
+      "VOICE_v8_rep1_r20_rating1",
+      "VOICE_v8_rep2_r10_rating1",
+      "VOICE_v8_rep2_r20_rating1",
+      "VOICE_v8_rep3_r10_rating1",
+      "VOICE_v8_rep3_r20_rating1",
+      "AI_READI_v7_rep1_r10_rating2",
+      "AI_READI_v7_rep1_r10_rating3",
+      "CHORUS_v7_rep1_r10_rating2",
+      "CHORUS_v7_rep1_r10_rating3",
+      "CM4AI_v7_rep1_r10_rating2",
+      "CM4AI_v7_rep1_r10_rating3",
+      "VOICE_v7_rep1_r10_rating2",
+      "VOICE_v7_rep1_r10_rating3"
+    ],
+    "qualification": "Seventeen accepted ratings precede the execution deadline increase from 900 to 1800 seconds; 39 follow it. Scoring prompts, definitions, inputs and the $5 CLI cap are unchanged. This execution boundary can affect completion/selection, so cohort and repeat comparisons do not isolate generation-version or evaluator effects."
+  },
+  "evaluation_narrative_qualification": {
+    "source": "canary_narrative_qualification.json",
+    "source_sha256": "ed889f3d8cfadcd8bdffe4323cb86b78bae4c0c504bda4f11388365c1a0b4118",
+    "scope": "Two licensing statements in the CHORUS v8 rep1 rubric10 retry-canary narrative. This is a targeted interpretation check, not adjudication of all scores or all evaluation prose.",
+    "qualification": "Evaluation narratives describe model judgments about the supplied documentation and are not verified facts about the underlying datasets. The CHORUS retry canary overstates missing license information as absence of a governing license and alleges conflation despite an explicit software/data distinction in the input. Keep its original score and prose, and do not repeat those statements as dataset facts. Other narrative claims remain unadjudicated.",
+    "issue": 1352,
+    "affected_job_ids": [
+      "CHORUS_v8_rep1_r10_rating1"
+    ]
+  },
+  "additional_evaluation_narrative_qualifications": [
+    {
+      "source": "cm4ai_pilot_narrative_qualification_1355.json",
+      "source_sha256": "67ebddb055797f5b50303f6681b7936a44d5dd2037972bb6e8762e3b68dac895",
+      "scope": "Targeted source-grounding inspection of the CM4AI v7 rep2 rubric20 retry pilot; not certification of all semantic judgments or external source truth.",
+      "qualification": "The CM4AI retry pilot overlooks the explicit per-deposit scope of release version numbers when reducing Q13 and qualifying Q19. Its containing total and related version-consistency findings require semantic adjudication. Additional narrative claims overstate the impossibility of participant-related documentation for cell-line work, credit donor age for both lines where the cited text supplies only one, and undercount creator entries. Keep all original scores and prose; do not repeat these statements as verified dataset facts or use small differences in the qualified total to select a generation run. No replacement scores are assigned.",
+      "issue": 1355,
+      "affected_job_ids": [
+        "CM4AI_v7_rep2_r20_rating1"
+      ]
+    }
+  ],
+  "evaluation_timestamp_qualification": {
+    "issue": 1353,
+    "related_issue": 667,
+    "cases": [
+      {
+        "job_id": "CHORUS_v7_rep1_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v7_rep1_r10_rating1_evaluation.json",
+        "evaluation_sha256": "b5ecb9d31a6a73d1f71e46f70617390ff62d63a84c5abd5d794afa9110755366",
+        "model_evaluation_timestamp": "2026-09-12T20:18:37Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-15-31.516182+00-00/receipt.json",
+        "receipt_sha256": "47b6032e74c4f3fcea7e137cae11f7c417850d9f6c1bef217defd9fc6b48506b",
+        "started_at": "2026-09-12T20:15:31.516561+00:00",
+        "completed_at": "2026-09-12T20:29:54.841578+00:00"
+      },
+      {
+        "job_id": "AI_READI_v7_rep1_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep1_r10_rating1_evaluation.json",
+        "evaluation_sha256": "f948eb177bbd79adfe237b0082c82219395ee996eb0870365bc0c0e25ad99df1",
+        "model_evaluation_timestamp": "2026-09-12T13:32:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r10_rating1/2026-09-12T20-32-32.402466+00-00/receipt.json",
+        "receipt_sha256": "224d65e4a345dcfea8650d5cdd4e01033511ea2193c50b54b472fb9775a421cf",
+        "started_at": "2026-09-12T20:32:32.402679+00:00",
+        "completed_at": "2026-09-12T20:41:22.065647+00:00"
+      },
+      {
+        "job_id": "AI_READI_v7_rep1_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep1_r20_rating1_evaluation.json",
+        "evaluation_sha256": "2f9de22877fbfe1cc1e785790c9042ba864d0f08aebcff6b395bc33772353cd2",
+        "model_evaluation_timestamp": "2026-09-12T20:35:12Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r20_rating1/2026-09-12T20-32-33.254113+00-00/receipt.json",
+        "receipt_sha256": "438cd663d375dbc38d17435da3699daa3f61bbbd9961b0fc3eca3774833f4579",
+        "started_at": "2026-09-12T20:32:33.254288+00:00",
+        "completed_at": "2026-09-12T20:41:07.310355+00:00"
+      },
+      {
+        "job_id": "AI_READI_v7_rep2_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep2_r10_rating1_evaluation.json",
+        "evaluation_sha256": "2233821f3fa7f9d8890b1029fca33fd8c52d0e3600d63f83fe4654a2d56bfb13",
+        "model_evaluation_timestamp": "2026-09-12T20:35:42Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r10_rating1/2026-09-12T20-32-34.114984+00-00/receipt.json",
+        "receipt_sha256": "bbbdc639a84ec6c3ecdafadeb7f9c7a8298846d15e1bcca9cd49097ff789ac9b",
+        "started_at": "2026-09-12T20:32:34.115166+00:00",
+        "completed_at": "2026-09-12T20:42:21.563229+00:00"
+      },
+      {
+        "job_id": "AI_READI_v7_rep2_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep2_r20_rating1_evaluation.json",
+        "evaluation_sha256": "a803649ca0d07c30ea1745f088e27e70ef4f53d5bafbe1f06d8d2589c2e20f44",
+        "model_evaluation_timestamp": "2026-09-12T21:14:11Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T21-11-05.481843+00-00/receipt.json",
+        "receipt_sha256": "ff0cfccde440f9b1a7ebdb6e40e9ac32a3049482ca9f24f446d891530ee50e1a",
+        "started_at": "2026-09-12T21:11:05.482133+00:00",
+        "completed_at": "2026-09-12T21:19:14.737561+00:00"
+      },
+      {
+        "job_id": "AI_READI_v7_rep3_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep3_r10_rating1_evaluation.json",
+        "evaluation_sha256": "abe88d9f64c85fa6de2dd828e1e0a5d28ed870ba4ec2ed8a0a2cbc98c831f099",
+        "model_evaluation_timestamp": "2026-09-12T20:44:10Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r10_rating1/2026-09-12T20-41-08.312392+00-00/receipt.json",
+        "receipt_sha256": "e9ff037c51daed765690eeaede656f605e74c4980948041ff12b4a10f808eee3",
+        "started_at": "2026-09-12T20:41:08.312579+00:00",
+        "completed_at": "2026-09-12T20:51:00.624878+00:00"
+      },
+      {
+        "job_id": "AI_READI_v7_rep3_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep3_r20_rating1_evaluation.json",
+        "evaluation_sha256": "3839068ada7e6483de6b40fe5a8d5ac028a1de4ee7f187bb363a123fde5e5713",
+        "model_evaluation_timestamp": "2026-09-12T21:21:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T21-21-44.920940+00-00/receipt.json",
+        "receipt_sha256": "97b24b5ef8f57894693a2756f3b07438a3aab3159f25572f98ce3b681381787f",
+        "started_at": "2026-09-12T21:21:44.921053+00:00",
+        "completed_at": "2026-09-12T21:35:59.456680+00:00"
+      },
+      {
+        "job_id": "AI_READI_v8_rep1_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v8_rep1_r10_rating1_evaluation.json",
+        "evaluation_sha256": "93ccee9803992a9245b48aff04ef85853fea4046f8980cf3fa2a6ff35d1f6413",
+        "model_evaluation_timestamp": "2026-09-12T14:21:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v8_rep1_r10_rating1/2026-09-12T21-21-45.820983+00-00/receipt.json",
+        "receipt_sha256": "009c7326fa6c901552546bc82cdd92827f71ff18277dafba160ed0ef9195029d",
+        "started_at": "2026-09-12T21:21:45.821160+00:00",
+        "completed_at": "2026-09-12T21:30:41.037913+00:00"
+      },
+      {
+        "job_id": "AI_READI_v8_rep1_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v8_rep1_r20_rating1_evaluation.json",
+        "evaluation_sha256": "2fc9e55cddda9c8814d7ea2d3ad9fffa4e8c7598511e72a746b119b3bedfe24e",
+        "model_evaluation_timestamp": "2026-09-12T14:21:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v8_rep1_r20_rating1/2026-09-12T21-21-46.729798+00-00/receipt.json",
+        "receipt_sha256": "1d8694b9f2c421a92b53e7effa57476b26d538c63ed7b022164b3b28473820d6",
+        "started_at": "2026-09-12T21:21:46.729949+00:00",
+        "completed_at": "2026-09-12T21:30:37.157814+00:00"
+      },
+      {
+        "job_id": "AI_READI_v8_rep2_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v8_rep2_r10_rating1_evaluation.json",
+        "evaluation_sha256": "d7ce06306e70100ce5b41e71bb6220611782d0e1f3ab357b9399166697107609",
+        "model_evaluation_timestamp": "2026-09-12T21:24:12Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v8_rep2_r10_rating1/2026-09-12T21-21-47.635988+00-00/receipt.json",
+        "receipt_sha256": "2231b93ba03598f52f334f4531806829c319721513e68919636a6edb22870c6a",
+        "started_at": "2026-09-12T21:21:47.636137+00:00",
+        "completed_at": "2026-09-12T21:30:06.397230+00:00"
+      },
+      {
+        "job_id": "AI_READI_v8_rep2_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v8_rep2_r20_rating1_evaluation.json",
+        "evaluation_sha256": "b72eba592255d4f480b0d896512e50ce2588bd3347f6ed7b679b343b21e42fa1",
+        "model_evaluation_timestamp": "2026-09-12T14:30:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v8_rep2_r20_rating1/2026-09-12T21-30-07.434568+00-00/receipt.json",
+        "receipt_sha256": "3977e0561d73ec9c86fe285954cd61006c441189dabe63c79ded530f6a35e722",
+        "started_at": "2026-09-12T21:30:07.434734+00:00",
+        "completed_at": "2026-09-12T21:44:16.271156+00:00"
+      },
+      {
+        "job_id": "AI_READI_v8_rep3_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v8_rep3_r10_rating1_evaluation.json",
+        "evaluation_sha256": "cc7f69894306f18092bd6efa4a149d4d05deaa607f3de343d7a1646684b81dfe",
+        "model_evaluation_timestamp": "2026-09-12T21:32:49Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v8_rep3_r10_rating1/2026-09-12T21-30-38.163887+00-00/receipt.json",
+        "receipt_sha256": "69a5555307894fa3c4342ca426615af750588a4d884661b751afe73b34737683",
+        "started_at": "2026-09-12T21:30:38.164054+00:00",
+        "completed_at": "2026-09-12T21:40:01.391145+00:00"
+      },
+      {
+        "job_id": "AI_READI_v8_rep3_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v8_rep3_r20_rating1_evaluation.json",
+        "evaluation_sha256": "eeb9f97b0889a300a2601a4353028cc0298223b1de5f88d997ba5306ec559db3",
+        "model_evaluation_timestamp": "2026-09-12T21:33:35Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v8_rep3_r20_rating1/2026-09-12T21-30-42.038834+00-00/receipt.json",
+        "receipt_sha256": "44c65d8382a7f3f612c8d83c4f74ca3e60f04fd0001c46076c3cc87c7feb1102",
+        "started_at": "2026-09-12T21:30:42.039012+00:00",
+        "completed_at": "2026-09-12T21:39:16.333556+00:00"
+      },
+      {
+        "job_id": "CHORUS_v7_rep1_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v7_rep1_r20_rating1_evaluation.json",
+        "evaluation_sha256": "d9dc9d3e86843f2c227909609606a1997317bba2f158c8ec25c566f6b23aa574",
+        "model_evaluation_timestamp": "2026-09-12T14:36:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r20_rating1/2026-09-12T21-36-00.468954+00-00/receipt.json",
+        "receipt_sha256": "fbe2478ec3e401a42f03b837ea8b03221bf705cde4a73fe0dc83b91f21776e92",
+        "started_at": "2026-09-12T21:36:00.469112+00:00",
+        "completed_at": "2026-09-12T21:44:15.203604+00:00"
+      },
+      {
+        "job_id": "CHORUS_v7_rep2_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v7_rep2_r10_rating1_evaluation.json",
+        "evaluation_sha256": "aacdd5a850bc9ebb8309ea666cc8d450061368b94bc379d9c19a363235006605",
+        "model_evaluation_timestamp": "2026-09-12T21:41:51Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep2_r10_rating1/2026-09-12T21-39-17.331116+00-00/receipt.json",
+        "receipt_sha256": "17a2f6f85be8ca5ba0645055af5dbbf9544452d3e21eda3a5ba06267b5e2dda8",
+        "started_at": "2026-09-12T21:39:17.331275+00:00",
+        "completed_at": "2026-09-12T21:47:29.087839+00:00"
+      },
+      {
+        "job_id": "CHORUS_v7_rep2_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v7_rep2_r20_rating1_evaluation.json",
+        "evaluation_sha256": "597deffef75a4a792e67b01c2f5285e68a2ceb0d827c70205d37ad1e39b936e4",
+        "model_evaluation_timestamp": "2026-09-12T14:40:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep2_r20_rating1/2026-09-12T21-40-02.391010+00-00/receipt.json",
+        "receipt_sha256": "bcac97bed80f6df1c78b0a5a0f03354501c32e160f91c3a5419efced93759904",
+        "started_at": "2026-09-12T21:40:02.391172+00:00",
+        "completed_at": "2026-09-12T21:47:04.667055+00:00"
+      },
+      {
+        "job_id": "CHORUS_v7_rep3_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v7_rep3_r10_rating1_evaluation.json",
+        "evaluation_sha256": "1185a4adc9d3e53cae620043cefb437733e23c3cb3e6fe7774f6408d828a2e98",
+        "model_evaluation_timestamp": "2026-09-12T22:40:00Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep3_r10_rating1/2026-09-12T22-37-00.155060+00-00/receipt.json",
+        "receipt_sha256": "ec09658b504facc2e6d50dc0eef876cfe65d1822f09b25fb0b2afd0a6fcfb5c1",
+        "started_at": "2026-09-12T22:37:00.155167+00:00",
+        "completed_at": "2026-09-12T22:46:05.664061+00:00"
+      },
+      {
+        "job_id": "CHORUS_v7_rep3_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v7_rep3_r20_rating1_evaluation.json",
+        "evaluation_sha256": "43a228dea6b422492527832d6227aac6ce3bae93b479765fa14dbfb2273e11a6",
+        "model_evaluation_timestamp": "2026-09-12T14:44:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep3_r20_rating1/2026-09-12T21-44-17.256443+00-00/receipt.json",
+        "receipt_sha256": "6a30d70f1530e6d489d44b70b0954cb76313166f3b84ced227b12bf75b5e9def",
+        "started_at": "2026-09-12T21:44:17.256611+00:00",
+        "completed_at": "2026-09-12T21:52:56.413808+00:00"
+      },
+      {
+        "job_id": "CHORUS_v8_rep1_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v8_rep1_r10_rating1_evaluation.json",
+        "evaluation_sha256": "84d194e0e212bbd212b089480a77d9c86f260545d7b7d419e77ecafbed7ff06e",
+        "model_evaluation_timestamp": "2026-09-12T22:25:12Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep1_r10_rating1/2026-09-12T22-22-17.411486+00-00/receipt.json",
+        "receipt_sha256": "0d5f9a3f64cccb476a04be8f48de325fe4414ec064109b00a2d78e929f2a5fe2",
+        "started_at": "2026-09-12T22:22:17.411848+00:00",
+        "completed_at": "2026-09-12T22:32:08.757798+00:00"
+      },
+      {
+        "job_id": "CHORUS_v8_rep1_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v8_rep1_r20_rating1_evaluation.json",
+        "evaluation_sha256": "79fa60b8bd5f77f0c649c55fb8b36447699b9ccef7c96d968466acee652b6ab2",
+        "model_evaluation_timestamp": "2026-09-12T15:37:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T22-37-01.019150+00-00/receipt.json",
+        "receipt_sha256": "d7c910aa43a786675e3813416595796a4ca98faaecd715c40f91c7c92acfb89f",
+        "started_at": "2026-09-12T22:37:01.019269+00:00",
+        "completed_at": "2026-09-12T22:45:45.467713+00:00"
+      },
+      {
+        "job_id": "CHORUS_v8_rep2_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v8_rep2_r10_rating1_evaluation.json",
+        "evaluation_sha256": "a66242dc6831b54f5cfd19da914504ccd2b58e4420ff9efba38ee89df017ea9c",
+        "model_evaluation_timestamp": "2026-09-12T15:37:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep2_r10_rating1/2026-09-12T22-37-01.887533+00-00/receipt.json",
+        "receipt_sha256": "ae12cb2aa84f2738ae5219fb93ccd376f0d92f48ac684f75881552226ce23aae",
+        "started_at": "2026-09-12T22:37:01.887642+00:00",
+        "completed_at": "2026-09-12T22:47:57.227465+00:00"
+      },
+      {
+        "job_id": "CHORUS_v8_rep2_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v8_rep2_r20_rating1_evaluation.json",
+        "evaluation_sha256": "42f528657bc887998e2f6ededdfa15ea2be7f3d7df07083dae0c60423940116d",
+        "model_evaluation_timestamp": "2026-09-12T22:40:25Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep2_r20_rating1/2026-09-12T22-37-02.741488+00-00/receipt.json",
+        "receipt_sha256": "500015b75567d668c605b952c6b7c7285a3121b22d8cc0cf45824f5ee70bde5c",
+        "started_at": "2026-09-12T22:37:02.741683+00:00",
+        "completed_at": "2026-09-12T22:46:06.413339+00:00"
+      },
+      {
+        "job_id": "CHORUS_v8_rep3_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v8_rep3_r10_rating1_evaluation.json",
+        "evaluation_sha256": "52d940459ed4ff53dc521b19c3ddf6ba52fe6912692cfb8ac99c53ae2b892bb9",
+        "model_evaluation_timestamp": "2026-09-12T22:49:44Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep3_r10_rating1/2026-09-12T22-45-46.473793+00-00/receipt.json",
+        "receipt_sha256": "509bbf55b3ba2d9c88009ab6b34f2c46784822dfcc8d38258727c1bb5970b5a5",
+        "started_at": "2026-09-12T22:45:46.473964+00:00",
+        "completed_at": "2026-09-12T22:56:21.197304+00:00"
+      },
+      {
+        "job_id": "CHORUS_v8_rep3_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v8_rep3_r20_rating1_evaluation.json",
+        "evaluation_sha256": "8e952fc6f6c445a3b2af84320ec98bdbff40c849d43f593ca9c20f3d5778dbbd",
+        "model_evaluation_timestamp": "2026-09-12T15:46:06Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep3_r20_rating1/2026-09-12T22-46-06.658490+00-00/receipt.json",
+        "receipt_sha256": "343844dc28f3ad4eccfdbad58090fcfe3a2f35a21dbde0cfb54cb5a150adbfb4",
+        "started_at": "2026-09-12T22:46:06.658666+00:00",
+        "completed_at": "2026-09-12T23:00:36.885219+00:00"
+      },
+      {
+        "job_id": "CM4AI_v7_rep1_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v7_rep1_r10_rating1_evaluation.json",
+        "evaluation_sha256": "819b91702ad9b12f5ca1e8219565d442fc91ba071efb628019ced9919c2144af",
+        "model_evaluation_timestamp": "2026-09-12T22:48:27Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep1_r10_rating1/2026-09-12T22-46-07.508492+00-00/receipt.json",
+        "receipt_sha256": "4a5bb0dc2078f2b9fa2f2f7770c2d6a5a0a335508dbaa5bafc715e8c457c422e",
+        "started_at": "2026-09-12T22:46:07.508668+00:00",
+        "completed_at": "2026-09-12T22:54:07.964709+00:00"
+      },
+      {
+        "job_id": "CM4AI_v7_rep1_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v7_rep1_r20_rating1_evaluation.json",
+        "evaluation_sha256": "b3b32ffa0b6d5d119177308cb90d59bece05202e64b9e58144489d91ed63d1a3",
+        "model_evaluation_timestamp": "2026-09-12T22:50:39Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep1_r20_rating1/2026-09-12T22-47-58.209050+00-00/receipt.json",
+        "receipt_sha256": "ed039d23f2d6de8b80a9f4edadaa5724495ca1ceb2659ca43ec601b385a85942",
+        "started_at": "2026-09-12T22:47:58.209241+00:00",
+        "completed_at": "2026-09-12T23:03:53.171839+00:00"
+      },
+      {
+        "job_id": "CM4AI_v7_rep2_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v7_rep2_r10_rating1_evaluation.json",
+        "evaluation_sha256": "31f54812c1900ac178c30e4f5165660b96420fe39597fb6680ac05462ec5f6d2",
+        "model_evaluation_timestamp": "2026-09-12T15:54:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep2_r10_rating1/2026-09-12T22-54-08.943272+00-00/receipt.json",
+        "receipt_sha256": "9edfe7c668050916d25dc8a1f962b0c44a075a8857c9e874d3009b309fa5292b",
+        "started_at": "2026-09-12T22:54:08.943459+00:00",
+        "completed_at": "2026-09-12T23:04:16.609249+00:00"
+      },
+      {
+        "job_id": "CM4AI_v7_rep2_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v7_rep2_r20_rating1_evaluation.json",
+        "evaluation_sha256": "b0e22af2feab2fff686eea1bc702e62cf184b101c418930e72536bc5a91286e1",
+        "model_evaluation_timestamp": "2026-09-12T16:25:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T23-21-52.389234+00-00/receipt.json",
+        "receipt_sha256": "8fcd0f74558e972e6cdcfcf44c24bdf7972663c4936a9bb6d1daefe4183f6eee",
+        "started_at": "2026-09-12T23:21:52.389530+00:00",
+        "completed_at": "2026-09-12T23:31:10.724547+00:00"
+      },
+      {
+        "job_id": "CM4AI_v7_rep3_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v7_rep3_r10_rating1_evaluation.json",
+        "evaluation_sha256": "391466e04b6b653bf55972efeef924129be4b58e8407644b443ba0cd62d92e8b",
+        "model_evaluation_timestamp": "2026-09-12T16:05:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep3_r10_rating1/2026-09-12T23-00-38.082683+00-00/receipt.json",
+        "receipt_sha256": "afa96e279b19121b2d32d0e8ce372d85c16db9dee392250d50f8b7fe915b5a0c",
+        "started_at": "2026-09-12T23:00:38.082895+00:00",
+        "completed_at": "2026-09-12T23:13:04.038827+00:00"
+      },
+      {
+        "job_id": "CM4AI_v7_rep3_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v7_rep3_r20_rating1_evaluation.json",
+        "evaluation_sha256": "1a4dd709685209dd8570047fd73458560669a16bef5ee87964df09e95f4251e0",
+        "model_evaluation_timestamp": "2026-09-12T23:08:07Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep3_r20_rating1/2026-09-12T23-03-54.141501+00-00/receipt.json",
+        "receipt_sha256": "841be6c921e46f83922025509f42562c0dc3485ae3a68b1b0825ebb90ba7fa82",
+        "started_at": "2026-09-12T23:03:54.141681+00:00",
+        "completed_at": "2026-09-12T23:15:11.225400+00:00"
+      },
+      {
+        "job_id": "CM4AI_v8_rep1_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v8_rep1_r10_rating1_evaluation.json",
+        "evaluation_sha256": "8880a7b162f1dfee9ccdfc3aee184e2dc026597c180ad4489951ec6e005f2c73",
+        "model_evaluation_timestamp": "2026-09-12T16:04:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v8_rep1_r10_rating1/2026-09-12T23-04-17.580919+00-00/receipt.json",
+        "receipt_sha256": "2723a0bc156068c2eef04b83a4ba6944f3c62ab545e4e29b0d9e56850955c122",
+        "started_at": "2026-09-12T23:04:17.581085+00:00",
+        "completed_at": "2026-09-12T23:14:12.593627+00:00"
+      },
+      {
+        "job_id": "CM4AI_v8_rep1_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v8_rep1_r20_rating1_evaluation.json",
+        "evaluation_sha256": "3760295a52cb901e9700b6f31a0d87c16c4fcd5c485e14634caaa1bb1b1f1634",
+        "model_evaluation_timestamp": "2026-09-12T16:50:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v8_rep1_r20_rating1/2026-09-12T23-44-53.110554+00-00/receipt.json",
+        "receipt_sha256": "9a88bba550c72dba4e245e5ff44442e9fc6e915b035b767ab261a0087f55bd1c",
+        "started_at": "2026-09-12T23:44:53.110755+00:00",
+        "completed_at": "2026-09-12T23:53:29.175189+00:00"
+      },
+      {
+        "job_id": "CM4AI_v8_rep2_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v8_rep2_r10_rating1_evaluation.json",
+        "evaluation_sha256": "74579aa53865a3e640435d061ea6695ef826d85b8990df45e4e873170012979d",
+        "model_evaluation_timestamp": "2026-09-12T16:45:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v8_rep2_r10_rating1/2026-09-12T23-44-53.965963+00-00/receipt.json",
+        "receipt_sha256": "b06b412178e421c834730f9917340f9a4e239d5f80e904682b0844dd683383b2",
+        "started_at": "2026-09-12T23:44:53.966128+00:00",
+        "completed_at": "2026-09-13T00:06:19.632799+00:00"
+      },
+      {
+        "job_id": "CM4AI_v8_rep2_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v8_rep2_r20_rating1_evaluation.json",
+        "evaluation_sha256": "ae7a6916fec053e1a6c2637594db2080b1cf405fc66a71aada18f07cb159b598",
+        "model_evaluation_timestamp": "2026-09-12T23:47:41Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v8_rep2_r20_rating1/2026-09-12T23-44-54.831551+00-00/receipt.json",
+        "receipt_sha256": "b05697680772bcd27904433ac0f7c5ebfbccb319a38bc9b8d127f2897c6d86d5",
+        "started_at": "2026-09-12T23:44:54.831708+00:00",
+        "completed_at": "2026-09-12T23:53:43.907547+00:00"
+      },
+      {
+        "job_id": "CM4AI_v8_rep3_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v8_rep3_r10_rating1_evaluation.json",
+        "evaluation_sha256": "99d08966af2dee9fb6bd9dc4c3e8e8c90d668e54fc08150b2e695accd954bfdc",
+        "model_evaluation_timestamp": "2026-09-12T23:47:22Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v8_rep3_r10_rating1/2026-09-12T23-44-55.691778+00-00/receipt.json",
+        "receipt_sha256": "ef45a6891a093353aa5f0a6c22cbf8db27436734d17a02fb19a3cb50626a4d46",
+        "started_at": "2026-09-12T23:44:55.691936+00:00",
+        "completed_at": "2026-09-12T23:53:30.434059+00:00"
+      },
+      {
+        "job_id": "CM4AI_v8_rep3_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v8_rep3_r20_rating1_evaluation.json",
+        "evaluation_sha256": "1da34cd91d5e2d756533c113568cb0c20935a1f85682d3a01c7db04f01aa2b23",
+        "model_evaluation_timestamp": "2026-09-12T23:55:58Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v8_rep3_r20_rating1/2026-09-12T23-53-30.162974+00-00/receipt.json",
+        "receipt_sha256": "145129b87cfe7cc641a04aa3048157840cb55efecf80050af84af76fa1de9f3a",
+        "started_at": "2026-09-12T23:53:30.163149+00:00",
+        "completed_at": "2026-09-13T00:01:46.004805+00:00"
+      },
+      {
+        "job_id": "VOICE_v7_rep1_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/VOICE_v7_rep1_r10_rating1_evaluation.json",
+        "evaluation_sha256": "a502581e6787c55df2076448558c509a224d96fa173334d5d84a17b487bbc909",
+        "model_evaluation_timestamp": "2026-09-12T23:56:21Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v7_rep1_r10_rating1/2026-09-12T23-53-31.425664+00-00/receipt.json",
+        "receipt_sha256": "72407f77418d092bce9166bc93d53b809ad9f4f3ae07967369c71e2888316143",
+        "started_at": "2026-09-12T23:53:31.425857+00:00",
+        "completed_at": "2026-09-13T00:03:03.407728+00:00"
+      },
+      {
+        "job_id": "VOICE_v7_rep1_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/VOICE_v7_rep1_r20_rating1_evaluation.json",
+        "evaluation_sha256": "db3a18828b9a1b6042585790d6917a35e4342569c313636cbf701460ab6446f9",
+        "model_evaluation_timestamp": "2026-09-12T23:56:24Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v7_rep1_r20_rating1/2026-09-12T23-53-44.887718+00-00/receipt.json",
+        "receipt_sha256": "67362fee4c3945ce016ccfed1f434a591cd9df6562cfd2e125e475f02c38224c",
+        "started_at": "2026-09-12T23:53:44.887886+00:00",
+        "completed_at": "2026-09-13T00:02:17.605935+00:00"
+      },
+      {
+        "job_id": "VOICE_v7_rep2_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/VOICE_v7_rep2_r10_rating1_evaluation.json",
+        "evaluation_sha256": "45eb07592b5b5e79928b35b69e9c1931d8774e24e24504cb13b9752088aa3802",
+        "model_evaluation_timestamp": "2026-09-13T00:04:14Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v7_rep2_r10_rating1/2026-09-13T00-01-46.990976+00-00/receipt.json",
+        "receipt_sha256": "b1a1ba204240da9d161fb831c901e33e59db2081ed037d4eb8951acbf0da7bad",
+        "started_at": "2026-09-13T00:01:46.991151+00:00",
+        "completed_at": "2026-09-13T00:11:08.278253+00:00"
+      },
+      {
+        "job_id": "VOICE_v7_rep2_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/VOICE_v7_rep2_r20_rating1_evaluation.json",
+        "evaluation_sha256": "80e212fd41a26832519d9b73ec0d23f5b7199c1a4bd774d8d04924d58300b76b",
+        "model_evaluation_timestamp": "2026-09-13T00:04:50Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v7_rep2_r20_rating1/2026-09-13T00-02-18.589078+00-00/receipt.json",
+        "receipt_sha256": "21a98ea8866c09157e0c7c0bb942900ffe6eda195f6ef2569e1485384d309f31",
+        "started_at": "2026-09-13T00:02:18.589261+00:00",
+        "completed_at": "2026-09-13T00:10:20.430701+00:00"
+      },
+      {
+        "job_id": "VOICE_v7_rep3_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/VOICE_v7_rep3_r10_rating1_evaluation.json",
+        "evaluation_sha256": "a7f8ecfdd0575747c2c0b554d927639465225dcf40337d31da46e6b531ea9497",
+        "model_evaluation_timestamp": "2026-09-12T17:10:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v7_rep3_r10_rating1/2026-09-13T00-03-04.407381+00-00/receipt.json",
+        "receipt_sha256": "220a0b0806729be1136e895edebac384157b1fbcb97abcadffdb76dbf60fc092",
+        "started_at": "2026-09-13T00:03:04.407567+00:00",
+        "completed_at": "2026-09-13T00:13:57.789708+00:00"
+      },
+      {
+        "job_id": "VOICE_v7_rep3_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/VOICE_v7_rep3_r20_rating1_evaluation.json",
+        "evaluation_sha256": "6258a153ee329ecba3c80f5795e9e5fb6e301e4f4989a5f746e42efbfad162cc",
+        "model_evaluation_timestamp": "2026-09-13T00:09:12Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v7_rep3_r20_rating1/2026-09-13T00-06-20.621653+00-00/receipt.json",
+        "receipt_sha256": "af7390a22387a3fe5d85e1cd003eb3b9904fbf17ff7c1d2c2a67e55536cd31cb",
+        "started_at": "2026-09-13T00:06:20.621828+00:00",
+        "completed_at": "2026-09-13T00:18:55.098944+00:00"
+      },
+      {
+        "job_id": "VOICE_v8_rep1_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/VOICE_v8_rep1_r10_rating1_evaluation.json",
+        "evaluation_sha256": "2601d3de58ccfdff9243d861fc62ace0ebefdb0cc48212872fd7338811ed6a52",
+        "model_evaluation_timestamp": "2026-09-13T00:12:46Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v8_rep1_r10_rating1/2026-09-13T00-10-21.444044+00-00/receipt.json",
+        "receipt_sha256": "071883f5a02a0c79ee65fed84dd48c720b4a47f1780ced90c010c6eb4a214d95",
+        "started_at": "2026-09-13T00:10:21.444225+00:00",
+        "completed_at": "2026-09-13T00:18:00.865204+00:00"
+      },
+      {
+        "job_id": "VOICE_v8_rep1_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/VOICE_v8_rep1_r20_rating1_evaluation.json",
+        "evaluation_sha256": "cbf9cd3c0930953db2e328a8a81316e2240d439d86ec99240537e54002c23f54",
+        "model_evaluation_timestamp": "2026-09-12T17:11:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v8_rep1_r20_rating1/2026-09-13T00-11-09.262075+00-00/receipt.json",
+        "receipt_sha256": "1389f7ce7b0a1c63bd09335f3802af41f05b7a3f6362504546630982f055879a",
+        "started_at": "2026-09-13T00:11:09.262356+00:00",
+        "completed_at": "2026-09-13T00:19:24.281387+00:00"
+      },
+      {
+        "job_id": "VOICE_v8_rep2_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/VOICE_v8_rep2_r10_rating1_evaluation.json",
+        "evaluation_sha256": "4c52bdd51c17d202d0ad611d6d4b33f9b8100516d7c6965d56f4955c1fa5d02f",
+        "model_evaluation_timestamp": "2026-09-13T00:16:25Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v8_rep2_r10_rating1/2026-09-13T00-13-58.775477+00-00/receipt.json",
+        "receipt_sha256": "3c259f6d8bbff430cb9ba6727ac1e7b52f8398086a0441c49dc42f75f9e91350",
+        "started_at": "2026-09-13T00:13:58.775638+00:00",
+        "completed_at": "2026-09-13T00:22:51.404362+00:00"
+      },
+      {
+        "job_id": "VOICE_v8_rep2_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/VOICE_v8_rep2_r20_rating1_evaluation.json",
+        "evaluation_sha256": "8fd40a53387d47c13e2427e632d170075e200628c81a16c9b543c75b10853945",
+        "model_evaluation_timestamp": "2026-09-13T00:20:58Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v8_rep2_r20_rating1/2026-09-13T00-18-01.863681+00-00/receipt.json",
+        "receipt_sha256": "6f328f49055ec49f423e030c53f9ccda8ecb9f8b89e58f5d11b7133dcffa187c",
+        "started_at": "2026-09-13T00:18:01.863862+00:00",
+        "completed_at": "2026-09-13T00:25:58.933527+00:00"
+      },
+      {
+        "job_id": "VOICE_v8_rep3_r10_rating1",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/VOICE_v8_rep3_r10_rating1_evaluation.json",
+        "evaluation_sha256": "45ee1544104e0a7b967b46618a2a1d0f8c45e128b57db0179c97b1ea13b1499f",
+        "model_evaluation_timestamp": "2026-09-13T00:21:51Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v8_rep3_r10_rating1/2026-09-13T00-18-56.147826+00-00/receipt.json",
+        "receipt_sha256": "c75082dc164263eedc9104c9417bb13daaf9f7e0ee9f71988492bc27e3f5a135",
+        "started_at": "2026-09-13T00:18:56.147993+00:00",
+        "completed_at": "2026-09-13T00:29:20.750213+00:00"
+      },
+      {
+        "job_id": "VOICE_v8_rep3_r20_rating1",
+        "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/VOICE_v8_rep3_r20_rating1_evaluation.json",
+        "evaluation_sha256": "4f427e6db8b56700f4966fd2c1d53bfdbbe182792e5c5c8576e0e60781145b5f",
+        "model_evaluation_timestamp": "2026-09-12T17:19:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v8_rep3_r20_rating1/2026-09-13T00-19-25.331737+00-00/receipt.json",
+        "receipt_sha256": "99382c863e46bb9580a81c89af614af965a2f320910401c0181d69f4cd1da3b3",
+        "started_at": "2026-09-13T00:19:25.331928+00:00",
+        "completed_at": "2026-09-13T00:27:06.124220+00:00"
+      },
+      {
+        "job_id": "AI_READI_v7_rep1_r10_rating2",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep1_r10_rating2_evaluation.json",
+        "evaluation_sha256": "74e3f74c420b65f7d63267a7d9524eb25f9ab4ef6f0f4f30a0cb9243f4610403",
+        "model_evaluation_timestamp": "2026-09-13T00:25:51Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r10_rating2/2026-09-13T00-22-52.430695+00-00/receipt.json",
+        "receipt_sha256": "f756cfe2706a2737a4bf6756160afb500bc691bc22bae38469cbfb8986c445e4",
+        "started_at": "2026-09-13T00:22:52.430861+00:00",
+        "completed_at": "2026-09-13T00:32:11.810883+00:00"
+      },
+      {
+        "job_id": "AI_READI_v7_rep1_r10_rating3",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep1_r10_rating3_evaluation.json",
+        "evaluation_sha256": "74d90b30da8c8ff100d7c28f6ea4c18a91af3f2fc11e72423b0baf67ecd025a6",
+        "model_evaluation_timestamp": "2026-09-13T00:28:32Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep1_r10_rating3/2026-09-13T00-25-59.954207+00-00/receipt.json",
+        "receipt_sha256": "ee872e3758586e7d81656594062ffe7c2261f3884b53b5b24e44a3ed1dd6b72c",
+        "started_at": "2026-09-13T00:25:59.954632+00:00",
+        "completed_at": "2026-09-13T00:36:11.438034+00:00"
+      },
+      {
+        "job_id": "CHORUS_v7_rep1_r10_rating2",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v7_rep1_r10_rating2_evaluation.json",
+        "evaluation_sha256": "379fc3750d7a54ed3a86f85948df17bf5438397912b2476bba241e0d87d19fee",
+        "model_evaluation_timestamp": "2026-09-12T17:30:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-13T00-27-07.168779+00-00/receipt.json",
+        "receipt_sha256": "7d7fe4c655a7ebe08c80e3db52951600343c56fd7cdfb7687e00ca8809ad0461",
+        "started_at": "2026-09-13T00:27:07.168975+00:00",
+        "completed_at": "2026-09-13T00:37:18.038690+00:00"
+      },
+      {
+        "job_id": "CHORUS_v7_rep1_r10_rating3",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CHORUS_v7_rep1_r10_rating3_evaluation.json",
+        "evaluation_sha256": "94a75de06bf77ca59d0dbcebb6e773fabca719b6f2a83e3fdb7969101f9df3de",
+        "model_evaluation_timestamp": "2026-09-13T00:32:25Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating3/2026-09-13T00-29-21.767556+00-00/receipt.json",
+        "receipt_sha256": "60e7bf5487bf05af605e720ddf1744943edbc053a00af988821af3d44d161465",
+        "started_at": "2026-09-13T00:29:21.767724+00:00",
+        "completed_at": "2026-09-13T00:38:35.410884+00:00"
+      },
+      {
+        "job_id": "CM4AI_v7_rep1_r10_rating2",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v7_rep1_r10_rating2_evaluation.json",
+        "evaluation_sha256": "b8f8c70c4bb91aedeb634c6a01ecf823fee2f54063b7715b9f22a705bc6821d2",
+        "model_evaluation_timestamp": "2026-09-12T17:32:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep1_r10_rating2/2026-09-13T00-32-13.061742+00-00/receipt.json",
+        "receipt_sha256": "a031059272b00f3d183c17c297c28cdca8480496009391fd979a92d400d80524",
+        "started_at": "2026-09-13T00:32:13.061920+00:00",
+        "completed_at": "2026-09-13T00:43:03.582325+00:00"
+      },
+      {
+        "job_id": "CM4AI_v7_rep1_r10_rating3",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v7_rep1_r10_rating3_evaluation.json",
+        "evaluation_sha256": "26207c6a31f7e160955f0e0ab0706bd0c1bb6f2ad3db77d30134da146796a9b7",
+        "model_evaluation_timestamp": "2026-09-12T17:40:00Z",
+        "relation_to_receipt_interval": "outside_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep1_r10_rating3/2026-09-13T00-36-12.464075+00-00/receipt.json",
+        "receipt_sha256": "95c707d1eb0430a7b6b009eeeb0b88a1b651909451739e72d9fc01a25435fb65",
+        "started_at": "2026-09-13T00:36:12.464267+00:00",
+        "completed_at": "2026-09-13T00:52:50.171181+00:00"
+      },
+      {
+        "job_id": "VOICE_v7_rep1_r10_rating2",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/VOICE_v7_rep1_r10_rating2_evaluation.json",
+        "evaluation_sha256": "89c52483b460f3f76b301a3725ad3684c0b53708a33752b3711aa0ee5af6ad95",
+        "model_evaluation_timestamp": "2026-09-13T00:39:22Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v7_rep1_r10_rating2/2026-09-13T00-37-19.080121+00-00/receipt.json",
+        "receipt_sha256": "1985be9fe59a96c3ca24d5406ac5aadcf59118189441cf61ccd424fadf3d76e9",
+        "started_at": "2026-09-13T00:37:19.080287+00:00",
+        "completed_at": "2026-09-13T00:45:14.334713+00:00"
+      },
+      {
+        "job_id": "VOICE_v7_rep1_r10_rating3",
+        "output": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/VOICE_v7_rep1_r10_rating3_evaluation.json",
+        "evaluation_sha256": "e0283f6394253db6228e6913d1731a4ac113ab6fcc6b0d7b842b62856758ec04",
+        "model_evaluation_timestamp": "2026-09-13T00:41:24Z",
+        "relation_to_receipt_interval": "within_receipt_interval",
+        "receipt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v7_rep1_r10_rating3/2026-09-13T00-38-36.431120+00-00/receipt.json",
+        "receipt_sha256": "17ce5dacf3eec9dc79f98a04d1bb25f6b94d3523b031a104d8e015ae2c4a483d",
+        "started_at": "2026-09-13T00:38:36.431306+00:00",
+        "completed_at": "2026-09-13T00:48:45.977348+00:00"
+      }
+    ],
+    "outside_receipt_interval": 23,
+    "not_comparable": 0,
+    "qualification": "Execution times and condition boundaries use launcher receipt started_at/completed_at, with original receipt hashes recorded in results.json. Model-written evaluation_timestamp values remain unchanged and are not independently verified, including values inside the recorded interval. Of 56 accepted ratings, 23 metadata timestamps lie outside their session intervals and 0 cannot be compared as timezone-aware timestamps. An interval mismatch alone does not establish fabrication; approximations and timezone errors can also cause it."
+  },
+  "cost_accounting": {
+    "cost_accounting_complete": false,
+    "cli_reported_total_cost_usd": null,
+    "known_terminal_cli_cost_usd": 161.3993945,
+    "unpriced_excluded_sessions": [
+      {
+        "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep1_r10_rating1/2026-09-12T21-47-05.670729+00-00",
+        "job_id": "CHORUS_v8_rep1_r10_rating1",
+        "classification": "reviewed_900_second_timeout_before_write",
+        "evaluator_launched": true,
+        "accepted": false,
+        "cli_reported_cost_usd": null,
+        "cost_basis": "No terminal CLI result. Partial stream usage does not establish complete cost; this real session is unpriced, not free."
+      },
+      {
+        "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep2_r10_rating1/2026-09-12T21-52-57.419848+00-00",
+        "job_id": "CHORUS_v8_rep2_r10_rating1",
+        "classification": "reviewed_900_second_timeout_before_write",
+        "evaluator_launched": true,
+        "accepted": false,
+        "cli_reported_cost_usd": null,
+        "cost_basis": "No terminal CLI result. Partial stream usage does not establish complete cost; this real session is unpriced, not free."
+      }
+    ],
+    "cost_qualification": "2 retained interrupted evaluator sessions have unknown cost. The known terminal CLI subtotal excludes their unreported usage; total expenditure is unknown. CLI estimates are not reconciled CBORG charges. Measurement/session completion does not imply complete cost accounting."
+  }
+}

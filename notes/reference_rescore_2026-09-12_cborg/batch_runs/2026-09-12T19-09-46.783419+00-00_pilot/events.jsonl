@@ -1,0 +1,3 @@
+{"event": "launched", "at": 1789240186.7864718, "job": "CHORUS_v7_rep1_r10_rating2", "pid": 88365}
+{"event": "started", "at": 1789240187.296492, "job": "CHORUS_v7_rep1_r10_rating2", "active_workers": 1}
+{"event": "finished", "at": 1789240740.056406, "job": "CHORUS_v7_rep1_r10_rating2", "exit_code": 1}

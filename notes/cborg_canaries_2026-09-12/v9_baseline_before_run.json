@@ -1,0 +1,19 @@
+{
+  "project": "CHORUS",
+  "baseline": "2026-09-01_claude-opus-5-api-generic-v7",
+  "counts": {
+    "pair errors": 0,
+    "report findings": 0,
+    "ungrounded identifiers": 0,
+    "resolver URLs in identifier slots": 0,
+    "organisational fragments": 0,
+    "undeclared prefixes": 0,
+    "British spellings": 0
+  },
+  "report_basis": {
+    "measured": 1,
+    "vacuous": 2,
+    "unchecked": 0
+  },
+  "observed_before_generation": true
+}

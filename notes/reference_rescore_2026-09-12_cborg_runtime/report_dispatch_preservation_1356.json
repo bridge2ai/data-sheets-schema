@@ -1,0 +1,22 @@
+{
+  "issue": 1356,
+  "completed_measurement_commit": "5f14512b70c1be785781878dfd8bcdf854ea0231",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "registered_path": "scripts/reference_rescore_cborg.py",
+  "measured_code_archive": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/reference_rescore_cborg.py",
+  "measured_code_sha256": "750b0e5d7ca9521d9d3e0432627b67d76a4ea2cb77c2eafc7a5e4442414456df",
+  "phase": "Post-measurement report dispatch only; no new scoring calls or instrument change.",
+  "preserved_before_repair": {
+    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/reference_rescore_cborg.py": "750b0e5d7ca9521d9d3e0432627b67d76a4ea2cb77c2eafc7a5e4442414456df",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/completion_audit.json": "660f4084c1ff308b3d373f24130d529cdd81271b1e927a06f6ac89f10752a01b",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/measurement_file_hashes.json": "ca0d6359d8963d83c9c40354b1237110c6497101b7478746ed29a0810baeaa78",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/final_written_output_audit.json": "d50145a74d167404c6ac07bcb23a397f90075b54261dc6d3f6224f77d61de99e",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/results.json": "52fe41cc351db360e8da785a906ce7208f45c64199a0ff24fc9ae3b6ad36f2c5",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/results.md": "6301b0aca08a004c51c0322de275425df177d7957dfae7afbaf44394b0c2fdbb",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/completion_summary.md": "13cd302577e8d821a993ab9b073cfd37927570f2e4ace79842001eff304cf255",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/semantic_review.md": "64777eb0a8b1131a8df993c68719f31054edb5b557bc621cd1feeed8046f7c32",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/reference_rescore_cborg_batch.py": "ef2e7f2c6ef17d8880a5e2884fb45ca8160a74d2f30825d030bad7ef32ab2d60"
+  },
+  "measured_scheduler_archive": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/reference_rescore_cborg_batch.py",
+  "measured_scheduler_sha256": "ef2e7f2c6ef17d8880a5e2884fb45ca8160a74d2f30825d030bad7ef32ab2d60"
+}

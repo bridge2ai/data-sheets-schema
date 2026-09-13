@@ -1,0 +1,139 @@
+{
+  "job_id": "CM4AI_v8_rep1_r10_rating1",
+  "started_at": "2026-09-12T23:04:17.581085+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "b77646b213584923505373b35a54d9f2bc382416c0275c605e5078dfea8d529b",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "b14858313cb86f692a326c76764505a6d3c1f64a92ee452638eedd3636baba41",
+  "evaluation_sha256": "8880a7b162f1dfee9ccdfc3aee184e2dc026597c180ad4489951ec6e005f2c73",
+  "cli_result": {
+    "duration_api_ms": 594242,
+    "stop_reason": "end_turn",
+    "session_id": "5d1d41b1-5800-4f9a-ba89-5ddb87b1fdee",
+    "total_cost_usd": 2.4963465,
+    "usage": {
+      "input_tokens": 309,
+      "cache_creation_input_tokens": 154166,
+      "cache_read_input_tokens": 483427,
+      "output_tokens": 46944,
+      "output_tokens_details": {
+        "thinking_tokens": 14519
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 154166
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 311,
+        "outputTokens": 46972,
+        "cacheReadInputTokens": 484533,
+        "cacheCreationInputTokens": 172516,
+        "webSearchRequests": 0,
+        "costUSD": 2.4963465,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 14519,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01RuGQnc2Dz1ASoChCbHYTCq",
+        "tool_input": {
+          "command": "cat data/rubric/rubric10.txt | head -100; echo \"=== SHA ===\"; shasum -a 256 data/rubric/rubric10.txt input/record.yaml",
+          "description": "Read rubric text and compute hashes"
+        }
+      },
+      {
+        "tool_name": "Read",
+        "tool_use_id": "toolu_vrtx_01VgusC6NHFT5AZJaG7dq5h7",
+        "tool_input": {
+          "file_path": "/Users/marcin/src/download/prompts/rubric10_semantic_schema.json"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01SBL5QnwKdQLCCw22MsMB1D",
+        "tool_input": {
+          "command": "date -u +\"%Y-%m-%dT%H:%M:%SZ\"; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get current UTC timestamp and a UUID"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01PPrARQmikDe8cxCqDyu5KA",
+        "tool_input": {
+          "command": "python3 -c \"import datetime,uuid;print(datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'));print(uuid.uuid4())\"",
+          "description": "Print current UTC time and a random UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (`VALID output_evaluation.json: rubric10-semantic`, exit 0).\n\n## Definition check\n\nThe section headed \"Source rubric and schema paths (#158)\" is present in my instructions. The sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches the current instrument (the dedicated `updates.update_details` slot, with the anti-credit-unrelated-notes requirement), so I proceeded. Recorded `instrument_sha256` = `66ad6231\u2026e34864`, `instrument_kind: agent_definition`.\n\n## Result\n\n`output_evaluation.json` \u2014 CM4AI June 2026 release (claudecode_api, generic-v8 rep1)\n\n| | |\n|---|---|\n| total_points | **39** |\n| fixed | 39 / **50** = **78.00 %** |\n| N/A-adjusted | 39 / **47** = **82.98 %** |\n| excluded | 3 sub-elements (E4.S3, E4.S4, E4.S5), `applicable: false`, `score: null` |\n\nElement scores: E1 5/5 \u00b7 E2 5/5 \u00b7 E3 3/5 \u00b7 E4 2/**2** \u00b7 E5 3/5 \u00b7 E6 4/5 \u00b7 E7 5/5 \u00b7 E8 3/5 \u00b7 E9 4/5 \u00b7 E10 5/5.\n\n**Applicability.** Human-subjects condition fails on external evidence (E1 description/keywords name MDA-MB-468 and KOLF2.1J cell lines; E8 `collection_mechanisms` describes AP-MS/SEC-MS/confocal/CRISPRi instrumentation, not recruitment; `direct_collection` independently states data were not collected from individuals), so the three participant-facing E4 items are excluded per #1060. E4 S1\u2013S2 remain applicable on the E2 governance disjunct (named Data Governance Committee with contact of record, active pre-publication embargo) and both score 1. Datasets-shared is met, so E3 S1\u2013S4, E6, E8 and E10 are all scored; E10.S2 is scored on that condition alone per #1080. E8.S3's software-output condition is met via the GitHub/Zenodo toolkit in `external_resources`.\n\n**Notable judgements.** E8.S4 scores **0** under the #1059/#1082 threshold: software is prominently documented, but the Cell Mapping Toolkit produces the computed cell maps the record twice says are *not* in this release (role e), and FAIRSCAPE is packaging/provenance-metadata production (role c) \u2014 nothing named produced or transformed the ten shipped archives. E3.S2 scores 0 (ZIP is a container, no internal formats or encoding) while E2.S4 scores 1 (the distribution question is answered per-file with MIME types and checksums). E6.S3 scores 0 (no errata, no version change log; the one delta sits in `related_datasets.notes` and is cross-DOI) while E9.S3 scores 1 (the release-specific irregularities \u2014 later file dates, differing MD5s, stale description stamp \u2014 are genuine, localised quality warnings).\n\nSemantic analysis: 12 issues recorded, 17 consistency checks passed / 2 failed / 8 warnings; DOI (10.18130 = UVA Dataverse), two NIH awards, Cellosaurus RRIDs, ORCIDs and checksums all validate; temporal ordering flagged inconsistent.",
+    "ttft_ms": 4908,
+    "type": "result",
+    "duration_ms": 594207,
+    "uuid": "e8695f42-ee36-4444-aea0-7ee2cba6370e",
+    "ttft_stream_ms": 2408,
+    "time_to_request_ms": 18,
+    "first_content_frame_ms": 2848,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [],
+  "completed_at": "2026-09-12T23:14:12.593627+00:00"
+}

@@ -1,0 +1,13 @@
+# Validator-status retry pilot review — 2026-09-12
+
+Accepted AI_READI v7 rep2 rubric20 rating1 at 83/88 (94.3%), with all 20 questions applicable. This is a fresh rating under the registered execution extension; both failed original 83/88 candidates remain excluded at their original paths. The matching total does not identify or promote their different bytes.
+
+The single successful absolute Write equals both the retained candidate and published evaluation (SHA256 a803649ca0d07c30ea1745f088e27e70ef4f53d5bafbe1f06d8d2589c2e20f44). All20 names match the frozen source rubric and supplied definition. Arithmetic, schema, input/rubric/definition hashes, current-text check-echo and configured/returned runtime identifiers passed. The session ran from 21:11:05.482133Z to 21:19:14.737561Z, 489.255 seconds; CLI-reported cost was $2.21761425. The controller queued exactly this job and completed with exit 0.
+
+The evaluator successfully ran the exact canonical own-file validator after its Write. Its status-echo evidence list is empty because it did not append an echo. This establishes a successful live rating with the extension enabled; the equivalent status-echo path itself retains the six-case native-CLI offline probe evidence until a real accepted rating uses it. Denied unrelated shell commands remain recorded. No transcript or generated score was edited.
+
+Read all 20 question objects. The five deducted points concern field coverage, documented absence of a data-protection impact analysis, unnamed conversion tooling, preservation/version access and bias-taxonomy detail. Applicability cites separate record fields and excludes no question. Q19 awards 5 using textual entity/activity/agent lineage: native Philips XML to WFDB, Topcon/Heidelberg exports to DICOM, Garmin FIT to Open mHealth, site quality-control responsibilities and PI-approved edits. It does not require PROV-O serialization to award full credit. The source input supports these examples; this inspection does not certify that every processing activity has a uniquely assigned agent.
+
+This accepts the registered execution and instrument checks, not every semantic conclusion. The reported institution conflict is already disclosed as a source conflict in the D4D; external identifier resolution, legal conclusions, current repository access and source truth were not independently adjudicated. One rating cannot establish repeatability. Original CHORUS instrument acceptance and all pre-extension output/attempt hashes remain unchanged.
+
+The new batch gate may now be accepted; the remaining 50 jobs include the exact registered rep3 rubric20 retry. All other retry, stop/drain, CLI pin and attempt cap controls remain in force.

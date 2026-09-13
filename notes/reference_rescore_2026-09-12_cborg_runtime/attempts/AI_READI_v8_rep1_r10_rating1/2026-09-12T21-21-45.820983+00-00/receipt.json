@@ -1,0 +1,140 @@
+{
+  "job_id": "AI_READI_v8_rep1_r10_rating1",
+  "started_at": "2026-09-12T21:21:45.821160+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "33e5b216b7824e1d6d9cc5e809b872b7338df653742b988bf467f638702739f2",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "4f09d95003ba1f3f5af5b611412126444f14acc1336410f0a962abd9c0f7f85f",
+  "evaluation_sha256": "93ccee9803992a9245b48aff04ef85853fea4046f8980cf3fa2a6ff35d1f6413",
+  "cli_result": {
+    "duration_api_ms": 533543,
+    "stop_reason": "end_turn",
+    "session_id": "9df6296b-d8ce-45cb-b5f9-6fdd0b77d069",
+    "total_cost_usd": 3.0320614999999997,
+    "usage": {
+      "input_tokens": 313,
+      "cache_creation_input_tokens": 241546,
+      "cache_read_input_tokens": 586373,
+      "output_tokens": 41736,
+      "output_tokens_details": {
+        "thinking_tokens": 10315
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 241546
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 315,
+        "outputTokens": 41764,
+        "cacheReadInputTokens": 586373,
+        "cacheCreationInputTokens": 270912,
+        "webSearchRequests": 0,
+        "costUSD": 3.0320614999999997,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 10315,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01AzVp8g8KxEHhdAMoUzoiv3",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate the agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_017HBBy8b2uAKgeTRAkyVaXK",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-i9dv6g1b/input/record.yaml /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-i9dv6g1b/data/rubric/rubric10.txt",
+          "description": "Compute checksums of record and rubric"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01MCnrZcYeTrdHkcxgjR28Vv",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get current UTC timestamp and a UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed with exit status 0.\n\n## Definition check\n\nThe section headed **\u201cSource rubric and schema paths (#158)\u201d** is present in my instructions, and reads as I would expect of the current rules (it carries the #1079/#1081/#1082 software-threshold and #1060 Element 4 per-sub-element gating context). The sentence beginning \u201cRead release-specific notes\u201d, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nI proceeded on that basis and recorded `instrument_sha256` as `66ad6231\u20264864` with `instrument_kind: agent_definition`.\n\n## Evaluation result\n\n**AI_READI, claudecode_api, rep1 \u2014 49/50.**\n\n| | |\n|---|---|\n| total_points | 49 |\n| max_points / fixed_percentage | 50 \u2192 **98.0 %** |\n| adjusted_max_points / normalized_percentage | 50 \u2192 **98.0 %** |\n| excluded_max_points | 0 (no N/A; no `applicable: false`, no null scores) |\n\nAll five trigger conditions resolved as satisfied on evidence outside the gated sub-elements: human subjects from E1 `description` and E8 `collection_mechanisms`; the governance disjunct from E2 `confidentiality_level: restricted`; datasets-shared from E2 `distribution_formats` plus a resolvable page and a reuse-permitting licence; data collection from populated `acquisition_methods`/`collection_mechanisms`; software-output from `external_resources` naming the AI-READI code repository. Both denominators are therefore 50 and the two percentages coincide.\n\n**The single 0 \u2014 Element 8 sub-element 4, software and tools.** No software that produced or transformed the released data is named. The `.fda`/`.sdt`\u2192DICOM and `.FIT`\u2192Open mHealth conversions and the OMOP mapping are described only by input and output format; no `used_software` appears anywhere. What *is* named falls in the excluded roles: REDCap and MoCA Duo are capture (a), FAIRhub on Azure is hosting (b), the OMOP CDM Data Quality Dashboard is validation (d), and `github.com/AI-READI` is an organisation root identifying the publisher, which per the threshold neither earns nor forfeits the point. Note that this pointer still satisfies sub-element 3's *applicability* condition, which is a different question \u2014 sub-element 4 is scored because the data were processed at all (#1081).\n\n**Consistency checks: 18 passed, 2 failed, 6 warnings.** The two failures are the three-way deidentification conflict carried in `is_deidentified` (FAIRhub \u201cNoDeIdentification\u201d vs RO-Crate \u201cdeidentified\u201d vs Safe Harbor, with the structured field asserting the strongest), and the three false sensitivity/confidentiality flags sitting against `confidentiality_level: restricted`, watermarking, verified-ID gating and an acknowledged re-identification risk. Both are disclosed by the record rather than hidden, which is why they are issues rather than score reductions on the sub-elements that document them.\n\nNotable positives the semantic pass confirmed: DOI prefix 10.60775 is FAIRhub's and agrees with publisher and citation; all three grant numbers match NIH activity-code patterns appropriate to their stated purpose (OT2/OD for the Bridge2AI Common Fund award, P30/DK, UL1/TR); and four independent participant distributions plus the recommended split each sum to 2280, while the file-count gap the record flags against itself resolves exactly once the nine enumerated root metadata files are added.\n\nWritten to `output_evaluation.json`; no judgement was altered for serialization.",
+    "ttft_ms": 3215,
+    "type": "result",
+    "duration_ms": 534364,
+    "uuid": "ab4c6ed8-b5d9-430e-92d4-8d35598dd96c",
+    "ttft_stream_ms": 2150,
+    "time_to_request_ms": 23,
+    "first_content_frame_ms": 2151,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01VGJoSAhdgbJvPiizuZ2VcP",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-12T21:30:41.037913+00:00"
+}

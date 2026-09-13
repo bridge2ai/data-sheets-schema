@@ -1,0 +1,128 @@
+{
+  "registered_at": "2026-09-12T20:06:05.573682+00:00",
+  "reason": "Fresh 56-rating condition with one original canary through the same four-worker controller as the fill. Execution identity is supplied as provenance; the strict returned-model gate is unchanged.",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "scheduler": "scripts/reference_rescore_cborg_batch.py",
+  "scheduler_sha256": "a912d46ac65b2782dc948efd33a16ac386b9e3bf27140f76069dcb9e78c023c2",
+  "workers": 4,
+  "pilot_job_id": "CHORUS_v7_rep1_r10_rating1",
+  "pilot_scope": "The primary CHORUS v7 rep1 rubric10 rating1 is both the instrument canary and the scheduler canary. Queue exactly this one job with the same four-worker limit and foreground environment; accept both gates after reviewing the original output.",
+  "preserved_files": {
+    "notes/reference_rescore_2026-09-12_cborg/.gitignore": "0ae10e879540b1f928937677f14df31e35f44b9ce8f1a0d331a406e90031389b",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-10-04.833451+00-00/prompt.txt": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-10-04.833451+00-00/receipt.json": "df148b428e63c4dc16e7d7a02113d71d66f12f5ca5bbd78e25cfa1b94386b0dd",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-10-04.833451+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-10-04.833451+00-00/transcript.jsonl": "4e4dce555d8bfc698c258f41e1989c01956f7d203319dd886d5d4301547533fa",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-35-24.172466+00-00/candidate.json": "8b08357453730a468b3f47f8c0c0315d1ef30fe69ed937a0c95cbf2f9f9d8178",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-35-24.172466+00-00/prompt.txt": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-35-24.172466+00-00/receipt.json": "8b271c69a611a93fbd1dedf064eff73c6ae516be48f68ef8e5067045014233e9",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-35-24.172466+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-35-24.172466+00-00/transcript.jsonl": "2036fac62df0674757bbb98b6cbbbd86d24e98c290569a11e569f74a10583aa1",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-35-24.172466+00-00/validation.txt": "556a828104ca26394a7547527fa48515dc20ac41b54e6bd9e6dcb937062e5386",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00/candidate.json": "29a632ca9ae771167e55d4a46fe583077ab192384503e6d3fe92e5573b081395",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00/prompt.txt": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00/receipt.json": "742d95373fed9163f0ad027d96aecbf86613474d1529f5c56784945b6a300455",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00/transcript.jsonl": "1fed9d0a552048ff6f2f3e5fa2facd37c9d22d584bc72c4e540448f7ef51e60d",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-32-36.629853+00-00/candidate.json": "37d030247ab26704bbde92ea4d40e2b78fea2f5778f77631deacc50ef3d4c05b",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-32-36.629853+00-00/prompt.txt": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-32-36.629853+00-00/receipt.json": "eb949cb3f7e05db4ce3247d9cb5085d85acf0e65594a49e247c51f94a554c498",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-32-36.629853+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-32-36.629853+00-00/transcript.jsonl": "79c9d872f1d0cd7b4ec4b639e9b5dad1030fefd592d171860feba8a61030ad81",
+    "notes/reference_rescore_2026-09-12_cborg/batch_canary_launch.json": "7eb00aab9a05cd6e81d8ff60fa0a4828c722ae1762d531a1c90724c67bb846aa",
+    "notes/reference_rescore_2026-09-12_cborg/batch_canary_launch_retry_1343.json": "598c097ae9e0324ea431f783b93aa0479ca758f18fa19fd105ae2a0e871362ce",
+    "notes/reference_rescore_2026-09-12_cborg/batch_pilot_rejection_1343.md": "fe284c2ac8b0c73f280ce3d4e0ddc1742cdb227d29e05448af5f0983c8976b0f",
+    "notes/reference_rescore_2026-09-12_cborg/batch_pre_spend_review.json": "e9e07babcbbbd21ea28e5863613c48dc34cc2b8472747eb34a1fdc054d4d8542",
+    "notes/reference_rescore_2026-09-12_cborg/batch_registration.json": "1877d4c0e28e3ba2189f826808bba97b574a25aa1dc4cb93e8a288d1f3d6f7d0",
+    "notes/reference_rescore_2026-09-12_cborg/batch_retry_1343_pre_spend_review.json": "14f8804624ed8992223a45580e3c4f96fcd1ed2af038eedb4dd6242204ff4dc3",
+    "notes/reference_rescore_2026-09-12_cborg/batch_retry_review_round1.md": "245f737a1f0fdfa56738d247fc9671f5b4df15ac6a42df8d73ea7c9f2be5fed1",
+    "notes/reference_rescore_2026-09-12_cborg/batch_retry_review_round2.md": "6de495665b041859244e3b135e55b257c914abb4672330bde078e6686799391e",
+    "notes/reference_rescore_2026-09-12_cborg/batch_review_round1.md": "da016f02c5993cc873a48dd95dd44682119daa026e035321a79da23c386f9a99",
+    "notes/reference_rescore_2026-09-12_cborg/batch_review_round2.md": "bf220cdf880c3fb07a931d22d1ad2e58c27cda7cf574c3d70b3fa006566b8431",
+    "notes/reference_rescore_2026-09-12_cborg/batch_review_round3.md": "e13a964c0c2f29659b5f8b3bdc42e4f652839cf72acf2f498e9946b2be18651b",
+    "notes/reference_rescore_2026-09-12_cborg/batch_runs/2026-09-12T19-09-46.783419+00-00_pilot/CHORUS_v7_rep1_r10_rating2.txt": "6ec029860cc728b19a608d400b45983cf85c00c818dfb91c837229ff6cc18350",
+    "notes/reference_rescore_2026-09-12_cborg/batch_runs/2026-09-12T19-09-46.783419+00-00_pilot/events.jsonl": "41819ad90e8439fae8b78352704d42511d7c85cbf9b279ed5f94010edfd1a16c",
+    "notes/reference_rescore_2026-09-12_cborg/batch_runs/2026-09-12T19-09-46.783419+00-00_pilot/result.json": "e67c14d1f0dc0dee938c388bc82f70e80d04336b8552e320895c92c6154d8eba",
+    "notes/reference_rescore_2026-09-12_cborg/batch_runs/2026-09-12T19-32-36.120818+00-00_pilot/CHORUS_v7_rep1_r10_rating2.txt": "1bad3a3ff64ed105243c69c8d0c96fbbbf16aacb9ea1dfcfa26df8d40d0d743a",
+    "notes/reference_rescore_2026-09-12_cborg/batch_runs/2026-09-12T19-32-36.120818+00-00_pilot/events.jsonl": "651d7915152283288740cc35b8e2300bba3ac8c2ccba6a65b908615f863553ff",
+    "notes/reference_rescore_2026-09-12_cborg/batch_runs/2026-09-12T19-32-36.120818+00-00_pilot/result.json": "e67c14d1f0dc0dee938c388bc82f70e80d04336b8552e320895c92c6154d8eba",
+    "notes/reference_rescore_2026-09-12_cborg/canary_acceptance.json": "b8b6a7c2fea2fc18ca35cc13405fa44b609e7789e0775201ce9778dac16f9986",
+    "notes/reference_rescore_2026-09-12_cborg/canary_review.md": "fde2835881e6e63158f7d6adbe460e02a494c5abe4da1e51fed4d28464ce54f6",
+    "notes/reference_rescore_2026-09-12_cborg/execution_tools/audit_completion.py": "78c1b9e29501b642cfcd401ec4600e5f6a1813b1f50e2d9cfd9c73281042296d",
+    "notes/reference_rescore_2026-09-12_cborg/execution_tools/write_completion_summary.py": "da4f93747482093d0283459304376f954a3afb92d51a6e4fe4488566cb558034",
+    "notes/reference_rescore_2026-09-12_cborg/fresh_canary_after_write_fix.json": "ee5899a30e5f64642480999347c8ae6bc625284a2eabfa53091babc0a53add5a",
+    "notes/reference_rescore_2026-09-12_cborg/manifest.json": "e71b8805b7fde90b5e64e23ba1c1f346f2f17e33fe49df7c98c9e885aeec1501",
+    "notes/reference_rescore_2026-09-12_cborg/preliminary_audit.json": "1b950f876001dd1e42f33e7a62ad1d75936726c060fb48f4ea4965540c1e9498",
+    "notes/reference_rescore_2026-09-12_cborg/registrations/batch-registration-before-interruption-fix.json": "f3879cf7499f8fdafdc1fc781bea3bd371d7fb1e08c074875884f285b047f997",
+    "notes/reference_rescore_2026-09-12_cborg/registrations/batch-registration-before-missing-history-fix.json": "9724ea71c524887cbff56eb4197c03ea0867746db32b75bc91ccacb863f21d37",
+    "notes/reference_rescore_2026-09-12_cborg/registrations/batch-registration-before-reviewed-retry-fix.json": "8e88be5cf92ec001976e1656af5e8e2eae9f3a7133698e8a4e7bc74bd44f3bd6",
+    "notes/reference_rescore_2026-09-12_cborg/registrations/batch-registration-before-stop-race-fix.json": "6710b7617fad0c71841b40da574c682f39aebe5e0bc05d17ebdaa70355326d16",
+    "notes/reference_rescore_2026-09-12_cborg/registrations/before_runtime_metadata/reference_rescore_cborg.py": "fa17fba0318ee3849d6c0e25634b7d6166a4f94c032eaf13b3913d90031c68fc",
+    "notes/reference_rescore_2026-09-12_cborg/registrations/before_runtime_metadata/reference_rescore_cborg_batch.py": "a70b897b408be2b019541b4b28f5a0f99c5181a1080988569ee638963f5cf8f5",
+    "notes/reference_rescore_2026-09-12_cborg/registrations/manifest-before-write-tool-fix.json": "ab13d9e824a47a70ff741372e8ac6a7abc1873b0b487959b04f01bdd00f0ee54",
+    "notes/reference_rescore_2026-09-12_cborg/registrations/plan-before-batch-amendment.md": "0030d928692a85938eddc1b144e824549fd150854b77309732d859d43076bca0",
+    "notes/reference_rescore_2026-09-12_cborg/registrations/reference_rescore_cborg-before-write-tool-fix.py": "9839a040a79b7701bbaedf900423ccc16f7af5aa059ff3541f855b45b01eb78a",
+    "notes/reference_rescore_2026-09-12_cborg/registrations/reference_rescore_cborg_batch-before-interruption-fix.py": "69890dfd1cabdb6ea640b4e3bb41610564bd2383a87e22d831fba34ff76861bc",
+    "notes/reference_rescore_2026-09-12_cborg/registrations/reference_rescore_cborg_batch-before-missing-history-fix.py": "dfdf97bf8c9a06b765e8d6a0a9a05908133e589a53105cd34abc39525caba46e",
+    "notes/reference_rescore_2026-09-12_cborg/registrations/reference_rescore_cborg_batch-before-reviewed-retry-fix.py": "1225d0cc5c166a233f73d5f95bd128a2b08beb8ff5000f5b1a89174363c81657",
+    "notes/reference_rescore_2026-09-12_cborg/registrations/reference_rescore_cborg_batch-before-stop-race-fix.py": "f0d6e1f35f99d302a9eabcd81c159eed4cd2fd55bd3e4a1a0a21f7b82d9f24a5",
+    "notes/reference_rescore_2026-09-12_cborg/superseded_condition.json": "0fddda3aaecca72137d4d521e990c8b20c0cc8782c038ffd2fabfe299d151821",
+    "notes/reference_rescore_2026-09-12_cborg/write_tool_fix_registration.json": "5f92989a5f4886e7497542415f1dc4a0982622060c78cade1d8ccf404b3e29d1",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/transcript.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/prompt.txt": "ff0196e807c8ec4835939296a9fdf1312942f9c639efd03fc48ca2fe6b6e360c",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/stderr.txt": "de29db459799054fc2961fa0a321c319114701377b36bdb4e7c8c493f51cf15b",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/receipt.json": "a8d93315e8c72b157e04f9d8edab67f08a3426148863ee77a74ff0640f9af221",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T20-03-09.540687+00-00_pilot/result.json": "49f1e7c4251f03723843bb2e4eb810be8f516870a92cb221212a9d2f8254b88e",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T20-03-09.540687+00-00_pilot/events.jsonl": "9414b1be56ca4bce5fdd5ea9d2b36ced0238236ed3ab942c35cb16a3512ec1a9",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T20-03-09.540687+00-00_pilot/CHORUS_v7_rep1_r10_rating1.txt": "81c4d2d4887d0fc7ebd3a3b157e62e1383b1bfa475127f7b4d4cadc5e74c7b5b",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_canary_launch.json": "8cc8833593d3653be64bc811b74250d2dfa4c46ac1c92547e8474ee6d1af00dc",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/batch_pre_spend_review.json": "700a3ed9cd670c893c2aef641e56b0d2e57ac41d92de5be8a3227645e3f50c17",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/pre_spend_review_round8.md": "de4524889ca249dbb45b22f083b92f095b280e81186ce25daf45e37689245b2a"
+  },
+  "existing_outputs": {
+    "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg/CHORUS_v7_rep1_r10_rating1_evaluation.json": "8b08357453730a468b3f47f8c0c0315d1ef30fe69ed937a0c95cbf2f9f9d8178"
+  },
+  "limits": "One canary cannot measure rate limits under load or repeatability. No automatic retries; stop new launches and drain active workers on failure. No further v9 generation or downloads.",
+  "supersedes_registration": {
+    "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/batch-registration-before-prelaunch-fix.json",
+    "sha256": "4cbff2317c3527c1cc164fb243a5bf9d2fc8beaa326b0c4680eaa1fbd17236af"
+  },
+  "pre_spend_review": "batch_pre_spend_review_cli_pin.json",
+  "pilot_launch_record": "batch_canary_launch_cli_pin.json",
+  "cli_executable_sha256": "c942e1228b93cb4d52183b3dfbc77f28264f35aa947acd9c0853d029164cf450",
+  "cli_executable_selection": {
+    "version": "2.1.269 (Claude Code)",
+    "source": "/Users/marcin/.local/share/claude/versions/2.1.269",
+    "selected_copy": "/private/tmp/d4d-cborg-pinned-bin/claude",
+    "environment": {
+      "DISABLE_AUTOUPDATER": "1"
+    },
+    "reason": "Default CLI symlink advanced to 2.1.270; explicit retained binary preserves the registered runtime."
+  },
+  "prelaunch_failures": {
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00": {
+      "reason": "registered_cli_version_guard_before_execve",
+      "adapter_sha256": "750b0e5d7ca9521d9d3e0432627b67d76a4ea2cb77c2eafc7a5e4442414456df",
+      "files": {
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/transcript.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/prompt.txt": "ff0196e807c8ec4835939296a9fdf1312942f9c639efd03fc48ca2fe6b6e360c",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/stderr.txt": "de29db459799054fc2961fa0a321c319114701377b36bdb4e7c8c493f51cf15b",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/receipt.json": "a8d93315e8c72b157e04f9d8edab67f08a3426148863ee77a74ff0640f9af221"
+      },
+      "control_flow": "route_evaluator obtains --version, rejects a mismatch before creating the CLI config directory or calling os.execve. Exact stderr terminates at that guard; transcript is empty. No evaluator session was launched."
+    }
+  },
+  "reviewed_retries": {
+    "CHORUS_v7_rep1_r10_rating1": {
+      "reason": "A single retry after the verified local version-guard failure; no model call occurred in that attempt. Preserve every original file.",
+      "attempts": {
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00": {
+          "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/transcript.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/prompt.txt": "ff0196e807c8ec4835939296a9fdf1312942f9c639efd03fc48ca2fe6b6e360c",
+          "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/stderr.txt": "de29db459799054fc2961fa0a321c319114701377b36bdb4e7c8c493f51cf15b",
+          "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/receipt.json": "a8d93315e8c72b157e04f9d8edab67f08a3426148863ee77a74ff0640f9af221"
+        }
+      }
+    }
+  }
+}

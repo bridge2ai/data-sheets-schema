@@ -1,0 +1,140 @@
+{
+  "job_id": "VOICE_v7_rep2_r10_rating1",
+  "started_at": "2026-09-13T00:01:46.991151+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "752312514f33c91d57d38c499d2df8b54452a69ec8374b7ceb804e23361dc332",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "9b103567b3c018761b67ea065d6e6e7c336b1866ed5d161a36d890566e1e9459",
+  "evaluation_sha256": "45eb07592b5b5e79928b35b69e9c1931d8774e24e24504cb13b9752088aa3802",
+  "cli_result": {
+    "duration_api_ms": 560716,
+    "stop_reason": "end_turn",
+    "session_id": "c52e833b-adb7-4ca7-8aee-3abdd20e2299",
+    "total_cost_usd": 2.5790605,
+    "usage": {
+      "input_tokens": 313,
+      "cache_creation_input_tokens": 161124,
+      "cache_read_input_tokens": 528746,
+      "output_tokens": 46106,
+      "output_tokens_details": {
+        "thinking_tokens": 9952
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 161124
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 315,
+        "outputTokens": 46133,
+        "cacheReadInputTokens": 528746,
+        "cacheCreationInputTokens": 185566,
+        "webSearchRequests": 0,
+        "costUSD": 2.5790605,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 9952,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_013ZzAFGNUYr2ZCfz8BNahgt",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01XPtLAf3jb71RrMdSKwrxD4",
+        "tool_input": {
+          "command": "ls -la ~/.claude/agents/ 2>/dev/null; ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-v150gk07/.claude/agents/ 2>/dev/null",
+          "description": "Check for agent definition directories"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01Q3tM4NfzVvy91fNefkCB94",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml && date -u +%Y-%m-%dT%H:%M:%SZ && python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Hash input record, print UTC timestamp and a UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed with exit status 0.\n\n## Definition check\n\nThe section headed \"Source rubric and schema paths (#158)\" is present in my instructions. The sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches what I would expect of the current rules (the dedicated `updates.update_details` mapping, with the requirement that the content be genuine release or derivation information). I proceeded.\n\n## Result\n\n`output_evaluation.json` written and validated: `VALID output_evaluation.json: rubric10-semantic`, exit 0.\n\n**Score: 49/50 \u2014 98.0% on both bases.** All five trigger conditions resolved as *satisfied*, so no sub-element was excluded: `excluded_max_points: 0`, `adjusted_max_points: 50`, `sub_elements_not_applicable: 0`, and `fixed_percentage` = `normalized_percentage` = 98.0.\n\nApplicability determinations, each evidenced from outside the gated sub-element:\n- **Element 4** \u2014 human-subjects condition met on E1 `description` (833 adult participants, clinical cohorts) and E8 `collection_mechanisms`/`data_collectors`; all five sub-elements applicable and scored, not just 1\u20132. The governance condition was independently met via E2 `confidentiality_level: restricted`.\n- **Element 8 sub-element 3** \u2014 software-output condition met on E10 `external_resources` (four GitHub repositories).\n- **Element 8 sub-element 4** \u2014 scored per #1081, not gated on the repository pointer. Threshold met per #1059/#1082: b2aiprep v3.0.0, senselab, torchaudio, openSMILE, Praat, parselmouth, sparc and ppgs are named in the *producing/transforming* role, with a pinned version and repository.\n- **Element 10 sub-element 2** \u2014 scored on the datasets-shared condition alone, not on the existence of a publication (#1080).\n\n**The one scored failure** is Element 1 sub-element 3: four broad keywords (`health, biomarkers, bridge2ai, voice`) that omit every disease cohort, feature family and modality the record documents richly elsewhere \u2014 a searchability gap, not a documentation gap.\n\nEight issues logged (2 medium, 6 low); 21 consistency checks passed, 0 failed, 5 warnings. Notable validations: DOI prefix 10.13026 correct for PhysioNet; `OT2OD032720` parses correctly as NIH activity/institute/serial; participant arithmetic 306+136+391=833 reconciles across three independent blocks. The medium-severity findings are the absent DPIA (stated outright as not conducted, beside an admission that voice cannot be de-identified) and the keywords gap. One caution on the `RRID:SCR_007345` in the citation: it is well formed but identifies PhysioNet the platform, not this dataset \u2014 the identification burden rests entirely on the DOI, which carries it.",
+    "ttft_ms": 5532,
+    "type": "result",
+    "duration_ms": 560485,
+    "uuid": "f87a1625-365d-4488-8ae4-3701e1b90c1d",
+    "ttft_stream_ms": 4576,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 4586,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_015hTs6Z6Y5uoKgbNkgXpNtc",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-13T00:11:08.278253+00:00"
+}

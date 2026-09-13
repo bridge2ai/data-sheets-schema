@@ -1,0 +1,132 @@
+{
+  "job_id": "CM4AI_v7_rep3_r20_rating1",
+  "started_at": "2026-09-12T23:03:54.141681+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "7be967dfeeddc4f64a6efc3a4660ccda404e1ed96955f80f400ecb0fb946f144",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "206c62821db4d7dc688ccff5de23020294dca149aa36de7682cafdfd9a083ad6",
+  "evaluation_sha256": "1a4dd709685209dd8570047fd73458560669a16bef5ee87964df09e95f4251e0",
+  "cli_result": {
+    "duration_api_ms": 673857,
+    "stop_reason": "end_turn",
+    "session_id": "4bcd655a-a3eb-4abc-94b3-d938757523e4",
+    "total_cost_usd": 3.03897625,
+    "usage": {
+      "input_tokens": 370,
+      "cache_creation_input_tokens": 207092,
+      "cache_read_input_tokens": 509045,
+      "output_tokens": 53429,
+      "output_tokens_details": {
+        "thinking_tokens": 19623
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 207092
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 372,
+        "outputTokens": 53455,
+        "cacheReadInputTokens": 509045,
+        "cacheCreationInputTokens": 231395,
+        "webSearchRequests": 0,
+        "costUSD": 3.03897625,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 19623,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01JY1gWjGbzrYu3pVNxEsYmp",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-_3i47s_t; find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01RgwU9yfySAFeCg544cuJWU",
+        "tool_input": {
+          "command": "shasum -a 256 data/rubric/rubric20.txt input/record.yaml",
+          "description": "Compute hashes of rubric and input record"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 11,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed with exit status 0.\n\n## Definition check\n\nThe **Reproducibility** section is present in my instructions and reads as expected of the current rules. The sentence beginning \"Repeatability must be\", quoted verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\n## Evaluation complete\n\n`output_evaluation.json` written and validated (`VALID output_evaluation.json: rubric20-semantic`, exit 0).\n\n**Score: 79/88 \u2014 89.8%** on both bases (no question met an exclusion condition, so `max_points` 88 and `adjusted_max_points` 88 coincide; `excluded_max_points` 0, `questions_not_applicable` 0).\n\n| Category | Score |\n|---|---|\n| Structural Completeness | 18/21 |\n| Metadata Quality & Content | 19/21 |\n| Technical Documentation | 22/25 |\n| FAIRness & Accessibility | 20/21 |\n\n**Applicability decisions.** All four trigger conditions were resolved before scoring, each from fields belonging to *other* questions per the anti-circular rule. The sharing and software-output conditions were met outright (public Dataverse page, CC BY-NC-SA reuse, `external_resources` code repositories). Q8/Q15 were borderline: the record declares `involves_human_subjects: false`, but `raw_data_sources` \u2014 a Q12 field \u2014 carries patient-origin donor descriptors for both lines. Per the ambiguity rule I set both `applicable: true` and scored them rather than letting the record's own Q8 fields exclude them.\n\n**Where semantic analysis changed the score.** 22 consistency checks passed, 2 failed, 8 warnings. The failures (confidentiality_level \"unrestricted\" beside a commercial prohibition and partial embargo; a version-number inversion where the current release is 2.0 and superseded ones are 2.1) are presentational and cost fractions, not bands. What actually held scores down was placement and coverage: Q4\u21923 because only `application/zip` is declared at the distribution layer; Q7\u21924 and Q13\u21924 because affiliations, sizes, governance contacts and publisher sit in prose while their designated fields sit empty; Q11\u21924 because every preprocessing entry is self-caveated as MuSIC-pipeline work *not applied to the released archives*; Q20\u21924 for missing measurement/technical bias in a dataset whose assay-level effects propagate straight into trained models.\n\nAll identifier validations passed on format *and* plausibility \u2014 the DOI prefix matches its stated repository, the NIH activity-code/institute pairings match the roles assigned to each award, and the RRIDs correctly use the Cellosaurus `CVCL_` namespace rather than `SCR_`/`AB_`.\n\nTwo caveats on provenance. `shasum` was denied in this session, so the three hashes are recorded as supplied by the launcher rather than independently recomputed; I noted this in `metadata.hash_note`. I also could not locate the agent definition on disk to verify the digest myself \u2014 the definition check above rests on the instructions I was given, which do contain the Reproducibility section intact. No other evaluation was read.",
+    "ttft_ms": 2096,
+    "type": "result",
+    "duration_ms": 676258,
+    "uuid": "0f14533e-23b3-4bc1-ac0b-f03e2bcc356e",
+    "ttft_stream_ms": 1588,
+    "time_to_request_ms": 21,
+    "first_content_frame_ms": 1589,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_011mrdkNBiDzCFjcgjaqtA2K",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-12T23:15:11.225400+00:00"
+}

@@ -1,0 +1,124 @@
+{
+  "job_id": "VOICE_v7_rep2_r20_rating1",
+  "started_at": "2026-09-13T00:02:18.589261+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "426d168879d6b3bb45cdc65cec3b29272b6045ddcded1a2521d161a1a7fb6af6",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "9b103567b3c018761b67ea065d6e6e7c336b1866ed5d161a36d890566e1e9459",
+  "evaluation_sha256": "80e212fd41a26832519d9b73ec0d23f5b7199c1a4bd774d8d04924d58300b76b",
+  "cli_result": {
+    "duration_api_ms": 479106,
+    "stop_reason": "end_turn",
+    "session_id": "f7b24dc9-d824-41ea-920d-5d0a9f54c520",
+    "total_cost_usd": 2.2220327500000003,
+    "usage": {
+      "input_tokens": 308,
+      "cache_creation_input_tokens": 129494,
+      "cache_read_input_tokens": 575697,
+      "output_tokens": 39050,
+      "output_tokens_details": {
+        "thinking_tokens": 10999
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 129494
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 310,
+        "outputTokens": 39077,
+        "cacheReadInputTokens": 576803,
+        "cacheCreationInputTokens": 152825,
+        "webSearchRequests": 0,
+        "costUSD": 2.2220327500000003,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 10999,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01VwF6JgB2cntivp6Da6TneK",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-e0a_71jx/ 2>/dev/null; echo \"---\"; find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate the agent definition file"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 9,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed with exit status 0.\n\n## Definition check\n\nThe \"Reproducibility\" section is present in my instructions. The sentence beginning \"Repeatability must be\" reads, verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nThis matches the current contract (repeatability conditioned on evaluator model *and* definition, with the explicit caveat that fixed or zero temperature guarantees nothing), so I proceeded rather than stopping.\n\n## Result\n\n**VOICE / claudecode_agent / rep2 \u2014 80 of 88 points, 90.9%** (fixed and normalized coincide: no question was excluded, so both denominators are 88).\n\n| Category | Score |\n|---|---|\n| Structural Completeness | 16 / 21 |\n| Metadata Quality & Content | 21 / 21 |\n| Technical Documentation | 23 / 25 |\n| FAIRness & Accessibility | 20 / 21 |\n\n**Applicability.** All four trigger conditions resolved as met, each on fields belonging to a *different* question than the one gated, per the anti-circular rule: human subjects via `description`/`collection_mechanisms` (Q8, Q15); datasets shared via `distribution_formats`, the PhysioNet page and `third_party_sharing` (Q10, Q17); software output via the `external_resources` code repositories b2aiprep and senselab (Q11); collection-plus-sharing via the four collection fields (Q12, Q13). `questions_not_applicable: 0`, `excluded_max_points: 0`.\n\n**Where semantic checks moved a score.** Two deductions came from analysis rather than field absence:\n\n- **Q12 \u2192 4.** `collection_timeframes` relays a twelve-month collection window, but the same field and `distribution_dates` record accrual of 306 \u2192 +136 \u2192 +391 participants across releases from November 2024 to December 2025. Timeframes is one of three components the 5-band names, and no absolute dates are given to resolve the conflict.\n- **Q20 \u2192 4.** Biases are correctly typed against BiasTypeEnum with causal descriptions, but two of four carry no mitigation and there are no demographic distributions \u2014 so the fairness claim is an acknowledgement of skew, not an analysis. This compounds with **Q15 \u2192 4**, where demographic axes are named but never quantified.\n\n**Judgement calls I made explicitly and recorded.** Q8 stayed at 5 despite `data_protection_impacts` stating no DPIA was conducted: the field is populated, the absence is disclosed rather than concealed, and it is partly substituted by ethicist review and a published memorandum \u2014 so I logged it as a medium-severity content-accuracy issue against the underlying ethics work instead of docking the documentation. Q10 stayed at 5 despite `conforms_to` conceding that BIDS does not cover the released Parquet files, because per-file JSON dictionaries, explicit `participant_id`/`session_id` join keys and typed `related_datasets` supply real integration capability; the narrow conformance is a low-severity note, and stating the limit is to the record's credit. Q1 is 4 at 12/14 fields (85.7%), between the 70% and 90% bands.\n\nConsistency checks: 23 passed, 2 failed, 5 warnings. Correctness validations all clean \u2014 DOI prefix 10.13026 matches PhysioNet and the declared publisher, `OT2OD032720` parses as valid NIH, `RRID:SCR_007345` is well-formed, all URLs structurally valid.\n\nOutput written to `output_evaluation.json` with `instrument_sha256` `9d08b5f3\u20260e7dd3`, `instrument_kind: agent_definition`, the supplied `rubric_hash` and `input_sha256`, `temperature: null`, and `claude-opus-5` as both `model.name` and `model.evaluator_model`.",
+    "ttft_ms": 2954,
+    "type": "result",
+    "duration_ms": 481037,
+    "uuid": "a2d178d0-0596-43c6-a5f2-3db6980c8f81",
+    "ttft_stream_ms": 1974,
+    "time_to_request_ms": 27,
+    "first_content_frame_ms": 1974,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01RcwfdNCjZjG82iyv2ZwQG5",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-13T00:10:20.430701+00:00"
+}

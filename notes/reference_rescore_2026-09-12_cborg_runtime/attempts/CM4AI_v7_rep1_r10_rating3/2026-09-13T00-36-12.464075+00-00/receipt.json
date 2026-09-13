@@ -1,0 +1,140 @@
+{
+  "job_id": "CM4AI_v7_rep1_r10_rating3",
+  "started_at": "2026-09-13T00:36:12.464267+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "f75897506db5218bdbaafa1b5f8d95171fcb8778f01ae3866a7afa5fd19ebfac",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "4ed78cb10f8d8d5b18f601ea82e38f7ab620a1fa05bc81977d9fa944ab0d47f9",
+  "evaluation_sha256": "26207c6a31f7e160955f0e0ab0706bd0c1bb6f2ad3db77d30134da146796a9b7",
+  "cli_result": {
+    "duration_api_ms": 994946,
+    "stop_reason": "end_turn",
+    "session_id": "d897d074-6aa8-4f8c-b3a8-0737c2460b8d",
+    "total_cost_usd": 2.37584875,
+    "usage": {
+      "input_tokens": 311,
+      "cache_creation_input_tokens": 115758,
+      "cache_read_input_tokens": 506980,
+      "output_tokens": 36508,
+      "output_tokens_details": {
+        "thinking_tokens": 764
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 115758
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 315,
+        "outputTokens": 49995,
+        "cacheReadInputTokens": 573585,
+        "cacheCreationInputTokens": 134017,
+        "webSearchRequests": 0,
+        "costUSD": 2.37584875,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 14008,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01ME7Er64Jd9wXCX36fD8xKC",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate the agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01ToEUwgtcyPUehFfuZv4jDj",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-h2ilsr7q/.claude/agents/ 2>/dev/null; ls -la ~/.claude/agents/ 2>/dev/null | head -30",
+          "description": "Check for agent definition directories"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01JAEBLVfnaLJzzwgzzY2tDc",
+        "tool_input": {
+          "command": "/usr/bin/python3 -c \"\nimport uuid, datetime\nprint(uuid.uuid4())\nprint(datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds').replace('+00:00','Z'))\nprint(round(43/47*100,2), round(43/50*100,2))\n\"",
+          "description": "Generate identifier, timestamp, and percentages"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0).\n\n## Definition check\n\nThe section headed \"Source rubric and schema paths (#158)\" is present in my instructions, and the sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches the current instrument (the dedicated `update_details` slot, with the anti-over-crediting clause), so I proceeded.\n\n## Result \u2014 CM4AI, claudecode_agent, rep1\n\n**43 / 47 adjusted = 91.49%** \u00b7 **43 / 50 fixed = 86.0%** \u00b7 3 sub-elements N/A\n\n| Element | Score |\n|---|---|\n| 1 Discovery & Identification | 5/5 |\n| 2 Access & Retrieval | 5/5 |\n| 3 Reuse & Interoperability | 4/5 |\n| 4 Ethics & Privacy | 2/2 (3 N/A) |\n| 5 Composition & Structure | 5/5 |\n| 6 Provenance & Versioning | 4/5 |\n| 7 Motivation & Funding | 5/5 |\n| 8 Technical Transparency | 4/5 |\n| 9 Limitations Disclosure | 4/5 |\n| 10 Community Integration | 5/5 |\n\n**Applicability.** The human-subjects condition fails on external evidence (E1 names only cell lines; E8 collection mechanisms describe instruments, not recruitment), so E4 sub-elements 3\u20135 are `applicable: false` / `score: null`. Sub-elements 1\u20132 are scored via the governance disjunct: E2 `regulatory_restrictions` carries a named governance committee contact and the access block imposes applying licensing constraints over donor-derived material. Datasets-shared, software-output and collection conditions are all met, so E3/E6/E8/E10 are fully scored.\n\n**The four lost points.**\n- **3.4** \u2014 `variables` absent entirely; no data dictionary for the tabular payloads.\n- **6.3** \u2014 no errata and no change description across four predecessor releases; `updates` carries only the forward cadence, which is 6.4's evidence and not double-counted.\n- **8.4** \u2014 no software named that produced or transformed the *released* data. Three collections are typed `processed_data`, yet every named tool falls in an excluded role: the MuSIC pipeline (node2vec, DenseNet-121, HiDeF, GPT-4/GSAI, cellmaps_pipeline) produces cell maps the record says are **not in this release** (e); FAIRSCAPE packaged the release and its provenance metadata (c); IMP serves `other_tasks` (e); the 10x 3'HT kit is capture (a).\n- **9.3** \u2014 `anomalies` and `missing_data_documentation` both absent; antibody scoring is named with no reported outcomes.\n\n**Semantic findings:** 20 consistency checks passed, 2 failed, 4 warnings. The two failures are the non-monotonic version numbering (this 2026 release is `2.0` while `version_access` records the 2025 releases at `2.1`) and the pipeline/artifact mismatch behind 8.4. Format validation: DOI valid for the 10.18130 UVA Dataverse prefix and coherent with `publisher` ROR:0153tk833; NIH awards `1OT2OD032742-01`, `3OT2OD032742-01S2` and `5U54HG012513-02` all parse correctly; ORCID, ROR and Cellosaurus RRIDs well formed; all URLs valid.\n\nOutput at `output_evaluation.json`, with `instrument_sha256` `66ad6231\u2026e34864`, `instrument_kind: agent_definition`, the supplied rubric and input hashes, `temperature: null`, and `claude-opus-5` recorded as both `name` and `evaluator_model`.",
+    "ttft_ms": 2464,
+    "type": "result",
+    "duration_ms": 996817,
+    "uuid": "a6a378c1-dec4-41cd-9afc-e8421dc67318",
+    "ttft_stream_ms": 1490,
+    "time_to_request_ms": 21,
+    "first_content_frame_ms": 1490,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01GDubD9p9sTwYJR8RpvZ62y",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-13T00:52:50.171181+00:00"
+}

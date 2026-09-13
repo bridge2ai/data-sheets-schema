@@ -1,0 +1,140 @@
+{
+  "job_id": "CHORUS_v8_rep2_r10_rating1",
+  "started_at": "2026-09-12T22:37:01.887642+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "68a538e4cf7c3627cb3700499110e98f524b2908a5809dbca71e3649a6143bd2",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "960c3500b4c6b43bd1eb1a17508148529a021c7ee3205c81aa19b021f75aa943",
+  "evaluation_sha256": "a66242dc6831b54f5cfd19da914504ccd2b58e4420ff9efba38ee89df017ea9c",
+  "cli_result": {
+    "duration_api_ms": 653022,
+    "stop_reason": "end_turn",
+    "session_id": "5885fc4a-a251-4b5d-b345-01590e977cfe",
+    "total_cost_usd": 2.74240125,
+    "usage": {
+      "input_tokens": 309,
+      "cache_creation_input_tokens": 178274,
+      "cache_read_input_tokens": 377349,
+      "output_tokens": 53944,
+      "output_tokens_details": {
+        "thinking_tokens": 17492
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 178274
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 311,
+        "outputTokens": 53972,
+        "cacheReadInputTokens": 378455,
+        "cacheCreationInputTokens": 192371,
+        "webSearchRequests": 0,
+        "costUSD": 2.74240125,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 17492,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01LbUaTfQZo3TbbGtwzs44oT",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate the agent definition file on disk"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_012NpFXCRAH3b9MWmLtgokKA",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-0au94jaj/input/record.yaml",
+          "description": "Compute checksum of the input record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01HEB7Y51xMQnHtRqtXNkKiC",
+        "tool_input": {
+          "command": "/usr/bin/python3 -c \"import uuid,datetime;print(uuid.uuid4());print(datetime.datetime.now().astimezone().isoformat(timespec='seconds'))\"",
+          "description": "Generate a UUID and current ISO timestamp"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed with exit status 0.\n\n## Definition check\n\nThe section \"Source rubric and schema paths (#158)\" is present in my instructions, and the sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis is the current wording (it names the dedicated `updates.update_details` slot and forbids crediting unrelated notes), so I proceeded. Recorded `instrument_sha256` as `66ad6231\u20264864`, `instrument_kind: agent_definition`.\n\n## Result: 36/50\n\n| Basis | Score | Denominator |\n|---|---|---|\n| Normalized (N/A-adjusted) | **72.0%** | 36 / 50 |\n| Fixed | **72.0%** | 36 / 50 |\n\n`excluded_max_points: 0`, `sub_elements_not_applicable: 0` \u2014 no `applicable: false` items, so the two bases coincide.\n\n**Applicability:** all five trigger conditions resolved as met, each on evidence outside the gated element. Human subjects via E1 `description`/`keywords` (ICU/PICU/NICU patient admissions) and E8 `collection_mechanisms`; datasets-shared via `distribution_formats`, `third_party_sharing.is_shared=true` and the August 2025 release (approval-gated access \u2192 ambiguity rule defaults to applicable); software-output via `external_resources` pointing at the chorus-ai repositories. E8.4 was scored on the #1081/#1082 rule \u2014 applicable because the data were processed, not because a repo is pointed at \u2014 and earned 1: OHNLP tokenization, chorus_waveform conversion, chorus-mapping and DeGauss each named software that transformed data actually in the release, not merely capture, hosting or validation tooling.\n\n**Per element:** E1 3, E2 4, E3 4, E4 4, E5 3, E6 2, E7 5, E8 5, E9 4, E10 2.\n\n**Drivers.** Strongest: funding transparency (grant `OT2OD032701` validates as NIH OT2/OD), processing provenance traceable to named repositories, and standards conformance stated consistently in four places. Weakest: Element 6 and Element 10 \u2014 a dataset that `status`, `distribution_dates` and `existing_uses` all describe as released and already cited in publications carries no DOI, version, citation or publisher. The two hardest calls were E4.1 and E4.2, both scored 1 on the governance-contact and tokenization evidence the sub-elements enumerate, with the missing IRB and the missing Safe Harbor/Expert Determination recorded as high- and medium-severity issues rather than double-counted. E4.4 (informed consent) scored 0: no consent, no waiver, nothing, for a cohort explicitly including neonates.\n\nConsistency: 14 passed, 7 failed, 10 warnings; 19 issues recorded. Notable credit to the record: it refuses to invent a reviewing IRB and says so in its own `source_caveats`, which is why the gap is visible at all.",
+    "ttft_ms": 3708,
+    "type": "result",
+    "duration_ms": 654480,
+    "uuid": "69a26a29-dbe3-4ce0-90b6-370787d2565e",
+    "ttft_stream_ms": 2742,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 2742,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01UqVBE77uLD2yvDkMyCepQW",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-12T22:47:57.227465+00:00"
+}

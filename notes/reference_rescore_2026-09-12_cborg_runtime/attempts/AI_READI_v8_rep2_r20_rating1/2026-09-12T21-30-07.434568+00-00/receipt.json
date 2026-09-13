@@ -1,0 +1,132 @@
+{
+  "job_id": "AI_READI_v8_rep2_r20_rating1",
+  "started_at": "2026-09-12T21:30:07.434734+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "eb4aafd01c0c12b7826335971269c5ae0d5ae152c1c63db817eea6ca21aa20e3",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "225e5fd96d9599600b8fa789943bec45e46f5a9b6d2f78c2da809111e27ab2b8",
+  "evaluation_sha256": "b72eba592255d4f480b0d896512e50ce2588bd3347f6ed7b679b343b21e42fa1",
+  "cli_result": {
+    "duration_api_ms": 846948,
+    "stop_reason": "end_turn",
+    "session_id": "924322ce-8736-4000-841e-45eb8a3ef9ed",
+    "total_cost_usd": 2.72675,
+    "usage": {
+      "input_tokens": 307,
+      "cache_creation_input_tokens": 189940,
+      "cache_read_input_tokens": 389622,
+      "output_tokens": 42206,
+      "output_tokens_details": {
+        "thinking_tokens": 12111
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 189940
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 311,
+        "outputTokens": 42883,
+        "cacheReadInputTokens": 466415,
+        "cacheCreationInputTokens": 227186,
+        "webSearchRequests": 0,
+        "costUSD": 2.72675,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 12290,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01Fp9EAdNzVCJ6XY3h9dmk4v",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml 2>/dev/null; shasum -a 256 data/rubric/rubric20.txt 2>/dev/null",
+          "description": "Compute hashes of input and rubric"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01KGaPd7b3qjSqE5jML7CsSx",
+        "tool_input": {
+          "command": "for f in resources parent_datasets labeling_strategies discouraged_uses data_protection_impacts errata download_url rrid governance_committee_contact machine_annotation_tools annotation_analyses imputation_protocols existing_uses software_and_tools compression splits subsets; do printf '%-34s %s\\n' \"$f\" \"$(grep -c \"^${f}:\\|^  *${f}:\\|^- *${f}:\" input/record.yaml)\"; done",
+          "description": "Count occurrences of key schema fields in the record"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed with exit status 0.\n\n**Definition quote (repeated, verbatim and in full), from the \"Reproducibility\" section:**\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\n## Evaluation complete\n\nWrote `output_evaluation.json`; `poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic` returned `VALID` with exit 0.\n\n**Score: 82/88 \u2014 fixed 93.2% (\u00f788), normalized 93.2% (\u00f788).** No question was excluded, so both bases coincide.\n\n| Category | Score | Max |\n|---|---|---|\n| Structural Completeness | 19 | 21 |\n| Metadata Quality & Content | 20 | 21 |\n| Technical Documentation | 23 | 25 |\n| FAIRness & Accessibility | 20 | 21 |\n\n**Applicability.** All four gate conditions resolved as met, so `excluded_max_points: 0` and `questions_not_applicable: 0`. Each conditional question carries `applicability_status` and `applicability_evidence` citing fields outside its own scoring set, per the anti-circular rule \u2014 notably Q11, which is applicable because `external_resources` (a Q14 field) names `https://github.com/AI-READI`, not because its own preprocessing fields are populated.\n\n**Deductions, all evidence-based:** Q3=3 (exactly 7 keywords, band is count-decided); Q8=4 (no DPIA, empty structured slot, unpopulated governance contact); Q11=4 (conversion tooling unnamed/unversioned); Q13=4 (no errata; v1/v2 DOIs documented as no longer accessible); Q20=4 (measurement bias across eight imaging platforms recorded only as an anomaly, no AIO mapping).\n\n**Semantic findings:** 13 issues \u2014 3 failed consistency checks (self-contradictory `is_deidentified`; sensitivity flags false against a restricted-tier control regime; `versions_available` listing versions the same field calls inaccessible), plus 9 warnings and content-accuracy items. Correctness validations passed: DOI prefixes map to real registrars (10.60775 FAIRhub, 10.5281 Zenodo, 10.1038, 10.1136), all three NIH grant numbers are well formed, ORCID/ROR valid, RRID not present. Two arithmetic checks were run independently: file counts reconcile exactly (356,334 + 9 = 356,343), byte totals do not (419,614-byte shortfall, disclosed by the record).\n\nTwo things worth flagging about my own output rather than the record. First, the `method` value `claudecode_api` you supplied is in the schema's enum, so provenance passed through unchanged. Second, this is a single evaluation: the 93.2% is one draw from a runtime whose temperature is not exposed (recorded as `null`), and it is comparable only to scores from the same evaluator model and instrument digest with the same excluded-item set \u2014 a caveat I recorded in `metadata.score_basis_note` rather than leaving to the reader.",
+    "ttft_ms": 4071,
+    "type": "result",
+    "duration_ms": 848004,
+    "uuid": "93f2dc3b-5183-4c6c-99a8-03fb16303bc5",
+    "ttft_stream_ms": 2155,
+    "time_to_request_ms": 22,
+    "first_content_frame_ms": 2155,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01Kkvca7PWZBTgXqQSyG8zHY",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-12T21:44:16.271156+00:00"
+}

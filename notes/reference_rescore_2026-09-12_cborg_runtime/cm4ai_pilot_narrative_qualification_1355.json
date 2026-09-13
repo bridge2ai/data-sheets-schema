@@ -1,0 +1,161 @@
+{
+  "recorded_at": "2026-09-12T23:35:32.735236+00:00",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "issue": 1355,
+  "related_issue": 1349,
+  "scope": "Targeted source-grounding inspection of the CM4AI v7 rep2 rubric20 retry pilot; not certification of all semantic judgments or external source truth.",
+  "qualification": "The CM4AI retry pilot overlooks the explicit per-deposit scope of release version numbers when reducing Q13 and qualifying Q19. Its containing total and related version-consistency findings require semantic adjudication. Additional narrative claims overstate the impossibility of participant-related documentation for cell-line work, credit donor age for both lines where the cited text supplies only one, and undercount creator entries. Keep all original scores and prose; do not repeat these statements as verified dataset facts or use small differences in the qualified total to select a generation run. No replacement scores are assigned.",
+  "cases": [
+    {
+      "job_id": "CM4AI_v7_rep2_r20_rating1",
+      "output": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v7_rep2_r20_rating1_evaluation.json",
+      "input": "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_d4d.yaml",
+      "evaluation_sha256": "b0e22af2feab2fff686eea1bc702e62cf184b101c418930e72536bc5a91286e1",
+      "input_sha256": "af41bfae4fd0cea107b3468ad46e9a1a1599e297bfa5dd92739c48e6008f30b1",
+      "statements": [
+        {
+          "pointer": [
+            "categories",
+            2,
+            "questions",
+            2,
+            "semantic_analysis"
+          ],
+          "original": "Reduced from 5 to 4 by a defect in precisely the thing this question measures. The version sequence is non-monotonic: this release, issued 2026-06-17, is version '2.0', while the June 2025 and October 2025 releases it supersedes are both recorded as version '2.1'. A consumer sorting the series by version string would order it wrongly, and the citation's 'V2' token adds a third form. The absent errata slot is a lesser matter, since its substance appears in related_datasets notes.",
+          "assessment": "The source version_access.version_details explicitly states that each quarterly release is a distinct Dataverse dataset with its own DOI and internal version history. Different local version numbers across those deposits do not by themselves establish the stated defect. The original Q13 reduction from 5 to 4 and containing total therefore require qualification; no replacement score is assigned."
+        },
+        {
+          "pointer": [
+            "categories",
+            3,
+            "questions",
+            3,
+            "semantic_analysis"
+          ],
+          "original": "Held to 4 because the graph is asserted rather than expressed here. The record never wires specific activities to specific outputs \u2014 no collection carries a was_generated_by, and a reader cannot tell from this datasheet which acquisition produced which of the ten archives, even though the filenames imply it. Three quality slots are also empty: missing_data_documentation is absent although known_limitations concedes incompletely overlapping protein sets across modalities, and no data-split indicators are given for a dataset explicitly intended for model training. Version-history provenance is itself degraded by the non-monotonic version sequence flagged at Q13.",
+          "assessment": "The version-sequence objection repeats the overlooked separate-deposit scope. The acquisition-to-archive absence claim also overlooks file_collections.description, which explicitly associates IF and SEC-MS archives with their assays, material and producing laboratories. The graph-representation/field-placement question is additionally recorded under issue 1349; complete lineage is not certified."
+        },
+        {
+          "pointer": [
+            "semantic_analysis",
+            "issues_detected",
+            0,
+            "description"
+          ],
+          "original": "Version sequence is non-monotonic across the release series. This release (issued 2026-06-17) carries version '2.0', while the two EARLIER releases it supersedes are recorded at higher version numbers: June 2025 (doi:10.18130/V3/F3TD5R, 'version 2.1') and October 2025 (doi:10.18130/V3/K7TGEM, 'version 2.1'). The March 2025 release is 'version 1.4'. A consumer ordering releases by version string would place this release before its own predecessors.",
+          "assessment": "This global version-consistency finding repeats the unsupported inference from separately versioned deposits."
+        },
+        {
+          "pointer": [
+            "semantic_analysis",
+            "issues_detected",
+            0,
+            "recommendation"
+          ],
+          "original": "Reconcile the version numbering across the series (e.g. assign this release a version strictly greater than 2.1), or state explicitly that Dataverse per-dataset version numbers are local to each deposit and are not comparable across releases.",
+          "assessment": "The requested explanation that versions are local to each deposit is already present in version_access.version_details. Do not recommend renumbering the release from this model finding."
+        },
+        {
+          "pointer": [
+            "semantic_analysis",
+            "correctness_validations",
+            "version_sequence"
+          ],
+          "original": "inconsistent",
+          "assessment": "This unqualified model status relies on the disputed version-sequence interpretation and is not an independently verified dataset defect."
+        },
+        {
+          "pointer": [
+            "categories",
+            1,
+            "questions",
+            2,
+            "quality_note"
+          ],
+          "original": "Excluded from the denominator per the 'Applies to' condition: the gating fields show cell-line rather than human-subject research. Scoring this question would penalize a datasheet for the absence of IRB protocols, consent forms, compensation schedules and vulnerable-population safeguards that cannot exist for work on established cell lines, which is exactly what the N/A convention prevents. Ethics documentation that is present is reported here and is, for what it covers, coherent and well-attributed.",
+          "assessment": "The input supports the scoped conclusion that this record describes established cell-line work rather than enrolled-participant research. It does not establish that IRB protocols, consent records, compensation arrangements or safeguards cannot exist in any work involving established lines or their source donors. The categorical impossibility statement exceeds the evidence; this does not change the recorded N/A decision."
+        },
+        {
+          "pointer": [
+            "categories",
+            2,
+            "questions",
+            4,
+            "semantic_analysis"
+          ],
+          "original": "The exclusion is non-circular: it rests entirely on description, keywords and collection_mechanisms and would hold even if subpopulations and instances were empty. Worth recording as a positive observation rather than a score: for a dataset with no human subjects, the record nevertheless documents donor ancestry, sex and age for both source lines and identifies them by Cellosaurus RRID, which is the appropriate analogue of population characterization for cell-line work and supports downstream reasoning about generalizability \u2014 a point the record itself makes in known_biases and future_use_impacts.",
+          "assessment": "The cited subpopulations.notes gives age 51 for the MDA-MB-468 donor, but no age for the KOLF2.1J donor. The claim that donor age is documented for both is unsupported by that passage. The recorded question remains N/A."
+        },
+        {
+          "pointer": [
+            "categories",
+            0,
+            "questions",
+            0,
+            "evidence"
+          ],
+          "original": "Populated (10/14): id 'doi:10.18130/V3/HIGT4C'; title 'Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta)'; description (~1,450 chars); keywords (29); license_and_use_terms (full CC BY-NC-SA 4.0 terms + data_use_permission: no_commercial_use); doi '10.18130/V3/HIGT4C'; page 'https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C'; creators (38, mostly with ORCID and affiliation); purposes (5); instances (4 typed instance records with B2AI_SUBSTRATE/B2AI_TOPIC CURIEs). Absent (4/14): resources; parent_datasets (related_datasets is used instead); variables; regulatory_restrictions.confidentiality_level (regulatory_restrictions is present but carries only a free-text statement and governance_committee_contact).",
+          "assessment": "The complete input creators list has 39 entries, 38 carrying ORCID identifiers. The assertion of 38 total creators undercounts that list. The field-presence score is not changed."
+        },
+        {
+          "pointer": [
+            "categories",
+            1,
+            "questions",
+            1,
+            "evidence"
+          ],
+          "original": "funders: four entries. NIH with grant '1OT2OD032742-01' (Bridge2AI: Cell Maps for AI Data Generation Project); NIH with grant '3OT2OD032742-01S2' plus RePORTER application 11211616, core project OT2OD032742, FY2025 award amount 5289382, project period 2022-09-01 to 2026-08-31, awardee UC San Diego; NIH with grant '5U54HG012513-02' (Bridge2AI Bridge Center); and the Frederick Thomas Fund of the University of Virginia (acknowledged in the preprint, no award number). creators: 38 entries, effectively all with institutional affiliations (UCSD, UCSF, Stanford, UVA with ROR:0153tk833, Yale, UT Austin, UAB, KTH, Simon Fraser, Montreal) and the large majority with ORCID iDs.",
+          "assessment": "The complete input creators list has 39 entries, 38 carrying ORCID identifiers. The assertion of 38 total creator entries undercounts it. This does not adjudicate external identifier correctness or change the funding score."
+        }
+      ],
+      "input_evidence": [
+        {
+          "pointer": [
+            "version_access",
+            "version_details"
+          ],
+          "original": "Each quarterly release is deposited as a distinct Dataverse dataset with its own persistent DOI and internal version history; the Dataverse record exposes version differences and per-version publication dates."
+        },
+        {
+          "pointer": [
+            "subpopulations",
+            0,
+            "notes"
+          ],
+          "original": "MDA-MB-468 (RRID:CVCL_0419) was established from a metastatic site pleural effusion of a 51-year-old black female with a metastatic mammary adenocarcinoma. KOLF2.1J (RRID:CVCL_B5P3) was derived from a healthy male Northern European donor."
+        },
+        {
+          "pointer": [
+            "file_collections",
+            0,
+            "description"
+          ],
+          "original": "Spatial localization of proteins of interest in untreated cells of the breast cancer cell line MDA-MB-468, imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg Lab at Stanford University."
+        },
+        {
+          "pointer": [
+            "file_collections",
+            5,
+            "description"
+          ],
+          "original": "Size exclusion chromatography-mass spectrometry (SEC-MS) data generated on KOLF2.1J human induced pluripotent stem cells and derivatives in the Nevan Krogan laboratory at the University of California San Francisco."
+        }
+      ],
+      "input_creator_counts": {
+        "entries": 39,
+        "with_orcid": 38
+      },
+      "original_score_preserved": {
+        "total_points": 64,
+        "max_points": 88,
+        "excluded_max_points": 10,
+        "adjusted_max_points": 78,
+        "normalized_percentage": 82.1,
+        "fixed_percentage": 72.7,
+        "questions_not_applicable": 2
+      },
+      "operator_score_changes": 0
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/private/tmp/d4d-cborg-canaries-2026-09-12/scripts/reference_rescore_cborg.py", line 188, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/private/tmp/d4d-cborg-canaries-2026-09-12/scripts/reference_rescore_cborg.py", line 147, in main
+    route_evaluator(args)
+    ~~~~~~~~~~~~~~~^^^^^^
+  File "/private/tmp/d4d-cborg-canaries-2026-09-12/scripts/reference_rescore_cborg.py", line 134, in route_evaluator
+    raise ValueError("Claude Code version differs from the registered transport")
+ValueError: Claude Code version differs from the registered transport

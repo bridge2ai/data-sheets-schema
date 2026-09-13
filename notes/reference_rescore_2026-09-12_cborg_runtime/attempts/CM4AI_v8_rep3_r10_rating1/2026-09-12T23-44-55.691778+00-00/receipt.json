@@ -1,0 +1,125 @@
+{
+  "job_id": "CM4AI_v8_rep3_r10_rating1",
+  "started_at": "2026-09-12T23:44:55.691936+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "f49548f6dcb95464e1949f694b5024a58e86fee047e36facff27c9daecb0bc43",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5",
+    "metadata.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "e3311d40121521b83f803ad969395396f63b7446fed36c1f55416379d0f16800",
+  "evaluation_sha256": "99d08966af2dee9fb6bd9dc4c3e8e8c90d668e54fc08150b2e695accd954bfdc",
+  "cli_result": {
+    "duration_api_ms": 513728,
+    "stop_reason": "end_turn",
+    "session_id": "443d8d75-ad26-473f-ad0f-97c167e790fb",
+    "total_cost_usd": 2.49787575,
+    "usage": {
+      "input_tokens": 310,
+      "cache_creation_input_tokens": 175044,
+      "cache_read_input_tokens": 422794,
+      "output_tokens": 41979,
+      "output_tokens_details": {
+        "thinking_tokens": 10125
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 175044
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 312,
+        "outputTokens": 42005,
+        "cacheReadInputTokens": 422794,
+        "cacheCreationInputTokens": 197567,
+        "webSearchRequests": 0,
+        "costUSD": 2.49787575,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 10125,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01DsFupR9ZWucUXnrYpKJAwz",
+        "tool_input": {
+          "command": "shasum -a 256 data/rubric/rubric10.txt input/record.yaml && ls scripts src && wc -l data/rubric/rubric10.txt",
+          "description": "Hash rubric and record, list dirs"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01AEYes5o6baXAhxR5Ffu76e",
+        "tool_input": {
+          "command": "/usr/bin/python3 -c \"import datetime,uuid;print(datetime.datetime.now(datetime.timezone.utc).isoformat());print(uuid.uuid4())\"",
+          "description": "Generate timestamp and uuid"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (`VALID output_evaluation.json: rubric10-semantic`, exit 0).\n\n## Definition check\n\nThe section headed \u201cSource rubric and schema paths (#158)\u201d is present in my instructions. The sentence beginning \u201cRead release-specific notes\u201d reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches the current instrument (sha256 `66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864`), so I proceeded.\n\n## Result \u2014 CM4AI, claudecode_api, rep3\n\n| | |\n|---|---|\n| total_points | **40** |\n| fixed_percentage | **80.0%** (40/50) |\n| normalized_percentage | **85.1%** (40/47) |\n| excluded | 3 sub-elements \u2014 E4.3 privacy/re-identification, E4.4 informed consent, E4.5 vulnerable populations & compensation |\n\nElement scores: E1 5/5 \u00b7 E2 5/5 \u00b7 E3 3/5 \u00b7 E4 2/2 \u00b7 E5 4/5 \u00b7 E6 4/5 \u00b7 E7 5/5 \u00b7 E8 3/5 \u00b7 E9 4/5 \u00b7 E10 5/5.\n\n**Element 4 applicability (per sub-element, #1060).** The human-subjects condition fails on external evidence: E1's description and keywords name only cell lines (MDA-MB-468, KOLF2.1J), and E8's collection mechanisms describe mass spectrometry, confocal microscopy and CRISPRi screens rather than recruitment. So sub-elements 3\u20135 are `applicable: false`/`score: null`. Sub-elements 1\u20132 were treated as applicable on the borderline rule: E2's `regulatory_restrictions` records only that no restriction applies (not itself a constraint), but the E2-scope `ip_restrictions` states an operative Data Access Committee constraint over donor-derived material. Both scored 1.\n\n**Points lost.** E3.2 (ZIP container declared, no internal format or encoding), E3.4 (no `variables` anywhere), E5.2 (no instance or sample counts at release level), E6.3 (no errata or change log; `updates` is purely prospective), E8.3 (no preprocessing/cleaning/labeling documented for seven `processed_data` archives), E8.4 (software threshold #1059/#1082 \u2014 every named tool falls in an excluded role: Cell Mapping Toolkit/MuSIC under (e), the record itself says its outputs are not in this release; FAIRSCAPE under (c); NDEx/Dataverse under (b); 10x 3'HT kit under (a)), E9.3 (`anomalies` absent).\n\nNotable strengths: consistent UVA Dataverse DOI across id/doi/citation/latest_version_doi, 40 ORCID-identified creators, a fully DOI-citable version chain, protocol-depth collection descriptions, and an unusually disciplined `source_caveats` that separates release-level facts from project-level totals and flags its own carried-forward RO-Crate claim.\n\nWritten to `output_evaluation.json` with `instrument_sha256`, `instrument_kind: agent_definition`, `rubric_hash`, `input_sha256` as supplied; `temperature: null`; model name and evaluator_model both `claude-opus-5`.",
+    "ttft_ms": 4397,
+    "type": "result",
+    "duration_ms": 513947,
+    "uuid": "ac78ea05-358c-4e78-a073-20a47fd7fcb3",
+    "ttft_stream_ms": 3474,
+    "time_to_request_ms": 25,
+    "first_content_frame_ms": 3893,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [],
+  "completed_at": "2026-09-12T23:53:30.434059+00:00"
+}

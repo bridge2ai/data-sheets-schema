@@ -1,0 +1,132 @@
+{
+  "job_id": "CHORUS_v7_rep2_r20_rating1",
+  "started_at": "2026-09-12T21:40:02.391172+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "6da726625b20558479930e4c326dae5d6fa6934472dcc147e74a1c2d4e795b2d",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "d96b8b8fb1dbc2748fc5cfcab49aa2eb745a8bcd3c8e83978ca4226b93922379",
+  "evaluation_sha256": "597deffef75a4a792e67b01c2f5285e68a2ceb0d827c70205d37ad1e39b936e4",
+  "cli_result": {
+    "duration_api_ms": 418911,
+    "stop_reason": "end_turn",
+    "session_id": "ee8bc46c-fe40-480f-8ab2-6fe0cc9edab9",
+    "total_cost_usd": 1.64842975,
+    "usage": {
+      "input_tokens": 310,
+      "cache_creation_input_tokens": 86041,
+      "cache_read_input_tokens": 439746,
+      "output_tokens": 32657,
+      "output_tokens_details": {
+        "thinking_tokens": 7825
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 86041
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 312,
+        "outputTokens": 32685,
+        "cacheReadInputTokens": 440852,
+        "cacheCreationInputTokens": 97491,
+        "webSearchRequests": 0,
+        "costUSD": 1.64842975,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 7825,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01MdQcrjjeMczPh1F7riVTsA",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/proc/*\" 2>/dev/null | head -5",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01CybegtiBBZ1JNqju19EkTS",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-vn6grbvp/data/rubric /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-vn6grbvp/scripts /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-vn6grbvp/src; shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-vn6grbvp/input/record.yaml /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-vn6grbvp/data/rubric/*",
+          "description": "Inspect rubric, scripts, and file hashes"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01SfXhxAFHeGmWMo1xrquPzD",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get current UTC time and a random UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Definition check passed. The \"Reproducibility\" section is present in my instructions and reads as expected; the sentence beginning \"Repeatability must be\" is, verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\n## Evaluation complete \u2014 CHORUS, claudecode_agent, rep2\n\n`output_evaluation.json` written and validated:\n\n```\nVALID output_evaluation.json: rubric20-semantic\n```\n\n**Score: 64 / 88 \u2014 fixed 72.7% (denominator 88), normalized 72.7% (adjusted denominator 88).** No question was excluded: `excluded_max_points: 0`, `questions_not_applicable: 0`.\n\nAll four conditional gates resolved to applicable on non-circular evidence:\n- **Human subjects** (Q8, Q15) \u2014 from `description` (\"50,000 patient admissions from intensive care units\"), `keywords`, `collection_mechanisms`; not from Q8's own fields.\n- **Datasets shared** (Q10, Q17) \u2014 five populated `distribution_formats`, `third_party_sharing.is_shared: true`, documented trainee use. Approval-gated access is the borderline case the ambiguity rule sends to applicable.\n- **Software output** (Q11) \u2014 `external_resources` names the chorus-ai code repository (28 repos); decided from Q14's field, not Q11's.\n- **Collection + shared** (Q12, Q13) \u2014 collection fields populated and the sharing condition met.\n\nCategory scores: Structural 19/21, Metadata 16/21, Technical 16/25, FAIRness 13/21.\n\n**Main findings.** Strongest on multi-modal standardization (Q10 = 5: OMOP/DICOM/WFDB/EDF+/OHNLP correctly matched per modality, LinkML schema URI, ontology-coded instances, chorus-mapping harmonization) and on collection and provenance narrative (Q12, Q19 = 4). Weakest on stewardship and responsible AI: Q13 = 2 (no version, no DOI, no publisher, no commitment past the 2026-11-30 award end) and Q20 = 2 (no `known_biases` at all in a record titled \"for Equitable AI\"). Q8 held at 3 \u2014 deidentification and governance contact are documented but IRB, consent and HIPAA are absent; the record discloses the IRB gap honestly, which I credited in the narrative but did not treat as filling it. Q7 took a one-point deduction because five of six creators carry names only inside `notes`, leaving affiliation-only records nothing can attribute.\n\nTen semantic issues recorded (2 high, 6 medium, 2 low); consistency checks 12 passed / 6 failed / 5 warnings. Correctness: grant `OT2OD032701` valid NIH; all URLs valid; no DOI or RRID present; contact domain `mgh.havard.edu` flagged invalid (upstream typo the record itself transcribes deliberately).\n\nModel recorded as `claude-opus-5` for both `name` and `evaluator_model`, `temperature: null` (not exposed by this runtime). `instrument_sha256`, `rubric_hash` and `input_sha256` set to the supplied values, with `instrument_kind: agent_definition`.",
+    "ttft_ms": 5765,
+    "type": "result",
+    "duration_ms": 421383,
+    "uuid": "e2110661-648b-457e-89a4-566ac84956b2",
+    "ttft_stream_ms": 1867,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 2305,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [],
+  "completed_at": "2026-09-12T21:47:04.667055+00:00"
+}

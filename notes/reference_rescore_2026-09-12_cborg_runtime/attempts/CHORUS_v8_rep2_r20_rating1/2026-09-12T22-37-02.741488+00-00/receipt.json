@@ -1,0 +1,140 @@
+{
+  "job_id": "CHORUS_v8_rep2_r20_rating1",
+  "started_at": "2026-09-12T22:37:02.741683+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "7d270b49ba4d688e50d0e5ca10aad16e9b3b1746f394a6396f38adb855011ca0",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "960c3500b4c6b43bd1eb1a17508148529a021c7ee3205c81aa19b021f75aa943",
+  "evaluation_sha256": "42f528657bc887998e2f6ededdfa15ea2be7f3d7df07083dae0c60423940116d",
+  "cli_result": {
+    "duration_api_ms": 541048,
+    "stop_reason": "end_turn",
+    "session_id": "1afa0704-8e43-4fed-a402-e31585e7862e",
+    "total_cost_usd": 2.1221727500000003,
+    "usage": {
+      "input_tokens": 320,
+      "cache_creation_input_tokens": 99595,
+      "cache_read_input_tokens": 642863,
+      "output_tokens": 43239,
+      "output_tokens_details": {
+        "thinking_tokens": 14300
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 99595
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 322,
+        "outputTokens": 43267,
+        "cacheReadInputTokens": 642863,
+        "cacheCreationInputTokens": 114793,
+        "webSearchRequests": 0,
+        "costUSD": 2.1221727500000003,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 14300,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_012PFy3HhC2j5ASUdQkqRmoC",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-6u6tfdgo/ 2>/dev/null; echo \"---\"; find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file on disk"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01GHmz5RM1ZGNjtANx7Gw8Js",
+        "tool_input": {
+          "command": "date -u +\"%Y-%m-%dT%H:%M:%SZ\"; python3 -c \"import uuid; print(uuid.uuid4())\"; shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-6u6tfdgo/input/record.yaml",
+          "description": "Get timestamp, generate UUID, hash input record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01LbqyHNaBF82k3bgvkHLnJB",
+        "tool_input": {
+          "command": "python3 -c \"import uuid; print(uuid.uuid4())\"",
+          "description": "Generate a UUID for evaluator id"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01WeubAdFiszDPHqsXnTtXvZ",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-6u6tfdgo/input/record.yaml",
+          "description": "Verify checksum of the pinned input record"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 16,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0).\n\n## Definition check\n\nThe \"Reproducibility\" section is present in my instructions and current. The sentence beginning \"Repeatability must be\", verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nThe surrounding section also carries the current provisions (null temperature when unexposed, definition digest, retention of repeated evaluations and their spread), so I proceeded.\n\n## Result\n\n`output_evaluation.json` written and validated: `VALID output_evaluation.json: rubric20-semantic`.\n\n**Score: 68 / 88 \u2014 fixed 77.3% (denominator 88), normalized 77.3% (denominator 88).** No items were excluded, so the two bases coincide; `excluded_max_points: 0`, `questions_not_applicable: 0`, excluded item ids: none.\n\n| Category | Score | Max |\n|---|---|---|\n| Structural Completeness (Q1\u20135) | 19 | 21 |\n| Metadata Quality & Content (Q6\u201310) | 17 | 21 |\n| Technical Documentation (Q11\u201315) | 16 | 25 |\n| FAIRness & Accessibility (Q16\u201320) | 16 | 21 |\n\n**Applicability.** I resolved all four trigger conditions before scoring, each from fields belonging to *other* questions per the anti-circular rule. Human subjects (Q8, Q15) from the description/keywords/collection_mechanisms; datasets shared (Q10, Q17) from `third_party_sharing.is_shared`, distribution_formats and the access-review process \u2014 approval-gated, so the ambiguity rule resolved it to applicable; software output (Q11) from `external_resources` naming the chorus-ai GitHub organization, not from Q11's own preprocessing fields; collection-and-shared (Q12, Q13) from both limbs. All came out applicable, so nothing was excluded.\n\n**Notable judgements.** Q13 scored 2 rather than 3 because band 3 requires a version number *and* a persistent ID, and both are absent from a dataset that is explicitly still growing. Q14 scored exactly 3 under the {0,3,5} rule \u2014 three distinct external resources but no formal dataset citation and no DOI. Q6 and Q16 pass, but marginally: the sole identifier is a project homepage the record itself reports is under review for modification; since pass/fail cannot express that, I reflected the persistence deficit in Q13 rather than manufacturing it into a binary. Q19 scored 4 on an inverted profile \u2014 weak version history, genuinely strong textual lineage, which the rubric explicitly permits.\n\nI logged 15 semantic issues (4 high: absent informed consent with pediatric/neonatal subjects; no IRB named; no DOI/publisher on a released dataset; plus the demographics gap against the \"Equitable AI\" claim), with 16 consistency checks passed, 6 failed, 8 warnings. The record's source discipline is unusual and I credited it as a strength \u2014 it discloses its own conflicting figures, a transcribed email typo, and the OMOP/OHNLP format conflation. I did not reduce scores for that honesty; where a gap is disclosed, the absence itself caps the score, not the disclosure.",
+    "ttft_ms": 3865,
+    "type": "result",
+    "duration_ms": 542855,
+    "uuid": "58597674-f0d8-4461-9ccb-c4b4dc30bf03",
+    "ttft_stream_ms": 2822,
+    "time_to_request_ms": 21,
+    "first_content_frame_ms": 2822,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [],
+  "completed_at": "2026-09-12T22:46:06.413339+00:00"
+}

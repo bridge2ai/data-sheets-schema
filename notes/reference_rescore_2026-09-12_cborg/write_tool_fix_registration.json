@@ -1,0 +1,19 @@
+{
+  "issue": 1340,
+  "registered_at": "2026-09-12T18:26:39.796790+00:00",
+  "previous_manifest_sha256": "ab13d9e824a47a70ff741372e8ac6a7abc1873b0b487959b04f01bdd00f0ee54",
+  "current_manifest_sha256": "e71b8805b7fde90b5e64e23ba1c1f346f2f17e33fe49df7c98c9e885aeec1501",
+  "same_56_complete_prompts": true,
+  "same_24_inputs_and_both_instruments": true,
+  "accepted_ratings": 0,
+  "excluded_original_sessions": 1,
+  "cli_reported_excluded_cost_usd": 2.433457,
+  "retained_failed_attempt_files": {
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-10-04.833451+00-00/transcript.jsonl": "4e4dce555d8bfc698c258f41e1989c01956f7d203319dd886d5d4301547533fa",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-10-04.833451+00-00/prompt.txt": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-10-04.833451+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-10-04.833451+00-00/receipt.json": "df148b428e63c4dc16e7d7a02113d71d66f12f5ca5bbd78e25cfa1b94386b0dd"
+  },
+  "fix": "Restore Write by removing --bare; clear inherited simple-mode/config overrides; use fresh .cborg-cli-config inside each isolated workspace; verify init tools, explicit API-key source and pinned CLI version.",
+  "retry": "One fresh canary only; no recovery or scoring from the denied shell payload."
+}

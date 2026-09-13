@@ -1,0 +1,124 @@
+{
+  "job_id": "CHORUS_v7_rep1_r10_rating3",
+  "started_at": "2026-09-13T00:29:21.767724+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "ff0196e807c8ec4835939296a9fdf1312942f9c639efd03fc48ca2fe6b6e360c",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "e5c0f47198cd20ea47158959f6cfb4d25648965eb8c063ac977e2b5b9aba355d",
+  "evaluation_sha256": "94a75de06bf77ca59d0dbcebb6e773fabca719b6f2a83e3fdb7969101f9df3de",
+  "cli_result": {
+    "duration_api_ms": 549708,
+    "stop_reason": "end_turn",
+    "session_id": "89275741-9136-4a42-884a-2fd3fba84c8d",
+    "total_cost_usd": 2.2184714999999997,
+    "usage": {
+      "input_tokens": 318,
+      "cache_creation_input_tokens": 128306,
+      "cache_read_input_tokens": 614304,
+      "output_tokens": 44000,
+      "output_tokens_details": {
+        "thinking_tokens": 11859
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 128306
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 320,
+        "outputTokens": 44028,
+        "cacheReadInputTokens": 628518,
+        "cacheCreationInputTokens": 128306,
+        "webSearchRequests": 0,
+        "costUSD": 2.2184714999999997,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 11859,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01HZV1BjxkThhfmrABxynFKR",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-qh15kq5c; find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01AZ7TMc94Sf6kPQ346g4FzD",
+        "tool_input": {
+          "command": "ls -R /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-qh15kq5c/data /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-qh15kq5c/input /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-qh15kq5c/scripts 2>/dev/null; shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-qh15kq5c/input/record.yaml",
+          "description": "List data, input, scripts directories and hash the record"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0, `VALID output_evaluation.json: rubric10-semantic`).\n\n## Definition check\n\nFrom the section **\u201cSource rubric and schema paths (#158)\u201d** in my instructions, the sentence beginning \u201cRead release-specific notes\u201d, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThat section is present and reads as the current rules require (the `updates.update_details` schema-path mapping, the RRID-in-`id` and `distribution_formats`/`file_collections` mappings, `at_risk_populations`, and `data_governance.committee_contact`), so I proceeded. Recorded `instrument_sha256` as `66ad6231\u2026e34864`, `instrument_kind: agent_definition`.\n\n## Result \u2014 CHORUS, claudecode_agent, rep1\n\n**34 / 50 \u00b7 fixed 68.0 % (\u00f750) \u00b7 normalized 68.0 % (\u00f750)** \u2014 no sub-element excluded, so both bases coincide.\n\n| E | Element | Score |\n|---|---|---|\n| 1 | Discovery and Identification | 3/5 |\n| 2 | Access and Retrieval | 4/5 |\n| 3 | Reuse and Interoperability | 4/5 |\n| 4 | Ethical Use and Privacy | 2/5 |\n| 5 | Composition and Structure | 4/5 |\n| 6 | Provenance and Version Tracking | 1/5 |\n| 7 | Motivation and Funding | 5/5 |\n| 8 | Technical Transparency | 5/5 |\n| 9 | Limitations Disclosure | 4/5 |\n| 10 | Cross-Platform Integration | 2/5 |\n\n**Applicability (all 50 items scored, nothing N/A).** Human subjects met on E1 (`description`: ICU/PICU/NICU admissions; keywords \u201ccritical care\u201d, \u201cclinical notes\u201d) and E8 \u2014 opening Element 4 sub-elements 1\u20135. The governance condition (E2 `confidentiality_level: restricted`, controlled access under signed agreement) independently met, and would alone have opened 4.1\u20134.2. Datasets-shared met on E2 (`distribution_formats` + `third_party_sharing.is_shared: true`); access-by-approval resolved to applicable under the ambiguity rule. Software-output met on `external_resources` \u2192 github.com/chorus-ai, opening 8.3; 8.4 scored under #1081 as processing is established.\n\n**Drivers of the score.** Funding (5/5: `OT2OD032701` validates against the NIH activity-code/institute/serial pattern, RePORTER ID consistent across three fields) and technical transparency (5/5) are the strengths; 8.4 was earned on *processing-role* software \u2014 OHNLP tokenisation, `chorus_waveform` conversion, DeGauss/UF-Geocoding \u2014 not on `chorus-extract-upload` (capture) or `CHoRUSReports` (validation), which I explicitly declined to rely on. Losses cluster in three places: human-subjects governance documented as programme activity rather than oversight (no IRB, no consent or waiver, no DPIA, despite `involves_human_subjects: true` and PICU/NICU patients) \u2192 4.1 and 4.4 = 0; complete absence of version tracking for a self-described \u201cpartially released\u201d, growing dataset \u2192 E6 1/5; and no persistent ID, DOI, citation or publisher \u2192 1.1, 10.1, 10.2 = 0. Four consistency checks failed, 12 passed, 6 warnings.\n\nThe record's candour is noted as a strength in its own right (it adjudicates a tier-2/tier-4 count conflict openly, flags the overloaded `OTHER` enum, reproduces source typos) \u2014 but candour about an absent IRB does not convert the absence into documentation, so it did not earn the points.",
+    "ttft_ms": 2269,
+    "type": "result",
+    "duration_ms": 552737,
+    "uuid": "2f92566c-1bbc-48c2-a6ee-cc72b2e4eade",
+    "ttft_stream_ms": 1289,
+    "time_to_request_ms": 21,
+    "first_content_frame_ms": 1290,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [],
+  "completed_at": "2026-09-13T00:38:35.410884+00:00"
+}

@@ -1,0 +1,8 @@
+{
+  "accepted_at": "2026-09-12T18:49:41.055209+00:00",
+  "canary_id": "CHORUS_v7_rep1_r10_rating1",
+  "evaluation_sha256": "8b08357453730a468b3f47f8c0c0315d1ef30fe69ed937a0c95cbf2f9f9d8178",
+  "manifest_sha256": "e71b8805b7fde90b5e64e23ba1c1f346f2f17e33fe49df7c98c9e885aeec1501",
+  "runtime_model": "claude-opus-5",
+  "basis": "exact-file, arithmetic, identity and check-echo checks passed; operator reviewed the canary"
+}

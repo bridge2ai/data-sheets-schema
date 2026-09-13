@@ -1,0 +1,148 @@
+{
+  "job_id": "CHORUS_v7_rep1_r10_rating1",
+  "started_at": "2026-09-12T20:15:31.516561+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "ff0196e807c8ec4835939296a9fdf1312942f9c639efd03fc48ca2fe6b6e360c",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5",
+    "metadata.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "e5c0f47198cd20ea47158959f6cfb4d25648965eb8c063ac977e2b5b9aba355d",
+  "evaluation_sha256": "b5ecb9d31a6a73d1f71e46f70617390ff62d63a84c5abd5d794afa9110755366",
+  "cli_result": {
+    "duration_api_ms": 861605,
+    "stop_reason": "end_turn",
+    "session_id": "b4fb91f7-c69b-44ec-9693-ef8eeff59689",
+    "total_cost_usd": 3.6787935,
+    "usage": {
+      "input_tokens": 321,
+      "cache_creation_input_tokens": 199270,
+      "cache_read_input_tokens": 885357,
+      "output_tokens": 75981,
+      "output_tokens_details": {
+        "thinking_tokens": 13430
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 199270
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 323,
+        "outputTokens": 76009,
+        "cacheReadInputTokens": 885357,
+        "cacheCreationInputTokens": 213484,
+        "webSearchRequests": 0,
+        "costUSD": 3.6787935,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 13430,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_011giEaC258MgxFQhup6mga8",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01Tg6aXPLg2fgyDfM5Lfcy36",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-8jmjh2yz/input/record.yaml",
+          "description": "Hash the input record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_011Wzy8E9oz3PRjeCboNxE3F",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get UTC timestamp and a UUID"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01PWBc9XAC8QBGNpQeJEF1V1",
+        "tool_input": {
+          "command": "poetry run python - <<'PY'\nimport json\np=\"output_evaluation.json\"\nd=json.load(open(p))\nfor e in d[\"elements\"]:\n    s=sum(x[\"score\"] for x in e[\"sub_elements\"] if x[\"score\"] is not None)\n    na=sum(1 for x in e[\"sub_elements\"] if x[\"score\"] is None)\n    print(e[\"id\"], \"recorded\",e[\"element_score\"],\"computed\",s,\"max\",e[\"element_max\"],\"na\",na)\nPY",
+          "description": "Recompute element sums from sub-element scores"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01BMrWLk4DZHpXs7sHj232uS",
+        "tool_input": {
+          "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"exit=$?\"",
+          "description": "Re-validate the corrected evaluation output"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 18,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "**Definition check \u2014 passed.** The section \"Source rubric and schema paths (#158)\" is present in my instructions, and the sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches what I would expect of the current rules (the dedicated `updates.update_details` slot plus the anti-crediting clause), so I proceeded.\n\n**Evaluation complete.** `output_evaluation.json` written and validated:\n\n```\nVALID output_evaluation.json: rubric10-semantic\n```\n\n**Score: 34/50 \u2014 fixed 68.0% (34/50), normalized 68.0% (34/50).** No sub-element was excluded: all five trigger conditions resolve as met (human subjects via E1 description/keywords and E8 collection mechanisms; governance via E2 `confidentiality_level: restricted`; datasets-shared via `distribution_formats` + `third_party_sharing.is_shared` + two documented access routes; software-output via the `chorus-ai` GitHub org in `external_resources`; collection via `acquisition_methods`/`collection_mechanisms`). So `excluded_max_points: 0`, `adjusted_max_points: 50`, and the two bases coincide.\n\nElement scores: E1 3, E2 4, E3 4, E4 2, E5 3, E6 2, E7 5, E8 5, E9 4, E10 2.\n\nPrincipal findings:\n- **Element 4 (2/5)** carries the central failure \u2014 `involves_human_subjects: true` for 50,000 admissions including PICU/NICU patients, with no IRB, no waiver determination, no `informed_consent` field at all, no DPIA, and no at-risk-population protections. Deidentification (per-modality, tool-named) and privacy protections (four named artefacts) do pass.\n- **Element 6 (2/5) and Element 10 (2/5)** \u2014 no version, version_access, errata, DOI, citation or publisher for an actively growing \"partially released\" dataset.\n- **Elements 7 and 8 (5/5 each)** \u2014 funding is fully verifiable (OT2OD032701 validates against the NIH pattern and mechanism), and processing software is named in genuine transformation roles (OHNLP toolkit, chorus_waveform conversion scripts, DeGauss/UF-Geocoding, chorus-mapping), satisfying the #1059/#1082 threshold rather than only capture/hosting/validation tooling.\n- Semantic analysis records 15 issues, 10 consistency checks passed / 4 failed / 8 warnings; `grant_number_format: valid_nih`, `doi_format: not_present`, `url_validity: some_invalid`.\n\nOne correction during serialization: my first write recorded Element 2's `element_score` as 3 when its sub-scores sum to 4. I fixed the arithmetic and the derived totals (33\u219234, 66.0%\u219268.0%); no sub-element judgement was changed.",
+    "ttft_ms": 2993,
+    "type": "result",
+    "duration_ms": 862377,
+    "uuid": "97ea5002-1719-4142-84b4-5a89bca8f285",
+    "ttft_stream_ms": 2014,
+    "time_to_request_ms": 22,
+    "first_content_frame_ms": 2015,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "completed_at": "2026-09-12T20:29:54.841578+00:00"
+}

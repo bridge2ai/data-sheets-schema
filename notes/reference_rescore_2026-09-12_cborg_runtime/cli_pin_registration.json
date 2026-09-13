@@ -1,0 +1,28 @@
+{
+  "recorded_at": "2026-09-12T20:06:05.694313+00:00",
+  "issue": 1345,
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "scoring_prompts_and_definitions_changed": false,
+  "failed_prelaunch": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00",
+  "failed_files": {
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/transcript.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/prompt.txt": "ff0196e807c8ec4835939296a9fdf1312942f9c639efd03fc48ca2fe6b6e360c",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/stderr.txt": "de29db459799054fc2961fa0a321c319114701377b36bdb4e7c8c493f51cf15b",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00/receipt.json": "a8d93315e8c72b157e04f9d8edab67f08a3426148863ee77a74ff0640f9af221"
+  },
+  "default_cli_observed": "2.1.270 (Claude Code)",
+  "selected_cli": {
+    "version": "2.1.269 (Claude Code)",
+    "source": "/Users/marcin/.local/share/claude/versions/2.1.269",
+    "selected_copy": "/private/tmp/d4d-cborg-pinned-bin/claude",
+    "environment": {
+      "DISABLE_AUTOUPDATER": "1"
+    },
+    "reason": "Default CLI symlink advanced to 2.1.270; explicit retained binary preserves the registered runtime."
+  },
+  "selected_cli_sha256": "c942e1228b93cb4d52183b3dfbc77f28264f35aa947acd9c0853d029164cf450",
+  "evaluator_launched": false,
+  "model_calls": 0,
+  "accounting": "Retain the local attempt separately; do not fabricate a CLI terminal result or model-cost receipt. Reviewed code flow and exact evidence establish that evaluator exec was not reached.",
+  "retry": "One primary canary through the same scheduler. Both acceptance gates remain required before remaining55."
+}

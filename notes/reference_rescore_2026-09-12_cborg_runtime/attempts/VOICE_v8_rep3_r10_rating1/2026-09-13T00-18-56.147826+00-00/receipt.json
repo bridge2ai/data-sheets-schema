@@ -1,0 +1,132 @@
+{
+  "job_id": "VOICE_v8_rep3_r10_rating1",
+  "started_at": "2026-09-13T00:18:56.147993+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "f839b4e822b4f469d6e379998d71b88fc73eb724c4c3fa668d597729367540a0",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "ba8876a62b15682af22bae93fe16f4ee6d229afca706435d4595064ad1d8b55c",
+  "evaluation_sha256": "45ee1544104e0a7b967b46618a2a1d0f8c45e128b57db0179c97b1ea13b1499f",
+  "cli_result": {
+    "duration_api_ms": 622663,
+    "stop_reason": "end_turn",
+    "session_id": "7e00d8a4-2e32-4f89-a62d-ef1f1c9b84be",
+    "total_cost_usd": 3.0314652499999997,
+    "usage": {
+      "input_tokens": 312,
+      "cache_creation_input_tokens": 211446,
+      "cache_read_input_tokens": 536978,
+      "output_tokens": 50411,
+      "output_tokens_details": {
+        "thinking_tokens": 12447
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 211446
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 314,
+        "outputTokens": 50438,
+        "cacheReadInputTokens": 536978,
+        "cacheCreationInputTokens": 240073,
+        "webSearchRequests": 0,
+        "costUSD": 3.0314652499999997,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 12447,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01KuJVcuVsWfzvo8dXrrwMav",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate the agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01KXC6HAbP6JqQNNBZSsfTin",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-gpjlelb0/input/record.yaml",
+          "description": "Hash the input record"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed with exit status 0.\n\n## Definition check\n\nThe section headed \"Source rubric and schema paths (#158)\" is present in my instructions and reads as expected of the current rules. The sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nI applied that mapping at Element 6 sub-element 5, scoring the provenance item on `was_derived_from`, `raw_data_sources` and the dedicated `updates.update_details` / `version_access.version_details` content rather than crediting `notes` generally.\n\n## Evaluation summary\n\n**48 / 50 \u2014 fixed 96.0% (denominator 50), normalized 96.0% (denominator 50).** No sub-element is N/A, so the two bases coincide and `excluded_item_ids` is empty.\n\nAll five trigger conditions resolved as satisfied before scoring, each on evidence external to the gated sub-elements: human subjects from the E1 description (\"833 adult participants enrolled at five clinical sites\") and E8 `collection_mechanisms`; governance from E2 `regulatory_restrictions` and `confidentiality_level: restricted`; datasets-shared from `distribution_formats` plus the PhysioNet access URL; software-output from the E10 `external_resources` code repositories. Element 4 was therefore applicable in all five sub-elements on participant evidence, not merely on the governance disjunct.\n\nElement scores: E1 4, E2 5, E3 5, E4 5, E5 5, E6 5, E7 5, E8 5, E9 5, E10 4.\n\nThe two zeros:\n- **E1.3 keywords** \u2014 four terms, all generic; none names a disease cohort, modality, feature family or the record's own \"audiomics\" framing.\n- **E10.3 community standards** \u2014 `conforms_to` is deliberately unasserted; `source_caveats` places BIDS conformance with the raw-audio distribution instead. Scored 0 against this item's narrower field list while E3.3 scored 1 on its wider list (`conforms_to_schema`, plus ICD-10 and the B2AI ontology CURIEs); I recorded that the divergence follows from the field lists, not from inconsistent judgement.\n\nConsistency: 20 passed, 2 failed (absent DPIA against acknowledged re-identification risk; unasserted content-level conformance), 14 warnings. Correctness: DOI `valid_physionet` (10.13026 prefix matches the stated publisher), grants `valid_nih` (OT2OD032720 decomposes correctly, supplements canonical), RRID `valid`, URLs `all_valid`.\n\nE8.4 scored 1 on processing-role software \u2014 openSMILE, Praat/Parselmouth, torchaudio, sparc, ppgs, Whisper Large, b2aiprep 3.0.0, SenseLab \u2014 with the Bridge2AI-Voice app and REDCap (capture, role a) and PhysioNet (hosting, role b) explicitly excluded from the basis.\n\nOutput at `output_evaluation.json`; `instrument_sha256`, `rubric_hash` and `input_sha256` recorded as supplied, with `model.name` and `model.evaluator_model` both `claude-opus-5` and `temperature: null`.",
+    "ttft_ms": 3192,
+    "type": "result",
+    "duration_ms": 623765,
+    "uuid": "1a9a10d1-0b1f-497e-ae9d-51691b7445a7",
+    "ttft_stream_ms": 2204,
+    "time_to_request_ms": 21,
+    "first_content_frame_ms": 2204,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_017wdnh1sFEx7A3pop9rzpEJ",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-13T00:29:20.750213+00:00"
+}

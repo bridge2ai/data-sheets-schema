@@ -1,0 +1,103 @@
+{
+  "project": "CHORUS",
+  "arm": "BASELINE (input documents only)",
+  "method": "claudecode_api",
+  "label": "2026-09-12_claude-opus-5-api-generic-v9_rep1",
+  "condition": "generic_v9",
+  "bundle": "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+  "bundle_bytes": 35920,
+  "model": {
+    "name": "claude-opus-5",
+    "temperature": 0.0,
+    "max_tokens": 16000,
+    "config_path": ".github/workflows/d4d_assistant_deterministic.config",
+    "temperature_applies": false,
+    "thinking": {
+      "type": "adaptive"
+    },
+    "temperature_note": "claude-opus-5 rejects `temperature` (400: deprecated for this model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config is not sent and does not apply. Sampling for this model family is selected by model-name suffix (-low/-medium/-high/-xhigh/-max), not by parameter."
+  },
+  "runtime": "Claude API (direct)",
+  "prompt_files": [
+    "src/download/prompts/d4d_generic_arm_prompt_v9.md"
+  ],
+  "schema_digest_md5": "a91bad8b8eaf7c34b147ff5970474342",
+  "phases": [
+    {
+      "phase": "full",
+      "approx_input_tokens": 27369,
+      "carried": {},
+      "cached_blocks": 5
+    },
+    {
+      "phase": "audit",
+      "approx_input_tokens": 30584,
+      "carried": {
+        "Completed full record": 13187
+      },
+      "cached_blocks": 5
+    },
+    {
+      "phase": "reconcile_full",
+      "approx_input_tokens": 33592,
+      "carried": {
+        "Completed full record": 13187,
+        "Audit findings": 12383
+      },
+      "cached_blocks": 5
+    },
+    {
+      "phase": "report",
+      "approx_input_tokens": 43236,
+      "carried": {
+        "Audit findings": 12383,
+        "Original full record": 0,
+        "Original core record": 0,
+        "Reconciled full record": 13187,
+        "Completed core record": 35699
+      },
+      "cached_blocks": 5
+    }
+  ],
+  "approx_total_input_tokens": 134781,
+  "estimate_basis": "carried artifacts sized from the most recent existing records for this project (2026-07-27_ourmap-v2)",
+  "outputs": {
+    "full": "data/d4d_concatenated/claudecode_api/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_d4d.yaml",
+    "core": "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_d4d_core.yaml",
+    "report": "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_reconciliation.md"
+  },
+  "conditional_calls": [
+    "full_readdress: one follow-up inside the full phase when a receipt entry's slot is not a path in the record; input is the full-phase exchange, output at most 8000 tokens",
+    "report_regate: one regeneration of the report when its dispositions contradict the records (#929); the report request plus the report and the contradictions, output at most 24000 tokens"
+  ],
+  "provider": {
+    "provider": "LBL CBORG (proxy to Anthropic)",
+    "base_url": "https://api.cborg.lbl.gov",
+    "key_env": "CBORG_API_KEY"
+  },
+  "generation_canary_only": true,
+  "canary_baseline": "2026-09-01_claude-opus-5-api-generic-v7",
+  "registered_max_tokens_by_phase": {
+    "full": 128000,
+    "reconcile_full": 96000,
+    "repair_full": 96000,
+    "core": 56000,
+    "reconcile_core": 56000,
+    "repair_core": 56000,
+    "audit": 24000,
+    "report": 24000
+  },
+  "input_sha256": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c",
+  "read_only_model_catalogue_observation": {
+    "observed_on": "2026-09-12",
+    "model": "claude-opus-5",
+    "route_model": "vertex_ai/claude-opus-5",
+    "max_input_tokens": 1000000,
+    "max_output_tokens": 128000,
+    "input_cost_per_token": 5e-06,
+    "output_cost_per_token": 2.5e-05,
+    "cache_creation_input_token_cost": 6.25e-06,
+    "cache_read_input_token_cost": 5e-07,
+    "limitation": "Catalogue configuration observed before the run; response identities and usage will be recorded separately."
+  }
+}

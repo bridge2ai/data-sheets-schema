@@ -1,0 +1,12 @@
+{
+  "reviewed_at": "2026-09-12T19:32:27.318736+00:00",
+  "verdict": "approved",
+  "reviewed_commit": "3d5da92f5",
+  "registration_sha256": "1877d4c0e28e3ba2189f826808bba97b574a25aa1dc4cb93e8a288d1f3d6f7d0",
+  "review": "notes/reference_rescore_2026-09-12_cborg/batch_retry_review_round2.md",
+  "review_sha256": "6de495665b041859244e3b135e55b257c914abb4672330bde078e6686799391e",
+  "offline_validation": "17 scheduler tests passed in the writable project environment; 62 independent in-memory checks passed.",
+  "issue": 1343,
+  "finding_resolved": 1344,
+  "next_authorized_action": "Exactly one fresh original CHORUS_v7_rep1_r10_rating2 through the same foreground controller; inspect before accepting and opening the remaining queue. No additional retry is authorized by this failed-history snapshot."
+}

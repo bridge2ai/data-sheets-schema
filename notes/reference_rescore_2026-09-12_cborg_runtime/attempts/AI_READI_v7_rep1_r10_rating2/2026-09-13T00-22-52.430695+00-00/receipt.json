@@ -1,0 +1,140 @@
+{
+  "job_id": "AI_READI_v7_rep1_r10_rating2",
+  "started_at": "2026-09-13T00:22:52.430861+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "5637a34291ff0d80c1f356204bd48e8f739dd28906a0086bedc40720f1ae6c3a",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "dd656a3a6e8b6bc0f00a50c5d1a5e75c6d2eae8407866c2ba3d2cc3c63b8fdb5",
+  "evaluation_sha256": "74e3f74c420b65f7d63267a7d9524eb25f9ab4ef6f0f4f30a0cb9243f4610403",
+  "cli_result": {
+    "duration_api_ms": 557643,
+    "stop_reason": "end_turn",
+    "session_id": "9bca8911-fc3a-474d-87d8-2a0f1ddb5ab6",
+    "total_cost_usd": 2.5900737499999997,
+    "usage": {
+      "input_tokens": 312,
+      "cache_creation_input_tokens": 146401,
+      "cache_read_input_tokens": 652370,
+      "output_tokens": 45506,
+      "output_tokens_details": {
+        "thinking_tokens": 11875
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 146401
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 314,
+        "outputTokens": 45534,
+        "cacheReadInputTokens": 652370,
+        "cacheCreationInputTokens": 179835,
+        "webSearchRequests": 0,
+        "costUSD": 2.5900737499999997,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 11875,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01YQ1pVP79PHUUrW9DPGLi9Z",
+        "tool_input": {
+          "command": "ls -la /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-w4pql6yl; echo \"---\"; find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "List working directory and find agent definition"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01FuCmyUxBNdXrzXNk8CMa5M",
+        "tool_input": {
+          "command": "cd \"/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-w4pql6yl\" && shasum -a 256 input/record.yaml data/rubric/rubric10.txt && python3 -c \"import uuid,datetime;print(uuid.uuid4());print(datetime.datetime.now(datetime.timezone.utc).isoformat().replace('+00:00','Z'))\"",
+          "description": "Compute input and rubric hashes, generate id and timestamp"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_014EHX9oWEunE7fwsQo33bkS",
+        "tool_input": {
+          "command": "shasum -a 256 \"/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-w4pql6yl/input/record.yaml\" \"/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-w4pql6yl/data/rubric/rubric10.txt\"",
+          "description": "Compute sha256 of record and rubric files"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_011ichuh2c6nvYqEENUiP9JN",
+        "tool_input": {
+          "command": "python3 -c \"import uuid,datetime;print(uuid.uuid4());print(datetime.datetime.now(datetime.timezone.utc).isoformat().replace('+00:00','Z'))\"",
+          "description": "Generate evaluator id and timestamp"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed.\n\n## Definition check\n\nThe section headed \"Source rubric and schema paths (#158)\" is present in my instructions. The sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis is the current wording, and the surrounding instrument carries the #1060 per-sub-element Element 4 gate, the #1081 Element 8 sub-element 4 applicability rule and the #1059/#1082 software-role threshold, so the definition is not stale. One caveat on provenance: the agent definition file is not present on disk in this session's working tree (no `.claude/agents/` directory exists here), so I could not recompute its digest; I recorded the supplied `66ad6231\u2026` as instructed and noted this in `metadata.instrument_note`. `shasum` and `python3` were also denied by the sandbox, so the input and rubric hashes are the supplied values rather than recomputed ones.\n\n## Result\n\n**49 / 50 \u2014 fixed 98.0% (denominator 50), normalized 98.0% (denominator 50).** Zero sub-elements excluded, so the two bases coincide and there are no excluded item identities to report.\n\nAll five trigger conditions resolve as satisfied on other elements' evidence: human subjects via the description and keywords (E1) and collection mechanisms (E8); governance via `regulatory_restrictions` (E2); datasets-shared via `distribution_formats`, `page` and the access endpoint (E2); software-output via `external_resources` pointing at the AI-READI code organisation (E10); collection-identified via `acquisition_methods` and `collection_mechanisms` (E8).\n\n**The single lost point is Element 8, sub-element 4 (Software and Tools).** The record describes every transformation \u2014 `.fda`/`.sdt` \u2192 DICOM, `.FIT` \u2192 Open mHealth, `.xml` \u2192 WFDB, REDCap \u2192 OMOP CDM \u2014 but names no tool for any of them, attributing them to \"a combination of automated and custom processing\". The software it does name falls entirely into the non-producing roles: REDCap and MoCA Duo are capture and data-entry applications (role a), FAIRhub is hosting (role b), and the OMOP CDM Data Quality Dashboard checks the released tables without producing them (role d). The GitHub link is an organisation root, which under the threshold neither earns nor forfeits the point.\n\nNotable in scoring the rest: the record's arithmetic is verifiably self-consistent \u2014 the ten collection file counts sum to exactly 356,343, the byte totals reconcile with `total_size_bytes` to within the 419,614 bytes of unmeasured root metadata, and all three demographic axes sum to 2,280 and reconcile across the 70/15/15 splits. One consistency check fails: `is_deidentified.method` records \"NoDeIdentification \u2026 no identifiers were collected\" while `participant_privacy` describes Safe Harbor removal of PHI and `identifiers_removed` lists what was taken out. Six warnings are recorded, including the `confidentiality_level: restricted` mapping that the record's own quoted sources (HL7:2N normal, PublicDownloadSelfAttestationRequired) do not support, and the absence of a DPIA despite an assessed re-identification risk over imaging and sensor modalities that Safe Harbor does not address.\n\nOutput written to `output_evaluation.json`.",
+    "ttft_ms": 4123,
+    "type": "result",
+    "duration_ms": 558554,
+    "uuid": "7026488f-4b90-4541-bd00-b6bfa5e97d1f",
+    "ttft_stream_ms": 3141,
+    "time_to_request_ms": 23,
+    "first_content_frame_ms": 3141,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [],
+  "completed_at": "2026-09-13T00:32:11.810883+00:00"
+}

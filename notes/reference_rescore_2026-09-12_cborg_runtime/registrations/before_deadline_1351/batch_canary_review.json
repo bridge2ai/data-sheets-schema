@@ -1,0 +1,23 @@
+{
+  "reviewed_at": "2026-09-12T21:20:52.810893+00:00",
+  "verdict": "approved",
+  "evaluation_sha256": "a803649ca0d07c30ea1745f088e27e70ef4f53d5bafbe1f06d8d2589c2e20f44",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "registration_sha256": "ff4ab3b919a6824c08fcb3f0150a6a7afc3e850559208447851ab7f545fe9d6f",
+  "review": "notes/reference_rescore_2026-09-12_cborg_runtime/validator_status_pilot_review.md",
+  "review_sha256": "3f0d8ac2d0cd9edcec13e14e5eafe8cdefaef7e35f8a4ea020899ad6b802788e",
+  "source_question_headings_equal": 20,
+  "original_write_binding": "one successful absolute original Write",
+  "final_score": {
+    "total_points": 83,
+    "max_points": 88,
+    "excluded_max_points": 0,
+    "adjusted_max_points": 88,
+    "normalized_percentage": 94.3,
+    "fixed_percentage": 94.3,
+    "questions_not_applicable": 0
+  },
+  "validator_used": "canonical exact own-file command; successful VALID result after Write",
+  "status_echo_proof_used": false,
+  "scope": "Execution/instrument acceptance and recorded semantic inspection; no replacement scores or external source/legal verification."
+}

@@ -1,0 +1,82 @@
+{
+  "status": "stopped",
+  "completed": [
+    {
+      "job_id": "AI_READI_v7_rep1_r20_rating1",
+      "exit_code": 0
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r10_rating1",
+      "exit_code": 0
+    },
+    {
+      "job_id": "AI_READI_v7_rep2_r20_rating1",
+      "exit_code": 1
+    },
+    {
+      "job_id": "AI_READI_v7_rep2_r10_rating1",
+      "exit_code": 0
+    },
+    {
+      "job_id": "AI_READI_v7_rep3_r20_rating1",
+      "exit_code": 1
+    },
+    {
+      "job_id": "AI_READI_v7_rep3_r10_rating1",
+      "exit_code": 0
+    }
+  ],
+  "not_launched": [
+    "AI_READI_v8_rep1_r10_rating1",
+    "AI_READI_v8_rep1_r20_rating1",
+    "AI_READI_v8_rep2_r10_rating1",
+    "AI_READI_v8_rep2_r20_rating1",
+    "AI_READI_v8_rep3_r10_rating1",
+    "AI_READI_v8_rep3_r20_rating1",
+    "CHORUS_v7_rep1_r20_rating1",
+    "CHORUS_v7_rep2_r10_rating1",
+    "CHORUS_v7_rep2_r20_rating1",
+    "CHORUS_v7_rep3_r10_rating1",
+    "CHORUS_v7_rep3_r20_rating1",
+    "CHORUS_v8_rep1_r10_rating1",
+    "CHORUS_v8_rep1_r20_rating1",
+    "CHORUS_v8_rep2_r10_rating1",
+    "CHORUS_v8_rep2_r20_rating1",
+    "CHORUS_v8_rep3_r10_rating1",
+    "CHORUS_v8_rep3_r20_rating1",
+    "CM4AI_v7_rep1_r10_rating1",
+    "CM4AI_v7_rep1_r20_rating1",
+    "CM4AI_v7_rep2_r10_rating1",
+    "CM4AI_v7_rep2_r20_rating1",
+    "CM4AI_v7_rep3_r10_rating1",
+    "CM4AI_v7_rep3_r20_rating1",
+    "CM4AI_v8_rep1_r10_rating1",
+    "CM4AI_v8_rep1_r20_rating1",
+    "CM4AI_v8_rep2_r10_rating1",
+    "CM4AI_v8_rep2_r20_rating1",
+    "CM4AI_v8_rep3_r10_rating1",
+    "CM4AI_v8_rep3_r20_rating1",
+    "VOICE_v7_rep1_r10_rating1",
+    "VOICE_v7_rep1_r20_rating1",
+    "VOICE_v7_rep2_r10_rating1",
+    "VOICE_v7_rep2_r20_rating1",
+    "VOICE_v7_rep3_r10_rating1",
+    "VOICE_v7_rep3_r20_rating1",
+    "VOICE_v8_rep1_r10_rating1",
+    "VOICE_v8_rep1_r20_rating1",
+    "VOICE_v8_rep2_r10_rating1",
+    "VOICE_v8_rep2_r20_rating1",
+    "VOICE_v8_rep3_r10_rating1",
+    "VOICE_v8_rep3_r20_rating1",
+    "AI_READI_v7_rep1_r10_rating2",
+    "AI_READI_v7_rep1_r10_rating3",
+    "CHORUS_v7_rep1_r10_rating2",
+    "CHORUS_v7_rep1_r10_rating3",
+    "CM4AI_v7_rep1_r10_rating2",
+    "CM4AI_v7_rep1_r10_rating3",
+    "VOICE_v7_rep1_r10_rating2",
+    "VOICE_v7_rep1_r10_rating3"
+  ],
+  "workers": 4,
+  "stop_signal": null
+}

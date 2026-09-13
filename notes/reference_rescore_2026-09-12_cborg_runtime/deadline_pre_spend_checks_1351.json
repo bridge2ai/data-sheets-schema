@@ -1,0 +1,13 @@
+{
+  "checked_at": "2026-09-12T22:13:58.517569+00:00",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "registration_sha256": "724f07cfec5aa26b33ed9f9d42542d383fabfc285a576a617992ce4c514e9cfd",
+  "tests": "231 passed in combined run; subsequent20 deadline tests passed, including1 new real local timeout probe (232 distinct tests in total).",
+  "model_calls_during_tests": 0,
+  "python39_syntax": "scheduler,deadline extension,dated execution helpers parse as3.9",
+  "unchanged_scoring_prefixes": 56,
+  "prior_evaluations_verified": 259,
+  "original_accepted_writes_verified": 17,
+  "pending": 39,
+  "candidate_retention_probe": "Real synthetic local subprocess killed/waited by subprocess.run after0.5s; original candidate retained before temporary-directory removal, receipt stays incomplete and no output accepted."
+}

@@ -1,0 +1,12 @@
+{
+  "status": "stopped",
+  "completed": [
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating1",
+      "exit_code": 1
+    }
+  ],
+  "not_launched": [],
+  "workers": 4,
+  "stop_signal": null
+}

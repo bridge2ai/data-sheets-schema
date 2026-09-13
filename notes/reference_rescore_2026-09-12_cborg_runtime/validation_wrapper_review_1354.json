@@ -1,0 +1,48 @@
+{
+  "job_id": "CM4AI_v7_rep2_r20_rating1",
+  "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T22-56-22.177804+00-00",
+  "finding": "The original successful validator command adds a cd-to-isolated-cwd wrapper outside the frozen canonical/status-echo grammar. Preserve its 75/88 candidate as excluded and register one fresh retry without broadening the gate.",
+  "candidate_sha256": "35911c71288958308cdf8a6c1be9f77101835f5df8d7892c174251d6425dfaf5",
+  "original_score": {
+    "total_points": 75,
+    "max_points": 88,
+    "excluded_max_points": 0,
+    "adjusted_max_points": 88,
+    "normalized_percentage": 85.2,
+    "fixed_percentage": 85.2,
+    "questions_not_applicable": 0,
+    "excluded_item_ids": [],
+    "denominator_note": "No question's 'Applies to' condition failed, so the adjusted denominator (88) equals the fixed denominator (88) and the two percentages coincide. Both are reported explicitly so this record remains comparable in form to records that do carry exclusions."
+  },
+  "original_validator_call": {
+    "type": "tool_use",
+    "id": "toolu_vrtx_01JmSh9HiVmrqsJALYK7YkLn",
+    "name": "Bash",
+    "input": {
+      "command": "cd \"/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-31a82aw7\" && poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+      "description": "Validate evaluation output against schema"
+    }
+  },
+  "original_validator_result": {
+    "tool_use_id": "toolu_vrtx_01JmSh9HiVmrqsJALYK7YkLn",
+    "type": "tool_result",
+    "content": "VALID output_evaluation.json: rubric20-semantic\nEXIT=0",
+    "is_error": false
+  },
+  "terminal_cli_cost_usd": 3.1502955,
+  "schema_check": "Separate read-only exact-file validator passed on the retained candidate; diagnostic only, not acceptance evidence.",
+  "files": {
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T22-56-22.177804+00-00/execution_deadline.json": "90789bd75bc9093f0b094b2002636309585bcbc3180f6d65a65e91b1264efa94",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T22-56-22.177804+00-00/transcript.jsonl": "ef514d18ed4fa25e9fc987235dabd50d83ce4ac6618979b952390a9a01ef1bf1",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T22-56-22.177804+00-00/candidate.json": "35911c71288958308cdf8a6c1be9f77101835f5df8d7892c174251d6425dfaf5",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T22-56-22.177804+00-00/prompt.txt": "559bc77d6d0f531c4f37f84e6616c0b4072784e827d30ec3131d0a2e8ea0f680",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T22-56-22.177804+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T22-56-22.177804+00-00/receipt.json": "62a9ee8c5e12fff4f394b4c6b1108c1167168388cfeaefa7a9bfb6131c121836"
+  },
+  "recorded_at": "2026-09-12T23:16:05.293911+00:00",
+  "issue": 1354,
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "controller_result": "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T22-36-59.308318+00-00_remaining/result.json",
+  "controller_result_sha256": "1f88684abcebd9aeb9cbf4f9c9e641f65ff81abd746e255e0d75a457249e5430",
+  "status": "all workers drained; original candidate remains excluded"
+}

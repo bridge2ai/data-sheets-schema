@@ -1,0 +1,65 @@
+{
+  "registered_at": "2026-09-12T19:21:31.683029+00:00",
+  "reason": "One successful rating required 9.7 minutes. Use up to four isolated workers to finish the existing 56-rating scope, with a new one-rating scheduler canary before fan-out.",
+  "previous_plan": "notes/reference_rescore_2026-09-12_cborg/registrations/plan-before-batch-amendment.md",
+  "previous_plan_sha256": "0030d928692a85938eddc1b144e824549fd150854b77309732d859d43076bca0",
+  "manifest_sha256": "e71b8805b7fde90b5e64e23ba1c1f346f2f17e33fe49df7c98c9e885aeec1501",
+  "scheduler": "scripts/reference_rescore_cborg_batch.py",
+  "scheduler_sha256": "dfdf97bf8c9a06b765e8d6a0a9a05908133e589a53105cd34abc39525caba46e",
+  "workers": 4,
+  "pilot_job_id": "CHORUS_v7_rep1_r10_rating2",
+  "pilot_scope": "One already planned rubric10 repeat rating, launched by the identical foreground Python controller, shell environment and four-worker scheduling mode used by the fill, with a queue containing only this job.",
+  "unchanged": "Frozen evaluator adapter, runner, 56 complete prompts, inputs, both instruments, schemas, output paths, Opus 5 selector and high effort, explicit CBORG route and $5 per-attempt limit.",
+  "failure_policy": "Stop new launches on observed failure, retain and drain every active evaluator, no automatic retry of any existing attempt.",
+  "limits": "One-job canary verifies worker credential inheritance and persisted output; concurrent service rate limits, cross-item contention and long-tail inputs are unmeasured until fill.",
+  "preserved_files": {
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-10-04.833451+00-00/prompt.txt": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-10-04.833451+00-00/receipt.json": "df148b428e63c4dc16e7d7a02113d71d66f12f5ca5bbd78e25cfa1b94386b0dd",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-10-04.833451+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-10-04.833451+00-00/transcript.jsonl": "4e4dce555d8bfc698c258f41e1989c01956f7d203319dd886d5d4301547533fa",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-35-24.172466+00-00/candidate.json": "8b08357453730a468b3f47f8c0c0315d1ef30fe69ed937a0c95cbf2f9f9d8178",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-35-24.172466+00-00/prompt.txt": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-35-24.172466+00-00/receipt.json": "8b271c69a611a93fbd1dedf064eff73c6ae516be48f68ef8e5067045014233e9",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-35-24.172466+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-35-24.172466+00-00/transcript.jsonl": "2036fac62df0674757bbb98b6cbbbd86d24e98c290569a11e569f74a10583aa1",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T18-35-24.172466+00-00/validation.txt": "556a828104ca26394a7547527fa48515dc20ac41b54e6bd9e6dcb937062e5386",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00/transcript.jsonl": "1fed9d0a552048ff6f2f3e5fa2facd37c9d22d584bc72c4e540448f7ef51e60d",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00/candidate.json": "29a632ca9ae771167e55d4a46fe583077ab192384503e6d3fe92e5573b081395",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00/prompt.txt": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00/receipt.json": "742d95373fed9163f0ad027d96aecbf86613474d1529f5c56784945b6a300455",
+    "notes/reference_rescore_2026-09-12_cborg/batch_runs/2026-09-12T19-09-46.783419+00-00_pilot/result.json": "e67c14d1f0dc0dee938c388bc82f70e80d04336b8552e320895c92c6154d8eba",
+    "notes/reference_rescore_2026-09-12_cborg/batch_runs/2026-09-12T19-09-46.783419+00-00_pilot/events.jsonl": "41819ad90e8439fae8b78352704d42511d7c85cbf9b279ed5f94010edfd1a16c",
+    "notes/reference_rescore_2026-09-12_cborg/batch_runs/2026-09-12T19-09-46.783419+00-00_pilot/CHORUS_v7_rep1_r10_rating2.txt": "6ec029860cc728b19a608d400b45983cf85c00c818dfb91c837229ff6cc18350",
+    "notes/reference_rescore_2026-09-12_cborg/batch_canary_launch.json": "7eb00aab9a05cd6e81d8ff60fa0a4828c722ae1762d531a1c90724c67bb846aa",
+    "notes/reference_rescore_2026-09-12_cborg/batch_pre_spend_review.json": "e9e07babcbbbd21ea28e5863613c48dc34cc2b8472747eb34a1fdc054d4d8542",
+    "notes/reference_rescore_2026-09-12_cborg/batch_review_round3.md": "e13a964c0c2f29659b5f8b3bdc42e4f652839cf72acf2f498e9946b2be18651b"
+  },
+  "existing_outputs": {
+    "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg/CHORUS_v7_rep1_r10_rating1_evaluation.json": "8b08357453730a468b3f47f8c0c0315d1ef30fe69ed937a0c95cbf2f9f9d8178"
+  },
+  "supersedes_registration": {
+    "path": "notes/reference_rescore_2026-09-12_cborg/registrations/batch-registration-before-reviewed-retry-fix.json",
+    "sha256": "8e88be5cf92ec001976e1656af5e8e2eae9f3a7133698e8a4e7bc74bd44f3bd6",
+    "reason": "#1343: retain a rejected self-identification mismatch; authorize exactly one fresh original retry via an exact failed-history snapshot. Frozen prompts, instrument, model gate and budget stay unchanged."
+  },
+  "interrupt_policy": "SIGINT and SIGTERM request a controller stop without propagating to worker sessions; active workers retain their original runner timeout and finish with evidence. A forced SIGKILL or host loss remains outside graceful-drain guarantees.",
+  "launch_boundary": "A stop observed during preparation leaves the job queued. Signal delivery is deferred only through the short atomic launch decision, then observed by the controller; existing workers remain in separate sessions.",
+  "pre_spend_review": "batch_retry_1343_pre_spend_review.json",
+  "pilot_launch_record": "batch_canary_launch_retry_1343.json",
+  "reviewed_retries": {
+    "CHORUS_v7_rep1_r10_rating2": {
+      "issue": 1343,
+      "reason": "JSON self-reported Opus 4.5 while every assistant event and CLI canonical identity report Opus 5. Reject the original; do not edit or alias that declaration. One fresh original measurement under identical scoring conditions.",
+      "attempts": {
+        "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00": {
+          "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00/transcript.jsonl": "1fed9d0a552048ff6f2f3e5fa2facd37c9d22d584bc72c4e540448f7ef51e60d",
+          "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00/candidate.json": "29a632ca9ae771167e55d4a46fe583077ab192384503e6d3fe92e5573b081395",
+          "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00/prompt.txt": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+          "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "notes/reference_rescore_2026-09-12_cborg/attempts/CHORUS_v7_rep1_r10_rating2/2026-09-12T19-09-47.292190+00-00/receipt.json": "742d95373fed9163f0ad027d96aecbf86613474d1529f5c56784945b6a300455"
+        }
+      }
+    }
+  }
+}

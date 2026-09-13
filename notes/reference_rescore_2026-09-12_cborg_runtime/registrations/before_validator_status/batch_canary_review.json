@@ -1,0 +1,24 @@
+{
+  "reviewed_at": "2026-09-12T20:31:18.803921+00:00",
+  "verdict": "approved",
+  "evaluation_sha256": "b5ecb9d31a6a73d1f71e46f70617390ff62d63a84c5abd5d794afa9110755366",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "registration_sha256": "deb2499bd10871f6147df4a115ae416c26d55153767c26bd561d793d80860907",
+  "review": "notes/reference_rescore_2026-09-12_cborg_runtime/canary_review.md",
+  "review_sha256": "c68cd4823fe04efde81c6b6c9adb535276ce0aac88aa010c5d75897316f0d38f",
+  "source_element_headings_equal": 10,
+  "source_item_headings_equal": 50,
+  "original_write_binding": "last successful original absolute Write",
+  "final_score": {
+    "total_points": 34,
+    "max_points": 50,
+    "excluded_max_points": 0,
+    "adjusted_max_points": 50,
+    "normalized_percentage": 68.0,
+    "fixed_percentage": 68.0,
+    "sub_elements_not_applicable": 0,
+    "excluded_item_ids": [],
+    "denominator_note": "No sub-element was excluded: the human-subjects, governance, datasets-shared, software-output and collection conditions are all met, so the fixed base (34/50) and the N/A-adjusted base (34/50) coincide."
+  },
+  "limits": "One primary rating only; observed duration863.325s, cost3.6787935 USD CLI estimate. No repeatability or four-worker latency inference. No weights/URL/legal compliance certification."
+}

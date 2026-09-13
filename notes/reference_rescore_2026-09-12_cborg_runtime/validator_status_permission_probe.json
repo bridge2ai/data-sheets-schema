@@ -1,0 +1,226 @@
+{
+  "probe": "Scripted local SSE endpoint, synthetic credentials and validator, no real records or provider calls. Headers and full request context were not recorded.",
+  "cases": [
+    {
+      "case": "canonical",
+      "extended": false,
+      "exit_code": 0,
+      "local_requests": 3,
+      "request_shapes": [
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [],
+          "stream": true,
+          "max_tokens": 64000
+        },
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [
+            "Bash"
+          ],
+          "stream": true,
+          "max_tokens": 64000
+        },
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [
+            "Bash"
+          ],
+          "stream": true,
+          "max_tokens": 64000
+        }
+      ],
+      "tool_result": {
+        "is_error": false,
+        "content": "VALID output_evaluation.json: rubric20-semantic"
+      },
+      "forbidden_file_exists": false,
+      "provider_calls": 0
+    },
+    {
+      "case": "old_compound",
+      "extended": false,
+      "exit_code": 0,
+      "local_requests": 3,
+      "request_shapes": [
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [],
+          "stream": true,
+          "max_tokens": 64000
+        },
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [
+            "Bash"
+          ],
+          "stream": true,
+          "max_tokens": 64000
+        },
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [
+            "Bash"
+          ],
+          "stream": true,
+          "max_tokens": 64000
+        }
+      ],
+      "tool_result": {
+        "is_error": true,
+        "content": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomplish this goal, e.g. using head instead of cat. But you *should not* attempt to work around this denial in malicious ways, e.g. do not use your ability to run tests to execute non-test actions. You should only try to work around this restriction in reasonable ways that do not attempt to bypass the intent behind this denial. If you believe this capability is essential to complete the user's request, STOP and explain to the user what you were trying to do and why you need this permission. Let the user decide how to proceed."
+      },
+      "forbidden_file_exists": false,
+      "provider_calls": 0
+    },
+    {
+      "case": "status_exact",
+      "extended": true,
+      "exit_code": 0,
+      "local_requests": 3,
+      "request_shapes": [
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [],
+          "stream": true,
+          "max_tokens": 64000
+        },
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [
+            "Bash"
+          ],
+          "stream": true,
+          "max_tokens": 64000
+        },
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [
+            "Bash"
+          ],
+          "stream": true,
+          "max_tokens": 64000
+        }
+      ],
+      "tool_result": {
+        "is_error": false,
+        "content": "VALID output_evaluation.json: rubric20-semantic\nEXIT=0"
+      },
+      "forbidden_file_exists": false,
+      "provider_calls": 0
+    },
+    {
+      "case": "status_lowercase",
+      "extended": true,
+      "exit_code": 0,
+      "local_requests": 3,
+      "request_shapes": [
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [],
+          "stream": true,
+          "max_tokens": 64000
+        },
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [
+            "Bash"
+          ],
+          "stream": true,
+          "max_tokens": 64000
+        },
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [
+            "Bash"
+          ],
+          "stream": true,
+          "max_tokens": 64000
+        }
+      ],
+      "tool_result": {
+        "is_error": false,
+        "content": "VALID output_evaluation.json: rubric20-semantic\nexit=0"
+      },
+      "forbidden_file_exists": false,
+      "provider_calls": 0
+    },
+    {
+      "case": "unrelated_environment",
+      "extended": true,
+      "exit_code": 0,
+      "local_requests": 3,
+      "request_shapes": [
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [
+            "Bash"
+          ],
+          "stream": true,
+          "max_tokens": 64000
+        },
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [],
+          "stream": true,
+          "max_tokens": 64000
+        },
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [
+            "Bash"
+          ],
+          "stream": true,
+          "max_tokens": 64000
+        }
+      ],
+      "tool_result": {
+        "is_error": true,
+        "content": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomplish this goal, e.g. using head instead of cat. But you *should not* attempt to work around this denial in malicious ways, e.g. do not use your ability to run tests to execute non-test actions. You should only try to work around this restriction in reasonable ways that do not attempt to bypass the intent behind this denial. If you believe this capability is essential to complete the user's request, STOP and explain to the user what you were trying to do and why you need this permission. Let the user decide how to proceed."
+      },
+      "forbidden_file_exists": false,
+      "provider_calls": 0
+    },
+    {
+      "case": "extra_mutation",
+      "extended": true,
+      "exit_code": 0,
+      "local_requests": 3,
+      "request_shapes": [
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [],
+          "stream": true,
+          "max_tokens": 64000
+        },
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [
+            "Bash"
+          ],
+          "stream": true,
+          "max_tokens": 64000
+        },
+        {
+          "path": "/v1/messages?beta=true",
+          "tools": [
+            "Bash"
+          ],
+          "stream": true,
+          "max_tokens": 64000
+        }
+      ],
+      "tool_result": {
+        "is_error": true,
+        "content": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomplish this goal, e.g. using head instead of cat. But you *should not* attempt to work around this denial in malicious ways, e.g. do not use your ability to run tests to execute non-test actions. You should only try to work around this restriction in reasonable ways that do not attempt to bypass the intent behind this denial. If you believe this capability is essential to complete the user's request, STOP and explain to the user what you were trying to do and why you need this permission. Let the user decide how to proceed."
+      },
+      "forbidden_file_exists": false,
+      "provider_calls": 0
+    }
+  ],
+  "cli_version": "2.1.269",
+  "cli_sha256": "c942e1228b93cb4d52183b3dfbc77f28264f35aa947acd9c0853d029164cf450",
+  "scope": "Permission probe only, using synthetic files and a scripted local API. It is not evaluator evidence and cannot satisfy instrument/input/original-Write gates.",
+  "accepted_original_ratings_reverified": 5,
+  "original_denied_ratings_still_excluded": 2
+}

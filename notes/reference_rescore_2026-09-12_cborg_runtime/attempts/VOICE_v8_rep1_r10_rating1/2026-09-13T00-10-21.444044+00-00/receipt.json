@@ -1,0 +1,137 @@
+{
+  "job_id": "VOICE_v8_rep1_r10_rating1",
+  "started_at": "2026-09-13T00:10:21.444225+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "e6c88243ed9b3f1531ddfe63e5e0ede0f405d1711e55ec94ddd9c37b5239c3d7",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "6ad8a47eab05cc4fe6015485d79d8601bc26a03c90d2c86711c1ff511a13030f",
+  "evaluation_sha256": "2601d3de58ccfdff9243d861fc62ace0ebefdb0cc48212872fd7338811ed6a52",
+  "cli_result": {
+    "duration_api_ms": 457969,
+    "stop_reason": "end_turn",
+    "session_id": "85b369d5-a81a-49fa-9774-2770bc413b3e",
+    "total_cost_usd": 1.98325025,
+    "usage": {
+      "input_tokens": 314,
+      "cache_creation_input_tokens": 100658,
+      "cache_read_input_tokens": 510128,
+      "output_tokens": 37718,
+      "output_tokens_details": {
+        "thinking_tokens": 9755
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 100658
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 316,
+        "outputTokens": 37750,
+        "cacheReadInputTokens": 510128,
+        "cacheCreationInputTokens": 125257,
+        "webSearchRequests": 0,
+        "costUSD": 1.98325025,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 9755,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01Wq9ze8mgp8YsuUetYwR7Dj",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01SADNt6G4rdWC4Eeit9ADtf",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml data/rubric/* 2>/dev/null"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01TjPojksuoXgLkSNKjNBBrV",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; python3 -c \"import uuid;print(uuid.uuid4())\""
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "**Definition check \u2014 passed.** The section headed \"Source rubric and schema paths (#158)\" is present in my instructions, and the sentence beginning \"Read release-specific notes\" reads verbatim:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThat is the current-rules wording (dedicated `updates.update_details`, with the guard against crediting unrelated notes), so I proceeded.\n\n**Evaluation written and validated.**\n\n```\nVALID output_evaluation.json: rubric10-semantic   (exit 0)\n```\n\nResult: **49 / 50**, fixed_percentage 98.0 (denominator 50), normalized_percentage 98.0 (adjusted denominator 50). No sub-element was excluded \u2014 all five applicability conditions resolve as met, each on evidence outside the gated element:\n\n- **Human subjects** \u2014 E1 `description` (\"833 adult participants recruited at five North American sites\"), E8 `collection_mechanisms` (in-clinic tablet collection) \u2192 Element 4 sub-elements 1\u20135 applicable.\n- **Governance restrictions** \u2014 E2 `confidentiality_level: restricted`, registered-access licence \u2192 independently opens E4 sub-elements 1\u20132.\n- **Datasets shared** \u2014 `distribution_formats` (TSV/JSON/Parquet) with PhysioNet `access_urls` \u2192 E3.1\u20134, E6, E8, E10.\n- **Software output** \u2014 E10 `external_resources` names `github.com/sensein/b2aiprep` \u2192 E8 sub-element 3.\n- **Collection identified and shared** \u2192 E8 sub-elements 1\u20132.\n\nThe single 0 is **Element 1 sub-element 3 (keywords)**: four broad terms (`health, biomarkers, bridge2ai, voice`), below the five-term threshold and covering domain only \u2014 no condition, method or modality terms, though all are described at length elsewhere.\n\nE8 sub-element 4 scored 1 on the processing-role threshold: `machine_annotation_tools`, `preprocessing_strategies` and `external_resources` name b2aiprep (version 3.0.0, with repository) as having produced the release, plus torchaudio, sparc, ppgs, openSMILE, Praat and parselmouth as the software that computed the distributed feature files \u2014 transformation of the released data, not capture, hosting, packaging or validation. E10 sub-element 2 was scored on the datasets-shared condition alone (#1080), not gated on an existing publication.\n\nNotable semantic findings (2 failed consistency checks, 7 warnings): `version_access.latest_version_doi` (10.13026/37yb-1t42) matches no listed version and conflicts with the record's own 3.1.0 DOI; the HIPAA position is left contradictory between the DTUA (\"not covered under HIPAA\") and `hipaa_compliant: compliant`. DOI (PhysioNet 10.13026), RRID (SCR_007345) and NIH grant formats (3OT2OD032720-01S1, OT2OD032720) all validate. Model recorded as `claude-opus-5` for both name and evaluator_model, temperature null, instrument digest `66ad6231\u2026` with `instrument_kind: agent_definition`.",
+    "ttft_ms": 3712,
+    "type": "result",
+    "duration_ms": 458585,
+    "uuid": "c3383730-f7da-4dfe-a1ef-e1084de273bd",
+    "ttft_stream_ms": 2787,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 3711,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01QeGskomyqyoT5oii1wmTCv",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"exit=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-13T00:18:00.865204+00:00"
+}

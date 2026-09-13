@@ -1,0 +1,124 @@
+{
+  "job_id": "CHORUS_v8_rep1_r20_rating1",
+  "started_at": "2026-09-12T22:37:01.019269+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "caf753dbdb3a2f60543933f56c90551b85d90e834cb10679212d92f94a3b18a2",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "f2a4d6229e5b4188a281727cb6723120e8ebbcfefe2883e6b1ada1c434bb0bb7",
+  "evaluation_sha256": "79fa60b8bd5f77f0c649c55fb8b36447699b9ccef7c96d968466acee652b6ab2",
+  "cli_result": {
+    "duration_api_ms": 521053,
+    "stop_reason": "end_turn",
+    "session_id": "c2538154-d850-47e5-ab88-7119fac7906c",
+    "total_cost_usd": 2.175593,
+    "usage": {
+      "input_tokens": 306,
+      "cache_creation_input_tokens": 142477,
+      "cache_read_input_tokens": 276031,
+      "output_tokens": 42069,
+      "output_tokens_details": {
+        "thinking_tokens": 11499
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 142477
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 308,
+        "outputTokens": 42097,
+        "cacheReadInputTokens": 276031,
+        "cacheCreationInputTokens": 157378,
+        "webSearchRequests": 0,
+        "costUSD": 2.175593,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 11499,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_015YisnGqxwQgew3yab3aPHi",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml data/rubric/rubric20.txt",
+          "description": "Compute hashes of input record and rubric text"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01YTzRb4xrnogjRBRnSzzqRE",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get UTC timestamp and generate a UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 10,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (`VALID output_evaluation.json: rubric20-semantic`, exit 0).\n\n## Definition check\n\nThe Reproducibility section is present in my active instructions and reads as expected. Verbatim:\n\n> **Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.**\n\n## Result: CHORUS \u2014 67/88\n\nNo `Applies to` condition failed, so `excluded_max_points: 0`, `adjusted_max_points: 88`, and both bases coincide at **76.1%** (fixed and normalized), `questions_not_applicable: 0`.\n\n| Category | Score |\n|---|---|\n| Structural Completeness (Q1\u20135) | 19/21 |\n| Metadata Quality & Content (Q6\u201310) | 18/21 |\n| Technical Documentation (Q11\u201315) | 16/25 |\n| FAIRness & Accessibility (Q16\u201320) | 14/21 |\n\n**Applicability, resolved before scoring.** All four conditional triggers fired. Q8/Q15 from `description` (\"acute and critical care hospital admissions\") and `keywords`, never from their own ethics/demographics fields. Q11 from `external_resources` (the chorus-ai GitHub organization), not from its own strategy fields. Q10/Q12/Q13/Q17 from `distribution_formats` plus the documented access route \u2014 access is approval-gated, so the ambiguity rule forced `applicable: true` rather than silent N/A inflation.\n\n**What drove the score.** Interoperability is the standout (Q10 = 5): five modality-appropriate standards, schema conformance at two levels, and real cross-site harmonization onto OMOP CDM via publicly inspectable validated mappings. Collection protocol, funding attribution, and textual provenance are all strong.\n\nThe losses cluster in two places. First, no persistent identifier \u2014 `id` duplicates the project homepage, and that single absence depresses Q6, Q13 (no sustainability anchor) and caps Q14 at 3 (references exist, but nothing to build a citation around). Second, human-subjects documentation: `involves_human_subjects=true` with no IRB of record, no consent or waiver, no HIPAA determination, and PICU/NICU minors flagged with no safeguards \u2014 that held Q8 at 3. Q20 scored 2: both scored fields are empty, and biases strongly implied by the record's own `known_limitations` (academic-center selection, modality coverage, flowsheet measurement) are never named as biases.\n\n**One judgement worth flagging.** This record is unusually honest \u2014 twelve element-level `source_caveats`, an explicit precedence rule for its own 50,000-vs-45K discrepancy, planned work consistently separated from delivered. That disclosure is why I logged the figure conflicts as *low* severity and scored the gaps as genuine source absences rather than extraction failures. It does not substitute for missing content: a well-flagged absent IRB is still an absent IRB.\n\n`instrument_sha256` recorded as supplied, with `instrument_kind: agent_definition`; `rubric_hash` recorded separately per the two-hash rationale. Two caveats on provenance fields: the sandbox denied `shasum`, so I recorded the supplied input hash rather than independently verifying it, and it denied `date`, so `evaluation_timestamp` derives from the observed input mtime rather than a live clock \u2014 both noted in `metadata.timestamp_note`.",
+    "ttft_ms": 2815,
+    "type": "result",
+    "duration_ms": 523649,
+    "uuid": "e2ac9fc6-76f2-4abb-bc8b-a730356db718",
+    "ttft_stream_ms": 1835,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 1835,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [],
+  "completed_at": "2026-09-12T22:45:45.467713+00:00"
+}

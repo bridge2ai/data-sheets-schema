@@ -1,0 +1,8 @@
+{
+  "accepted_at": "2026-09-12T23:44:41.766237+00:00",
+  "registration_sha256": "b0a02133382c51cd8ebaa480917bd1c8920f3c7cfece11deea0392c6d9f0cbad",
+  "job_id": "CM4AI_v7_rep2_r20_rating1",
+  "evaluation_sha256": "b0e22af2feab2fff686eea1bc702e62cf184b101c418930e72536bc5a91286e1",
+  "original_attempt": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CM4AI_v7_rep2_r20_rating1/2026-09-12T23-21-52.389234+00-00",
+  "runtime_model": "claude-opus-5"
+}

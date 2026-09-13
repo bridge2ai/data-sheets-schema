@@ -1,0 +1,55 @@
+{
+  "cases": [
+    {
+      "job_id": "CHORUS_v7_rep3_r10_rating1",
+      "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep3_r10_rating1/2026-09-12T21-44-16.183393+00-00",
+      "receipt_error": "ValueError: element score or denominator disagrees with its sub-elements",
+      "original_score": {
+        "total_points": 35,
+        "max_points": 50,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 50,
+        "normalized_percentage": 70.0,
+        "fixed_percentage": 70.0,
+        "sub_elements_not_applicable": 0
+      },
+      "cost_usd": 2.79090375,
+      "files": {
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep3_r10_rating1/2026-09-12T21-44-16.183393+00-00/transcript.jsonl": "a770c76af2a17b0aaeca3ac10ff919f80d751c3a83bc8223932730fa9d97231b",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep3_r10_rating1/2026-09-12T21-44-16.183393+00-00/candidate.json": "0f3dbda32aa00745e82677f846b2e64696543f8640cf3fab0b58d3c5a918ae55",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep3_r10_rating1/2026-09-12T21-44-16.183393+00-00/prompt.txt": "ffb3b59a919e4e30d0f17615b10ede8d79c221d2b4e3d7f267019c977c27f694",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep3_r10_rating1/2026-09-12T21-44-16.183393+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep3_r10_rating1/2026-09-12T21-44-16.183393+00-00/receipt.json": "3b072295e5654cec36aab06aeaf248c1a424dd5e7f63b367b432c13dc45652e8"
+      },
+      "finding": "Element10 reports3 although its five item scores sum to2; reported overall35 also exceeds the34 item sum. Original item judgments and derived totals are retained unchanged and excluded."
+    },
+    {
+      "job_id": "CHORUS_v8_rep1_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T21-47-30.078685+00-00",
+      "receipt_error": "ValueError: output label does not identify this job consistently",
+      "original_score": {
+        "total_points": 66,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 75.0,
+        "fixed_percentage": 75.0,
+        "questions_not_applicable": 0
+      },
+      "cost_usd": 2.17750825,
+      "files": {
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T21-47-30.078685+00-00/transcript.jsonl": "876aa19d44fe57a1917367fba07c8b1f62b74f02088f87087e529b50ed80b379",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T21-47-30.078685+00-00/candidate.json": "8f447deb07b8ec4f0a9265253df42d17b33cb78f73e88146f95997afd136dbc4",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T21-47-30.078685+00-00/prompt.txt": "caf753dbdb3a2f60543933f56c90551b85d90e834cb10679212d92f94a3b18a2",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T21-47-30.078685+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v8_rep1_r20_rating1/2026-09-12T21-47-30.078685+00-00/receipt.json": "f845be23c16c81cf109b01d25cdb9da7e2d48657c2bd0b4ccc8133b4b2465792"
+      },
+      "finding": "The required job label is absent from both top level and metadata although it is supplied in the prompt. This is missing provenance, not a verified rating of another record. Original candidate remains excluded."
+    }
+  ],
+  "status": "all workers drained; original failed candidates retained unchanged",
+  "code_or_prompt_changes": 0,
+  "recorded_at": "2026-09-12T22:12:50.345894+00:00",
+  "issue": 1350,
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2"
+}

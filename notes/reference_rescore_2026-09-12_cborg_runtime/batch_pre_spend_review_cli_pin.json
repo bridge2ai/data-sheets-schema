@@ -1,0 +1,14 @@
+{
+  "reviewed_at": "2026-09-12T20:15:17.766734+00:00",
+  "verdict": "approved",
+  "reviewed_commit": "8e6fb74581c53dba067133d542ae79f5e3fe20b9",
+  "registration_sha256": "deb2499bd10871f6147df4a115ae416c26d55153767c26bd561d793d80860907",
+  "review": "notes/reference_rescore_2026-09-12_cborg_runtime/pre_spend_review_round10.md",
+  "review_sha256": "d89d686089b8bb3edef3a847adf78cbe8dadab95fa2568542a12178999695e9e",
+  "findings_resolved": [
+    1345,
+    1346
+  ],
+  "offline_validation": "28 scheduler tests passed; actual effective-PATH binary and all retained hashes verified without model calls. Independent review approved the control-flow classification, original failed evidence and corrected executable selection.",
+  "next_authorized_action": "One primary CHORUS v7 rep1 rubric10 canary retry with the registered CLI binary. Both canary reviews and acceptance gates before any remaining55."
+}

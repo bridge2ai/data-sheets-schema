@@ -1,0 +1,121 @@
+{
+  "record": "CHORUS",
+  "label": "2026-09-12_claude-opus-5-api-generic-v9_rep1",
+  "completed_at": "2026-09-12T18:26:00+00:00",
+  "status": "canary_gates_passed",
+  "generated_records": 1,
+  "model_requests": 6,
+  "provider": "LBL CBORG (proxy to Anthropic)",
+  "model": "claude-opus-5",
+  "validation_and_report_hashes_verified": true,
+  "registered_generation_pins_unchanged": 9,
+  "gated_metrics": [
+    {
+      "metric": "pair errors",
+      "run": 0,
+      "baseline_worst": 0
+    },
+    {
+      "metric": "report findings",
+      "run": 0,
+      "baseline_worst": 0
+    },
+    {
+      "metric": "ungrounded identifiers",
+      "run": 0,
+      "baseline_worst": 0
+    },
+    {
+      "metric": "resolver URLs in identifier slots",
+      "run": 0,
+      "baseline_worst": 0
+    },
+    {
+      "metric": "organisational fragments",
+      "run": 0,
+      "baseline_worst": 0
+    },
+    {
+      "metric": "undeclared prefixes",
+      "run": 0,
+      "baseline_worst": 0
+    },
+    {
+      "metric": "British spellings",
+      "run": 0,
+      "baseline_worst": 0
+    },
+    {
+      "metric": "chunks unreviewed",
+      "run": 0,
+      "baseline_worst": 0
+    },
+    {
+      "metric": "snippets unverified",
+      "run": 0,
+      "baseline_worst": 0
+    },
+    {
+      "metric": "addressing slips over tolerance",
+      "run": 0,
+      "baseline_worst": 0
+    },
+    {
+      "metric": "receipts vacuous",
+      "run": 0,
+      "baseline_worst": 0
+    },
+    {
+      "metric": "receipt findings",
+      "run": 0,
+      "baseline_worst": 0
+    },
+    {
+      "metric": "duplicate keys",
+      "run": 0,
+      "baseline_worst": 0
+    }
+  ],
+  "usage_totals": {
+    "input_tokens": 147518,
+    "output_tokens": 80716,
+    "thinking_tokens": 36040,
+    "cache_read": 95109,
+    "cache_write": 80812
+  },
+  "catalogue_price_estimate_usd": "3.30811950",
+  "cost_basis": "Usage multiplied by CBORG catalogue prices observed before the run; not a reconciled invoice. Thinking tokens are already included in output_tokens.",
+  "artifact_sha256": {
+    "data/d4d_concatenated/claudecode_api/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_d4d.yaml": "e5ed1b70d6b1f620540e01a8077ab2906cf4936518f2a5b10e4dda747d88c8e9",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_d4d_core.yaml": "b1e21b7ac8919bd64e779a2e1d3944ed4ecebbe044522ddfab50f01c19c4bdf9",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_reasoning.jsonl": "490fa081094e55c608bffc8283f1834846a9081ebf2d9b2bb083cb99ba718234",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_provenance.yaml": "2bd4444878f996c688c5d11b68722d347dc765177ad5c0089fa464be97ff095a",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_reconciliation.md": "fc415a3523ce2a89ff5d9009620899f6d85c5681b3a47b32744bb23244c6f349",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_coverage_receipt.yaml": "5619e50e6720194b1cd837efa38caaa60da8f72495ae460a8bcad6b0041b3950",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_api_usage_46d8033e251b3c6e.json": "8ab9ffb6941de45ec51600af1044175d961af39c47c3dca1e99b2de57d63c1de",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/intermediate/CHORUS_reconcile_core.yaml": "6ec862a277f0b7cd89c8804eeb7c04d73c7c588dcdec0d19f74f21fbcf150630",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/intermediate/CHORUS_reconcile_full.yaml": "c485ec5da4c3f72da53f3b28f61a1f7672d17a9cef9a9026dd1da6818d6bb568",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/intermediate/CHORUS_report.md": "67936422b145e2c8c6723509379ed5fcc0eb0e73e85dde3f9d8ffd79007ef266",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/intermediate/CHORUS_audit.json": "29d4d5821f356abb275854dd795d07f24345bfea2fb43303ef09fa3638fb927e",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/intermediate/CHORUS_repair_full_r1.yaml": "e5ed1b70d6b1f620540e01a8077ab2906cf4936518f2a5b10e4dda747d88c8e9",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/intermediate/CHORUS_coverage_receipt.yaml": "5619e50e6720194b1cd837efa38caaa60da8f72495ae460a8bcad6b0041b3950",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/intermediate/CHORUS_core.yaml": "9482551ac2840131ec1bb0ba2f9654f518e18c338f43696f3af33e12b5b86a9a",
+    "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/intermediate/CHORUS_full.yaml": "81dabcdda36c4fb38631c3fa1f300901b5efdb2d7007e9be105039c4d351cab6"
+  },
+  "receipt_review": {
+    "chunks_reviewed": 8,
+    "chunks_total": 8,
+    "snippets_verified": 125,
+    "snippets_total": 125,
+    "slots_with_receipt": 115,
+    "receiptable_slots": 129,
+    "nongated_no_value_overlap": 1,
+    "nongated_single_leaf_entries": 2,
+    "sampled_cases": [
+      "c001 is the concatenation header and table of contents; no additional substantive source content identified.",
+      "The c002 NIH Common Fund snippet supports the expanded National Institutes of Health grantor; the no-token-overlap count is not evidence of a false grantor.",
+      "The c006 50000 ICU/PICU/NICU admissions and7642 radiology-admission snippets support the corresponding instance counts/types; the lexical counter does not credit the controlled-vocabulary codes."
+    ]
+  },
+  "scope_limit": "One existing CHORUS source bundle and one generation replicate; no new full v9 cohort, reference rubric rating, or general-user certification."
+}

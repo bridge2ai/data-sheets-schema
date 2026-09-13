@@ -1,0 +1,304 @@
+{
+  "recorded_at": "2026-09-12T19:53:53.446374+00:00",
+  "issue": 1343,
+  "previous_manifest": "notes/reference_rescore_2026-09-12_cborg/manifest.json",
+  "previous_manifest_sha256": "e71b8805b7fde90b5e64e23ba1c1f346f2f17e33fe49df7c98c9e885aeec1501",
+  "new_manifest": "notes/reference_rescore_2026-09-12_cborg_runtime/manifest.json",
+  "new_manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "reason": "API/runtime identifiers are execution provenance. Two evaluators self-identified as Opus 4.5 despite request/context/route metadata naming Opus 5. The new prompt provides the configured identifier and preserves independent runtime verification. No scoring criterion changes.",
+  "preliminary_condition": {
+    "completed_cli_sessions": 4,
+    "accepted_canaries_retained_separately": 1,
+    "excluded_attempts": 3,
+    "cli_reported_cost_usd": 10.2673605,
+    "audit": "notes/reference_rescore_2026-09-12_cborg/preliminary_audit.json"
+  },
+  "instrument_definitions_unchanged": true,
+  "record_bytes_unchanged": 24,
+  "prior_evaluations_preserved": 259,
+  "prompt_change": "The full previous prompt remains an exact prefix; one identical execution-metadata suffix is appended after the closing record tag for all 56 jobs.",
+  "execution_metadata_suffix": "\nExecution metadata supplied by the launcher (outside the record):\nThe model fields in this evaluation identify the configured API/runtime identifier. They are execution provenance, not an introspective claim about underlying model weights. Use the supplied canonical identifier for model.name and model.evaluator_model; do not substitute a remembered training identity or the record's generator identity. The retained runtime trace will independently check these values and reject any actual route mismatch.\n{\n  \"provider\": \"LBL CBORG\",\n  \"requested_selector\": \"claude-opus-5[1m]\",\n  \"model.name\": \"claude-opus-5\",\n  \"model.evaluator_model\": \"claude-opus-5\",\n  \"model.model_identity_note\": \"API/runtime identifier supplied by the launcher and verified against the retained runtime trace; not an identification of underlying weights.\"\n}\nAll scoring criteria, evidence requirements and the definition check above remain unchanged.\n",
+  "prompts": [
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating1",
+      "previous_prompt_sha256": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+      "current_prompt_sha256": "ff0196e807c8ec4835939296a9fdf1312942f9c639efd03fc48ca2fe6b6e360c"
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r10_rating1",
+      "previous_prompt_sha256": "2903d9b53ac82e60ad0dce7056a1a32ac1df2e3ca1033810d94b69619f4a14b5",
+      "current_prompt_sha256": "5637a34291ff0d80c1f356204bd48e8f739dd28906a0086bedc40720f1ae6c3a"
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r20_rating1",
+      "previous_prompt_sha256": "d665529a7705444f11d673228273e25315e5984901c5ca4ed79dae85021dca34",
+      "current_prompt_sha256": "c41b8291ae3c2158f3ab2fccff6feb6c697595265a09aa395b8af1808840e221"
+    },
+    {
+      "job_id": "AI_READI_v7_rep2_r10_rating1",
+      "previous_prompt_sha256": "2e6f9ea38ada33e93cbd9c08e11705729a83e106d74b26f2b19f60eb306818f7",
+      "current_prompt_sha256": "d1a70c3b5b4c322750f8112cb8e700472922c29b2214e7e68017e71fd2290033"
+    },
+    {
+      "job_id": "AI_READI_v7_rep2_r20_rating1",
+      "previous_prompt_sha256": "4ece579e0334d3cc84387506b7918e67299024b8e7034a02f029d8d561871c1b",
+      "current_prompt_sha256": "d2e1cc8b4d51d2ed69f9011a6bee45e69042b908fa723e9f107e76440716ba53"
+    },
+    {
+      "job_id": "AI_READI_v7_rep3_r10_rating1",
+      "previous_prompt_sha256": "ffe91bfd4f860846cd4405854e6442afbf0913d69ed4d66d315643c1516a4b62",
+      "current_prompt_sha256": "be9e18da9bf9c5195a38c2d9b5ccf40f1b260ac9cc45499fdddb0f21020f029a"
+    },
+    {
+      "job_id": "AI_READI_v7_rep3_r20_rating1",
+      "previous_prompt_sha256": "b1f96f348c8556ec0c812f81c40984f65ea1a24dfdc4a13a896873e96b15cab9",
+      "current_prompt_sha256": "de9530b69f159b671119ab4bb40fcd4283def9627c32bc2ec0b03e4affde5124"
+    },
+    {
+      "job_id": "AI_READI_v8_rep1_r10_rating1",
+      "previous_prompt_sha256": "e858e65b93d8b059bed782649d973646b0c58b8e431570494570bd077d53d639",
+      "current_prompt_sha256": "33e5b216b7824e1d6d9cc5e809b872b7338df653742b988bf467f638702739f2"
+    },
+    {
+      "job_id": "AI_READI_v8_rep1_r20_rating1",
+      "previous_prompt_sha256": "f30f5ef785c52af941db1b22e3a727f125dd8bd542e6ab9aa8121eceaacfcf9f",
+      "current_prompt_sha256": "42c81fa3adec4976378b0d79de92a2374be0a9ab5762b20000416386728bc634"
+    },
+    {
+      "job_id": "AI_READI_v8_rep2_r10_rating1",
+      "previous_prompt_sha256": "dc0e9af59201b591873194933fa94d8074452c6b5657ef561f386b01a3f88491",
+      "current_prompt_sha256": "7d487f89c7ed723c079e88dc4b099c0d7f3ebeb2e54280510bebc3953c72ade3"
+    },
+    {
+      "job_id": "AI_READI_v8_rep2_r20_rating1",
+      "previous_prompt_sha256": "a23a507c6c107e2085ebfa651e76fa216d0aa3ac2fbaf09a93a9afa494a0312a",
+      "current_prompt_sha256": "eb4aafd01c0c12b7826335971269c5ae0d5ae152c1c63db817eea6ca21aa20e3"
+    },
+    {
+      "job_id": "AI_READI_v8_rep3_r10_rating1",
+      "previous_prompt_sha256": "737abc97340bbceec9130f132d48af5a797e051f0d447eb5cf87c166cfc6cd20",
+      "current_prompt_sha256": "7f574e3071c7fe65d2133c5d90b446780f712eebe1c1905f4215f6121760b9ca"
+    },
+    {
+      "job_id": "AI_READI_v8_rep3_r20_rating1",
+      "previous_prompt_sha256": "7fad4475a3d20a6fb9aec2176f15673311ac2254e0ddda6fa6ae8aeb18866983",
+      "current_prompt_sha256": "bd3b595f002b656ceeb7c4552e0fb6708cb709768d61687aa1a39b5196ae7f05"
+    },
+    {
+      "job_id": "CHORUS_v7_rep1_r20_rating1",
+      "previous_prompt_sha256": "18866735910ef701a114788e651cbb789d38c754dc323147941c65c41a6e468f",
+      "current_prompt_sha256": "6ff74e69b6e11a183fcf659a56061a2e6aadc81e452d06d9b14317aa28b201bf"
+    },
+    {
+      "job_id": "CHORUS_v7_rep2_r10_rating1",
+      "previous_prompt_sha256": "eece7b151956c2909711d54e4b4f50dd729fd08e1ba134e2c2c84cc7fde155ed",
+      "current_prompt_sha256": "319a3011fb2b7ca078b5eaf4594595acb27a26549265fe0c0b0f1502b0ce1e7e"
+    },
+    {
+      "job_id": "CHORUS_v7_rep2_r20_rating1",
+      "previous_prompt_sha256": "4be2a79c7e6877243ebee7f7fe05aeb84ae8bdf29bf4aa3cca1e071298a208ee",
+      "current_prompt_sha256": "6da726625b20558479930e4c326dae5d6fa6934472dcc147e74a1c2d4e795b2d"
+    },
+    {
+      "job_id": "CHORUS_v7_rep3_r10_rating1",
+      "previous_prompt_sha256": "a59bd945c5de8b22162c2c1557eed7fa3f48fc6cfb3c73537d12c6ba26d761c0",
+      "current_prompt_sha256": "ffb3b59a919e4e30d0f17615b10ede8d79c221d2b4e3d7f267019c977c27f694"
+    },
+    {
+      "job_id": "CHORUS_v7_rep3_r20_rating1",
+      "previous_prompt_sha256": "82d62d5072bfcfbf015cbcd9d2226f8618db5036cdd97d3db17323c92f2bb027",
+      "current_prompt_sha256": "a409c07ff9c8aa2a9bad5906f57c2ac5daf6574ede7f734bd9416381d1525aa3"
+    },
+    {
+      "job_id": "CHORUS_v8_rep1_r10_rating1",
+      "previous_prompt_sha256": "c4f3ccd94a1a5963765d6277298fc983bfb27b8d3d898a148f03a35d76e65a5d",
+      "current_prompt_sha256": "40eba579964f9e58f1d45f1d75a611daedb350a3b65b06c8b988b19614ea1326"
+    },
+    {
+      "job_id": "CHORUS_v8_rep1_r20_rating1",
+      "previous_prompt_sha256": "14fce7d6f0a5cd1713275169fea0ea8deba33ba4ab6133f64a73b68e7e482775",
+      "current_prompt_sha256": "caf753dbdb3a2f60543933f56c90551b85d90e834cb10679212d92f94a3b18a2"
+    },
+    {
+      "job_id": "CHORUS_v8_rep2_r10_rating1",
+      "previous_prompt_sha256": "a8c09ee97d1beb0587525499c12c149bcdd4fd3de9170b258d81ef416bf5ab2c",
+      "current_prompt_sha256": "68a538e4cf7c3627cb3700499110e98f524b2908a5809dbca71e3649a6143bd2"
+    },
+    {
+      "job_id": "CHORUS_v8_rep2_r20_rating1",
+      "previous_prompt_sha256": "87cdbd23ef3cfabcdc27b4c39a1a02852317116f17786a7078ddda9a3bcf6441",
+      "current_prompt_sha256": "7d270b49ba4d688e50d0e5ca10aad16e9b3b1746f394a6396f38adb855011ca0"
+    },
+    {
+      "job_id": "CHORUS_v8_rep3_r10_rating1",
+      "previous_prompt_sha256": "a753ac71d65674f61f3bc70c0174ae3ab4b8356c1905fccf2cca9b8fd5849d1a",
+      "current_prompt_sha256": "8019cce6b58d9fdfedac94223230c90556ec176808a4ab9688d0702794a7918c"
+    },
+    {
+      "job_id": "CHORUS_v8_rep3_r20_rating1",
+      "previous_prompt_sha256": "452160c4c9c7effb353f536c341c3b4f74d918115052cbb6d15d843222baf2f2",
+      "current_prompt_sha256": "bb97cf26d9e43317347d611c96e09a55c28ba8473ae40c922087b39381af2127"
+    },
+    {
+      "job_id": "CM4AI_v7_rep1_r10_rating1",
+      "previous_prompt_sha256": "40cd5ac92ae9b4dc31efa9684db9900318aed15e38b6b390c1326c952c1e0dc3",
+      "current_prompt_sha256": "f75897506db5218bdbaafa1b5f8d95171fcb8778f01ae3866a7afa5fd19ebfac"
+    },
+    {
+      "job_id": "CM4AI_v7_rep1_r20_rating1",
+      "previous_prompt_sha256": "d7092c01df5d66df38e3d486741d41d627b3b075f954f261fc5224ae57f6f7e7",
+      "current_prompt_sha256": "587d62fbc87dd688a79f16f7937805e7d779819694273344349973a09f92e7b5"
+    },
+    {
+      "job_id": "CM4AI_v7_rep2_r10_rating1",
+      "previous_prompt_sha256": "827b8dbe85348de4479c8063321b63b724313f3c7d25ac9e98604651641313ef",
+      "current_prompt_sha256": "81046e746488662f82f8f1919e987032b951a05cfe19bd46b29d5fb12d7bdff3"
+    },
+    {
+      "job_id": "CM4AI_v7_rep2_r20_rating1",
+      "previous_prompt_sha256": "a78a2344261ea6b0171e4fad6744ec97775f3502d7e92369d6a7c52ecff9af73",
+      "current_prompt_sha256": "559bc77d6d0f531c4f37f84e6616c0b4072784e827d30ec3131d0a2e8ea0f680"
+    },
+    {
+      "job_id": "CM4AI_v7_rep3_r10_rating1",
+      "previous_prompt_sha256": "06f988b924154ee9c98d8a67d85826b97bd8f7c025e0f997caf3fc5bc880efd4",
+      "current_prompt_sha256": "c7c5060d258ba5a3c2e364b512c90465fc6e1361d27660ed97b3bbf5cdfbd4f0"
+    },
+    {
+      "job_id": "CM4AI_v7_rep3_r20_rating1",
+      "previous_prompt_sha256": "ee54b345a920825af3b8f30930a88341f8c273345a8f4cc2864041c2c39f3ea3",
+      "current_prompt_sha256": "7be967dfeeddc4f64a6efc3a4660ccda404e1ed96955f80f400ecb0fb946f144"
+    },
+    {
+      "job_id": "CM4AI_v8_rep1_r10_rating1",
+      "previous_prompt_sha256": "1febfa2e3e13079eaf33c7f3c660d5d5e118cbc4b1b61d5fe6fd3a8dc42517b7",
+      "current_prompt_sha256": "b77646b213584923505373b35a54d9f2bc382416c0275c605e5078dfea8d529b"
+    },
+    {
+      "job_id": "CM4AI_v8_rep1_r20_rating1",
+      "previous_prompt_sha256": "461263b0c9b9f29d9140a3511fd91e413abe48fc3a60c333961aa02899ae80ac",
+      "current_prompt_sha256": "c7cc26d2b0b635aad6ac25e43273ba35706fa357ac414a25c4d2576391d72891"
+    },
+    {
+      "job_id": "CM4AI_v8_rep2_r10_rating1",
+      "previous_prompt_sha256": "85fa989c3238a0bc174ee9a85aebbe50e1c66837325f38b147edfa2ac0a53849",
+      "current_prompt_sha256": "d1f3ef11c692394702fbae7f47aaa869565a2b77dd27ad54ecb3b16a80a04742"
+    },
+    {
+      "job_id": "CM4AI_v8_rep2_r20_rating1",
+      "previous_prompt_sha256": "8bb298d92bed9ad2fb2655b00697d5ba49a83e1168b56721f85dfc8893ec31a8",
+      "current_prompt_sha256": "cbe3000af5f6117f8fbb8e2ac6fcca0d2a4c5fe53fd2d8205a8de1021b3908df"
+    },
+    {
+      "job_id": "CM4AI_v8_rep3_r10_rating1",
+      "previous_prompt_sha256": "d0994de159dc1680319d6c9f1ac70cc0c482508249f0e8ab657c52e90d8b3109",
+      "current_prompt_sha256": "f49548f6dcb95464e1949f694b5024a58e86fee047e36facff27c9daecb0bc43"
+    },
+    {
+      "job_id": "CM4AI_v8_rep3_r20_rating1",
+      "previous_prompt_sha256": "a81179d1899d959b11f3baef72ef963629d44aa52f30f7333cd614e7554bd731",
+      "current_prompt_sha256": "356923c982ff76906c37b0f270b8f5645aa4e7b18261aeefc8089982ac60fb2e"
+    },
+    {
+      "job_id": "VOICE_v7_rep1_r10_rating1",
+      "previous_prompt_sha256": "465c09de7c6e0a276cecc509291c132903a854845af5dbaa0555a322aef20dec",
+      "current_prompt_sha256": "8a0af72bf07cceb27bd5062e95013b080ec01bfb382ff9ad33d518b6c0eba46f"
+    },
+    {
+      "job_id": "VOICE_v7_rep1_r20_rating1",
+      "previous_prompt_sha256": "7ebb5a6c4e3cf855e4e1103db4733425be3e178fd07cd22377b3d5abb7994736",
+      "current_prompt_sha256": "ab688eeaef5154a28167508a3dd636aea545b387d5d45fb4bb0a6a375b5578e7"
+    },
+    {
+      "job_id": "VOICE_v7_rep2_r10_rating1",
+      "previous_prompt_sha256": "3b6915b1d8eabae976e712882518e7d3e362fa97ca5efa92a7262e812c3b1673",
+      "current_prompt_sha256": "752312514f33c91d57d38c499d2df8b54452a69ec8374b7ceb804e23361dc332"
+    },
+    {
+      "job_id": "VOICE_v7_rep2_r20_rating1",
+      "previous_prompt_sha256": "da107c44cce4ad16a1bc644b729fe490dc95b06efbd6cfe7d998fd9cb7f9c4a7",
+      "current_prompt_sha256": "426d168879d6b3bb45cdc65cec3b29272b6045ddcded1a2521d161a1a7fb6af6"
+    },
+    {
+      "job_id": "VOICE_v7_rep3_r10_rating1",
+      "previous_prompt_sha256": "f2f6ce02dff3b716c1a68d85ecbdbc763f11588332760d9a0e562de21b68f444",
+      "current_prompt_sha256": "65261e0edb14d250bd5a0e3f1ac23c2146710b719524b1e73ec2f99cdcd15f8c"
+    },
+    {
+      "job_id": "VOICE_v7_rep3_r20_rating1",
+      "previous_prompt_sha256": "02a9deddc6a3fe89e28a37151752ac890eb43e7dd8488db83274d308aaf52f5e",
+      "current_prompt_sha256": "6643079a237a84da21af97964962aa364173ffdb95125b8a2042aec74eab6f50"
+    },
+    {
+      "job_id": "VOICE_v8_rep1_r10_rating1",
+      "previous_prompt_sha256": "2be9569fbc73c8787410b1cf1aa787a0a8b56f368ed5fd5bc27bf77283d6bb01",
+      "current_prompt_sha256": "e6c88243ed9b3f1531ddfe63e5e0ede0f405d1711e55ec94ddd9c37b5239c3d7"
+    },
+    {
+      "job_id": "VOICE_v8_rep1_r20_rating1",
+      "previous_prompt_sha256": "893273e3cc43f1a23996f70950e41a8d560145ce190299e04c6e9d32ef51e0b6",
+      "current_prompt_sha256": "d64f8b3f94c3e437e007a07ada9c6465a09719606c79ea08f5a93ca7bd12a7d7"
+    },
+    {
+      "job_id": "VOICE_v8_rep2_r10_rating1",
+      "previous_prompt_sha256": "4446eee7128ff937bd2850e4269b216f07032e1b7fdf11e8f3d7188507e1eddd",
+      "current_prompt_sha256": "7fe44291c629c842f805362020a7ab581e2d734c911744129bafb4bb6e5d070a"
+    },
+    {
+      "job_id": "VOICE_v8_rep2_r20_rating1",
+      "previous_prompt_sha256": "d875704618c538dcead68490a3f8428735b5871562f864f7f77a29d6a34e4d82",
+      "current_prompt_sha256": "bd2925e374a759cc91e4e75c60ec22cb1e37db36e5eaafc21ccdbcb21fd0e53a"
+    },
+    {
+      "job_id": "VOICE_v8_rep3_r10_rating1",
+      "previous_prompt_sha256": "78dea75fc0f1769613b04e3aa8871abb4cf048d32461b1583746ef66ee19d0eb",
+      "current_prompt_sha256": "f839b4e822b4f469d6e379998d71b88fc73eb724c4c3fa668d597729367540a0"
+    },
+    {
+      "job_id": "VOICE_v8_rep3_r20_rating1",
+      "previous_prompt_sha256": "44bd868bfd1fda0d6095e23216413d9648204d3569f50fd5ab1a5782a4d9fbe7",
+      "current_prompt_sha256": "a1905ae4a399b5ed53946856031e95c0d49425fa17e3c0786fbff0fc84ab66a1"
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r10_rating2",
+      "previous_prompt_sha256": "2903d9b53ac82e60ad0dce7056a1a32ac1df2e3ca1033810d94b69619f4a14b5",
+      "current_prompt_sha256": "5637a34291ff0d80c1f356204bd48e8f739dd28906a0086bedc40720f1ae6c3a"
+    },
+    {
+      "job_id": "AI_READI_v7_rep1_r10_rating3",
+      "previous_prompt_sha256": "2903d9b53ac82e60ad0dce7056a1a32ac1df2e3ca1033810d94b69619f4a14b5",
+      "current_prompt_sha256": "5637a34291ff0d80c1f356204bd48e8f739dd28906a0086bedc40720f1ae6c3a"
+    },
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating2",
+      "previous_prompt_sha256": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+      "current_prompt_sha256": "ff0196e807c8ec4835939296a9fdf1312942f9c639efd03fc48ca2fe6b6e360c"
+    },
+    {
+      "job_id": "CHORUS_v7_rep1_r10_rating3",
+      "previous_prompt_sha256": "7a92d97f097d894d6e15f2d083157d21712b0d09148af4907009f0b2a819e48d",
+      "current_prompt_sha256": "ff0196e807c8ec4835939296a9fdf1312942f9c639efd03fc48ca2fe6b6e360c"
+    },
+    {
+      "job_id": "CM4AI_v7_rep1_r10_rating2",
+      "previous_prompt_sha256": "40cd5ac92ae9b4dc31efa9684db9900318aed15e38b6b390c1326c952c1e0dc3",
+      "current_prompt_sha256": "f75897506db5218bdbaafa1b5f8d95171fcb8778f01ae3866a7afa5fd19ebfac"
+    },
+    {
+      "job_id": "CM4AI_v7_rep1_r10_rating3",
+      "previous_prompt_sha256": "40cd5ac92ae9b4dc31efa9684db9900318aed15e38b6b390c1326c952c1e0dc3",
+      "current_prompt_sha256": "f75897506db5218bdbaafa1b5f8d95171fcb8778f01ae3866a7afa5fd19ebfac"
+    },
+    {
+      "job_id": "VOICE_v7_rep1_r10_rating2",
+      "previous_prompt_sha256": "465c09de7c6e0a276cecc509291c132903a854845af5dbaa0555a322aef20dec",
+      "current_prompt_sha256": "8a0af72bf07cceb27bd5062e95013b080ec01bfb382ff9ad33d518b6c0eba46f"
+    },
+    {
+      "job_id": "VOICE_v7_rep1_r10_rating3",
+      "previous_prompt_sha256": "465c09de7c6e0a276cecc509291c132903a854845af5dbaa0555a322aef20dec",
+      "current_prompt_sha256": "8a0af72bf07cceb27bd5062e95013b080ec01bfb382ff9ad33d518b6c0eba46f"
+    }
+  ],
+  "no_old_measurement_promoted": true
+}

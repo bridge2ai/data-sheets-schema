@@ -1,0 +1,54 @@
+{
+  "reviewed_at": "2026-09-12T21:01:51.206477+00:00",
+  "issue": 1347,
+  "verdict": "both original candidates remain excluded",
+  "cases": [
+    {
+      "job_id": "AI_READI_v7_rep2_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00",
+      "accepted": false,
+      "candidate_score": {
+        "total_points": 83,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 94.3,
+        "fixed_percentage": 94.3,
+        "questions_not_applicable": 0
+      },
+      "cli_reported_cost_usd": 2.3643259999999997,
+      "files": {
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00/transcript.jsonl": "24a879efecfc736f738b128374139d99f34551fd12cc102ca7c7f172676fdb8a",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00/candidate.json": "85399fbad8384fa5472d97b5dbc99bc40d8d312cbeeaeffcc90f8e44b6289a86",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00/prompt.txt": "d2e1cc8b4d51d2ed69f9011a6bee45e69042b908fa723e9f107e76440716ba53",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep2_r20_rating1/2026-09-12T20-32-34.968549+00-00/receipt.json": "eaf683be0d4cef4b75587fbbfd81b67426fba20812fe4c8bc8b70ac93b0ff446"
+      },
+      "finding": "Only validator-plus-exit-status commands were attempted; every validator attempt was denied. No successful canonical validator call is present."
+    },
+    {
+      "job_id": "AI_READI_v7_rep3_r20_rating1",
+      "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00",
+      "accepted": false,
+      "candidate_score": {
+        "total_points": 83,
+        "max_points": 88,
+        "excluded_max_points": 0,
+        "adjusted_max_points": 88,
+        "normalized_percentage": 94.3,
+        "fixed_percentage": 94.3,
+        "questions_not_applicable": 0
+      },
+      "cli_reported_cost_usd": 3.49564175,
+      "files": {
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00/transcript.jsonl": "b396841b61e61f0a4378c5b04e2596e34f01a5f25f98ee3740a875d81a95d6de",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00/candidate.json": "5cd5c32de48a1d7da4ae4d053c59d929ec32a212f4f662bf64873769afaf2b7c",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00/prompt.txt": "de9530b69f159b671119ab4bb40fcd4283def9627c32bc2ec0b03e4affde5124",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/AI_READI_v7_rep3_r20_rating1/2026-09-12T20-41-23.074495+00-00/receipt.json": "748667cc07f7a3cd9d157b45a230367fa1491f8d74d6bf55357057b5c7812d68"
+      },
+      "finding": "Only validator-plus-exit-status commands were attempted; every validator attempt was denied. No successful canonical validator call is present."
+    }
+  ],
+  "resolution": "An exact status-echo permission and proof adapter; unchanged scoring prompts, definitions, input bytes and original traces. Successful canonical validation or proven equivalent validation with EXIT=0 remains required."
+}

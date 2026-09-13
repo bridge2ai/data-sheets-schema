@@ -1,0 +1,138 @@
+{
+  "job_id": "VOICE_v8_rep2_r20_rating1",
+  "started_at": "2026-09-13T00:18:01.863862+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "bd2925e374a759cc91e4e75c60ec22cb1e37db36e5eaafc21ccdbcb21fd0e53a",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "0766cb45aa40e3557eb0501fd4883cedbaf7462f6c2f59099c05dac4b3d59aea",
+  "evaluation_sha256": "8fd40a53387d47c13e2427e632d170075e200628c81a16c9b543c75b10853945",
+  "cli_result": {
+    "duration_api_ms": 475381,
+    "stop_reason": "end_turn",
+    "session_id": "af5be3b9-6723-43d6-8557-7ffbf44d9c5a",
+    "total_cost_usd": 1.9647569999999999,
+    "usage": {
+      "input_tokens": 310,
+      "cache_creation_input_tokens": 97567,
+      "cache_read_input_tokens": 509694,
+      "output_tokens": 37798,
+      "output_tokens_details": {
+        "thinking_tokens": 11928
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 97567
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 312,
+        "outputTokens": 37825,
+        "cacheReadInputTokens": 509694,
+        "cacheCreationInputTokens": 122036,
+        "webSearchRequests": 0,
+        "costUSD": 1.9647569999999999,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 11928,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01Q4uaMKyz8Wf2opUhPq8oET",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml 2>/dev/null; find . -name \"*rubric20*\" -maxdepth 4 2>/dev/null | head -50",
+          "description": "Hash input record and locate rubric files"
+        }
+      },
+      {
+        "tool_name": "Read",
+        "tool_use_id": "toolu_vrtx_01NUpJEkKzqNcRzadE5SKcNf",
+        "tool_input": {
+          "file_path": "/Users/marcin/src/download/prompts/rubric20_semantic_schema.json"
+        }
+      },
+      {
+        "tool_name": "Read",
+        "tool_use_id": "toolu_vrtx_012dSSUY4trH4NZrmg2JNgSd",
+        "tool_input": {
+          "file_path": "/Users/marcin/data/rubric/rubric20.txt"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01X77JHssF7b7SyJ7LKhVwf4",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; python3 -c \"import uuid; print(uuid.uuid4())\"",
+          "description": "Get UTC timestamp and generate a UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Definition check \u2014 the sentence under **Reproducibility** in my instructions, verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nThis matches the current instrument (sha256 `9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3`), so I proceeded.\n\n## Evaluation complete \u2014 validated\n\n`poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic` \u2192 `VALID output_evaluation.json: rubric20-semantic`\n\n**Score: 77 / 88 \u2014 fixed 87.5% (denominator 88), normalized 87.5% (adjusted denominator 88).** No questions excluded (`excluded_max_points: 0`, `questions_not_applicable: 0`), so the two bases coincide.\n\nAll four conditional gates resolved to applicable, each on evidence outside the gated question's own fields (anti-circular rule):\n- **Human subjects** (Q8, Q15): description's \"833 adult participants recruited across five sites\", clinical cohorts; collection_mechanisms administering surveys to participants.\n- **Datasets shared** (Q10, Q17): distribution_formats access_urls to PhysioNet, `third_party_sharing.is_shared: true`, licence permitting general research use.\n- **Software output** (Q11): four code repositories in external_resources (b2aiprep, senselab, bridge2ai-redcap, bridge2ai-docs).\n- **Collection + shared** (Q12, Q13): collection fields populated plus the sharing evidence above.\n\nCategory scores: Structural 17/21 \u00b7 Metadata 18/21 \u00b7 Technical 22/25 \u00b7 FAIRness 20/21.\n\nWhere points came off: keywords number four (Q3=3); three file types and no size metadata (Q4=3); no DPIA plus an unreconciled `identifiable_elements_present: false` against the DTUA's PII designation and admitted k<2 (Q8=4); US-only compliance framing despite Canadian collection sites (Q9=4); data-level schema conformance undeclared (Q10=4); no imputation_protocols/annotation_analyses and only b2aiprep version-pinned (Q11=4); undated collection timeframe (Q12=4); no demographic quantities (Q15=4); no AIO mappings and mitigation for only two of four bias types (Q20=4).\n\nSemantic analysis recorded 15 issues (3 failed consistency checks, 19 passed, 7 warnings). Correctness: DOI valid PhysioNet prefix, grant numbers valid NIH form, URLs plausible; two identifier defects flagged \u2014 `latest_version_doi` holds the concept DOI rather than 3.1.0's, and `RRID:SCR_007345` denotes PhysioNet rather than the dataset.\n\nProvenance values, `instrument_sha256`, `instrument_kind`, `rubric_hash`, `input_sha256` and the model identity (`claude-opus-5` as both name and evaluator_model, temperature `null`) were written exactly as supplied.",
+    "ttft_ms": 4264,
+    "type": "result",
+    "duration_ms": 476215,
+    "uuid": "10576f40-24a2-4df5-ae67-76e2727c5f46",
+    "ttft_stream_ms": 1912,
+    "time_to_request_ms": 21,
+    "first_content_frame_ms": 2356,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [],
+  "completed_at": "2026-09-13T00:25:58.933527+00:00"
+}

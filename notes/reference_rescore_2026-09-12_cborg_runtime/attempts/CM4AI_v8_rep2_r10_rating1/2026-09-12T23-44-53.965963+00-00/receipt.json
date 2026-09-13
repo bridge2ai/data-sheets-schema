@@ -1,0 +1,140 @@
+{
+  "job_id": "CM4AI_v8_rep2_r10_rating1",
+  "started_at": "2026-09-12T23:44:53.966128+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "d1f3ef11c692394702fbae7f47aaa869565a2b77dd27ad54ecb3b16a80a04742",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "9fce395dfcba6684dbf183e6c5cf2acc7b6b656c2f76b4ba519974025ca80200",
+  "evaluation_sha256": "74579aa53865a3e640435d061ea6695ef826d85b8990df45e4e873170012979d",
+  "cli_result": {
+    "duration_api_ms": 1285485,
+    "stop_reason": "end_turn",
+    "session_id": "c2c42f4f-d4be-48cd-9945-0b4f79b08d00",
+    "total_cost_usd": 3.1688057499999998,
+    "usage": {
+      "input_tokens": 307,
+      "cache_creation_input_tokens": 246295,
+      "cache_read_input_tokens": 286344,
+      "output_tokens": 49261,
+      "output_tokens_details": {
+        "thinking_tokens": 14754
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 246295
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 311,
+        "outputTokens": 49292,
+        "cacheReadInputTokens": 345689,
+        "cacheCreationInputTokens": 281937,
+        "webSearchRequests": 0,
+        "costUSD": 3.1688057499999998,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 14754,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01GG8YvawyARCK3xTBd34rf5",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate the agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01Y76NY2Y4L9jh7UjWCEEWiC",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-i45avlg2/input/record.yaml /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-i45avlg2/data/rubric/rubric10.txt",
+          "description": "Compute hashes of record and rubric"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01Aa4yVFv7MXJR8wn5dSSsRt",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get UTC timestamp and generate a UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed with exit status 0.\n\n## Definition check\n\nThe section headed \"Source rubric and schema paths (#158)\" is present in my instructions. The sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches what the current rules require (the #158 schema-path mappings, including the dedicated `updates.update_details` slot), so I proceeded.\n\n## Evaluation written\n\n`output_evaluation.json`, validated: `VALID output_evaluation.json: rubric10-semantic`, exit 0.\n\n**Score: 41 points.** normalized 87.2% (41/47), fixed 82.0% (41/50), 3 sub-elements N/A.\n\n| Element | Score |\n|---|---|\n| 1 Discovery | 5/5 |\n| 2 Access | 5/5 |\n| 3 Reuse & Interoperability | 3/5 |\n| 4 Ethics & Privacy | 2/2 |\n| 5 Composition | 4/5 |\n| 6 Provenance & Versions | 5/5 |\n| 7 Motivation & Funding | 5/5 |\n| 8 Technical Transparency | 3/5 |\n| 9 Limitations | 4/5 |\n| 10 Community Integration | 5/5 |\n\n**Applicability determinations.** Element 4 was gated per sub-element. The human-subjects condition fails on evidence outside Element 4 \u2014 E1's description and keywords name only cell lines and assays, E8's `collection_mechanisms` describes robotic fixation and 10x kits rather than recruitment \u2014 so sub-elements 3\u20135 are `applicable: false`, `score: null`, and excluded (denominator 47). Sub-elements 1\u20132 stay applicable on the governance disjunct (`data_governance.committee_contact`, `access_review_process`, `ip_restrictions`, the embargo in `confidential_elements`); `regulatory_restrictions` alone records only negative determinations, which #1060 says is not a constraint. Element 8 sub-element 4 is applicable and scored **0**, not excluded (#1081).\n\n**The two structural failures.** E8.4: no software is named that produced or transformed the released data \u2014 the 10x kit and confocal microscope are capture (role a), NDEx/MassIVE/Figshare are hosting (b), FAIRSCAPE is metadata packaging (c), and the MuSIC pipeline falls under (e) because the record itself states its outputs are not in this release. E3.2: all ten files are documented only as ZIP containers, with no internal format and no encoding.\n\n**What stands out positively.** The record's `source_caveats` blocks rank conflicting sources rather than merging them, label the byte total as the record's own computation, and refuse to carry an earlier release's image description forward because the checksums differ. The ten per-file byte counts sum to `total_size_bytes` exactly (12,601,718,300), and both NIH award numbers parse cleanly.\n\nI logged 20 consistency checks passed, 3 failed (erratum self-reference, non-monotonic version numbering, undocumented processing against referenced code repositories), and 7 warnings.",
+    "ttft_ms": 3470,
+    "type": "result",
+    "duration_ms": 1284841,
+    "uuid": "51a98393-3ebd-4711-b9ec-0263d3f29311",
+    "ttft_stream_ms": 2507,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 2507,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01ST3EE5TZCcDK6dHonNaZbL",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-13T00:06:19.632799+00:00"
+}

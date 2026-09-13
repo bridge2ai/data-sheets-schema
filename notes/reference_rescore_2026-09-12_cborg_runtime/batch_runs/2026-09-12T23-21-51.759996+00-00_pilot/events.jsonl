@@ -1,0 +1,3 @@
+{"event": "launched", "at": 1789255311.763104, "job": "CM4AI_v7_rep2_r20_rating1", "pid": 64649}
+{"event": "started", "at": 1789255312.3932931, "job": "CM4AI_v7_rep2_r20_rating1", "active_workers": 1}
+{"event": "finished", "at": 1789255870.863828, "job": "CM4AI_v7_rep2_r20_rating1", "exit_code": 0}

@@ -1,0 +1,138 @@
+{
+  "job_id": "CHORUS_v7_rep2_r10_rating1",
+  "started_at": "2026-09-12T21:39:17.331275+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "319a3011fb2b7ca078b5eaf4594595acb27a26549265fe0c0b0f1502b0ce1e7e",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "d96b8b8fb1dbc2748fc5cfcab49aa2eb745a8bcd3c8e83978ca4226b93922379",
+  "evaluation_sha256": "aacdd5a850bc9ebb8309ea666cc8d450061368b94bc379d9c19a363235006605",
+  "cli_result": {
+    "duration_api_ms": 490205,
+    "stop_reason": "end_turn",
+    "session_id": "b99ec56c-9df0-4c4f-b1f9-dcdbc1f34ebe",
+    "total_cost_usd": 2.1263655,
+    "usage": {
+      "input_tokens": 315,
+      "cache_creation_input_tokens": 141613,
+      "cache_read_input_tokens": 356036,
+      "output_tokens": 39299,
+      "output_tokens_details": {
+        "thinking_tokens": 10356
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 141613
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 317,
+        "outputTokens": 39327,
+        "cacheReadInputTokens": 356036,
+        "cacheCreationInputTokens": 154174,
+        "webSearchRequests": 0,
+        "costUSD": 2.1263655,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 10356,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01LKDmLk7NPjyUuzvYuDJJq9",
+        "tool_input": {
+          "command": "ls data/rubric/ scripts/ && shasum -a 256 data/rubric/* input/record.yaml",
+          "description": "List rubric files and hash inputs"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01XJt8rPLJ7tuJ7WZ6mHUBoe",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml",
+          "description": "Hash the input record"
+        }
+      },
+      {
+        "tool_name": "Read",
+        "tool_use_id": "toolu_vrtx_01BzbEMDB6VD3XTetApzrKc1",
+        "tool_input": {
+          "file_path": "/Users/marcin/d4d/data/rubric/rubric10.txt"
+        }
+      },
+      {
+        "tool_name": "Read",
+        "tool_use_id": "toolu_vrtx_01W9ABPBqZhQ6sYEQx6Shou4",
+        "tool_input": {
+          "file_path": "/Users/marcin/d4d/src/download/prompts/rubric10_semantic_schema.json"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 15,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "**Definition check \u2014 verbatim quote from \u201cSource rubric and schema paths (#158)\u201d:**\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThat section is present and reads as expected of the current rules, so I proceeded.\n\n**Evaluation complete.** `output_evaluation.json` written and validated:\n\n```\nVALID output_evaluation.json: rubric10-semantic\n```\n\n**Score: 30 / 50 \u2014 fixed_percentage 60.0% (\u00f750), normalized_percentage 60.0% (\u00f750).** No sub-elements were excluded (`sub_elements_not_applicable: 0`), because all four relevant trigger conditions resolve as met on *other* elements' evidence: human subjects (E1 description \"50,000 patient admissions from intensive care units\"; E8 collection_mechanisms), datasets shared (E2 distribution_formats + `third_party_sharing.is_shared: true`), software output (E10 external_resources \u2192 github.com/chorus-ai), and data collection identified (E8 acquisition_methods).\n\nElement scores: E1 3, E2 4, E3 3, **E4 1**, E5 2, E6 2, **E7 5**, **E8 5**, E9 3, E10 2.\n\nNotable judgements:\n- **E4 = 1/5.** Applicable throughout, not N/A. The record's own caveat states no IRB or ethics board of record; `informed_consent`, `participant_privacy` and `at_risk_populations` are absent. Only the deidentification method (tokenization, CTP-deid, site-local notes) earns a point. PICU/NICU are named as special populations with no safeguards attached.\n- **E9 sub-element 5 = 1 while E4 sub-element 1 = 0** on partly overlapping `ethical_reviews` text \u2014 deliberate and stated in both quality notes: community ethics focus groups and trustworthiness work are social-impact/ethics-programme evidence, but they are not oversight or approval of the human-subjects collection.\n- **E8 sub-element 4 = 1** under the #1059/#1082 threshold: OHNLP toolkit (tokens are in the release), chorus_waveform conversion scripts, CTP-deid and chorus-mapping all transformed distributed data; chorus-extract-upload (role a) and CHoRUSReports (role d) were not relied on.\n- **E10 sub-element 2 = 0, not N/A** (#1080): the dataset is shared but has neither DOI nor citation.\n\n11 semantic issues recorded (3 failed consistency checks: human subjects without IRB, without consent, and deidentification claims without re-identification risk assessment). Grant `OT2OD032701` validates as a well-formed NIH Common Fund OT2 award; no DOI or RRID present.\n\nProvenance recorded as supplied: `d4d_file` set to the CHORUS input path, `instrument_sha256` `66ad6231\u2026`, `instrument_kind` `agent_definition`, `rubric_hash` `e5f8b6be\u2026`, `input_sha256`/`d4d_file_hash` `d96b8b8f\u2026`, model name and evaluator_model `claude-opus-5`, temperature `null`.",
+    "ttft_ms": 4480,
+    "type": "result",
+    "duration_ms": 490875,
+    "uuid": "1bf43a24-2842-420f-817b-fdf2d132c3ec",
+    "ttft_stream_ms": 3552,
+    "time_to_request_ms": 22,
+    "first_content_frame_ms": 3968,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [],
+  "completed_at": "2026-09-12T21:47:29.087839+00:00"
+}
