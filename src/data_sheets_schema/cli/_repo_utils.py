@@ -76,6 +76,9 @@ def require_repo_context(command_name: str = "this command"):
         get_repo_root()
     except RuntimeError as e:
         import click
+        from data_sheets_schema.resources import ResourceRootError
+        if isinstance(e, ResourceRootError):
+            raise                            # already a click error, and the reason is the whole message (#1730)
         raise click.ClickException(
             f"{command_name} requires a repository checkout.\n"
             f"The d4d CLI currently relies on repository-local code.\n"
