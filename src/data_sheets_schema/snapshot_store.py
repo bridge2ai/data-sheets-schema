@@ -40,7 +40,7 @@ def _load(directory: Path, project: str, *, path: Path | None = None,
             if (owner.get("generation_id") != data["generation_id"]
                     or owner.get("identity") != data["run_identity"]
                     or (owner.get("input_identity") is not None
-                        and ledger._identity_differs(owner["input_identity"], data["input_identity"]))):
+                        and ledger._identity_differs(data["input_identity"], owner["input_identity"]))):   # the index is the pin (#1560)
                 # A writer that is opening a fresh generation must archive
                 # the old index first; readers must not treat it as current.
                 data["superseded"] = True

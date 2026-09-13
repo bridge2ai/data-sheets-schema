@@ -143,7 +143,10 @@ def declared_profile(manifest: Path | str | None) -> str | None:
     if not p.exists():
         return None
     from data_sheets_schema.schema_cache import load_yaml
-    data = load_yaml(p) or {}
+    try:
+        data = load_yaml(p) or {}
+    except Exception as exc:                                   # noqa: BLE001 — yaml or OS; the file is named (#1586)
+        raise ValueError(f"manifest {p} could not be read: {exc}") from None
     value = data.get("profile") if isinstance(data, dict) else None
     return str(value) if value else None
 
@@ -229,15 +232,22 @@ def for_record(record: dict[str, Any] | None) -> Profile:
     checkout. Evaluation, review packs and backfills read this, never the
     environment alone, so a historical record keeps its instrument when the
     environment changes."""
-    schema = ((record or {}).get("schema") or {}) if isinstance(record, dict) else {}
+    schema = (record or {}).get("schema") if isinstance(record, dict) else None
+    if not isinstance(schema, dict):
+        schema = {}
     name = schema.get("profile")
     if name:
-        return profile_named(str(name))
-    if schema.get("digest_md5"):
-        # A digest with no profile is a record made before profiles existed —
-        # under the study's — and must not follow the environment (#1518).
-        return BRIDGE2AI
-    return active_profile()
+        try:
+            return profile_named(str(name))
+        except ValueError as exc:
+            import warnings
+            warnings.warn(f"record states a profile this code does not know ({exc}); read as the study's",
+                          RuntimeWarning, stacklevel=2)
+            return BRIDGE2AI
+    # No profile: a record made before profiles existed — every one of them
+    # the study's, digest or not (103 corpus records carry neither; #1518,
+    # #1583) — and it must not follow the environment.
+    return BRIDGE2AI
 
 
 def arm_projects_for(arm: str, profile: Profile | None = None) -> list[str] | None:
