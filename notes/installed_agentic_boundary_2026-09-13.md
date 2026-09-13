@@ -92,17 +92,17 @@ wrong repository's definition before the fix; all 49 identity/challenge checks
 pass afterward. #1688 declares the write-guard fixture in its own manifest.
 
 The branch includes corpus c51cecbf7, installed evaluation ed4734151, profile
-27b627fa2 and packaging2a840076a. The combined identity/recheck/controller lane
-passes157 checks. All nine fresh-wheel workflows pass (153.69 seconds), with
+27b627fa2 and packaging 2a840076a. The combined identity/recheck/controller lane
+passes 157 checks. All nine fresh-wheel workflows pass (153.69 seconds), with
 only declared runtime dependencies and synthetic/fake-provider fixtures. The
-subsequent profile/backfill/resume integration passes214 checks, and the final
-review-pack integration passes25. Validation retains explicit artifact inputs;
-backfill retains renderer6 toolchain recovery and the profile evidence rules.
+subsequent profile/backfill/resume integration passes 214 checks, and the final
+review-pack integration passes 25. Validation retains explicit artifact inputs;
+backfill retains renderer 6 toolchain recovery and the profile evidence rules.
 
-All60 historical renderer controls match. All12 definition preimages match
+All 60 historical renderer controls match. All 12 definition preimages match
 both current definition hashes and the previous text obtained from the selected
-checkout's actual Git history. The preservation audit verifies56 accepted
-ratings,259 prior evaluations and450 preservation hashes. No production model
+checkout's actual Git history. The preservation audit verifies 56 accepted
+ratings, 259 prior evaluations and 450 preservation hashes. No production model
 call, source download, generation output, rescore or historical attribution
 change occurs. The refreshed JSON registers the combined implementation for
 independent review and exact-head CI.
