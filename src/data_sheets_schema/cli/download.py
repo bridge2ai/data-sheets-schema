@@ -301,9 +301,12 @@ def audit_manifest(project, manifest):
 @click.option('--strict', is_flag=True,
               help='Exit non-zero if any record is about a related-but-'
                    'distinct dataset.')
+@click.option('--record', 'selected_records', multiple=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help='With --check and --project: check only these exact records (repeatable).')
 @click.option('--manifest', type=click.Path(exists=True), is_eager=True,
               default='data/preprocessed/source_manifest.yaml', show_default=True)
-def scope_cmd(project, do_check, strict, manifest):
+def scope_cmd(project, do_check, strict, selected_records, manifest):
     """What each project's record is about, and whether the records agree.
 
     Scope is a property of the dataset, not of the prompt (#422). The VOICE
@@ -312,6 +315,8 @@ def scope_cmd(project, do_check, strict, manifest):
     makes it checkable and makes every future dataset inherit the check
     instead of needing its own paragraph.
     """
+    if selected_records and (not do_check or not project):
+        raise click.UsageError("--record requires --check and --project")
     require_repo_context("d4d download scope")
     setup_repo_imports()
     from data_sheets_schema.scope import (all_scopes, check_manifest,
@@ -360,10 +365,10 @@ def scope_cmd(project, do_check, strict, manifest):
         # Core records too. Sweeping only `*_d4d.yaml` reported 16 records
         # where the corpus holds 32: a core record is a record, and the
         # pediatric identifiers appear in both halves of the pair.
-        records = sorted([*CONCAT_DIR.glob("*/*/*_d4d.yaml"),
-                          *CONCAT_DIR.glob("*/*/*_d4d_core.yaml")])
+        records = list(selected_records) if selected_records else sorted([
+            *CONCAT_DIR.glob("*/*/*_d4d.yaml"), *CONCAT_DIR.glob("*/*/*_d4d_core.yaml")])
         for rec in records:
-            name = rec.name.replace("_d4d_core.yaml", "").replace("_d4d.yaml", "")
+            name = project if selected_records else rec.name.replace("_d4d_core.yaml", "").replace("_d4d.yaml", "")
             if project and name != project:
                 continue
             if name not in scopes:
@@ -411,7 +416,7 @@ def scope_cmd(project, do_check, strict, manifest):
             click.echo("   (checked on the record's `id`; prose that discusses "
                        "a related dataset is legitimate and not inspected)")
 
-    if problems or (strict and bad):
+    if problems or (strict and (bad or (selected_records and unreadable))):
         sys.exit(1)
 
 
@@ -600,14 +605,13 @@ def _crate_evidence_in(bundle: Path) -> set[str]:
 @click.option("--decide", "decide_ids", default=None,
               help="comma-separated source ids; which of them settles a disagreement")
 @click.option("--strict", is_flag=True, help="exit 1 if any source_type is unranked")
-def priority_cmd(project, decide_ids, strict):
+@click.pass_context
+def priority_cmd(ctx, project, decide_ids, strict):
     """Which source wins when two of them state different things.
 
-    The uniform rules have always said to represent a disagreement rather than
-    select a side, and a v4 CHORUS record named the gap that left: "the bundle
-    offers no basis for preferring one". `source_priority` in the manifest is
-    that basis — declared there rather than in a prompt, for the reason #422
-    records.
+    The selected manifest declares source_priority tiers and any explicit
+    source overrides or supersession. Use d4d --manifest or D4D_MANIFEST to
+    select that declaration.
 
     A tier is about how directly a source speaks for the released dataset, not
     about how much anyone trusts its authors. Equal tiers do not decide.
@@ -617,31 +621,32 @@ def priority_cmd(project, decide_ids, strict):
     from data_sheets_schema.source_priority import (decide as decide_between,
                                                     ranked, tiers,
                                                     unranked_types)
+    from data_sheets_schema.registry import selected_manifest
+
+    manifest = load_registry(selected_manifest(ctx)).data
     if decide_ids:
         if not project:
             raise click.ClickException("--decide needs --project")
         ids = [x.strip() for x in decide_ids.split(",") if x.strip()]
-        result = decide_between(project, ids)
+        result = decide_between(project, ids, manifest)
         for c in result["candidates"]:
             click.echo(f"   tier {c['priority']}  {c['id']:32} {c['basis']}")
         for u in result["unknown"]:
             click.echo(f"   ?       {u:32} not declared for {project}", err=True)
         click.echo(f"\n{'winner: ' + result['winner'] if result['winner'] else 'no winner'}"
                    f"\n{result['reason']}")
-        return
-
-    if project:
-        for s in ranked(project):
+    elif project:
+        for s in ranked(project, manifest):
             click.echo(f"   tier {s['priority']}  {s['id']:32} "
                        f"{str(s.get('source_type') or ''):26} {s['priority_basis']}")
     else:
         table = {}
-        for source_type, tier in tiers().items():
+        for source_type, tier in tiers(manifest).items():
             table.setdefault(tier, []).append(source_type)
         for tier in sorted(table):
             click.echo(f"   tier {tier}  {', '.join(sorted(table[tier]))}")
 
-    missing = unranked_types()
+    missing = unranked_types(manifest)
     if missing:
         click.echo("\n⚠️  source_types in use that no tier covers:")
         for proj, types in sorted(missing.items()):

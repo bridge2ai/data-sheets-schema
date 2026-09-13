@@ -43,7 +43,7 @@ from typing import Any
 import yaml
 
 from data_sheets_schema import provenance, reasoning, schema_digest
-from data_sheets_schema.registry import AUTO, DEFAULT_MANIFEST, select_manifest
+from data_sheets_schema.registry import AUTO, DEFAULT_MANIFEST, select_manifest, manifest_declared_unused
 from data_sheets_schema.usage_ledger import (
     UsageLedgerError,
     append_usage as _append_usage,
@@ -477,9 +477,9 @@ class RunSpec:
     # was selected, blocks or no blocks.
     profile: str | None = None
     profile_basis: str | None = None
-    # Version 2 passes selected manifest arguments to agentic recording.
+    # Version 4 binds every agentic playbook read/check to selected inputs.
     # Historical render specs omit this field and replay under version 1.
-    render_version: int = 3
+    render_version: int = 4
     # Frozen when the run is specified, not read from the clock on each use.
     # A six-phase run takes tens of minutes and this study's sweep genuinely
     # ran past midnight UTC, so recomputing per call gave phases of one run
@@ -504,12 +504,13 @@ class RunSpec:
     provider: str | None = None
     _replay_only: bool = field(default=False, init=False, repr=False)
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
+    _agentic_artifact_paths: dict[str, str] | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self):
         if self.run_date is AUTO:
             self.run_date = datetime.now(timezone.utc).date().isoformat()
             self._automatic_run_date = self.run_date
-        if self.render_version not in (1, 2, 3):
+        if self.render_version not in (1, 2, 3, 4):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         default_line = type(self).__dataclass_fields__["manifest_line"].default
         self.manifest = select_manifest(self.project, self.bundle, self.manifest)
@@ -517,6 +518,15 @@ class RunSpec:
             self.manifest = Path(self.manifest)
         if self.chunk_manifest is not None:
             self.chunk_manifest = Path(self.chunk_manifest)
+        elif self.render_version >= 4 and self.is_agentic:
+            # The agentic playbook reads a chunk mapping even when discovery
+            # chose it. Freeze that path for instruction replay (#1507).
+            from data_sheets_schema.chunking import manifest_for
+            self.chunk_manifest = manifest_for(self.bundle)
+        if self.render_version >= 4 and self.is_agentic:
+            self._agentic_artifact_paths = {
+                "full": str(self.full_path), "core": str(self.core_path),
+                "receipt": str(self.report_path.parent / f"{self.project}_coverage_receipt.yaml")}
         if self.manifest_line == default_line:   # an arm that declares its own header keeps it
             self.manifest_line = self.header_for_manifest(self.manifest)
         if self.profile is None:
@@ -551,6 +561,11 @@ class RunSpec:
                     "the bundle was passed explicitly)")
         return f"# Source manifest: {manifest}"
 
+    @property
+    def is_agentic(self) -> bool:
+        """Whether the runtime follows the shared agentic playbook."""
+        return self.runtime in {"Claude Code", "Codex CLI"}
+
     @classmethod
     def from_render_spec(cls, recorded: dict[str, Any], *, project: str,
                          method: str, label: str) -> "RunSpec":
@@ -574,6 +589,12 @@ class RunSpec:
         manifest = recorded.get("manifest")
         spec.manifest = Path(manifest) if manifest else None
         spec.manifest_line = recorded.get("manifest_line", "")
+        if "agentic_artifact_paths" in recorded:
+            paths = recorded["agentic_artifact_paths"]
+            if (not isinstance(paths, dict) or set(paths) != {"full", "core", "receipt"}
+                    or any(not isinstance(value, str) or not value for value in paths.values())):
+                raise ValueError("invalid recorded agentic artifact paths")
+            spec._agentic_artifact_paths = dict(paths)
         # A replay reads no live declaration — the manifest may be gone or
         # malformed since — so the profile is not resolved here either;
         # a replay never renders the digest (#1438).
@@ -586,7 +607,7 @@ class RunSpec:
     def manifest_used(self) -> bool:
         """Whether the run consults a manifest at all: one is selected and
         the arm's header does not declare it unused (#603)."""
-        return self.manifest is not None and "not used" not in self.manifest_line.lower()
+        return self.manifest is not None and not manifest_declared_unused(self.manifest_line)
 
     def input_identity(self) -> dict[str, Any]:
         """Current bundle and manifest bytes, separate from billing identity.
@@ -627,7 +648,9 @@ class RunSpec:
         lets `verify_request()` re-render and compare, which is what turns
         "do not intervene" from a rule into something detectable (#420).
         """
-        return {"render_version": self.render_version,
+        return {**({"agentic_artifact_paths": dict(self._agentic_artifact_paths)}
+                   if self.render_version >= 4 and self._agentic_artifact_paths is not None else {}),
+                "render_version": self.render_version,
                 "chunk_manifest": str(self.chunk_manifest) if self.chunk_manifest is not None else None,
                 "condition": self.condition, "arm": self.arm,
                 "manifest_line": self.manifest_line, "run_date": self.run_date,
@@ -784,7 +807,7 @@ def context_blocks(spec: "RunSpec") -> dict[str, Any]:
                                 if manifest is None else
                                 "arm declares the manifest unused"
                                 if spec.manifest_line
-                                and "not used" in spec.manifest_line.lower()
+                                and manifest_declared_unused(spec.manifest_line)
                                 else "project declares none, or the manifest "
                                      "was not readable")})
     return out
@@ -818,6 +841,60 @@ def resolved_prompt_digest(spec: RunSpec) -> dict[str, Any]:
     text = spec.instruction
     return {"sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
             "bytes": len(text.encode("utf-8"))}
+
+
+def agentic_selected_inputs(spec: RunSpec) -> str:
+    """Bind every manifest-dependent playbook step to this run's inputs."""
+    import shlex
+    paths = spec._agentic_artifact_paths
+    def command(*args):
+        return shlex.join(["poetry", "run", "d4d", *map(str, args)])
+
+    text = (
+        "\n\n## Selected inputs for all four phases (renderer v4)\n\n"
+        "This section overrides the input paths and manifest-dependent commands in "
+        "d4d-full-core.md. Keep its evidence boundary, receipt protocol and phase order. "
+        "Apply these selections in every phase and in the orchestrator's transcript audit.\n\n"
+        f"Read only this source bundle: `{spec.bundle}`. Read this chunk manifest first: "
+        f"`{spec.chunk_manifest}`. Use its ordered chunk IDs and line windows. "
+        "Replace the playbook's default chunk-path read and bundle-chunk check with:\n\n"
+        + command("bundle", "chunk", "--bundle", spec.bundle, "--chunk-manifest", spec.chunk_manifest,
+                  "--check", "--strict") + "\n\n"
+        "Require current canonical coverage under the selected rule. Stop on failure; "
+        "do not regenerate or replace the selected manifest during this run.\n\n"
+    )
+    if spec.manifest_used:
+        text += (
+            f"The only source manifest for this run is `{spec.manifest}`. Its declarations "
+            "supply naming, ranking and scope. Replace the playbook's scope read with:\n\n"
+            + command("download", "scope", "--manifest", spec.manifest, "--project", spec.project)
+            + "\n\nAfter generating and validating the pair, replace the scope completion check with "
+            "this check of the current pair only:\n\n"
+            + command("download", "scope", "--manifest", spec.manifest, "--project", spec.project,
+                      "--check", "--record", paths["full"], "--record", paths["core"], "--strict")
+            + "\n\nIf no scope is declared, report that no scope declaration was available. "
+            "For every other command using --project, pass this selected source manifest through "
+            "the command's own --manifest option when present, or through the root "
+            "`d4d --manifest PATH <command>` option otherwise.\n\n"
+        )
+    else:
+        text += (
+            "No source manifest is used. Do not read the playbook's default source manifest "
+            "or run its manifest-dependent scope commands. Report scope as undeclared; "
+            "do not infer declarations from another dataset or from an ambient registry.\n\n"
+        )
+    text += (
+        "Before Phase 2, use this exact receipt check, then repeat it with --write after provenance recording:\n\n"
+        + command(*(["--manifest", spec.manifest] if spec.manifest_used else []),
+                  "receipts", "check", "--method", spec.method, "--label", spec.label,
+                  "--project", spec.project, "--bundle", spec.bundle,
+                  "--chunk-manifest", spec.chunk_manifest, "--strict") + "\n\n"
+        "For scripts/agentic_observed.py, replace its --bundle and --manifest values with "
+        f"`{spec.bundle}` and `{spec.chunk_manifest}` respectively; its --receipt names this "
+        f"run's `{paths['receipt']}`. "
+        "Supply only the actual transcripts of this run. Do not read any default chunk mapping.\n"
+    )
+    return text
 
 
 def resolve_prompt(spec: RunSpec) -> str:
@@ -878,8 +955,8 @@ def resolve_prompt(spec: RunSpec) -> str:
     if spec.render_version >= 3:
         # Keep replay/backfill unambiguous even when no explicit chunk
         # selection needs the new pre-provenance receipt command.
-        body += "\n\n<!-- D4D prompt renderer version 3 -->\n"
-    if spec.render_version >= 3 and spec.runtime == "Claude Code" and spec.chunk_manifest is not None:
+        body += f"\n\n<!-- D4D prompt renderer version {spec.render_version} -->\n"
+    if spec.render_version == 3 and spec.runtime == "Claude Code" and spec.chunk_manifest is not None:
         import shlex
         args = ["poetry", "run", "d4d"]
         if spec.manifest is not None:
@@ -891,6 +968,8 @@ def resolve_prompt(spec: RunSpec) -> str:
                  "Before Phase 2 and before provenance exists, use this receipt-check command "
                  "for the selected inputs when following d4d-full-core.md:\n\n"
                  + shlex.join(args) + "\n")
+    if spec.render_version >= 4 and spec.is_agentic:
+        body += agentic_selected_inputs(spec)
 
     # v1 hardcodes `# Generated: 2026-07-28` where every neighbouring header
     # line takes a placeholder, so every record produced under it since that
@@ -1245,7 +1324,7 @@ def naming_block(project: str,
     no naming, and None when the arm declares the manifest unused, for the
     same reason as `source_ranking_block` (#603).
     """
-    if manifest_line is not None and "not used" in manifest_line.lower():
+    if manifest_line is not None and manifest_declared_unused(manifest_line):
         return None
     if manifest is None:
         return None
@@ -1291,7 +1370,7 @@ def scope_block(project: str,
     unused (#603), and None when the project declares no referent — the
     block would then assert nothing.
     """
-    if manifest_line is not None and "not used" in manifest_line.lower():
+    if manifest_line is not None and manifest_declared_unused(manifest_line):
         return None
     if manifest is None:
         return None
@@ -1372,7 +1451,7 @@ def source_ranking_block(project: str,
     supply a single bundle, so sending the baseline arm's ranking would tell the
     model to prefer between documents it was never given.
     """
-    if manifest_line and "not used" in manifest_line.lower():
+    if manifest_line and manifest_declared_unused(manifest_line):
         return None
     if manifest is None:
         return None
@@ -4859,6 +4938,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     generation = _usage_generation(spec) if resume else _prepare_usage(spec, resume=False)
     if resume:
         _require_resolved_usage(spec)
+    progress = _load_progress(spec) if resume else {}
     skipped: list[str] = []
     carry: dict[str, str] = {}
 
@@ -4887,6 +4967,18 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             else:
                 prior_identifier = identifier
             prior_matches = _usage_record_matches(spec, identity) and _same_usage_generation(spec, identifier)
+            if (prior_matches and generation is not None and identifier is None
+                    and prior.get("record_mode") == "reconstructed"):
+                # Generic backfill cannot supersede observed generation-bound
+                # inputs. Older backfill could publish during an interruption.
+                from data_sheets_schema.usage_ledger import recorded_inputs
+                current = spec.input_identity()
+                bound_progress = (
+                    progress.get("generation_id") == generation
+                    and _usage_record_matches(spec, progress.get("run_identity"))
+                    and progress.get("input_identity") == current)
+                if recorded_inputs(spec) == current or bound_progress:
+                    prior_matches = False
             if prior_matches:
                 _require_recorded_inputs(spec, prior)
                 prior_record = prior
@@ -4905,7 +4997,6 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # artifacts. A `full` record on disk may be pre- or post-reconciliation and
     # nothing in the file distinguishes them, so guessing would silently skip
     # reconciliation or redo it.
-    progress = _load_progress(spec) if resume else {}
     foreign_progress = (_foreign_usage_identity(spec, progress.get("run_identity"))
                         or progress.get("label") not in (None, spec.label)
                         or (foreign_prior and not progress.get("run_identity")

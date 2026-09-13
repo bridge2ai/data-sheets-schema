@@ -105,15 +105,23 @@ def verifiable_cmd(project, method, labels, show):
 
 
 @evaluate.command()
-@click.option('--project', callback=project_choice,
+@click.option('--file', type=click.Path(exists=True, dir_okay=False),
+              help='Evaluate an explicit D4D file with declared identities')
+@click.option('--context', type=click.Path(exists=True, dir_okay=False),
+              help='YAML/JSON applicability predicates and their evidence')
+@click.option('--project',
               help='Evaluate specific project only (default: all)')
-@click.option('--method', type=click.Choice(METHODS), default='gpt5',
+@click.option('--method', default=None,
               help='Method to evaluate')
 @click.option('--output-dir', type=click.Path(), default='data/evaluation',
               help='Output directory for evaluation reports')
-def presence(project, method, output_dir):
+def presence(file, context, project, method, output_dir):
     """Run presence-based evaluation (field existence check)."""
-    require_repo_context("d4d evaluate presence")
+    if file:
+        if not project or not method:
+            raise click.ClickException("--file requires --project and --method")
+    else:
+        require_repo_context("d4d evaluate presence")
 
     if project:
         click.echo(f"📊 Evaluating {project} ({method}) - presence-based...")
@@ -126,11 +134,16 @@ def presence(project, method, output_dir):
 
     # Set up args for the evaluation script
     old_argv = sys.argv
-    sys.argv = ['evaluate_d4d.py',
-                '--methods', method,
-                '--output-dir', output_dir]
+    sys.argv = ['evaluate_d4d.py']
+    if method:
+        sys.argv.extend(['--methods', method])
+    sys.argv.extend(['--output-dir', output_dir])
     if project:
         sys.argv.extend(['--project', project])
+    if file:
+        sys.argv.extend(['--file', file])
+    if context:
+        sys.argv.extend(['--context', context])
 
     try:
         eval_main()
@@ -144,18 +157,19 @@ def presence(project, method, output_dir):
 @evaluate.command()
 @click.option('--file', type=click.Path(exists=True), required=True,
               help='D4D YAML file to evaluate')
-@click.option('--project', callback=project_choice, required=True,
+@click.option('--project', required=True,
               help='Project name')
-@click.option('--method', type=click.Choice(METHODS), required=True,
+@click.option('--method', required=True,
               help='Generation method')
 @click.option('--rubric', type=click.Choice(RUBRIC_TYPES + ['both']),
               default='both',
               help='Which rubric to use')
 @click.option('--output-dir', type=click.Path(), default='data/evaluation_llm',
               help='Output directory for LLM evaluation reports')
-def llm(file, project, method, rubric, output_dir):
+@click.option('--context', type=click.Path(exists=True, dir_okay=False),
+              help='YAML/JSON applicability predicates and their evidence')
+def llm(file, project, method, rubric, output_dir, context):
     """Run LLM-based quality evaluation (requires ANTHROPIC_API_KEY)."""
-    require_repo_context("d4d evaluate llm")
 
     click.echo(f"🤖 LLM evaluating {file} with {rubric}...")
     click.echo("⚠️  Note: Requires ANTHROPIC_API_KEY environment variable")
@@ -178,6 +192,8 @@ def llm(file, project, method, rubric, output_dir):
                 '--method', method,
                 '--rubric', rubric,
                 '--output-dir', output_dir]
+    if context:
+        sys.argv.extend(['--context', context])
 
     try:
         llm_eval_main()

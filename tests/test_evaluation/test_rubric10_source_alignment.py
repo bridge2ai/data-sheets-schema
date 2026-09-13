@@ -89,8 +89,9 @@ def resolves(path):
     for element in SOURCE
     for index, source in enumerate(element["sub_elements"], 1)
 ])
-def test_each_item_preserves_its_source_name_and_evidence(element, sub, source):
-    actual = items(AGENT.read_text())[element, sub]
+@pytest.mark.parametrize("definition", ["d4d-rubric10", "d4d-rubric10-semantic"])
+def test_each_item_preserves_its_source_name_and_evidence(element, sub, source, definition):
+    actual = items((ROOT / ".claude" / "agents" / f"{definition}.md").read_text())[element, sub]
     assert actual["name"] == source["name"]
     assert not missing_fields(source["field"], actual["fields"])
     assert actual["fields"]
