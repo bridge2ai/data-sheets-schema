@@ -323,6 +323,7 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
     click.echo(f"   bundle   {p['bundle']}  ({p['bundle_bytes']:,} b)")
     click.echo(f"   prompts  {', '.join(Path(x).name for x in p['prompt_files'])}")
     click.echo(f"   digest   md5 {p['schema_digest_md5'][:12]}")
+    click.echo(f"   profile  {p['profile']}  ({p['profile_basis']})")
     for ph in p["phases"]:
         click.echo(f"     {ph['phase']:10} ~{ph['approx_input_tokens']:>8,} tok"
                    f"   cached blocks={ph['cached_blocks']}")

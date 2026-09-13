@@ -310,7 +310,7 @@ reasoning effort, and mode.
 **Phase 1 is a receipt protocol, not a reading instruction.** The API path
 has every byte of the bundle in context on every call; this path reads it
 through a file tool, and the 2026-08-24 arm's agents never opened roughly a
-fifth of three of the four bundles (#700). "Read the whole bundle" was the
+fifth of most of the bundles (#700). "Read the whole bundle" was the
 rule; nothing could tell laziness from compliance. So the reading now leaves
 a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
 

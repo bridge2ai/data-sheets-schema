@@ -134,9 +134,18 @@ def build_bundle(record_path: Path | None = None,
     dataset the bundle identifies itself as: the caller's, else the
     active profile's (#1464)."""
     record_path = _record(record_path)
+    # The profile's name and project describe the profile's *own* record;
+    # any other record names its project and gets its own file (#1493).
+    from data_sheets_schema.profiles import active_profile
+    prof = active_profile()
+    own = (prof.healthsheet_record is not None
+           and Path(record_path).resolve() == Path(prof.healthsheet_record).resolve())
+    project = project or (prof.healthsheet_project if own else None)
+    if not project:
+        raise ValueError(f"no project for {record_path}: it is not the active profile's record; pass one")
     healthsheet, record = load_healthsheet(record_path)
     text, stats = render(healthsheet, record, record_path, project=project)
     output_dir.mkdir(parents=True, exist_ok=True)
-    target = output_dir / (name or bundle_name() or f"{record_path.stem}_healthsheet_only.txt")
+    target = output_dir / (name or (bundle_name() if own else None) or f"{project}_healthsheet_only.txt")
     target.write_text(text, encoding="utf-8")
     return target, stats

@@ -1338,7 +1338,9 @@ in an md5 a ledger lookup would have to explain. The neutral digest
 (`029c2abc…`) is now in the inventory beside the study's. **One
 evaluation-side instrument moves**: the fitness judge's slot specification
 (`evidence_score.slot_spec`) renders the schema's term-source scope for
-`data_topic`/`data_substrate` exactly as the digest does, under both
+`data_topic` (the one attribute `TERM_SOURCES` declares a source list for;
+`data_substrate` has none, so neither the digest nor the judge renders a
+scope for it under `neutral`) exactly as the digest does, under both
 profiles — under `neutral` it previously rendered no guidance for those
 attributes at all. Fitness judgements cached under the earlier
 specification stay retained and are not reused (the scorer keys on the

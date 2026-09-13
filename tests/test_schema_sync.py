@@ -18,6 +18,7 @@ import unittest
 from pathlib import Path
 
 from data_sheets_schema import schema_digest
+from data_sheets_schema.profiles import BRIDGE2AI   # the study's instrument, whatever D4D_PROFILE says (#1497)
 from data_sheets_schema.schema_sync import (
     IN_SYNC,
     MERGED_SCHEMAS,
@@ -125,7 +126,7 @@ class DigestIsAFunctionOfContentTest(unittest.TestCase):
         if not self.SCHEMA.exists():
             self.skipTest("merged schema not present in this checkout")
         self.assertEqual(
-            schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
+            schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=BRIDGE2AI)),
             "cd3c79f2c62f11675d5ce2c1df96b88e")
 
 

@@ -49,8 +49,19 @@ def _concat_dir() -> Path:
 
 
 def default_manifest_path() -> Path:
+    """The default manifest from here — one rule for the registry, the
+    chunk manifests and the profile (#1491): the working directory's, else
+    the nearest ancestor's (an installed package run from a subdirectory of
+    the user's project, #1467), else the checkout's (`anchored`), which
+    may not exist."""
     from data_sheets_schema.chunking import anchored
-    return anchored(DEFAULT_MANIFEST)
+    rel = Path(DEFAULT_MANIFEST)
+    if rel.exists():
+        return rel
+    for ancestor in Path.cwd().resolve().parents:
+        if (ancestor / rel).exists():
+            return ancestor / rel
+    return anchored(rel)
 
 
 @dataclass(frozen=True)

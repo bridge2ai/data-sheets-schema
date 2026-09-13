@@ -62,8 +62,14 @@ class TestRender(unittest.TestCase):
         self.assertIn("baseline", text)
 
     def test_build_writes_the_bundle(self):
+        """A record that is not the profile's names its project and gets its
+        own file — never the study's tracked bundle name (#1493)."""
         out_dir = Path(self.tmp.name) / "out"
-        target, stats = build_bundle(self.record_path, out_dir)
+        with self.assertRaises(ValueError):
+            build_bundle(self.record_path, out_dir)
+        target, stats = build_bundle(self.record_path, out_dir, project="TESTPROJ")
+        self.assertEqual(target.name, "TESTPROJ_healthsheet_only.txt")
+        self.assertIn("Project: TESTPROJ", target.read_text())
         self.assertTrue(target.exists())
         self.assertEqual(stats.sections, 2)
         self.assertIn("Test Dataset", target.read_text())

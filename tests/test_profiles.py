@@ -430,3 +430,105 @@ class TestTheThreadingHolds(_Clean):
             for cls in ("Dataset", "CoreDataset"):
                 for slot in schema_digest.slot_names(cls):
                     self.assertIs(schema_digest.slot_existed_at(md5, cls, slot), True, (prof.name, cls, slot))
+
+
+class TestRoundThree(_Clean):
+    """The Claude round-2 residuals (#1491–#1498)."""
+
+    def test_one_default_manifest_rule(self):
+        """#1491: the profile's default is the registry's default."""
+        from data_sheets_schema import profiles, registry
+        self.assertEqual(profiles.default_manifest(), registry.default_manifest_path())
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d); man = root / "data/preprocessed/source_manifest.yaml"; man.parent.mkdir(parents=True)
+            man.write_text(yaml.safe_dump({"profile": "neutral", "projects": {"X": [{"id": "s", "source": "s"}]}}), encoding="utf-8")
+            sub = root / "work" / "deeper"; sub.mkdir(parents=True)
+            os.chdir(sub)
+            self.assertEqual(registry.default_manifest_path().resolve(), man.resolve())
+            self.assertEqual(profiles.default_manifest().resolve(), man.resolve())
+            self.assertEqual(profiles.select_profile().name, "neutral")
+            os.chdir(ROOT)
+
+    def test_the_basis_says_undeclared_and_missing(self):
+        """#1494"""
+        from data_sheets_schema.profiles import select_profile
+        with tempfile.TemporaryDirectory() as d:
+            m = Path(d) / "m.yaml"
+            m.write_text(yaml.safe_dump({"projects": {"X": []}}), encoding="utf-8")
+            sel = select_profile(m)
+            self.assertEqual(sel.name, "neutral")
+            self.assertRegex(sel.basis, r"@[0-9a-f]{12} \(undeclared\)$")
+            m.write_text(yaml.safe_dump({"profile": "neutral", "projects": {"X": []}}), encoding="utf-8")
+            from data_sheets_schema import schema_cache
+            schema_cache.clear()
+            self.assertRegex(select_profile(m).basis, r"@[0-9a-f]{12}$")
+            gone = select_profile(Path(d) / "nope.yaml")
+            self.assertEqual(gone.name, "neutral")
+            self.assertTrue(gone.basis.endswith("nope.yaml (missing)"), gone.basis)
+
+    def test_the_plan_prints_the_profile_in_text_mode(self):
+        """#1492"""
+        from click.testing import CliRunner
+        from data_sheets_schema.cli import cli
+        r = CliRunner().invoke(cli, ["api", "plan", "--project", "CHORUS", "--label", "2026-09-13_x-api-generic-v9_rep1",
+                                     "--condition", "generic_v9"])
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertRegex(r.output, r"profile  bridge2ai  \(manifest:data/preprocessed/source_manifest\.yaml@[0-9a-f]{12}\)")
+
+    def test_agreement_main_reports_a_missing_default_instead_of_a_traceback(self):
+        """#1495"""
+        import contextlib, io
+        from data_sheets_schema import agreement
+        os.environ["D4D_PROFILE"] = "neutral"
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            code = agreement.main(["--offline"])
+        self.assertEqual(code, 2)
+        self.assertIn("names none", err.getvalue())
+
+    def test_form_defects_takes_the_records_profile(self):
+        """#1496"""
+        from data_sheets_schema.form_defects import FormSubtypeClassifier
+        from data_sheets_schema.profiles import NEUTRAL
+        self.assertEqual(FormSubtypeClassifier(profile=NEUTRAL)._default_schema(), "029c2abcda26e45c4465fd0a8455893d")
+        self.assertEqual(FormSubtypeClassifier()._default_schema(), "cd3c79f2c62f11675d5ce2c1df96b88e")
+
+    def test_the_recorder_selects_the_profile_from_a_manifest_the_header_declares_unused(self):
+        """#1461 at the recorder itself (#1497): the crate-only arm's header
+        says the manifest's context was not used; the manifest was still
+        selected and its profile decides the digest."""
+        import click.testing
+        from data_sheets_schema.cli import provenance as prov_cli
+        method, label = "claudecode_agent_crate_only", "2026-09-13_test-crate_rep1"
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "src/data_sheets_schema").mkdir(parents=True)          # the recorder's root marker
+            full_dir = root / "data/d4d_concatenated" / method / label
+            core_dir = root / "data/d4d_concatenated" / f"{method}_core" / label
+            full_dir.mkdir(parents=True); core_dir.mkdir(parents=True)
+            man = root / "data/preprocessed/source_manifest.yaml"; man.parent.mkdir(parents=True)
+            man.write_text(yaml.safe_dump({"profile": "bridge2ai",
+                                           "projects": {"CHORUS": [{"id": "s", "source": "s", "title": "s"}]}}), encoding="utf-8")
+            bundle = root / "data/preprocessed/concatenated/CHORUS_crate_only.txt"
+            bundle.parent.mkdir(parents=True, exist_ok=True); bundle.write_text("crate\n", encoding="utf-8")
+            body = ("# Generated: 2026-09-13\n# Source manifest: not used (crate-only arm; single declared source bundle)\n"
+                    "id: https://example.org/x\nname: x\n")
+            (full_dir / "CHORUS_d4d.yaml").write_text(body, encoding="utf-8")
+            (core_dir / "CHORUS_d4d_core.yaml").write_text(body, encoding="utf-8")
+            (core_dir / "CHORUS_reconciliation.md").write_text("# r\n", encoding="utf-8")
+            os.chdir(root)
+            try:
+                r = click.testing.CliRunner().invoke(prov_cli.provenance, [
+                    "record", "--project", "CHORUS", "--method", method, "--label", label, "--arm", "crate_only",
+                    "--input-bundle", str(bundle), "--manifest", "data/preprocessed/source_manifest.yaml",
+                    "--phase", "generate_full"])
+            finally:
+                os.chdir(ROOT)
+            self.assertEqual(r.exit_code, 0, r.output)
+            rec = yaml.safe_load((core_dir / "CHORUS_provenance.yaml").read_text(encoding="utf-8"))
+        self.assertEqual(rec["schema"]["profile"], "bridge2ai")
+        self.assertRegex(rec["schema"]["profile_basis"], r"^manifest:data/preprocessed/source_manifest\.yaml@[0-9a-f]{12}$")
+        self.assertEqual(rec["schema"]["digest_md5"], "cd3c79f2c62f11675d5ce2c1df96b88e")
+        attested = (rec.get("inputs") or {}).get("source_manifest") or {}
+        self.assertIsNone(attested.get("path"))                      # not consumed as context …
+        self.assertIn("unused", attested.get("basis", ""))           # … and the record says why

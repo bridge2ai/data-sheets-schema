@@ -22,6 +22,24 @@ from pathlib import Path
 import yaml
 
 from data_sheets_schema import schema_digest
+from data_sheets_schema.profiles import BRIDGE2AI   # the study's instrument, whatever D4D_PROFILE says (#1497)
+
+_SAVED_PROFILE = None
+
+
+def setUpModule():
+    """These tests pin the study's instrument; the judge and renderer entry
+    points they exercise read the ambient profile, so the environment is
+    cleared for the module and restored afterwards (#1497)."""
+    global _SAVED_PROFILE
+    import os
+    _SAVED_PROFILE = os.environ.pop("D4D_PROFILE", None)
+
+
+def tearDownModule():
+    import os
+    if _SAVED_PROFILE is not None:
+        os.environ["D4D_PROFILE"] = _SAVED_PROFILE
 from data_sheets_schema.evidence_score import slot_spec
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,7 +48,7 @@ PIN = ROOT / "src/data_sheets_schema/b2ai_registry_vocabularies.yaml"
 
 class TestTheVocabularyIsPinned(unittest.TestCase):
     def test_both_vocabularies_are_present(self):
-        vocab = schema_digest.vocabularies()
+        vocab = schema_digest.vocabularies(profile=BRIDGE2AI)
         self.assertGreater(len(vocab["B2AI_SUBSTRATE"]), 70)
         self.assertGreater(len(vocab["B2AI_TOPIC"]), 50)
 
@@ -38,14 +56,14 @@ class TestTheVocabularyIsPinned(unittest.TestCase):
         """The test that decides whether option 3 was possible at all. If the
         registry could not express DICOM or waveform data, rendering it would
         have forced runs to pick a near-neighbour."""
-        terms = set(schema_digest.vocabularies()["B2AI_SUBSTRATE"].values())
+        terms = set(schema_digest.vocabularies(profile=BRIDGE2AI)["B2AI_SUBSTRATE"].values())
         for needed in ("DICOM", "Comma-separated values", "Waveform Data",
                        "JSON", "Image", "Text"):
             with self.subTest(term=needed):
                 self.assertIn(needed, terms)
 
     def test_it_covers_each_project_topic(self):
-        terms = set(schema_digest.vocabularies()["B2AI_TOPIC"].values())
+        terms = set(schema_digest.vocabularies(profile=BRIDGE2AI)["B2AI_TOPIC"].values())
         for needed in ("Diabetes", "Voice", "Clinical Observations", "Cell"):
             with self.subTest(term=needed):
                 self.assertIn(needed, terms)
@@ -63,7 +81,7 @@ class TestItReachesTheGenerationPrompt(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.text = schema_digest.digest_text("Dataset")
+        cls.text = schema_digest.digest_text("Dataset", profile=BRIDGE2AI)
 
     def test_the_digest_names_the_vocabulary(self):
         self.assertIn("draws from", self.text)
@@ -153,7 +171,7 @@ class TestTheFallbackIsRendered(unittest.TestCase):
 
     def test_it_reaches_both_the_run_and_the_judge(self):
         self.assertIn("omit the slot rather than approximate",
-                      schema_digest.digest_text("Dataset"))
+                      schema_digest.digest_text("Dataset", profile=BRIDGE2AI))
         self.assertIn("omit the slot rather than approximate",
                       slot_spec("instances"))
 
@@ -169,7 +187,7 @@ class TestTheVocabularyCoverageIsKnown(unittest.TestCase):
     can say."""
 
     def test_every_substrate_concept_the_corpus_needs_exists(self):
-        terms = set(schema_digest.vocabularies()["B2AI_SUBSTRATE"].values())
+        terms = set(schema_digest.vocabularies(profile=BRIDGE2AI)["B2AI_SUBSTRATE"].values())
         for concept in ("DICOM", "Comma-separated values", "Waveform Data",
                         "JSON", "Text", "Image", "Parquet", "Data Frame"):
             with self.subTest(concept=concept):
@@ -179,6 +197,6 @@ class TestTheVocabularyCoverageIsKnown(unittest.TestCase):
         """Not a defect to fix here — a fact the fallback exists for. If a
         `Critical Care` term is ever added upstream, this test fails and the
         gap is closed rather than forgotten."""
-        terms = set(schema_digest.vocabularies()["B2AI_TOPIC"].values())
+        terms = set(schema_digest.vocabularies(profile=BRIDGE2AI)["B2AI_TOPIC"].values())
         self.assertNotIn("Critical Care", terms)
         self.assertNotIn("Radiology", terms)

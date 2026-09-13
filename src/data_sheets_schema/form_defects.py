@@ -288,8 +288,11 @@ class FormSubtypeClassifier:
     def __init__(self, client=None, model: str | None = None,
                  max_tokens: int = 8000, cache_path: Path | None = None,
                  offline: bool = False, schema: str | None = None,
-                 specification: str | None = None):
+                 specification: str | None = None, profile=None):
         self._client, self._model = client, model
+        # The instrument of the records being classified (#1496); None is
+        # the ambient profile, right only for a fresh run in the study.
+        self.profile = profile
         self._schema = schema
         self._specification = specification
         self.max_tokens = max_tokens
@@ -421,7 +424,7 @@ class FormSubtypeClassifier:
         """
         from data_sheets_schema import schema_digest
         def live_schema():
-            return schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
+            return schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=self.profile))
         if not (self.cache_path and Path(self.cache_path).exists()):
             return live_schema()
         try:

@@ -148,16 +148,10 @@ def default_manifest() -> Path | None:
     — the way git finds a repository), else the checkout's when this
     package is imported from a checkout — so a script run from `tests/` in
     the study's checkout still sees the study's — else none."""
-    rel = Path(DEFAULT_MANIFEST)
-    if rel.exists():
-        return rel
-    here = Path.cwd().resolve()
-    for ancestor in here.parents:
-        if (ancestor / rel).exists():
-            return ancestor / rel
-    if _CHECKOUT_ROOT is not None and (_CHECKOUT_ROOT / rel).exists():
-        return _CHECKOUT_ROOT / rel
-    return None
+    # The registry's rule, not a second one (#1491).
+    from data_sheets_schema.registry import default_manifest_path
+    p = default_manifest_path()
+    return p if p.exists() else None
 
 
 def _shown(path: Path) -> str:
@@ -203,8 +197,17 @@ def select_profile(manifest: Path | str | None | Any = "default") -> Selection:
         basis = "default manifest"
     if manifest is None:
         return Selection(NEUTRAL, "no manifest")
-    name = declared_profile(manifest)
-    return Selection(profile_named(name) if name else NEUTRAL, basis_for(basis, Path(manifest)))
+    p = Path(manifest)
+    if not p.exists():
+        # Not a fallback that hides: the basis names the path and says it
+        # was not there (#1494).
+        return Selection(NEUTRAL, f"{basis}:{_shown(p)} (missing)")
+    name = declared_profile(p)
+    if name:
+        return Selection(profile_named(name), basis_for(basis, p))
+    # The silent fallback #1439 wanted visible: neutral because the manifest
+    # declares nothing, said as such.
+    return Selection(NEUTRAL, basis_for(basis, p) + " (undeclared)")
 
 
 def active_profile(manifest: Path | str | None | Any = "default") -> Profile:
