@@ -37,10 +37,16 @@ def score_bases(result: dict[str, Any], default_max: int) -> ScoreBases:
     overall = result.get("overall_score")
     if overall:
         total = overall["total_points"]
-        maximum = overall.get("max_points", default_max)
-        adjusted = overall.get("adjusted_max_points")
-        if adjusted is None:
-            adjusted = maximum - overall.get("excluded_max_points", 0)
+        if "fixed_max_points" in overall:
+            maximum = overall["fixed_max_points"]
+            adjusted = overall.get("max_points")
+            if "adjusted_max_points" in overall and overall["adjusted_max_points"] != adjusted:
+                raise ValueError("API adjusted maxima disagree")
+        else:
+            maximum = overall.get("max_points", default_max)
+            adjusted = overall.get("adjusted_max_points")
+            if adjusted is None:
+                adjusted = maximum - overall.get("excluded_max_points", 0)
     else:
         summary = result["summary_scores"]
         total = summary["total_score"]

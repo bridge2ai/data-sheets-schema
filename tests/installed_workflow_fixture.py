@@ -68,7 +68,7 @@ class JudgeClient:
         self.calls.append(request)
         contract = json.loads(request["messages"][0]["content"].split("```json\n")[1].split("```")[0])
         rubric = "rubric10" if next(iter(contract["items"])).startswith("E") else "rubric20"
-        return response(json.dumps(judge_reply(contract, rubric, PROJECT, METHOD)))
+        return response(json.dumps(judge_reply(contract, rubric, PROJECT, METHOD, perfect=True)))
 
 
 def semantic_record(path, rubric, context, definition):
@@ -130,7 +130,7 @@ def check_installed_evaluation_and_rendering(path, core_path):
     assert not Path("data/d4d_concatenated").exists()
 
     runner = CliRunner()
-    context = {"human_subjects": {"value": True, "evidence": "Synthetic clinical cohort"},
+    context = {"human_subjects": {"value": False, "evidence": "Fabricated clinical records; no human participants"},
                "processing_software": {"value": False, "evidence": "No software produced in this fixture"}}
     context_path = Path("context.yaml")
     context_path.write_text(yaml.safe_dump(context), encoding="utf-8")
@@ -155,6 +155,12 @@ def check_installed_evaluation_and_rendering(path, core_path):
         html = target.with_suffix(".html")
         result = runner.invoke(cli, ["render", "evaluation", str(target), "--rubric", rubric, "-o", str(html)])
         assert result.exit_code == 0 and html.is_file(), result.output + str(result.exception)
+        overall = judgment["overall_score"]
+        total, fixed, adjusted = overall["total_points"], overall["fixed_max_points"], overall["max_points"]
+        assert 0 < total == adjusted < fixed, overall
+        rendered = html.read_text()
+        assert f"Fixed: {total}/{fixed} ({100*total/fixed:.1f}%)" in rendered
+        assert f"N/A-adjusted: {total}/{adjusted} (100.0%)" in rendered
 
         definition = resources.resource_path(f".claude/agents/d4d-{rubric}-semantic.md")
         semantic = semantic_record(path, rubric, context, definition)

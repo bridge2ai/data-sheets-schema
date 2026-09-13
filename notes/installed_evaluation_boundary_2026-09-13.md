@@ -38,3 +38,32 @@ real isolated rescore subprocess tests. The preservation audit verifies all
 Remaining installed-agentic command/helper work is tracked in #1556 and
 manifest-relative corpus roots in #1523. These must be resolved before claiming
 both generation arms and corpus operations are independent of a checkout.
+
+## Review round 2 — 2026-09-13
+
+Independent review found #1569: compatibility batch commands printed root
+CLI help instead of dispatching renders. The source compatibility scripts
+now retain batch drivers; the YAML drivers discover their input files rather
+than naming study datasets. Installed reusable modules remain unchanged.
+All four actual source-command subprocesses produce HTML from isolated
+synthetic fixtures. Their combined rendering/provenance/CLI lane passes
+47 tests. The 39-file boundary updates the four compatibility entry-point
+hashes; no scoring or generation instrument changes in this round.
+
+## Review round 3 — 2026-09-13
+
+Round 2 confirms #1569 and finds #1580: API results use an adjusted
+max_points and a separate fixed_max_points, while the renderer interpreted
+max_points as fixed. Reporting now reads both denominators explicitly.
+The API acceptance gate annotates each item's fixed maximum from the trusted
+contract. Renderers adapt these item maxima on a copy; earlier API outputs
+can recover them only from the rubric bytes matching their recorded hash.
+Stored scores and historical semantic interpretations remain unchanged.
+
+Five regression cases fail on the preceding head. The corrected focused
+rendering/API/semantic lane passes 57 tests. The broader evaluation/controller/
+CLI/inventory lane passes 877 tests. A fresh wheel install passes all six
+release checks with nonzero fake API ratings and real N/A exclusions in both
+rubrics. This explicitly checks both displayed percentages; zeros alone did
+not reveal the earlier denominator error. The boundary now pins 40 files.
+No new real ratings, generation runs or downloads are performed.

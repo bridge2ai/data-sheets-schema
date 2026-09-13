@@ -18,10 +18,13 @@ from pathlib import Path
 from datetime import datetime
 from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
 from data_sheets_schema.semantic_comparison import ScoreBases, score_bases
+from data_sheets_schema.rendering.normalization import for_rendering
 
 
 def generate_evaluation_html(eval_data, output_path):
     """Generate HTML from rubric20 evaluation JSON data"""
+
+    eval_data = for_rendering(eval_data)
 
     # Extract metadata from root level and nested structures
     project = eval_data.get("project", "Unknown")
