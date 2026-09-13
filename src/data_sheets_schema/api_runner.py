@@ -505,6 +505,7 @@ class RunSpec:
     _replay_only: bool = field(default=False, init=False, repr=False)
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
     _agentic_artifact_paths: dict[str, str] | None = field(default=None, init=False, repr=False)
+    _corpus_root: Path | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self):
         if self.run_date is AUTO:
@@ -516,6 +517,8 @@ class RunSpec:
         self.manifest = select_manifest(self.project, self.bundle, self.manifest)
         if self.manifest is not None:
             self.manifest = Path(self.manifest)
+        from data_sheets_schema.corpus import root
+        self._corpus_root = root(self.manifest)
         if self.chunk_manifest is not None:
             self.chunk_manifest = Path(self.chunk_manifest)
         elif self.render_version >= 4 and self.is_agentic:
@@ -675,23 +678,29 @@ class RunSpec:
         return resolve_prompt(self)
 
     @property
+    def output_root(self) -> Path:
+        from data_sheets_schema.corpus import relative_to_root
+        return (relative_to_root(CONCAT_DIR, self._corpus_root)
+                if self._corpus_root is not None else CONCAT_DIR)
+
+    @property
     def full_path(self) -> Path:
         if self.out_dir:
             return self.out_dir / f"{self.project}_d4d.yaml"
-        return CONCAT_DIR / self.method / self.label / f"{self.project}_d4d.yaml"
+        return self.output_root / self.method / self.label / f"{self.project}_d4d.yaml"
 
     @property
     def core_path(self) -> Path:
         if self.out_dir:
             return self.out_dir / f"{self.project}_d4d_core.yaml"
-        return (CONCAT_DIR / f"{self.method}_core" / self.label /
+        return (self.output_root / f"{self.method}_core" / self.label /
                 f"{self.project}_d4d_core.yaml")
 
     @property
     def report_path(self) -> Path:
         if self.out_dir:
             return self.out_dir / f"{self.project}_reconciliation.md"
-        return (CONCAT_DIR / f"{self.method}_core" / self.label /
+        return (self.output_root / f"{self.method}_core" / self.label /
                 f"{self.project}_reconciliation.md")
 
     @property

@@ -191,20 +191,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def anchored(d: Path) -> Path:
-    """A repository-owned relative directory as a path that is correct from
-    any working directory: as written from the repository root — so the
-    paths a record carries stay relative and portable (`inputs.chunks.path`
-    is `data/preprocessed/chunks/…` on every record) — and anchored to the
-    checkout from anywhere else (#1367 round 2, #1388)."""
-    d = Path(d)
-    if d.is_absolute():
-        return d
-    try:
-        if Path.cwd().resolve() == REPO_ROOT:
-            return d
-    except OSError:
-        pass
-    return REPO_ROOT / d
+    """A conventional corpus path under the selected manifest's project root."""
+    from data_sheets_schema.corpus import anchored as resolve, selected_manifest
+    return resolve(d, selected_manifest(allow_checkout_fallback=True))
 
 
 def _study_dir() -> Path:

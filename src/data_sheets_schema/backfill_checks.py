@@ -89,7 +89,8 @@ def declared_bundle(record: dict[str, Any]) -> Path | None:
     """The bundle the record says it read, if it says."""
     inputs = record.get("inputs") or {}
     path = inputs.get("bundle_path") or inputs.get("bundle")
-    return Path(path) if path else None
+    from data_sheets_schema.corpus import anchored
+    return anchored(Path(path)) if path else None
 
 
 def compute(provenance: Path, declared: dict[str, set[str]] | None = None,

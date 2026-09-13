@@ -6,6 +6,8 @@ from pathlib import Path
 
 import click
 
+from data_sheets_schema.corpus import anchored as _corpus_path
+
 @click.group()
 def receipts():
     """Coverage and claim receipts: what the agent says it read, checked."""
@@ -14,9 +16,9 @@ def receipts():
 def _run_paths(method: str, label: str, project: str) -> dict[str, Path]:
     from data_sheets_schema.provenance import CONCAT_DIR
     base = method[:-5] if method.endswith("_core") else method
-    core_dir = CONCAT_DIR / f"{base}_core" / label
+    core_dir = _corpus_path(CONCAT_DIR) / f"{base}_core" / label
     return {"core_dir": core_dir,
-            "full": CONCAT_DIR / base / label / f"{project}_d4d.yaml",
+            "full": _corpus_path(CONCAT_DIR) / base / label / f"{project}_d4d.yaml",
             "provenance": core_dir / f"{project}_provenance.yaml"}
 
 

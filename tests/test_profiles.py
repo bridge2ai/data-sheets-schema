@@ -446,13 +446,12 @@ class TestRoundThree(_Clean):
             self.assertEqual(registry.default_manifest_path().resolve(), man.resolve())
             self.assertEqual(profiles.default_manifest().resolve(), man.resolve())
             self.assertEqual(profiles.select_profile().name, "neutral")
-            # Not from a subdirectory: the corpus root is anchored to the
-            # checkout, so an ancestor's manifest is not discovered until the
-            # corpus root follows the manifest (#1515, #1523).
+            # #1523: ancestor discovery now keeps profile, context and corpus
+            # paths together in the caller's own project.
             sub = root / "work" / "deeper"; sub.mkdir(parents=True)
             os.chdir(sub)
-            self.assertEqual(registry.default_manifest_path().resolve(), STUDY_MANIFEST.resolve())
-            self.assertEqual(profiles.select_profile().name, "bridge2ai")
+            self.assertEqual(registry.default_manifest_path().resolve(), man.resolve())
+            self.assertEqual(profiles.select_profile().name, "neutral")
             os.chdir(ROOT)
 
     def test_the_basis_says_undeclared_and_missing(self):

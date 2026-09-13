@@ -368,3 +368,19 @@ still being reviewed by Claude. Complete #1523 (manifest-relative corpus
 roots) and #1556 (installed agentic commands/helpers) before declaring both
 generation arms fully installable. Preserve all prior measurements and keep
 source downloads and new production generation/scoring deferred.
+
+## 2026-09-13: external corpus roots and remaining installed arm
+
+Generation PR #1367 and evaluation PR #1449 are merged and their branches
+removed. Installed evaluation/rendering PR #1557 has an approved round-3
+review; its exact-head CI is pending. The #1523 follow-up now roots context,
+bundles, chunks and conventional outputs together, with external-project
+clean-wheel acceptance. It awaits independent review and CI.
+
+Finish the active profiles and packaging reviews, integrate their committed
+fixes, and complete #1556 for installed agentic execution and definition
+checks. Preserve every existing evaluation, the registered CBORG v7/v8
+reference condition, its repeat ratings, and the historical v9 canary. The
+API and agentic arms and all evaluation styles remain required. No new
+production generation, scoring or downloads belong to this implementation
+acceptance run; a future measurement needs its dated condition registration.

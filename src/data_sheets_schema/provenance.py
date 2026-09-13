@@ -1630,6 +1630,9 @@ def _replicate_for(label: str) -> int | None:
 
 def record_path_for(project: str, method: str, label: str,
                     concat_dir: Path = CONCAT_DIR) -> Path:
+    if concat_dir == CONCAT_DIR:
+        from data_sheets_schema.corpus import anchored
+        concat_dir = anchored(concat_dir)
     base = method[:-5] if method.endswith("_core") else method
     return concat_dir / f"{base}_core" / label / f"{project}_provenance.yaml"
 
