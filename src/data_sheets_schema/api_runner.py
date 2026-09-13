@@ -2775,9 +2775,17 @@ def _crash_diagnostic(text: str) -> list[str]:
     for line in crash.splitlines()[1:]:
         if not line.strip():
             continue
-        if not line[:1].isspace() or re.match(r'\s*in "[^"]*", line \d+', line):
+        if not line[:1].isspace() or re.match(r'\s*in ".*", line \d+', line):     # a quote in the name keeps the marker (#1672)
             out.append(line.strip())
     return out or [l for l in crash.strip().splitlines() if l.strip()][-3:]
+
+
+def _finding_class(lines) -> str:
+    """`structured` when every finding is a validator line the repair can
+    count against the next round; `diagnostic` when the record could not
+    even be read. A round that turns a diagnostic into structured findings
+    made progress, whatever the counts (#1670)."""
+    return "structured" if all(str(l).startswith(("[ERROR]", "[WARN")) for l in lines) else "diagnostic"
 
 
 #: A crash whose last line is an OS error never opened the data file
@@ -2802,7 +2810,10 @@ def _validator_did_not_run(text: str, data_path: str | Path | None = None) -> bo
     if any(l.startswith(("Traceback (most recent call last)", "ModuleNotFoundError:", "ImportError:"))
            for l in lines):
         if data_path is not None and "Traceback" in text:
-            crash = text[text.index("Traceback"):]
+            # The *last* traceback: a chained exception's earlier frames may
+            # name the record while the failure that ended the run did not
+            # (#1668).
+            crash = text[text.rindex("Traceback (most recent call last)"):] if "Traceback (most recent call last)" in text else text[text.rindex("Traceback"):]
             # The data file, as it was named to the validator — quoted, as a
             # YAML diagnostic (`in "<path>"`) or an exception message
             # (`'<path>'`) names it — never a bare basename, which a schema
@@ -2844,8 +2855,10 @@ def _validator_lines(path: Path, schema: str,
     if "Traceback (most recent call last)" in text:
         # The validator ran and the record broke it (#1589): the finding is
         # the diagnostic — the exception line and any `in "<file>", line N`
-        # marker — not fifty lines of frames (#1639).
-        lines = _crash_diagnostic(text)
+        # marker — not fifty lines of frames (#1639); every `[ERROR]` line it
+        # emitted before crashing is a finding too (#1669).
+        emitted = [l.strip() for l in text.splitlines() if l.strip().startswith(("[ERROR]", "[WARN"))]
+        lines = emitted + _crash_diagnostic(text)
     else:
         lines = [l for l in text.strip().splitlines()
                  if l.strip()]
@@ -3807,6 +3820,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
         # nothing, so its unchanged count says nothing about convergence and
         # must not cancel the retry the round ceiling allows for.
         applied_from: int | None = None
+        applied_class: str | None = None
         for rnd in range(1, REPAIR_ROUNDS + 1):
             errors, failure = _validator_lines(path, schema, cls)
             if failure is not None:
@@ -3822,7 +3836,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             if not errors:
                 break
 
-            if applied_from is not None and len(errors) >= applied_from:
+            if applied_from is not None and applied_class == _finding_class(errors) and len(errors) >= applied_from:
                 log.append({"phase": ph, "round": rnd,
                             "outcome": (f"not converging: {applied_from} -> "
                                         f"{len(errors)} findings; stopped")})
@@ -3892,6 +3906,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             path.write_text(body, encoding="utf-8")
             _snapshot(spec, f"{spec.project}_{ph}_r{rnd}.yaml", body)
             applied_from = len(errors)
+            applied_class = _finding_class(errors)
             log.append({"phase": ph, "round": rnd, "outcome": "applied",
                         "findings": len(errors)})
     return log

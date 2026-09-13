@@ -317,10 +317,13 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
         # nouns (the carve-out examples "Wellcome Trust Sanger Centre",
         # "Medical Research Council Programme Grant"); the rule is about the
         # prose the file composes.
-        text = re.sub(r'"[^"\n]*"', "", re.sub(r"`[^`]*`", "", PLAYBOOK.read_text(encoding="utf-8"))).lower()
-        for british in ("organisation", "characterise", "standardise", "analyse", "behaviour", "licence",
-                        "recognise", "programme", "centre", "labelled"):
-            self.assertNotIn(british, text, british)
+        # Every instruction the generation model reads, not the rules alone
+        # (#1661): the full/core playbook and the provenance guard too.
+        for playbook in (PLAYBOOK, ROOT / ".claude/commands/d4d-full-core.md", ROOT / ".claude/agents/d4d-provenance-guard.md"):
+            text = re.sub(r'"[^"\n]*"', "", re.sub(r"`[^`]*`", "", playbook.read_text(encoding="utf-8"))).lower()
+            for british in ("organisation", "characterise", "standardise", "analyse", "behaviour", "licence",
+                            "recognise", "programme", "centre", "labelled", "normalisation", "judgement"):
+                self.assertNotIn(british, text, f"{playbook.name}: {british}")
 
     def test_the_playbook_has_no_rule_this_table_does_not_know(self):
         """A rule added to the playbook and to no prompt is the original defect.

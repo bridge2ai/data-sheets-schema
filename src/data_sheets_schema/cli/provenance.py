@@ -518,8 +518,12 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
 @click.option("--condition", required=True, help="the condition the instruction was rendered under")
 @click.option("--runtime", default="Claude Code", show_default=True)
 @click.option("--arm", type=click.Choice(sorted(_ARMS)), default="baseline", show_default=True)
+@click.option("--manifest", "selected_manifest_opt", default=None,
+              help="the manifest the run selected, for a record whose attested path is null (an arm whose header "
+                   "declares it unused) and whose selection was not the study default — tried first, proven only "
+                   "by the hash (#1654)")
 @click.option("--execute", is_flag=True, help="write the spec; without it, report only")
-def backfill_spec(project, method, label, condition, runtime, arm, execute):
+def backfill_spec(project, method, label, condition, runtime, arm, execute, selected_manifest_opt=None):
     """Attach the render spec to a record that recorded its request hash
     without one (#772).
 
@@ -573,6 +577,8 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     # selected is tried, proven by the hash alone (#1607).
     manifest_choices = ([Path(sm["path"])] if sm.get("path")
                         else [None, DEFAULT_MANIFEST, default_manifest_path()])
+    if selected_manifest_opt:
+        manifest_choices = [Path(selected_manifest_opt)] + manifest_choices   # the caller's candidate first (#1654)
     # An arm that declares its own header keeps it — the crate-only and
     # healthsheet arms say "not used" whatever was selected — and the
     # default header follows the selection (#1607).

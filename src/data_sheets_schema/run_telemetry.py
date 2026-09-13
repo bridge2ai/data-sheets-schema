@@ -744,7 +744,7 @@ def trap_inventory(root: Path | None = None,
         if lines:
             with_errors += 1
         other = [line for line in lines if not parse_validator_line(line)]
-        if other and not any(parse_validator_line(line) for line in lines):
+        if other:                                                    # beside parsed findings too (#1669)
             unparsed.append({"record": str(f), "project": project, "method": method,
                              "lines": [line[:200] for line in other[-4:]]})
         for line in lines:

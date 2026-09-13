@@ -644,36 +644,57 @@ def software_facts() -> dict[str, Any]:
 DIRTY_PATHS_MAX = 50
 
 
-def _installed_files_changed() -> tuple[list[str], bool]:
-    """`(paths, measured)`: the installed files whose bytes no longer match
-    the wheel's RECORD — an edited shipped file, a rewritten digest ledger
-    (#1537) — or that are gone; `measured` False when the RECORD cannot be
-    read (#1641). The record's hashes are `<algorithm>=<urlsafe base64,
-    unpadded>`."""
+#: RECORD entries the installer writes without a hash by design.
+_INSTALL_BOOKKEEPING = ("RECORD", "INSTALLER", "REQUESTED", "direct_url.json")
+
+
+def _installed_files_changed() -> tuple[list[str], bool, list[str]]:
+    """`(changed, measured, unmeasured)`: the installed files whose bytes no
+    longer match the wheel's RECORD — an edited shipped file, a rewritten
+    digest ledger (#1537) — or that are gone; `measured` False when the
+    RECORD cannot be read or when a resource it lists carries no hash, those
+    listed under `unmeasured` (#1641, #1667). A missing file is missing
+    whether or not it was hashed; the installer's own bookkeeping (`RECORD`,
+    `.pth`, `__pycache__`) is neither. The record's hashes are
+    `<algorithm>=<urlsafe base64, unpadded>`."""
     import base64
     from importlib.metadata import PackageNotFoundError, files
     try:
         entries = files("data-sheets-schema")
     except PackageNotFoundError:
-        return [], False
+        return [], False, []
     if not entries:
-        return [], False
+        return [], False, []
     changed: list[str] = []
+    unmeasured: list[str] = []
     seen = 0
     for entry in entries:
+        name = str(entry)
+        bookkeeping = (name.endswith(".pth") or "__pycache__" in name
+                       or any(name.endswith(b) for b in _INSTALL_BOOKKEEPING))
         h = getattr(entry, "hash", None)
+        try:
+            data = entry.locate().read_bytes()
+        except FileNotFoundError:
+            if not bookkeeping:
+                changed.append(name)         # gone, hashed or not
+            continue
+        except (OSError, ValueError):
+            changed.append(name)
+            continue
         if h is None or not getattr(h, "value", None):
+            if not bookkeeping:
+                unmeasured.append(name)      # a resource the RECORD does not attest
             continue
         seen += 1
         try:
-            algo = getattr(h, "mode", "sha256")
-            digest = hashlib.new(algo, entry.locate().read_bytes()).digest()
-        except (OSError, ValueError):
-            changed.append(str(entry))
+            digest = hashlib.new(getattr(h, "mode", "sha256"), data).digest()
+        except ValueError:
+            unmeasured.append(name)
             continue
         if base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii") != h.value:
-            changed.append(str(entry))
-    return sorted(changed), seen > 0
+            changed.append(name)
+    return sorted(changed), seen > 0 and not unmeasured, sorted(unmeasured)
 
 
 def repo_facts() -> dict[str, Any]:
@@ -697,16 +718,19 @@ def repo_facts() -> dict[str, Any]:
             pkg = version("data-sheets-schema")
         except PackageNotFoundError:
             pkg = None
-        changed, measured = _installed_files_changed()
+        changed, measured, unmeasured = _installed_files_changed()
         return {"commit": None, "commit_short": None, "branch": None,
                 "dirty": (bool(changed) if measured else None),
                 "dirty_file_count": (len(changed) if measured else None),
                 "dirty_paths": changed[:DIRTY_PATHS_MAX],
                 **({"dirty_paths_truncated": len(changed) - DIRTY_PATHS_MAX} if len(changed) > DIRTY_PATHS_MAX else {}),
+                **({"unmeasured_paths": unmeasured[:DIRTY_PATHS_MAX]} if unmeasured else {}),
                 "resource_root": str(at), "resource_kind": "install", "package_version": pkg,
                 "note": ("no checkout: the resources are the installed package's, so there is no commit to name; "
                          + ("the installed files were compared with the wheel's RECORD hashes (#1641)" if measured
-                            else "the wheel's RECORD could not be read, so whether the installed files changed is unknown, not clean (#1641)"))}
+                            else ("the wheel's RECORD lists resources it does not hash, so whether the installed files "
+                                  "changed is unknown, not clean (#1667)" if unmeasured
+                                  else "the wheel's RECORD could not be read, so whether the installed files changed is unknown, not clean (#1641)")))}
     commit = _run(["git", "rev-parse", "HEAD"], cwd=at)
     top = _run(["git", "rev-parse", "--show-toplevel"], cwd=at)
     try:
@@ -1035,6 +1059,8 @@ def _profile_digest_disagreement(data: dict[str, Any]) -> str | None:
     schema = data.get("schema") if isinstance(data, dict) else None
     if not isinstance(schema, dict) or not schema.get("profile") or not schema.get("digest_md5"):
         return None
+    if not isinstance(schema["profile"], str) or not isinstance(schema["digest_md5"], str):
+        return None                        # a malformed value is the structural validator's finding (#1655)
     try:
         from data_sheets_schema import schema_digest
         from data_sheets_schema.profiles import PROFILES

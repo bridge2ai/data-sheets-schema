@@ -47,6 +47,11 @@ def chunk(manifest, project, bundles, check, chunk_manifest, strict, max_lines, 
     """
     from data_sheets_schema.chunking import (DEFAULT_RULE, manifest_status_for,
                                               project_bundles, write_manifest_for)
+    if not bundles and not check:
+        # An implicit corpus write lands under the checkout the corpus is
+        # anchored on — never from a subdirectory of any checkout (#1663).
+        from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+        _require_repo_root_cwd("d4d bundle chunk")
 
     if chunk_manifest is not None:
         if not check or len(bundles) != 1 or project or max_lines is not None or max_bytes is not None:

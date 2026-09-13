@@ -9,7 +9,12 @@ from data_sheets_schema.agent_pin import (AGENT_DIR,
 
 
 def _names():
-    return sorted(p.stem for p in AGENT_DIR.glob("*.md"))
+    # The same resolver as the single lookup (#1666): the shipped
+    # definitions from an install, the working checkout's from a checkout.
+    from pathlib import Path
+    from data_sheets_schema.resources import resource_path
+    d = resource_path(Path(".claude/agents"))
+    return sorted(p.stem for p in d.glob("*.md")) if d.is_dir() else []
 
 
 @click.group()

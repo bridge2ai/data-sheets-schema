@@ -226,7 +226,7 @@ equivalent, and only the first two are ever acceptable:
 |---|---|---|---|
 | **decision rule** | "prefer omission over inference" | ✅ if applied to every project identically | ✅ |
 | **factual disambiguation** | "this bundle describes a release programme, not one release" | ❌ project-specific | ✅ |
-| **quality warning** | "earlier runs conflated two entities here" | ❌ | ⚠️ steers behaviour; avoid |
+| **quality warning** | "earlier runs conflated two entities here" | ❌ | ⚠️ steers behavior; avoid |
 | **outcome expectation** | "expect roughly 60 populated slots" | ❌ | ❌ **never, in any condition** |
 
 Outcome expectations are excluded from *both* conditions. They tell the model
@@ -337,7 +337,7 @@ a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
    - `extracted` with `extracted: [{slot, snippet}, …]` — the record slot
      path the fact fills (`funders[0].grant_id`, or an entry path such as
      `funders[0]` when one passage attests a whole entry) and a **verbatim**
-     snippet from *this* chunk of at least 8 characters after normalisation
+     snippet from *this* chunk of at least 8 characters after normalization
      per `...`-separated part (a grant number or an identifier qualifies; a
      short common word does not, and fails the check);
    - `redundant_with: [chunk ids]` — relevant, but every fact it holds is
@@ -412,7 +412,7 @@ receipt, nothing else. It must not create a core record.
 of every generated core's slot values and the rest was the two core-only
 slots. Generating it was where the API arm's pair errors came from. So Phase
 2 is one command, run on the validated Phase 1 file, and involves no model
-judgement:
+judgment:
 
 ```bash
 poetry run d4d derive core \
@@ -503,7 +503,7 @@ There is no full/core reconciliation for a model to perform: the shared
 slots agree because the core is projected from the full record, the
 projection rules (`resources` by id, `file_collections` → `distributions`,
 `dialect` when files agree) are code, and the pair checker is the proof.
-What remains for judgement is the semantic review the checker asks for and
+What remains for judgment is the semantic review the checker asks for and
 the repair of what the checkers find.
 
 1. **Re-derive the core from the corrected full record** (Phase 2's command

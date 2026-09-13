@@ -40,6 +40,7 @@ from __future__ import annotations
 import datetime as _dt
 import hashlib
 import subprocess
+import os
 from pathlib import Path
 from typing import Any
 
@@ -313,6 +314,17 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
             return t.resolve().is_relative_to(Path.cwd().resolve())
         except (OSError, ValueError):
             return False
+    def _shared_inode(t: Path) -> bool:
+        # A hard link is the same file under two names: an implicit write
+        # would rewrite the other name's registry too (#1671).
+        try:
+            return t.exists() and os.stat(t).st_nlink > 1
+        except OSError:
+            return False
+    if implicit and _shared_inode(target):
+        raise ValueError(
+            f"the registry {registry} is hard-linked ({os.stat(target).st_nlink} names share its inode); "
+            "an implicit write would change another path's registry — name the registry explicitly")
     if implicit and (target != Path(registry) or not _in_working_tree(target)):
         # Resolution fell through to the checkout's or the installed
         # registry — or an alias in this tree resolves into another one
