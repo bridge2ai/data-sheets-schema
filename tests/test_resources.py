@@ -165,12 +165,18 @@ class TestRoundOne(unittest.TestCase):
         other checkout's file, and the readers hash that file."""
         import hashlib
         from data_sheets_schema import prompt_registry
-        os.chdir(ROOT)
-        link = ROOT / ".venv"
-        if not link.is_symlink():
-            self.skipTest("no symlinked .venv to walk through")
+        # Stage both possible parents, independent of the developer's or
+        # CI runner's own virtualenv layout.
+        root = Path(self.tmp)
+        other = root / "other"
+        (other / "venv").mkdir(parents=True)
+        (other / "pyproject.toml").write_text("# the symlink target's parent\n")
+        (root / "pyproject.toml").write_text("# not the target's parent\n")
+        (root / ".venv").symlink_to(other / "venv", target_is_directory=True)
+        os.chdir(root)
         p = Path(".venv/../pyproject.toml")
         self.assertEqual(prompt_registry.sha256_of(p), hashlib.sha256(p.read_bytes()).hexdigest())
+        self.assertNotEqual(prompt_registry.sha256_of(p), hashlib.sha256((root / "pyproject.toml").read_bytes()).hexdigest())
 
     def test_a_staged_file_has_one_recorded_identity(self):
         """#1536"""
