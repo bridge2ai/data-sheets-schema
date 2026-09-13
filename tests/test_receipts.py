@@ -857,7 +857,7 @@ class Playbook(unittest.TestCase):
                        "nothing_relevant", "duplicate_of", "d4d receipts check"):
             self.assertIn(needle, p1, needle)
         # the rule the validator enforces, not a looser paraphrase of it (#733)
-        self.assertIn(f"at least {rc.MIN_SNIPPET_CHARS} characters after normalisation", p1)
+        self.assertIn(f"at least {rc.MIN_SNIPPET_CHARS} characters after normalization", p1)   # the playbook writes American English (#1661)
         for status in rc.STATUSES:
             self.assertIn(status, p1)
 
