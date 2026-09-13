@@ -87,15 +87,15 @@ def test_an_old_generationless_reconstruction_cannot_override_bound_resume_evide
             del progress["input_identity"]
             api._progress_path(spec).write_text(json.dumps(progress))
     elif drift == "progress-subset":
-        # Identities saved before a later key (`chunks`) existed still bind
-        # the generation under the compatibility rule; on `==` neither the
-        # ledger nor the progress file would, and the reconstruction would
-        # be adopted instead (#1629, #1704). The instrument evidence stays.
+        # Optional render-spec metadata can be absent while the original
+        # bundle/source-manifest/chunk file pins and instrument evidence stay
+        # complete (#1749). Raw equality would fail to bind this generation
+        # and adopt the reconstruction instead (#1629, #1704).
         usage = json.loads(ledger.ledger_path(spec).read_text())
-        usage["input_identity"].pop("chunks", None)
+        del usage["input_identity"]["instruction"]["spec"]["chunk_manifest"]
         ledger.ledger_path(spec).write_text(json.dumps(usage))
         progress = json.loads(api._progress_path(spec).read_text())
-        progress["input_identity"].pop("chunks", None)
+        del progress["input_identity"]["instruction"]["spec"]["chunk_manifest"]
         api._progress_path(spec).write_text(json.dumps(progress))
         # The snapshot index was written by the same run and carries the same
         # shape as its owner's pin: strip the key there too.
@@ -105,7 +105,7 @@ def test_an_old_generationless_reconstruction_cannot_override_bound_resume_evide
             except ValueError:
                 continue
             if isinstance(doc, dict) and isinstance(doc.get("input_identity"), dict) and "snapshots" in doc:
-                doc["input_identity"].pop("chunks", None)
+                del doc["input_identity"]["instruction"]["spec"]["chunk_manifest"]
                 index.write_text(json.dumps(doc))
     client = client_for(spec)
     if drift in {"progress", "bundle", "unbound"}:

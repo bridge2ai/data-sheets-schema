@@ -587,7 +587,15 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
     path = pv.record_path_for(project, method, label, pv.CONCAT_DIR)   # resolved at call time
     if not path.exists():
         raise click.ClickException(f"no provenance record at {path}")
-    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    try:
+        data = _yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, _yaml.YAMLError) as exc:
+        raise click.ClickException(f"cannot read provenance record {path}: {exc}") from exc
+    if data is None:
+        data = {}
+    malformed = pv.record_mapping_problem(data)
+    if malformed:
+        raise click.ClickException(malformed)
     req = ((data.get("prompts") or {}).get("request")) or {}
     if not req.get("sha256"):
         raise click.ClickException("the record carries no request hash; nothing to attach a spec to")
@@ -597,8 +605,15 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
     bundle = ((data.get("inputs") or {}).get("bundle_path"))
     if not bundle:
         raise click.ClickException("the record names no input bundle; the spec needs one")
-    stamp = (data.get("record_generated_at") or "")[:10]
-    base = date.fromisoformat(stamp) if stamp else date.today()
+    stamp = data.get("record_generated_at")
+    if isinstance(stamp, date):
+        stamp = stamp.isoformat()
+    if stamp is not None and not isinstance(stamp, str):
+        raise click.ClickException("record_generated_at must be an ISO date/time string or null")
+    try:
+        base = date.fromisoformat(stamp[:10]) if stamp else date.today()
+    except ValueError as exc:
+        raise click.ClickException(f"record_generated_at is not a valid ISO date/time: {stamp!r}") from exc
     # The provider the record itself states — `d4d prompt render` writes the
     # runtime's provider (Anthropic for Claude Code), not the proxy identity
     # the API path's default spec carries, and the header line differs.
@@ -654,7 +669,7 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
     # run had one, and a record from before profiles carries neither. The
     # candidate restates the record rather than selecting live (#1438).
     schema_block = data.get("schema") if isinstance(data.get("schema"), dict) else {}
-    if schema_block.get("profile"):
+    if "profile" in schema_block and schema_block["profile"] is not None:
         from data_sheets_schema.profiles import PROFILES as _known
         if not isinstance(schema_block["profile"], str) or schema_block["profile"] not in _known:
             raise click.ClickException(f"the record's schema.profile is {schema_block['profile']!r}, not a profile "
@@ -713,22 +728,25 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
         got = hashlib.sha256(resolve_prompt(spec).encode("utf-8")).hexdigest()
         if got == req["sha256"]:
             rendered = spec.render_spec()
+            from copy import deepcopy
+            proposed = deepcopy(data)
+            proposed["prompts"]["request"]["spec"] = rendered
+            proposed["prompts"]["request"]["spec_basis"] = (
+                "backfilled by d4d provenance backfill-spec: verified by re-rendering to the recorded hash (#772)"
+                + ("" if render_version > 1 else
+                   "; render version 1 does not hash the profile, which is restated"))
+            if rendered.get("profile") and not schema_block.get("profile") and render_version > 1:
+                if not isinstance(proposed.get("schema"), dict):
+                    proposed["schema"] = {}
+                proposed["schema"]["profile"] = rendered["profile"]
+                proposed["schema"]["profile_basis"] = backfill_basis
+            problems = pv.profile_problems(proposed)
+            if problems:
+                raise click.ClickException("reconstructed spec conflicts with recorded instrument evidence; "
+                                           "not written: " + "; ".join(problems))
             click.echo(f"   ✓ {label}/{project}: {condition} on {rendered['run_date']} re-renders to the recorded hash")
             if execute:
-                data["prompts"]["request"]["spec"] = rendered
-                data["prompts"]["request"]["spec_basis"] = ("backfilled by d4d provenance backfill-spec: "
-                                                            "verified by re-rendering to the recorded hash (#772)"
-                                                            + ("" if render_version > 1 else
-                                                               "; render version 1 does not hash the profile, which is restated"))
-                # The profile the hash proved is the record's, for every
-                # reader (`profiles.for_record`): a spec stating one the
-                # record does not is two records in one (#1678).
-                if rendered.get("profile") and not schema_block.get("profile") and render_version > 1:
-                    if not isinstance(data.get("schema"), dict):
-                        data["schema"] = {}            # absent or null (#1710)
-                    data["schema"]["profile"] = rendered["profile"]
-                    data["schema"]["profile_basis"] = backfill_basis
-                pv.ProvenanceRecord(data=data).write(path)
+                pv.ProvenanceRecord(data=proposed).write(path)
                 click.echo(f"     written to {path}")
             return
     raise click.ClickException(

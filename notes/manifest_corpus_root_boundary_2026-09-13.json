@@ -15,7 +15,7 @@
     "src/data_sheets_schema/registry.py": "04868fd2cd791c41e47637f638dc338d3b777d928ae7c793a696676ccacafdb3",
     "src/data_sheets_schema/resources.py": "7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435",
     "src/data_sheets_schema/review_pack.py": "a8be3deeddf18ab3ab932e206f421c77380042acf79772aa8bdf029a3900cbec",
-    "src/data_sheets_schema/runs.py": "b2c4a3a3266487faffac5ba4ff193595646913bc877b5e4d375c07b4bd89ad9c",
+    "src/data_sheets_schema/runs.py": "ee6ecd2ff7b18404f972181518afd4e5381499bcdabe1542b1fca22ebf7bfc02",
     "src/data_sheets_schema/verifiable.py": "e997cb63a9807d7a534b86b66547d2eda9e5cd29c562cebbb49497c959da1f18"
   },
   "generation_arms": [
@@ -23,7 +23,7 @@
     "api"
   ],
   "historical_renderer_controls": 60,
-  "integration_dependency_commit": "721d2471ccc549b003c6596276d71e5dd3be7a87",
+  "integration_dependency_commit": "3dff432e3c61e40f84bd34bc0feb2801b304e274",
   "issues": [
     1523,
     1594,
@@ -60,7 +60,8 @@
     1732,
     1735,
     1736,
-    1738
+    1738,
+    1746
   ],
   "new_spec_chunk_check_uses_manifest": true,
   "preservation_sha256": "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f",

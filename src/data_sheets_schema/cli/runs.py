@@ -557,21 +557,11 @@ def check_cmd(method, label, project, strict):
             # Duplicate mapping keys the validation block recorded (#1029):
             # a standard loader keeps only the last, so a record that
             # carries one is not the record its readers see.
-            prov_data = _prov(run.method, run.label, proj) or {}
-            # Report malformed prompt blocks before audit readers dereference
-            # them. Keep auditing the remaining records, and fail --strict
-            # with the record address rather than an AttributeError (#1734).
-            node = prov_data
-            prefix = []
-            malformed = None
-            for key in ("prompts", "request", "spec"):
-                prefix.append(key)
-                node = node.get(key)
-                if node is None:
-                    break
-                if not isinstance(node, dict):
-                    malformed = f"{'.'.join(prefix)} must be a mapping or null"
-                    break
+            prov_data = _prov(run.method, run.label, proj)
+            if prov_data is None:
+                prov_data = {}
+            from data_sheets_schema.provenance import record_mapping_problem
+            malformed = record_mapping_problem(prov_data)
             if malformed:
                 malformed_records.append(f"{run.label}/{proj}: {malformed}")
                 continue
@@ -720,7 +710,7 @@ def check_cmd(method, label, project, strict):
     # — a drifted record is still usable, it just cannot be re-derived from the
     # path it names, and a gate would collapse that distinction.
     from data_sheets_schema.runs import (
-        BUNDLE_ABSENT, BUNDLE_CURRENT, BUNDLE_DRIFTED, BUNDLE_UNRECORDED,
+        BUNDLE_ABSENT, BUNDLE_CURRENT, BUNDLE_DRIFTED, BUNDLE_UNRECORDED, BUNDLE_UNRESOLVED,
         bundle_drift_detail,
     )
     drift: collections.Counter = collections.Counter()
@@ -927,6 +917,9 @@ def check_cmd(method, label, project, strict):
                    "not consistent.")
 
     stale = drift[BUNDLE_DRIFTED] + drift[BUNDLE_ABSENT]
+    if drift[BUNDLE_UNRESOLVED]:
+        click.echo(f"\nⓘ  {drift[BUNDLE_UNRESOLVED]} record(s) name relative input bundles "
+                   "with no known corpus owner; whether their bytes still match is unknown.")
     if stale:
         click.echo(f"\nⓘ  {stale} record(s) name an input bundle whose bytes "
                    f"have since changed ({drift[BUNDLE_CURRENT]} still match, "

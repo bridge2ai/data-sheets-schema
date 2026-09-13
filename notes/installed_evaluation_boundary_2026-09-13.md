@@ -189,3 +189,13 @@ dependency commits. Both generation arms and all listed evaluation styles
 remain covered by the plan; no new production measurements were made.
 
 The integrated head proceeds to independent review and exact-head CI.
+
+## Review round 12 — 2026-09-13
+
+Round 11 found #1739: explicit-file validation dropped the legacy wrapper's
+selected schema directory. The CLI now forwards it while preserving caller
+ownership of the input, context and definition paths. Eight subprocess
+regressions, covering both rubrics, relative/absolute inputs and opposing
+caller schemas, fail before correction. All 45 focused validator, semantic
+context and enabled fresh-wheel checks pass afterward. The implementation
+pins are refreshed; no historical assessment or instrument text changes.

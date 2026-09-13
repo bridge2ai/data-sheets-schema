@@ -1237,6 +1237,7 @@ def _prompt_files_drifted(record: dict) -> bool | None:
 
 BUNDLE_CURRENT, BUNDLE_DRIFTED = "current", "drifted"
 BUNDLE_ABSENT, BUNDLE_UNRECORDED = "absent", "unrecorded"
+BUNDLE_UNRESOLVED = "unresolved"
 
 
 def bundle_drift(method: str, label: str, project: str,
@@ -1257,7 +1258,7 @@ def bundle_drift(method: str, label: str, project: str,
     strips were correct. The defect is that the corpus absorbed a corpus-wide
     input change with no report.
 
-    Four outcomes, kept distinct because they license different actions:
+    Five outcomes, kept distinct because they license different actions:
 
     - ``current``    — the file still hashes to what the record pinned.
     - ``drifted``    — it does not. The record stays usable and stops being
@@ -1265,6 +1266,8 @@ def bundle_drift(method: str, label: str, project: str,
     - ``absent``     — the path no longer exists at all.
     - ``unrecorded`` — no ``bundle_md5``, so there is nothing to compare. A
       different claim from ``current`` and never counted as one.
+    - ``unresolved`` — a relative path has no known record owner; no caller
+      directory can establish whether its bytes match (#1750).
 
     Scope note. Callers iterating ``discover()`` see 158 runs against 162
     provenance records on disk. The four extra are the ``guarded-union``
@@ -1300,7 +1303,7 @@ def bundle_drift_detail(method: str, label: str, project: str,
     # it in, so it cannot outlive the invocation that built it.
     import hashlib
 
-    from data_sheets_schema.provenance import record_path_for
+    from data_sheets_schema.provenance import record_path_for, resolve_record_input
     path = record_path_for(project, method, label, concat_dir)
     if not path.exists():
         return BUNDLE_UNRECORDED, "no provenance record", None
@@ -1311,7 +1314,9 @@ def bundle_drift_detail(method: str, label: str, project: str,
     if not recorded or not declared:
         return BUNDLE_UNRECORDED, "no bundle hash recorded", declared
 
-    bundle = Path(declared)
+    bundle = resolve_record_input(Path(declared), path)
+    if bundle is None:
+        return BUNDLE_UNRESOLVED, f"cannot resolve {declared}: record owner is unknown", declared
     if not bundle.exists():
         return BUNDLE_ABSENT, f"{declared} does not exist", declared
 
@@ -1689,7 +1694,7 @@ def report_claim_status(method: str, label: str, project: str,
     """
     import yaml as _yaml
 
-    from data_sheets_schema.provenance import _md5, record_path_for
+    from data_sheets_schema.provenance import record_path_for, verify_entry
     path = record_path_for(project, method, label, concat_dir or CONCAT_DIR)
     if not path.exists():
         return CLAIMS_UNRECORDED, 0
@@ -1702,8 +1707,7 @@ def report_claim_status(method: str, label: str, project: str,
     for entry in (block.get("artifacts") or {}).values():
         if not isinstance(entry, dict) or not entry.get("md5"):
             continue
-        f = Path(entry["path"])
-        if not f.exists() or _md5(f) != entry["md5"]:
+        if verify_entry(entry, record=path) is not True:
             # Distinct from `not_run`, as PAIR_STALE is: a checker that could
             # not run and a verdict about bytes that have changed are different
             # states, and the pair check already draws that line.
@@ -1746,12 +1750,11 @@ def pair_status(method: str, label: str, project: str,
     # A verdict about two files, re-checked against those files. Same reason
     # `validation_status` re-hashes: without this, editing either record leaves
     # the pair verdict asserting agreement about bytes that are gone.
-    from data_sheets_schema.provenance import _md5
+    from data_sheets_schema.provenance import verify_entry
     for entry in (block.get("artifacts") or {}).values():
         if not isinstance(entry, dict) or not entry.get("md5"):
             continue
-        f = Path(entry["path"])
-        if not f.exists() or _md5(f) != entry["md5"]:
+        if verify_entry(entry, record=path) is not True:
             return PAIR_STALE, errors
     return (PAIR_CONSISTENT if block.get("consistent") else PAIR_DIVERGENT,
             errors)

@@ -648,14 +648,15 @@ def software_facts() -> dict[str, Any]:
 DIRTY_PATHS_MAX = 50
 
 
-#: The installer's own bookkeeping: the wheel's metadata directory, a
-#: root-level `.pth`, byte-code caches. Nothing else is exempt (#1717).
+#: Only installer-owned metadata files, root-level `.pth` and byte-code
+#: caches are bookkeeping. Shipped wheel metadata is measured (#1748).
 _LEDGER = "data_sheets_schema/schema/digest_inventory.yaml"
 
 
 def _is_bookkeeping(name: str) -> bool:
     parts = name.replace("\\", "/").split("/")
-    return (any(p.endswith(".dist-info") for p in parts[:-1])
+    return ((len(parts) == 2 and parts[0].endswith(".dist-info")
+             and parts[1] in {"RECORD", "INSTALLER", "REQUESTED", "direct_url.json"})
             or (len(parts) == 1 and parts[0].endswith(".pth"))
             or "__pycache__" in parts[:-1])
 
@@ -1105,14 +1106,17 @@ def record_schema_path() -> Path:
 
 
 def _profile_digest_disagreement(data: dict[str, Any]) -> str | None:
-    """A record whose `schema.profile` names one profile while its
+    """A record whose effective profile names one instrument while its
     `schema.digest_md5` is the *other* profile's current digest states an
     instrument it did not consume (#1581). Only the current digests are
     known here; an older digest of the same profile is not a finding."""
     schema = data.get("schema") if isinstance(data, dict) else None
-    if not isinstance(schema, dict) or not schema.get("profile") or not schema.get("digest_md5"):
+    if not isinstance(schema, dict) or not schema.get("digest_md5"):
         return None
-    if not isinstance(schema["profile"], str) or not isinstance(schema["digest_md5"], str):
+    stated = schema.get("profile")
+    from data_sheets_schema.profiles import for_record
+    effective = for_record(data).name if stated is None else stated
+    if not isinstance(effective, str) or not isinstance(schema["digest_md5"], str):
         return None                        # a malformed value is the structural validator's finding (#1655)
     try:
         from data_sheets_schema import schema_digest
@@ -1124,11 +1128,12 @@ def _profile_digest_disagreement(data: dict[str, Any]) -> str | None:
         if isinstance(exc, MissingVocabulary):
             return (f"the record's profile cannot be checked here: {exc}")   # a finding, not silence (#1729)
         return None
-    if current.get(schema["profile"]) == schema["digest_md5"]:
+    if current.get(effective) == schema["digest_md5"]:
         return None                        # its own current digest, whatever else renders the same bytes (#1609)
     for name, md5 in current.items():
-        if name != schema["profile"] and md5 == schema["digest_md5"]:
-            return (f"schema.profile is {schema['profile']!r} but schema.digest_md5 {md5[:12]}… is the "
+        if name != effective and md5 == schema["digest_md5"]:
+            basis = f" (read as {effective!r})" if stated is None else ""
+            return (f"schema.profile is {stated!r}{basis} but schema.digest_md5 {md5[:12]}… is the "
                     f"{name} profile's current digest")
     return None
 
@@ -1176,6 +1181,22 @@ def check_record(data: dict[str, Any]) -> tuple[list[str], str | None]:
     return problems, None
 
 
+def record_mapping_problem(data: Any) -> str | None:
+    """Report malformed mapping blocks before profile/audit readers use them."""
+    if not isinstance(data, dict):
+        return "record must be a mapping"
+    for path in ("run", "model", "schema", "inputs", "inputs.source_manifest",
+                 "inputs.chunks", "prompts", "prompts.request", "prompts.request.spec"):
+        node = data
+        for key in path.split("."):
+            node = node.get(key)
+            if node is None:
+                break
+        if node is not None and not isinstance(node, dict):
+            return f"{path} must be a mapping or null"
+    return None
+
+
 def profile_problems(data: dict[str, Any]) -> list[str]:
     """The profile findings `check_record` appends (#1581, #1678), on their
     own so a gate that does not run the structural validator can still
@@ -1184,10 +1205,11 @@ def profile_problems(data: dict[str, Any]) -> list[str]:
 
 
 def _spec_profile_disagreement(data: dict[str, Any]) -> str | None:
-    """A record whose stored render spec states one profile while its
-    `schema.profile` states another — or none — is two records in one
-    (#1678): the gate re-renders under the spec's, every reader reads the
-    schema's."""
+    """Compare the stored spec's profile with the one record readers use.
+
+    A missing historical profile has the documented study fallback; an
+    explicit different profile identifies a different instrument (#1740).
+    """
     schema = data.get("schema") if isinstance(data, dict) else None
     prompts = data.get("prompts") if isinstance(data, dict) else None
     request = prompts.get("request") if isinstance(prompts, dict) else None
@@ -1196,9 +1218,13 @@ def _spec_profile_disagreement(data: dict[str, Any]) -> str | None:
         return None
     if not isinstance(schema, dict):
         schema = {}                        # no schema block, or null: the readers read the study's (#1709)
-    if schema.get("profile") != spec["profile"]:
+    stated = schema.get("profile")
+    from data_sheets_schema.profiles import for_record
+    effective = for_record(data).name if stated is None else stated
+    if effective != spec["profile"]:
+        basis = f" (read as {effective!r})" if stated is None else ""
         return (f"prompts.request.spec.profile is {spec['profile']!r} but schema.profile is "
-                f"{schema.get('profile')!r}; the gate and the readers would use different instruments")
+                f"{stated!r}{basis}; the gate and the readers would use different instruments")
     return None
 
 
