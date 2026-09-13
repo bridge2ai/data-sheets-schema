@@ -700,15 +700,25 @@ class TestRoundFour(_Clean):
         record = {"inputs": {"bundle_path": identity["bundle"]["path"], "bundle_sha256": identity["bundle"]["sha256"],
                              "source_manifest": identity["source_manifest"], "chunks": identity["chunks"]},
                   "schema": {}, "prompts": {"request": {"sha256": identity["instruction"]["sha256"]}}}
-        with self.assertRaises(usage_ledger.UsageLedgerError) as caught:
-            api_runner._require_recorded_inputs(spec, record)
-        self.assertIn("no schema digest", str(caught.exception))
+        api_runner._require_recorded_inputs(spec, record)             # no digest: no evidence here, no refusal here
+        # … the refusal is at continuation: finished phases, no digest in the
+        # record, no profile in the pin.
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as d:
+            spec = self._spec(out_dir=Path(d))
+            api_runner._prepare_usage(spec, resume=False)
+            with mock.patch.object(api_runner, "_load_progress", return_value={"completed": ["full"], "input_identity": legacy,
+                                                                                 "generation_id": api_runner._usage_generation(spec)}), \
+                    mock.patch.object(usage_ledger, "recorded_inputs", return_value=legacy):
+                with self.assertRaises(usage_ledger.UsageLedgerError) as caught:
+                    api_runner.execute(spec, resume=True, client=self._fake_client())
+            self.assertIn("no instrument identity", str(caught.exception))
 
-    def _spec(self):
+    def _spec(self, **kw):
         from data_sheets_schema.api_runner import RunSpec
         return RunSpec(project="CHORUS", arm="BASELINE (input documents only)", method="claudecode_api",
                        label="2026-09-13_x-api-generic-v9_rep1", condition="generic_v9", run_date="2026-09-13",
-                       bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt")
+                       bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt", **kw)
 
     def test_neutral_sync_needs_no_pin(self):
         """#1520"""
