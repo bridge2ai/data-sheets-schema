@@ -35,7 +35,7 @@ class TestRepoFacts(unittest.TestCase):
         # work-tree rename (`git add -N`) carries the R in the Y column.
         porcelain = " M aurelian\0?? data/x y.yaml\0R  new.py\0old.py\0 R w2.py\0w.py\0UU c.py\0"
 
-        def fake(cmd, *, strip=True):
+        def fake(cmd, *, strip=True, cwd=None):          # `_run` now takes the checkout as cwd (#1550)
             if "--porcelain" in cmd:
                 return porcelain.strip() if strip else porcelain
             return "abc"
