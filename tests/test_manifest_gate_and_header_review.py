@@ -65,10 +65,12 @@ def test_missing_record_backfill_retains_the_positive_header_manifest(prior, ver
 
 
 @pytest.mark.parametrize("explicit", [None, "path", "auto"])
-def test_header_selection_preserves_unused_and_explicit_caller_choices(prior, explicit):
+@pytest.mark.parametrize("unused", ["not used (this arm)",
+    "not used; this arm declares its single source bundle explicitly"])
+def test_header_selection_preserves_unused_and_explicit_caller_choices(prior, explicit, unused):
     spec, chunks, target = prior
     full = spec.out_dir / spec.method / spec.label / f"{spec.project}_d4d.yaml"
-    full.write_text(f"# Source bundle: {spec.bundle}\n# Source manifest: not used (this arm)\nid: example:cohort\n")
+    full.write_text(f"# Source bundle: {spec.bundle}\n# Source manifest: {unused}\nid: example:cohort\n")
     kwargs = {} if explicit == "auto" else {"manifest": spec.manifest if explicit == "path" else None}
     rec = pv.build_record(spec.project, spec.method, spec.label, mode="reconstructed",
                           input_verified=True, **kwargs)

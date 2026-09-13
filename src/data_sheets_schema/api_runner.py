@@ -468,9 +468,9 @@ class RunSpec:
     # The chunk manifest the run was given explicitly, when it is not the
     # one discovered beside the bundle (#1299). None means discover.
     chunk_manifest: Path | None = None
-    # Version 2 passes selected manifest arguments to agentic recording.
+    # Version 4 binds every agentic playbook read/check to selected inputs.
     # Historical render specs omit this field and replay under version 1.
-    render_version: int = 3
+    render_version: int = 4
     # Frozen when the run is specified, not read from the clock on each use.
     # A six-phase run takes tens of minutes and this study's sweep genuinely
     # ran past midnight UTC, so recomputing per call gave phases of one run
@@ -495,12 +495,13 @@ class RunSpec:
     provider: str | None = None
     _replay_only: bool = field(default=False, init=False, repr=False)
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
+    _agentic_artifact_paths: dict[str, str] | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self):
         if self.run_date is AUTO:
             self.run_date = datetime.now(timezone.utc).date().isoformat()
             self._automatic_run_date = self.run_date
-        if self.render_version not in (1, 2, 3):
+        if self.render_version not in (1, 2, 3, 4):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         default_line = type(self).__dataclass_fields__["manifest_line"].default
         self.manifest = select_manifest(self.project, self.bundle, self.manifest)
@@ -508,6 +509,15 @@ class RunSpec:
             self.manifest = Path(self.manifest)
         if self.chunk_manifest is not None:
             self.chunk_manifest = Path(self.chunk_manifest)
+        elif self.render_version >= 4 and self.runtime == "Claude Code":
+            # The agentic playbook reads a chunk mapping even when discovery
+            # chose it. Freeze that path for instruction replay (#1507).
+            from data_sheets_schema.chunking import manifest_for
+            self.chunk_manifest = manifest_for(self.bundle)
+        if self.render_version >= 4 and self.runtime == "Claude Code":
+            self._agentic_artifact_paths = {
+                "full": str(self.full_path), "core": str(self.core_path),
+                "receipt": str(self.report_path.parent / f"{self.project}_coverage_receipt.yaml")}
         if self.manifest_line != default_line:
             return                      # an arm that declares its own header keeps it
         self.manifest_line = self.header_for_manifest(self.manifest)
@@ -540,6 +550,12 @@ class RunSpec:
         manifest = recorded.get("manifest")
         spec.manifest = Path(manifest) if manifest else None
         spec.manifest_line = recorded.get("manifest_line", "")
+        if "agentic_artifact_paths" in recorded:
+            paths = recorded["agentic_artifact_paths"]
+            if (not isinstance(paths, dict) or set(paths) != {"full", "core", "receipt"}
+                    or any(not isinstance(value, str) or not value for value in paths.values())):
+                raise ValueError("invalid recorded agentic artifact paths")
+            spec._agentic_artifact_paths = dict(paths)
         spec._replay_only = True
         return spec
 
@@ -582,7 +598,9 @@ class RunSpec:
         lets `verify_request()` re-render and compare, which is what turns
         "do not intervene" from a rule into something detectable (#420).
         """
-        return {"render_version": self.render_version,
+        return {**({"agentic_artifact_paths": dict(self._agentic_artifact_paths)}
+                   if self.render_version >= 4 and self._agentic_artifact_paths is not None else {}),
+                "render_version": self.render_version,
                 "chunk_manifest": str(self.chunk_manifest) if self.chunk_manifest is not None else None,
                 "condition": self.condition, "arm": self.arm,
                 "manifest_line": self.manifest_line, "run_date": self.run_date,
@@ -773,6 +791,60 @@ def resolved_prompt_digest(spec: RunSpec) -> dict[str, Any]:
             "bytes": len(text.encode("utf-8"))}
 
 
+def agentic_selected_inputs(spec: RunSpec) -> str:
+    """Bind every manifest-dependent playbook step to this run's inputs."""
+    import shlex
+    paths = spec._agentic_artifact_paths
+    def command(*args):
+        return shlex.join(["poetry", "run", "d4d", *map(str, args)])
+
+    text = (
+        "\n\n## Selected inputs for all four phases (renderer v4)\n\n"
+        "This section overrides the input paths and manifest-dependent commands in "
+        "d4d-full-core.md. Keep its evidence boundary, receipt protocol and phase order. "
+        "Apply these selections in every phase and in the orchestrator's transcript audit.\n\n"
+        f"Read only this source bundle: `{spec.bundle}`. Read this chunk manifest first: "
+        f"`{spec.chunk_manifest}`. Use its ordered chunk IDs and line windows. "
+        "Replace the playbook's default chunk-path read and bundle-chunk check with:\n\n"
+        + command("bundle", "chunk", "--bundle", spec.bundle, "--chunk-manifest", spec.chunk_manifest,
+                  "--check", "--strict") + "\n\n"
+        "Require current canonical coverage under the selected rule. Stop on failure; "
+        "do not regenerate or replace the selected manifest during this run.\n\n"
+    )
+    if spec.manifest_used:
+        text += (
+            f"The only source manifest for this run is `{spec.manifest}`. Its declarations "
+            "supply naming, ranking and scope. Replace the playbook's scope read with:\n\n"
+            + command("download", "scope", "--manifest", spec.manifest, "--project", spec.project)
+            + "\n\nAfter generating and validating the pair, replace the scope completion check with "
+            "this check of the current pair only:\n\n"
+            + command("download", "scope", "--manifest", spec.manifest, "--project", spec.project,
+                      "--check", "--record", paths["full"], "--record", paths["core"], "--strict")
+            + "\n\nIf no scope is declared, report that no scope declaration was available. "
+            "For every other command using --project, pass this selected source manifest through "
+            "the command's own --manifest option when present, or through the root "
+            "`d4d --manifest PATH <command>` option otherwise.\n\n"
+        )
+    else:
+        text += (
+            "No source manifest is used. Do not read the playbook's default source manifest "
+            "or run its manifest-dependent scope commands. Report scope as undeclared; "
+            "do not infer declarations from another dataset or from an ambient registry.\n\n"
+        )
+    text += (
+        "Before Phase 2, use this exact receipt check, then repeat it with --write after provenance recording:\n\n"
+        + command(*(["--manifest", spec.manifest] if spec.manifest_used else []),
+                  "receipts", "check", "--method", spec.method, "--label", spec.label,
+                  "--project", spec.project, "--bundle", spec.bundle,
+                  "--chunk-manifest", spec.chunk_manifest, "--strict") + "\n\n"
+        "For scripts/agentic_observed.py, replace its --bundle and --manifest values with "
+        f"`{spec.bundle}` and `{spec.chunk_manifest}` respectively; its --receipt names this "
+        f"run's `{paths['receipt']}`. "
+        "Supply only the actual transcripts of this run. Do not read any default chunk mapping.\n"
+    )
+    return text
+
+
 def resolve_prompt(spec: RunSpec) -> str:
     """The exact instruction text this run will receive.
 
@@ -822,8 +894,8 @@ def resolve_prompt(spec: RunSpec) -> str:
     if spec.render_version >= 3:
         # Keep replay/backfill unambiguous even when no explicit chunk
         # selection needs the new pre-provenance receipt command.
-        body += "\n\n<!-- D4D prompt renderer version 3 -->\n"
-    if spec.render_version >= 3 and spec.runtime == "Claude Code" and spec.chunk_manifest is not None:
+        body += f"\n\n<!-- D4D prompt renderer version {spec.render_version} -->\n"
+    if spec.render_version == 3 and spec.runtime == "Claude Code" and spec.chunk_manifest is not None:
         import shlex
         args = ["poetry", "run", "d4d"]
         if spec.manifest is not None:
@@ -835,6 +907,8 @@ def resolve_prompt(spec: RunSpec) -> str:
                  "Before Phase 2 and before provenance exists, use this receipt-check command "
                  "for the selected inputs when following d4d-full-core.md:\n\n"
                  + shlex.join(args) + "\n")
+    if spec.render_version >= 4 and spec.runtime == "Claude Code":
+        body += agentic_selected_inputs(spec)
 
     # v1 hardcodes `# Generated: 2026-07-28` where every neighbouring header
     # line takes a placeholder, so every record produced under it since that

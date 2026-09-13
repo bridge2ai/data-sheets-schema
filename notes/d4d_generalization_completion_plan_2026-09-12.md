@@ -279,3 +279,22 @@ isolated validator subprocesses. The historical CBORG instrument remains
 archived and is audited separately. Claude continues profile PR #1436 and
 packaging PR #1455. Merge order, all arms/evaluation styles, preservation and
 the no-download/no-new-measurement boundary remain unchanged.
+
+## Generation review round 17 — 2026-09-13
+
+Round 16 found #1507: required agentic playbook reads/checks still used default
+inputs. Renderer 4 now carries the selected bundle/chunks/source declaration
+through every phase, limits scope checks to the current pair and records the
+artifact paths used in its instruction. Older renderer controls remain byte
+identical. The broad compatibility lane passes 139 tests; final replay checks
+pass 34. Round-16 CI's one historical unused-header regression is also fixed;
+3,971 tests passed with four skips. See the round-17 review note.
+
+Evaluation PR #1449 round 3 confirms all 21 boundary pins and 315 historical
+attributions. It found #1508 (standalone semantic validation must bind context
+to the caller) and #1509 (explicit Dataset declarations must survive valid
+resources). Both are being addressed before its next review. The local
+combined evaluation lane passed 816 tests, final controller checks 169 and
+inventory checks 12. Continue generation, evaluation, profile PR #1436, then
+packaging PR #1455; preserve both generation arms, all evaluation styles and
+all measured artifacts, with source downloads and new measurements deferred.
