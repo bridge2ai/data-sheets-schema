@@ -68,8 +68,9 @@ def capture_schema(path: str | Path, *, content: bytes | None = None,
     The source preflight supplies its existing byte capture and requests the
     generator's default traversal alone, with errors raised before generation.
     """
+    from data_sheets_schema.resources import resource_path
     read = read_bytes or Path.read_bytes
-    root = Path(os.path.abspath(path))
+    root = Path(os.path.abspath(resource_path(path)))   # from any directory (#1301)
     files = {root: read(root) if content is None else content}
     root_meta = _metadata(files[root])
     names = {root: root_meta[0]}

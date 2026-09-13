@@ -245,6 +245,8 @@ def check_one(merged: Path, source: Path, class_name: str,
 
     out: dict[str, Any] = {"merged": str(merged), "source": str(source),
                            "class": class_name}
+    from data_sheets_schema.resources import resource_path
+    merged, source = resource_path(merged), resource_path(source)   # from any directory (#1301)
     if not source.exists():
         return {**out, "status": UNCHECKED,
                 "reason": f"source schema {source} is not on disk"}

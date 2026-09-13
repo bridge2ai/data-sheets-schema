@@ -87,7 +87,16 @@ HEADER_FIELDS = ("Generation Method", "Agent runtime", "Provider", "Model",
                  "Sources", "Phase 4 reconciliation")
 
 
+def _resource(path):
+    """A resource constant resolved for reading (#1301); anything else as is."""
+    if not path:
+        return path
+    from data_sheets_schema.resources import resource_path
+    return resource_path(path)
+
+
 def _md5(path: Path) -> str | None:
+    path = _resource(path)
     if not path or not path.exists():
         return None
     h = hashlib.md5()
@@ -98,6 +107,7 @@ def _md5(path: Path) -> str | None:
 
 
 def _sha256(path: Path) -> str | None:
+    path = _resource(path)
     if not path or not path.exists():
         return None
     h = hashlib.sha256()
@@ -228,15 +238,8 @@ def repo_relative(path: Path | str) -> str:
     function that normalises inconsistently is harder to reason about than one
     that does not normalise at all.
     """
-    p = Path(path)
-    try:
-        resolved = p.resolve()
-    except OSError:
-        return str(p)
-    try:
-        return str(resolved.relative_to(Path(__file__).resolve().parents[2]))
-    except (ValueError, OSError):
-        return str(resolved)
+    from data_sheets_schema.resources import repo_relative as _rr
+    return _rr(path, cwd=False)         # checkout, package data, install root; never cwd (#398, #1301)
 
 
 #: Runtimes that open the playbooks for themselves. The agentic path does,
@@ -280,9 +283,10 @@ def playbook_facts(paths: tuple[Path, ...] = AGENT_PLAYBOOKS,
     out: list[dict[str, Any]] = []
     for p in paths:
         p = Path(p)
+        q = _resource(p)                    # read from wherever it is (#1301)
         out.append({"path": repo_relative(p), "sha256": _sha256(p),
-                    "bytes": p.stat().st_size if p.exists() else None,
-                    "exists": p.exists()})
+                    "bytes": q.stat().st_size if q.exists() else None,
+                    "exists": q.exists()})
     block: dict[str, Any] = {"hash_algorithm": PROMPT_HASH, "files": out}
     if consumed is not None:
         block["consumed"] = consumed
@@ -878,8 +882,9 @@ RECORD_SCHEMA = Path("src/data_sheets_schema/schema/d4d_generation_record.yaml")
 
 def record_schema_path() -> Path:
     """`RECORD_SCHEMA` if it resolves from here, else the packaged copy."""
-    if RECORD_SCHEMA.exists():
-        return RECORD_SCHEMA
+    found = _resource(RECORD_SCHEMA)
+    if found.exists():
+        return found
     return Path(__file__).resolve().parent / "schema" / RECORD_SCHEMA.name
 
 
@@ -1210,8 +1215,9 @@ def companion_facts(project: str, method: str, label: str,
         "note": ("derived from records like this one, per label rather than "
                  "per run; `d4d runs telemetry` writes it")}
     for name, path, note in COMPANION_FILES:
-        out[name] = {"path": repo_relative(path), "present": path.exists(),
-                     "md5": _md5(path) if path.exists() else None,
+        q = _resource(path)
+        out[name] = {"path": repo_relative(path), "present": q.exists(),
+                     "md5": _md5(path) if q.exists() else None,
                      "note": note}
     return out
 

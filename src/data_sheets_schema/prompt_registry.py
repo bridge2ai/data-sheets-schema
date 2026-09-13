@@ -74,9 +74,10 @@ def body_sha256_of(path: Path) -> str | None:
     the whole-file hash stays the only check — which is correct, because for
     them every byte is sent.
     """
-    if not path or not Path(path).exists():
+    from data_sheets_schema.resources import resource_path
+    if not path or not resource_path(path).exists():
         return None
-    text = Path(path).read_text(encoding="utf-8", errors="replace")
+    text = resource_path(path).read_text(encoding="utf-8", errors="replace")
     if "## Prompt body" not in text:
         return None
     body = text.split("## Prompt body", 1)[1].strip()
@@ -84,10 +85,11 @@ def body_sha256_of(path: Path) -> str | None:
 
 
 def sha256_of(path: Path) -> str | None:
-    if not path or not Path(path).exists():
+    from data_sheets_schema.resources import resource_path
+    if not path or not resource_path(path).exists():
         return None
     h = hashlib.sha256()
-    with Path(path).open("rb") as fh:
+    with resource_path(path).open("rb") as fh:
         for chunk in iter(lambda: fh.read(1 << 20), b""):
             h.update(chunk)
     return h.hexdigest()
@@ -101,13 +103,8 @@ def normalise(path: str | Path) -> str:
     simpler and wrong — two files can share a name, and the pin would then
     vouch for the wrong one.
     """
-    p = Path(path)
-    if p.is_absolute():
-        try:
-            p = p.relative_to(Path.cwd())
-        except ValueError:
-            return p.as_posix()
-    return p.as_posix()
+    from data_sheets_schema.resources import repo_relative
+    return repo_relative(path)        # anchored to the checkout or install, then cwd (#1301)
 
 
 #: Parsed registries, keyed on (path, mtime_ns, size) — see `load` (#439).
@@ -135,7 +132,8 @@ def load(registry: Path = REGISTRY) -> dict[str, Any]:
     A copy is returned. Callers that mutated the result would otherwise be
     editing every later caller's view of the file.
     """
-    path = Path(registry)
+    from data_sheets_schema.resources import resource_path
+    path = resource_path(registry)
     try:
         stat = path.stat()
     except OSError:
@@ -297,7 +295,9 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
     """
     if not reason or not reason.strip():
         raise ValueError("a pin needs a reason — see the docstring")
-    p = Path(path)
+    from data_sheets_schema.resources import resource_path
+    p = resource_path(path)
+    registry = resource_path(registry)
     sha = sha256_of(p)
     if sha is None:
         raise FileNotFoundError(f"{p} is not on disk; nothing to pin")

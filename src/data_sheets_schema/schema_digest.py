@@ -43,8 +43,10 @@ def resolve_schema(path: Path) -> Path:
     the packaged copy sits beside this module, so resolve against it when the
     cwd-relative path does not exist.
     """
-    if path.exists():
-        return path
+    from data_sheets_schema.resources import resource_path
+    found = resource_path(path)
+    if found.exists():
+        return found
     packaged = Path(__file__).resolve().parent / "schema" / path.name
     return packaged if packaged.exists() else path
 
@@ -599,7 +601,8 @@ def record_inventory(classes: tuple[str, ...] = ("Dataset", "CoreDataset"),
     """
     import yaml as _yaml
 
-    path = ledger or INVENTORY_LEDGER
+    from data_sheets_schema.resources import resource_path
+    path = resource_path(ledger or INVENTORY_LEDGER)
     data = {}
     if path.exists():
         data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
@@ -628,7 +631,8 @@ def slot_existed_at(digest: str, class_name: str, slot: str,
     """Did `slot` exist in `class_name` at `digest`? None when unrecorded."""
     import yaml as _yaml
 
-    path = ledger or INVENTORY_LEDGER
+    from data_sheets_schema.resources import resource_path
+    path = resource_path(ledger or INVENTORY_LEDGER)
     if not path.exists():
         return None
     data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}

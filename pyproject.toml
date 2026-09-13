@@ -5,7 +5,25 @@ description = "A LinkML schema for Datasheets for Datasets."
 authors = ["My Name <MJoachimiak@lbl.gov>"]
 license = "MIT"
 readme = "README.md"
-include = ["README.md", "src/data_sheets_schema/schema", "project"]
+packages = [
+    { include = "data_sheets_schema", from = "src" },
+    { include = "fairscape_integration", from = "src" },
+]
+# Resources the installed package reads at their repository-relative paths
+# (`resources.resource_path`, #1301): the condition prompts and their pin
+# registry, the agentic playbooks and agent definitions the provenance
+# record hashes, and the rubric sources. Kept at those paths in the wheel so
+# a record made from a checkout and one made from an install store the same
+# relative path.
+include = [
+    "README.md",
+    { path = "src/data_sheets_schema/schema", format = ["sdist", "wheel"] },
+    { path = "project", format = ["sdist"] },
+    { path = "src/download/prompts/**/*", format = ["sdist", "wheel"] },
+    { path = ".claude/commands/*.md", format = ["sdist", "wheel"] },
+    { path = ".claude/agents/*.md", format = ["sdist", "wheel"] },
+    { path = "data/rubric/*", format = ["sdist", "wheel"] },
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -21,6 +39,10 @@ synapseclient = {version = "^4.9.0", python = ">=3.9,<3.14"}
 jsonschema = "^4.25.1"
 click = "^8.1.0"
 python-docx = "^1.2.0"
+# Not a development-only dependency: `record_schema` compiles the record
+# contract with the LinkML generators and the runner validates every record
+# with `linkml.validator` (#1301). A user who generates needs it.
+linkml = "^1.3.5"
 
 [tool.poetry.scripts]
 d4d = "data_sheets_schema.cli:cli"
@@ -32,7 +54,6 @@ vcs = "git"
 style = "pep440"
 
 [tool.poetry.group.dev.dependencies]
-linkml = "^1.3.5"
 mkdocs-material = "^8.2.8"
 mkdocs-mermaid2-plugin = "^0.6.0"
 schemasheets = "^0.4.0"
@@ -55,4 +76,5 @@ docs = ["linkml", "mkdocs-material"]
 [tool.pytest.ini_options]
 markers = [
     "corpus: walks the committed corpus under data/ (hundreds of records or a whole-corpus CLI check). Run on merge to main and on demand; a pull request runs the rest (#1203).",
+    "install: builds the wheel and installs it into a fresh virtual environment (network for dependencies), then runs the generation path from a directory that is not a checkout (#1301).",
 ]

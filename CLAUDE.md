@@ -1431,6 +1431,53 @@ hashes recorded (#1200). The whole-corpus command therefore still exits 1 for
 the one annotated artifact. New evaluations use the strict exact-file check,
 whose exit status must be 0.
 
+## Resources resolve from anywhere, and the wheel ships them (#1301, #673)
+
+The constants keep their repository-relative spelling — `Path("src/download/
+prompts/…")`, `.claude/commands/…`, `src/data_sheets_schema/schema/…` — because
+that is the form every record stores and every pin is keyed on, and the
+**readers resolve them when they read** (`data_sheets_schema.resources.
+resource_path`, the shape `schema_digest.resolve_schema` and
+`record_schema_path` already had): the working directory's copy when it is
+there or when the working directory carries that resource *directory* (a
+staged fixture that omits a prompt reads it as `missing`, never the
+checkout's copy; the test is any ancestor below the top-level component, so a
+user's own `src/` or `.claude/` does not count); else the checkout's when the
+package is imported from one (`pyproject.toml` two levels up); else the
+installed copy — the wheel places the condition prompts and their pin
+registry, the playbooks and agent definitions the record hashes, and the
+rubric sources at the same relative paths under the installation root, and
+the schema files as package data. Only `src/`, `.claude/`, `data/rubric/` and
+`project/` are resources; the corpus under `data/` is the caller's tree and a
+missing record never resolves to the checkout's. Not at import time: a
+constant resolved once takes the value of whichever directory the first
+importer was in, and a fixture test that ran later then wrote the real
+registry (the first form of this change did exactly that).
+
+The wrapped readers: `schema_cache.load_yaml`/`sha256_of`,
+`schema_snapshot.capture_schema` (so every `shared_view`), the digest
+ledger, the prompt registry (`load`, `sha256_of`, `pin`, `normalise`),
+`provenance._md5/_sha256`, the playbook and companion hashes,
+`prompt_body`, the tuned component, `schema_sync.check_one`, and every
+`linkml-validate` subprocess, which now runs `resources.linkml_validate()`
+— the console script beside the interpreter, else the module entry point —
+because `poetry run` needs a `pyproject.toml` in the working directory and
+failed from anywhere else. `repo_relative` anchors an absolute path to the
+checkout, the package data, then the install root; the registry's key also
+falls back to the working directory as it always did, the record's never
+does (#398). `d4d provenance record` no longer requires the repository root:
+it refuses only a working directory *inside* the checkout but not at its
+root, where the record would land under `<subdir>/data/` unread (#672's
+case); from an installed package the record goes into the caller's tree.
+`linkml` is a runtime dependency: the record contract is compiled with its
+generators and every record is validated with its validator. Commands that
+import checkout-only code through `setup_repo_imports` (`download`,
+`evaluate`, `render`, `rocrate`, `schema`, `utils`) still require a checkout
+and say so. `D4D_INSTALL_TESTS=1 pytest tests/test_installed_wheel.py`
+(marker `install`) builds the wheel, installs it into a fresh virtual
+environment and runs the offline generation path from a directory with no
+checkout and no study tree — the release canary, not a pull-request test.
+
 ## One parse per file per process (#1203)
 
 `data_sheets_schema.schema_cache.load_yaml(path)` parses a YAML file once
