@@ -1541,8 +1541,8 @@ class TestRoundTwelve(_Clean):
             problems, why = check_record(data); self.assertTrue(problems or why)
         for pin in ("text", None, {"instruction": "text"}, {"instruction": {"spec": "x"}}, {"instruction": {"spec": ["x"]}}, {"instruction": None}):
             pre_profile_pin(pin); self.assertIn("generation input identity changed", identity_refusal(pin, "x"))
-        self.assertTrue(pre_profile_pin({"instruction": {"spec": {"bundle": "b"}}}))
-        self.assertTrue(pre_profile_pin({"profile": {"name": "neutral"}, "instruction": {"spec": {}}}))    # the #1460–#1581 window (#1712)
+        self.assertFalse(pre_profile_pin({"instruction": {"spec": {"bundle": "b"}}}))
+        self.assertFalse(pre_profile_pin({"profile": {"name": "neutral"}, "instruction": {"spec": {}}}))    # incomplete evidence, not an attested historical instruction (#1744)
         self.assertFalse(pre_profile_pin({"profile": {"name": "neutral"}, "instruction": {"spec": {"profile": "neutral"}}}))
 
     def test_runs_check_fails_strict_on_a_profile_disagreement(self):

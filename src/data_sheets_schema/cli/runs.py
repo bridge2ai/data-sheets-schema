@@ -551,21 +551,11 @@ def check_cmd(method, label, project, strict):
             # Duplicate mapping keys the validation block recorded (#1029):
             # a standard loader keeps only the last, so a record that
             # carries one is not the record its readers see.
-            prov_data = _prov(run.method, run.label, proj) or {}
-            # Report malformed prompt blocks before audit readers dereference
-            # them. Keep auditing the remaining records, and fail --strict
-            # with the record address rather than an AttributeError (#1734).
-            node = prov_data
-            prefix = []
-            malformed = None
-            for key in ("prompts", "request", "spec"):
-                prefix.append(key)
-                node = node.get(key)
-                if node is None:
-                    break
-                if not isinstance(node, dict):
-                    malformed = f"{'.'.join(prefix)} must be a mapping or null"
-                    break
+            prov_data = _prov(run.method, run.label, proj)
+            if prov_data is None:
+                prov_data = {}
+            from data_sheets_schema.provenance import record_mapping_problem
+            malformed = record_mapping_problem(prov_data)
             if malformed:
                 malformed_records.append(f"{run.label}/{proj}: {malformed}")
                 continue
