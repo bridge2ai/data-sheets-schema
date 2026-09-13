@@ -832,23 +832,20 @@ def hash_file(path: Path, algorithm: str = HASH_ALGORITHM) -> str | None:
     return _sha256(path) if algorithm == "sha256" else _md5(path)
 
 
-def artifact_root(record: Path) -> Path:
+def artifact_root(record: Path) -> Path | None:
     """Resolve relative artifact pins from their record's tree, not an ambient one.
 
     Conventional records carry a stable ``data/d4d_concatenated`` owner.
-    Flat records use their own ancestor manifest, or their directory when
-    addressed absolutely; a caller-relative flat record retains caller paths.
+    A caller-relative flat record retains caller paths. An absolute flat
+    record cannot establish the original base of a relative pin; its writer
+    must capture absolute artifact paths instead of guessing an ancestor.
     """
     record = Path(record)
     absolute = record.absolute()
     for parent in absolute.parents:
         if parent.parts[-2:] == ("data", "d4d_concatenated"):
             return parent.parent.parent
-    from data_sheets_schema.corpus import DEFAULT_MANIFEST
-    for parent in absolute.parents:
-        if (parent / DEFAULT_MANIFEST).is_file():
-            return parent
-    return absolute.parent if record.is_absolute() else Path.cwd()
+    return None if record.is_absolute() else Path.cwd()
 
 
 def verify_entry(entry: dict[str, Any], *, record: Path | None = None) -> bool | None:
@@ -861,8 +858,13 @@ def verify_entry(entry: dict[str, Any], *, record: Path | None = None) -> bool |
     from data_sheets_schema.resources import is_resource, resource_path
     if is_resource(path):
         resolved = resource_path(path)
+    elif Path(path).is_absolute():
+        resolved = Path(path)
     elif record is not None:
-        resolved = artifact_root(record) / Path(path)
+        owner = artifact_root(record)
+        if owner is None:
+            return None
+        resolved = owner / Path(path)
     else:
         resolved = anchored(Path(path))
     if not resolved.exists():

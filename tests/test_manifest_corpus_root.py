@@ -66,7 +66,7 @@ def test_explicit_output_directory_remains_the_callers_override(project_tree):
     _, manifest, bundle = project_tree
     spec = _spec("CLINICAL_X", "baseline", "test_run", "generic", bundle=bundle,
                  manifest=manifest, out_dir="chosen-output")
-    assert spec.full_path == Path("chosen-output/CLINICAL_X_d4d.yaml")
+    assert spec.full_path == Path("chosen-output/CLINICAL_X_d4d.yaml").absolute()
 
 
 def test_a_standalone_manifest_uses_its_own_directory(project_tree):

@@ -320,11 +320,14 @@ class TestGenerationContextIsExplicit(_Offline):
         try:
             os.chdir(self.tmp)
             from data_sheets_schema.registry import select_manifest, load_registry
-            selected = select_manifest("CHORUS", b)
+            # External launches select their context explicitly; availability
+            # of the imported checkout is not corpus ownership (#1594).
+            selected = select_manifest("CHORUS", b, ROOT / "data/preprocessed/source_manifest.yaml")
             self.assertEqual(selected, ROOT / "data/preprocessed/source_manifest.yaml")
             self.assertEqual(load_registry(selected).bundle("CHORUS"), b)
-            self.assertEqual(manifest_for(b).resolve(), (REPO_ROOT / "data/preprocessed/chunks/CHORUS_chunks.yaml").resolve())
-            self.assertEqual(manifest_status_for(b)[0], "current")
+            chunks = manifest_for(b, source_manifest=selected)
+            self.assertEqual(chunks.resolve(), (REPO_ROOT / "data/preprocessed/chunks/CHORUS_chunks.yaml").resolve())
+            self.assertEqual(manifest_status_for(b, chunks_dir=chunks.parent)[0], "current")
         finally:
             os.chdir(here)
         # From the root the recorded form stays relative and portable.
