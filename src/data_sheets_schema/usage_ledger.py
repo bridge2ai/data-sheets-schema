@@ -191,8 +191,10 @@ def _subset_differs(pinned, current) -> bool:
 
 #: What every pin has carried since identities were first written: the
 #: bundle it read and the hash of the instruction it sent. A pin without
-#: them is evidence of nothing, and compatible with nothing (#1698).
-_REQUIRED_IN_A_PIN = (("bundle", "sha256"), ("instruction", "sha256"))
+#: those keys is evidence of nothing, and compatible with nothing (#1698).
+#: `bundle` is an entry (`{path, sha256}`) or null where the spec had no
+#: bundle to hash; `instruction.sha256` is the hash itself.
+_REQUIRED_IN_A_PIN = (("bundle",), ("instruction", "sha256"))
 
 
 def _identity_differs(pinned: dict, current: dict) -> bool:
@@ -208,10 +210,12 @@ def _identity_differs(pinned: dict, current: dict) -> bool:
     if not isinstance(pinned, dict) or not isinstance(current, dict):
         return True
     for path in _REQUIRED_IN_A_PIN:
+        # The keys must be there; a value recorded as null (a spec with no
+        # bundle to hash) is a recorded fact and is compared as one.
         node = pinned
-        for key in path:
+        for key in path[:-1]:
             node = node.get(key) if isinstance(node, dict) else None
-        if not node:
+        if not isinstance(node, dict) or path[-1] not in node:
             return True
     return _subset_differs(_comparable(pinned), _comparable(current))
 
