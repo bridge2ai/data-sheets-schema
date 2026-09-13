@@ -61,7 +61,8 @@ def validate_scope(result: dict, *, document: dict | None = None, input_sha256: 
     # Version-2 rules are the source rubric's declared predicate assignments.
     # The instrument boundary records these bytes; future rule revisions need
     # another version instead of reinterpreting previously accepted scores.
-    rubric_path = Path(__file__).resolve().parents[2] / "data/rubric" / f"{rubric_name}.txt"
+    from data_sheets_schema.resources import resource_path
+    rubric_path = resource_path(Path("data/rubric") / f"{rubric_name}.txt")   # the shipped rubric, from any directory (#1625)
     raw = rubric_path.read_bytes()
     specification = yaml.safe_load(raw)
     if metadata.get("rubric_sha256") != hashlib.sha256(raw).hexdigest():

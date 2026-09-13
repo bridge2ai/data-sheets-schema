@@ -41,15 +41,24 @@ from pathlib import Path
 PACKAGE_ROOT = Path(__file__).resolve().parent
 
 #: The source checkout this package is imported from, or None for a wheel.
+class ResourceRootError(RuntimeError):
+    """A directory that may be a checkout could not be inspected (#1619)."""
+
+
 def _is_our_checkout(root: Path) -> bool:
     """A `pyproject.toml` two levels up is the checkout only when it is this
     project's and the source layout is there — a copy installed under a
     user's own project (`<project>/vendor/data_sheets_schema/`) must not
-    adopt that project (#1577)."""
+    adopt that project (#1577). A marker that is absent is no checkout; one
+    that cannot be read is not evidence of anything and is refused rather
+    than read as absent (#1619)."""
+    marker = root / "pyproject.toml"
     try:
-        text = (root / "pyproject.toml").read_text(encoding="utf-8")
-    except OSError:
+        text = marker.read_text(encoding="utf-8")
+    except (FileNotFoundError, NotADirectoryError):
         return False
+    except OSError as exc:
+        raise ResourceRootError(f"{marker} could not be read: {exc}; whether {root} is a checkout is unknown") from exc
     import re
     return (re.search(r'^name\s*=\s*"data[-_]sheets[-_]schema"', text, re.M) is not None
             and (root / "src" / "data_sheets_schema").is_dir())
@@ -180,7 +189,10 @@ def resource_path(path: str | Path) -> Path:
     """Where a repository-relative resource is read from, decided now.
 
     The working directory's copy, as the relative path it was given, when it
-    exists there or the working directory carries its tree (`_cwd_carries`);
+    exists there or the working directory carries its tree (`_cwd_carries`)
+    — and always when the working directory is a checkout of this project:
+    a checkout is authoritative for its absences too, so a playbook or
+    prompt deleted there is missing, never another checkout's (#1617) —
     else the checkout's, else the installed copy, as an absolute path; else
     the path unchanged so the caller's own error names it. An absolute path,
     one with `..`, or one outside `RESOURCE_PREFIXES`, is returned as given.
@@ -188,6 +200,8 @@ def resource_path(path: str | Path) -> Path:
     p = Path(path)
     if p.is_absolute() or not is_resource(p) or p.exists() or _cwd_carries(p):
         return p
+    if cwd_checkout() is not None:
+        return p                                 # missing here is missing (#1617)
     for candidate in _candidates(p):
         if candidate.exists():
             return candidate
@@ -227,13 +241,15 @@ def repo_relative(path: str | Path, *, cwd: bool = True) -> str:
         resolved = p.resolve()
     except OSError:
         return p.as_posix()
-    anchors: list[tuple[Path, tuple[str, ...], bool]] = []
-    if here is not None:
-        anchors.append((here, (), False))
-    if CHECKOUT_ROOT is not None:
-        anchors.append((CHECKOUT_ROOT, (), False))
-    anchors.append((PACKAGE_ROOT, _PACKAGE_PREFIX, False))
-    anchors.append((INSTALL_ROOT, (), True))
+    # Anchored on the one resource root this process records (#1618): a
+    # file under another checkout of this project keeps its absolute
+    # identity, so two checkouts' copies of one playbook are never
+    # recorded under one string.
+    root, kind = resource_root()
+    anchors: list[tuple[Path, tuple[str, ...], bool]] = [(root, (), False)]
+    if kind == "install":
+        anchors.append((PACKAGE_ROOT, _PACKAGE_PREFIX, False))
+        anchors.append((INSTALL_ROOT, (), True))
     if cwd:
         anchors.append((Path.cwd(), (), False))
     for root, prefix, resources_only in anchors:

@@ -2694,8 +2694,9 @@ def validation_block(spec: RunSpec, problems: list[dict[str, str]],
     return block
 
 
-#: What a crash says when it never opened the data file (#1589).
-_NOT_OPENED = ("No such file or directory", "Permission denied", "Is a directory")
+#: A crash whose last line is an OS error never opened the data file
+#: (#1589, #1620): `[Errno N]` is how every one of them reads.
+_OS_ERROR_LINE = re.compile(r"^\w*Error: \[Errno \d+\]")
 
 
 def _validator_did_not_run(text: str, data_path: str | Path | None = None) -> bool:
@@ -2716,8 +2717,14 @@ def _validator_did_not_run(text: str, data_path: str | Path | None = None) -> bo
            for l in lines):
         if data_path is not None and "Traceback" in text:
             crash = text[text.index("Traceback"):]
-            names = {str(data_path), Path(data_path).name}
-            if any(n in crash for n in names) and not any(m in crash for m in _NOT_OPENED):
+            # The data file, as it was named to the validator — quoted, as a
+            # YAML diagnostic (`in "<path>"`) or an exception message
+            # (`'<path>'`) names it — never a bare basename, which a schema
+            # file, a class or a module can share (#1620).
+            spelled = {str(data_path), os.path.abspath(str(data_path))}
+            named = any(f'"{s}"' in crash or f"'{s}'" in crash for s in spelled)
+            last = [l for l in crash.splitlines() if l.strip()][-1].strip()
+            if named and not _OS_ERROR_LINE.match(last):
                 return False                 # it ran, and the record broke it
         return True                          # a crash, whatever it printed first (#1572)
     if any(l.startswith(("[ERROR]", "[WARN", "[WARNING]")) for l in lines):

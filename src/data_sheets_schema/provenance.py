@@ -355,7 +355,9 @@ def prompt_facts(prompt_paths: list[Path] | None,
     return facts
 
 
-def _run(cmd: list[str], *, strip: bool = True, cwd: Path | None = None) -> str | None:
+def _run_result(cmd: list[str], *, strip: bool = True, cwd: Path | None = None) -> tuple[bool, str]:
+    """`(ok, output)`: `ok` only when the command ran and exited 0, so an
+    empty successful output and a failure are told apart (#1621)."""
     try:
         # Bytes, decoded with a reversible escape (#1045): a path git prints
         # verbatim under -z that is not UTF-8 must neither turn the whole
@@ -363,11 +365,17 @@ def _run(cmd: list[str], *, strip: bool = True, cwd: Path | None = None) -> str 
         # into U+FFFD (two files recorded as one); and no newline
         # translation, so a `\r` in a name is kept.
         r = subprocess.run(cmd, capture_output=True, timeout=15, cwd=str(cwd) if cwd else None)
-        text = r.stdout.decode("utf-8", errors="backslashreplace")
-        out = text.strip() if strip else text
-        return out or None
     except Exception:
-        return None
+        return False, ""
+    text = r.stdout.decode("utf-8", errors="backslashreplace")
+    return r.returncode == 0, (text.strip() if strip else text)
+
+
+def _run(cmd: list[str], *, strip: bool = True, cwd: Path | None = None) -> str | None:
+    """The output of a command that exited 0, else None — never the output
+    of one that failed (#1621)."""
+    ok, out = _run_result(cmd, strip=strip, cwd=cwd)
+    return out or None if ok else None
 
 
 _EFFORT_LADDER = ("minimal", "low", "medium", "high")
@@ -667,7 +675,16 @@ def repo_facts() -> dict[str, Any]:
                 "resource_root": str(at), "resource_kind": "checkout",
                 "note": f"git could not answer at {at} (no repository there, or no git): "
                         "the commit and the dirty state are unknown, not clean"}
-    dirty = _run(["git", "status", "--porcelain", "-z"], strip=False, cwd=at)
+    ok, dirty = _run_result(["git", "status", "--porcelain", "-z"], strip=False, cwd=at)
+    if not ok:
+        # The commit is known, the tree's state is not: unknown, not clean (#1621).
+        return {
+            "commit": commit,
+            "commit_short": _run(["git", "rev-parse", "--short", "HEAD"], cwd=at),
+            "branch": _run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=at),
+            "resource_root": str(at), "resource_kind": "checkout",
+            "dirty": None, "dirty_file_count": None, "dirty_paths": [],
+            "note": f"git status failed at {at}: the dirty state is unknown, not clean"}
     # NUL-separated, unstripped (#1039): `_run`'s strip took the leading
     # status space off the first line and `aurelian` was recorded as
     # `urelian`; a path with a space survives -z where a line split does

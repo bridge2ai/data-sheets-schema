@@ -6,6 +6,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -376,12 +377,26 @@ class TestRoundThree(unittest.TestCase):
     def test_a_staged_symlinked_prompt_has_one_identity_for_registry_and_record(self):
         """#1573"""
         from data_sheets_schema import prompt_registry as pr, provenance
+        # The alias points at a third tree — outside the checkout, the
+        # package and this directory — so the branch #1573 changed is the
+        # one exercised: both spellings must resolve to that tree's file
+        # (#1624; the first version aliased the checkout, which the pre-fix
+        # fast path satisfied too).
+        elsewhere = Path(self.tmp) / "elsewhere" / "prompts"; elsewhere.mkdir(parents=True)
+        (elsewhere / "d4d_generic_arm_prompt_v9.md").write_text("# staged\n\n## Prompt body\nbody\n", encoding="utf-8")
         (Path(self.tmp) / "src/download").mkdir(parents=True)
-        os.symlink(ROOT / "src/download/prompts", Path(self.tmp) / "src/download/prompts")
+        os.symlink(elsewhere, Path(self.tmp) / "src/download/prompts")
         rel = "src/download/prompts/d4d_generic_arm_prompt_v9.md"
-        self.assertEqual(pr.normalise(rel), rel)                                   # resolves into the checkout
-        self.assertEqual(provenance.repo_relative(rel), rel)
-        self.assertEqual(pr.normalise(Path(self.tmp) / rel), rel)
+        physical = (elsewhere / "d4d_generic_arm_prompt_v9.md").resolve()
+        # The registry keys a staged tree's file relative to the working
+        # directory (#1536); the record stores it absolute (`cwd=False`);
+        # each identity is the same for both spellings, and neither is the
+        # shipped file's relative spelling.
+        self.assertEqual(pr.normalise(rel), pr.normalise(Path(self.tmp) / rel))
+        self.assertEqual(pr.normalise(rel), physical.relative_to(Path(self.tmp).resolve()).as_posix())
+        self.assertEqual(provenance.repo_relative(rel), provenance.repo_relative(Path(self.tmp) / rel))
+        self.assertEqual(provenance.repo_relative(rel), physical.as_posix())
+        self.assertNotEqual(pr.normalise(rel), rel)
 
     def test_an_implicit_registry_that_resolves_to_the_checkouts_is_refused(self):
         """#1576"""
@@ -533,3 +548,164 @@ class TestClaudeRoundThree(unittest.TestCase):
         import subprocess
         r = subprocess.run(["poetry", "check", "--lock"], cwd=ROOT, capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
+
+class TestCodexRoundFour(unittest.TestCase):
+    """The Codex round-4 findings on #1455 (#1617–#1625)."""
+
+    def setUp(self):
+        self._cwd = os.getcwd()
+        self.tmp = tempfile.mkdtemp(prefix="d4d-resources-")
+        os.chdir(self.tmp)
+
+    def tearDown(self):
+        os.chdir(self._cwd)
+
+    def _second_checkout(self, name="wt", *, git=True) -> Path:
+        import subprocess
+        repo = Path(self.tmp) / name
+        (repo / "src" / "data_sheets_schema").mkdir(parents=True)
+        (repo / ".claude" / "commands").mkdir(parents=True)
+        (repo / "pyproject.toml").write_text('[tool.poetry]\nname = "data-sheets-schema"\n', encoding="utf-8")
+        (repo / ".claude" / "commands" / "d4d-uniform-rules.md").write_text("# the second checkout's rules\n", encoding="utf-8")
+        if git:
+            run = lambda *a: subprocess.run(["git", "-c", "user.email=t@example.org", "-c", "user.name=t", *a],
+                                            cwd=repo, check=True, capture_output=True)
+            run("init", "-q"); run("add", "."); run("commit", "-q", "-m", "x")
+        return repo
+
+    def test_a_checkout_is_authoritative_for_its_absences(self):
+        """#1617: from a second checkout no resource is read from the importing one."""
+        from data_sheets_schema import provenance
+        from data_sheets_schema.resources import resource_path
+        repo = self._second_checkout(); os.chdir(repo)
+        for rel in (".claude/commands/d4d-full-core.md", "src/download/prompts/d4d_generic_arm_prompt_v9.md",
+                    "data/rubric/rubric10.txt", ".github/workflows/d4d_assistant_deterministic.config"):
+            self.assertEqual(resource_path(rel), Path(rel))
+            self.assertFalse(resource_path(rel).exists(), rel)
+        entries = {e["path"]: e for e in provenance.playbook_facts()["files"]}
+        self.assertTrue(entries[".claude/commands/d4d-uniform-rules.md"]["exists"])
+        absent = [p for p, e in entries.items() if not e["exists"]]
+        self.assertTrue(absent and all(e["sha256"] is None for p, e in entries.items() if p in absent), entries)
+        self.assertEqual(len(entries), len(provenance.playbook_facts()["files"]))
+
+    def test_another_checkouts_absolute_file_keeps_its_identity(self):
+        """#1618"""
+        from data_sheets_schema import provenance
+        from data_sheets_schema.resources import CHECKOUT_ROOT
+        repo = self._second_checkout(); os.chdir(repo)
+        rel = Path(".claude/commands/d4d-uniform-rules.md")
+        mine, theirs = repo / rel, CHECKOUT_ROOT / rel
+        self.assertEqual(provenance.repo_relative(mine), rel.as_posix())
+        self.assertEqual(provenance.repo_relative(theirs), theirs.resolve().as_posix())
+        paths = [e["path"] for e in provenance.prompt_facts([mine, theirs])["files"]]
+        self.assertEqual(len(set(paths)), 2, paths)
+
+    def test_an_unreadable_marker_is_refused_not_read_as_no_checkout(self):
+        """#1619"""
+        import click
+        from data_sheets_schema import resources
+        from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+        repo = self._second_checkout(); (repo / "sub").mkdir()
+        real = Path.read_text
+        def unreadable(path, *a, **kw):
+            if Path(path).resolve() == (repo / "pyproject.toml").resolve():
+                raise PermissionError(13, "Permission denied", str(path))
+            return real(path, *a, **kw)
+        os.chdir(repo / "sub")
+        with mock.patch.object(Path, "read_text", unreadable):
+            with self.assertRaises(resources.ResourceRootError):
+                resources.checkout_at(Path.cwd())
+            with self.assertRaises(click.ClickException):
+                _require_repo_root_cwd("t")
+            os.chdir(repo)
+            with self.assertRaises(resources.ResourceRootError):
+                resources.cwd_checkout()
+
+    def test_the_data_diagnostic_is_the_path_as_named_not_a_basename(self):
+        """#1620"""
+        from data_sheets_schema.api_runner import FULL_SCHEMA_PATH, _validator_did_not_run, _validator_lines
+        tb = "Traceback (most recent call last):\n"
+        self.assertTrue(_validator_did_not_run(tb + 'yaml.parser.ParserError: bad schema\n  in "/env/schema/x.yaml", line 2, column 1\n', "x.yaml"))
+        self.assertTrue(_validator_did_not_run(tb + "ValueError: No such class: Dataset\n", "Dataset"))
+        self.assertTrue(_validator_did_not_run(tb + "NotADirectoryError: [Errno 20] Not a directory: '/tmp/notadir/r.yaml'\n", "/tmp/notadir/r.yaml"))
+        self.assertTrue(_validator_did_not_run(tb + "OSError: [Errno 62] Too many levels of symbolic links: '/tmp/r.yaml'\n", "/tmp/r.yaml"))
+        self.assertFalse(_validator_did_not_run(tb + 'yaml.parser.ParserError: while parsing\n  in "/tmp/r.yaml", line 2, column 8\n', "/tmp/r.yaml"))
+        # A schema that fails to parse, sharing the record's basename, is the validator not running.
+        a = Path(self.tmp) / "a"; b = Path(self.tmp) / "b"; a.mkdir(); b.mkdir()
+        (a / "bad.yaml").write_text("id: x\ntitle: [unclosed\n", encoding="utf-8")
+        (b / "bad.yaml").write_text("id: x\ntitle: [unclosed\n", encoding="utf-8")
+        os.chdir(ROOT)
+        findings, failure = _validator_lines(b / "bad.yaml", str(a / "bad.yaml"), "Dataset")
+        self.assertIsNone(findings); self.assertIsNotNone(failure)
+        findings, failure = _validator_lines(b / "bad.yaml", FULL_SCHEMA_PATH, "Dataset")
+        self.assertIsNone(failure, failure); self.assertTrue(findings)
+
+    def test_a_failed_status_is_unknown_and_a_failed_command_yields_nothing(self):
+        """#1621"""
+        import subprocess
+        from data_sheets_schema import provenance as p
+        real = p.subprocess.run
+        def status_fails(args, **kw):
+            if args[:2] == ["git", "status"]:
+                return subprocess.CompletedProcess(args, 128, b"", b"fatal: unable to read index\n")
+            return real(args, **kw)
+        os.chdir(ROOT)
+        with mock.patch.object(p.subprocess, "run", status_fails):
+            facts = p.repo_facts()
+        self.assertIsNotNone(facts["commit"])
+        self.assertEqual((facts["dirty"], facts["dirty_file_count"]), (None, None))
+        self.assertIn("unknown, not clean", facts["note"])
+        with mock.patch.object(p.subprocess, "run", return_value=subprocess.CompletedProcess([], 128, b"HEAD\n", b"")):
+            self.assertIsNone(p._run(["git", "rev-parse", "HEAD"]))
+
+    def test_an_implicit_registry_aliasing_another_checkout_is_refused_from_a_checkout_root(self):
+        """#1622"""
+        from data_sheets_schema import prompt_registry as pr
+        from data_sheets_schema.resources import CHECKOUT_ROOT
+        repo = self._second_checkout()
+        (repo / "src/download").mkdir(parents=True)
+        os.symlink(CHECKOUT_ROOT / "src/download/prompts", repo / "src/download/prompts")
+        os.chdir(repo)
+        with self.assertRaises(ValueError) as caught:
+            pr.pin(".claude/commands/d4d-uniform-rules.md", "must not write the other checkout's registry")
+        self.assertIn("not in the working tree", str(caught.exception))
+
+    def test_trap_inventory_keeps_parser_findings(self):
+        """#1623"""
+        from data_sheets_schema import api_runner as a, run_telemetry as t
+        bad = Path(self.tmp) / "bad.yaml"; bad.write_text("id: x\ntitle: [unclosed\n", encoding="utf-8")
+        os.chdir(ROOT)
+        lines, failure = a._validator_lines(bad, a.FULL_SCHEMA_PATH, "Dataset")
+        self.assertIsNone(failure)
+        base = Path(self.tmp) / "corpus"; rec = base / "api" / "run" / "P_d4d.yaml"; rec.parent.mkdir(parents=True)
+        rec.write_text("id: x\n", encoding="utf-8")
+        with mock.patch.object(a, "_validator_lines", return_value=(lines, failure)):
+            result = t.trap_inventory(base)
+        self.assertEqual((result["records_scanned"], result["records_with_errors"], result["records_with_unparsed_findings"]), (1, 1, 1))
+        self.assertEqual(result["unparsed_findings"][0]["record"], str(rec))
+        self.assertTrue(any("ParserError" in l or "parsing" in l for l in result["unparsed_findings"][0]["lines"]))
+
+    def test_semantic_scope_reads_the_rubric_through_the_resolver(self):
+        """#1625: the committed rubric example validates with the module placed
+        where an install puts it — the rubric is found through `resource_path`,
+        not two directories above the module."""
+        import inspect
+        import json
+        import re
+        from data_sheets_schema import semantic_scope as scope
+        src = inspect.getsource(scope.validate_scope)
+        self.assertIn("resource_path(", src); self.assertNotIn("parents[2]", src)
+        text = (ROOT / ".claude/agents/d4d-rubric10-semantic.md").read_text(encoding="utf-8")
+        block = re.search(r"```json\n(.*?)\n```", text, re.S)
+        if not block:
+            self.skipTest("no example result in the rubric10-semantic definition")
+        try:
+            result = json.loads(block.group(1))
+        except ValueError:
+            self.skipTest("the example block is not JSON")
+        os.chdir(ROOT)
+        scope.validate_scope(result)                                           # from the checkout
+        elsewhere = Path(self.tmp) / "site" / "data_sheets_schema"; elsewhere.mkdir(parents=True)
+        with mock.patch.object(scope, "__file__", str(elsewhere / "semantic_scope.py")):
+            scope.validate_scope(result)                                       # from an install-shaped location

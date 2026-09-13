@@ -39,7 +39,11 @@ class TestRepoFacts(unittest.TestCase):
             if "--porcelain" in cmd:
                 return porcelain.strip() if strip else porcelain
             return "abc"
-        with mock.patch.object(provenance, "_run", side_effect=fake):
+
+        def fake_result(cmd, *, strip=True, cwd=None):   # the status query reports its exit too (#1621)
+            return True, fake(cmd, strip=strip, cwd=cwd)
+        with mock.patch.object(provenance, "_run", side_effect=fake), \
+                mock.patch.object(provenance, "_run_result", side_effect=fake_result):
             facts = provenance.repo_facts()
         self.assertEqual(facts["dirty_paths"], ["aurelian", "data/x y.yaml", "new.py", "w2.py", "c.py"])
         self.assertEqual(facts["dirty_file_count"], 5)
@@ -53,14 +57,16 @@ class TestRepoFacts(unittest.TestCase):
 
     def test_dirty_paths_are_named_and_bounded(self):
         porcelain = "\0".join([" M src/a.py", "?? notes/scratch.md"] + [f"?? f{i}" for i in range(60)]) + "\0"
-        with mock.patch.object(provenance, "_run", lambda args, **kw: porcelain if "status" in args else "abc"):
+        with mock.patch.object(provenance, "_run", lambda args, **kw: "abc"), \
+                mock.patch.object(provenance, "_run_result", lambda args, **kw: (True, porcelain)):
             facts = provenance.repo_facts()
         self.assertTrue(facts["dirty"])
         self.assertEqual(facts["dirty_file_count"], 62)
         self.assertEqual(facts["dirty_paths"][:2], ["src/a.py", "notes/scratch.md"])
         self.assertEqual(len(facts["dirty_paths"]), provenance.DIRTY_PATHS_MAX)
         self.assertEqual(facts["dirty_paths_truncated"], 12)
-        with mock.patch.object(provenance, "_run", lambda args, **kw: "" if "status" in args else "abc"):
+        with mock.patch.object(provenance, "_run", lambda args, **kw: "abc"), \
+                mock.patch.object(provenance, "_run_result", lambda args, **kw: (True, "")):
             clean = provenance.repo_facts()
         self.assertEqual((clean["dirty"], clean["dirty_paths"]), (False, []))
         self.assertNotIn("dirty_paths_truncated", clean)
