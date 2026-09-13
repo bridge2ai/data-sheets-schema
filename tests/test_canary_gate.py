@@ -359,7 +359,7 @@ class ResumedBatchCanRegateTest(unittest.TestCase):
         from data_sheets_schema.api_runner import _execute
         src = inspect.getsource(_execute)
         head = src[:src.index("already_complete")]
-        for fn in ("pair_consistency(spec)", "report_claims_block(spec)",
+        for fn in ("pair_consistency(spec)", "report_claims_block(spec, record=existing)",
                    "grounding_block(spec)"):
             with self.subTest(fn=fn):
                 self.assertIn(fn, head)

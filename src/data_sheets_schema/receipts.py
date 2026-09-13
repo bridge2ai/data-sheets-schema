@@ -625,26 +625,29 @@ def phase1_snapshot(receipt: Path) -> dict[str, Any] | None:
     """The record as the `full` phase wrote it: the API runner's phase-1
     snapshot beside the receipt under intermediate/ (#758) — written after
     the runner's value normalisation, so shapes match the record at the
-    path level while the receipt itself came from the raw text. A same-
-    label re-run appends _2, _3 to the snapshot names while the top-level
-    receipt is overwritten, so the contemporary snapshot is the highest-
-    numbered one (#761). Absent on the agentic path, whose Phase 3
+    path level while the receipt itself came from the raw text. The portable
+    record or active generation identifies the evidence (#1415). Absent on
+    the agentic path, whose Phase 3
     re-receipts what it changes."""
     return phase1_snapshot_state(receipt)[2]
 
 
-def phase1_snapshot_state(receipt: Path) -> tuple[str, Path | None, dict[str, Any] | None, str | None]:
+def phase1_snapshot_state(receipt: Path, *, spec=None, record: dict | None = None) -> tuple[str, Path | None, dict[str, Any] | None, str | None]:
     """(state, path, snapshot, why): `absent` (no file), `usable` (a
     mapping), or `unusable` with `why` — a parse error, bytes that are not
     UTF-8, a file that cannot be opened, an empty document, or a document
     that is a list or a scalar (#1124 Codex review, SF2: the two-valued
     reading returned None for all of these and a truthy list as if it were
     a record)."""
-    path = phase1_snapshot_path(receipt)
-    if path is None:
-        return "absent", None, None, None
     try:
-        doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+        snapshot = phase1_snapshot_read(receipt, spec=spec, record=record)
+    except OSError as exc:
+        return "unusable", None, None, str(exc)
+    if snapshot is None:
+        return "absent", None, None, None
+    path, raw = snapshot
+    try:
+        doc = yaml.safe_load(raw.decode("utf-8"))
     except (yaml.YAMLError, UnicodeDecodeError, OSError) as exc:
         return "unusable", path, None, f"{type(exc).__name__}: {str(exc).splitlines()[0] if str(exc) else ''}".rstrip(": ")
     if doc is None or doc == {} or doc == []:
@@ -654,15 +657,26 @@ def phase1_snapshot_state(receipt: Path) -> tuple[str, Path | None, dict[str, An
     return "usable", path, doc, None
 
 
-def phase1_snapshot_path(receipt: Path) -> Path | None:
-    """The file `phase1_snapshot` would read, or None where none exists —
-    so a caller can tell "no snapshot" from "a snapshot that would not
-    parse" (#1124 round 6): the two are different claims about a record."""
-    stem = receipt.name.replace("_coverage_receipt.yaml", "_full")
+def phase1_snapshot_read(receipt: Path, *, spec=None, record: dict | None = None) -> tuple[Path, bytes] | None:
+    """Read the phase evidence under its run identity and hash in one operation."""
+    from data_sheets_schema.snapshot_store import read_latest
+    project = receipt.name.removesuffix("_coverage_receipt.yaml")
+    indexed, snapshot = read_latest(receipt.parent, project, f"{project}_full.yaml", spec=spec, record=record)
+    if indexed:
+        return snapshot
+    # Historical unregistered helpers have no generation identity. This
+    # compatibility path is unreachable for an identified portable run.
+    stem = f"{project}_full"
     snaps = sorted((receipt.parent / "intermediate").glob(f"{stem}.yaml")) + sorted(
         (receipt.parent / "intermediate").glob(f"{stem}_[0-9]*.yaml"),
         key=lambda p: int(p.stem.rsplit("_", 1)[1]))
-    return snaps[-1] if snaps else None
+    return (snaps[-1], snaps[-1].read_bytes()) if snaps else None
+
+
+def phase1_snapshot_path(receipt: Path, *, spec=None, record: dict | None = None) -> Path | None:
+    """The verified evidence path; parsers use phase1_snapshot_read directly."""
+    snapshot = phase1_snapshot_read(receipt, spec=spec, record=record)
+    return snapshot[0] if snapshot is not None else None
 
 
 # ---------------------------------------------------------------- derived core
@@ -723,8 +737,8 @@ def core_path(full_path: str, pmap: dict[str, str]) -> str | None:
 
 
 # ---------------------------------------------------------------- receipt
-def load_receipt(path: Path) -> dict[str, Any]:
-    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+def load_receipt(path: Path, *, raw: bytes | None = None) -> dict[str, Any]:
+    data = yaml.safe_load(raw.decode("utf-8") if raw is not None else path.read_text(encoding="utf-8"))
     if not isinstance(data, dict) or not isinstance(data.get("chunks"), list):
         raise ValueError(f"{path}: a receipt is a mapping with a `chunks` list")
     return data
@@ -1258,7 +1272,8 @@ def claims_path(core_dir: Path, project: str) -> Path:
 def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle_md5: str | None,
               expected: bool, manifest: Path | None = None,
               bundle_rel_path: str | None = None, record_bundle_sha256: str | None = None,
-              record_chunks: dict[str, Any] | None = None) -> dict[str, Any]:
+              record_chunks: dict[str, Any] | None = None, *,
+              snapshot_spec=None, snapshot_record: dict | None = None) -> dict[str, Any]:
     """The provenance block for one run, or why it could not be computed.
 
     `expected` is whether this run's procedure was to write a receipt. It is
@@ -1289,14 +1304,15 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     import hashlib
 
     from data_sheets_schema.chunking import chunk_texts as _texts
-    from data_sheets_schema.chunking import load_manifest, manifest_for
+    from data_sheets_schema.chunking import manifest_for, canonical_name
 
     base = {"expected": expected, "non_checks": list(NON_CHECKS)}
     if not receipt.exists():
         return {**base, "checked": False, "reason": f"no coverage receipt at {receipt}"}
     try:
-        rec = load_receipt(receipt)
-    except (ValueError, yaml.YAMLError) as exc:
+        receipt_bytes = receipt.read_bytes()
+        rec = load_receipt(receipt, raw=receipt_bytes)
+    except (OSError, ValueError, yaml.YAMLError) as exc:
         return {**base, "checked": False, "reason": f"receipt unreadable: {exc}"}
     # Three sources for the bytes and the chunks, in order (#1140; #1187
     # rounds 3 and 4): the manifest on disk where it chunked the bytes the
@@ -1318,6 +1334,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     raw = b""
     on_disk: dict[str, Any] | None = None
     disk_bytes: bytes | None = None
+    manifest_bytes: bytes | None = None
     if bundle is None or not bundle.exists():
         disk_state = "the record's bundle is absent"
     else:
@@ -1328,15 +1345,34 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
             disk_advice = "run `d4d bundle chunk` (every bundle kind is chunked, #725)"
         else:
             try:
-                cand = load_manifest(mpath)
+                manifest_bytes = mpath.read_bytes()
+                cand = yaml.safe_load(manifest_bytes.decode("utf-8"))
                 if not isinstance(cand, dict) or not isinstance(cand.get("chunks"), list):
                     raise ValueError("manifest is not a mapping with a chunks list")
                 if hashlib.md5(disk_bytes).hexdigest() != cand.get("bundle_md5"):
                     disk_state = "the manifest on disk did not chunk the bytes on disk"
                     disk_advice = "rebuild it with `d4d bundle chunk`"
+                elif ((record_chunks or {}).get("sha256")
+                      and hashlib.sha256(manifest_bytes).hexdigest() != record_chunks["sha256"]):
+                    # It chunked these bytes, but it is not the instrument the
+                    # record names: a different rule over the same bytes puts
+                    # the same chunk ids over different text, and a receipt
+                    # judged against it can pass where it should not (#1367
+                    # review, must-fix 6). The record's rule then chunks the
+                    # bytes in memory below.
+                    disk_state = ("the manifest on disk is not the one the record names "
+                                  "(its sha256 differs from inputs.chunks.sha256)")
+                    disk_advice = "check against the recorded manifest, or re-record the run"
+                elif ((record_chunks or {}).get("rule") is not None
+                      and cand.get("rule") != record_chunks["rule"]):
+                    disk_state = "the manifest on disk uses a different rule than the record"
+                elif ((record_chunks or {}).get("chunk_count") is not None
+                      and cand.get("chunk_count") != record_chunks["chunk_count"]):
+                    disk_state = (f"the manifest on disk has {cand.get('chunk_count')} chunks, "
+                                  f"not the {record_chunks['chunk_count']} the record cites")
                 else:
                     on_disk = cand
-            except (ValueError, yaml.YAMLError) as exc:
+            except (OSError, ValueError, yaml.YAMLError) as exc:
                 disk_state = f"the manifest on disk is unreadable ({exc})"
     disk_hashes = ({"md5": hashlib.md5(disk_bytes).hexdigest(), "sha256": hashlib.sha256(disk_bytes).hexdigest()}
                    if disk_bytes is not None else {})
@@ -1353,6 +1389,14 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     rule_basis = ("the record's own inputs.chunks.rule" if (record_chunks or {}).get("rule")
                   else "the on-disk manifest's rule (the record carries none)")
     expected_count = (record_chunks or {}).get("chunk_count")
+    # The original basename participates in the manifest digest. A symlink
+    # into the study can have a different basename from that canonical name.
+    recorded_name = (record_chunks or {}).get("bundle_name")
+    if recorded_name is not None and (not isinstance(recorded_name, str)
+                                      or not recorded_name or Path(recorded_name).name != recorded_name):
+        return {**base, "checked": False, "reason": "invalid recorded chunk bundle_name"}
+    reconstruction_name = recorded_name or (
+        canonical_name(bundle) if bundle is not None else Path(bundle_rel_path or "").name)
 
     def _in_memory(source_bytes: bytes, name: str, where: str) -> dict[str, Any] | None:
         """Chunk `source_bytes` under `rule`; None with the refusal set in
@@ -1362,7 +1406,18 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
             refusal = (f"{where}, but neither the record nor a usable manifest on disk says which chunking "
                        "rule to read it under")
             return None
-        built = manifest_from_bytes(source_bytes, name, rule)
+        try:
+            built = manifest_from_bytes(source_bytes, name, rule)
+        except (KeyError, TypeError, ValueError) as exc:
+            refusal = f"{where}, but the recorded chunk rule cannot be reconstructed ({exc})"
+            return None
+        expected_digest = (record_chunks or {}).get("sha256")
+        if expected_digest:
+            from data_sheets_schema.chunking import dump_manifest
+            if hashlib.sha256(dump_manifest(built).encode("utf-8")).hexdigest() != expected_digest:
+                refusal = (f"{where}, but reconstruction does not reproduce inputs.chunks.sha256; "
+                           "the recorded chunk identities cannot be established")
+                return None
         if expected_count is not None and built.get("chunk_count") != expected_count:
             refusal = (f"{where}, but chunks to {built.get('chunk_count')} under {rule_basis}, not the "
                        f"{expected_count} the record cites, so its chunk ids would not name the receipt's text")
@@ -1383,7 +1438,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
         # `where` composes `_in_memory`'s two refusals and is discarded on
         # success, so it carries the advice; the basis below keeps the bare
         # state (#1187 round 6, SF1).
-        built = _in_memory(disk_bytes, bundle.name, f"the bundle on disk is the bytes the record hashed ({disk_because})")  # type: ignore[arg-type]
+        built = _in_memory(disk_bytes, reconstruction_name, f"the bundle on disk is the bytes the record hashed ({disk_because})")  # type: ignore[arg-type]
         if built is None:
             return {**base, "checked": False, "reason": refusal}
         m, raw = built, disk_bytes                                              # type: ignore[assignment]
@@ -1414,8 +1469,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
             return {**base, "checked": False,
                     "reason": f"the version the record hashed was recovered from {entry['commit'][:12]} but is "
                               f"not UTF-8 ({exc}); {context}"}
-        name = Path(bundle_rel_path).name if bundle is None else bundle.name
-        built = _in_memory(raw, name, f"the version the record hashed was recovered from {entry['commit'][:12]}")
+        built = _in_memory(raw, reconstruction_name, f"the version the record hashed was recovered from {entry['commit'][:12]}")
         if built is None:
             return {**base, "checked": False, "reason": f"{refusal}; {context}"}
         m = built
@@ -1433,7 +1487,8 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     # coverage: its leaves show under `without_receipt` until something
     # re-receipts them. A path whose entry merely moved is followed to it
     # by identity (#899, `remap_path`).
-    snap_state, snap_path, original, snap_why = phase1_snapshot_state(receipt)
+    snap_state, snap_path, original, snap_why = phase1_snapshot_state(
+        receipt, spec=snapshot_spec, record=snapshot_record)
     if snap_state == "unusable":
         # The pack reports this gap; the block must not run the index join
         # over it and return `checked: true` (#1124 Codex review, M7) — on
@@ -1445,8 +1500,8 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
                           "join would credit the wrong entries (#899)"}
     block = check(rec, m, texts, full, record_bundle_md5, original)
     block["artifacts"] = {
-        "receipt": {"path": str(receipt), "sha256": hashlib.sha256(receipt.read_bytes()).hexdigest()},
-        "manifest": ({"path": str(mpath), "sha256": hashlib.sha256(mpath.read_bytes()).hexdigest()}
+        "receipt": {"path": str(receipt), "sha256": hashlib.sha256(receipt_bytes).hexdigest()},
+        "manifest": ({"path": str(mpath), "sha256": hashlib.sha256(manifest_bytes).hexdigest()}
                      if bundle_basis["source"] == "bundle on disk" and "manifest" not in bundle_basis else
                      {"path": None, "rule": m.get("rule"), "chunk_count": m.get("chunk_count"),
                       "bundle_md5": m.get("bundle_md5"), "bundle_sha256": m.get("bundle_sha256")}),

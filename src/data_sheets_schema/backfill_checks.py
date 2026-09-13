@@ -171,7 +171,7 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
                                 "recorded_by": RECORDED_BY}
     else:
         from data_sheets_schema.report_claims import declared_ranges, phase1_snapshot_with_pin_for
-        snapshot, snapshot_pin = phase1_snapshot_with_pin_for(core)
+        snapshot, snapshot_pin = phase1_snapshot_with_pin_for(core, record=record)
         block = check_report(
             report,
             yaml.safe_load(full.read_text(encoding="utf-8")) if full.exists() else {},
@@ -203,6 +203,9 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
         block["schema"] = {"full_sha256": _schema_sha(FULL_SCHEMA),
                            "core_sha256": _schema_sha(CORE_SCHEMA)}
         block["recorded_by"] = RECORDED_BY
+        if snapshot_pin and snapshot_pin.get("state") == "unusable":
+            block["checked"] = False
+            block["reason"] = snapshot_pin["reason"]
         # The expectation is a fact about the run, not about the report:
         # carried on `inputs` (and on the recorded block) by the runner that
         # asked for the table, restored here so a rebuild cannot downgrade a
@@ -263,12 +266,15 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
     if want("receipts"):
         from data_sheets_schema.receipts import block_for, receipt_path
         inputs = record.get("inputs") or {}
+        chunks = inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None
         out["receipts"] = {**block_for(full, receipt_path(provenance.parent, paths["project"]),
                                        bundle, inputs.get("bundle_md5"),
                                        bool(inputs.get("receipt_expected")),
+                                       manifest=Path(chunks["path"]) if chunks and chunks.get("path") else None,
                                        bundle_rel_path=inputs.get("bundle_path"),
                                        record_bundle_sha256=inputs.get("bundle_sha256"),
-                                       record_chunks=inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None),
+                                       record_chunks=inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None,
+                                       snapshot_record=record),
                            "recorded_by": RECORDED_BY}
     return out
 

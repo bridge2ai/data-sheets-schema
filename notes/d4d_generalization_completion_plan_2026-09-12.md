@@ -100,3 +100,106 @@ Changing the retained v9 request count, its cost, or the successful-Write audit
 now stops publication. Default-runner compatibility and the original receipt
 uniqueness/accounting tests also pass. Independent review and CI on this
 committed round-3 head remain required before merge.
+
+## Completed prerequisite and current generation review
+
+PR #1396 merged as `140cd10b90231beda811ece02d59929112f70f1e` after
+independent round-3 approval and full CI (3,760 passed, 4 skipped). Issues
+#1381, #1397, #1398, #1400 and #1401 are closed; its branch and worktree
+were deleted. The merged read-only audit reproduced all retained facts, and
+the pre-existing unrelated main-checkout files remained unchanged.
+
+PR #1367 round 4 passed full CI (3,815 passed, 4 skipped), but independent
+review still found five defects. Together with an additional backfill
+reproduction, they are tracked as #1408–#1413 and addressed in round 5; see
+`reviews/pr_1367_round5_2026-09-12.md`. Review and exact-head CI remain
+required before merging that patch. The next evaluation-applicability stage
+also includes #1414, the incorrectly gated preprocessing item.
+
+## Generation review round 6
+
+The round-5 reviewer found two remaining recovery defects (#1415, #1416),
+and a strict missing-bundle check was independently reproduced (#1417).
+Round 6 binds every snapshot consumer to the requested run or its portable
+attestation, retains logical phase/generation identities, reads verified
+bytes once, and checks surviving attempt evidence before completed-run
+shortcuts. Strict checks now fail on absent selected bundles. See
+`reviews/pr_1367_round6_2026-09-12.md` for reproductions and boundary details.
+Round-5 CI passed 3,831 tests and found two outdated recovery fixtures; those
+are updated without relaxing the behavior being tested. The revised head
+still requires green full CI and independent plugin approval. Evaluation
+identities/applicability (#1300, #627, #159, #1414), vocabulary/study profiles
+(#1302, #628), and installable packaging (#1301) remain queued in that order.
+
+## Generation review round 7
+
+Round 6 still found a stale same-generation index overriding completed
+checks (#1420) and a strict registry check with zero targets (#1419). Local
+corpus replay identified the historical pin needed for #1418. These are
+addressed in round 7, with 158 tests passing, including the registered
+historical report aggregate. Two adjacent interrupted-resume probes found
+#1421 (progress lacks phase-history recovery evidence) and #1422 (a completed
+return omits later journaled charges); both have fixes under expanded testing.
+See `reviews/pr_1367_round7_2026-09-12.md`. Merge still requires exact-head CI
+and independent Codex plugin approval. No measurement is launched by this
+maintenance work; all API and agentic arms and evaluation styles remain in
+the next-stage plan.
+
+## Generation review round 8
+
+Round-7 independent review found four remaining defects (#1423–#1426):
+receipt read/hash identity, surviving accounting on completed returns, empty
+strict bundle audits, and historical replay depending on the current source
+manifest. All are addressed, with 77 targeted tests passing; see
+`reviews/pr_1367_round8_2026-09-12.md`. Broader recovery tests, full CI and
+independent approval of the revised head still precede merge. Stage order and
+all API/agentic and evaluation-style requirements remain unchanged.
+
+## Generation review round 9
+
+Round 8 confirmed its preceding fixes and found partial-resume accounting,
+predecessor reasoning isolation and historical backfill gaps (#1427–#1429).
+These are addressed with 36 focused tests and two additional snapshot/failure
+guards passing. See `reviews/pr_1367_round9_2026-09-12.md`. Broad tests, full
+CI and independent review still precede merge. Evaluation preparation is
+isolated on `generalize-evaluation-applicability`; its merge remains after
+generation, followed by profiles and packaging. No paid measurement or source
+download is launched by these maintenance stages.
+
+## Generation review round 10
+
+Independent round-9 review confirmed the preceding fixes and found #1430:
+an explicit fresh restart failed when a partial predecessor retained its
+snapshot index but had lost its usage journal. The successor now durably
+records that specific predecessor before activating a new index. Unrelated
+archives remain unaccounted and are refused. All 107 focused and broader
+recovery tests pass; see `reviews/pr_1367_round10_2026-09-12.md`. Round-8 full
+CI passed 3,884 tests with four skips. The final generation head still needs
+green CI and independent approval. Evaluation applicability preparation
+continues in its separate worktree without new scoring; profiles and
+installable packaging remain the subsequent stages.
+
+## Generation review round 11 — 2026-09-13
+
+The next independent review found #1431–#1433: pre-provenance chunk selection,
+inconsistent source-directory precedence, and canonical bundle-name recovery.
+All are addressed; see `reviews/pr_1367_round11_2026-09-13.md`. Renderer
+version 3 carries the selected agentic receipt command and an unambiguous
+version stamp, while historical versions 1 and 2 remain replayable. Round-9
+full CI is green. Exact-head CI and independent review still precede merge.
+The evaluation worktree has passing applicability/collection and fake API
+judge acceptance tests; agent instruction/schema alignment is in progress.
+All earlier stage ordering and measurement-preservation requirements remain.
+
+## Generation review round 12 — 2026-09-13
+
+Round 11 found mixed-renderer resume and interrupted label-switch activation
+defects (#1434/#1435). Durable instruction pins and exact predecessor activation
+intent address both. Three CI fixture assumptions are corrected in #1437.
+The recovery lane passes 203 tests and final compatibility passes 100;
+see `reviews/pr_1367_round12_2026-09-13.md`. Exact-head full CI and independent
+approval remain required. Evaluation implementation is isolated in its own
+worktree. Existing profile PR #1436 is the candidate for the subsequent
+profile stage; review it after generation and evaluation rather than duplicate
+that work. Packaging follows. All API/agentic arms and evaluation styles above
+remain in scope, with historical measurements preserved and downloads deferred.

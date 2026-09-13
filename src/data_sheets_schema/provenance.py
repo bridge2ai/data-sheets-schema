@@ -35,6 +35,8 @@ from typing import Any
 
 import yaml
 
+from data_sheets_schema.registry import AUTO
+
 RECORD_VERSION = 1
 CONCAT_DIR = Path("data/d4d_concatenated")
 FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
@@ -1253,12 +1255,29 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                  receipt_expected: bool = False,
                  condition: str | None = None,
                  condition_source_paths: list[str] | None = None,
-                 condition_mismatch_allowed: bool = False) -> ProvenanceRecord:
+                 condition_mismatch_allowed: bool = False,
+                 manifest: Path | None | object = AUTO,
+                 chunk_manifest: Path | None = None,
+                 manifest_basis: str | None = None) -> ProvenanceRecord:
     """Assemble a provenance record for one project-run.
 
     ``mode`` is ``live`` or ``reconstructed``. ``input_verified`` must be True
     only when the input bundle on disk is known to be the same bytes the run
     consumed; otherwise the input hash is withheld as unrecoverable.
+
+    ``manifest`` is the source manifest the run *consulted*: a path, or
+    ``None`` for a run that selected none, or ``registry.AUTO`` to decide by
+    the one rule (the study's only where the bundle is one it declares for
+    the project, #621, #1384) once the bundle is known — which is why the
+    selection happens below, after a bundle named only in the record's
+    header has been read. Before this the study's manifest was hashed into
+    every record with a verified bundle, whether or not the run read it,
+    which is a false input claim of the kind #470 and #448 forbid.
+    ``manifest_basis`` says why none was consulted where that is not the
+    default reason (an arm whose header declares the manifest unused,
+    #1395). ``chunk_manifest`` is the chunk manifest the run was given
+    explicitly, when discovery beside the bundle is not how it found one
+    (#1299).
     """
     # Taken from the caller when it knows, reconstructed only when it does not.
     # A run with `--out-dir` writes flat into that directory, and rebuilding the
@@ -1304,7 +1323,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         # bytes (#707) — only when one exists for exactly this md5; a manifest
         # of some other version of the bundle would attest the wrong file.
         from data_sheets_schema.chunking import chunks_input
-        inputs["chunks"] = chunks_input(bundle, inputs["bundle_md5"])
+        inputs["chunks"] = chunks_input(bundle, inputs["bundle_md5"], manifest=chunk_manifest)
     elif bundle:
         inputs["bundle_md5"] = None
         inputs["chunks"] = None      # nothing anchors chunk ids to unverified bytes (#716)
@@ -1323,16 +1342,33 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                        "a false provenance claim"),
         })
 
-    manifest_md5 = _md5(SOURCE_MANIFEST)
-    if input_verified:
-        inputs["source_manifest"] = {"path": str(SOURCE_MANIFEST),
-                                     "md5": manifest_md5}
+    if manifest is AUTO:
+        from data_sheets_schema.registry import select_manifest
+        header_manifest = header.get("Source manifest", "")
+        if "not used" in header_manifest.lower():
+            manifest = None
+            manifest_basis = manifest_basis or f"the output header declares the source manifest unused ({header_manifest})"
+        else:
+            manifest = select_manifest(project, bundle) if bundle is not None else None
+    if manifest is None:
+        # No manifest was consulted, so none is an input. Stated, not
+        # left as the study's path with a null hash, which would read as
+        # "the study's manifest, edited since" (#621).
+        inputs["source_manifest"] = {
+            "path": None, "md5": None,
+            "basis": manifest_basis or (
+                "no source manifest was selected for this run")}
     else:
-        inputs["source_manifest"] = {"path": str(SOURCE_MANIFEST), "md5": None}
-        unrecoverable.append({
-            "field": "inputs.source_manifest.md5",
-            "reason": "manifest has been edited since this run",
-        })
+        manifest = Path(manifest)
+        manifest_md5 = _md5(manifest)
+        if input_verified:
+            inputs["source_manifest"] = {"path": str(manifest), "md5": manifest_md5}
+        else:
+            inputs["source_manifest"] = {"path": str(manifest), "md5": None}
+            unrecoverable.append({
+                "field": "inputs.source_manifest.md5",
+                "reason": "manifest has been edited since this run",
+            })
 
     # ---- agent playbooks -------------------------------------------------
     # Hashed only for a live record. A reconstructed one is assembled today,

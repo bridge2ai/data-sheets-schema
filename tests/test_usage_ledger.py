@@ -534,6 +534,9 @@ def test_legacy_partial_run_adopts_a_generation_without_losing_recorded_usage(tm
     api.execute(s, client=FakeClient())
     prior = yaml.safe_load(s.provenance_path.read_text())
     del prior["run"]["generation_id"]
+    for entry in prior["intermediates"]:
+        for key in ("generation_id", "phase", "usage_id"):
+            entry.pop(key, None)
     for entry in prior["api_usage"]:
         entry.pop("usage_id")
     reasoning = [json.loads(line) for line in api._reasoning_path(s).read_text().splitlines()]
@@ -544,6 +547,10 @@ def test_legacy_partial_run_adopts_a_generation_without_losing_recorded_usage(tm
     old = prior["api_usage"]
     s.provenance_path.write_text(yaml.safe_dump(prior))
     ledger.ledger_path(s).unlink()
+    # This fixture simulates a run from before generation identities and
+    # snapshot indices existed; retaining the new index would contradict it.
+    from data_sheets_schema.snapshot_store import index_path
+    index_path(s.metadata_dir, s.project).unlink()
     api._save_progress(s, list(api.PHASES), None)
     assert "generation_id" not in json.loads(api._progress_path(s).read_text())
     client = FakeClient()
@@ -685,7 +692,7 @@ def test_completed_record_covers_its_abandoned_rows_but_not_later_charges(tmp_pa
 def test_reasoning_only_state_requires_its_missing_usage_ledger(tmp_path, monkeypatch):
     s, client = spec(out_dir=tmp_path), FakeClient()
 
-    def fail(*args):
+    def fail(*args, **kwargs):
         raise OSError("snapshot failure")
 
     with monkeypatch.context() as failing:

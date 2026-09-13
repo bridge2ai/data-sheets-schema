@@ -194,9 +194,12 @@ class ManifestNaming(unittest.TestCase):
         one unsegmented document, windowed like any other."""
         from data_sheets_schema.chunking import (UNSEGMENTED, chunk_text, chunks_input, manifest_for,
                                                   project_bundles, write_manifest_for)
-        self.assertEqual(manifest_for(Path("x/CHORUS_preprocessed.txt")).name, "CHORUS_chunks.yaml")
-        self.assertEqual(manifest_for(Path("x/CHORUS_crate_only.txt")).name, "CHORUS_crate_only_chunks.yaml")
-        self.assertEqual(manifest_for(Path("x/AI_READI_healthsheet_only.txt")).name,
+        from data_sheets_schema.chunking import CONCAT_DIR
+        self.assertEqual(manifest_for(CONCAT_DIR / "CHORUS_preprocessed.txt").name, "CHORUS_chunks.yaml")
+        self.assertEqual(manifest_for(CONCAT_DIR / "CHORUS_crate_only.txt").name, "CHORUS_crate_only_chunks.yaml")
+        # A bundle outside the study directory keeps its manifest beside itself (#1299).
+        self.assertEqual(manifest_for(Path("x/CHORUS_preprocessed.txt")), Path("x/CHORUS_preprocessed_chunks.yaml"))
+        self.assertEqual(manifest_for(CONCAT_DIR / "AI_READI_healthsheet_only.txt").name,
                          "AI_READI_healthsheet_only_chunks.yaml")
         chunks = chunk_text("no file headers here\n" * 3)
         self.assertEqual([c["source"] for c in chunks], [UNSEGMENTED])

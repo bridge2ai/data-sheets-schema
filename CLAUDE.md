@@ -79,7 +79,9 @@ d4d render html input.yaml -o output.html             # Render to HTML
 ```
 
 ### Benefits
-- **Auto-validation**: Project/method names validated via click.Choice
+- **Registry validation**: a `--project` is checked against the source manifest the
+  command selects (`--manifest`, default `data/preprocessed/source_manifest.yaml`),
+  not against a hardcoded list (#623); method names via click.Choice
 - **Consistent interface**: All commands use same patterns
 - **Help everywhere**: `--help` on any command/group
 - **Constants**: Uses centralized constants from `data_sheets_schema.constants`
@@ -1455,6 +1457,48 @@ every record are untouched. The table, not a schema annotation, because a
 merged-schema edit moves the schema hashes every checked report block
 attests (#1362). Test: `tests/test_profiles.py` asserts on the assembled
 full-phase request under both profiles.
+
+## The manifest is the project registry (#621, #623, #624, #637, #1299)
+
+A dataset is whatever the selected source manifest declares under
+`projects:`. Every command that names a dataset takes `--manifest`
+(default `data/preprocessed/source_manifest.yaml`) and validates
+`--project` against it — `registry.project_choice`, not
+`click.Choice(PROJECTS)`. `d4d download list-projects [--manifest M]
+[--plain]` prints that registry, and `project.Makefile` asks it for
+`PROJECTS` rather than keeping its own list. A project record is a list of
+sources or a mapping carrying `sources:`, optionally `raw_dir:` (where its
+raw documents are, when not `<input-dir>/<project>`), `source_dir:` (where
+its preprocessed files are — the VOICE_PEDIATRIC override, formerly the
+sibling key `<P>_source_dir`, which is still read and is never a project,
+#626) and `bundle:` (its document bundle, when not
+`data/preprocessed/concatenated/<P>_preprocessed.txt`).
+`constants.PROJECTS` remains the study's corpus for the analysis scripts.
+
+**A run consults one manifest, or none, and its record says which.**
+`d4d api run|plan|render-prompt|batch` take `--manifest`; without it the
+study's manifest is selected only when the bundle is the one it declares
+for that project — `--project VOICE --bundle /elsewhere/x.txt` selects
+none, so the study's naming, scope and source ranking are not sent for a
+bundle they do not describe, and `inputs.source_manifest` records
+`path: null` with a `basis` rather than the study's path and hash (#621).
+`batch` runs every project the manifest declares, or the ones given with
+`--project-bundle NAME=PATH`; a tuned component that was never written
+and never pinned is "no component", while one that exists unpinned, or is
+pinned and gone, is still refused (#624). `d4d provenance record
+--manifest none` is the agentic path's equivalent. The study's own
+DECLARED NAMING sentence is unchanged: its affiliation phrase moved from a
+code literal into the manifest's `naming.<P>.programme`.
+
+**Chunk manifests follow the bundle.** A study bundle keeps
+`data/preprocessed/chunks/<stem>_chunks.yaml`; `d4d bundle chunk --bundle
+PATH` writes `<stem>_chunks.yaml` beside any other bundle, so two bundles
+with one basename in different directories never share a manifest, and
+`--chunk-manifest` names one explicitly (#1299). The receipt-condition
+gate still refuses a missing or stale manifest before any spend. The
+acceptance test is `tests/test_external_dataset_onboarding.py`: a dataset
+that exists only in a temporary manifest goes through preprocessing,
+concatenation, chunking, an offline plan and status with no Python edit.
 
 ## One parse per file per process (#1203)
 

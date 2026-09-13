@@ -6,9 +6,6 @@ from pathlib import Path
 
 import click
 
-from data_sheets_schema.constants import PROJECTS
-
-
 @click.group()
 def receipts():
     """Coverage and claim receipts: what the agent says it read, checked."""
@@ -26,7 +23,7 @@ def _run_paths(method: str, label: str, project: str) -> dict[str, Path]:
 @receipts.command("check")
 @click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--label", required=True)
-@click.option("--project", type=click.Choice(PROJECTS), required=True)
+@click.option("--project", required=True, help="dataset identifier carried by the run's files")
 @click.option("--write", is_flag=True,
               help="write the `receipts` block into the provenance record and the "
                    "claim-receipt sidecar beside it")
@@ -35,7 +32,9 @@ def _run_paths(method: str, label: str, project: str) -> dict[str, Path]:
 @click.option("--bundle", "bundle_opt", default=None, type=click.Path(exists=True, dir_okay=False),
               help="the bundle the run read; needed only before the provenance record "
                    "exists and the full record's header does not name it")
-def check(method, label, project, write, strict, bundle_opt):
+@click.option("--chunk-manifest", type=click.Path(dir_okay=False, path_type=Path),
+              help="selected chunk manifest, including before provenance exists; recorded hashes still apply")
+def check(method, label, project, write, strict, bundle_opt, chunk_manifest):
     """Validate `{PROJECT}_coverage_receipt.yaml` against the chunk manifest,
     the bundle and the full record, with affirmative counts.
 
@@ -46,6 +45,8 @@ def check(method, label, project, write, strict, bundle_opt):
     (`inputs.receipt_expected`).
     """
     from data_sheets_schema.cli.method import resolve_method
+    if not project.strip() or "/" in project or "\\" in project or project in {".", ".."}:
+        raise click.BadParameter("must be a nonempty dataset basename", param_hint="--project")
     method = method or resolve_method(label, project)
     import yaml
 
@@ -58,7 +59,7 @@ def check(method, label, project, write, strict, bundle_opt):
         inputs = record.get("inputs") or {}
         bundle = bc.declared_bundle(record)
         md5, expected = inputs.get("bundle_md5"), bool(inputs.get("receipt_expected"))
-        recovery = {"bundle_rel_path": inputs.get("bundle_path"), "record_bundle_sha256": inputs.get("bundle_sha256"),
+        recovery = {"snapshot_record": record, "bundle_rel_path": inputs.get("bundle_path"), "record_bundle_sha256": inputs.get("bundle_sha256"),
                     "record_chunks": inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None}
     else:
         # Before the record exists — Phase 1 runs this before Phase 2 (#730).
@@ -80,6 +81,11 @@ def check(method, label, project, write, strict, bundle_opt):
         click.echo(f"   · no provenance record yet; checking against {bundle} as on disk")
     # The same recovery the backfill makes (#1140, #1187 review M2): the gate
     # on attestation must not say "unchecked" of a record the backfill checked.
+    chunks = recovery.get("record_chunks") if isinstance(recovery.get("record_chunks"), dict) else None
+    if chunks and chunks.get("path") and "manifest" not in recovery:
+        recovery["manifest"] = Path(chunks["path"])           # the manifest the run sent (#1367 review, must-fix 6)
+    if chunk_manifest is not None:
+        recovery["manifest"] = chunk_manifest
     block = rc.block_for(p["full"], rc.receipt_path(p["core_dir"], project), bundle, md5, expected, **recovery)
     if not block.get("checked"):
         click.echo(f"   · unchecked: {block['reason']}"

@@ -18,8 +18,16 @@ D4D_HTML_DIR = data/d4d_html
 SYNC ?=
 D4D_PAIR_SYNC_ARG = $(if $(filter 1 true yes,$(SYNC)),--sync-core,)
 
-# Projects
-PROJECTS = AI_READI CHORUS CM4AI VOICE
+# Projects: asked of the CLI, which reads them from the source manifest
+# (#623, #637). This used to be a second, hand-kept list that had already
+# drifted from constants.PROJECTS. Override with `make PROJECTS="A B"` or
+# point at another registry with `make SOURCE_MANIFEST=path`.
+# Expanded only by recipes that consume projects. Bootstrap and schema/test
+# targets therefore work before d4d is installed, and any consuming target
+# rejects an unreadable or empty registry, including user-supplied empty lists.
+PROJECTS ?= $(shell $(RUN) d4d download list-projects --manifest $(SOURCE_MANIFEST) --plain 2>/dev/null || echo REGISTRY_UNAVAILABLE)
+checked_projects = $(if $(filter REGISTRY_UNAVAILABLE,$(1)),$(error the project registry could not be read: '$(RUN) d4d download list-projects --manifest $(SOURCE_MANIFEST)' failed. Install the environment or pass PROJECTS explicitly),$(if $(strip $(1)),$(1),$(error the project registry $(SOURCE_MANIFEST) declares no projects; pass PROJECTS explicitly)))
+D4D_PROJECTS = $(call checked_projects,$(PROJECTS))
 
 # Bridge2AI source documentation Google Sheet
 # Note: Use CSV export URL format for the extractor script
@@ -81,7 +89,7 @@ preprocess-sources:
 	$(RUN) python src/download/preprocess_sources.py \
 		-i $(RAW_DIR) \
 		-o $(PREPROCESSED_INDIVIDUAL_DIR) \
-		-p $(PROJECTS) \
+		-p $(D4D_PROJECTS) \
 		--manifest $(SOURCE_MANIFEST)
 
 # Validate preprocessing quality (check for empty files, stubs, data loss)
@@ -90,7 +98,6 @@ validate-preprocessing:
 	$(RUN) python src/download/validate_preprocessing_quality.py \
 		--raw-dir $(RAW_DIR) \
 		--preprocessed-dir $(PREPROCESSED_INDIVIDUAL_DIR) \
-		--projects $(PROJECTS) \
 		--manifest $(SOURCE_MANIFEST)
 
 # Full download + preprocess + validate pipeline
@@ -139,7 +146,7 @@ data-status:
 	@echo "─────────────────────────────────────────────────────────────────"
 	@echo "RAW DOWNLOADS (data/raw/)"
 	@echo "─────────────────────────────────────────────────────────────────"
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		dir="$(RAW_DIR)/$$project"; \
 		if [ -d "$$dir" ]; then \
 			count=$$(ls -1 "$$dir" 2>/dev/null | wc -l | tr -d ' '); \
@@ -156,7 +163,7 @@ data-status:
 	@echo "─────────────────────────────────────────────────────────────────"
 	@echo "PREPROCESSED INDIVIDUAL (data/preprocessed/individual/)"
 	@echo "─────────────────────────────────────────────────────────────────"
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		dir="$(PREPROCESSED_INDIVIDUAL_DIR)/$$project"; \
 		if [ -d "$$dir" ]; then \
 			count=$$(ls -1 "$$dir" 2>/dev/null | wc -l | tr -d ' '); \
@@ -174,7 +181,7 @@ data-status:
 	@echo "PREPROCESSED CONCATENATED (data/preprocessed/concatenated/)"
 	@echo "─────────────────────────────────────────────────────────────────"
 	@if [ -d "$(PREPROCESSED_CONCAT_DIR)" ]; then \
-		for project in $(PROJECTS); do \
+		for project in $(D4D_PROJECTS); do \
 				file="$(PREPROCESSED_CONCAT_DIR)/$${project}_preprocessed.txt"; \
 			if [ -f "$$file" ]; then \
 				lines=$$(wc -l < "$$file" | tr -d ' '); \
@@ -191,7 +198,7 @@ data-status:
 	@echo "─────────────────────────────────────────────────────────────────"
 	@echo "D4D INDIVIDUAL - GPT-5 (data/d4d_individual/gpt5/)"
 	@echo "─────────────────────────────────────────────────────────────────"
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		dir="$(D4D_INDIVIDUAL_DIR)/gpt5/$$project"; \
 		if [ -d "$$dir" ]; then \
 			count=$$(ls -1 "$$dir"/*_d4d.yaml 2>/dev/null | wc -l | tr -d ' '); \
@@ -208,7 +215,7 @@ data-status:
 	@echo "─────────────────────────────────────────────────────────────────"
 	@echo "D4D INDIVIDUAL - CLAUDE CODE (data/d4d_individual/claudecode/)"
 	@echo "─────────────────────────────────────────────────────────────────"
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		dir="$(D4D_INDIVIDUAL_DIR)/claudecode/$$project"; \
 		if [ -d "$$dir" ]; then \
 			count=$$(ls -1 "$$dir"/*_d4d.yaml 2>/dev/null | wc -l | tr -d ' '); \
@@ -227,7 +234,7 @@ data-status:
 	@echo "─────────────────────────────────────────────────────────────────"
 	@echo "GPT-5:"
 	@if [ -d "$(D4D_CONCAT_DIR)/gpt5" ]; then \
-		for project in $(PROJECTS); do \
+		for project in $(D4D_PROJECTS); do \
 			file="$(D4D_CONCAT_DIR)/gpt5/$${project}_d4d.yaml"; \
 			if [ -f "$$file" ]; then \
 				lines=$$(wc -l < "$$file" | tr -d ' '); \
@@ -242,7 +249,7 @@ data-status:
 	fi
 	@echo "Claude Code:"
 	@if [ -d "$(D4D_CONCAT_DIR)/claudecode" ]; then \
-		for project in $(PROJECTS); do \
+		for project in $(D4D_PROJECTS); do \
 			file="$(D4D_CONCAT_DIR)/claudecode/$${project}_d4d.yaml"; \
 			if [ -f "$$file" ]; then \
 				lines=$$(wc -l < "$$file" | tr -d ' '); \
@@ -300,7 +307,7 @@ data-status:
 	total_d4d_individual_gpt5=0; \
 	total_d4d_concat_gpt5=0; \
 	total_html=0; \
-	for project in $(PROJECTS); do \
+	for project in $(D4D_PROJECTS); do \
 		if [ -d "$(RAW_DIR)/$$project" ]; then \
 			count=$$(ls -1 "$(RAW_DIR)/$$project" 2>/dev/null | wc -l | tr -d ' '); \
 			total_raw=$$((total_raw + count)); \
@@ -334,7 +341,7 @@ data-status:
 	@echo "────────────────────────────────────────────────────────────────"
 	@printf "  %-12s  %5s  %10s  %10s  %s\n" "PROJECT" "FILES" "TOTAL SIZE" "AVG SIZE" "LARGEST"
 	@echo "────────────────────────────────────────────────────────────────"
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		dir="$(D4D_INDIVIDUAL_DIR)/gpt5/$$project"; \
 		if [ -d "$$dir" ]; then \
 			files=$$(ls -1 "$$dir"/*_d4d.yaml 2>/dev/null | wc -l | tr -d ' '); \
@@ -360,7 +367,7 @@ data-status:
 	@printf "  %-12s  %10s  %7s  %10s  %7s  %10s  %7s\n" \
 		"PROJECT" "GPT-5" "LINES" "CLAUDE" "LINES" "CURATED" "LINES"
 	@echo "────────────────────────────────────────────────────────────────"
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		gpt5_file="$(D4D_CONCAT_DIR)/gpt5/$${project}_d4d.yaml"; \
 		claude_file="$(D4D_CONCAT_DIR)/claudecode/$${project}_d4d.yaml"; \
 		curated_file="$(D4D_CONCAT_DIR)/curated/$${project}_curated.yaml"; \
@@ -394,7 +401,7 @@ data-status:
 	@total_individual=0; \
 	total_concat_gpt5=0; \
 	total_concat_curated=0; \
-	for project in $(PROJECTS); do \
+	for project in $(D4D_PROJECTS); do \
 		dir="$(D4D_INDIVIDUAL_DIR)/gpt5/$$project"; \
 		if [ -d "$$dir" ]; then \
 			bytes=$$(find "$$dir" -name "*_d4d.yaml" -exec stat -f%z {} \; 2>/dev/null | awk '{s+=$$1} END {print s}'); \
@@ -422,7 +429,7 @@ data-status:
 # Quick data status - compact version
 data-status-quick:
 	@echo "D4D Pipeline Status:"
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		raw_count=$$(ls -1 "$(RAW_DIR)/$$project" 2>/dev/null | wc -l | tr -d ' '); \
 		prep_count=$$(ls -1 "$(PREPROCESSED_INDIVIDUAL_DIR)/$$project" 2>/dev/null | wc -l | tr -d ' '); \
 		d4d_count=$$(ls -1 "$(D4D_INDIVIDUAL_DIR)/gpt5/$$project"/*_d4d.yaml 2>/dev/null | wc -l | tr -d ' '); \
@@ -444,7 +451,7 @@ data-d4d-sizes:
 	@echo "────────────────────────────────────────────────────────────────────────────────"
 	@printf "  %-12s  %5s  %10s  %10s  %s\n" "PROJECT" "FILES" "TOTAL SIZE" "AVG SIZE" "LARGEST"
 	@echo "────────────────────────────────────────────────────────────────────────────────"
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		dir="$(D4D_INDIVIDUAL_DIR)/gpt5/$$project"; \
 		if [ -d "$$dir" ]; then \
 			files=$$(ls -1 "$$dir"/*_d4d.yaml 2>/dev/null | wc -l | tr -d ' '); \
@@ -470,7 +477,7 @@ data-d4d-sizes:
 	@printf "  %-12s  %10s  %7s  %10s  %7s  %10s  %7s\n" \
 		"PROJECT" "GPT-5" "LINES" "CLAUDE" "LINES" "CURATED" "LINES"
 	@echo "────────────────────────────────────────────────────────────────────────────────"
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		gpt5_file="$(D4D_CONCAT_DIR)/gpt5/$${project}_d4d.yaml"; \
 		claude_file="$(D4D_CONCAT_DIR)/claudecode/$${project}_d4d.yaml"; \
 		curated_file="$(D4D_CONCAT_DIR)/curated/$${project}_curated.yaml"; \
@@ -504,7 +511,7 @@ data-d4d-sizes:
 	@total_individual=0; \
 	total_concat_gpt5=0; \
 	total_concat_curated=0; \
-	for project in $(PROJECTS); do \
+	for project in $(D4D_PROJECTS); do \
 		dir="$(D4D_INDIVIDUAL_DIR)/gpt5/$$project"; \
 		if [ -d "$$dir" ]; then \
 			bytes=$$(find "$$dir" -name "*_d4d.yaml" -exec stat -f%z {} \; 2>/dev/null | awk '{s+=$$1} END {print s}'); \
@@ -540,7 +547,7 @@ d4d-output-diagnostic:
 	@printf "%-10s | %6s | %8s | %10s | %10s | %10s | %10s | %10s | %s\n" \
 		"PROJECT" "FILES" "IND.SIZE" "CONCAT.IN" "GPT5 YAML" "CC YAML" "GPT5 HTML" "CC HTML" "STATUS"
 	@echo "────────────────────────────────────────────────────────────────────────────────"
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		ind_dir="$(D4D_INDIVIDUAL_DIR)/gpt5/$$project"; \
 		concat_file="$(PREPROCESSED_CONCAT_DIR)/$${project}_concatenated.txt"; \
 		gpt5_yaml="$(D4D_CONCAT_DIR)/gpt5/$${project}_d4d.yaml"; \
@@ -626,7 +633,7 @@ d4d-output-diagnostic:
 concat-extracted:
 	@echo "Concatenating individual D4D YAMLs by project..."
 	@mkdir -p $(D4D_INDIVIDUAL_CONCAT_DIR)
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		input_dir="$(D4D_INDIVIDUAL_DIR)/gpt5/$$project"; \
 		output_file="$(D4D_INDIVIDUAL_CONCAT_DIR)/$${project}_d4d_records.txt"; \
 		if [ -d "$$input_dir" ] && [ -n "$$(ls -A $$input_dir 2>/dev/null)" ]; then \
@@ -643,20 +650,13 @@ concat-extracted:
 concat-preprocessed:
 	@echo "Concatenating preprocessed individual files by project..."
 	@mkdir -p $(PREPROCESSED_CONCAT_DIR)
-	@for project in $(PROJECTS); do \
-		input_dir="$(PREPROCESSED_INDIVIDUAL_DIR)/$$project"; \
-			output_file="$(PREPROCESSED_CONCAT_DIR)/$${project}_preprocessed.txt"; \
-			if [ -d "$$input_dir" ] && [ -n "$$(ls -A $$input_dir 2>/dev/null)" ]; then \
-				echo "Processing $$project..."; \
-				$(RUN) python src/download/concatenate_documents.py \
-					-i "$$input_dir" \
-					-o "$$output_file" \
-					-e .txt \
-					--manifest $(SOURCE_MANIFEST) \
-					--project "$$project" || exit 1; \
-		else \
-			echo "⚠️  Skipping $$project (no preprocessed files found)"; \
-		fi \
+	@for project in $(D4D_PROJECTS); do \
+		echo "Processing $$project..."; \
+		$(RUN) d4d download concatenate \
+			--manifest $(SOURCE_MANIFEST) \
+			--project "$$project" \
+			--input-dir $(PREPROCESSED_INDIVIDUAL_DIR) \
+			--output-dir $(PREPROCESSED_CONCAT_DIR) || exit 1; \
 	done
 	@echo "✅ All preprocessed files concatenated to $(PREPROCESSED_CONCAT_DIR)/"
 
@@ -665,7 +665,7 @@ concat-preprocessed:
 concat-raw:
 	@echo "Concatenating raw download files by project..."
 	@mkdir -p $(PREPROCESSED_CONCAT_DIR)
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		input_dir="$(RAW_DIR)/$$project"; \
 		output_file="$(PREPROCESSED_CONCAT_DIR)/$${project}_raw.txt"; \
 		if [ -d "$$input_dir" ] && [ -n "$$(ls -A $$input_dir 2>/dev/null)" ]; then \
@@ -736,7 +736,7 @@ endif
 # Extract D4D metadata from all projects using GPT-5
 extract-d4d-individual-all-gpt5:
 	@echo "Extracting D4D metadata for all projects using GPT-5..."
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		echo ""; \
 		echo "═══════════════════════════════════════"; \
 		echo "Processing $$project..."; \
@@ -767,7 +767,7 @@ extract-d4d-individual-claude:
 list-d4d-individual-claude:
 	@echo "Individual D4D YAMLs (Claude Code validated):"
 	@echo ""
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		echo "$$project:"; \
 		find data/d4d_individual/claudecode/$$project -name '*_d4d.yaml' 2>/dev/null | sed 's|.*/||' | sed 's/^/  /' || echo "  (none)"; \
 		echo ""; \
@@ -805,7 +805,7 @@ endif
 # Extract D4D from all concatenated files using GPT-5
 extract-d4d-concat-all-gpt5:
 	@echo "Extracting D4D from all concatenated files using GPT-5..."
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		echo ""; \
 		echo "═══════════════════════════════════════"; \
 		echo "Processing $$project..."; \
@@ -896,7 +896,7 @@ ifndef PROJECT
 	@echo "Usage: make d4d-agent PROJECT=AI_READI"
 	@echo ""
 	@echo "Projects available:"
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		input_file="$(PREPROCESSED_CONCAT_DIR)/$${project}_preprocessed.txt"; \
 		if [ -f "$$input_file" ]; then \
 			size=$$(ls -lh "$$input_file" | awk '{print $$5}'); \
@@ -954,7 +954,7 @@ ifndef PROJECT
 	@echo "Usage: make d4d-assistant PROJECT=AI_READI"
 	@echo ""
 	@echo "Projects available:"
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		input_file="$(PREPROCESSED_CONCAT_DIR)/$${project}_preprocessed.txt"; \
 		if [ -f "$$input_file" ]; then \
 			size=$$(ls -lh "$$input_file" | awk '{print $$5}'); \
@@ -996,7 +996,7 @@ d4d-agent-all:
 	@echo "D4D Agent approach for all projects..."
 	@echo ""
 	@mkdir -p $(D4D_CONCAT_DIR)/claudecode_agent
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		$(MAKE) d4d-agent PROJECT=$$project; \
 		echo ""; \
 	done
@@ -1006,7 +1006,7 @@ d4d-assistant-all:
 	@echo "D4D Assistant approach for all projects..."
 	@echo ""
 	@mkdir -p $(D4D_CONCAT_DIR)/claudecode_assistant
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		$(MAKE) d4d-assistant PROJECT=$$project; \
 		echo ""; \
 	done
@@ -1082,7 +1082,7 @@ endif
 validate-d4d-all:
 	@echo "Validating all D4D YAMLs..."
 	@GENERATOR=${GENERATOR:-gpt5}; \
-	for project in $(PROJECTS); do \
+	for project in $(D4D_PROJECTS); do \
 		echo ""; \
 		$(MAKE) validate-d4d-project PROJECT=$$project GENERATOR=$$GENERATOR || true; \
 	done
@@ -1112,7 +1112,7 @@ ifndef VERSION
 endif
 	@echo "Creating v$(VERSION) HTML files from claudecode_agent output..."
 	@mkdir -p src/html/output
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		echo "  Versioning $$project..."; \
 		if [ -f data/d4d_html/concatenated/claudecode_agent/$${project}_d4d_human_readable.html ]; then \
 			cp data/d4d_html/concatenated/claudecode_agent/$${project}_d4d_human_readable.html \
@@ -1174,7 +1174,7 @@ d4d-pipeline-concatenated-gpt5:
 	$(MAKE) extract-d4d-concat-all-gpt5
 	@echo ""
 	@echo "Step 3: Validate concatenated D4D YAMLs"
-	@for project in $(PROJECTS); do \
+	@for project in $(D4D_PROJECTS); do \
 		file="$(D4D_CONCAT_DIR)/gpt5/$${project}_d4d.yaml"; \
 		if [ -f "$$file" ]; then \
 			echo "Validating $$file..."; \

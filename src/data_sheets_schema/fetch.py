@@ -59,6 +59,9 @@ class Source:
     minimum_characters: int | None = None
     curation_note: str | None = None
     fetch: str | None = None          # "manual" => no handler can reproduce it
+    # Declared per-project directories (#1392); None means the convention.
+    raw_dir: Path | None = None
+    processed_dir: Path | None = None
 
     @property
     def is_manual(self) -> bool:
@@ -74,11 +77,11 @@ class Source:
 
     @property
     def raw_path(self) -> Path:
-        return RAW_DIR / self.project / self.raw_file
+        return (self.raw_dir or RAW_DIR / self.project) / self.raw_file
 
     @property
     def processed_path(self) -> Path:
-        return PROCESSED_DIR / self.project / self.processed_file
+        return (self.processed_dir or PROCESSED_DIR / self.project) / self.processed_file
 
     @property
     def has_raw(self) -> bool:
@@ -113,15 +116,14 @@ class Plan:
 def load_sources(manifest_path: Path = MANIFEST,
                  projects: Iterable[str] | None = None) -> list[Source]:
     """Every manifest entry, as Source objects."""
-    data = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
+    from data_sheets_schema.registry import load_registry
+    reg = load_registry(manifest_path)
     out: list[Source] = []
     wanted = set(projects) if projects else None
-    for project, entries in (data.get("projects") or {}).items():
+    for project in reg.projects():                # never a `<P>_source_dir` key (#626)
         if wanted and project not in wanted:
             continue
-        for e in entries or []:
-            if not isinstance(e, dict):
-                continue
+        for e in reg.sources(project):            # list or mapping record (#1367 review, must-fix 5)
             out.append(Source(
                 project=project,
                 id=str(e.get("id") or "(unnamed)"),
@@ -132,6 +134,8 @@ def load_sources(manifest_path: Path = MANIFEST,
                 minimum_characters=e.get("minimum_characters"),
                 curation_note=e.get("curation_note"),
                 fetch=e.get("fetch"),
+                raw_dir=reg.raw_dir(project),
+                processed_dir=reg.source_dir(project),
             ))
     return out
 
