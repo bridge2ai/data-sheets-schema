@@ -953,15 +953,26 @@ def check_record(data: dict[str, Any]) -> tuple[list[str], str | None]:
     return problems, None
 
 
+def profile_problems(data: dict[str, Any]) -> list[str]:
+    """The profile findings `check_record` appends (#1581, #1678), on their
+    own so a gate that does not run the structural validator can still
+    fail on them (#1699)."""
+    return [p for p in (_profile_digest_disagreement(data), _spec_profile_disagreement(data)) if p]
+
+
 def _spec_profile_disagreement(data: dict[str, Any]) -> str | None:
     """A record whose stored render spec states one profile while its
     `schema.profile` states another — or none — is two records in one
     (#1678): the gate re-renders under the spec's, every reader reads the
     schema's."""
     schema = data.get("schema") if isinstance(data, dict) else None
-    spec = (((data.get("prompts") or {}).get("request") or {}).get("spec")) if isinstance(data, dict) else None
-    if not isinstance(schema, dict) or not isinstance(spec, dict) or not isinstance(spec.get("profile"), str):
+    prompts = data.get("prompts") if isinstance(data, dict) else None
+    request = prompts.get("request") if isinstance(prompts, dict) else None
+    spec = request.get("spec") if isinstance(request, dict) else None       # any shape short of a mapping is the validator's finding (#1700)
+    if not isinstance(spec, dict) or not isinstance(spec.get("profile"), str):
         return None
+    if not isinstance(schema, dict):
+        schema = {}                        # no schema block, or null: the readers read the study's (#1709)
     if schema.get("profile") != spec["profile"]:
         return (f"prompts.request.spec.profile is {spec['profile']!r} but schema.profile is "
                 f"{schema.get('profile')!r}; the gate and the readers would use different instruments")

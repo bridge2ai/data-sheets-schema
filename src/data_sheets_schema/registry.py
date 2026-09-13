@@ -269,7 +269,7 @@ def load_registry(path: Path | str | None = DEFAULT_MANIFEST) -> Registry:
         data = load_yaml(p)
         if data is None:
             data = {}                        # an empty document; a falsey non-mapping is refused below (#1658)
-    except (OSError, yaml.YAMLError) as exc:
+    except (OSError, yaml.YAMLError, UnicodeDecodeError) as exc:     # a non-UTF-8 file included (#1708)
         raise click.ClickException(f"manifest {p} could not be read: {exc}") from exc
     if not isinstance(data, dict):
         raise click.ClickException(f"manifest {p} is not a mapping")

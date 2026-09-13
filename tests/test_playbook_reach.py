@@ -319,8 +319,13 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
         # prose the file composes.
         # Every instruction the generation model reads, not the rules alone
         # (#1661): the full/core playbook and the provenance guard too.
-        for playbook in (PLAYBOOK, ROOT / ".claude/commands/d4d-full-core.md", ROOT / ".claude/agents/d4d-provenance-guard.md"):
-            text = re.sub(r'"[^"\n]*"', "", re.sub(r"`[^`]*`", "", playbook.read_text(encoding="utf-8"))).lower()
+        for playbook in (PLAYBOOK, ROOT / ".claude/commands/d4d-full-core.md", ROOT / ".claude/agents/d4d-provenance-guard.md",
+                         ROOT / ".claude/commands/d4d-agent.md", ROOT / ".claude/commands/d4d-assistant.md", ROOT / ".claude/commands/d4d-webfetch.md"):
+            # Backticks quote sources and identifiers; a double-quoted span
+            # is exempt only when it names a proper noun the carve-out
+            # examples carry — an authored example sentence is prose (#1706).
+            raw = re.sub(r"`[^`]*`", "", playbook.read_text(encoding="utf-8"))
+            text = re.sub(r'"[^"\n]*\b(Centre|Programme Grant|Sanger)\b[^"\n]*"', "", raw).lower()
             for british in ("organisation", "characterise", "standardise", "analyse", "behaviour", "licence",
                             "recognise", "programme", "centre", "labelled", "normalisation", "judgement"):
                 self.assertNotIn(british, text, f"{playbook.name}: {british}")
