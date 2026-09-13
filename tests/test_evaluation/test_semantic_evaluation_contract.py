@@ -240,8 +240,8 @@ class TestTheSchemasStillReject(unittest.TestCase):
         bad["overall_score"]["max_points"] = 84
         self.assertTrue(self._errors(bad, "rubric20-semantic"))
 
-    def test_an_unknown_method_is_rejected(self):
-        bad = _rubric20_record(method="claudecode_agent_corex")
+    def test_an_empty_method_is_rejected(self):
+        bad = _rubric20_record(method="   ")
         self.assertTrue(self._errors(bad, "rubric20-semantic"))
 
     def test_a_missing_normalized_percentage_is_rejected(self):
@@ -272,11 +272,26 @@ class TestTheDenominators(unittest.TestCase):
 class TestTheMethodVocabulary(unittest.TestCase):
     """A hand-written subset rejected `claudecode_agent_core` for months."""
 
-    def test_both_schemas_enumerate_the_canonical_methods(self):
-        for name in SCHEMAS:
-            with self.subTest(schema=name):
-                self.assertEqual(_schema(name)["properties"]["method"].get("enum"),
-                                 list(METHODS))
+    def test_full_records_accept_declared_external_and_study_identities(self):
+        import jsonschema
+        for name, build in (("rubric10-semantic", _rubric10_record), ("rubric20-semantic", _rubric20_record)):
+            for project in ("EXTERNAL_CLINICAL", "VOICE_PEDIATRIC"):
+                for method in (*METHODS, "manual", "independent_pipeline"):
+                    with self.subTest(schema=name, project=project, method=method):
+                        record = build()
+                        record.update(project=project, method=method)
+                        jsonschema.Draft7Validator(_schema(name)).validate(record)
+
+    def test_identity_fields_reject_empty_or_non_string_values(self):
+        import jsonschema
+        for name, build in (("rubric10-semantic", _rubric10_record), ("rubric20-semantic", _rubric20_record)):
+            validator = jsonschema.Draft7Validator(_schema(name))
+            for key in ("project", "method"):
+                for value in ("", "   ", None, [], 42):
+                    with self.subTest(schema=name, field=key, value=value):
+                        record = build()
+                        record[key] = value
+                        self.assertTrue(list(validator.iter_errors(record)))
 
 
 class TestTheValidatorClassifies(unittest.TestCase):

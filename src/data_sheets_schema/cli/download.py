@@ -301,9 +301,12 @@ def audit_manifest(project, manifest):
 @click.option('--strict', is_flag=True,
               help='Exit non-zero if any record is about a related-but-'
                    'distinct dataset.')
+@click.option('--record', 'selected_records', multiple=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help='With --check and --project: check only these exact records (repeatable).')
 @click.option('--manifest', type=click.Path(exists=True), is_eager=True,
               default='data/preprocessed/source_manifest.yaml', show_default=True)
-def scope_cmd(project, do_check, strict, manifest):
+def scope_cmd(project, do_check, strict, selected_records, manifest):
     """What each project's record is about, and whether the records agree.
 
     Scope is a property of the dataset, not of the prompt (#422). The VOICE
@@ -312,6 +315,8 @@ def scope_cmd(project, do_check, strict, manifest):
     makes it checkable and makes every future dataset inherit the check
     instead of needing its own paragraph.
     """
+    if selected_records and (not do_check or not project):
+        raise click.UsageError("--record requires --check and --project")
     require_repo_context("d4d download scope")
     setup_repo_imports()
     from data_sheets_schema.scope import (all_scopes, check_manifest,
@@ -360,10 +365,10 @@ def scope_cmd(project, do_check, strict, manifest):
         # Core records too. Sweeping only `*_d4d.yaml` reported 16 records
         # where the corpus holds 32: a core record is a record, and the
         # pediatric identifiers appear in both halves of the pair.
-        records = sorted([*CONCAT_DIR.glob("*/*/*_d4d.yaml"),
-                          *CONCAT_DIR.glob("*/*/*_d4d_core.yaml")])
+        records = list(selected_records) if selected_records else sorted([
+            *CONCAT_DIR.glob("*/*/*_d4d.yaml"), *CONCAT_DIR.glob("*/*/*_d4d_core.yaml")])
         for rec in records:
-            name = rec.name.replace("_d4d_core.yaml", "").replace("_d4d.yaml", "")
+            name = project if selected_records else rec.name.replace("_d4d_core.yaml", "").replace("_d4d.yaml", "")
             if project and name != project:
                 continue
             if name not in scopes:
@@ -411,7 +416,7 @@ def scope_cmd(project, do_check, strict, manifest):
             click.echo("   (checked on the record's `id`; prose that discusses "
                        "a related dataset is legitimate and not inspected)")
 
-    if problems or (strict and bad):
+    if problems or (strict and (bad or (selected_records and unreadable))):
         sys.exit(1)
 
 

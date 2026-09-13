@@ -223,3 +223,78 @@ all requested generation arms and evaluation styles; the historical condition
 audit passes unchanged. Merge order remains generation, evaluation, existing
 profile PR #1436, then packaging. Preserve Claude's separate profile/packaging
 worktrees while their work continues.
+
+## Generation review round 14 — 2026-09-13
+
+Round 13 is green in full CI. Its independent review reproduced #1454:
+backfill could replace a selected chunk instrument with a discovered sidecar.
+The fix verifies and preserves the original bundle/chunk identity, retains
+recorded absence and refuses unverifiable evidence before writing. The
+manifest/replay lane passes 48 tests and provenance compatibility passes 88;
+see `reviews/pr_1367_round14_2026-09-13.md`. Revised-head CI and independent
+approval remain required before merge.
+
+Evaluation PR #1449 is addressing round-1 findings #1450–#1453 (new-output
+version downgrade, source-item criteria, format/MIME double counting, semantic
+score-band instructions), plus current hash-contract fixtures and instrument
+inventory. No new measurement is launched. The remaining work order stays
+evaluation, Claude's profile PR #1436, then packaging, with both generation
+arms, every evaluation style and historical preservation still in scope.
+
+## Generation review round 15 — 2026-09-13
+
+Round 14 reproduced #1456: replacing an existing provenance record loses
+runtime evidence even if its chunk attestation is preserved. Backfill now
+creates only missing records and keeps existing bytes unchanged. Exclusive
+publication prevents concurrent replacement and partial canonical records.
+Actual fake-provider generation tests preserve accounting, portable snapshots,
+receipt enforcement and completed resume. The final provenance lane passes
+105 tests and the receipt/recovery lane passes 96; see
+`reviews/pr_1367_round15_2026-09-13.md`. Full revised-head CI and independent
+approval still precede merge.
+
+Evaluation PR #1449 round 2 has finished: all prior measurement attributions
+and boundary hashes were independently confirmed. Remaining findings concern
+optional empty Dataset resources, Core collection schema detection, additional
+format/MIME aliases and two later semantic score-band instructions. These are
+being addressed before its next review. Claude's profile PR #1436 and packaging
+PR #1455 are committed; packaging's remaining complete-workflow acceptance is
+tracked in #1457. Keep the merge order and all prior measurement constraints.
+
+## Generation review round 16 — 2026-09-13
+
+Round 15 is green (3,957 passed, four skipped). Independent review found
+#1472 (incomplete chunk mappings accepted by the pre-provenance strict gate)
+and #1473 (a positive source-manifest header lost by missing-record backfill).
+Both are fixed, including paths containing “not used.” #1475 removes unsupported
+study-history assertions from new unverified external records. Final local
+receipt/recovery/rendering verification passes 81 tests; see the round-16
+review note. Exact-head CI and approval still precede merge.
+
+Evaluation PR #1449 round 3 resolves its input/alias/instruction findings and
+#1474: the reference-rescore harness must copy/pin its complete version-2
+validator, original input and definition and verify the registered context.
+The offline rescore workflow passes 166 tests, including both rubrics in real
+isolated validator subprocesses. The historical CBORG instrument remains
+archived and is audited separately. Claude continues profile PR #1436 and
+packaging PR #1455. Merge order, all arms/evaluation styles, preservation and
+the no-download/no-new-measurement boundary remain unchanged.
+
+## Generation review round 17 — 2026-09-13
+
+Round 16 found #1507: required agentic playbook reads/checks still used default
+inputs. Renderer 4 now carries the selected bundle/chunks/source declaration
+through every phase, limits scope checks to the current pair and records the
+artifact paths used in its instruction. Older renderer controls remain byte
+identical. The broad compatibility lane passes 139 tests; final replay checks
+pass 34. Round-16 CI's one historical unused-header regression is also fixed;
+3,971 tests passed with four skips. See the round-17 review note.
+
+Evaluation PR #1449 round 3 confirms all 21 boundary pins and 315 historical
+attributions. It found #1508 (standalone semantic validation must bind context
+to the caller) and #1509 (explicit Dataset declarations must survive valid
+resources). Both are being addressed before its next review. The local
+combined evaluation lane passed 816 tests, final controller checks 169 and
+inventory checks 12. Continue generation, evaluation, profile PR #1436, then
+packaging PR #1455; preserve both generation arms, all evaluation styles and
+all measured artifacts, with source downloads and new measurements deferred.

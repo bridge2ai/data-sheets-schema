@@ -362,7 +362,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     # than reporting `unverifiable`. Only when the caller says which condition
     # was rendered: guessing it would assert a condition the run may not have
     # used, which is the failure the gate exists to catch.
-    from data_sheets_schema.registry import AUTO, select_manifest
+    from data_sheets_schema.registry import AUTO, select_manifest, manifest_declared_unused
     requested = (None if (manifest and str(manifest).lower() == "none")
                  else Path(manifest) if manifest else AUTO)
     # The bundle the record will name: the one passed, else the one the
@@ -376,7 +376,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     header_bundle = h.get("Source bundle") or h.get("Source")
     resolved_bundle = input_bundle or header_bundle
     header_manifest = h.get("Source manifest", "").strip()
-    header_unused = "not used" in header_manifest.lower()
+    header_unused = manifest_declared_unused(header_manifest)
     if requested is AUTO and header_manifest and not header_unused:
         requested = Path(header_manifest)
     selected = (None if requested is AUTO and (resolved_bundle is None or header_unused)
@@ -531,7 +531,7 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     # selection belongs in the rendered recording command (#1408).
     chunk_choices = (None, Path(chunks)) if chunks else (None,)
     for delta, render_version, selected_chunks, selected_manifest in product(
-            (0, -1, 1, -2, 2), (3, 2, 1), chunk_choices, manifest_choices):
+            (0, -1, 1, -2, 2), (4, 3, 2, 1), chunk_choices, manifest_choices):
         spec = RunSpec.from_render_spec({
             "arm": _ARMS[arm][0], "bundle": str(bundle), "condition": condition,
             "runtime": runtime, "provider": provider,
@@ -1501,65 +1501,59 @@ def annotate_observed(project, method, label, run_observed, until, extend):
               help='Run labels whose input bytes are known unchanged; may repeat.')
 @click.option('--dry-run', is_flag=True)
 def backfill(verified, dry_run):
-    """Reconstruct provenance records for runs already on disk.
+    """Create missing provenance records for runs already on disk.
 
-    Refuses to run from anywhere but the repository root — see
-    _require_repo_root_cwd.
+    Existing records are kept byte-for-byte: reconstruction cannot recover
+    their runtime identities, accounting, prompt/phase evidence or receipt
+    expectations (#1456). Use the targeted annotation and recovery commands
+    to enrich an existing record under their individual evidence checks.
 
-    Fields that cannot be honestly recovered are listed under `unrecoverable`
-    rather than filled from present-day observation. Pass --verified-label for
-    runs whose inputs are known unchanged, so their input hashes can be
-    recorded.
+    Refuses to run from anywhere but the repository root. For a missing
+    record, fields that cannot honestly be recovered are listed under
+    `unrecoverable`. Pass --verified-label only for runs whose input bytes
+    are known unchanged, so their input hashes can be recorded.
     """
     _require_repo_root_cwd("d4d provenance backfill")
     from data_sheets_schema.provenance import build_record, record_path_for
     from data_sheets_schema.runs import discover
 
-    written = skipped = 0
+    written = proposed = kept = 0
     for run in discover():
         if run.is_core or run.deterministic:
             continue
         for project in run.projects:
-            is_verified = run.label in verified
-            # The condition claim of a reconstructed record comes from the
-            # prompt file the existing record hashed, never from a label a
-            # reconstruction cannot check (#1094 review, N2).
-            existing = record_path_for(project, run.method, run.label)
-            source_paths: list[str] = []
-            import yaml as _yaml
-            if existing.exists():
-                try:
-                    prompts = (_yaml.safe_load(existing.read_text(encoding="utf-8")) or {}).get("prompts") or {}
-                    source_paths = [f.get("path", "") if isinstance(f, dict) else str(f)
-                                    for f in (prompts.get("files") or prompts.get("paths") or [])]
-                except Exception:                              # noqa: BLE001
-                    source_paths = []
-            # A reconstruction keeps the manifest the existing record names —
-            # none where it recorded none (#1367 review, must-fix 2).
-            from data_sheets_schema.registry import AUTO as _AUTO
-            prior_manifest = _AUTO                  # no prior record: the rule decides from the bundle (#1384)
-            if existing.exists():
-                try:
-                    sm = ((_yaml.safe_load(existing.read_text(encoding="utf-8")) or {}).get("inputs") or {}).get("source_manifest")
-                    if isinstance(sm, dict) and "path" in sm:
-                        prior_manifest = Path(sm["path"]) if sm["path"] else None
-                except Exception:                              # noqa: BLE001
-                    pass
-            rec = build_record(project, run.method, run.label,
-                               mode="reconstructed", input_verified=is_verified,
-                               condition_source_paths=source_paths,
-                               manifest=prior_manifest)
             target = record_path_for(project, run.method, run.label)
+            if target.exists():
+                click.echo(f"  kept existing {target}")
+                kept += 1
+                continue
+            rec = build_record(project, run.method, run.label,
+                               mode="reconstructed", input_verified=run.label in verified)
             n_unrec = len(rec.data.get("unrecoverable") or [])
             if dry_run:
                 click.echo(f"  would write {target}  ({n_unrec} unrecoverable)")
-                skipped += 1
+                proposed += 1
             else:
-                rec.write(target)
+                # Publish a complete record only if the destination is still
+                # absent. A run can finish while reconstruction is in progress.
+                import os
+                import tempfile
+                target.parent.mkdir(parents=True, exist_ok=True)
+                with tempfile.TemporaryDirectory(prefix=".backfill-", dir=target.parent) as temporary:
+                    staged = Path(temporary) / target.name
+                    rec.write(staged)
+                    try:
+                        os.link(staged, target)
+                    except FileExistsError:
+                        click.echo(f"  kept existing {target}")
+                        kept += 1
+                        continue
+                from data_sheets_schema.schema_cache import forget
+                forget(target)
                 click.echo(f"  ✓ {target}  ({n_unrec} unrecoverable)")
                 written += 1
     click.echo(f"\n{'would write' if dry_run else 'wrote'} "
-               f"{skipped or written} record(s)")
+               f"{proposed if dry_run else written} record(s); kept {kept} existing record(s)")
 
 
 @provenance.command('reasoning')

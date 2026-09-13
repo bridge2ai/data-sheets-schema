@@ -68,7 +68,8 @@ def test_citation_applicability_is_consistent_between_table_and_question():
     assert not any("Publication identified" in line for line in rows)
     assert any("Datasets shared" in line and "Element 10 (all)" in line for line in rows)
     citation = text.split("2. **Citation and DOI for Cross-referencing**", 1)[1].split("3. **", 1)[0]
-    assert "exactly as for the other Element 10 sub-elements" in citation
+    assert "shared_dataset predicate" in citation
+    assert "Missing scoring fields never establish false" in citation
     assert "neither citation nor DOI earns 0" in citation
     text = (REPO / ".claude/agents/d4d-rubric20-semantic.md").read_text()
     assert not any("Q14" in line.split("|")[-2]
