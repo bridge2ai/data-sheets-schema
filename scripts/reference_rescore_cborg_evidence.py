@@ -8,14 +8,16 @@ not a registration or an authorization to execute another measurement.
 from __future__ import annotations
 
 import hashlib
+import builtins
 import importlib.util
 import json
 import os
+import sys
 from pathlib import Path
 
 PLAN = "notes/reference_rescore_2026-09-12_cborg_runtime"
 ARCHIVE = f"{PLAN}/registrations/measured_inputs_1381"
-PRESERVATION_SHA256 = "9894f0e42ce94d2e5d404c02b95dea10b0a91e62f39384d99c2d72860c05e901"
+PRESERVATION_SHA256 = "54a5f79b445ede200c4ed7111be281bb8d981ad92bf20fa1dc07466e69456f27"
 
 
 def _verified(path, expected):
@@ -38,13 +40,17 @@ class EvidenceRoot(os.PathLike):
         self.preservation = json.loads(_verified(
             self.root / ARCHIVE / "preservation.json", PRESERVATION_SHA256))
         record = self.preservation
-        _verified(self.root / PLAN / "manifest.json", record["manifest_sha256"])
+        manifest = json.loads(_verified(self.root / PLAN / "manifest.json", record["manifest_sha256"]))
         inventory = json.loads(_verified(self.root / PLAN / "measurement_file_hashes.json",
                                          record["measurement_index_sha256"]))["files"]
         self.paths = {}
         for relative, entry in record["files"].items():
             if inventory.get(relative) != entry["sha256"]:
                 raise ValueError(f"input archive differs from the original audit: {relative}")
+            self.paths[relative] = self._archived(entry)
+        for relative, entry in record["report_dependencies"].items():
+            if entry["source_revision"] != manifest["definition_commit"]:
+                raise ValueError("report dependency identifies another registered revision")
             self.paths[relative] = self._archived(entry)
         self.previous_definitions = {
             name: self._archived(entry) for name, entry in record["previous_definitions"].items()
@@ -66,11 +72,37 @@ class EvidenceRoot(os.PathLike):
     def __truediv__(self, relative):
         return self.paths.get(str(relative), self.root / relative)
 
-    def load_module(self, relative, name):
+    def load_module(self, relative, name, imports=None):
         """Load a verified historical helper without replacing public modules."""
-        spec = importlib.util.spec_from_file_location(name, self / relative)
+        entry = {**self.preservation["files"], **self.preservation["report_dependencies"]}[relative]
+        path = self.paths[relative]
+        raw = _verified(path, entry["sha256"])
+        # Dataclass processing needs a module registry entry. Use a private,
+        # checkout-specific name; never replace a live public module.
+        name = "_cborg_archive_" + hashlib.sha256(str(path).encode()).hexdigest()[:16] + "_" + name
+        spec = importlib.util.spec_from_file_location(name, path)
         module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        if imports:
+            ordinary_import = builtins.__import__
+
+            def frozen_import(name, globals=None, locals=None, fromlist=(), level=0):
+                if level == 0 and name in imports:
+                    return imports[name]
+                return ordinary_import(name, globals, locals, fromlist, level)
+
+            module.__dict__["__builtins__"] = {**vars(builtins), "__import__": frozen_import}
+        # Execute the checked source, never an unverified cached .pyc. This
+        # also makes the check and execution use exactly the same byte string.
+        previous = sys.modules.get(name)
+        sys.modules[name] = module
+        try:
+            exec(compile(raw, str(path), "exec"), module.__dict__)
+        except BaseException:
+            if previous is None:
+                sys.modules.pop(name, None)
+            else:
+                sys.modules[name] = previous
+            raise
         return module
 
     def agent_pin(self):

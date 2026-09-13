@@ -311,6 +311,42 @@ def test_original_output_cannot_be_replaced_by_an_archive(monkeypatch, reports_i
     assert files == before
 
 
+def test_archived_runner_does_not_import_live_pin_or_report_exports(monkeypatch, reports_in_memory):
+    import builtins
+    ordinary = builtins.__import__
+
+    def changed_api(name, *args, **kwargs):
+        if name in {"data_sheets_schema.agent_pin", "data_sheets_schema.semantic_comparison",
+                    "report_semantic_comparison"}:
+            raise ImportError("the live pin/reporting API has changed")
+        return ordinary(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", changed_api)
+    r = adapter.load_runner()
+    manifest = json.loads((PLAN / "manifest.json").read_bytes())
+    r.verify_frozen(manifest)
+    for instrument in manifest["instruments"].values():
+        assert r.spawn_preamble(instrument["agent"]) == instrument["preamble"]
+    assert adapter.main(["report"]) == 0
+
+
+def test_completed_audit_does_not_write_its_original_evidence(monkeypatch):
+    from reference_rescore_cborg_evidence import EvidenceRoot
+    evidence = EvidenceRoot(ROOT)
+    live = {ROOT / relative for relative in evidence.paths}
+    read = Path.read_bytes
+    monkeypatch.setattr(Path, "read_bytes", lambda p: b"changed live input" if p in live else read(p))
+
+    def refuse_write(*args, **kwargs):
+        raise AssertionError("completed audit tried to rewrite original evidence")
+
+    monkeypatch.setattr(Path, "write_bytes", refuse_write)
+    monkeypatch.setattr(Path, "write_text", refuse_write)
+    assert adapter.main(["audit"]) == 0
+    # Re-reading the registered condition must still work after audit.
+    batch.load_registered()
+
+
 @pytest.mark.parametrize("action", ["freeze", "canary", "remaining", "accept-canary", "--print"])
 def test_completed_public_cli_refuses_measurement_actions(action):
     with pytest.raises(SystemExit) as error:

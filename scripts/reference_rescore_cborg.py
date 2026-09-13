@@ -103,11 +103,15 @@ def load_runner():
     sys.path[:0] = [str(ROOT / "src"), str(ROOT / "scripts")]
     from reference_rescore_cborg_evidence import EvidenceRoot
     evidence = EvidenceRoot(ROOT)
-    runner = evidence.load_module("scripts/reference_rescore.py", "cborg_reference_runner")
-    runner.ROOT = evidence
     pin = evidence.agent_pin()
-    runner.spawn_preamble = pin.spawn_preamble
-    runner.verify_echo = pin.verify_echo
+    comparison = evidence.load_module("src/data_sheets_schema/semantic_comparison.py", "semantic_comparison")
+    imports = {"data_sheets_schema.agent_pin": pin,
+               "data_sheets_schema.semantic_comparison": comparison}
+    imports["report_semantic_comparison"] = evidence.load_module(
+        "scripts/report_semantic_comparison.py", "report_semantic_comparison", imports=imports)
+    runner = evidence.load_module("scripts/reference_rescore.py", "cborg_reference_runner",
+                                  imports=imports)
+    runner.ROOT = evidence
     runner.DATE = DATE
     runner.PLAN = ROOT / f"notes/reference_rescore_{DATE}"
     validate = runner.validate_candidate

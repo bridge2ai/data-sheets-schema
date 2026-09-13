@@ -98,7 +98,7 @@ def main():
     preserved = {}
     for mapping in (registration["preserved_files"], registration["existing_outputs"]):
         for rel, sha in mapping.items():
-            if r.digest(ROOT / rel) != sha:
+            if r.digest(r.ROOT / rel) != sha:
                 raise ValueError(f"pre-batch evidence changed: {rel}")
             preserved[rel] = sha
     for start in (r.PLAN / "manifest.json", r.PLAN / "batch_registration.json"):
@@ -107,7 +107,7 @@ def main():
         while "supersedes_registration" in current:
             prior = current["supersedes_registration"]
             rel, sha = prior["path"], prior["sha256"]
-            if rel in seen or r.digest(ROOT / rel) != sha:
+            if rel in seen or r.digest(r.ROOT / rel) != sha:
                 raise ValueError(f"invalid registration archive: {rel}")
             seen.add(rel)
             preserved[rel] = sha
@@ -132,7 +132,7 @@ def main():
     v9 = json.loads((generation / "v9_canary_review.json").read_bytes())
     pins = json.loads((generation / "v9_input_pins.json").read_bytes())["pinned_files"]
     for rel, sha in {**pins, **v9["artifact_sha256"]}.items():
-        if r.digest(ROOT / rel) != sha:
+        if r.digest(r.ROOT / rel) != sha:
             raise ValueError(f"v9 canary evidence changed: {rel}")
         preserved[rel] = sha
     for result_path in sorted((r.PLAN / "batch_runs").glob("*/result.json")):
@@ -152,7 +152,7 @@ def main():
             or archive_record["measured_scheduler_sha256"] != registration["scheduler_sha256"]):
         raise ValueError("post-measurement code archive identifies different measured bytes")
     for rel, sha in archive_record["preserved_before_repair"].items():
-        if r.digest(ROOT / rel) != sha:
+        if r.digest(r.ROOT / rel) != sha:
             raise ValueError(f"pre-repair evidence changed: {rel}")
         preserved[rel] = sha
     preserved[str(archive_record_path.relative_to(ROOT))] = r.digest(archive_record_path)
@@ -176,11 +176,10 @@ def main():
                   "v9_model_requests": v9["model_requests"],
                   "v9_catalogue_price_estimate_usd": v9["catalogue_price_estimate_usd"],
                   "cost_basis": "The known evaluation CLI subtotal includes priced excluded sessions and omits explicitly unpriced interruptions; total expenditure is unknown. Generation uses observed CBORG catalogue rates. Neither is a reconciled invoice; review-tool usage is outside these figures."})
-    r.write_json(r.PLAN / "completion_audit.json", audit)
-    r.write_json(r.PLAN / "final_written_output_audit.json", {
+    written_audit = {
         "verified_at": r.now(), "manifest_sha256": audit["manifest_sha256"], "accepted": len(written),
         "verification": "Every published rating and retained candidate matches the last successful original evaluator Write at its isolated output path.",
-        "model_calls_during_verification": 0, "ratings": written})
+        "model_calls_during_verification": 0, "ratings": written}
     measured_pins = r.measured_pinned_files(manifest)
     immutable = {**measured_pins, **manifest["prior_evaluations"], **preserved}
     for directory in (r.PLAN / "attempts", r.PLAN / "batch_runs"):
@@ -189,7 +188,7 @@ def main():
                 immutable[str(path.relative_to(ROOT))] = r.digest(path)
     for job in manifest["jobs"]:
         immutable[job["output"]] = r.digest(ROOT / job["output"])
-    r.write_json(r.PLAN / "measurement_file_hashes.json", {
+    measurement_inventory = {
         "verified_at": r.now(), "search_scope": "Filesystem walk includes ignored attempt and controller files.",
         "measured_code_archives": {
             "scripts/reference_rescore_cborg_batch.py": {
@@ -203,7 +202,24 @@ def main():
                 "basis": "Exact adapter bytes used for the completed measurements; the public command was subsequently repaired under #1356. The original manifest and receipts are unchanged.",
             }
         },
-        "files": immutable})
+        "files": immutable}
+    # This condition is complete. Re-audit the retained evidence without
+    # rewriting its originals or invalidating the pinned preservation index.
+    for name, current, timestamp in (
+        ("completion_audit.json", audit, "audited_at"),
+        ("final_written_output_audit.json", written_audit, "verified_at"),
+        ("measurement_file_hashes.json", measurement_inventory, "verified_at"),
+    ):
+        saved = json.loads((r.PLAN / name).read_bytes())
+        if name == "measurement_file_hashes.json":
+            # The original index's descriptive search_scope wording is not
+            # recomputed evidence. Compare its complete path/hash inventory.
+            equal = saved["files"] == current["files"] and saved["measured_code_archives"] == current["measured_code_archives"]
+        else:
+            equal = ({k: v for k, v in saved.items() if k != timestamp}
+                     == {k: v for k, v in current.items() if k != timestamp})
+        if not equal:
+            raise ValueError(f"completed audit differs from retained evidence: {name}")
     print(json.dumps({k: v for k, v in audit.items() if k not in ("ratings", "original_calls")}, indent=2))
 
 

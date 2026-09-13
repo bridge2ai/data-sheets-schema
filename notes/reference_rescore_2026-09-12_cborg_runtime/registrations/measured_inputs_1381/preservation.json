@@ -99,5 +99,19 @@
       "source": ".claude/agents/d4d-rubric20-semantic.md"
     }
   },
+  "report_dependencies": {
+    "scripts/report_semantic_comparison.py": {
+      "basis": "Reporting dependency from the registered definition commit; identical to the pre-repair report helper. Not an entry in the original measurement hash inventory.",
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/scripts/report_semantic_comparison.py",
+      "sha256": "6a084cd4a74d747b3640f6d592ebed4b9a9d748ea2ac05d0b7e581075a1dc16a",
+      "source_revision": "03cf94bf08f82e7399201c09140b32221e42c4dc"
+    },
+    "src/data_sheets_schema/semantic_comparison.py": {
+      "basis": "Reporting dependency from the registered definition commit; identical to the pre-repair report helper. Not an entry in the original measurement hash inventory.",
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/src/data_sheets_schema/semantic_comparison.py",
+      "sha256": "60630583f39209b3c509adf7e2e54d1345cb4f8b0a2b1a271a1c87b4f059f5d8",
+      "source_revision": "03cf94bf08f82e7399201c09140b32221e42c4dc"
+    }
+  },
   "source_revision": "ef13c5a3f0907953a94d68cec0cdc5889f4ffec0"
 }

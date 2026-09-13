@@ -55,3 +55,29 @@ This is a report-replay maintenance boundary, not a new scoring condition. The
 no record is rescored and no score changes. Tests must show identical report
 contents (apart from the reporting timestamp) despite live input changes, while rejecting archive and
 original-evidence tampering. No test skips or relaxed frozen hashes are used.
+
+## Prerequisite review round 1 and fixes
+
+PR #1396 preserves the measured inputs required to unblock #1367. The Codex
+plugin reviewed public commit `955f57e97` and found three concrete defects:
+completed audit rewrote the inventory it must preserve; its v9 check still
+read live source inputs; and replay imported live pin/reporting dependencies.
+The first two are tracked in #1397 and the dependency defects in #1398.
+
+The audit now recomputes all session, original-Write and inventory facts and
+compares them with the originals, writing no evidence files. Input checks use
+the preserved paths. The runner and pin/reporting imports execute verified
+source bytes in private modules; public modules and bytecode caches cannot
+replace the measured helpers. The two reporting dependencies are copied from
+Git revision `03cf94bf08f82e7399201c09140b32221e42c4dc`, which the registration
+names, and are identical to the prior reporting code. They have a separately
+identified section in the preservation record because the original audit did
+not list them. The original 981-file inventory is unchanged.
+
+Round-2 local validation: 92 targeted tests pass, including the complete
+read-only audit after simulated evolution of every archived live input,
+refused imports of all three live pin/report helper modules, original
+check-echo reconstruction, and tampering/publication rollback tests. An actual
+offline audit also reproduced all retained facts, including 56 accepted
+ratings and six recorded v9 requests, without starting a measurement.
+Independent review and CI must still pass on the final head before merge.
