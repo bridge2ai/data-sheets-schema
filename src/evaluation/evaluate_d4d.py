@@ -85,7 +85,7 @@ def validate_d4d_yaml(file_path: Path, method: str = "") -> bool:
         with open(file_path, "r", encoding="utf-8-sig") as fh:
             top = yaml.safe_load(fh)
         document = unwrap_document(top)
-        dataset_units(document)  # reject empty or malformed collections
+        units = dataset_units(document)  # reject malformed resource lists
         wrappers = {"Dataset", "CoreDataset", "DatasetCollection", "CoreDatasetCollection"} & set(top)
         if wrappers:
             class_name = next(iter(wrappers))
@@ -96,9 +96,13 @@ def validate_d4d_yaml(file_path: Path, method: str = "") -> bool:
             match = re.search(r"(?:^|[/#:])(CoreDataset(?:Collection)?|Dataset(?:Collection)?)$", declared)
             if match:
                 class_name = match.group(1)
-            elif "distributions" in document:
+            elif "distributions" in document or any(
+                    "distributions" in unit or re.search(
+                        r"(?:^|[/#:])CoreDataset(?:Collection)?$",
+                        str(unit.get("conforms_to_class", "")))
+                    for _, unit in units):
                 class_name = "CoreDataset"
-            if "resources" in document:
+            if document.get("resources"):
                 class_name = "CoreDatasetCollection" if class_name.startswith("Core") else "DatasetCollection"
             schema_file = (_METHOD_SCHEMA["claudecode_agent_core"][0]
                            if class_name.startswith("Core") else _DEFAULT_SCHEMA[0])
@@ -431,6 +435,13 @@ class D4DEvaluator:
         aliases = {"text/csv": "csv", "text/tab-separated-values": "tsv",
                    "application/json": "json", "application/ld+json": "jsonld",
                    "application/xml": "xml", "text/xml": "xml",
+                   "application/yaml": "yaml", "text/yaml": "yaml", "text/html": "html",
+                   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+                   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+                   "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx",
+                   "text/markdown": "md", "application/zip": "zip",
+                   "application/x-tar": "tar", "application/gzip": "gz",
+                   "application/x-bzip2": "bz2", "application/x-xz": "xz",
                    "text/plain": "txt", "image/png": "png", "image/jpeg": "jpeg",
                    "jpg": "jpeg", "image/tiff": "tiff", "tif": "tiff",
                    "application/pdf": "pdf", "application/dicom": "dicom"}

@@ -30,6 +30,48 @@ def valid_record(number=10):
     return doc
 
 
+def current_record(input_path, number=10):
+    """A complete version-2 fake rating for the actual isolated input."""
+    import yaml
+    from data_sheets_schema.evaluation_context import context_digest, load_document
+    from data_sheets_schema.judge_contract import evaluation_contract
+    document, input_sha = load_document(input_path)
+    raw = (REAL_ROOT / f"data/rubric/rubric{number}.txt").read_bytes()
+    contract = evaluation_contract(f"rubric{number}", yaml.safe_load(raw), {}, document)
+    doc = valid_record(number)
+    doc.update(version="2.0", applicability_context=contract["context"], evaluation_scope=contract["scope"])
+    doc["metadata"] = {"context_sha256": context_digest(contract["context"]), "input_sha256": input_sha}
+    total = adjusted = excluded = 0
+    for group in doc["elements" if number == 10 else "categories"]:
+        points = cap = fixed = 0
+        for index, item in enumerate(group["sub_elements" if number == 10 else "questions"], 1):
+            key = f"E{group['id']}.{index}" if number == 10 else f"Q{item['id']}"
+            rule = contract["items"][key]
+            score = rule["fixed_max_score"] if rule["applicable"] else None
+            item.update(name=rule["name"], applicable=rule["applicable"], applicability_status=rule["status"],
+                        applicability_evidence=rule["evidence"], score=score,
+                        unit_scores=[{"path": unit["path"], "score": score, "evidence": "Synthetic test evidence"}
+                                     for unit in contract["scope"]["units"]])
+            if number == 10:
+                item["item_id"] = key
+            else:
+                item["max_score"] = rule["fixed_max_score"]
+            points += score or 0
+            cap += rule["max_score"]
+            fixed += rule["fixed_max_score"]
+            excluded += not rule["applicable"]
+        group.update({"element_score": points, "element_max": cap} if number == 10 else
+                     {"category_score": points, "category_max": fixed})
+        total += points
+        adjusted += cap
+    maximum = 50 if number == 10 else 88
+    doc["overall_score"].update(total_points=total, adjusted_max_points=adjusted,
+        excluded_max_points=maximum-adjusted, normalized_percentage=100 * total / adjusted,
+        fixed_percentage=100 * total / maximum,
+        **{"sub_elements_not_applicable" if number == 10 else "questions_not_applicable": excluded})
+    return doc
+
+
 def test_registered_cohort_and_repeats_are_exact():
     jobs = runner.cohort_jobs()
     assert len(jobs) == 56 and len({j["id"] for j in jobs}) == 56
@@ -72,15 +114,15 @@ def events(doc, validator_success=True):
         {"type": "assistant", "message": {"model": "claude-opus-5", "content": [
             {"type": "text", "text": "verified current definition"},
             {"type": "tool_use", "name": "Bash", "id": "validate", "input": {
-                "command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic"}}]}},
+                "command": f"poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric {doc['rubric']} --input input/record.yaml --agent-definition .claude/agents/d4d-{doc['rubric']}.md"}}]}},
         {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "validate",
-            "is_error": not validator_success, "content": "VALID output_evaluation.json: rubric10-semantic"}]}},
+            "is_error": not validator_success, "content": f"VALID output_evaluation.json: {doc['rubric']}"}]}},
         {"type": "result", "subtype": "success", "is_error": False},
     ]
 
 
 @pytest.fixture
-def environment(tmp_path, monkeypatch):
+def environment(tmp_path, monkeypatch, request):
     monkeypatch.setattr(runner, "ROOT", tmp_path)
     monkeypatch.setattr(runner, "PLAN", tmp_path / "plan")
     temporary = tmp_path / "temporary"
@@ -93,12 +135,13 @@ def environment(tmp_path, monkeypatch):
             raise ValueError("stale echo")
 
     monkeypatch.setattr(runner, "verify_echo", echo)
-    job = copy.deepcopy(runner.cohort_jobs()[0])
+    number = getattr(request, "param", 10)
+    job = copy.deepcopy(next(j for j in runner.cohort_jobs() if j["rubric"] == f"rubric{number}-semantic"))
     (tmp_path / job["input"]).parent.mkdir(parents=True)
     (tmp_path / job["input"]).write_text("id: example\n")
     paths = ["scripts/validate_evaluation_schema.py", "scripts/reference_rescore.py", "pyproject.toml", "poetry.lock",
-             ".claude/agents/d4d-rubric10-semantic.md", "data/rubric/rubric10.txt",
-             "src/download/prompts/rubric10_semantic_schema.json"]
+             f".claude/agents/d4d-rubric{number}-semantic.md", f"data/rubric/rubric{number}.txt",
+             f"src/download/prompts/rubric{number}_semantic_schema.json", *runner.INSTRUMENT_SUPPORT]
     for path in paths:
         dest = tmp_path / path
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -113,14 +156,15 @@ def environment(tmp_path, monkeypatch):
                 "pinned_files": {p: runner.digest(tmp_path / p) for p in paths + [job["input"]]},
                 "prior_evaluations": {"prior_evaluation.json": runner.digest(prior)}}
     runner.write_json(runner.PLAN / "manifest.json", manifest)
-    doc = valid_record()
+    doc = current_record(tmp_path / job["input"], number)
     doc.update({k: job[k] for k in ("rubric", "project", "method", "label")})
     doc["d4d_file"] = job["input"]
     doc["model"] = {"name": "claude-opus-5", "evaluator_model": "claude-opus-5",
                     "temperature": None, "evaluation_type": "semantic_llm_judge"}
-    doc["metadata"] = {"instrument_sha256": instrument["definition_sha256"],
-                       "instrument_kind": "agent_definition", "rubric_hash": manifest["pinned_files"][instrument["rubric"]],
-                       "input_sha256": manifest["pinned_files"][job["input"]]}
+    doc["metadata"].update(instrument_sha256=instrument["definition_sha256"],
+                           instrument_kind="agent_definition",
+                           rubric_sha256=manifest["pinned_files"][instrument["rubric"]],
+                           input_sha256=manifest["pinned_files"][job["input"]])
     return tmp_path, manifest, job, doc
 
 
@@ -162,7 +206,7 @@ def test_equivalent_own_file_validator_paths_attest_the_rating(environment, scri
     root, manifest, job, doc = environment
     trace = events(doc)
     trace[0]["message"]["content"][1]["input"]["command"] = (
-        f"poetry run python {script} --file {output} --rubric rubric10-semantic")
+        f"poetry run python {script} --file {output} --rubric rubric10-semantic --input input/record.yaml --agent-definition .claude/agents/d4d-rubric10-semantic.md")
     trace.insert(0, {"type": "system", "subtype": "init", "cwd": "__ISOLATED__"})
     cli = fake_cli(root / "fake-claude", doc, trace, run_validator=True)
     receipt = runner.run_job(manifest, job, cli)
@@ -177,7 +221,7 @@ def test_symlinked_temporary_root_grants_the_runtime_canonical_validator_path(en
     trace = events(doc)
     trace[0]["message"]["content"][1]["input"]["command"] = (
         "poetry run python __ISOLATED__/scripts/validate_evaluation_schema.py "
-        "--file __ISOLATED__/output_evaluation.json --rubric rubric10-semantic")
+        "--file __ISOLATED__/output_evaluation.json --rubric rubric10-semantic --input input/record.yaml --agent-definition .claude/agents/d4d-rubric10-semantic.md")
     trace.insert(0, {"type": "system", "subtype": "init", "cwd": "__ISOLATED__"})
     cli = fake_cli(root / "fake-claude", doc, trace, run_validator=True, check_validator_permissions=True)
     receipt = runner.run_job(manifest, job, cli)
@@ -192,7 +236,7 @@ def test_symlinked_temporary_root_grants_the_runtime_canonical_validator_path(en
 def test_validator_receipt_must_name_the_exact_command_output(command_output, receipt_output):
     trace = events(valid_record())
     trace[0]["message"]["content"][1]["input"]["command"] = (
-        f"poetry run python scripts/validate_evaluation_schema.py --file {command_output} --rubric rubric10-semantic")
+        f"poetry run python scripts/validate_evaluation_schema.py --file {command_output} --rubric rubric10-semantic --input input/record.yaml --agent-definition .claude/agents/d4d-rubric10-semantic.md")
     trace[1]["message"]["content"][0]["content"] = f"VALID {receipt_output}: rubric10-semantic"
     trace.insert(0, {"type": "system", "subtype": "init", "cwd": "/isolated"})
     assert not runner.evaluator_validated(trace, "rubric10-semantic")
@@ -222,7 +266,7 @@ def test_validation_must_follow_the_last_potential_mutation(timing, revalidate):
 
 def denied_command_trace():
     trace = events(valid_record())
-    args = {"command": 'poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic > /dev/null; echo "EXIT=$?"',
+    args = {"command": 'poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic --input input/record.yaml --agent-definition .claude/agents/d4d-rubric10-semantic.md > /dev/null; echo "EXIT=$?"',
             "description": "Confirm validator exit status"}
     denial = [
         {"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Bash",
@@ -363,7 +407,7 @@ def test_later_executed_validator_failure_requires_new_success(error, revalidate
 def test_proven_denial_of_exact_validator_preserves_prior_success():
     trace = denied_command_trace()
     args = trace[2]["message"]["content"][0]["input"]
-    args["command"] = "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic"
+    args["command"] = "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic --input input/record.yaml --agent-definition .claude/agents/d4d-rubric10-semantic.md"
     trace[-1]["permission_denials"][0]["tool_input"] = copy.deepcopy(args)
     assert runner.evaluator_validated(trace, "rubric10-semantic")
     assert not runner.evaluator_validated(trace[2:], "rubric10-semantic")
@@ -392,13 +436,13 @@ def test_delayed_validation_cannot_restore_revoked_attestation(error, batched, f
 
 
 @pytest.mark.parametrize("command", [
-    "poetry run python /other/scripts/validate_evaluation_schema.py --file /isolated/output_evaluation.json --rubric rubric10-semantic",
-    "poetry run python /isolated/scripts/validate_evaluation_schema.py --file /other/output_evaluation.json --rubric rubric10-semantic",
+    "poetry run python /other/scripts/validate_evaluation_schema.py --file /isolated/output_evaluation.json --rubric rubric10-semantic --input input/record.yaml --agent-definition .claude/agents/d4d-rubric10-semantic.md",
+    "poetry run python /isolated/scripts/validate_evaluation_schema.py --file /other/output_evaluation.json --rubric rubric10-semantic --input input/record.yaml --agent-definition .claude/agents/d4d-rubric10-semantic.md",
     "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
-    'poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo "EXIT=$?"',
-    "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic > /tmp/other",
-    "poetry run python /isolated/$UNTRUSTED/../scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
-    "poetry run python 'scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
+    'poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic --input input/record.yaml --agent-definition .claude/agents/d4d-rubric10-semantic.md; echo "EXIT=$?"',
+    "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic --input input/record.yaml --agent-definition .claude/agents/d4d-rubric10-semantic.md > /tmp/other",
+    "poetry run python /isolated/$UNTRUSTED/../scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic --input input/record.yaml --agent-definition .claude/agents/d4d-rubric10-semantic.md",
+    "poetry run python 'scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic --input input/record.yaml --agent-definition .claude/agents/d4d-rubric10-semantic.md",
     None,
 ])
 def test_other_files_or_extra_shell_commands_do_not_attest_validation(command):
@@ -412,7 +456,7 @@ def test_absolute_validator_needs_a_unique_recorded_working_directory():
     trace = events(valid_record())
     trace[0]["message"]["content"][1]["input"]["command"] = (
         "poetry run python /isolated/scripts/validate_evaluation_schema.py "
-        "--file /isolated/output_evaluation.json --rubric rubric10-semantic")
+        "--file /isolated/output_evaluation.json --rubric rubric10-semantic --input input/record.yaml --agent-definition .claude/agents/d4d-rubric10-semantic.md")
     assert not runner.evaluator_validated(trace, "rubric10-semantic")
     trace[:0] = [{"type": "system", "subtype": "init", "cwd": p} for p in ("/isolated", "/other")]
     assert not runner.evaluator_validated(trace, "rubric10-semantic")
@@ -448,13 +492,14 @@ def test_missing_or_conflicting_labels_never_publish_a_rating(environment, defec
 def test_exact_poetry_validator_command_runs_in_isolated_environment(environment):
     import os
     import subprocess
-    root, _, _, doc = environment
+    root, _, job, doc = environment
     (root / "output_evaluation.json").write_text(json.dumps(doc))
     env = {**os.environ, "VIRTUAL_ENV": sys.prefix,
            "PATH": str(Path(sys.executable).parent) + os.pathsep + os.environ.get("PATH", "")}
     env.pop("CONDA_DEFAULT_ENV", None)
     done = subprocess.run(["poetry", "run", "python", "scripts/validate_evaluation_schema.py",
-                           "--file", "output_evaluation.json", "--rubric", "rubric10-semantic"],
+                           "--file", "output_evaluation.json", "--rubric", "rubric10-semantic",
+                           "--input", job["input"], "--agent-definition", ".claude/agents/d4d-rubric10-semantic.md"],
                           cwd=root, env=env, text=True, capture_output=True)
     assert done.returncode == 0, done.stdout + done.stderr
     assert "VALID output_evaluation.json: rubric10-semantic" in done.stdout
@@ -976,7 +1021,7 @@ def test_unattested_or_misidentified_candidate_is_retained_but_not_published(env
     elif defect == "kind":
         doc["metadata"]["instrument_kind"] = "api_system_prompt"
     elif defect == "rubric":
-        doc["metadata"]["rubric_hash"] = "0" * 64
+        doc["metadata"]["rubric_sha256"] = "0" * 64
     else:
         doc["model"]["temperature"] = 0.0
     cli = fake_cli(root / "fake-claude", doc, trace)
@@ -1007,6 +1052,8 @@ def test_existing_output_without_receipt_or_with_changed_bytes_cannot_resume(env
 def test_repeatability_report_separates_repeated_ratings_from_generation_records(
         environment, monkeypatch, rating_count, changed_applicability):
     root, manifest, job, doc = environment
+    doc = valid_record()
+    doc["project"] = job["project"]
     monkeypatch.syspath_prepend(str(REAL_ROOT / "scripts"))
     jobs = []
     for rating in (1, 2, 3):
@@ -1046,6 +1093,8 @@ def test_repeatability_report_separates_repeated_ratings_from_generation_records
 @pytest.mark.parametrize("different_scores", [False, True])
 def test_repeatability_ignores_serialized_percentage_precision(environment, monkeypatch, different_scores):
     root, manifest, job, doc = environment
+    doc = valid_record()
+    doc["project"] = job["project"]
     monkeypatch.syspath_prepend(str(REAL_ROOT / "scripts"))
     jobs = [{**job, "id": f"rating{rating}", "rating": rating,
              "purpose": "primary" if rating == 1 else "repeatability", "output": f"rating{rating}.json"}
@@ -1102,3 +1151,66 @@ def test_primary_rubric20_derives_both_percentage_bases(environment, monkeypatch
     assert primary["fixed_percentages"] == pytest.approx([100 * 83 / 88])
     assert primary["adjusted_percentages"] == [100.0]  # Five N/A points: 83/83, not 83/88.
     assert runner.digest(root / job["output"]) == preserved
+
+
+@pytest.mark.parametrize("environment", [10, 20], indirect=True)
+def test_both_v2_rubrics_validate_with_the_complete_isolated_instrument(environment, monkeypatch):
+    root, manifest, job, doc = environment
+    poison = root / "ambient"
+    (poison / "data_sheets_schema").mkdir(parents=True)
+    (poison / "data_sheets_schema/semantic_scope.py").write_text("raise RuntimeError('ambient instrument used')\n")
+    monkeypatch.setenv("PYTHONPATH", str(poison))
+    trace = events(doc)
+    trace.insert(0, {"type": "system", "subtype": "init", "cwd": "__ISOLATED__"})
+    cli = fake_cli(root / "fake-claude", doc, trace, run_validator=True)
+    receipt = runner.run_job(manifest, job, cli)
+    assert receipt["status"] == "passed", receipt
+    assert json.loads((root / job["output"]).read_bytes()) == doc
+
+
+@pytest.mark.parametrize("missing", runner.INSTRUMENT_SUPPORT)
+def test_unpinned_validator_support_is_refused_before_spending(environment, missing):
+    root, manifest, job, doc = environment
+    del manifest["pinned_files"][missing]
+    with pytest.raises(ValueError, match="complete version-2"):
+        runner.run_job(manifest, job, "must-never-run")
+    assert not (runner.PLAN / "attempts").exists()
+
+
+@pytest.mark.parametrize("defect", ["old-command", "other-input", "other-definition"])
+def test_validation_must_attest_the_current_input_and_definition(defect):
+    trace = events(valid_record())
+    block = trace[0]["message"]["content"][1]["input"]
+    if defect == "old-command":
+        block["command"] = block["command"].split(" --input")[0]
+    elif defect == "other-input":
+        block["command"] = block["command"].replace("input/record.yaml", "input/other.yaml")
+    else:
+        block["command"] = block["command"].replace("d4d-rubric10-semantic.md", "other.md")
+    assert not runner.evaluator_validated(trace, "rubric10-semantic")
+
+
+def test_controller_uses_its_own_check_echo_helper_before_an_ambient_checkout(environment):
+    import os
+    import subprocess
+    root, manifest, job, doc = environment
+    local = root / "src/data_sheets_schema/agent_pin.py"
+    shutil.copyfile(REAL_ROOT / "src/data_sheets_schema/agent_pin.py", local)
+    poison = root / "ambient"
+    (poison / "data_sheets_schema").mkdir(parents=True)
+    (poison / "data_sheets_schema/agent_pin.py").write_text("raise RuntimeError('ambient check-echo used')\n")
+    done = subprocess.run([sys.executable, str(root / "scripts/reference_rescore.py"), "--help"],
+                          cwd=root, env={**os.environ, "PYTHONPATH": str(poison)}, text=True, capture_output=True)
+    assert done.returncode == 0, done.stdout + done.stderr
+
+
+def test_evaluator_cannot_replace_the_registered_context(environment):
+    from data_sheets_schema.evaluation_context import context_digest, normalize_context
+    root, manifest, job, doc = environment
+    doc["applicability_context"] = normalize_context({"human_subjects": True})
+    doc["metadata"]["context_sha256"] = context_digest(doc["applicability_context"])
+    cli = fake_cli(root / "fake-claude", doc, events(doc))
+    receipt = runner.run_job(manifest, job, cli)
+    assert receipt["status"] == "incomplete"
+    assert "registered version-2 applicability context" in receipt["error"]
+    assert not (root / job["output"]).exists()

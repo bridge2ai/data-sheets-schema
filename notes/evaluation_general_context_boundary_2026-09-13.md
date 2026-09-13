@@ -68,7 +68,7 @@ instrument digest and the actual expanded API system-prompt digests.
 | `d4d-rubric10.md` | `031118e9121ade1c7fad246663ccf24eb02fb5d383ed426971b448912e48a5f7` |
 | `d4d-rubric20.md` | `2b11d1b903a07bac5f2cd23f639b36dd05a3f6ad4554df9effc83abdfbadc31b` |
 | `d4d-rubric10-semantic.md` | `b1dd37d24b271ee8c69adb37cff1204d161bbf04b0b2c0a36a6855bf7e8c87ea` |
-| `d4d-rubric20-semantic.md` | `8d164cd5c8d3eb3baca972c8fcc802d7316d53cdd198d81af0f1d92c72dacefc` |
+| `d4d-rubric20-semantic.md` | `8aa735fb746df6b425d034a9db399705445783f81e3947e309c752739a93ca6a` |
 
 The earlier completed CBORG condition remains bound to its original schemas,
 rubrics, definitions and helper bytes by merged PR #1396. Its read-only audit
@@ -100,10 +100,15 @@ remain required before merge.
 
 ## Independent review corrections
 
-Round 1 of PR #1449 found #1450–#1453. The revised contract blocks a version
-downgrade in the new-output validator, audits every rubric10 source item in
-both definitions, counts equivalent format/MIME labels once, and removes
-unsupported semantic rubric20 score bands. See
-`reviews/pr_1449_round2_2026-09-13.md` for source-scope decisions and tests.
-The current boundary hashes include these corrections. No model has used this
-new instrument in this work.
+Round 3 finishes the optional Dataset-resources, Core-collection inference,
+complete format/MIME and semantic 0/3/5 guidance corrections. It also upgrades
+the live reference-rescore controller to pin/copy the version-2 validator and
+support modules, check the registered context, and validate the original input
+and definition in both isolated sessions and offline recovery (#1474).
+The controller and validator select their own source helpers before ambient
+checkouts; the check-echo helper is itself pinned. All 21 boundary files are
+hashed in the adjacent JSON. The completed CBORG condition continues using
+its archived instrument; its preservation audit passes with 56 accepted
+ratings and 450 unchanged preservation hashes. The combined offline lane
+passes 816 tests; see `reviews/pr_1449_round3_2026-09-13.md` for later focused
+verification. No new measurement is registered or performed here.

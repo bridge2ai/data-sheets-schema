@@ -64,7 +64,7 @@ in other jurisdictions.
 
 Read the provided D4D YAML file and perform a **semantic quality assessment** that goes beyond simple quality checks to include correctness validation, consistency checking, and deep semantic understanding across 20 evaluation questions organized into 4 categories. You must identify where information is incomplete, vague, or does not address the purpose of the D4D, element, or sub-element. For each question, provide:
 
-1. **Score** - Either numeric (0-5 scale) or pass/fail depending on question type
+1. **Score** - Either numeric (0/3/5 scale) or pass/fail depending on question type
 2. **Score label** - Description of the quality level achieved
 3. **Evidence** - Specific quotes or field references from the D4D file
 4. **Quality assessment** - Brief explanation of scoring rationale
@@ -165,7 +165,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `id`, `title`, `description`, `keywords`, `license_and_use_terms`, `doi`, `page`, `creators`, `purposes`, `instances`, `resources`, `parent_datasets`, `variables`, `regulatory_restrictions.confidentiality_level`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** ≤40% fields populated
 - **3:** ≈70% fields populated
 - **5:** ≥90% fields populated
@@ -181,7 +181,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `description`, `purposes`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** <50 chars
 - **3:** 50–200 chars
 - **5:** >200 chars
@@ -197,7 +197,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `keywords`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** <3 keywords
 - **3:** 3–7 keywords
 - **5:** ≥8 keywords
@@ -213,7 +213,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `distribution_formats`, `file_collections`, `total_file_count`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** 1 file type only
 - **3:** 2–3 file types
 - **5:** >3 file types
@@ -261,7 +261,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `funders`, `creators`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** No funding data
 - **3:** Funding agency or creator info but missing grants/affiliations
 - **5:** Funders with grants + creators with affiliations
@@ -277,7 +277,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `ethical_reviews`, `human_subject_research`, `is_deidentified`, `participant_privacy`, `participant_privacy.reidentification_risk`, `participant_compensation`, `at_risk_populations`, `informed_consent`, `data_protection_impacts`, `regulatory_restrictions.hipaa_compliant`, `regulatory_restrictions.other_compliance`, `regulatory_restrictions.governance_committee_contact`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** No ethics fields present
 - **3:** Basic ethics (IRB + deidentification)
 - **5:** Comprehensive (all human subjects protections and data protection impacts documented)
@@ -293,7 +293,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `license_and_use_terms`, `ip_restrictions`, `regulatory_restrictions`, `regulatory_restrictions.confidentiality_level`, `data_protection_impacts`, `regulatory_restrictions.governance_committee_contact`, `regulatory_restrictions.hipaa_compliant`, `regulatory_restrictions.other_compliance`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** No license or access info
 - **3:** License only
 - **5:** License + restrictions + confidentiality classification
@@ -309,7 +309,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `distribution_formats`, `conforms_to_schema`, `file_collections.compression`, `conforms_to`, `external_resources`, `related_datasets`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** Non-standard or unspecified format
 - **3:** Standard format but no schema reference
 - **5:** Standard formats + schema/ontology compliance + integration capability
@@ -327,7 +327,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`, `machine_annotation_tools`, `annotation_analyses`, `imputation_protocols`, `missing_data_documentation`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** No software tools documented
 - **3:** At least one strategy or tool listed
 - **5:** Comprehensive strategies with software versions/URLs
@@ -343,7 +343,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `acquisition_methods`, `collection_mechanisms`, `data_collectors`, `collection_timeframes`, `raw_data_sources`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** No collection description
 - **3:** Partial description (e.g., mechanism only)
 - **5:** Full collection protocol with methods, collectors, and timeframes
@@ -359,7 +359,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `version`, `version_access`, `errata`, `updates`, `maintainers`, `doi`, `publisher`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** Single version only, no sustainability plan
 - **3:** Version number + basic access info + persistent ID
 - **5:** Comprehensive versioning + full sustainability documentation (governance + repository + commitment)
@@ -375,7 +375,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `citation`, `external_resources`, `doi`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** No publication, external resource or dataset citation is documented.
 - **3:** At least one distinct citation or external resource is documented, but the 5-point condition is not met.
 - **5:** At least two distinct references are documented and a formal citation for this dataset is present.
@@ -391,7 +391,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `instances`, `subpopulations`, `subsets.is_data_split`, `subsets.is_subpopulation`, `at_risk_populations`, `missing_data_documentation`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** No human subject information
 - **3:** General human data without subgroup description
 - **5:** Detailed demographics and inclusion/exclusion criteria
@@ -424,7 +424,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `distribution_formats`, `license_and_use_terms`, `download_url`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** Unclear access method
 - **3:** Partially described access mechanism
 - **5:** Fully defined access path (platform, login, policy)
@@ -440,7 +440,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `license_and_use_terms`, `intended_uses`, `prohibited_uses`, `discouraged_uses`, `future_use_impacts`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** No license or use guidance
 - **3:** License + basic use guidance
 - **5:** License + comprehensive use guidance + social impact analysis with mitigation strategies
@@ -456,7 +456,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `version_access`, `errata`, `updates`, `was_derived_from`, `parent_datasets`, `missing_data_documentation`, `subsets.is_data_split`, `splits`, `raw_data_sources`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** No provenance metadata
 - **3:** Version history (version numbers, errata, updates) but no full provenance graph
 - **5:** Full provenance graph with entity-activity-agent relationships, processing lineage, and derivation paths
@@ -472,7 +472,7 @@ direct API and conversational quality judges' numeric scale.
 
 **Fields:** `known_biases`, `future_use_impacts`
 
-**Scoring (numeric 0-5):**
+**Scoring (numeric 0/3/5):**
 - **0:** No bias documentation
 - **3:** Basic bias identification without taxonomy
 - **5:** Comprehensive bias categorization using standard taxonomy (AIO/CROISSANT RAI) + fairness analysis
@@ -648,7 +648,7 @@ When evaluating **multiple D4D files** (batch mode), generate a comprehensive su
 ```yaml
 id: rubric20_semantic_evaluation_<timestamp>
 rubric_type: rubric20
-rubric_description: "20-question detailed rubric with semantic analysis: 4 categories (Structural Completeness, Metadata Quality, Technical Documentation, FAIRness), 0-5 scoring + pass/fail, maximum 88 points, enhanced with correctness validation, consistency checking, and semantic understanding"
+rubric_description: "20-question detailed rubric with semantic analysis: 4 categories (Structural Completeness, Metadata Quality, Technical Documentation, FAIRness), 0/3/5 scoring + pass/fail, maximum 88 points, enhanced with correctness validation, consistency checking, and semantic understanding"
 total_files_evaluated: 8
 evaluation_date: "<ISO 8601 date>"
 
@@ -827,7 +827,7 @@ semantic_analysis_summary:
 ## Scoring Summary
 
 **Score resolution (#1062, #1232):** Numeric questions receive an integer
-from 0 through 5, using the question's stated bands; Q14 uses only 0, 3 or 5.
+chosen from only 0, 3 or 5, using each question's stated anchors, including Q14.
 Pass/fail questions receive 0 or 1. No half-points or other fractions are
 allowed. N/A remains null, never a fractional or zero substitute. Per-record
 question sums, category sums and total points are integers. Means over
@@ -866,7 +866,7 @@ Same-project comparisons must name the item identities whose applicability diffe
 
 3. **Context-Aware:** Some questions apply only to specific dataset and program types (see "Applies to" field in questions).
 
-4. **Graduated Scoring:** Use the full 0-5 range for numeric questions based on quality levels.
+4. **Discrete Scoring:** Use only 0, 3 or 5 for numeric questions, following the stated anchors without interpolation.
 
 5. **Actionable Recommendations:** Provide specific, implementable improvement suggestions.
 
@@ -879,7 +879,7 @@ Same-project comparisons must name the item identities whose applicability diffe
 **Agent:**
 1. Reads the D4D YAML file
 2. Assesses each of the 20 questions across 4 categories
-3. Assigns quality-based scores (0-5 or pass/fail) with evidence
+3. Assigns quality-based scores (0/3/5 or pass/fail) with evidence
 4. Identifies strengths, weaknesses, and recommendations
 5. Returns JSON evaluation result
 

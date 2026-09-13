@@ -12,6 +12,10 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+# The isolated rescore copies the pinned support modules beside this script.
+# Resolve those bytes before any ambient checkout/installation (#1474).
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
 try:
     import jsonschema
     from jsonschema import validate, ValidationError

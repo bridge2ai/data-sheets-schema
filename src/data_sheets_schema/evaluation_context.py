@@ -119,7 +119,9 @@ def load_document(path: Path) -> tuple[dict, str]:
 
 def dataset_units(data: dict, prefix: str = "#") -> list[tuple[str, dict]]:
     """Every terminal dataset, retaining paths and never inheriting a sibling."""
-    if "resources" not in data:
+    # Dataset.resources is optional. Empty/null means this dataset has no
+    # children; an explicit empty Collection was already refused by unwrap.
+    if "resources" not in data or data["resources"] is None or data["resources"] == []:
         return [(prefix, data)]
     resources = data["resources"]
     if not isinstance(resources, list) or not resources:

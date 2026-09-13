@@ -138,7 +138,7 @@ class TestQuestionParity(unittest.TestCase):
         for name, text in self.text.items():
             for i, q in enumerate(self.canon, 1):
                 declared = "pass/fail" if q.get("score_type") == "pass_fail" \
-                    else "numeric 0-5"
+                    else "numeric 0/3/5" if name.endswith("-semantic") else "numeric 0-5"
                 block = text.split(f"#### Question {i}: ", 1)[1].split("---", 1)[0]
                 with self.subTest(agent=name, question=i):
                     self.assertIn(f"**Scoring ({declared}):**", block)
