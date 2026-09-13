@@ -48,7 +48,9 @@ def _selected_path(value) -> Path | None:
     if str(value).lower() == "none":
         return None
     path = Path(value)
-    return default_manifest_path() if path == DEFAULT_MANIFEST and not path.exists() else path
+    # The registry treats this spelling as the discovered default even if
+    # an archived copy exists below the checkout root (#1754).
+    return default_manifest_path() if path == DEFAULT_MANIFEST else path
 
 
 def manifest_override():
