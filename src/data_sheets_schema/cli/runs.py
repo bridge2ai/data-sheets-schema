@@ -541,6 +541,7 @@ def check_cmd(method, label, project, strict):
     header_mismatches = []
     pack_pin_drift = []                                        # a record's review pins a pack no longer on disk (#1095)
     profile_disagreements: list[str] = []
+    malformed_records: list[str] = []
     for run in discover():
         if run.is_core or run.deterministic:
             continue
@@ -553,11 +554,28 @@ def check_cmd(method, label, project, strict):
                 continue
             if not is_complete(run.method, run.label, proj):
                 continue
-            rows.append(check_provenance(run.method, run.label, proj))
             # Duplicate mapping keys the validation block recorded (#1029):
             # a standard loader keeps only the last, so a record that
             # carries one is not the record its readers see.
             prov_data = _prov(run.method, run.label, proj) or {}
+            # Report malformed prompt blocks before audit readers dereference
+            # them. Keep auditing the remaining records, and fail --strict
+            # with the record address rather than an AttributeError (#1734).
+            node = prov_data
+            prefix = []
+            malformed = None
+            for key in ("prompts", "request", "spec"):
+                prefix.append(key)
+                node = node.get(key)
+                if node is None:
+                    break
+                if not isinstance(node, dict):
+                    malformed = f"{'.'.join(prefix)} must be a mapping or null"
+                    break
+            if malformed:
+                malformed_records.append(f"{run.label}/{proj}: {malformed}")
+                continue
+            rows.append(check_provenance(run.method, run.label, proj))
             # A record whose profile and digest, or whose stored spec and
             # schema, name different instruments is two records in one:
             # the gate and the readers would disagree (#1581, #1678, #1699).
@@ -686,7 +704,7 @@ def check_cmd(method, label, project, strict):
     click.echo(f"\n{len(rows)} run(s) checked, {len(required)} subject to the "
                f"requirement, {len(failed)} failing"
                + (f"; {len(duplicates)} with duplicate mapping keys (reported)" if duplicates else ""))
-    if not failed:
+    if not failed and not malformed_records:
         click.echo("All runs subject to the live-provenance requirement satisfy it.")
 
     if unobserved:
@@ -1049,7 +1067,12 @@ def check_cmd(method, label, project, strict):
                    "stored spec vs schema; #1699) — fatal under --strict:")
         for line in profile_disagreements:
             click.echo(f"   {line}")
-    if strict and (failed or bad_requests or never_pinned or condition_contradictions or profile_disagreements):
+    if malformed_records:
+        click.echo(f"\n❌ {len(malformed_records)} malformed record(s) — fatal under --strict:")
+        for line in malformed_records:
+            click.echo(f"   {line}")
+    if strict and (failed or bad_requests or never_pinned or condition_contradictions
+                   or profile_disagreements or malformed_records):
         raise SystemExit(1)
 
 
