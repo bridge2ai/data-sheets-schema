@@ -298,3 +298,18 @@ approved profile follow-up #1737 and installed integration 721d2471c are now
 included; all 60 historical renderer controls still match. No production
 record, rating or source bundle was changed. Round-14 review and exact-head
 CI are the remaining corpus merge gates.
+
+## Review round 15 — 2026-09-13
+
+Round 14 found #1746: portable pair/report evidence was still verified from
+the caller's directory. Both status readers now use the shared verifier with
+the provenance record's address, which establishes the selected corpus owner.
+Explicit absolute pins retain their meaning and unknown bases do not pass.
+
+The CLI regressions reproduce three failures with three controls passing
+before correction. They cover nested callers, foreign callers and conflicting
+copies of the selected corpus. All 47 focused ownership/check/validator tests
+and all 212 downstream pair/report/selection checks pass after correction.
+Installed validator fix 3dff432e3 (#1739) is integrated. The recorded source
+pins are refreshed; no generation instructions, production records or ratings
+were changed by this correction. Independent review and exact-head CI follow.

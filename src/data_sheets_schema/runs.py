@@ -1689,7 +1689,7 @@ def report_claim_status(method: str, label: str, project: str,
     """
     import yaml as _yaml
 
-    from data_sheets_schema.provenance import _md5, record_path_for
+    from data_sheets_schema.provenance import record_path_for, verify_entry
     path = record_path_for(project, method, label, concat_dir or CONCAT_DIR)
     if not path.exists():
         return CLAIMS_UNRECORDED, 0
@@ -1702,8 +1702,7 @@ def report_claim_status(method: str, label: str, project: str,
     for entry in (block.get("artifacts") or {}).values():
         if not isinstance(entry, dict) or not entry.get("md5"):
             continue
-        f = Path(entry["path"])
-        if not f.exists() or _md5(f) != entry["md5"]:
+        if verify_entry(entry, record=path) is not True:
             # Distinct from `not_run`, as PAIR_STALE is: a checker that could
             # not run and a verdict about bytes that have changed are different
             # states, and the pair check already draws that line.
@@ -1746,12 +1745,11 @@ def pair_status(method: str, label: str, project: str,
     # A verdict about two files, re-checked against those files. Same reason
     # `validation_status` re-hashes: without this, editing either record leaves
     # the pair verdict asserting agreement about bytes that are gone.
-    from data_sheets_schema.provenance import _md5
+    from data_sheets_schema.provenance import verify_entry
     for entry in (block.get("artifacts") or {}).values():
         if not isinstance(entry, dict) or not entry.get("md5"):
             continue
-        f = Path(entry["path"])
-        if not f.exists() or _md5(f) != entry["md5"]:
+        if verify_entry(entry, record=path) is not True:
             return PAIR_STALE, errors
     return (PAIR_CONSISTENT if block.get("consistent") else PAIR_DIVERGENT,
             errors)
