@@ -42,6 +42,22 @@ def test_historical_profile_fallback_agrees_with_a_study_spec(schema):
     assert "different instruments" in provenance._spec_profile_disagreement(data)
 
 
+@pytest.mark.parametrize("explicit_null", [False, True])
+@pytest.mark.parametrize("digest_profile", ["neutral", "bridge2ai", "unknown-historical"])
+def test_fallback_profile_checks_known_digest_evidence(explicit_null, digest_profile):
+    digest = ("old-unrecognized-digest" if digest_profile == "unknown-historical" else
+              schema_digest.fingerprint(schema_digest.digest_text(
+                  "Dataset", profile=profiles.PROFILES[digest_profile])))
+    schema = {"digest_md5": digest}
+    if explicit_null:
+        schema["profile"] = None
+    data = {"schema": schema, "prompts": {"request": {"spec": {"profile": "bridge2ai"}}}}
+    findings = provenance.profile_problems(data)
+    assert bool(findings) == (digest_profile == "neutral"), findings
+    if findings:
+        assert "digest" in findings[0] and "bridge2ai" in findings[0]
+
+
 @pytest.mark.parametrize("execute", [False, True])
 @pytest.mark.parametrize("conflicting", [False, True])
 def test_backfill_checks_digest_evidence_before_reporting_or_writing(reconstruction, execute, conflicting):
