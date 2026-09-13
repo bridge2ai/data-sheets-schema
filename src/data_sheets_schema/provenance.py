@@ -648,14 +648,15 @@ def software_facts() -> dict[str, Any]:
 DIRTY_PATHS_MAX = 50
 
 
-#: The installer's own bookkeeping: the wheel's metadata directory, a
-#: root-level `.pth`, byte-code caches. Nothing else is exempt (#1717).
+#: Only installer-owned metadata files, root-level `.pth` and byte-code
+#: caches are bookkeeping. Shipped wheel metadata is measured (#1748).
 _LEDGER = "data_sheets_schema/schema/digest_inventory.yaml"
 
 
 def _is_bookkeeping(name: str) -> bool:
     parts = name.replace("\\", "/").split("/")
-    return (any(p.endswith(".dist-info") for p in parts[:-1])
+    return ((len(parts) == 2 and parts[0].endswith(".dist-info")
+             and parts[1] in {"RECORD", "INSTALLER", "REQUESTED", "direct_url.json"})
             or (len(parts) == 1 and parts[0].endswith(".pth"))
             or "__pycache__" in parts[:-1])
 
