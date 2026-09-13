@@ -73,17 +73,26 @@ def test_legacy_profile_omission_and_explicit_missing_file_hash_remain_comparabl
     missing_file["chunks"]["sha256"] = None
     assert not usage_ledger._identity_differs(missing_file, missing_file)
     assert usage_ledger._identity_differs(missing_file, current)
+    no_bundle = dict(current, bundle=None)
+    assert not usage_ledger._identity_differs(no_bundle, no_bundle)
+    for required in ("source_manifest", "chunks"):
+        partial = {k: v for k, v in current.items() if k != required}
+        assert usage_ledger._identity_differs(partial, current)
 
 
+@pytest.mark.parametrize("has_good", [False, True])
 @pytest.mark.parametrize("prompts,field", [
     ("text", "prompts"), (["text"], "prompts"),
     ({"request": "text"}, "prompts.request"),
     ({"request": {"spec": ["text"]}}, "prompts.request.spec"),
 ])
-def test_strict_check_reports_malformed_prompts_and_continues(tmp_path, monkeypatch, prompts, field):
+def test_strict_check_reports_malformed_prompts_and_continues(tmp_path, monkeypatch, prompts, field, has_good):
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("D4D_PROFILE", raising=False)
-    for label, value in (("2000-01-01_bad", prompts), ("2000-01-02_good", None)):
+    records = [("2000-01-01_bad", prompts)]
+    if has_good:
+        records.append(("2000-01-02_good", None))
+    for label, value in records:
         full = Path("data/d4d_concatenated/external") / label / "SYNTHETIC_d4d.yaml"
         core = Path("data/d4d_concatenated/external_core") / label / "SYNTHETIC_d4d_core.yaml"
         full.parent.mkdir(parents=True)
@@ -99,4 +108,5 @@ def test_strict_check_reports_malformed_prompts_and_continues(tmp_path, monkeypa
     assert isinstance(result.exception, SystemExit), repr(result.exception)
     assert "malformed" in result.output and field in result.output
     assert "2000-01-01_bad/SYNTHETIC" in result.output
-    assert "1 run(s) checked" in result.output  # The valid record was still audited.
+    assert f"{int(has_good)} run(s) checked" in result.output
+
