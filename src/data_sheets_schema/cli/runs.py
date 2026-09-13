@@ -1213,9 +1213,12 @@ def validate_cmd(method, project, label, recheck, dry_run):
 
     passed = failed = norec = 0
     for m, l, p in targets:
-        spec = RunSpec(project=p, arm="", method=m,
-                       bundle=Path("data/preprocessed/concatenated") /
-                              f"{p}_preprocessed.txt", label=l)
+        try:
+            spec = RunSpec(project=p, arm="", method=m,
+                           bundle=Path("data/preprocessed/concatenated") /
+                                  f"{p}_preprocessed.txt", label=l)
+        except ValueError as exc:                    # an unknown ambient profile (#1679)
+            raise click.ClickException(str(exc))
         problems = validate_outputs(spec)
         rec = record_path_for(p, m, l)
         icon = "✓" if not problems else "❌"

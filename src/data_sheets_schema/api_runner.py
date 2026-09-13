@@ -2712,6 +2712,22 @@ def _validator_lines(path: Path, schema: str,
     return lines, None
 
 
+def _generation_bound_inputs_observed(spec, progress: dict, generation, recorded, current: dict) -> bool:
+    """Whether the ledger or the progress file binds this generation to the
+    current inputs — the evidence a generic backfill cannot supersede (main's
+    #1555 rule). Compared under the one compatibility rule (#1629, #1676): a
+    pin that lacks a key says nothing about it, every key it carries must
+    match."""
+    from data_sheets_schema.usage_ledger import _identity_differs
+    saved = progress.get("input_identity") if isinstance(progress, dict) else None
+    bound_progress = (
+        isinstance(progress, dict)
+        and progress.get("generation_id") == generation
+        and _usage_record_matches(spec, progress.get("run_identity"))
+        and isinstance(saved, dict) and not _identity_differs(saved, current))
+    return (isinstance(recorded, dict) and not _identity_differs(recorded, current)) or bound_progress
+
+
 def validate_outputs(spec: RunSpec) -> list[dict[str, str]]:
     """LinkML-validate both records, returning problems rather than raising.
 
@@ -4922,18 +4938,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                     and prior.get("record_mode") == "reconstructed"):
                 # Generic backfill cannot supersede observed generation-bound
                 # inputs. Older backfill could publish during an interruption.
-                from data_sheets_schema.usage_ledger import _identity_differs, recorded_inputs
-                current = spec.input_identity()
-                # The same compatibility rule as every other identity
-                # compare (#1629): a pin that lacks a key says nothing
-                # about it, and every key it carries must match.
-                saved = progress.get("input_identity")
-                bound_progress = (
-                    progress.get("generation_id") == generation
-                    and _usage_record_matches(spec, progress.get("run_identity"))
-                    and isinstance(saved, dict) and not _identity_differs(saved, current))
-                recorded = recorded_inputs(spec)
-                if (isinstance(recorded, dict) and not _identity_differs(recorded, current)) or bound_progress:
+                from data_sheets_schema.usage_ledger import recorded_inputs
+                if _generation_bound_inputs_observed(
+                        spec, progress, generation, recorded_inputs(spec), spec.input_identity()):
                     prior_matches = False
             if prior_matches:
                 _require_recorded_inputs(spec, prior)
@@ -4959,12 +4966,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                             and progress.get("generation_id") in (None, foreign_identifier)))
     if foreign_progress or not _same_usage_generation(spec, progress.get("generation_id")):
         progress = {}
-    from data_sheets_schema.usage_ledger import _identity_differs
+    from data_sheets_schema.usage_ledger import _identity_differs, identity_refusal
     if progress.get("input_identity") is not None and _identity_differs(progress["input_identity"], spec.input_identity()):
-        raise UsageLedgerError("generation input identity changed since saved progress; restore the "
-                               "recorded inputs or use --no-resume for an explicit new generation "
-                               "(a generation saved before profiles existed hashed an instruction that no "
-                               "longer renders, and cannot be resumed; #1628)")
+        raise UsageLedgerError(identity_refusal(progress["input_identity"], "since saved progress"))
     done = set(progress.get("completed", []))
     if done and progress.get("input_identity") is None and not prior_record:
         from data_sheets_schema.usage_ledger import recorded_inputs

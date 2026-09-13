@@ -586,8 +586,11 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
             {"profile": name,
              "profile_basis": "re-rendered to the recorded hash by d4d provenance backfill-spec (#772)"}
             for name in PROFILES]
+    backfill_basis = "re-rendered to the recorded hash by d4d provenance backfill-spec (#772)"
     for delta, render_version, selected_chunks, selected_manifest, selected_profile in product(
             (0, -1, 1, -2, 2), (4, 3, 2, 1), chunk_choices, manifest_choices, profile_choices):
+        if render_version == 1 and selected_profile and not schema_block.get("profile"):
+            continue                 # version 1 cannot see the profile: no evidence to assert one (#1678)
         spec = RunSpec.from_render_spec({
             "arm": _ARMS[arm][0], "bundle": str(bundle), "condition": condition,
             "runtime": runtime, "provider": provider,
@@ -605,7 +608,15 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
             if execute:
                 data["prompts"]["request"]["spec"] = rendered
                 data["prompts"]["request"]["spec_basis"] = ("backfilled by d4d provenance backfill-spec: "
-                                                            "verified by re-rendering to the recorded hash (#772)")
+                                                            "verified by re-rendering to the recorded hash (#772)"
+                                                            + ("" if render_version > 1 else
+                                                               "; render version 1 does not hash the profile, which is restated"))
+                # The profile the hash proved is the record's, for every
+                # reader (`profiles.for_record`): a spec stating one the
+                # record does not is two records in one (#1678).
+                if rendered.get("profile") and not schema_block.get("profile") and render_version > 1:
+                    data.setdefault("schema", {})["profile"] = rendered["profile"]
+                    data["schema"]["profile_basis"] = backfill_basis
                 pv.ProvenanceRecord(data=data).write(path)
                 click.echo(f"     written to {path}")
             return
@@ -734,7 +745,10 @@ def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bo
     # and `{method}_core`. A `_core` suffix names the record's directory,
     # not the method (#1032).
     base = method[:-5] if method.endswith("_core") else method
-    spec = RunSpec(project=project, arm="", method=base, bundle=_P(""), label=label)
+    try:
+        spec = RunSpec(project=project, arm="", method=base, bundle=_P(""), label=label)
+    except ValueError as exc:                    # an unknown ambient profile (#1679)
+        raise click.ClickException(str(exc))
     data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     prior = data.get("validation") or {}
     tag = f"{project} {method} {label}"
