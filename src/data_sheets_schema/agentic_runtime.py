@@ -17,13 +17,20 @@ SCHEMAS = ("src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
            "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml")
 
 
+def resource_names(directory: str) -> list[str]:
+    """Names shipped by the selected D4D installation or source checkout."""
+    from data_sheets_schema.resources import resource_root
+    root, _ = resource_root()
+    return [f"{directory}/{path.name}" for path in sorted((root / directory).glob("*.md"))]
+
+
 def toolchain() -> dict:
     paths = {name: str(resource_path(name).absolute()) for name in SCHEMAS}
     for directory in (".claude/commands", ".claude/agents"):
-        for path in sorted(resource_path(directory).glob("*.md")):
-            paths[f"{directory}/{path.name}"] = str(path.absolute())
+        for name in resource_names(directory):
+            paths[name] = str(resource_path(name).absolute())
     # Do not resolve the interpreter symlink: its path selects the venv.
-    return {"python": str(Path(sys.executable).absolute()), "resources": paths}
+    return validate_toolchain({"python": str(Path(sys.executable).absolute()), "resources": paths})
 
 
 def validate_toolchain(value) -> dict:

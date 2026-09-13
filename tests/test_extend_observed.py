@@ -60,7 +60,8 @@ class Siblings(unittest.TestCase):
             _transcripts(tmp, ["agent-av6-VOICE-rep3", "agent-avoicepeds-rep3", "agent-avoicepediatric-rep3",
                                "agent-av6-VOICE-rep10"])
             roots = [Path(tmp) / "cfg"]
-            got = lambda p, l: sorted(f.name.rsplit("-", 1)[0] for f in cli._transcript_candidates(p, l, roots))
+            from data_sheets_schema.profiles import BRIDGE2AI
+            got = lambda p, l: sorted(f.name.rsplit("-", 1)[0] for f in cli._transcript_candidates(p, l, roots, profile=BRIDGE2AI))
             self.assertEqual(got("VOICE", "x_rep3"), ["agent-av6-VOICE-rep3"])
             self.assertEqual(got("VOICE_PEDIATRIC", "x_rep3"), ["agent-avoicepediatric-rep3", "agent-avoicepeds-rep3"])
             self.assertEqual(got("VOICE", "x_rep1"), [])                                       # rep10 is not rep1
@@ -200,7 +201,7 @@ class Extension(unittest.TestCase):
             b = root / "agent-afanout-p-rep1-bbbbbbbbbbbbbbbb.jsonl"; b.write_text("second\n")
             import os, time
             os.utime(a, (time.time() - 100, time.time() - 100))
-            with mock.patch.object(cli, "_transcript_candidates", lambda p, l, roots=None: [b, a]):
+            with mock.patch.object(cli, "_transcript_candidates", lambda p, l, roots=None, profile=None: [b, a]):
                 r = self._run(tmp, path, {"agent-afanout-p-rep1+agent-afanout-p-rep1": FULL})
             self.assertEqual(r.exit_code, 0, r.output); self.assertIn("wrote", r.output)
             (ext,) = yaml.safe_load(path.read_text().split("\n", 1)[1])["phase_log"]["run_observed_extended"]
@@ -403,7 +404,7 @@ class Extension(unittest.TestCase):
                  mock.patch("data_sheets_schema.provenance.bundle_bytes_for",
                             lambda p, md5=None, sha256=None: (raw, entry) if md5 == entry["md5"] else None), \
                  mock.patch("data_sheets_schema.receipts.receipt_path", lambda core, p: Path(tmp) / "no_receipt.yaml"), \
-                 mock.patch.object(cli, "_transcript_candidates", lambda p, l, roots=None: [t]):
+                 mock.patch.object(cli, "_transcript_candidates", lambda p, l, roots=None, profile=None: [t]):
                 r = click.testing.CliRunner().invoke(cli.provenance, ["extend-observed", "--label", "L_rep1", "--project", "P",
                                                                        "--method", "claudecode_agent", "--execute"])
             self.assertEqual(r.exit_code, 0, r.output); self.assertIn("wrote", r.output)
@@ -566,7 +567,7 @@ class CodexRound(unittest.TestCase):
 
             with mock.patch.object(cli, "_observe", observe), \
                  mock.patch.object(cli, "_require_repo_root_cwd", lambda *a, **k: None), \
-                 mock.patch.object(cli, "_transcript_candidates", lambda p, l: list(files)), \
+                 mock.patch.object(cli, "_transcript_candidates", lambda p, l, profile=None: list(files)), \
                  mock.patch("data_sheets_schema.provenance.record_path_for",
                             lambda project, method, label, concat_dir=None: path), \
                  mock.patch("data_sheets_schema.receipts.receipt_path", lambda core, p: Path(tmp) / "none.yaml"):

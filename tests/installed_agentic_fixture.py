@@ -16,6 +16,10 @@ def check_installed_agentic():
     from data_sheets_schema.agentic_runtime import playbook_text
 
     assert not resources.is_checkout()
+    for name in (".claude/commands/my-command.md", ".claude/agents/my-agent.md"):
+        path = Path(name)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("An unrelated project-local Claude customization.\n")
     assert Path(agentic_observed.__file__).resolve().is_relative_to(resources.PACKAGE_ROOT.resolve())
     bundle = Path("synthetic source with spaces.txt").absolute()
     bundle.write_text("FILE: overview.txt\nA synthetic clinical dataset.\n")

@@ -355,7 +355,7 @@ class TestTheThreadingHolds(_Clean):
                         bundle=ROOT / "data/preprocessed/concatenated/CHORUS_crate_only.txt",
                         manifest=STUDY_MANIFEST, manifest_line=ARMS["crate_only"][3])
         self.assertEqual((crate.profile, crate.manifest_used), ("bridge2ai", False))
-        line = next(l for l in resolve_prompt(crate).splitlines() if "d4d provenance record" in l)
+        line = next(l for l in resolve_prompt(crate).splitlines() if " provenance record --project " in l)
         self.assertIn(f"--manifest {STUDY_MANIFEST}", line)
         self.assertNotIn("--manifest none", line)
         with tempfile.TemporaryDirectory() as d:
@@ -363,7 +363,7 @@ class TestTheThreadingHolds(_Clean):
             external = RunSpec(project="CLINIC", arm=ARMS["baseline"][0], method=ARMS["baseline"][1],
                                label="2026-09-13_x-claudecode-generic-v9_rep1", condition="generic_v9",
                                runtime="Claude Code", run_date="2026-09-13", bundle=ext)
-            line = next(l for l in resolve_prompt(external).splitlines() if "d4d provenance record" in l)
+            line = next(l for l in resolve_prompt(external).splitlines() if " provenance record --project " in l)
         self.assertIn("--manifest none", line)
 
     def test_replay_never_consults_the_environment(self):
@@ -993,7 +993,7 @@ class TestRoundSeven(_Clean):
                        runtime="Claude Code", run_date="2026-09-13",
                        bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt")
         self.assertEqual((spec.profile, spec.profile_basis), ("neutral", "environment"))
-        line = next(l for l in resolve_prompt(spec).splitlines() if "d4d provenance record" in l)
+        line = next(l for l in resolve_prompt(spec).splitlines() if " provenance record --project " in l)
         self.assertIn("--profile neutral", line)
         self.assertEqual(spec.render_spec()["profile"], "neutral")
         replay = RunSpec.from_render_spec(spec.render_spec(), project="CHORUS", method=spec.method, label=spec.label)

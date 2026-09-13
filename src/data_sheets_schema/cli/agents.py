@@ -9,8 +9,12 @@ from data_sheets_schema.agent_pin import (AGENT_DIR,
 
 
 def _names():
-    from data_sheets_schema.resources import resource_path
-    return sorted(p.stem for p in resource_path(".claude/agents").glob("*.md"))
+    from pathlib import Path
+    from data_sheets_schema.agentic_runtime import resource_names
+    # Project-local agents are allowed, but do not hide shipped D4D agents.
+    names = {Path(name).stem for name in resource_names(".claude/agents")}
+    names.update(path.stem for path in Path(".claude/agents").glob("*.md"))
+    return sorted(names)
 
 
 @click.group()

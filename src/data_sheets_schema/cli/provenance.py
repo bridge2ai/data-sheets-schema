@@ -1173,16 +1173,10 @@ def _extend_run_observed(log: dict, observed: dict, *, recorded_by: str, instrum
 
 #: How launchers have named a project in a subagent's name: the project
 #: itself with its underscore dropped, and the abbreviations on disk.
-_PROJECT_NAME_KEYS: dict[str, tuple[str, ...]] = {
-    "AI_READI": ("aireadi",), "CHORUS": ("chorus",), "CM4AI": ("cm4ai",),
-    "VOICE": ("voice",), "VOICE_PEDIATRIC": ("voicepediatric", "voicepeds"),
-}
-
-
-def _transcript_candidates(project: str, label: str, roots: list[Path] | None = None) -> list[Path]:
+def _transcript_candidates(project: str, label: str, roots: list[Path] | None = None, *, profile=None) -> list[Path]:
     """Subagent transcripts that could be this run's, by name (#1010): a
     launcher names its subagent after the project and the replicate
-    (`agent-av6-AI_READI-rep1-…`, `agent-afanout-aireadi-rep3-…`) or, for
+    (`agent-run-COHORT_X-rep1-…`, `agent-batch-cohortx-rep3-…`) or, for
     the canary that opened an arm, after the project and the word canary
     (`agent-acanary-chorus-agentic-…`). Both config directories are
     searched — the two hold identical copies of some transcripts (#688) —
@@ -1205,10 +1199,11 @@ def _transcript_candidates(project: str, label: str, roots: list[Path] | None = 
                                              Path.home() / ".claude-work" / "projects" / repo_dir]
     m = _re.search(r"_rep(\d+)$", label)
     rep = m.group(1) if m else None
-    keys = _PROJECT_NAME_KEYS.get(project, (project.lower().replace("_", ""),))
-    # A sibling project whose name contains this one's (VOICE_PEDIATRIC,
-    # VOICE) must not be offered as this one's run (#1191 review, S3).
-    others = [k for p, ks in _PROJECT_NAME_KEYS.items() if p != project for k in ks
+    from data_sheets_schema.profiles import active_profile
+    aliases = (profile if profile is not None else active_profile()).transcript_name_keys
+    keys = aliases.get(project, (project.lower().replace("_", "").replace("-", ""),))
+    # A sibling project's longer alias must not be offered as this run.
+    others = [k for p, ks in aliases.items() if p != project for k in ks
               if any(key in k and key != k for key in keys)]
     out: list[Path] = []; seen: set[str] = set()
     for root in roots:
@@ -1333,7 +1328,8 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
         basis = {"bundle_basis": {"source": "git blob", "path": bpath, "commit": entry["commit"],
                                   "md5": entry["md5"], "matched_on": entry.get("matched_on")}}
     rule = ((inputs.get("chunks") or {}).get("rule")) or None
-    candidates = list(given) or _transcript_candidates(proj, label)
+    from data_sheets_schema.profiles import for_record
+    candidates = list(given) or _transcript_candidates(proj, label, profile=for_record(data))
     if not candidates:
         click.echo(f"{tag}: no transcript found by name for this project and replicate"); return
     # A killed-and-resumed run has two transcripts under one name and

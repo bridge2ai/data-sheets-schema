@@ -74,6 +74,8 @@ class Profile:
     #: How that dataset is written in prose — the tracked study bundle says
     #: "AI-READI baseline" where the key is `AI_READI` (#1542).
     healthsheet_display: str | None = None
+    #: Optional historical aliases used to discover a study's transcripts.
+    transcript_name_keys: dict[str, tuple[str, ...]] = field(default_factory=dict)
 
     @property
     def pin_path(self) -> Path | None:
@@ -102,6 +104,10 @@ BRIDGE2AI = Profile(
     healthsheet_bundle="AI_READI_healthsheet_only.txt",
     healthsheet_project="AI_READI",
     healthsheet_display="AI-READI",
+    transcript_name_keys={
+        "AI_READI": ("aireadi",), "CHORUS": ("chorus",), "CM4AI": ("cm4ai",),
+        "VOICE": ("voice",), "VOICE_PEDIATRIC": ("voicepediatric", "voicepeds"),
+    },
 )
 
 NEUTRAL = Profile(name="neutral")
