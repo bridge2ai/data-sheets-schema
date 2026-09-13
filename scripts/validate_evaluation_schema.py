@@ -9,6 +9,6 @@ from data_sheets_schema.evaluation.validate import *  # noqa: F401,F403
 from data_sheets_schema.evaluation import validate as _implementation
 
 if __name__ == "__main__":
-    sys.exit(_implementation.cli())
+    sys.exit(_implementation.cli(eval_base=Path(__file__).resolve().parents[1] / "data/evaluation_llm"))
 else:
     sys.modules[__name__] = _implementation

@@ -238,7 +238,7 @@ def main(eval_base: Path | None = None, schema_dir: Path | None = None) -> int:
     return 0 if not live_invalid and not counts[("live", "unreadable")] else 1
 
 
-def cli(argv: List[str] | None = None) -> int:
+def cli(argv: List[str] | None = None, *, eval_base: Path | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--file", type=Path, action="append", dest="files",
                         help="validate this exact new output strictly; repeat for multiple files")
@@ -257,7 +257,7 @@ def cli(argv: List[str] | None = None) -> int:
     if args.context and not args.files:
         parser.error("--context requires --file")
     return validate_outputs(args.files, args.rubric, input_path=args.input,
-                            definition_path=args.agent_definition, context_path=args.context) if args.files else main()
+                            definition_path=args.agent_definition, context_path=args.context) if args.files else main(eval_base=eval_base)
 
 
 if __name__ == "__main__":
