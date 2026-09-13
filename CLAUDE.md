@@ -1466,8 +1466,15 @@ ledger call) and to the record, whose `schema` block carries `profile` and
 `profile_basis` (`environment`; `no manifest`; `stated by the caller`;
 `manifest:<repo-relative path>@<sha256[:12]>` or `default manifest:…`, with
 ` (undeclared)` when the manifest declares no profile, or `(missing)` when
-the path is not there) beside `digest_md5`; `d4d api plan` prints them. The agentic
-recorder resolves it the same way from the manifest it attests. A caller
+the path is not there; `rendered instruction`, with ` (this process would
+select …)` when the recorder's own selection differs) beside `digest_md5`;
+`d4d api plan` prints them. The rendered `d4d provenance record` line
+carries `--profile <name>`, so the agentic recorder — another process,
+without the environment that selected it — records the instruction's
+profile and states what it would have selected itself (#1581); the basis
+is a record fact and not part of the resume identity (#1626). A generation
+pinned before profiles existed hashed an instruction that no longer
+renders and cannot be resumed (#1628). A caller
 that selected nothing gets the default manifest resolved *when asked*
 (#1439): the working directory's, else the checkout's — so a script run
 from `tests/` still sees the study's — else none. Both digests are in

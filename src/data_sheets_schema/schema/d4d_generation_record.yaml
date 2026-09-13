@@ -578,7 +578,10 @@ classes:
           caller`; `manifest:<path>@<sha256[:12]>` or `default
           manifest:<path>@<sha256[:12]>`, each with ` (undeclared)` when the
           manifest declares no profile, or `<kind>:<path> (missing)` when the
-          path is not there (#1443, #1494, #1549).
+          path is not there; `rendered instruction`, with ` (this process
+          would select <name>: <basis>)` when the recorder's own selection
+          differs, for a profile the launch instruction carried (#1443,
+          #1494, #1549, #1581).
       full_md5:
       core_md5:
       full_sha256:

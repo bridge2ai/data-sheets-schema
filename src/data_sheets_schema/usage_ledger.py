@@ -169,7 +169,11 @@ def pin_inputs(spec) -> None:
 
 def _identity_differs(pinned: dict, current: dict) -> bool:
     """A pin made before a key existed says nothing about it (`profile`,
-    #1460); every key the pin carries must match."""
+    #1460); every key the pin carries must match. That is the rule for any
+    key added later; it does not readmit the generations pinned before
+    profiles existed, whose instruction hash — the recorder line carries
+    `--profile` now — no longer renders (#1628): those cannot be resumed,
+    and the refusal says so."""
     return any(current.get(k) != v for k, v in pinned.items())
 
 
@@ -184,7 +188,9 @@ def require_resolved(spec) -> None:
     pinned = data.get("input_identity")
     if pinned is not None and _identity_differs(pinned, spec.input_identity()):
         raise UsageLedgerError("generation input identity changed (bundle, manifests or resolved instruction); "
-                               "restore the recorded inputs or use --no-resume for an explicit new generation")
+                               "restore the recorded inputs or use --no-resume for an explicit new generation "
+                               "(a generation pinned before profiles existed hashed an instruction that no "
+                               "longer renders, and cannot be resumed; #1628)")
     _finish_reasoning_archive(spec, data)
     from data_sheets_schema.snapshot_store import finish_activation
     finish_activation(spec)

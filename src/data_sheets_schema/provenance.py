@@ -1004,6 +1004,8 @@ def _profile_digest_disagreement(data: dict[str, Any]) -> str | None:
                    for name, prof in PROFILES.items()}
     except Exception:                                          # noqa: BLE001 — no schema here: nothing to compare
         return None
+    if current.get(schema["profile"]) == schema["digest_md5"]:
+        return None                        # its own current digest, whatever else renders the same bytes (#1609)
     for name, md5 in current.items():
         if name != schema["profile"] and md5 == schema["digest_md5"]:
             return (f"schema.profile is {schema['profile']!r} but schema.digest_md5 {md5[:12]}… is the "
