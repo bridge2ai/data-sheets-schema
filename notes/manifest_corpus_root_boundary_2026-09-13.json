@@ -64,7 +64,10 @@
     1746,
     1750,
     1753,
-    1754
+    1754,
+    1755,
+    1756,
+    1757
   ],
   "new_spec_chunk_check_uses_manifest": true,
   "preservation_sha256": "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f",
