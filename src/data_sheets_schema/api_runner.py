@@ -521,6 +521,11 @@ class RunSpec:
             self.manifest_line = self.header_for_manifest(self.manifest)
         if self.profile is None:
             self._select_profile()
+        else:
+            from data_sheets_schema.profiles import profile_named
+            profile_named(self.profile)                              # unknown names fail here, not mid-batch (#1585)
+            if self.profile_basis is None:
+                self.profile_basis = "stated by the caller"       # the record says why, always (#1549)
 
     def _select_profile(self) -> None:
         from data_sheets_schema.profiles import select_profile
@@ -556,7 +561,8 @@ class RunSpec:
         requires a freshly validated spec; this object is only for replay.
         """
         spec = cls(project=project, method=method, label=label,
-                   profile="replay",          # skip live selection (#1468); cleared below
+                   profile=recorded.get("profile") or "neutral",   # never live selection (#1468); the recorded values are restored below
+                   profile_basis=recorded.get("profile_basis") or "replay",
                    arm=recorded.get("arm", ""), bundle=Path(recorded.get("bundle", "")),
                    condition=recorded["condition"],
                    render_version=recorded.get("render_version", 1),
@@ -571,7 +577,8 @@ class RunSpec:
         # A replay reads no live declaration — the manifest may be gone or
         # malformed since — so the profile is not resolved here either;
         # a replay never renders the digest (#1438).
-        spec.profile = spec.profile_basis = None
+        spec.profile = recorded.get("profile")                    # what was recorded, or None for an older spec
+        spec.profile_basis = recorded.get("profile_basis")
         spec._replay_only = True
         return spec
 
@@ -625,6 +632,7 @@ class RunSpec:
                 "condition": self.condition, "arm": self.arm,
                 "manifest_line": self.manifest_line, "run_date": self.run_date,
                 "manifest": str(self.manifest) if self.manifest is not None else None,
+                **({"profile": self.profile, "profile_basis": self.profile_basis} if self.profile else {}),   # the gate re-renders under them (#1581); absent on an older spec
                 "runtime": self.runtime,
                 "provider": self.provider or provider_identity()["provider"]
                 or PROVIDER,
@@ -854,6 +862,11 @@ def resolve_prompt(spec: RunSpec) -> str:
             # profile from it, and the header still governs what the input
             # block attests (#1461). `none` means none was selected.
             command += " --manifest " + shlex.quote(str(spec.manifest) if spec.manifest is not None else "none")
+            if spec.profile:
+                # The profile this instruction was rendered under: the
+                # recorder runs in another process, where the environment
+                # that may have selected it is not set (#1581).
+                command += " --profile " + shlex.quote(spec.profile)
             if spec.chunk_manifest is not None:
                 command += " --chunk-manifest " + shlex.quote(str(spec.chunk_manifest))
             return command
@@ -4792,6 +4805,8 @@ def _require_recorded_inputs(spec: RunSpec, record: dict[str, Any]) -> None:
     # since #426 — and its profile must be resumed under the same ones.
     schema_block = record.get("schema") or {}
     recorded_digest = schema_block.get("digest_md5")
+    # A record without a digest carries no instrument evidence of its own;
+    # `_execute` then requires the pinned identity to carry one (#1519).
     if recorded_digest and recorded_digest != current["profile"]["digest_md5"]:
         raise UsageLedgerError("generation instrument changed: the record's schema digest "
                                f"{recorded_digest} is not this run's {current['profile']['digest_md5']} "
@@ -4897,7 +4912,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                             and progress.get("generation_id") in (None, foreign_identifier)))
     if foreign_progress or not _same_usage_generation(spec, progress.get("generation_id")):
         progress = {}
-    if progress.get("input_identity") is not None and progress["input_identity"] != spec.input_identity():
+    from data_sheets_schema.usage_ledger import _identity_differs
+    if progress.get("input_identity") is not None and _identity_differs(progress["input_identity"], spec.input_identity()):
         raise UsageLedgerError("generation input identity changed since saved progress; restore the "
                                "recorded inputs or use --no-resume for an explicit new generation")
     done = set(progress.get("completed", []))
@@ -4906,6 +4922,16 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         if recorded_inputs(spec) is None:
             raise UsageLedgerError("saved phases have no recorded generation input identity; restore "
                                    "their input evidence or use --no-resume for an explicit new generation")
+    if done and not ((prior_record.get("schema") or {}).get("digest_md5") if prior_record else None):
+        # A pin made before the instrument was part of the identity says
+        # nothing about it; without a record attesting the digest, the
+        # finished phases' instrument is unknown and they are not continued
+        # under whatever this run resolved (#1519).
+        from data_sheets_schema.usage_ledger import recorded_inputs
+        sources = (progress.get("input_identity"), recorded_inputs(spec))   # each on its own (#1559)
+        if not any(isinstance(s, dict) and "profile" in s for s in sources):
+            raise UsageLedgerError("saved phases carry no instrument identity (profile and schema digest) and "
+                                   "no record attests one; use --no-resume for an explicit new generation")
     if done:
         from data_sheets_schema.usage_ledger import recorded_inputs
         evidence = progress.get("input_identity") or recorded_inputs(spec) or {}

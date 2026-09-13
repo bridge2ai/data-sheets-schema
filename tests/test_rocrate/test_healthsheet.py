@@ -7,6 +7,22 @@ from pathlib import Path
 
 from data_sheets_schema.healthsheet import build_bundle, load_healthsheet, render
 
+_SAVED_PROFILE = None
+
+
+def setUpModule():
+    """The renderer's default project is the active profile's; these tests
+    render the study's shape, whatever `D4D_PROFILE` says outside (#1582)."""
+    global _SAVED_PROFILE
+    import os
+    _SAVED_PROFILE = os.environ.pop("D4D_PROFILE", None)
+
+
+def tearDownModule():
+    import os
+    if _SAVED_PROFILE is not None:
+        os.environ["D4D_PROFILE"] = _SAVED_PROFILE
+
 RECORD = {
     "title": "Test Dataset",
     "doi": "10.60775/test",
@@ -62,8 +78,14 @@ class TestRender(unittest.TestCase):
         self.assertIn("baseline", text)
 
     def test_build_writes_the_bundle(self):
+        """A record that is not the profile's names its project and gets its
+        own file — never the study's tracked bundle name (#1493)."""
         out_dir = Path(self.tmp.name) / "out"
-        target, stats = build_bundle(self.record_path, out_dir)
+        with self.assertRaises(ValueError):
+            build_bundle(self.record_path, out_dir)
+        target, stats = build_bundle(self.record_path, out_dir, project="TESTPROJ")
+        self.assertEqual(target.name, "TESTPROJ_healthsheet_only.txt")
+        self.assertIn("Project: TESTPROJ", target.read_text())
         self.assertTrue(target.exists())
         self.assertEqual(stats.sections, 2)
         self.assertIn("Test Dataset", target.read_text())

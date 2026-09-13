@@ -38,7 +38,8 @@ def bundle_name() -> str | None:
 
 
 def _record(record_path: Path | None) -> Path:
-    path = record_path or default_record()
+    from data_sheets_schema.chunking import anchored
+    path = record_path if record_path is not None else (anchored(default_record()) if default_record() else None)   # from any directory (#1567)
     if path is None:
         raise FileNotFoundError(
             "no healthsheet record: the active profile names none; pass one")
@@ -74,9 +75,29 @@ def _project(project: str | None) -> str:
     return name
 
 
+def _shown(source: Path) -> str:
+    """The record's path as the bundle names it: repository-relative under
+    the checkout, so the bytes do not depend on how the caller spelled it
+    (#1564)."""
+    import os
+    from data_sheets_schema.chunking import REPO_ROOT
+    p = Path(source)
+    try:
+        r = p.resolve()
+        if r == REPO_ROOT or REPO_ROOT in r.parents:
+            return os.path.relpath(r, REPO_ROOT)
+    except OSError:
+        pass
+    return str(source)
+
+
 def render(healthsheet: dict, record: dict, source: Path, *,
-           project: str | None = None) -> tuple[str, HealthsheetStats]:
+           project: str | None = None,
+           display: str | None = None) -> tuple[str, HealthsheetStats]:
+    """`display` is the dataset's name in prose (the profile's for its own
+    record — the tracked bundle's bytes depend on it, #1542); the key otherwise."""
     project = _project(project)
+    display = display or project
     stats = HealthsheetStats()
     body: list[str] = []
 
@@ -105,13 +126,13 @@ def render(healthsheet: dict, record: dict, source: Path, *,
         f"Project: {project}",
         f"Dataset: {record.get('title', '')}",
         f"DOI: {record.get('doi', '')}",
-        f"Source: {source}",
+        f"Source: {_shown(source)}",
         "Origin: FAIRhub API record, metadata.healthsheet",
         "",
         "This bundle contains the Healthsheet and nothing else — no publications,",
         "no documentation, no license, no IRB protocol. It exists to measure what",
         "a single structured upstream source yields on its own. It is NOT the",
-        f"{project} baseline; the baseline corpus carries all cited sources,",
+        f"{display} baseline; the baseline corpus carries all cited sources,",
         "including this one.",
         "",
         f"Sections: {stats.sections}",
@@ -134,9 +155,28 @@ def build_bundle(record_path: Path | None = None,
     dataset the bundle identifies itself as: the caller's, else the
     active profile's (#1464)."""
     record_path = _record(record_path)
+    # The profile's name and project describe the profile's *own* record;
+    # any other record names its project and gets its own file (#1493).
+    from data_sheets_schema.chunking import anchored
+    from data_sheets_schema.profiles import active_profile
+    prof = active_profile()
+    own = (prof.healthsheet_record is not None
+           and Path(record_path).resolve() == anchored(Path(prof.healthsheet_record)).resolve())   # from any directory (#1544)
+    project = project or (prof.healthsheet_project if own else None)
+    if not project:
+        raise ValueError(f"no project for {record_path}: it is not the active profile's record; pass one")
+    own_name = own and project == prof.healthsheet_project        # the study's bundle is the study's dataset (#1516)
     healthsheet, record = load_healthsheet(record_path)
-    text, stats = render(healthsheet, record, record_path, project=project)
+    text, stats = render(healthsheet, record, record_path, project=project,
+                         display=prof.healthsheet_display if own_name else None)
     output_dir.mkdir(parents=True, exist_ok=True)
-    target = output_dir / (name or bundle_name() or f"{record_path.stem}_healthsheet_only.txt")
+    target = output_dir / (name or (bundle_name() if own_name else None) or f"{project}_healthsheet_only.txt")
+    from data_sheets_schema.profiles import PROFILES
+    reserved = {p.healthsheet_bundle for p in PROFILES.values() if p.healthsheet_bundle}
+    if not own_name and name is None and target.name in reserved:
+        # A record that is not the profile's may not take a profile's
+        # tracked bundle name by claiming its project — under any active
+        # profile (#1543, #1565).
+        raise ValueError(f"{target.name} is the active profile's bundle name; pass --name for {record_path}")
     target.write_text(text, encoding="utf-8")
     return target, stats

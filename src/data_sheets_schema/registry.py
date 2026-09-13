@@ -49,8 +49,28 @@ def _concat_dir() -> Path:
 
 
 def default_manifest_path() -> Path:
-    from data_sheets_schema.chunking import anchored
-    return anchored(DEFAULT_MANIFEST)
+    """The default manifest from here — one rule for the registry, the
+    chunk manifests and the profile (#1491): the working directory's, else
+    the checkout's (`anchored`), which may not exist. Not an ancestor's:
+    the conventional bundles are anchored to the checkout, so a manifest
+    found higher up would pair its context and profile with another
+    tree's corpus (#1515); discovery in an ancestor returns when the
+    corpus root follows the manifest (#1523)."""
+    from data_sheets_schema.chunking import REPO_ROOT, anchored
+    rel = Path(DEFAULT_MANIFEST)
+    try:
+        here = Path.cwd().resolve()
+    except OSError:
+        here = None
+    inside = here is not None and (here == REPO_ROOT or REPO_ROOT in here.parents)
+    if inside:
+        # The corpus root is the checkout (#1523): a copy of the manifest
+        # nested inside it — an archived registration under `notes/` — is
+        # not the registry from its own directory (#1545).
+        return anchored(rel)
+    if rel.exists():
+        return rel
+    return anchored(rel)
 
 
 @dataclass(frozen=True)
@@ -225,8 +245,8 @@ def load_registry(path: Path | str | None = DEFAULT_MANIFEST) -> Registry:
     if path is None:
         return Registry(path=None)
     p = Path(path)
-    if p == DEFAULT_MANIFEST and not p.exists():
-        p = default_manifest_path()
+    if p == DEFAULT_MANIFEST:
+        p = default_manifest_path()          # one rule, whether or not a relative copy is here (#1563)
     if not p.exists():
         return Registry(path=p)
     import yaml

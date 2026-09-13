@@ -1338,7 +1338,9 @@ in an md5 a ledger lookup would have to explain. The neutral digest
 (`029c2abc…`) is now in the inventory beside the study's. **One
 evaluation-side instrument moves**: the fitness judge's slot specification
 (`evidence_score.slot_spec`) renders the schema's term-source scope for
-`data_topic`/`data_substrate` exactly as the digest does, under both
+`data_topic` (the one attribute `TERM_SOURCES` declares a source list for;
+`data_substrate` has none, so neither the digest nor the judge renders a
+scope for it under `neutral`) exactly as the digest does, under both
 profiles — under `neutral` it previously rendered no guidance for those
 attributes at all. Fitness judgements cached under the earlier
 specification stay retained and are not reused (the scorer keys on the
@@ -1346,7 +1348,10 @@ specification); no rescore is made by this change, and any later fitness
 comparison across it is a comparison across instruments. The comparison
 arms' project lists, the agreement default and the healthsheet input are
 read from the active profile when asked rather than bound at import, and
-the arm table carries none.
+the arm table carries none. **No record made before this change can be
+re-entered with `--resume`**: its `schema.digest_md5` is the earlier
+instrument and the manifest's md5 moved with the `profile:` line, and the
+resume guard refuses both; a rerun is a new generation.
 
 ### The manifest is the registry, and a run attests the manifest it read (#621, #623, #624, #637, #1299; 2026-09-12)
 

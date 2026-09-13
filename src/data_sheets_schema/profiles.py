@@ -10,9 +10,10 @@ the study — and none of it belongs in front of another dataset.
 A **profile** names those facts. Two ship here:
 
 - ``bridge2ai`` — the study. Its vocabulary pin is the file the digest has
-  always rendered, so the study's digest under this profile is exactly what
-  its runs consumed; its arm project lists, agreement defaults and
-  healthsheet input are the manuscript's.
+  always rendered — the study's registry lists — and its arm project lists,
+  agreement defaults and healthsheet input are the manuscript's. (The
+  digest text itself moved with the term-source scope, `a91bad8b` →
+  `cd3c79f2`, a registered boundary: no earlier record resumes under it.)
 - ``neutral`` — nothing pinned, nothing named. The digest renders the term
   sources the schema itself declares (GO, MeSH, EFO, NCIT for `data_topic`)
   and no registry list; the study arms do not exist.
@@ -70,6 +71,9 @@ class Profile:
     #: The dataset that record describes — written into the bundle's
     #: header as its identity (#1464).
     healthsheet_project: str | None = None
+    #: How that dataset is written in prose — the tracked study bundle says
+    #: "AI-READI baseline" where the key is `AI_READI` (#1542).
+    healthsheet_display: str | None = None
 
     @property
     def pin_path(self) -> Path | None:
@@ -97,6 +101,7 @@ BRIDGE2AI = Profile(
     healthsheet_record=Path("data/raw/AI_READI/fairhub_api_dataset_3_2026-07-27.json"),
     healthsheet_bundle="AI_READI_healthsheet_only.txt",
     healthsheet_project="AI_READI",
+    healthsheet_display="AI-READI",
 )
 
 NEUTRAL = Profile(name="neutral")
@@ -111,8 +116,11 @@ ENV_VAR = "D4D_PROFILE"
 class Selection:
     """A profile and why it was selected — what a record states (#1443)."""
     profile: Profile
-    #: `environment`, `manifest:<path>`, `default manifest:<path>`, or
-    #: `no manifest`.
+    #: `environment`; `no manifest`; `manifest:<path>@<sha256[:12]>` or
+    #: `default manifest:<path>@<sha256[:12]>`, each with ` (undeclared)`
+    #: when the manifest has no `profile:` key; `<kind>:<path> (missing)`
+    #: when the path is not there. The path is repository-relative under
+    #: the checkout (#1466, #1494).
     basis: str
 
     @property
@@ -135,7 +143,10 @@ def declared_profile(manifest: Path | str | None) -> str | None:
     if not p.exists():
         return None
     from data_sheets_schema.schema_cache import load_yaml
-    data = load_yaml(p) or {}
+    try:
+        data = load_yaml(p) or {}
+    except Exception as exc:                                   # noqa: BLE001 — yaml or OS; the file is named (#1586)
+        raise ValueError(f"manifest {p} could not be read: {exc}") from None
     value = data.get("profile") if isinstance(data, dict) else None
     return str(value) if value else None
 
@@ -143,21 +154,14 @@ def declared_profile(manifest: Path | str | None) -> str | None:
 def default_manifest() -> Path | None:
     """The manifest a caller that selected none is read against, decided
     when asked rather than when imported (#1439): the working directory's
-    default manifest if there is one, else the nearest ancestor's (an
-    installed package run from a subdirectory of the user's project, #1467
-    — the way git finds a repository), else the checkout's when this
-    package is imported from a checkout — so a script run from `tests/` in
-    the study's checkout still sees the study's — else none."""
-    rel = Path(DEFAULT_MANIFEST)
-    if rel.exists():
-        return rel
-    here = Path.cwd().resolve()
-    for ancestor in here.parents:
-        if (ancestor / rel).exists():
-            return ancestor / rel
-    if _CHECKOUT_ROOT is not None and (_CHECKOUT_ROOT / rel).exists():
-        return _CHECKOUT_ROOT / rel
-    return None
+    default manifest if there is one, else the checkout's when this package
+    is imported from a checkout — so a script run from `tests/` in the
+    study's checkout still sees the study's — else none (the registry's
+    rule, #1491; an ancestor's manifest waits on #1523)."""
+    # The registry's rule, not a second one (#1491).
+    from data_sheets_schema.registry import default_manifest_path
+    p = default_manifest_path()
+    return p if p.exists() else None
 
 
 def _shown(path: Path) -> str:
@@ -203,8 +207,17 @@ def select_profile(manifest: Path | str | None | Any = "default") -> Selection:
         basis = "default manifest"
     if manifest is None:
         return Selection(NEUTRAL, "no manifest")
-    name = declared_profile(manifest)
-    return Selection(profile_named(name) if name else NEUTRAL, basis_for(basis, Path(manifest)))
+    p = Path(manifest)
+    if not p.exists():
+        # Not a fallback that hides: the basis names the path and says it
+        # was not there (#1494).
+        return Selection(NEUTRAL, f"{basis}:{_shown(p)} (missing)")
+    name = declared_profile(p)
+    if name:
+        return Selection(profile_named(name), basis_for(basis, p))
+    # The silent fallback #1439 wanted visible: neutral because the manifest
+    # declares nothing, said as such.
+    return Selection(NEUTRAL, basis_for(basis, p) + " (undeclared)")
 
 
 def active_profile(manifest: Path | str | None | Any = "default") -> Profile:
@@ -219,8 +232,22 @@ def for_record(record: dict[str, Any] | None) -> Profile:
     checkout. Evaluation, review packs and backfills read this, never the
     environment alone, so a historical record keeps its instrument when the
     environment changes."""
-    name = ((record or {}).get("schema") or {}).get("profile") if isinstance(record, dict) else None
-    return profile_named(str(name)) if name else active_profile()
+    schema = (record or {}).get("schema") if isinstance(record, dict) else None
+    if not isinstance(schema, dict):
+        schema = {}
+    name = schema.get("profile")
+    if name:
+        try:
+            return profile_named(str(name))
+        except ValueError as exc:
+            import warnings
+            warnings.warn(f"record states a profile this code does not know ({exc}); read as the study's",
+                          RuntimeWarning, stacklevel=2)
+            return BRIDGE2AI
+    # No profile: a record made before profiles existed — every one of them
+    # the study's, digest or not (103 corpus records carry neither; #1518,
+    # #1583) — and it must not follow the environment.
+    return BRIDGE2AI
 
 
 def arm_projects_for(arm: str, profile: Profile | None = None) -> list[str] | None:

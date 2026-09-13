@@ -5,6 +5,13 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+
+
+@pytest.fixture(autouse=True)
+def _study_profile_environment(monkeypatch):
+    """These tests repoint the vocabulary pin and expect it rendered — the
+    study's instrument, whatever `D4D_PROFILE` says outside (#1548)."""
+    monkeypatch.delenv("D4D_PROFILE", raising=False)
 import yaml
 
 from data_sheets_schema import api_runner, schema_digest
