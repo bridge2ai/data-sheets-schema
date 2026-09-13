@@ -6,7 +6,6 @@ import collections
 import sys
 from pathlib import Path
 from data_sheets_schema.constants import METHODS
-from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
 
 
 def _detect_evaluation_rubric(input_file):
@@ -72,9 +71,9 @@ def _render_evaluation_html(input_file, output, rubric):
     resolved_output, selected_rubric = _resolve_evaluation_output(input_file, output, rubric)
 
     if selected_rubric == 'rubric10':
-        from scripts.render_evaluation_html_rubric10_semantic import render_evaluation_file
+        from data_sheets_schema.rendering.rubric10_semantic import render_evaluation_file
     elif selected_rubric == 'rubric20':
-        from scripts.render_evaluation_html_rubric20_semantic import render_evaluation_file
+        from data_sheets_schema.rendering.rubric20_semantic import render_evaluation_file
     else:
         raise click.ClickException(f"Unsupported rubric: {selected_rubric}")
 
@@ -97,7 +96,6 @@ def render():
               help='Skip linkml-validate check before rendering')
 def html(input_file, output, template, skip_validation):
     """Render a structured file to HTML."""
-    require_repo_context("d4d render html")
 
     if not output and template != 'evaluation':
         output = Path(input_file).with_suffix('.html')
@@ -105,8 +103,7 @@ def html(input_file, output, template, skip_validation):
     # Validate D4D YAML before rendering (skipped for evaluation JSONs and linkml templates).
     # Acts as a gate: refuses to render invalid YAML unless --skip-validation is passed.
     if template == 'human-readable' and not skip_validation:
-        setup_repo_imports()
-        from src.evaluation.evaluate_d4d import validate_d4d_yaml
+        from data_sheets_schema.evaluation.evaluate_d4d import validate_d4d_yaml
         if not validate_d4d_yaml(Path(input_file)):
             raise click.ClickException(
                 f"Validation failed for {input_file}. "
@@ -115,12 +112,9 @@ def html(input_file, output, template, skip_validation):
 
     click.echo(f"🎨 Rendering {input_file} to HTML ({template} style)...")
 
-    # Import and call the rendering script
-    setup_repo_imports()
-
     try:
         if template == 'human-readable':
-            from src.html.human_readable_renderer import render_yaml_file
+            from data_sheets_schema.rendering.human_readable_renderer import render_yaml_file
 
             rendered_path = render_yaml_file(input_file, output)
             css_path = Path(rendered_path).parent / 'datasheet-common.css'
@@ -133,7 +127,7 @@ def html(input_file, output, template, skip_validation):
             click.echo(f"✓ Evaluation HTML saved to {rendered_path} ({selected_rubric})")
 
         elif template == 'linkml':
-            from src.html.process_text_files import render_structured_file_to_linkml_html
+            from data_sheets_schema.rendering.process_text_files import render_structured_file_to_linkml_html
 
             rendered_path = render_structured_file_to_linkml_html(input_file, output)
             click.echo(f"✓ LinkML HTML saved to {rendered_path}")
@@ -172,9 +166,7 @@ def generate_all(method, labels, projects, publish, execute):
 
     Output is `.../{method}/{label}/{PROJECT}.html`, which cannot collide.
     """
-    require_repo_context("d4d render generate-all")
-    setup_repo_imports()
-    from src.html.human_readable_renderer import render_yaml_file
+    from data_sheets_schema.rendering.human_readable_renderer import render_yaml_file
 
     concat = Path("data/d4d_concatenated")
     out_root = Path("data/d4d_html/concatenated")
@@ -255,11 +247,9 @@ def generate_all(method, labels, projects, publish, execute):
               help='Evaluation rubric to render')
 def evaluation(input_file, output, rubric):
     """Render evaluation JSON to HTML."""
-    require_repo_context("d4d render evaluation")
 
     click.echo(f"📊 Rendering evaluation {input_file} to HTML...")
 
-    setup_repo_imports()
 
     try:
         rendered_path, selected_rubric = _render_evaluation_html(input_file, output, rubric)

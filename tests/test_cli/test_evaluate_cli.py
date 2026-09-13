@@ -37,11 +37,9 @@ class TestEvaluateCLI(unittest.TestCase):
         def fake_main():
             captured_argv.append(list(sys.argv))
 
-        fake_modules = build_module_tree("src.evaluation.evaluate_d4d", main=fake_main)
+        fake_modules = build_module_tree("data_sheets_schema.evaluation.evaluate_d4d", main=fake_main)
 
-        with patch("data_sheets_schema.cli.evaluate.require_repo_context"), \
-             patch("data_sheets_schema.cli.evaluate.setup_repo_imports"), \
-             patch.dict(sys.modules, fake_modules):
+        with patch.dict(sys.modules, fake_modules):
             original_argv = list(sys.argv)
             result = self.runner.invoke(
                 cli,
@@ -79,11 +77,9 @@ class TestEvaluateCLI(unittest.TestCase):
         def fake_main():
             captured_argv.append(list(sys.argv))
 
-        fake_modules = build_module_tree("src.evaluation.evaluate_d4d_llm", main=fake_main)
+        fake_modules = build_module_tree("data_sheets_schema.evaluation.evaluate_d4d_llm", main=fake_main)
 
-        with patch("data_sheets_schema.cli.evaluate.require_repo_context"), \
-             patch("data_sheets_schema.cli.evaluate.setup_repo_imports"), \
-             patch.dict(sys.modules, fake_modules):
+        with patch.dict(sys.modules, fake_modules):
             original_argv = list(sys.argv)
             result = self.runner.invoke(
                 cli,
@@ -125,15 +121,13 @@ class TestEvaluateCLI(unittest.TestCase):
 
     def test_llm_reports_missing_backend_module_cleanly(self):
         def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
-            if name == "src.evaluation.evaluate_d4d_llm":
+            if name == "data_sheets_schema.evaluation.evaluate_d4d_llm":
                 raise ImportError("missing llm backend")
             return original_import(name, globals, locals, fromlist, level)
 
         original_import = __import__
 
-        with patch("data_sheets_schema.cli.evaluate.require_repo_context"), \
-             patch("data_sheets_schema.cli.evaluate.setup_repo_imports"), \
-             patch("builtins.__import__", side_effect=fake_import):
+        with patch("builtins.__import__", side_effect=fake_import):
             result = self.runner.invoke(
                 cli,
                 [

@@ -9,7 +9,6 @@ from data_sheets_schema.registry import project_choice
 import sys
 from pathlib import Path
 from data_sheets_schema.constants import METHODS, RUBRIC_TYPES
-from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
 
 @click.group()
 def evaluate():
@@ -120,17 +119,13 @@ def presence(file, context, project, method, output_dir):
     if file:
         if not project or not method:
             raise click.ClickException("--file requires --project and --method")
-    else:
-        require_repo_context("d4d evaluate presence")
 
     if project:
         click.echo(f"📊 Evaluating {project} ({method}) - presence-based...")
     else:
         click.echo(f"📊 Evaluating all projects ({method}) - presence-based...")
 
-    # Import and call the evaluation script
-    setup_repo_imports()
-    from src.evaluation.evaluate_d4d import main as eval_main
+    from data_sheets_schema.evaluation.evaluate_d4d import main as eval_main
 
     # Set up args for the evaluation script
     old_argv = sys.argv
@@ -174,14 +169,11 @@ def llm(file, project, method, rubric, output_dir, context):
     click.echo(f"🤖 LLM evaluating {file} with {rubric}...")
     click.echo("⚠️  Note: Requires ANTHROPIC_API_KEY environment variable")
 
-    # Import and call the LLM evaluation script
-    setup_repo_imports()
-
     try:
-        from src.evaluation.evaluate_d4d_llm import main as llm_eval_main
+        from data_sheets_schema.evaluation.evaluate_d4d_llm import main as llm_eval_main
     except ImportError:
         click.echo("❌ Error: LLM evaluation script not found", err=True)
-        click.echo("   Expected: src/evaluation/evaluate_d4d_llm.py", err=True)
+        click.echo("   Expected: data_sheets_schema.evaluation.evaluate_d4d_llm", err=True)
         sys.exit(1)
 
     # Set up args for the LLM evaluation script
