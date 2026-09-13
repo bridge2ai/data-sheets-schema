@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Compatibility batch entry point; rendering lives in data_sheets_schema.rendering.human_readable_renderer."""
 from data_sheets_schema.rendering.human_readable_renderer import *  # noqa: F401,F403
 from data_sheets_schema.rendering import human_readable_renderer as _implementation

@@ -28,8 +28,8 @@
     "poetry.lock": "d2ef0a7d2b8b7891315a851eafeec1fdb56ca639e9fa878ebca4b3f33abfabd4",
     "pyproject.toml": "d98ab2a4a096659fd897801294dbeba6b84eadcfce7827c111ddbb888be6711a",
     "scripts/reference_rescore.py": "73d54c3baa304502536ce88dcb899f9acf72ee2e8a672a268c0ccc5c158d3f06",
-    "scripts/render_evaluation_html_rubric10_semantic.py": "8b1402a76e923a7cd6a0cae4753e021caf6d43334592e5ac29c5739b66c2ff70",
-    "scripts/render_evaluation_html_rubric20_semantic.py": "4bd76c2ed502ca04474627d58a0a7d59b3e6f6d8df5ebb8e29caccf1ff6df6f9",
+    "scripts/render_evaluation_html_rubric10_semantic.py": "f9deb21b82dcad3bddf1c742b526523ef06904cc32f991619f59e65074c72b03",
+    "scripts/render_evaluation_html_rubric20_semantic.py": "6990ab4d859c76a5c43d5df7b3c25098abfc5eb69cf3a4abffa455f7b6b04610",
     "scripts/validate_evaluation_schema.py": "ddf683b03b7b9a20e0bf837066fb8dd820f5088169a1ec0c90565259170e3825",
     "src/data_sheets_schema/agent_pin.py": "de955738981a32a5b4d210a57fa7019738e9d2d4cf96689167f63450066013ea",
     "src/data_sheets_schema/cli/evaluate.py": "f7cb0c174aa9db60afb9c9151c3b10a047c024fd99ded53b7a2ef352436410c0",
@@ -57,10 +57,10 @@
     "src/download/prompts/rubric10_system_prompt.md": "187b693af395355d5e912e5310eee2da590a51f84e771ca6d3b611572b9e49a7",
     "src/download/prompts/rubric20_semantic_schema.json": "0c79f51048dd080155ed6b0bd8b3ba92509869c89c526ab98fdca8a6c2ad9988",
     "src/download/prompts/rubric20_system_prompt.md": "0ef76922733671b100f2454793adc8718e5aefcf0d62508780f3f82d795410c3",
-    "src/evaluation/evaluate_d4d.py": "c7500f115dd807e8a2bc1347e6b49344b2d8e65f52476fa49b6a911b9373a1ed",
-    "src/evaluation/evaluate_d4d_llm.py": "5f8936729ae4f4e4f4368916cfd8da2f69075cc201a53cac1c0fdf3ca20b4003",
-    "src/html/human_readable_renderer.py": "85271fd784e8bd400e91114018b7ed91d97d405e0a69c186b3b484247691a764",
-    "src/html/process_text_files.py": "40c0b3ceed8cdf319df48ccc184f085423d65cca94b410f0135f2d8dc576db1d"
+    "src/evaluation/evaluate_d4d.py": "5853205378271b38add3dc17971c0db8e5987e03206129561c5c57401d8d7875",
+    "src/evaluation/evaluate_d4d_llm.py": "44cec11c31217574fdb317111b2983d794ce6564446fe37dedafdaeb814280eb",
+    "src/html/human_readable_renderer.py": "769089a49fc75f06927e06ce5c46d89b815b97134801be9e901fdd4c42a959a7",
+    "src/html/process_text_files.py": "54f6ee0820f8d36d68aff9b3ede658b541999de98ce8f5e727f53f1dc1ee0f3a"
   },
   "generation_arms": [
     "api",
@@ -74,7 +74,8 @@
     1569,
     1580,
     1599,
-    1600
+    1600,
+    1662
   ],
   "presence_instrument": {
     "inputs": {

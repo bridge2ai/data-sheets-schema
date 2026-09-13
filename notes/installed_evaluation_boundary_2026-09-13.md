@@ -115,3 +115,12 @@ audit verifies 56 accepted ratings, 259 prior evaluations and 450 file hashes.
 The dependency lock check passes. These are implementation changes with no
 new production model call, generation output, score or quoted definition.
 The JSON pins the combined implementation for review and exact-head CI.
+
+## Executable compatibility correction — 2026-09-13
+
+Round-6 review found #1662: the executable legacy evaluator lost its Python
+shebang when replaced by a compatibility wrapper. Direct subprocess execution
+reproduced errno 8. The original shebangs are restored on all six affected
+wrappers, retaining their existing modes. Direct evaluator --help succeeds,
+and all seven legacy-renderer/evaluation CLI checks pass. Packaged scoring
+implementation and instrument texts are unchanged.
