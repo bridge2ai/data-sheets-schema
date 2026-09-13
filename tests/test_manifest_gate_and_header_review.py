@@ -1,5 +1,6 @@
 """Selected manifest declarations survive reconstruction and cannot fake coverage."""
 from dataclasses import replace
+from pathlib import Path
 
 from click.testing import CliRunner
 import pytest
@@ -89,7 +90,9 @@ def test_a_positive_manifest_path_containing_unused_words_is_still_selected(prio
         selected = selected.relative_to(spec.bundle.parent)
     full.write_text(f"# Source bundle: {spec.bundle}\n# Source manifest: {selected}\nid: example:cohort\n")
     rec = pv.build_record(spec.project, spec.method, spec.label, mode="reconstructed", input_verified=True)
-    assert rec.data["inputs"]["source_manifest"]["path"] == str(selected)
+    captured = rec.data["inputs"]["source_manifest"]
+    assert Path(captured["path"]).resolve() == selected.resolve()
+    assert captured["md5"] == pv._md5(selected)
     changed = replace(spec, manifest=selected, manifest_line=spec.header_for_manifest(selected))
     assert changed.manifest_used
 
