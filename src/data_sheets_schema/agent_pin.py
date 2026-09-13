@@ -146,13 +146,21 @@ def _usable(lines):
     return out
 
 
-def _git(*args) -> str:
+def _git(*args, cwd: Path | None = None) -> str:
     from data_sheets_schema.resources import resource_root
     root, kind = resource_root()
     if kind != "checkout":
         return ""
     return subprocess.run(["git", *args], capture_output=True, text=True,
-                          cwd=root).stdout
+                          cwd=cwd or root).stdout
+
+
+def _history_root(path: Path) -> Path:
+    """The checkout whose git holds `path`'s history: the checkout the
+    definition was read from — the working directory's when it is one —
+    not the checkout the code was imported from (#1638)."""
+    from data_sheets_schema.resources import checkout_at
+    return checkout_at(path.resolve()) or REPO
 
 
 def _previous_text(name: str) -> str | None:
@@ -183,21 +191,23 @@ def _previous_text(name: str) -> str | None:
         except (OSError, ValueError, KeyError, TypeError, AttributeError):
             return None
     current = agent_path(name)
+    if _history_root(current).resolve() != root.resolve():
+        return None
     rel = repo_relative(current, cwd=False)
     if current.resolve() != (root / rel).resolve():
         # A staged resource outside the selected checkout has no established
         # relationship to that checkout's version history.
         return None
-    if _git("diff", "HEAD", "--name-only", "--", rel).strip():
-        blob = _git("show", f"HEAD:{rel}")
+    if _git("diff", "HEAD", "--name-only", "--", rel, cwd=root).strip():
+        blob = _git("show", f"HEAD:{rel}", cwd=root)
         return blob or None
-    commit = _git("log", "-n1", "--format=%H", "--", rel).strip()
+    commit = _git("log", "-n1", "--format=%H", "--", rel, cwd=root).strip()
     if not commit:
         return None
-    parent = _git("rev-parse", f"{commit}^").strip()
+    parent = _git("rev-parse", f"{commit}^", cwd=root).strip()
     if not parent:
         return None
-    return _git("show", f"{parent}:{rel}") or None
+    return _git("show", f"{parent}:{rel}", cwd=root) or None
 
 
 def sentences_by_section(body: str) -> list[tuple[str | None, str]]:

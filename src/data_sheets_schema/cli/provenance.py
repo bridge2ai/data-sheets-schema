@@ -162,9 +162,12 @@ def _require_repo_root_cwd(command: str) -> None:
     # Any checkout of this project, not only the one the code is imported
     # from (#1588): a worktree's subdirectory is as wrong a place as the
     # primary's.
-    from data_sheets_schema.resources import checkout_at
+    from data_sheets_schema.resources import ResourceRootError, checkout_at
     cwd = Path.cwd().resolve()
-    root = checkout_at(cwd)
+    try:
+        root = checkout_at(cwd)
+    except ResourceRootError as exc:
+        raise click.ClickException(f"{command}: {exc}; a record cannot say whose resources it hashed (#1619)")
     if root is not None and cwd != root:
         raise click.ClickException(
             f"{command} must run from the data-sheets-schema repository root ({root}), "
@@ -321,6 +324,7 @@ def _parse_phases(specs) -> list[dict]:
                    'path\'s resumed runs carry. Repeat once per skipped '
                    'phase; names are validated like --phase.')
 @click.option('--profile', 'stated_profile', default=None,
+              type=click.Choice(sorted(__import__("data_sheets_schema.profiles", fromlist=["PROFILES"]).PROFILES)),
               help='the profile the launch instruction was rendered under (the rendered `d4d provenance record` '
                    'line carries it); recorded with the basis `rendered instruction`, over what the manifest '
                    'or this process\'s environment would select (#1581)')
@@ -399,14 +403,27 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     selected_manifest = (None if requested is AUTO and resolved_bundle is None
                          else select_manifest(project, resolved_bundle, requested))
     from data_sheets_schema.profiles import select_profile
-    profile_selection = select_profile(selected_manifest)
     if stated_profile:
+        # The instruction's profile is authoritative (#1581); what this
+        # process would have selected is a diagnostic, and a process whose
+        # own selection is invalid — `D4D_PROFILE=typo` — still records the
+        # profile it was told (#1606).
         from data_sheets_schema.profiles import Selection, profile_named
         stated = profile_named(stated_profile)
         basis = "rendered instruction"
-        if stated is not profile_selection.profile:
-            basis += f" (this process would select {profile_selection.name}: {profile_selection.basis})"
+        try:
+            ambient = select_profile(selected_manifest)
+        except ValueError as exc:
+            basis += f" (this process could not select one: {exc})"
+        else:
+            if stated is not ambient.profile:
+                basis += f" (this process would select {ambient.name}: {ambient.basis})"
         profile_selection = Selection(stated, basis)
+    else:
+        try:
+            profile_selection = select_profile(selected_manifest)
+        except ValueError as exc:                # a manifest declaring a profile this code does not know (#1630)
+            raise click.ClickException(str(exc))
     # … and the header governs what the input block attests.
     selected = None if header_unused else selected_manifest
     manifest_basis = ("the output header declares the source manifest unused"
@@ -429,6 +446,9 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             manifest_line=_ARMS[arm][3],
             manifest=selected_manifest,  # what was selected; `manifest_used` reads the header (#1367 review, must-fix 3; #1461)
             chunk_manifest=Path(chunk_manifest) if chunk_manifest else None,
+            # The spec the gate re-renders carries the profile the record
+            # states, not a second selection of this process's own (#1606).
+            profile=profile_selection.name, profile_basis=profile_selection.basis,
         )
         spec = run_spec.render_spec()
         if not run_spec.manifest_used:
@@ -546,8 +566,18 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     # only by reproducing the complete original instruction hash.
     from data_sheets_schema.registry import DEFAULT_MANIFEST, default_manifest_path
     sm = ((data.get("inputs") or {}).get("source_manifest")) or {}
-    manifest_choices = ([Path(sm["path"]) if sm.get("path") else None] if "path" in sm
+    # A recorded path is authoritative. A null path says the manifest's
+    # blocks were not consumed — an arm whose header declares it unused,
+    # or none selected — but the renderer still names the *selected*
+    # manifest in the recording command, so every way it could have been
+    # selected is tried, proven by the hash alone (#1607).
+    manifest_choices = ([Path(sm["path"])] if sm.get("path")
                         else [None, DEFAULT_MANIFEST, default_manifest_path()])
+    # An arm that declares its own header keeps it — the crate-only and
+    # healthsheet arms say "not used" whatever was selected — and the
+    # default header follows the selection (#1607).
+    arm_header = _ARMS[arm][3]
+    own_header = "not used" in arm_header.lower()
     from itertools import product
     chunks = ((data.get("inputs") or {}).get("chunks") or {}).get("path")
     # A discovered sidecar is attested as an input too. Only an explicit
@@ -619,7 +649,7 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
             "arm": _ARMS[arm][0], "bundle": str(bundle), "condition": condition,
             "runtime": runtime, "provider": provider,
             "manifest": str(selected_manifest) if selected_manifest is not None else None,
-            "manifest_line": RunSpec.header_for_manifest(selected_manifest),
+            "manifest_line": arm_header if own_header else RunSpec.header_for_manifest(selected_manifest),
             "render_version": render_version,
             **({"chunk_check_uses_manifest": True} if scoped_chunks else {}),
             **({"agentic_artifact_paths": destinations} if destinations is not None

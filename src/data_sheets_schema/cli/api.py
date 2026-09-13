@@ -72,10 +72,13 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
         kw["provider"] = provider
     if condition is None:                      # not chosen: the default applies and the record says so (#1094)
         condition, kw["condition_stated"] = "generic", False
-    return RunSpec(project=project, arm=display, method=method,
-                   bundle=resolved, label=label, condition=condition,
-                   manifest_line=manifest_line,
-                   out_dir=Path(out_dir) if out_dir else None, **kw)
+    try:
+        return RunSpec(project=project, arm=display, method=method,
+                       bundle=resolved, label=label, condition=condition,
+                       manifest_line=manifest_line,
+                       out_dir=Path(out_dir) if out_dir else None, **kw)
+    except ValueError as exc:                    # an unknown profile, from a manifest or the environment (#1630)
+        raise click.ClickException(str(exc))
 
 
 def _manifest_kw(manifest, chunk_manifest) -> dict:
@@ -357,6 +360,8 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
 @click.option("--yes", is_flag=True, help="skip the cost confirmation")
 def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, manifest, chunk_manifest, out_dir, yes):
     """Execute every phase (four model calls, plus one bounded re-addressing call under a receipt condition when a receipt entry names a slot the record does not carry, #952; the core is derived from the full) and write outputs plus a live provenance record."""
+    from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+    _require_repo_root_cwd("d4d api run")          # the record and the outputs land under the cwd (#1643)
     from data_sheets_schema.api_runner import execute, plan
     spec = _spec(project, arm, label, condition, bundle, out_dir, **_manifest_kw(manifest, chunk_manifest))
     _require_bundle(spec, project, bundle)
@@ -439,6 +444,8 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     Each run resumes independently, so a sweep interrupted partway costs only
     the unfinished phases to complete rather than restarting.
     """
+    from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+    _require_repo_root_cwd("d4d api batch")          # the record and the outputs land under the cwd (#1643)
     from data_sheets_schema.api_runner import execute, plan
 
     requested = (AUTO if manifest is None

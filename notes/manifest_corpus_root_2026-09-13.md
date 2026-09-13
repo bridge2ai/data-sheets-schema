@@ -155,3 +155,21 @@ fixture captures its chunk path before changing directory. All 60 historical
 renderer controls remain unchanged. Prior-head CI had exactly the copied
 pair-gate fixture failure already fixed by #1646, with 4406 passes and 13
 skips. No measured record, rating or original working-tree file was changed.
+
+## Final dependency integration and round 7 — 2026-09-13
+
+The branch now includes the published profile and packaging fixes through
+installed-workflow dependency 66130d5cb. #1653 separates omitted source-manifest
+selection from explicit none in chunk discovery, canonical names, API phase
+assembly and recorded chunk identity. An automatically undeclared project
+uses the caller's sidecar even when its bundle is a symlink into an ancestor
+corpus. Its emitted strict preflight now validates the same selection.
+
+The emitted-command regression fails before the fix. All 76 focused checks
+pass, followed by 177 combined profile/resource/corpus/replay checks with one
+existing skip. All eight fresh-wheel workflows pass (125.60 seconds), and all
+42 frozen-controller/audit checks pass. All 60 historical renderer controls
+retain their hashes. The nested archived-checkout probe also confirms resource
+and corpus discovery agree after the upstream integration. No production
+record, prior score or historical instrument attribution is rewritten.
+The next review and CI use this combined committed implementation.

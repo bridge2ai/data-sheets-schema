@@ -23,7 +23,7 @@ include = [
     { path = ".claude/commands/*.md", format = ["sdist", "wheel"] },
     { path = ".claude/agents/*.md", format = ["sdist", "wheel"] },
     { path = ".claude/agents/_preimages.json", format = ["sdist", "wheel"] },
-    { path = "data/rubric/*", format = ["sdist", "wheel"] },
+    { path = "data/rubric/rubric*.txt", format = ["sdist", "wheel"] },   # the rubrics, not the reviewer files (#1637)
     { path = "src/data_sheets_schema/rendering/*.css", format = ["sdist", "wheel"] },
     { path = ".github/workflows/*.config", format = ["sdist", "wheel"] },
 ]
@@ -38,7 +38,11 @@ pyyaml = "^6.0.2"
 jinja2 = "^3.1.6"
 requests = "^2.31.0"
 pydantic-ai = "^0.2.0"
-anthropic = "^0.72.0"
+# The runner's own SDK, declared (#1636): it reached the lock only through
+# pydantic-ai's extra, and a wheel resolved a later major the runner was
+# never run against. Exact, as the locked version the code reasons about.
+anthropic = "==0.72.0"
+httpx = "^0.28.1"
 beautifulsoup4 = "^4.12.0"
 pdfminer-six = "^20221105"
 pandas = "^2.3.1"

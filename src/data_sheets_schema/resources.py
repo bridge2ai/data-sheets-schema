@@ -41,15 +41,24 @@ from pathlib import Path
 PACKAGE_ROOT = Path(__file__).resolve().parent
 
 #: The source checkout this package is imported from, or None for a wheel.
+class ResourceRootError(RuntimeError):
+    """A directory that may be a checkout could not be inspected (#1619)."""
+
+
 def _is_our_checkout(root: Path) -> bool:
     """A `pyproject.toml` two levels up is the checkout only when it is this
     project's and the source layout is there — a copy installed under a
     user's own project (`<project>/vendor/data_sheets_schema/`) must not
-    adopt that project (#1577)."""
+    adopt that project (#1577). A marker that is absent is no checkout; one
+    that cannot be read is not evidence of anything and is refused rather
+    than read as absent (#1619)."""
+    marker = root / "pyproject.toml"
     try:
-        text = (root / "pyproject.toml").read_text(encoding="utf-8")
-    except OSError:
+        text = marker.read_text(encoding="utf-8")
+    except (FileNotFoundError, NotADirectoryError):
         return False
+    except OSError as exc:
+        raise ResourceRootError(f"{marker} could not be read: {exc}; whether {root} is a checkout is unknown") from exc
     import re
     return (re.search(r'^name\s*=\s*"data[-_]sheets[-_]schema"', text, re.M) is not None
             and (root / "src" / "data_sheets_schema").is_dir())
@@ -78,27 +87,31 @@ def is_checkout() -> bool:
 
 
 def checkout_at(directory: str | Path) -> Path | None:
-    """The checkout of this project `directory` is in: itself when it is
-    one, else its nearest ancestor that is — a worktree or a second clone as
-    much as the checkout the code is imported from. None outside every
-    checkout."""
+    """The checkout of this project `directory` is in: the *outermost* of
+    itself and its ancestors that is one — a worktree or a second clone as
+    much as the checkout the code is imported from. Outermost, because a
+    copy of the tree archived inside a checkout (a registration of measured
+    inputs under `notes/`, #1545) is part of the checkout that holds it,
+    not a checkout of its own. None outside every checkout."""
     try:
         p = Path(directory).resolve()
     except OSError:
         return None
+    found = None
     for candidate in (p, *p.parents):
         if _is_our_checkout(candidate):
-            return candidate
-    return None
+            found = candidate
+    return found
 
 
 def cwd_checkout() -> Path | None:
     """The working directory when it is the *root* of a checkout of this
     project (#1588): its files are what `resource_path` reads first, so it —
     not the checkout the code happens to be imported from — is where the
-    resources come from. A subdirectory of a checkout is not one (#672)."""
-    cwd = Path.cwd()
-    return cwd.resolve() if _is_our_checkout(cwd) else None
+    resources come from. A subdirectory of a checkout is not one (#672),
+    and neither is a copy of the tree nested inside one (#1545)."""
+    cwd = Path.cwd().resolve()
+    return cwd if checkout_at(cwd) == cwd else None
 
 
 def resource_root() -> tuple[Path, str]:
@@ -180,7 +193,10 @@ def resource_path(path: str | Path) -> Path:
     """Where a repository-relative resource is read from, decided now.
 
     The working directory's copy, as the relative path it was given, when it
-    exists there or the working directory carries its tree (`_cwd_carries`);
+    exists there or the working directory carries its tree (`_cwd_carries`)
+    — and always when the working directory is a checkout of this project:
+    a checkout is authoritative for its absences too, so a playbook or
+    prompt deleted there is missing, never another checkout's (#1617) —
     else the checkout's, else the installed copy, as an absolute path; else
     the path unchanged so the caller's own error names it. An absolute path,
     one with `..`, or one outside `RESOURCE_PREFIXES`, is returned as given.
@@ -188,6 +204,8 @@ def resource_path(path: str | Path) -> Path:
     p = Path(path)
     if p.is_absolute() or not is_resource(p) or p.exists() or _cwd_carries(p):
         return p
+    if cwd_checkout() is not None:
+        return p                                 # missing here is missing (#1617)
     for candidate in _candidates(p):
         if candidate.exists():
             return candidate
@@ -240,13 +258,15 @@ def repo_relative(path: str | Path, *, cwd: bool = True) -> str:
             library = sysconfig.get_path(kind)
             if library and resolved.is_relative_to(Path(library).resolve()):
                 return resolved.as_posix()
-    anchors: list[tuple[Path, tuple[str, ...], bool]] = []
-    if here is not None:
-        anchors.append((here, (), False))
-    if CHECKOUT_ROOT is not None:
-        anchors.append((CHECKOUT_ROOT, (), False))
-    anchors.append((PACKAGE_ROOT, _PACKAGE_PREFIX, False))
-    anchors.append((INSTALL_ROOT, (), True))
+    # Anchored on the one resource root this process records (#1618): a
+    # file under another checkout of this project keeps its absolute
+    # identity, so two checkouts' copies of one playbook are never
+    # recorded under one string.
+    root, kind = resource_root()
+    anchors: list[tuple[Path, tuple[str, ...], bool]] = [(root, (), False)]
+    if kind == "install":
+        anchors.append((PACKAGE_ROOT, _PACKAGE_PREFIX, False))
+        anchors.append((INSTALL_ROOT, (), True))
     if cwd:
         anchors.append((Path.cwd(), (), False))
     for root, prefix, resources_only in anchors:
