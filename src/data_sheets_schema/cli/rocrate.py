@@ -155,13 +155,13 @@ def merge(input_files, output, primary):
 @click.option('--packages-dir', type=click.Path(), default='data/ro-crate_packages',
               show_default=True, help='Root of the per-project crate packages.')
 def normalize(project, packages_dir):
-    require_repo_context("d4d rocrate normalize")     # the mapping table and packages are the corpus (#1551)
     """Normalize upstream RO-Crate packages into D4D-usable artifacts.
 
     Writes {PROJECT}/processed/ with a schema-valid D4D YAML (deterministic
     fork), a size-reduced crate JSON-LD (de novo fork), and a changes report.
     Raw inputs are never modified.
     """
+    require_repo_context("d4d rocrate normalize")     # the mapping table and packages are the corpus (#1551); below the docstring (#1590)
     from linkml_runtime import SchemaView
 
     from data_sheets_schema.rocrate_normalize import (
@@ -294,13 +294,13 @@ def emit_arm(version, project, packages_dir):
 @click.option('--packages-dir', type=click.Path(), default='data/ro-crate_packages',
               show_default=True)
 def map_cmd(project, packages_dir):
-    require_repo_context("d4d rocrate map")
     """Map a crate to D4D using this repo's own static mapping table.
 
     Reads ro-crate-metadata.json (which every crate has) rather than the
     upstream ro-crate-linkml.yaml, so it works uniformly across crates and
     reports the declared mapping quality of every field it fills.
     """
+    require_repo_context("d4d rocrate map")
     from linkml_runtime import SchemaView
 
     from data_sheets_schema.rocrate_map import (

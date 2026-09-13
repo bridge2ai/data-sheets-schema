@@ -7,6 +7,22 @@ from pathlib import Path
 
 from data_sheets_schema.healthsheet import build_bundle, load_healthsheet, render
 
+_SAVED_PROFILE = None
+
+
+def setUpModule():
+    """The renderer's default project is the active profile's; these tests
+    render the study's shape, whatever `D4D_PROFILE` says outside (#1582)."""
+    global _SAVED_PROFILE
+    import os
+    _SAVED_PROFILE = os.environ.pop("D4D_PROFILE", None)
+
+
+def tearDownModule():
+    import os
+    if _SAVED_PROFILE is not None:
+        os.environ["D4D_PROFILE"] = _SAVED_PROFILE
+
 RECORD = {
     "title": "Test Dataset",
     "doi": "10.60775/test",

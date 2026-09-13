@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-13",
+  "files": {
+    "src/data_sheets_schema/api_runner.py": "f30add682291163eb07ffabe4b4fc2559580ae84a217fa9938ffba9c63e4147a",
+    "src/data_sheets_schema/chunking.py": "9cbce2687ae2770f9c65928696ac397480e56e3da8a8d6148b9cde8beb4949e3",
+    "src/data_sheets_schema/cli/provenance.py": "ea88f0260d959085f0f92c2a8bae2421224cbecabfc64c229f249a1e7ab053fc",
+    "src/data_sheets_schema/cli/receipts.py": "aa321289cf79ab32d26c00699c4a40c1c3f57930cfc7dac850a40188337ae29b",
+    "src/data_sheets_schema/cli/runs.py": "431a6485e88b7566c505c0a706b266f752fd3e04834819c74b0ec98dede4213c",
+    "src/data_sheets_schema/corpus.py": "056034a783b3e304252ab81a094f3d8e9d99eb3e2b7db00ec73c67b989491c95",
+    "src/data_sheets_schema/profiles.py": "8c22e510968da387195ae518e280e9b52c5c72c70e90ec829d449419ecec963e",
+    "src/data_sheets_schema/provenance.py": "63eb286948fefd5406efe914faa1c438766cdbfa2c68e8f724ab69c058b84c6d",
+    "src/data_sheets_schema/registry.py": "2a5b9cc824e85b6dc05c3563454edd7d6930685dba3b13bffd85de3db8097234",
+    "src/data_sheets_schema/resources.py": "dfaf639641a8f688fad52be0cfe03463920cdd27e996ac2902a72599ba8142e1",
+    "src/data_sheets_schema/runs.py": "609158ba70b60049e381bb2a83d85214498d3ff5e61bffcc2a3cc6f18483b4b0"
+  },
+  "generation_arms": [
+    "agentic",
+    "api"
+  ],
+  "historical_renderer_controls": 48,
+  "issues": [
+    1523,
+    1594,
+    1595,
+    1596,
+    1597,
+    1598,
+    1601,
+    1602,
+    1603,
+    1604,
+    1605
+  ],
+  "preservation_sha256": "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f",
+  "preserved_condition": "notes/reference_rescore_2026-09-12_cborg_runtime",
+  "records_generated": [],
+  "records_rescored": [],
+  "renderer": 5,
+  "runtime_quoted_definition_sha256": null,
+  "status": "implementation_boundary_no_new_measurements"
+}

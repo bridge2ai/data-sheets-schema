@@ -165,12 +165,14 @@ class TestTheInstalledWheel(unittest.TestCase):
             f = rec["prompts"]["files"][0]
             assert f["path"] == "src/download/prompts/d4d_generic_arm_prompt.md", f
             assert f["exists"] is True and f["bytes"] > 0 and len(f["sha256"]) == 64, f
-            assert all(pb["exists"] for pb in rec["playbooks"]["files"]), rec["playbooks"]
+            pbs = rec["playbooks"]["files"]
+            assert len(pbs) >= 4 and all(pb["exists"] and len(pb["sha256"]) == 64 for pb in pbs), rec["playbooks"]   # #1578
             assert rec["schema"]["profile"] == "neutral", rec["schema"]
             v = rec.get("validation") or {{}}
             assert v.get("passed") is True and not v.get("problems") and not v.get("failure"), v
             assert (rec.get("pair_consistency") or {{}}).get("ran") is True, rec.get("pair_consistency")
-            assert "form" in rec and "grounding" in rec, sorted(rec)
+            assert (rec.get("form") or {{}}).get("checked") is True and (rec.get("grounding") or {{}}).get("checked") is True, (rec.get("form"), rec.get("grounding"))   # the runner computes them inline
+            assert (rec.get("core_derivation") or {{}}).get("derived") is True, rec.get("core_derivation")
             notes = rec.get("notes") or []
             assert any("Model settings read from .github/workflows/d4d_assistant_deterministic.config" in n for n in notes), notes   # the shipped config was read (#1529)
             from data_sheets_schema.provenance import check_record

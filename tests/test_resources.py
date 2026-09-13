@@ -345,3 +345,197 @@ class TestRoundOne(unittest.TestCase):
         from data_sheets_schema import agent_pin
         p = agent_pin.agent_path("d4d-review-record")
         self.assertTrue(p.exists())
+
+
+class TestRoundThree(unittest.TestCase):
+    """The #1455 round-3 findings (#1570–#1579)."""
+
+    def setUp(self):
+        self._cwd = os.getcwd()
+        self.tmp = tempfile.mkdtemp(prefix="d4d-resources-")
+        os.chdir(self.tmp)
+
+    def tearDown(self):
+        os.chdir(self._cwd)
+
+    def test_schema_readers_follow_the_filesystem_through_a_symlink(self):
+        """#1570"""
+        import hashlib
+        from data_sheets_schema.schema_snapshot import capture_schema
+        os.chdir(ROOT)
+        if not (ROOT / ".venv").is_symlink():
+            self.skipTest("no symlinked .venv to walk through")
+        p = Path(".venv/../src/data_sheets_schema/schema/d4d_generation_record.yaml")
+        if not p.exists():
+            self.skipTest("the other checkout carries no record schema")
+        snap = capture_schema(p)
+        self.assertEqual(Path(snap.key[0]).resolve(), p.resolve())
+        self.assertEqual(hashlib.sha256(snap.sources[0][2]).hexdigest(), hashlib.sha256(p.read_bytes()).hexdigest())
+
+    def test_a_crash_after_findings_is_still_a_crash(self):
+        """#1572"""
+        from data_sheets_schema.api_runner import _validator_did_not_run
+        self.assertTrue(_validator_did_not_run("[ERROR] [r/0] invalid\nTraceback (most recent call last):\nRuntimeError: boom"))
+        self.assertTrue(_validator_did_not_run("Usage: -c [OPTIONS] [DATA_SOURCES]...\nError: Invalid value"))
+        self.assertFalse(_validator_did_not_run("[ERROR] [r/0] 'does not exist.' is not of type 'object' in /creators/0"))
+
+    def test_a_staged_symlinked_prompt_has_one_identity_for_registry_and_record(self):
+        """#1573"""
+        from data_sheets_schema import prompt_registry as pr, provenance
+        (Path(self.tmp) / "src/download").mkdir(parents=True)
+        os.symlink(ROOT / "src/download/prompts", Path(self.tmp) / "src/download/prompts")
+        rel = "src/download/prompts/d4d_generic_arm_prompt_v9.md"
+        self.assertEqual(pr.normalise(rel), rel)                                   # resolves into the checkout
+        self.assertEqual(provenance.repo_relative(rel), rel)
+        self.assertEqual(pr.normalise(Path(self.tmp) / rel), rel)
+
+    def test_an_implicit_registry_that_resolves_to_the_checkouts_is_refused(self):
+        """#1576"""
+        from data_sheets_schema import prompt_registry as pr
+        (Path(self.tmp) / "src/download").mkdir(parents=True)
+        os.symlink(ROOT / "src/download/prompts", Path(self.tmp) / "src/download/prompts")
+        with self.assertRaises(ValueError) as caught:
+            pr.pin("src/download/prompts/d4d_generic_arm_prompt_v9.md", "must not write through the alias")
+        self.assertIn("not in the working tree", str(caught.exception))
+
+    def test_pin_metadata_names_the_blob_and_refuses_untracked_files(self):
+        """#1574, #1575"""
+        import subprocess
+        from data_sheets_schema import prompt_registry as pr
+        repo = Path(self.tmp) / "repo"; repo.mkdir()
+        git = lambda *a: subprocess.run(["git", "-c", "user.email=t@example.org", "-c", "user.name=t", *a], cwd=repo, check=True, capture_output=True)
+        git("init", "-q")
+        (repo / "nested").mkdir(); (repo / "nested" / "p.md").write_text("# x\n\n## Prompt body\nbody\n")
+        (repo / ".gitignore").write_text("ignored/\n")
+        git("add", "."); git("commit", "-q", "-m", "x")
+        # An *ignored* file: status reads clean, yet git holds no blob for it
+        # (an untracked one reads dirty and is refused as an uncommitted edit).
+        (repo / "nested" / "ignored").mkdir(); (repo / "nested" / "ignored" / "loose.md").write_text("never in history\n")
+        reg = Path(self.tmp) / "registry.yaml"
+        entry = pr.pin(repo / "nested" / "p.md", "tracked", registry=reg)
+        pinned = pr.entry_for(repo / "nested" / "p.md", reg)
+        self.assertIsNotNone(pinned["pinned_at_commit"])
+        self.assertEqual(pinned["pinned_blob_path"], "nested/p.md")
+        self.assertEqual(Path(pinned["pinned_in_repository"]).resolve(), repo.resolve())
+        blob = subprocess.run(["git", "show", f"{pinned['pinned_at_commit']}:{pinned['pinned_blob_path']}"],
+                              cwd=repo, capture_output=True, text=True, check=True).stdout
+        self.assertEqual(blob, "# x\n\n## Prompt body\nbody\n")                   # the audit route works
+        pr.pin(repo / "nested" / "ignored" / "loose.md", "ignored", registry=reg)
+        loose = pr.entry_for(repo / "nested" / "ignored" / "loose.md", reg)
+        self.assertIsNone(loose["pinned_at_commit"])
+        self.assertIn("not tracked", loose["commit_unavailable"])
+
+    def test_a_foreign_pyproject_is_not_this_checkout(self):
+        """#1577"""
+        from data_sheets_schema.resources import _is_our_checkout
+        other = Path(self.tmp) / "proj"; (other / "src" / "data_sheets_schema").mkdir(parents=True)
+        (other / "pyproject.toml").write_text('[tool.poetry]\nname = "someone-elses"\n')
+        self.assertFalse(_is_our_checkout(other))
+        self.assertTrue(_is_our_checkout(ROOT))
+
+
+class TestClaudeRoundThree(unittest.TestCase):
+    """The Claude round-3 findings on #1455 (#1588–#1593)."""
+
+    def setUp(self):
+        self._cwd = os.getcwd()
+        self.tmp = tempfile.mkdtemp(prefix="d4d-resources-")
+        os.chdir(self.tmp)
+
+    def tearDown(self):
+        os.chdir(self._cwd)
+
+    def _stage_checkout(self, name: str, *, git: bool) -> Path:
+        """A second checkout of this project: our `pyproject.toml`, the source
+        layout, one playbook — and its own repository when `git`."""
+        import subprocess
+        repo = Path(self.tmp) / name
+        (repo / "src" / "data_sheets_schema").mkdir(parents=True)
+        (repo / ".claude" / "commands").mkdir(parents=True)
+        (repo / "pyproject.toml").write_text('[tool.poetry]\nname = "data-sheets-schema"\n', encoding="utf-8")
+        (repo / ".claude" / "commands" / "d4d-uniform-rules.md").write_text("# the worktree's rules\n", encoding="utf-8")
+        if git:
+            run = lambda *a: subprocess.run(["git", "-c", "user.email=t@example.org", "-c", "user.name=t", *a],
+                                            cwd=repo, check=True, capture_output=True)
+            run("init", "-q"); run("add", "."); run("commit", "-q", "-m", "x")
+        return repo
+
+    def test_a_second_checkout_as_the_working_directory_is_the_resource_root(self):
+        """#1588: code from one checkout, cwd another — the record names the
+        cwd's commit, keeps its files repository-relative, and the root guard
+        refuses a subdirectory of it."""
+        import hashlib
+        import subprocess
+        import click
+        from data_sheets_schema import provenance
+        from data_sheets_schema.cli._repo_utils import get_repo_root
+        from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+        from data_sheets_schema.resources import CHECKOUT_ROOT, cwd_checkout, repo_relative, resource_root
+        repo = self._stage_checkout("wt", git=True)
+        os.chdir(repo)
+        self.assertEqual(cwd_checkout(), repo.resolve())
+        self.assertEqual(resource_root(), (repo.resolve(), "checkout"))
+        self.assertEqual(get_repo_root(), repo.resolve())
+        facts = provenance.repo_facts()
+        head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repo, capture_output=True, text=True).stdout.strip()
+        self.assertEqual((facts["commit"], facts["dirty"], Path(facts["resource_root"])), (head, False, repo.resolve()))
+        self.assertNotEqual(facts["commit"],
+                            subprocess.run(["git", "rev-parse", "HEAD"], cwd=CHECKOUT_ROOT, capture_output=True, text=True).stdout.strip())
+        # The playbook is the cwd's, hashed as the cwd's bytes, recorded relative — the
+        # commit the record names reproduces the hash it records.
+        rel = ".claude/commands/d4d-uniform-rules.md"
+        self.assertEqual(repo_relative(rel, cwd=False), rel)
+        self.assertEqual(repo_relative(str(repo / rel), cwd=False), rel)
+        entry = next(e for e in provenance.playbook_facts()["files"] if e["path"].endswith("d4d-uniform-rules.md"))
+        self.assertEqual(entry["path"], rel)
+        self.assertEqual(entry["sha256"], hashlib.sha256(b"# the worktree's rules\n").hexdigest())
+        blob = subprocess.run(["git", "show", f"{facts['commit']}:{rel}"], cwd=repo, capture_output=True, text=True).stdout
+        self.assertEqual(hashlib.sha256(blob.encode()).hexdigest(), entry["sha256"])
+        _require_repo_root_cwd("t")                                   # the root of a second checkout
+        (repo / "sub").mkdir(); os.chdir(repo / "sub")
+        with self.assertRaises(click.ClickException):
+            _require_repo_root_cwd("t")                               # inside it (#672, generalised)
+
+    def test_a_checkout_git_cannot_answer_for_records_unknown_not_clean(self):
+        """#1591"""
+        from data_sheets_schema import provenance
+        repo = self._stage_checkout("exported", git=False)
+        os.chdir(repo)
+        facts = provenance.repo_facts()
+        self.assertEqual((facts["commit"], facts["dirty"], facts["dirty_file_count"], facts["resource_kind"]),
+                         (None, None, None, "checkout"))
+        self.assertIn("unknown, not clean", facts["note"])
+
+    def test_a_validator_crash_on_the_record_is_a_finding_about_the_record(self):
+        """#1589: a YAML the loader rejects names the file in the traceback —
+        the validator ran, on that record; a crash that never opened it did not."""
+        from data_sheets_schema.api_runner import FULL_SCHEMA_PATH, _validator_did_not_run, _validator_lines
+        bad = Path(self.tmp) / "bad.yaml"
+        bad.write_text("id: x\ntitle: [unclosed\n", encoding="utf-8")
+        parser = ("Traceback (most recent call last):\n  File \"x.py\", line 1, in <module>\n"
+                  "yaml.parser.ParserError: while parsing a flow sequence\n"
+                  f"  in \"{bad}\", line 2, column 8\nexpected ',' or ']', but got '<stream end>'\n")
+        self.assertFalse(_validator_did_not_run(parser, bad))
+        self.assertTrue(_validator_did_not_run(parser))                # no record named: as before
+        self.assertTrue(_validator_did_not_run("Traceback (most recent call last):\nModuleNotFoundError: No module named 'linkml'\n", bad))
+        self.assertTrue(_validator_did_not_run(f"Traceback (most recent call last):\nFileNotFoundError: [Errno 2] No such file or directory: '{bad}'\n", bad))
+        os.chdir(ROOT)
+        findings, failure = _validator_lines(bad, FULL_SCHEMA_PATH, "Dataset")
+        self.assertIsNone(failure, failure)
+        self.assertTrue(findings and any("ParserError" in l or "while parsing" in l for l in findings), findings)
+
+    def test_rocrate_normalize_and_map_keep_their_help(self):
+        """#1590"""
+        from click.testing import CliRunner
+        from data_sheets_schema.cli.rocrate import rocrate
+        for name, text in (("normalize", "Normalize upstream RO-Crate packages"), ("map", "Map a crate to D4D")):
+            r = CliRunner().invoke(rocrate, [name, "--help"])
+            self.assertEqual(r.exit_code, 0, r.output)
+            self.assertIn(text, r.output)
+
+    @unittest.skipUnless(__import__("shutil").which("poetry"), "poetry is not installed")
+    def test_the_lock_and_the_metadata_agree(self):
+        """#1593: no extra names a dependency the main table does not declare."""
+        import subprocess
+        r = subprocess.run(["poetry", "check", "--lock"], cwd=ROOT, capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)

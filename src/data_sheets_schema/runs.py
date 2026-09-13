@@ -321,7 +321,7 @@ def validation_status(method: str, label: str, project: str,
             # predating the sha256 unification hold md5, and refusing to read it
             # would turn every historical verdict unverifiable — the opposite of
             # what binding them to a hash was for.
-            ok = verify_entry(entry)
+            ok = verify_entry(entry, record=rec)
             if ok is False:
                 return STALE
             if ok is None and entry.get("path") and (entry.get("sha256") or entry.get("md5")):
@@ -736,15 +736,17 @@ def check_provenance(method: str, label: str, project: str,
     # report was pinned before its closing rows were appended. The API path
     # cannot do this, because it writes provenance in-process after all phases.
     # Checking at the end of a run gives the agent path the same property.
+    from data_sheets_schema.provenance import record_path_for
+    owner_record = record if record is not None else record_path_for(project, method, label, concat_dir)
     drifted = [k for k, e in artifacts.items()
-               if isinstance(e, dict) and _verify(e) is False]
+               if isinstance(e, dict) and _verify(e, record=owner_record) is False]
     # Three outcomes, not two. `verify_entry` returns None when a file is absent
     # — unknowable is not mismatched, and conflating them would report a moved
     # file as tampering. But treating unknowable as *fine* inverts the gate: it
     # gave its strongest assurance exactly where there was least to go on, so a
     # run with no validation block, or whose artifacts were deleted, passed.
     unverifiable = [k for k, e in artifacts.items()
-                    if isinstance(e, dict) and _verify(e) is None]
+                    if isinstance(e, dict) and _verify(e, record=owner_record) is None]
     # No exemption for a caller-supplied path. The reasoning for one was that a
     # record written moments ago has no validation block yet — but `execute()`
     # writes its validation block before it calls this, so the exemption bought
@@ -819,9 +821,9 @@ def _prov(method: str, label: str, project: str,
     return data if isinstance(data, dict) else None
 
 
-def _verify(entry: dict) -> bool | None:
+def _verify(entry: dict, *, record: Path | None = None) -> bool | None:
     from data_sheets_schema.provenance import verify_entry
-    return verify_entry(entry)
+    return verify_entry(entry, record=record)
 
 
 def attestation(method: str, label: str, project: str,

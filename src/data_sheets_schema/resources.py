@@ -41,8 +41,22 @@ from pathlib import Path
 PACKAGE_ROOT = Path(__file__).resolve().parent
 
 #: The source checkout this package is imported from, or None for a wheel.
+def _is_our_checkout(root: Path) -> bool:
+    """A `pyproject.toml` two levels up is the checkout only when it is this
+    project's and the source layout is there — a copy installed under a
+    user's own project (`<project>/vendor/data_sheets_schema/`) must not
+    adopt that project (#1577)."""
+    try:
+        text = (root / "pyproject.toml").read_text(encoding="utf-8")
+    except OSError:
+        return False
+    import re
+    return (re.search(r'^name\s*=\s*"data[-_]sheets[-_]schema"', text, re.M) is not None
+            and (root / "src" / "data_sheets_schema").is_dir())
+
+
 CHECKOUT_ROOT: Path | None = (
-    PACKAGE_ROOT.parents[1] if (PACKAGE_ROOT.parents[1] / "pyproject.toml").exists() else None)
+    PACKAGE_ROOT.parents[1] if _is_our_checkout(PACKAGE_ROOT.parents[1]) else None)
 
 #: For a wheel, the directory the repository-relative includes were
 #: installed under: the wheel's root is `site-packages`, one level above
@@ -61,6 +75,43 @@ _PACKAGE_PREFIX = ("src", "data_sheets_schema")
 
 def is_checkout() -> bool:
     return CHECKOUT_ROOT is not None
+
+
+def checkout_at(directory: str | Path) -> Path | None:
+    """The checkout of this project `directory` is in: itself when it is
+    one, else its nearest ancestor that is — a worktree or a second clone as
+    much as the checkout the code is imported from. None outside every
+    checkout."""
+    try:
+        p = Path(directory).resolve()
+    except OSError:
+        return None
+    for candidate in (p, *p.parents):
+        if _is_our_checkout(candidate):
+            return candidate
+    return None
+
+
+def cwd_checkout() -> Path | None:
+    """The working directory when it is the *root* of a checkout of this
+    project (#1588): its files are what `resource_path` reads first, so it —
+    not the checkout the code happens to be imported from — is where the
+    resources come from. A subdirectory of a checkout is not one (#672)."""
+    cwd = Path.cwd()
+    return cwd.resolve() if _is_our_checkout(cwd) else None
+
+
+def resource_root() -> tuple[Path, str]:
+    """Where this process's resources come from, decided once for git facts
+    and path identity alike (#1588): `(root, "checkout")` for the working
+    directory when it is a checkout of this project, else for the checkout
+    the package is imported from; `(root, "install")` for a wheel."""
+    here = cwd_checkout()
+    if here is not None:
+        return here, "checkout"
+    if CHECKOUT_ROOT is not None:
+        return CHECKOUT_ROOT, "checkout"
+    return INSTALL_ROOT, "install"
 
 
 def roots() -> list[Path]:
@@ -115,6 +166,16 @@ def _cwd_carries(rel: Path) -> bool:
     return False
 
 
+def physical(path: str | Path) -> Path:
+    """An absolute path for reading: as spelled (an alias directory keeps its
+    meaning — a schema's imports resolve beside the alias, as the generator
+    reads them), except that a `..` segment is resolved through the
+    filesystem, never lexically (#1528, #1570)."""
+    import os
+    p = Path(path)
+    return p.resolve() if ".." in p.parts else Path(os.path.abspath(p))
+
+
 def resource_path(path: str | Path) -> Path:
     """Where a repository-relative resource is read from, decided now.
 
@@ -153,10 +214,14 @@ def repo_relative(path: str | Path, *, cwd: bool = True) -> str:
     pin could match (#673).
     """
     p = Path(path)
+    here = cwd_checkout()
     if not p.is_absolute() and is_resource(p):
-        in_checkout = (CHECKOUT_ROOT is not None
-                       and Path.cwd().resolve() == CHECKOUT_ROOT.resolve())
-        if cwd or in_checkout or not p.exists():
+        # The shipped file's identity is its spelling — in any checkout of
+        # this project, a worktree or a second clone included (#1588); a
+        # staged tree's own file (it exists here, and here is no checkout)
+        # is resolved — for the registry's key and the record alike (#1536,
+        # #1573).
+        if here is not None or not p.exists():
             return p.as_posix()
     try:
         resolved = p.resolve()
@@ -176,6 +241,8 @@ def repo_relative(path: str | Path, *, cwd: bool = True) -> str:
             if library and resolved.is_relative_to(Path(library).resolve()):
                 return resolved.as_posix()
     anchors: list[tuple[Path, tuple[str, ...], bool]] = []
+    if here is not None:
+        anchors.append((here, (), False))
     if CHECKOUT_ROOT is not None:
         anchors.append((CHECKOUT_ROOT, (), False))
     anchors.append((PACKAGE_ROOT, _PACKAGE_PREFIX, False))
