@@ -25,13 +25,13 @@
     ".claude/agents/d4d-rubric20.md": "6b7aeff1d7c2dc827710162129991d5466e63eb12df218ef47347b228ec87b50",
     "data/rubric/rubric10.txt": "9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97",
     "data/rubric/rubric20.txt": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
-    "poetry.lock": "2de5bdec156e4658018d1535bc1cd75c284c730727798fb225778826c66c8bbe",
-    "pyproject.toml": "70ef7da6b02bd0f6bfa062a61c167b99ab1613625e0d7f9ca6f1dd5b5eef6f63",
+    "poetry.lock": "d2ef0a7d2b8b7891315a851eafeec1fdb56ca639e9fa878ebca4b3f33abfabd4",
+    "pyproject.toml": "d98ab2a4a096659fd897801294dbeba6b84eadcfce7827c111ddbb888be6711a",
     "scripts/reference_rescore.py": "73d54c3baa304502536ce88dcb899f9acf72ee2e8a672a268c0ccc5c158d3f06",
     "scripts/render_evaluation_html_rubric10_semantic.py": "8b1402a76e923a7cd6a0cae4753e021caf6d43334592e5ac29c5739b66c2ff70",
     "scripts/render_evaluation_html_rubric20_semantic.py": "4bd76c2ed502ca04474627d58a0a7d59b3e6f6d8df5ebb8e29caccf1ff6df6f9",
     "scripts/validate_evaluation_schema.py": "ddf683b03b7b9a20e0bf837066fb8dd820f5088169a1ec0c90565259170e3825",
-    "src/data_sheets_schema/agent_pin.py": "65ef4f48a7a07c115a838772b3b114eb8e7e58cf2331fa5afa78dc77056cc16a",
+    "src/data_sheets_schema/agent_pin.py": "de955738981a32a5b4d210a57fa7019738e9d2d4cf96689167f63450066013ea",
     "src/data_sheets_schema/cli/evaluate.py": "f7cb0c174aa9db60afb9c9151c3b10a047c024fd99ded53b7a2ef352436410c0",
     "src/data_sheets_schema/cli/render.py": "e8304b2d6b99e951ca35dee57d9c84c5ee6fb32ed9a6ffa5f0baa473c225f418",
     "src/data_sheets_schema/evaluation/__init__.py": "216a416e75fdb3561aeac7916ba0832573c6cd85d7e2f12ad0454f4955e4501b",
@@ -47,7 +47,7 @@
     "src/data_sheets_schema/rendering/process_text_files.py": "dbaa5b1a9e87b7f66aa703879ff1aa2b452fc83e47094ee66211b6394d3d3a72",
     "src/data_sheets_schema/rendering/rubric10_semantic.py": "960ab6e4db38d6a0bcf8663d8f0c6cf36691f47f08b2fa85de9ddd52382efc82",
     "src/data_sheets_schema/rendering/rubric20_semantic.py": "15ab76025dea2fcf4a9552bc1c5686cb458abad85e634db49da19abb5cf7ec5c",
-    "src/data_sheets_schema/resources.py": "0438987d06609f6bc99680e4efa0423b52b80bde10f29ffa4a2f314d3897c073",
+    "src/data_sheets_schema/resources.py": "566bc0cfb46ad9377b7a7d0a3bac7f1daea2827971667a709b008e95e02d6ede",
     "src/data_sheets_schema/schema/D4D_Evaluation_Summary.yaml": "2cc165cd388d53918d8cc6f5c4bbf2bdd347194e3c6f7b914cfb1695165da765",
     "src/data_sheets_schema/schema_snapshot.py": "33e2928f435d1f1ca9c6d13edb0ec0c3e393d4ee28c5e9e4957c60c089ef52b1",
     "src/data_sheets_schema/schema_view.py": "c95e6777751aaf26b1acaa59c6366d67a1703f77e9f250927871b3c41bde6f09",
@@ -67,10 +67,14 @@
     "agentic"
   ],
   "generation_dependency": "PR #1367, PR #1436 and PR #1455",
-  "integration_dependency_commit": "805ff3eb01bc08ceef715e6c92e1fcf0122f0007",
+  "integration_dependency_commit": "d770703b0d05b9b2c0d4122f2126ceb8b6e09f6a",
   "issues": [
     1301,
-    1457
+    1457,
+    1569,
+    1580,
+    1599,
+    1600
   ],
   "presence_instrument": {
     "inputs": {
