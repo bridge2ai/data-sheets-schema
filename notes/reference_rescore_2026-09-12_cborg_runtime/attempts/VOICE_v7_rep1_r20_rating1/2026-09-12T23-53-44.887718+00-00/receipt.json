@@ -1,0 +1,148 @@
+{
+  "job_id": "VOICE_v7_rep1_r20_rating1",
+  "started_at": "2026-09-12T23:53:44.887886+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "ab688eeaef5154a28167508a3dd636aea545b387d5d45fb4bb0a6a375b5578e7",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "7660c4d93ccf05a12ebdd26c6c960e8f5d07455b3088cd3b2e909e95c802d048",
+  "evaluation_sha256": "db3a18828b9a1b6042585790d6917a35e4342569c313636cbf701460ab6446f9",
+  "cli_result": {
+    "duration_api_ms": 509858,
+    "stop_reason": "end_turn",
+    "session_id": "cdb30f91-3b1c-4158-bcc8-162f9be26706",
+    "total_cost_usd": 2.5545185000000004,
+    "usage": {
+      "input_tokens": 313,
+      "cache_creation_input_tokens": 176923,
+      "cache_read_input_tokens": 606956,
+      "output_tokens": 40578,
+      "output_tokens_details": {
+        "thinking_tokens": 10112
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 176923
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 315,
+        "outputTokens": 40605,
+        "cacheReadInputTokens": 608062,
+        "cacheCreationInputTokens": 197406,
+        "webSearchRequests": 0,
+        "costUSD": 2.5545185000000004,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 10112,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01XHFaeTjAX2Bdq6ZUwP6ewb",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric20-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20; echo \"---PWD---\"; pwd; ls -la",
+          "description": "Locate agent definition file and list working directory"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_013EJW12UVSy4UGUAVhjVmMM",
+        "tool_input": {
+          "command": "ls -R data scripts input src | head -50; echo \"---\"; shasum -a 256 input/record.yaml; echo \"---\"; shasum -a 256 data/rubric/* 2>/dev/null",
+          "description": "List project files and compute input hashes"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_0148mTTgo4efqB7rbpHTqNBp",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml data/rubric/rubric20.txt",
+          "description": "Compute checksums of input record and rubric text"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01EZ2wnPp8PWJeFCYg6mU12g",
+        "tool_input": {
+          "command": "python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Generate a UUID for the evaluator id"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 14,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed with exit status 0.\n\n## Definition check\n\nThe \"Reproducibility\" section is present in my instructions and reads as expected of the current rules. The sentence beginning \"Repeatability must be\", quoted verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\nRecorded `instrument_sha256`: `9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3` (`instrument_kind: agent_definition`). Note: my definition file is not on disk in this sandbox (no `.claude/agents/`), so I could not independently recompute that digest; it is recorded as supplied.\n\n## Result\n\n`output_evaluation.json` \u2014 VOICE, claudecode_agent, **81 / 88**\n\n| Basis | Denominator | Percentage |\n|---|---|---|\n| normalized | 88 (adjusted) | 92.0 % |\n| fixed | 88 (whole rubric) | 92.0 % |\n\nExcluded items: **none**. `questions_not_applicable: 0`, `excluded_max_points: 0` \u2014 both bases coincide because every conditional trigger resolved to applicable. Each was evidenced anti-circularly from fields outside the gated question: human subjects (Q8, Q15) from `description`/`collection_mechanisms`/`data_collectors`; datasets shared (Q10, Q17) from `third_party_sharing.is_shared`, `page`, licence; software output (Q11) from `external_resources` GitHub repositories and `extension_mechanism.contribution_url`; collection-and-sharing (Q12, Q13) from both limbs.\n\nCategory scores: Structural 18/21 \u00b7 Metadata 21/21 \u00b7 Technical 22/25 \u00b7 FAIRness 20/21.\n\nScores below maximum, with the deduction stated at each: Q3 = 3 (four low-specificity keywords); Q1 = 4 (12/14 fields, 85.7%); Q11 = 4 (no tool versions); Q12 = 4 (unanchored, self-contradicted timeframe); Q15 = 4 (axes named, never quantified); Q20 = 4 (mitigation on 1 of 4 biases, no AIO mappings, qualitative fairness only).\n\nSemantic analysis: 12 issues (21 checks passed, 2 failed, 5 warnings). The two failures are the collection-timeframe conflict, which reduced Q12, and `is_deidentified.identifiable_elements_present: false` sitting against the record's own admission that k-anonymity k\u22652 is unachieved while the release ships speaker-discriminative spectrogram and MFCC features \u2014 that one did **not** reduce Q8, and the JSON says so and why. Identifier validation was clean: the 10.13026 prefix matches PhysioNet across all six DOIs, 10.5281/10.57764 match Zenodo and Health Data Nexus, OT2OD032720 parses as a valid NIH Common Fund award, and RRID:SCR_007345 is well-formed (though it identifies the repository, not the dataset).",
+    "ttft_ms": 2826,
+    "type": "result",
+    "duration_ms": 511866,
+    "uuid": "6e1343c4-8b33-4357-bbce-7661bd418cb6",
+    "ttft_stream_ms": 1863,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 1863,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01PDavM18oE8hYL7TXyC7WXU",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-13T00:02:17.605935+00:00"
+}

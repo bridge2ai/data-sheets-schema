@@ -1,0 +1,147 @@
+{
+  "job_id": "CM4AI_v8_rep1_r20_rating1",
+  "started_at": "2026-09-12T23:44:53.110755+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "c7cc26d2b0b635aad6ac25e43273ba35706fa357ac414a25c4d2576391d72891",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "b14858313cb86f692a326c76764505a6d3c1f64a92ee452638eedd3636baba41",
+  "evaluation_sha256": "3760295a52cb901e9700b6f31a0d87c16c4fcd5c485e14634caaa1bb1b1f1634",
+  "cli_result": {
+    "duration_api_ms": 514420,
+    "stop_reason": "end_turn",
+    "session_id": "91f6fee7-1b78-43cf-aa17-5df0a51dcaa5",
+    "total_cost_usd": 2.3043467499999997,
+    "usage": {
+      "input_tokens": 317,
+      "cache_creation_input_tokens": 148968,
+      "cache_read_input_tokens": 501866,
+      "output_tokens": 39939,
+      "output_tokens_details": {
+        "thinking_tokens": 8862
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 148968
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 319,
+        "outputTokens": 39968,
+        "cacheReadInputTokens": 501866,
+        "cacheCreationInputTokens": 168419,
+        "webSearchRequests": 0,
+        "costUSD": 2.3043467499999997,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 8862,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_013jwWQySwNoAF67aDFthvjo",
+        "tool_input": {
+          "command": "shasum -a 256 input/record.yaml data/rubric/rubric20.txt; ls scripts/ src/",
+          "description": "Hash input record and rubric text"
+        }
+      },
+      {
+        "tool_name": "Read",
+        "tool_use_id": "toolu_vrtx_016u63UgDqUSXpKmu4c3FSqj",
+        "tool_input": {
+          "file_path": "/Users/marcin/src/download/prompts/rubric20_semantic_schema.json"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01JbaZbnTZjz3X6aubXJfp9R",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get UTC timestamp and generate a UUID"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01Tq92ihkHDHhsYQpYtoErec",
+        "tool_input": {
+          "command": "python3 -c \"\nimport hashlib\nfor p in ['input/record.yaml','data/rubric/rubric20.txt']:\n    print(p, hashlib.sha256(open(p,'rb').read()).hexdigest())\n\"",
+          "description": "Compute hashes of record and rubric text"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 16,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Definition check passed. The **Reproducibility** section of my instructions is present and reads as expected of the current rules. Verbatim, the sentence beginning \"Repeatability must be\":\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\n**Evaluation complete and validated** (`VALID output_evaluation.json: rubric20-semantic`, exit 0).\n\n## Result: CM4AI, claudecode_api, rep1 \u2014 70/88\n\n| Basis | Score | Denominator |\n|---|---|---|\n| fixed_percentage | 79.5% | 88 (whole rubric) |\n| normalized_percentage | 79.5% | 88 (adjusted) |\n\n`excluded_max_points: 0`, `questions_not_applicable: 0` \u2014 every item was scored, so the two bases coincide.\n\n**Category scores:** Structural Completeness 16/21 \u00b7 Metadata Quality 19/21 \u00b7 Technical Documentation 19/25 \u00b7 FAIRness 16/21\n\n**Applicability determinations** (all made from other questions' fields, per the anti-circular rule):\n- **Q8/Q15** \u2014 borderline: `direct_collection.is_direct=false` and `involves_human_subjects=false`, but `raw_data_sources` describes donor-identifying detail for both cell lines. Resolved to **applicable** under the ambiguity rule and scored (4 and 3) rather than silently excluded.\n- **Q11** \u2014 applicable via `external_resources` code repositories (Cell Mapping Toolkit on GitHub/Zenodo, FAIRSCAPE), not via its own empty fields. Scored **2**: the sole preprocessing entry is self-flagged as inferred from two filenames, a deliberate semantic discount below the literally-satisfied 3-band.\n- **Q10/Q12/Q13/Q17** \u2014 datasets-shared condition met (populated `distribution_formats`, resolving page, public file access, reuse-permitting license).\n\n**Notable semantic findings** (12 issues; 18 checks passed, 3 failed, 6 warnings):\n- **Size implausibility not flagged by the record** \u2014 a 30.2 KB \"cell atlas\" for an 11,739-gene screen and 73.3 KB of \"raw sequence\" suggest pointer archives rather than data; only the 3.8\u20134.6 GB image archives match their descriptions.\n- **RO-Crate provenance graph asserted in `conforms_to` but not identifiable** among the ten resources; `was_derived_from` and `parent_datasets` empty.\n- **ZIP-only format declaration** leaves internal formats unstated, undercutting the AI-ready and schema-conformance claims.\n- Disclosed-and-unresolved: the 2026-07-15 image archives postdating the 2026-06-17 version, description text carried forward from prior releases, and the embargo/public-access wording.\n\nThe record's unusual strength is evidential discipline \u2014 `source_caveats` in nine field groups naming weaker sources and declining to assert contested figures (523 vs 464 proteins, 2025 vs 2026 release date). Its weakest areas are data-preparation transparency (Q11) and format variety (Q4, scored 1 to credit exemplary enumeration against zero format diversity).",
+    "ttft_ms": 4365,
+    "type": "result",
+    "duration_ms": 515221,
+    "uuid": "f3957d04-4733-45e1-8169-b2e3132539fc",
+    "ttft_stream_ms": 3384,
+    "time_to_request_ms": 21,
+    "first_content_frame_ms": 3384,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_011biCWuxmi3PCV87op4Sq1J",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-12T23:53:29.175189+00:00"
+}

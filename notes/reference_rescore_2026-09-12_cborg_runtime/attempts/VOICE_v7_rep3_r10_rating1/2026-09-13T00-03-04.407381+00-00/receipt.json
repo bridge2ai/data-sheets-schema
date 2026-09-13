@@ -1,0 +1,140 @@
+{
+  "job_id": "VOICE_v7_rep3_r10_rating1",
+  "started_at": "2026-09-13T00:03:04.407567+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "65261e0edb14d250bd5a0e3f1ac23c2146710b719524b1e73ec2f99cdcd15f8c",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "48a64a4e950a1ed59daf3d4efed662513451e2a0d192fd0b381031684efe2275",
+  "evaluation_sha256": "a7f8ecfdd0575747c2c0b554d927639465225dcf40337d31da46e6b531ea9497",
+  "cli_result": {
+    "duration_api_ms": 652084,
+    "stop_reason": "end_turn",
+    "session_id": "80a0239e-44b8-4638-bd00-b4bebab0a94b",
+    "total_cost_usd": 2.7666344999999994,
+    "usage": {
+      "input_tokens": 307,
+      "cache_creation_input_tokens": 161621,
+      "cache_read_input_tokens": 459604,
+      "output_tokens": 53506,
+      "output_tokens_details": {
+        "thinking_tokens": 12001
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 161621
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 309,
+        "outputTokens": 53533,
+        "cacheReadInputTokens": 459604,
+        "cacheCreationInputTokens": 191514,
+        "webSearchRequests": 0,
+        "costUSD": 2.7666344999999994,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 12001,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01UQShMyoq7cYfEasrupCeHB",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20; echo \"---PWD---\"; pwd; ls -la",
+          "description": "Locate the agent definition file on disk"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_012bMLAsMY64wxin8XvYQnb9",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-4_u3a6q7/input/record.yaml",
+          "description": "Compute hash of input record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01NmSzDuG9VgPWLfNNmFiNPb",
+        "tool_input": {
+          "command": "/usr/bin/python3 -c \"import datetime,uuid;print(datetime.datetime.now(datetime.timezone.utc).isoformat());print(uuid.uuid4())\"",
+          "description": "Generate timestamp and evaluator UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed with exit status 0.\n\n## Definition check\n\nThe section **\"Source rubric and schema paths (#158)\"** is present in my running instructions. The sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches what I expect of the current rules, so I proceeded. Recorded `instrument_sha256` as `66ad6231\u2026e34864` with `instrument_kind: agent_definition`.\n\n## Result\n\n`output_evaluation.json` \u2014 **48/50**, fixed 96.0% (\u00f750) and normalized 96.0% (\u00f750). The two bases coincide because **no sub-element was excluded**: all five trigger conditions resolved as satisfied before scoring.\n\n| Condition | Status | Evidence source |\n|---|---|---|\n| Human subjects | satisfied | E1 description (\"833 adult participants\", clinic recruitment), E8 collection_mechanisms |\n| Governance restrictions | satisfied | E2 `confidentiality_level: restricted`, Certificate of Confidentiality \u2014 a constraint that applies |\n| Datasets shared | satisfied | distribution_formats + access_urls, versioned PhysioNet page, research-use license |\n| Software output | satisfied | E10 external_resources \u2192 github.com/sensein/b2aiprep |\n| Collection + shared | satisfied | acquisition_methods, collection_mechanisms populated |\n\nElement scores: E1 **4**, E2 5, E3 **4**, E4 5, E5 5, E6 5, E7 5, E8 5, E9 5, E10 5.\n\n**The two zeros:**\n- **E1.3 Keywords** \u2014 four terms (`voice, health, biomarkers, bridge2ai`), below the \u22655 threshold and covering only domain plus program. None of the eighteen conditions, six feature families, BIDS or ICD-10 documented elsewhere are discoverable.\n- **E3.4 Variable metadata** \u2014 no `variables` field. Data dictionaries are documented as *existing*; no column identifiers, types or descriptions appear in the datasheet.\n\n**Judgement calls worth flagging to you:**\n- **E8.4 (software)** scored 1 on the transforming-role threshold: b2aiprep v3.0.0 assembled the released files, with torchaudio/sparc/ppgs/openSMILE/Praat each attributed to named distributed features. The tablet app (capture) and PhysioNet (hosting) are documented but are not what earns the point; Whisper sits near role (e) since its transcripts were removed.\n- **E5.3** scored 1 despite `variables` and `is_tabular` both being absent \u2014 the split/subpopulation flags it names are complete and correct across all eight subsets. I recorded the gap rather than treating it as trivial, and the `variables` absence is already penalized at E3.4.\n- **E2.3** scored 1 with no `download_url`; access_urls, page and access_review_process supply the platform link three times over.\n\nTen issues detected (2 medium consistency/content-accuracy, 2 medium completeness, 6 low). The `at_risk_groups_included: false` flag against dementia and psychiatric cohorts, and `identifiable_elements_present: false` against the admission that k-anonymity k\u22652 is not achieved, are the substantive tensions \u2014 both flagged, neither costing a point, since the underlying documentation is present and reasoned. Notably, most tensions in this record are **self-disclosed** via `source_caveats`, which I treated as a strength rather than a defect.",
+    "ttft_ms": 3472,
+    "type": "result",
+    "duration_ms": 652591,
+    "uuid": "dd83533c-4230-4c3f-b098-1bceb37fae75",
+    "ttft_stream_ms": 2490,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 2491,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01JB877KboTTH8gmg6KzHty8",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-13T00:13:57.789708+00:00"
+}

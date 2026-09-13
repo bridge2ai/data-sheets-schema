@@ -1,0 +1,140 @@
+{
+  "job_id": "VOICE_v7_rep1_r10_rating2",
+  "started_at": "2026-09-13T00:37:19.080287+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "8a0af72bf07cceb27bd5062e95013b080ec01bfb382ff9ad33d518b6c0eba46f",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "7660c4d93ccf05a12ebdd26c6c960e8f5d07455b3088cd3b2e909e95c802d048",
+  "evaluation_sha256": "89c52483b460f3f76b301a3725ad3684c0b53708a33752b3711aa0ee5af6ad95",
+  "cli_result": {
+    "duration_api_ms": 475028,
+    "stop_reason": "end_turn",
+    "session_id": "c52cfdd9-7eeb-4a25-a5d1-807ab0f6b7e0",
+    "total_cost_usd": 2.0016495,
+    "usage": {
+      "input_tokens": 310,
+      "cache_creation_input_tokens": 104368,
+      "cache_read_input_tokens": 477204,
+      "output_tokens": 38942,
+      "output_tokens_details": {
+        "thinking_tokens": 8051
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 104368
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 312,
+        "outputTokens": 38969,
+        "cacheReadInputTokens": 477204,
+        "cacheCreationInputTokens": 125962,
+        "webSearchRequests": 0,
+        "costUSD": 2.0016495,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 8051,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01GtEbnrHXQsqDyWd9yW48DD",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01D9LanryJRe7Kqn3qur9LXL",
+        "tool_input": {
+          "command": "shasum -a 256 data/rubric/rubric10.txt input/record.yaml",
+          "description": "Hash rubric and record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01WsiAPZ44kSf4mAzj2SumT3",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get UTC timestamp and a UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 13,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Definition check passed. The section headed \u201cSource rubric and schema paths (#158)\u201d is present in my instructions, and the sentence beginning \u201cRead release-specific notes\u201d reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThat is the current-rules form (the dedicated `updates.update_details` field rather than a top-level `release_notes` slot), so I proceeded.\n\n## Result\n\n**VOICE / claudecode_agent \u2014 49/50**\n\n- `total_points` 49, `max_points` 50, `excluded_max_points` 0, `adjusted_max_points` 50\n- `fixed_percentage` 98.0 (denominator 50), `normalized_percentage` 98.0 (denominator 50)\n- `sub_elements_not_applicable` 0 \u2014 no `applicable: false`, so no `null` scores and the two bases coincide\n\nApplicability, resolved from other elements before scoring: the datasets-shared condition holds (three populated `distribution_formats`, an accessible PhysioNet 3.1.0 page, a research-use licence), so Elements 3, 6, 8 and 10 are fully in scope. The human-subjects condition holds on E1 `description` and E8 `collection_mechanisms`, so all five Element 4 sub-elements are applicable on participant evidence, not merely on the governance disjunct. E8.3's software-output condition is met by `external_resources` naming `sensein/b2aiprep`; E8.4 is scored as processed-data tooling per #1081, not gated on the pointer.\n\nThe one scored failure is **E1.3 keywords**: four terms (`health, biomarkers, bridge2ai, voice`), none covering the disease cohorts, modalities, feature methods or standards the record documents in detail \u2014 below the coverage the sub-element asks for.\n\nBorderline calls I scored 1, with the shortfall recorded as a semantic issue rather than a zero: `download_url` empty but the gated retrieval path fully instructed (E2.3); `publisher` empty but PhysioNet named in citation, page, maintainers and the 10.13026 prefix (E10.1); `variables` covering only four Parquet columns while phenotype-table variables sit in external dictionaries (E3.4, E5.3). Ten issues logged across consistency, completeness, correctness, content accuracy and semantic understanding; consistency checks 18 passed / 2 failed / 3 warnings. Grant `OT2OD032720` parses as a valid Common Fund OT2/OD award; the malformed `3Tf-OTOD03272001S2` variant is quarantined in the record's own `source_caveats` and was not treated as asserted.\n\nProvenance written as supplied: `d4d_file` set to the pinned input path, `model.name` and `model.evaluator_model` both `claude-opus-5`, `temperature` null, and the three hashes plus `instrument_kind: agent_definition` in `metadata`.\n\nValidation: `poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic` \u2192 `VALID output_evaluation.json: rubric10-semantic`, exit 0. No judgement was altered to satisfy serialization.\n\nOne caveat on interpretation: this is a single replicate, and 98% against a 50-point denominator is comparable only to scores from the same evaluator model and the same `instrument_sha256`.",
+    "ttft_ms": 2603,
+    "type": "result",
+    "duration_ms": 474298,
+    "uuid": "93404900-8eaf-4e9e-bd67-d274cbdde9b8",
+    "ttft_stream_ms": 1667,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 2117,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01RAKPfngwmQH9CV3fEeHCeX",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-13T00:45:14.334713+00:00"
+}

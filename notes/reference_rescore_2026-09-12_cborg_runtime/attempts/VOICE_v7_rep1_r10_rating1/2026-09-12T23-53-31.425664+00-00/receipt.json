@@ -1,0 +1,132 @@
+{
+  "job_id": "VOICE_v7_rep1_r10_rating1",
+  "started_at": "2026-09-12T23:53:31.425857+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "8a0af72bf07cceb27bd5062e95013b080ec01bfb382ff9ad33d518b6c0eba46f",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "7660c4d93ccf05a12ebdd26c6c960e8f5d07455b3088cd3b2e909e95c802d048",
+  "evaluation_sha256": "a502581e6787c55df2076448558c509a224d96fa173334d5d84a17b487bbc909",
+  "cli_result": {
+    "duration_api_ms": 570374,
+    "stop_reason": "end_turn",
+    "session_id": "b608f1dd-11e3-42ff-a173-b9844679ffd9",
+    "total_cost_usd": 2.6761692499999996,
+    "usage": {
+      "input_tokens": 315,
+      "cache_creation_input_tokens": 181485,
+      "cache_read_input_tokens": 492831,
+      "output_tokens": 46329,
+      "output_tokens_details": {
+        "thinking_tokens": 11679
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 181485
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 317,
+        "outputTokens": 46357,
+        "cacheReadInputTokens": 492831,
+        "cacheCreationInputTokens": 203079,
+        "webSearchRequests": 0,
+        "costUSD": 2.6761692499999996,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 11679,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01X2L1qbygs4WYxjjTa4by3c",
+        "tool_input": {
+          "command": "find / -name \"d4d-rubric10-semantic.md\" -not -path \"*/node_modules/*\" 2>/dev/null | head -20",
+          "description": "Locate the agent definition file"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01XRfjPhWjyXK91b5bEBPaBo",
+        "tool_input": {
+          "command": "shasum -a 256 /private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/d4d-reference-8bqgzjog/input/record.yaml",
+          "description": "Hash the input record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01S31nRWD64iJtSQJwAVq2J2",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ; python3 -c \"import uuid;print(uuid.uuid4())\"",
+          "description": "Get UTC timestamp and generate a UUID"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 14,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0).\n\n## Definition check\n\nThe section **\u201cSource rubric and schema paths (#158)\u201d** is present in my active instructions, and the sentence beginning \u201cRead release-specific notes\u201d reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches what the current rules require (the dedicated `updates.update_details` mapping), so I proceeded.\n\n## Result\n\n**49 / 50 \u2014 fixed 98.0% (denominator 50), normalized 98.0% (denominator 50).** No sub-element was excluded, so the two bases coincide and `excluded_item_ids` is empty. All five applicability conditions resolved as *met* on external-element evidence, recorded per conditional sub-element:\n\n- **Human subjects** \u2014 E1 `description` (\u201cParticipants were recruited at high-volume expert clinics\u201d) and E8 `collection_mechanisms`; all five Element 4 sub-elements applicable, including 3\u20135, which the participant evidence (not the governance disjunct) opens.\n- **Governance** \u2014 E2 `confidentiality_level: restricted` plus DACO review (independently sufficient for E4.1\u20132).\n- **Datasets shared** \u2014 three `distribution_formats`, PhysioNet landing page, research-reuse licence.\n- **Data collection** \u2014 `acquisition_methods` and `collection_mechanisms` populated.\n- **Software output** \u2014 E10 `external_resources` names `sensein/b2aiprep`, `senselab`, `bridge2ai-redcap` (gates E8.3 only; E8.4 scored per #1081 on the processing evidence).\n\n**The single 0** is Element 1 sub-element 3: four broad keywords (`health, biomarkers, bridge2ai, voice`), below the \u22655 threshold and omitting every disease cohort, modality, feature family and standard the record otherwise describes richly.\n\n**E8.4 (software)** scored 1 under the #1082 threshold: `b2aiprep` is stated to have converted the raw waveforms into the distributed Parquet files, with `sparc`, `openSMILE`, `Parselmouth`/`Praat`, `ppgs` and `Whisper Large` each producing a named released feature family \u2014 transformation software, not the excluded capture (tablet app, REDCap) or hosting (PhysioNet, Synapse) roles. Evidence slots: `preprocessing_strategies` prose, `machine_annotation_tools`, `external_resources`. Missing versions weaken it but do not defeat disclosure.\n\n**Ten issues logged**, 22 consistency checks passed / 2 failed / 12 warnings. The two failures: the 12-month collection window against the four-year IRB protocol and a Nov-2024\u2192May-2026 release history, and `confidential_elements_present: false` against the Certificate of Confidentiality recorded in the same block. Both are surfaced by the record\u2019s own `source_caveats`, which I credited as disclosure while still scoring the underlying tension. Six empty dedicated slots (`publisher`, `download_url`, `is_tabular`, `imputation_protocols`, `was_derived_from`, `media_type`) cost no points \u2014 their substance is unambiguous in prose \u2014 but are logged as machine-readability gaps.\n\nProvenance recorded as supplied: `instrument_sha256` `66ad6231\u2026`, `instrument_kind: agent_definition`, `rubric_hash` `e5f8b6be\u2026`, `input_sha256` `7660c4d9\u2026`, model `claude-opus-5` as both name and evaluator_model, temperature `null`. One caveat: the sandbox denied `shasum`/`python3`, so I could not independently recompute the input digest \u2014 `d4d_file_hash` carries the supplied value and `metadata.hash_note` states that plainly rather than implying verification I did not perform.",
+    "ttft_ms": 2949,
+    "type": "result",
+    "duration_ms": 571127,
+    "uuid": "4b1d53a8-c24b-4dcc-890f-60778633414c",
+    "ttft_stream_ms": 1981,
+    "time_to_request_ms": 19,
+    "first_content_frame_ms": 1982,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [],
+  "completed_at": "2026-09-13T00:03:03.407728+00:00"
+}

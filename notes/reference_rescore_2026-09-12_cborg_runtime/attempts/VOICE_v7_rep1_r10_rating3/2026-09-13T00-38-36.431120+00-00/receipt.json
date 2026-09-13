@@ -1,0 +1,132 @@
+{
+  "job_id": "VOICE_v7_rep1_r10_rating3",
+  "started_at": "2026-09-13T00:38:36.431306+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "8a0af72bf07cceb27bd5062e95013b080ec01bfb382ff9ad33d518b6c0eba46f",
+  "system_prompt_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
+  "input_sha256": "7660c4d93ccf05a12ebdd26c6c960e8f5d07455b3088cd3b2e909e95c802d048",
+  "evaluation_sha256": "e0283f6394253db6228e6913d1731a4ac113ab6fcc6b0d7b842b62856758ec04",
+  "cli_result": {
+    "duration_api_ms": 608525,
+    "stop_reason": "end_turn",
+    "session_id": "dc6a52ff-fff7-4d03-9639-5a2794b1aa44",
+    "total_cost_usd": 2.15944825,
+    "usage": {
+      "input_tokens": 309,
+      "cache_creation_input_tokens": 97337,
+      "cache_read_input_tokens": 518430,
+      "output_tokens": 51154,
+      "output_tokens_details": {
+        "thinking_tokens": 11841
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 97337
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 311,
+        "outputTokens": 51181,
+        "cacheReadInputTokens": 540024,
+        "cacheCreationInputTokens": 97337,
+        "webSearchRequests": 0,
+        "costUSD": 2.15944825,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 11841,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_012pz6rnuKeVbWT1FUti9rDM",
+        "tool_input": {
+          "command": "shasum -a 256 data/rubric/rubric10.txt input/record.yaml",
+          "description": "Compute hashes of rubric and record"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01LiGsUAhoAuJcCUzNSzkq5h",
+        "tool_input": {
+          "command": "/usr/bin/python3 -c \"import uuid,datetime;print(uuid.uuid4());print(datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))\"",
+          "description": "Generate a UUID and current UTC timestamp"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 12,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Validation passed (exit 0).\n\n## Definition check\n\nThe section **\"Source rubric and schema paths (#158)\"** is present in my active instructions. The sentence beginning \"Read release-specific notes\" reads, verbatim and in full:\n\n> Read release-specific notes from the dedicated `updates.update_details` field, `updates.description` or `notes`, requiring actual release or derivation information rather than crediting unrelated notes.\n\nThis matches the current instrument (dedicated `updates.update_details` slot, with the anti-crediting proviso), so I proceeded. Recorded `instrument_sha256` as `66ad6231\u2026e34864`, `instrument_kind: agent_definition`.\n\n## Result\n\n**48 / 50 \u2014 fixed 96.0% (denominator 50), normalized 96.0% (denominator 50).** All five trigger conditions resolved as *satisfied* before scoring, so `excluded_max_points = 0`, `sub_elements_not_applicable = 0`, and no `applicable: false` items exist. The two percentage bases coincide only because nothing was excluded.\n\nApplicability was resolved from fields outside each gated sub-element's own element: human subjects from `description` (E1) and `collection_mechanisms` (E8); governance from `regulatory_restrictions` (E2); datasets-shared from `distribution_formats`/`access_urls`; software-output from `external_resources` (E10) naming code repositories. Element 8 sub-element 4 was scored as applicable under the datasets-shared gate, not gated on the repository pointer.\n\n**Element scores:** E1 4, E2 5, E3 5, E4 5, E5 4, E6 5, E7 5, E8 5, E9 5, E10 5.\n\n**The two zeros:**\n- **E1.3 keywords** \u2014 four terms (`health, biomarkers, bridge2ai, voice`), below the \u22655 threshold and covering domain/programme only; none of the modalities, five disease cohorts, methods or standards the description enumerates are discoverable.\n- **E5.3 variable metadata / tabular flag / splits** \u2014 four generic feature-file columns documented, no `is_tabular`, and none of the phenotype tables' analytically substantive columns described.\n\n**Scored 1 on substance despite an empty named slot,** each flagged in `issues_detected`: E2.3 (`download_url` absent, but the record says so explicitly and supplies both access URLs plus a full access-review process) and E10.1 (`publisher` absent, but PhysioNet is established four ways \u2014 citation, maintainers, `third_party_sharing`, DOI prefix).\n\n**E8.4** passed the processing-role threshold decisively: sparc, openSMILE, Parselmouth, Praat, ppgs, Whisper Large and b2aiprep each tied to the released artifact they produced. Capture software (tablet app, REDCap, ReproSchema-UI \u2014 role (a)) and hosts (PhysioNet, Synapse \u2014 role (b)) were explicitly *not* counted.\n\n**Consistency: 20 passed, 2 failed, 5 warnings.** The two failures are internal contradictions the record does not resolve: `regulatory_restrictions` asserting no regulatory restrictions apply while its sibling `other_compliance` records a Certificate of Confidentiality and HIPAA safeguards under `confidentiality_level: restricted`; and `confidential_elements_present: false` against its own caveat recording that same certificate. Format validation: DOI `valid_physionet`, grants `valid_nih`, RRID `valid`, URLs `all_valid` \u2014 the malformed award rendering `3Tf-OTOD03272001S2` is quarantined in `source_caveats` and never reaches `funders.grants`.\n\nI read no other evaluation, and validated only the file I wrote.",
+    "ttft_ms": 2619,
+    "type": "result",
+    "duration_ms": 608637,
+    "uuid": "aa65a060-b61a-4ace-addd-001fd64db68a",
+    "ttft_stream_ms": 1706,
+    "time_to_request_ms": 20,
+    "first_content_frame_ms": 2124,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_01KofawN2k8vacnLYUiTqWDc",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric10-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-13T00:48:45.977348+00:00"
+}

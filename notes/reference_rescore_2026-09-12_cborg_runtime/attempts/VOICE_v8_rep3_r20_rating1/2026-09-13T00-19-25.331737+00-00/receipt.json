@@ -1,0 +1,146 @@
+{
+  "job_id": "VOICE_v8_rep3_r20_rating1",
+  "started_at": "2026-09-13T00:19:25.331928+00:00",
+  "status": "passed",
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "user_prompt_sha256": "a1905ae4a399b5ed53946856031e95c0d49425fa17e3c0786fbff0fc84ab66a1",
+  "system_prompt_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "exit_code": 0,
+  "runtime_model": "claude-opus-5",
+  "reported_model": "claude-opus-5",
+  "model_alias_evidence": null,
+  "evaluator_model_declarations": {
+    "model.evaluator_model": "claude-opus-5"
+  },
+  "model_identity_aliases": {},
+  "check_echo": "passed",
+  "definition_sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
+  "input_sha256": "ba8876a62b15682af22bae93fe16f4ee6d229afca706435d4595064ad1d8b55c",
+  "evaluation_sha256": "4f427e6db8b56700f4966fd2c1d53bfdbbe182792e5c5c8576e0e60781145b5f",
+  "cli_result": {
+    "duration_api_ms": 459579,
+    "stop_reason": "end_turn",
+    "session_id": "c5c69075-6129-41b0-93d1-92c15f7f4e5e",
+    "total_cost_usd": 2.03936025,
+    "usage": {
+      "input_tokens": 317,
+      "cache_creation_input_tokens": 102287,
+      "cache_read_input_tokens": 621168,
+      "output_tokens": 36332,
+      "output_tokens_details": {
+        "thinking_tokens": 10871
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 102287
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5[1m]": {
+        "inputTokens": 319,
+        "outputTokens": 36360,
+        "cacheReadInputTokens": 621168,
+        "cacheCreationInputTokens": 130909,
+        "webSearchRequests": 0,
+        "costUSD": 2.03936025,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 10871,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01HzQEzjpxioamftw6uP6fp9",
+        "tool_input": {
+          "command": "shasum -a 256 .claude/agents/d4d-rubric20-semantic.md input/record.yaml data/rubric/rubric20.txt 2>&1",
+          "description": "Compute checksums of instrument, record, rubric"
+        }
+      },
+      {
+        "tool_name": "Read",
+        "tool_use_id": "toolu_vrtx_01DTsK1ZArhJXfSH9HXAM49i",
+        "tool_input": {
+          "file_path": "/Users/marcin/data/rubric/rubric20.txt"
+        }
+      },
+      {
+        "tool_name": "Read",
+        "tool_use_id": "toolu_vrtx_017hXz89burvSaUwmaX2jbha",
+        "tool_input": {
+          "file_path": "/Users/marcin/scripts/validate_evaluation_schema.py"
+        }
+      },
+      {
+        "tool_name": "Bash",
+        "tool_use_id": "toolu_vrtx_01Ac14kKkAu4LJDnYzdUhZhv",
+        "tool_input": {
+          "command": "date -u +%Y-%m-%dT%H:%M:%SZ && python3 -c \"print(80/88*100)\"",
+          "description": "Get UTC timestamp and compute percentage"
+        }
+      }
+    ],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 14,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Definition check passed. The \"Reproducibility\" section is present in my instructions, and the sentence there reads, verbatim and in full:\n\n> Repeatability must be measured on unchanged records under the same evaluator model and definition, because even a fixed or zero sampling temperature does not guarantee identical semantic judgements.\n\n## Evaluation complete\n\n`output_evaluation.json` written and validated:\n\n```\nVALID output_evaluation.json: rubric20-semantic   (exit 0)\n```\n\n**Result: 80 / 88 points.** No question met an N/A condition, so `excluded_max_points = 0`, `adjusted_max_points = 88`, and both bases coincide: `fixed_percentage = 90.9` (denominator 88) and `normalized_percentage = 90.9` (denominator 88). `questions_not_applicable = 0`; excluded item ids: none. Every conditional question (Q8, Q10, Q11, Q12, Q13, Q15, Q17) carries `applicability_status` and `applicability_evidence` drawn from fields belonging to *other* questions, per the anti-circular rule \u2014 e.g. Q11 is applicable because `external_resources` names four code repositories, not because its own strategy fields are populated.\n\n| Category | Score |\n|---|---|\n| Structural Completeness (Q1\u20135) | 17 / 21 |\n| Metadata Quality & Content (Q6\u201310) | 20 / 21 |\n| Technical Documentation (Q11\u201315) | 23 / 25 |\n| FAIRness & Accessibility (Q16\u201320) | 20 / 21 |\n\nPoints were lost at Q3 (4 keywords \u2192 band 3), Q1 (empty `resources`/`parent_datasets`), Q4 (three formats, below the >3 threshold), Q10 (no data-level `conforms_to` asserted for the release), Q12 (collection window given only as \"twelve months\", self-flagged as possibly describing an earlier version), Q15 (no quantitative demographics) and Q20 (fairness analysis qualitative, no AIO mapping).\n\nSemantic analysis recorded 11 issues (2 failed consistency checks, 6 warnings, 22 passed): the twelve-month timeframe cannot be reconciled with a release history spanning Nov 2024\u2013May 2026, and the unqualified OMB M-07-16 PII assertion sits beside `identifiable_elements_present: false`. Correctness validations were clean \u2014 DOI prefix 10.13026 matches the declared PhysioNet publisher and page, NIH grant forms (OT2OD032720, U24EB037545, R01EB030362) are well-formed, all URLs plausible; the one RRID is well-formed but designates the platform rather than the dataset. A notable strength is that the record declines unsupported claims (BIDS conformance, remote collection, DPIA) rather than asserting them.\n\nProvenance is as supplied: `d4d_file` is the label path (not `input/record.yaml`), `temperature` is null, and `model.name`/`model.evaluator_model` both record `claude-opus-5` with the launcher's identity note. `instrument_sha256`, `rubric_hash` and `input_sha256` are set to the given values with `instrument_kind: agent_definition`.\n\nOne caveat worth flagging: `date` was not runnable in this sandbox, so `evaluation_timestamp` is `2026-09-12T17:19:00Z`, inferred from working-directory file mtimes rather than read from the clock.",
+    "ttft_ms": 4989,
+    "type": "result",
+    "duration_ms": 459932,
+    "uuid": "88fdf8f0-33cc-46c8-b9d8-ebfec2cacc71",
+    "ttft_stream_ms": 2601,
+    "time_to_request_ms": 22,
+    "first_content_frame_ms": 3189,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "validator_exit_status_evidence": [
+    {
+      "tool_use_id": "toolu_vrtx_013TzTes4t6VAS29re2Yx3XF",
+      "original_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic; echo \"EXIT=$?\"",
+      "canonical_command": "poetry run python scripts/validate_evaluation_schema.py --file output_evaluation.json --rubric rubric20-semantic",
+      "output": "output_evaluation.json",
+      "exit_status": 0
+    }
+  ],
+  "completed_at": "2026-09-13T00:27:06.124220+00:00"
+}
