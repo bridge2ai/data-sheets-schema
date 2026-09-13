@@ -101,10 +101,13 @@ def measured_pinned_files(manifest):
 
 def load_runner():
     sys.path[:0] = [str(ROOT / "src"), str(ROOT / "scripts")]
-    spec = importlib.util.spec_from_file_location("cborg_reference_runner", ROOT / "scripts/reference_rescore.py")
-    runner = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(runner)
-    runner.ROOT = ROOT
+    from reference_rescore_cborg_evidence import EvidenceRoot
+    evidence = EvidenceRoot(ROOT)
+    runner = evidence.load_module("scripts/reference_rescore.py", "cborg_reference_runner")
+    runner.ROOT = evidence
+    pin = evidence.agent_pin()
+    runner.spawn_preamble = pin.spawn_preamble
+    runner.verify_echo = pin.verify_echo
     runner.DATE = DATE
     runner.PLAN = ROOT / f"notes/reference_rescore_{DATE}"
     validate = runner.validate_candidate

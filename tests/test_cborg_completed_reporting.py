@@ -256,6 +256,61 @@ def test_changed_manifest_cannot_borrow_historical_code_pin():
         adapter.measured_pinned_files(manifest)
 
 
+def test_completed_report_survives_evolution_of_every_preserved_input(monkeypatch, reports_in_memory):
+    """The pipeline may evolve while historical code, checks and results stay pinned."""
+    from reference_rescore_cborg_evidence import EvidenceRoot
+    evidence = EvidenceRoot(ROOT)
+    files, _ = reports_in_memory
+    assert adapter.main(["report"]) == 0
+    baseline = dict(files)
+    live = {ROOT / relative for relative in evidence.paths}
+    read = Path.read_bytes
+    monkeypatch.setattr(Path, "read_bytes", lambda p: b"changed live input" if p in live else read(p))
+    assert adapter.main(["report"]) == 0
+    for path, raw in files.items():
+        if path.suffix == ".json":
+            actual, expected = json.loads(raw), json.loads(baseline[path])
+            # Rendering time is report provenance, not a measured result.
+            actual.pop("reported_at")
+            expected.pop("reported_at")
+            assert actual == expected
+        else:
+            assert raw == baseline[path]
+    r = adapter.load_runner()
+    manifest = json.loads((PLAN / "manifest.json").read_bytes())
+    r.verify_frozen(manifest)
+    assert "measured_inputs_1381" in r.__file__
+    assert r.digest(ROOT / "src/data_sheets_schema/api_runner.py") != evidence.preservation["files"][
+        "src/data_sheets_schema/api_runner.py"]["sha256"]
+
+
+@pytest.mark.parametrize("kind", ["input", "preimage", "preservation", "inventory"])
+def test_changed_preserved_inputs_are_rejected_before_report_publication(kind, monkeypatch, reports_in_memory):
+    from reference_rescore_cborg_evidence import EvidenceRoot, ARCHIVE
+    evidence = EvidenceRoot(ROOT)
+    paths = {"input": evidence / "src/data_sheets_schema/api_runner.py",
+             "preimage": evidence.previous_definitions["d4d-rubric10-semantic"],
+             "preservation": ROOT / ARCHIVE / "preservation.json",
+             "inventory": PLAN / "measurement_file_hashes.json"}
+    read = Path.read_bytes
+    monkeypatch.setattr(Path, "read_bytes", lambda p: read(p) + b"\n" if p == paths[kind] else read(p))
+    files, before = reports_in_memory
+    with pytest.raises(ValueError, match="preserved measurement input changed"):
+        adapter.main(["report"])
+    assert files == before
+
+
+def test_original_output_cannot_be_replaced_by_an_archive(monkeypatch, reports_in_memory):
+    manifest = json.loads((PLAN / "manifest.json").read_bytes())
+    output = ROOT / manifest["jobs"][0]["output"]
+    read = Path.read_bytes
+    monkeypatch.setattr(Path, "read_bytes", lambda p: read(p) + b"\n" if p == output else read(p))
+    files, before = reports_in_memory
+    with pytest.raises(ValueError, match="measurement changed after audit"):
+        adapter.main(["report"])
+    assert files == before
+
+
 @pytest.mark.parametrize("action", ["freeze", "canary", "remaining", "accept-canary", "--print"])
 def test_completed_public_cli_refuses_measurement_actions(action):
     with pytest.raises(SystemExit) as error:

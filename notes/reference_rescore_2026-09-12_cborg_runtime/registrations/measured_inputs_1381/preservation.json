@@ -1,0 +1,103 @@
+{
+  "files": {
+    ".claude/agents/d4d-rubric10-semantic.md": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/.claude/agents/d4d-rubric10-semantic.md",
+      "sha256": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864"
+    },
+    ".claude/agents/d4d-rubric20-semantic.md": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/.claude/agents/d4d-rubric20-semantic.md",
+      "sha256": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3"
+    },
+    ".github/workflows/d4d_assistant_deterministic.config": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/.github/workflows/d4d_assistant_deterministic.config",
+      "sha256": "0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"
+    },
+    "data/preprocessed/concatenated/CHORUS_crate_only.txt": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/data/preprocessed/concatenated/CHORUS_crate_only.txt",
+      "sha256": "4de5dfda961363be1a4f109933668f4abe9936514f5e990402858177660681dc"
+    },
+    "data/preprocessed/concatenated/CHORUS_preprocessed.txt": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+      "sha256": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c"
+    },
+    "data/preprocessed/concatenated/CHORUS_preprocessed_with_crate.txt": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/data/preprocessed/concatenated/CHORUS_preprocessed_with_crate.txt",
+      "sha256": "433e7cb6c9e9b109a4b6e810ab07b400c987420d6acecb7fd5dcbc5d8732c77a"
+    },
+    "data/preprocessed/source_manifest.yaml": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/data/preprocessed/source_manifest.yaml",
+      "sha256": "87641b3b0538f849a44918521c7b7d734646ad8fded11e5c2f0546327637cb04"
+    },
+    "data/rubric/rubric10.txt": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/data/rubric/rubric10.txt",
+      "sha256": "e5f8b6beced5f62f6cc4b3dcf45f6e8cb1431d84f4649227831ef8ecfbf28ab7"
+    },
+    "data/rubric/rubric20.txt": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/data/rubric/rubric20.txt",
+      "sha256": "669490b61351353476ce7c1d4be9efb7da790da6499eb57078d1da0f06c0291b"
+    },
+    "poetry.lock": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/poetry.lock",
+      "sha256": "57a1c937b54e24a0450316bb5f1e82c3b1f5366dbbe156b3d1d5bf7ee81725fa"
+    },
+    "pyproject.toml": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/pyproject.toml",
+      "sha256": "210e6e897d375a24e4a1ba67344e1b21e6cc2a4f6cd3104fcbe53c604d9d40ac"
+    },
+    "scripts/reference_rescore.py": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/scripts/reference_rescore.py",
+      "sha256": "fb71398524d682dfac80f14b68b81b6859297fb0221947f0172e9ac4323d4650"
+    },
+    "scripts/validate_evaluation_schema.py": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/scripts/validate_evaluation_schema.py",
+      "sha256": "dc2e540c4800950eb866914c72894cda668b9a92d41c5f05aa045ff17483652c"
+    },
+    "src/data_sheets_schema/agent_pin.py": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/src/data_sheets_schema/agent_pin.py",
+      "sha256": "35d60bcc835ba0d77e3c3c531fe225b8825ff77f038a7cc499cfbcaa535ba962"
+    },
+    "src/data_sheets_schema/api_runner.py": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/src/data_sheets_schema/api_runner.py",
+      "sha256": "9f38722f8cb334a52abb46c181ada79b1bb3d8695b9c8205ed9709a652f83ee9"
+    },
+    "src/data_sheets_schema/schema/data_sheets_schema_all.yaml": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+      "sha256": "ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da"
+    },
+    "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+      "sha256": "7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449"
+    },
+    "src/download/prompts/d4d_generic_arm_prompt_v9.md": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/src/download/prompts/d4d_generic_arm_prompt_v9.md",
+      "sha256": "a14c871598880ad490130be9ada71d67190488d3323b39d829441cbe7a67d051"
+    },
+    "src/download/prompts/rubric10_semantic_schema.json": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/src/download/prompts/rubric10_semantic_schema.json",
+      "sha256": "5ac1989a60414d41f03383266535eee9963816d0d9b42bf5b90e1efe8d9d3dc2"
+    },
+    "src/download/prompts/rubric20_semantic_schema.json": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/src/download/prompts/rubric20_semantic_schema.json",
+      "sha256": "5ccdbd229471748fa1dde8074d904c0334c983741dd90c7e56f95b45b012f32b"
+    }
+  },
+  "issue": 1381,
+  "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "measurement_index_sha256": "b95df396c911a3fce7b0d76adf27aff6008c386f6036d9b39adf6d39fd86010f",
+  "preserved_at": "2026-09-12",
+  "previous_definitions": {
+    "d4d-rubric10-semantic": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/previous_definitions/d4d-rubric10-semantic.md",
+      "revision": "859d19ce5477d0cb86d7d49a7ef5c253df8cd6c7",
+      "sha256": "00b2f03d183d8f9105de8dc10346b2ee67d32376830243f1ec19348ceb8528db",
+      "source": ".claude/agents/d4d-rubric10-semantic.md"
+    },
+    "d4d-rubric20-semantic": {
+      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/previous_definitions/d4d-rubric20-semantic.md",
+      "revision": "6edb854f23b2778a49f29e186f421ab2c6ba848d",
+      "sha256": "4958f9fe884c19b13703afa72ed39a7365f17ba787401eac270c864e0b14d0a9",
+      "source": ".claude/agents/d4d-rubric20-semantic.md"
+    }
+  },
+  "source_revision": "ef13c5a3f0907953a94d68cec0cdc5889f4ffec0"
+}

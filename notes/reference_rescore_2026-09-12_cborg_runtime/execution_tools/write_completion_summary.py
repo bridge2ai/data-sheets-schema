@@ -217,7 +217,7 @@ def main():
             raise ValueError("session/cost evidence changed after the audit")
     inventory = json.loads((plan / "measurement_file_hashes.json").read_bytes())["files"]
     for rel, sha in inventory.items():
-        if r.digest(ROOT / rel) != sha:
+        if r.digest(r.ROOT / rel) != sha:
             raise ValueError(f"measurement changed after audit: {rel}")
     code_archive = audit["measured_code_archive"]
     if (code_archive["registered_path"] != batch.c.MEASURED_PATH
