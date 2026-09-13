@@ -317,3 +317,25 @@ class TestRoundOne(unittest.TestCase):
         with mock.patch.object(api_runner, "load_generation_config", return_value={}):
             s = api_runner._model_settings()
         self.assertIsNone(s["config_path"]); self.assertIn("not found", s["config_note"])
+
+    def test_the_record_names_the_resource_root_not_the_working_directorys_repository(self):
+        """#1550"""
+        import subprocess
+        from data_sheets_schema import provenance
+        from data_sheets_schema.resources import CHECKOUT_ROOT
+        subprocess.run(["git", "init", "-q"], cwd=self.tmp, check=True)
+        subprocess.run(["git", "-c", "user.email=t@example.org", "-c", "user.name=t", "commit", "-q", "--allow-empty", "-m", "x"],
+                       cwd=self.tmp, check=True)
+        other = subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.tmp, capture_output=True, text=True).stdout.strip()
+        facts = provenance.repo_facts()
+        self.assertEqual(facts["resource_kind"], "checkout")
+        self.assertEqual(Path(facts["resource_root"]), CHECKOUT_ROOT)
+        self.assertNotEqual(facts["commit"], other)
+        here = subprocess.run(["git", "rev-parse", "HEAD"], cwd=CHECKOUT_ROOT, capture_output=True, text=True).stdout.strip()
+        self.assertEqual(facts["commit"], here)
+
+    def test_agent_definitions_resolve_from_elsewhere(self):
+        """#1553"""
+        from data_sheets_schema import agent_pin
+        p = agent_pin.agent_path("d4d-review-record")
+        self.assertTrue(p.exists())

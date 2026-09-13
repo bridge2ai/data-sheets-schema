@@ -155,6 +155,7 @@ def merge(input_files, output, primary):
 @click.option('--packages-dir', type=click.Path(), default='data/ro-crate_packages',
               show_default=True, help='Root of the per-project crate packages.')
 def normalize(project, packages_dir):
+    require_repo_context("d4d rocrate normalize")     # the mapping table and packages are the corpus (#1551)
     """Normalize upstream RO-Crate packages into D4D-usable artifacts.
 
     Writes {PROJECT}/processed/ with a schema-valid D4D YAML (deterministic
@@ -293,6 +294,7 @@ def emit_arm(version, project, packages_dir):
 @click.option('--packages-dir', type=click.Path(), default='data/ro-crate_packages',
               show_default=True)
 def map_cmd(project, packages_dir):
+    require_repo_context("d4d rocrate map")
     """Map a crate to D4D using this repo's own static mapping table.
 
     Reads ro-crate-metadata.json (which every crate has) rather than the

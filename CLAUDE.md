@@ -1588,7 +1588,15 @@ checks and `linkml-validate`, and `check_record` — the release canary, run
 (the deterministic model config under `.github/workflows/` ships too, and a
 record made where it is absent says the defaults applied rather than naming
 a file it did not read, #1529; on an install the digest ledger under
-`site-packages` is mutable package data, a stated design cost, #1537),
+`site-packages` is mutable package data, a stated design cost, #1537;
+the record's `repo` block names `resource_root` and `resource_kind` —
+the checkout git runs at, or the install root and package version — so
+a record made from a user's own repository no longer attests that
+repository's commit beside the checkout's hashes, #1550; `agent_pin`
+reads the shipped definitions, while `chunking.anchored`, the review
+pack's bundle path, `verifiable`'s record lookup and `git show` at the
+repository root still anchor on the checkout and are checkout-only until
+the corpus root follows the manifest, #1523/#1553),
 by the publish workflow before `poetry build`, not a pull-request test; it
 fails, never skips, when the wheel does not install.
 
