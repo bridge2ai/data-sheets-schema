@@ -35,6 +35,7 @@ from typing import Any
 import yaml
 
 from data_sheets_schema.registry import AUTO, manifest_declared_unused
+from data_sheets_schema.corpus import AUTO as SOURCE_MANIFEST_AUTO
 
 RECORD_VERSION = 1
 CONCAT_DIR = Path("data/d4d_concatenated")
@@ -1507,7 +1508,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         # of some other version of the bundle would attest the wrong file.
         from data_sheets_schema.chunking import chunks_input
         inputs["chunks"] = chunks_input(bundle, inputs["bundle_md5"], manifest=chunk_manifest,
-                                         source_manifest=None if namespace is AUTO else namespace)
+                                         source_manifest=SOURCE_MANIFEST_AUTO if namespace is AUTO else namespace)
     elif bundle:
         inputs["bundle_md5"] = None
         inputs["chunks"] = None      # nothing anchors chunk ids to unverified bytes (#716)

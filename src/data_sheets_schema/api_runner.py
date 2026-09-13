@@ -43,6 +43,7 @@ from typing import Any
 import yaml
 
 from data_sheets_schema import provenance, reasoning, schema_digest
+from data_sheets_schema.corpus import AUTO as SOURCE_MANIFEST_AUTO
 from data_sheets_schema.registry import AUTO, DEFAULT_MANIFEST, select_manifest, manifest_declared_unused
 from data_sheets_schema.usage_ledger import (
     UsageLedgerError,
@@ -1554,7 +1555,7 @@ def source_ranking_block(project: str,
 
 
 def chunk_marked_bundle(bundle: Path, manifest: Path | None = None, *,
-                        source_manifest: Path | None = None) -> tuple[str, str]:
+                        source_manifest: Path | None | object = SOURCE_MANIFEST_AUTO) -> tuple[str, str]:
     """The bundle's text with a `[cNNN]` marker line opening each chunk of
     its manifest (#710), and the manifest's md5.
 
