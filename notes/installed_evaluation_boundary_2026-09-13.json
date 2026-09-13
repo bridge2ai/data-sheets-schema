@@ -67,7 +67,7 @@
     "agentic"
   ],
   "generation_dependency": "PR #1367, PR #1436 and PR #1455",
-  "integration_dependency_commit": "53359f5833f6da9c0453630ea6d4a9567c45f31b",
+  "integration_dependency_commit": "5d6d885f0075080b72c4a5bf89760f0ffdf1c75b",
   "issues": [
     1301,
     1457,
@@ -97,7 +97,7 @@
     "path": "notes/evaluation_general_context_boundary_2026-09-13.json",
     "sha256": "0a915145cd9db8feab67f3ee4249853ddd1cc47217063805aacaaf018f573c0a"
   },
-  "profile_dependency_commit": "00ec443ad91f5a3611545c9c018200025c17d1c8",
+  "profile_dependency_commit": "37c958ff21381b20a8d8797647cd9a5dbf0f20ca",
   "records_generated": [],
   "records_rescored": [],
   "runtime_quoted_definition_sha256": null,
