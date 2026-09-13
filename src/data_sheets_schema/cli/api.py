@@ -203,9 +203,10 @@ def _plan_or_refuse(spec):
     """A plan that cannot be assembled is a refusal with a reason, not a
     traceback (#742): a receipt condition on a bundle with no chunk manifest."""
     from data_sheets_schema.api_runner import plan
+    from data_sheets_schema.profiles import MissingVocabulary
     try:
         return plan(spec)
-    except RuntimeError as exc:
+    except (RuntimeError, MissingVocabulary) as exc:           # a vocabulary the checkout lacks too (#1729)
         raise click.ClickException(str(exc))
 
 @click.group()
