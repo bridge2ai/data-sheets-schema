@@ -38,3 +38,14 @@ real isolated rescore subprocess tests. The preservation audit verifies all
 Remaining installed-agentic command/helper work is tracked in #1556 and
 manifest-relative corpus roots in #1523. These must be resolved before claiming
 both generation arms and corpus operations are independent of a checkout.
+
+## Review round 2 — 2026-09-13
+
+Independent review found #1569: compatibility batch commands printed root
+CLI help instead of dispatching renders. The source compatibility scripts
+now retain batch drivers; the YAML drivers discover their input files rather
+than naming study datasets. Installed reusable modules remain unchanged.
+All four actual source-command subprocesses produce HTML from isolated
+synthetic fixtures. Their combined rendering/provenance/CLI lane passes
+47 tests. The 39-file boundary updates the four compatibility entry-point
+hashes; no scoring or generation instrument changes in this round.
