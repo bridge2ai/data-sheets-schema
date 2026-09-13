@@ -321,13 +321,7 @@ def require_completed_accounted(spec, record: dict) -> None:
     """A completed return must include every surviving call of this generation."""
     if ledger.generation_id(spec) is None:
         return
-    recorded = {row.get("usage_id"): row for row in record.get("api_usage") or [] if isinstance(row, dict)}
-    extra = [row for row in ledger.merge_usage(spec, [])
-             if row.get("usage_id") not in recorded
-             or any(recorded[row["usage_id"]].get(key) != value for key, value in row.items())]
-    if extra:
-        raise ledger.UsageLedgerError("billed attempt accounting is absent from or conflicts with the completed record; "
-                                       "restore its progress and accounting before resuming")
+    ledger.require_matching_usage(spec, record.get("api_usage") or [], complete=True)
 
 
 def entries(spec) -> list[dict] | None:

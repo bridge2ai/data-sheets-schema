@@ -692,7 +692,7 @@ def test_completed_record_covers_its_abandoned_rows_but_not_later_charges(tmp_pa
 def test_reasoning_only_state_requires_its_missing_usage_ledger(tmp_path, monkeypatch):
     s, client = spec(out_dir=tmp_path), FakeClient()
 
-    def fail(*args):
+    def fail(*args, **kwargs):
         raise OSError("snapshot failure")
 
     with monkeypatch.context() as failing:

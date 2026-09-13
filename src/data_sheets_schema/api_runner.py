@@ -507,11 +507,14 @@ class RunSpec:
             self.chunk_manifest = Path(self.chunk_manifest)
         if self.manifest_line != default_line:
             return                      # an arm that declares its own header keeps it
-        if self.manifest is None:
-            self.manifest_line = ("# Source manifest: not used (no manifest selected; "
-                                  "the bundle was passed explicitly)")
-        elif self.manifest != DEFAULT_MANIFEST:
-            self.manifest_line = f"# Source manifest: {self.manifest}"
+        self.manifest_line = self.header_for_manifest(self.manifest)
+
+    @staticmethod
+    def header_for_manifest(manifest: Path | None) -> str:
+        if manifest is None:
+            return ("# Source manifest: not used (no manifest selected; "
+                    "the bundle was passed explicitly)")
+        return f"# Source manifest: {manifest}"
 
     @classmethod
     def from_render_spec(cls, recorded: dict[str, Any], *, project: str,
@@ -3703,6 +3706,7 @@ def _attach_output_tokens_details(msg, details: dict[str, Any]) -> None:
 
 
 def _call_with_usage(spec: RunSpec, phase: str, attempt: int, started_at: str, client, **kwargs):
+    _require_surviving_accounting(spec)
     identifier = _begin_usage_call(spec, phase, attempt, started_at)
     try:
         response = _call_with_retry(client, **kwargs)
@@ -4403,6 +4407,26 @@ def _unrecorded_reasoning(spec: RunSpec, prior: dict[str, Any]) -> bool:
     return False
 
 
+def _require_surviving_accounting(spec: RunSpec, usage: list[dict] | None = None) -> list[dict]:
+    """Prove every surviving response before another call or final publication."""
+    generation = _usage_generation(spec)
+    if generation is None:
+        return list(usage or [])
+    from data_sheets_schema import snapshot_store, usage_ledger
+    _require_resolved_usage(spec)
+    usage_ledger.require_matching_usage(spec, usage or [])
+    recovered = merge_abandoned_rows(spec, merge_completed_rows(spec, list(usage or [])))
+    proof = {"run": {**_usage_identity(spec), "generation_id": generation,
+                     "prior_generation_ids": _prior_usage_generations(spec)},
+             "api_usage": recovered}
+    if _unrecorded_abandoned(spec, proof):
+        raise UsageLedgerError("surviving abandoned attempts lack recovered accounting; restore their ledger")
+    if _unrecorded_reasoning(spec, proof):
+        raise UsageLedgerError("surviving reasoning lacks recovered accounting; restore its usage ledger")
+    snapshot_store.require_accounted(spec, proof)
+    return recovered
+
+
 def merge_abandoned_rows(spec: RunSpec, usage: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Recover this generation's drops once; legacy rows use snapshot paths."""
     def key(row):
@@ -4719,6 +4743,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     from data_sheets_schema import snapshot_store
     if resume:
         snapshot_store.require_accounted(spec, prior_record)
+        if generation is not None:
+            _require_surviving_accounting(spec, prior_record.get("api_usage") or [])
     # A *finished* run has no progress file — success deletes it — so resuming
     # found nothing and re-ran all six phases of work already paid for. The
     # artifacts on disk are the durable record of what completed; the progress
@@ -4948,7 +4974,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             # The progress file that carries the findings is deleted on
             # success, so without this the run's richest intermediate
             # survives only as the report's prose summary (#369).
-            _snapshot(spec, f"{spec.project}_audit.json", body)
+            call_id = next((row.get("usage_id") for row in reversed(usage) if row.get("phase") == ph), None)
+            _snapshot(spec, f"{spec.project}_audit.json", body, usage_id=call_id)
         elif artifact:
             target.parent.mkdir(parents=True, exist_ok=True)
             if artifact in ("full", "core"):
@@ -4959,9 +4986,10 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             target.write_text(body, encoding="utf-8")
             # Reconcile (and later repair) overwrite the artifact in place;
             # the snapshot is the only record of what this phase produced.
+            call_id = next((row.get("usage_id") for row in reversed(usage) if row.get("phase") == ph), None)
             _snapshot(spec, f"{spec.project}_{ph}.yaml"
                       if artifact != "report" else f"{spec.project}_{ph}.md",
-                      body)
+                      body, usage_id=call_id)
             label = {"full": "Completed full record",
                      "core": "Completed core record",
                      "report": "Reconciliation report"}[artifact]
@@ -5222,6 +5250,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # Sizes re-read at the last moment — after repair, the report regate and
     # the companions hash, so they describe the bytes the hashes do (#1021).
     provenance.refresh_output_sizes(rec.data)
+    rec.data["api_usage"] = _require_surviving_accounting(spec, rec.data.get("api_usage") or [])
     rec.write(spec.provenance_path)
 
     # Verify what was just written rather than assuming it. The playbook lists a

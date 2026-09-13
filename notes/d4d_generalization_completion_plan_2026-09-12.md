@@ -154,3 +154,14 @@ manifest. All are addressed, with 77 targeted tests passing; see
 `reviews/pr_1367_round8_2026-09-12.md`. Broader recovery tests, full CI and
 independent approval of the revised head still precede merge. Stage order and
 all API/agentic and evaluation-style requirements remain unchanged.
+
+## Generation review round 9
+
+Round 8 confirmed its preceding fixes and found partial-resume accounting,
+predecessor reasoning isolation and historical backfill gaps (#1427–#1429).
+These are addressed with 36 focused tests and two additional snapshot/failure
+guards passing. See `reviews/pr_1367_round9_2026-09-12.md`. Broad tests, full
+CI and independent review still precede merge. Evaluation preparation is
+isolated on `generalize-evaluation-applicability`; its merge remains after
+generation, followed by profiles and packaging. No paid measurement or source
+download is launched by these maintenance stages.

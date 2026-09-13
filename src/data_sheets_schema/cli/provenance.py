@@ -495,24 +495,29 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     # runtime's provider (Anthropic for Claude Code), not the proxy identity
     # the API path's default spec carries, and the header line differs.
     provider = (data.get("model") or {}).get("provider") or None
-    # The manifest the record's input block names, none where it names none;
-    # a record that predates the field consulted the study's (#1367 review, M2).
-    from data_sheets_schema.registry import AUTO as _AUTO
+    # Historical candidates never consult today's registry. A recorded path
+    # is authoritative; a pre-field record can match either legacy convention
+    # only by reproducing the complete original instruction hash.
+    from data_sheets_schema.registry import DEFAULT_MANIFEST, default_manifest_path
     sm = ((data.get("inputs") or {}).get("source_manifest")) or {}
-    # Absent: the record predates the field, and the rule decides from the
-    # bundle exactly as it did for the run that produced the hash.
-    recorded_manifest = (Path(sm["path"]) if sm.get("path") else None) if "path" in sm else _AUTO
+    manifest_choices = ([Path(sm["path"]) if sm.get("path") else None] if "path" in sm
+                        else [None, DEFAULT_MANIFEST, default_manifest_path()])
     from itertools import product
     chunks = ((data.get("inputs") or {}).get("chunks") or {}).get("path")
     # A discovered sidecar is attested as an input too. Only an explicit
     # selection belongs in the rendered recording command (#1408).
     chunk_choices = (None, Path(chunks)) if chunks else (None,)
-    for delta, render_version, selected_chunks in product((0, -1, 1, -2, 2), (2, 1), chunk_choices):
-        spec = RunSpec(project=project, arm=_ARMS[arm][0], method=method, bundle=Path(bundle),
-                       label=label, condition=condition, runtime=runtime, provider=provider,
-                       manifest=recorded_manifest, render_version=render_version,
-                       chunk_manifest=selected_chunks,
-                       run_date=(base + timedelta(days=delta)).isoformat())
+    for delta, render_version, selected_chunks, selected_manifest in product(
+            (0, -1, 1, -2, 2), (2, 1), chunk_choices, manifest_choices):
+        spec = RunSpec.from_render_spec({
+            "arm": _ARMS[arm][0], "bundle": str(bundle), "condition": condition,
+            "runtime": runtime, "provider": provider,
+            "manifest": str(selected_manifest) if selected_manifest is not None else None,
+            "manifest_line": RunSpec.header_for_manifest(selected_manifest),
+            "render_version": render_version,
+            "chunk_manifest": str(selected_chunks) if selected_chunks is not None else None,
+            "run_date": (base + timedelta(days=delta)).isoformat(),
+        }, project=project, method=method, label=label)
         got = hashlib.sha256(resolve_prompt(spec).encode("utf-8")).hexdigest()
         if got == req["sha256"]:
             rendered = spec.render_spec()
