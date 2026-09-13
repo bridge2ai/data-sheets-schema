@@ -964,7 +964,9 @@ class TestValidatorDrivenRepair(unittest.TestCase):
             self.assertIn(expected, names)
         d = _yaml.safe_load((self.out / "CHORUS_provenance.yaml").read_text())
         listed = {Path(i["path"]).name for i in d["intermediates"]}
-        self.assertEqual(listed, set(names))
+        # The mutable recovery index is metadata; phase bodies are the
+        # immutable artifacts attested by the portable record.
+        self.assertEqual(listed, set(names) - {"CHORUS_snapshot_index.json"})
         for i in d["intermediates"]:
             self.assertEqual(len(i["sha256"]), 64)
 
@@ -2106,11 +2108,17 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
             spec = self._spec(td)
             spec.out_dir.mkdir(parents=True)
             spec.full_path.write_text(self.REC)
+            # Keep actual phase ownership evidence before corrupting the
+            # working artifact: the test isolates artifact validation.
+            from data_sheets_schema import api_runner, usage_ledger
+            usage_ledger.prepare_usage(spec, resume=True)
+            api_runner._snapshot(spec, f"{spec.project}_full.yaml", self.REC)
+            api_runner._snapshot(spec, f"{spec.project}_core.yaml", self.REC)
             spec.core_path.write_text(
                 "_distributions: []\ncompression: none\ndialect: x\n")
             _progress_path(spec).parent.mkdir(parents=True, exist_ok=True)
             _progress_path(spec).write_text(json.dumps(
-                {"completed": ["full", "core"]}))
+                {"completed": ["full", "core"], "input_identity": spec.input_identity()}))
 
             ran = []
 
@@ -2217,11 +2225,24 @@ class TestReceiptCondition(unittest.TestCase):
         from pathlib import Path
 
         from data_sheets_schema.api_runner import chunk_marked_bundle
+        from data_sheets_schema.chunking import manifest_for, write_manifest_for
         with tempfile.TemporaryDirectory() as tmp:
+            # A bundle outside the study directory has its manifest beside
+            # itself (#1299): the study's CHORUS manifest is not consulted for
+            # a file that merely shares its basename, so this one is missing.
             other = Path(tmp) / "CHORUS_preprocessed.txt"
             other.write_text("not the bytes the manifest chunked\n", encoding="utf-8")
+            self.assertEqual(manifest_for(other).parent, Path(tmp))
+            with self.assertRaisesRegex(RuntimeError, "no chunk manifest"):
+                chunk_marked_bundle(other)
+            # Stale: a manifest beside it, of other bytes.
+            write_manifest_for(other)
+            other.write_text("the bytes moved after chunking\n", encoding="utf-8")
             with self.assertRaisesRegex(RuntimeError, "not of the bytes"):
                 chunk_marked_bundle(other)
+            # An explicit manifest of some other file is refused the same way.
+            with self.assertRaisesRegex(RuntimeError, "not of the bytes"):
+                chunk_marked_bundle(other, Path("data/preprocessed/chunks/CHORUS_chunks.yaml"))
             missing = Path(tmp) / "NOPE_crate_only.txt"
             missing.write_text("x\n", encoding="utf-8")
             with self.assertRaisesRegex(RuntimeError, "no chunk manifest"):

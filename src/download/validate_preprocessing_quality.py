@@ -220,12 +220,15 @@ def validate_manifest_project(
     project: str,
 ) -> Dict:
     """Validate only canonical manifest sources and reject active extras."""
-    entries = manifest.get("projects", {}).get(project)
-    if entries is None:
+    from data_sheets_schema.registry import Registry
+    registry = Registry(path=None, data=manifest)
+    if not registry.declares(project):
         return {"error": f"Project not found in source manifest: {project}"}
+    entries = registry.sources(project)          # list or mapping record (#1391)
 
-    raw_dir = raw_root / project
-    preprocessed_dir = preprocessed_root / project
+    owner = registry.shared_source_project(project, preprocessed_root)
+    raw_dir = registry.raw_dir(project) or (registry.raw_dir(owner) if owner else None) or (raw_root / (owner or project))
+    preprocessed_dir = registry.preprocessed_directory(project, preprocessed_root)
     default_minimum = int(manifest.get("default_minimum_characters", 500))
     results = {
         "project": project,
@@ -238,7 +241,8 @@ def validate_manifest_project(
         "unexpected_outputs": 0,
         "quality_reports": [],
     }
-    expected_outputs = set()
+    expected_outputs = ({s["processed_file"] for s in registry.sources(owner)}
+                        if owner else set())
 
     for entry in entries:
         raw_file = raw_dir / entry["raw_file"]
@@ -371,8 +375,9 @@ def main():
     parser.add_argument(
         "--projects",
         nargs="+",
-        default=["AI_READI", "CHORUS", "CM4AI", "VOICE"],
-        help="Projects to validate (default: all)"
+        default=None,
+        help="Projects to validate (default: every project the manifest declares "
+             "with a raw directory of its own; the study's four without a manifest)"
     )
     parser.add_argument(
         "--min-ratio",
@@ -411,6 +416,14 @@ def main():
     manifest = None
     if args.manifest:
         manifest = yaml.safe_load(args.manifest.read_text(encoding="utf-8"))
+    if args.projects is None:
+        if args.manifest:
+            from data_sheets_schema.registry import load_registry
+            reg = load_registry(args.manifest)
+            args.projects = [p for p in reg.projects()
+                             if reg.shared_source_project(p, args.preprocessed_dir) is None]
+        else:
+            args.projects = sorted(p.name for p in args.raw_dir.iterdir() if p.is_dir())
 
     for project in args.projects:
         if manifest:

@@ -96,6 +96,8 @@ class SlotDigest:
     #: (#538). Collected and rendered together — collecting without rendering
     #: is the state this issue was filed about.
     values_from: list[str] = field(default_factory=list)
+    #: The schema's declared term sources for the slot (#1302).
+    term_sources: str | None = None
 
 
 @dataclass
@@ -134,21 +136,51 @@ class NestedClass:
     #: so a top-level-only rendering reaches neither — the same reason #486
     #: had to render nested ranges here rather than on the slot listing.
     values_from: dict[str, list[str]] = field(default_factory=dict)
+    #: Declared term sources per nested attribute (#1302).
+    term_sources: dict[str, str] = field(default_factory=dict)
 
 
-#: Registry vocabularies for slots declaring `values_from` (#538), pinned in
-#: `b2ai_registry_vocabularies.yaml`.
+#: The study's registry vocabularies for slots declaring `values_from`
+#: (#538). Kept as a name for the callers that pin the study's file; which
+#: vocabulary a digest renders is the active profile's (#1302, #628).
 VOCABULARY_PIN = Path(__file__).with_name("b2ai_registry_vocabularies.yaml")
+
+#: The slot annotation that names a slot's term sources in prose the digest
+#: renders (#1302): `"d4d:termSources": "GO, MeSH, EFO, NCIT"`. Read when a
+#: schema carries it; this schema does not yet, see `TERM_SOURCES`.
+TERM_SOURCES_ANNOTATION = "d4d:termSources"
+
+#: The term sources the schema's own descriptions declare, by (class, slot),
+#: rendered ahead of any pinned registry list (#1302). `Instance.data_topic`
+#: has said "GO, MeSH, EFO and NCIT IRIs as well as Bridge2AI standards
+#: terms" since #487; the renderer added in #538 carried only the registry.
+#: Declared here rather than as a schema annotation for now: an edit to the
+#: merged schema moves the schema hashes every checked report block attests
+#: (#1362 pins which blocks the runner wrote and which were backfilled, and
+#: a runner-written block cannot be recomputed under a changed schema
+#: without being recast as a backfill), so the annotation route waits for a
+#: schema boundary. `term_sources_of` already reads the annotation when a
+#: schema carries it, and it wins over this table.
+TERM_SOURCES: dict[tuple[str, str], str] = {
+    ("Instance", "data_topic"): "GO, MeSH, EFO, NCIT",
+}
 
 _VOCABULARIES: dict[str, dict[str, str]] | None = None
 _VOCABULARY_KEY: tuple[str, str] | None = None
 
 
-def vocabularies(*, content: bytes | None = None) -> dict[str, dict[str, str]]:
-    """The pinned registry vocabularies, keyed by `values_from` name."""
+def vocabularies(*, content: bytes | None = None,
+                 profile: "Profile | None" = None) -> dict[str, dict[str, str]]:
+    """The vocabularies the active profile pins, keyed by `values_from`
+    name — `{}` for a profile that pins none (#1302). `content` overrides
+    the bytes, for a caller that already read them."""
     global _VOCABULARIES, _VOCABULARY_KEY
-    data = VOCABULARY_PIN.read_bytes() if content is None else content
-    key = content_key(VOCABULARY_PIN, content=data)
+    from data_sheets_schema.profiles import active_profile, vocabulary_bytes
+    prof = profile or active_profile()
+    data = vocabulary_bytes(prof) if content is None else content
+    if not data:
+        return {}
+    key = content_key(prof.pin_path or VOCABULARY_PIN, content=data)
     if _VOCABULARIES is None or key != _VOCABULARY_KEY:
         import yaml as _yaml
         doc = _yaml.safe_load(data) or {}
@@ -157,8 +189,45 @@ def vocabularies(*, content: bytes | None = None) -> dict[str, dict[str, str]]:
     return copy.deepcopy(_VOCABULARIES)
 
 
-def render_values_from(names: list[str], *, vocabulary: dict | None = None) -> str | None:
-    """The permitted terms for a slot that declares `values_from` (#538).
+def term_sources_of(slot) -> str | None:
+    """The `d4d:termSources` annotation on a slot definition, as text.
+
+    linkml-runtime hands annotations back as a dict of `Annotation` on a
+    loaded schema and as a `JsonObj` (tag → {tag, value}) on an induced
+    slot; both are read here, and either value shape."""
+    ann = getattr(slot, "annotations", None)
+    if not ann:
+        return None
+    if hasattr(ann, "items"):
+        pairs = list(ann.items())
+    elif hasattr(ann, "_items"):
+        pairs = list(ann._items())
+    else:
+        return None
+    for tag, v in pairs:
+        if str(tag) != TERM_SOURCES_ANNOTATION:
+            continue
+        value = getattr(v, "value", None)
+        if value is None and isinstance(v, dict):
+            value = v.get("value")
+        if value is None:
+            value = v
+        text = str(value).strip()
+        return text or None
+    return None
+
+
+def render_values_from(names: list[str], *, vocabulary: dict | None = None,
+                       term_sources: str | None = None) -> str | None:
+    """The permitted terms for a slot that declares `values_from` (#538),
+    and the term sources the schema declares for it (#1302).
+
+    The schema's own scope is rendered first: `data_topic` accepts GO, MeSH,
+    EFO and NCIT identifiers, and a source-supported one is in range whether
+    or not the pinned registry lists it. Under a profile that pins no
+    registry that is the whole instruction; under the study's the pinned
+    list follows, and the omission rule applies to a subject none of the
+    sources names.
 
     Rendered because nothing rendered it before. `data_topic` and
     `data_substrate` have declared `values_from` all along and no run has ever
@@ -174,11 +243,14 @@ def render_values_from(names: list[str], *, vocabulary: dict | None = None) -> s
     A `values_from` naming no pinned vocabulary renders nothing rather than
     guessing. Silence is the honest output when the terms are unknown.
     """
-    if not names:
+    if not names and not term_sources:
         return None
     known = vocabularies() if vocabulary is None else vocabulary
     parts = []
-    for name in names:
+    if term_sources:
+        parts.append(f"a term from {term_sources} (the source's own identifier, "
+                     "as an IRI or CURIE, when the documents supply one)")
+    for name in names or []:
         terms = known.get(name)
         if not terms:
             continue
@@ -371,6 +443,7 @@ def _build_uncached(class_name: str, schema_path: Path | None = None, *,
             enum_values=enum_values,
             enum_truncated=truncated,
             values_from=[str(v) for v in (slot.values_from or [])],
+            term_sources=term_sources_of(slot) or TERM_SOURCES.get((class_name, str(slot.name))),
         ))
     digest.slots.sort(key=lambda s: s.name)
 
@@ -401,6 +474,7 @@ def _build_uncached(class_name: str, schema_path: Path | None = None, *,
         enums_truncated: dict[str, int] = {}
         ranges: dict[str, str] = {}
         values_from: dict[str, list[str]] = {}
+        term_sources: dict[str, str] = {}
         inlined_ranges: list[str] = []
         for sub in sv.class_induced_slots(rng):
             (req if sub.required else opt).append(str(sub.name))
@@ -426,6 +500,9 @@ def _build_uncached(class_name: str, schema_path: Path | None = None, *,
                     inlined_ranges.append(str(sub.range))
             if sub.values_from:
                 values_from[str(sub.name)] = [str(v) for v in sub.values_from]
+            ts = term_sources_of(sub) or TERM_SOURCES.get((rng, str(sub.name)))
+            if ts:
+                term_sources[str(sub.name)] = ts
             sub_enum = sv.get_enum(sub.range) if sub.range else None
             if sub_enum is not None:
                 values = list((sub_enum.permissible_values or {}).keys())
@@ -437,7 +514,8 @@ def _build_uncached(class_name: str, schema_path: Path | None = None, *,
             return None, inlined_ranges
         return NestedClass(name=rng, required=sorted(req), optional=sorted(opt),
                            enums=enums, enums_truncated=enums_truncated,
-                           ranges=ranges, values_from=values_from), inlined_ranges
+                           ranges=ranges, values_from=values_from,
+                           term_sources=term_sources), inlined_ranges
 
     frontier = [slot.range for slot in digest.slots if slot.range]
     for depth in range(NESTING_DEPTH):
@@ -480,7 +558,8 @@ def render(digest: ClassDigest, *, vocabulary: dict | None = None) -> str:
             shown = ", ".join(f"`{v}`" for v in s.enum_values)
             tail = f" (+{s.enum_truncated} more)" if s.enum_truncated else ""
             lines.append(f"Permitted: {shown}{tail}")
-        terms = render_values_from(s.values_from, vocabulary=vocabulary)
+        terms = render_values_from(s.values_from, vocabulary=vocabulary,
+                                   term_sources=s.term_sources)
         if terms:
             lines.append(f"Draw from: {terms}")
         lines.append("")
@@ -560,8 +639,9 @@ def render(digest: ClassDigest, *, vocabulary: dict | None = None) -> str:
                 lines.append(f"    - `{slot_name}` accepts only: {shown}{tail}")
             # The registry vocabulary a nested attribute draws from (#538).
             # Here or nowhere, exactly as for the enums above.
-            for slot_name, names in sorted(n.values_from.items()):
-                terms = render_values_from(names, vocabulary=vocabulary)
+            for slot_name in sorted(set(n.values_from) | set(n.term_sources)):
+                terms = render_values_from(n.values_from.get(slot_name, []), vocabulary=vocabulary,
+                                           term_sources=n.term_sources.get(slot_name))
                 if terms:
                     lines.append(f"    - `{slot_name}` draws from {terms}")
         lines.append("")
@@ -591,8 +671,13 @@ LEDGER_KEY_CLASS = "Dataset"
 
 
 def record_inventory(classes: tuple[str, ...] = ("Dataset", "CoreDataset"),
-                     ledger: Path | None = None) -> bool:
+                     ledger: Path | None = None, *,
+                     profile: "Profile | None" = None) -> bool:
     """Note today's digest and the slot inventory of each class. True if new.
+
+    Under `profile`, else the ambient one: the digest is keyed on the
+    profile's vocabulary, so a run records the ledger entry for the
+    digest it consumed and both profiles' digests are entries (#1441).
 
     Called when a run records its schema, so the ledger grows as digests do.
     Entries are never edited: an inventory recorded for a digest is a fact
@@ -607,7 +692,7 @@ def record_inventory(classes: tuple[str, ...] = ("Dataset", "CoreDataset"),
     if path.exists():
         data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     entries = data.setdefault("digests", {})
-    digest = fingerprint(digest_text(LEDGER_KEY_CLASS))
+    digest = fingerprint(digest_text(LEDGER_KEY_CLASS, profile=profile))
     entry = entries.setdefault(digest, {})
     added = False
     for class_name in classes:
@@ -642,7 +727,8 @@ def slot_existed_at(digest: str, class_name: str, slot: str,
     return slot in names
 
 
-def digest_text(class_name: str, schema_path: Path | None = None) -> str:
+def digest_text(class_name: str, schema_path: Path | None = None, *,
+                profile: "Profile | None" = None) -> str:
     """The rendered digest, memoised separately from `build`.
 
     `build` returns a deep copy so a caller cannot corrupt the cache (#528),
@@ -658,12 +744,19 @@ def digest_text(class_name: str, schema_path: Path | None = None) -> str:
     """
     path = _schema_path(class_name, schema_path)
     snapshot = capture_schema(path)
-    vocabulary_bytes = VOCABULARY_PIN.read_bytes()
-    key = (*_cache_key(class_name, path, snapshot),
-           *content_key(VOCABULARY_PIN, content=vocabulary_bytes))
+    # The profile decides which vocabulary, if any, the digest carries
+    # (#1302, #628); it is part of the cache key and of the fingerprint.
+    # A run passes the one it resolved from its selected manifest (#1438);
+    # a caller that has not selected a manifest gets the ambient one.
+    from data_sheets_schema.profiles import active_profile, vocabulary_bytes as _vb
+    prof = profile or active_profile()
+    vocabulary_bytes = _vb(prof)
+    key = (*_cache_key(class_name, path, snapshot), prof.name,
+           *(content_key(prof.pin_path, content=vocabulary_bytes)
+             if vocabulary_bytes else ("", "")))
     if key not in _TEXT_CACHE:
         fresh = render(_build_cached(class_name, path, snapshot),
-                       vocabulary=vocabularies(content=vocabulary_bytes))
+                       vocabulary=vocabularies(content=vocabulary_bytes, profile=prof))
         _drop_stale(_TEXT_CACHE, key)
         _TEXT_CACHE[key] = fresh
     return _TEXT_CACHE[key]

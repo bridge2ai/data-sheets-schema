@@ -345,7 +345,7 @@ class TestTheRecordGate(unittest.TestCase):
                        bundle=Path("b.txt"), label=self.label,
                        condition="generic_v3", manifest_line="",
                        run_date="2026-08-10", runtime="Claude Code",
-                       provider="Anthropic")
+                       provider="Anthropic", render_version=1)
         sent = resolve_prompt(spec)
         self.assertIn("CRITICAL SCOPE BOUNDARY", sent)
 
@@ -377,7 +377,7 @@ class TestTheRecordGate(unittest.TestCase):
                        bundle=Path("b.txt"), label=self.label,
                        condition="generic_v3", manifest_line="",
                        run_date="2026-08-10", runtime="Claude Code",
-                       provider="Anthropic")
+                       provider="Anthropic", render_version=1)
         sent = resolve_prompt(spec)
         self._write_record(
             [{"path": str(self.prompt), "sha256": pr.sha256_of(self.prompt)}],

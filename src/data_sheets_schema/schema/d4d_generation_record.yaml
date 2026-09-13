@@ -567,6 +567,15 @@ classes:
           stands then — the same value whenever the schema did not move mid-run,
           and an unfalsifiable assumption when it did. Absent on records written
           before the digest was recorded.
+      profile:
+        description: >-
+          The profile the digest was rendered under (`bridge2ai`, `neutral`;
+          #1302, #1443). Absent on records written before profiles existed,
+          whose digest was the study's.
+      profile_basis:
+        description: >-
+          Why that profile — `environment`, `manifest:<path>`,
+          `default manifest:<path>`, or `no manifest`.
       full_md5:
       core_md5:
       full_sha256:

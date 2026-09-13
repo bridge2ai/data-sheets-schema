@@ -5,6 +5,7 @@ import functools
 import click
 
 from data_sheets_schema.cli.api import ARMS as _ARMS
+from data_sheets_schema.provenance import SOURCE_MANIFEST as SOURCE_MANIFEST_DEFAULT
 from pathlib import Path
 
 #: The effort ladder, duplicated here so the CLI keeps its lazy imports and
@@ -314,13 +315,19 @@ def _parse_phases(specs) -> list[dict]:
                    'already existed and validated — the same field the API '
                    'path\'s resumed runs carry. Repeat once per skipped '
                    'phase; names are validated like --phase.')
+@click.option('--manifest', default=None,
+              help='the source manifest this run consulted and attests as an input; default: '
+                   'the manifest selected by the resolved bundle and output header; `none` '
+                   'for a run that read no manifest (#621)')
+@click.option('--chunk-manifest', type=click.Path(exists=True, dir_okay=False),
+              help='the exact chunk manifest consumed by this run; default: discover beside the bundle')
 @click.option('--receipt-expected', 'receipt_expected', is_flag=True, default=False,
               help='this run\'s procedure wrote a coverage receipt (#708); the '
                    'canary gate then treats a missing or failing one as a stop '
                    'rather than as not-applicable')
 def record(project, method, label, input_bundle, prompts, prompt_text,
            condition, arm, runtime, provider, bundle_for_spec,
-           reasoning_effort, phase_specs, phases_skipped, receipt_expected):
+           reasoning_effort, phase_specs, phases_skipped, manifest, chunk_manifest, receipt_expected):
     """Write a LIVE provenance record for a run just produced.
 
     Refuses to run from anywhere but the repository root — see
@@ -345,27 +352,60 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     # the digest is observed rather than asserted. `d4d api run` has always
     # recorded it and this path never could, which left the agentic arm off the
     # axis the whole prompt comparison is stratified by — and unable to go
-    # STALE when the schema moves (#426, #433, #497).
-    digest = schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
+    # STALE when the schema moves (#426, #433, #497). Rendered under the
+    # profile the selected manifest declares, once the manifest is selected
+    # below (#1438).
 
     # Reconstruct the render spec, so the gate can re-render and compare rather
     # than reporting `unverifiable`. Only when the caller says which condition
     # was rendered: guessing it would assert a condition the run may not have
     # used, which is the failure the gate exists to catch.
+    from data_sheets_schema.registry import AUTO, select_manifest
+    requested = (None if (manifest and str(manifest).lower() == "none")
+                 else Path(manifest) if manifest else AUTO)
+    # The bundle the record will name: the one passed, else the one the
+    # output's header declares — read here, before selecting, so a study
+    # key over an external header bundle selects none (#1384).
+    from data_sheets_schema.provenance import CONCAT_DIR as _CD, parse_header
+    header_bundle = None
+    base = method[:-5] if method.endswith("_core") else method
+    full_out = _CD / base / label / f"{project}_d4d.yaml"
+    h = parse_header(full_out) if full_out.exists() else {}
+    header_bundle = h.get("Source bundle") or h.get("Source")
+    resolved_bundle = input_bundle or header_bundle
+    header_manifest = h.get("Source manifest", "").strip()
+    header_unused = "not used" in header_manifest.lower()
+    if requested is AUTO and header_manifest and not header_unused:
+        requested = Path(header_manifest)
+    selected = (None if requested is AUTO and (resolved_bundle is None or header_unused)
+                else select_manifest(project, resolved_bundle, requested))
+    manifest_basis = ("the output header declares the source manifest unused"
+                      if selected is None and header_unused else None)
+    from data_sheets_schema.profiles import select_profile
+    profile_selection = select_profile(selected)
+    digest = schema_digest.fingerprint(
+        schema_digest.digest_text("Dataset", profile=profile_selection.profile))
     spec = None
     if condition:
         from data_sheets_schema.api_runner import RunSpec
-        bundle = bundle_for_spec or input_bundle
+        bundle = bundle_for_spec or resolved_bundle
         # `render-prompt` substitutes `ARMS[arm][0]`, the display name, not the
         # token. Storing the token here produced a spec that could never
         # re-render to what was sent, and the gate blamed an unchanged prompt
         # file for it (#500). Expanded through the same table, so the two
         # commands cannot drift apart.
-        spec = RunSpec(
+        run_spec = RunSpec(
             project=project, arm=_ARMS[arm][0], method=method,
             bundle=Path(bundle) if bundle else None, label=label,
             condition=condition, runtime=runtime, provider=provider,
-        ).render_spec()
+            manifest_line=_ARMS[arm][3],
+            manifest=selected,           # the same selection the input block records (#1367 review, must-fix 3)
+            chunk_manifest=Path(chunk_manifest) if chunk_manifest else None,
+        )
+        spec = run_spec.render_spec()
+        if not run_spec.manifest_used:
+            selected = None
+            manifest_basis = f"the arm's header declares the source manifest unused ({run_spec.manifest_line})"
 
     rec = build_record(project, method, label, mode="live",
                        input_bundle=Path(input_bundle) if input_bundle else None,
@@ -375,10 +415,13 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                                        if prompt_text else None),
                        prompt_request_spec=spec,
                        schema_digest_md5=digest,
+                       profile=profile_selection,
                        reasoning_effort=reasoning_effort,
                        phases=_parse_phases(phase_specs),
                        receipt_expected=receipt_expected,
-                       condition=condition)                  # the launcher's own claim (#1094)
+                       condition=condition,                  # the launcher's own claim (#1094)
+                       manifest=selected, manifest_basis=manifest_basis,
+                       chunk_manifest=Path(chunk_manifest) if chunk_manifest else None)
     if phases_skipped:
         known = _known_phases()
         bad = [n for n in phases_skipped if n not in known]
@@ -466,10 +509,29 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     # runtime's provider (Anthropic for Claude Code), not the proxy identity
     # the API path's default spec carries, and the header line differs.
     provider = (data.get("model") or {}).get("provider") or None
-    for delta in (0, -1, 1, -2):
-        spec = RunSpec(project=project, arm=_ARMS[arm][0], method=method, bundle=Path(bundle),
-                       label=label, condition=condition, runtime=runtime, provider=provider,
-                       run_date=(base + timedelta(days=delta)).isoformat())
+    # Historical candidates never consult today's registry. A recorded path
+    # is authoritative; a pre-field record can match either legacy convention
+    # only by reproducing the complete original instruction hash.
+    from data_sheets_schema.registry import DEFAULT_MANIFEST, default_manifest_path
+    sm = ((data.get("inputs") or {}).get("source_manifest")) or {}
+    manifest_choices = ([Path(sm["path"]) if sm.get("path") else None] if "path" in sm
+                        else [None, DEFAULT_MANIFEST, default_manifest_path()])
+    from itertools import product
+    chunks = ((data.get("inputs") or {}).get("chunks") or {}).get("path")
+    # A discovered sidecar is attested as an input too. Only an explicit
+    # selection belongs in the rendered recording command (#1408).
+    chunk_choices = (None, Path(chunks)) if chunks else (None,)
+    for delta, render_version, selected_chunks, selected_manifest in product(
+            (0, -1, 1, -2, 2), (3, 2, 1), chunk_choices, manifest_choices):
+        spec = RunSpec.from_render_spec({
+            "arm": _ARMS[arm][0], "bundle": str(bundle), "condition": condition,
+            "runtime": runtime, "provider": provider,
+            "manifest": str(selected_manifest) if selected_manifest is not None else None,
+            "manifest_line": RunSpec.header_for_manifest(selected_manifest),
+            "render_version": render_version,
+            "chunk_manifest": str(selected_chunks) if selected_chunks is not None else None,
+            "run_date": (base + timedelta(days=delta)).isoformat(),
+        }, project=project, method=method, label=label)
         got = hashlib.sha256(resolve_prompt(spec).encode("utf-8")).hexdigest()
         if got == req["sha256"]:
             rendered = spec.render_spec()
@@ -1455,17 +1517,29 @@ def backfill(verified, dry_run):
             # reconstruction cannot check (#1094 review, N2).
             existing = record_path_for(project, run.method, run.label)
             source_paths: list[str] = []
+            import yaml as _yaml
             if existing.exists():
-                import yaml as _yaml
                 try:
                     prompts = (_yaml.safe_load(existing.read_text(encoding="utf-8")) or {}).get("prompts") or {}
                     source_paths = [f.get("path", "") if isinstance(f, dict) else str(f)
                                     for f in (prompts.get("files") or prompts.get("paths") or [])]
                 except Exception:                              # noqa: BLE001
                     source_paths = []
+            # A reconstruction keeps the manifest the existing record names —
+            # none where it recorded none (#1367 review, must-fix 2).
+            from data_sheets_schema.registry import AUTO as _AUTO
+            prior_manifest = _AUTO                  # no prior record: the rule decides from the bundle (#1384)
+            if existing.exists():
+                try:
+                    sm = ((_yaml.safe_load(existing.read_text(encoding="utf-8")) or {}).get("inputs") or {}).get("source_manifest")
+                    if isinstance(sm, dict) and "path" in sm:
+                        prior_manifest = Path(sm["path"]) if sm["path"] else None
+                except Exception:                              # noqa: BLE001
+                    pass
             rec = build_record(project, run.method, run.label,
                                mode="reconstructed", input_verified=is_verified,
-                               condition_source_paths=source_paths)
+                               condition_source_paths=source_paths,
+                               manifest=prior_manifest)
             target = record_path_for(project, run.method, run.label)
             n_unrec = len(rec.data.get("unrecoverable") or [])
             if dry_run:

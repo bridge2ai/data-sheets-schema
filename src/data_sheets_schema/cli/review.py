@@ -6,9 +6,10 @@ import sys
 from pathlib import Path
 
 import click
+
+from data_sheets_schema.registry import project_choice
 import yaml
 
-from data_sheets_schema.constants import PROJECTS
 
 from data_sheets_schema import backfill_checks as bc
 
@@ -26,7 +27,7 @@ def _provenance(method: str, label: str, project: str) -> Path:
 @review.command("pack")
 @click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--label", required=True)
-@click.option("--project", type=click.Choice(PROJECTS), required=True)
+@click.option("--project", callback=project_choice, required=True)
 @click.option("--instruction", "instruction_file", default=None, type=click.Path(exists=True, dir_okay=False),
               help="the instruction file the launcher sent; otherwise re-rendered from the record's spec")
 @click.option("--receipted", default=25, show_default=True, help="receipted slots to sample")
@@ -90,7 +91,7 @@ def pack(method, label, project, instruction_file, receipted, receiptless, force
 @review.command("check")
 @click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--label", required=True)
-@click.option("--project", type=click.Choice(PROJECTS), required=True)
+@click.option("--project", callback=project_choice, required=True)
 @click.option("--write", is_flag=True, help="write the `review` block into the provenance record")
 @click.option("--strict", is_flag=True, help="exit 1 on any unanswered item or finding")
 def check(method, label, project, write, strict):
@@ -188,7 +189,7 @@ def check(method, label, project, write, strict):
 @review.command("disposition")
 @click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--label", required=True)
-@click.option("--project", type=click.Choice(PROJECTS), required=True)
+@click.option("--project", callback=project_choice, required=True)
 @click.option("--item", required=True, help="the review item this disposes of (e.g. slot-008, rule-01)")
 @click.option("--disposition", type=click.Choice(["retain", "amend"]), required=True)
 @click.option("--note", required=True, help="why: what the finding was and what this disposition rests on")
@@ -351,7 +352,7 @@ def disposition(method, label, project, item, disposition, note, slot_path, old,
 @review.command("agree")
 @click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--label", required=True)
-@click.option("--project", type=click.Choice(PROJECTS), required=True)
+@click.option("--project", callback=project_choice, required=True)
 @click.option("--write", is_flag=True, help="write the reliability block into the provenance record's review block")
 def agree_cmd(method, label, project, write):
     """Test-retest agreement between {P}_review.yaml and {P}_review_b.yaml

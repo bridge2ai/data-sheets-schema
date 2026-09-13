@@ -4,11 +4,12 @@ Commands for working with RO-Crate metadata.
 """
 
 import click
+
+from data_sheets_schema.registry import project_choice, projects_for
 import sys
 from pathlib import Path
 
 from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
-from data_sheets_schema.constants import PROJECTS
 @click.group()
 def rocrate():
     """RO-Crate integration commands."""
@@ -149,7 +150,7 @@ def merge(input_files, output, primary):
 
 
 @rocrate.command()
-@click.option('--project', type=click.Choice(PROJECTS), multiple=True,
+@click.option('--project', callback=project_choice, multiple=True,
               help='Project(s) to normalize; repeatable. Default: all available.')
 @click.option('--packages-dir', type=click.Path(), default='data/ro-crate_packages',
               show_default=True, help='Root of the per-project crate packages.')
@@ -168,7 +169,7 @@ def normalize(project, packages_dir):
 
     root = Path(packages_dir)
     targets = list(project) or [
-        p for p in PROJECTS
+        p for p in projects_for(click.get_current_context())
         if (root / p / 'raw').is_dir() or (root / p / 'crate').is_dir()
     ]
     if not targets:
@@ -204,7 +205,7 @@ def normalize(project, packages_dir):
 
 
 @rocrate.command()
-@click.option('--project', type=click.Choice(PROJECTS), multiple=True,
+@click.option('--project', callback=project_choice, multiple=True,
               help='Project(s) to bundle; repeatable. Default: all normalized.')
 @click.option('--packages-dir', type=click.Path(), default='data/ro-crate_packages',
               show_default=True)
@@ -219,7 +220,7 @@ def bundle(project, packages_dir):
 
     root = Path(packages_dir)
     targets = list(project) or [
-        p for p in PROJECTS if (root / p / 'processed').is_dir()
+        p for p in projects_for(click.get_current_context()) if (root / p / 'processed').is_dir()
     ]
     if not targets:
         click.echo(f"No normalized crates under {root}; run `d4d rocrate normalize`",
@@ -249,7 +250,7 @@ def bundle(project, packages_dir):
 @rocrate.command('emit-arm')
 @click.option('--version', required=True,
               help='Run label, e.g. 2026-07-24_deterministic-v1')
-@click.option('--project', type=click.Choice(PROJECTS), multiple=True,
+@click.option('--project', callback=project_choice, multiple=True,
               help='Project(s); default all normalized.')
 @click.option('--packages-dir', type=click.Path(), default='data/ro-crate_packages',
               show_default=True)
@@ -263,7 +264,7 @@ def emit_arm(version, project, packages_dir):
 
     root = Path(packages_dir)
     targets = list(project) or [
-        p for p in PROJECTS
+        p for p in projects_for(click.get_current_context())
         if (root / p / 'processed' / f'{p}_crate_d4d.yaml').exists()
     ]
     if not targets:
@@ -286,7 +287,7 @@ def emit_arm(version, project, packages_dir):
 
 
 @rocrate.command('map')
-@click.option('--project', type=click.Choice(PROJECTS), multiple=True,
+@click.option('--project', callback=project_choice, multiple=True,
               help='Project(s); default all with a crate.')
 @click.option('--packages-dir', type=click.Path(), default='data/ro-crate_packages',
               show_default=True)
@@ -305,7 +306,7 @@ def map_cmd(project, packages_dir):
 
     root = Path(packages_dir)
     targets = list(project) or [
-        p for p in PROJECTS
+        p for p in projects_for(click.get_current_context())
         if (root / p / 'raw' / 'ro-crate-metadata.json').exists()
         or (root / p / 'crate' / 'ro-crate-metadata.json').exists()
     ]
@@ -345,7 +346,7 @@ def map_cmd(project, packages_dir):
 
 @rocrate.command('emit-map-arm')
 @click.option('--version', required=True, help='Run label for this arm.')
-@click.option('--project', type=click.Choice(PROJECTS), multiple=True)
+@click.option('--project', callback=project_choice, multiple=True)
 @click.option('--packages-dir', type=click.Path(), default='data/ro-crate_packages',
               show_default=True)
 def emit_map_arm(version, project, packages_dir):
@@ -354,7 +355,7 @@ def emit_map_arm(version, project, packages_dir):
 
     root = Path(packages_dir)
     targets = list(project) or [
-        p for p in PROJECTS
+        p for p in projects_for(click.get_current_context())
         if (root / p / 'processed' / f'{p}_crate_mapped_d4d.yaml').exists()
     ]
     if not targets:

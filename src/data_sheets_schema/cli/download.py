@@ -4,11 +4,12 @@ Commands for downloading and preprocessing data sources.
 """
 
 import click
+
+from data_sheets_schema.registry import load_registry, project_choice, projects_for
 import sys
 
 import yaml
 from pathlib import Path
-from data_sheets_schema.constants import PROJECTS
 from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
 
 DEFAULT_SOURCE_SHEET_CSV = (
@@ -22,8 +23,36 @@ def download():
     """Download and preprocess data sources."""
     pass
 
+@download.command('list-projects')
+@click.option('--manifest', type=click.Path(), default='data/preprocessed/source_manifest.yaml',
+              show_default=True, help='the source manifest that is the registry (#623)')
+@click.option('--plain', is_flag=True, help='one name per line, nothing else (for scripts and Make)')
+def list_projects(manifest, plain):
+    """The projects the selected manifest declares — the one registry the
+    CLI and the Make targets read (#623, #637)."""
+    reg = load_registry(manifest)
+    names = reg.projects()
+    if reg.path is None or not reg.path.exists():
+        # Loud in both modes: a Make loop fed an empty list by a silent
+        # failure "completes" having done nothing (#1367 review, must-fix 8).
+        click.echo(f"manifest {manifest} does not exist; no projects", err=True)
+        sys.exit(1)
+    if plain:
+        for n in names:
+            click.echo(n)
+        return
+    click.echo(f"{reg.path}: {len(names)} project(s)")
+    for n in names:
+        extras = []
+        if reg.source_dir(n):
+            extras.append(f"source_dir={reg.source_dir(n)}")
+        if reg.raw_dir(n):
+            extras.append(f"raw_dir={reg.raw_dir(n)}")
+        click.echo(f"   {n}" + (f"  ({', '.join(extras)})" if extras else ""))
+
+
 @download.command()
-@click.option('--project', type=click.Choice(PROJECTS), required=True,
+@click.option('--project', callback=project_choice, required=True,
               help='Project to download')
 @click.option('--output-dir', type=click.Path(), default='data/raw',
               help='Output directory for downloads')
@@ -31,7 +60,7 @@ def download():
               help='Public CSV export URL or local CSV file')
 @click.option(
     '--manifest',
-    type=click.Path(exists=True),
+    type=click.Path(exists=True), is_eager=True,
     default='data/preprocessed/source_manifest.yaml',
     show_default=True,
     help='Canonical source selection manifest',
@@ -64,7 +93,7 @@ def sources(project, output_dir, sheet_url, manifest):
         sys.argv = old_argv
 
 @download.command()
-@click.option('--project', type=click.Choice(PROJECTS),
+@click.option('--project', callback=project_choice,
               help='Preprocess specific project only (default: all)')
 @click.option('--input-dir', type=click.Path(), default='data/raw',
               help='Input directory with raw downloads')
@@ -72,7 +101,7 @@ def sources(project, output_dir, sheet_url, manifest):
               help='Output directory for preprocessed files')
 @click.option(
     '--manifest',
-    type=click.Path(exists=True),
+    type=click.Path(exists=True), is_eager=True,
     default='data/preprocessed/source_manifest.yaml',
     show_default=True,
     help='Canonical source selection manifest',
@@ -109,26 +138,28 @@ def preprocess(project, input_dir, output_dir, manifest):
         sys.argv = old_argv
 
 @download.command()
-@click.option('--project', type=click.Choice(PROJECTS), required=True,
+@click.option('--project', callback=project_choice, required=True,
               help='Project to concatenate')
-@click.option('--input-dir', type=click.Path(exists=True),
+@click.option('--input-dir', type=click.Path(file_okay=False),
               default='data/preprocessed/individual',
-              help='Input directory with preprocessed files')
+              help='Fallback root for projects without a declared source_dir')
 @click.option('--output-file', type=click.Path(),
-              help='Output file path (default: data/preprocessed/concatenated/{PROJECT}_preprocessed.txt)')
+              help='Output file path (default: the selected registry bundle destination)')
+@click.option('--output-dir', type=click.Path(), default=None,
+              help='Fallback directory for projects without a declared bundle path')
 @click.option(
     '--manifest',
-    type=click.Path(exists=True),
+    type=click.Path(exists=True), is_eager=True,
     default='data/preprocessed/source_manifest.yaml',
     show_default=True,
     help='Canonical source selection manifest',
 )
-def concatenate(project, input_dir, output_file, manifest):
+def concatenate(project, input_dir, output_file, output_dir, manifest):
     """Concatenate preprocessed files by project."""
     require_repo_context("d4d download concatenate")
 
     if not output_file:
-        output_file = f"data/preprocessed/concatenated/{project}_preprocessed.txt"
+        output_file = str(load_registry(manifest).bundle(project, Path(output_dir) if output_dir else None))
 
     click.echo(f"📑 Concatenating {project} files...")
 
@@ -141,16 +172,8 @@ def concatenate(project, input_dir, output_file, manifest):
     # the override used to build its bundle lived only in the command someone
     # happened to type (#302). Declared in the manifest, it rebuilds from the
     # manifest.
-    if str(input_dir) == 'data/preprocessed/individual':
-        try:
-            declared = (yaml.safe_load(Path(manifest).read_text(encoding="utf-8"))
-                        or {}).get("projects", {}).get(f"{project}_source_dir")
-        except (OSError, yaml.YAMLError):
-            declared = None
-        input_path = Path(declared) if declared else Path(input_dir) / project
-    else:
-        input_path = Path(input_dir) / project
-    if not input_path.exists():
+    input_path = load_registry(manifest).preprocessed_directory(project, Path(input_dir))
+    if not input_path.is_dir():
         click.echo(f"❌ Error: Input directory not found: {input_path}", err=True)
         sys.exit(1)
 
@@ -174,9 +197,9 @@ def concatenate(project, input_dir, output_file, manifest):
 
 
 @download.command()
-@click.option('--project', type=click.Choice(PROJECTS),
+@click.option('--project', callback=project_choice,
               help='Limit to one project (default: all)')
-@click.option('--manifest', type=click.Path(exists=True),
+@click.option('--manifest', type=click.Path(exists=True), is_eager=True,
               default='data/preprocessed/source_manifest.yaml', show_default=True,
               help='Canonical source selection manifest')
 @click.option('--only', multiple=True, metavar='ID',
@@ -231,9 +254,9 @@ def supplements(project, manifest, only, force, dry_run):
 
 
 @download.command('audit-manifest')
-@click.option('--project', type=click.Choice(PROJECTS),
+@click.option('--project', callback=project_choice,
               help='Limit to one project (default: all)')
-@click.option('--manifest', type=click.Path(exists=True),
+@click.option('--manifest', type=click.Path(exists=True), is_eager=True,
               default='data/preprocessed/source_manifest.yaml', show_default=True)
 def audit_manifest(project, manifest):
     """Report manifest-declared sources against what is on disk."""
@@ -271,14 +294,14 @@ def audit_manifest(project, manifest):
 
 
 @download.command('scope')
-@click.option('--project', type=click.Choice(PROJECTS),
+@click.option('--project', callback=project_choice,
               help='Limit to one project (default: all)')
 @click.option('--check', 'do_check', is_flag=True,
               help='Also check generated records against the declaration.')
 @click.option('--strict', is_flag=True,
               help='Exit non-zero if any record is about a related-but-'
                    'distinct dataset.')
-@click.option('--manifest', type=click.Path(exists=True),
+@click.option('--manifest', type=click.Path(exists=True), is_eager=True,
               default='data/preprocessed/source_manifest.yaml', show_default=True)
 def scope_cmd(project, do_check, strict, manifest):
     """What each project's record is about, and whether the records agree.
@@ -297,7 +320,7 @@ def scope_cmd(project, do_check, strict, manifest):
 
     m = Path(manifest)
     scopes = all_scopes(m)
-    names = [project] if project else sorted(scopes)
+    names = [project] if project else sorted(set(scopes) | set(load_registry(m).projects()))
     for name in names:
         s = scopes.get(name)
         if not s:
@@ -393,11 +416,11 @@ def scope_cmd(project, do_check, strict, manifest):
 
 
 @download.command('audit-bundles')
-@click.option('--project', type=click.Choice(PROJECTS),
+@click.option('--project', callback=project_choice,
               help='Limit to one project (default: all)')
 @click.option('--strict', is_flag=True,
               help='Exit non-zero if any derived bundle is stale.')
-@click.option('--manifest', type=click.Path(exists=True),
+@click.option('--manifest', type=click.Path(exists=True), is_eager=True,
               default='data/preprocessed/source_manifest.yaml', show_default=True)
 def audit_bundles(project, strict, manifest):
     """Rebuild every derived bundle into a temp file and compare it to disk.
@@ -422,101 +445,129 @@ def audit_bundles(project, strict, manifest):
 
     from data_sheets_schema.rocrate_normalize import build_crate_bundle
 
+    from data_sheets_schema.registry import default_manifest_path
+    from data_sheets_schema.chunking import manifest_for, manifest_status_for
+    import shlex
+
     concat = Path('data/preprocessed/concatenated')
-    targets = [project] if project else list(PROJECTS)
+    reg = load_registry(manifest)
+    targets = projects_for(manifest, project)
+    if strict:
+        from data_sheets_schema.registry import validate_context
+        if reg.path is None or not reg.path.is_file():
+            raise click.ClickException(f"selected manifest does not exist: {reg.path}")
+        raw = reg.data.get("projects")
+        if not isinstance(raw, dict):
+            raise click.ClickException("selected manifest projects must be a mapping")
+        declared = reg.projects()
+        invalid = [str(key) for key in raw
+                   if key not in declared and not (
+                       isinstance(key, str) and key.endswith("_source_dir")
+                       and key[:-len("_source_dir")] in declared
+                       and isinstance(raw[key], str) and raw[key])]
+        if invalid:
+            raise click.ClickException("invalid project declarations: " + ", ".join(invalid))
+        if not targets:
+            raise click.ClickException("selected manifest declares no bundle audit targets")
+        for name in targets:
+            validate_context(reg, name)
+    study = reg.path is not None and reg.path.resolve() == default_manifest_path().resolve()
     md5 = lambda p: hashlib.md5(p.read_bytes()).hexdigest()  # noqa: E731
 
     stale, checked, unchecked, manifests = [], 0, [], 0
+    incomplete = False
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         for name in targets:
-            # Document bundle: re-concatenate from the individual files the
-            # manifest selects, honouring the source-dir override that lets
-            # VOICE_PEDIATRIC read VOICE's directory (#302).
-            current = concat / f"{name}_preprocessed.txt"
-            if current.exists():
-                declared = (yaml.safe_load(Path(manifest).read_text(encoding="utf-8"))
-                            or {}).get("projects", {}).get(f"{name}_source_dir")
-                src = Path(declared) if declared else Path(
-                    'data/preprocessed/individual') / name
+            current = reg.bundle(name, concat)
+            if not current.is_file():
+                unchecked.append((current, 'declared document bundle is missing'))
+                incomplete = True
+            else:
+                src = reg.source_dir(name) or Path('data/preprocessed/individual') / name
                 out = tmp / f"{name}_preprocessed.txt"
-                from src.download.concatenate_documents import main as concat_main
-                argv = sys.argv
-                sys.argv = ['concatenate_documents.py', '-i', str(src),
-                            '-o', str(out), '-e', '.txt',
-                            '--manifest', manifest, '--project', name]
                 try:
-                    # The builders narrate; this command's own output is the
-                    # verdict, and 60 lines of progress before it hides that.
-                    with contextlib.redirect_stdout(io.StringIO()):
-                        concat_main()
-                finally:
-                    sys.argv = argv
-                checked += 1
-                if out.exists() and md5(out) != md5(current):
-                    stale.append((current, 'd4d download concatenate '
-                                           f'--project {name}'))
-
-            # Crate-augmented bundle: only where a normalized crate exists.
-            crate = concat / f"{name}_preprocessed_with_crate.txt"
-            if crate.exists():
-                try:
-                    out = tmp / f"{name}_with_crate.txt"
-                    with contextlib.redirect_stdout(io.StringIO()):
-                        _, included, _ = build_crate_bundle(name, out_path=out)
-                    # Compare inputs before comparing bytes. Part of the crate
-                    # package is gitignored, so a clean checkout rebuilds from
-                    # fewer artifacts and the bundle would read `stale` when
-                    # what is actually incomplete is the checkout. The bundle
-                    # header lists what it was built from, so the two are
-                    # directly comparable (#449).
-                    was = _crate_evidence_in(crate)
-                    missing = was - set(included)
-                    if missing:
-                        unchecked.append((
-                            crate,
-                            "this checkout is missing crate artifacts the "
-                            f"bundle was built from: {', '.join(sorted(missing))}"))
-                        continue
+                    from src.download.concatenate_documents import main as concat_main
+                    argv = sys.argv
+                    sys.argv = ['concatenate_documents.py', '-i', str(src),
+                                '-o', str(out), '-e', '.txt',
+                                '--manifest', str(manifest), '--project', name]
+                    try:
+                        with contextlib.redirect_stdout(io.StringIO()):
+                            concat_main()
+                    finally:
+                        sys.argv = argv
+                    if not out.is_file():
+                        raise ValueError('the declared sources produced no bundle')
                     checked += 1
-                    if md5(out) != md5(crate):
-                        stale.append((crate, f'd4d rocrate bundle --project {name}'))
-                except Exception as exc:                       # noqa: BLE001
-                    unchecked.append((crate, f'{type(exc).__name__}: {exc}'))
+                    if md5(out) != md5(current):
+                        stale.append((current, shlex.join([
+                            'd4d', 'download', 'concatenate', '--project', name,
+                            '--manifest', str(manifest)])))
+                except (Exception, SystemExit) as exc:
+                    unchecked.append((current, f'{type(exc).__name__}: {exc}'))
+                    incomplete = True
 
-            # Named, not silently skipped: a bundle with no registered rebuild
-            # route cannot be checked, and that is a gap in this command rather
-            # than evidence the file is current.
-            for suffix in ('_crate_only.txt', '_healthsheet_only.txt'):
-                other = concat / f"{name}{suffix}"
-                if other.exists():
-                    unchecked.append((other, 'no rebuild route registered here'))
+            # Additional study arms are only targets of the study registry.
+            # A custom registry cannot audit files belonging to a namesake.
+            if study:
+                crate = concat / f"{name}_preprocessed_with_crate.txt"
+                if crate.exists():
+                    try:
+                        out = tmp / f"{name}_with_crate.txt"
+                        with contextlib.redirect_stdout(io.StringIO()):
+                            _, included, _ = build_crate_bundle(name, out_path=out)
+                        missing = _crate_evidence_in(crate) - set(included)
+                        if missing:
+                            unchecked.append((crate, 'this checkout is missing crate artifacts the '
+                                              f"bundle was built from: {', '.join(sorted(missing))}"))
+                        else:
+                            checked += 1
+                            if md5(out) != md5(crate):
+                                stale.append((crate, f'd4d rocrate bundle --project {name}'))
+                    except Exception as exc:
+                        unchecked.append((crate, f'{type(exc).__name__}: {exc}'))
+                for suffix in ('_crate_only.txt', '_healthsheet_only.txt'):
+                    other = concat / f"{name}{suffix}"
+                    if other.exists():
+                        unchecked.append((other, 'no rebuild route registered here'))
 
-            # Chunk manifests (#707, every kind #725): derived from the bundle
-            # under the recorded rule, so one goes stale exactly when its
-            # bundle changes.
-            from data_sheets_schema.chunking import (manifest_for, manifest_status_for,
-                                                      project_bundles)
-            for b in project_bundles(name):        # every kind (#725)
-                st, detail = manifest_status_for(b)
-                if st in ('current', 'stale', 'off_rule'):
+            for bundle in reg.bundles(name, concat):
+                if not bundle.is_file():
+                    continue  # the required document was reported above
+                status, detail = manifest_status_for(bundle)
+                if status == 'off_rule' and not study:
+                    from data_sheets_schema.chunking import (canonical_name, load_manifest,
+                                                              validate_manifest_mapping)
+                    try:
+                        validate_manifest_mapping(load_manifest(manifest_for(bundle)),
+                                                  bundle.read_bytes(), canonical_name(bundle))
+                    except (OSError, ValueError) as exc:
+                        status, detail = 'unreadable', str(exc)
+                rebuild = shlex.join(['d4d', 'bundle', 'chunk', '--bundle', str(bundle)])
+                if status in ('current', 'stale', 'off_rule'):
                     manifests += 1
-                if st in ('stale', 'off_rule'):
-                    stale.append((manifest_for(b), f'd4d bundle chunk --project {name}'))
-                elif st == 'missing':
-                    unchecked.append((manifest_for(b), 'no chunk manifest; ' + detail))
-                elif st == 'unreadable':
-                    unchecked.append((manifest_for(b), detail))
+                if status == 'stale' or (status == 'off_rule' and study):
+                    stale.append((manifest_for(bundle), rebuild))
+                elif status in ('missing', 'unreadable', 'no_bundle'):
+                    unchecked.append((manifest_for(bundle), detail))
+                    # Study-only historical gaps remain visible. Explicit
+                    # external inputs must all be auditable in strict mode.
+                    incomplete |= not study
 
     click.echo(f"📦 {checked} derived bundle(s) rebuilt and compared; "
                f"{manifests} chunk manifest(s) rebuilt under their recorded rule (#707)")
-    for path, cmd in stale:
-        click.echo(f"   ❌ stale  {path}\n      rebuild: {cmd}")
-    if not stale:
-        click.echo("   ✓ every rebuildable bundle matches what its inputs produce")
+    for path, command in stale:
+        click.echo(f"   ❌ stale  {path}\n      rebuild: {command}")
+    if not stale and not unchecked and checked:
+        click.echo("   ✓ every declared bundle and chunk manifest matches its inputs")
+    elif not stale and checked:
+        click.echo("   ✓ every rebuilt bundle matches what its inputs produce; unchecked targets are listed below")
+    elif not stale:
+        click.echo("   · no bundle was checked; unchecked targets remain")
     for path, why in unchecked:
-        click.echo(f"   ·  unchecked {path.name}: {why}")
-    if strict and stale:
+        click.echo(f"   ·  unchecked {path}: {why}")
+    if strict and (stale or incomplete):
         sys.exit(1)
 
 

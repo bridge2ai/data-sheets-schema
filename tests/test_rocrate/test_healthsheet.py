@@ -76,11 +76,16 @@ class TestRender(unittest.TestCase):
 
 
 class TestArmRegistration(unittest.TestCase):
-    def test_arm_is_restricted_to_ai_readi(self):
+    def test_arm_is_restricted_to_ai_readi_by_the_study_profile(self):
+        """The arm table declares the arm; which datasets it applies to is
+        the profile's fact (#628, #1444) — the table carries no list."""
         from data_sheets_schema.constants.methods import GENERATION_ARMS
+        from data_sheets_schema.profiles import BRIDGE2AI, NEUTRAL, arm_projects_for
         arm = GENERATION_ARMS["healthsheet_only"]
-        self.assertEqual(arm["projects"], ["AI_READI"])
+        self.assertNotIn("projects", arm)
         self.assertTrue(arm["model_involved"])
+        self.assertEqual(arm_projects_for("healthsheet_only", BRIDGE2AI), ["AI_READI"])
+        self.assertIsNone(arm_projects_for("healthsheet_only", NEUTRAL))
 
     def test_arm_is_counted_as_stochastic(self):
         from data_sheets_schema.constants.methods import STOCHASTIC_ARMS

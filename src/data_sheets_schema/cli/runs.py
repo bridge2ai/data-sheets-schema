@@ -5,6 +5,8 @@ from pathlib import Path
 
 import click
 
+from data_sheets_schema.registry import project_choice, projects_for
+
 from data_sheets_schema.constants import PROJECTS
 
 
@@ -73,7 +75,7 @@ def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
 @runs.command("award-numbers")
 @click.option("--method", default=None, help="run directory family; defaults to the one the first label lives in (#934)")
 @click.option("--label", "labels", multiple=True, help="record labels to read grant_number from; repeat for each")
-@click.option("--project", "projects", multiple=True, type=click.Choice(PROJECTS), help="default: every project")
+@click.option("--project", "projects", multiple=True, callback=project_choice, help="default: every project")
 @click.option("--bundle-dir", default="data/preprocessed/concatenated", show_default=True,
               help="directory holding {PROJECT}_preprocessed.txt (to run from another root); the crate and healthsheet bundles have their own denominators and this command does not read them")
 @click.option("--contexts", is_flag=True, help="print every bundle mention with its source file and context")
@@ -88,7 +90,7 @@ def award_numbers_cmd(method, labels, projects, bundle_dir, contexts):
     from data_sheets_schema.cli.method import resolve_method
     from data_sheets_schema.runs import full_record_path
     import yaml as _yaml
-    projects = list(projects) or list(PROJECTS)
+    projects = list(projects) or projects_for(click.get_current_context())   # the selected registry (#1387)
     method = method or (resolve_method(labels[0]) if labels else None)
     for project in projects:
         bundle = Path(bundle_dir) / f"{project}_preprocessed.txt"
@@ -119,7 +121,7 @@ def award_numbers_cmd(method, labels, projects, bundle_dir, contexts):
 @runs.command("full-output-baseline")
 @click.option("--method", default=None, help="run directory family; defaults to the one the first label lives in (#934)")
 @click.option("--label", "labels", multiple=True, required=True, help="a replicate label; repeat for each")
-@click.option("--project", "projects", multiple=True, type=click.Choice(PROJECTS), help="default: every project")
+@click.option("--project", "projects", multiple=True, callback=project_choice, help="default: every project")
 @click.option("--json", "as_json", is_flag=True)
 def full_output_baseline_cmd(method, labels, projects, as_json):
     """Per-project `full` output baseline under `PREDICTION_9_RULE` (#1026),
@@ -149,7 +151,7 @@ def full_output_baseline_cmd(method, labels, projects, as_json):
         if not families:
             raise click.ClickException("none of the labels lives under claudecode_agent_core or claudecode_api_core; pass --method")
         method = families.pop()
-    base = full_output_baseline(method, list(labels), list(projects) or list(PROJECTS))
+    base = full_output_baseline(method, list(labels), list(projects) or projects_for(click.get_current_context()))
     if as_json:
         click.echo(_json.dumps(base, indent=2))
         return
@@ -447,8 +449,9 @@ def canonical_cmd(project, config, paths_only, missing, runtime):
     is how many projects *have* one, which is three of four while no VOICE
     replicate validates (#292).
     """
-    from data_sheets_schema.constants import PROJECTS
     from data_sheets_schema.runs import AmbiguousCanonical, canonical_runs
+
+    projects = projects_for(click.get_current_context(), project)
 
     try:
         found = canonical_runs(config=config, runtime=runtime)
@@ -461,7 +464,7 @@ def canonical_cmd(project, config, paths_only, missing, runtime):
         found = {k: v for k, v in found.items() if k == project}
 
     if missing:
-        gap = [p for p in PROJECTS if p not in found]
+        gap = [p for p in projects if p not in found]
         if project:
             gap = [p for p in gap if p == project]
         for p in gap:

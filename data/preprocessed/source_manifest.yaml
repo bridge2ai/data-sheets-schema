@@ -1,4 +1,7 @@
 version: 1
+# The profile this manifest selects (#628): the study's vocabularies, arms
+# and defaults. A manifest without `profile:` selects none of them.
+profile: bridge2ai
 generated_at: "2026-07-24"
 source_sheet:
   id: 1jBD6sTp6TDemy6v75PGAHSVz5yfIAXZ8zdDPbmOGATM
@@ -312,21 +315,25 @@ naming:
   AI_READI:
     canonical_label: AI-READI
     gc_name: Salutogenesis Grand Challenge
+    programme: the Bridge2AI Salutogenesis Grand Challenge
     b2ai_org_id: B2AI_ORG:114
     variants: ["AI_READI", "AIREADI", "AI READI"]
   CHORUS:
     canonical_label: CHoRUS
     gc_name: AI/ML for Clinical Care Grand Challenge
+    programme: the Bridge2AI AI/ML for Clinical Care Grand Challenge
     b2ai_org_id: B2AI_ORG:115
     variants: ["CHORUS", "Chorus", "CHoRUS4AI"]
   CM4AI:
     canonical_label: CM4AI
     gc_name: Functional Genomics Grand Challenge
+    programme: the Bridge2AI Functional Genomics Grand Challenge
     b2ai_org_id: B2AI_ORG:116
     variants: ["CM4AI Consortium project", "Cell Maps for AI project"]
   VOICE:
     canonical_label: Voice
     gc_name: Precision Public Health Grand Challenge
+    programme: the Bridge2AI Precision Public Health Grand Challenge
     b2ai_org_id: B2AI_ORG:117
     variants: ["VOICE", "B2AI-VOICE", "B2AI-Voice", "Bridge2AI-Voice",
                "Bridge2AI Voice", "Voice as a Biomarker of Health project"]

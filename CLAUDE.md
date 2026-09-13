@@ -79,7 +79,9 @@ d4d render html input.yaml -o output.html             # Render to HTML
 ```
 
 ### Benefits
-- **Auto-validation**: Project/method names validated via click.Choice
+- **Registry validation**: a `--project` is checked against the source manifest the
+  command selects (`--manifest`, default `data/preprocessed/source_manifest.yaml`),
+  not against a hardcoded list (#623); method names via click.Choice
 - **Consistent interface**: All commands use same patterns
 - **Help everywhere**: `--help` on any command/group
 - **Constants**: Uses centralized constants from `data_sheets_schema.constants`
@@ -1430,6 +1432,93 @@ invalid; no exception makes it pass. The eight obsolete rubric20 outputs with
 hashes recorded (#1200). The whole-corpus command therefore still exits 1 for
 the one annotated artifact. New evaluations use the strict exact-file check,
 whose exit status must be 0.
+
+## Profiles: the study's text and vocabularies (#628, #1302)
+
+What is Bridge2AI's and not the pipeline's lives in `profiles.py`: the
+pinned registry vocabularies the schema digest renders for `data_topic`
+and `data_substrate`, the four-project default of the agreement matrix,
+the AI-READI healthsheet input, and the project lists of the comparison
+arms. The **`bridge2ai`** profile carries them; the **`neutral`** profile
+carries none. The source manifest selects the profile with a top-level
+`profile:` key (the study's declares `bridge2ai`); a manifest without one,
+or a run that selected no manifest, is neutral; `D4D_PROFILE` overrides
+for one process. A profile is never inferred from a project name.
+
+The digest now renders the term sources the schema's description declares
+for a slot (`schema_digest.TERM_SOURCES`: GO, MeSH, EFO, NCIT for
+`Instance.data_topic`; a `d4d:termSources` slot annotation wins when a
+schema carries one) before any pinned list, so a source-supported GO,
+MeSH, EFO or NCIT identifier is in range whether or not the registry lists
+it; the neutral profile renders only that scope. **This changes the
+study's digest** — its md5 moves for every run made after it — and is
+registered as a condition boundary in the plan note; the schema files and
+every record are untouched. The table, not a schema annotation, because a
+merged-schema edit moves the schema hashes every checked report block
+attests (#1362). Test: `tests/test_profiles.py` asserts on the assembled
+full-phase request under both profiles.
+
+**A run resolves its profile once and says so** (#1438, #1443): `RunSpec`
+selects it from the manifest it selected — `profile:` key, else neutral;
+`D4D_PROFILE` overriding — and passes it to every digest it renders
+(`digest_text(…, profile=)`, the repair request, the pair-consistency
+ledger call) and to the record, whose `schema` block carries `profile` and
+`profile_basis` (`environment`, `manifest:<path>`, `default manifest:<path>`,
+`no manifest`) beside `digest_md5`; `d4d api plan` prints them. The agentic
+recorder resolves it the same way from the manifest it attests. A caller
+that selected nothing gets the default manifest resolved *when asked*
+(#1439): the working directory's, else the checkout's — so a script run
+from `tests/` still sees the study's — else none. Both digests are in
+`digest_inventory.yaml` (`record_inventory(profile=)`, #1441), so
+`slot_existed_at` answers for a neutral run. The fitness judge's slot
+specification renders the same term-source scope the digest does (#1440;
+an evaluation-instrument change, dated in the plan note). The arm table
+(`GENERATION_ARMS`) carries no project lists: `profiles.arm_projects_for`
+is the study's scope for its comparison arms, and `agreement.default_projects()`
+/ `healthsheet.default_record()` read the active profile when called —
+empty and `None` under `neutral`, where a caller must name them (#1444).
+
+## The manifest is the project registry (#621, #623, #624, #637, #1299)
+
+A dataset is whatever the selected source manifest declares under
+`projects:`. Every command that names a dataset takes `--manifest`
+(default `data/preprocessed/source_manifest.yaml`) and validates
+`--project` against it — `registry.project_choice`, not
+`click.Choice(PROJECTS)`. `d4d download list-projects [--manifest M]
+[--plain]` prints that registry, and `project.Makefile` asks it for
+`PROJECTS` rather than keeping its own list. A project record is a list of
+sources or a mapping carrying `sources:`, optionally `raw_dir:` (where its
+raw documents are, when not `<input-dir>/<project>`), `source_dir:` (where
+its preprocessed files are — the VOICE_PEDIATRIC override, formerly the
+sibling key `<P>_source_dir`, which is still read and is never a project,
+#626) and `bundle:` (its document bundle, when not
+`data/preprocessed/concatenated/<P>_preprocessed.txt`).
+`constants.PROJECTS` remains the study's corpus for the analysis scripts.
+
+**A run consults one manifest, or none, and its record says which.**
+`d4d api run|plan|render-prompt|batch` take `--manifest`; without it the
+study's manifest is selected only when the bundle is the one it declares
+for that project — `--project VOICE --bundle /elsewhere/x.txt` selects
+none, so the study's naming, scope and source ranking are not sent for a
+bundle they do not describe, and `inputs.source_manifest` records
+`path: null` with a `basis` rather than the study's path and hash (#621).
+`batch` runs every project the manifest declares, or the ones given with
+`--project-bundle NAME=PATH`; a tuned component that was never written
+and never pinned is "no component", while one that exists unpinned, or is
+pinned and gone, is still refused (#624). `d4d provenance record
+--manifest none` is the agentic path's equivalent. The study's own
+DECLARED NAMING sentence is unchanged: its affiliation phrase moved from a
+code literal into the manifest's `naming.<P>.programme`.
+
+**Chunk manifests follow the bundle.** A study bundle keeps
+`data/preprocessed/chunks/<stem>_chunks.yaml`; `d4d bundle chunk --bundle
+PATH` writes `<stem>_chunks.yaml` beside any other bundle, so two bundles
+with one basename in different directories never share a manifest, and
+`--chunk-manifest` names one explicitly (#1299). The receipt-condition
+gate still refuses a missing or stale manifest before any spend. The
+acceptance test is `tests/test_external_dataset_onboarding.py`: a dataset
+that exists only in a temporary manifest goes through preprocessing,
+concatenation, chunking, an offline plan and status with no Python edit.
 
 ## Resources resolve from anywhere, and the wheel ships them (#1301, #673)
 

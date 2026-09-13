@@ -5,6 +5,7 @@ from contextlib import contextmanager
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import tempfile
 import uuid
@@ -97,7 +98,8 @@ def ledger_path(spec) -> Path:
 def _empty(spec, *, accept_legacy: bool) -> dict:
     return {"version": 1, "identity": run_identity(spec),
             "generation_id": uuid.uuid4().hex, "prior_generation_ids": [],
-            "accept_legacy": accept_legacy, "rows": []}
+            "accept_legacy": accept_legacy, "rows": [],
+            "input_identity": spec.input_identity()}
 
 
 def _read(spec) -> dict:
@@ -111,6 +113,8 @@ def _read(spec) -> dict:
     if (not isinstance(data, dict) or data.get("version") != 1
             or data.get("identity") != run_identity(spec) or not isinstance(data.get("rows"), list)):
         raise UsageLedgerError(f"invalid API usage ledger identity or version: {path}")
+    if "input_identity" in data and not isinstance(data["input_identity"], dict):
+        raise UsageLedgerError(f"invalid API input identity: {path}")
     if (not isinstance(data.get("generation_id"), str) or not data["generation_id"]
             or not isinstance(data.get("accept_legacy"), bool)):
         raise UsageLedgerError(f"invalid API usage generation identity: {path}")
@@ -133,12 +137,34 @@ def _read(spec) -> dict:
     return data
 
 
+def recorded_inputs(spec) -> dict | None:
+    """Only persisted pins count as evidence for a legacy progress file."""
+    return _read(spec).get("input_identity") if ledger_path(spec).is_file() else None
+
+
+def pin_inputs(spec) -> None:
+    """Bind a verified legacy continuation before it can make another call."""
+    data = _read(spec)
+    if data.get("input_identity") is None:
+        data["input_identity"] = spec.input_identity()
+        _write(spec, data)
+
+
 def require_resolved(spec) -> None:
-    pending = _read(spec).get("pending_call")
+    data = _read(spec)
+    pending = data.get("pending_call")
     if pending is not None:
         raise UsageLedgerError(
             f"API call {pending['usage_id']} has unresolved accounting in {ledger_path(spec)}; "
             "restore its usage before resuming, or explicitly start fresh to archive this generation")
+
+    pinned = data.get("input_identity")
+    if pinned is not None and pinned != spec.input_identity():
+        raise UsageLedgerError("generation input identity changed (bundle, manifests or resolved instruction); "
+                               "restore the recorded inputs or use --no-resume for an explicit new generation")
+    _finish_reasoning_archive(spec, data)
+    from data_sheets_schema.snapshot_store import finish_activation
+    finish_activation(spec)
 
 
 def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
@@ -170,6 +196,12 @@ def prepare_usage(spec, *, resume: bool) -> str:
     data = _empty(spec, accept_legacy=resume)
     if not resume:
         data["prior_generation_ids"] = _record_generations(spec)
+        from data_sheets_schema.snapshot_store import predecessor_generation
+        predecessor = predecessor_generation(spec)
+        if predecessor is not None and predecessor not in data["prior_generation_ids"]:
+            data["prior_generation_ids"].append(predecessor)
+        from data_sheets_schema.snapshot_store import activation_intent
+        data["pending_snapshot_activation"] = activation_intent(spec)
     if path.exists():
         try:
             previous = _read(spec)
@@ -187,8 +219,49 @@ def prepare_usage(spec, *, resume: bool) -> str:
             out.write(path.read_bytes())
             out.flush()
             os.fsync(out.fileno())
+    if not resume:
+        reasoning = spec.metadata_dir / f"{spec.project}_reasoning.jsonl"
+        if reasoning.exists():
+            data["pending_reasoning_archive"] = {
+                "name": f"{spec.project}_reasoning.previous-{uuid.uuid4().hex}.jsonl",
+                "sha256": hashlib.sha256(reasoning.read_bytes()).hexdigest(),
+            }
     _write(spec, data)
+    _finish_reasoning_archive(spec, data)
     return data["generation_id"]
+
+
+def _finish_reasoning_archive(spec, data: dict) -> None:
+    """Finish a recorded restart boundary without parsing predecessor bytes.
+
+    The plan is durable before the rename. If a process dies after renaming,
+    the next resume verifies the archive and completes the same plan.
+    """
+    pending = data.get("pending_reasoning_archive")
+    if pending is None:
+        return
+    pattern = re.escape(f"{spec.project}_reasoning.previous-") + r"[a-f0-9]{32}\.jsonl"
+    if (not isinstance(pending, dict)
+            or not re.fullmatch(pattern, str(pending.get("name", "")))
+            or Path(pending["name"]).name != pending["name"]
+            or not re.fullmatch(r"[a-f0-9]{64}", str(pending.get("sha256", "")))):
+        raise UsageLedgerError("invalid predecessor reasoning archive plan")
+    source = spec.metadata_dir / f"{spec.project}_reasoning.jsonl"
+    archive = source.with_name(pending["name"])
+    try:
+        if source.exists():
+            if hashlib.sha256(source.read_bytes()).hexdigest() != pending["sha256"]:
+                raise UsageLedgerError("predecessor reasoning changed during archive initialization")
+            if archive.exists():
+                raise UsageLedgerError("reasoning archive target already exists while the source remains")
+            os.replace(source, archive)
+        if not archive.is_file() or hashlib.sha256(archive.read_bytes()).hexdigest() != pending["sha256"]:
+            raise UsageLedgerError("predecessor reasoning archive is missing or its bytes changed")
+        data.setdefault("reasoning_archives", []).append(dict(pending))
+        data.pop("pending_reasoning_archive")
+        _write(spec, data)
+    except OSError as exc:
+        raise UsageLedgerError(f"cannot establish reasoning generation boundary: {exc}") from exc
 
 
 def generation_id(spec) -> str | None:
@@ -265,3 +338,14 @@ def merge_usage(spec, usage: list[dict]) -> list[dict]:
             usage.append(row)
             have.add(row["usage_id"])
     return usage
+
+
+def require_matching_usage(spec, usage: list[dict], *, complete: bool = False) -> None:
+    """A stable ID never excuses contradictory surviving call counters."""
+    recorded = {row.get("usage_id"): row for row in usage if isinstance(row, dict)}
+    for row in _read(spec)["rows"]:
+        previous = recorded.get(row["usage_id"])
+        if (previous is None and complete) or (
+                previous is not None and any(previous.get(key) != value for key, value in row.items())):
+            raise UsageLedgerError("billed attempt accounting is absent from or conflicts with the record; "
+                                   "restore its progress and accounting before resuming")
