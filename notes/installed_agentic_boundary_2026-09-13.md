@@ -39,3 +39,23 @@ was spawned or quoted a new definition, and no source was downloaded. The
 existing measured condition and its hashes remain preserved.
 
 The final packaged-observer attribution wording also passes all 37 observed-extension and token-accounting tests.
+
+## Review round 2 — 2026-09-13
+
+#1633 is reproduced with unrelated project-local Claude command and agent
+files. Toolchain construction now enumerates the selected D4D installation's
+resource names and resolves each file separately, validating the result
+before emission. Agent discovery keeps shipped definitions visible alongside
+local custom agents. #1634 moves historical transcript aliases into the
+selected profile; neutral/custom datasets use generic identifier normalization
+or their configured aliases, and record-driven discovery uses the recorded
+profile. The general provenance command no longer embeds study dataset names.
+
+The combined corpus round-4 dependency is included. All 106 integrated
+agentic/corpus/recording/accounting checks pass, as do 50 remaining recording
+command consumers. All eight fresh-wheel workflows pass (176.36 seconds),
+including local Claude customizations and a flat output override under an
+ancestor manifest. The broader profile lane passes 95 checks; its final mock
+signature was corrected and passes separately. The historical audit again
+verifies 56 accepted ratings, 259 prior evaluations and 450 preservation hashes.
+The implementation pins are refreshed; no new production measurement occurs.

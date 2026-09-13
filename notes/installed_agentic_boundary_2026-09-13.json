@@ -30,12 +30,13 @@
     "scripts/update_agent_preimages.py": "8e7825087e2edcfc7d53972a4e3f9f977cffe584c5050f8441092100b35d4066",
     "src/data_sheets_schema/agent_pin.py": "3f1f6f841592102c72047062b8c083f5c89fb2e10e2c75dc049388856b6ec846",
     "src/data_sheets_schema/agentic_observed.py": "1bdeb4fde0bc28a63d9615acba9e53f70db027668086be35ceae8d12c369c0a8",
-    "src/data_sheets_schema/agentic_runtime.py": "4e05048f075c154b57aa272663345fcd3c8f1c4ca8c803c4119c5a1d72d9c9b8",
-    "src/data_sheets_schema/api_runner.py": "434d377b07b20a279f33b99be5773d793da2aeef581cf0ced032f44731666017",
+    "src/data_sheets_schema/agentic_runtime.py": "6b4fbe2ee80b3d33d5c930ad75d58be7c0247aba12f57d23389bce166a452c33",
+    "src/data_sheets_schema/api_runner.py": "4186d4d90e7fe92c24c66aec744e6af18253f9a8ea1b38c31b3bc53a0205e0a9",
     "src/data_sheets_schema/cli/__main__.py": "0848b1c32239a50b9efd3b432181704327b749c2e470a75865baa55ed997674e",
-    "src/data_sheets_schema/cli/agents.py": "3b9da62cbf939e9b7934cf101e1073f7e06735c6a155457a4859a0d323b231e7",
-    "src/data_sheets_schema/cli/provenance.py": "af3af92a8e121a21a51d879924ecc1275cf38878b3466d7656438e6fbbf9313f",
-    "src/data_sheets_schema/provenance.py": "98a084fce97cc6f324bfed383bffb6e4464ec45b71355b529c3e6c22edf2f0b8",
+    "src/data_sheets_schema/cli/agents.py": "958bbfab19faac7dd23f0ddcbb48150bffedf865fcc8cdf76e562fa08122e12b",
+    "src/data_sheets_schema/cli/provenance.py": "342ff92ba382187096bcb7de30658c16afa4f296a1717206772add30877dcef7",
+    "src/data_sheets_schema/profiles.py": "331955f174216c2cefd7a29d75ed308ed6d2d049187f7494da6feeabbe2ef93c",
+    "src/data_sheets_schema/provenance.py": "929937fbc7b9eeb303c4cae9545d73772252321051fbbd9466259384388433b5",
     "src/data_sheets_schema/resources.py": "0438987d06609f6bc99680e4efa0423b52b80bde10f29ffa4a2f314d3897c073"
   },
   "generation_arms": [
@@ -44,14 +45,16 @@
   ],
   "issues": [
     1556,
-    1612
+    1612,
+    1633,
+    1634
   ],
   "minimum_agentic_python": "3.10",
   "preservation_sha256": "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f",
   "preserved_condition": "notes/reference_rescore_2026-09-12_cborg_runtime",
   "previous_boundary": {
     "path": "notes/manifest_corpus_root_boundary_2026-09-13.json",
-    "sha256": "756dcdab6778505bf666d36ab8e4935f70a618aa07ff3dd36cabf63021653fd9"
+    "sha256": "6051f79c11a23de6f1692b6b900c00e90dbf3264f4eecb589766b9050bc7f323"
   },
   "records_generated": [],
   "records_rescored": [],
