@@ -5,13 +5,94 @@ ratings and generation-replicate summaries; this wrapper attaches the dated
 semantic qualification before publishing derived manuscript tables.
 """
 from pathlib import Path
+from contextlib import contextmanager
 from datetime import datetime
 import json
+import os
+import shutil
 import sys
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path[:0] = [str(ROOT / "src"), str(ROOT / "scripts")]
 import reference_rescore_cborg_batch as batch
+
+
+REPORT_NAMES = ("results.json", "results.md", "completion_summary.md", "semantic_review.md")
+
+
+class ReportDestinations:
+    """Redirect only report paths; receipt and manifest reads keep their sources."""
+
+    def __init__(self, source, staging):
+        self.source, self.staging = source, staging
+
+    def __truediv__(self, name):
+        return (self.staging if name in REPORT_NAMES else self.source) / name
+
+
+class ReportRecoveryError(RuntimeError):
+    """A filesystem failure prevented rollback; retained backups need recovery."""
+
+
+def publish_staged_reports(plan, staging):
+    """Publish completed files, retaining the old inodes until all renames pass."""
+    if not all((staging / name).is_file() for name in REPORT_NAMES):
+        raise ValueError("all four qualified reports must be staged before publication")
+    backups = staging / "backups"
+    backups.mkdir()
+    for name in REPORT_NAMES:
+        if (plan / name).exists():
+            os.link(plan / name, backups / name)
+    replaced = []
+    try:
+        for name in REPORT_NAMES:
+            # Include the destination before the syscall, so an interruption
+            # immediately after a successful rename cannot evade rollback.
+            replaced.append(name)
+            os.replace(staging / name, plan / name)
+    except BaseException as error:
+        failed = []
+        for name in reversed(replaced):
+            try:
+                if (backups / name).exists():
+                    os.replace(backups / name, plan / name)
+                else:
+                    (plan / name).unlink(missing_ok=True)
+            except OSError:
+                failed.append(name)
+        if failed:
+            raise ReportRecoveryError(
+                f"report rollback failed for {failed}; original backups retained at {backups}") from error
+        raise
+
+
+@contextmanager
+def staged_publication(r):
+    """Keep intermediate output off published paths, including on disk-full errors."""
+    plan = r.PLAN
+    # Reuse the condition lock to serialize report publication. This completed
+    # condition no longer permits new canary or worker launches.
+    with r.canary_lock():
+        staging = Path(tempfile.mkdtemp(prefix=".report-staging-", dir=plan))
+        retain = False
+        try:
+            r.PLAN = ReportDestinations(plan, staging)
+            yield staging
+            r.PLAN = plan
+            publish_staged_reports(plan, staging)
+        except ReportRecoveryError:
+            retain = True
+            raise
+        finally:
+            r.PLAN = plan
+            if not retain:
+                shutil.rmtree(staging)
+
+
+def require_qualification(value, name):
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{name} requires nonblank qualification text")
 
 
 def timestamp_qualification(r, manifest, writes, inventory):
@@ -182,6 +263,16 @@ def main():
         r, audit["manifest_sha256"], all_jobs, plan / "canary_narrative_qualification.json")
     cm4ai_narrative, cm4ai_qualification = read_narrative_qualification(
         r, audit["manifest_sha256"], all_jobs, plan / "cm4ai_pilot_narrative_qualification_1355.json")
+    for name, value in (
+            ("semantic inspection", review["qualification"]),
+            ("execution boundary", execution["qualification"]),
+            ("execution deadline", deadline_boundary["qualification"]),
+            ("cost accounting", audit["cost_qualification"]),
+            ("evaluation prose", narrative["qualification"]),
+            ("CM4AI pilot judgments", cm4ai_narrative["qualification"]),
+            ("evaluation timing", timing["qualification"]),
+            ("measured code archive", code_archive["qualification"])):
+        require_qualification(value, name)
     banner = ("**Semantic inspection — Q19:** " + review["qualification"]
               + " See the [24-rating inspection](semantic_review.md).\n\n"
               + "**Execution boundary:** " + execution["qualification"]
@@ -197,9 +288,7 @@ def main():
               + "**Evaluation timing:** " + timing["qualification"] + "\n\n"
               + "**Measured code archive:** " + code_archive["qualification"]
               + " See [the preservation record](report_dispatch_preservation_1356.json).\n\n")
-    reports = [plan / name for name in ("results.json", "results.md", "completion_summary.md", "semantic_review.md")]
-    before = {path: path.read_bytes() if path.exists() else None for path in reports}
-    try:
+    with staged_publication(r) as staging:
         results = r.report_results(manifest)
         if (results["completed"] != 56 or results["pending"]
                 or any(row["ratings"] != 3 for row in results["repeatability"])):
@@ -215,13 +304,13 @@ def main():
         results["cost_accounting"] = {key: audit[key] for key in (
             "cost_accounting_complete", "cli_reported_total_cost_usd", "known_terminal_cli_cost_usd",
             "unpriced_excluded_sessions", "cost_qualification")}
-        r.write_json(plan / "results.json", results)
-        text = (plan / "results.md").read_text().replace(str(ROOT) + "/", "")
+        r.write_json(staging / "results.json", results)
+        text = (staging / "results.md").read_text().replace(str(ROOT) + "/", "")
         title, rest = text.split("\n", 1)
         for case in flagged:
             text_path = case["output"]
             rest = rest.replace(f"| {text_path} |", f"| {text_path} [Q19 inspection](semantic_review.md) |")
-        (plan / "results.md").write_text(title + "\n\n" + banner + rest.lstrip("\n"))
+        (staging / "results.md").write_text(title + "\n\n" + banner + rest.lstrip("\n"))
         lines = ["# CBORG reference rescore completion — 2026-09-12", "", banner.rstrip(), "",
                  "Completed **56 accepted ratings** of the 24 existing v7/v8 D4Ds: 48 primary ratings across both semantic rubrics and eight additional rubric10 ratings. All original scores remain unchanged; this provider condition is separate from the earlier reference run.", "",
                  f"The [completion audit](completion_audit.json) accounts for {audit['actual_model_calls']} evaluator CLI sessions, including {audit['excluded_original_attempts']} retained excluded attempts in this completed condition. The separate preliminary condition used {audit['preliminary_condition']['sessions']} sessions and ${audit['preliminary_condition']['cli_reported_cost_usd']:.8f}, retaining one accepted canary and three excluded attempts; none is pooled into these 56 ratings. All {audit['prior_evaluations_unchanged']} prior evaluations retain their hashes, all 56 accepted outputs match their original successful Writes, and peak completed-session concurrency was {audit['peak_completed_session_concurrency']}. The known terminal CLI subtotal is **${audit['known_terminal_cli_cost_usd']:.8f}**; it excludes the two unpriced interrupted sessions and is not a complete expenditure total. A session may contain multiple model/tool turns; this is not a count of HTTP requests or a reconciled invoice. Review-tool usage is outside this figure.", "",
@@ -250,7 +339,7 @@ def main():
             lines.append(f"| {project} {cohort} rep{rep} | {values['rubric10-semantic']} | {values['rubric20-semantic']} |")
         lines += ["", "## Separate v9 generation canary", "",
                   f"Exactly one CHORUS v9 full/core pair was generated from the existing source bundle and passed the registered gates. It made {audit['v9_model_requests']} native API requests, with a catalogue-rate usage estimate of ${float(audit['v9_catalogue_price_estimate_usd']):.8f}. The [generation review](../cborg_canaries_2026-09-12/v9_canary_review.md) retains the source checks and limits. This is one canary, not a completed v9 manuscript cohort; no downloads or additional v9 generation occurred.", ""]
-        (plan / "completion_summary.md").write_text("\n".join(lines))
+        (staging / "completion_summary.md").write_text("\n".join(lines))
         lines = ["# Q19 inspection of the CBORG reference measurements", "", review["scope"], "", banner.rstrip(), "",
                  "The frozen rule permits complete textual provenance as well as W3C PROV-O graphs. A representation-related objection is flagged for adjudication; this inspection does not assign replacement scores or certify other judgments or external source truth.", ""]
         for case in cases:
@@ -258,14 +347,7 @@ def main():
             lines += [f"## {case['job_id']}", "", f"Recorded Q19: {q['score']}/{q['max_score']}. Status: `{case['status']}`.", "", case["assessment"], "",
                       f"Original output: [evaluation](../../{case['output']}); SHA256 `{case['evaluation_sha256']}`.", "",
                       "Original Q19 object:", "", "```json", json.dumps(q, indent=2), "```", ""]
-        (plan / "semantic_review.md").write_text("\n".join(lines))
-    except BaseException:
-        for path, content in before.items():
-            if content is None:
-                path.unlink(missing_ok=True)
-            else:
-                path.write_bytes(content)
-        raise
+        (staging / "semantic_review.md").write_text("\n".join(lines))
     print(f"Rendered 56 original measurements and {len(cases)} Q19 inspections; {len(flagged)} require adjudication.")
 
 

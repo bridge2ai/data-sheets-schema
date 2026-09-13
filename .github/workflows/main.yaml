@@ -28,6 +28,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
+        with:
+          # Registered check-echo verification compares agent definitions to
+          # their previous versions. A shallow checkout loses that evidence.
+          fetch-depth: 0
 
       # `fairscape_models` is a git submodule imported by
       # `src/fairscape_integration`, not a pip dependency (#926).
@@ -81,6 +85,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
+        with:
+          # The corpus and public report checks also verify the registered
+          # preambles against the preceding agent-definition versions.
+          fetch-depth: 0
 
       - name: Initialise the FAIRSCAPE models submodule
         run: git submodule update --init fairscape_models

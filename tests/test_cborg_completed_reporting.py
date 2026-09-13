@@ -1,7 +1,10 @@
 """Public reporting must retain qualifications without rewriting measurements."""
 import copy
+from contextlib import nullcontext
+import errno
 import hashlib
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -22,6 +25,7 @@ def reports_in_memory(monkeypatch):
         "results.json", "results.md", "completion_summary.md", "semantic_review.md")]
     read_bytes, read_text = Path.read_bytes, Path.read_text
     write_bytes, write_text, unlink = Path.write_bytes, Path.write_text, Path.unlink
+    link, replace = os.link, os.replace
     before = {p: read_bytes(p) for p in paths}
     files = dict(before)
     monkeypatch.setattr(Path, "read_bytes", lambda p: files[p] if p in files else read_bytes(p))
@@ -49,6 +53,32 @@ def reports_in_memory(monkeypatch):
     monkeypatch.setattr(Path, "write_bytes", put_bytes)
     monkeypatch.setattr(Path, "write_text", put_text)
     monkeypatch.setattr(Path, "unlink", remove)
+
+    def backup(source, target, *args, **kwargs):
+        if source in files:
+            target.write_bytes(files[source])
+        else:
+            return link(source, target, *args, **kwargs)
+
+    def publish(source, target, *args, **kwargs):
+        if target in before:
+            files[target] = source.read_bytes()
+            source.unlink()
+        else:
+            return replace(source, target, *args, **kwargs)
+
+    monkeypatch.setattr(os, "link", backup)
+    monkeypatch.setattr(os, "replace", publish)
+    load = batch.load_registered
+
+    def isolated_runner():
+        r, manifest, registration = load()
+        # These report destinations are private in-memory objects, including
+        # under pytest-xdist. The real condition lock is not needed here.
+        r.canary_lock = nullcontext
+        return r, manifest, registration
+
+    monkeypatch.setattr(batch, "load_registered", isolated_runner)
     # The real completion audit is run separately. These tests exercise the
     # public report path and its publication transaction against real records.
     audit = json.loads(read_bytes(PLAN / "completion_audit.json"))
@@ -108,7 +138,7 @@ def test_wrong_condition_qualification_preserves_reports(monkeypatch, reports_in
     assert files == before
 
 
-def test_failure_after_raw_write_restores_all_reports(monkeypatch, reports_in_memory):
+def test_failure_after_raw_staged_write_preserves_all_reports(monkeypatch, reports_in_memory):
     files, before = reports_in_memory
     load = batch.load_registered
 
@@ -118,7 +148,8 @@ def test_failure_after_raw_write_restores_all_reports(monkeypatch, reports_in_me
 
         def fail_after_write(m):
             raw(m)
-            assert files[PLAN / "results.json"] != before[PLAN / "results.json"]
+            assert (r.PLAN / "results.json").read_bytes() != before[PLAN / "results.json"]
+            assert files == before
             raise RuntimeError("failure after unqualified intermediate write")
 
         r.report_results = fail_after_write
@@ -126,6 +157,68 @@ def test_failure_after_raw_write_restores_all_reports(monkeypatch, reports_in_me
 
     monkeypatch.setattr(batch, "load_registered", failing_runner)
     with pytest.raises(RuntimeError, match="unqualified intermediate"):
+        adapter.main(["report"])
+    assert files == before
+
+
+@pytest.mark.parametrize("failed_name", ["results.md", "semantic_review.md"])
+def test_persistent_disk_full_never_replaces_prior_reports(monkeypatch, reports_in_memory, failed_name):
+    files, before = reports_in_memory
+    write_text, write_bytes = Path.write_text, Path.write_bytes
+    failed = False
+
+    def fail_text(path, data, *args, **kwargs):
+        nonlocal failed
+        if path.name == failed_name:
+            failed = True
+        if failed:
+            raise OSError(errno.ENOSPC, "persistent disk-full fixture")
+        return write_text(path, data, *args, **kwargs)
+
+    def fail_bytes(path, data, *args, **kwargs):
+        if failed:
+            raise OSError(errno.ENOSPC, "persistent disk-full fixture")
+        return write_bytes(path, data, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "write_text", fail_text)
+    monkeypatch.setattr(Path, "write_bytes", fail_bytes)
+    with pytest.raises(OSError, match="disk-full"):
+        adapter.main(["report"])
+    assert failed and files == before
+
+
+@pytest.mark.parametrize("value", ["", " \t\n", None])
+@pytest.mark.parametrize("name", ["semantic_review.json", "canary_narrative_qualification.json",
+                                  "cm4ai_pilot_narrative_qualification_1355.json"])
+def test_blank_qualification_preserves_all_reports(monkeypatch, reports_in_memory, name, value):
+    files, before = reports_in_memory
+    path = PLAN / name
+    read = Path.read_bytes
+    doc = json.loads(read(path))
+    doc["qualification"] = value
+    monkeypatch.setattr(Path, "read_bytes", lambda p: json.dumps(doc).encode() if p == path else read(p))
+    with pytest.raises(ValueError, match="nonblank qualification"):
+        adapter.main(["report"])
+    assert files == before
+
+
+@pytest.mark.parametrize("value", ["", " \n"])
+@pytest.mark.parametrize("pointer", [
+    ("cost_qualification",), ("execution_permission_boundary", "qualification"),
+    ("execution_deadline_boundary", "qualification"), ("measured_code_archive", "qualification"),
+])
+def test_blank_audit_qualification_preserves_reports(monkeypatch, reports_in_memory, pointer, value):
+    files, before = reports_in_memory
+    path = PLAN / "completion_audit.json"
+    read = Path.read_bytes
+    doc = json.loads(read(path))
+    target = doc
+    for key in pointer[:-1]:
+        target = target[key]
+    target[pointer[-1]] = value
+    monkeypatch.setattr(Path, "read_bytes", lambda p: json.dumps(doc).encode() if p == path else read(p))
+    monkeypatch.setattr(deadline, "accounted_audit", lambda *args: copy.deepcopy(doc))
+    with pytest.raises(ValueError, match="nonblank qualification"):
         adapter.main(["report"])
     assert files == before
 

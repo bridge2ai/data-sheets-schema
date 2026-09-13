@@ -1,0 +1,12 @@
+{
+  "shallow_results": {
+    "d4d-rubric10-semantic": "correctly refused without history",
+    "d4d-rubric20-semantic": "correctly refused without history"
+  },
+  "full_history_matches_registered_preambles": {
+    "d4d-rubric10-semantic": true,
+    "d4d-rubric20-semantic": true
+  },
+  "model_calls": 0,
+  "remote_network_calls": 0
+}

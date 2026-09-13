@@ -15,6 +15,11 @@ These commands make no model calls. The [preservation record](report_dispatch_pr
 binds the exact measured adapter and scheduler archives to their original
 manifest and registration hashes. The post-measurement reporting repair does
 not restamp the instrument, prompts, receipts or evaluations.
+Strict check-echo verification requires Git history containing the preceding
+agent definitions; a shallow checkout cannot establish that discriminator.
+Report publication stages all four qualified files and retains original-file
+backups until replacement succeeds. A failed filesystem recovery preserves
+those backups and reports their location.
 
 This supersedes the preliminary CBORG condition before any cohort fill.
 That condition retains one accepted canary, three excluded attempts and
