@@ -48,10 +48,12 @@ def test_recorded_toolchain_replays_without_live_environment(external, monkeypat
     assert restored.render_spec() == recorded
 
 
-def test_historical_backfill_does_not_require_a_current_toolchain(project_tree, monkeypatch):
+@pytest.mark.parametrize("error_name", ["ValueError", "OSError", "ResourceRootError"])
+def test_historical_backfill_does_not_require_a_current_toolchain(project_tree, monkeypatch, error_name):
     import yaml
     from click.testing import CliRunner
     from data_sheets_schema import chunking, provenance
+    from data_sheets_schema.resources import ResourceRootError
     from data_sheets_schema.cli import cli
     root, manifest, bundle = project_tree
     monkeypatch.chdir(root)
@@ -75,7 +77,9 @@ def test_historical_backfill_does_not_require_a_current_toolchain(project_tree, 
     attempted = []
     def unavailable():
         attempted.append(True)
-        raise ValueError("current playbook resources are unavailable")
+        error = {"ValueError": ValueError, "OSError": OSError,
+                 "ResourceRootError": ResourceRootError}[error_name]
+        raise error("current playbook resources are unavailable")
     monkeypatch.setattr(agentic_runtime, "toolchain", unavailable)
     result = CliRunner().invoke(cli, ["--manifest", str(manifest), "provenance", "backfill-spec",
         "--project", spec.project, "--method", spec.method, "--label", spec.label,

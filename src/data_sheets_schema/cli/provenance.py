@@ -632,9 +632,10 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute, sele
     current_toolchain = None
     if runtime in {"Claude Code", "Codex CLI"}:
         from data_sheets_schema.agentic_runtime import toolchain
+        from data_sheets_schema.resources import ResourceRootError
         try:
             current_toolchain = toolchain()
-        except (OSError, ValueError):
+        except (OSError, ValueError, ResourceRootError):
             # Current resources may be gone while older renderer hashes
             # still reproduce. Only this candidate becomes unavailable.
             pass
