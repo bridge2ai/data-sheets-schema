@@ -1,0 +1,518 @@
+# D4D Rubric20 - Twenty-Question Detailed Evaluation Rubric
+# Schema Version: 2.1
+# Last Updated: 2026-01-12
+
+# =============================================================================
+# FIELD REFERENCE GUIDE
+# =============================================================================
+# Use these exact field names when evaluating D4D files against the schema.
+# The D4D schema uses a class-based structure, not dot-notation.
+#
+# Discovery & Access:
+#   - id: Unique identifier (URI)
+#   - doi: Digital Object Identifier
+#   - rrid: Research Resource Identifier
+#   - title: Dataset title
+#   - description: Dataset description
+#   - keywords: Search keywords (list)
+#   - download_url: Download URL
+#   - page: Landing page URL
+#   - distribution_formats: DistributionFormat (list)
+#
+# Licensing & Governance:
+#   - license_and_use_terms: LicenseAndUseTerms class
+#   - ip_restrictions: IPRestrictions class
+#   - regulatory_restrictions: ExportControlRegulatoryRestrictions class
+#   - confidentiality_level: ConfidentialityLevelEnum
+#
+# Human Subjects:
+#   - human_subject_research: HumanSubjectResearch class
+#   - informed_consent: InformedConsent (list)
+#   - participant_privacy: ParticipantPrivacy (list)
+#   - participant_compensation: HumanSubjectCompensation class
+#   - vulnerable_populations: VulnerablePopulations class
+#   - ethical_reviews: EthicalReview (list)
+#
+# Data Composition:
+#   - instances: Instance (list)
+#   - variables: VariableMetadata (list)
+#   - subpopulations: Subpopulation (list)
+#   - is_tabular: Boolean
+#   - is_deidentified: Deidentification class
+#
+# Data Quality:
+#   - anomalies: DataAnomaly (list)
+#   - known_biases: DatasetBias (list)
+#   - known_limitations: DatasetLimitation (list)
+#
+# Use Guidance:
+#   - intended_uses: IntendedUse (list)
+#   - prohibited_uses: ProhibitedUse (list)
+#   - discouraged_uses: DiscouragedUse (list)
+#   - existing_uses: ExistingUse (list)
+#
+# Hierarchical Structure:
+#   - resources: Dataset (list) - nested sub-resources
+#   - parent_datasets: Dataset (list) - parent datasets
+#   - related_datasets: DatasetRelationship (list) - typed relationships
+#
+# Funding & Motivation:
+#   - purposes: Purpose (list)
+#   - tasks: Task (list)
+#   - funders: FundingMechanism (list)
+#   - creators: Creator (list)
+#
+# Technical Methods:
+#   - collection_mechanisms: CollectionMechanism (list)
+#   - acquisition_methods: DataAcquisition (list)
+#   - preprocessing_strategies: PreprocessingStrategy (list)
+#   - cleaning_strategies: CleaningStrategy (list)
+#   - labeling_strategies: LabelingStrategy (list)
+#   - software_and_tools: Software (list)
+#
+# Versioning & Maintenance:
+#   - version: Version string
+#   - version_access: VersionAccess class
+#   - updates: UpdatePlan class
+#   - errata: Erratum (list)
+#   - maintainers: Maintainer (list)
+#   - was_derived_from: Source provenance
+#   - release_notes: Release documentation
+#
+# Distribution:
+#   - format: File format specification
+#   - media_type: MIME type
+#   - encoding: Character encoding
+#   - bytes: File size in bytes
+#   - conforms_to: Standards conformance
+#   - conforms_to_schema: Schema conformance
+#
+# Other:
+#   - publisher: Publishing organization
+#   - citation: Recommended citation
+#   - external_resources: ExternalResource (list)
+#   - sensitive_elements: Sensitive content description
+#   - content_warnings: Content warnings
+#
+# Data Protection & Compliance:
+#   - data_protection_impacts: DataProtectionImpact (list)
+#   - reidentification_risk: Re-identification risk assessment
+#   - hipaa_compliant: ComplianceStatusEnum
+#   - other_compliance: Other regulatory frameworks (list)
+#   - governance_committee_contact: Governance committee contact person
+#
+# Responsible AI (CROISSANT RAI Alignment):
+#   - future_use_impacts: FutureUseImpact (rai:dataSocialImpact) - Social impact analysis
+#   - intended_uses: IntendedUse (rai:dataUseCases) - Explicit intended uses
+#   - known_biases: DatasetBias (rai:dataBiases) - Categorized with BiasTypeEnum
+#
+# Data Quality & Documentation:
+#   - missing_data_documentation: MissingDataDocumentation (list)
+#   - annotation_analyses: AnnotationAnalysis (list)
+#   - machine_annotation_tools: MachineAnnotationTool (list)
+#   - raw_data_sources: RawDataSource (list)
+#   - imputation_protocols: ImputationProtocol (list)
+#
+# Dataset Structure Flags:
+#   - is_data_split: Boolean - Training/test split flag
+#   - is_subpopulation: Boolean - Subpopulation subset flag
+#   - confidential_elements: Confidentiality (list)
+#
+# Provenance (W3C PROV-O):
+#   - was_derived_from: Source provenance with entity-activity-agent relationships
+#   - Note: Provenance may be represented as text OR as W3C PROV-O graphs
+#
+# AI/ML Readiness (Bridge2AI):
+#   - Reference: Bridge2AI AI-readiness characterization criteria
+#   - Tool: Bridge2AI AI-readiness scorecard
+#
+# Data Sustainability:
+#   - Persistent identifiers (DOI, ARK, Handle)
+#   - Long-term governance plan
+#   - Domain-appropriate repository
+#   - Institutional commitment documentation
+#
+# Integration/Merging Capability:
+#   - Common identifiers for cross-dataset integration
+#   - Standardized formats for data harmonization
+#   - Integration procedure documentation
+# =============================================================================
+
+d4d_evaluation_rubric:
+  schema_version: "2.0"
+  description: >
+    A 20-question rubric for evaluating D4D YAML files for completeness, data quality,
+    interoperability, and FAIR compliance. Each element is linked to specific metadata fields
+    and tasks described in the D4D schema (data_sheets_schema_all.yaml).
+
+    Total maximum score: 88 points (17 numeric questions × 5 points + 3 pass/fail questions × 1 point)
+
+  scoring_scale:
+    quantitative: 0–5
+    qualitative: ["Pass", "Fail", "N/A"]
+
+  rubric:
+    # --------------------------- #
+    # 1. Structural Completeness  #
+    # --------------------------- #
+    - id: 1
+      name: "Field Completeness"
+      description: >
+        Proportion of mandatory schema fields populated including core identification,
+        hierarchical structure, governance, and composition metadata.
+      field: ["id", "title", "description", "keywords", "license_and_use_terms", "doi",
+              "page", "creators", "purposes", "instances", "resources", "parent_datasets",
+              "variables", "regulatory_restrictions.confidentiality_level"]
+      method: "Count non-empty required fields; score by proportion filled."
+      score_type: numeric
+      scoring:
+        0: "≤40% fields populated"
+        3: "≈70% fields populated"
+        5: "≥90% fields populated"
+      task_ref: [1, 2, 4, 6, 13]
+
+    - id: 2
+      name: "Entry Length Adequacy"
+      description: "Checks whether narrative fields (e.g., description, purposes) have meaningful content length."
+      field: ["description", "purposes"]
+      method: "Measure average string length >200 characters."
+      score_type: numeric
+      scoring:
+        0: "<50 chars"
+        3: "50–200 chars"
+        5: ">200 chars"
+      task_ref: [16, 17]
+
+    - id: 3
+      name: "Keyword Diversity"
+      description: >
+        Number of unique keywords provided to describe dataset topic coverage.
+
+        Note: For datasets targeting multiple conditions (e.g., Bridge2AI-Voice with 50+ diseases),
+        keywords may be supplemented by schema-defined condition lists. Check: (1) keywords field,
+        (2) condition/disease fields in schema, (3) external ontology references (e.g., SNOMED CT,
+        ICD codes).
+      field: ["keywords"]
+      method: "Count unique keywords."
+      score_type: numeric
+      scoring:
+        0: "<3 keywords"
+        3: "3–7 keywords"
+        5: "≥8 keywords"
+      task_ref: [1, 2, 3]
+
+    - id: 4
+      name: "File Enumeration and Type Variety"
+      description: >
+        Number of distribution formats and file type diversity.
+
+        Note: In Bridge2AI, multimodality is achieved by: (1) packaging separate single-modality
+        datasets integrated on participant_id/sample_id, OR (2) single dataset with multiple data
+        types. Check for: unified participant/sample identifiers across modalities. Multimodality
+        is evaluated separately from AI/ML readiness (Q10).
+      field: ["distribution_formats", "file_collections", "total_file_count"]
+      method: "Count total formats and unique media types."
+      score_type: numeric
+      scoring:
+        0: "1 file type only"
+        3: "2–3 file types"
+        5: ">3 file types"
+      task_ref: [94, 95]
+
+    - id: 5
+      name: "Data File Size Availability"
+      description: "Presence of file size or dimensional metadata (bytes, instance counts, data splits)."
+      field: ["total_size_bytes", "file_collections.total_bytes", "instances",
+              "subsets.is_data_split", "splits", "subsets.is_subpopulation",
+              "subpopulations"]
+      method: "Detect numeric values for file size or instance counts."
+      score_type: pass_fail
+      scoring:
+        Pass: "Numeric file size or dimension info found."
+        Fail: "No file size/dimension metadata."
+      task_ref: [69, 70]
+
+    # --------------------------- #
+    # 2. Metadata Quality & Content #
+    # --------------------------- #
+    - id: 6
+      name: "Dataset Identification Metadata"
+      description: >
+        Presence of unique identifiers such as DOI, RRID, or persistent URLs, AND hosting
+        platform identification (publisher or repository).
+
+        Note: Dataset identification should include both persistent identifiers AND hosting
+        platform information (e.g., PhysioNet, Dataverse, Zenodo, institutional repositories).
+      field: ["doi", "id", "page", "publisher"]
+      method: "Check for non-null DOI or equivalent identifier AND publisher/platform."
+      score_type: pass_fail
+      scoring:
+        Pass: "At least one persistent ID found."
+        Fail: "No persistent ID or link."
+      task_ref: [2, 7]
+
+    - id: 7
+      name: "Funding and Acknowledgements Completeness"
+      description: "Checks presence of funding sources, grants, institutional sponsors, and creator affiliations."
+      field: ["funders", "creators"]
+      score_type: numeric
+      scoring:
+        0: "No funding data"
+        3: "Funding agency or creator info but missing grants/affiliations"
+        5: "Funders with grants + creators with affiliations"
+      task_ref: [22, 23, 24, 25]
+
+    - id: 8
+      name: "Ethical and Privacy Declarations"
+      description: >
+        Comprehensive ethics coverage including IRB approval, deidentification, privacy protections,
+        informed consent, participant compensation, vulnerable population safeguards, data protection
+        impact assessments (DPIA), and re-identification risk analysis.
+
+        Note: Sensitive data includes protected health information (PHI) such as: voice recordings,
+        physical activity data (step counts), retinal images, genetic data, location data, biometric
+        identifiers, and other individually identifiable health information requiring special protections.
+      field: ["ethical_reviews", "human_subject_research", "is_deidentified",
+              "participant_privacy", "participant_compensation", "at_risk_populations",
+              "informed_consent", "data_protection_impacts",
+              "participant_privacy.reidentification_risk"]
+      score_type: numeric
+      scoring:
+        0: "No ethics fields present"
+        3: "Basic ethics (IRB + deidentification)"
+        5: "Comprehensive (ethics + DPIA + re-identification risk + all human subjects protections)"
+      task_ref: [59, 76, 80, 84]
+      applies_to: ["Bridge2AI-Voice", "AI-READI"]
+
+    - id: 9
+      name: "Access Requirements and Governance Documentation"
+      description: >
+        Determines if access policy, license, IP restrictions, regulatory restrictions,
+        confidentiality level, multi-jurisdiction compliance, and governance contacts are clearly defined.
+
+        Note: In Bridge2AI, license types include: (1) CM4AI uses CC-BY-NC-SA (permissive license),
+        (2) AI-READi, CHORUS, VOICE use Data Use Agreements (controlled access). Avoid misleading
+        terms like "Open" or "Public" - instead use: permissive license (e.g., CC-BY, CC-BY-NC-SA)
+        or openly accessible with DUA (requires signed agreement). Access tiers: (1) No authentication,
+        (2) Registration required, (3) DUA required, (4) IRB/committee approval required.
+      field: ["license_and_use_terms", "ip_restrictions", "regulatory_restrictions",
+              "regulatory_restrictions.confidentiality_level",
+              "regulatory_restrictions.hipaa_compliant",
+              "regulatory_restrictions.other_compliance",
+              "regulatory_restrictions.governance_committee_contact"]
+      score_type: numeric
+      scoring:
+        0: "No license or access info"
+        3: "License + basic restrictions"
+        5: "License + multi-jurisdiction compliance + confidentiality classification + governance contact"
+      task_ref: [11, 12, 87, 88]
+      applies_to: ["Bridge2AI-Voice", "Dataverse"]
+
+    - id: 10
+      name: "Interoperability, Standardization, and Cross-Platform Integration"
+      description: >
+        Presence of standard formats, ontologies, schema conformance (e.g., Parquet, TSV, LinkML),
+        cross-platform dataset linkages with typed relationships, AND dataset integration capability.
+
+        Note: Evaluation aligned with Bridge2AI AI/ML readiness characterization criteria (FAIRness,
+        semantic/statistical characterization, governance, quality, pre-model XAI, ethics, computability).
+        Reference: https://www.biorxiv.org/content/10.1101/2024.12.18.629172v1 and Bridge2AI AI-readiness
+        scorecard tool.
+
+        All Bridge2AI datasets are designed for AI/ML use. This question evaluates HOW WELL the dataset
+        supports AI/ML (interoperability, standardization), not WHETHER it supports AI/ML.
+
+        Dataset integration capability: Check for common identifiers for cross-dataset linking,
+        standardized formats for data harmonization, and documented integration procedures.
+      field: ["distribution_formats", "conforms_to_schema", "file_collections.compression",
+              "conforms_to", "external_resources", "related_datasets"]
+      score_type: numeric
+      scoring:
+        0: "Non-standard or unspecified format"
+        3: "Standard format but no schema reference"
+        5: "Standard formats + schema/ontology compliance + integration capability"
+      task_ref: [50, 67, 96, 97]
+      applies_to: ["Bridge2AI-Voice", "Health Nexus"]
+
+    # --------------------------- #
+    # 3. Technical Documentation  #
+    # --------------------------- #
+    - id: 11
+      name: "Tool and Software Transparency"
+      description: >
+        Mentions of preprocessing, cleaning, and labeling strategies with software tools
+        used in data preparation, including annotation quality metrics and imputation protocols.
+
+        Note: Preprocessing and collection metadata may be represented as structured text descriptions
+        OR as machine-readable provenance graphs (e.g., W3C PROV-O, workflow graphs). Evaluation should
+        check for: (1) structured text descriptions OR (2) graph representations with entity-activity-agent
+        relationships. Both formats are acceptable. Some datasets (e.g., CM4AI) describe preprocessing in
+        provenance graphs rather than text.
+      field: ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies",
+              "machine_annotation_tools", "annotation_analyses", "imputation_protocols"]
+      score_type: numeric
+      scoring:
+        0: "No software tools documented"
+        3: "At least one strategy or tool listed"
+        5: "Comprehensive strategies with software versions/URLs, annotation quality, and imputation protocols"
+      task_ref: [64, 65, 66]
+      applies_to: ["Bridge2AI-Voice"]
+
+    - id: 12
+      name: "Collection Protocol Clarity"
+      description: >
+        Evaluates description completeness of data collection mechanisms, acquisition methods,
+        data collectors, collection timeframes, and raw data sources.
+      field: ["acquisition_methods", "collection_mechanisms", "data_collectors",
+              "collection_timeframes", "raw_data_sources"]
+      score_type: numeric
+      scoring:
+        0: "No collection description"
+        3: "Partial description (e.g., mechanism only)"
+        5: "Full collection protocol with methods, collectors, and timeframes"
+      task_ref: [46, 47, 48, 49]
+      applies_to: ["Bridge2AI-Voice", "AI-READI"]
+
+    - id: 13
+      name: "Version History, Maintenance, and Sustainability"
+      description: >
+        Presence of version information, version access methods, errata, update plans, release notes
+        with dates, AND data sustainability indicators (persistent identifiers, long-term governance
+        plan, domain-appropriate repository, institutional commitment documentation).
+
+        Note: Data sustainability evaluation checks for: (1) persistent identifiers (DOI, ARK, Handle),
+        (2) long-term governance plan, (3) domain-appropriate repository (e.g., PhysioNet for biomedical
+        data), (4) institutional commitment or preservation funding. Sustainable datasets have clear
+        maintenance plans beyond initial publication.
+      field: ["version", "version_access", "errata", "updates", "maintainers", "doi",
+              "publisher"]
+      score_type: numeric
+      scoring:
+        0: "Single version only, no sustainability plan"
+        3: "Version number + basic access info + persistent ID"
+        5: "Comprehensive versioning + full sustainability documentation (governance + repository + commitment)"
+      task_ref: [8, 95]
+      applies_to: ["Bridge2AI-Voice", "Dataverse"]
+
+    - id: 14
+      name: "Associated Publications"
+      description: >
+        Presence of formal citations or DOI-linked references.
+
+        Note: All Bridge2AI datasets require citation metadata if reused. Evaluation checks for:
+        (1) formatted citation string (DataCite or BibTeX format), (2) DOI, (3) citation instructions
+        in documentation. Datasets without citation metadata receive 0 points, as citation is mandatory
+        for proper attribution and reproducibility in Bridge2AI.
+      field: ["citation", "external_resources", "doi"]
+      score_type: numeric
+      scoring:
+        0: "No publications cited (citation metadata missing - MANDATORY for Bridge2AI)"
+        3: "One citation or reference with DOI"
+        5: "Multiple references with DOI cross-links + formatted citation + citation instructions"
+      task_ref: [9, 30]
+      applies_to: ["Bridge2AI-Voice", "AI-READI"]
+
+    - id: 15
+      name: "Human Subject Representation"
+      description: >
+        Indicates inclusion of human subjects with demographic diversity, subpopulation details,
+        vulnerable population protections, and missing data documentation.
+      field: ["subpopulations", "instances", "at_risk_populations",
+              "subsets.is_subpopulation", "missing_data_documentation"]
+      score_type: numeric
+      scoring:
+        0: "No human subject information"
+        3: "General human data without subgroup description"
+        5: "Detailed demographics, subpopulations, and inclusion/exclusion criteria"
+      task_ref: [31, 35, 37]
+      applies_to: ["Bridge2AI-Voice", "AI-READI"]
+
+    # --------------------------- #
+    # 4. FAIRness & Accessibility #
+    # --------------------------- #
+    - id: 16
+      name: "Findability (Persistent Links)"
+      description: "Dataset includes persistent URLs, DOI, and identifier for access and documentation."
+      field: ["page", "doi", "id"]
+      score_type: pass_fail
+      scoring:
+        Pass: "At least one persistent identifier present."
+        Fail: "No persistent identifiers found."
+      task_ref: [7, 14, 91]
+
+    - id: 17
+      name: "Accessibility (Access Mechanism)"
+      description: >
+        Describes how users can obtain the dataset (download URL, distribution formats, access policy).
+
+        Note: "Public" does not mean "no restrictions." Even openly accessible datasets may require
+        signed Data Use Agreements (DUAs). Distinguish between access tiers: (1) No authentication
+        required (truly public), (2) Registration required (email/account), (3) DUA required (signed
+        agreement), (4) IRB/committee approval required (restricted access). For example, AI-READi is
+        openly accessible but requires a DUA - it is NOT "public" in the unrestricted sense.
+      field: ["download_url", "distribution_formats", "license_and_use_terms"]
+      score_type: numeric
+      scoring:
+        0: "Unclear access method"
+        3: "Partially described access mechanism (access tier unclear)"
+        5: "Fully defined access path with explicit access tier (download URL, formats, policy, access requirements)"
+      task_ref: [11, 87, 90]
+      applies_to: ["Dataverse", "PhysioNet"]
+
+    - id: 18
+      name: "Reusability, Use Guidance, and Social Impact"
+      description: >
+        License is clearly defined with explicit use guidance including intended uses,
+        prohibited uses, discouraged uses, AND comprehensive social impact analysis with risk
+        identification and mitigation strategies (CROISSANT RAI aligned).
+      field: ["license_and_use_terms", "intended_uses", "prohibited_uses",
+              "discouraged_uses", "future_use_impacts"]
+      score_type: numeric
+      scoring:
+        0: "No license or use guidance"
+        3: "License + basic use guidance"
+        5: "License + comprehensive use guidance + social impact analysis with mitigation strategies"
+      task_ref: [13, 88]
+
+    - id: 19
+      name: "Data Integrity, Provenance Graph, and Quality"
+      description: >
+        Presence of version access, errata, update plans, source derivation, parent dataset linkages,
+        missing data documentation, data split indicators, AND provenance graph representation.
+
+        Note: Provenance is a transparent graph of origins and processing of data (W3C PROV-O standard:
+        https://www.w3.org/TR/prov-o/), NOT just version changes. Evaluation checks for:
+        (1) Entity-activity-agent relationships, (2) Processing lineage, (3) Derivation paths.
+
+        Scoring distinction:
+        - Version history alone (version numbers, errata, updates) = 3 points
+        - Full provenance graph (W3C PROV-O with entity-activity-agent relationships, processing
+          lineage, derivation paths) = 5 points
+
+        Provenance may be represented as text OR as W3C PROV-O graphs. Both formats are acceptable
+        if they provide complete lineage information.
+      field: ["version_access", "errata", "updates", "was_derived_from", "parent_datasets",
+              "missing_data_documentation", "subsets.is_data_split", "splits",
+              "raw_data_sources"]
+      score_type: numeric
+      scoring:
+        0: "No provenance metadata"
+        3: "Version history (version numbers, errata, updates) but no full provenance graph"
+        5: "Full provenance graph with entity-activity-agent relationships, processing lineage, and derivation paths"
+      task_ref: [3, 8, 95]
+
+    - id: 20
+      name: "Bias Documentation and Responsible AI Alignment"
+      description: >
+        Metadata documents known biases using standardized taxonomies (BiasTypeEnum, AIO)
+        aligned with CROISSANT RAI standards, and includes fairness analysis. Assesses whether
+        biases are categorized systematically (e.g., selection_bias, measurement_bias,
+        algorithmic_bias, ecological_fallacy) with mappings to AI Ontology (AIO).
+      field: ["known_biases", "future_use_impacts"]
+      score_type: numeric
+      scoring:
+        0: "No bias documentation"
+        3: "Basic bias identification without taxonomy"
+        5: "Comprehensive bias categorization using standard taxonomy (AIO/CROISSANT RAI) + fairness analysis"
+      task_ref: [varies]
+      applies_to: ["Bridge2AI-Voice", "AI-READI", "CM4AI", "CHORUS"]

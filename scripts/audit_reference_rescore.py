@@ -14,7 +14,30 @@ from pathlib import Path
 from datetime import datetime
 
 sys.path[:0] = [str(Path(__file__).resolve().parents[1] / 'src')]
-import reference_rescore as r
+
+
+class _DefaultRunner:
+    """Load the live runner only for callers that actually use the default.
+
+    Completed-condition verification injects its preserved runner before
+    auditing. Importing this utility must not first load a different live
+    implementation or require exports that its archive no longer needs.
+    """
+
+    def __getattr__(self, name):
+        import reference_rescore
+        return getattr(reference_rescore, name)
+
+    def __setattr__(self, name, value):
+        import reference_rescore
+        setattr(reference_rescore, name, value)
+
+    def __delattr__(self, name):
+        import reference_rescore
+        delattr(reference_rescore, name)
+
+
+r = _DefaultRunner()
 
 
 def read_trace(source: Path) -> list[dict]:

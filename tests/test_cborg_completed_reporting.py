@@ -16,6 +16,8 @@ import reference_rescore_cborg as adapter
 import reference_rescore_cborg_batch as batch
 import reference_rescore_cborg_deadline as deadline
 
+REAL_ACCOUNTED_AUDIT = deadline.accounted_audit
+
 PLAN = ROOT / f"notes/reference_rescore_{adapter.DATE}"
 
 
@@ -254,6 +256,139 @@ def test_changed_manifest_cannot_borrow_historical_code_pin():
     manifest["budget_cap_usd_per_attempt"] = 6
     with pytest.raises(ValueError, match="registered manifest"):
         adapter.measured_pinned_files(manifest)
+
+
+def test_completed_report_survives_evolution_of_every_preserved_input(monkeypatch, reports_in_memory):
+    """The pipeline may evolve while historical code, checks and results stay pinned."""
+    from reference_rescore_cborg_evidence import EvidenceRoot
+    evidence = EvidenceRoot(ROOT)
+    files, _ = reports_in_memory
+    assert adapter.main(["report"]) == 0
+    baseline = dict(files)
+    live = {ROOT / relative for relative in evidence.paths}
+    read = Path.read_bytes
+    monkeypatch.setattr(Path, "read_bytes", lambda p: b"changed live input" if p in live else read(p))
+    assert adapter.main(["report"]) == 0
+    for path, raw in files.items():
+        if path.suffix == ".json":
+            actual, expected = json.loads(raw), json.loads(baseline[path])
+            # Rendering time is report provenance, not a measured result.
+            actual.pop("reported_at")
+            expected.pop("reported_at")
+            assert actual == expected
+        else:
+            assert raw == baseline[path]
+    r = adapter.load_runner()
+    manifest = json.loads((PLAN / "manifest.json").read_bytes())
+    r.verify_frozen(manifest)
+    assert "measured_inputs_1381" in r.__file__
+    assert r.digest(ROOT / "src/data_sheets_schema/api_runner.py") != evidence.preservation["files"][
+        "src/data_sheets_schema/api_runner.py"]["sha256"]
+
+
+@pytest.mark.parametrize("kind", ["input", "preimage", "preservation", "inventory"])
+def test_changed_preserved_inputs_are_rejected_before_report_publication(kind, monkeypatch, reports_in_memory):
+    from reference_rescore_cborg_evidence import EvidenceRoot, ARCHIVE
+    evidence = EvidenceRoot(ROOT)
+    paths = {"input": evidence / "src/data_sheets_schema/api_runner.py",
+             "preimage": evidence.previous_definitions["d4d-rubric10-semantic"],
+             "preservation": ROOT / ARCHIVE / "preservation.json",
+             "inventory": PLAN / "measurement_file_hashes.json"}
+    read = Path.read_bytes
+    monkeypatch.setattr(Path, "read_bytes", lambda p: read(p) + b"\n" if p == paths[kind] else read(p))
+    files, before = reports_in_memory
+    with pytest.raises(ValueError, match="preserved measurement input changed"):
+        adapter.main(["report"])
+    assert files == before
+
+
+def test_original_output_cannot_be_replaced_by_an_archive(monkeypatch, reports_in_memory):
+    manifest = json.loads((PLAN / "manifest.json").read_bytes())
+    output = ROOT / manifest["jobs"][0]["output"]
+    read = Path.read_bytes
+    monkeypatch.setattr(Path, "read_bytes", lambda p: read(p) + b"\n" if p == output else read(p))
+    files, before = reports_in_memory
+    with pytest.raises(ValueError, match="measurement changed after audit"):
+        adapter.main(["report"])
+    assert files == before
+
+
+def test_archived_runner_does_not_import_live_pin_or_report_exports(monkeypatch, reports_in_memory):
+    import builtins
+    ordinary = builtins.__import__
+
+    def changed_api(name, *args, **kwargs):
+        if name in {"data_sheets_schema.agent_pin", "data_sheets_schema.semantic_comparison",
+                    "report_semantic_comparison"}:
+            raise ImportError("the live pin/reporting API has changed")
+        return ordinary(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", changed_api)
+    r = adapter.load_runner()
+    manifest = json.loads((PLAN / "manifest.json").read_bytes())
+    r.verify_frozen(manifest)
+    for instrument in manifest["instruments"].values():
+        assert r.spawn_preamble(instrument["agent"]) == instrument["preamble"]
+    assert adapter.main(["report"]) == 0
+
+
+def test_completed_audit_does_not_write_its_original_evidence(monkeypatch):
+    from reference_rescore_cborg_evidence import EvidenceRoot
+    evidence = EvidenceRoot(ROOT)
+    live = {ROOT / relative for relative in evidence.paths}
+    read = Path.read_bytes
+    monkeypatch.setattr(Path, "read_bytes", lambda p: b"changed live input" if p in live else read(p))
+
+    def refuse_write(*args, **kwargs):
+        raise AssertionError("completed audit tried to rewrite original evidence")
+
+    monkeypatch.setattr(Path, "write_bytes", refuse_write)
+    monkeypatch.setattr(Path, "write_text", refuse_write)
+    assert adapter.main(["audit"]) == 0
+    # Re-reading the registered condition must still work after audit.
+    batch.load_registered()
+
+
+def test_public_commands_with_fresh_audit_imports_and_real_accounting(monkeypatch, reports_in_memory):
+    import builtins
+    import socket
+    ordinary = builtins.__import__
+
+    def changed_apis(name, *args, **kwargs):
+        if name in {"reference_rescore", "data_sheets_schema.agent_pin",
+                    "data_sheets_schema.semantic_comparison", "report_semantic_comparison"}:
+            raise ImportError("live API refactored; use its retained implementation")
+        return ordinary(name, *args, **kwargs)
+
+    def refuse_network(*args, **kwargs):
+        raise AssertionError("verification attempted a network connection")
+
+    monkeypatch.setattr(socket.socket, "connect", refuse_network)
+    monkeypatch.setattr(deadline, "accounted_audit", REAL_ACCOUNTED_AUDIT)
+    monkeypatch.setattr(builtins, "__import__", changed_apis)
+    for action in ("audit", "report", "audit"):
+        monkeypatch.delitem(sys.modules, "audit_reference_rescore", raising=False)
+        assert adapter.main([action]) == 0
+    files, _ = reports_in_memory
+    results = json.loads(files[PLAN / "results.json"])
+    assert results["completed"] == 56
+
+
+@pytest.mark.parametrize("name,field,value", [
+    ("completion_audit.json", "v9_model_requests", 106),
+    ("completion_audit.json", "v9_catalogue_price_estimate_usd", "0.00"),
+    ("final_written_output_audit.json", "model_calls_during_verification", 10),
+])
+def test_changed_retained_audit_statistics_never_reach_reports(name, field, value, monkeypatch, reports_in_memory):
+    path = PLAN / name
+    read = Path.read_bytes
+    doc = json.loads(read(path))
+    doc[field] = value
+    monkeypatch.setattr(Path, "read_bytes", lambda p: json.dumps(doc).encode() if p == path else read(p))
+    files, before = reports_in_memory
+    with pytest.raises(ValueError, match="preserved completed audit changed"):
+        adapter.main(["report"])
+    assert files == before
 
 
 @pytest.mark.parametrize("action", ["freeze", "canary", "remaining", "accept-canary", "--print"])
