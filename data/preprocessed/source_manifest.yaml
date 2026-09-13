@@ -1,4 +1,7 @@
 version: 1
+# The profile this manifest selects (#628): the study's vocabularies, arms
+# and defaults. A manifest without `profile:` selects none of them.
+profile: bridge2ai
 generated_at: "2026-07-24"
 source_sheet:
   id: 1jBD6sTp6TDemy6v75PGAHSVz5yfIAXZ8zdDPbmOGATM

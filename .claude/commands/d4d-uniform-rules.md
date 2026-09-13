@@ -36,7 +36,7 @@ to every project:
   decide**: represent what the evidence states, as the rule above says. This
   refines that rule rather than replacing it.
 
-  It exists because a v4 CHORUS record wrote that no instance count was
+  It exists because one v4 record wrote that no instance count was
   asserted "because the two sources give different figures … and the bundle
   offers no basis for preferring one". The rule was right; the basis was
   missing.
@@ -121,17 +121,17 @@ to every project:
     take from a crate or a DOI is a token, not a sentence. Only ids *you* mint
     follow house style.
 
-- **Call the project by its declared canonical label** — the manifest's
-  `naming:` block (`data/preprocessed/source_manifest.yaml`) declares one
-  label per project, taken from the B2AI Standards Explorer (#668). Use it in
-  every sentence *you* compose; one project written many ways reads as many
-  projects, and the v5 canonical records wrote one project four ways. The
-  same three carve-outs as the American-English rule apply unchanged: quoted
-  source text, proper nouns as a source states them (a consortium's name in
-  the release's own citation is a citation, not your prose), and identifiers
-  including URLs keep their form exactly. The B2AI_ORG ids in the manifest
-  are provenance of where the mapping came from — never write one into a
-  record.
+- **Call the project by its declared canonical label** — the selected source
+  manifest's `naming:` block declares one label per project and records
+  where that label came from (#668). Use it in every sentence *you*
+  compose; one project written many ways reads as many projects, and the
+  v5 canonical records wrote one project four ways. The same three
+  carve-outs as the American-English rule apply unchanged: quoted source
+  text, proper nouns as a source states them (a consortium's name in the
+  release's own citation is a citation, not your prose), and identifiers
+  including URLs keep their form exactly. Any registry identifier the
+  manifest carries beside a label is provenance of where the mapping came
+  from — never write one into a record.
 
 - **A class-ranged attribute the schema digest marks `(reference — a string,
   not an object)` takes exactly that string; every other class-ranged

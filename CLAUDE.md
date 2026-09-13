@@ -1433,6 +1433,51 @@ hashes recorded (#1200). The whole-corpus command therefore still exits 1 for
 the one annotated artifact. New evaluations use the strict exact-file check,
 whose exit status must be 0.
 
+## Profiles: the study's text and vocabularies (#628, #1302)
+
+What is Bridge2AI's and not the pipeline's lives in `profiles.py`: the
+pinned registry vocabularies the schema digest renders for `data_topic`
+and `data_substrate`, the four-project default of the agreement matrix,
+the AI-READI healthsheet input, and the project lists of the comparison
+arms. The **`bridge2ai`** profile carries them; the **`neutral`** profile
+carries none. The source manifest selects the profile with a top-level
+`profile:` key (the study's declares `bridge2ai`); a manifest without one,
+or a run that selected no manifest, is neutral; `D4D_PROFILE` overrides
+for one process. A profile is never inferred from a project name.
+
+The digest now renders the term sources the schema's description declares
+for a slot (`schema_digest.TERM_SOURCES`: GO, MeSH, EFO, NCIT for
+`Instance.data_topic`; a `d4d:termSources` slot annotation wins when a
+schema carries one) before any pinned list, so a source-supported GO,
+MeSH, EFO or NCIT identifier is in range whether or not the registry lists
+it; the neutral profile renders only that scope. **This changes the
+study's digest** — its md5 moves for every run made after it — and is
+registered as a condition boundary in the plan note; the schema files and
+every record are untouched. The table, not a schema annotation, because a
+merged-schema edit moves the schema hashes every checked report block
+attests (#1362). Test: `tests/test_profiles.py` asserts on the assembled
+full-phase request under both profiles.
+
+**A run resolves its profile once and says so** (#1438, #1443): `RunSpec`
+selects it from the manifest it selected — `profile:` key, else neutral;
+`D4D_PROFILE` overriding — and passes it to every digest it renders
+(`digest_text(…, profile=)`, the repair request, the pair-consistency
+ledger call) and to the record, whose `schema` block carries `profile` and
+`profile_basis` (`environment`, `manifest:<path>`, `default manifest:<path>`,
+`no manifest`) beside `digest_md5`; `d4d api plan` prints them. The agentic
+recorder resolves it the same way from the manifest it attests. A caller
+that selected nothing gets the default manifest resolved *when asked*
+(#1439): the working directory's, else the checkout's — so a script run
+from `tests/` still sees the study's — else none. Both digests are in
+`digest_inventory.yaml` (`record_inventory(profile=)`, #1441), so
+`slot_existed_at` answers for a neutral run. The fitness judge's slot
+specification renders the same term-source scope the digest does (#1440;
+an evaluation-instrument change, dated in the plan note). The arm table
+(`GENERATION_ARMS`) carries no project lists: `profiles.arm_projects_for`
+is the study's scope for its comparison arms, and `agreement.default_projects()`
+/ `healthsheet.default_record()` read the active profile when called —
+empty and `None` under `neutral`, where a caller must name them (#1444).
+
 ## The manifest is the project registry (#621, #623, #624, #637, #1299)
 
 A dataset is whatever the selected source manifest declares under

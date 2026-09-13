@@ -62,8 +62,14 @@ class TestRender(unittest.TestCase):
         self.assertIn("baseline", text)
 
     def test_build_writes_the_bundle(self):
+        """A record that is not the profile's names its project and gets its
+        own file — never the study's tracked bundle name (#1493)."""
         out_dir = Path(self.tmp.name) / "out"
-        target, stats = build_bundle(self.record_path, out_dir)
+        with self.assertRaises(ValueError):
+            build_bundle(self.record_path, out_dir)
+        target, stats = build_bundle(self.record_path, out_dir, project="TESTPROJ")
+        self.assertEqual(target.name, "TESTPROJ_healthsheet_only.txt")
+        self.assertIn("Project: TESTPROJ", target.read_text())
         self.assertTrue(target.exists())
         self.assertEqual(stats.sections, 2)
         self.assertIn("Test Dataset", target.read_text())
@@ -76,11 +82,16 @@ class TestRender(unittest.TestCase):
 
 
 class TestArmRegistration(unittest.TestCase):
-    def test_arm_is_restricted_to_ai_readi(self):
+    def test_arm_is_restricted_to_ai_readi_by_the_study_profile(self):
+        """The arm table declares the arm; which datasets it applies to is
+        the profile's fact (#628, #1444) — the table carries no list."""
         from data_sheets_schema.constants.methods import GENERATION_ARMS
+        from data_sheets_schema.profiles import BRIDGE2AI, NEUTRAL, arm_projects_for
         arm = GENERATION_ARMS["healthsheet_only"]
-        self.assertEqual(arm["projects"], ["AI_READI"])
+        self.assertNotIn("projects", arm)
         self.assertTrue(arm["model_involved"])
+        self.assertEqual(arm_projects_for("healthsheet_only", BRIDGE2AI), ["AI_READI"])
+        self.assertIsNone(arm_projects_for("healthsheet_only", NEUTRAL))
 
     def test_arm_is_counted_as_stochastic(self):
         from data_sheets_schema.constants.methods import STOCHASTIC_ARMS

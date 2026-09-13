@@ -468,6 +468,15 @@ class RunSpec:
     # The chunk manifest the run was given explicitly, when it is not the
     # one discovered beside the bundle (#1299). None means discover.
     chunk_manifest: Path | None = None
+    # The profile every digest of this run is rendered under (#1302,
+    # #1438): resolved once in `__post_init__` from the selected manifest
+    # — its `profile:` key, else neutral, `D4D_PROFILE` overriding — and
+    # recorded with the basis of that selection beside the digest md5
+    # (#1443). The manifest's *blocks* may be declared unused by an arm's
+    # header; the profile is the study's whenever the study's manifest
+    # was selected, blocks or no blocks.
+    profile: str | None = None
+    profile_basis: str | None = None
     # Version 2 passes selected manifest arguments to agentic recording.
     # Historical render specs omit this field and replay under version 1.
     render_version: int = 3
@@ -508,9 +517,27 @@ class RunSpec:
             self.manifest = Path(self.manifest)
         if self.chunk_manifest is not None:
             self.chunk_manifest = Path(self.chunk_manifest)
-        if self.manifest_line != default_line:
-            return                      # an arm that declares its own header keeps it
-        self.manifest_line = self.header_for_manifest(self.manifest)
+        if self.manifest_line == default_line:   # an arm that declares its own header keeps it
+            self.manifest_line = self.header_for_manifest(self.manifest)
+        if self.profile is None:
+            self._select_profile()
+
+    def _select_profile(self) -> None:
+        from data_sheets_schema.profiles import select_profile
+        sel = select_profile(self.manifest)
+        self.profile, self.profile_basis = sel.name, sel.basis
+
+    @property
+    def profile_obj(self):
+        """The `Profile` the digest is rendered under."""
+        from data_sheets_schema.profiles import profile_named
+        return profile_named(self.profile) if self.profile else None
+
+    @property
+    def profile_selection(self):
+        """What the record states: the profile and why (#1443)."""
+        from data_sheets_schema.profiles import Selection
+        return Selection(self.profile_obj, self.profile_basis) if self.profile else None
 
     @staticmethod
     def header_for_manifest(manifest: Path | None) -> str:
@@ -529,6 +556,7 @@ class RunSpec:
         requires a freshly validated spec; this object is only for replay.
         """
         spec = cls(project=project, method=method, label=label,
+                   profile="replay",          # skip live selection (#1468); cleared below
                    arm=recorded.get("arm", ""), bundle=Path(recorded.get("bundle", "")),
                    condition=recorded["condition"],
                    render_version=recorded.get("render_version", 1),
@@ -540,6 +568,10 @@ class RunSpec:
         manifest = recorded.get("manifest")
         spec.manifest = Path(manifest) if manifest else None
         spec.manifest_line = recorded.get("manifest_line", "")
+        # A replay reads no live declaration — the manifest may be gone or
+        # malformed since — so the profile is not resolved here either;
+        # a replay never renders the digest (#1438).
+        spec.profile = spec.profile_basis = None
         spec._replay_only = True
         return spec
 
@@ -567,9 +599,15 @@ class RunSpec:
                     if path.is_file() else None}
 
         chunks = (self.chunk_manifest or manifest_for(self.bundle)) if self.bundle else None
+        # The instrument is an input too (#1460): a resumed run under
+        # another profile would render another digest for its remaining
+        # phases and record only that one.
+        digest = (schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=self.profile_obj))
+                  if self.profile else None)
         return {"bundle": entry(self.bundle),
                 "source_manifest": entry(self.manifest) if self.manifest_used else None,
                 "chunks": entry(chunks),
+                "profile": {"name": self.profile, "digest_md5": digest},
                 "instruction": {"render_version": self.render_version,
                                 "spec": self.render_spec(),
                                 "sha256": hashlib.sha256(self.instruction.encode()).hexdigest()}}
@@ -810,7 +848,11 @@ def resolve_prompt(spec: RunSpec) -> str:
             command = match.group(1)
             for key, value in subs.items():
                 command = command.replace(key, shlex.quote(value))
-            command += " --manifest " + shlex.quote(str(spec.manifest) if spec.manifest_used else "none")
+            # The manifest that was *selected*, even when the arm's header
+            # declares its context blocks unused: the recorder selects the
+            # profile from it, and the header still governs what the input
+            # block attests (#1461). `none` means none was selected.
+            command += " --manifest " + shlex.quote(str(spec.manifest) if spec.manifest is not None else "none")
             if spec.chunk_manifest is not None:
                 command += " --chunk-manifest " + shlex.quote(str(spec.chunk_manifest))
             return command
@@ -1467,7 +1509,7 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     # `third_party_sharing`) that CoreDataset does not accept — the first live
     # run produced a core record that failed validation for exactly that.
     cls = "CoreDataset" if PHASE_ARTIFACT.get(phase) == "core" else "Dataset"
-    digest = schema_digest.digest_text(cls)
+    digest = schema_digest.digest_text(cls, profile=spec.profile_obj)
     receipted = spec.condition in RECEIPT_CONDITIONS
     if receipted:
         bundle_text, bundle_md5 = chunk_marked_bundle(spec.bundle, spec.chunk_manifest)
@@ -1625,7 +1667,8 @@ def plan(spec: RunSpec) -> dict[str, Any]:
         "runtime": RUNTIME,
         "prompt_files": [repo_relative(p) for p in spec.prompt_files],
         "schema_digest_md5": schema_digest.fingerprint(
-            schema_digest.digest_text("Dataset")),
+            schema_digest.digest_text("Dataset", profile=spec.profile_obj)),
+        "profile": spec.profile, "profile_basis": spec.profile_basis,
         "phases": phases,
         "approx_total_input_tokens": sum(p["approx_input_tokens"] for p in phases),
         "estimate_basis": basis,
@@ -2656,8 +2699,8 @@ def pair_consistency(spec: RunSpec) -> dict[str, Any] | None:
         # This run's own digest, so a presence mismatch is excused only for
         # slots the ledger shows did not exist then (#580).
         from data_sheets_schema import schema_digest as _sd
-        _sd.record_inventory()
-        run_digest = _sd.fingerprint(_sd.digest_text("Dataset"))
+        _sd.record_inventory(profile=spec.profile_obj)
+        run_digest = _sd.fingerprint(_sd.digest_text("Dataset", profile=spec.profile_obj))
         report = validate_pair_data(full, core, pair, schema_moved=moved,
                                     run_digest=run_digest)
     except Exception as exc:                                       # noqa: BLE001
@@ -3398,7 +3441,8 @@ def normalise_multivalued(text: str) -> str:
     return "\n".join(out)
 
 
-def build_repair(artifact: str, body: str, errors: list[str]) -> PhaseRequest:
+def build_repair(artifact: str, body: str, errors: list[str], *,
+                 profile=None) -> PhaseRequest:
     """A shape-repair request: digest, failing record, validator findings.
 
     Deliberately excludes the input bundle. The validator names shapes, not
@@ -3407,7 +3451,7 @@ def build_repair(artifact: str, body: str, errors: list[str]) -> PhaseRequest:
     it also makes a repair call an order of magnitude cheaper than a phase.
     """
     cls = "CoreDataset" if artifact == "core" else "Dataset"
-    digest = schema_digest.digest_text(cls)
+    digest = schema_digest.digest_text(cls, profile=profile)
     cached = [{"type": "text", "text": digest,
                "cache_control": {"type": "ephemeral"}}]
     parts: list[dict[str, Any]] = list(cached)
@@ -3539,7 +3583,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                                         f"{len(errors)} findings; stopped")})
                 break
             req = build_repair(artifact, path.read_text(encoding="utf-8"),
-                               errors)
+                               errors, profile=spec.profile_obj)
             attempt_started = datetime.now(timezone.utc).isoformat(
                 timespec="seconds")
             attempt_t0 = time.monotonic()
@@ -4690,6 +4734,20 @@ def _require_recorded_inputs(spec: RunSpec, record: dict[str, Any]) -> None:
         if changed:
             raise UsageLedgerError(f"generation input identity changed for {name}; restore the "
                                    "recorded inputs or use --no-resume for an explicit new generation")
+    # The instrument (#1460): a record that names its digest — every record
+    # since #426 — and its profile must be resumed under the same ones.
+    schema_block = record.get("schema") or {}
+    recorded_digest = schema_block.get("digest_md5")
+    if recorded_digest and recorded_digest != current["profile"]["digest_md5"]:
+        raise UsageLedgerError("generation instrument changed: the record's schema digest "
+                               f"{recorded_digest} is not this run's {current['profile']['digest_md5']} "
+                               f"(profile {current['profile']['name']}); restore the recorded "
+                               "profile and schema or use --no-resume for an explicit new generation")
+    recorded_profile = schema_block.get("profile")
+    if recorded_profile and recorded_profile != current["profile"]["name"]:
+        raise UsageLedgerError(f"generation profile changed: the record was made under {recorded_profile}, "
+                               f"this run resolves {current['profile']['name']}; restore it or use "
+                               "--no-resume for an explicit new generation")
     instruction = ((record.get("prompts") or {}).get("request") or {}).get("sha256")
     if instruction is not None and instruction != current["instruction"]["sha256"]:
         raise UsageLedgerError("generation instruction identity changed; restore the recorded renderer "
@@ -4713,7 +4771,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     _rewrites: list[dict[str, Any]] = []
     _rewrite_token = _REWRITE_LOG.set(_rewrites)
     from data_sheets_schema.schema_sync import blocking, check as _schema_check
-    stale = blocking(_schema_check())
+    stale = blocking(_schema_check(profile=spec.profile_obj))     # this run's instrument (#1463)
     if stale:
         detail = "; ".join(f"{r['class']}: {r.get('reason', r['status'])}"
                            for r in stale)
@@ -5105,7 +5163,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         outputs={"full": spec.full_path, "core": spec.core_path,
                  "report": spec.report_path,
                  "reasoning": _reasoning_path(spec)},
-        schema_digest_md5=schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
+        schema_digest_md5=schema_digest.fingerprint(
+            schema_digest.digest_text("Dataset", profile=spec.profile_obj)),
+        profile=spec.profile_selection,
         receipt_expected=spec.condition in RECEIPT_CONDITIONS,
         extra_notes=[
             (f"Generated via {RUNTIME}; temperature {settings['temperature']} "

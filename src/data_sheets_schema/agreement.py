@@ -563,7 +563,14 @@ DEFAULT_CONFIGS = {"v1  (2026-07-28 generic)": "2026-07-28_claude-opus-5-generic
 #: Unlike `form_defects._value_index`, whose omission of the fifth project was
 #: an oversight that silently produced an `unattributed` column, an absent
 #: project here is visible: it simply has no row.
-DEFAULT_PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE")
+#: Read from the *active* profile when asked (#628, #1444): the set is the
+#: study's under `bridge2ai`, and empty under `neutral`, which has no
+#: published matrix to keep faith with — a caller must then name them.
+def default_projects() -> tuple[str, ...]:
+    from data_sheets_schema.profiles import active_profile
+    return tuple(active_profile().agreement_projects)
+
+
 DEFAULT_ROOT = Path("data/d4d_concatenated")
 DEFAULT_CACHE = Path("data/evaluation_llm/agreement_cache")
 
@@ -586,7 +593,7 @@ def load_replicates(root: Path, method: str, label: str, project: str,
 
 def build_matrix(*, root: Path = DEFAULT_ROOT, method: str = DEFAULT_METHOD,
                  configs: dict[str, str] | None = None,
-                 projects: tuple[str, ...] = DEFAULT_PROJECTS,
+                 projects: tuple[str, ...] | None = None,
                  reps: int = 3, cache_dir: Path = DEFAULT_CACHE,
                  embed: bool = False, offline: bool = False,
                  embed_online: bool = False,
@@ -606,6 +613,9 @@ def build_matrix(*, root: Path = DEFAULT_ROOT, method: str = DEFAULT_METHOD,
     publication records.
     """
     configs = configs or DEFAULT_CONFIGS
+    projects = tuple(projects) if projects else default_projects()
+    if not projects:
+        raise ValueError("no projects: the active profile names none; pass them")
     embedder = (Embedder(cache_path=cache_dir / "embeddings.jsonl",
                          offline=offline or not embed_online)
                 if embed else None)
@@ -677,11 +687,15 @@ def main(argv: list[str] | None = None) -> int:
 
     configs = ({c.split("=", 1)[0]: c.split("=", 1)[1] for c in a.configs}
                if a.configs else None)
-    matrix, rows = build_matrix(
-        root=a.root, method=a.method, configs=configs,
-        projects=tuple(a.projects) if a.projects else DEFAULT_PROJECTS,
-        reps=a.reps, cache_dir=a.cache_dir, embed=a.embed, offline=a.offline,
-        embed_online=a.embed_online)
+    try:
+        matrix, rows = build_matrix(
+            root=a.root, method=a.method, configs=configs,
+            projects=tuple(a.projects) if a.projects else None,
+            reps=a.reps, cache_dir=a.cache_dir, embed=a.embed, offline=a.offline,
+            embed_online=a.embed_online)
+    except ValueError as exc:                          # the profile names no projects (#1495)
+        print(f"agreement: {exc}", file=sys.stderr)
+        return 2
 
     for key, cell in sorted(matrix.items()):
         rate = f"{cell['rate']:6.1%}" if cell["rate"] is not None else "     —"

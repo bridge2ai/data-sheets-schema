@@ -18,6 +18,7 @@ import unittest
 from pathlib import Path
 
 from data_sheets_schema import schema_digest
+from data_sheets_schema.profiles import BRIDGE2AI   # the study's instrument, whatever D4D_PROFILE says (#1497)
 from data_sheets_schema.schema_sync import (
     IN_SYNC,
     MERGED_SCHEMAS,
@@ -107,12 +108,26 @@ class DigestIsAFunctionOfContentTest(unittest.TestCase):
         No slot added or removed: the inventory under the new digest is the
         old one (98 Dataset, 84 CoreDataset), no record's validity moves,
         and the CoreDataset digest moves with it (`386a470d…` → `dfb9f93c…`). No v9 record exists.
+
+        `a91bad8b` → the pinned value below, on 2026-09-13 (#1302, #628): the
+        digest renders the term sources the schema's description declares
+        for `Instance.data_topic` (GO, MeSH, EFO, NCIT; `schema_digest.
+        TERM_SOURCES`) ahead of the pinned registry list, so a source-
+        supported identifier from those ontologies is in range whether or
+        not B2AI_TOPIC lists it — the scope the description has stated since
+        #487 and the renderer added in #538 never carried. The vocabulary
+        itself is now the active profile's: under `bridge2ai` the same
+        pinned list follows the scope, under `neutral` only the scope is
+        rendered (`029c2abc…`). The schema files are untouched — no slot
+        added or removed, no schema hash or record validity moves — and
+        both new digests are in the ledger. The v9 CHORUS canary of
+        2026-09-12 consumed `a91bad8b`, which its record carries.
         """
         if not self.SCHEMA.exists():
             self.skipTest("merged schema not present in this checkout")
         self.assertEqual(
-            schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
-            "a91bad8b8eaf7c34b147ff5970474342")
+            schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=BRIDGE2AI)),
+            "cd3c79f2c62f11675d5ce2c1df96b88e")
 
 
 class SyncCheckTest(unittest.TestCase):
