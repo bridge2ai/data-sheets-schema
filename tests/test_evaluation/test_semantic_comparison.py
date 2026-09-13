@@ -56,6 +56,20 @@ def test_same_basis_has_no_denominator_warning():
     assert comparison_warnings([record(total=65), record(total=70)]) == []
 
 
+@pytest.mark.parametrize("changed", ["model", "instrument", "context", "scope"])
+def test_equal_denominators_do_not_hide_different_evaluation_conditions(changed):
+    first, second = record(total=65), record(total=70)
+    if changed == "model":
+        second["model"] = {"name": "another-evaluator"}
+    elif changed == "scope":
+        second["evaluation_scope"] = {"policy": "all-resources", "units": [{"path": "#/resources/0"}]}
+    else:
+        second["metadata"] = {f"{changed}_sha256": "b" * 64}
+    warnings = comparison_warnings([first, second])
+    assert len(warnings) == 1
+    assert "mixed evaluator, instrument, context or collection scope" in warnings[0]
+
+
 def test_legacy_zero_and_current_zero_survive():
     old = {"summary_scores": {"total_score": 0, "total_max_score": 50,
                               "overall_percentage": 0.0}}

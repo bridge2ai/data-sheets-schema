@@ -33,35 +33,15 @@
     },
     "project": {
       "type": "string",
-      "enum": [
-        "AI_READI",
-        "CHORUS",
-        "CM4AI",
-        "VOICE"
-      ],
-      "description": "Project name"
+      "description": "Declared dataset identifier",
+      "minLength": 1,
+      "pattern": "\\S"
     },
     "method": {
       "type": "string",
-      "enum": [
-        "curated",
-        "gpt5",
-        "claudecode",
-        "claudecode_agent",
-        "claudecode_agent_core",
-        "claudecode_api",
-        "claudecode_api_core",
-        "claudecode_assistant",
-        "rocrate_mapped",
-        "rocrate_static_map",
-        "claudecode_agent_crate",
-        "claudecode_agent_crate_core",
-        "claudecode_agent_healthsheet",
-        "claudecode_agent_healthsheet_core",
-        "claudecode_agent_crate_only",
-        "claudecode_agent_crate_only_core"
-      ],
-      "description": "Generation method. Mirrors data_sheets_schema.constants.METHODS; pinned by tests/test_evaluation/test_semantic_evaluation_contract.py"
+      "description": "Declared generation or authorship method; study membership is checked separately",
+      "minLength": 1,
+      "pattern": "\\S"
     },
     "evaluation_timestamp": {
       "type": "string",
@@ -220,6 +200,43 @@
                 "semantic_validation": {
                   "type": "string",
                   "description": "Optional semantic validation notes (format checks, consistency)"
+                },
+                "unit_scores": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "path",
+                      "score",
+                      "evidence"
+                    ],
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "score": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "enum": [
+                          0,
+                          1,
+                          null
+                        ]
+                      },
+                      "evidence": {
+                        "type": "string",
+                        "pattern": "\\S"
+                      }
+                    }
+                  }
+                },
+                "item_id": {
+                  "type": "string",
+                  "pattern": "^E(?:10|[1-9])\\.[1-5]$"
                 }
               }
             }
@@ -381,6 +398,110 @@
           "description": "Time taken to complete evaluation (optional)"
         }
       }
+    },
+    "applicability_context": {
+      "type": "object",
+      "description": "Explicit context predicates and their evidence; unknown stays scored"
+    },
+    "evaluation_scope": {
+      "type": "object",
+      "required": [
+        "policy",
+        "units",
+        "collection_metadata_inherited"
+      ],
+      "properties": {
+        "policy": {
+          "enum": [
+            "single_dataset",
+            "minimum_per_item_across_all_resource_datasets_v1"
+          ]
+        },
+        "collection_metadata_inherited": {
+          "const": false
+        },
+        "units": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "path"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "input_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "context_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "rubric_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "version": {
+            "const": "2.0"
+          }
+        },
+        "required": [
+          "version"
+        ]
+      },
+      "then": {
+        "required": [
+          "applicability_context",
+          "evaluation_scope",
+          "metadata"
+        ],
+        "properties": {
+          "metadata": {
+            "required": [
+              "input_sha256",
+              "context_sha256",
+              "rubric_sha256",
+              "instrument_sha256"
+            ]
+          },
+          "elements": {
+            "items": {
+              "properties": {
+                "sub_elements": {
+                  "items": {
+                    "required": [
+                      "applicable",
+                      "applicability_status",
+                      "applicability_evidence",
+                      "unit_scores",
+                      "item_id"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }
