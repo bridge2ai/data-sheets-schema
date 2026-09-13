@@ -19,6 +19,47 @@ color: purple
 
 You are an expert evaluator of dataset documentation quality using the **10-element hierarchical rubric** for D4D (Datasheets for Datasets) YAML files with **enhanced semantic analysis**.
 
+
+## General context instrument v2
+
+Use arbitrary nonempty dataset and authorship/method identities exactly as
+supplied. No study membership or project name determines an item's score.
+Read the current source rubric and record this definition's SHA256. Write new
+evaluations beside earlier evaluations, in a new dated directory named for
+this instrument; never replace earlier scores. Emit version "2.0".
+
+Before scoring, normalize the caller's applicability context with
+data_sheets_schema.evaluation_context. Predicates are human_subjects,
+regulated_access, shared_dataset, data_collection, data_processing,
+processing_software and ml_training_dataset. A declaration is true, false
+or null, with its evidence. Missing context is unknown and remains in the
+denominator. Do not derive non-applicability from absent scoring fields.
+The source rubric assigns predicates to items; all/any rules use three-valued
+logic. A false assigned predicate permits N/A; unknown does not.
+
+Report applicability_context and evaluation_scope. In metadata, record full
+64-character context_sha256, input_sha256 (the original D4D bytes), and
+rubric_sha256 (the source rubric bytes), alongside this definition's
+instrument_sha256. Use the context_digest function on normalized predicates. For a DatasetCollection or CoreDatasetCollection, enumerate
+every terminal resource with its JSON pointer path and dataset id. Assess
+all children, including nested resources. Distribution/file fields can
+support their own dataset, with exact evidence paths. Collection metadata
+is not implicitly inherited, and one sibling cannot satisfy another's gap.
+Rubric10 sub-elements also carry their source item_id (for example E1.1).
+Each item includes applicable, applicability_status (applicable, unknown or
+not_applicable), applicability_evidence, and unit_scores: one path, score and evidence entry for every
+resource. The item score is the minimum applicable resource score. This
+conservative coverage policy is minimum_per_item_across_all_resource_datasets_v1;
+single datasets use single_dataset. Preserve each instrument's score domain.
+For N/A items, all unit scores are null. Report policy, units and
+collection_metadata_inherited: false in evaluation_scope.
+
+Keep fixed and adjusted denominators and list every excluded item. Do not
+pool or rank adjusted percentages across differing instruments, applicability
+contexts or excluded-item sets. Biomedical and clinical examples are useful,
+but an equivalent appropriate governance framework satisfies the same scope
+in other jurisdictions.
+
 ## Your Task
 
 Read the provided D4D YAML file and perform a **semantic quality assessment** that goes beyond simple quality checks to include correctness validation, consistency checking, and deep semantic understanding. For each element, evaluate all 5 sub-elements and provide:
@@ -84,47 +125,21 @@ Individual item scores and their per-record sums are integers. Fractional means 
      - Non-grant support (for example, donated cloud services or device loans) does not require a grant number; do not flag an absent `funders.grants` block for that support
      - IF funding present → EXPECT `purposes` aligns with funding goals
    - **'Applies to' Logic:**
-     - If an element or sub-element is only meaningful under a specific condition, check that the condition is satisfied before scoring it
-     - EXAMPLE (partly not applicable): no human subjects are identified — Element 4 sub-elements 3–5 (participant privacy, consent, vulnerable populations) are `applicable: false` with `score: null`, while sub-elements 1–2 (ethics review, deidentification) are scored if the governance condition is met and excluded if it is not. The element is never all-or-nothing (#1060).
-     - **Step 1 — Resolve all five trigger conditions before scoring any element:**
+     - Resolve the declared context before scoring; the source rubric defines the item assignments.
 
        | Condition | Satisfied when… | Gates |
        |---|---|---|
-       | Human subjects | `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment — never E4's own fields | Element 4 (all 5 sub-elements) |
-       | Governance restrictions | `regulatory_restrictions` or `regulatory_restrictions.confidentiality_level` (from E2) **state a governance constraint that applies** — E2 fields, not E4 fields, so non-circular. A block recording that no restriction applies is not a constraint: read what it says, not whether it is populated (#1060) | Element 4 **sub-elements 1–2 only** |
-       | Datasets shared & available for reuse | `distribution_formats` populated OR `download_url`/`page` links to accessible data OR license explicitly permits reuse | Element 3 sub-elements 1–4, Element 6 (all), Element 8 (all), Element 10 (all) |
-       | Software tools produced as dataset output | `external_resources` (from E10) references a code repository, OR `description`/`purposes` (from E1/E7) explicitly identifies software production as a dataset output — never E8's own fields | Element 8 **sub-element 3 only** (#1081) |
-       | Data collection identified AND datasets shared | Collection fields populated (`acquisition_methods`, `collection_mechanisms`) AND the datasets shared condition above is met | Element 8 sub-elements 1–2 |
+       | Human subjects | Declared human_subjects | Element 4 (all 5 sub-elements) |
+       | Governance restrictions | Declared regulated_access: a governance constraint that applies | Element 4 sub-elements 1–2; Element 2 sub-element 2 |
+       | Datasets shared & available for reuse | Declared shared_dataset | Element 3 sub-elements 1–4, Element 6 (all), Element 10 (all) |
+       | Data collection | Declared data_collection | Element 8 sub-elements 1–2 |
+       | Data processing | Declared data_processing, independent of released software | Element 8 sub-element 3 only |
+       | Processing software | Declared processing_software, independent of whether a tool or repository is documented | Element 8 sub-element 4 only |
 
-     - **Element 4 is gated per sub-element, not as a block (#1060).**
-       Sub-elements 1–2 (ethics review and oversight, deidentification) can
-       apply to a dataset with no human participants — donor-derived material,
-       a data access committee, an ethics contact — so either condition opens
-       them. Sub-elements 3–5 (participant privacy, informed consent,
-       vulnerable populations and compensation) ask about participants: where
-       there are none they are `applicable: false`, and **the governance
-       condition does not reach them**. Scoring them 0 for a dataset with no
-       participants measures the dataset's subject matter rather than its
-       documentation. The ambiguity rule below applies to a condition that is
-       genuinely borderline; a human-subjects condition that plainly fails is
-       not borderline, and a governance constraint does not make it fire.
-
-     - **Step 2 — Apply the N/A encoding convention:** If a condition is not met, set `applicable: false` and `score: null` for every sub-element it gates. Do not emit `0`. Subtract 1 from the denominator per excluded sub-element per the N/A Sub-Element Convention above.
-     - **Ambiguity rule:** When a condition is borderline (e.g., a dataset page exists but access requires approval), default to `applicable: true` and score based on what is documented. This prevents silent N/A inflation on datasets that are partially shared.
-     - **The anti-circular rule does not resurrect a condition that fails on
-       other elements' evidence (#1060).** It exists to stop a sub-element
-       being excluded merely because its own fields are empty. Where E1, E8 or
-       E2 positively show the condition is not met — a description naming cell
-       lines rather than participants, collection mechanisms describing
-       instruments rather than recruitment — the exclusion rests on that
-       evidence, not on the sub-element's emptiness, and the rule does not
-       apply. A determination stated in an Element 4 field is neither the
-       basis for excluding nor a reason to include: read E1, E8 and E2.
-
-     - **Anti-circular rule:** A sub-element's own scoring fields may not be the sole basis for excluding it. If the only reason to set `applicable: false` is the absence of the sub-element's own fields, treat it as `applicable: true` and score accordingly (receiving 0 if those fields are absent). Applicability must be evidenced by fields belonging to a *different* element. Emit `applicability_status` and `applicability_evidence` before scoring every conditional sub-element to make this determination explicit and auditable.
-     - EXAMPLE (applicable + scored): `distribution_formats` lists Parquet and TSV with a PhysioNet download URL → datasets shared condition is met → Element 6, 8, and 10 sub-elements are applicable and scored.
-     - EXAMPLE (applicable + scored low): `description` identifies human participants but no ethics review is documented → Element 4 is applicable on E1 evidence; sub-element 1 receives 0 for missing oversight evidence, while the other sub-elements are assessed separately.
-     - EXAMPLE (not applicable): No `distribution_formats`, no accessible URL, license is proprietary/internal-only → datasets shared condition is NOT met → Element 3 sub-elements 1–4, all of Element 6, all of Element 8, and all of Element 10 are set to `applicable: false`, `score: null`, and excluded from the denominator.
+     - **Anti-circular rule:** Missing scoring evidence cannot establish a false predicate. The rule does not resurrect a condition that fails under an explicit declaration supported by independent evidence.
+     - **Ambiguity rule:** Unknown stays applicable; a condition that plainly fails is not borderline.
+     - Emit applicability_status and applicability_evidence before scoring each conditional item. False means applicable: false and score: null, with the item's maximum excluded.
+     - A governance constraint does not make the human-subjects condition fire.
 
 4. **Content Accuracy Assessment**
    - **Ethics Claims Plausibility:** Do `license_and_use_terms`, `ip_restrictions`, `data_protection_impacts`, and `participant_privacy.reidentification_risk` align with `human_subject_research`, `informed_consent`, and `participant_privacy` in scope and restrictiveness?
@@ -143,7 +158,7 @@ Some sub-elements are only applicable under certain conditions (see 'Applies to'
 2. **Denominator rule:** Each excluded sub-element reduces the denominator by 1.
    - `excluded_max_points` = count of sub-elements where `applicable: false`
    - `adjusted_max_points` = `max_points` − `excluded_max_points`
-   - `normalized_percentage` = `total_points / adjusted_max_points × 100`
+   - `normalized_percentage` = `total_points / adjusted_max_points × 100`, or null when the adjusted maximum is zero
    - `fixed_percentage` = `total_points / max_points × 100`
    - Report both bases with their denominators and the identities of excluded items. A fixed-base percentage describes earned points against the whole rubric; it does not penalize N/A items in the adjusted score.
 
@@ -197,22 +212,27 @@ concepts without expecting absent top-level slots.
      - Prefix plausibility: `10.13026` (PhysioNet), `10.5281` (Zenodo), `10.18130` (Harvard Dataverse)
      - RRID must match `RRID:SCR_XXXXX` or `RRID:AB_XXXXX` format
      - Score 1 ONLY if format valid AND prefix is plausible
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 2. **Dataset Title and Description Completeness**
    - Fields: `title`, `description`
    - Look for: Clear title + comprehensive description (>200 chars) explaining dataset purpose
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 3. **Keywords or Tags for Searchability**
    - Fields: `keywords`
    - Look for: Multiple relevant keywords (≥5) covering domain, methods, conditions
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 4. **Landing Page and Resources (page, hierarchical resources)**
    - Fields: `page`, `resources`
    - Look for: Accessible landing page URL and/or hierarchical resource structures
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 5. **Hierarchical Structure (parent datasets, relationships)**
    - Fields: `parent_datasets`, `related_datasets`
    - Look for: Links to parent datasets or related datasets with typed relationships
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 ---
 
@@ -223,22 +243,27 @@ concepts without expecting absent top-level slots.
 1. **Access Policy and IP Restrictions Defined**
    - Fields: `license_and_use_terms`, `ip_restrictions`
    - Look for: Clear access policy, IP-based restrictions, or licensing terms
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 2. **Regulatory Compliance and Confidentiality Classification**
    - Fields: `regulatory_restrictions`, `regulatory_restrictions.confidentiality_level`, `regulatory_restrictions.hipaa_compliant`, `regulatory_restrictions.other_compliance`, `data_governance.committee_contact`, `regulatory_restrictions.governance_committee_contact`
    - Look for: Export control restrictions, GDPR compliance, data sensitivity classification, HIPAA compliance status, other regulatory frameworks (CCPA, PIPEDA), and contact information for the responsible governance committee
+   - **Applies to:** Use the declared regulated_access predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 3. **Download URL or Platform Link Available**
    - Fields: `download_url`
    - Look for: Direct download links or platform access instructions
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 4. **Distribution Formats and File Types Specified**
    - Fields: `distribution_formats`, `distribution_formats.format`, `distribution_formats.media_type`, `file_collections.resources.format`, `file_collections.resources.media_type`
    - Look for: Specific file formats (TSV, Parquet, DICOM, etc.) and MIME types
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 5. **Related Datasets and External Resources Linked**
    - Fields: `related_datasets`, `external_resources`
    - Look for: Links to related datasets and external documentation
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 ---
 
@@ -249,26 +274,27 @@ concepts without expecting absent top-level slots.
 1. **License Terms Allow Reuse**
    - Fields: `license_and_use_terms`
    - Look for: Clear license (CC BY, CC BY-NC-SA, etc.) with reuse permissions
-   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
+   - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 2. **Data Formats Are Standardized (encoding, format)**
    - Fields: `distribution_formats`, `file_collections`, `distribution_formats.format`, `file_collections.resources.format`, `file_collections.resources.encoding`
    - Look for: Use of standard formats (JSON, TSV, Parquet, DICOM, WFDB) and character encoding
-   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
+   - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 3. **Schema or Ontology Conformance Stated**
    - Fields: `conforms_to`, `conforms_to_schema`
    - Look for: References to schemas (OMOP, FHIR, schema.org, etc.)
-   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
+   - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 4. **Variable Metadata with Identifiers Defined**
    - Fields: `variables`
    - Look for: Variable-level metadata with identifiers and descriptions
-   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
+   - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 5. **Use Guidance Provided (intended, prohibited uses)**
    - Fields: `intended_uses`, `prohibited_uses`, `discouraged_uses`
    - Look for: Clear guidance on allowed, prohibited, and discouraged uses
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 ---
 
@@ -288,7 +314,7 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 **Consistency Checks (apply across all sub-elements):**
 - IF `human_subject_research.involves_human_subjects=True` → EXPECT sub-element 1 (IRB approval) AND sub-element 4 (consent) to score 1
 - IF `is_deidentified` present → EXPECT deidentification method described
-- IF IRB approval documented → EXPECT consent procedures also described
+- IF human participation and ethics approval are documented → check whether consent or an explicit applicable waiver is described
 - IF `data_protection_impacts` present → EXPECT `participant_privacy.reidentification_risk` assessed
 - Flag any inconsistencies in semantic_analysis.issues_detected
 
@@ -297,27 +323,27 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
    - Fields: `ethical_reviews`, `human_subject_research`, `data_protection_impacts`, `data_governance.committee_contact`, `regulatory_restrictions.governance_committee_contact`
    - Look for: IRB approval details, institutional oversight, ethics review boards, data protection impact assessments (DPIAs), governance committee contacts
    - **Semantic Check:** If `human_subject_research.involves_human_subjects=True`, this MUST be populated
-   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment, OR `regulatory_restrictions`/`confidentiality_level` (from E2) state a governance constraint that applies. **A record that no restriction applies is not a constraint** (#1060) — read what the block says, not whether it is populated. Ethical oversight and deidentification can apply to a dataset with no human participants — donor-derived material, a data access committee, an ethics contact — which is why these two sub-elements carry the governance disjunct and sub-elements 3 to 5 do not. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
+   - **Applies to:** Use human_subjects OR regulated_access. The latter must describe a governance constraint that applies; a declaration that no restriction applies is not a constraint. Unknown remains scored.
 
 2. **Deidentification Method Described**
    - Fields: `is_deidentified`
    - Look for: Specific deidentification method (HIPAA Safe Harbor, Expert Determination, k-anonymity)
-   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment, OR `regulatory_restrictions`/`confidentiality_level` (from E2) state a governance constraint that applies. **A record that no restriction applies is not a constraint** (#1060) — read what the block says, not whether it is populated. Ethical oversight and deidentification can apply to a dataset with no human participants — donor-derived material, a data access committee, an ethics contact — which is why these two sub-elements carry the governance disjunct and sub-elements 3 to 5 do not. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
+   - **Applies to:** Use human_subjects OR regulated_access. The latter must describe a governance constraint that applies; a declaration that no restriction applies is not a constraint. Unknown remains scored.
 
 3. **Privacy Protections and Re-identification Risk Assessment**
    - Fields: `participant_privacy`, `participant_privacy.reidentification_risk`
    - Look for: Privacy protections, anonymization procedures, explicit re-identification risk assessment and mitigation measures
-   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment. **A governance structure is not a participant signal** (#1060): a data access committee, an embargo or a governance contact over a dataset with no human participants does not make this sub-element applicable, because what it asks about does not exist. Scoring it 0 there would measure the dataset's subject matter rather than its documentation. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
+   - **Applies to:** Use human_subjects only. Governance is not a participant signal; a governance constraint does not make it fire. A human-subjects condition that plainly fails is not borderline. Unknown remains scored.
 
 4. **Informed Consent Obtained from Participants**
    - Fields: `informed_consent`
    - Look for: Consent procedures, consent type (written, verbal), withdrawal mechanisms
-   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment. **A governance structure is not a participant signal** (#1060): a data access committee, an embargo or a governance contact over a dataset with no human participants does not make this sub-element applicable, because what it asks about does not exist. Scoring it 0 there would measure the dataset's subject matter rather than its documentation. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
+   - **Applies to:** Use human_subjects only. Governance is not a participant signal; a governance constraint does not make it fire. A human-subjects condition that plainly fails is not borderline. Unknown remains scored.
 
 5. **Vulnerable Populations and Compensation Documented**
    - Fields: `at_risk_populations`, `participant_compensation`
    - Look for: Protections for at-risk populations, compensation details
-   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment. **A governance structure is not a participant signal** (#1060): a data access committee, an embargo or a governance contact over a dataset with no human participants does not make this sub-element applicable, because what it asks about does not exist. Scoring it 0 there would measure the dataset's subject matter rather than its documentation. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
+   - **Applies to:** Use human_subjects only. Governance is not a participant signal; a governance constraint does not make it fire. A human-subjects condition that plainly fails is not borderline. Unknown remains scored.
 
 ---
 
@@ -328,22 +354,27 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 1. **Cohort or Subpopulations Characteristics Described**
    - Fields: `subpopulations`, `subsets.is_subpopulation`
    - Look for: Demographics, inclusion/exclusion criteria, population characteristics, subpopulation flags on dataset subsets
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 2. **Number of Instances or Samples Reported**
    - Fields: `instances`, `subsets.is_data_split`
    - Look for: Specific counts (e.g., 306 participants, 12,523 recordings), dataset split flags indicating training/test/validation subsets
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 3. **Variable-Level Metadata, Tabular Flag, and Data Splits**
    - Fields: `variables`, `is_tabular`, `subsets.is_data_split`, `subsets.is_subpopulation`
    - Look for: Variable/column descriptions, data dictionary, tabular data indicator, and documented split/subpopulation flags identifying the roles of dataset subsets
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 4. **Data Topics or Conditions Represented**
    - Fields: `instances`
    - Look for: Disease conditions, phenotypes, topics covered in the dataset
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 5. **Data Quality, Anomalies, and Missing Data Documented**
    - Fields: `anomalies`, `sampling_strategies`, `missing_data_documentation`
    - Look for: Known data quality issues, anomalies, sampling methods, missing data patterns and handling strategies
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 ---
 
@@ -354,27 +385,27 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 1. **Dataset Version Number Provided**
    - Fields: `version`
    - Look for: Version number (1.0, 1.1, 2.0.1)
-   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
+   - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 2. **Version Access Methods Documented**
    - Fields: `version_access`
    - Look for: How to access different versions of the dataset
-   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
+   - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 3. **Change Descriptions and Errata Provided**
    - Fields: `errata`, `updates`
    - Look for: Errata documentation, update descriptions, change logs
-   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
+   - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 4. **Update Schedule or Frequency Indicated**
    - Fields: `updates`
    - Look for: Update schedule, maintenance plan, update frequency
-   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
+   - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 5. **Provenance, Source Derivation, and Raw Data Sources**
    - Fields: `was_derived_from`, `updates.update_details`, `updates.description`, `notes`, `raw_data_sources`
    - Look for: Source provenance, dataset derivation, release notes, raw data sources before preprocessing
-   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
+   - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 ---
 
@@ -385,14 +416,17 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 1. **Motivation or Purpose for Dataset Creation**
    - Fields: `purposes`
    - Look for: Scientific rationale, research gaps addressed, dataset purposes
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 2. **Primary Research Objectives or Tasks**
    - Fields: `tasks`
    - Look for: Specific research questions, ML tasks, intended analyses
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 3. **Funding Sources and Mechanisms Listed**
    - Fields: `funders`
    - Look for: NIH, NSF, specific grant agencies and funding mechanisms
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 4. **Grant IDs or Award Numbers Present**
    - Fields: `funders`
@@ -401,10 +435,12 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
      - NIH format: `[Type][Number][Institute][Digits]` (e.g., `OT2OD032742`, `R01GM123456`)
      - NSF format: `[Division]-[Number]` (e.g., `DBI-1234567`)
      - Score 1 if grant number follows expected pattern for stated agency
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 5. **Creators and Acknowledgements Documented**
    - Fields: `creators`, `funders`
    - Look for: Dataset creators, contributor acknowledgements, institutional support
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 ---
 
@@ -415,17 +451,17 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 1. **Collection Mechanisms and Settings Described**
    - Fields: `collection_mechanisms`
    - Look for: Collection procedures, settings, timeframes
-   - **Applies to:** Always report results of this sub-element, but only score if data collection is identified elsewhere and datasets are shared and available for reuse.
+   - **Applies to:** Use the declared data_collection predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 2. **Data Acquisition Methods Listed**
    - Fields: `acquisition_methods`, `raw_data_sources`
    - Look for: Instruments, devices, software used for data capture and acquisition, raw data sources before preprocessing
-   - **Applies to:** Always report results of this sub-element, but only score if data collection is identified elsewhere and datasets are shared and available for reuse.
+   - **Applies to:** Use the declared data_collection predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 3. **Preprocessing, Cleaning, Labeling, and Annotation Quality**
    - Fields: `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`, `annotation_analyses`, `machine_annotation_tools`, `imputation_protocols`
    - Look for: Preprocessing pipeline, cleaning steps, labeling methods, annotation quality analyses, machine annotation tools, imputation protocols for missing values
-   - **Applies to:** Always report results of this sub-element, but only score if `external_resources` (from E10) references a code repository, OR `description` or `purposes` (from E1/E7) explicitly identifies software production as a dataset output. Do not use E8's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
+   - **Applies to:** Use the declared data_processing predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 4. **Software and Tools Documented**
    - Fields: `preprocessing_strategies.used_software`, `cleaning_strategies.used_software`, `labeling_strategies.used_software`, `imputation_protocols.used_software`, `machine_annotation_tools`, `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`, `imputation_protocols`, `external_resources`
@@ -438,14 +474,7 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
      prose, is the alternative evidence, and any one of them carrying the
      evidence satisfies the global requirement that the field exist.
    - Look for: Software names, versions, processing tools, GitHub repos
-   - **Applicability (#1079, #1081).** Within Element 8's datasets-shared
-     gate, this sub-element is applicable to every dataset that was processed
-     at all — which the collection and preprocessing fields of Element 8
-     establish — and is **not** gated on whether a repository is pointed at.
-     Gating it on the pointer would let a record that documents no tooling be
-     excused from the question by that very silence, which is what the
-     anti-circular rule forbids. The software-output condition in the
-     conditions table governs sub-element 3 only.
+   - **Applicability.** This item uses processing_software. It is **not** gated on whether a repository is pointed at. Unknown remains applicable; missing tooling documentation cannot establish non-applicability.
    - **Threshold (#1059, #1082).** The question is whether a reader can tell
      what software **produced or transformed the data being distributed**.
      Score 1 when the record names such software, by name, in any of the slots
@@ -476,16 +505,12 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
      forfeits the point on its own; it is the name that matters. State which
      slot carried the evidence, and when scoring 0 either that nothing was
      named or which of (a)-(e) applies.
-   - **Applies to:** Always report results of this sub-element. It is scored
-     for every dataset that meets Element 8's datasets-shared condition and
-     was processed at all; the software-output condition does not gate it
-     (#1081). Emit `applicability_status` and `applicability_evidence` before
-     scoring.
+   - **Applies to:** Use the declared processing_software predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 5. **External Standards, Resources, and Imputation Protocols**
    - Fields: `external_resources`, `conforms_to`, `imputation_protocols`
    - Look for: Published papers, standards documents, external documentation, and protocols explaining how missing values were imputed or explicitly documenting that imputation was not used
-   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 ---
 
@@ -496,22 +521,27 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 1. **Known Limitations Documented**
    - Fields: `known_limitations`
    - Look for: Explicit limitations section with known issues
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 2. **Biases Categorized Using Standard Taxonomy (RAI-aligned)**
    - Fields: `known_biases`, `future_use_impacts`
    - Look for: Structured bias categorization via `BiasTypeEnum` (mapped to AI Ontology), fairness issues, representativeness, anticipated downstream social impacts (`rai:dataSocialImpact`)
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 3. **Data Anomalies and Quality Issues Noted**
    - Fields: `anomalies`
    - Look for: Data quality issues, anomalies, outliers documented
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 4. **Sensitive Content and Warnings Provided**
    - Fields: `sensitive_elements`, `content_warnings`
    - Look for: Sensitive content descriptions, content warnings
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 5. **Ethical Review and Social Impact Analysis**
    - Fields: `ethical_reviews`, `future_use_impacts`
    - Look for: Ethical review documentation, conflicts of interest, and analysis of anticipated downstream social impacts and mitigations
+   - **Applies to:** Always applicable; missing documentation is scored, not excluded.
 
 ---
 
@@ -522,90 +552,64 @@ on it, scoring the same cell-line dataset out of 50 and out of 45.
 1. **Dataset Published on a Recognized Platform**
    - Fields: `publisher`
    - Look for: PhysioNet, Dataverse, FAIRhub, Zenodo, institutional repository
-   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
+   - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 2. **Citation and DOI for Cross-referencing**
    - Fields: `citation`, `doi`
    - Look for: Recommended citation format, DOI for cross-referencing
-   - **Applies to:** Score whenever the datasets-shared condition is met, exactly as for the other Element 10 sub-elements. Do not require an existing publication or citation to make this sub-element applicable. A shared dataset with neither citation nor DOI earns 0; it is not N/A (#1080).
+   - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
+   - With true or unknown shared_dataset, a record with neither citation nor DOI earns 0.
 
 3. **Community Standards or Schema Conformance**
    - Fields: `conforms_to`
    - Look for: OMOP, FHIR, schema.org, Dublin Core, other community standards
-   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
+   - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 4. **Outreach Materials and Documentation Links**
    - Fields: `external_resources`, `page`
    - Look for: Webinars, tutorials, documentation links, landing pages
-   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
+   - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 5. **Related Datasets with Typed Relationships**
    - Fields: `related_datasets`
    - Look for: Related datasets with relationship types (supplements, derives from, is version of)
-   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
+   - **Applies to:** Use the declared shared_dataset predicate. False is N/A; true or unknown stays scored. Missing scoring fields never establish false.
 
 ---
 
 ## Output Format
 
-Return your evaluation as a **JSON object** with this EXACT structure:
+Return a complete JSON object with the following fields and all rubric items.
+This is a structural example, not a measurement: its zero scores and placeholder
+evidence must be replaced by the assessment. It illustrates the explicit caller
+context shown below and the one-line input `id: https://example.org/synthetic-dataset`
+(with a trailing newline). Replace all input/context/rubric digests, the model,
+timestamp, identity and definition SHA256 with the values actually used. Never
+copy placeholder hashes into an accepted output. N/A comes from the declared
+context, never from missing scoring fields.
 
 ```json
 {
   "rubric": "rubric10-semantic",
-  "version": "1.2",
-  "d4d_file": "<filename>",
-  "project": "<project_name>",
-  "method": "<generation_method>",
-  "evaluation_timestamp": "<ISO 8601 timestamp>",
+  "version": "2.0",
+  "d4d_file": "example.yaml",
+  "project": "EXAMPLE_NONHUMAN",
+  "method": "manual",
+  "evaluation_timestamp": "2026-09-13T00:00:00Z",
   "model": {
-    "name": "<the evaluating session's actual runtime model>",
+    "name": "<actual evaluating session model>",
     "temperature": null,
     "temperature_note": "Not exposed by this runtime; no deterministic-score guarantee",
     "evaluation_type": "semantic_llm_judge"
   },
-  "semantic_analysis": {
-    "issues_detected": [
-      {
-        "type": "consistency",
-        "severity": "medium",
-        "description": "human_subject_research=True but no IRB approval details found",
-        "fields_involved": ["human_subject_research", "ethics.irb_approval"],
-        "recommendation": "Add ethics.irb_approval with institutional approval details"
-      },
-      {
-        "type": "correctness",
-        "severity": "low",
-        "description": "DOI prefix 10.99999 does not match known registrars",
-        "fields_involved": ["doi"],
-        "recommendation": "Verify DOI is registered with DataCite or Crossref"
-      }
-    ],
-    "semantic_insights": [
-      "Description provides specific participant demographics (4,184 participants, 18+ years)",
-      "HIPAA Safe Harbor deidentification method appropriate for health data type",
-      "PhysioNet DOI prefix (10.13026) correctly used"
-    ],
-    "consistency_checks": {
-      "passed": 15,
-      "failed": 2,
-      "warnings": 3
-    },
-    "correctness_validations": {
-      "doi_format": "valid",
-      "grant_number_format": "valid",
-      "rrid_format": "not_present",
-      "url_validity": "all_valid"
-    }
-  },
   "overall_score": {
-    "total_points": 38,
+    "total_points": 0,
     "max_points": 50,
-    "excluded_max_points": 0,
-    "adjusted_max_points": 50,
-    "normalized_percentage": 76.0,
-    "fixed_percentage": 76.0,
-    "sub_elements_not_applicable": 0
+    "excluded_max_points": 6,
+    "adjusted_max_points": 44,
+    "normalized_percentage": 0.0,
+    "fixed_percentage": 0.0,
+    "sub_elements_not_applicable": 6
   },
   "elements": [
     {
@@ -613,97 +617,182 @@ Return your evaluation as a **JSON object** with this EXACT structure:
       "name": "Dataset Discovery and Identification",
       "description": "Can a user or system discover and uniquely identify this dataset?",
       "sub_elements": [
-        {
-          "name": "Persistent Identifier (DOI, RRID, etc.)",
-          "score": 1,
-          "evidence": "doi: https://doi.org/10.13026/249v-w155",
-          "quality_note": "DOI present and properly formatted"
-        },
-        {
-          "name": "Dataset Title and Description Completeness",
-          "score": 1,
-          "evidence": "title: Bridge2AI-Voice - An ethically-sourced, diverse voice dataset...",
-          "quality_note": "Clear title and comprehensive 200+ char description"
-        },
-        {
-          "name": "Keywords or Tags for Searchability",
-          "score": 1,
-          "evidence": "keywords: [Bridge2AI, voice biomarker, speech, health, ...]",
-          "quality_note": "12 relevant keywords covering domain and methods"
-        },
-        {
-          "name": "Dataset Landing Page or Platform URL",
-          "score": 1,
-          "evidence": "page: https://physionet.org/content/b2ai-voice/1.1/",
-          "quality_note": "Active landing page on PhysioNet"
-        },
-        {
-          "name": "Associated Project or Program",
-          "score": 1,
-          "evidence": "keywords: [Bridge2AI, ...]",
-          "quality_note": "Clear association with Bridge2AI project"
-        }
+        {"name": "Persistent Identifier (DOI, RRID, or URI)", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E1.1"},
+        {"name": "Dataset Title and Description Completeness", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E1.2"},
+        {"name": "Keywords or Tags for Searchability", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E1.3"},
+        {"name": "Landing Page and Resources (page, hierarchical resources)", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E1.4"},
+        {"name": "Hierarchical Structure (parent datasets, relationships)", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E1.5"}
       ],
-      "element_score": 5,
+      "element_score": 0,
+      "element_max": 5
+    },
+    {
+      "id": 2,
+      "name": "Dataset Access and Retrieval",
+      "description": "Can the dataset and its associated resources be located, accessed, and downloaded?",
+      "sub_elements": [
+        {"name": "Access Policy and IP Restrictions Defined", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E2.1"},
+        {"name": "Regulatory Compliance and Confidentiality Classification", "score": null, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": false, "applicability_status": "not_applicable", "applicability_evidence": "regulated_access: Explicit caller declaration for this structural example.", "unit_scores": [{"path": "#", "score": null, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E2.2"},
+        {"name": "Download URL or Platform Link Available", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E2.3"},
+        {"name": "Distribution Formats and File Types Specified", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E2.4"},
+        {"name": "Related Datasets and External Resources Linked", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E2.5"}
+      ],
+      "element_score": 0,
+      "element_max": 4
+    },
+    {
+      "id": 3,
+      "name": "Data Reuse and Interoperability",
+      "description": "Is sufficient information provided to reuse and integrate the dataset with others?\nNote: Evaluate whether the dataset is designed for integration with similar datasets, including: common identifiers for cross-dataset linking, standardized formats for data harmonization, and documented integration procedures.\n",
+      "sub_elements": [
+        {"name": "License Terms Allow Reuse", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "shared_dataset: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E3.1"},
+        {"name": "Data Formats Are Standardized (encoding, format)", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "shared_dataset: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E3.2"},
+        {"name": "Schema or Ontology Conformance Stated", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "shared_dataset: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E3.3"},
+        {"name": "Variable Metadata with Identifiers Defined", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "shared_dataset: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E3.4"},
+        {"name": "Use Guidance Provided (intended, prohibited uses)", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E3.5"}
+      ],
+      "element_score": 0,
       "element_max": 5
     },
     {
       "id": 4,
       "name": "Ethical Use and Privacy Safeguards",
-      "description": "Does the dataset provide clear information about consent, privacy, and ethical oversight?",
+      "description": "Does the dataset document the ethical oversight, privacy, consent and safeguards that apply to its subjects and governance context? Equivalent local ethics and regulatory frameworks are accepted; HIPAA or an IRB is not a universal requirement.",
       "sub_elements": [
-        {
-          "name": "IRB or Ethics Review Documented",
-          "applicable": true,
-          "applicability_status": "applicable",
-          "applicability_evidence": "description contains 'voice recordings from participants'; keywords include 'clinical trial'",
-          "score": 1,
-          "evidence": "ethical_reviews: IRB approval from 5 institutions documented",
-          "quality_note": "Human subjects confirmed; IRB details present"
-        },
-        {
-          "name": "Informed Consent Obtained from Participants",
-          "applicable": false,
-          "applicability_status": "not_applicable",
-          "applicability_evidence": "description and keywords contain no clinical/patient/participant terms; collection_mechanisms absent; regulatory_restrictions and confidentiality_level (E2) not populated",
-          "score": null,
-          "evidence": "No human subject evidence found in E1, E2, or E8 fields",
-          "quality_note": "Excluded from denominator: human subjects and governance conditions not met via external fields"
-        }
+        {"name": "IRB or Ethics Review and Data Protection Impact", "score": null, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": false, "applicability_status": "not_applicable", "applicability_evidence": "any: human_subjects: Explicit caller declaration for this structural example.; regulated_access: Explicit caller declaration for this structural example.", "unit_scores": [{"path": "#", "score": null, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E4.1"},
+        {"name": "Deidentification Method Described", "score": null, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": false, "applicability_status": "not_applicable", "applicability_evidence": "any: human_subjects: Explicit caller declaration for this structural example.; regulated_access: Explicit caller declaration for this structural example.", "unit_scores": [{"path": "#", "score": null, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E4.2"},
+        {"name": "Privacy Protections and Re-identification Risk Assessment", "score": null, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": false, "applicability_status": "not_applicable", "applicability_evidence": "human_subjects: Explicit caller declaration for this structural example.", "unit_scores": [{"path": "#", "score": null, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E4.3"},
+        {"name": "Informed Consent Obtained from Participants", "score": null, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": false, "applicability_status": "not_applicable", "applicability_evidence": "human_subjects: Explicit caller declaration for this structural example.", "unit_scores": [{"path": "#", "score": null, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E4.4"},
+        {"name": "Vulnerable Populations and Compensation Documented", "score": null, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": false, "applicability_status": "not_applicable", "applicability_evidence": "human_subjects: Explicit caller declaration for this structural example.", "unit_scores": [{"path": "#", "score": null, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E4.5"}
       ],
-      "element_score": 1,
-      "element_max": 1
+      "element_score": 0,
+      "element_max": 0
     },
-    "... (repeat for all 10 elements)"
+    {
+      "id": 5,
+      "name": "Data Composition and Structure",
+      "description": "Can the dataset's structure, modality, and population be understood from metadata?",
+      "sub_elements": [
+        {"name": "Cohort or Subpopulations Characteristics Described", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E5.1"},
+        {"name": "Number of Instances or Samples Reported", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E5.2"},
+        {"name": "Variable-Level Metadata, Tabular Flag, and Data Splits", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E5.3"},
+        {"name": "Data Topics or Conditions Represented", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E5.4"},
+        {"name": "Data Quality, Anomalies, and Missing Data Documented", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E5.5"}
+      ],
+      "element_score": 0,
+      "element_max": 5
+    },
+    {
+      "id": 6,
+      "name": "Data Provenance and Version Tracking",
+      "description": "Can a user determine dataset versions, update history, and provenance?",
+      "sub_elements": [
+        {"name": "Dataset Version Number Provided", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "shared_dataset: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E6.1"},
+        {"name": "Version Access Methods Documented", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "shared_dataset: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E6.2"},
+        {"name": "Change Descriptions and Errata Provided", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "shared_dataset: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E6.3"},
+        {"name": "Update Schedule or Frequency Indicated", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "shared_dataset: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E6.4"},
+        {"name": "Provenance, Source Derivation, and Raw Data Sources", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "shared_dataset: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E6.5"}
+      ],
+      "element_score": 0,
+      "element_max": 5
+    },
+    {
+      "id": 7,
+      "name": "Scientific Motivation and Funding Transparency",
+      "description": "Does the metadata clearly state why the dataset exists and who funded it?",
+      "sub_elements": [
+        {"name": "Motivation or Purpose for Dataset Creation", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E7.1"},
+        {"name": "Primary Research Objectives or Tasks", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E7.2"},
+        {"name": "Funding Sources and Mechanisms Listed", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E7.3"},
+        {"name": "Grant IDs or Award Numbers Present", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E7.4"},
+        {"name": "Creators and Acknowledgements Documented", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E7.5"}
+      ],
+      "element_score": 0,
+      "element_max": 5
+    },
+    {
+      "id": 8,
+      "name": "Technical Transparency (Data Collection and Processing)",
+      "description": "Can data collection and processing steps be replicated or understood?\nNote: Preprocessing and collection metadata may be represented as structured text descriptions OR as machine-readable provenance graphs (e.g., W3C PROV-O, workflow graphs). Evaluation should check for: (1) structured text descriptions OR (2) graph representations with entity-activity-agent relationships. Both formats are acceptable.\n",
+      "sub_elements": [
+        {"name": "Collection Mechanisms and Settings Described", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "data_collection: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E8.1"},
+        {"name": "Data Acquisition Methods Listed", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "data_collection: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E8.2"},
+        {"name": "Preprocessing, Cleaning, Labeling, and Annotation Quality", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "data_processing: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E8.3"},
+        {"name": "Software and Tools Documented", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "processing_software: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E8.4"},
+        {"name": "External Standards, Resources, and Imputation Protocols", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E8.5"}
+      ],
+      "element_score": 0,
+      "element_max": 5
+    },
+    {
+      "id": 9,
+      "name": "Dataset Evaluation and Limitations Disclosure",
+      "description": "Does the metadata communicate known risks, biases, or dataset limitations?",
+      "sub_elements": [
+        {"name": "Known Limitations Documented", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E9.1"},
+        {"name": "Biases Categorized Using Standard Taxonomy (RAI-aligned)", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E9.2"},
+        {"name": "Data Anomalies and Quality Issues Noted", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E9.3"},
+        {"name": "Sensitive Content and Warnings Provided", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E9.4"},
+        {"name": "Ethical Review and Social Impact Analysis", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "applicable", "applicability_evidence": "This item applies to every dataset", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E9.5"}
+      ],
+      "element_score": 0,
+      "element_max": 5
+    },
+    {
+      "id": 10,
+      "name": "Cross-Platform and Community Integration",
+      "description": "Does the dataset connect to relevant repositories, communities and standards? A shared dataset needs citation or identifier guidance and a named hosting or preservation route appropriate to its domain.",
+      "sub_elements": [
+        {"name": "Dataset Published on a Recognized Platform", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "shared_dataset: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E10.1"},
+        {"name": "Citation and DOI for Cross-referencing", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "shared_dataset: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E10.2"},
+        {"name": "Community Standards or Schema Conformance", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "shared_dataset: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E10.3"},
+        {"name": "Outreach Materials and Documentation Links", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "shared_dataset: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E10.4"},
+        {"name": "Related Datasets with Typed Relationships", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence.", "quality_note": "Illustrative zero or N/A, not an assessment.", "applicable": true, "applicability_status": "unknown", "applicability_evidence": "shared_dataset: not declared; retained in the denominator", "unit_scores": [{"path": "#", "score": 0, "evidence": "Structural example only; replace with actual dataset evidence."}], "item_id": "E10.5"}
+      ],
+      "element_score": 0,
+      "element_max": 5
+    }
   ],
-  "assessment": {
-    "strengths": [
-      "Comprehensive ethical documentation with IRB approval and HIPAA Safe Harbor deidentification",
-      "Clear access mechanisms via PhysioNet registered access with explicit DUA requirements",
-      "Detailed preprocessing pipeline with specific tools (openSMILE, Parselmouth, Whisper)",
-      "Well-documented version history with multiple releases and change notes",
-      "Strong community integration via PhysioNet and Bridge2AI platforms"
+  "semantic_analysis": {
+    "issues_detected": [],
+    "semantic_insights": [],
+    "consistency_checks": {
+      "passed": 0,
+      "failed": 0,
+      "warnings": 0
+    },
+    "correctness_validations": {
+      "doi_format": "not_checked",
+      "grant_number_format": "not_checked",
+      "rrid_format": "not_checked",
+      "url_validity": "not_checked"
+    }
+  },
+  "applicability_context": {
+    "human_subjects": {
+      "value": false,
+      "evidence": "Explicit caller declaration for this structural example."
+    },
+    "regulated_access": {
+      "value": false,
+      "evidence": "Explicit caller declaration for this structural example."
+    }
+  },
+  "evaluation_scope": {
+    "policy": "single_dataset",
+    "units": [
+      {
+        "path": "#",
+        "id": "https://example.org/synthetic-dataset"
+      }
     ],
-    "weaknesses": [
-      "Missing funding agency and award number details in funding_and_acknowledgements",
-      "Limited documentation of collection site specifics and institutional affiliations",
-      "No external publication DOIs or related dataset cross-references",
-      "Sampling bias and representativeness not explicitly discussed in limitations",
-      "Processing code repositories not linked or provided"
-    ],
-    "recommendations": [
-      "Add funding_and_acknowledgements section with NIH grant details",
-      "Include collection_process.setting with specific site names and locations",
-      "Link to related publications and datasets in references and external_resources",
-      "Add limitations section discussing selection bias and generalizability constraints",
-      "Provide GitHub repository links for preprocessing code and feature extraction pipelines"
-    ]
+    "collection_metadata_inherited": false
   },
   "metadata": {
-    "evaluator_id": "<uuid>",
-    "instrument_sha256": "<sha256 of .claude/agents/d4d-rubric10-semantic.md, this file>",
-    "rubric_hash": "<sha256 of data/rubric/rubric10.txt>",
-    "d4d_file_hash": "<sha256 of D4D file>"
+    "instrument_sha256": "<SHA256 of this agent definition>",
+    "rubric_sha256": "9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97",
+    "input_sha256": "4036882d0087e11a4a436c5987461fc05006c6a0ba66ca0b165ead5de23830d0",
+    "context_sha256": "1abc4085973dd1ce6e0e3e0f1048f2d8982e61f827b8350b195969360a5f4694"
   }
 }
 ```
@@ -723,7 +812,7 @@ After writing the requested JSON file, run the following command with its exact
 path, and require exit status 0 before reporting the evaluation complete:
 
 ```bash
-poetry run python scripts/validate_evaluation_schema.py --file OUTPUT_PATH --rubric rubric10-semantic
+poetry run python scripts/validate_evaluation_schema.py --file OUTPUT_PATH --input ORIGINAL_D4D_PATH --agent-definition .claude/agents/d4d-rubric10-semantic.md --rubric rubric10-semantic
 ```
 
 Validate only the output you just wrote; a corpus sweep would expose other
@@ -758,17 +847,17 @@ overall_performance:
   best_score: 42.0
   worst_score: 28.0
   best_performer:
-    file: AI_READI_d4d.yaml
+    file: EXAMPLE_CLINICAL_d4d.yaml
     method: claudecode_agent
-    project: AI_READI
+    project: EXAMPLE_CLINICAL
     score: 42.0
     excluded_max_points: 0
     adjusted_max_points: 50
     normalized_percentage: 84.0
   worst_performer:
-    file: CHORUS_d4d.yaml
+    file: EXAMPLE_IMAGING_d4d.yaml
     method: gpt5
-    project: CHORUS
+    project: EXAMPLE_IMAGING
     score: 28.0
     excluded_max_points: 5
     adjusted_max_points: 45
@@ -791,14 +880,14 @@ method_comparison:
     rank: 2
 
 project_comparison:
-  - project: AI_READI
+  - project: EXAMPLE_CLINICAL
     file_count: 2
     average_score: 39.0
     average_excluded_max_points: 2.0
     average_adjusted_max_points: 48.0
     average_normalized_percentage: 81.3
     rank: 1
-  - project: CM4AI
+  - project: EXAMPLE_MOLECULAR
     file_count: 2
     average_score: 36.5
     average_excluded_max_points: 4.0
@@ -917,7 +1006,7 @@ semantic_analysis_summary:
 
 ### Example 1: Evaluate a Single D4D File
 
-**User:** "Evaluate data/d4d_concatenated/claudecode/VOICE_d4d.yaml with rubric10"
+**User:** "Evaluate data/d4d_concatenated/claudecode/EXAMPLE_AUDIO_d4d.yaml with rubric10"
 
 **Agent:**
 1. Reads the D4D YAML file
@@ -928,7 +1017,7 @@ semantic_analysis_summary:
 
 ### Example 2: Compare Multiple Methods
 
-**User:** "Run rubric10 assessment on all VOICE D4D files (curated, gpt5, claudecode)"
+**User:** "Run rubric10 assessment on all EXAMPLE_AUDIO D4D files (curated, gpt5, claudecode)"
 
 **Agent:**
 1. Evaluates each file separately
@@ -941,7 +1030,7 @@ semantic_analysis_summary:
 
 This agent works directly within Claude Code conversations:
 
-1. **User invokes agent:** "Evaluate VOICE_d4d.yaml with rubric10"
+1. **User invokes agent:** "Evaluate EXAMPLE_AUDIO_d4d.yaml with rubric10"
 2. **Agent reads D4D file** using the Read tool
 3. **Agent applies rubric criteria** and generates evaluation
 4. **Agent returns JSON results** with scores, evidence, recommendations
@@ -951,7 +1040,7 @@ This agent works directly within Claude Code conversations:
 
 **For batch evaluation:** Simply ask the agent to evaluate multiple files:
 ```
-"Evaluate all VOICE D4D files (curated, gpt5, claudecode_agent, claudecode_assistant)
+"Evaluate all EXAMPLE_AUDIO D4D files (curated, gpt5, claudecode_agent, claudecode_assistant)
 using rubric10 and save results to data/evaluation_llm/"
 ```
 

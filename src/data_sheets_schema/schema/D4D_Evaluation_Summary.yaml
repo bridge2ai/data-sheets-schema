@@ -55,7 +55,7 @@ classes:
         required: true
 
       project_comparison:
-        description: Performance comparison across Bridge2AI projects.
+        description: Performance comparison across declared datasets or projects.
         range: ProjectPerformance
         multivalued: true
         required: true
@@ -149,7 +149,8 @@ classes:
     attributes:
       method:
         description: The D4D generation method used to create the datasheets (e.g., claudecode_agent, gpt5).
-        range: GenerationMethodEnum
+        range: string
+        pattern: ".*\\S.*"
         required: true
 
       input_type:
@@ -188,15 +189,16 @@ classes:
         range: integer
 
   ProjectPerformance:
-    description: Performance metrics for a Bridge2AI Grand Challenge project.
+    description: Performance metrics for a declared dataset or project.
     attributes:
       project:
-        description: The Bridge2AI Grand Challenge project for which D4D datasheets were evaluated (e.g., AI_READI, VOICE).
-        range: Bridge2AIProjectEnum
+        description: The dataset or project identifier for which D4D datasheets were evaluated.
+        range: string
+        pattern: ".*\\S.*"
         required: true
 
       file_count:
-        description: Number of D4D files evaluated for this specific Bridge2AI project.
+        description: Number of D4D files evaluated for this dataset or project.
         range: integer
         required: true
 
@@ -227,13 +229,15 @@ classes:
         required: true
 
       project:
-        description: The Bridge2AI project associated with this top-performing datasheet.
-        range: Bridge2AIProjectEnum
+        description: The dataset or project associated with this top-performing datasheet.
+        range: string
+        pattern: ".*\\S.*"
         required: true
 
       method:
         description: The D4D generation method used to create this top-performing file.
-        range: GenerationMethodEnum
+        range: string
+        pattern: ".*\\S.*"
         required: true
 
       input_type:
@@ -443,7 +447,8 @@ classes:
 
       best_method:
         description: Generation method that achieved the highest performance for this input type.
-        range: GenerationMethodEnum
+        range: string
+        pattern: ".*\\S.*"
 
   GeneratedFile:
     description: Information about generated output file.

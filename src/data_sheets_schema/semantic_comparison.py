@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from math import isfinite
 from typing import Any, Iterable
 
@@ -105,14 +106,22 @@ def comparison_warnings(results: Iterable[dict[str, Any]]) -> list[str]:
         default = 50 if rubric.startswith("rubric10") else 88
         bases = score_bases(result, default)
         key = (result.get("project", "unknown"), rubric)
+        metadata = result.get("metadata") or {}
+        model = result.get("model") or {}
         groups.setdefault(key, []).append((bases.fixed_max, bases.adjusted_max,
-                                          excluded_items(result)))
+                                          excluded_items(result), model.get("name"),
+                                          metadata.get("instrument_sha256"),
+                                          metadata.get("context_sha256"),
+                                          json.dumps(result.get("evaluation_scope"), sort_keys=True)))
     warnings = []
     for (project, rubric), signatures in sorted(groups.items()):
         if any(s[2] is None for s in signatures):
             warnings.append(f"{project} / {rubric}: excluded item identities are unreported; "
                             "applicability comparability is unknown.")
-        if len(set(signatures)) > 1:
+        if len({signature[:3] for signature in signatures}) > 1:
             warnings.append(f"{project} / {rubric}: mixed denominators or excluded items; "
                             "do not rank or pool adjusted percentages across these bases.")
+        if len({signature[3:] for signature in signatures}) > 1:
+            warnings.append(f"{project} / {rubric}: mixed evaluator, instrument, context or collection scope; "
+                            "compare within matching conditions before interpreting score differences.")
     return warnings

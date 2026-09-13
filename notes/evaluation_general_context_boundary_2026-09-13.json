@@ -1,0 +1,70 @@
+{
+  "date": "2026-09-13",
+  "status": "implementation_boundary_no_new_measurements",
+  "generation_dependency": "PR #1367",
+  "issues": [
+    1300,
+    627,
+    159,
+    1414
+  ],
+  "generation_arms": [
+    "api",
+    "agentic"
+  ],
+  "evaluation_styles": [
+    "rubric10_presence",
+    "rubric20_presence",
+    "rubric10_api_quality",
+    "rubric20_api_quality",
+    "rubric10_agent_quality",
+    "rubric20_agent_quality",
+    "rubric10_agent_semantic",
+    "rubric20_agent_semantic",
+    "schema_and_provenance",
+    "grounding_receipts_and_report",
+    "source_and_record_semantic_review",
+    "human_adjudication_and_repeats"
+  ],
+  "records_rescored": [],
+  "records_generated": [],
+  "runtime_quoted_definition_sha256": null,
+  "files": {
+    ".claude/agents/d4d-rubric10.md": "c872457ac69d286f36a4864b27a2bfb17427a4924dfb7301a336413a70e7deae",
+    ".claude/agents/d4d-rubric20.md": "0908520cc229d0b582b443e09f2768c424822fa61c249efaf0067d3faa9fc538",
+    ".claude/agents/d4d-rubric10-semantic.md": "1f15e8c49a5e76c18d52d86b1a53681fbb048f2fe879edfd0a7aa61e0eba1e60",
+    ".claude/agents/d4d-rubric20-semantic.md": "463c7547e5fb91260920cbae8d902c15969173a964c5fcba7fae6d9a89e3877a",
+    "data/rubric/rubric10.txt": "9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97",
+    "data/rubric/rubric20.txt": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
+    "src/download/prompts/rubric10_system_prompt.md": "b2dda0c4576050634f406dde1838ae58a23056723538725c4471a882d45b8776",
+    "src/download/prompts/rubric20_system_prompt.md": "c92c07fa78fae940dd8f019a801ef2c8284df750ca9a30415f2470a0fc30d26d",
+    "src/download/prompts/rubric10_semantic_schema.json": "607d44412fad475e90dc27e56614f767d4d72677c3141a5d12b7571aa3af886f",
+    "src/download/prompts/rubric20_semantic_schema.json": "0c79f51048dd080155ed6b0bd8b3ba92509869c89c526ab98fdca8a6c2ad9988",
+    "src/data_sheets_schema/schema/D4D_Evaluation_Summary.yaml": "2cc165cd388d53918d8cc6f5c4bbf2bdd347194e3c6f7b914cfb1695165da765",
+    "src/data_sheets_schema/evaluation_context.py": "c703e300ea6614390f43c6264884d9d5a61b9b7203dc1c904e0a031661dbd124",
+    "src/data_sheets_schema/judge_contract.py": "40c424dd282c864fa3add1f036d00e7dfcfb5f988ed3d8588ee034301cbf24db",
+    "src/data_sheets_schema/semantic_scope.py": "90f69a1c473939111e3312f927690e4f83958c3bf80c160c890e4f5f59ecc4eb",
+    "src/data_sheets_schema/semantic_comparison.py": "c2522d718477fdc4ff296213e5983f3b549d689189e120fc85f1f868a36e060d",
+    "src/evaluation/evaluate_d4d.py": "15c9132a5b75e9188fda381a67967bf78db78682984dd78fb7c241d602f7165a",
+    "src/evaluation/evaluate_d4d_llm.py": "88e6e309c4924e72eb8e29bd8225a2ab19fd955ce163d0bcc7acda90ab7e84d1",
+    "src/data_sheets_schema/cli/evaluate.py": "ab0dfb694629aa555a050aa5129dedd2a163165c56d6b656b8077565e0ed9608",
+    "scripts/validate_evaluation_schema.py": "421ad72e63d8b954091d9ce7db55712c3d814fd277ee4ec3e8e39beea84f3d8c"
+  },
+  "presence_instrument": {
+    "kind": "deterministic_presence",
+    "version": "2.0",
+    "sha256": "0a98498e43d32e08afa223315622dd9d6b2bd2b7ca026041aea69de977dabab5",
+    "inputs": {
+      "rubric10": "9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97",
+      "rubric20": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
+      "runner": "15c9132a5b75e9188fda381a67967bf78db78682984dd78fb7c241d602f7165a",
+      "context_policy": "c703e300ea6614390f43c6264884d9d5a61b9b7203dc1c904e0a031661dbd124"
+    }
+  },
+  "api_system_prompt_sha256": {
+    "rubric10": "60ccf1166f8f990f3be5787c12c7c47808e1c357f20c14bcb5112ed4ec33185b",
+    "rubric20": "f97718ad04e3469c55446258d5ef204f206b637a2b84803e0d8ebe4c5148cea1"
+  },
+  "preserved_condition": "notes/reference_rescore_2026-09-12_cborg_runtime",
+  "preservation_sha256": "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f"
+}

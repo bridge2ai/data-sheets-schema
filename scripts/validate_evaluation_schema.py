@@ -55,6 +55,8 @@ def classify(eval_data: Dict, schema: Dict) -> Tuple[str, List[str]]:
     errors = []
     try:
         validate(instance=eval_data, schema=schema)
+        from data_sheets_schema.semantic_scope import validate_scope
+        validate_scope(eval_data)
         return "valid", []
     except ValidationError as e:
         errors.append(f"Validation error: {e.message}")
@@ -64,6 +66,8 @@ def classify(eval_data: Dict, schema: Dict) -> Tuple[str, List[str]]:
         if any(k in eval_data for k in SUPERSEDED_SHAPE_KEYS):
             return "superseded", errors
         return "invalid", errors
+    except ValueError as e:
+        return "invalid", [f"Validation error: {e}"]
 
 
 def validate_evaluation(eval_data: Dict, schema: Dict) -> Tuple[bool, List[str]]:
@@ -73,7 +77,8 @@ def validate_evaluation(eval_data: Dict, schema: Dict) -> Tuple[bool, List[str]]
 
 
 def validate_outputs(paths: List[Path], rubric: str | None = None,
-                     schema_dir: Path | None = None) -> int:
+                     schema_dir: Path | None = None, input_path: Path | None = None,
+                     definition_path: Path | None = None) -> int:
     """Require each explicitly named new output to pass its semantic schema.
 
     Directory names and superseded shapes do not exempt a new output. This
@@ -97,6 +102,19 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
             valid, errors = validate_evaluation(doc, load_schema(schema_dir / names[declared]))
             if not valid:
                 raise ValueError("\n".join(errors))
+            if doc.get("version") == "2.0":
+                if input_path is None:
+                    raise ValueError("version-2 output validation requires --input to verify every source resource")
+                if definition_path is None:
+                    raise ValueError("version-2 output validation requires --agent-definition to verify its instrument pin")
+                import hashlib
+                definition_sha256 = hashlib.sha256(definition_path.read_bytes()).hexdigest()
+                if doc["metadata"]["instrument_sha256"] != definition_sha256:
+                    raise ValueError("evaluation instrument SHA256 does not match the supplied agent definition")
+                from data_sheets_schema.evaluation_context import load_document
+                from data_sheets_schema.semantic_scope import validate_scope
+                document, digest = load_document(input_path)
+                validate_scope(doc, document=document, input_sha256=digest)
         except (OSError, ValueError, jsonschema.SchemaError) as exc:
             print(f"INVALID {path}: {exc}")
             failed = True
@@ -219,10 +237,17 @@ def cli(argv: List[str] | None = None) -> int:
                         help="validate this exact new output strictly; repeat for multiple files")
     parser.add_argument("--rubric", choices=("rubric10-semantic", "rubric20-semantic"),
                         help="require the named outputs to use this rubric")
+    parser.add_argument("--input", type=Path, help="original D4D input for version-2 resource coverage and byte identity")
+    parser.add_argument("--agent-definition", type=Path, help="exact agent definition used for this version-2 assessment")
     args = parser.parse_args(argv)
     if args.rubric and not args.files:
         parser.error("--rubric requires --file")
-    return validate_outputs(args.files, args.rubric) if args.files else main()
+    if args.input and not args.files:
+        parser.error("--input requires --file")
+    if args.agent_definition and not args.files:
+        parser.error("--agent-definition requires --file")
+    return validate_outputs(args.files, args.rubric, input_path=args.input,
+                            definition_path=args.agent_definition) if args.files else main()
 
 
 if __name__ == "__main__":

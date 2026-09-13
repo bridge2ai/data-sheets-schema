@@ -9,19 +9,25 @@ from types import SimpleNamespace
 import pytest
 
 from evaluation import evaluate_d4d_llm as llm
+from tests.judge_fixtures import judge_reply
 
 
 def evaluator(tmp_path, metadata=None):
     obj = llm.D4DLLMEvaluator.__new__(llm.D4DLLMEvaluator)
-    obj.config = llm.LLMEvaluationConfig(rubric_dir=tmp_path)
+    obj.config = llm.LLMEvaluationConfig(rubric_dir=tmp_path, error_dir=tmp_path / "errors")
     (tmp_path / "rubric20.txt").write_text("rubric: example\n")
-    obj.rubric20 = {"rubric": "example"}
+    obj.rubric20 = {"rubric": "example", "d4d_evaluation_rubric": {"rubric": [
+        {"id": 1, "name": "Example", "score_type": "numeric", "field": ["id"]}]}}
+    obj.context = {}
+    obj._rubric_bytes = {"rubric20.txt": (tmp_path / "rubric20.txt").read_bytes()}
     obj.rubric20_system_prompt = "Judge only these rules:\n{RUBRIC_SPECIFICATION}"
     calls = []
 
     def create(**kw):
         calls.append(kw)
-        return SimpleNamespace(content=[SimpleNamespace(text=json.dumps({"metadata": metadata or {}}))])
+        contract = json.loads(kw["messages"][0]["content"].split("```json\n")[1].split("\n```")[0])
+        result = judge_reply(contract, "rubric20", metadata=metadata)
+        return SimpleNamespace(content=[SimpleNamespace(text=json.dumps(result))])
 
     obj.client = SimpleNamespace(messages=SimpleNamespace(create=create))
     return obj, calls
