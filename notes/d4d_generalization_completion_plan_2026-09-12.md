@@ -190,3 +190,16 @@ full CI is green. Exact-head CI and independent review still precede merge.
 The evaluation worktree has passing applicability/collection and fake API
 judge acceptance tests; agent instruction/schema alignment is in progress.
 All earlier stage ordering and measurement-preservation requirements remain.
+
+## Generation review round 12 — 2026-09-13
+
+Round 11 found mixed-renderer resume and interrupted label-switch activation
+defects (#1434/#1435). Durable instruction pins and exact predecessor activation
+intent address both. Three CI fixture assumptions are corrected in #1437.
+The recovery lane passes 203 tests and final compatibility passes 100;
+see `reviews/pr_1367_round12_2026-09-13.md`. Exact-head full CI and independent
+approval remain required. Evaluation implementation is isolated in its own
+worktree. Existing profile PR #1436 is the candidate for the subsequent
+profile stage; review it after generation and evaluation rather than duplicate
+that work. Packaging follows. All API/agentic arms and evaluation styles above
+remain in scope, with historical measurements preserved and downloads deferred.

@@ -566,7 +566,10 @@ class RunSpec:
         chunks = (self.chunk_manifest or manifest_for(self.bundle)) if self.bundle else None
         return {"bundle": entry(self.bundle),
                 "source_manifest": entry(self.manifest) if self.manifest_used else None,
-                "chunks": entry(chunks)}
+                "chunks": entry(chunks),
+                "instruction": {"render_version": self.render_version,
+                                "spec": self.render_spec(),
+                                "sha256": hashlib.sha256(self.instruction.encode()).hexdigest()}}
 
     def render_spec(self) -> dict[str, Any]:
         """Everything `resolve_prompt` reads, for the record to keep.
@@ -4651,6 +4654,10 @@ def _require_recorded_inputs(spec: RunSpec, record: dict[str, Any]) -> None:
         if changed:
             raise UsageLedgerError(f"generation input identity changed for {name}; restore the "
                                    "recorded inputs or use --no-resume for an explicit new generation")
+    instruction = ((record.get("prompts") or {}).get("request") or {}).get("sha256")
+    if instruction is not None and instruction != current["instruction"]["sha256"]:
+        raise UsageLedgerError("generation instruction identity changed; restore the recorded renderer "
+                               "and instruction or use --no-resume for an explicit new generation")
 
 
 def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
@@ -4751,6 +4758,13 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         if recorded_inputs(spec) is None:
             raise UsageLedgerError("saved phases have no recorded generation input identity; restore "
                                    "their input evidence or use --no-resume for an explicit new generation")
+    if done:
+        from data_sheets_schema.usage_ledger import recorded_inputs
+        evidence = progress.get("input_identity") or recorded_inputs(spec) or {}
+        recorded_instruction = ((prior_record.get("prompts") or {}).get("request") or {}).get("sha256")
+        if not evidence.get("instruction") and not recorded_instruction:
+            raise UsageLedgerError("saved phases have no recorded instruction identity; restore their "
+                                   "instruction evidence or use --no-resume for an explicit new generation")
     if generation is None and _unrecorded_abandoned(spec, prior_record):
         raise UsageLedgerError("identified abandoned charges survive but their usage ledger is missing; "
                                "restore the ledger before resuming")

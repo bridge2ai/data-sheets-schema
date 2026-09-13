@@ -497,14 +497,16 @@ class TestStatusAndMakeSeeTheRegistry(_Offline):
         self.assertNotIn("EXTERNAL_CLINICAL", r.output)
 
     def test_commands_without_a_manifest_option_take_the_root_one(self):
-        """Fourteen commands validate --project but have no --manifest of
-        their own; `d4d --manifest M <command>` is their registry (#1367
-        review, must-fix 4)."""
+        """A command with a project callback uses the root registry (#1367).
+
+        Receipt checking instead accepts the identity already carried by a
+        run, without requiring registry membership (#1431).
+        """
         from data_sheets_schema.cli import cli
         m = _manifest(self.tmp, raw_dir=self.raw)
-        r = CliRunner().invoke(cli, ["receipts", "check", "--project", "EXTERNAL_CLINICAL", "--label", "L"])
+        r = CliRunner().invoke(cli, ["review", "pack", "--project", "EXTERNAL_CLINICAL", "--label", "L"])
         self.assertNotEqual(r.exit_code, 0)
         self.assertIn("d4d --manifest PATH", r.output)
-        r = CliRunner().invoke(cli, ["--manifest", str(m), "receipts", "check",
+        r = CliRunner().invoke(cli, ["--manifest", str(m), "review", "pack",
                                      "--project", "EXTERNAL_CLINICAL", "--label", "L"])
         self.assertNotIn("not declared by the selected manifest", r.output)

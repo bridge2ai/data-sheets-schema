@@ -70,6 +70,66 @@ def predecessor_generation(spec) -> str | None:
     return None
 
 
+def activation_intent(spec) -> dict:
+    """Capture the exact predecessor before publishing a fresh usage ledger."""
+    path = index_path(spec.metadata_dir, spec.project)
+    raw = path.read_bytes() if path.exists() else None
+    try:
+        previous = json.loads(raw) if raw is not None else {}
+    except ValueError:
+        previous = {}
+    if not isinstance(previous, dict):
+        previous = {}
+    return {"sha256": hashlib.sha256(raw).hexdigest() if raw is not None else None,
+            "generation_id": previous.get("generation_id"),
+            "run_identity": previous.get("run_identity"),
+            "archive_name": f"{path.stem}.previous-{uuid.uuid4().hex}.json"}
+
+
+def finish_activation(spec) -> None:
+    """Finish only the recorded initialization, including after publication."""
+    account = ledger._read(spec)
+    pending = account.get("pending_snapshot_activation")
+    if pending is None:
+        return
+    path = index_path(spec.metadata_dir, spec.project)
+    pattern = re.escape(f"{path.stem}.previous-") + r"[a-f0-9]{32}\.json"
+    if (not isinstance(pending, dict)
+            or not re.fullmatch(pattern, str(pending.get("archive_name", "")))
+            or (pending.get("sha256") is not None
+                and not re.fullmatch(r"[a-f0-9]{64}", str(pending["sha256"])))):
+        raise ledger.UsageLedgerError("invalid snapshot activation intent")
+    data = {"version": 1, "generation_id": account["generation_id"],
+            "run_identity": account["identity"],
+            "input_identity": account["input_identity"], "snapshots": []}
+    raw = path.read_bytes() if path.exists() else None
+    try:
+        published = raw is not None and json.loads(raw) == data
+    except ValueError:
+        published = False
+    archive = path.with_name(pending["archive_name"])
+    if not published:
+        observed = hashlib.sha256(raw).hexdigest() if raw is not None else None
+        if observed != pending.get("sha256"):
+            raise ledger.UsageLedgerError("snapshot predecessor changed during activation; restore its recorded bytes")
+        if raw is not None:
+            archive.parent.mkdir(parents=True, exist_ok=True)
+            if archive.exists():
+                if archive.read_bytes() != raw:
+                    raise ledger.UsageLedgerError("snapshot predecessor archive changed during activation")
+            else:
+                with archive.open("xb") as stream:
+                    stream.write(raw)
+                    stream.flush()
+                    os.fsync(stream.fileno())
+        _write(path, data)
+    if pending.get("sha256") is not None:
+        if not archive.is_file() or hashlib.sha256(archive.read_bytes()).hexdigest() != pending["sha256"]:
+            raise ledger.UsageLedgerError("snapshot predecessor archive is missing or changed")
+    account.pop("pending_snapshot_activation")
+    ledger._write(spec, account)
+
+
 def _write(path: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = None
@@ -107,6 +167,7 @@ def _verified(entry: dict) -> Path:
 
 def activate(spec, *, fresh: bool, completed: bool, prior_record: dict) -> None:
     """Establish the snapshot owner before reading or writing any phase."""
+    finish_activation(spec)
     directory = spec.provenance_path.parent
     path = index_path(directory, spec.project)
     try:

@@ -152,7 +152,6 @@ def pin_inputs(spec) -> None:
 
 def require_resolved(spec) -> None:
     data = _read(spec)
-    _finish_reasoning_archive(spec, data)
     pending = data.get("pending_call")
     if pending is not None:
         raise UsageLedgerError(
@@ -161,8 +160,11 @@ def require_resolved(spec) -> None:
 
     pinned = data.get("input_identity")
     if pinned is not None and pinned != spec.input_identity():
-        raise UsageLedgerError("generation input identity changed (bundle, source manifest or chunk manifest); "
+        raise UsageLedgerError("generation input identity changed (bundle, manifests or resolved instruction); "
                                "restore the recorded inputs or use --no-resume for an explicit new generation")
+    _finish_reasoning_archive(spec, data)
+    from data_sheets_schema.snapshot_store import finish_activation
+    finish_activation(spec)
 
 
 def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
@@ -198,6 +200,8 @@ def prepare_usage(spec, *, resume: bool) -> str:
         predecessor = predecessor_generation(spec)
         if predecessor is not None and predecessor not in data["prior_generation_ids"]:
             data["prior_generation_ids"].append(predecessor)
+        from data_sheets_schema.snapshot_store import activation_intent
+        data["pending_snapshot_activation"] = activation_intent(spec)
     if path.exists():
         try:
             previous = _read(spec)
