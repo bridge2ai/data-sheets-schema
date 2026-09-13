@@ -173,3 +173,20 @@ retain their hashes. The nested archived-checkout probe also confirms resource
 and corpus discovery agree after the upstream integration. No production
 record, prior score or historical instrument attribution is rewritten.
 The next review and CI use this combined committed implementation.
+
+## Review round 8 and dependency integration — 2026-09-13
+
+#1675 fixes validation from a nested directory. The runs command now keeps
+the corpus it discovered and validates explicit full/core paths, without
+constructing a generation spec that could select a different manifest. The
+verdict and hashes describe that same discovered pair. Four regressions cover
+new and replacement verdicts, with and without invalid caller-local copies;
+they fail before the fix and pass afterward, preserving recorded hash algorithms.
+
+All 55 focused validation/recheck checks pass, followed by 156 run-selection
+and compatibility checks. The combined tree includes profile 6a35a45ee,
+packaging 8c48a532b, and installed-workflow c94059d7e, including the wrapper
+shebang correction. All 101 corpus/selected-command/recording integration
+checks pass. All 60 historical renderer controls retain their hashes.
+The next independent review and exact-head CI remain merge gates.
+No production record, rating, source bundle or historical attribution changes.

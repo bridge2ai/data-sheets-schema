@@ -1,16 +1,16 @@
 {
   "date": "2026-09-13",
   "files": {
-    "src/data_sheets_schema/api_runner.py": "0de5d67aff472247801f247a2de2a99c14a7b4cb1ca4e9feb43543cfbb399932",
+    "src/data_sheets_schema/api_runner.py": "bd843dfeb2c301029a636b125e2439bad777948e235072b3aefcf3b34ddd867d",
     "src/data_sheets_schema/chunking.py": "21ecc188bffe61efc38ce3fca84292dbbab08043973649364449263cdbe86e4a",
-    "src/data_sheets_schema/cli/provenance.py": "c39ef3b90a12a03ec21d33e90196482bdaacfad980596636312b38b3f153f8e9",
+    "src/data_sheets_schema/cli/provenance.py": "614739822261b2b421cb0331431ae7f5385da5358b5baf86c30a0de7fd5531f7",
     "src/data_sheets_schema/cli/receipts.py": "aa321289cf79ab32d26c00699c4a40c1c3f57930cfc7dac850a40188337ae29b",
-    "src/data_sheets_schema/cli/runs.py": "431a6485e88b7566c505c0a706b266f752fd3e04834819c74b0ec98dede4213c",
+    "src/data_sheets_schema/cli/runs.py": "a71dd71b918f435abbdaa5e5ca94bd78d4cc6e7bf783317d22445263683b2855",
     "src/data_sheets_schema/corpus.py": "056034a783b3e304252ab81a094f3d8e9d99eb3e2b7db00ec73c67b989491c95",
-    "src/data_sheets_schema/profiles.py": "03697ef00d4b03cbd7eab157b89a17724d2e3050dd884d39faa12f348a4c7416",
-    "src/data_sheets_schema/provenance.py": "3020d0ca2f908e197ff383a77f17b0696d8c61668390fe95bb83f56c3d84d963",
-    "src/data_sheets_schema/registry.py": "728a09f36ead8e5b2588849fca71338d09a23004e3ad5ee5dacb0014fdc108eb",
-    "src/data_sheets_schema/resources.py": "566bc0cfb46ad9377b7a7d0a3bac7f1daea2827971667a709b008e95e02d6ede",
+    "src/data_sheets_schema/profiles.py": "b1226da67852c6c83d1a47af244e73f1c880dc8b3f8ce9a44b07a57c9d341251",
+    "src/data_sheets_schema/provenance.py": "221d6425b41e3ccba0d0da2c351882f8dbfb744ca392bc63bc27d6453d97ba3a",
+    "src/data_sheets_schema/registry.py": "e260fb38b354b5f71a6d9556cc2e98ee1c12e180a176646c236203b7ba50556f",
+    "src/data_sheets_schema/resources.py": "e7a203a289d2053bbcaee77f222ca81c905827148de4a10bd9bd7563c0d4ba17",
     "src/data_sheets_schema/runs.py": "71e9b152065dd876776e6b39fda893718e36cd5d092492a43dc3ef181665b788"
   },
   "generation_arms": [
@@ -18,7 +18,7 @@
     "api"
   ],
   "historical_renderer_controls": 60,
-  "integration_dependency_commit": "66130d5cb",
+  "integration_dependency_commit": "c94059d7ea1fb225ec4230b6eb045f58c293dc9b",
   "issues": [
     1523,
     1594,
@@ -40,7 +40,8 @@
     1649,
     1650,
     1651,
-    1653
+    1653,
+    1675
   ],
   "new_spec_chunk_check_uses_manifest": true,
   "preservation_sha256": "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f",
