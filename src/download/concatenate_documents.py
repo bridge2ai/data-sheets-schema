@@ -18,16 +18,16 @@ def files_from_manifest(
     input_dir: Path,
 ) -> List[Path]:
     """Resolve the canonical processed files for one project."""
-    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
-    projects = manifest.get("projects") if isinstance(manifest, dict) else None
-    if not isinstance(projects, dict) or project not in projects:
+    from data_sheets_schema.registry import load_registry
+    registry = load_registry(manifest_path)
+    if not registry.declares(project):
         raise ValueError(
             f"Project {project!r} is not present in manifest {manifest_path}"
         )
 
     files = []
     seen = set()
-    for entry in projects[project]:
+    for entry in registry.sources(project):
         filename = entry.get("processed_file")
         if not filename:
             raise ValueError(

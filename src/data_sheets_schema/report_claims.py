@@ -1443,23 +1443,24 @@ def _has_populated_key(node: Any, name: str) -> bool:
 
 def phase1_snapshot_for(core_path: Path) -> dict | None:
     """The phase-1 snapshot beside a core record, by the same rule the
-    receipts join uses (`receipts.phase1_snapshot`, #758/#761): the
-    highest-numbered `intermediate/{P}_full*.yaml`. None where the runner
-    kept none."""
+    receipts join uses (`receipts.phase1_snapshot`, #1415): the evidence
+    attested by the matching run. None where the runner kept none."""
     return phase1_snapshot_with_pin_for(core_path)[0]
 
 
-def phase1_snapshot_with_pin_for(core_path: Path) -> tuple[dict | None, dict | None]:
+def phase1_snapshot_with_pin_for(core_path: Path, *, spec=None, record: dict | None = None) -> tuple[dict | None, dict | None]:
     """Read the snapshot once and pin the exact bytes being judged (#1194)."""
     import yaml
-    from data_sheets_schema.receipts import phase1_snapshot_path
+    from data_sheets_schema.receipts import phase1_snapshot_read
     receipt = core_path.parent / core_path.name.replace("_d4d_core.yaml", "_coverage_receipt.yaml")
-    path = phase1_snapshot_path(receipt)
-    if path is None:
-        return None, None
-    raw = None
     try:
-        raw = path.read_bytes()
+        snapshot = phase1_snapshot_read(receipt, spec=spec, record=record)
+    except OSError as exc:
+        return None, {"path": None, "sha256": None, "state": "unusable", "reason": str(exc)}
+    if snapshot is None:
+        return None, None
+    path, raw = snapshot
+    try:
         doc = yaml.safe_load(raw.decode("utf-8"))
         if not isinstance(doc, dict) or not doc:
             raise ValueError("snapshot is not a nonempty mapping")

@@ -6,7 +6,8 @@ from pathlib import Path
 
 import click
 
-from data_sheets_schema.constants import PROJECTS
+from data_sheets_schema.registry import (DEFAULT_MANIFEST, default_manifest_path, load_registry,
+                                         project_choice)
 
 
 @click.group()
@@ -15,14 +16,27 @@ def bundle():
 
 
 @bundle.command("chunk")
-@click.option("--project", type=click.Choice(PROJECTS), help="one project (default: all)")
+@click.option("--manifest", type=click.Path(), default=str(DEFAULT_MANIFEST),
+              show_default=True, is_eager=True,
+              help="source manifest that declares the projects (the registry for --project)")
+@click.option("--project", callback=project_choice,
+              help="one project the manifest declares (default: all it declares)")
+@click.option("--bundle", "bundles", multiple=True, type=click.Path(path_type=Path),
+              help="an explicit bundle file, wherever it is (repeatable, #1299); its "
+                   "manifest is written beside it as `<stem>_chunks.yaml`")
 @click.option("--check", is_flag=True,
               help="rebuild each manifest under its recorded rule and compare; write nothing")
+@click.option("--chunk-manifest", type=click.Path(path_type=Path, dir_okay=False),
+              help="with --check and one --bundle: validate this exact selected mapping under its declared rule")
 @click.option("--strict", is_flag=True, help="with --check: exit 1 on stale or missing")
-@click.option("--max-lines", type=int, default=None, help="override the rule's line bound")
-@click.option("--max-bytes", type=int, default=None, help="override the rule's byte bound")
-def chunk(project, check, strict, max_lines, max_bytes):
-    """Write `data/preprocessed/chunks/{PROJECT}_chunks.yaml`.
+@click.option("--max-lines", type=click.IntRange(min=1), default=None, help="override the rule's line bound")
+@click.option("--max-bytes", type=click.IntRange(min=1), default=None, help="override the rule's byte bound")
+def chunk(manifest, project, bundles, check, chunk_manifest, strict, max_lines, max_bytes):
+    """Write a chunk manifest for each bundle.
+
+    A study bundle's manifest is `data/preprocessed/chunks/{PROJECT}_chunks.yaml`;
+    an explicit `--bundle` anywhere else gets `{stem}_chunks.yaml` beside it,
+    so two bundles with one basename in different places never share one.
 
     The manifest is a pure function of the bundle's bytes and the rule it
     records: chunks follow the bundle's `FILE:` boundaries, long documents
@@ -34,19 +48,60 @@ def chunk(project, check, strict, max_lines, max_bytes):
     from data_sheets_schema.chunking import (DEFAULT_RULE, manifest_status_for,
                                               project_bundles, write_manifest_for)
 
-    targets = [project] if project else list(PROJECTS)
+    if chunk_manifest is not None:
+        if not check or len(bundles) != 1 or project or max_lines is not None or max_bytes is not None:
+            raise click.UsageError("--chunk-manifest requires --check and exactly one --bundle, without --project or rule overrides")
+        import yaml
+        from data_sheets_schema.chunking import canonical_name, validate_manifest_mapping
+        selected_bundle = Path(bundles[0])
+        try:
+            mapping = yaml.safe_load(chunk_manifest.read_bytes())
+            validate_manifest_mapping(mapping, selected_bundle.read_bytes(), canonical_name(selected_bundle))
+        except (OSError, ValueError, yaml.YAMLError) as exc:
+            click.echo(f"   ❌ unreadable {chunk_manifest}: {exc}")
+            if strict:
+                raise click.exceptions.Exit(1)
+        else:
+            click.echo(f"   ✓ current {chunk_manifest}: {mapping['chunk_count']} canonical chunks under the selected rule")
+        return
+
+    targets: list[tuple[str, list[Path]]] = []
+    if bundles:
+        targets.append(("--bundle", [Path(b) for b in bundles]))
+    if project or not bundles:
+        reg = load_registry(manifest)
+        if reg.path is None or not reg.path.is_file():
+            raise click.ClickException(f"selected source manifest does not exist or is not a file: {reg.path}")
+        names = [project] if project else reg.projects()
+        study = reg.path is not None and reg.path.resolve() == default_manifest_path().resolve()
+        for name in names:
+            declared = reg.bundle(name)
+            if study:
+                # The study's registry: every bundle kind it keeps (#725).
+                found = project_bundles(name)
+                if declared.exists() and declared not in found:
+                    found = [declared] + found
+            else:
+                # Another registry names its own bundles and nothing else —
+                # not the study's, which share the project key (#1367
+                # review, must-fix 10).
+                found = [declared] if declared.exists() else []
+            targets.append((name, found))
+
     if check:
+        if strict and not targets:
+            raise click.ClickException("selected source manifest declares no bundle targets to check")
         bad = 0
-        for name in targets:
-            bundles = project_bundles(name)
-            if not bundles:
+        for name, found in targets:
+            if not found:
                 click.echo(f"   · no_bundle  {name}")
-            for b in bundles:
+                bad += 1
+            for b in found:
                 st, detail = manifest_status_for(b)
                 mark = {"current": "✓", "stale": "❌", "missing": "❌", "off_rule": "❌",
                         "unreadable": "❌", "no_bundle": "·"}[st]
                 click.echo(f"   {mark} {st:<10} {b.name}: {detail}")
-                bad += st in ("stale", "missing", "off_rule", "unreadable")
+                bad += st in ("stale", "missing", "off_rule", "unreadable", "no_bundle")
         if strict and bad:
             sys.exit(1)
         return
@@ -60,11 +115,12 @@ def chunk(project, check, strict, max_lines, max_bytes):
         # A manifest under a non-default rule is a different instrument; say so
         # in the rule itself rather than letting it pass as the default.
         rule["version"] = f"{DEFAULT_RULE['version']}-custom"
-    for name in targets:
-        bundles = project_bundles(name)
-        if not bundles:
+    for name, found in targets:
+        if not found:
             click.echo(f"   · {name}: no bundle")
-        for b in bundles:            # every kind a run may declare (#725)
+        for b in found:            # every kind a run may declare (#725)
+            if not b.exists():
+                raise click.ClickException(f"bundle not found: {b}")
             out, m = write_manifest_for(b, rule)
             oversize = sum(1 for c in m["chunks"] if c.get("oversize"))
             largest = max(c["bytes"] for c in m["chunks"]) if m["chunks"] else 0

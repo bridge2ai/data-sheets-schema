@@ -253,7 +253,11 @@ def preprocess_manifest(
 ) -> dict:
     """Build a canonical text-only processed set from a source manifest."""
     manifest = load_source_manifest(manifest_path)
-    selected_projects = set(projects or manifest["projects"].keys())
+    from data_sheets_schema.registry import load_registry
+    registry = load_registry(manifest_path)
+    # The registry says which keys are projects: a `<P>_source_dir` sibling
+    # is an override, not a project to iterate (#626, #623).
+    selected_projects = set(projects or registry.projects())
     default_minimum = int(manifest.get("default_minimum_characters", 500))
     stats = {
         "processed": 0,
@@ -261,22 +265,37 @@ def preprocess_manifest(
         "projects": {},
     }
 
-    unknown = selected_projects - set(manifest["projects"])
+    unknown = selected_projects - set(registry.projects())     # a `<P>_source_dir` key is not a project (#626)
     if unknown:
         raise ValueError(
             f"Projects not present in {manifest_path}: {sorted(unknown)}"
         )
 
-    for project, entries in manifest["projects"].items():
+    for project in registry.projects():
         if project not in selected_projects:
             continue
-        if not isinstance(entries, list):
-            raise ValueError(f"Manifest project {project} must contain a list")
+        owner = registry.shared_source_project(project, output_dir)
+        if owner is not None:
+            # A verified legacy shared-directory declaration reuses a subset
+            # of another project's sources. An output-directory override or
+            # a unique source never triggers this skip (#1390).
+            print(f"\n📁 {project}: preprocessed files are declared under "
+                  f"{registry.source_dir(project)}; nothing to preprocess here")
+            stats["projects"][project] = {"processed": 0, "errors": 0,
+                                          "source_dir": str(registry.source_dir(project))}
+            continue
+        entries = registry.sources(project)
+        if not entries:
+            raise ValueError(f"Manifest project {project} must declare a list of sources")
+        # Raw documents live under `<input_dir>/<project>` by convention, or
+        # wherever the manifest's `raw_dir` says for a dataset whose documents
+        # are not laid out that way (#637).
+        raw_root = registry.raw_dir(project) or (input_dir / project)
 
         seen_ids = set()
         seen_outputs = set()
         project_stats = {"processed": 0, "errors": 0}
-        destination_dir = output_dir / project
+        destination_dir = registry.preprocessed_directory(project, output_dir)
         destination_dir.mkdir(parents=True, exist_ok=True)
 
         print(f"\n📁 {project} ({len(entries)} canonical sources)")
@@ -302,7 +321,7 @@ def preprocess_manifest(
             seen_ids.add(source_id)
             seen_outputs.add(processed_name)
 
-            source_path = input_dir / project / raw_name
+            source_path = raw_root / raw_name
             destination_path = destination_dir / processed_name
             if not source_path.exists():
                 print(f"    ❌ Missing raw source: {source_path}")
@@ -522,8 +541,9 @@ def main():
     parser.add_argument(
         "-p", "--projects",
         nargs="+",
-        default=PROJECTS,
-        help="Projects to process (default: all)"
+        default=None,
+        help="Projects to process (default: every project the manifest declares, "
+             "or the study's without a manifest)"
     )
     parser.add_argument(
         "--manifest",
@@ -563,7 +583,7 @@ def main():
         print("✅ Canonical preprocessing complete!")
         return
 
-    for project in args.projects:
+    for project in (args.projects or PROJECTS):
         print(f"\n📁 {project}")
         src_dir = args.input_dir / project
         dst_dir = args.output_dir / project

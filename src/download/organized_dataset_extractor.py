@@ -87,9 +87,12 @@ def promote_canonical_downloads(
     manifest_projects = manifest.get("projects") if isinstance(manifest, dict) else None
     if not isinstance(manifest_projects, dict):
         raise ValueError(f"Invalid source manifest: {manifest_path}")
+    from data_sheets_schema.registry import load_registry
+    registry = load_registry(manifest_path)
+    declared = registry.projects()
 
-    selected_projects = set(projects or manifest_projects)
-    unknown = selected_projects - set(manifest_projects)
+    selected_projects = set(projects or declared)
+    unknown = selected_projects - set(declared)
     if unknown:
         raise ValueError(
             f"Projects not present in {manifest_path}: {sorted(unknown)}"
@@ -100,14 +103,14 @@ def promote_canonical_downloads(
     retained_fallbacks = []
     unresolved_sources = []
 
-    for project, entries in manifest_projects.items():
+    for project in declared:
         if project not in selected_projects:
             continue
-        for entry in entries:
+        for entry in registry.sources(project):   # list or mapping record (#1367 review, must-fix 5)
             filename = entry["raw_file"]
             minimum = int(entry.get("minimum_characters", default_minimum))
             staged_path = staging_dir / project / filename
-            active_path = output_dir / project / filename
+            active_path = (registry.raw_dir(project) or output_dir / project) / filename   # #1392
             staged_error = validate_raw_artifact(staged_path, minimum)
 
             if not staged_error:
@@ -1131,8 +1134,9 @@ def main():
     parser.add_argument(
         "--projects",
         nargs="+",
-        choices=["AI_READI", "CHORUS", "CM4AI", "VOICE"],
-        help="Only process the selected project columns",
+        help="Only process the selected project columns (any column the sheet "
+             "or manifest declares; the study's four were the only choices "
+             "before #623)",
     )
     parser.add_argument(
         "--manifest",

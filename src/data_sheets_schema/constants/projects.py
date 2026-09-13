@@ -5,7 +5,11 @@ This module centralizes project names and paths used throughout the codebase.
 
 from pathlib import Path
 
-# Project names.
+# Project names — the study's corpus, for the analysis scripts that compare
+# arms and for `SHARED_CORPUS_GROUPS` below. Not the CLI's project universe:
+# since #623 a `--project` is validated against the source manifest the
+# command selects (`registry.project_choice`), so a dataset declared in any
+# manifest can be run without editing this file.
 #
 # `VOICE` is the adult/main Bridge2AI-Voice dataset. `VOICE_PEDIATRIC` is the
 # companion pediatric dataset — its own DOI (10.13026/h995-bt35), its own

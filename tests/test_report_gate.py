@@ -377,7 +377,10 @@ class TestTheRunnerGate(unittest.TestCase):
         s.full_path.write_text(yaml.safe_dump(FULL)); s.core_path.write_text(yaml.safe_dump(CORE))
         s.report_path.write_text("# R\n\n## Dispositions\n\n| slot | disposition | record | reason |\n|---|---|---|---|\n"
                                  "| `keywords` | removed | full | gone |\n")
-        s.provenance_path.write_text(yaml.safe_dump({"report_gate": {"regenerated": True, "findings_after": 1}}))
+        s.provenance_path.write_text(yaml.safe_dump({
+            "run": {"project": s.project, "method": s.method, "label": s.label,
+                    "condition": s.condition},
+            "report_gate": {"regenerated": True, "findings_after": 1}}))
         class Boom:
             messages = property(lambda self: (_ for _ in ()).throw(AssertionError("must not call")))
         out = api_runner._gate_report(s, Boom(), {"name": "m", "max_tokens": 10, "temperature": None,

@@ -1301,6 +1301,32 @@ the evidence supplies is a claim about the evidence; the assembly digest
 does not move, no v9 record exists, so nothing
 is re-baselined and no record is superseded.
 
+### The manifest is the registry, and a run attests the manifest it read (#621, #623, #624, #637, #1299; 2026-09-12)
+
+Not a generation-path change for the study: every study run selects the
+same manifest it always did, and the three context blocks the API path
+sends (source ranking, declared naming, declared scope) render
+byte-identically for all five projects before and after (checked by
+rendering both and comparing). What moved is where the affiliation phrase
+in the naming block lives — `naming.<P>.programme` in the manifest, which
+now reads `the Bridge2AI <gc_name>` for the four GCs, where the code used
+to write "the Bridge2AI" itself — and what happens for a dataset the study
+does not declare: no study context is sent, and the record's
+`inputs.source_manifest` says no manifest was selected instead of naming
+the study's file with its hash. Records made before this attest the
+study's manifest on every verified bundle, including bundles whose source
+context it did not describe. Existing records retain their original
+attestations; none is rewritten by this change. **One study-side change**: the crate-only and
+healthsheet arms, whose headers have always said "Source manifest: not
+used", attested the study manifest's path and md5 anyway (the July 31
+CHORUS crate-only and AI_READI healthsheet records do). A re-record of
+such a run now writes `path: null` with the basis "the arm's header
+declares it unused"; the existing records are left as they are, and the
+difference is a statement about the recorder, not about what those runs
+read. The chunk-manifest identity for bundles
+outside the study directory is new (`<stem>_chunks.yaml` beside the
+bundle); the study's twelve manifests keep their paths and bytes.
+
 ### What a v9 arm can and cannot be compared against (#1072)
 
 `condition_delta("generic_v8", "generic_v9")` returns `["base"]`, and that

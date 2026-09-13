@@ -75,7 +75,9 @@ class TestUtilsCLI(unittest.TestCase):
                 str(self.test_path / "raw"),
                 "--preprocessed-dir",
                 str(self.test_path / "preprocessed"),
-                "--project",
+                "--manifest",
+                "data/preprocessed/source_manifest.yaml",
+                "--projects",
                 "CM4AI",
             ]],
         )

@@ -4,9 +4,11 @@ Commands for evaluating D4D datasheet quality.
 """
 
 import click
+
+from data_sheets_schema.registry import project_choice
 import sys
 from pathlib import Path
-from data_sheets_schema.constants import PROJECTS, METHODS, RUBRIC_TYPES
+from data_sheets_schema.constants import METHODS, RUBRIC_TYPES
 from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
 
 @click.group()
@@ -103,7 +105,7 @@ def verifiable_cmd(project, method, labels, show):
 
 
 @evaluate.command()
-@click.option('--project', type=click.Choice(PROJECTS),
+@click.option('--project', callback=project_choice,
               help='Evaluate specific project only (default: all)')
 @click.option('--method', type=click.Choice(METHODS), default='gpt5',
               help='Method to evaluate')
@@ -142,7 +144,7 @@ def presence(project, method, output_dir):
 @evaluate.command()
 @click.option('--file', type=click.Path(exists=True), required=True,
               help='D4D YAML file to evaluate')
-@click.option('--project', type=click.Choice(PROJECTS), required=True,
+@click.option('--project', callback=project_choice, required=True,
               help='Project name')
 @click.option('--method', type=click.Choice(METHODS), required=True,
               help='Generation method')

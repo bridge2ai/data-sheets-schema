@@ -152,7 +152,7 @@ def chunk_texts(text: str, chunks: list[dict[str, Any]]) -> list[str]:
 
 
 def build_manifest(bundle: Path, rule: dict[str, Any] | None = None) -> dict[str, Any]:
-    return manifest_from_bytes(bundle.read_bytes(), bundle.name, rule)
+    return manifest_from_bytes(bundle.read_bytes(), canonical_name(bundle), rule)
 
 
 def manifest_from_bytes(raw: bytes, name: str, rule: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -180,28 +180,101 @@ def manifest_from_bytes(raw: bytes, name: str, rule: dict[str, Any] | None = Non
 def manifest_path(project: str, chunks_dir: Path | None = None) -> Path:
     """The document bundle's manifest: `{PROJECT}_chunks.yaml`."""
     # Resolved at call time so a test (or a caller) can repoint the module dirs.
-    return (chunks_dir or CHUNKS_DIR) / f"{project}_chunks.yaml"
+    return (chunks_dir if chunks_dir is not None else anchored(CHUNKS_DIR)) / f"{project}_chunks.yaml"
+
+
+#: The repository this package is checked out in — the root `CONCAT_DIR`
+#: is relative to. Resolved from the package, not the working directory, so
+#: a study bundle named by absolute path is a study bundle from anywhere
+#: (#1367 review, must-fix 7).
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def anchored(d: Path) -> Path:
+    """A repository-owned relative directory as a path that is correct from
+    any working directory: as written from the repository root — so the
+    paths a record carries stay relative and portable (`inputs.chunks.path`
+    is `data/preprocessed/chunks/…` on every record) — and anchored to the
+    checkout from anywhere else (#1367 round 2, #1388)."""
+    d = Path(d)
+    if d.is_absolute():
+        return d
+    try:
+        if Path.cwd().resolve() == REPO_ROOT:
+            return d
+    except OSError:
+        pass
+    return REPO_ROOT / d
+
+
+def _study_dir() -> Path:
+    return anchored(CONCAT_DIR).resolve()
+
+
+def canonical_name(bundle: Path) -> str:
+    """The basename a manifest records for `bundle`: a study bundle's own,
+    through any symlink; any other bundle's as given. The name in the
+    payload and the destination of the file are decided together, so an
+    alias never writes the canonical manifest under a different `bundle:`
+    (#1367 round 2, #1389)."""
+    bundle = Path(bundle)
+    if _under_concat_dir(bundle):
+        try:
+            return bundle.resolve().name
+        except OSError:
+            return bundle.name
+    return bundle.name
+
+
+def _under_concat_dir(bundle: Path) -> bool:
+    """Whether `bundle` is one of the study's bundles: a file under
+    `CONCAT_DIR`, both resolved — so a symlink into the study directory is
+    a study bundle, and a path spelled relative to another working
+    directory is not mistaken for one."""
+    try:
+        return Path(bundle).resolve().parent == _study_dir()
+    except OSError:
+        return False
 
 
 def manifest_for(bundle: Path, chunks_dir: Path | None = None) -> Path:
-    """The manifest for any bundle kind (#725): the document bundle keeps
-    `{PROJECT}_chunks.yaml`; every other kind is `{bundle stem}_chunks.yaml`
-    (`CHORUS_crate_only_chunks.yaml`). Two bundles never share a manifest."""
-    name = bundle.name
+    """The manifest for any bundle kind (#725).
+
+    A study bundle — one under `CONCAT_DIR`, or any bundle when the caller
+    names a `chunks_dir` — keeps the frozen layout: the document bundle is
+    `{PROJECT}_chunks.yaml` and every other kind `{bundle stem}_chunks.yaml`
+    (`CHORUS_crate_only_chunks.yaml`) under the chunks directory.
+
+    Any other bundle gets a sidecar beside itself, `{bundle stem}_chunks.yaml`
+    in the bundle's own directory (#1299). Keyed by basename alone, two
+    external bundles named `dataset.txt` in different directories shared one
+    manifest under the study layout, so the second chunking silently replaced
+    the first's — and a receipt validated against the wrong bytes. Beside the
+    bundle, the manifest's identity is the bundle's, and the manifest still
+    names the bundle by basename, so its bytes are the same wherever the
+    bundle was read from (#713).
+    """
+    bundle = Path(bundle)
+    if chunks_dir is None and not _under_concat_dir(bundle):
+        stem = bundle.name[:-4] if bundle.name.endswith(".txt") else bundle.name
+        return bundle.parent / f"{stem}_chunks.yaml"
+    # A study bundle is named by what it resolves to: a symlink's alias is
+    # not a second identity for the same bytes.
+    name = canonical_name(bundle) if chunks_dir is None else bundle.name
+    stem = name[:-4] if name.endswith(".txt") else name
     if name.endswith("_preprocessed.txt"):
         return manifest_path(name[: -len("_preprocessed.txt")], chunks_dir)
-    stem = name[:-4] if name.endswith(".txt") else name
-    return (chunks_dir or CHUNKS_DIR) / f"{stem}_chunks.yaml"
+    return (chunks_dir if chunks_dir is not None else anchored(CHUNKS_DIR)) / f"{stem}_chunks.yaml"
 
 
 def bundle_path(project: str, concat_dir: Path | None = None) -> Path:
-    return (concat_dir or CONCAT_DIR) / f"{project}_preprocessed.txt"
+    return (concat_dir if concat_dir is not None else anchored(CONCAT_DIR)) / f"{project}_preprocessed.txt"
 
 
 def project_bundles(project: str, concat_dir: Path | None = None) -> list[Path]:
     """Every bundle of a known kind that exists for the project, document
     bundle first."""
-    base = concat_dir or CONCAT_DIR
+    base = concat_dir if concat_dir is not None else anchored(CONCAT_DIR)
     return [p for s in BUNDLE_SUFFIXES if (p := base / f"{project}{s}").exists()]
 
 
@@ -230,6 +303,28 @@ def write_manifest(project: str, rule: dict[str, Any] | None = None,
 def load_manifest(path: Path) -> dict[str, Any]:
     import yaml
     return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
+def validate_manifest_mapping(manifest: dict[str, Any], raw: bytes, name: str) -> None:
+    """A receipt procedure may only send deterministic chunk IDs (#1404)."""
+    if not isinstance(manifest, dict) or not isinstance(manifest.get("rule"), dict):
+        raise ValueError("chunk manifest must declare a chunking rule")
+    rule = manifest["rule"]
+    for key, value in DEFAULT_RULE.items():
+        selected = rule.get(key)
+        if key in ("max_lines", "max_bytes"):
+            if type(selected) is not int or selected < 1:
+                raise ValueError(f"chunk rule {key} must be a positive integer")
+        elif key == "version":
+            if selected not in (2, "2-custom") or isinstance(selected, bool):
+                raise ValueError(f"unsupported chunk rule {key}: {selected!r}")
+        elif selected != value:
+            raise ValueError(f"unsupported chunk rule {key}: {selected!r}")
+    if set(rule) != set(DEFAULT_RULE):
+        raise ValueError("unsupported chunk rule fields")
+    expected = manifest_from_bytes(raw, name, rule)
+    if manifest != expected:
+        raise ValueError("chunk manifest does not reproduce canonical chunk identities under its recorded rule")
 
 
 def file_sha256(path: Path) -> str:
@@ -281,7 +376,8 @@ def manifest_status_for(bundle: Path, chunks_dir: Path | None = None) -> tuple[s
 
 
 def chunks_input(bundle: Path | None, bundle_md5: str | None,
-                 chunks_dir: Path | None = None) -> dict[str, Any] | None:
+                 chunks_dir: Path | None = None,
+                 manifest: Path | None = None) -> dict[str, Any] | None:
     """What a provenance record should carry under `inputs.chunks`.
 
     Returned only when a manifest exists for this bundle *and* it was built
@@ -292,14 +388,20 @@ def chunks_input(bundle: Path | None, bundle_md5: str | None,
     """
     if bundle is None or bundle_md5 is None:
         return None
-    path = manifest_for(bundle, chunks_dir)
+    # An explicitly selected manifest wins over discovery (#1299): the run
+    # that chunked an external bundle knows where it put the manifest.
+    path = Path(manifest) if manifest is not None else manifest_for(bundle, chunks_dir)
     if not path.exists():
         return None
     try:
-        m = load_manifest(path)
+        import yaml
+        manifest_bytes = path.read_bytes()
+        m = yaml.safe_load(manifest_bytes)
         if not isinstance(m, dict) or m.get("bundle_md5") != bundle_md5:
             return None
-        return {"path": str(path), "sha256": file_sha256(path),
+        validate_manifest_mapping(m, bundle.read_bytes(), canonical_name(bundle))
+        return {"path": str(path), "sha256": hashlib.sha256(manifest_bytes).hexdigest(),
+                "bundle_name": m["bundle"],
                 "rule": m.get("rule"), "chunk_count": m.get("chunk_count")}
     except Exception:                                               # noqa: BLE001
         # A broken manifest must not abort a live provenance record (#715);
