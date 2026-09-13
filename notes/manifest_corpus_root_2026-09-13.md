@@ -336,3 +336,18 @@ All 60 historical renderer controls still match on the combined implementation,
 and the read-only audit verifies 56 registered ratings, 259 earlier evaluations
 and all 450 preservation hashes. No production records, scores or source bundles
 were changed. Round-16 review and exact-head CI remain the merge gates.
+
+## Review round 17 — 2026-09-13
+
+Round 16 confirmed bundle-drift ownership and reconstruction, then found
+#1754: a nested archived manifest could make chunk lookup choose a different
+owner from registry lookup. The conventional default spelling now uses the
+same discovery rule in both readers, even when a copied relative file exists.
+Explicit absolute selections retain their recorded owner.
+
+Two regressions failed before correction and two explicit-selection controls
+passed. All 34 archived-copy, corpus-root, emitted-preflight and chunking checks
+pass afterward, including both valid and stale selected bundles. The source
+pin is refreshed. This corrects path resolution without changing chunk rules,
+instructions or measurements; no production generation, scoring or download
+ran. Independent round-17 review and updated exact-head CI follow.

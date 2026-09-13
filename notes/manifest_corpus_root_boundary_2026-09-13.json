@@ -8,7 +8,7 @@
     "src/data_sheets_schema/cli/provenance.py": "1bce101b159193608591937d081329029cde5a4fa983392de9ce0b06419d5f72",
     "src/data_sheets_schema/cli/receipts.py": "4134a1e383fd4fd4775de172824f1c142e3ed7ed1a9ecef2511887d572222d6f",
     "src/data_sheets_schema/cli/runs.py": "a5e4570ffaa43f88d326b5669631ad875438bab010c59297c9795fa6d9563d14",
-    "src/data_sheets_schema/corpus.py": "056034a783b3e304252ab81a094f3d8e9d99eb3e2b7db00ec73c67b989491c95",
+    "src/data_sheets_schema/corpus.py": "16b90dc728960a0d001f98a45bf250906aeae51885aee7a52b7226324f5e2089",
     "src/data_sheets_schema/profiles.py": "55524c2ede59dbd320ef2646ae0aa4018076030944a9ced1b4f0dc7bc4d9faaf",
     "src/data_sheets_schema/provenance.py": "f8d61b2495ce1c54c392df81f22da002c0257ebc5672564ab4190f0098498917",
     "src/data_sheets_schema/receipts.py": "033179c2e51f88d2e048281a08a7f0b8a738bf6d74385355cb094b320cac7f44",
@@ -63,7 +63,8 @@
     1738,
     1746,
     1750,
-    1753
+    1753,
+    1754
   ],
   "new_spec_chunk_check_uses_manifest": true,
   "preservation_sha256": "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f",
