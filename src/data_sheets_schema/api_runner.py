@@ -902,7 +902,9 @@ def agentic_selected_inputs(spec: RunSpec) -> str:
         )
     text += (
         "Before Phase 2, use this exact receipt check, then repeat it with --write after provenance recording:\n\n"
-        + command(*(["--manifest", spec.manifest] if spec.manifest_used else []),
+        + command(*(["--manifest", spec.manifest if spec.manifest is not None else "none"]
+                    if spec.render_version >= 5 else
+                    ["--manifest", spec.manifest] if spec.manifest_used else []),
                   "receipts", "check", "--method", spec.method, "--label", spec.label,
                   "--project", spec.project, "--bundle", spec.bundle,
                   "--chunk-manifest", spec.chunk_manifest, "--strict") + "\n\n"
@@ -998,7 +1000,7 @@ def resolve_prompt(spec: RunSpec) -> str:
         body = head + marker + tail
         body += "\n\n## Authoritative output destinations (renderer v5)\n\n"
         body += "Use these destinations in every phase and every playbook command:\n\n"
-        body += "\n".join(f"- {key}: `{value}`" for key, value in paths.items()) + "\n"
+        body += "\n".join(f"- {key}: `{paths[key]}`" for key in ("full", "core", "receipt", "report")) + "\n"
 
     # v1 hardcodes `# Generated: 2026-07-28` where every neighbouring header
     # line takes a placeholder, so every record produced under it since that

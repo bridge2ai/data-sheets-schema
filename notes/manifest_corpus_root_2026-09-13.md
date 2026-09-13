@@ -62,3 +62,23 @@ same controls. No new production generation, scoring or source downloads.
 
 The additional context/profile/rendering lane passes 70 tests. A fresh-wheel
 check of global CLI/environment selection is running on the same source.
+
+## Review round 3 — 2026-09-13
+
+The four round-2 findings are #1602–#1605. Artifact verification and validation
+preservation now follow the provenance record's own corpus, including an
+explicit corpus that differs from the launch directory's ancestor manifest.
+The strict provenance gate uses the same owner. Explicit no-manifest recording
+keeps caller outputs; a context-unused arm's CLI recorder passes its selected
+output tree independently of whether manifest context was consumed. Renderer 5
+receipt commands always bind that selection, including explicit none. Backfill
+uses recorded output destinations and canonical ordering, still requiring the
+complete original request SHA256 before writing.
+
+Nine synthetic cases reproduce these faults at the reviewed head; the final
+eleven targeted checks pass. The broader provenance lane passes 171 checks
+before the last backfill ordering fix, and that corrected recovery passes in
+the final targeted lane. The selected generation/replay lane passes 62 checks.
+All 48 historical renderer 1–4 controls remain byte-identical. All seven
+fresh-wheel acceptance checks pass (107.19 seconds). No production
+record, rating, instrument attribution or source bundle was modified.

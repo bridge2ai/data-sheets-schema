@@ -417,6 +417,9 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             manifest_basis = f"the arm's header declares the source manifest unused ({run_spec.manifest_line})"
 
     rec = build_record(project, method, label, mode="live",
+                       # The selected manifest owns outputs even when this
+                       # arm consumes none of its context blocks.
+                       concat_dir=_corpus_path(_CD).absolute(),
                        input_bundle=Path(input_bundle) if input_bundle else None,
                        input_verified=True,
                        prompt_paths=[Path(p) for p in prompts] or None,
@@ -530,6 +533,14 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     # A discovered sidecar is attested as an input too. Only an explicit
     # selection belongs in the rendered recording command (#1408).
     chunk_choices = (None, Path(chunks)) if chunks else (None,)
+    outputs = data.get("outputs") or {}
+    destinations = {key: value["path"] for key, value in outputs.items()
+                    if key in {"full", "core", "report"} and isinstance(value, dict)
+                    and isinstance(value.get("path"), str) and value["path"]}
+    if set(destinations) == {"full", "core", "report"}:
+        destinations["receipt"] = str(Path(destinations["report"]).parent / f"{project}_coverage_receipt.yaml")
+    else:
+        destinations = None
     for delta, render_version, selected_chunks, selected_manifest in product(
             (0, -1, 1, -2, 2), (5, 4, 3, 2, 1), chunk_choices, manifest_choices):
         spec = RunSpec.from_render_spec({
@@ -538,6 +549,8 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
             "manifest": str(selected_manifest) if selected_manifest is not None else None,
             "manifest_line": RunSpec.header_for_manifest(selected_manifest),
             "render_version": render_version,
+            **({"agentic_artifact_paths": destinations} if destinations is not None
+               and render_version >= 5 and runtime in {"Claude Code", "Codex CLI"} else {}),
             "chunk_manifest": str(selected_chunks) if selected_chunks is not None else None,
             "run_date": (base + timedelta(days=delta)).isoformat(),
         }, project=project, method=method, label=label)
@@ -729,7 +742,7 @@ def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bo
         # hash, as `provenance.verify_entry` does.
         from data_sheets_schema.provenance import verify_entry
         drifted = [k for k, v in (prior.get("artifacts") or {}).items()
-                   if isinstance(v, dict) and verify_entry(v) is False]
+                   if isinstance(v, dict) and verify_entry(v, record=path) is False]
         moved = ("verdict" if not same_verdict else "artifacts" if drifted
                  else "problems" if _problem_shape(prior) != _problem_shape(block) else None)
         if moved:

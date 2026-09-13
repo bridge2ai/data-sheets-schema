@@ -819,7 +819,26 @@ def hash_file(path: Path, algorithm: str = HASH_ALGORITHM) -> str | None:
     return _sha256(path) if algorithm == "sha256" else _md5(path)
 
 
-def verify_entry(entry: dict[str, Any]) -> bool | None:
+def artifact_root(record: Path) -> Path:
+    """Resolve relative artifact pins from their record's tree, not an ambient one.
+
+    Conventional records carry a stable ``data/d4d_concatenated`` owner.
+    Flat records use their own ancestor manifest, or their directory when
+    addressed absolutely; a caller-relative flat record retains caller paths.
+    """
+    record = Path(record)
+    absolute = record.absolute()
+    for parent in absolute.parents:
+        if parent.parts[-2:] == ("data", "d4d_concatenated"):
+            return parent.parent.parent
+    from data_sheets_schema.corpus import DEFAULT_MANIFEST
+    for parent in absolute.parents:
+        if (parent / DEFAULT_MANIFEST).is_file():
+            return parent
+    return absolute.parent if record.is_absolute() else Path.cwd()
+
+
+def verify_entry(entry: dict[str, Any], *, record: Path | None = None) -> bool | None:
     """Does the file still hash to what the entry recorded? None if unknowable."""
     got = recorded_hash(entry)
     path = entry.get("path")
@@ -827,7 +846,12 @@ def verify_entry(entry: dict[str, Any]) -> bool | None:
         return None
     from data_sheets_schema.corpus import anchored
     from data_sheets_schema.resources import is_resource, resource_path
-    resolved = resource_path(path) if is_resource(path) else anchored(Path(path))
+    if is_resource(path):
+        resolved = resource_path(path)
+    elif record is not None:
+        resolved = artifact_root(record) / Path(path)
+    else:
+        resolved = anchored(Path(path))
     if not resolved.exists():
         return None
     algo, value = got
@@ -881,7 +905,7 @@ def preservable_validation(path: Path,
         # A verdict with nothing to re-hash cannot be shown still true.
         return None
     for entry in artifacts.values():
-        if not isinstance(entry, dict) or verify_entry(entry) is not True:
+        if not isinstance(entry, dict) or verify_entry(entry, record=path) is not True:
             return None
 
     # Same record, same bytes, different schema is a different question.
@@ -1318,7 +1342,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     # class as the declared-bundle defect: a path assumed rather than derived
     # from the spec that already knew it (#604).
     from data_sheets_schema.corpus import root, relative_to_root
-    owner = root(manifest) if manifest is not AUTO and manifest is not None else root()
+    owner = root() if manifest is AUTO else root(manifest)
     if concat_dir == CONCAT_DIR:
         concat_dir = relative_to_root(concat_dir, owner)
     base = method[:-5] if method.endswith("_core") else method
