@@ -29,7 +29,12 @@ required universally.
 For every item, include `applicable`, `max_score`, and `unit_scores`.
 Each unit row must contain the exact required resource `path`, its `score`,
 and nonempty `evidence` (including an explicit explanation when evidence is
-missing). Assess every terminal resource, including nested collections.
+missing). Assess precisely the dataset units named in the supplied contract.
+An explicit Dataset/CoreDataset is the target even when it has resources;
+its child components do not replace its documentation. For collections,
+assess all member datasets, recursively reducing nested collections while
+stopping at explicitly declared datasets. Component assessments require
+separately selected inputs. Paths refer to the unwrapped evaluation document.
 Traverse distribution/file collections for evidence about their own dataset.
 Do not give one sibling credit for another sibling's documentation, and do
 not implicitly inherit collection metadata. For an applicable item, its

@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -96,6 +97,22 @@ def applicability(rule: Any, context: dict[str, dict]) -> Applicability:
     return Applicability(value, f"{operator}: " + "; ".join(d.evidence for d in decisions))
 
 
+class _ClassDocument(dict):
+    """Keep a wrapper's class without adding fields to the supplied content."""
+
+    def __init__(self, data: dict, class_name: str):
+        super().__init__(data)
+        self.class_name = class_name
+
+
+def declared_class(data: dict) -> str | None:
+    if isinstance(data, _ClassDocument):
+        return data.class_name
+    match = re.search(r"(?:^|[/#:])(CoreDataset(?:Collection)?|Dataset(?:Collection)?)$",
+                      str(data.get("conforms_to_class", "")))
+    return match.group(1) if match else None
+
+
 def unwrap_document(data: Any) -> dict:
     if not isinstance(data, dict):
         raise ValueError("a D4D evaluation input must be a mapping")
@@ -109,6 +126,7 @@ def unwrap_document(data: Any) -> dict:
             raise ValueError("a D4D class wrapper must contain a mapping")
         if wrapper.endswith("Collection") and not data.get("resources"):
             raise ValueError("a D4D collection must contain resource datasets")
+        return _ClassDocument(data, wrapper)
     return data
 
 
@@ -118,10 +136,19 @@ def load_document(path: Path) -> tuple[dict, str]:
 
 
 def dataset_units(data: dict, prefix: str = "#") -> list[tuple[str, dict]]:
-    """Every terminal dataset, retaining paths and never inheriting a sibling."""
+    """Keep explicit datasets; reduce collections to their member datasets.
+
+    A Dataset's resources are its components, not replacements for the dataset
+    the caller asked to score. Undeclared resource containers retain the legacy
+    collection interpretation. Validate every child even when scoring its parent.
+    """
+    data = unwrap_document(data)
+    kind = declared_class(data)
     # Dataset.resources is optional. Empty/null means this dataset has no
     # children; an explicit empty Collection was already refused by unwrap.
     if "resources" not in data or data["resources"] is None or data["resources"] == []:
+        if kind in {"DatasetCollection", "CoreDatasetCollection"}:
+            raise ValueError(f"{prefix}/resources must contain resource datasets")
         return [(prefix, data)]
     resources = data["resources"]
     if not isinstance(resources, list) or not resources:
@@ -131,7 +158,7 @@ def dataset_units(data: dict, prefix: str = "#") -> list[tuple[str, dict]]:
         if not isinstance(child, dict):
             raise ValueError(f"{prefix}/resources/{index} is not a dataset mapping")
         units.extend(dataset_units(unwrap_document(child), f"{prefix}/resources/{index}"))
-    return units
+    return [(prefix, data)] if kind in {"Dataset", "CoreDataset"} else units
 
 
 # These are representations of the same dataset/distribution properties in

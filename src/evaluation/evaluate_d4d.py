@@ -109,7 +109,7 @@ def validate_d4d_yaml(file_path: Path, method: str = "") -> bool:
         if wrappers:
             tmp_file = tempfile.NamedTemporaryFile(
                 mode="w", suffix=".yaml", delete=False, encoding="utf-8")
-            yaml.safe_dump(document, tmp_file)
+            yaml.safe_dump(dict(document), tmp_file)
             tmp_file.close()
             validate_path = Path(tmp_file.name)
     except (ValueError, OSError, yaml.YAMLError) as exc:

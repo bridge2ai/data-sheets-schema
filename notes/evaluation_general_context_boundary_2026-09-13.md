@@ -41,8 +41,12 @@ percentage. Fixed and adjusted percentages and excluded-item identities are
 reported separately. Equivalent biomedical/clinical governance frameworks
 satisfy the same scope; study affiliation earns no credit.
 
-All terminal collection resources are assessed, including nested resources;
-distribution evidence belongs to its dataset. Collection metadata is not
+Explicit Dataset/CoreDataset inputs remain scoring targets even when they
+have resources. Collection inputs are reduced to member datasets, recursively
+reducing nested collections but stopping at explicitly declared datasets.
+Undeclared resource containers retain the collection interpretation. Components
+require separately selected assessments; distribution evidence belongs to its
+dataset. Collection metadata is not
 implicitly inherited, and siblings cannot fill each other's gaps. Per-item
 collection scores are the minimum across all resource scores, under
 minimum_per_item_across_all_resource_datasets_v1. Every item retains resource
@@ -65,10 +69,10 @@ instrument digest and the actual expanded API system-prompt digests.
 
 | Agent definition | SHA256 |
 |---|---|
-| `d4d-rubric10.md` | `031118e9121ade1c7fad246663ccf24eb02fb5d383ed426971b448912e48a5f7` |
-| `d4d-rubric20.md` | `2b11d1b903a07bac5f2cd23f639b36dd05a3f6ad4554df9effc83abdfbadc31b` |
-| `d4d-rubric10-semantic.md` | `71ea72d9dfc36a3a9f34071ac8e692e338ca7c07f2f166c10bd2da28197c6a6b` |
-| `d4d-rubric20-semantic.md` | `1d2598f750bf3183d8ecaee62396035d5a2e1193039d2f1ec6cbfda32dcd06a2` |
+| `d4d-rubric10.md` | `c7cb23b3693ce9813534214a1da4611dac2f87cb51392204bd826ea26e1562e5` |
+| `d4d-rubric20.md` | `6b7aeff1d7c2dc827710162129991d5466e63eb12df218ef47347b228ec87b50` |
+| `d4d-rubric10-semantic.md` | `d78cb66cd01f4114cc2f2d3b8bf6af486682573b6529617f9a024de554239c8f` |
+| `d4d-rubric20-semantic.md` | `484c28271b42037b9e18030768a3d0213e49c4f2d7ca3513c5196cb493f278f9` |
 
 The earlier completed CBORG condition remains bound to its original schemas,
 rubrics, definitions and helper bytes by merged PR #1396. Its read-only audit
@@ -111,3 +115,16 @@ the adjacent JSON. The focused suite passes 213 tests and the broader evaluation
 lane 658; the completed-condition audit verifies 56 accepted ratings and 450
 preservation hashes. See `reviews/pr_1449_round4_2026-09-13.md` for the independent
 reproductions and final CI compatibility checks. No new measurement is run.
+
+## Independent review correction in round 5
+
+#1539 preserves explicit Dataset/CoreDataset identity across class unwrapping
+and the shared scoring scope. Presence scores, actual fake-client API requests
+and both semantic-output gates now agree on parent datasets versus collection
+members. No content field is added to carry wrapper identity, and malformed
+components and empty collections still fail. All four agent definitions and
+both API prompts state this distinction. The preceding code reproduces eleven
+failures with eleven passing controls. The focused lane passes 305 tests and
+the broader evaluation/CLI lane passes 694. The read-only completed-condition
+audit still verifies all 56 accepted ratings and 450 preservation hashes.
+Inventory refresh and exact-head CI/review follow the source commit.
