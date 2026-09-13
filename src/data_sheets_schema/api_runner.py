@@ -43,7 +43,7 @@ from typing import Any
 import yaml
 
 from data_sheets_schema import provenance, reasoning, schema_digest
-from data_sheets_schema.registry import DEFAULT_MANIFEST
+from data_sheets_schema.registry import AUTO, DEFAULT_MANIFEST, select_manifest
 from data_sheets_schema.usage_ledger import (
     UsageLedgerError,
     append_usage as _append_usage,
@@ -460,7 +460,11 @@ class RunSpec:
     # dataset declared elsewhere, None for an explicit external bundle with
     # no declaration (#621, #623). `manifest_line` is the header the model
     # sees; `__post_init__` derives it from here unless an arm set its own.
-    manifest: Path | None = DEFAULT_MANIFEST
+    # `AUTO` — the constructor did not choose — is resolved by
+    # `registry.select_manifest` in `__post_init__`, so a spec built
+    # directly is under the same rule as one the CLI builds (#1367 review,
+    # must-fix 2).
+    manifest: Path | None | object = AUTO
     # The chunk manifest the run was given explicitly, when it is not the
     # one discovered beside the bundle (#1299). None means discover.
     chunk_manifest: Path | None = None
@@ -490,6 +494,8 @@ class RunSpec:
 
     def __post_init__(self):
         default_line = type(self).__dataclass_fields__["manifest_line"].default
+        if self.manifest is AUTO:
+            self.manifest = select_manifest(self.project, self.bundle)
         if self.manifest is not None:
             self.manifest = Path(self.manifest)
         if self.chunk_manifest is not None:
@@ -650,11 +656,15 @@ def context_blocks(spec: "RunSpec") -> dict[str, Any]:
     rule refers to a declaration it never received says so in its own record.
     """
     out: dict[str, Any] = {}
+    # A spec that predates the field (a reconstructed one, a duck-typed one
+    # in a test) consulted the study's manifest, which is what the default
+    # says.
+    manifest = getattr(spec, "manifest", DEFAULT_MANIFEST)
     for name, fn in (("source_ranking", source_ranking_block),
                      ("declared_naming", naming_block),
                      ("declared_scope", scope_block)):
         try:
-            text = fn(spec.project, spec.manifest_line, manifest=spec.manifest)
+            text = fn(spec.project, spec.manifest_line, manifest=manifest)
         except Exception:                                      # noqa: BLE001
             out[name] = {"sent": False, "basis": "renderer raised"}
             continue
@@ -662,7 +672,7 @@ def context_blocks(spec: "RunSpec") -> dict[str, Any]:
                      if text else
                      {"sent": False,
                       "basis": ("no manifest was selected for this run"
-                                if spec.manifest is None else
+                                if manifest is None else
                                 "arm declares the manifest unused"
                                 if spec.manifest_line
                                 and "not used" in spec.manifest_line.lower()
@@ -1302,9 +1312,15 @@ def _receipts_block(spec: RunSpec, record: dict[str, Any]) -> dict[str, Any]:
     and form on a resumed batch (#599), never read back from the record."""
     from data_sheets_schema.receipts import block_for
     inputs = record.get("inputs") or {}
+    chunks = inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None
+    # The manifest the run sent — recorded under `inputs.chunks.path` — is
+    # the one the receipt is judged against, never a rediscovered sidecar
+    # (#1367 review, must-fix 6).
     return block_for(spec.full_path, _receipt_path(spec), spec.bundle,
                      inputs.get("bundle_md5"),
                      spec.condition in RECEIPT_CONDITIONS,
+                     manifest=(Path(chunks["path"]) if chunks and chunks.get("path")
+                               else spec.chunk_manifest),
                      bundle_rel_path=inputs.get("bundle_path"),
                      record_bundle_sha256=inputs.get("bundle_sha256"),
                      record_chunks=inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None)
@@ -1386,20 +1402,20 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     # A breakpoint caches the whole prefix up to it, so one at the end of the
     # group caches all three together — fewer breakpoints, longer prefix,
     # identical content.
-    ranking = source_ranking_block(spec.project, spec.manifest_line)
+    ranking = source_ranking_block(spec.project, spec.manifest_line, manifest=spec.manifest)
     if ranking:
         cached.append({"type": "text", "text": ranking})
     # The declared naming, for the same reason and with the same manifest-not-
     # used exemption (#668): the label standard lives in the manifest, and a
     # rule the API path never received would be one condition with two
     # behaviours.
-    naming = naming_block(spec.project, spec.manifest_line)
+    naming = naming_block(spec.project, spec.manifest_line, manifest=spec.manifest)
     if naming:
         cached.append({"type": "text", "text": naming})
     # The declared scope, same source and same exemption (#932): the rules
     # already tell the model what to do with a passage about another dataset,
     # and until now nothing told it which datasets those are.
-    scope = scope_block(spec.project, spec.manifest_line)
+    scope = scope_block(spec.project, spec.manifest_line, manifest=spec.manifest)
     if scope:
         cached.append({"type": "text", "text": scope})
     # The group's single breakpoint. `cached[-1]` is the bundle when none of
@@ -4803,8 +4819,10 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         condition_mismatch_allowed=spec.condition_mismatch_allowed,
         input_bundle=spec.bundle, input_verified=True,
         # The manifest this run consulted, or none: never the study's by
-        # default for a bundle it did not declare (#621, #1299).
-        manifest=spec.manifest, chunk_manifest=spec.chunk_manifest,
+        # default for a bundle it did not declare, and none for an arm whose
+        # header declares the manifest unused (#621, #1299).
+        manifest=spec.manifest if spec.manifest_used else None,
+        chunk_manifest=spec.chunk_manifest,
         prompt_paths=spec.prompt_files,
         # The API path builds its instruction with `resolve_prompt`, so it can
         # record exactly what it sent rather than only what it was built from

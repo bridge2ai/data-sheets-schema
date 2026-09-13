@@ -874,8 +874,11 @@ class Playbook(unittest.TestCase):
                                                  + yaml.safe_dump(FULL), encoding="utf-8")
             (core / "P_coverage_receipt.yaml").write_text(yaml.safe_dump(_receipt(hashlib.md5(BUNDLE.encode()).hexdigest())))
             from data_sheets_schema import chunking
-            old = pv.CONCAT_DIR, chunking.CHUNKS_DIR
-            pv.CONCAT_DIR, chunking.CHUNKS_DIR = tmp / "concat", tmp / "chunks"
+            old = pv.CONCAT_DIR, chunking.CHUNKS_DIR, chunking.CONCAT_DIR
+            # The study layout: the bundle under the concatenation directory,
+            # its manifest under the chunks directory (#1299 keeps a sidecar
+            # only for bundles outside it).
+            pv.CONCAT_DIR, chunking.CHUNKS_DIR, chunking.CONCAT_DIR = tmp / "concat", tmp / "chunks", tmp
             try:
                 # --project is a closed choice, so the command's record-less
                 # path is exercised through the same calls it makes
@@ -888,7 +891,7 @@ class Playbook(unittest.TestCase):
                                      pv._md5(bundle), True)
                 self.assertTrue(block["checked"]); self.assertEqual(block["findings"], [])
             finally:
-                pv.CONCAT_DIR, chunking.CHUNKS_DIR = old
+                pv.CONCAT_DIR, chunking.CHUNKS_DIR, chunking.CONCAT_DIR = old
 
     def test_the_record_step_passes_receipt_expected_and_names_the_receipt_artifact(self):
         self.assertIn("--receipt-expected", self.TEXT)

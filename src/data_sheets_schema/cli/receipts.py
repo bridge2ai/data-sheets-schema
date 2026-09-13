@@ -81,6 +81,9 @@ def check(method, label, project, write, strict, bundle_opt):
         click.echo(f"   · no provenance record yet; checking against {bundle} as on disk")
     # The same recovery the backfill makes (#1140, #1187 review M2): the gate
     # on attestation must not say "unchecked" of a record the backfill checked.
+    chunks = recovery.get("record_chunks") if isinstance(recovery.get("record_chunks"), dict) else None
+    if chunks and chunks.get("path") and "manifest" not in recovery:
+        recovery["manifest"] = Path(chunks["path"])           # the manifest the run sent (#1367 review, must-fix 6)
     block = rc.block_for(p["full"], rc.receipt_path(p["core_dir"], project), bundle, md5, expected, **recovery)
     if not block.get("checked"):
         click.echo(f"   · unchecked: {block['reason']}"

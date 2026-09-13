@@ -13,6 +13,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
 import socket
 import tempfile
 import unittest
@@ -47,8 +48,10 @@ def _manifest(tmp: Path, *, raw_dir: Path, bundle: Path | None = None) -> Path:
                 ],
             },
             # The legacy override key beside the projects is metadata, not a
-            # project (#626).
-            "EXTERNAL_CLINICAL_source_dir": str(tmp / "nowhere"),
+            # project (#626). Named for a project this manifest does not
+            # declare, so it proves only that: a `<P>_source_dir` for a
+            # declared P would say P's files live elsewhere.
+            "ANOTHER_COHORT_source_dir": str(tmp / "nowhere"),
         },
     }
     p = tmp / "manifest.yaml"
@@ -66,6 +69,7 @@ class _Offline(unittest.TestCase):
                                  side_effect=AssertionError("network refused in this test"))
         self._net.start()
         self.tmp = Path(tempfile.mkdtemp(prefix="d4d-external-"))
+        self.addCleanup(shutil.rmtree, self.tmp, True)      # nothing leaks (#1367 review, should-fix 2)
         self.raw = self.tmp / "docs"
         self.raw.mkdir()
         (self.raw / "overview.txt").write_text(
@@ -96,6 +100,18 @@ class TestTheRegistry(_Offline):
         reg = load_registry(STUDY_MANIFEST)
         self.assertEqual(reg.projects(), ["AI_READI", "CHORUS", "CM4AI", "VOICE", "VOICE_PEDIATRIC"])
         self.assertEqual(reg.source_dir("VOICE_PEDIATRIC"), Path("data/preprocessed/individual/VOICE"))
+
+    def test_a_project_whose_files_are_another_projects_is_not_preprocessed(self):
+        """VOICE_PEDIATRIC's preprocessed files are VOICE's (#302); asking
+        the preprocessor for it must say so, not report every source missing
+        under a raw directory it never had (#1367 review, must-fix 9)."""
+        import sys
+        sys.path.insert(0, str(ROOT))
+        from src.download.preprocess_sources import preprocess_manifest
+        stats = preprocess_manifest(STUDY_MANIFEST, Path("data/raw"), self.tmp / "out", ["VOICE_PEDIATRIC"])
+        self.assertEqual(stats["errors"], 0)
+        self.assertEqual(stats["projects"]["VOICE_PEDIATRIC"]["source_dir"], "data/preprocessed/individual/VOICE")
+        self.assertFalse((self.tmp / "out" / "VOICE_PEDIATRIC").exists())
 
     def test_no_manifest_is_an_empty_registry_not_the_study(self):
         from data_sheets_schema.registry import load_registry
@@ -184,15 +200,24 @@ class TestGenerationContextIsExplicit(_Offline):
         _, bundle = self._bundle()
         # The project key is the study's own, and the bundle is not the
         # study's: the study manifest must not be selected implicitly (#621).
-        spec = _spec("VOICE", "baseline", "2026-09-12_x_rep1", "generic_v9",
-                     bundle=str(bundle), manifest=None)
-        self.assertIsNone(spec.manifest)
-        self.assertIn("not used", spec.manifest_line.lower())
-        blocks = context_blocks(spec)
-        for name in ("source_ranking", "declared_naming", "declared_scope"):
-            self.assertFalse(blocks[name]["sent"], (name, blocks[name]))
-        self.assertNotIn("Bridge2AI", resolve_prompt(spec))
-        self.assertNotIn("source_manifest.yaml", resolve_prompt(spec))
+        # Nothing said about a manifest: the rule decides, and it decides
+        # none. Also for a spec built directly, not through the CLI.
+        from data_sheets_schema.api_runner import RunSpec, build_phase
+        for spec in (_spec("VOICE", "baseline", "2026-09-12_x_rep1", "generic_v9", bundle=str(bundle)),
+                     RunSpec(project="VOICE", arm="BASELINE (input documents only)",
+                             method="claudecode_api", bundle=bundle,
+                             label="2026-09-12_x_rep1", condition="generic_v9")):
+            self.assertIsNone(spec.manifest)
+            self.assertIn("not used", spec.manifest_line.lower())
+            blocks = context_blocks(spec)
+            for name in ("source_ranking", "declared_naming", "declared_scope"):
+                self.assertFalse(blocks[name]["sent"], (name, blocks[name]))
+            self.assertNotIn("Bridge2AI", resolve_prompt(spec))
+            self.assertNotIn("source_manifest.yaml", resolve_prompt(spec))
+            sent = "\n".join(b["text"] for b in build_phase(spec, "full", carry={}).cached_blocks)
+            self.assertNotIn("Grand Challenge", sent)
+            self.assertNotIn("DECLARED NAMING", sent)
+            self.assertNotIn("DECLARED SCOPE", sent)
 
     def test_the_study_bundle_selects_the_study_manifest_as_before(self):
         from data_sheets_schema.cli.api import _spec
@@ -214,6 +239,14 @@ class TestGenerationContextIsExplicit(_Offline):
         blocks = context_blocks(spec)
         self.assertTrue(blocks["declared_naming"]["sent"])
         self.assertTrue(blocks["declared_scope"]["sent"])
+        # What the model is actually sent, not the helpers (#1367 review,
+        # must-fix 1): the assembled phase carries this manifest's context.
+        from data_sheets_schema.api_runner import build_phase
+        sent = "\n".join(b["text"] for b in build_phase(spec, "full", carry={}).cached_blocks)
+        self.assertIn('call this project "Open Clinical Cohort"', sent)
+        self.assertIn("Open Clinical Cohort release", sent)
+        self.assertNotIn("Bridge2AI", sent)
+        self.assertNotIn("Grand Challenge", sent)
 
     def test_an_offline_plan_assembles_for_a_receipt_condition(self):
         from data_sheets_schema.cli import cli
@@ -268,13 +301,7 @@ class TestGenerationContextIsExplicit(_Offline):
         self.assertEqual(r.exit_code, 0, r.output)
         self.assertIn("EXTERNAL_CLINICAL", r.output)
         self.assertIn("1 runs", r.output)
-        # Projects default to the manifest's, not the study's four.
-        r = CliRunner().invoke(cli, ["api", "batch", "--manifest", str(m),
-                                     "--project-bundle", f"EXTERNAL_CLINICAL={bundle}",
-                                     "--condition", "generic_v9", "--replicates", "1",
-                                     "--label-prefix", "2026-09-12_x-api-generic-v9",
-                                     "--dry-run"])
-        self.assertNotIn("AI_READI", r.output)
+        self.assertNotIn("AI_READI", r.output)     # the manifest's projects, not the study's four
 
 
 class TestStatusAndMakeSeeTheRegistry(_Offline):
@@ -291,3 +318,28 @@ class TestStatusAndMakeSeeTheRegistry(_Offline):
         text = (ROOT / "project.Makefile").read_text(encoding="utf-8")
         self.assertNotRegex(text, r"(?m)^PROJECTS\s*=\s*AI_READI")
         self.assertRegex(text, r"(?m)^PROJECTS\s*\?=.*list-projects")
+        # And a registry that cannot be read is an error, not an empty loop
+        # (#1367 review, must-fix 8).
+        self.assertIn("REGISTRY_UNAVAILABLE", text)
+        self.assertRegex(text, r"\$\(error the project registry could not be read")
+
+    def test_a_missing_manifest_is_a_failure_for_list_projects(self):
+        from data_sheets_schema.cli import cli
+        r = CliRunner().invoke(cli, ["download", "list-projects", "--plain",
+                                     "--manifest", str(self.tmp / "absent.yaml")])
+        self.assertEqual(r.exit_code, 1, r.output)
+        self.assertIn("does not exist", r.output)
+        self.assertNotIn("EXTERNAL_CLINICAL", r.output)
+
+    def test_commands_without_a_manifest_option_take_the_root_one(self):
+        """Fourteen commands validate --project but have no --manifest of
+        their own; `d4d --manifest M <command>` is their registry (#1367
+        review, must-fix 4)."""
+        from data_sheets_schema.cli import cli
+        m = _manifest(self.tmp, raw_dir=self.raw)
+        r = CliRunner().invoke(cli, ["receipts", "check", "--project", "EXTERNAL_CLINICAL", "--label", "L"])
+        self.assertNotEqual(r.exit_code, 0)
+        self.assertIn("d4d --manifest PATH", r.output)
+        r = CliRunner().invoke(cli, ["--manifest", str(m), "receipts", "check",
+                                     "--project", "EXTERNAL_CLINICAL", "--label", "L"])
+        self.assertNotIn("not declared by the selected manifest", r.output)

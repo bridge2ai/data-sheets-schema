@@ -87,9 +87,12 @@ def promote_canonical_downloads(
     manifest_projects = manifest.get("projects") if isinstance(manifest, dict) else None
     if not isinstance(manifest_projects, dict):
         raise ValueError(f"Invalid source manifest: {manifest_path}")
+    from data_sheets_schema.registry import load_registry
+    registry = load_registry(manifest_path)
+    declared = registry.projects()
 
-    selected_projects = set(projects or manifest_projects)
-    unknown = selected_projects - set(manifest_projects)
+    selected_projects = set(projects or declared)
+    unknown = selected_projects - set(declared)
     if unknown:
         raise ValueError(
             f"Projects not present in {manifest_path}: {sorted(unknown)}"
@@ -100,10 +103,10 @@ def promote_canonical_downloads(
     retained_fallbacks = []
     unresolved_sources = []
 
-    for project, entries in manifest_projects.items():
+    for project in declared:
         if project not in selected_projects:
             continue
-        for entry in entries:
+        for entry in registry.sources(project):   # list or mapping record (#1367 review, must-fix 5)
             filename = entry["raw_file"]
             minimum = int(entry.get("minimum_characters", default_minimum))
             staged_path = staging_dir / project / filename

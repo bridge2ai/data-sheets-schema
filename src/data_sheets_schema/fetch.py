@@ -113,15 +113,14 @@ class Plan:
 def load_sources(manifest_path: Path = MANIFEST,
                  projects: Iterable[str] | None = None) -> list[Source]:
     """Every manifest entry, as Source objects."""
-    data = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
+    from data_sheets_schema.registry import load_registry
+    reg = load_registry(manifest_path)
     out: list[Source] = []
     wanted = set(projects) if projects else None
-    for project, entries in (data.get("projects") or {}).items():
+    for project in reg.projects():                # never a `<P>_source_dir` key (#626)
         if wanted and project not in wanted:
             continue
-        for e in entries or []:
-            if not isinstance(e, dict):
-                continue
+        for e in reg.sources(project):            # list or mapping record (#1367 review, must-fix 5)
             out.append(Source(
                 project=project,
                 id=str(e.get("id") or "(unnamed)"),

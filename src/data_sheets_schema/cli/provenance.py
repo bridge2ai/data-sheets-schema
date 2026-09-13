@@ -5,6 +5,7 @@ import functools
 import click
 
 from data_sheets_schema.cli.api import ARMS as _ARMS
+from data_sheets_schema.provenance import SOURCE_MANIFEST as SOURCE_MANIFEST_DEFAULT
 from pathlib import Path
 
 #: The effort ladder, duplicated here so the CLI keeps its lazy imports and
@@ -348,6 +349,10 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     # than reporting `unverifiable`. Only when the caller says which condition
     # was rendered: guessing it would assert a condition the run may not have
     # used, which is the failure the gate exists to catch.
+    from data_sheets_schema.registry import select_manifest
+    selected = select_manifest(project, input_bundle,
+                               None if (manifest and str(manifest).lower() == "none")
+                               else Path(manifest) if manifest else __import__("data_sheets_schema.registry", fromlist=["AUTO"]).AUTO)
     spec = None
     if condition:
         from data_sheets_schema.api_runner import RunSpec
@@ -361,6 +366,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             project=project, arm=_ARMS[arm][0], method=method,
             bundle=Path(bundle) if bundle else None, label=label,
             condition=condition, runtime=runtime, provider=provider,
+            manifest=selected,           # the same selection the input block records (#1367 review, must-fix 3)
         ).render_spec()
 
     rec = build_record(project, method, label, mode="live",
@@ -375,8 +381,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                        phases=_parse_phases(phase_specs),
                        receipt_expected=receipt_expected,
                        condition=condition,                  # the launcher's own claim (#1094)
-                       **({} if manifest is None else
-                          {"manifest": None if str(manifest).lower() == "none" else Path(manifest)}))
+                       manifest=selected)
     if phases_skipped:
         known = _known_phases()
         bad = [n for n in phases_skipped if n not in known]
@@ -464,9 +469,14 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     # runtime's provider (Anthropic for Claude Code), not the proxy identity
     # the API path's default spec carries, and the header line differs.
     provider = (data.get("model") or {}).get("provider") or None
+    # The manifest the record's input block names, none where it names none;
+    # a record that predates the field consulted the study's (#1367 review, M2).
+    sm = ((data.get("inputs") or {}).get("source_manifest")) or {}
+    recorded_manifest = (Path(sm["path"]) if sm.get("path") else None) if "path" in sm else SOURCE_MANIFEST_DEFAULT
     for delta in (0, -1, 1, -2):
         spec = RunSpec(project=project, arm=_ARMS[arm][0], method=method, bundle=Path(bundle),
                        label=label, condition=condition, runtime=runtime, provider=provider,
+                       manifest=recorded_manifest,
                        run_date=(base + timedelta(days=delta)).isoformat())
         got = hashlib.sha256(resolve_prompt(spec).encode("utf-8")).hexdigest()
         if got == req["sha256"]:
@@ -1453,17 +1463,28 @@ def backfill(verified, dry_run):
             # reconstruction cannot check (#1094 review, N2).
             existing = record_path_for(project, run.method, run.label)
             source_paths: list[str] = []
+            import yaml as _yaml
             if existing.exists():
-                import yaml as _yaml
                 try:
                     prompts = (_yaml.safe_load(existing.read_text(encoding="utf-8")) or {}).get("prompts") or {}
                     source_paths = [f.get("path", "") if isinstance(f, dict) else str(f)
                                     for f in (prompts.get("files") or prompts.get("paths") or [])]
                 except Exception:                              # noqa: BLE001
                     source_paths = []
+            # A reconstruction keeps the manifest the existing record names —
+            # none where it recorded none (#1367 review, must-fix 2).
+            prior_manifest = SOURCE_MANIFEST_DEFAULT
+            if existing.exists():
+                try:
+                    sm = ((_yaml.safe_load(existing.read_text(encoding="utf-8")) or {}).get("inputs") or {}).get("source_manifest")
+                    if isinstance(sm, dict) and "path" in sm:
+                        prior_manifest = Path(sm["path"]) if sm["path"] else None
+                except Exception:                              # noqa: BLE001
+                    pass
             rec = build_record(project, run.method, run.label,
                                mode="reconstructed", input_verified=is_verified,
-                               condition_source_paths=source_paths)
+                               condition_source_paths=source_paths,
+                               manifest=prior_manifest)
             target = record_path_for(project, run.method, run.label)
             n_unrec = len(rec.data.get("unrecoverable") or [])
             if dry_run:

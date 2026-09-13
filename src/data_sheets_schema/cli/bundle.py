@@ -52,11 +52,19 @@ def chunk(manifest, project, bundles, check, strict, max_lines, max_bytes):
     if project or not bundles:
         reg = load_registry(manifest)
         names = [project] if project else reg.projects()
+        study = Path(manifest).resolve() == Path(DEFAULT_MANIFEST).resolve()
         for name in names:
-            found = project_bundles(name)
             declared = reg.bundle(name)
-            if declared.exists() and declared not in found:
-                found = [declared] + found
+            if study:
+                # The study's registry: every bundle kind it keeps (#725).
+                found = project_bundles(name)
+                if declared.exists() and declared not in found:
+                    found = [declared] + found
+            else:
+                # Another registry names its own bundles and nothing else —
+                # not the study's, which share the project key (#1367
+                # review, must-fix 10).
+                found = [declared] if declared.exists() else []
             targets.append((name, found))
 
     if check:

@@ -62,9 +62,8 @@ def tiers(manifest: dict[str, Any] | None = None) -> dict[str, int]:
 def sources(project: str, manifest: dict[str, Any] | None = None
             ) -> list[dict[str, Any]]:
     data = manifest if manifest is not None else _manifest()
-    entry = (data.get("projects") or {}).get(project)
-    return [s for s in entry if isinstance(s, dict)] if isinstance(entry, list) \
-        else []
+    from data_sheets_schema.registry import Registry
+    return Registry(path=None, data=data).sources(project)      # list or mapping record (#1367 review, must-fix 5)
 
 
 def priority_of(source: dict[str, Any],

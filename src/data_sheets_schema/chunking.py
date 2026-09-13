@@ -183,13 +183,25 @@ def manifest_path(project: str, chunks_dir: Path | None = None) -> Path:
     return (chunks_dir or CHUNKS_DIR) / f"{project}_chunks.yaml"
 
 
+#: The repository this package is checked out in — the root `CONCAT_DIR`
+#: is relative to. Resolved from the package, not the working directory, so
+#: a study bundle named by absolute path is a study bundle from anywhere
+#: (#1367 review, must-fix 7).
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _study_dir() -> Path:
+    d = Path(CONCAT_DIR)
+    return (d if d.is_absolute() else REPO_ROOT / d).resolve()
+
+
 def _under_concat_dir(bundle: Path) -> bool:
     """Whether `bundle` is one of the study's bundles: a file under
-    `CONCAT_DIR`, resolved. A relative study path (`data/preprocessed/
-    concatenated/CHORUS_preprocessed.txt`) resolves against the working
-    directory, which is the repository root for every study command."""
+    `CONCAT_DIR`, both resolved — so a symlink into the study directory is
+    a study bundle, and a path spelled relative to another working
+    directory is not mistaken for one."""
     try:
-        return Path(bundle).resolve().parent == CONCAT_DIR.resolve()
+        return Path(bundle).resolve().parent == _study_dir()
     except OSError:
         return False
 
@@ -212,10 +224,16 @@ def manifest_for(bundle: Path, chunks_dir: Path | None = None) -> Path:
     bundle was read from (#713).
     """
     bundle = Path(bundle)
-    name = bundle.name
-    stem = name[:-4] if name.endswith(".txt") else name
     if chunks_dir is None and not _under_concat_dir(bundle):
+        stem = bundle.name[:-4] if bundle.name.endswith(".txt") else bundle.name
         return bundle.parent / f"{stem}_chunks.yaml"
+    # A study bundle is named by what it resolves to: a symlink's alias is
+    # not a second identity for the same bytes.
+    try:
+        name = bundle.resolve().name if chunks_dir is None else bundle.name
+    except OSError:
+        name = bundle.name
+    stem = name[:-4] if name.endswith(".txt") else name
     if name.endswith("_preprocessed.txt"):
         return manifest_path(name[: -len("_preprocessed.txt")], chunks_dir)
     return (chunks_dir or CHUNKS_DIR) / f"{stem}_chunks.yaml"

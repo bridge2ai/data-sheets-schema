@@ -1151,11 +1151,14 @@ def verify_request(method: str, label: str, project: str,
     try:
         import hashlib
         from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        from data_sheets_schema.registry import DEFAULT_MANIFEST
+        recorded = spec_d.get("manifest", str(DEFAULT_MANIFEST))   # absent: predates recording (#1367 review, M2)
         spec = RunSpec(
             project=project, arm=spec_d.get("arm", ""), method=method,
             bundle=Path(spec_d.get("bundle", "")), label=label,
             condition=spec_d["condition"],
             manifest_line=spec_d.get("manifest_line", ""),
+            manifest=Path(recorded) if recorded else None,
             run_date=spec_d.get("run_date", ""),
             runtime=spec_d.get("runtime", ""),
             provider=spec_d.get("provider"))

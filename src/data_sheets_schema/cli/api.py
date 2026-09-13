@@ -8,10 +8,10 @@ import click
 
 from data_sheets_schema.api_runner import CONDITION_PROMPTS
 
-from data_sheets_schema.registry import DEFAULT_MANIFEST, load_registry
+from data_sheets_schema.registry import AUTO, DEFAULT_MANIFEST, load_registry, select_manifest
 
 #: `_spec`'s "the caller did not say": the manifest is then selected by rule.
-_UNSET = object()
+_UNSET = AUTO
 
 # `baseline` writes under `claudecode_api` from generic_v8 on (#690, v8 plan
 # D6): the API and agentic runtimes shared `claudecode_agent` through v7 and
@@ -58,14 +58,7 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
     """
     from data_sheets_schema.api_runner import RunSpec
     display, method, pattern, manifest_line = ARMS[arm]
-    if manifest is _UNSET:
-        reg = load_registry(DEFAULT_MANIFEST)
-        if bundle is None:
-            selected = DEFAULT_MANIFEST if reg.declares(project) else None
-        else:
-            selected = DEFAULT_MANIFEST if reg.declares_bundle(project, Path(bundle)) else None
-    else:
-        selected = Path(manifest) if manifest is not None else None
+    selected = select_manifest(project, bundle, manifest)      # one rule, everywhere (#1367 review)
     reg = load_registry(selected)
     resolved = (Path(bundle) if bundle else
                 reg.bundle(project) if reg.declares(project) and arm == "baseline" else
@@ -406,9 +399,10 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
 @click.option("--projects", default=None,
               help="comma-separated; default: every project the selected manifest declares "
                    "(#623), or the --project-bundle names")
-@click.option("--manifest", default=str(DEFAULT_MANIFEST), show_default=True,
+@click.option("--manifest", default=None,
               help="the source manifest that declares the projects and their context; "
-                   "`none` to run explicit bundles with no manifest")
+                   "default: the study's for the bundles it declares, none for any other "
+                   "(#621); `none` to run explicit bundles with no manifest")
 @click.option("--project-bundle", "project_bundles", multiple=True, metavar="NAME=PATH",
               help="an explicit bundle for one project (repeatable, #624); a project "
                    "without one resolves its bundle from the manifest by convention")
@@ -445,7 +439,8 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     """
     from data_sheets_schema.api_runner import execute, plan
 
-    selected = None if str(manifest).lower() == "none" else Path(manifest)
+    requested = (AUTO if manifest is None
+                 else None if str(manifest).lower() == "none" else Path(manifest))
     bundles: dict[str, str] = {}
     for item in project_bundles:
         name, sep, path = item.partition("=")
@@ -455,7 +450,8 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     if projects:
         names = [p.strip() for p in projects.split(",") if p.strip()]
     else:
-        names = list(bundles) or load_registry(selected).projects()
+        names = list(bundles) or load_registry(
+            DEFAULT_MANIFEST if requested is AUTO else requested).projects()
     if not names:
         raise click.ClickException(
             "no projects: the selected manifest declares none and no --project-bundle "
@@ -464,7 +460,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     for p in names:
         for n in range(1, replicates + 1):
             s = _spec(p, arm, f"{label_prefix}_rep{n}", condition,
-                      bundle=bundles.get(p), manifest=selected)
+                      bundle=bundles.get(p), manifest=requested)
             if not s.bundle.exists():
                 raise click.ClickException(
                     f"bundle not found for {p}: {s.bundle}")

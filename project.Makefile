@@ -22,7 +22,13 @@ D4D_PAIR_SYNC_ARG = $(if $(filter 1 true yes,$(SYNC)),--sync-core,)
 # (#623, #637). This used to be a second, hand-kept list that had already
 # drifted from constants.PROJECTS. Override with `make PROJECTS="A B"` or
 # point at another registry with `make SOURCE_MANIFEST=path`.
-PROJECTS ?= $(shell $(RUN) d4d download list-projects --manifest $(SOURCE_MANIFEST) --plain 2>/dev/null)
+PROJECTS ?= $(shell $(RUN) d4d download list-projects --manifest $(SOURCE_MANIFEST) --plain 2>/dev/null || echo REGISTRY_UNAVAILABLE)
+ifeq ($(strip $(PROJECTS)),REGISTRY_UNAVAILABLE)
+$(error the project registry could not be read: '$(RUN) d4d download list-projects --manifest $(SOURCE_MANIFEST)' failed. Install the environment (make install), or pass PROJECTS="A B" explicitly)
+endif
+ifeq ($(strip $(PROJECTS)),)
+$(error the project registry $(SOURCE_MANIFEST) declares no projects; pass PROJECTS="A B" explicitly)
+endif
 
 # Bridge2AI source documentation Google Sheet
 # Note: Use CSV export URL format for the extractor script
@@ -647,19 +653,12 @@ concat-preprocessed:
 	@echo "Concatenating preprocessed individual files by project..."
 	@mkdir -p $(PREPROCESSED_CONCAT_DIR)
 	@for project in $(PROJECTS); do \
-		input_dir="$(PREPROCESSED_INDIVIDUAL_DIR)/$$project"; \
-			output_file="$(PREPROCESSED_CONCAT_DIR)/$${project}_preprocessed.txt"; \
-			if [ -d "$$input_dir" ] && [ -n "$$(ls -A $$input_dir 2>/dev/null)" ]; then \
-				echo "Processing $$project..."; \
-				$(RUN) python src/download/concatenate_documents.py \
-					-i "$$input_dir" \
-					-o "$$output_file" \
-					-e .txt \
-					--manifest $(SOURCE_MANIFEST) \
-					--project "$$project" || exit 1; \
-		else \
-			echo "⚠️  Skipping $$project (no preprocessed files found)"; \
-		fi \
+		echo "Processing $$project..."; \
+		$(RUN) d4d download concatenate \
+			--manifest $(SOURCE_MANIFEST) \
+			--project "$$project" \
+			--input-dir $(PREPROCESSED_INDIVIDUAL_DIR) \
+			--output-file "$(PREPROCESSED_CONCAT_DIR)/$${project}_preprocessed.txt" || exit 1; \
 	done
 	@echo "✅ All preprocessed files concatenated to $(PREPROCESSED_CONCAT_DIR)/"
 

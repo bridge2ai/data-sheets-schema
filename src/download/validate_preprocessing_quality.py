@@ -371,8 +371,9 @@ def main():
     parser.add_argument(
         "--projects",
         nargs="+",
-        default=["AI_READI", "CHORUS", "CM4AI", "VOICE"],
-        help="Projects to validate (default: all)"
+        default=None,
+        help="Projects to validate (default: every project the manifest declares "
+             "with a raw directory of its own; the study's four without a manifest)"
     )
     parser.add_argument(
         "--min-ratio",
@@ -411,6 +412,13 @@ def main():
     manifest = None
     if args.manifest:
         manifest = yaml.safe_load(args.manifest.read_text(encoding="utf-8"))
+    if args.projects is None:
+        if args.manifest:
+            from data_sheets_schema.registry import load_registry
+            reg = load_registry(args.manifest)
+            args.projects = [p for p in reg.projects() if reg.source_dir(p) is None]
+        else:
+            args.projects = ["AI_READI", "CHORUS", "CM4AI", "VOICE"]
 
     for project in args.projects:
         if manifest:

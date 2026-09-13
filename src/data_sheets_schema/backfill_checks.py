@@ -263,9 +263,11 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
     if want("receipts"):
         from data_sheets_schema.receipts import block_for, receipt_path
         inputs = record.get("inputs") or {}
+        chunks = inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None
         out["receipts"] = {**block_for(full, receipt_path(provenance.parent, paths["project"]),
                                        bundle, inputs.get("bundle_md5"),
                                        bool(inputs.get("receipt_expected")),
+                                       manifest=Path(chunks["path"]) if chunks and chunks.get("path") else None,
                                        bundle_rel_path=inputs.get("bundle_path"),
                                        record_bundle_sha256=inputs.get("bundle_sha256"),
                                        record_chunks=inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None),

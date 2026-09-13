@@ -32,13 +32,15 @@ def list_projects(manifest, plain):
     CLI and the Make targets read (#623, #637)."""
     reg = load_registry(manifest)
     names = reg.projects()
+    if reg.path is None or not reg.path.exists():
+        # Loud in both modes: a Make loop fed an empty list by a silent
+        # failure "completes" having done nothing (#1367 review, must-fix 8).
+        click.echo(f"manifest {manifest} does not exist; no projects", err=True)
+        sys.exit(1)
     if plain:
         for n in names:
             click.echo(n)
         return
-    if reg.path is None or not reg.path.exists():
-        click.echo(f"manifest {manifest} does not exist; no projects", err=True)
-        sys.exit(1)
     click.echo(f"{reg.path}: {len(names)} project(s)")
     for n in names:
         extras = []

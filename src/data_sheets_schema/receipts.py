@@ -1289,7 +1289,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     import hashlib
 
     from data_sheets_schema.chunking import chunk_texts as _texts
-    from data_sheets_schema.chunking import load_manifest, manifest_for
+    from data_sheets_schema.chunking import file_sha256, load_manifest, manifest_for
 
     base = {"expected": expected, "non_checks": list(NON_CHECKS)}
     if not receipt.exists():
@@ -1334,6 +1334,17 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
                 if hashlib.md5(disk_bytes).hexdigest() != cand.get("bundle_md5"):
                     disk_state = "the manifest on disk did not chunk the bytes on disk"
                     disk_advice = "rebuild it with `d4d bundle chunk`"
+                elif ((record_chunks or {}).get("sha256")
+                      and file_sha256(mpath) != record_chunks["sha256"]):
+                    # It chunked these bytes, but it is not the instrument the
+                    # record names: a different rule over the same bytes puts
+                    # the same chunk ids over different text, and a receipt
+                    # judged against it can pass where it should not (#1367
+                    # review, must-fix 6). The record's rule then chunks the
+                    # bytes in memory below.
+                    disk_state = ("the manifest on disk is not the one the record names "
+                                  "(its sha256 differs from inputs.chunks.sha256)")
+                    disk_advice = "check against the recorded manifest, or re-record the run"
                 else:
                     on_disk = cand
             except (ValueError, yaml.YAMLError) as exc:

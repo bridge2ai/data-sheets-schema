@@ -265,7 +265,7 @@ def preprocess_manifest(
         "projects": {},
     }
 
-    unknown = selected_projects - set(manifest["projects"])
+    unknown = selected_projects - set(registry.projects())     # a `<P>_source_dir` key is not a project (#626)
     if unknown:
         raise ValueError(
             f"Projects not present in {manifest_path}: {sorted(unknown)}"
@@ -273,6 +273,16 @@ def preprocess_manifest(
 
     for project in registry.projects():
         if project not in selected_projects:
+            continue
+        if registry.source_dir(project) is not None:
+            # Its preprocessed files are another project's (VOICE_PEDIATRIC
+            # reads VOICE's directory, #302): there is nothing of its own to
+            # preprocess, and looking for `<input>/<project>` reports every
+            # source missing (#1367 review, must-fix 9).
+            print(f"\n📁 {project}: preprocessed files are declared under "
+                  f"{registry.source_dir(project)}; nothing to preprocess here")
+            stats["projects"][project] = {"processed": 0, "errors": 0,
+                                          "source_dir": str(registry.source_dir(project))}
             continue
         entries = registry.sources(project)
         if not entries:

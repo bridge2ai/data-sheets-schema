@@ -48,9 +48,15 @@ def validate_preprocessing(raw_dir, preprocessed_dir, manifest, project):
     old_argv = sys.argv
     sys.argv = ['validate_preprocessing_quality.py',
                 '--raw-dir', raw_dir,
-                '--preprocessed-dir', preprocessed_dir]
-    if project:
-        sys.argv.extend(['--project', project])
+                '--preprocessed-dir', preprocessed_dir,
+                '--manifest', manifest]
+    # The registry's projects, not the validator's own four (#1367 review,
+    # should-fix 1); a project whose files are another project's directory
+    # has nothing of its own to validate.
+    reg = load_registry(manifest)
+    names = [project] if project else [p for p in reg.projects() if reg.source_dir(p) is None]
+    if names:
+        sys.argv.append('--projects'); sys.argv.extend(names)
 
     try:
         validate_main()

@@ -34,11 +34,18 @@ DEFAULT_MANIFEST = Path("data/preprocessed/source_manifest.yaml")
 #: The legacy override key: `<PROJECT>_source_dir` beside the projects.
 _SOURCE_DIR_SUFFIX = "_source_dir"
 
-#: Where a project's document bundle lives by convention, and the suffix each
-#: bundle kind carries (#725). Mirrors `chunking.BUNDLE_SUFFIXES`, which stays
-#: the authority for chunking; this is the registry's view of the same layout.
-CONCAT_DIR = Path("data/preprocessed/concatenated")
+#: The suffix a project's document bundle carries by convention (#725). The
+#: directory is `chunking.CONCAT_DIR`, read at call time so a test or caller
+#: that repoints it repoints the registry too (#1367 review, must-fix 10).
 DOCUMENT_BUNDLE_SUFFIX = "_preprocessed.txt"
+
+#: "The caller did not choose": `select_manifest` then decides by rule.
+AUTO = object()
+
+
+def _concat_dir() -> Path:
+    from data_sheets_schema import chunking
+    return chunking.CONCAT_DIR
 
 
 @dataclass(frozen=True)
@@ -111,7 +118,7 @@ class Registry:
         v = self._setting(project, "bundle")
         if isinstance(v, str) and v:
             return Path(v)
-        return (concat_dir or CONCAT_DIR) / f"{project}{DOCUMENT_BUNDLE_SUFFIX}"
+        return (concat_dir or _concat_dir()) / f"{project}{DOCUMENT_BUNDLE_SUFFIX}"
 
     def declares_bundle(self, project: str, bundle: Path,
                         concat_dir: Path | None = None) -> bool:
@@ -171,6 +178,32 @@ def load_registry(path: Path | str | None = DEFAULT_MANIFEST) -> Registry:
     return Registry(path=p, data=data)
 
 
+def select_manifest(project: str, bundle: Path | str | None,
+                    requested=AUTO) -> Path | None:
+    """The one rule for which manifest a run consults (#621, #1367 review,
+    must-fix 2), applied wherever a spec or a record is built rather than
+    only in the API CLI.
+
+    `requested` is a path the caller named, `None` for "none", or `AUTO`
+    when the caller said nothing. Under `AUTO` the default manifest is
+    selected only when it declares `project` and — where a bundle is given
+    — that bundle is the one it declares for the project. A study key with
+    an external bundle selects none: the study's naming, scope and ranking
+    describe a bundle the run is not reading, and hashing the study's file
+    into the record would attest an input the run never consulted.
+    """
+    if requested is None:
+        return None
+    if requested is not AUTO:
+        return Path(requested)
+    reg = load_registry(DEFAULT_MANIFEST)
+    if not reg.declares(project):
+        return None
+    if bundle is None:
+        return DEFAULT_MANIFEST
+    return DEFAULT_MANIFEST if reg.declares_bundle(project, Path(bundle)) else None
+
+
 # ---- click integration --------------------------------------------------
 
 def manifest_option(**kw):
@@ -191,7 +224,7 @@ def project_choice(ctx: click.Context, param: click.Parameter, value):
     """
     if value is None or value == () or value == []:
         return value
-    manifest = ctx.params.get("manifest", str(DEFAULT_MANIFEST))
+    manifest = selected_manifest(ctx)
     reg = load_registry(manifest)
     values = list(value) if isinstance(value, (tuple, list)) else [value]
     declared = reg.projects()
@@ -200,17 +233,34 @@ def project_choice(ctx: click.Context, param: click.Parameter, value):
         where = (f"{reg.path} declares {', '.join(declared) or 'no projects'}"
                  if reg.path is not None and reg.path.exists()
                  else f"manifest {manifest} does not exist")
+        how = ("--manifest" if "manifest" in ctx.params
+               else "`d4d --manifest PATH <command>` (or D4D_MANIFEST=PATH)")
         raise click.BadParameter(
             f"{', '.join(map(repr, unknown))}: not declared by the selected manifest "
             f"({where}). Declare the dataset under `projects:` in a manifest and pass "
-            "--manifest, or name one the manifest declares.")
+            f"{how}, or name one the manifest declares.")
     return value
+
+
+def selected_manifest(ctx: click.Context) -> str:
+    """The manifest a command's `--project` is validated against: the
+    command's own `--manifest` when it has one, else the root group's
+    `d4d --manifest` / `D4D_MANIFEST` (#1367 review, must-fix 4: fourteen
+    commands validate a project but never needed a manifest of their own),
+    else the study's."""
+    own = ctx.params.get("manifest")
+    if own:
+        return str(own)
+    root = ctx.find_root()
+    if root is not ctx and root.params.get("manifest"):
+        return str(root.params["manifest"])
+    return str(DEFAULT_MANIFEST)
 
 
 def projects_for(ctx_or_manifest, project=None) -> list[str]:
     """`[project]` when one was given, else every project the manifest
     declares — the loop body of every "default: all" command."""
-    manifest = (ctx_or_manifest.params.get("manifest") if isinstance(ctx_or_manifest, click.Context)
+    manifest = (selected_manifest(ctx_or_manifest) if isinstance(ctx_or_manifest, click.Context)
                 else ctx_or_manifest)
     if project:
         return [project] if isinstance(project, str) else list(project)
