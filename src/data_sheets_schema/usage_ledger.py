@@ -167,13 +167,25 @@ def pin_inputs(spec) -> None:
         _write(spec, data)
 
 
+def _comparable(identity: dict) -> dict:
+    """An identity without `profile_basis` inside its instruction spec: the
+    basis was never an input (#1626), and a pin written while it sat there
+    (#1581–#1626) must not refuse a resume whose inputs are the same (#1657)."""
+    out = dict(identity)
+    instr = out.get("instruction")
+    if isinstance(instr, dict) and isinstance(instr.get("spec"), dict) and "profile_basis" in instr["spec"]:
+        out["instruction"] = {**instr, "spec": {k: v for k, v in instr["spec"].items() if k != "profile_basis"}}
+    return out
+
+
 def _identity_differs(pinned: dict, current: dict) -> bool:
     """A pin made before a key existed says nothing about it (`profile`,
-    #1460); every key the pin carries must match. That is the rule for any
-    key added later; it does not readmit the generations pinned before
-    profiles existed, whose instruction hash — the recorder line carries
-    `--profile` now — no longer renders (#1628): those cannot be resumed,
-    and the refusal says so."""
+    #1460); every key the pin carries must match, the basis excepted
+    (#1657). That is the rule for any key added later; it does not readmit
+    the generations pinned before profiles existed, whose instruction hash
+    — the recorder line carries `--profile` now — no longer renders
+    (#1628): those cannot be resumed, and the refusal says so."""
+    pinned, current = _comparable(pinned), _comparable(current)
     return any(current.get(k) != v for k, v in pinned.items())
 
 

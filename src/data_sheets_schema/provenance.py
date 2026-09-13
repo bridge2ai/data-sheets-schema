@@ -997,6 +997,8 @@ def _profile_digest_disagreement(data: dict[str, Any]) -> str | None:
     schema = data.get("schema") if isinstance(data, dict) else None
     if not isinstance(schema, dict) or not schema.get("profile") or not schema.get("digest_md5"):
         return None
+    if not isinstance(schema["profile"], str) or not isinstance(schema["digest_md5"], str):
+        return None                        # a malformed value is the structural validator's finding (#1655)
     try:
         from data_sheets_schema import schema_digest
         from data_sheets_schema.profiles import PROFILES
