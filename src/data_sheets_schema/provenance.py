@@ -650,48 +650,45 @@ def software_facts() -> dict[str, Any]:
 DIRTY_PATHS_MAX = 50
 
 
-#: RECORD entries the installer writes without a hash by design.
-_INSTALL_BOOKKEEPING = ("RECORD", "INSTALLER", "REQUESTED", "direct_url.json")
+#: The installer's own bookkeeping: the wheel's metadata directory, a
+#: root-level `.pth`, byte-code caches. Nothing else is exempt (#1717).
+_LEDGER = "data_sheets_schema/schema/digest_inventory.yaml"
 
 
-def _installed_files_changed() -> tuple[list[str], bool, list[str]]:
-    """`(changed, measured, unmeasured)`: the installed files whose bytes no
-    longer match the wheel's RECORD — an edited shipped file, a rewritten
-    digest ledger (#1537) — or that are gone; `measured` False when the
-    RECORD cannot be read or when a resource it lists carries no hash, those
-    listed under `unmeasured` (#1641, #1667). A missing file is missing
-    whether or not it was hashed; the installer's own bookkeeping (`RECORD`,
-    `.pth`, `__pycache__`) is neither. The record's hashes are
+def _is_bookkeeping(name: str) -> bool:
+    parts = name.replace("\\", "/").split("/")
+    return (any(p.endswith(".dist-info") for p in parts[:-1])
+            or (len(parts) == 1 and parts[0].endswith(".pth"))
+            or "__pycache__" in parts[:-1])
+
+
+def _installed_files_changed() -> tuple[list[str], bool, list[str], bool]:
+    """`(changed, measured, unmeasured, ledger_changed)`: the installed files
+    whose bytes no longer match the wheel's RECORD or that are gone;
+    `measured` False when the RECORD cannot be read or a resource it lists
+    carries no usable hash, those listed under `unmeasured` (#1641, #1667,
+    #1723). The digest ledger a run appends to (#1537) is reported apart as
+    `ledger_changed`: a hash says it differs, not that earlier entries
+    survived, so it is neither counted clean nor called an append (#1716).
+    Exempt is only the installer's bookkeeping (#1717). Returned, never
+    stored on the function (#1720). The record's hashes are
     `<algorithm>=<urlsafe base64, unpadded>`."""
     import base64
     from importlib.metadata import PackageNotFoundError, files
     try:
         entries = files("data-sheets-schema")
     except PackageNotFoundError:
-        return [], False, []
+        return [], False, [], False
     if not entries:
-        return [], False, []
+        return [], False, [], False
     changed: list[str] = []
     unmeasured: list[str] = []
-    ledger_appended = False
+    ledger_changed = False
     seen = 0
     for entry in entries:
         name = str(entry)
-        if name.endswith("data_sheets_schema/schema/digest_inventory.yaml"):
-            # The digest ledger is package data a run appends to by design
-            # (#1537): a difference there is the ledger growing, reported
-            # under its own key, not an edited shipped file (#1683).
-            try:
-                data = entry.locate().read_bytes()
-            except OSError:
-                changed.append(name); continue
-            h = getattr(entry, "hash", None)
-            if h is not None and getattr(h, "value", None):
-                digest = hashlib.new(getattr(h, "mode", "sha256"), data).digest()
-                ledger_appended = base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii") != h.value
-            continue
-        bookkeeping = (name.endswith(".pth") or "__pycache__" in name
-                       or any(name.endswith(b) for b in _INSTALL_BOOKKEEPING))
+        bookkeeping = _is_bookkeeping(name)
+        is_ledger = name.replace("\\", "/").endswith(_LEDGER)
         h = getattr(entry, "hash", None)
         try:
             data = entry.locate().read_bytes()
@@ -704,18 +701,21 @@ def _installed_files_changed() -> tuple[list[str], bool, list[str]]:
             continue
         if h is None or not getattr(h, "value", None):
             if not bookkeeping:
-                unmeasured.append(name)      # a resource the RECORD does not attest
+                unmeasured.append(name)      # a resource the RECORD does not attest — the ledger included
             continue
-        seen += 1
         try:
             digest = hashlib.new(getattr(h, "mode", "sha256"), data).digest()
         except ValueError:
-            unmeasured.append(name)
+            unmeasured.append(name)          # an algorithm this interpreter lacks (#1723)
             continue
-        if base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii") != h.value:
+        same = base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii") == h.value
+        if is_ledger:
+            ledger_changed = not same
+            continue
+        seen += 1
+        if not same:
             changed.append(name)
-    _installed_files_changed.ledger_appended = ledger_appended
-    return sorted(changed), seen > 0 and not unmeasured, sorted(unmeasured)
+    return sorted(changed), seen > 0 and not unmeasured, sorted(unmeasured), ledger_changed
 
 
 def repo_facts() -> dict[str, Any]:
@@ -739,10 +739,9 @@ def repo_facts() -> dict[str, Any]:
             pkg = version("data-sheets-schema")
         except PackageNotFoundError:
             pkg = None
-        changed, measured, unmeasured = _installed_files_changed()
-        ledger_appended = getattr(_installed_files_changed, "ledger_appended", False)
+        changed, measured, unmeasured, ledger_changed = _installed_files_changed()
         return {"commit": None, "commit_short": None, "branch": None,
-                **({"ledger_appended": True} if ledger_appended else {}),
+                **({"ledger_changed": True} if ledger_changed else {}),
                 "dirty": (bool(changed) if measured else None),
                 "dirty_file_count": (len(changed) if measured else None),
                 "dirty_paths": changed[:DIRTY_PATHS_MAX],
@@ -753,7 +752,9 @@ def repo_facts() -> dict[str, Any]:
                          + ("the installed files were compared with the wheel's RECORD hashes (#1641)" if measured
                             else ("the wheel's RECORD lists resources it does not hash, so whether the installed files "
                                   "changed is unknown, not clean (#1667)" if unmeasured
-                                  else "the wheel's RECORD could not be read, so whether the installed files changed is unknown, not clean (#1641)")))}
+                                  else "the wheel's RECORD could not be read, so whether the installed files changed is unknown, not clean (#1641)"))
+                         + ("; the digest ledger differs from the shipped one — a run appends to it by design (#1537), and "
+                            "whether the shipped entries survived is not established (#1716)" if ledger_changed else ""))}
     commit = _run(["git", "rev-parse", "HEAD"], cwd=at)
     top = _run(["git", "rev-parse", "--show-toplevel"], cwd=at)
     try:
@@ -965,6 +966,15 @@ def artifact_root(record: Path) -> Path | None:
     return None if record.is_absolute() else Path.cwd()
 
 
+def resolve_record_input(path: Path, record: Path) -> Path | None:
+    """Resolve a recorded input without borrowing an unrelated caller base."""
+    path = Path(path)
+    if path.is_absolute():
+        return path
+    owner = artifact_root(record)
+    return owner / path if owner is not None else None
+
+
 def verify_entry(entry: dict[str, Any], *, record: Path | None = None) -> bool | None:
     """Does the file still hash to what the entry recorded? None if unknowable."""
     got = recorded_hash(entry)
@@ -1143,15 +1153,26 @@ def check_record(data: dict[str, Any]) -> tuple[list[str], str | None]:
     return problems, None
 
 
+def profile_problems(data: dict[str, Any]) -> list[str]:
+    """The profile findings `check_record` appends (#1581, #1678), on their
+    own so a gate that does not run the structural validator can still
+    fail on them (#1699)."""
+    return [p for p in (_profile_digest_disagreement(data), _spec_profile_disagreement(data)) if p]
+
+
 def _spec_profile_disagreement(data: dict[str, Any]) -> str | None:
     """A record whose stored render spec states one profile while its
     `schema.profile` states another — or none — is two records in one
     (#1678): the gate re-renders under the spec's, every reader reads the
     schema's."""
     schema = data.get("schema") if isinstance(data, dict) else None
-    spec = (((data.get("prompts") or {}).get("request") or {}).get("spec")) if isinstance(data, dict) else None
-    if not isinstance(schema, dict) or not isinstance(spec, dict) or not isinstance(spec.get("profile"), str):
+    prompts = data.get("prompts") if isinstance(data, dict) else None
+    request = prompts.get("request") if isinstance(prompts, dict) else None
+    spec = request.get("spec") if isinstance(request, dict) else None       # any shape short of a mapping is the validator's finding (#1700)
+    if not isinstance(spec, dict) or not isinstance(spec.get("profile"), str):
         return None
+    if not isinstance(schema, dict):
+        schema = {}                        # no schema block, or null: the readers read the study's (#1709)
     if schema.get("profile") != spec["profile"]:
         return (f"prompts.request.spec.profile is {spec['profile']!r} but schema.profile is "
                 f"{schema.get('profile')!r}; the gate and the readers would use different instruments")
@@ -1529,13 +1550,25 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     # were elsewhere or absent — the GitHub assistant's layout, and the same
     # class as the declared-bundle defect: a path assumed rather than derived
     # from the spec that already knew it (#604).
-    from data_sheets_schema.corpus import root, relative_to_root
-    namespace = manifest if selected_manifest is AUTO else selected_manifest
-    owner = root() if namespace is AUTO else root(namespace)
-    if concat_dir == CONCAT_DIR:
-        concat_dir = relative_to_root(concat_dir, owner)
+    from data_sheets_schema.corpus import root, relative_to_root, manifest_override, AUTO as CORPUS_AUTO
+    from data_sheets_schema.registry import select_manifest
     base = method[:-5] if method.endswith("_core") else method
     outputs = outputs or {}
+    namespace = manifest if selected_manifest is AUTO else selected_manifest
+    automatic_namespace = namespace is AUTO
+    explicit_namespace = manifest_override() is not CORPUS_AUTO if automatic_namespace else True
+    if automatic_namespace:
+        namespace = select_manifest(project, input_bundle) if input_bundle is not None or explicit_namespace else None
+    owner = root(namespace)
+    if automatic_namespace and input_bundle is None and not explicit_namespace:
+        # Header-only reconstruction needs the discovered artifact address;
+        # an ancestor's manifest cannot establish where this run wrote.
+        core_address = outputs.get("core") or (
+            concat_dir / f"{base}_core" / label / f"{project}_d4d_core.yaml")
+        owner = artifact_root(Path(core_address).absolute().with_name(
+            f"{project}_provenance.yaml")) or Path.cwd().resolve()
+    if concat_dir == CONCAT_DIR:
+        concat_dir = relative_to_root(concat_dir, owner)
     full = outputs.get("full") or concat_dir / base / label / f"{project}_d4d.yaml"
     core = outputs.get("core") or (
         concat_dir / f"{base}_core" / label / f"{project}_d4d_core.yaml")
@@ -1543,8 +1576,9 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         concat_dir / f"{base}_core" / label / f"{project}_reconciliation.md")
     # A flat record's absolute address does not encode its launch directory.
     # Capture input addresses now, while their caller base is still known.
-    freeze_inputs = (owner != Path.cwd().resolve() or artifact_root(
-        Path(core).absolute().with_name(f"{project}_provenance.yaml")) is None)
+    output_owner = artifact_root(Path(core).absolute().with_name(f"{project}_provenance.yaml"))
+    freeze_inputs = (owner != Path.cwd().resolve() or output_owner is None
+                     or output_owner.resolve() != Path.cwd().resolve())
 
     header = parse_header(full)
     unrecoverable: list[dict[str, str]] = []
@@ -1562,6 +1596,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         bundle = relative_to_root(Path(declared), owner) if declared else None
     if bundle is not None and freeze_inputs:
         bundle = Path(bundle).absolute()
+    if automatic_namespace and input_bundle is None:
+        namespace = select_manifest(project, bundle) if bundle is not None else None
 
     inputs: dict[str, Any] = {"bundle_path": str(bundle) if bundle else None,
                               "chunks": None,
@@ -1606,7 +1642,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
             manifest = None
             manifest_basis = manifest_basis or f"the output header declares the source manifest unused ({header_manifest})"
         elif header_manifest:
-            manifest = Path(header_manifest)
+            manifest = relative_to_root(Path(header_manifest), owner)
             manifest_basis = manifest_basis or "the output header declares this source manifest"
         else:
             manifest = select_manifest(project, bundle) if bundle is not None else None

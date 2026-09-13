@@ -200,9 +200,12 @@ Once prerequisites are met, mention me again to retry.
 make full-schema
 ```
 
-**Read validated reference examples:**
-- `data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/AI_READI_d4d.yaml` - Comprehensive validated example
-- `data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/CHORUS_d4d.yaml` - Another validated example
+**Read the schema's own validated examples** — never a previously generated
+datasheet (the provenance guard, `.claude/agents/d4d-provenance-guard.md`,
+forbids reading or borrowing from prior generated D4D records; the
+examples below are schema fixtures, not dataset descriptions):
+- `src/data/examples/valid/*.yaml` — one validated example per class
+  (`make test-examples` validates them)
 
 **What to observe:**
 - How `purposes`, `tasks`, `addressing_gaps`, `creators`, `funders` are structured
@@ -448,7 +451,7 @@ poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_a
    **Root Cause**: You invented semantic field names instead of using schema field names
 
    **Fix**:
-   - Read reference examples to see correct field structure
+   - Read the schema's validated examples (`src/data/examples/valid/`) to see correct field structure
    - Most classes use `{id, description}` pattern
    - Replace invented fields with schema-defined fields:
      ```yaml

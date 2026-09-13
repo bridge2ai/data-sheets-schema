@@ -61,7 +61,7 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest):
     if p["provenance"].exists():
         record = yaml.safe_load(bc._split_header(p["provenance"].read_text(encoding="utf-8"))[1]) or {}
         inputs = record.get("inputs") or {}
-        bundle = bc.declared_bundle(record)
+        bundle = bc.declared_bundle(record, p["provenance"])
         md5, expected = inputs.get("bundle_md5"), bool(inputs.get("receipt_expected"))
         recovery = {"snapshot_record": record, "bundle_rel_path": inputs.get("bundle_path"), "record_bundle_sha256": inputs.get("bundle_sha256"),
                     "record_chunks": inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None}
@@ -87,7 +87,9 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest):
     # on attestation must not say "unchecked" of a record the backfill checked.
     chunks = recovery.get("record_chunks") if isinstance(recovery.get("record_chunks"), dict) else None
     if chunks and chunks.get("path") and "manifest" not in recovery:
-        recovery["manifest"] = Path(chunks["path"])           # the manifest the run sent (#1367 review, must-fix 6)
+        from data_sheets_schema.provenance import resolve_record_input
+        recovery["manifest"] = resolve_record_input(Path(chunks["path"]), p["provenance"])
+        recovery["allow_manifest_discovery"] = False
     if chunk_manifest is not None:
         recovery["manifest"] = chunk_manifest
     block = rc.block_for(p["full"], rc.receipt_path(p["core_dir"], project), bundle, md5, expected, **recovery)

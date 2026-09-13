@@ -1,19 +1,20 @@
 {
   "date": "2026-09-13",
   "files": {
-    "src/data_sheets_schema/api_runner.py": "6802a736544258f4f30cae4fb6c97cf186e2c8a4a5076624f1fec0473c9b6b15",
-    "src/data_sheets_schema/backfill_checks.py": "bbfe9c1892cb2cde27db30a5538edeee5f1d3a03832f6c7ce5e043e05c7ef7c5",
+    "src/data_sheets_schema/api_runner.py": "eee3a6cfd7cc632508e6ab6cd4ac71cfb15caf16484d4255e6c252bb920839cf",
+    "src/data_sheets_schema/backfill_checks.py": "e80e7ae38236d2bc83f4ab332b8ae0465aa5e3c050061be32899191180a7a101",
     "src/data_sheets_schema/chunking.py": "21ecc188bffe61efc38ce3fca84292dbbab08043973649364449263cdbe86e4a",
     "src/data_sheets_schema/cli/api.py": "c9dedebba350edd0a9e5e7638b3e78f907854921fada4c855b389d6634e6d199",
-    "src/data_sheets_schema/cli/provenance.py": "b98306ad9eb303a280dee3bb0f7c9bf7318cab307eb668d8f420a4df1384ec9a",
-    "src/data_sheets_schema/cli/receipts.py": "13e4c21dc66d7e92ed91e722deb33771a837a69f44d2607c943cacf0b0315696",
-    "src/data_sheets_schema/cli/runs.py": "e3055b8d94d1db3c9e70695662ecc6bebe2bd9876ea6455a45a8a1b31adadeae",
+    "src/data_sheets_schema/cli/provenance.py": "0e49e780921bcac8355c974df55d65ee24f7dc4f15831a6d3b6882b0485a348d",
+    "src/data_sheets_schema/cli/receipts.py": "4134a1e383fd4fd4775de172824f1c142e3ed7ed1a9ecef2511887d572222d6f",
+    "src/data_sheets_schema/cli/runs.py": "252451d708a46524703b6b645d153df86ee5a9da394712677ff0bdcba4a4de58",
     "src/data_sheets_schema/corpus.py": "056034a783b3e304252ab81a094f3d8e9d99eb3e2b7db00ec73c67b989491c95",
-    "src/data_sheets_schema/profiles.py": "6c32b067a3d52358f8643754835a2963695afcdfe3aa58a619edb73260aa24c7",
-    "src/data_sheets_schema/provenance.py": "4e69ef3ca5ce85f40a7389a7fb569b855647a14d5c12f9fade7f7d624ce37824",
-    "src/data_sheets_schema/registry.py": "e260fb38b354b5f71a6d9556cc2e98ee1c12e180a176646c236203b7ba50556f",
-    "src/data_sheets_schema/resources.py": "3d74348ebef7dcbe2126396f292ba237ce1b148652b8e7e8a1c40dd58e5e9520",
-    "src/data_sheets_schema/review_pack.py": "f27ce2fbe2b5b6ddb1f2111858249195a88ca0456535fa585a14bb263f0c65b1",
+    "src/data_sheets_schema/profiles.py": "89fbca990b0bbf44cff0b8a6d1e6089e8d0fa6ae07df70c384c1cfc58325d00b",
+    "src/data_sheets_schema/provenance.py": "57df904b0736e40574b767f27c3bb531c5f42f98682d66ee89f6f1f57bc401b1",
+    "src/data_sheets_schema/receipts.py": "033179c2e51f88d2e048281a08a7f0b8a738bf6d74385355cb094b320cac7f44",
+    "src/data_sheets_schema/registry.py": "04868fd2cd791c41e47637f638dc338d3b777d928ae7c793a696676ccacafdb3",
+    "src/data_sheets_schema/resources.py": "9fe33bd7645de0b984fb2fbfbc99c37b8723bfb340af0be5bddd15c07d3f0cdb",
+    "src/data_sheets_schema/review_pack.py": "a8be3deeddf18ab3ab932e206f421c77380042acf79772aa8bdf029a3900cbec",
     "src/data_sheets_schema/runs.py": "b2c4a3a3266487faffac5ba4ff193595646913bc877b5e4d375c07b4bd89ad9c",
     "src/data_sheets_schema/verifiable.py": "e997cb63a9807d7a534b86b66547d2eda9e5cd29c562cebbb49497c959da1f18"
   },
@@ -22,7 +23,7 @@
     "api"
   ],
   "historical_renderer_controls": 60,
-  "integration_dependency_commit": "8dec686e53dcd3275942cada9640ff5df515d2e9",
+  "integration_dependency_commit": "1e50aa0e785a37ef98aeb05af66fcd4e06f8bb1b",
   "issues": [
     1523,
     1594,
@@ -51,7 +52,11 @@
     1690,
     1693,
     1695,
-    1696
+    1696,
+    1724,
+    1725,
+    1726,
+    1731
   ],
   "new_spec_chunk_check_uses_manifest": true,
   "preservation_sha256": "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f",

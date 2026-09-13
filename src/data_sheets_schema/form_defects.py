@@ -663,16 +663,22 @@ def main(argv: list[str] | None = None) -> int:
     print(f"{len(failures)} form failure(s) loaded", file=sys.stderr)
 
     from data_sheets_schema.profiles import profile_named
-    classifier = FormSubtypeClassifier(cache_path=args.cache,
-                                       model=args.model,
-                                       schema=args.schema,
-                                       specification=args.specification,
-                                       offline=args.offline,
-                                       profile=profile_named(args.profile) if args.profile else None)
-    print(f"instrument: {classifier.model}  schema: {classifier.schema[:8]}",
-          file=sys.stderr)
-    print(f"specification: {classifier.specification or 'historical, unattested; replay only'}",
-          file=sys.stderr)
+    try:
+        classifier = FormSubtypeClassifier(cache_path=args.cache,
+                                           model=args.model,
+                                           schema=args.schema,
+                                           specification=args.specification,
+                                           offline=args.offline,
+                                           profile=profile_named(args.profile) if args.profile else None)
+        # The live instrument is materialised here: an unknown ambient
+        # profile surfaces as a named error, not a traceback (#1679, #1703).
+        print(f"instrument: {classifier.model}  schema: {classifier.schema[:8]}",
+              file=sys.stderr)
+        print(f"specification: {classifier.specification or 'historical, unattested; replay only'}",
+              file=sys.stderr)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
     classified = classify(failures, classifier)
     counts = table(classified)
 

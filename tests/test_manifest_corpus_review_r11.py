@@ -51,7 +51,8 @@ def test_canonical_paths_with_an_unknown_absolute_record_base_are_unavailable(tm
 
 
 @pytest.mark.parametrize("has_manifest", [False, True])
-def test_fresh_flat_records_keep_bundle_and_chunks_for_later_review(tmp_path, monkeypatch, has_manifest):
+@pytest.mark.parametrize("destination_kind", ["flat", "foreign_conventional"])
+def test_fresh_flat_records_keep_bundle_and_chunks_for_later_review(tmp_path, monkeypatch, has_manifest, destination_kind):
     owner = tmp_path / "owner"; owner.mkdir()
     original, instruction = review_fixtures.Pack()._run(owner)
     old_paths = review_pack.record_paths(original)
@@ -60,11 +61,13 @@ def test_fresh_flat_records_keep_bundle_and_chunks_for_later_review(tmp_path, mo
     if has_manifest:
         manifest = Path("source_manifest.yaml")
         manifest.write_text("projects:\n  P:\n    bundle: P_preprocessed.txt\n    sources: []\n")
+    destination = (Path("out") if destination_kind == "flat" else
+                   tmp_path / "other/data/d4d_concatenated/external_core/fresh")
     spec = api_runner.RunSpec(project="P", arm="BASELINE (input documents only)",
         method="external", label="fresh", condition="generic", profile="neutral",
         manifest=manifest, bundle=Path("P_preprocessed.txt"), chunk_manifest=Path("P_chunks.yaml"),
-        out_dir=Path("out"))
-    spec.out_dir.mkdir()
+        out_dir=destination)
+    spec.out_dir.mkdir(parents=True)
     outputs = {"full": spec.full_path, "core": spec.core_path, "report": spec.report_path}
     for key in ("full", "core"):
         shutil.copyfile(old_paths[key], outputs[key])

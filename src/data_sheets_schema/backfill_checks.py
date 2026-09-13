@@ -85,10 +85,13 @@ def record_paths(provenance: Path) -> dict[str, Path]:
             "full": full_dir / f"{project}_d4d.yaml"}
 
 
-def declared_bundle(record: dict[str, Any]) -> Path | None:
+def declared_bundle(record: dict[str, Any], provenance: Path | None = None) -> Path | None:
     """The bundle the record says it read, if it says."""
     inputs = record.get("inputs") or {}
     path = inputs.get("bundle_path") or inputs.get("bundle")
+    if path and provenance is not None:
+        from data_sheets_schema.provenance import resolve_record_input
+        return resolve_record_input(Path(path), provenance)
     from data_sheets_schema.corpus import anchored
     return anchored(Path(path)) if path else None
 
@@ -225,12 +228,15 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
         out["form"] = {**form_facts(full, core), "recorded_by": RECORDED_BY}
 
     # --- grounding --------------------------------------------------------
-    bundle = declared_bundle(record)
+    bundle = declared_bundle(record, provenance)
     if not want("grounding"):
         pass
     elif bundle is None:
         out["grounding"] = {"checked": False,
-                            "reason": "the record names no input bundle",
+                            "reason": ("the input bundle's relative path has no recorded base"
+                                       if (record.get("inputs") or {}).get("bundle_path")
+                                       or (record.get("inputs") or {}).get("bundle")
+                                       else "the record names no input bundle"),
                             "recorded_by": RECORDED_BY}
     elif not bundle.exists():
         out["grounding"] = {"checked": False,
@@ -266,12 +272,15 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
     # does". A receipt that exists is checked either way.
     if want("receipts"):
         from data_sheets_schema.receipts import block_for, receipt_path
+        from data_sheets_schema.provenance import resolve_record_input
         inputs = record.get("inputs") or {}
         chunks = inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None
+        declared_mapping = chunks.get("path") if chunks else None
         out["receipts"] = {**block_for(full, receipt_path(provenance.parent, paths["project"]),
                                        bundle, inputs.get("bundle_md5"),
                                        bool(inputs.get("receipt_expected")),
-                                       manifest=Path(chunks["path"]) if chunks and chunks.get("path") else None,
+                                       manifest=resolve_record_input(Path(declared_mapping), provenance) if declared_mapping else None,
+                                       allow_manifest_discovery=not declared_mapping,
                                        bundle_rel_path=inputs.get("bundle_path"),
                                        record_bundle_sha256=inputs.get("bundle_sha256"),
                                        record_chunks=inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None,

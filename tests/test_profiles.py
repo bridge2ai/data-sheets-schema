@@ -1280,7 +1280,7 @@ class TestRoundNine(_Clean):
         with mock.patch("data_sheets_schema.usage_ledger._read", return_value={"input_identity": old_identity}):
             with self.assertRaises(UsageLedgerError) as caught:
                 require_resolved(current)
-        self.assertIn("before profiles existed", str(caught.exception))
+        self.assertIn("cannot be resumed", str(caught.exception))          # the cause is named (#1628, #1712)
 
     def test_an_unknown_profile_is_a_usage_error_not_a_traceback(self):
         """#1630"""
@@ -1452,7 +1452,7 @@ class TestRoundEleven(_Clean):
         pre["instruction"] = {"render_version": old.render_version, "spec": old_dict,
                               "sha256": hashlib.sha256(resolve_prompt(old).encode()).hexdigest()}
         self.assertTrue(pre_profile_pin(pre)); self.assertTrue(_identity_differs(pre, current))
-        self.assertIn("before profiles existed", identity_refusal(pre, "x"))
+        self.assertIn("cannot be resumed", identity_refusal(pre, "x"))
 
     def test_a_backfilled_profile_is_the_records_and_a_disagreement_is_a_finding(self):
         """#1678"""
@@ -1498,10 +1498,203 @@ class TestRoundEleven(_Clean):
         r = click.testing.CliRunner().invoke(hs, ["bundle", "--output-dir", tempfile.mkdtemp()])
         self.assertNotEqual(r.exit_code, 0)
         self.assertNotIsInstance(r.exception, ValueError, r.output)
-        r = click.testing.CliRunner().invoke(prov_cli.provenance, [
-            "recheck-validation", "--method", "claudecode_api", "--label", "x", "--project", "CHORUS"])
-        self.assertNotIsInstance(r.exception, ValueError, r.output)   # a click error (here the missing record comes first)
+        label = "2026-07-31_claude-opus-5-api-generic_rep2"                  # a tracked record (#1705)
+        if (ROOT / "data/d4d_concatenated/claudecode_agent_crate_only_core" / label / "CHORUS_provenance.yaml").exists():
+            os.chdir(ROOT)
+            r = click.testing.CliRunner().invoke(prov_cli.provenance, [
+                "recheck-validation", "--method", "claudecode_agent_crate_only", "--label", label, "--project", "CHORUS"])
+            self.assertNotIsInstance(r.exception, ValueError, r.output)
+            self.assertIn("unknown profile", r.output)
         import subprocess, sys
         r2 = subprocess.run([sys.executable, "-m", "data_sheets_schema.form_defects", "--offline", "--profile", "bogus"],
                             capture_output=True, text=True, cwd=ROOT, env={**os.environ, "PYTHONPATH": str(ROOT / "src")})
         self.assertNotEqual(r2.returncode, 0); self.assertIn("invalid choice", r2.stderr)
+
+
+class TestRoundTwelve(_Clean):
+    """The Codex round-7 findings (#1698–#1708)."""
+
+    def test_a_pin_without_its_inputs_is_no_pin(self):
+        """#1698"""
+        from data_sheets_schema.api_runner import RunSpec
+        from data_sheets_schema.cli.api import ARMS
+        from data_sheets_schema.usage_ledger import _identity_differs
+        spec = RunSpec(project="CHORUS", method=ARMS["baseline"][1], arm=ARMS["baseline"][0],
+                       bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+                       label="2026-09-13_x-claudecode-generic-v9_rep1", condition="generic_v9",
+                       runtime="Claude Code", provider="Anthropic", run_date="2026-09-13", profile="bridge2ai")
+        current = spec.input_identity()
+        self.assertTrue(_identity_differs({"profile": current["profile"], "instruction": {"render_version": 4}}, current))
+        self.assertTrue(_identity_differs({k: v for k, v in current.items() if k != "bundle"}, current))
+        no_hash = dict(current, instruction={k: v for k, v in current["instruction"].items() if k != "sha256"})
+        self.assertTrue(_identity_differs(no_hash, current))
+        self.assertFalse(_identity_differs({k: v for k, v in current.items() if k != "profile"}, current))
+        self.assertTrue(_identity_differs("not a pin", current)); self.assertTrue(_identity_differs(current, None))
+
+    def test_malformed_records_and_pins_never_crash_the_helpers(self):
+        """#1700, #1701"""
+        from data_sheets_schema.provenance import _spec_profile_disagreement, check_record, profile_problems
+        from data_sheets_schema.usage_ledger import identity_refusal, pre_profile_pin
+        for prompts in ("text", 3, ["x"], {"request": "text"}, {"request": {"spec": ["x"]}}, {"request": {"spec": {"profile": 5}}}):
+            data = {"schema": {"profile": "bridge2ai", "digest_md5": "x"}, "prompts": prompts}
+            self.assertIsNone(_spec_profile_disagreement(data)); self.assertIsInstance(profile_problems(data), list)
+            problems, why = check_record(data); self.assertTrue(problems or why)
+        for pin in ("text", None, {"instruction": "text"}, {"instruction": {"spec": "x"}}, {"instruction": {"spec": ["x"]}}, {"instruction": None}):
+            pre_profile_pin(pin); self.assertIn("generation input identity changed", identity_refusal(pin, "x"))
+        self.assertTrue(pre_profile_pin({"instruction": {"spec": {"bundle": "b"}}}))
+        self.assertTrue(pre_profile_pin({"profile": {"name": "neutral"}, "instruction": {"spec": {}}}))    # the #1460–#1581 window (#1712)
+        self.assertFalse(pre_profile_pin({"profile": {"name": "neutral"}, "instruction": {"spec": {"profile": "neutral"}}}))
+
+    def test_runs_check_fails_strict_on_a_profile_disagreement(self):
+        """#1699"""
+        import click.testing
+        from data_sheets_schema.cli import runs as runs_cli
+        label = "2026-07-31_claude-opus-5-api-generic_rep2"
+        if not (ROOT / "data/d4d_concatenated/claudecode_agent_crate_only_core" / label / "CHORUS_provenance.yaml").exists():
+            self.skipTest("the tracked record is not in this checkout")
+        os.chdir(ROOT)
+        from data_sheets_schema import runs as runs_lib
+        real = runs_lib._prov
+        def disagreeing(method, lab, proj, *a, **kw):
+            data = real(method, lab, proj, *a, **kw) or {}
+            return dict(data, schema=dict(data.get("schema") or {}, profile="bridge2ai"),
+                        prompts={"request": {"spec": {"profile": "neutral"}}})
+        with mock.patch.object(runs_lib, "_prov", disagreeing):        # the command imports it at call time
+            r = click.testing.CliRunner().invoke(runs_cli.runs, ["check", "--strict", "--method", "claudecode_agent_crate_only",
+                                                                 "--label", label, "--project", "CHORUS"])
+        self.assertNotEqual(r.exit_code, 0); self.assertIn("two instruments", r.output)
+
+    def test_backfill_spec_refuses_a_malformed_recorded_profile(self):
+        """#1702"""
+        import click.testing
+        import yaml
+        from data_sheets_schema import provenance as pv
+        from data_sheets_schema.cli import provenance as prov_cli
+        record = {"record_generated_at": "2026-09-13T12:00:00Z", "model": {"provider": "Anthropic"},
+                  "schema": {"profile": ["neutral"]},
+                  "inputs": {"bundle_path": "data/preprocessed/concatenated/CHORUS_preprocessed.txt", "source_manifest": {"path": None}},
+                  "prompts": {"request": {"sha256": "0" * 64}}}
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "CHORUS_provenance.yaml"; path.write_text(yaml.safe_dump(record), encoding="utf-8")
+            with mock.patch.object(pv, "record_path_for", return_value=path):
+                r = click.testing.CliRunner().invoke(prov_cli.provenance, [
+                    "backfill-spec", "--project", "CHORUS", "--method", "claudecode_api", "--label", "x",
+                    "--condition", "generic_v9", "--runtime", "Claude Code"])
+        self.assertEqual(r.exit_code, 1, r.output); self.assertIn("schema.profile", r.output)
+        self.assertNotIsInstance(r.exception, (ValueError, TypeError))
+
+    def test_form_defects_names_an_unknown_ambient_profile_with_a_fresh_cache(self):
+        """#1703"""
+        import subprocess, sys
+        with tempfile.TemporaryDirectory() as d:
+            r = subprocess.run([sys.executable, "-m", "data_sheets_schema.form_defects", "--offline", "--cache", str(Path(d) / "fresh.jsonl"), "--limit", "1"],
+                               capture_output=True, text=True, cwd=ROOT,
+                               env={**os.environ, "PYTHONPATH": str(ROOT / "src"), "D4D_PROFILE": "typo"})
+        self.assertEqual(r.returncode, 2, r.stderr[-500:]); self.assertIn("unknown profile", r.stderr)
+        self.assertNotIn("Traceback", r.stderr)
+
+    def test_the_playbooks_send_the_model_to_no_prior_output(self):
+        """#1706, #1707"""
+        import re
+        for rel in (".github/workflows/d4d_assistant_create.md", ".github/workflows/d4d_assistant_edit.md",
+                    ".claude/commands/d4d-assistant.md", ".claude/commands/d4d-webfetch.md"):
+            text = (ROOT / rel).read_text(encoding="utf-8")
+            self.assertNotIn("data/d4d_concatenated/claudecode_agent/2026-04-10", text, rel)
+            self.assertIsNone(re.search(r"\bprogramme\b", text, re.I), rel)
+
+    def test_a_non_utf8_manifest_is_a_click_error_from_the_registry(self):
+        """#1708"""
+        import click
+        from data_sheets_schema import schema_cache
+        from data_sheets_schema.registry import load_registry
+        with tempfile.TemporaryDirectory() as d:
+            m = Path(d) / "m.yaml"; m.write_bytes(b"projects: {}\nnote: J\xf6rg\n"); schema_cache.clear()
+            with self.assertRaises(click.ClickException):
+                load_registry(m)
+
+
+class TestRoundThirteen(_Clean):
+    """The Claude round-7 findings (#1709–#1712)."""
+
+    def test_a_missing_schema_block_with_a_spec_profile_is_the_split(self):
+        """#1709"""
+        from data_sheets_schema.provenance import _spec_profile_disagreement
+        for schema in ({}, None, "x", ["x"]):
+            data = {"prompts": {"request": {"spec": {"profile": "neutral"}}}}
+            if schema != {}:
+                data["schema"] = schema
+            finding = _spec_profile_disagreement(data)
+            self.assertIsNotNone(finding, repr(schema)); self.assertIn("different instruments", finding)
+        self.assertIsNone(_spec_profile_disagreement({"prompts": {"request": {"spec": {}}}}))
+
+    def test_backfill_spec_writes_into_a_null_schema_block_and_restates_a_version_one_profile(self):
+        """#1710, #1711"""
+        import hashlib
+        import click.testing
+        import yaml
+        from data_sheets_schema import provenance as pv
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        from data_sheets_schema.cli import provenance as prov_cli
+        from data_sheets_schema.cli.api import ARMS
+        os.environ["D4D_PROFILE"] = "neutral"
+        spec = RunSpec(project="CHORUS", method=ARMS["baseline"][1], arm=ARMS["baseline"][0],
+                       bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+                       label="2026-09-13_x-claudecode-generic-v9_rep1", condition="generic_v9",
+                       runtime="Claude Code", provider="Anthropic", run_date="2026-09-13")
+        os.environ.pop("D4D_PROFILE")
+        base = {"record_generated_at": "2026-09-13T12:00:00Z", "model": {"provider": "Anthropic"},
+                "inputs": {"bundle_path": str(spec.bundle), "source_manifest": {"path": str(spec.manifest)},
+                           **({"chunks": {"path": str(spec.chunk_manifest)}} if spec.chunk_manifest else {})}}
+        args = ["backfill-spec", "--project", "CHORUS", "--method", spec.method, "--label", spec.label,
+                "--condition", "generic_v9", "--runtime", "Claude Code", "--execute"]
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "CHORUS_provenance.yaml"
+            # schema: null, a version-4 instruction rendered under neutral (#1710)
+            path.write_text(yaml.safe_dump(dict(base, schema=None, prompts={"request": {"sha256": hashlib.sha256(resolve_prompt(spec).encode()).hexdigest()}})), encoding="utf-8")
+            with mock.patch.object(pv, "record_path_for", return_value=path):
+                r = click.testing.CliRunner().invoke(prov_cli.provenance, args)
+            self.assertEqual(r.exit_code, 0, r.output); self.assertNotIsInstance(r.exception, TypeError)
+            written = yaml.safe_load(path.read_text(encoding="utf-8"))
+            self.assertEqual(written["schema"]["profile"], "neutral")
+            # a version-1 record that states a profile: restated, not verified (#1711)
+            v1 = RunSpec.from_render_spec({**spec.render_spec(), "render_version": 1}, project="CHORUS", method=spec.method, label=spec.label)
+            path.write_text(yaml.safe_dump(dict(base, schema={"profile": "neutral", "profile_basis": "environment"},
+                                                prompts={"request": {"sha256": hashlib.sha256(resolve_prompt(v1).encode()).hexdigest()}})), encoding="utf-8")
+            with mock.patch.object(pv, "record_path_for", return_value=path):
+                r = click.testing.CliRunner().invoke(prov_cli.provenance, args)
+            self.assertEqual(r.exit_code, 0, r.output)
+            written = yaml.safe_load(path.read_text(encoding="utf-8"))
+            self.assertEqual(written["prompts"]["request"]["spec"]["render_version"], 1)
+            self.assertIn("render version 1 does not hash the profile", written["prompts"]["request"]["spec_basis"])
+
+    def test_runs_validate_names_an_unknown_ambient_profile(self):
+        """#1711 (the `runs validate` wrap)"""
+        import click.testing
+        from data_sheets_schema.cli import runs as runs_cli
+        label = "2026-07-31_claude-opus-5-api-generic_rep2"
+        if not (ROOT / "data/d4d_concatenated/claudecode_agent_crate_only_core" / label / "CHORUS_provenance.yaml").exists():
+            self.skipTest("the tracked record is not in this checkout")
+        os.chdir(ROOT); os.environ["D4D_PROFILE"] = "typo"
+        r = click.testing.CliRunner().invoke(runs_cli.runs, ["validate", "--recheck", "--method", "claudecode_agent_crate_only", "--label", label, "--project", "CHORUS"])
+        self.assertNotIsInstance(r.exception, ValueError, r.output)
+        self.assertIn("unknown profile", r.output)
+
+    def test_a_window_pin_is_refused_with_the_cause(self):
+        """#1712: a pin with the profile key beside an instruction hashed without `--profile`."""
+        import hashlib
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        from data_sheets_schema.cli.api import ARMS
+        from data_sheets_schema.usage_ledger import _identity_differs, identity_refusal, pre_profile_pin
+        spec = RunSpec(project="CHORUS", method=ARMS["baseline"][1], arm=ARMS["baseline"][0],
+                       bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+                       label="2026-09-13_x-claudecode-generic-v9_rep1", condition="generic_v9",
+                       runtime="Claude Code", provider="Anthropic", run_date="2026-09-13", profile="bridge2ai")
+        current = spec.input_identity()
+        old_dict = {k: v for k, v in spec.render_spec().items() if k not in ("profile", "profile_basis")}
+        old = RunSpec.from_render_spec(old_dict, project="CHORUS", method=spec.method, label=spec.label)
+        window = dict(current, instruction={"render_version": old.render_version, "spec": old_dict,
+                                            "sha256": hashlib.sha256(resolve_prompt(old).encode()).hexdigest()})
+        self.assertIn("profile", window)
+        self.assertTrue(_identity_differs(window, current)); self.assertTrue(pre_profile_pin(window))
+        self.assertIn("cannot be resumed", identity_refusal(window, "x"))
+        self.assertFalse(pre_profile_pin(current))

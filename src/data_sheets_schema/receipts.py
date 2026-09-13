@@ -1273,7 +1273,8 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
               expected: bool, manifest: Path | None = None,
               bundle_rel_path: str | None = None, record_bundle_sha256: str | None = None,
               record_chunks: dict[str, Any] | None = None, *,
-              snapshot_spec=None, snapshot_record: dict | None = None) -> dict[str, Any]:
+              snapshot_spec=None, snapshot_record: dict | None = None,
+              allow_manifest_discovery: bool = True) -> dict[str, Any]:
     """The provenance block for one run, or why it could not be computed.
 
     `expected` is whether this run's procedure was to write a receipt. It is
@@ -1339,8 +1340,10 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
         disk_state = "the record's bundle is absent"
     else:
         disk_bytes = bundle.read_bytes()
-        mpath = manifest if manifest is not None else manifest_for(bundle)
-        if not mpath.exists():
+        mpath = manifest if manifest is not None else manifest_for(bundle) if allow_manifest_discovery else None
+        if mpath is None:
+            disk_state = "the recorded chunk manifest has no established path base"
+        elif not mpath.exists():
             disk_state = f"no chunk manifest for {bundle.name} at {mpath}"
             disk_advice = "run `d4d bundle chunk` (every bundle kind is chunked, #725)"
         else:
