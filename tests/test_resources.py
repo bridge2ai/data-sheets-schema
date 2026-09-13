@@ -1163,7 +1163,10 @@ class TestCodexRoundSix(unittest.TestCase):
         from data_sheets_schema.cli.bundle import bundle
         from data_sheets_schema.cli.runs import runs
         elsewhere = Path(self.tmp) / "work"; elsewhere.mkdir(); os.chdir(elsewhere)      # outside every checkout
-        r = click.testing.CliRunner().invoke(bundle, ["chunk", "--project", "CHORUS", "--bundle", str(Path(self.tmp) / "b.txt")])
+        manifest = Path(self.tmp) / "data/preprocessed/source_manifest.yaml"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text("projects:\n  SYNTHETIC:\n    sources: []\n")
+        r = click.testing.CliRunner().invoke(bundle, ["chunk", "--project", "SYNTHETIC", "--bundle", str(Path(self.tmp) / "b.txt")])
         self.assertNotEqual(r.exit_code, 0); self.assertIn("implicit corpus targets", r.output)
         r = click.testing.CliRunner().invoke(runs, ["trap-inventory", "--output", str(Path(self.tmp) / "out.json")])
         self.assertNotEqual(r.exit_code, 0); self.assertIn("implicit corpus targets", r.output)
