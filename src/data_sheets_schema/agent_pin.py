@@ -47,6 +47,7 @@ opening words — enough to find it in its section, never enough to answer.
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -151,8 +152,10 @@ def _git(*args, cwd: Path | None = None) -> str:
     root, kind = resource_root()
     if kind != "checkout":
         return ""
+    env = {key: value for key, value in os.environ.items()
+           if key not in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR")}
     return subprocess.run(["git", *args], capture_output=True, text=True,
-                          cwd=cwd or root).stdout
+                          cwd=cwd or root, env=env).stdout
 
 
 def _history_root(path: Path) -> Path:

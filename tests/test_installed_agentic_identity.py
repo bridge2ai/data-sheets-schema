@@ -106,7 +106,8 @@ def test_renderer6_rejects_unusable_recorded_toolchains(external, damage):
 
 
 @pytest.mark.parametrize("imported_checkout", [True, False])
-def test_definition_challenge_uses_the_checkout_that_supplies_the_definition(tmp_path, monkeypatch, imported_checkout):
+@pytest.mark.parametrize("foreign_git_dir", [False, True])
+def test_definition_challenge_uses_the_checkout_that_supplies_the_definition(tmp_path, monkeypatch, imported_checkout, foreign_git_dir):
     import subprocess
     roots = []
     for name in ("imported", "selected"):
@@ -125,6 +126,8 @@ def test_definition_challenge_uses_the_checkout_that_supplies_the_definition(tmp
     monkeypatch.setattr(agent_pin, "REPO", roots[0])
     monkeypatch.setattr(resources, "CHECKOUT_ROOT", roots[0] if imported_checkout else None)
     monkeypatch.chdir(roots[1])
+    if foreign_git_dir:
+        monkeypatch.setenv("GIT_DIR", str(roots[0] / ".git"))
     assert agent_pin._previous_text("synthetic") == "## Procedure\n\nThe selected checkout's previous rule is distinct.\n"
 
 
