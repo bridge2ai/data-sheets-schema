@@ -128,3 +128,13 @@ failures with eleven passing controls. The focused lane passes 305 tests and
 the broader evaluation/CLI lane passes 694. The read-only completed-condition
 audit still verifies all 56 accepted ratings and 450 preservation hashes.
 Inventory refresh and exact-head CI/review follow the source commit.
+
+## Python compatibility correction in round 6
+
+#1555 postpones annotations in the presence evaluator and standalone semantic
+validator so both import under the declared Python 3.9 support range. An actual
+Python 3.9.6 probe reproduces both annotation failures and passes after the
+correction; third-party dependencies are stubbed in that import-only check.
+This does not establish a complete clean dependency installation on Python 3.9.
+Scoring behavior and agent definitions are unchanged. The two code pins and
+the presence implementation digest are refreshed in the JSON companion.

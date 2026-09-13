@@ -15,6 +15,8 @@ Author: Claude Code Assistant
 Date: 2025-11-17
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import hashlib
