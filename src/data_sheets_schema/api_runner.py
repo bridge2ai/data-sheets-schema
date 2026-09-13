@@ -43,6 +43,7 @@ from typing import Any
 import yaml
 
 from data_sheets_schema import provenance, reasoning, schema_digest
+from data_sheets_schema.registry import DEFAULT_MANIFEST
 from data_sheets_schema.usage_ledger import (
     UsageLedgerError,
     append_usage as _append_usage,
@@ -454,6 +455,15 @@ class RunSpec:
     # `runs check` reports the label disagreement instead of failing it.
     condition_mismatch_allowed: bool = False
     manifest_line: str = "# Source manifest: data/preprocessed/source_manifest.yaml"
+    # The source manifest this run consults for its context blocks and
+    # attests as an input — the study's by default, another file for a
+    # dataset declared elsewhere, None for an explicit external bundle with
+    # no declaration (#621, #623). `manifest_line` is the header the model
+    # sees; `__post_init__` derives it from here unless an arm set its own.
+    manifest: Path | None = DEFAULT_MANIFEST
+    # The chunk manifest the run was given explicitly, when it is not the
+    # one discovered beside the bundle (#1299). None means discover.
+    chunk_manifest: Path | None = None
     # Frozen when the run is specified, not read from the clock on each use.
     # A six-phase run takes tens of minutes and this study's sweep genuinely
     # ran past midnight UTC, so recomputing per call gave phases of one run
@@ -478,6 +488,26 @@ class RunSpec:
     # Anthropic)" into a Claude Code header, a provider that run never touches.
     provider: str | None = None
 
+    def __post_init__(self):
+        default_line = type(self).__dataclass_fields__["manifest_line"].default
+        if self.manifest is not None:
+            self.manifest = Path(self.manifest)
+        if self.chunk_manifest is not None:
+            self.chunk_manifest = Path(self.chunk_manifest)
+        if self.manifest_line != default_line:
+            return                      # an arm that declares its own header keeps it
+        if self.manifest is None:
+            self.manifest_line = ("# Source manifest: not used (no manifest selected; "
+                                  "the bundle was passed explicitly)")
+        elif self.manifest != DEFAULT_MANIFEST:
+            self.manifest_line = f"# Source manifest: {self.manifest}"
+
+    @property
+    def manifest_used(self) -> bool:
+        """Whether the run consults a manifest at all: one is selected and
+        the arm's header does not declare it unused (#603)."""
+        return self.manifest is not None and "not used" not in self.manifest_line.lower()
+
     def render_spec(self) -> dict[str, Any]:
         """Everything `resolve_prompt` reads, for the record to keep.
 
@@ -488,6 +518,7 @@ class RunSpec:
         """
         return {"condition": self.condition, "arm": self.arm,
                 "manifest_line": self.manifest_line, "run_date": self.run_date,
+                "manifest": str(self.manifest) if self.manifest is not None else None,
                 "runtime": self.runtime,
                 "provider": self.provider or provider_identity()["provider"]
                 or PROVIDER,
@@ -623,14 +654,16 @@ def context_blocks(spec: "RunSpec") -> dict[str, Any]:
                      ("declared_naming", naming_block),
                      ("declared_scope", scope_block)):
         try:
-            text = fn(spec.project, spec.manifest_line)
+            text = fn(spec.project, spec.manifest_line, manifest=spec.manifest)
         except Exception:                                      # noqa: BLE001
             out[name] = {"sent": False, "basis": "renderer raised"}
             continue
         out[name] = ({"sent": True, "bytes": len(text.encode("utf-8"))}
                      if text else
                      {"sent": False,
-                      "basis": ("arm declares the manifest unused"
+                      "basis": ("no manifest was selected for this run"
+                                if spec.manifest is None else
+                                "arm declares the manifest unused"
                                 if spec.manifest_line
                                 and "not used" in spec.manifest_line.lower()
                                 else "project declares none, or the manifest "
@@ -1034,7 +1067,8 @@ PHASE_NEEDS = {
 
 
 def naming_block(project: str,
-                 manifest_line: str | None = None) -> str | None:
+                 manifest_line: str | None = None,
+                 manifest: Path | None = DEFAULT_MANIFEST) -> str | None:
     """The declared canonical GC label for one project, as sent to the model.
 
     Rendered from the manifest's `naming:` block (#668) so an edit there
@@ -1045,13 +1079,19 @@ def naming_block(project: str,
     """
     if manifest_line is not None and "not used" in manifest_line.lower():
         return None
+    if manifest is None:
+        return None
     from data_sheets_schema.grounding import declared_naming
-    declared = (declared_naming() or {}).get(project) or {}
+    declared = (declared_naming(Path(manifest)) or {}).get(project) or {}
     label = declared.get("canonical_label")
     if not label:
         return None
-    gc = declared.get("gc_name")
-    context = f" (the Bridge2AI {gc})" if gc else ""
+    # A declared programme affiliation is rendered from the manifest, never
+    # named here: `gc_name` was the study's key and the sentence hardcoded
+    # "the Bridge2AI", which put the study's affiliation in front of any
+    # dataset whose manifest happened to carry that key (#628 review).
+    programme = declared.get("programme") or declared.get("gc_name")
+    context = f" ({programme})" if programme else ""
     return (
         "DECLARED NAMING — in prose you compose, call this project "
         f"\"{label}\"{context}. This governs your own wording only: quoted "
@@ -1064,7 +1104,8 @@ def naming_block(project: str,
 
 
 def scope_block(project: str,
-                manifest_line: str | None = None) -> str | None:
+                manifest_line: str | None = None,
+                manifest: Path | None = DEFAULT_MANIFEST) -> str | None:
     """The declared scope for one project, as sent to the model (#932).
 
     v8's R2 tells the model that a passage whose subject is another dataset
@@ -1084,9 +1125,11 @@ def scope_block(project: str,
     """
     if manifest_line is not None and "not used" in manifest_line.lower():
         return None
+    if manifest is None:
+        return None
     try:
         from data_sheets_schema.scope import scope_of
-        declared = scope_of(project) or {}
+        declared = scope_of(project, Path(manifest)) or {}
     except Exception:                                          # noqa: BLE001
         return None
     referent = str(declared.get("referent") or "").strip()
@@ -1148,7 +1191,8 @@ def scope_block(project: str,
 
 
 def source_ranking_block(project: str,
-                         manifest_line: str | None = None) -> str | None:
+                         manifest_line: str | None = None,
+                         manifest: Path | None = DEFAULT_MANIFEST) -> str | None:
     """The declared source ranking for one project, as sent to the model.
 
     Rendered from the manifest rather than restated, so a tier edited there
@@ -1162,9 +1206,12 @@ def source_ranking_block(project: str,
     """
     if manifest_line and "not used" in manifest_line.lower():
         return None
+    if manifest is None:
+        return None
     try:
         from data_sheets_schema.source_priority import ranked
-        rows = ranked(project)
+        from data_sheets_schema.scope import load_manifest
+        rows = ranked(project, load_manifest(Path(manifest)))
     except Exception:                                          # noqa: BLE001
         return None
     if not rows:
@@ -1197,21 +1244,25 @@ def source_ranking_block(project: str,
     return "\n".join(lines)
 
 
-def chunk_marked_bundle(bundle: Path) -> tuple[str, str]:
+def chunk_marked_bundle(bundle: Path, manifest: Path | None = None) -> tuple[str, str]:
     """The bundle's text with a `[cNNN]` marker line opening each chunk of
     its manifest (#710), and the manifest's md5.
 
     Refuses a bundle whose manifest is absent or stale: markers the receipt
     validator cannot resolve back to bytes would make every receipt
     unmeasurable, and that is a fact to learn before a token is spent.
+    `manifest` selects one explicitly; otherwise it is discovered beside a
+    study bundle in the chunks directory, or beside any other bundle in its
+    own directory (#1299).
     """
     import hashlib
 
     from data_sheets_schema.chunking import load_manifest, manifest_for
     raw = bundle.read_bytes()
-    mpath = manifest_for(bundle)               # any bundle kind (#725)
+    mpath = Path(manifest) if manifest is not None else manifest_for(bundle)   # any bundle kind (#725)
     if not mpath.exists():
-        raise RuntimeError(f"no chunk manifest for {bundle} (expected {mpath}); run `d4d bundle chunk`")
+        raise RuntimeError(f"no chunk manifest for {bundle} (expected {mpath}); "
+                           f"run `d4d bundle chunk --bundle {bundle}`")
     m = load_manifest(mpath)
     if m.get("bundle_md5") != hashlib.md5(raw).hexdigest():
         raise RuntimeError(f"chunk manifest {mpath} is not of the bytes at {bundle}; "
@@ -1304,7 +1355,7 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     digest = schema_digest.digest_text(cls)
     receipted = spec.condition in RECEIPT_CONDITIONS
     if receipted:
-        bundle_text, bundle_md5 = chunk_marked_bundle(spec.bundle)
+        bundle_text, bundle_md5 = chunk_marked_bundle(spec.bundle, spec.chunk_manifest)
         bundle_head = (BUNDLE_HEAD.format(bundle=spec.bundle)
                        + BUNDLE_MD5_LINE.format(md5=bundle_md5)
                        + CHUNK_MARKER_NOTE)
@@ -4751,6 +4802,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         condition=spec.condition if spec.condition_stated else None,   # the run's own claim, or none (#1094)
         condition_mismatch_allowed=spec.condition_mismatch_allowed,
         input_bundle=spec.bundle, input_verified=True,
+        # The manifest this run consulted, or none: never the study's by
+        # default for a bundle it did not declare (#621, #1299).
+        manifest=spec.manifest, chunk_manifest=spec.chunk_manifest,
         prompt_paths=spec.prompt_files,
         # The API path builds its instruction with `resolve_prompt`, so it can
         # record exactly what it sent rather than only what it was built from

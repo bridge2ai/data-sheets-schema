@@ -5,6 +5,8 @@ from pathlib import Path
 
 import click
 
+from data_sheets_schema.registry import project_choice
+
 from data_sheets_schema.constants import PROJECTS
 
 
@@ -72,7 +74,7 @@ def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
 @runs.command("award-numbers")
 @click.option("--method", default=None, help="run directory family; defaults to the one the first label lives in (#934)")
 @click.option("--label", "labels", multiple=True, help="record labels to read grant_number from; repeat for each")
-@click.option("--project", "projects", multiple=True, type=click.Choice(PROJECTS), help="default: every project")
+@click.option("--project", "projects", multiple=True, callback=project_choice, help="default: every project")
 @click.option("--bundle-dir", default="data/preprocessed/concatenated", show_default=True,
               help="directory holding {PROJECT}_preprocessed.txt (to run from another root); the crate and healthsheet bundles have their own denominators and this command does not read them")
 @click.option("--contexts", is_flag=True, help="print every bundle mention with its source file and context")
@@ -118,7 +120,7 @@ def award_numbers_cmd(method, labels, projects, bundle_dir, contexts):
 @runs.command("full-output-baseline")
 @click.option("--method", default=None, help="run directory family; defaults to the one the first label lives in (#934)")
 @click.option("--label", "labels", multiple=True, required=True, help="a replicate label; repeat for each")
-@click.option("--project", "projects", multiple=True, type=click.Choice(PROJECTS), help="default: every project")
+@click.option("--project", "projects", multiple=True, callback=project_choice, help="default: every project")
 @click.option("--json", "as_json", is_flag=True)
 def full_output_baseline_cmd(method, labels, projects, as_json):
     """Per-project `full` output baseline under `PREDICTION_9_RULE` (#1026),

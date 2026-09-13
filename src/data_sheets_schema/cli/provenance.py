@@ -306,13 +306,17 @@ def _parse_phases(specs) -> list[dict]:
                    'already existed and validated — the same field the API '
                    'path\'s resumed runs carry. Repeat once per skipped '
                    'phase; names are validated like --phase.')
+@click.option('--manifest', default=None,
+              help='the source manifest this run consulted and attests as an input; default: '
+                   'the study\'s (data/preprocessed/source_manifest.yaml); `none` for a run '
+                   'that read no manifest — an explicit external bundle (#621)')
 @click.option('--receipt-expected', 'receipt_expected', is_flag=True, default=False,
               help='this run\'s procedure wrote a coverage receipt (#708); the '
                    'canary gate then treats a missing or failing one as a stop '
                    'rather than as not-applicable')
 def record(project, method, label, input_bundle, prompts, prompt_text,
            condition, arm, runtime, provider, bundle_for_spec,
-           reasoning_effort, phase_specs, phases_skipped, receipt_expected):
+           reasoning_effort, phase_specs, phases_skipped, manifest, receipt_expected):
     """Write a LIVE provenance record for a run just produced.
 
     Refuses to run from anywhere but the repository root — see
@@ -370,7 +374,9 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                        reasoning_effort=reasoning_effort,
                        phases=_parse_phases(phase_specs),
                        receipt_expected=receipt_expected,
-                       condition=condition)                  # the launcher's own claim (#1094)
+                       condition=condition,                  # the launcher's own claim (#1094)
+                       **({} if manifest is None else
+                          {"manifest": None if str(manifest).lower() == "none" else Path(manifest)}))
     if phases_skipped:
         known = _known_phases()
         bad = [n for n in phases_skipped if n not in known]

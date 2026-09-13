@@ -1131,8 +1131,9 @@ def main():
     parser.add_argument(
         "--projects",
         nargs="+",
-        choices=["AI_READI", "CHORUS", "CM4AI", "VOICE"],
-        help="Only process the selected project columns",
+        help="Only process the selected project columns (any column the sheet "
+             "or manifest declares; the study's four were the only choices "
+             "before #623)",
     )
     parser.add_argument(
         "--manifest",

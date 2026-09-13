@@ -8,7 +8,10 @@ import click
 
 from data_sheets_schema.api_runner import CONDITION_PROMPTS
 
-from data_sheets_schema.constants import PROJECTS
+from data_sheets_schema.registry import DEFAULT_MANIFEST, load_registry
+
+#: `_spec`'s "the caller did not say": the manifest is then selected by rule.
+_UNSET = object()
 
 # `baseline` writes under `claudecode_api` from generic_v8 on (#690, v8 plan
 # D6): the API and agentic runtimes shared `claudecode_agent` through v7 and
@@ -38,19 +41,37 @@ _CONDITIONS = sorted(CONDITION_PROMPTS)
 
 
 def _spec(project, arm, label, condition, bundle=None, out_dir=None,
-          runtime=None, provider=None):
+          runtime=None, provider=None, manifest=_UNSET, chunk_manifest=None):
     """Resolve a run spec.
 
     `project` is a free string rather than a click.Choice because the GitHub
     assistant generates datasheets for datasets outside the four study
     projects. A known project resolves its bundle by convention; anything else
     must declare one, which is checked in `_require_bundle`.
+
+    Which manifest the run consults (#621, #623): the one the caller names
+    with `--manifest`; `None` when the caller says `--manifest none`; and when
+    the caller says nothing, the default manifest **only if the bundle is the
+    one it declares for this project** — a study key with an external
+    `--bundle` does not select the study's declarations for that bundle, and
+    a run without a manifest records that it had none.
     """
     from data_sheets_schema.api_runner import RunSpec
-    display, method, pattern, manifest = ARMS[arm]
+    display, method, pattern, manifest_line = ARMS[arm]
+    if manifest is _UNSET:
+        reg = load_registry(DEFAULT_MANIFEST)
+        if bundle is None:
+            selected = DEFAULT_MANIFEST if reg.declares(project) else None
+        else:
+            selected = DEFAULT_MANIFEST if reg.declares_bundle(project, Path(bundle)) else None
+    else:
+        selected = Path(manifest) if manifest is not None else None
+    reg = load_registry(selected)
     resolved = (Path(bundle) if bundle else
+                reg.bundle(project) if reg.declares(project) and arm == "baseline" else
                 Path("data/preprocessed/concatenated") / pattern.format(p=project))
-    kw = {}
+    kw = {"manifest": selected,
+          "chunk_manifest": Path(chunk_manifest) if chunk_manifest else None}
     if runtime:
         kw["runtime"] = runtime
     if provider:
@@ -59,8 +80,18 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
         condition, kw["condition_stated"] = "generic", False
     return RunSpec(project=project, arm=display, method=method,
                    bundle=resolved, label=label, condition=condition,
-                   manifest_line=manifest,
+                   manifest_line=manifest_line,
                    out_dir=Path(out_dir) if out_dir else None, **kw)
+
+
+def _manifest_kw(manifest, chunk_manifest) -> dict:
+    """`--manifest` as `_spec` reads it: unset, a path, or `none`."""
+    kw: dict = {}
+    if manifest is not None:
+        kw["manifest"] = None if str(manifest).lower() == "none" else Path(manifest)
+    if chunk_manifest:
+        kw["chunk_manifest"] = Path(chunk_manifest)
+    return kw
 
 
 def _refuse_condition_mismatch(spec, allow: bool) -> None:
@@ -93,7 +124,16 @@ def _require_canonical_prompts(spec):
     from data_sheets_schema import prompt_registry as pr
 
     bad = [(p, pr.disk_status(p)) for p in spec.prompt_files]
-    bad = [(p, why) for p, (st, why) in bad if st != pr.CANONICAL]
+    # A tuned component that was never written for this project and is not
+    # pinned is "no component declared", which the renderer treats as empty;
+    # a component that exists but is unpinned, or is pinned but gone, stays a
+    # refusal exactly as before (#624; the gate's purpose is that a prompt in
+    # use is pinned, not that every project has one — #432, #436).
+    from data_sheets_schema.api_runner import COMPONENTS
+    bad = [(p, why) for p, (st, why) in bad
+           if st != pr.CANONICAL
+           and not (st == pr.UNPINNED and Path(p).parent == COMPONENTS
+                    and not Path(p).exists())]
     if not bad:
         return
     lines = "\n".join(f"   {pr.normalise(p)}: {why}" for p, why in bad)
@@ -106,10 +146,14 @@ def _require_canonical_prompts(spec):
 
 
 def _require_bundle(spec, project, bundle):
-    if bundle is None and project not in PROJECTS:
+    if bundle is None and not load_registry(spec.manifest).declares(project):
+        reg = load_registry(spec.manifest)
+        where = (f"{reg.path} declares {', '.join(reg.projects()) or 'no projects'}"
+                 if reg.path is not None else "no manifest was selected")
         raise click.ClickException(
-            f"{project!r} is not one of the known projects ({', '.join(PROJECTS)}), "
-            "so its bundle cannot be resolved by convention. Pass --bundle.")
+            f"{project!r} is not declared by the selected manifest ({where}), "
+            "so its bundle cannot be resolved by convention. Pass --bundle, or "
+            "--manifest naming a manifest that declares it.")
     if not spec.bundle.exists():
         raise click.ClickException(f"bundle not found: {spec.bundle}")
 
@@ -174,14 +218,20 @@ def api():
 
 @api.command("render-prompt")
 @click.option("--project", required=True,
-              help="AI_READI|CHORUS|CM4AI|VOICE, or any dataset name with --bundle")
+              help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
 @click.option("--label", required=True, help="run label")
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
               help="prompt condition; omitted, `generic` applies without being called a choice (#1094)")
 @click.option("--bundle", type=click.Path(), default=None,
-              help="explicit input bundle; required for datasets outside PROJECTS")
+              help="explicit input bundle; required for a dataset the selected manifest does not declare")
+@click.option("--manifest", default=None,
+              help="the source manifest that declares this project's context (naming, scope, "
+                   "source ranking) and is attested as an input; default: the study's only "
+                   "when the bundle is the one it declares (#621, #623); `none` for no manifest")
+@click.option("--chunk-manifest", default=None, type=click.Path(),
+              help="an explicit chunk manifest for the bundle (default: discovered beside it, #1299)")
 @click.option("--runtime", default="Claude Code", show_default=True,
               help="runtime the instruction should declare")
 @click.option("--provider", default="Anthropic", show_default=True)
@@ -189,7 +239,7 @@ def api():
               help="write the instruction here as well as printing its digest")
 @click.option("--allow-condition-mismatch", is_flag=True,
               help="render even though the label names a different condition (#1094)")
-def render_prompt_cmd(project, arm, label, condition, bundle, runtime, allow_condition_mismatch,
+def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, runtime, allow_condition_mismatch,
                       provider, out):
     """Render the exact instruction a run should receive, for any runtime.
 
@@ -213,7 +263,8 @@ def render_prompt_cmd(project, arm, label, condition, bundle, runtime, allow_con
     from data_sheets_schema.api_runner import resolve_prompt
 
     spec = _spec(project, arm, label, condition, bundle,
-                 runtime=runtime, provider=provider)
+                 runtime=runtime, provider=provider,
+                 **_manifest_kw(manifest, chunk_manifest))
     _refuse_condition_mismatch(spec, allow_condition_mismatch)   # the agentic path's launch instrument (#1130 round 2)
     _require_bundle(spec, project, bundle)
 
@@ -245,21 +296,27 @@ def render_prompt_cmd(project, arm, label, condition, bundle, runtime, allow_con
 
 @api.command("plan")
 @click.option("--project", required=True,
-              help="AI_READI|CHORUS|CM4AI|VOICE, or any dataset name with --bundle")
+              help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
 @click.option("--label", required=True, help="run label, e.g. 2026-07-29_claude-opus-5-api-generic_rep1")
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
               help="prompt condition; omitted, `generic` applies without being called a choice (#1094)")
 @click.option("--bundle", type=click.Path(), default=None,
-              help="explicit input bundle; required for datasets outside PROJECTS")
+              help="explicit input bundle; required for a dataset the selected manifest does not declare")
+@click.option("--manifest", default=None,
+              help="the source manifest that declares this project's context (naming, scope, "
+                   "source ranking) and is attested as an input; default: the study's only "
+                   "when the bundle is the one it declares (#621, #623); `none` for no manifest")
+@click.option("--chunk-manifest", default=None, type=click.Path(),
+              help="an explicit chunk manifest for the bundle (default: discovered beside it, #1299)")
 @click.option("--out-dir", type=click.Path(), default=None,
               help="flat output directory (the assistant layout)")
 @click.option("--json", "as_json", is_flag=True, help="emit the full plan as JSON")
-def plan_cmd(project, arm, label, condition, bundle, out_dir, as_json):
+def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, out_dir, as_json):
     """Render every phase without calling the API — no key, no charge."""
     from data_sheets_schema.api_runner import plan
-    spec = _spec(project, arm, label, condition, bundle, out_dir)
+    spec = _spec(project, arm, label, condition, bundle, out_dir, **_manifest_kw(manifest, chunk_manifest))
     _require_bundle(spec, project, bundle)
     p = _plan_or_refuse(spec)
     if as_json:
@@ -283,7 +340,7 @@ def plan_cmd(project, arm, label, condition, bundle, out_dir, as_json):
 
 @api.command("run")
 @click.option("--project", required=True,
-              help="AI_READI|CHORUS|CM4AI|VOICE, or any dataset name with --bundle")
+              help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
 @click.option("--label", required=True)
@@ -293,14 +350,20 @@ def plan_cmd(project, arm, label, condition, bundle, out_dir, as_json):
 @click.option("--allow-condition-mismatch", is_flag=True,
               help="run even though the label names a different condition (#1094)")
 @click.option("--bundle", type=click.Path(), default=None,
-              help="explicit input bundle; required for datasets outside PROJECTS")
+              help="explicit input bundle; required for a dataset the selected manifest does not declare")
+@click.option("--manifest", default=None,
+              help="the source manifest that declares this project's context (naming, scope, "
+                   "source ranking) and is attested as an input; default: the study's only "
+                   "when the bundle is the one it declares (#621, #623); `none` for no manifest")
+@click.option("--chunk-manifest", default=None, type=click.Path(),
+              help="an explicit chunk manifest for the bundle (default: discovered beside it, #1299)")
 @click.option("--out-dir", type=click.Path(), default=None,
               help="flat output directory (the assistant layout)")
 @click.option("--yes", is_flag=True, help="skip the cost confirmation")
-def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, out_dir, yes):
+def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, manifest, chunk_manifest, out_dir, yes):
     """Execute every phase (four model calls, plus one bounded re-addressing call under a receipt condition when a receipt entry names a slot the record does not carry, #952; the core is derived from the full) and write outputs plus a live provenance record."""
     from data_sheets_schema.api_runner import execute, plan
-    spec = _spec(project, arm, label, condition, bundle, out_dir)
+    spec = _spec(project, arm, label, condition, bundle, out_dir, **_manifest_kw(manifest, chunk_manifest))
     _require_bundle(spec, project, bundle)
     _require_canonical_prompts(spec)
     _refuse_condition_mismatch(spec, allow_condition_mismatch)
@@ -340,8 +403,15 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ou
 
 
 @api.command("batch")
-@click.option("--projects", default="AI_READI,CHORUS,CM4AI,VOICE", show_default=True,
-              help="comma-separated")
+@click.option("--projects", default=None,
+              help="comma-separated; default: every project the selected manifest declares "
+                   "(#623), or the --project-bundle names")
+@click.option("--manifest", default=str(DEFAULT_MANIFEST), show_default=True,
+              help="the source manifest that declares the projects and their context; "
+                   "`none` to run explicit bundles with no manifest")
+@click.option("--project-bundle", "project_bundles", multiple=True, metavar="NAME=PATH",
+              help="an explicit bundle for one project (repeatable, #624); a project "
+                   "without one resolves its bundle from the manifest by convention")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
@@ -365,7 +435,8 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ou
               help="fan out even if the first run regresses against the "
                    "baseline; the comparison is still printed")
 @click.option("--yes", is_flag=True)
-def batch_cmd(projects, arm, condition, allow_condition_mismatch, replicates, label_prefix, dry_run,
+def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_condition_mismatch,
+              replicates, label_prefix, dry_run,
               continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard):
     """Run a sweep of projects x replicates, reporting cumulative cost.
 
@@ -374,11 +445,26 @@ def batch_cmd(projects, arm, condition, allow_condition_mismatch, replicates, la
     """
     from data_sheets_schema.api_runner import execute, plan
 
-    names = [p.strip() for p in projects.split(",") if p.strip()]
+    selected = None if str(manifest).lower() == "none" else Path(manifest)
+    bundles: dict[str, str] = {}
+    for item in project_bundles:
+        name, sep, path = item.partition("=")
+        if not sep or not name.strip() or not path.strip():
+            raise click.ClickException(f"--project-bundle {item!r}: expected NAME=PATH")
+        bundles[name.strip()] = path.strip()
+    if projects:
+        names = [p.strip() for p in projects.split(",") if p.strip()]
+    else:
+        names = list(bundles) or load_registry(selected).projects()
+    if not names:
+        raise click.ClickException(
+            "no projects: the selected manifest declares none and no --project-bundle "
+            "was given; pass --projects, --project-bundle NAME=PATH, or --manifest")
     specs = []
     for p in names:
         for n in range(1, replicates + 1):
-            s = _spec(p, arm, f"{label_prefix}_rep{n}", condition)
+            s = _spec(p, arm, f"{label_prefix}_rep{n}", condition,
+                      bundle=bundles.get(p), manifest=selected)
             if not s.bundle.exists():
                 raise click.ClickException(
                     f"bundle not found for {p}: {s.bundle}")

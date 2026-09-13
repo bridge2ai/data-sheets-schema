@@ -4,6 +4,8 @@ Commands for working with RO-Crate metadata.
 """
 
 import click
+
+from data_sheets_schema.registry import project_choice
 import sys
 from pathlib import Path
 
@@ -149,7 +151,7 @@ def merge(input_files, output, primary):
 
 
 @rocrate.command()
-@click.option('--project', type=click.Choice(PROJECTS), multiple=True,
+@click.option('--project', callback=project_choice, multiple=True,
               help='Project(s) to normalize; repeatable. Default: all available.')
 @click.option('--packages-dir', type=click.Path(), default='data/ro-crate_packages',
               show_default=True, help='Root of the per-project crate packages.')
@@ -204,7 +206,7 @@ def normalize(project, packages_dir):
 
 
 @rocrate.command()
-@click.option('--project', type=click.Choice(PROJECTS), multiple=True,
+@click.option('--project', callback=project_choice, multiple=True,
               help='Project(s) to bundle; repeatable. Default: all normalized.')
 @click.option('--packages-dir', type=click.Path(), default='data/ro-crate_packages',
               show_default=True)
@@ -249,7 +251,7 @@ def bundle(project, packages_dir):
 @rocrate.command('emit-arm')
 @click.option('--version', required=True,
               help='Run label, e.g. 2026-07-24_deterministic-v1')
-@click.option('--project', type=click.Choice(PROJECTS), multiple=True,
+@click.option('--project', callback=project_choice, multiple=True,
               help='Project(s); default all normalized.')
 @click.option('--packages-dir', type=click.Path(), default='data/ro-crate_packages',
               show_default=True)
@@ -286,7 +288,7 @@ def emit_arm(version, project, packages_dir):
 
 
 @rocrate.command('map')
-@click.option('--project', type=click.Choice(PROJECTS), multiple=True,
+@click.option('--project', callback=project_choice, multiple=True,
               help='Project(s); default all with a crate.')
 @click.option('--packages-dir', type=click.Path(), default='data/ro-crate_packages',
               show_default=True)
@@ -345,7 +347,7 @@ def map_cmd(project, packages_dir):
 
 @rocrate.command('emit-map-arm')
 @click.option('--version', required=True, help='Run label for this arm.')
-@click.option('--project', type=click.Choice(PROJECTS), multiple=True)
+@click.option('--project', callback=project_choice, multiple=True)
 @click.option('--packages-dir', type=click.Path(), default='data/ro-crate_packages',
               show_default=True)
 def emit_map_arm(version, project, packages_dir):

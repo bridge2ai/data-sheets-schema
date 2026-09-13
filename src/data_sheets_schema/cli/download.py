@@ -4,11 +4,12 @@ Commands for downloading and preprocessing data sources.
 """
 
 import click
+
+from data_sheets_schema.registry import load_registry, project_choice, projects_for
 import sys
 
 import yaml
 from pathlib import Path
-from data_sheets_schema.constants import PROJECTS
 from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
 
 DEFAULT_SOURCE_SHEET_CSV = (
@@ -22,8 +23,34 @@ def download():
     """Download and preprocess data sources."""
     pass
 
+@download.command('list-projects')
+@click.option('--manifest', type=click.Path(), default='data/preprocessed/source_manifest.yaml',
+              show_default=True, help='the source manifest that is the registry (#623)')
+@click.option('--plain', is_flag=True, help='one name per line, nothing else (for scripts and Make)')
+def list_projects(manifest, plain):
+    """The projects the selected manifest declares — the one registry the
+    CLI and the Make targets read (#623, #637)."""
+    reg = load_registry(manifest)
+    names = reg.projects()
+    if plain:
+        for n in names:
+            click.echo(n)
+        return
+    if reg.path is None or not reg.path.exists():
+        click.echo(f"manifest {manifest} does not exist; no projects", err=True)
+        sys.exit(1)
+    click.echo(f"{reg.path}: {len(names)} project(s)")
+    for n in names:
+        extras = []
+        if reg.source_dir(n):
+            extras.append(f"source_dir={reg.source_dir(n)}")
+        if reg.raw_dir(n):
+            extras.append(f"raw_dir={reg.raw_dir(n)}")
+        click.echo(f"   {n}" + (f"  ({', '.join(extras)})" if extras else ""))
+
+
 @download.command()
-@click.option('--project', type=click.Choice(PROJECTS), required=True,
+@click.option('--project', callback=project_choice, required=True,
               help='Project to download')
 @click.option('--output-dir', type=click.Path(), default='data/raw',
               help='Output directory for downloads')
@@ -31,7 +58,7 @@ def download():
               help='Public CSV export URL or local CSV file')
 @click.option(
     '--manifest',
-    type=click.Path(exists=True),
+    type=click.Path(exists=True), is_eager=True,
     default='data/preprocessed/source_manifest.yaml',
     show_default=True,
     help='Canonical source selection manifest',
@@ -64,7 +91,7 @@ def sources(project, output_dir, sheet_url, manifest):
         sys.argv = old_argv
 
 @download.command()
-@click.option('--project', type=click.Choice(PROJECTS),
+@click.option('--project', callback=project_choice,
               help='Preprocess specific project only (default: all)')
 @click.option('--input-dir', type=click.Path(), default='data/raw',
               help='Input directory with raw downloads')
@@ -72,7 +99,7 @@ def sources(project, output_dir, sheet_url, manifest):
               help='Output directory for preprocessed files')
 @click.option(
     '--manifest',
-    type=click.Path(exists=True),
+    type=click.Path(exists=True), is_eager=True,
     default='data/preprocessed/source_manifest.yaml',
     show_default=True,
     help='Canonical source selection manifest',
@@ -109,7 +136,7 @@ def preprocess(project, input_dir, output_dir, manifest):
         sys.argv = old_argv
 
 @download.command()
-@click.option('--project', type=click.Choice(PROJECTS), required=True,
+@click.option('--project', callback=project_choice, required=True,
               help='Project to concatenate')
 @click.option('--input-dir', type=click.Path(exists=True),
               default='data/preprocessed/individual',
@@ -118,7 +145,7 @@ def preprocess(project, input_dir, output_dir, manifest):
               help='Output file path (default: data/preprocessed/concatenated/{PROJECT}_preprocessed.txt)')
 @click.option(
     '--manifest',
-    type=click.Path(exists=True),
+    type=click.Path(exists=True), is_eager=True,
     default='data/preprocessed/source_manifest.yaml',
     show_default=True,
     help='Canonical source selection manifest',
@@ -141,13 +168,9 @@ def concatenate(project, input_dir, output_file, manifest):
     # the override used to build its bundle lived only in the command someone
     # happened to type (#302). Declared in the manifest, it rebuilds from the
     # manifest.
-    if str(input_dir) == 'data/preprocessed/individual':
-        try:
-            declared = (yaml.safe_load(Path(manifest).read_text(encoding="utf-8"))
-                        or {}).get("projects", {}).get(f"{project}_source_dir")
-        except (OSError, yaml.YAMLError):
-            declared = None
-        input_path = Path(declared) if declared else Path(input_dir) / project
+    declared = load_registry(manifest).source_dir(project)
+    if str(input_dir) == 'data/preprocessed/individual' and declared:
+        input_path = declared
     else:
         input_path = Path(input_dir) / project
     if not input_path.exists():
@@ -174,9 +197,9 @@ def concatenate(project, input_dir, output_file, manifest):
 
 
 @download.command()
-@click.option('--project', type=click.Choice(PROJECTS),
+@click.option('--project', callback=project_choice,
               help='Limit to one project (default: all)')
-@click.option('--manifest', type=click.Path(exists=True),
+@click.option('--manifest', type=click.Path(exists=True), is_eager=True,
               default='data/preprocessed/source_manifest.yaml', show_default=True,
               help='Canonical source selection manifest')
 @click.option('--only', multiple=True, metavar='ID',
@@ -231,9 +254,9 @@ def supplements(project, manifest, only, force, dry_run):
 
 
 @download.command('audit-manifest')
-@click.option('--project', type=click.Choice(PROJECTS),
+@click.option('--project', callback=project_choice,
               help='Limit to one project (default: all)')
-@click.option('--manifest', type=click.Path(exists=True),
+@click.option('--manifest', type=click.Path(exists=True), is_eager=True,
               default='data/preprocessed/source_manifest.yaml', show_default=True)
 def audit_manifest(project, manifest):
     """Report manifest-declared sources against what is on disk."""
@@ -271,14 +294,14 @@ def audit_manifest(project, manifest):
 
 
 @download.command('scope')
-@click.option('--project', type=click.Choice(PROJECTS),
+@click.option('--project', callback=project_choice,
               help='Limit to one project (default: all)')
 @click.option('--check', 'do_check', is_flag=True,
               help='Also check generated records against the declaration.')
 @click.option('--strict', is_flag=True,
               help='Exit non-zero if any record is about a related-but-'
                    'distinct dataset.')
-@click.option('--manifest', type=click.Path(exists=True),
+@click.option('--manifest', type=click.Path(exists=True), is_eager=True,
               default='data/preprocessed/source_manifest.yaml', show_default=True)
 def scope_cmd(project, do_check, strict, manifest):
     """What each project's record is about, and whether the records agree.
@@ -297,7 +320,7 @@ def scope_cmd(project, do_check, strict, manifest):
 
     m = Path(manifest)
     scopes = all_scopes(m)
-    names = [project] if project else sorted(scopes)
+    names = [project] if project else sorted(set(scopes) | set(load_registry(m).projects()))
     for name in names:
         s = scopes.get(name)
         if not s:
@@ -393,11 +416,11 @@ def scope_cmd(project, do_check, strict, manifest):
 
 
 @download.command('audit-bundles')
-@click.option('--project', type=click.Choice(PROJECTS),
+@click.option('--project', callback=project_choice,
               help='Limit to one project (default: all)')
 @click.option('--strict', is_flag=True,
               help='Exit non-zero if any derived bundle is stale.')
-@click.option('--manifest', type=click.Path(exists=True),
+@click.option('--manifest', type=click.Path(exists=True), is_eager=True,
               default='data/preprocessed/source_manifest.yaml', show_default=True)
 def audit_bundles(project, strict, manifest):
     """Rebuild every derived bundle into a temp file and compare it to disk.
@@ -423,7 +446,7 @@ def audit_bundles(project, strict, manifest):
     from data_sheets_schema.rocrate_normalize import build_crate_bundle
 
     concat = Path('data/preprocessed/concatenated')
-    targets = [project] if project else list(PROJECTS)
+    targets = projects_for(manifest, project)
     md5 = lambda p: hashlib.md5(p.read_bytes()).hexdigest()  # noqa: E731
 
     stale, checked, unchecked, manifests = [], 0, [], 0
@@ -435,9 +458,8 @@ def audit_bundles(project, strict, manifest):
             # VOICE_PEDIATRIC read VOICE's directory (#302).
             current = concat / f"{name}_preprocessed.txt"
             if current.exists():
-                declared = (yaml.safe_load(Path(manifest).read_text(encoding="utf-8"))
-                            or {}).get("projects", {}).get(f"{name}_source_dir")
-                src = Path(declared) if declared else Path(
+                declared = load_registry(manifest).source_dir(name)
+                src = declared if declared else Path(
                     'data/preprocessed/individual') / name
                 out = tmp / f"{name}_preprocessed.txt"
                 from src.download.concatenate_documents import main as concat_main

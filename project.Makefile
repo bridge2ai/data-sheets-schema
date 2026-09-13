@@ -18,8 +18,11 @@ D4D_HTML_DIR = data/d4d_html
 SYNC ?=
 D4D_PAIR_SYNC_ARG = $(if $(filter 1 true yes,$(SYNC)),--sync-core,)
 
-# Projects
-PROJECTS = AI_READI CHORUS CM4AI VOICE
+# Projects: asked of the CLI, which reads them from the source manifest
+# (#623, #637). This used to be a second, hand-kept list that had already
+# drifted from constants.PROJECTS. Override with `make PROJECTS="A B"` or
+# point at another registry with `make SOURCE_MANIFEST=path`.
+PROJECTS ?= $(shell $(RUN) d4d download list-projects --manifest $(SOURCE_MANIFEST) --plain 2>/dev/null)
 
 # Bridge2AI source documentation Google Sheet
 # Note: Use CSV export URL format for the extractor script

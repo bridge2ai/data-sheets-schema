@@ -183,14 +183,41 @@ def manifest_path(project: str, chunks_dir: Path | None = None) -> Path:
     return (chunks_dir or CHUNKS_DIR) / f"{project}_chunks.yaml"
 
 
+def _under_concat_dir(bundle: Path) -> bool:
+    """Whether `bundle` is one of the study's bundles: a file under
+    `CONCAT_DIR`, resolved. A relative study path (`data/preprocessed/
+    concatenated/CHORUS_preprocessed.txt`) resolves against the working
+    directory, which is the repository root for every study command."""
+    try:
+        return Path(bundle).resolve().parent == CONCAT_DIR.resolve()
+    except OSError:
+        return False
+
+
 def manifest_for(bundle: Path, chunks_dir: Path | None = None) -> Path:
-    """The manifest for any bundle kind (#725): the document bundle keeps
-    `{PROJECT}_chunks.yaml`; every other kind is `{bundle stem}_chunks.yaml`
-    (`CHORUS_crate_only_chunks.yaml`). Two bundles never share a manifest."""
+    """The manifest for any bundle kind (#725).
+
+    A study bundle — one under `CONCAT_DIR`, or any bundle when the caller
+    names a `chunks_dir` — keeps the frozen layout: the document bundle is
+    `{PROJECT}_chunks.yaml` and every other kind `{bundle stem}_chunks.yaml`
+    (`CHORUS_crate_only_chunks.yaml`) under the chunks directory.
+
+    Any other bundle gets a sidecar beside itself, `{bundle stem}_chunks.yaml`
+    in the bundle's own directory (#1299). Keyed by basename alone, two
+    external bundles named `dataset.txt` in different directories shared one
+    manifest under the study layout, so the second chunking silently replaced
+    the first's — and a receipt validated against the wrong bytes. Beside the
+    bundle, the manifest's identity is the bundle's, and the manifest still
+    names the bundle by basename, so its bytes are the same wherever the
+    bundle was read from (#713).
+    """
+    bundle = Path(bundle)
     name = bundle.name
+    stem = name[:-4] if name.endswith(".txt") else name
+    if chunks_dir is None and not _under_concat_dir(bundle):
+        return bundle.parent / f"{stem}_chunks.yaml"
     if name.endswith("_preprocessed.txt"):
         return manifest_path(name[: -len("_preprocessed.txt")], chunks_dir)
-    stem = name[:-4] if name.endswith(".txt") else name
     return (chunks_dir or CHUNKS_DIR) / f"{stem}_chunks.yaml"
 
 
@@ -281,7 +308,8 @@ def manifest_status_for(bundle: Path, chunks_dir: Path | None = None) -> tuple[s
 
 
 def chunks_input(bundle: Path | None, bundle_md5: str | None,
-                 chunks_dir: Path | None = None) -> dict[str, Any] | None:
+                 chunks_dir: Path | None = None,
+                 manifest: Path | None = None) -> dict[str, Any] | None:
     """What a provenance record should carry under `inputs.chunks`.
 
     Returned only when a manifest exists for this bundle *and* it was built
@@ -292,7 +320,9 @@ def chunks_input(bundle: Path | None, bundle_md5: str | None,
     """
     if bundle is None or bundle_md5 is None:
         return None
-    path = manifest_for(bundle, chunks_dir)
+    # An explicitly selected manifest wins over discovery (#1299): the run
+    # that chunked an external bundle knows where it put the manifest.
+    path = Path(manifest) if manifest is not None else manifest_for(bundle, chunks_dir)
     if not path.exists():
         return None
     try:

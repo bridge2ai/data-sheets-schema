@@ -6,7 +6,8 @@ from pathlib import Path
 
 import click
 
-from data_sheets_schema.constants import PROJECTS
+from data_sheets_schema.registry import project_choice
+
 
 
 @click.group()
@@ -26,7 +27,7 @@ def _run_paths(method: str, label: str, project: str) -> dict[str, Path]:
 @receipts.command("check")
 @click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--label", required=True)
-@click.option("--project", type=click.Choice(PROJECTS), required=True)
+@click.option("--project", callback=project_choice, required=True)
 @click.option("--write", is_flag=True,
               help="write the `receipts` block into the provenance record and the "
                    "claim-receipt sidecar beside it")

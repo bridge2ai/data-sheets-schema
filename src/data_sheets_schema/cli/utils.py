@@ -6,7 +6,8 @@ Commands for utility operations like status checks.
 import click
 import sys
 from pathlib import Path
-from data_sheets_schema.constants import PROJECTS, METHODS
+from data_sheets_schema.constants import METHODS
+from data_sheets_schema.registry import load_registry, project_choice
 from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
 
 @click.group()
@@ -16,14 +17,15 @@ def utils():
 
 @utils.command()
 @click.option('--quick', is_flag=True, help='Show compact overview')
-def status(quick):
+@click.option('--manifest', type=click.Path(), default='data/preprocessed/source_manifest.yaml',
+              show_default=True, help='the source manifest whose projects are listed (#637)')
+def status(quick, manifest):
     """Show data pipeline status and file counts."""
-    from data_sheets_schema.constants import PROJECT_PATHS
-
+    projects = load_registry(manifest).projects()
     if quick:
-        _show_compact_status()
+        _show_compact_status(projects)
     else:
-        _show_detailed_status()
+        _show_detailed_status(projects)
 
 @utils.command('validate-preprocessing')
 @click.option('--raw-dir', type=click.Path(), default='data/raw',
@@ -31,9 +33,11 @@ def status(quick):
 @click.option('--preprocessed-dir', type=click.Path(),
               default='data/preprocessed/individual',
               help='Preprocessed data directory')
-@click.option('--project', type=click.Choice(PROJECTS),
+@click.option('--manifest', type=click.Path(), default='data/preprocessed/source_manifest.yaml',
+              show_default=True, is_eager=True, help='the registry for --project')
+@click.option('--project', callback=project_choice,
               help='Validate specific project only')
-def validate_preprocessing(raw_dir, preprocessed_dir, project):
+def validate_preprocessing(raw_dir, preprocessed_dir, manifest, project):
     """Validate preprocessing quality (check for empty/stub files)."""
     require_repo_context("d4d utils validate-preprocessing")
 
@@ -53,7 +57,7 @@ def validate_preprocessing(raw_dir, preprocessed_dir, project):
     finally:
         sys.argv = old_argv
 
-def _show_compact_status():
+def _show_compact_status(projects):
     """Show compact pipeline status."""
     data_dir = Path('data')
 
@@ -77,7 +81,7 @@ def _show_compact_status():
         else:
             click.echo(f"  {section_name:20} ❌ Not found")
 
-def _show_detailed_status():
+def _show_detailed_status(projects):
     """Show detailed pipeline status."""
     data_dir = Path('data')
 
@@ -86,7 +90,7 @@ def _show_detailed_status():
 
     # Raw downloads by project
     click.echo("\n📁 Raw Downloads:")
-    for project in PROJECTS:
+    for project in projects:
         project_dir = data_dir / 'raw' / project
         if project_dir.exists():
             file_count = len(list(project_dir.glob('*')))
@@ -96,7 +100,7 @@ def _show_detailed_status():
 
     # Preprocessed by project
     click.echo("\n🔄 Preprocessed:")
-    for project in PROJECTS:
+    for project in projects:
         project_dir = data_dir / 'preprocessed' / 'individual' / project
         if project_dir.exists():
             file_count = len(list(project_dir.glob('*')))
