@@ -258,7 +258,8 @@ def cli(argv: List[str] | None = None, *, eval_base: Path | None = None,
     if args.context and not args.files:
         parser.error("--context requires --file")
     return validate_outputs(args.files, args.rubric, input_path=args.input,
-                            definition_path=args.agent_definition, context_path=args.context) if args.files else main(eval_base=eval_base, schema_dir=schema_dir)
+                            definition_path=args.agent_definition, context_path=args.context,
+                            schema_dir=schema_dir) if args.files else main(eval_base=eval_base, schema_dir=schema_dir)
 
 
 if __name__ == "__main__":
