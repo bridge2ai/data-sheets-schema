@@ -805,10 +805,10 @@ class TestClaudeRoundFour(unittest.TestCase):
             return SimpleNamespace(hash=SimpleNamespace(mode="sha256", value=value), locate=lambda: path, __str__=lambda self: path.name)
         entries = [entry(good, b"bytes\n"), entry(bad, b"other\n")]
         with mock.patch("importlib.metadata.files", return_value=entries):
-            changed, measured = provenance._installed_files_changed()
-        self.assertTrue(measured); self.assertEqual(len(changed), 1)
+            changed, measured, unmeasured = provenance._installed_files_changed()
+        self.assertTrue(measured); self.assertEqual(len(changed), 1); self.assertEqual(unmeasured, [])
         with mock.patch("importlib.metadata.files", return_value=[]):
-            self.assertEqual(provenance._installed_files_changed(), ([], False))
+            self.assertEqual(provenance._installed_files_changed(), ([], False, []))
         with mock.patch("data_sheets_schema.resources.resource_root", return_value=(Path(self.tmp), "install")), \
                 mock.patch("importlib.metadata.files", return_value=[entry(good, b"bytes\n")]):
             facts = provenance.repo_facts()
@@ -838,3 +838,168 @@ class TestClaudeRoundFour(unittest.TestCase):
             r = click.testing.CliRunner().invoke(api, args)
             self.assertNotEqual(r.exit_code, 0)
             self.assertIn("repository root", r.output, args[0])
+
+
+class TestCodexRoundFive(unittest.TestCase):
+    """The Codex round-5 findings on #1455 (#1663–#1674)."""
+
+    def setUp(self):
+        self._cwd = os.getcwd()
+        self.tmp = tempfile.mkdtemp(prefix="d4d-resources-")
+        os.chdir(self.tmp)
+
+    def tearDown(self):
+        os.chdir(self._cwd)
+
+    def _checkout(self, at: Path) -> Path:
+        (at / "src" / "data_sheets_schema").mkdir(parents=True)
+        (at / "pyproject.toml").write_text('[tool.poetry]\nname = "data-sheets-schema"\n', encoding="utf-8")
+        return at
+
+    def test_an_implicit_chunk_write_is_refused_from_a_subdirectory(self):
+        """#1663"""
+        import click.testing
+        from data_sheets_schema.cli.bundle import bundle
+        repo = self._checkout(Path(self.tmp) / "wt"); os.chdir(repo / "src")
+        r = click.testing.CliRunner().invoke(bundle, ["chunk", "--project", "CHORUS", "--max-lines", "7"])
+        self.assertNotEqual(r.exit_code, 0); self.assertIn("repository root", r.output)
+
+    def test_agent_lookup_honours_an_authoritative_absence(self):
+        """#1664"""
+        from data_sheets_schema import agent_pin
+        repo = self._checkout(Path(self.tmp) / "wt"); os.chdir(repo)
+        with self.assertRaises(FileNotFoundError):
+            agent_pin.agent_path("d4d-rubric10-semantic")
+
+    def _install(self):
+        site = Path(self.tmp) / "site"
+        (site / "data_sheets_schema" / "schema").mkdir(parents=True)
+        (site / "data_sheets_schema" / "schema" / "x.yaml").write_text("a: 1\n", encoding="utf-8")
+        (site / ".claude" / "agents").mkdir(parents=True)
+        (site / ".claude" / "agents" / "d4d-review-record.md").write_text("---\nname: d4d-review-record\n---\n\nbody\n", encoding="utf-8")
+        (site / "other_package").mkdir(); (site / "other_package" / "__init__.py").write_text("", encoding="utf-8")
+        return site
+
+    def test_installed_package_data_has_one_identity(self):
+        """#1665"""
+        from data_sheets_schema import resources
+        site = self._install(); os.chdir(Path(self.tmp) / "work" if (Path(self.tmp) / "work").mkdir() is None else self.tmp)
+        with mock.patch.multiple(resources, CHECKOUT_ROOT=None, INSTALL_ROOT=site, PACKAGE_ROOT=site / "data_sheets_schema"):
+            self.assertEqual(resources.resource_root(), (site, "install"))
+            physical = site / "data_sheets_schema" / "schema" / "x.yaml"
+            self.assertEqual(resources.repo_relative(physical, cwd=False), "src/data_sheets_schema/schema/x.yaml")
+            self.assertEqual(resources.resource_path(resources.repo_relative(physical, cwd=False)), physical)
+            self.assertTrue(Path(resources.repo_relative(site / "other_package" / "__init__.py", cwd=False)).is_absolute())
+
+    def test_the_agents_cli_enumerates_the_resolvers_definitions(self):
+        """#1666"""
+        from data_sheets_schema import resources
+        from data_sheets_schema.cli import agents as ca
+        site = self._install(); os.chdir(self.tmp)
+        with mock.patch.multiple(resources, CHECKOUT_ROOT=None, INSTALL_ROOT=site, PACKAGE_ROOT=site / "data_sheets_schema"):
+            self.assertEqual(ca._names(), ["d4d-review-record"])
+
+    def test_a_partially_unhashed_record_is_not_a_clean_install(self):
+        """#1667"""
+        import base64, hashlib
+        from types import SimpleNamespace
+        from data_sheets_schema import provenance
+        good = Path(self.tmp) / "good.py"; good.write_text("good", encoding="utf-8")
+        h = SimpleNamespace(mode="sha256", value=base64.urlsafe_b64encode(hashlib.sha256(b"good").digest()).rstrip(b"=").decode())
+        class Entry:
+            def __init__(self, name, hash_value, path): self.name, self.hash, self.path = name, hash_value, path
+            def __str__(self): return self.name
+            def locate(self): return self.path
+        g = Entry("good.py", h, good)
+        missing = Entry("data_sheets_schema/schema/missing.yaml", None, Path(self.tmp) / "absent.yaml")
+        pth = Entry("startup.pth", None, good)
+        unhashed = Entry("data_sheets_schema/schema/x.yaml", None, good)
+        with mock.patch("importlib.metadata.files", return_value=[g, missing]):
+            self.assertEqual(provenance._installed_files_changed(), (["data_sheets_schema/schema/missing.yaml"], True, []))
+        with mock.patch("importlib.metadata.files", return_value=[g, pth]):
+            self.assertEqual(provenance._installed_files_changed(), ([], True, []))
+        with mock.patch("importlib.metadata.files", return_value=[g, unhashed]):
+            changed, measured, unmeasured = provenance._installed_files_changed()
+            self.assertEqual((changed, measured, unmeasured), ([], False, ["data_sheets_schema/schema/x.yaml"]))
+
+    def test_the_last_traceback_decides_and_a_quoted_name_keeps_its_marker(self):
+        """#1668, #1672"""
+        from data_sheets_schema.api_runner import _crash_diagnostic, _validator_did_not_run
+        tb = "Traceback (most recent call last):\n  File \"validator.py\", line 1\n    parse()\n"
+        chained = (tb + 'yaml.parser.ParserError: invalid\n  in "record.yaml", line 2, column 1\n\n'
+                   "During handling of the above exception, another exception occurred:\n\n"
+                   + tb + "RuntimeError: validator configuration broke\n")
+        self.assertTrue(_validator_did_not_run(chained, "record.yaml"))
+        quoted = tb + 'yaml.parser.ParserError: while parsing\n  in "a"b.yaml", line 2, column 1\n'
+        self.assertFalse(_validator_did_not_run(quoted, 'a"b.yaml'))
+        self.assertIn('in "a"b.yaml", line 2, column 1', _crash_diagnostic(quoted))
+
+    def test_findings_emitted_before_a_crash_survive_it(self):
+        """#1669"""
+        import subprocess
+        from data_sheets_schema import api_runner as a, run_telemetry as t
+        out = "[ERROR] [r.yaml/0] ['not', 'string'] is not of type 'string' in /title\n"
+        err = "Traceback (most recent call last):\n  File \"v.py\", line 1\n    go()\nyaml.parser.ParserError: while parsing\n  in \"/tmp/r.yaml\", line 5, column 8\n"
+        with mock.patch.object(a.subprocess, "run", return_value=subprocess.CompletedProcess([], 1, out, err)):
+            findings, failure = a._validator_lines(Path("/tmp/r.yaml"), "schema.yaml", "Dataset")
+        self.assertIsNone(failure)
+        self.assertTrue(any(t.parse_validator_line(l) for l in findings), findings)
+        self.assertTrue(any("ParserError" in l for l in findings), findings)
+        base = Path(self.tmp) / "corpus"; rec = base / "api" / "run" / "P_d4d.yaml"; rec.parent.mkdir(parents=True)
+        rec.write_text("id: x\n", encoding="utf-8")
+        with mock.patch.object(a, "_validator_lines", return_value=(findings, None)):
+            report = t.trap_inventory(base)
+        self.assertEqual(report["records_with_unparsed_findings"], 1)
+        self.assertTrue(report["traps"])
+
+    def test_a_change_of_diagnostic_class_is_progress(self):
+        """#1670"""
+        from data_sheets_schema.api_runner import _finding_class
+        parser = ["yaml.parser.ParserError: while parsing", 'in "P_d4d.yaml", line 2, column 8']
+        shape = [f"[ERROR] [P_d4d.yaml/0] 12 is not of type object in /creators/{i}" for i in range(5)]
+        self.assertEqual((_finding_class(parser), _finding_class(shape)), ("diagnostic", "structured"))
+        self.assertNotEqual(_finding_class(parser), _finding_class(shape))     # the counts are not compared across classes
+
+    def test_a_hard_linked_implicit_registry_is_refused(self):
+        """#1671"""
+        from data_sheets_schema import prompt_registry as pr
+        staged = Path(self.tmp) / "staged"; (staged / "src" / "download" / "prompts").mkdir(parents=True)
+        reg = staged / pr.REGISTRY; reg.write_text("prompts: {}\n", encoding="utf-8")
+        other = Path(self.tmp) / "elsewhere.yaml"
+        try:
+            os.link(reg, other)
+        except OSError:
+            self.skipTest("hard links unavailable here")
+        (staged / "src" / "download" / "prompts" / "p.md").write_text("# x\n\n## Prompt body\nbody\n", encoding="utf-8")
+        os.chdir(staged)
+        with self.assertRaises(ValueError) as caught:
+            pr.pin("src/download/prompts/p.md", "must not write through the link")
+        self.assertIn("hard-linked", str(caught.exception))
+        self.assertEqual(other.read_text(encoding="utf-8"), "prompts: {}\n")
+
+    def test_the_root_error_is_a_click_error(self):
+        """#1673"""
+        import click
+        from data_sheets_schema.resources import ResourceRootError
+        self.assertTrue(issubclass(ResourceRootError, click.ClickException))
+        self.assertTrue(issubclass(ResourceRootError, RuntimeError))
+        self.assertEqual(ResourceRootError("x").message, "x")
+
+    def test_the_telemetry_schema_declares_the_new_fields(self):
+        """#1674"""
+        import json
+        import subprocess
+        from data_sheets_schema import run_telemetry as t
+        from data_sheets_schema.resources import linkml_validate, resource_path
+        os.chdir(ROOT)
+        report = t.trap_inventory(Path(self.tmp) / "absent")
+        schema = str(resource_path(t.SCHEMA_PATH))
+
+        def validate(doc):                       # the command's own path (`d4d runs trap-inventory --validate`)
+            f = Path(self.tmp) / "report.json"; f.write_text(json.dumps(doc, default=str), encoding="utf-8")
+            return subprocess.run([*linkml_validate(), "-s", schema, "-C", "TrapSlotInventoryReport", str(f)],
+                                  capture_output=True, text=True)
+        good = validate(report)
+        self.assertEqual(good.returncode, 0, good.stdout + good.stderr)
+        bad = validate(dict(report, records_unchecked="not an integer", unchecked=42))
+        self.assertNotEqual(bad.returncode, 0)

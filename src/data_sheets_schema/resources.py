@@ -41,8 +41,17 @@ from pathlib import Path
 PACKAGE_ROOT = Path(__file__).resolve().parent
 
 #: The source checkout this package is imported from, or None for a wheel.
-class ResourceRootError(RuntimeError):
-    """A directory that may be a checkout could not be inspected (#1619)."""
+import click
+
+
+class ResourceRootError(click.ClickException, RuntimeError):
+    """A directory that may be a checkout could not be inspected (#1619).
+    A `ClickException` too, so every command that reaches it prints the
+    reason and exits 1 instead of a traceback (#1673); library callers see
+    a `RuntimeError`."""
+
+    def __init__(self, message: str):
+        click.ClickException.__init__(self, message)
 
 
 def _is_our_checkout(root: Path) -> bool:
@@ -250,8 +259,14 @@ def repo_relative(path: str | Path, *, cwd: bool = True) -> str:
     # identity, so two checkouts' copies of one playbook are never
     # recorded under one string.
     root, kind = resource_root()
-    anchors: list[tuple[Path, tuple[str, ...], bool]] = [(root, (), False)]
-    if kind == "install":
+    anchors: list[tuple[Path, tuple[str, ...], bool]] = []
+    if kind == "checkout":
+        anchors.append((root, (), False))
+    else:
+        # Package data first — `site-packages/data_sheets_schema/schema/x`
+        # is `src/data_sheets_schema/schema/x` — then the install root for
+        # resources only, so another installed package's file stays
+        # absolute (#1487, #1665).
         anchors.append((PACKAGE_ROOT, _PACKAGE_PREFIX, False))
         anchors.append((INSTALL_ROOT, (), True))
     if cwd:
