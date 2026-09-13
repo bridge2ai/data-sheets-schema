@@ -885,6 +885,28 @@ def record_schema_path() -> Path:
     return Path(__file__).resolve().parent / "schema" / RECORD_SCHEMA.name
 
 
+def _profile_digest_disagreement(data: dict[str, Any]) -> str | None:
+    """A record whose `schema.profile` names one profile while its
+    `schema.digest_md5` is the *other* profile's current digest states an
+    instrument it did not consume (#1581). Only the current digests are
+    known here; an older digest of the same profile is not a finding."""
+    schema = data.get("schema") if isinstance(data, dict) else None
+    if not isinstance(schema, dict) or not schema.get("profile") or not schema.get("digest_md5"):
+        return None
+    try:
+        from data_sheets_schema import schema_digest
+        from data_sheets_schema.profiles import PROFILES
+        current = {name: schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=prof))
+                   for name, prof in PROFILES.items()}
+    except Exception:                                          # noqa: BLE001 — no schema here: nothing to compare
+        return None
+    for name, md5 in current.items():
+        if name != schema["profile"] and md5 == schema["digest_md5"]:
+            return (f"schema.profile is {schema['profile']!r} but schema.digest_md5 {md5[:12]}… is the "
+                    f"{name} profile's current digest")
+    return None
+
+
 def check_record(data: dict[str, Any]) -> tuple[list[str], str | None]:
     """`(violations, why it could not be checked)` for a record (#605).
 
@@ -918,7 +940,11 @@ def check_record(data: dict[str, Any]) -> tuple[list[str], str | None]:
         report = validator.validate(data, "GenerationRecord")
     except Exception as exc:                                   # noqa: BLE001
         return [], f"the validator could not run against {schema}: {exc}"
-    return [str(r.message) for r in getattr(report, "results", [])], None
+    problems = [str(r.message) for r in getattr(report, "results", [])]
+    _pd = _profile_digest_disagreement(data)
+    if _pd:
+        problems.append(_pd)
+    return problems, None
 
 
 _VALIDATORS: dict[tuple[str, str], Any] = {}

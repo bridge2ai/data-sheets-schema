@@ -673,7 +673,13 @@ class TestRoundFour(_Clean):
         from data_sheets_schema.profiles import BRIDGE2AI, NEUTRAL, for_record
         os.environ["D4D_PROFILE"] = "neutral"
         self.assertIs(for_record({"schema": {"digest_md5": "34d24ff30fb6ad0f10d82af09ddc1fba"}}), BRIDGE2AI)
-        self.assertIs(for_record({"schema": {}}), NEUTRAL)                 # nothing recorded: the ambient one
+        self.assertIs(for_record({"schema": {}}), BRIDGE2AI)               # no profile at all: before profiles, the study's (#1583)
+        self.assertIs(for_record({"schema": "not a mapping"}), BRIDGE2AI)
+        import warnings
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            self.assertIs(for_record({"schema": {"profile": "acme"}}), BRIDGE2AI)
+        self.assertTrue(any("does not know" in str(w.message) for w in caught))
 
     def test_own_record_under_another_project_gets_its_own_file(self):
         """#1516"""
@@ -966,3 +972,83 @@ class TestRoundSix(_Clean):
         replay = RunSpec.from_render_spec({"condition": "generic"}, project="P", method="claudecode_api", label="L")
         with self.assertRaises(usage_ledger.UsageLedgerError):
             usage_ledger.prepare_usage(replay, resume=True)
+
+
+class TestRoundSeven(_Clean):
+    """The Claude round-4 findings (#1581–#1586)."""
+
+    def test_the_environment_selected_profile_reaches_the_recorder(self):
+        """#1581: the rendered recording command carries the profile; the
+        recorder records it over what its own process would select; the
+        render gate's spec carries it; a record whose digest is the other
+        profile's is a finding."""
+        import click.testing
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        from data_sheets_schema.cli import provenance as prov_cli
+        from data_sheets_schema.cli.api import ARMS
+        from data_sheets_schema.provenance import check_record
+        os.environ["D4D_PROFILE"] = "neutral"
+        spec = RunSpec(project="CHORUS", arm=ARMS["baseline"][0], method=ARMS["baseline"][1],
+                       label="2026-09-13_x-claudecode-generic-v9_rep1", condition="generic_v9",
+                       runtime="Claude Code", run_date="2026-09-13",
+                       bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt")
+        self.assertEqual((spec.profile, spec.profile_basis), ("neutral", "environment"))
+        line = next(l for l in resolve_prompt(spec).splitlines() if "d4d provenance record" in l)
+        self.assertIn("--profile neutral", line)
+        self.assertEqual(spec.render_spec()["profile"], "neutral")
+        replay = RunSpec.from_render_spec(spec.render_spec(), project="CHORUS", method=spec.method, label=spec.label)
+        self.assertEqual((replay.profile, replay.profile_basis), ("neutral", "environment"))
+        self.assertEqual(resolve_prompt(replay), resolve_prompt(spec))            # the gate re-renders the same line
+        os.environ.pop("D4D_PROFILE")
+        # The recorder in a process without the environment, told the profile.
+        method, label = "claudecode_api", "2026-09-13_test-env_rep1"
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "src/data_sheets_schema").mkdir(parents=True)
+            full_dir = root / "data/d4d_concatenated" / method / label
+            core_dir = root / "data/d4d_concatenated" / f"{method}_core" / label
+            full_dir.mkdir(parents=True); core_dir.mkdir(parents=True)
+            man = root / "data/preprocessed/source_manifest.yaml"; man.parent.mkdir(parents=True)
+            man.write_text(yaml.safe_dump({"profile": "bridge2ai",
+                                           "projects": {"CHORUS": [{"id": "s", "source": "s", "title": "s"}]}}), encoding="utf-8")
+            bundle = root / "data/preprocessed/concatenated/CHORUS_preprocessed.txt"
+            bundle.parent.mkdir(parents=True, exist_ok=True); bundle.write_text("docs\n", encoding="utf-8")
+            body = "# Generated: 2026-09-13\n# Source manifest: data/preprocessed/source_manifest.yaml\nid: https://example.org/x\nname: x\n"
+            (full_dir / "CHORUS_d4d.yaml").write_text(body, encoding="utf-8")
+            (core_dir / "CHORUS_d4d_core.yaml").write_text(body, encoding="utf-8")
+            (core_dir / "CHORUS_reconciliation.md").write_text("# r\n", encoding="utf-8")
+            os.chdir(root)
+            try:
+                r = click.testing.CliRunner().invoke(prov_cli.provenance, [
+                    "record", "--project", "CHORUS", "--method", method, "--label", label,
+                    "--input-bundle", str(bundle), "--manifest", "data/preprocessed/source_manifest.yaml",
+                    "--profile", "neutral", "--phase", "generate_full"])
+            finally:
+                os.chdir(ROOT)
+            self.assertEqual(r.exit_code, 0, r.output)
+            rec = yaml.safe_load((core_dir / "CHORUS_provenance.yaml").read_text(encoding="utf-8"))
+        self.assertEqual(rec["schema"]["profile"], "neutral")
+        self.assertTrue(rec["schema"]["profile_basis"].startswith("rendered instruction (this process would select bridge2ai"))
+        self.assertEqual(rec["schema"]["digest_md5"], "029c2abcda26e45c4465fd0a8455893d")
+        # A profile whose digest is the other profile's current digest is a finding.
+        bad = dict(rec); bad["schema"] = dict(rec["schema"], digest_md5="cd3c79f2c62f11675d5ce2c1df96b88e")
+        violations, why = check_record(bad)
+        self.assertIsNone(why)
+        self.assertTrue(any("bridge2ai profile's current digest" in v for v in violations), violations)
+
+    def test_an_unknown_stated_profile_fails_at_construction(self):
+        """#1585"""
+        from data_sheets_schema.api_runner import RunSpec
+        with self.assertRaises(ValueError) as caught:
+            RunSpec(project="CHORUS", arm="x", method="claudecode_api", label="L", profile="bogus",
+                    bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt")
+        self.assertIn("bridge2ai", str(caught.exception))
+
+    def test_an_unreadable_manifest_names_the_file(self):
+        """#1586"""
+        from data_sheets_schema.profiles import select_profile
+        with tempfile.TemporaryDirectory() as d:
+            m = Path(d) / "m.yaml"; m.write_text("[broken", encoding="utf-8")
+            with self.assertRaises(ValueError) as caught:
+                select_profile(m)
+            self.assertIn("m.yaml", str(caught.exception))

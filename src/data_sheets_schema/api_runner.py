@@ -521,8 +521,11 @@ class RunSpec:
             self.manifest_line = self.header_for_manifest(self.manifest)
         if self.profile is None:
             self._select_profile()
-        elif self.profile_basis is None:
-            self.profile_basis = "stated by the caller"           # the record says why, always (#1549)
+        else:
+            from data_sheets_schema.profiles import profile_named
+            profile_named(self.profile)                              # unknown names fail here, not mid-batch (#1585)
+            if self.profile_basis is None:
+                self.profile_basis = "stated by the caller"       # the record says why, always (#1549)
 
     def _select_profile(self) -> None:
         from data_sheets_schema.profiles import select_profile
@@ -558,7 +561,8 @@ class RunSpec:
         requires a freshly validated spec; this object is only for replay.
         """
         spec = cls(project=project, method=method, label=label,
-                   profile="replay",          # skip live selection (#1468); cleared below
+                   profile=recorded.get("profile") or "neutral",   # never live selection (#1468); the recorded values are restored below
+                   profile_basis=recorded.get("profile_basis") or "replay",
                    arm=recorded.get("arm", ""), bundle=Path(recorded.get("bundle", "")),
                    condition=recorded["condition"],
                    render_version=recorded.get("render_version", 1),
@@ -573,7 +577,8 @@ class RunSpec:
         # A replay reads no live declaration — the manifest may be gone or
         # malformed since — so the profile is not resolved here either;
         # a replay never renders the digest (#1438).
-        spec.profile = spec.profile_basis = None
+        spec.profile = recorded.get("profile")                    # what was recorded, or None for an older spec
+        spec.profile_basis = recorded.get("profile_basis")
         spec._replay_only = True
         return spec
 
@@ -627,6 +632,7 @@ class RunSpec:
                 "condition": self.condition, "arm": self.arm,
                 "manifest_line": self.manifest_line, "run_date": self.run_date,
                 "manifest": str(self.manifest) if self.manifest is not None else None,
+                **({"profile": self.profile, "profile_basis": self.profile_basis} if self.profile else {}),   # the gate re-renders under them (#1581); absent on an older spec
                 "runtime": self.runtime,
                 "provider": self.provider or provider_identity()["provider"]
                 or PROVIDER,
@@ -855,6 +861,11 @@ def resolve_prompt(spec: RunSpec) -> str:
             # profile from it, and the header still governs what the input
             # block attests (#1461). `none` means none was selected.
             command += " --manifest " + shlex.quote(str(spec.manifest) if spec.manifest is not None else "none")
+            if spec.profile:
+                # The profile this instruction was rendered under: the
+                # recorder runs in another process, where the environment
+                # that may have selected it is not set (#1581).
+                command += " --profile " + shlex.quote(spec.profile)
             if spec.chunk_manifest is not None:
                 command += " --chunk-manifest " + shlex.quote(str(spec.chunk_manifest))
             return command
