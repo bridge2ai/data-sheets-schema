@@ -200,14 +200,19 @@ def _study_dir() -> Path:
     return anchored(CONCAT_DIR).resolve()
 
 
-def canonical_name(bundle: Path) -> str:
+def canonical_name(bundle: Path, *, source_manifest: Path | None = None) -> str:
     """The basename a manifest records for `bundle`: a study bundle's own,
     through any symlink; any other bundle's as given. The name in the
     payload and the destination of the file are decided together, so an
     alias never writes the canonical manifest under a different `bundle:`
     (#1367 round 2, #1389)."""
     bundle = Path(bundle)
-    if _under_concat_dir(bundle):
+    if source_manifest is not None:
+        from data_sheets_schema.corpus import manifest_root
+        conventional = bundle.resolve().parent == (manifest_root(source_manifest) / CONCAT_DIR).resolve()
+    else:
+        conventional = _under_concat_dir(bundle)
+    if conventional:
         try:
             return bundle.resolve().name
         except OSError:
@@ -376,7 +381,8 @@ def manifest_status_for(bundle: Path, chunks_dir: Path | None = None) -> tuple[s
 
 def chunks_input(bundle: Path | None, bundle_md5: str | None,
                  chunks_dir: Path | None = None,
-                 manifest: Path | None = None) -> dict[str, Any] | None:
+                 manifest: Path | None = None, *,
+                 source_manifest: Path | None = None) -> dict[str, Any] | None:
     """What a provenance record should carry under `inputs.chunks`.
 
     Returned only when a manifest exists for this bundle *and* it was built
@@ -389,7 +395,7 @@ def chunks_input(bundle: Path | None, bundle_md5: str | None,
         return None
     # An explicitly selected manifest wins over discovery (#1299): the run
     # that chunked an external bundle knows where it put the manifest.
-    path = Path(manifest) if manifest is not None else manifest_for(bundle, chunks_dir)
+    path = Path(manifest) if manifest is not None else manifest_for(bundle, chunks_dir, source_manifest=source_manifest)
     if not path.exists():
         return None
     try:
@@ -398,7 +404,7 @@ def chunks_input(bundle: Path | None, bundle_md5: str | None,
         m = yaml.safe_load(manifest_bytes)
         if not isinstance(m, dict) or m.get("bundle_md5") != bundle_md5:
             return None
-        validate_manifest_mapping(m, bundle.read_bytes(), canonical_name(bundle))
+        validate_manifest_mapping(m, bundle.read_bytes(), canonical_name(bundle, source_manifest=source_manifest))
         return {"path": str(path), "sha256": hashlib.sha256(manifest_bytes).hexdigest(),
                 "bundle_name": m["bundle"],
                 "rule": m.get("rule"), "chunk_count": m.get("chunk_count")}
