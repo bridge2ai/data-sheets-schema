@@ -2,10 +2,10 @@
 from data_sheets_schema.judge_contract import VERSION
 
 
-def judge_reply(contract, rubric, project="P", method="method", metadata=None):
+def judge_reply(contract, rubric, project="P", method="method", metadata=None, *, perfect=False):
     items = []
     for key, rule in contract["items"].items():
-        score = 0 if rule["applicable"] else None
+        score = (rule["max_score"] if perfect else 0) if rule["applicable"] else None
         item = {"id": key if rubric == "rubric10" else int(key[1:]),
                 "name": rule["name"],
                 "applicable": rule["applicable"], "score": score,
@@ -20,16 +20,16 @@ def judge_reply(contract, rubric, project="P", method="method", metadata=None):
     if rubric == "rubric10":
         for number in sorted({int(item["id"].split(".")[0][1:]) for item in items}):
             subset = [item for item in items if item["id"].startswith(f"E{number}.")]
-            groups.append({"id": number, "sub_elements": subset, "element_score": 0,
+            groups.append({"id": number, "sub_elements": subset, "element_score": sum(item["score"] or 0 for item in subset),
                            "element_max": sum(item["max_score"] for item in subset)})
     else:
         for number in sorted({(item["id"] - 1) // 5 for item in items}):
             subset = [item for item in items if (item["id"] - 1) // 5 == number]
             groups.append({"name": f"Category {number + 1}", "questions": subset,
-                           "category_score": 0, "category_max": sum(item["max_score"] for item in subset)})
+                           "category_score": sum(item["score"] or 0 for item in subset), "category_max": sum(item["max_score"] for item in subset)})
     maximum = sum(rule["max_score"] for rule in contract["items"].values())
     return {"rubric": rubric, "version": VERSION, "project": project, "method": method,
             "elements" if rubric == "rubric10" else "categories": groups,
-            "overall_score": {"total_points": 0, "max_points": maximum,
-                              "percentage": 0 if maximum else None},
+            "overall_score": {"total_points": sum(item["score"] or 0 for item in items), "max_points": maximum,
+                              "percentage": (100 * sum(item["score"] or 0 for item in items) / maximum) if maximum else None},
             "metadata": metadata or {}}

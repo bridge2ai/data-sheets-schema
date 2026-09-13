@@ -3,16 +3,16 @@
 Render rubric10-semantic evaluation JSON files to HTML
 """
 import json
-from copy import deepcopy
 from pathlib import Path
 from datetime import datetime
 from data_sheets_schema.semantic_comparison import ScoreBases, score_bases
+from data_sheets_schema.rendering.normalization import for_rendering
 
 
 def generate_evaluation_html(eval_data, output_path):
     """Generate HTML from evaluation JSON data"""
 
-    eval_data = deepcopy(eval_data)
+    eval_data = for_rendering(eval_data)
     metadata = eval_data.get("evaluation_metadata") or {
         "dataset_id": eval_data.get("project", "Unknown"),
         "method": eval_data.get("method", "Unknown"),
