@@ -1406,3 +1406,102 @@ class TestRoundTen(_Clean):
             r = click.testing.CliRunner().invoke(cli, ["bundle", "--output-dir", d])
             self.assertEqual(r.exit_code, 0, r.output)
             self.assertTrue((Path(d) / BRIDGE2AI.healthsheet_bundle).exists())
+
+
+class TestRoundEleven(_Clean):
+    """The Claude round-6 findings (#1676–#1679)."""
+
+    def _spec(self, **over):
+        from data_sheets_schema.api_runner import RunSpec
+        from data_sheets_schema.cli.api import ARMS
+        return RunSpec(project="CHORUS", method=ARMS["baseline"][1], arm=ARMS["baseline"][0],
+                       bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+                       label="2026-09-13_x-claudecode-generic-v9_rep1", condition="generic_v9",
+                       runtime="Claude Code", provider="Anthropic", run_date="2026-09-13", **over)
+
+    def test_the_reconstructed_prior_rule_binds_under_the_subset_rule(self):
+        """#1676, #1629: a saved identity lacking the profile key still binds the
+        generation; one whose bundle moved does not."""
+        from data_sheets_schema import api_runner as a
+        spec = self._spec(profile="bridge2ai")
+        current = spec.input_identity()
+        subset = {k: v for k, v in current.items() if k != "profile"}
+        progress = {"generation_id": "g1", "run_identity": None, "input_identity": subset}
+        with mock.patch.object(a, "_usage_record_matches", return_value=True):
+            self.assertTrue(a._generation_bound_inputs_observed(spec, progress, "g1", None, current))
+            moved = dict(subset, bundle={"path": "x", "sha256": "y"})
+            self.assertFalse(a._generation_bound_inputs_observed(spec, dict(progress, input_identity=moved), "g1", None, current))
+            self.assertTrue(a._generation_bound_inputs_observed(spec, {}, "g1", subset, current))     # the ledger's pin
+            self.assertFalse(a._generation_bound_inputs_observed(spec, {}, "g1", moved, current))
+
+    def test_the_subset_rule_holds_at_every_depth_and_the_refusal_names_its_cause(self):
+        """#1677"""
+        import hashlib
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        from data_sheets_schema.usage_ledger import _identity_differs, identity_refusal, pre_profile_pin
+        current = self._spec(profile="bridge2ai").input_identity()
+        nested_subset = dict(current, instruction={**current["instruction"],
+                                                   "spec": {k: v for k, v in current["instruction"]["spec"].items() if k != "chunk_manifest"}})
+        self.assertFalse(_identity_differs(nested_subset, current))
+        with_basis = dict(current, instruction={**current["instruction"], "spec": {**current["instruction"]["spec"], "profile_basis": "environment"}})
+        self.assertFalse(_identity_differs(with_basis, current))
+        self.assertNotIn("before profiles existed", identity_refusal(with_basis, "x"))     # not the cause
+        old_dict = {k: v for k, v in self._spec().render_spec().items() if k not in ("profile", "profile_basis")}
+        old = RunSpec.from_render_spec(old_dict, project="CHORUS", method=self._spec().method, label=self._spec().label)
+        pre = {k: v for k, v in current.items() if k != "profile"}
+        pre["instruction"] = {"render_version": old.render_version, "spec": old_dict,
+                              "sha256": hashlib.sha256(resolve_prompt(old).encode()).hexdigest()}
+        self.assertTrue(pre_profile_pin(pre)); self.assertTrue(_identity_differs(pre, current))
+        self.assertIn("before profiles existed", identity_refusal(pre, "x"))
+
+    def test_a_backfilled_profile_is_the_records_and_a_disagreement_is_a_finding(self):
+        """#1678"""
+        import hashlib
+        import click.testing
+        import yaml
+        from data_sheets_schema import provenance as pv
+        from data_sheets_schema.api_runner import resolve_prompt
+        from data_sheets_schema.cli import provenance as prov_cli
+        from data_sheets_schema.profiles import for_record
+        from data_sheets_schema.provenance import _spec_profile_disagreement, check_record
+        os.environ["D4D_PROFILE"] = "neutral"
+        spec = self._spec()
+        os.environ.pop("D4D_PROFILE")
+        self.assertEqual(spec.profile, "neutral")
+        record = {"record_generated_at": "2026-09-13T12:00:00Z", "model": {"provider": "Anthropic"},
+                  "inputs": {"bundle_path": str(spec.bundle), "source_manifest": {"path": str(spec.manifest)},
+                             **({"chunks": {"path": str(spec.chunk_manifest)}} if spec.chunk_manifest else {})},
+                  "prompts": {"request": {"sha256": hashlib.sha256(resolve_prompt(spec).encode()).hexdigest()}}}
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "CHORUS_provenance.yaml"; path.write_text(yaml.safe_dump(record), encoding="utf-8")
+            with mock.patch.object(pv, "record_path_for", return_value=path):
+                r = click.testing.CliRunner().invoke(prov_cli.provenance, [
+                    "backfill-spec", "--project", "CHORUS", "--method", spec.method, "--label", spec.label,
+                    "--condition", "generic_v9", "--runtime", "Claude Code", "--execute"])
+            self.assertEqual(r.exit_code, 0, r.output)
+            written = yaml.safe_load(path.read_text(encoding="utf-8"))
+        self.assertEqual(written["prompts"]["request"]["spec"]["profile"], "neutral")
+        self.assertEqual(written["schema"]["profile"], "neutral")               # the readers see it too
+        self.assertEqual(for_record(written).name, "neutral")
+        self.assertIsNone(_spec_profile_disagreement(written))
+        split = {"schema": {"profile": "bridge2ai", "digest_md5": "x"}, "prompts": {"request": {"spec": {"profile": "neutral"}}}}
+        self.assertIn("different instruments", _spec_profile_disagreement(split))
+        problems, _ = check_record(split)
+        self.assertTrue(any("different instruments" in p for p in problems))
+
+    def test_an_unknown_ambient_profile_is_a_usage_error_everywhere(self):
+        """#1679"""
+        import click.testing
+        from data_sheets_schema.cli.healthsheet import healthsheet as hs
+        from data_sheets_schema.cli import provenance as prov_cli
+        os.environ["D4D_PROFILE"] = "typo"
+        r = click.testing.CliRunner().invoke(hs, ["bundle", "--output-dir", tempfile.mkdtemp()])
+        self.assertNotEqual(r.exit_code, 0)
+        self.assertNotIsInstance(r.exception, ValueError, r.output)
+        r = click.testing.CliRunner().invoke(prov_cli.provenance, [
+            "recheck-validation", "--method", "claudecode_api", "--label", "x", "--project", "CHORUS"])
+        self.assertNotIsInstance(r.exception, ValueError, r.output)   # a click error (here the missing record comes first)
+        import subprocess, sys
+        r2 = subprocess.run([sys.executable, "-m", "data_sheets_schema.form_defects", "--offline", "--profile", "bogus"],
+                            capture_output=True, text=True, cwd=ROOT, env={**os.environ, "PYTHONPATH": str(ROOT / "src")})
+        self.assertNotEqual(r2.returncode, 0); self.assertIn("invalid choice", r2.stderr)
