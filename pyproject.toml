@@ -23,6 +23,7 @@ include = [
     { path = ".claude/commands/*.md", format = ["sdist", "wheel"] },
     { path = ".claude/agents/*.md", format = ["sdist", "wheel"] },
     { path = "data/rubric/*", format = ["sdist", "wheel"] },
+    { path = ".github/workflows/*.config", format = ["sdist", "wheel"] },
 ]
 
 [tool.poetry.dependencies]

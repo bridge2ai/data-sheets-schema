@@ -1531,9 +1531,11 @@ resource_path`, the shape `schema_digest.resolve_schema` and
 there or when the working directory carries that resource *directory* (a
 staged fixture that omits a prompt reads it as `missing`, never the
 checkout's copy; the test is any ancestor below the top-level component, so a
-user's own `src/` or `.claude/` does not count, and since #1500 only
-directories under `src/` can be authoritative at all — a project's own
-`.claude/commands/` cannot hide the playbooks an install ships); else the checkout's when the
+user's own `src/` or `.claude/` does not count: authority is the nearest
+existing ancestor at depth three or deeper under `src/` — `src/download/prompts`,
+`src/data_sheets_schema/schema` — the same answer for a directory and its
+files, #1535; a project's own `.claude/commands/` cannot hide the playbooks an
+install ships, #1500); else the checkout's when the
 package is imported from one (`pyproject.toml` two levels up); else the
 installed copy — the wheel places the condition prompts and their pin
 registry, the playbooks and agent definitions the record hashes, and the
@@ -1583,6 +1585,10 @@ environment and, from a directory with no checkout and no study tree,
 checks the metadata, runs the schema preflight, a fake-client generation
 through every phase, the derived core, the record write, its deterministic
 checks and `linkml-validate`, and `check_record` — the release canary, run
+(the deterministic model config under `.github/workflows/` ships too, and a
+record made where it is absent says the defaults applied rather than naming
+a file it did not read, #1529; on an install the digest ledger under
+`site-packages` is mutable package data, a stated design cost, #1537),
 by the publish workflow before `poetry build`, not a pull-request test; it
 fails, never skips, when the wheel does not install.
 

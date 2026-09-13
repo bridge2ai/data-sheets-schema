@@ -137,7 +137,7 @@ def _regenerate(source: Path, target: Path,
     the repository-relative one the committed artifact carries — when
     `source` is a resolved absolute read path (#1478)."""
     state, files = _source_snapshot(source) if snapshot is None else snapshot
-    key = (state, marker)
+    key = (state, marker, name)                     # the name is in the bytes (#1527)
     cached = _REBUILT.get(key)
     if cached is not None:
         target.write_bytes(cached)
@@ -201,7 +201,7 @@ def _regenerate(source: Path, target: Path,
     if source_line and yaml.safe_load(source_line.group()).get("source_file") == str(captured_source):
         named = yaml.safe_dump({"source_file": name or str(source)}, sort_keys=False, allow_unicode=True)
         content = content[:source_line.start()] + named + content[source_line.end():]
-    target.write_text(("---\n" if marker else "") + content, encoding="utf-8")
+    target.write_text(("---\n" if marker else "") + content, encoding="utf-8", newline="\n")
     _REBUILT[key] = target.read_bytes()
     return True, None
 
@@ -260,7 +260,7 @@ def check_one(merged: Path, source: Path, class_name: str,
     out: dict[str, Any] = {"merged": str(merged), "source": str(source),
                            "class": class_name}
     from data_sheets_schema.resources import resource_path
-    logical_source = str(source)          # what the artifact names (#1478)
+    logical_source = Path(source).as_posix()   # what the artifact names, on every platform (#1478, #1531)
     merged, source = resource_path(merged), resource_path(source)   # from any directory (#1301)
     if not source.exists():
         return {**out, "status": UNCHECKED,

@@ -126,6 +126,7 @@ def load_generation_config(path: Path = DETERMINISTIC_CONFIG) -> dict[str, Any]:
     paths disagree about the model or temperature they are different
     procedures, and the fingerprint should say so rather than paper over it.
     """
+    path = _resource(path)                  # shipped with the package (#1529)
     if not path.exists():
         return {}
     try:

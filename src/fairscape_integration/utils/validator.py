@@ -42,10 +42,10 @@ class D4DValidator:
         if not yaml_path.exists():
             return False, f"File not found: {yaml_file}"
 
-        # Try linkml-validate directly first, fall back to poetry run if not found
+        # This interpreter's validator, never PATH or `poetry run` (#1530).
+        from data_sheets_schema.resources import linkml_validate, resource_path
         commands_to_try = [
-            ["linkml-validate", "-s", str(self.schema_path), "-C", target_class, str(yaml_path)],
-            ["poetry", "run", "linkml-validate", "-s", str(self.schema_path), "-C", target_class, str(yaml_path)]
+            [*linkml_validate(), "-s", str(resource_path(self.schema_path)), "-C", target_class, str(yaml_path)],
         ]
 
         for cmd in commands_to_try:

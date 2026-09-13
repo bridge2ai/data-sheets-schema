@@ -910,13 +910,16 @@ def resolve_prompt(spec: RunSpec) -> str:
 
 def _model_settings() -> dict[str, Any]:
     cfg = load_generation_config()
+    found = bool(cfg)
     m = (cfg.get("model") or {}) if isinstance(cfg, dict) else {}
     name = m.get("name") or "claude-opus-5"
     settings = {
         "name": name,
         "temperature": float(m.get("temperature", 0.0)),
         "max_tokens": int(m.get("max_tokens", DEFAULT_MAX_TOKENS)),
-        "config_path": str(DETERMINISTIC_CONFIG),
+        # The file the values came from — or None, with the note, when the
+        # shipped config was not found and the defaults above applied (#1529).
+        "config_path": str(DETERMINISTIC_CONFIG) if found else None,
         "temperature_applies": accepts_temperature(name),
     }
     # What the request says about thinking (#1047). On claude-opus-5 thinking
@@ -933,6 +936,9 @@ def _model_settings() -> dict[str, Any]:
     # proposed shape is refused here, and a test holds that line. A model that
     # predates adaptive thinking gets no parameter and a note, mirroring the
     # temperature gate.
+    if not found:
+        settings["config_note"] = (f"{DETERMINISTIC_CONFIG} was not found (from the working directory, the "
+                                   "checkout or the installed package); the built-in defaults above apply")
     if accepts_adaptive_thinking(name):
         settings["thinking"] = {"type": "adaptive"}
     else:
@@ -950,8 +956,9 @@ def _model_settings() -> dict[str, Any]:
         # that never reached the request.
         settings["temperature_note"] = (
             f"{name} rejects `temperature` (400: deprecated for this model), "
-            f"so the {settings['temperature']} declared in "
-            f"{DETERMINISTIC_CONFIG} is not sent and does not apply. Sampling "
+            f"so the {settings['temperature']} "
+            + (f"declared in {DETERMINISTIC_CONFIG}" if found else "defaulted here")
+            + " is not sent and does not apply. Sampling "
             "for this model family is selected by model-name suffix "
             "(-low/-medium/-high/-xhigh/-max), not by parameter.")
     return settings
@@ -2598,9 +2605,16 @@ def validation_block(spec: RunSpec, problems: list[dict[str, str]],
 def _validator_did_not_run(text: str) -> bool:
     """A traceback, a missing module or a usage error is the validator failing
     to start, not a finding about the record (#1506); handed to a repair
-    round as findings it would be repaired against."""
-    return any(marker in text for marker in ("Traceback (most recent call last)", "No module named",
-                                             "Usage: linkml-validate", "does not exist."))
+    round as findings it would be repaired against. Decided on whole lines
+    (#1525): a finding line — `[ERROR] …` — proves the validator ran, and a
+    value inside a finding (`'does not exist.' is not of type 'object'`)
+    never counts as a marker."""
+    lines = [l.strip() for l in text.splitlines()]
+    if any(l.startswith(("[ERROR]", "[WARN", "[WARNING]")) for l in lines):
+        return False
+    return any(l.startswith(("Traceback (most recent call last)", "Usage: linkml-validate",
+                             "Error: Invalid value for", "ModuleNotFoundError:", "ImportError:"))
+               for l in lines)
 
 
 def _validator_lines(path: Path, schema: str,
@@ -2627,6 +2641,10 @@ def _validator_lines(path: Path, schema: str,
         return None, f"linkml-validate did not run: {text.strip()[-300:]}"
     lines = [l for l in text.strip().splitlines()
              if l.strip()]
+    if not lines:
+        # A nonzero exit with nothing to say — a signal, a crash before
+        # output — is not a clean validation (#1524).
+        return None, f"linkml-validate exited {r.returncode} with no output"
     return lines, None
 
 
@@ -3567,10 +3585,14 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             text = stamp_provenance_header(text, settings)      # the same sequence as the phase write (#1027 review)
             spec.core_path.write_text(text, encoding="utf-8")
             errors, failure = _validator_lines(path, schema, cls)
-            log.append({"phase": ph, "round": 1,
-                        "outcome": ("re-derived from the repaired full record"
-                                    + ("; validates" if not errors and failure is None
-                                       else f"; still {len(errors)} validator finding(s) — the full record carries a shape the core schema rejects"))})
+            outcome = "re-derived from the repaired full record"
+            if failure is not None:                       # the validator did not run (#1526)
+                outcome += f"; validator did not run: {failure}"
+            elif not errors:
+                outcome += "; validates"
+            else:
+                outcome += f"; still {len(errors)} validator finding(s) — the full record carries a shape the core schema rejects"
+            log.append({"phase": ph, "round": 1, "outcome": outcome})
             continue
         # The count the last APPLIED repair was working from. Compared only
         # against applied rounds: a truncated or unusable round rewrote
@@ -5187,7 +5209,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
              "was set on the request and is therefore observed, not asserted."
              if settings["temperature_applies"]
              else f"Generated via {RUNTIME}. {settings['temperature_note']}"),
-            f"Model settings read from {settings['config_path']}.",
+            (f"Model settings read from {settings['config_path']}." if settings.get("config_path")
+             else f"Model settings are the runner's defaults: {settings.get('config_note')}."),
             f"Endpoint: {provider_identity()['provider']} at "
             f"{provider_identity()['base_url']}.",
         ] + ([f"Resumed run; phases skipped as already present: {', '.join(skipped)}."]
