@@ -479,7 +479,7 @@ class RunSpec:
     profile_basis: str | None = None
     # Version 4 binds every agentic playbook read/check to selected inputs.
     # Historical render specs omit this field and replay under version 1.
-    render_version: int = 4
+    render_version: int | object = AUTO
     # Frozen when the run is specified, not read from the clock on each use.
     # A six-phase run takes tens of minutes and this study's sweep genuinely
     # ran past midnight UTC, so recomputing per call gave phases of one run
@@ -505,12 +505,15 @@ class RunSpec:
     _replay_only: bool = field(default=False, init=False, repr=False)
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
     _agentic_artifact_paths: dict[str, str] | None = field(default=None, init=False, repr=False)
+    _agentic_toolchain: dict | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self):
         if self.run_date is AUTO:
             self.run_date = datetime.now(timezone.utc).date().isoformat()
             self._automatic_run_date = self.run_date
-        if self.render_version not in (1, 2, 3, 4):
+        if self.render_version is AUTO:
+            self.render_version = 5 if self.is_agentic else 4
+        if self.render_version not in (1, 2, 3, 4, 5):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         default_line = type(self).__dataclass_fields__["manifest_line"].default
         self.manifest = select_manifest(self.project, self.bundle, self.manifest)
@@ -527,6 +530,9 @@ class RunSpec:
             self._agentic_artifact_paths = {
                 "full": str(self.full_path), "core": str(self.core_path),
                 "receipt": str(self.report_path.parent / f"{self.project}_coverage_receipt.yaml")}
+        if self.render_version >= 5 and self.is_agentic:
+            from data_sheets_schema.agentic_runtime import toolchain
+            self._agentic_toolchain = toolchain()
         if self.manifest_line == default_line:   # an arm that declares its own header keeps it
             self.manifest_line = self.header_for_manifest(self.manifest)
         if self.profile is None:
@@ -595,6 +601,9 @@ class RunSpec:
                     or any(not isinstance(value, str) or not value for value in paths.values())):
                 raise ValueError("invalid recorded agentic artifact paths")
             spec._agentic_artifact_paths = dict(paths)
+        if spec.render_version >= 5 and spec.is_agentic:
+            from data_sheets_schema.agentic_runtime import validate_toolchain
+            spec._agentic_toolchain = validate_toolchain(recorded.get("agentic_toolchain"))
         spec._replay_only = True
         return spec
 
@@ -645,6 +654,9 @@ class RunSpec:
         """
         return {**({"agentic_artifact_paths": dict(self._agentic_artifact_paths)}
                    if self.render_version >= 4 and self._agentic_artifact_paths is not None else {}),
+                **({"agentic_toolchain": {"python": self._agentic_toolchain["python"],
+                                         "resources": dict(self._agentic_toolchain["resources"])}}
+                   if self.render_version >= 5 and self._agentic_toolchain is not None else {}),
                 "render_version": self.render_version,
                 "chunk_manifest": str(self.chunk_manifest) if self.chunk_manifest is not None else None,
                 "condition": self.condition, "arm": self.arm,
@@ -986,6 +998,9 @@ def resolve_prompt(spec: RunSpec) -> str:
             "state nothing about what the output should contain, how many slots "
             "to populate, or how this record should compare to any other.\n\n"
             f"{block}\n\nRETURN:", 1)
+    if spec.render_version >= 5 and spec.is_agentic:
+        from data_sheets_schema.agentic_runtime import portable_text, instruction_adapter
+        body = portable_text(body, spec._agentic_toolchain) + instruction_adapter(spec)
     return body
 
 

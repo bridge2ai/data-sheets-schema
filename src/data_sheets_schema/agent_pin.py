@@ -163,7 +163,20 @@ def _previous_text(name: str) -> str | None:
     moment anything else is committed, which left the mechanism inert for all
     twelve definitions.
     """
-    from data_sheets_schema.resources import repo_relative
+    from data_sheets_schema.resources import CHECKOUT_ROOT, repo_relative, resource_path
+    if CHECKOUT_ROOT is None:
+        import json
+        try:
+            rows = json.loads(resource_path(".claude/agents/_preimages.json").read_text())
+            row = rows["agents"][name]
+            previous = row.get("previous_text")
+            if (rows.get("version") != 1 or row.get("current_sha256") != agent_digest(name)
+                    or not isinstance(previous, str) or not previous
+                    or hashlib.sha256(previous.encode()).hexdigest() != row.get("previous_sha256")):
+                return None
+            return previous
+        except (OSError, ValueError, KeyError, TypeError, AttributeError):
+            return None
     rel = repo_relative(agent_path(name), cwd=False)
     if _git("diff", "HEAD", "--name-only", "--", rel).strip():
         blob = _git("show", f"HEAD:{rel}")

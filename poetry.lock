@@ -6,11 +6,12 @@ version = "0.2.7"
 description = "Easy and quick html builder with natural syntax correspondence (python->html). No templates needed. Serves pure pythonic library with no dependencies."
 optional = false
 python-versions = "*"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "airium-0.2.7-py3-none-any.whl", hash = "sha256:35e3ae334327b17b7c2fc39bb57ab2c48171ca849f8cf3dff11437d1e054952e"},
     {file = "airium-0.2.7.tar.gz", hash = "sha256:6b4dd8b69838b7766179ab90078a049dc337b1da4fc0f7754f30f74d6eed706e"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.extras]
 dev = ["check-manifest", "flake8 (>=7.1,<8.0)", "mypy (>=1.10,<2.0)", "pytest (>=6.2,<7.0)", "pytest-cov (>=3.0,<4.0)", "pytest-mock (>=3.6,<4.0)", "types-beautifulsoup4 (>=4.12,<5.0)", "types-requests (>=2.32,<3.0)"]
@@ -119,11 +120,12 @@ version = "1.4.4"
 description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 optional = false
 python-versions = "*"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128"},
     {file = "appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [[package]]
 name = "argcomplete"
@@ -250,11 +252,12 @@ version = "0.1.0"
 description = "Language tags made easy"
 optional = false
 python-versions = "*"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "bcp47-0.1.0-py3-none-any.whl", hash = "sha256:a567b7fe881c900916a9db62ac8f792370c7ddf2664e601b74eeed35d8758aa5"},
     {file = "bcp47-0.1.0.tar.gz", hash = "sha256:37cc7a03fd696149ebfe7de785c5bad473f911eddac8415cf479584049cf03d5"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [[package]]
 name = "beautifulsoup4"
@@ -428,11 +431,12 @@ version = "24.1.3"
 description = "Composable complex class support for attrs and dataclasses."
 optional = false
 python-versions = ">=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "cattrs-24.1.3-py3-none-any.whl", hash = "sha256:adf957dddd26840f27ffbd060a6c4dd3b2192c5b7c2c0525ef1bd8131d8a83f5"},
     {file = "cattrs-24.1.3.tar.gz", hash = "sha256:981a6ef05875b5bb0c7fb68885546186d306f10f0f6718fe9b96c226e68821ff"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 attrs = ">=23.1.0"
@@ -691,11 +695,12 @@ version = "0.6.0"
 description = "Lookup and instantiate classes with style."
 optional = false
 python-versions = ">=3.9"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "class_resolver-0.6.0-py3-none-any.whl", hash = "sha256:cc629187a10bacff2e360939f8a4e8e7d209583dc8b318485ff91a0d24d5c9d0"},
     {file = "class_resolver-0.6.0.tar.gz", hash = "sha256:8a3c20ab771925477f65cad8a49bb431e11543c82fbfadbf611c6769228a6cae"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 importlib-metadata = {version = ">3.6", markers = "python_full_version < \"3.10.0\""}
@@ -1270,11 +1275,12 @@ version = "0.7.1"
 description = "XML bomb protection for Python stdlib modules"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "defusedxml-0.7.1-py2.py3-none-any.whl", hash = "sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61"},
     {file = "defusedxml-0.7.1.tar.gz", hash = "sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [[package]]
 name = "deprecated"
@@ -1300,11 +1306,12 @@ version = "2.1.0"
 description = "A library to handle automated deprecations"
 optional = false
 python-versions = "*"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "deprecation-2.1.0-py2.py3-none-any.whl", hash = "sha256:a10811591210e1fb0e768a8c25517cabeabcba6f0bf96564f8ff45189f90b14a"},
     {file = "deprecation-2.1.0.tar.gz", hash = "sha256:72b3bde64e5d778694b0cf68178aed03d15e15477116add3fb773e581f9518ff"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 packaging = "*"
@@ -1391,11 +1398,12 @@ version = "0.6.0"
 description = "\"Python interface to NCBI's eutilities API\""
 optional = false
 python-versions = ">=3.6"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "eutils-0.6.0-py2.py3-none-any.whl", hash = "sha256:4938c4baff6ca52141204ff3eff3a91ec1e83e52a6c5d92e7163585117b96566"},
     {file = "eutils-0.6.0.tar.gz", hash = "sha256:3515178c0aadb836206a3eee2bc9f340f3213c13b53632e058eb58a9219d03cf"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 lxml = "*"
@@ -1541,7 +1549,7 @@ version = "0.13.0"
 description = "Faultless AST for Open Biomedical Ontologies in Python."
 optional = false
 python-versions = ">=3.7"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "fastobo-0.13.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:4620527cb6575a844dd244c725984f2d3d9b41d32140026782d18e1666f8228d"},
     {file = "fastobo-0.13.0-cp310-cp310-macosx_12_0_x86_64.whl", hash = "sha256:4e126c58378c9df1c3f3c2f21f62b4badcd97076656e6f708ee5d0ec776c960c"},
@@ -1579,6 +1587,7 @@ files = [
     {file = "fastobo-0.13.0-cp39-cp39-win_amd64.whl", hash = "sha256:699da60c277c02ce8db253d37fe05b1ba1388483f7b521c3a0a6eedc4f761f8a"},
     {file = "fastobo-0.13.0.tar.gz", hash = "sha256:c4548bcfb7f9f87188bf5d8e4c7fd530162707265a8d644ee75259d305cd6964"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [[package]]
 name = "filelock"
@@ -1857,11 +1866,12 @@ version = "0.2.3"
 description = "Python rendering of the OWL Functional syntax"
 optional = false
 python-versions = ">=3.7"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "funowl-0.2.3-py3-none-any.whl", hash = "sha256:4c4328d03c7815cd61d6691f0fafc78dc9a78ec3dcab4c83afb64d125ad3660e"},
     {file = "funowl-0.2.3.tar.gz", hash = "sha256:eecc2f58d792c714f6671a826cb2744e80cd3019fa56b3c8539ce69c8d874126"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 bcp47 = "*"
@@ -2406,7 +2416,7 @@ version = "3.4.0"
 description = "Iterative JSON parser with standard Python iterator interfaces"
 optional = false
 python-versions = ">=3.9"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "ijson-3.4.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:e27e50f6dcdee648f704abc5d31b976cd2f90b4642ed447cf03296d138433d09"},
     {file = "ijson-3.4.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:2a753be681ac930740a4af9c93cfb4edc49a167faed48061ea650dc5b0f406f1"},
@@ -2494,6 +2504,7 @@ files = [
     {file = "ijson-3.4.0-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:b5a05fd935cc28786b88c16976313086cd96414c6a3eb0a3822c47ab48b1793e"},
     {file = "ijson-3.4.0.tar.gz", hash = "sha256:5f74dcbad9d592c428d3ca3957f7115a42689ee7ee941458860900236ae9bb13"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [[package]]
 name = "imagesize"
@@ -2672,7 +2683,7 @@ version = "25.3.1"
 description = "Command-line interface to Jinja2 for templating in shell scripts."
 optional = false
 python-versions = ">=3.10"
-groups = ["dev"]
+groups = ["main", "dev"]
 markers = "python_version >= \"3.10\""
 files = [
     {file = "jinjanator-25.3.1-py3-none-any.whl", hash = "sha256:d62d64df9b8dce2f973def96f26206f791b532a7da131ca284813f98a4bb88b5"},
@@ -2711,7 +2722,7 @@ version = "25.1.0"
 description = "Package which provides the plugin API for the jinjanator tool"
 optional = false
 python-versions = ">=3.10"
-groups = ["dev"]
+groups = ["main", "dev"]
 markers = "python_version >= \"3.10\""
 files = [
     {file = "jinjanator_plugins-25.1.0-py3-none-any.whl", hash = "sha256:7c4361fd2450e4b0928a47e252ea384ca6c93ac389f7dde07875d0709e22b849"},
@@ -2911,11 +2922,12 @@ version = "4.0.0"
 description = "Library with helpers for the jsonlines file format"
 optional = false
 python-versions = ">=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "jsonlines-4.0.0-py3-none-any.whl", hash = "sha256:185b334ff2ca5a91362993f42e83588a360cf95ce4b71a73548502bda52a7c55"},
     {file = "jsonlines-4.0.0.tar.gz", hash = "sha256:0c6d2c09117550c089995247f605ae4cf77dd1533041d366351f6f298822ea74"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 attrs = ">=19.2.0"
@@ -2983,11 +2995,12 @@ version = "0.5.0"
 description = "Schema for the KGCL project."
 optional = false
 python-versions = ">=3.8,<4.0"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "kgcl_rdflib-0.5.0-py3-none-any.whl", hash = "sha256:214c011eac692384dd18397e455af2a7375f6a2f71fa318df245e8826678f454"},
     {file = "kgcl_rdflib-0.5.0.tar.gz", hash = "sha256:19e34690316714b9c500e1749a35d1a0d17282f2a38cd2b1fd3d7d8cf5e6013d"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 kgcl-schema = ">=0.5.0"
@@ -2999,11 +3012,12 @@ version = "0.6.9"
 description = "Schema for the KGCL project."
 optional = false
 python-versions = "<4.0,>=3.9"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "kgcl_schema-0.6.9-py3-none-any.whl", hash = "sha256:6acd367a4cd998ec8dfe70987bf797aecce558df86a1395bc8c3e0489f66b9a9"},
     {file = "kgcl_schema-0.6.9.tar.gz", hash = "sha256:1bb0f9f13356df7b5c6ba9c73a7124dc897e525af49f40454dafd45bfca021bd"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 curies = ">=0.6.0"
@@ -3270,11 +3284,12 @@ version = "1.2.2"
 description = "a modern parsing library"
 optional = false
 python-versions = ">=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "lark-1.2.2-py3-none-any.whl", hash = "sha256:c2276486b02f0f1b90be155f2c8ba4a8e194d42775786db622faccd652d8e80c"},
     {file = "lark-1.2.2.tar.gz", hash = "sha256:ca807d0162cd16cef15a8feecb862d7319e7a09bdb13aef927968e45040fed80"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.extras]
 atomic-cache = ["atomicwrites"]
@@ -3378,11 +3393,12 @@ version = "0.3.1"
 description = "linkml-renderer"
 optional = false
 python-versions = "<4.0,>=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "linkml_renderer-0.3.1-py3-none-any.whl", hash = "sha256:3737247ecc349c270b849c55593719fb457b385223ef8f75e7e7b0da11eb12e3"},
     {file = "linkml_renderer-0.3.1.tar.gz", hash = "sha256:f600ca96d603e53b7187abe1dc9c417334bd96756d3e4f704a96892f6b28ba5a"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 airium = ">=0.2.5,<0.3.0"
@@ -3424,7 +3440,7 @@ version = "0.1.1"
 description = "Validating external terms"
 optional = false
 python-versions = "<4.0,>=3.10"
-groups = ["dev"]
+groups = ["main"]
 markers = "python_version >= \"3.10\""
 files = [
     {file = "linkml_term_validator-0.1.1-py3-none-any.whl", hash = "sha256:1a4cfc2841472614885e659ed65cba63ec8ae8c4bf5dc0e1709b062a91fa2bb9"},
@@ -4091,11 +4107,12 @@ version = "0.1.2"
 description = "More click."
 optional = false
 python-versions = ">=3.7"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "more_click-0.1.2-py3-none-any.whl", hash = "sha256:f6387af37ef7e7423bd94b72a81a53c79c5086a3bfe5cc035da534ff0c2a0a9e"},
     {file = "more_click-0.1.2.tar.gz", hash = "sha256:085da66d5a9b823c5d912a888dca1fa0c8b3a14ed1b21ea9c8a1b814857a3981"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 click = "*"
@@ -4133,11 +4150,12 @@ version = "3.11.0"
 description = "Nice CX Python includes a client and a data model."
 optional = false
 python-versions = "*"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "ndex2-3.11.0-py2.py3-none-any.whl", hash = "sha256:cafb2efa38e9faf3f7e47805429d2498cfd127b5a452df020bf3c8e199c9c072"},
     {file = "ndex2-3.11.0.tar.gz", hash = "sha256:3fbf4d96254f0e85a2162c9f77d970687fe5a41622671a553111238e81350512"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 ijson = "*"
@@ -4168,12 +4186,12 @@ version = "3.2.1"
 description = "Python package for creating and manipulating graphs and networks"
 optional = false
 python-versions = ">=3.9"
-groups = ["dev"]
-markers = "python_version < \"3.11\""
+groups = ["main", "dev"]
 files = [
     {file = "networkx-3.2.1-py3-none-any.whl", hash = "sha256:f18c69adc97877c42332c170849c96cefa91881c99a7cb3e95b7c659ebdc1ec2"},
     {file = "networkx-3.2.1.tar.gz", hash = "sha256:9f1bb5cf3409bf324e0a722c20bdb4c20ee39bf1c30ce8ae499c8502b0b5e0c6"},
 ]
+markers = {main = "python_version == \"3.10\"", dev = "python_version < \"3.11\""}
 
 [package.extras]
 default = ["matplotlib (>=3.5)", "numpy (>=1.22)", "pandas (>=1.4)", "scipy (>=1.9,!=1.11.0,!=1.11.1)"]
@@ -4188,7 +4206,7 @@ version = "3.5"
 description = "Python package for creating and manipulating graphs and networks"
 optional = false
 python-versions = ">=3.11"
-groups = ["dev"]
+groups = ["main", "dev"]
 markers = "python_version >= \"3.11\""
 files = [
     {file = "networkx-3.5-py3-none-any.whl", hash = "sha256:0030d386a9a06dee3565298b4a734b68589749a544acbb6c412dc9e2489ec6ec"},
@@ -4271,11 +4289,12 @@ version = "0.6.23"
 description = "Ontology Access Kit: Python library for common ontology operations over a variety of backends"
 optional = false
 python-versions = "<4.0.0,>=3.9"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "oaklib-0.6.23-py3-none-any.whl", hash = "sha256:2e20732f49f91b21f85e55c0ddaba8365ecc473ce0b07929c7ec68c0ca500ace"},
     {file = "oaklib-0.6.23.tar.gz", hash = "sha256:66cab87f2a672910d779c39e85dca90fdf8fc6728f37dd70d81f683791db52ff"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 airium = ">=0.2.5"
@@ -4361,7 +4380,7 @@ version = "0.2.1"
 description = "A client to the EBI Ontology Lookup Service"
 optional = false
 python-versions = ">=3.10"
-groups = ["dev"]
+groups = ["main", "dev"]
 markers = "python_version >= \"3.10\""
 files = [
     {file = "ols_client-0.2.1-py3-none-any.whl", hash = "sha256:e6d094b8d49711ed2b173b06bd3fbc62be4c8becd21def3bf4efec59096fcca8"},
@@ -4406,11 +4425,12 @@ version = "0.0.4"
 description = "A client to BioPortal and other OntoPortal instances."
 optional = false
 python-versions = ">=3.7"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "ontoportal_client-0.0.4-py3-none-any.whl", hash = "sha256:0dedd4ce003e0b6c1128fa05101e57bcc128ad79a6c9fcae66037d2447706c4c"},
     {file = "ontoportal_client-0.0.4.tar.gz", hash = "sha256:1bf7edcb94db3ed68ea9a64c620056f0517f7e209826b05dbfda8fe27384fa48"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 pystow = "*"
@@ -5199,11 +5219,12 @@ version = "4.1.0"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 optional = false
 python-versions = ">=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "platformdirs-4.1.0-py3-none-any.whl", hash = "sha256:11c8f37bcca40db96d8144522d925583bdb7a31f7b0e37e3ed4318400a8e2380"},
     {file = "platformdirs-4.1.0.tar.gz", hash = "sha256:906d548203468492d432bcb294d4bc2fff751bf84971fbb2c10918cc206ee420"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.extras]
 docs = ["furo (>=2023.7.26)", "proselint (>=0.13)", "sphinx (>=7.1.1)", "sphinx-autodoc-typehints (>=1.24)"]
@@ -5280,11 +5301,12 @@ version = "2.7.0"
 description = "Python frontend to ontologies."
 optional = false
 python-versions = ">=3.7"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "pronto-2.7.0-py3-none-any.whl", hash = "sha256:da4fb4a6fd67ed7958cc3fc02ad0360ef81e48d2282b8e3fb9715209fcc64952"},
     {file = "pronto-2.7.0.tar.gz", hash = "sha256:8454b89094f20eb74b3dadfd23d09ac3722a47d40c6ef3f6a1b462bc3faa030b"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 chardet = ">=5.0,<6.0"
@@ -5845,10 +5867,11 @@ version = "3.10.0"
 description = "Lightweight Python client for Apache Solr"
 optional = false
 python-versions = "*"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "pysolr-3.10.0.tar.gz", hash = "sha256:127b4a2dd169234acb1586643a6cd1e3e94b917921e69bf569d7b2a2aa0ef409"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 requests = ">=2.9.1"
@@ -5863,11 +5886,12 @@ version = "0.5.2"
 description = "Easily pick a place to store data for your python package."
 optional = false
 python-versions = ">=3.7"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "pystow-0.5.2-py3-none-any.whl", hash = "sha256:c0faeb0fc854ede714be7949555f4d55ce40d8fd57f0ae1ff75e86158792299a"},
     {file = "pystow-0.5.2.tar.gz", hash = "sha256:d05d233299d61b50f53c7de220d990ec4c58e3a54d195d8449f0302563eb6de6"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 click = "*"
@@ -6259,10 +6283,11 @@ version = "2.2.1"
 description = "API rate limit decorator"
 optional = false
 python-versions = "*"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "ratelimit-2.2.1.tar.gz", hash = "sha256:af8a9b64b821529aca09ebaf6d8d279100d766f19e90b5059ac6a718ca6dee42"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [[package]]
 name = "rdflib"
@@ -6362,11 +6387,12 @@ version = "1.2.1"
 description = "A persistent cache for python requests"
 optional = false
 python-versions = ">=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "requests_cache-1.2.1-py3-none-any.whl", hash = "sha256:1285151cddf5331067baa82598afe2d47c7495a1334bfe7a7d329b43e9fd3603"},
     {file = "requests_cache-1.2.1.tar.gz", hash = "sha256:68abc986fdc5b8d0911318fbb5f7c80eebcd4d01bfacc6685ecf8876052511d1"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 attrs = ">=21.2"
@@ -6412,11 +6438,12 @@ version = "1.0.0"
 description = "A utility belt for advanced users of python-requests"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "requests-toolbelt-1.0.0.tar.gz", hash = "sha256:7681a0a3d047012b5bdc0ee37d7f8f07ebe76ab08caeccfc3921ce23c88d5bc6"},
     {file = "requests_toolbelt-1.0.0-py2.py3-none-any.whl", hash = "sha256:cccfdd665f0a24fcf4726e690f65639d272bb0637b9b92dfd91a5568ccf6bd06"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 requests = ">=2.0.1,<3.0.0"
@@ -6615,7 +6642,7 @@ version = "0.18.16"
 description = "ruamel.yaml is a YAML parser/emitter that supports roundtrip preservation of comments, seq/map flow style, and map key order"
 optional = false
 python-versions = ">=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 markers = "python_version >= \"3.10\""
 files = [
     {file = "ruamel.yaml-0.18.16-py3-none-any.whl", hash = "sha256:048f26d64245bae57a4f9ef6feb5b552a386830ef7a826f235ffb804c59efbba"},
@@ -6635,7 +6662,7 @@ version = "0.2.15"
 description = "C version of reader, parser and emitter for ruamel.yaml derived from libyaml"
 optional = false
 python-versions = ">=3.9"
-groups = ["dev"]
+groups = ["main", "dev"]
 markers = "python_version < \"3.14\" and platform_python_implementation == \"CPython\" and python_version >= \"3.10\""
 files = [
     {file = "ruamel_yaml_clib-0.2.15-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:88eea8baf72f0ccf232c22124d122a7f26e8a24110a0273d9bcddcb0f7e1fa03"},
@@ -6831,11 +6858,12 @@ version = "0.4.0"
 description = ""
 optional = false
 python-versions = "<4.0.0,>=3.8.1"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "semsql-0.4.0-py3-none-any.whl", hash = "sha256:a8e5be068a5d6b8b6fd86884019f7054a59a9178592cd149b90bc23ca9f4bf1b"},
     {file = "semsql-0.4.0.tar.gz", hash = "sha256:89a3273e3595036a190c7d1bb779a8e144996582d131d9757c5ffbbb8029a3ce"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 click = ">=8.1.3,<9.0.0"
@@ -6848,11 +6876,12 @@ version = "69.0.2"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 optional = false
 python-versions = ">=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "setuptools-69.0.2-py3-none-any.whl", hash = "sha256:1e8fdff6797d3865f37397be788a4e3cba233608e9b509382a2777d25ebde7f2"},
     {file = "setuptools-69.0.2.tar.gz", hash = "sha256:735896e78a4742605974de002ac60562d286fa8051a7e2299445e8e8fbb01aa6"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.extras]
 docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "pygments-github-lexers (==0.0.5)", "rst.linker (>=1.9)", "sphinx (<7.2.5)", "sphinx (>=3.5)", "sphinx-favicon", "sphinx-inline-tabs", "sphinx-lint", "sphinx-notfound-page (>=1,<2)", "sphinx-reredirects", "sphinxcontrib-towncrier"]
@@ -6870,7 +6899,7 @@ files = [
     {file = "shellingham-1.5.4-py2.py3-none-any.whl", hash = "sha256:7ecfff8f2fd72616f7481040475a65b2bf8af90a56c89140852d1120324e8686"},
     {file = "shellingham-1.5.4.tar.gz", hash = "sha256:8dbca0739d487e5bd35ab3ca4b36e11c4078f3a234bfce294b0a0291363404de"},
 ]
-markers = {main = "platform_system != \"Emscripten\"", dev = "python_version >= \"3.10\""}
+markers = {main = "platform_system != \"Emscripten\" or python_version >= \"3.10\"", dev = "python_version >= \"3.10\""}
 
 [[package]]
 name = "shexjsg"
@@ -7280,11 +7309,12 @@ version = "0.38.3"
 description = "Various utility functions for SQLAlchemy."
 optional = false
 python-versions = "~=3.6"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "SQLAlchemy-Utils-0.38.3.tar.gz", hash = "sha256:9f9afba607a40455cf703adfa9846584bf26168a0c5a60a70063b70d65051f4d"},
     {file = "SQLAlchemy_Utils-0.38.3-py3-none-any.whl", hash = "sha256:5c13b5d08adfaa85f3d4e8ec09a75136216fad41346980d02974a70a77988bf9"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 SQLAlchemy = ">=1.3"
@@ -7361,7 +7391,7 @@ version = "0.4.18"
 description = "Operations on SSSOM mapping tables"
 optional = false
 python-versions = "<4.0.0,>=3.10"
-groups = ["dev"]
+groups = ["main", "dev"]
 markers = "python_version >= \"3.10\""
 files = [
     {file = "sssom-0.4.18-py3-none-any.whl", hash = "sha256:214bed6b19ab8614e3d231ac074644cbffd475ce326378bbca683154992f7cd7"},
@@ -7395,11 +7425,12 @@ version = "1.1.0a3"
 description = "SSSOM is a Simple Standard for Sharing Ontology Mappings."
 optional = false
 python-versions = ">=3.8.1"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "sssom_schema-1.1.0a3-py3-none-any.whl", hash = "sha256:ca737e771919e947eb85240f56f5c7fd78980992f92cdb130195cd42aca5215b"},
     {file = "sssom_schema-1.1.0a3.tar.gz", hash = "sha256:b68a4a14a3712c01b8637147b9f7e5153806acdba966cde86961030df2533b1c"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 jinjanator = "*"
@@ -7632,7 +7663,7 @@ version = "0.20.0"
 description = "Typer, build great CLIs. Easy to code. Based on Python type hints."
 optional = false
 python-versions = ">=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 markers = "python_version >= \"3.10\""
 files = [
     {file = "typer-0.20.0-py3-none-any.whl", hash = "sha256:5b463df6793ec1dca6213a3cf4c0f03bc6e322ac5e16e13ddd622a889489784a"},
@@ -7815,11 +7846,12 @@ version = "2.2.1"
 description = "URL normalization for Python"
 optional = false
 python-versions = ">=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "url_normalize-2.2.1-py3-none-any.whl", hash = "sha256:3deb687587dc91f7b25c9ae5162ffc0f057ae85d22b1e15cf5698311247f567b"},
     {file = "url_normalize-2.2.1.tar.gz", hash = "sha256:74a540a3b6eba1d95bdc610c24f2c0141639f3ba903501e61a52a8730247ff37"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.dependencies]
 idna = ">=3.3"
@@ -7871,11 +7903,12 @@ version = "0.35.0"
 description = "Python Data Validation for Humans™"
 optional = false
 python-versions = ">=3.9"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "validators-0.35.0-py3-none-any.whl", hash = "sha256:e8c947097eae7892cb3d26868d637f79f47b4a0554bc6b80065dfe5aac3705dd"},
     {file = "validators-0.35.0.tar.gz", hash = "sha256:992d6c48a4e77c81f1b4daba10d16c3a9bb0dbb79b3a19ea847ff0928e70497a"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.extras]
 crypto-eth-addresses = ["eth-hash[pycryptodome] (>=0.7.0)"]
@@ -8130,4 +8163,4 @@ docs = []
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9"
-content-hash = "52717cdf7ac915a5fca3cc677ed2fbb82c88197d801021f6c6358d0eb56515b2"
+content-hash = "48590937fce348951b8e76edfefdfc46e408466b3d1f1285450bc3d51b8d347f"

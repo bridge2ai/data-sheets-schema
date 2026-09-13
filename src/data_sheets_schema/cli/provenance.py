@@ -1166,11 +1166,9 @@ def _transcript_candidates(project: str, label: str, roots: list[Path] | None = 
 
 
 def _observe(transcripts: list, bundle, until, receipt, manifest) -> dict:
-    """`scripts/agentic_observed.observe`, imported from the script."""
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("agentic_observed", Path("scripts/agentic_observed.py"))
-    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
-    obs = mod.observe(transcripts, bundle, until, receipt, manifest)
+    """The packaged transcript observer, shared with the command entry point."""
+    from data_sheets_schema.agentic_observed import observe
+    obs = observe(transcripts, bundle, until, receipt, manifest)
     return {k: v for k, v in obs.items() if not k.startswith("_") and k in _RUN_OBSERVED_FIELDS
             and isinstance(v, int) and not isinstance(v, bool)}
 
@@ -1179,7 +1177,8 @@ def _observer_sha256() -> str:
     """The instrument's own hash, recorded with every extension (#1191
     review, S1): the observer is what the proof rests on."""
     import hashlib as _h
-    return _h.sha256(Path("scripts/agentic_observed.py").read_bytes()).hexdigest()
+    from data_sheets_schema import agentic_observed
+    return _h.sha256(Path(agentic_observed.__file__).read_bytes()).hexdigest()
 
 
 @provenance.command('extend-observed')

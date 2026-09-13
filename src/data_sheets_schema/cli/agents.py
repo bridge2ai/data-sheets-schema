@@ -9,12 +9,20 @@ from data_sheets_schema.agent_pin import (AGENT_DIR,
 
 
 def _names():
-    return sorted(p.stem for p in AGENT_DIR.glob("*.md"))
+    from data_sheets_schema.resources import resource_path
+    return sorted(p.stem for p in resource_path(".claude/agents").glob("*.md"))
 
 
 @click.group()
 def agents():
     """Agent definitions: their pins, and whether a subagent read them."""
+
+
+@agents.command("playbook")
+def playbook():
+    """Print the agentic playbook with executable installed resource paths."""
+    from data_sheets_schema.agentic_runtime import playbook_text
+    click.echo(playbook_text())
 
 
 @agents.command("preamble")

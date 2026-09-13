@@ -48,7 +48,7 @@ class TestTheInstalledWheel(unittest.TestCase):
             raise AssertionError(f"the wheel did not install: {r.stderr[-1200:]}")
         cls.work = cls.tmp / "work"
         cls.work.mkdir()
-        for fixture in ("installed_workflow_fixture.py", "judge_fixtures.py"):
+        for fixture in ("installed_workflow_fixture.py", "judge_fixtures.py", "installed_agentic_fixture.py"):
             shutil.copy2(ROOT / "tests" / fixture, cls.work / fixture)
 
     @classmethod
@@ -74,6 +74,14 @@ class TestTheInstalledWheel(unittest.TestCase):
             assert reqs, "no linkml requirement"
             assert all("extra ==" not in x for x in reqs), reqs
             import linkml, linkml.validator          # importable in the install
+            print("ok")
+        """)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
+    def test_the_installed_agentic_instructions_and_observer_execute(self):
+        r = self._run("""
+            from installed_agentic_fixture import check_installed_agentic
+            check_installed_agentic()
             print("ok")
         """)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
