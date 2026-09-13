@@ -40,6 +40,8 @@ def pack(method, label, project, instruction_file, receipted, receiptless, force
     their cited passage, the receiptless and reshaped slots, and the
     instruction's rules as a checklist — each item with its pointer and its
     question, and a closed verdict vocabulary per kind."""
+    from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+    _require_repo_root_cwd("d4d review pack")          # a corpus write lands under the cwd (#1685)
     from data_sheets_schema.cli.method import resolve_method
     method = method or resolve_method(label, project)
     from data_sheets_schema.review_pack import PackAttested, pack_pins, write_pack
@@ -98,6 +100,8 @@ def check(method, label, project, write, strict):
     """Check `{PROJECT}_review.yaml` against its pack: every item answered
     once with a verdict from its kind's vocabulary and evidence; counts are
     affirmative and cannot_tell is its own number."""
+    from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+    _require_repo_root_cwd("d4d review check")          # a corpus write lands under the cwd (#1685)
     from data_sheets_schema.cli.method import resolve_method
     method = method or resolve_method(label, project)
     import hashlib
@@ -213,6 +217,8 @@ def disposition(method, label, project, item, disposition, note, slot_path, old,
     Evaluations that predate an amendment are not re-attributed: the entry
     names them as predating it.
     """
+    from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+    _require_repo_root_cwd("d4d review disposition")          # a corpus write lands under the cwd (#1685)
     from data_sheets_schema.cli.method import resolve_method
     method = method or resolve_method(label, project)
     import hashlib
