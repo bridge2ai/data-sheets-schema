@@ -351,3 +351,24 @@ pass afterward, including both valid and stale selected bundles. The source
 pin is refreshed. This corrects path resolution without changing chunk rules,
 instructions or measurements; no production generation, scoring or download
 ran. Independent round-17 review and updated exact-head CI follow.
+
+## Final CI corrections and review round 18 — 2026-09-13
+
+The full corpus CI exposed six outdated fixture failures, and the final
+integration exposed a seventh intermittent failure. #1755 updates the recorder
+stub for the explicit corpus argument. #1756 tests structural validation on
+synthetic artifact pairs independently of an ambient generation profile, and
+uses an actual renderer-4 fixture before testing renderer-1 restatement. The
+obsolete validation test no longer rewrites a tracked provenance record.
+
+#1757 moves bundle-audit mutation cases to complete temporary copies. A write
+guard rejects even transient changes to the shared corpus; all three prior
+mutation bodies were independently confirmed to fail at that guard before
+changing tracked bytes. The actual rebuilding and drift assertions remain.
+All 142 tests in the four affected files pass in parallel, with one existing
+skip for unavailable crate inputs (81.60 seconds). Only tests and these dated
+notes change; the 16 implementation pins remain identical to round 17.
+
+The final combined review and exact-head CI remain merge gates. No production
+generation, evaluation, source download, instruction or historical pin changes
+are part of this correction.

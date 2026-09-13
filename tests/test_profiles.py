@@ -1489,8 +1489,8 @@ class TestRoundEleven(_Clean):
         problems, _ = check_record(split)
         self.assertTrue(any("different instruments" in p for p in problems))
 
-    def test_an_unknown_ambient_profile_is_a_usage_error_everywhere(self):
-        """#1679"""
+    def test_unknown_profiles_are_rejected_only_by_profile_selecting_commands(self):
+        """#1679, #1756: structural validation has no generation profile."""
         import click.testing
         from data_sheets_schema.cli.healthsheet import healthsheet as hs
         from data_sheets_schema.cli import provenance as prov_cli
@@ -1498,13 +1498,17 @@ class TestRoundEleven(_Clean):
         r = click.testing.CliRunner().invoke(hs, ["bundle", "--output-dir", tempfile.mkdtemp()])
         self.assertNotEqual(r.exit_code, 0)
         self.assertNotIsInstance(r.exception, ValueError, r.output)
-        label = "2026-07-31_claude-opus-5-api-generic_rep2"                  # a tracked record (#1705)
-        if (ROOT / "data/d4d_concatenated/claudecode_agent_crate_only_core" / label / "CHORUS_provenance.yaml").exists():
-            os.chdir(ROOT)
+        from tests.test_manifest_corpus_review_r9 import recorded_pair
+        with tempfile.TemporaryDirectory() as d:
+            record, _, _, _ = recorded_pair(Path(d))
+            before = record.read_bytes()
+            os.chdir(d)
             r = click.testing.CliRunner().invoke(prov_cli.provenance, [
-                "recheck-validation", "--method", "claudecode_agent_crate_only", "--label", label, "--project", "CHORUS"])
-            self.assertNotIsInstance(r.exception, ValueError, r.output)
-            self.assertIn("unknown profile", r.output)
+                "recheck-validation", "--method", "external", "--label", "run", "--project", "CLINICAL_X"])
+            self.assertEqual(r.exit_code, 0, (r.output, r.exception))
+            self.assertIn("passed True → True", r.output)
+            self.assertEqual(record.read_bytes(), before)
+            os.chdir(ROOT)
         import subprocess, sys
         r2 = subprocess.run([sys.executable, "-m", "data_sheets_schema.form_defects", "--offline", "--profile", "bogus"],
                             capture_output=True, text=True, cwd=ROOT, env={**os.environ, "PYTHONPATH": str(ROOT / "src")})
@@ -1640,7 +1644,7 @@ class TestRoundThirteen(_Clean):
         spec = RunSpec(project="CHORUS", method=ARMS["baseline"][1], arm=ARMS["baseline"][0],
                        bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
                        label="2026-09-13_x-claudecode-generic-v9_rep1", condition="generic_v9",
-                       runtime="Claude Code", provider="Anthropic", run_date="2026-09-13")
+                       runtime="Claude Code", provider="Anthropic", run_date="2026-09-13", render_version=4)
         os.environ.pop("D4D_PROFILE")
         base = {"record_generated_at": "2026-09-13T12:00:00Z", "model": {"provider": "Anthropic"},
                 "inputs": {"bundle_path": str(spec.bundle), "source_manifest": {"path": str(spec.manifest)},
@@ -1667,17 +1671,24 @@ class TestRoundThirteen(_Clean):
             self.assertEqual(written["prompts"]["request"]["spec"]["render_version"], 1)
             self.assertIn("render version 1 does not hash the profile", written["prompts"]["request"]["spec_basis"])
 
-    def test_runs_validate_names_an_unknown_ambient_profile(self):
-        """#1711 (the `runs validate` wrap)"""
+    def test_runs_validate_uses_artifacts_without_selecting_a_generation_profile(self):
+        """#1756: exercise the write on a synthetic pair, never the corpus."""
         import click.testing
         from data_sheets_schema.cli import runs as runs_cli
-        label = "2026-07-31_claude-opus-5-api-generic_rep2"
-        if not (ROOT / "data/d4d_concatenated/claudecode_agent_crate_only_core" / label / "CHORUS_provenance.yaml").exists():
-            self.skipTest("the tracked record is not in this checkout")
-        os.chdir(ROOT); os.environ["D4D_PROFILE"] = "typo"
-        r = click.testing.CliRunner().invoke(runs_cli.runs, ["validate", "--recheck", "--method", "claudecode_agent_crate_only", "--label", label, "--project", "CHORUS"])
-        self.assertNotIsInstance(r.exception, ValueError, r.output)
-        self.assertIn("unknown profile", r.output)
+        from tests.test_manifest_corpus_review_r9 import recorded_pair
+        with tempfile.TemporaryDirectory() as d:
+            record, full, core, prior = recorded_pair(Path(d))
+            os.chdir(d); os.environ["D4D_PROFILE"] = "typo"
+            r = click.testing.CliRunner().invoke(runs_cli.runs, ["validate", "--recheck", "--method", "external", "--label", "run", "--project", "CLINICAL_X"])
+            self.assertEqual(r.exit_code, 0, (r.output, r.exception))
+            block = yaml.safe_load(record.read_text())["validation"]
+            self.assertTrue(block["passed"])
+            for name, path in (("full", full), ("core", core)):
+                entry = block["artifacts"][name]
+                self.assertEqual(Path(entry["path"]).resolve(), path.resolve())
+                self.assertEqual(entry["sha256"], prior["artifacts"][name]["sha256"])
+            self.assertEqual(block["recorded_by"], "d4d runs validate")
+            os.chdir(ROOT)
 
     def test_a_window_pin_is_refused_with_the_cause(self):
         """#1712: a pin with the profile key beside an instruction hashed without `--profile`."""

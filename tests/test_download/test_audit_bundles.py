@@ -13,8 +13,12 @@ the real corpus today.
 """
 
 import hashlib
+import os
+import shutil
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from click.testing import CliRunner
 
@@ -58,7 +62,30 @@ def _crate_inputs_complete(project: str = "CM4AI") -> bool:
 
 @unittest.skipUnless(CONCAT.is_dir(), "corpus not present")
 class TestTheAuditOverTheRealCorpus(unittest.TestCase):
-    """Runs against the real bundles, and restores anything it touches."""
+    """Exercise real bundle copies without editing parallel readers' inputs."""
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        root = Path(tmp.name)
+        for relative in ("data/preprocessed", "data/ro-crate_packages"):
+            shutil.copytree(REPO / relative, root / relative)
+        previous = Path.cwd()
+        self.addCleanup(os.chdir, previous)
+        os.chdir(root)
+        self.concat = root / "data/preprocessed/concatenated"
+
+        # Restoring bytes after a test cannot protect concurrent readers.
+        # Refuse even transient writes to the shared corpus (#1757).
+        original_open = Path.open
+        def checked_open(path, mode="r", *args, **kwargs):
+            if any(flag in mode for flag in "wax+"):
+                self.assertFalse(path.resolve().is_relative_to(REPO / "data"),
+                                 f"test tried to write the shared corpus: {path}")
+            return original_open(path, mode, *args, **kwargs)
+        guard = mock.patch.object(Path, "open", checked_open)
+        guard.start()
+        self.addCleanup(guard.stop)
 
     def test_the_corpus_is_currently_consistent(self):
         r = _run("--strict")
@@ -68,7 +95,7 @@ class TestTheAuditOverTheRealCorpus(unittest.TestCase):
     def test_it_catches_a_bundle_that_no_longer_matches_its_inputs(self):
         """The canary for the checker itself. A checker that has never been
         seen to fail is not evidence of anything."""
-        target = CONCAT / "CM4AI_preprocessed.txt"
+        target = self.concat / "CM4AI_preprocessed.txt"
         original = target.read_bytes()
         self.addCleanup(target.write_bytes, original)
 
@@ -83,7 +110,7 @@ class TestTheAuditOverTheRealCorpus(unittest.TestCase):
     def test_the_crate_bundle_is_reported_when_the_document_bundle_moves(self):
         """The propagation failure itself: editing the document bundle makes
         the crate bundle stale, because the crate bundle embeds it."""
-        target = CONCAT / "CM4AI_preprocessed.txt"
+        target = self.concat / "CM4AI_preprocessed.txt"
         original = target.read_bytes()
         self.addCleanup(target.write_bytes, original)
 
@@ -93,7 +120,7 @@ class TestTheAuditOverTheRealCorpus(unittest.TestCase):
         self.assertIn("d4d rocrate bundle --project CM4AI", r.output)
 
     def test_restoring_the_bytes_restores_the_verdict(self):
-        target = CONCAT / "CM4AI_preprocessed.txt"
+        target = self.concat / "CM4AI_preprocessed.txt"
         before = _md5(target)
         original = target.read_bytes()
         target.write_bytes(original + b"\n# temporary\n")
