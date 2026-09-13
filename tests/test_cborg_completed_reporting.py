@@ -16,6 +16,8 @@ import reference_rescore_cborg as adapter
 import reference_rescore_cborg_batch as batch
 import reference_rescore_cborg_deadline as deadline
 
+REAL_ACCOUNTED_AUDIT = deadline.accounted_audit
+
 PLAN = ROOT / f"notes/reference_rescore_{adapter.DATE}"
 
 
@@ -345,6 +347,48 @@ def test_completed_audit_does_not_write_its_original_evidence(monkeypatch):
     assert adapter.main(["audit"]) == 0
     # Re-reading the registered condition must still work after audit.
     batch.load_registered()
+
+
+def test_public_commands_with_fresh_audit_imports_and_real_accounting(monkeypatch, reports_in_memory):
+    import builtins
+    import socket
+    ordinary = builtins.__import__
+
+    def changed_apis(name, *args, **kwargs):
+        if name in {"reference_rescore", "data_sheets_schema.agent_pin",
+                    "data_sheets_schema.semantic_comparison", "report_semantic_comparison"}:
+            raise ImportError("live API refactored; use its retained implementation")
+        return ordinary(name, *args, **kwargs)
+
+    def refuse_network(*args, **kwargs):
+        raise AssertionError("verification attempted a network connection")
+
+    monkeypatch.setattr(socket.socket, "connect", refuse_network)
+    monkeypatch.setattr(deadline, "accounted_audit", REAL_ACCOUNTED_AUDIT)
+    monkeypatch.setattr(builtins, "__import__", changed_apis)
+    for action in ("audit", "report", "audit"):
+        monkeypatch.delitem(sys.modules, "audit_reference_rescore", raising=False)
+        assert adapter.main([action]) == 0
+    files, _ = reports_in_memory
+    results = json.loads(files[PLAN / "results.json"])
+    assert results["completed"] == 56
+
+
+@pytest.mark.parametrize("name,field,value", [
+    ("completion_audit.json", "v9_model_requests", 106),
+    ("completion_audit.json", "v9_catalogue_price_estimate_usd", "0.00"),
+    ("final_written_output_audit.json", "model_calls_during_verification", 10),
+])
+def test_changed_retained_audit_statistics_never_reach_reports(name, field, value, monkeypatch, reports_in_memory):
+    path = PLAN / name
+    read = Path.read_bytes
+    doc = json.loads(read(path))
+    doc[field] = value
+    monkeypatch.setattr(Path, "read_bytes", lambda p: json.dumps(doc).encode() if p == path else read(p))
+    files, before = reports_in_memory
+    with pytest.raises(ValueError, match="preserved completed audit changed"):
+        adapter.main(["report"])
+    assert files == before
 
 
 @pytest.mark.parametrize("action", ["freeze", "canary", "remaining", "accept-canary", "--print"])

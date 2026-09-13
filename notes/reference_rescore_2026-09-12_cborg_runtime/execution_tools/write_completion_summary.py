@@ -201,8 +201,10 @@ def main():
         raise ValueError("This dated helper requires its own registered condition; use the current condition helper or check out the recorded revision.")
     r, manifest, registration = batch.load_registered()
     plan = r.PLAN
-    audit = json.loads((plan / "completion_audit.json").read_bytes())
-    writes = json.loads((plan / "final_written_output_audit.json").read_bytes())
+    audit_raw = (plan / "completion_audit.json").read_bytes()
+    writes_raw = (plan / "final_written_output_audit.json").read_bytes()
+    audit = json.loads(audit_raw)
+    writes = json.loads(writes_raw)
     if (audit["status"] != "verified" or audit["accepted"] != audit["planned"] or audit["planned"] != 56
             or writes["accepted"] != 56 or audit["manifest_sha256"] != r.digest(plan / "manifest.json")
             or writes["manifest_sha256"] != audit["manifest_sha256"] or audit["unresolved_attempts"]
@@ -280,6 +282,8 @@ def main():
             ("evaluation timing", timing["qualification"]),
             ("measured code archive", code_archive["qualification"])):
         require_qualification(value, name)
+    r.ROOT.verify_completed_audit("completion_audit.json", audit_raw)
+    r.ROOT.verify_completed_audit("final_written_output_audit.json", writes_raw)
     banner = ("**Semantic inspection — Q19:** " + review["qualification"]
               + " See the [24-rating inspection](semantic_review.md).\n\n"
               + "**Execution boundary:** " + execution["qualification"]

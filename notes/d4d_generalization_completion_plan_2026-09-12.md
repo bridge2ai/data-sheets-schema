@@ -81,3 +81,22 @@ check-echo reconstruction, and tampering/publication rollback tests. An actual
 offline audit also reproduced all retained facts, including 56 accepted
 ratings and six recorded v9 requests, without starting a measurement.
 Independent review and CI must still pass on the final head before merge.
+
+## Prerequisite review round 2 and fixes
+
+The second Codex review verified all archive copies and found two remaining
+paths: the audit utility eagerly imported its live default runner (#1400), and
+the report trusted some retained audit statistics that were not hash-bound
+(#1401). The utility now loads its default only if used, allowing completed
+verification to inject the archived runner first. Both retained audit documents
+are bound in the preservation record; the reporter verifies the exact byte
+strings it parsed before publishing any derived file. Field-specific missing
+qualification checks still run, and the original audit files remain untouched.
+
+Round-3 validation: 112 tests pass, including audit → report → audit with a
+fresh audit-module import each time, real session accounting, blocked network
+connections, and refused imports of the live runner/pin/report helpers.
+Changing the retained v9 request count, its cost, or the successful-Write audit
+now stops publication. Default-runner compatibility and the original receipt
+uniqueness/accounting tests also pass. Independent review and CI on this
+committed round-3 head remain required before merge.

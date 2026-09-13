@@ -1,4 +1,8 @@
 {
+  "completed_audits": {
+    "completion_audit.json": "fe74c3133ee0aad46fc5361dd2ead1656a00372d512f4a3b1740969adf7477fd",
+    "final_written_output_audit.json": "c0fbfba0eb3ed2ba5932e1b6db17f9ec93ffe81d9680fd1f2848c3cfe3b95551"
+  },
   "files": {
     ".claude/agents/d4d-rubric10-semantic.md": {
       "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files/.claude/agents/d4d-rubric10-semantic.md",

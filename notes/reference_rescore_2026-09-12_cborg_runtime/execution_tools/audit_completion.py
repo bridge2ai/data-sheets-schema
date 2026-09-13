@@ -210,7 +210,10 @@ def main():
         ("final_written_output_audit.json", written_audit, "verified_at"),
         ("measurement_file_hashes.json", measurement_inventory, "verified_at"),
     ):
-        saved = json.loads((r.PLAN / name).read_bytes())
+        raw = (r.PLAN / name).read_bytes()
+        saved = json.loads(raw)
+        if name != "measurement_file_hashes.json":
+            r.ROOT.verify_completed_audit(name, raw)
         if name == "measurement_file_hashes.json":
             # The original index's descriptive search_scope wording is not
             # recomputed evidence. Compare its complete path/hash inventory.

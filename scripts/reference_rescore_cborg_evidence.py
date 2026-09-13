@@ -17,7 +17,7 @@ from pathlib import Path
 
 PLAN = "notes/reference_rescore_2026-09-12_cborg_runtime"
 ARCHIVE = f"{PLAN}/registrations/measured_inputs_1381"
-PRESERVATION_SHA256 = "54a5f79b445ede200c4ed7111be281bb8d981ad92bf20fa1dc07466e69456f27"
+PRESERVATION_SHA256 = "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f"
 
 
 def _verified(path, expected):
@@ -71,6 +71,11 @@ class EvidenceRoot(os.PathLike):
 
     def __truediv__(self, relative):
         return self.paths.get(str(relative), self.root / relative)
+
+    def verify_completed_audit(self, name, raw):
+        """Verify the bytes parsed by the caller before publishing their facts."""
+        if hashlib.sha256(raw).hexdigest() != self.preservation["completed_audits"][name]:
+            raise ValueError(f"preserved completed audit changed: {name}")
 
     def load_module(self, relative, name, imports=None):
         """Load a verified historical helper without replacing public modules."""
