@@ -246,8 +246,8 @@ def load_registry(path: Path | str | None = DEFAULT_MANIFEST) -> Registry:
     if path is None:
         return Registry(path=None)
     p = Path(path)
-    if p == DEFAULT_MANIFEST and not p.exists():
-        p = default_manifest_path()
+    if p == DEFAULT_MANIFEST:
+        p = default_manifest_path()          # one rule, whether or not a relative copy is here (#1563)
     if not p.exists():
         return Registry(path=p)
     import yaml

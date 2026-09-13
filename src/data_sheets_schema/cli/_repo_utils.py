@@ -22,10 +22,15 @@ def get_repo_root() -> Path:
     Raises:
         RuntimeError: If not running in a repository checkout
     """
-    # The same anchor as `resources.CHECKOUT_ROOT` (#1501): `pyproject.toml`
-    # two levels above the package, not any ancestor — a wheel installed in
-    # a user's project venv would otherwise adopt that project as the root.
-    from data_sheets_schema.resources import CHECKOUT_ROOT
+    # The same decision as `resources.resource_root` (#1501, #1588): the
+    # working directory when it is a checkout of this project, else the
+    # checkout the package is imported from — never an arbitrary ancestor,
+    # so a wheel installed in a user's project venv does not adopt that
+    # project as the root (#1577).
+    from data_sheets_schema.resources import CHECKOUT_ROOT, cwd_checkout
+    here = cwd_checkout()
+    if here is not None:
+        return here
     if CHECKOUT_ROOT is not None:
         return CHECKOUT_ROOT
 

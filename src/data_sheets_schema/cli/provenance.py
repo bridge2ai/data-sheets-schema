@@ -159,16 +159,18 @@ def _require_repo_root_cwd(command: str) -> None:
     # shell that wandered into a subdirectory of the checkout: that record
     # would land under <subdir>/data/ where no check reads it. Refuse
     # exactly that case.
-    from data_sheets_schema.resources import CHECKOUT_ROOT
+    # Any checkout of this project, not only the one the code is imported
+    # from (#1588): a worktree's subdirectory is as wrong a place as the
+    # primary's.
+    from data_sheets_schema.resources import checkout_at
     cwd = Path.cwd().resolve()
-    if CHECKOUT_ROOT is not None:
-        root = CHECKOUT_ROOT.resolve()
-        if cwd != root and root in cwd.parents:
-            raise click.ClickException(
-                f"{command} must run from the data-sheets-schema repository root, "
-                f"not a directory inside it: output paths resolve relative to the "
-                f"working directory, and a record written from {cwd} would land "
-                "where no check reads it. cd to the repo root and re-run.")
+    root = checkout_at(cwd)
+    if root is not None and cwd != root:
+        raise click.ClickException(
+            f"{command} must run from the data-sheets-schema repository root ({root}), "
+            f"not a directory inside it: output paths resolve relative to the "
+            f"working directory, and a record written from {cwd} would land "
+            "where no check reads it. cd to the repo root and re-run.")
 
 
 def _parse_phases(specs) -> list[dict]:
@@ -318,6 +320,10 @@ def _parse_phases(specs) -> list[dict]:
                    'already existed and validated — the same field the API '
                    'path\'s resumed runs carry. Repeat once per skipped '
                    'phase; names are validated like --phase.')
+@click.option('--profile', 'stated_profile', default=None,
+              help='the profile the launch instruction was rendered under (the rendered `d4d provenance record` '
+                   'line carries it); recorded with the basis `rendered instruction`, over what the manifest '
+                   'or this process\'s environment would select (#1581)')
 @click.option('--manifest', default=None,
               help='the source manifest this run selected: its `profile:` decides the digest '
                    'and, unless the output header declares its context unused, it is attested '
@@ -331,7 +337,8 @@ def _parse_phases(specs) -> list[dict]:
                    'rather than as not-applicable')
 def record(project, method, label, input_bundle, prompts, prompt_text,
            condition, arm, runtime, provider, bundle_for_spec,
-           reasoning_effort, phase_specs, phases_skipped, manifest, chunk_manifest, receipt_expected):
+           reasoning_effort, phase_specs, phases_skipped, manifest, chunk_manifest, receipt_expected,
+           stated_profile=None):
     """Write a LIVE provenance record for a run just produced.
 
     Refuses to run from anywhere but the repository root — see
@@ -381,6 +388,11 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     header_unused = manifest_declared_unused(header_manifest)
     if requested is AUTO and header_manifest and not header_unused:
         requested = Path(header_manifest)
+    if requested is AUTO and "no manifest selected" in header_manifest.lower():
+        # The runner's own header for a run that selected none (#1558):
+        # not context withheld from a selected manifest, but no manifest —
+        # the profile is neutral, whatever the study's manifest declares.
+        requested = None
     # Selected by the runner's rule whenever a bundle is resolved — the
     # header's "not used" says the manifest's *context blocks* were not
     # sent, not that no manifest was selected (#1461, #1512) …
@@ -388,6 +400,13 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                          else select_manifest(project, resolved_bundle, requested))
     from data_sheets_schema.profiles import select_profile
     profile_selection = select_profile(selected_manifest)
+    if stated_profile:
+        from data_sheets_schema.profiles import Selection, profile_named
+        stated = profile_named(stated_profile)
+        basis = "rendered instruction"
+        if stated is not profile_selection.profile:
+            basis += f" (this process would select {profile_selection.name}: {profile_selection.basis})"
+        profile_selection = Selection(stated, basis)
     # … and the header governs what the input block attests.
     selected = None if header_unused else selected_manifest
     manifest_basis = ("the output header declares the source manifest unused"
@@ -541,8 +560,25 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
         destinations["receipt"] = str(Path(destinations["report"]).parent / f"{project}_coverage_receipt.yaml")
     else:
         destinations = None
-    for delta, render_version, selected_chunks, selected_manifest in product(
-            (0, -1, 1, -2, 2), (5, 4, 3, 2, 1), chunk_choices, manifest_choices):
+    # The profile the record states is the one its instruction was rendered
+    # under: the recording command carries `--profile <name>` whenever the
+    # run had one, and a record from before profiles carries neither. The
+    # candidate restates the record rather than selecting live (#1438).
+    schema_block = data.get("schema") if isinstance(data.get("schema"), dict) else {}
+    if schema_block.get("profile"):
+        profile_choices: list[dict[str, str]] = [
+            {k: schema_block[k] for k in ("profile", "profile_basis") if schema_block.get(k)}]
+    else:
+        # A record that states no profile is from before profiles — or from
+        # a writer that did not record one: no `--profile` line first, then
+        # each profile this code knows, proven only by the hash.
+        from data_sheets_schema.profiles import PROFILES
+        profile_choices = [{}] + [
+            {"profile": name,
+             "profile_basis": "re-rendered to the recorded hash by d4d provenance backfill-spec (#772)"}
+            for name in PROFILES]
+    for delta, render_version, selected_chunks, selected_manifest, selected_profile in product(
+            (0, -1, 1, -2, 2), (5, 4, 3, 2, 1), chunk_choices, manifest_choices, profile_choices):
         spec = RunSpec.from_render_spec({
             "arm": _ARMS[arm][0], "bundle": str(bundle), "condition": condition,
             "runtime": runtime, "provider": provider,
@@ -553,6 +589,7 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
                and render_version >= 5 and runtime in {"Claude Code", "Codex CLI"} else {}),
             "chunk_manifest": str(selected_chunks) if selected_chunks is not None else None,
             "run_date": (base + timedelta(days=delta)).isoformat(),
+            **selected_profile,
         }, project=project, method=method, label=label)
         got = hashlib.sha256(resolve_prompt(spec).encode("utf-8")).hexdigest()
         if got == req["sha256"]:

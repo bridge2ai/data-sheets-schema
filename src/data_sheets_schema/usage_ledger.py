@@ -212,6 +212,10 @@ def cancel_call(spec, identifier: str) -> None:
 
 def prepare_usage(spec, *, resume: bool) -> str:
     """Establish the generation boundary before any call can be made (#1291)."""
+    if getattr(spec, "_replay_only", False):
+        # A replay spec carries no instrument; it must not open or continue
+        # a generation (#1568).
+        raise UsageLedgerError("a replay spec cannot prepare a usage generation")
     path = ledger_path(spec)
     if resume and path.exists():
         require_resolved(spec)

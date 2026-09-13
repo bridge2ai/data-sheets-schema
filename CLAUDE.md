@@ -1542,10 +1542,10 @@ package is imported from one (`pyproject.toml` two levels up); else the
 installed copy — the wheel places the condition prompts and their pin
 registry, the playbooks and agent definitions the record hashes, and the
 rubric sources at the same relative paths under the installation root, and
-the schema files as package data — so `src`, `data` and `.claude` are
+the schema files as package data — so `src`, `data`, `.claude` and `.github` are
 top-level entries of `site-packages` and `import src` resolves as a
 namespace package there, a stated cost of keeping one spelling in both
-places (#1504). Only `src/`, `.claude/`, `data/rubric/` and
+places (#1504). Only `src/`, `.claude/`, `.github/`, `data/rubric/` and
 `project/` are resources; the corpus under `data/` is the caller's tree and a
 missing record never resolves to the checkout's. Not at import time: a
 constant resolved once takes the value of whichever directory the first
@@ -1566,9 +1566,10 @@ the tuned component, `schema_sync.check_one` (which keeps the logical
 which runs `resources.linkml_validate()` — the console script beside the
 interpreter, else the module entry point through the interpreter, never a
 `PATH` search (#1486) — because `poetry run` needs a `pyproject.toml` in
-the working directory and failed from anywhere else. Paths are normalized
-before classification: a `..` spelling of a prompt is its canonical form
-and `src/../data/…` is the corpus (#1481, #1482). `repo_relative` anchors
+the working directory and failed from anywhere else. A spelling with `..` is never a resource and is never
+collapsed lexically — `.venv/../x` through a symlinked `.venv` is the file
+the filesystem says it is, in every reader (#1481, #1482, #1528, #1570) — and
+a resource directory classifies like its files (#1488). `repo_relative` anchors
 an absolute path to the checkout, the package data, then — for a resource
 only — the install root; the registry's key also falls back to the working
 directory as it always did, the record's never does (#398). `d4d provenance
@@ -1594,7 +1595,15 @@ a file it did not read, #1529; on an install the digest ledger under
 the record's `repo` block names `resource_root` and `resource_kind` —
 the checkout git runs at, or the install root and package version — so
 a record made from a user's own repository no longer attests that
-repository's commit beside the checkout's hashes, #1550; `agent_pin`
+repository's commit beside the checkout's hashes, #1550; that root is
+decided once (`resources.resource_root`): the working directory when it
+is a checkout of this project — a worktree or a second clone, whose files
+the readers take first — else the checkout the code is imported from, so
+a run from a worktree with the primary's code names the worktree's
+commit and keeps its files repository-relative, and the root guard
+refuses a subdirectory of any checkout, #1588; where git cannot answer
+there the commit and the dirty state are recorded unknown, not clean,
+#1591; `agent_pin`
 reads the shipped definitions, while `chunking.anchored`, the review
 pack's bundle path, `verifiable`'s record lookup and `git show` at the
 repository root still anchor on the checkout and are checkout-only until

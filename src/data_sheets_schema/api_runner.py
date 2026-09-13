@@ -547,8 +547,11 @@ class RunSpec:
             self.manifest_line = self.header_for_manifest(self.manifest)
         if self.profile is None:
             self._select_profile()
-        elif self.profile_basis is None:
-            self.profile_basis = "stated by the caller"           # the record says why, always (#1549)
+        else:
+            from data_sheets_schema.profiles import profile_named
+            profile_named(self.profile)                              # unknown names fail here, not mid-batch (#1585)
+            if self.profile_basis is None:
+                self.profile_basis = "stated by the caller"       # the record says why, always (#1549)
 
     def _select_profile(self) -> None:
         from data_sheets_schema.profiles import select_profile
@@ -589,7 +592,8 @@ class RunSpec:
         requires a freshly validated spec; this object is only for replay.
         """
         spec = cls(project=project, method=method, label=label,
-                   profile="replay",          # skip live selection (#1468); cleared below
+                   profile=recorded.get("profile") or "neutral",   # never live selection (#1468); the recorded values are restored below
+                   profile_basis=recorded.get("profile_basis") or "replay",
                    arm=recorded.get("arm", ""), bundle=Path(recorded.get("bundle", "")),
                    condition=recorded["condition"],
                    render_version=recorded.get("render_version", 1),
@@ -601,10 +605,6 @@ class RunSpec:
         manifest = recorded.get("manifest")
         spec.manifest = Path(manifest) if manifest else None
         spec.manifest_line = recorded.get("manifest_line", "")
-        # A replay reads no live declaration — the manifest may be gone or
-        # malformed since — so the profile is not resolved here either;
-        # a replay never renders the digest (#1438).
-        spec.profile = spec.profile_basis = None
         if "agentic_artifact_paths" in recorded:
             paths = recorded["agentic_artifact_paths"]
             expected = {"full", "core", "receipt"} | ({"report"} if spec.render_version >= 5 else set())
@@ -612,6 +612,11 @@ class RunSpec:
                     or any(not isinstance(value, str) or not value for value in paths.values())):
                 raise ValueError("invalid recorded agentic artifact paths")
             spec._agentic_artifact_paths = dict(paths)
+        # A replay reads no live declaration — the manifest may be gone or
+        # malformed since — so the profile is not resolved here either;
+        # a replay never renders the digest (#1438).
+        spec.profile = recorded.get("profile")                    # what was recorded, or None for an older spec
+        spec.profile_basis = recorded.get("profile_basis")
         spec._replay_only = True
         return spec
 
@@ -667,6 +672,7 @@ class RunSpec:
                 "condition": self.condition, "arm": self.arm,
                 "manifest_line": self.manifest_line, "run_date": self.run_date,
                 "manifest": str(self.manifest) if self.manifest is not None else None,
+                **({"profile": self.profile, "profile_basis": self.profile_basis} if self.profile else {}),   # the gate re-renders under them (#1581); absent on an older spec
                 "runtime": self.runtime,
                 "provider": self.provider or provider_identity()["provider"]
                 or PROVIDER,
@@ -958,6 +964,11 @@ def resolve_prompt(spec: RunSpec) -> str:
             # profile from it, and the header still governs what the input
             # block attests (#1461). `none` means none was selected.
             command += " --manifest " + shlex.quote(str(spec.manifest) if spec.manifest is not None else "none")
+            if spec.profile:
+                # The profile this instruction was rendered under: the
+                # recorder runs in another process, where the environment
+                # that may have selected it is not set (#1581).
+                command += " --profile " + shlex.quote(spec.profile)
             if spec.chunk_manifest is not None:
                 command += " --chunk-manifest " + shlex.quote(str(spec.chunk_manifest))
             return command
@@ -2725,18 +2736,35 @@ def validation_block(spec: RunSpec, problems: list[dict[str, str]],
     return block
 
 
-def _validator_did_not_run(text: str) -> bool:
+#: What a crash says when it never opened the data file (#1589).
+_NOT_OPENED = ("No such file or directory", "Permission denied", "Is a directory")
+
+
+def _validator_did_not_run(text: str, data_path: str | Path | None = None) -> bool:
     """A traceback, a missing module or a usage error is the validator failing
     to start, not a finding about the record (#1506); handed to a repair
     round as findings it would be repaired against. Decided on whole lines
     (#1525): a finding line — `[ERROR] …` — proves the validator ran, and a
     value inside a finding (`'does not exist.' is not of type 'object'`)
-    never counts as a marker."""
+    never counts as a marker.
+
+    A crash that names the data file — a YAML the loader rejects, a value a
+    plugin chokes on — is the validator failing *on the record* (#1589):
+    that is a finding about the record, and what a repair round is for. A
+    crash before the data file is opened, or one saying it could not be
+    opened, is the validator not running."""
     lines = [l.strip() for l in text.splitlines()]
+    if any(l.startswith(("Traceback (most recent call last)", "ModuleNotFoundError:", "ImportError:"))
+           for l in lines):
+        if data_path is not None and "Traceback" in text:
+            crash = text[text.index("Traceback"):]
+            names = {str(data_path), Path(data_path).name}
+            if any(n in crash for n in names) and not any(m in crash for m in _NOT_OPENED):
+                return False                 # it ran, and the record broke it
+        return True                          # a crash, whatever it printed first (#1572)
     if any(l.startswith(("[ERROR]", "[WARN", "[WARNING]")) for l in lines):
         return False
-    return any(l.startswith(("Traceback (most recent call last)", "Usage: linkml-validate",
-                             "Error: Invalid value for", "ModuleNotFoundError:", "ImportError:"))
+    return any(l.startswith(("Usage: linkml-validate", "Usage: -c", "Error: Invalid value for"))
                for l in lines)
 
 
@@ -2760,7 +2788,7 @@ def _validator_lines(path: Path, schema: str,
     if r.returncode == 0:
         return [], None
     text = r.stdout + r.stderr
-    if _validator_did_not_run(text):
+    if _validator_did_not_run(text, path):
         return None, f"linkml-validate did not run: {text.strip()[-300:]}"
     lines = [l for l in text.strip().splitlines()
              if l.strip()]
@@ -5033,8 +5061,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         # finished phases' instrument is unknown and they are not continued
         # under whatever this run resolved (#1519).
         from data_sheets_schema.usage_ledger import recorded_inputs
-        pinned = progress.get("input_identity") or recorded_inputs(spec) or {}
-        if "profile" not in pinned:
+        sources = (progress.get("input_identity"), recorded_inputs(spec))   # each on its own (#1559)
+        if not any(isinstance(s, dict) and "profile" in s for s in sources):
             raise UsageLedgerError("saved phases carry no instrument identity (profile and schema digest) and "
                                    "no record attests one; use --no-resume for an explicit new generation")
     if done:

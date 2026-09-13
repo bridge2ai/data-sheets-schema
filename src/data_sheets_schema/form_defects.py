@@ -142,6 +142,7 @@ def load_form_failures(cache_dir: Path = JUDGEMENT_CACHE) -> list[FormFailure]:
     rubrics: set[str] = set()
     models: set[str] = set()
     schemas: set[str] = set()
+    specifications: set[str] = set()
     for path in sorted(cache_dir.glob("*_fitness.jsonl")):
         project = path.name.replace("_fitness.jsonl", "")
         for line in path.read_text(encoding="utf-8").splitlines():
@@ -153,13 +154,16 @@ def load_form_failures(cache_dir: Path = JUDGEMENT_CACHE) -> list[FormFailure]:
             rubrics.add(entry.get("rubric", ""))
             models.add(entry.get("model", ""))
             schemas.add(entry.get("schema", ""))
+            if entry.get("specification"):
+                specifications.add(str(entry["specification"]))
             out.append(FormFailure(
                 project=project, slot=entry["slot"], value=entry["value"],
                 reason=entry.get("reason", ""),
                 fitness=float(entry.get("fitness", 0.0)),
                 schema=str(entry.get("schema", "") or ""),
                 specification=str(entry.get("specification", "") or "")))
-    for name, seen in (("rubric", rubrics), ("model", models), ("schema", schemas)):
+    for name, seen in (("rubric", rubrics), ("model", models), ("schema", schemas),
+                       ("specification", specifications)):     # the digest omits distinctions the specification keeps (#1562)
         if len(seen) > 1:
             raise ValueError(
                 f"form failures span {len(seen)} fitness {name}s: "
@@ -475,6 +479,15 @@ class FormSubtypeClassifier:
                                  "subtype": subtype, "reason": reason}) + "\n")
 
     def __call__(self, failure: FormFailure) -> tuple[str, str]:
+        # The instrument first, before any cache can answer for it (#1561):
+        # a failure judged under another schema or complete specification
+        # is not this classifier's to classify, cached or not (#1514, #1562).
+        if failure.schema and failure.schema != self.schema:
+            raise ValueError(f"the failure was judged under schema {failure.schema[:12]}…, this classifier "
+                             f"is keyed on {self.schema[:12]}…; they are different instruments (#1514)")
+        if failure.specification and self.specification and failure.specification != self.specification:
+            raise ValueError(f"the failure was judged under specification {failure.specification[:12]}…, this "
+                             f"classifier is keyed on {self.specification[:12]}…; they are different instruments (#1562)")
         reason_hash = hashlib.sha256(str(failure.reason).encode("utf-8")).hexdigest()
         key = failure.key + (":" + reason_hash if self.specification else "")
         if key in self._memo:
@@ -482,9 +495,6 @@ class FormSubtypeClassifier:
             return self._memo[key]
         if self.offline:
             raise OfflineCacheMiss(f"no cached subtype for {failure.slot!r}")
-        if failure.schema and failure.schema != self.schema:
-            raise ValueError(f"the failure was judged under schema {failure.schema[:12]}…, this classifier "
-                             f"is keyed on {self.schema[:12]}…; they are different instruments (#1514)")
 
         snapshot = self._live_snapshot()
         if self.schema != snapshot[0] or self.specification != snapshot[3]:

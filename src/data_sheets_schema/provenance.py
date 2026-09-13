@@ -636,14 +636,21 @@ DIRTY_PATHS_MAX = 50
 
 
 def repo_facts() -> dict[str, Any]:
-    """The repository the *resources* came from (#1550): the checkout this
-    package is imported from, whatever the working directory — a record
-    made from a user's own repository used to attest that repository's
-    commit beside hashes of the checkout's playbooks and schemas. From an
-    installed package there is no commit; the record names the install
-    root and the package version instead."""
-    from data_sheets_schema.resources import CHECKOUT_ROOT, INSTALL_ROOT
-    if CHECKOUT_ROOT is None:
+    """The repository the *resources* came from (#1550, #1588): the working
+    directory when it is a checkout of this project — a worktree or a
+    second clone, whose files `resource_path` reads first — else the
+    checkout this package is imported from, whatever the working directory.
+    A record made from a user's own repository used to attest that
+    repository's commit beside hashes of the checkout's playbooks and
+    schemas, and one made from a worktree with the primary's code attested
+    the primary's commit beside the worktree's bytes. From an installed
+    package there is no commit; the record names the install root and the
+    package version instead. Where git cannot answer at the resource root
+    the commit and the dirty state are recorded unknown, never clean
+    (#1591)."""
+    from data_sheets_schema.resources import resource_root
+    at, kind = resource_root()
+    if kind == "install":
         from importlib.metadata import PackageNotFoundError, version
         try:
             pkg = version("data-sheets-schema")
@@ -651,9 +658,15 @@ def repo_facts() -> dict[str, Any]:
             pkg = None
         return {"commit": None, "commit_short": None, "branch": None, "dirty": False,
                 "dirty_file_count": 0, "dirty_paths": [],
-                "resource_root": str(INSTALL_ROOT), "resource_kind": "install", "package_version": pkg,
+                "resource_root": str(at), "resource_kind": "install", "package_version": pkg,
                 "note": "no checkout: the resources are the installed package's, so there is no commit to name"}
-    at = CHECKOUT_ROOT
+    commit = _run(["git", "rev-parse", "HEAD"], cwd=at)
+    if commit is None:
+        return {"commit": None, "commit_short": None, "branch": None, "dirty": None,
+                "dirty_file_count": None, "dirty_paths": [],
+                "resource_root": str(at), "resource_kind": "checkout",
+                "note": f"git could not answer at {at} (no repository there, or no git): "
+                        "the commit and the dirty state are unknown, not clean"}
     dirty = _run(["git", "status", "--porcelain", "-z"], strip=False, cwd=at)
     # NUL-separated, unstripped (#1039): `_run`'s strip took the leading
     # status space off the first line and `aurelian` was recorded as
@@ -676,7 +689,7 @@ def repo_facts() -> dict[str, Any]:
     # it names; one that lists `data/.run_locks/x.json`, `aurelian` can.
     paths = [ln[3:] for ln in lines if len(ln) > 3]
     return {
-        "commit": _run(["git", "rev-parse", "HEAD"], cwd=at),
+        "commit": commit,
         "commit_short": _run(["git", "rev-parse", "--short", "HEAD"], cwd=at),
         "branch": _run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=at),
         "resource_root": str(at), "resource_kind": "checkout",
@@ -939,6 +952,28 @@ def record_schema_path() -> Path:
     return _resource(RECORD_SCHEMA)
 
 
+def _profile_digest_disagreement(data: dict[str, Any]) -> str | None:
+    """A record whose `schema.profile` names one profile while its
+    `schema.digest_md5` is the *other* profile's current digest states an
+    instrument it did not consume (#1581). Only the current digests are
+    known here; an older digest of the same profile is not a finding."""
+    schema = data.get("schema") if isinstance(data, dict) else None
+    if not isinstance(schema, dict) or not schema.get("profile") or not schema.get("digest_md5"):
+        return None
+    try:
+        from data_sheets_schema import schema_digest
+        from data_sheets_schema.profiles import PROFILES
+        current = {name: schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=prof))
+                   for name, prof in PROFILES.items()}
+    except Exception:                                          # noqa: BLE001 — no schema here: nothing to compare
+        return None
+    for name, md5 in current.items():
+        if name != schema["profile"] and md5 == schema["digest_md5"]:
+            return (f"schema.profile is {schema['profile']!r} but schema.digest_md5 {md5[:12]}… is the "
+                    f"{name} profile's current digest")
+    return None
+
+
 def check_record(data: dict[str, Any]) -> tuple[list[str], str | None]:
     """`(violations, why it could not be checked)` for a record (#605).
 
@@ -972,7 +1007,11 @@ def check_record(data: dict[str, Any]) -> tuple[list[str], str | None]:
         report = validator.validate(data, "GenerationRecord")
     except Exception as exc:                                   # noqa: BLE001
         return [], f"the validator could not run against {schema}: {exc}"
-    return [str(r.message) for r in getattr(report, "results", [])], None
+    problems = [str(r.message) for r in getattr(report, "results", [])]
+    _pd = _profile_digest_disagreement(data)
+    if _pd:
+        problems.append(_pd)
+    return problems, None
 
 
 _VALIDATORS: dict[tuple[str, str], Any] = {}
