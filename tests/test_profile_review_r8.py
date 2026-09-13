@@ -83,6 +83,7 @@ def test_legacy_profile_omission_and_explicit_missing_file_hash_remain_comparabl
 @pytest.mark.parametrize("has_good", [False, True])
 @pytest.mark.parametrize("prompts,field", [
     ("text", "prompts"), (["text"], "prompts"),
+    ("text", "schema"), (["text"], "schema"),
     ({"request": "text"}, "prompts.request"),
     ({"request": {"spec": ["text"]}}, "prompts.request.spec"),
 ])
@@ -101,7 +102,7 @@ def test_strict_check_reports_malformed_prompts_and_continues(tmp_path, monkeypa
             path.write_text("id: https://example.org/synthetic\n")
         core.with_name("SYNTHETIC_reconciliation.md").write_text("Synthetic report.\n")
         core.with_name("SYNTHETIC_provenance.yaml").write_text(yaml.safe_dump({
-            "record_mode": "reconstructed", "prompts": value,
+            "record_mode": "reconstructed", ("schema" if field == "schema" else "prompts"): value,
             "run": {"project": "SYNTHETIC", "method": "external", "label": label}}))
     result = CliRunner().invoke(runs, ["check", "--strict", "--method", "external"])
     assert result.exit_code == 1, (result.output, result.exception)

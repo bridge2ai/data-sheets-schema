@@ -1176,6 +1176,22 @@ def check_record(data: dict[str, Any]) -> tuple[list[str], str | None]:
     return problems, None
 
 
+def record_mapping_problem(data: Any) -> str | None:
+    """Report malformed mapping blocks before profile/audit readers use them."""
+    if not isinstance(data, dict):
+        return "record must be a mapping"
+    for path in ("run", "model", "schema", "inputs", "inputs.source_manifest",
+                 "inputs.chunks", "prompts", "prompts.request", "prompts.request.spec"):
+        node = data
+        for key in path.split("."):
+            node = node.get(key)
+            if node is None:
+                break
+        if node is not None and not isinstance(node, dict):
+            return f"{path} must be a mapping or null"
+    return None
+
+
 def profile_problems(data: dict[str, Any]) -> list[str]:
     """The profile findings `check_record` appends (#1581, #1678), on their
     own so a gate that does not run the structural validator can still
@@ -1184,10 +1200,11 @@ def profile_problems(data: dict[str, Any]) -> list[str]:
 
 
 def _spec_profile_disagreement(data: dict[str, Any]) -> str | None:
-    """A record whose stored render spec states one profile while its
-    `schema.profile` states another — or none — is two records in one
-    (#1678): the gate re-renders under the spec's, every reader reads the
-    schema's."""
+    """Compare the stored spec's profile with the one record readers use.
+
+    A missing historical profile has the documented study fallback; an
+    explicit different profile identifies a different instrument (#1740).
+    """
     schema = data.get("schema") if isinstance(data, dict) else None
     prompts = data.get("prompts") if isinstance(data, dict) else None
     request = prompts.get("request") if isinstance(prompts, dict) else None
@@ -1196,9 +1213,13 @@ def _spec_profile_disagreement(data: dict[str, Any]) -> str | None:
         return None
     if not isinstance(schema, dict):
         schema = {}                        # no schema block, or null: the readers read the study's (#1709)
-    if schema.get("profile") != spec["profile"]:
+    stated = schema.get("profile")
+    from data_sheets_schema.profiles import for_record
+    effective = for_record(data).name if stated is None else stated
+    if effective != spec["profile"]:
+        basis = f" (read as {effective!r})" if stated is None else ""
         return (f"prompts.request.spec.profile is {spec['profile']!r} but schema.profile is "
-                f"{schema.get('profile')!r}; the gate and the readers would use different instruments")
+                f"{stated!r}{basis}; the gate and the readers would use different instruments")
     return None
 
 

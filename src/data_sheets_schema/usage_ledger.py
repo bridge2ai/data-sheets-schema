@@ -189,24 +189,22 @@ def _subset_differs(pinned, current) -> bool:
     return pinned != current
 
 
-#: What every pin has carried since identities were first written: the
-#: bundle it read and the hash of the instruction it sent. A pin without
-#: those keys is evidence of nothing, and compatible with nothing (#1698).
+#: Evidence required for resume comparison: the bundle entry and the hash
+#: of the instruction sent. The earliest identities carried no instruction
+#: hash and cannot establish this comparison (#1698).
 #: `bundle` is an entry (`{path, sha256}`) or null where the spec had no
 #: bundle to hash; `instruction.sha256` is the hash itself.
 _REQUIRED_IN_A_PIN = (("bundle",), ("instruction", "sha256"))
 
 
 def _identity_differs(pinned: dict, current: dict) -> bool:
-    """A pin made before a key existed says nothing about it (`profile`,
-    #1460); every key the pin carries must match, at every depth (#1677),
-    the basis excepted (#1657). That is the rule for keys added later — a
-    pin that lacks the bundle hash or the instruction hash is not an older
-    pin but no pin, and differs (#1698). The rule does not readmit the
-    generations pinned before profiles existed, whose instruction hash —
-    the recorder line carries `--profile` now — no longer renders (#1628):
-    those cannot be resumed, and the refusal says so where that is the
-    cause (`pre_profile_pin`)."""
+    """Compare the input evidence a pin can attest.
+
+    Original file-entry fields and an instruction hash are required. Later
+    optional keys, including an omitted legacy profile, remain compatible;
+    present entries must be complete and every recorded value must match.
+    The descriptive profile basis is excluded from identity (#1657).
+    """
     if not isinstance(pinned, dict) or not isinstance(current, dict):
         return True
     for path in _REQUIRED_IN_A_PIN:
@@ -248,7 +246,12 @@ def pre_profile_pin(pinned) -> bool:
         return False
     instr = pinned.get("instruction")
     spec = instr.get("spec") if isinstance(instr, dict) else None
-    return not (isinstance(spec, dict) and "profile" in spec)
+    import re
+    digest = instr.get("sha256") if isinstance(instr, dict) else None
+    return (isinstance(digest, str) and re.fullmatch(r"[0-9a-fA-F]{64}", digest) is not None
+            and isinstance(spec, dict)
+            and {"condition", "bundle", "render_version"} <= spec.keys()
+            and "profile" not in spec)
 
 
 def identity_refusal(pinned: dict, where: str) -> str:
