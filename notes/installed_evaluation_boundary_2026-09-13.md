@@ -166,3 +166,6 @@ The complete focused validator lane passes 40 tests. Explicit-file input
 ownership and the installed interface remain covered. The other finding,
 malformed prompt blocks in profile consistency checks, is tracked on the
 profile parent as #1700 and still awaits integration.
+
+The committed packaging-parent integration at 4c1898617 is now included.
+Its merge changes no files relative to the tested installed implementation.

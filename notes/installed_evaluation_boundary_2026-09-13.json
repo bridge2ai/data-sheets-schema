@@ -67,7 +67,7 @@
     "agentic"
   ],
   "generation_dependency": "PR #1367, PR #1436 and PR #1455",
-  "integration_dependency_commit": "2a840076a8aca8d67a49652caa82e07eb6ff390d",
+  "integration_dependency_commit": "4c18986170c6521ad3cc9562bf75c9790ecb306c",
   "issues": [
     1301,
     1457,
