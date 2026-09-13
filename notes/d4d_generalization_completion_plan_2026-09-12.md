@@ -240,3 +240,23 @@ score-band instructions), plus current hash-contract fixtures and instrument
 inventory. No new measurement is launched. The remaining work order stays
 evaluation, Claude's profile PR #1436, then packaging, with both generation
 arms, every evaluation style and historical preservation still in scope.
+
+## Generation review round 15 — 2026-09-13
+
+Round 14 reproduced #1456: replacing an existing provenance record loses
+runtime evidence even if its chunk attestation is preserved. Backfill now
+creates only missing records and keeps existing bytes unchanged. Exclusive
+publication prevents concurrent replacement and partial canonical records.
+Actual fake-provider generation tests preserve accounting, portable snapshots,
+receipt enforcement and completed resume. The final provenance lane passes
+105 tests and the receipt/recovery lane passes 96; see
+`reviews/pr_1367_round15_2026-09-13.md`. Full revised-head CI and independent
+approval still precede merge.
+
+Evaluation PR #1449 round 2 has finished: all prior measurement attributions
+and boundary hashes were independently confirmed. Remaining findings concern
+optional empty Dataset resources, Core collection schema detection, additional
+format/MIME aliases and two later semantic score-band instructions. These are
+being addressed before its next review. Claude's profile PR #1436 and packaging
+PR #1455 are committed; packaging's remaining complete-workflow acceptance is
+tracked in #1457. Keep the merge order and all prior measurement constraints.

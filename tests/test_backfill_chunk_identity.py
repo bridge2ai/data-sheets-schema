@@ -51,7 +51,7 @@ def test_verified_backfill_preserves_the_selected_chunk_instrument(prior):
 
 
 @pytest.mark.parametrize("damage", ["missing", "changed", "bundle", "unverified", "hashless", "rule"])
-def test_backfill_refuses_to_erase_or_replace_unreproduced_chunk_evidence(prior, damage):
+def test_backfill_keeps_existing_evidence_even_when_inputs_are_unavailable(prior, damage):
     spec, selected, path = prior
     if damage == "missing":
         selected.unlink()
@@ -71,8 +71,8 @@ def test_backfill_refuses_to_erase_or_replace_unreproduced_chunk_evidence(prior,
     if damage != "unverified":
         args += ["--verified-label", spec.label]
     result = CliRunner().invoke(cli, args)
-    assert result.exit_code != 0, result.output
-    assert "chunk" in result.output.lower()
+    assert result.exit_code == 0, result.output
+    assert "kept existing" in result.output
     assert path.read_bytes() == original
 
 
@@ -100,17 +100,62 @@ def test_backfill_can_discover_chunks_for_a_new_verified_record(prior):
     assert restored["chunks"]["chunk_count"] == 1
 
 
-def test_backfill_rechecks_the_builders_actual_chunk_bytes_before_writing(prior, monkeypatch):
+def test_backfill_does_not_reconstruct_existing_records_from_todays_inputs(prior, monkeypatch):
     spec, selected, path = prior
     original = path.read_bytes()
+
+    def cannot_recover_runtime_evidence(*args, **kwargs):
+        raise AssertionError("an existing record must not be reconstructed")
+
+    monkeypatch.setattr(pv, "build_record", cannot_recover_runtime_evidence)
+    result = CliRunner().invoke(cli, ["provenance", "backfill", "--verified-label", spec.label])
+    assert result.exit_code == 0, result.output
+    assert "kept existing" in result.output
+    assert path.read_bytes() == original
+
+
+@pytest.mark.parametrize("existing", [True, False])
+def test_backfill_dry_run_preserves_files_and_reports_only_missing_records(prior, existing):
+    spec, selected, path = prior
+    original = path.read_bytes()
+    if not existing:
+        path.unlink()
+    result = CliRunner().invoke(cli, ["provenance", "backfill", "--dry-run", "--verified-label", spec.label])
+    assert result.exit_code == 0, result.output
+    if existing:
+        assert path.read_bytes() == original
+        assert "would write 0 record(s); kept 1 existing" in result.output
+    else:
+        assert not path.exists()
+        assert "would write 1 record(s); kept 0 existing" in result.output
+
+
+def test_backfill_does_not_replace_a_record_created_during_reconstruction(prior, monkeypatch):
+    spec, selected, path = prior
+    observed = path.read_bytes()
+    path.unlink()
     build = pv.build_record
 
-    def changed_between_reads(*args, **kwargs):
-        selected.write_text(selected.read_text() + "\n# changed during reconstruction\n")
-        return build(*args, **kwargs)
+    def concurrent_observation(*args, **kwargs):
+        record = build(*args, **kwargs)
+        path.write_bytes(observed)
+        return record
 
-    monkeypatch.setattr(pv, "build_record", changed_between_reads)
+    monkeypatch.setattr(pv, "build_record", concurrent_observation)
     result = CliRunner().invoke(cli, ["provenance", "backfill", "--verified-label", spec.label])
-    assert result.exit_code != 0, result.output
-    assert "chunk evidence changed during reconstruction" in result.output
-    assert path.read_bytes() == original
+    assert result.exit_code == 0, result.output
+    assert path.read_bytes() == observed
+
+
+def test_a_failed_backfill_write_does_not_publish_a_partial_record(prior, monkeypatch):
+    spec, selected, path = prior
+    path.unlink()
+
+    def failed_write(self, destination):
+        destination.write_text("partial record\n")
+        raise OSError("interrupted write")
+
+    monkeypatch.setattr(pv.ProvenanceRecord, "write", failed_write)
+    result = CliRunner().invoke(cli, ["provenance", "backfill", "--verified-label", spec.label])
+    assert result.exit_code != 0
+    assert not path.exists()
