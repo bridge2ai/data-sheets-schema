@@ -52,8 +52,10 @@ class TestReRecordPreservesTheVerdict(unittest.TestCase):
         self.core_dir = concat / f"{self.method}_core" / self.label
         self.full_dir.mkdir(parents=True)
         self.core_dir.mkdir(parents=True)
-        # The recorder refuses any cwd that is not shaped like the repo root
-        # (#672): it needs both marker directories. The tests run in a scratch
+        # The recorder once refused any cwd that is not shaped like the repo
+        # root (#672); since #1301 it refuses only a directory *inside* the
+        # checkout that is not its root, and the marker below is kept so the
+        # fixture still reads as a tree of its own. The tests run in a scratch
         # root by design — they test verdict preservation, not cwd policy —
         # so the scratch root carries the markers.
         (self.root / 'src' / 'data_sheets_schema').mkdir(parents=True)

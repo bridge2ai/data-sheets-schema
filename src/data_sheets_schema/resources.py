@@ -110,7 +110,10 @@ def _cwd_carries(rel: Path) -> bool:
     read. A project that happens to carry the exact directory reads its
     own files: that is the rule, stated.
     """
-    return len(rel.parts) > 2 and rel.parent.is_dir()
+    # Only the study's own source layout can be authoritative: a project's
+    # own `.claude/commands/` or `data/rubric/` must not hide the playbooks
+    # or the rubric an install ships (#1500).
+    return rel.parts[0] == "src" and len(rel.parts) > 2 and rel.parent.is_dir()
 
 
 def resource_path(path: str | Path) -> Path:

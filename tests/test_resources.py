@@ -41,8 +41,7 @@ class TestResourcesFromElsewhere(unittest.TestCase):
         self.assertTrue(resource_path(prompt_registry.REGISTRY).exists())
         self.assertTrue(schema_digest.resolve_schema(provenance.FULL_SCHEMA).exists())
         self.assertTrue(provenance.record_schema_path().exists())
-        self.assertIn("## Prompt body", api_runner.prompt_body(api_runner.GENERIC_PROMPT_V9)
-                      if False else resource_path(api_runner.GENERIC_PROMPT_V9).read_text())
+        self.assertIn("## Prompt body", resource_path(api_runner.GENERIC_PROMPT_V9).read_text())
         self.assertTrue(api_runner.prompt_body(api_runner.GENERIC_PROMPT_V9))
         facts = provenance.playbook_facts()
         self.assertTrue(all(f["exists"] and f["sha256"] for f in facts["files"]), facts)
@@ -121,10 +120,12 @@ class TestResourcesFromElsewhere(unittest.TestCase):
         must not die on it, and the non-recording must be said."""
         import warnings
         from data_sheets_schema import schema_digest
-        unwritable = Path("/nonexistent-root-for-d4d-tests/digest_inventory.yaml")
-        with warnings.catch_warnings(record=True) as caught:
+        from unittest import mock
+        ledger = Path(self.tmp) / "digest_inventory.yaml"        # not on disk yet
+        with warnings.catch_warnings(record=True) as caught, \
+                mock.patch.object(Path, "write_text", side_effect=PermissionError("read-only")):
             warnings.simplefilter("always")
-            self.assertFalse(schema_digest.record_inventory(ledger=unwritable))
+            self.assertFalse(schema_digest.record_inventory(ledger=ledger))
         self.assertTrue(any("digest inventory not recorded" in str(w.message) for w in caught), caught)
 
 
@@ -227,3 +228,15 @@ class TestRoundOne(unittest.TestCase):
             cmd = resources.linkml_validate()
         self.assertEqual(cmd[0], sys.executable)
         self.assertIn("linkml.validator.cli", cmd[-1])
+
+    def test_the_recorder_guard_refuses_only_a_subdirectory_of_the_checkout(self):
+        """#1502 (the #672 guard as narrowed by #1301)."""
+        import click
+        from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+        _require_repo_root_cwd("t")                                   # a directory outside the checkout
+        os.chdir(ROOT)
+        _require_repo_root_cwd("t")                                   # the root
+        os.chdir(ROOT / "tests")
+        with self.assertRaises(click.ClickException) as caught:
+            _require_repo_root_cwd("t")
+        self.assertIn("not a directory inside it", str(caught.exception))

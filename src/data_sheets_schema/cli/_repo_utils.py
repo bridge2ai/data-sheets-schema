@@ -22,12 +22,12 @@ def get_repo_root() -> Path:
     Raises:
         RuntimeError: If not running in a repository checkout
     """
-    # Try to find repo root by looking for pyproject.toml
-    current = Path(__file__).resolve()
-
-    for parent in [current] + list(current.parents):
-        if (parent / "pyproject.toml").exists():
-            return parent
+    # The same anchor as `resources.CHECKOUT_ROOT` (#1501): `pyproject.toml`
+    # two levels above the package, not any ancestor — a wheel installed in
+    # a user's project venv would otherwise adopt that project as the root.
+    from data_sheets_schema.resources import CHECKOUT_ROOT
+    if CHECKOUT_ROOT is not None:
+        return CHECKOUT_ROOT
 
     raise RuntimeError(
         "This command requires a repository checkout.\n"

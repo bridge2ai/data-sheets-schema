@@ -1531,12 +1531,17 @@ resource_path`, the shape `schema_digest.resolve_schema` and
 there or when the working directory carries that resource *directory* (a
 staged fixture that omits a prompt reads it as `missing`, never the
 checkout's copy; the test is any ancestor below the top-level component, so a
-user's own `src/` or `.claude/` does not count); else the checkout's when the
+user's own `src/` or `.claude/` does not count, and since #1500 only
+directories under `src/` can be authoritative at all — a project's own
+`.claude/commands/` cannot hide the playbooks an install ships); else the checkout's when the
 package is imported from one (`pyproject.toml` two levels up); else the
 installed copy — the wheel places the condition prompts and their pin
 registry, the playbooks and agent definitions the record hashes, and the
 rubric sources at the same relative paths under the installation root, and
-the schema files as package data. Only `src/`, `.claude/`, `data/rubric/` and
+the schema files as package data — so `src`, `data` and `.claude` are
+top-level entries of `site-packages` and `import src` resolves as a
+namespace package there, a stated cost of keeping one spelling in both
+places (#1504). Only `src/`, `.claude/`, `data/rubric/` and
 `project/` are resources; the corpus under `data/` is the caller's tree and a
 missing record never resolves to the checkout's. Not at import time: a
 constant resolved once takes the value of whichever directory the first

@@ -256,18 +256,20 @@ def check_disk(paths: list[Path] | None = None,
     return rows
 
 
-def _git(*args: str) -> str | None:
-    """Run a git command, or None if git cannot answer (not a repo, no git)."""
+def _git(*args: str, cwd: Path | None = None) -> str | None:
+    """Run a git command at `cwd` — the pinned file's directory, never the
+    working directory, which may be another repository (#1499) — or None if
+    git cannot answer (not a repo, no git)."""
     try:
         out = subprocess.run(["git", *args], capture_output=True, text=True,
-                             timeout=10)
+                             timeout=10, cwd=str(cwd) if cwd else None)
     except (OSError, subprocess.SubprocessError):
         return None
     return out.stdout if out.returncode == 0 else None
 
 
-def _head_commit() -> str | None:
-    out = _git("rev-parse", "HEAD")
+def _head_commit(at: Path | None = None) -> str | None:
+    out = _git("rev-parse", "HEAD", cwd=at)
     return (out or "").strip() or None
 
 
@@ -279,7 +281,8 @@ def _is_dirty(path: Path) -> bool:
     commit that hashes to something else, and produce the wrong answer for
     exactly the case the registry exists to catch (#438).
     """
-    out = _git("status", "--porcelain", "--", str(path))
+    p = Path(path)
+    out = _git("status", "--porcelain", "--", p.name, cwd=p.parent if p.parent != Path("") else None)
     return bool((out or "").strip())
 
 
@@ -349,7 +352,7 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
                            "reason": prev.get("reason")})
     files[key] = {"sha256": sha, "body_sha256": body_sha256_of(p),
                   "bytes": p.stat().st_size,
-                  "pinned_on": today, "pinned_at_commit": _head_commit(),
+                  "pinned_on": today, "pinned_at_commit": _head_commit(p.parent),
                   "reason": reason.strip()}
     if superseded:
         files[key]["superseded"] = superseded

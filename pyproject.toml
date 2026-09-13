@@ -41,8 +41,12 @@ click = "^8.1.0"
 python-docx = "^1.2.0"
 # Not a development-only dependency: `record_schema` compiles the record
 # contract with the LinkML generators and the runner validates every record
-# with `linkml.validator` (#1301). A user who generates needs it.
-linkml = "^1.3.5"
+# with `linkml.validator` (#1301). A user who generates needs it. Pinned to
+# the locked minor: the committed merged schemas are the generator's bytes,
+# and the sync gate compares bytes — an install that resolved 1.11 rebuilt
+# them differently (`domain_of` lists, a type description) with an
+# identical digest and read STALE (#1478, canary).
+linkml = ">=1.9.3,<1.10"
 
 [tool.poetry.scripts]
 d4d = "data_sheets_schema.cli:cli"

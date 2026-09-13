@@ -2595,6 +2595,14 @@ def validation_block(spec: RunSpec, problems: list[dict[str, str]],
     return block
 
 
+def _validator_did_not_run(text: str) -> bool:
+    """A traceback, a missing module or a usage error is the validator failing
+    to start, not a finding about the record (#1506); handed to a repair
+    round as findings it would be repaired against."""
+    return any(marker in text for marker in ("Traceback (most recent call last)", "No module named",
+                                             "Usage: linkml-validate", "does not exist."))
+
+
 def _validator_lines(path: Path, schema: str,
                      cls: str) -> tuple[list[str] | None, str | None]:
     """(findings, failure): every validator finding, one per line.
@@ -2614,7 +2622,10 @@ def _validator_lines(path: Path, schema: str,
         return None, str(exc)
     if r.returncode == 0:
         return [], None
-    lines = [l for l in (r.stdout + r.stderr).strip().splitlines()
+    text = r.stdout + r.stderr
+    if _validator_did_not_run(text):
+        return None, f"linkml-validate did not run: {text.strip()[-300:]}"
+    lines = [l for l in text.strip().splitlines()
              if l.strip()]
     return lines, None
 

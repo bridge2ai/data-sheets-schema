@@ -33,11 +33,11 @@ def stats(level, format, output, schema_file):
     # Import and call the schema_stats script
     setup_repo_imports()
 
+    old_argv = sys.argv                 # bound before the try: the finally reads it (#1501)
     try:
         from schema_stats import main as stats_main
 
         # Set up args for the schema_stats script
-        old_argv = sys.argv
         sys.argv = ['schema_stats.py',
                     '--level', str(level),
                     '--format', format]

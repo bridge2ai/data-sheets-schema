@@ -103,14 +103,13 @@ class TestTheInstalledWheel(unittest.TestCase):
             from click.testing import CliRunner
             from data_sheets_schema.cli import cli
             bundle = Path({str(bundle)!r})
-            r = CliRunner().invoke(cli, ["bundle", "chunk", "--bundle", str(bundle)]) if False else None
             r = CliRunner().invoke(cli, ["api", "plan", "--project", "EXTERNAL_CLINICAL", "--bundle", str(bundle),
                                          "--label", "2026-09-13_x-api-generic_rep1", "--condition", "generic",
                                          "--out-dir", "out", "--json"])
             assert r.exit_code == 0, r.output
             plan = json.loads(r.output)
             assert plan["approx_total_input_tokens"] > 0
-            assert "src/" not in (r.output if "FileNotFound" in r.output else "")
+            assert "FileNotFound" not in r.output and "requires a repository checkout" not in r.output, r.output
             from data_sheets_schema import schema_digest
             text = schema_digest.digest_text("Dataset")
             assert "## `title`" in text
