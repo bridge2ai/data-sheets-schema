@@ -1206,8 +1206,18 @@ def validate_cmd(method, project, label, recheck, dry_run):
             # investigation, not a fresh verdict quietly laundering it.
             # Re-validation of an already-verdicted record is `--recheck`,
             # a deliberate act naming its scope.
-            if not recheck and status != UNVERIFIED:
-                continue
+            if not recheck:
+                if status != UNVERIFIED:
+                    continue
+                # UNVERIFIED also means an existing verdict's old artifact
+                # locations are unavailable. That never authorizes replacing
+                # the historical verdict without an explicit --recheck.
+                record = record_path_for(proj, run.method, run.label, corpus_dir)
+                if record.exists():
+                    prior_record = _yaml.safe_load(record.read_text(encoding="utf-8"))
+                    prior_verdict = prior_record.get("validation") if isinstance(prior_record, dict) else None
+                    if isinstance(prior_verdict, dict) and "passed" in prior_verdict:
+                        continue
             targets.append((run.method, run.label, proj, corpus_dir))
 
     click.echo(f"🔍 {len(targets)} run(s) to validate")
