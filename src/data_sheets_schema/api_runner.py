@@ -494,6 +494,7 @@ class RunSpec:
     # another runtime will execute — it rendered "LBL CBORG (proxy to
     # Anthropic)" into a Claude Code header, a provider that run never touches.
     provider: str | None = None
+    _replay_only: bool = field(default=False, init=False, repr=False)
 
     def __post_init__(self):
         if self.render_version not in (1, 2):
@@ -515,17 +516,26 @@ class RunSpec:
     @classmethod
     def from_render_spec(cls, recorded: dict[str, Any], *, project: str,
                          method: str, label: str) -> "RunSpec":
-        """Replay the same version and explicit input choices in every reader."""
-        manifest = recorded.get("manifest", AUTO)
-        return cls(project=project, method=method, label=label,
+        """Restore recorded substitutions without consulting live declarations.
+
+        The source manifest contributes a recorded path/header, not bytes to
+        this instruction. It may have moved since the run. Execution still
+        requires a freshly validated spec; this object is only for replay.
+        """
+        spec = cls(project=project, method=method, label=label,
                    arm=recorded.get("arm", ""), bundle=Path(recorded.get("bundle", "")),
                    condition=recorded["condition"],
                    render_version=recorded.get("render_version", 1),
                    chunk_manifest=Path(recorded["chunk_manifest"]) if recorded.get("chunk_manifest") else None,
                    manifest_line=recorded.get("manifest_line", ""),
-                   manifest=(manifest if manifest is AUTO else Path(manifest) if manifest else None),
+                   manifest=None,
                    run_date=recorded.get("run_date", ""), runtime=recorded.get("runtime", ""),
                    provider=recorded.get("provider"))
+        manifest = recorded.get("manifest")
+        spec.manifest = Path(manifest) if manifest else None
+        spec.manifest_line = recorded.get("manifest_line", "")
+        spec._replay_only = True
+        return spec
 
     @property
     def manifest_used(self) -> bool:
@@ -4552,6 +4562,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     at phase 5 costs one call to finish rather than six. Set it False to force
     a clean regeneration.
     """
+    if spec._replay_only:
+        raise ValueError("historical prompt replay cannot execute; construct a new validated RunSpec")
     if dry_run:
         return plan(spec)
 
@@ -4731,6 +4743,12 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             existing = yaml.safe_load(
                 spec.provenance_path.read_text(encoding="utf-8")) or {}
             snapshot_store.require_completed_accounted(spec, existing)
+            if _unrecorded_abandoned(spec, existing):
+                raise UsageLedgerError("surviving abandoned charges are absent from completed accounting; "
+                                       "restore their progress and accounting before resuming")
+            if _unrecorded_reasoning(spec, existing):
+                raise UsageLedgerError("surviving reasoning usage is absent from completed accounting; "
+                                       "restore its progress and accounting before resuming")
             if not foreign_progress:
                 _progress_path(spec).unlink(missing_ok=True)
             # Re-validate rather than report a clean bill nobody checked.

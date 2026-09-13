@@ -737,8 +737,8 @@ def core_path(full_path: str, pmap: dict[str, str]) -> str | None:
 
 
 # ---------------------------------------------------------------- receipt
-def load_receipt(path: Path) -> dict[str, Any]:
-    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+def load_receipt(path: Path, *, raw: bytes | None = None) -> dict[str, Any]:
+    data = yaml.safe_load(raw.decode("utf-8") if raw is not None else path.read_text(encoding="utf-8"))
     if not isinstance(data, dict) or not isinstance(data.get("chunks"), list):
         raise ValueError(f"{path}: a receipt is a mapping with a `chunks` list")
     return data
@@ -1304,14 +1304,15 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     import hashlib
 
     from data_sheets_schema.chunking import chunk_texts as _texts
-    from data_sheets_schema.chunking import file_sha256, load_manifest, manifest_for
+    from data_sheets_schema.chunking import manifest_for
 
     base = {"expected": expected, "non_checks": list(NON_CHECKS)}
     if not receipt.exists():
         return {**base, "checked": False, "reason": f"no coverage receipt at {receipt}"}
     try:
-        rec = load_receipt(receipt)
-    except (ValueError, yaml.YAMLError) as exc:
+        receipt_bytes = receipt.read_bytes()
+        rec = load_receipt(receipt, raw=receipt_bytes)
+    except (OSError, ValueError, yaml.YAMLError) as exc:
         return {**base, "checked": False, "reason": f"receipt unreadable: {exc}"}
     # Three sources for the bytes and the chunks, in order (#1140; #1187
     # rounds 3 and 4): the manifest on disk where it chunked the bytes the
@@ -1333,6 +1334,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     raw = b""
     on_disk: dict[str, Any] | None = None
     disk_bytes: bytes | None = None
+    manifest_bytes: bytes | None = None
     if bundle is None or not bundle.exists():
         disk_state = "the record's bundle is absent"
     else:
@@ -1343,14 +1345,15 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
             disk_advice = "run `d4d bundle chunk` (every bundle kind is chunked, #725)"
         else:
             try:
-                cand = load_manifest(mpath)
+                manifest_bytes = mpath.read_bytes()
+                cand = yaml.safe_load(manifest_bytes.decode("utf-8"))
                 if not isinstance(cand, dict) or not isinstance(cand.get("chunks"), list):
                     raise ValueError("manifest is not a mapping with a chunks list")
                 if hashlib.md5(disk_bytes).hexdigest() != cand.get("bundle_md5"):
                     disk_state = "the manifest on disk did not chunk the bytes on disk"
                     disk_advice = "rebuild it with `d4d bundle chunk`"
                 elif ((record_chunks or {}).get("sha256")
-                      and file_sha256(mpath) != record_chunks["sha256"]):
+                      and hashlib.sha256(manifest_bytes).hexdigest() != record_chunks["sha256"]):
                     # It chunked these bytes, but it is not the instrument the
                     # record names: a different rule over the same bytes puts
                     # the same chunk ids over different text, and a receipt
@@ -1369,7 +1372,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
                                   f"not the {record_chunks['chunk_count']} the record cites")
                 else:
                     on_disk = cand
-            except (ValueError, yaml.YAMLError) as exc:
+            except (OSError, ValueError, yaml.YAMLError) as exc:
                 disk_state = f"the manifest on disk is unreadable ({exc})"
     disk_hashes = ({"md5": hashlib.md5(disk_bytes).hexdigest(), "sha256": hashlib.sha256(disk_bytes).hexdigest()}
                    if disk_bytes is not None else {})
@@ -1490,8 +1493,8 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
                           "join would credit the wrong entries (#899)"}
     block = check(rec, m, texts, full, record_bundle_md5, original)
     block["artifacts"] = {
-        "receipt": {"path": str(receipt), "sha256": hashlib.sha256(receipt.read_bytes()).hexdigest()},
-        "manifest": ({"path": str(mpath), "sha256": hashlib.sha256(mpath.read_bytes()).hexdigest()}
+        "receipt": {"path": str(receipt), "sha256": hashlib.sha256(receipt_bytes).hexdigest()},
+        "manifest": ({"path": str(mpath), "sha256": hashlib.sha256(manifest_bytes).hexdigest()}
                      if bundle_basis["source"] == "bundle on disk" and "manifest" not in bundle_basis else
                      {"path": None, "rule": m.get("rule"), "chunk_count": m.get("chunk_count"),
                       "bundle_md5": m.get("bundle_md5"), "bundle_sha256": m.get("bundle_sha256")}),

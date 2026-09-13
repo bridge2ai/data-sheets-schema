@@ -456,6 +456,25 @@ def audit_bundles(project, strict, manifest):
     concat = Path('data/preprocessed/concatenated')
     reg = load_registry(manifest)
     targets = projects_for(manifest, project)
+    if strict:
+        from data_sheets_schema.registry import validate_context
+        if reg.path is None or not reg.path.is_file():
+            raise click.ClickException(f"selected manifest does not exist: {reg.path}")
+        raw = reg.data.get("projects")
+        if not isinstance(raw, dict):
+            raise click.ClickException("selected manifest projects must be a mapping")
+        declared = reg.projects()
+        invalid = [str(key) for key in raw
+                   if key not in declared and not (
+                       isinstance(key, str) and key.endswith("_source_dir")
+                       and key[:-len("_source_dir")] in declared
+                       and isinstance(raw[key], str) and raw[key])]
+        if invalid:
+            raise click.ClickException("invalid project declarations: " + ", ".join(invalid))
+        if not targets:
+            raise click.ClickException("selected manifest declares no bundle audit targets")
+        for name in targets:
+            validate_context(reg, name)
     study = reg.path is not None and reg.path.resolve() == default_manifest_path().resolve()
     md5 = lambda p: hashlib.md5(p.read_bytes()).hexdigest()  # noqa: E731
 

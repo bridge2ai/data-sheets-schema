@@ -144,3 +144,13 @@ See `reviews/pr_1367_round7_2026-09-12.md`. Merge still requires exact-head CI
 and independent Codex plugin approval. No measurement is launched by this
 maintenance work; all API and agentic arms and evaluation styles remain in
 the next-stage plan.
+
+## Generation review round 8
+
+Round-7 independent review found four remaining defects (#1423–#1426):
+receipt read/hash identity, surviving accounting on completed returns, empty
+strict bundle audits, and historical replay depending on the current source
+manifest. All are addressed, with 77 targeted tests passing; see
+`reviews/pr_1367_round8_2026-09-12.md`. Broader recovery tests, full CI and
+independent approval of the revised head still precede merge. Stage order and
+all API/agentic and evaluation-style requirements remain unchanged.
