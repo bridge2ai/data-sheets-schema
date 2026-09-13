@@ -104,6 +104,15 @@ def _anchored(rel: Path) -> Path:
     return resource_path(rel) if is_resource(rel) else anchored(rel)
 
 
+def _record_input(path: Path, provenance: Path) -> Path | None:
+    """Recorded inputs retain their corpus owner, without ambient fallback."""
+    if path.is_absolute():
+        return path
+    from data_sheets_schema.provenance import artifact_root
+    owner = artifact_root(provenance)
+    return owner / path if owner is not None else None
+
+
 PAIR_SCHEMAS = ("src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
                 "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml")
 SCHEMA_FILES = ("src/data_sheets_schema/schema/data_sheets_schema_all.yaml (class Dataset; slot descriptions)",
@@ -487,10 +496,15 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     if not text:
         pack["gaps"].append("instruction: " + basis)
 
-    bundle = Path(inputs["bundle_path"]) if inputs.get("bundle_path") else None
+    declared_bundle = Path(inputs["bundle_path"]) if inputs.get("bundle_path") else None
+    bundle = _record_input(declared_bundle, provenance) if declared_bundle else None
+    unknown_bundle_base = declared_bundle is not None and bundle is None
     chunks_in = inputs.get("chunks") or {}
-    manifest_path = Path(chunks_in["path"]) if chunks_in.get("path") else None
-    pack["bundle"] = {"path": str(bundle) if bundle else None, "md5": inputs.get("bundle_md5"),
+    declared_manifest = Path(chunks_in["path"]) if chunks_in.get("path") else None
+    manifest_path = _record_input(declared_manifest, provenance) if declared_manifest else None
+    if declared_manifest is not None and manifest_path is None:
+        pack["gaps"].append(f"chunk manifest base unavailable for recorded relative path: {declared_manifest}")
+    pack["bundle"] = {"path": str(declared_bundle) if declared_bundle else None, "md5": inputs.get("bundle_md5"),
                       "manifest": str(manifest_path) if manifest_path else None}
     pack["records"] = {"full": str(paths["full"]), "core": str(paths["core"]),
                        "report": str(paths["report"]),
@@ -506,11 +520,12 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     # the AI_READI 2026-09-01 rep1 record that motivated #901 is one of them.
     # A pack that checked today's file and printed the recorded md5 beside
     # the result would attest against bytes the record never saw (#1108
-    # review, finding 4). Relative paths resolve against the repo root, as
-    # the schema does (#822).
-    bundle_text, bundle_state = None, "no bundle_path recorded"
+    # review, finding 4). Relative input paths resolve from the record's
+    # corpus; schemas remain resources of the selected implementation.
+    bundle_text = None
+    bundle_state = "relative bundle path has no recorded base" if unknown_bundle_base else "no bundle_path recorded"
     if bundle:
-        bpath = _anchored(bundle)
+        bpath = bundle
         pack["bundle"]["resolved_path"] = str(bpath)          # which root the bytes came from (round 2, note 6)
         if not bpath.exists():
             bundle_state = f"bundle not on disk ({bpath})"
@@ -577,7 +592,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
 
     # --- chunks marked nothing_relevant: every one, with its lines
     items: list[dict[str, Any]] = []
-    if paths["receipt"].exists() and manifest_path and manifest_path.exists():
+    if not unknown_bundle_base and paths["receipt"].exists() and manifest_path and manifest_path.exists():
         try:
             receipt = load_receipt(paths["receipt"])
         except yaml.YAMLError as exc:
