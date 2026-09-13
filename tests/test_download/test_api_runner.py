@@ -964,7 +964,9 @@ class TestValidatorDrivenRepair(unittest.TestCase):
             self.assertIn(expected, names)
         d = _yaml.safe_load((self.out / "CHORUS_provenance.yaml").read_text())
         listed = {Path(i["path"]).name for i in d["intermediates"]}
-        self.assertEqual(listed, set(names))
+        # The mutable recovery index is metadata; phase bodies are the
+        # immutable artifacts attested by the portable record.
+        self.assertEqual(listed, set(names) - {"CHORUS_snapshot_index.json"})
         for i in d["intermediates"]:
             self.assertEqual(len(i["sha256"]), 64)
 
@@ -2106,6 +2108,12 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
             spec = self._spec(td)
             spec.out_dir.mkdir(parents=True)
             spec.full_path.write_text(self.REC)
+            # Keep actual phase ownership evidence before corrupting the
+            # working artifact: the test isolates artifact validation.
+            from data_sheets_schema import api_runner, usage_ledger
+            usage_ledger.prepare_usage(spec, resume=True)
+            api_runner._snapshot(spec, f"{spec.project}_full.yaml", self.REC)
+            api_runner._snapshot(spec, f"{spec.project}_core.yaml", self.REC)
             spec.core_path.write_text(
                 "_distributions: []\ncompression: none\ndialect: x\n")
             _progress_path(spec).parent.mkdir(parents=True, exist_ok=True)

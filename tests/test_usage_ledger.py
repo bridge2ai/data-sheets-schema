@@ -534,6 +534,9 @@ def test_legacy_partial_run_adopts_a_generation_without_losing_recorded_usage(tm
     api.execute(s, client=FakeClient())
     prior = yaml.safe_load(s.provenance_path.read_text())
     del prior["run"]["generation_id"]
+    for entry in prior["intermediates"]:
+        for key in ("generation_id", "phase", "usage_id"):
+            entry.pop(key, None)
     for entry in prior["api_usage"]:
         entry.pop("usage_id")
     reasoning = [json.loads(line) for line in api._reasoning_path(s).read_text().splitlines()]

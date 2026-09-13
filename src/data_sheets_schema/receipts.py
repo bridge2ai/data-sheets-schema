@@ -625,15 +625,14 @@ def phase1_snapshot(receipt: Path) -> dict[str, Any] | None:
     """The record as the `full` phase wrote it: the API runner's phase-1
     snapshot beside the receipt under intermediate/ (#758) — written after
     the runner's value normalisation, so shapes match the record at the
-    path level while the receipt itself came from the raw text. A same-
-    label re-run appends _2, _3 to the snapshot names while the top-level
-    receipt is overwritten, so the contemporary snapshot is the highest-
-    numbered one (#761). Absent on the agentic path, whose Phase 3
+    path level while the receipt itself came from the raw text. The portable
+    record or active generation identifies the evidence (#1415). Absent on
+    the agentic path, whose Phase 3
     re-receipts what it changes."""
     return phase1_snapshot_state(receipt)[2]
 
 
-def phase1_snapshot_state(receipt: Path) -> tuple[str, Path | None, dict[str, Any] | None, str | None]:
+def phase1_snapshot_state(receipt: Path, *, spec=None, record: dict | None = None) -> tuple[str, Path | None, dict[str, Any] | None, str | None]:
     """(state, path, snapshot, why): `absent` (no file), `usable` (a
     mapping), or `unusable` with `why` — a parse error, bytes that are not
     UTF-8, a file that cannot be opened, an empty document, or a document
@@ -641,13 +640,14 @@ def phase1_snapshot_state(receipt: Path) -> tuple[str, Path | None, dict[str, An
     reading returned None for all of these and a truthy list as if it were
     a record)."""
     try:
-        path = phase1_snapshot_path(receipt)
+        snapshot = phase1_snapshot_read(receipt, spec=spec, record=record)
     except OSError as exc:
         return "unusable", None, None, str(exc)
-    if path is None:
+    if snapshot is None:
         return "absent", None, None, None
+    path, raw = snapshot
     try:
-        doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+        doc = yaml.safe_load(raw.decode("utf-8"))
     except (yaml.YAMLError, UnicodeDecodeError, OSError) as exc:
         return "unusable", path, None, f"{type(exc).__name__}: {str(exc).splitlines()[0] if str(exc) else ''}".rstrip(": ")
     if doc is None or doc == {} or doc == []:
@@ -657,20 +657,26 @@ def phase1_snapshot_state(receipt: Path) -> tuple[str, Path | None, dict[str, An
     return "usable", path, doc, None
 
 
-def phase1_snapshot_path(receipt: Path) -> Path | None:
-    """The file `phase1_snapshot` would read, or None where none exists —
-    so a caller can tell "no snapshot" from "a snapshot that would not
-    parse" (#1124 round 6): the two are different claims about a record."""
-    stem = receipt.name.replace("_coverage_receipt.yaml", "_full")
-    from data_sheets_schema.snapshot_store import latest
+def phase1_snapshot_read(receipt: Path, *, spec=None, record: dict | None = None) -> tuple[Path, bytes] | None:
+    """Read the phase evidence under its run identity and hash in one operation."""
+    from data_sheets_schema.snapshot_store import read_latest
     project = receipt.name.removesuffix("_coverage_receipt.yaml")
-    indexed, path = latest(receipt.parent, project, f"{project}_full.yaml")
+    indexed, snapshot = read_latest(receipt.parent, project, f"{project}_full.yaml", spec=spec, record=record)
     if indexed:
-        return path
+        return snapshot
+    # Historical unregistered helpers have no generation identity. This
+    # compatibility path is unreachable for an identified portable run.
+    stem = f"{project}_full"
     snaps = sorted((receipt.parent / "intermediate").glob(f"{stem}.yaml")) + sorted(
         (receipt.parent / "intermediate").glob(f"{stem}_[0-9]*.yaml"),
         key=lambda p: int(p.stem.rsplit("_", 1)[1]))
-    return snaps[-1] if snaps else None
+    return (snaps[-1], snaps[-1].read_bytes()) if snaps else None
+
+
+def phase1_snapshot_path(receipt: Path, *, spec=None, record: dict | None = None) -> Path | None:
+    """The verified evidence path; parsers use phase1_snapshot_read directly."""
+    snapshot = phase1_snapshot_read(receipt, spec=spec, record=record)
+    return snapshot[0] if snapshot is not None else None
 
 
 # ---------------------------------------------------------------- derived core
@@ -1266,7 +1272,8 @@ def claims_path(core_dir: Path, project: str) -> Path:
 def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle_md5: str | None,
               expected: bool, manifest: Path | None = None,
               bundle_rel_path: str | None = None, record_bundle_sha256: str | None = None,
-              record_chunks: dict[str, Any] | None = None) -> dict[str, Any]:
+              record_chunks: dict[str, Any] | None = None, *,
+              snapshot_spec=None, snapshot_record: dict | None = None) -> dict[str, Any]:
     """The provenance block for one run, or why it could not be computed.
 
     `expected` is whether this run's procedure was to write a receipt. It is
@@ -1470,7 +1477,8 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     # coverage: its leaves show under `without_receipt` until something
     # re-receipts them. A path whose entry merely moved is followed to it
     # by identity (#899, `remap_path`).
-    snap_state, snap_path, original, snap_why = phase1_snapshot_state(receipt)
+    snap_state, snap_path, original, snap_why = phase1_snapshot_state(
+        receipt, spec=snapshot_spec, record=snapshot_record)
     if snap_state == "unusable":
         # The pack reports this gap; the block must not run the index join
         # over it and return `checked: true` (#1124 Codex review, M7) — on

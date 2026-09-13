@@ -16,8 +16,8 @@ def index_path(directory: Path, project: str) -> Path:
     return directory / "intermediate" / f"{project}_snapshot_index.json"
 
 
-def _load(directory: Path, project: str) -> dict | None:
-    path = index_path(directory, project)
+def _load(directory: Path, project: str, *, path: Path | None = None) -> dict | None:
+    path = path or index_path(directory, project)
     if not path.exists():
         return None
     try:
@@ -71,11 +71,22 @@ def _write(path: Path, data: dict) -> None:
             temporary.unlink(missing_ok=True)
 
 
-def _verified(entry: dict) -> Path:
+def _read_verified(entry: dict) -> tuple[Path, bytes]:
+    if (not isinstance(entry.get("path"), str) or not entry["path"]
+            or not re.fullmatch(r"[a-f0-9]{64}", str(entry.get("sha256", "")))):
+        raise ledger.UsageLedgerError("invalid portable snapshot byte attestation")
     path = Path(entry["path"])
-    if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != entry["sha256"]:
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        raise ledger.UsageLedgerError(f"generation snapshot bytes changed or are missing: {path}; restore its evidence") from exc
+    if hashlib.sha256(raw).hexdigest() != entry["sha256"]:
         raise ledger.UsageLedgerError(f"generation snapshot bytes changed or are missing: {path}; restore its evidence")
-    return path
+    return path, raw
+
+
+def _verified(entry: dict) -> Path:
+    return _read_verified(entry)[0]
 
 
 def activate(spec, *, fresh: bool, completed: bool, prior_record: dict) -> None:
@@ -103,21 +114,27 @@ def activate(spec, *, fresh: bool, completed: bool, prior_record: dict) -> None:
         # Legacy progress can adopt only hash-attested phase evidence from
         # its matched portable record, never a directory's numbered files.
         run = prior_record.get("run") or {}
-        if run.get("prior_generation_ids"):
+        if run.get("prior_generation_ids") and not run.get("generation_id"):
             raise ledger.UsageLedgerError("legacy snapshots have multiple generations; use --no-resume to regenerate")
-        pattern = re.compile(re.escape(spec.project) + r"_(full|core)(?:_[0-9]+)?\.yaml")
-        for entry in prior_record.get("intermediates") or []:
-            if not isinstance(entry, dict) or not entry.get("path") or not entry.get("sha256"):
-                continue
-            match = pattern.fullmatch(Path(entry["path"]).name)
-            if match:
-                _verified(entry)
-                entries.append({"name": f"{spec.project}_{match[1]}.yaml",
-                                "path": entry["path"], "sha256": entry["sha256"]})
-        entries.sort(key=lambda entry: int(re.search(r"_([0-9]+)\.yaml$", entry["path"])[1])
-                     if re.search(r"_([0-9]+)\.yaml$", entry["path"]) else 1)
-        if not entries:
+        selected = {}
+        for phase in ("full", "core"):
+            name = f"{spec.project}_{phase}.yaml"
+            entry = _portable_entry(prior_record, spec.project, name)
+            if entry is not None:
+                selected[entry["path"]] = name
+        if not selected:
             raise ledger.UsageLedgerError("saved phases have no generation snapshot evidence; restore it or use --no-resume")
+        # Keep the complete portable history in its attested order. Placing
+        # the selected phase before older copies would make those current.
+        for entry in prior_record.get("intermediates") or []:
+            if not isinstance(entry, dict):
+                raise ledger.UsageLedgerError("invalid portable snapshot evidence")
+            if entry.get("generation_id") not in (None, run.get("generation_id")):
+                raise ledger.UsageLedgerError("portable snapshot belongs to a different generation")
+            _verified(entry)
+            entries.append({"name": entry.get("phase") or selected.get(entry["path"]) or Path(entry["path"]).name,
+                            "path": entry["path"], "sha256": entry["sha256"],
+                            **({"usage_id": entry["usage_id"]} if entry.get("usage_id") else {})})
     data = {"version": 1, "generation_id": generation, "run_identity": identity,
             "input_identity": ledger.recorded_inputs(spec) or spec.input_identity(), "snapshots": entries}
     if existing is not None:
@@ -152,15 +169,111 @@ def record(spec, name: str, path: Path, *, usage_id: str | None = None) -> None:
     _write(index_path(directory, spec.project), data)
 
 
-def latest(directory: Path, project: str, name: str) -> tuple[bool, Path | None]:
-    """Whether an index exists, and its last verified snapshot for this phase."""
-    data = _load(directory, project)
-    if data is None:
-        return False, None
-    if data.get("superseded"):
-        raise ledger.UsageLedgerError("snapshot index is not the active generation; restore its evidence")
-    entry = next((e for e in reversed(data["snapshots"]) if e["name"] == name), None)
-    return True, _verified(entry) if entry is not None else None
+def _portable(directory: Path, project: str, record: dict | None, spec=None) -> dict | None:
+    """The caller's record is authoritative; a neighboring index is not."""
+    if record is None:
+        path = directory / f"{project}_provenance.yaml"
+        if not path.exists():
+            return None
+        import yaml
+        try:
+            record = yaml.safe_load(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError, yaml.YAMLError) as exc:
+            raise ledger.UsageLedgerError(f"cannot read snapshot owner record: {path}: {exc}") from exc
+    run = record.get("run") if isinstance(record, dict) else None
+    if (not isinstance(run, dict) or run.get("project") != project
+            or (spec is not None and not ledger.record_matches(spec, run))):
+        raise ledger.UsageLedgerError("snapshot owner record does not match the requested run")
+    return record
+
+
+def _portable_entry(record: dict, project: str, name: str) -> dict | None:
+    run = record.get("run") or {}
+    candidates = []
+    pattern = re.compile(re.escape(Path(name).stem) + r"(?:_[0-9]+)?" + re.escape(Path(name).suffix))
+    for entry in record.get("intermediates") or []:
+        if not isinstance(entry, dict) or not entry.get("path"):
+            continue
+        phase = entry.get("phase")
+        if (phase == name or (phase is None and pattern.fullmatch(Path(entry["path"]).name))):
+            if not re.fullmatch(r"[a-f0-9]{64}", str(entry.get("sha256", ""))):
+                raise ledger.UsageLedgerError("portable phase snapshot has no valid byte attestation")
+            if entry.get("generation_id") not in (None, run.get("generation_id")):
+                raise ledger.UsageLedgerError("portable phase snapshot belongs to a different generation")
+            candidates.append(entry)
+    if len(candidates) > 1 and any(e.get("phase") is None or not e.get("generation_id") for e in candidates):
+        raise ledger.UsageLedgerError("portable phase snapshots have ambiguous generation ownership; restore their index")
+    return candidates[-1] if candidates else None
+
+
+def read_latest(directory: Path, project: str, name: str, *, spec=None,
+                record: dict | None = None) -> tuple[bool, tuple[Path, bytes] | None]:
+    """Read once under an expected live identity or portable byte attestation.
+
+    The boolean distinguishes identified evidence from older unregistered
+    helpers. A modern record without an index never falls back to filenames.
+    """
+    generation = ledger.generation_id(spec) if spec is not None else None
+    if generation is not None:
+        expected_inputs = ledger.recorded_inputs(spec)
+        if expected_inputs is not None and expected_inputs != spec.input_identity():
+            raise ledger.UsageLedgerError("snapshot input identity differs from the active generation")
+        data = _load(directory, project)
+        if (data is not None and not data.get("superseded")
+                and data["generation_id"] == generation
+                and data["run_identity"] == ledger.run_identity(spec)
+                and data["input_identity"] == spec.input_identity()):
+            entry = next((e for e in reversed(data["snapshots"]) if e["name"] == name), None)
+            return True, _read_verified(entry) if entry is not None else None
+        # Portable evidence may recover a missing/stale index, but cannot
+        # replace a new active generation with a previous completed one.
+        portable = _portable(directory, project, record, spec)
+        if portable is None or portable["run"].get("generation_id") != generation:
+            raise ledger.UsageLedgerError("snapshot index does not match the active run and input identity")
+    else:
+        portable = _portable(directory, project, record, spec)
+    if portable is not None and (portable["run"].get("generation_id") or "intermediates" in portable):
+        entry = _portable_entry(portable, project, name)
+        if entry is None and portable["run"].get("generation_id"):
+            raise ledger.UsageLedgerError("identified run has no attested phase snapshot; restore its evidence")
+        return True, _read_verified(entry) if entry is not None else None
+    if index_path(directory, project).exists() or any(
+            index_path(directory, project).parent.glob(f"{project}_snapshot_index.previous-*.json")):
+        raise ledger.UsageLedgerError("generation snapshots require a matching run record or active identity")
+    return False, None  # historical helpers predate generation-bound snapshots
+
+
+def latest(directory: Path, project: str, name: str, *, spec=None,
+           record: dict | None = None) -> tuple[bool, Path | None]:
+    indexed, snapshot = read_latest(directory, project, name, spec=spec, record=record)
+    return indexed, snapshot[0] if snapshot is not None else None
+
+
+def require_accounted(spec, prior_record: dict) -> None:
+    """Do not let a completed record hide a later delivered attempt (#1416)."""
+    generation = ledger.generation_id(spec)
+    run = prior_record.get("run") or {}
+    known = set(ledger.prior_generation_ids(spec) if generation else run.get("prior_generation_ids") or [])
+    expected = generation or run.get("generation_id")
+    rows = ledger.merge_usage(spec, prior_record.get("api_usage") or []) if generation else prior_record.get("api_usage") or []
+    accounted = {row.get("usage_id") for row in rows if isinstance(row, dict)}
+    path = index_path(spec.metadata_dir, spec.project)
+    paths = [path, *sorted(path.parent.glob(f"{spec.project}_snapshot_index.previous-*.json"))]
+    for candidate in paths:
+        try:
+            data = _load(spec.metadata_dir, spec.project, path=candidate)
+        except ledger.UsageLedgerError:
+            if candidate == path:
+                raise
+            continue  # an explicit restart may preserve an opaque old index
+        if data is None or data["run_identity"] != ledger.run_identity(spec):
+            continue
+        if data["generation_id"] in known:
+            continue  # a recorded explicit restart preserves this predecessor
+        if data["generation_id"] != expected or any(
+                e.get("usage_id") is not None and e["usage_id"] not in accounted for e in data["snapshots"]):
+            raise ledger.UsageLedgerError("generation snapshot evidence includes an unaccounted attempt; "
+                                           "restore its usage ledger before resuming")
 
 
 def entries(spec) -> list[dict] | None:
@@ -171,4 +284,7 @@ def entries(spec) -> list[dict] | None:
         raise ledger.UsageLedgerError("cannot publish another generation's snapshots")
     for entry in data["snapshots"]:
         _verified(entry)
-    return [{"path": entry["path"], "sha256": entry["sha256"]} for entry in data["snapshots"]]
+    return [{"path": entry["path"], "sha256": entry["sha256"], "phase": entry["name"],
+             "generation_id": data["generation_id"],
+             **({"usage_id": entry["usage_id"]} if entry.get("usage_id") else {})}
+            for entry in data["snapshots"]]

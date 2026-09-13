@@ -1385,7 +1385,8 @@ def _receipts_block(spec: RunSpec, record: dict[str, Any]) -> dict[str, Any]:
                                else spec.chunk_manifest),
                      bundle_rel_path=inputs.get("bundle_path"),
                      record_bundle_sha256=inputs.get("bundle_sha256"),
-                     record_chunks=inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None)
+                     record_chunks=inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None,
+                     snapshot_spec=spec, snapshot_record=record)
 
 
 def core_inventory_block() -> str:
@@ -2727,7 +2728,10 @@ def report_claims_block(spec: RunSpec) -> dict[str, Any] | None:
             if spec.core_path.exists() else {}
         # This runner always asks the report phase for the table (#929),
         # and records the expectation on the record it writes (#961).
-        snapshot, snapshot_pin = phase1_snapshot_with_pin_for(spec.core_path)
+        snapshot, snapshot_pin = phase1_snapshot_with_pin_for(spec.core_path, spec=spec)
+        if snapshot_pin and snapshot_pin.get("state") == "unusable":
+            return {"checked": False, "reason": snapshot_pin["reason"],
+                    "artifacts": {"phase1_snapshot": snapshot_pin}}
         out = check_report(spec.report_path, full or {}, core or {},
                            declared_slots(),
                            snapshot=snapshot,
@@ -4696,6 +4700,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     if generation is None and _unrecorded_reasoning(spec, prior_record):
         raise UsageLedgerError("identified reasoning survives but its usage ledger is missing; "
                                "restore the ledger before resuming")
+    from data_sheets_schema import snapshot_store
+    if resume:
+        snapshot_store.require_accounted(spec, prior_record)
     # A *finished* run has no progress file — success deletes it — so resuming
     # found nothing and re-ran all six phases of work already paid for. The
     # artifacts on disk are the durable record of what completed; the progress
@@ -4783,7 +4790,6 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         fresh_generation = bool(foreign_prior or foreign_progress)
     from data_sheets_schema.usage_ledger import pin_inputs
     pin_inputs(spec)
-    from data_sheets_schema import snapshot_store
     snapshot_store.activate(spec, fresh=fresh_generation, completed=bool(done), prior_record=prior_record)
     carry: dict[str, str] = {}
     if "Audit findings" in progress:
@@ -4849,13 +4855,13 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # produces it rather than reporting a diff against a record it never saw.
     for phase, name in (("full", "Original full record"),
                         ("core", "Original core record")):
-        _, snapshot = snapshot_store.latest(spec.provenance_path.parent, spec.project,
-                                             f"{spec.project}_{phase}.yaml")
+        _, snapshot = snapshot_store.read_latest(spec.provenance_path.parent, spec.project,
+                                                  f"{spec.project}_{phase}.yaml", spec=spec)
         if snapshot is None:
             done.discard(phase)
             done -= _dependents_of(name, (phase,))
             continue
-        body = snapshot.read_text(encoding="utf-8")
+        body = snapshot[1].decode("utf-8")
         schema_path, class_name = PHASE_SCHEMA[phase]
         try:
             parsed = yaml.safe_load(body)

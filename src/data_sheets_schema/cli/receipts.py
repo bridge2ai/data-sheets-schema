@@ -59,7 +59,7 @@ def check(method, label, project, write, strict, bundle_opt):
         inputs = record.get("inputs") or {}
         bundle = bc.declared_bundle(record)
         md5, expected = inputs.get("bundle_md5"), bool(inputs.get("receipt_expected"))
-        recovery = {"bundle_rel_path": inputs.get("bundle_path"), "record_bundle_sha256": inputs.get("bundle_sha256"),
+        recovery = {"snapshot_record": record, "bundle_rel_path": inputs.get("bundle_path"), "record_bundle_sha256": inputs.get("bundle_sha256"),
                     "record_chunks": inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None}
     else:
         # Before the record exists — Phase 1 runs this before Phase 2 (#730).

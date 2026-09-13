@@ -604,7 +604,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         # the reviewer scores a bundle-attested value `unsupported`. The
         # item carries the path as written and where it resolves.
         from data_sheets_schema.receipts import phase1_snapshot_state
-        snap_state, snapshot_file, original, snap_why = phase1_snapshot_state(paths["receipt"])
+        snap_state, snapshot_file, original, snap_why = phase1_snapshot_state(paths["receipt"], record=record)
         # Not a gap: the agentic path writes no snapshot by design (its
         # Phase 3 re-receipts what it changes), so an index join there is
         # the instrument, not a defect in this pack. A snapshot that exists
@@ -618,7 +618,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
             # "unreadable" was a false claim for a file that parsed to
             # nothing (Codex review, SF2); the reason says which it is.
             pack["receipt_join"] = {"basis": "index",
-                                    "reason": f"the phase-1 snapshot {snapshot_file.name} is present but not "
+                                    "reason": f"the phase-1 snapshot {snapshot_file.name if snapshot_file else 'ownership evidence'} is not "
                                               f"usable ({snap_why}); receipt paths joined by index, not entry "
                                               "identity (#899)"}
             pack["gaps"].append(f"phase-1 snapshot not usable ({snap_why}): {snapshot_file}")

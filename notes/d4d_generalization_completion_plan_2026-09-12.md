@@ -115,3 +115,18 @@ reproduction, they are tracked as #1408–#1413 and addressed in round 5; see
 `reviews/pr_1367_round5_2026-09-12.md`. Review and exact-head CI remain
 required before merging that patch. The next evaluation-applicability stage
 also includes #1414, the incorrectly gated preprocessing item.
+
+## Generation review round 6
+
+The round-5 reviewer found two remaining recovery defects (#1415, #1416),
+and a strict missing-bundle check was independently reproduced (#1417).
+Round 6 binds every snapshot consumer to the requested run or its portable
+attestation, retains logical phase/generation identities, reads verified
+bytes once, and checks surviving attempt evidence before completed-run
+shortcuts. Strict checks now fail on absent selected bundles. See
+`reviews/pr_1367_round6_2026-09-12.md` for reproductions and boundary details.
+Round-5 CI passed 3,831 tests and found two outdated recovery fixtures; those
+are updated without relaxing the behavior being tested. The revised head
+still requires green full CI and independent plugin approval. Evaluation
+identities/applicability (#1300, #627, #159, #1414), vocabulary/study profiles
+(#1302, #628), and installable packaging (#1301) remain queued in that order.
