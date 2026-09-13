@@ -53,7 +53,14 @@ def test_new_provider_preserves_cohort_and_uses_new_output_locations():
 
 def test_execution_metadata_preserves_scoring_prompt_and_stays_outside_record():
     import json
-    import reference_rescore as original
+    from reference_rescore_cborg_evidence import EvidenceRoot
+
+    # The completed condition is compared with the runner it measured. The
+    # live controller can adopt a new instrument without restamping it.
+    evidence = EvidenceRoot(ROOT)
+    original = evidence.load_module("scripts/reference_rescore.py", "original_scoring_prompt", imports={
+        "data_sheets_schema.agent_pin": evidence.agent_pin()})
+    original.ROOT = evidence
 
     manifest = json.loads((ROOT / "notes/reference_rescore_2026-09-12_cborg/manifest.json").read_bytes())
     manifest["transport"] = adapter.TRANSPORT
