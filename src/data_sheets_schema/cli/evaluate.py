@@ -229,6 +229,11 @@ def plan_cmd(config, paths_only, all_replicates, runtime):
     if paths_only:
         for path in dict.fromkeys(str(e.path) for e in evaluations):
             click.echo(path)
+        # Preserve a clean path stream while making reduced cohort coverage
+        # visible to a caller piping it into a sweep (#1364).
+        from data_sheets_schema.evaluation_plan import LAST_EXCLUDED
+        if LAST_EXCLUDED:
+            click.echo(summarise(evaluations), err=True)
         return
 
     for evaluation in evaluations:
@@ -261,13 +266,21 @@ def related_datasets_cmd(records, project, runtime):
 
     paths = [Path(r) for r in records]
     if not paths:
-        from data_sheets_schema.evaluation_plan import NothingSelected, plan
-        from data_sheets_schema.runs import AmbiguousCanonical
+        from data_sheets_schema.evaluation_plan import NothingSelected, VARIANTS
+        from data_sheets_schema.runs import AmbiguousCanonical, canonical_runs
         try:
-            paths = list(dict.fromkeys(
-                e.path for e in plan(runtime=runtime) if project in (None, e.project)))
+            # Diagnostics must inspect stale and invalid marks too (#1365).
+            # Workload planning filters those before a paid evaluation.
+            canonical = canonical_runs(runtime=runtime)
+            if not canonical:
+                raise NothingSelected(None)
+            paths = list(dict.fromkeys(Path(record[variant])
+                for name, record in canonical.items() if project in (None, name)
+                for variant in VARIANTS if record.get(variant)))
         except (NothingSelected, AmbiguousCanonical) as exc:
             raise click.ClickException(str(exc))
+        if not paths:
+            raise click.ClickException(f"no canonical records matched project {project!r}")
 
     total = 0
     for path in paths:

@@ -48,12 +48,20 @@ class NothingSelected(RuntimeError):
     read as a finished scoping exercise rather than an unstarted one.
     """
 
-    def __init__(self, concat_dir: Path | None):
+    def __init__(self, concat_dir: Path | None,
+                 excluded: list[tuple[str, str, str]] | None = None):
         # The location is built outside the f-string: a multi-line expression
         # inside a replacement field is PEP 701, valid on 3.12+ and a
         # SyntaxError on the 3.10 and 3.11 this project still supports. It
         # parsed fine locally on 3.13 and broke all three CI matrix entries.
         where = concat_dir or "the default concatenated directory"
+        if excluded:
+            detail = "; ".join(f"{p} {label} ({status})"
+                               for p, label, status in excluded)
+            super().__init__(
+                f"no currently valid records selected under {where}. "
+                f"Resolve these validation exclusions before planning: {detail}")
+            return
         super().__init__(
             f"no canonical record found under {where}. "
             "Run `d4d runs select --execute` first; "
@@ -110,8 +118,9 @@ def plan(concat_dir: Path | None = None, config: str | None = None,
     """Every evaluation the canonical set implies, in a stable order.
 
     Reads the canonical marks rather than any project list: a project without a
-    canonical record contributes nothing, which is the whole reason the count
-    cannot be stated in advance.
+    canonical record contributes nothing. Marks do not establish current
+    validity after artifacts or schemas change: both planning modes apply the
+    same validation eligibility check and report excluded selections.
 
     `all_replicates` widens the plan from one record per project to every
     replicate of the canonical configuration — #287's other coverage option.
@@ -122,12 +131,16 @@ def plan(concat_dir: Path | None = None, config: str | None = None,
     """
     from data_sheets_schema.runs import canonical_runs
 
+    LAST_EXCLUDED.clear()
     found = canonical_runs(concat_dir=concat_dir, config=config, runtime=runtime)
     if all_replicates:
         return _replicate_plan(found, rubrics, concat_dir)
     out: list[Evaluation] = []
     for project in sorted(found):
         record = found[project]
+        if not _eligible(record.get("method") or "claudecode_agent",
+                         record.get("label") or "", project, concat_dir):
+            continue
         for variant in VARIANTS:
             # `canonical_runs` reports the two record paths as top-level keys
             # named for the variant, alongside `label`, `method` and
@@ -141,40 +154,44 @@ def plan(concat_dir: Path | None = None, config: str | None = None,
                 out.append(Evaluation(project=project, variant=variant,
                                       rubric=rubric, path=Path(path)))
     if not out:
-        raise NothingSelected(concat_dir)
+        raise NothingSelected(concat_dir, LAST_EXCLUDED)
     return out
 
 
-#: Replicates excluded by the most recent `plan(all_replicates=True)`, as
+#: Selections excluded by the most recent `plan()`, in either mode, as
 #: `(project, label, status)`. Reported rather than dropped silently: the count
 #: falling from 18 to 15 with no explanation is its own defect (#344).
 LAST_EXCLUDED: list[tuple[str, str, str]] = []
 
 
+def _eligible(method: str, label: str, project: str,
+              concat_dir: Path | None) -> bool:
+    from data_sheets_schema.runs import CONCAT_DIR, VALID, validation_status
+
+    try:
+        status = validation_status(
+            method, label, project,
+            concat_dir=concat_dir if concat_dir is not None else CONCAT_DIR)
+    except Exception:
+        status = "unverified"
+    if status == VALID:
+        return True
+    entry = (project, label, status)
+    if entry not in LAST_EXCLUDED:
+        LAST_EXCLUDED.append(entry)
+    return False
+
+
 def _replicate_plan(found: dict[str, dict], rubrics: tuple[str, ...],
                     concat_dir: Path | None) -> list[Evaluation]:
-    from data_sheets_schema.runs import VALID, validation_status
-
-    LAST_EXCLUDED.clear()
     out: list[Evaluation] = []
     for project in sorted(found):
         method = found[project].get("method") or "claudecode_agent"
         for sibling in replicates_of(found[project]):
-            # The canonical mark exists *because* that replicate validates —
-            # the selection criterion is "full and core both validate", and
-            # siblings inherit none of it. Three of the 18 records this
-            # enumerated on the 2026-07-31 corpus were invalid, and scoring
-            # those would measure validation failure as quality variance, which
-            # is the opposite of what a within-config estimate is for (#344).
+            # Every sibling, including the marked record, must still validate
+            # against its recorded artifact/schema pins (#344, #1364).
             label = sibling.get("label") or ""
-            try:
-                status = validation_status(method, label, project)
-            except Exception:
-                status = "unverified"
-            if status != VALID:
-                entry = (project, label, status)
-                if entry not in LAST_EXCLUDED:
-                    LAST_EXCLUDED.append(entry)
+            if not _eligible(method, label, project, concat_dir):
                 continue
             for variant in VARIANTS:
                 path = sibling.get(variant)
@@ -185,7 +202,7 @@ def _replicate_plan(found: dict[str, dict], rubrics: tuple[str, ...],
                                           rubric=rubric, path=Path(path),
                                           label=sibling.get("label")))
     if not out:
-        raise NothingSelected(concat_dir)
+        raise NothingSelected(concat_dir, LAST_EXCLUDED)
     return out
 
 
@@ -229,6 +246,6 @@ def summarise(evaluations: list[Evaluation]) -> str:
         # Named, not just counted: "3 excluded" invites the reader to assume
         # they were the same kind of thing.
         detail = "; ".join(f"{p} {l} ({s})" for p, l, s in LAST_EXCLUDED)
-        line += (f"\n{len(LAST_EXCLUDED)} replicate(s) excluded as not "
+        line += (f"\n{len(LAST_EXCLUDED)} record(s) excluded as not "
                  f"validating: {detail}")
     return line
