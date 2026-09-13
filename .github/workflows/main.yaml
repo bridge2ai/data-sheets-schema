@@ -2,13 +2,10 @@
 # https://docs.github.com/en/actions/guides/building-and-testing-python
 # https://github.com/snok/install-poetry#workflows-and-tips
 #
-# Two lanes (#1203). A pull request runs the suite once, on one interpreter,
-# without the tests that walk the committed corpus: those check the data, not
-# the change, and a pull request that touches neither gains nothing from
-# running them three times. Merging to `main` — and a manual dispatch — runs
-# everything on every supported interpreter, the corpus tests and the schema
-# and example builds included. Wall time for a pull request is one job, not
-# the slowest of three.
+# Two lanes (#1203, #1361). A pull request runs all Python tests once, on one
+# interpreter, including the committed corpus: code and data changes can both
+# invalidate its measurements. Merging to `main` — and a manual dispatch —
+# also runs the schema and example builds on every supported interpreter.
 ---
 name: Build and test data_sheets_schema
 
@@ -65,8 +62,8 @@ jobs:
       # The schema-generation tests build into temporary directories (#1208),
       # so the parallel suite reads the committed schemas without rebuilding
       # them first. Keep slow tests visible in the timing report.
-      - name: Run the suite without the corpus walks
-        run: poetry run pytest tests -v -p no:cacheprovider --durations=25 -n auto -m "not corpus"
+      - name: Run the suite including the corpus walks
+        run: poetry run pytest tests -v -p no:cacheprovider --durations=25 -n auto
 
   # Merge to main, or on demand: everything, everywhere.
   full:
