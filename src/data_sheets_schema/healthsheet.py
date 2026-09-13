@@ -75,8 +75,12 @@ def _project(project: str | None) -> str:
 
 
 def render(healthsheet: dict, record: dict, source: Path, *,
-           project: str | None = None) -> tuple[str, HealthsheetStats]:
+           project: str | None = None,
+           display: str | None = None) -> tuple[str, HealthsheetStats]:
+    """`display` is the dataset's name in prose (the profile's for its own
+    record — the tracked bundle's bytes depend on it, #1542); the key otherwise."""
     project = _project(project)
+    display = display or project
     stats = HealthsheetStats()
     body: list[str] = []
 
@@ -111,7 +115,7 @@ def render(healthsheet: dict, record: dict, source: Path, *,
         "This bundle contains the Healthsheet and nothing else — no publications,",
         "no documentation, no license, no IRB protocol. It exists to measure what",
         "a single structured upstream source yields on its own. It is NOT the",
-        f"{project} baseline; the baseline corpus carries all cited sources,",
+        f"{display} baseline; the baseline corpus carries all cited sources,",
         "including this one.",
         "",
         f"Sections: {stats.sections}",
@@ -136,17 +140,23 @@ def build_bundle(record_path: Path | None = None,
     record_path = _record(record_path)
     # The profile's name and project describe the profile's *own* record;
     # any other record names its project and gets its own file (#1493).
+    from data_sheets_schema.chunking import anchored
     from data_sheets_schema.profiles import active_profile
     prof = active_profile()
     own = (prof.healthsheet_record is not None
-           and Path(record_path).resolve() == Path(prof.healthsheet_record).resolve())
+           and Path(record_path).resolve() == anchored(Path(prof.healthsheet_record)).resolve())   # from any directory (#1544)
     project = project or (prof.healthsheet_project if own else None)
     if not project:
         raise ValueError(f"no project for {record_path}: it is not the active profile's record; pass one")
-    healthsheet, record = load_healthsheet(record_path)
-    text, stats = render(healthsheet, record, record_path, project=project)
-    output_dir.mkdir(parents=True, exist_ok=True)
     own_name = own and project == prof.healthsheet_project        # the study's bundle is the study's dataset (#1516)
+    healthsheet, record = load_healthsheet(record_path)
+    text, stats = render(healthsheet, record, record_path, project=project,
+                         display=prof.healthsheet_display if own_name else None)
+    output_dir.mkdir(parents=True, exist_ok=True)
     target = output_dir / (name or (bundle_name() if own_name else None) or f"{project}_healthsheet_only.txt")
+    if not own_name and name is None and prof.healthsheet_bundle and target.name == prof.healthsheet_bundle:
+        # A record that is not the profile's may not take the profile's
+        # bundle name by claiming its project (#1543).
+        raise ValueError(f"{target.name} is the active profile's bundle name; pass --name for {record_path}")
     target.write_text(text, encoding="utf-8")
     return target, stats

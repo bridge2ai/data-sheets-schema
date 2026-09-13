@@ -521,6 +521,8 @@ class RunSpec:
             self.manifest_line = self.header_for_manifest(self.manifest)
         if self.profile is None:
             self._select_profile()
+        elif self.profile_basis is None:
+            self.profile_basis = "stated by the caller"           # the record says why, always (#1549)
 
     def _select_profile(self) -> None:
         from data_sheets_schema.profiles import select_profile

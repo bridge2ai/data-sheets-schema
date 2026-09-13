@@ -56,8 +56,18 @@ def default_manifest_path() -> Path:
     found higher up would pair its context and profile with another
     tree's corpus (#1515); discovery in an ancestor returns when the
     corpus root follows the manifest (#1523)."""
-    from data_sheets_schema.chunking import anchored
+    from data_sheets_schema.chunking import REPO_ROOT, anchored
     rel = Path(DEFAULT_MANIFEST)
+    try:
+        here = Path.cwd().resolve()
+    except OSError:
+        here = None
+    inside = here is not None and (here == REPO_ROOT or REPO_ROOT in here.parents)
+    if inside:
+        # The corpus root is the checkout (#1523): a copy of the manifest
+        # nested inside it — an archived registration under `notes/` — is
+        # not the registry from its own directory (#1545).
+        return anchored(rel)
     if rel.exists():
         return rel
     return anchored(rel)

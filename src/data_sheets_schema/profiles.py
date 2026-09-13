@@ -10,9 +10,10 @@ the study — and none of it belongs in front of another dataset.
 A **profile** names those facts. Two ship here:
 
 - ``bridge2ai`` — the study. Its vocabulary pin is the file the digest has
-  always rendered, so the study's digest under this profile is exactly what
-  its runs consumed; its arm project lists, agreement defaults and
-  healthsheet input are the manuscript's.
+  always rendered — the study's registry lists — and its arm project lists,
+  agreement defaults and healthsheet input are the manuscript's. (The
+  digest text itself moved with the term-source scope, `a91bad8b` →
+  `cd3c79f2`, a registered boundary: no earlier record resumes under it.)
 - ``neutral`` — nothing pinned, nothing named. The digest renders the term
   sources the schema itself declares (GO, MeSH, EFO, NCIT for `data_topic`)
   and no registry list; the study arms do not exist.
@@ -70,6 +71,9 @@ class Profile:
     #: The dataset that record describes — written into the bundle's
     #: header as its identity (#1464).
     healthsheet_project: str | None = None
+    #: How that dataset is written in prose — the tracked study bundle says
+    #: "AI-READI baseline" where the key is `AI_READI` (#1542).
+    healthsheet_display: str | None = None
 
     @property
     def pin_path(self) -> Path | None:
@@ -97,6 +101,7 @@ BRIDGE2AI = Profile(
     healthsheet_record=Path("data/raw/AI_READI/fairhub_api_dataset_3_2026-07-27.json"),
     healthsheet_bundle="AI_READI_healthsheet_only.txt",
     healthsheet_project="AI_READI",
+    healthsheet_display="AI-READI",
 )
 
 NEUTRAL = Profile(name="neutral")
@@ -111,8 +116,11 @@ ENV_VAR = "D4D_PROFILE"
 class Selection:
     """A profile and why it was selected — what a record states (#1443)."""
     profile: Profile
-    #: `environment`, `manifest:<path>`, `default manifest:<path>`, or
-    #: `no manifest`.
+    #: `environment`; `no manifest`; `manifest:<path>@<sha256[:12]>` or
+    #: `default manifest:<path>@<sha256[:12]>`, each with ` (undeclared)`
+    #: when the manifest has no `profile:` key; `<kind>:<path> (missing)`
+    #: when the path is not there. The path is repository-relative under
+    #: the checkout (#1466, #1494).
     basis: str
 
     @property

@@ -1463,8 +1463,10 @@ selects it from the manifest it selected — `profile:` key, else neutral;
 `D4D_PROFILE` overriding — and passes it to every digest it renders
 (`digest_text(…, profile=)`, the repair request, the pair-consistency
 ledger call) and to the record, whose `schema` block carries `profile` and
-`profile_basis` (`environment`, `manifest:<path>`, `default manifest:<path>`,
-`no manifest`) beside `digest_md5`; `d4d api plan` prints them. The agentic
+`profile_basis` (`environment`; `no manifest`; `stated by the caller`;
+`manifest:<repo-relative path>@<sha256[:12]>` or `default manifest:…`, with
+` (undeclared)` when the manifest declares no profile, or `(missing)` when
+the path is not there) beside `digest_md5`; `d4d api plan` prints them. The agentic
 recorder resolves it the same way from the manifest it attests. A caller
 that selected nothing gets the default manifest resolved *when asked*
 (#1439): the working directory's, else the checkout's — so a script run

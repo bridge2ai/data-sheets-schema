@@ -1348,7 +1348,10 @@ specification); no rescore is made by this change, and any later fitness
 comparison across it is a comparison across instruments. The comparison
 arms' project lists, the agreement default and the healthsheet input are
 read from the active profile when asked rather than bound at import, and
-the arm table carries none.
+the arm table carries none. **No record made before this change can be
+re-entered with `--resume`**: its `schema.digest_md5` is the earlier
+instrument and the manifest's md5 moved with the `profile:` line, and the
+resume guard refuses both; a rerun is a new generation.
 
 ### The manifest is the registry, and a run attests the manifest it read (#621, #623, #624, #637, #1299; 2026-09-12)
 

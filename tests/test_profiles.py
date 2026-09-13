@@ -728,3 +728,79 @@ class TestRoundFour(_Clean):
         with mock.patch.object(schema_digest, "VOCABULARY_PIN", Path("/nonexistent-round4-vocabulary.yaml")):
             rows = schema_sync.check(profile=NEUTRAL)
         self.assertTrue(all(r["status"] == schema_sync.IN_SYNC for r in rows), rows)
+
+
+class TestRoundFive(_Clean):
+    """The Claude round-3 residuals (#1540–#1549)."""
+
+    def test_the_studys_own_bundle_reproduces_the_tracked_bytes(self):
+        """#1542: the profile's record renders what the chunk manifest and 12
+        records hash — the display name in prose, the key in the header."""
+        from data_sheets_schema import healthsheet
+        from data_sheets_schema.profiles import BRIDGE2AI
+        rec = ROOT / BRIDGE2AI.healthsheet_record
+        tracked = ROOT / "data/preprocessed/concatenated" / BRIDGE2AI.healthsheet_bundle
+        if not (rec.exists() and tracked.exists()):
+            self.skipTest("the study's healthsheet record or bundle is not in this checkout")
+        with tempfile.TemporaryDirectory() as d:
+            target, _ = healthsheet.build_bundle(rec, Path(d))
+            self.assertEqual(target.name, BRIDGE2AI.healthsheet_bundle)
+            got = [l for l in target.read_text(encoding="utf-8").splitlines() if not l.startswith("Source: ")]
+        want = [l for l in tracked.read_text(encoding="utf-8").splitlines() if not l.startswith("Source: ")]
+        self.assertEqual(got, want)
+        # #1544: from another directory, by absolute path, it is still the profile's record.
+        os.chdir(ROOT / "tests")
+        with tempfile.TemporaryDirectory() as d:
+            target, _ = healthsheet.build_bundle(rec, Path(d))
+            self.assertEqual(target.name, BRIDGE2AI.healthsheet_bundle)
+        os.chdir(ROOT)
+
+    def test_a_foreign_record_cannot_take_the_studys_bundle_name(self):
+        """#1543"""
+        import json
+        from data_sheets_schema import healthsheet
+        with tempfile.TemporaryDirectory() as d:
+            rec = Path(d) / "other.json"
+            rec.write_text(json.dumps({"title": "Other", "metadata": {"healthsheet": {"cohort": [
+                {"question": "Q?", "response": "A."}]}}}), encoding="utf-8")
+            with self.assertRaises(ValueError) as caught:
+                healthsheet.build_bundle(rec, Path(d), project="AI_READI")
+            self.assertIn("pass --name", str(caught.exception))
+            target, _ = healthsheet.build_bundle(rec, Path(d), project="AI_READI", name="other.txt")
+            self.assertEqual(target.name, "other.txt")
+            self.assertIn("AI_READI baseline", target.read_text(encoding="utf-8"))   # a foreign record: the key, not the study's prose
+
+    def test_a_nested_manifest_copy_inside_the_checkout_is_not_the_registry(self):
+        """#1545"""
+        from data_sheets_schema import profiles, registry
+        nested = ROOT / "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/measured_inputs_1381/files"
+        if not (nested / "data/preprocessed/source_manifest.yaml").exists():
+            self.skipTest("no nested manifest copy in this checkout")
+        os.chdir(nested)
+        self.assertEqual(registry.default_manifest_path().resolve(), STUDY_MANIFEST.resolve())
+        self.assertEqual(profiles.select_profile().name, "bridge2ai")
+        os.chdir(ROOT)
+
+    def test_a_caller_stated_profile_has_a_basis(self):
+        """#1549"""
+        spec = self._spec(profile="neutral")
+        self.assertEqual((spec.profile, spec.profile_basis), ("neutral", "stated by the caller"))
+
+    def test_the_snapshot_store_accepts_a_pre_profile_identity(self):
+        """#1540"""
+        from data_sheets_schema import snapshot_store, usage_ledger
+        spec = self._spec()
+        identity = spec.input_identity()
+        legacy = {k: v for k, v in identity.items() if k != "profile"}
+        self.assertFalse(usage_ledger._identity_differs(legacy, identity))
+        import inspect
+        src = inspect.getsource(snapshot_store)
+        self.assertNotIn('["input_identity"] != ', src)
+        self.assertNotIn('["input_identity"] == ', src)
+        self.assertNotIn("expected_inputs != spec.input_identity()", src)
+
+    def _spec(self, **kw):
+        from data_sheets_schema.api_runner import RunSpec
+        return RunSpec(project="CHORUS", arm="BASELINE (input documents only)", method="claudecode_api",
+                       label="2026-09-13_x-api-generic-v9_rep1", condition="generic_v9", run_date="2026-09-13",
+                       bundle=ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt", **kw)

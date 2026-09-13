@@ -591,6 +591,9 @@ def main(argv: list[str] | None = None) -> int:
                         default=SUBTYPE_CACHE / "form_subtypes.jsonl")
     parser.add_argument("--offline", action="store_true",
                         help="fail instead of making a paid call")
+    parser.add_argument("--profile", default=None,
+                        help="the profile the judged records were generated under (bridge2ai | neutral); "
+                             "default: the ambient profile (#1541)")
     parser.add_argument("--limit", type=int, default=None,
                         help="classify only the first N (for a canary)")
     parser.add_argument("--model", default=None,
@@ -642,11 +645,13 @@ def main(argv: list[str] | None = None) -> int:
         failures = failures[:args.limit]
     print(f"{len(failures)} form failure(s) loaded", file=sys.stderr)
 
+    from data_sheets_schema.profiles import profile_named
     classifier = FormSubtypeClassifier(cache_path=args.cache,
                                        model=args.model,
                                        schema=args.schema,
                                        specification=args.specification,
-                                       offline=args.offline)
+                                       offline=args.offline,
+                                       profile=profile_named(args.profile) if args.profile else None)
     print(f"instrument: {classifier.model}  schema: {classifier.schema[:8]}",
           file=sys.stderr)
     print(f"specification: {classifier.specification or 'historical, unattested; replay only'}",

@@ -40,7 +40,7 @@ def _load(directory: Path, project: str, *, path: Path | None = None,
             if (owner.get("generation_id") != data["generation_id"]
                     or owner.get("identity") != data["run_identity"]
                     or (owner.get("input_identity") is not None
-                        and owner["input_identity"] != data["input_identity"])):
+                        and ledger._identity_differs(owner["input_identity"], data["input_identity"]))):
                 # A writer that is opening a fresh generation must archive
                 # the old index first; readers must not treat it as current.
                 data["superseded"] = True
@@ -179,7 +179,7 @@ def activate(spec, *, fresh: bool, completed: bool, prior_record: dict) -> None:
     identity = ledger.run_identity(spec)
     generation = ledger.generation_id(spec)
     if existing is not None and existing.get("generation_id") == generation:
-        if existing["run_identity"] != identity or existing["input_identity"] != spec.input_identity():
+        if existing["run_identity"] != identity or ledger._identity_differs(existing["input_identity"], spec.input_identity()):
             raise ledger.UsageLedgerError("generation snapshot identity disagrees with the active run")
         run = prior_record.get("run") or {}
         if run.get("generation_id") == generation and "intermediates" in prior_record:
@@ -322,7 +322,7 @@ def read_latest(directory: Path, project: str, name: str, *, spec=None,
     generation = ledger.generation_id(spec) if spec is not None else None
     if generation is not None:
         expected_inputs = ledger.recorded_inputs(spec)
-        if expected_inputs is not None and expected_inputs != spec.input_identity():
+        if expected_inputs is not None and ledger._identity_differs(expected_inputs, spec.input_identity()):
             raise ledger.UsageLedgerError("snapshot input identity differs from the active generation")
     if record is not None and "intermediates" in record:
         # A caller checking a completed record supplies its exact attestation.
@@ -339,7 +339,7 @@ def read_latest(directory: Path, project: str, name: str, *, spec=None,
         if (data is not None and not data.get("superseded")
                 and data["generation_id"] == generation
                 and data["run_identity"] == ledger.run_identity(spec)
-                and data["input_identity"] == spec.input_identity()):
+                and not ledger._identity_differs(data["input_identity"], spec.input_identity())):
             entry = next((e for e in reversed(data["snapshots"]) if e["name"] == name), None)
             return True, _read_verified(entry) if entry is not None else None
         # Portable evidence may recover a missing/stale index, but cannot
