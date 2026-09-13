@@ -27,16 +27,16 @@
     "poetry.lock": "f4a9bfdb7bd0c48eac92d644ed7d12deddc5fe4182d5b6c6acf05e6edf13eacf",
     "pyproject.toml": "86df2da59eb22bca48e30189cc2427d32bd5d53c3132b403409a0fd052ab3483",
     "scripts/agentic_observed.py": "dd6ca4294eef8afaa9248ea71d652541fe4a62064e998d6193ccc402c1751653",
-    "scripts/update_agent_preimages.py": "8e7825087e2edcfc7d53972a4e3f9f977cffe584c5050f8441092100b35d4066",
+    "scripts/update_agent_preimages.py": "497f3565fdfa25a81d99d3bfb50022ac3180cba1bfe6e7ea1e4371668d82b4b0",
     "src/data_sheets_schema/agent_pin.py": "3f1f6f841592102c72047062b8c083f5c89fb2e10e2c75dc049388856b6ec846",
     "src/data_sheets_schema/agentic_observed.py": "1bdeb4fde0bc28a63d9615acba9e53f70db027668086be35ceae8d12c369c0a8",
     "src/data_sheets_schema/agentic_runtime.py": "6b4fbe2ee80b3d33d5c930ad75d58be7c0247aba12f57d23389bce166a452c33",
-    "src/data_sheets_schema/api_runner.py": "4186d4d90e7fe92c24c66aec744e6af18253f9a8ea1b38c31b3bc53a0205e0a9",
+    "src/data_sheets_schema/api_runner.py": "b8a76b1fbe264faab6b9077a008e037864463bfbd8418a6cdc9456138e9afb38",
     "src/data_sheets_schema/cli/__main__.py": "0848b1c32239a50b9efd3b432181704327b749c2e470a75865baa55ed997674e",
     "src/data_sheets_schema/cli/agents.py": "958bbfab19faac7dd23f0ddcbb48150bffedf865fcc8cdf76e562fa08122e12b",
-    "src/data_sheets_schema/cli/provenance.py": "342ff92ba382187096bcb7de30658c16afa4f296a1717206772add30877dcef7",
+    "src/data_sheets_schema/cli/provenance.py": "d63aa590ec3c164fcac09e2e67164b1e9cda2d89e4b713d9fa277735ce3d7dd4",
     "src/data_sheets_schema/profiles.py": "331955f174216c2cefd7a29d75ed308ed6d2d049187f7494da6feeabbe2ef93c",
-    "src/data_sheets_schema/provenance.py": "929937fbc7b9eeb303c4cae9545d73772252321051fbbd9466259384388433b5",
+    "src/data_sheets_schema/provenance.py": "9be0bdec4231ccf62c19011fc80bb70626e6b83998ca2c5c341f5676d3a3d776",
     "src/data_sheets_schema/resources.py": "0438987d06609f6bc99680e4efa0423b52b80bde10f29ffa4a2f314d3897c073"
   },
   "generation_arms": [
@@ -47,14 +47,16 @@
     1556,
     1612,
     1633,
-    1634
+    1634,
+    1647,
+    1648
   ],
   "minimum_agentic_python": "3.10",
   "preservation_sha256": "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f",
   "preserved_condition": "notes/reference_rescore_2026-09-12_cborg_runtime",
   "previous_boundary": {
     "path": "notes/manifest_corpus_root_boundary_2026-09-13.json",
-    "sha256": "6051f79c11a23de6f1692b6b900c00e90dbf3264f4eecb589766b9050bc7f323"
+    "sha256": "99029c12273300dad9f8770088d9f965ee2a978d086be2c34fbe53b34924552b"
   },
   "records_generated": [],
   "records_rescored": [],

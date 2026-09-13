@@ -59,3 +59,24 @@ ancestor manifest. The broader profile lane passes 95 checks; its final mock
 signature was corrected and passes separately. The historical audit again
 verifies 56 accepted ratings, 259 prior evaluations and 450 preservation hashes.
 The implementation pins are refreshed; no new production measurement occurs.
+
+## Review round 3 — 2026-09-13
+
+The round-2 review findings are #1647 and #1648. Preimage registration now
+binds enumeration, current definition bytes, previous definition history and
+the registry destination to one selected source checkout. Mismatched resource
+paths and registry symlinks are rejected before a write. Renderer-6 replay
+skips discovery of today's toolchain and validates the recorded paths;
+fresh execution specs still discover their actual interpreter and resources.
+
+Both review defects fail their synthetic reproductions before the fixes.
+All 81 focused identity, challenge, playbook and replay checks pass. The
+expanded identity lane passes 17 checks, including cross-checkout definition
+and registry rejection. After corpus round-5 integration, all 111 combined
+checks pass. All 60 historical renderer controls retain their hashes.
+
+All eight fresh-wheel workflows pass on the combined fixes (151.46 seconds).
+The package installs with declared runtime dependencies and executes only
+synthetic/fake-provider paths in these checks. No new production generation,
+scoring, definition quotation or source download occurs. The committed head
+is submitted for independent review and CI before merge.
