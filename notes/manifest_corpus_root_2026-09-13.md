@@ -226,3 +226,18 @@ retains the profile27b627fa2 compatibility fixes, with explicit ValidationInputs
 for validation and the complete corpus destination/backfill candidate set.
 The next independent review and exact-head CI remain required. Existing
 production records, ratings and historical attributions are unchanged.
+
+## Review round 11 — 2026-09-13
+
+Codex round 10 found #1695 and #1696. Canonical full/core paths now resolve
+from each provenance record's corpus; unknown relative bases are unavailable.
+New flat-output provenance captures bundle, chunk-map and source-manifest
+addresses while the launch directory is known, so later review retains its
+evidence. Historical flat records with unknown bases still remain unverified.
+
+Seven regression cases fail before the fix. The focused canonical/planning/
+review lane passes 111 tests, and all corpus/recheck/backfill/selection checks
+pass 185 tests. After integrating #1694 from 8dec686e5, the eleven combined
+regressions pass. All 60 historical renderer controls retain identical bytes.
+The boundary refreshes the affected source pins and names the integrated
+validator dependency. No production generation, scoring or downloads occur.
