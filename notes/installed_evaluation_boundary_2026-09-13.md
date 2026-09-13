@@ -97,3 +97,21 @@ The read-only historical audit verifies all 56 accepted ratings and 450
 preservation hashes. No new model call, generated record or rescore occurred.
 The adjacent JSON refreshes the implementation pins for this combined tree.
 An independent review and CI on the resulting head remain merge gates.
+
+## Final profile and packaging integration — 2026-09-13
+
+The branch includes profile head 4fb2949f6 and packaging head d770703b0.
+The merge retains the installed renderer CSS, the exact Anthropic 0.72.0
+runtime pin and declared httpx dependency, and both protections for resource
+identity: one selected checkout and absolute third-party library paths.
+Semantic scope keeps its direct resolver import; this installed workflow's
+frozen controller already copies that resolver, while archived instruments
+remain unchanged.
+
+The combined profile/resource/classification/evaluation lane passes 870 tests
+with one existing skip. All seven fresh-wheel workflows pass (89.05 seconds),
+and all 42 frozen-controller/audit/validator-status checks pass. The preservation
+audit verifies 56 accepted ratings, 259 prior evaluations and 450 file hashes.
+The dependency lock check passes. These are implementation changes with no
+new production model call, generation output, score or quoted definition.
+The JSON pins the combined implementation for review and exact-head CI.
