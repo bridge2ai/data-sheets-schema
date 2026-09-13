@@ -153,3 +153,16 @@ pending. Reprioritize newly discovered blockers before new paid work.
   all 278 checked provenance paths and their original markers from the merged
   baseline, rejects origin changes and membership changes, and leaves the
   original records unchanged. CI and review must pass on this correction.
+- 2026-09-12: The arm inventory found #1364. The default agentic planner
+  admitted canonical selections with stale schema-validation pins, whereas
+  all-replicate planning excluded them. Record artifact hashes still match.
+  The next correction applies one current-validation eligibility policy in
+  both modes and runtimes, reports exclusions (on stderr for path-only output),
+  and checks the selected corpus root. Revalidation against an explicitly
+  chosen schema is a separate act; no original provenance is rewritten.
+- 2026-09-12: Review of #1364 found #1365: record diagnostics and canonical
+  integrity tests also used the evaluation planner. Those callers now read
+  the unfiltered canonical set so stale or invalid records remain inspectable.
+  Evaluation workload planning retains its validation gate. Regression cases
+  include defective full/core artifacts in both runtimes and project-scoped
+  diagnostics with another eligible project present.
