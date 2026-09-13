@@ -470,7 +470,7 @@ class RunSpec:
     chunk_manifest: Path | None = None
     # Version 2 passes selected manifest arguments to agentic recording.
     # Historical render specs omit this field and replay under version 1.
-    render_version: int = 2
+    render_version: int = 3
     # Frozen when the run is specified, not read from the clock on each use.
     # A six-phase run takes tens of minutes and this study's sweep genuinely
     # ran past midnight UTC, so recomputing per call gave phases of one run
@@ -497,7 +497,7 @@ class RunSpec:
     _replay_only: bool = field(default=False, init=False, repr=False)
 
     def __post_init__(self):
-        if self.render_version not in (1, 2):
+        if self.render_version not in (1, 2, 3):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         default_line = type(self).__dataclass_fields__["manifest_line"].default
         self.manifest = select_manifest(self.project, self.bundle, self.manifest)
@@ -812,6 +812,23 @@ def resolve_prompt(spec: RunSpec) -> str:
                       recording_command, body)
     for k, v in subs.items():
         body = body.replace(k, v)
+
+    if spec.render_version >= 3:
+        # Keep replay/backfill unambiguous even when no explicit chunk
+        # selection needs the new pre-provenance receipt command.
+        body += "\n\n<!-- D4D prompt renderer version 3 -->\n"
+    if spec.render_version >= 3 and spec.runtime == "Claude Code" and spec.chunk_manifest is not None:
+        import shlex
+        args = ["poetry", "run", "d4d"]
+        if spec.manifest is not None:
+            args += ["--manifest", str(spec.manifest)]
+        args += ["receipts", "check", "--method", spec.method, "--label", spec.label,
+                 "--project", spec.project, "--bundle", str(spec.bundle),
+                 "--chunk-manifest", str(spec.chunk_manifest), "--strict"]
+        body += ("\n\n## Selected Phase-1 receipt manifest (renderer v3)\n\n"
+                 "Before Phase 2 and before provenance exists, use this receipt-check command "
+                 "for the selected inputs when following d4d-full-core.md:\n\n"
+                 + shlex.join(args) + "\n")
 
     # v1 hardcodes `# Generated: 2026-07-28` where every neighbouring header
     # line takes a placeholder, so every record produced under it since that

@@ -9,7 +9,7 @@ from data_sheets_schema.cli import cli
 from data_sheets_schema.runs import verify_request
 from tests.test_generation_manifest_identity import external, offline  # noqa: F401
 
-@pytest.mark.parametrize("version", [1, 2])
+@pytest.mark.parametrize("version", [1, 2, 3])
 @pytest.mark.parametrize("state", ["missing", "malformed", "changed"])
 def test_backfill_does_not_revalidate_historical_source_context(external, monkeypatch, version, state):
     spec = replace(external, render_version=version, runtime="Claude Code")

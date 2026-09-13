@@ -15,7 +15,7 @@ from tests.test_download.test_api_runner import FakeClient
 from tests.test_generation_manifest_identity import external, offline  # noqa: F401
 
 
-@pytest.mark.parametrize("version", [1, 2])
+@pytest.mark.parametrize("version", [1, 2, 3])
 @pytest.mark.parametrize("explicit", [False, True])
 def test_review_and_backfill_reproduce_the_recorded_instruction(external, monkeypatch, version, explicit):
     from data_sheets_schema.review_pack import instruction_text

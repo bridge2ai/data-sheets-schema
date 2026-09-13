@@ -117,6 +117,14 @@ class Registry:
         v = self._setting(project, "raw_dir")
         return Path(v) if isinstance(v, str) and v else None
 
+    def preprocessed_directory(self, project: str, root: Path) -> Path:
+        """Declared source_dir wins; a pipeline root supplies only the fallback.
+
+        Preprocessing, quality checks and concatenation must choose the same
+        files even when the caller relocates its default pipeline directory.
+        """
+        return self.source_dir(project) or (Path(root) / project)
+
     def shared_source_project(self, project: str, preprocessed_root: Path | None = None) -> str | None:
         """Resolve the legacy shared-directory declaration only when its
         source list is a subset of the owner's. A mapping's source_dir is
@@ -138,7 +146,7 @@ class Registry:
             roots = [Path("data/preprocessed/individual")]
             if preprocessed_root is not None:
                 roots.append(preprocessed_root)
-            candidates = [self.source_dir(owner) or root / owner for root in roots]
+            candidates = [self.preprocessed_directory(owner, root) for root in roots]
             if (any(shared.resolve() == path.resolve() for path in candidates)
                     and wanted <= source_pairs(owner)):
                 return owner

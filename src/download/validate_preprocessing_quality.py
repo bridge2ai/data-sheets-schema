@@ -228,7 +228,7 @@ def validate_manifest_project(
 
     owner = registry.shared_source_project(project, preprocessed_root)
     raw_dir = registry.raw_dir(project) or (registry.raw_dir(owner) if owner else None) or (raw_root / (owner or project))
-    preprocessed_dir = registry.source_dir(project) or (preprocessed_root / project)
+    preprocessed_dir = registry.preprocessed_directory(project, preprocessed_root)
     default_minimum = int(manifest.get("default_minimum_characters", 500))
     results = {
         "project": project,

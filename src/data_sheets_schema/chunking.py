@@ -394,11 +394,14 @@ def chunks_input(bundle: Path | None, bundle_md5: str | None,
     if not path.exists():
         return None
     try:
-        m = load_manifest(path)
+        import yaml
+        manifest_bytes = path.read_bytes()
+        m = yaml.safe_load(manifest_bytes)
         if not isinstance(m, dict) or m.get("bundle_md5") != bundle_md5:
             return None
         validate_manifest_mapping(m, bundle.read_bytes(), canonical_name(bundle))
-        return {"path": str(path), "sha256": file_sha256(path),
+        return {"path": str(path), "sha256": hashlib.sha256(manifest_bytes).hexdigest(),
+                "bundle_name": m["bundle"],
                 "rule": m.get("rule"), "chunk_count": m.get("chunk_count")}
     except Exception:                                               # noqa: BLE001
         # A broken manifest must not abort a live provenance record (#715);

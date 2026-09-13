@@ -508,7 +508,7 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
     # selection belongs in the rendered recording command (#1408).
     chunk_choices = (None, Path(chunks)) if chunks else (None,)
     for delta, render_version, selected_chunks, selected_manifest in product(
-            (0, -1, 1, -2, 2), (2, 1), chunk_choices, manifest_choices):
+            (0, -1, 1, -2, 2), (3, 2, 1), chunk_choices, manifest_choices):
         spec = RunSpec.from_render_spec({
             "arm": _ARMS[arm][0], "bundle": str(bundle), "condition": condition,
             "runtime": runtime, "provider": provider,

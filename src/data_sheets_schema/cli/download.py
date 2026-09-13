@@ -140,9 +140,9 @@ def preprocess(project, input_dir, output_dir, manifest):
 @download.command()
 @click.option('--project', callback=project_choice, required=True,
               help='Project to concatenate')
-@click.option('--input-dir', type=click.Path(exists=True),
+@click.option('--input-dir', type=click.Path(file_okay=False),
               default='data/preprocessed/individual',
-              help='Input directory with preprocessed files')
+              help='Fallback root for projects without a declared source_dir')
 @click.option('--output-file', type=click.Path(),
               help='Output file path (default: the selected registry bundle destination)')
 @click.option('--output-dir', type=click.Path(), default=None,
@@ -172,12 +172,8 @@ def concatenate(project, input_dir, output_file, output_dir, manifest):
     # the override used to build its bundle lived only in the command someone
     # happened to type (#302). Declared in the manifest, it rebuilds from the
     # manifest.
-    declared = load_registry(manifest).source_dir(project)
-    if str(input_dir) == 'data/preprocessed/individual' and declared:
-        input_path = declared
-    else:
-        input_path = Path(input_dir) / project
-    if not input_path.exists():
+    input_path = load_registry(manifest).preprocessed_directory(project, Path(input_dir))
+    if not input_path.is_dir():
         click.echo(f"❌ Error: Input directory not found: {input_path}", err=True)
         sys.exit(1)
 

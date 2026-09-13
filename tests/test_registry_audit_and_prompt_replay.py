@@ -38,7 +38,7 @@ def test_non_strict_empty_audit_explains_that_nothing_was_checked(tmp_path):
     assert "no bundle was checked" in result.output
 
 
-@pytest.mark.parametrize("version", [1, 2])
+@pytest.mark.parametrize("version", [1, 2, 3])
 @pytest.mark.parametrize("runtime", ["Claude Code", "Claude API (direct)"])
 @pytest.mark.parametrize("current", ["missing", "malformed", "changed"])
 def test_recorded_instruction_replays_without_live_manifest_validation(external, version, runtime, current):

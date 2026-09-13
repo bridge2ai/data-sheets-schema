@@ -295,7 +295,7 @@ def preprocess_manifest(
         seen_ids = set()
         seen_outputs = set()
         project_stats = {"processed": 0, "errors": 0}
-        destination_dir = registry.source_dir(project) or (output_dir / project)
+        destination_dir = registry.preprocessed_directory(project, output_dir)
         destination_dir.mkdir(parents=True, exist_ok=True)
 
         print(f"\n📁 {project} ({len(entries)} canonical sources)")

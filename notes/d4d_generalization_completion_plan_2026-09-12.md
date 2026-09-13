@@ -178,3 +178,15 @@ CI passed 3,884 tests with four skips. The final generation head still needs
 green CI and independent approval. Evaluation applicability preparation
 continues in its separate worktree without new scoring; profiles and
 installable packaging remain the subsequent stages.
+
+## Generation review round 11 — 2026-09-13
+
+The next independent review found #1431–#1433: pre-provenance chunk selection,
+inconsistent source-directory precedence, and canonical bundle-name recovery.
+All are addressed; see `reviews/pr_1367_round11_2026-09-13.md`. Renderer
+version 3 carries the selected agentic receipt command and an unambiguous
+version stamp, while historical versions 1 and 2 remain replayable. Round-9
+full CI is green. Exact-head CI and independent review still precede merge.
+The evaluation worktree has passing applicability/collection and fake API
+judge acceptance tests; agent instruction/schema alignment is in progress.
+All earlier stage ordering and measurement-preservation requirements remain.

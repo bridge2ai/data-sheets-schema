@@ -1304,7 +1304,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     import hashlib
 
     from data_sheets_schema.chunking import chunk_texts as _texts
-    from data_sheets_schema.chunking import manifest_for
+    from data_sheets_schema.chunking import manifest_for, canonical_name
 
     base = {"expected": expected, "non_checks": list(NON_CHECKS)}
     if not receipt.exists():
@@ -1389,6 +1389,14 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     rule_basis = ("the record's own inputs.chunks.rule" if (record_chunks or {}).get("rule")
                   else "the on-disk manifest's rule (the record carries none)")
     expected_count = (record_chunks or {}).get("chunk_count")
+    # The original basename participates in the manifest digest. A symlink
+    # into the study can have a different basename from that canonical name.
+    recorded_name = (record_chunks or {}).get("bundle_name")
+    if recorded_name is not None and (not isinstance(recorded_name, str)
+                                      or not recorded_name or Path(recorded_name).name != recorded_name):
+        return {**base, "checked": False, "reason": "invalid recorded chunk bundle_name"}
+    reconstruction_name = recorded_name or (
+        canonical_name(bundle) if bundle is not None else Path(bundle_rel_path or "").name)
 
     def _in_memory(source_bytes: bytes, name: str, where: str) -> dict[str, Any] | None:
         """Chunk `source_bytes` under `rule`; None with the refusal set in
@@ -1430,7 +1438,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
         # `where` composes `_in_memory`'s two refusals and is discarded on
         # success, so it carries the advice; the basis below keeps the bare
         # state (#1187 round 6, SF1).
-        built = _in_memory(disk_bytes, bundle.name, f"the bundle on disk is the bytes the record hashed ({disk_because})")  # type: ignore[arg-type]
+        built = _in_memory(disk_bytes, reconstruction_name, f"the bundle on disk is the bytes the record hashed ({disk_because})")  # type: ignore[arg-type]
         if built is None:
             return {**base, "checked": False, "reason": refusal}
         m, raw = built, disk_bytes                                              # type: ignore[assignment]
@@ -1461,8 +1469,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
             return {**base, "checked": False,
                     "reason": f"the version the record hashed was recovered from {entry['commit'][:12]} but is "
                               f"not UTF-8 ({exc}); {context}"}
-        name = Path(bundle_rel_path).name if bundle is None else bundle.name
-        built = _in_memory(raw, name, f"the version the record hashed was recovered from {entry['commit'][:12]}")
+        built = _in_memory(raw, reconstruction_name, f"the version the record hashed was recovered from {entry['commit'][:12]}")
         if built is None:
             return {**base, "checked": False, "reason": f"{refusal}; {context}"}
         m = built
