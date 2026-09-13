@@ -608,7 +608,7 @@ def main(argv: list[str] | None = None) -> int:
                         default=SUBTYPE_CACHE / "form_subtypes.jsonl")
     parser.add_argument("--offline", action="store_true",
                         help="fail instead of making a paid call")
-    parser.add_argument("--profile", default=None,
+    parser.add_argument("--profile", default=None, choices=sorted(__import__("data_sheets_schema.profiles", fromlist=["PROFILES"]).PROFILES),
                         help="the profile the judged records were generated under (bridge2ai | neutral); "
                              "default: the ambient profile (#1541)")
     parser.add_argument("--limit", type=int, default=None,
