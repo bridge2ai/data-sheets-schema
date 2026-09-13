@@ -153,3 +153,25 @@ receipts/report checks, pair/source review, human adjudication and repeats.
 No production generation, rescore, evaluator spawn, download or measurement
 attribution change occurred. There is no new evaluator-quoted definition SHA
 or newly scored record set at this implementation boundary.
+
+## Final resolver integration and review round 8 — 2026-09-13
+
+Agentic round 7 approved d376d1139 and corpus round 17 approved 9bb8bc8cc.
+The latter's #1754 default-manifest correction is now included. It uses the
+registry's discovery rule beneath archived copies; the documented local/global
+manifest option precedence and explicit absolute selections are preserved.
+
+All 38 affected archive, emitted-preflight, recovery and selected-playbook
+checks pass on the combined source. All 60 historical renderer controls still
+match. The preceding 147-test integration (including enabled fresh wheels),
+92 installed-workflow checks and their independently verified preservation
+results remain the broader validation evidence. The implementation and parent
+boundary hashes are refreshed for the exact final integration review and CI.
+No production measurement, instruction text or source bundle changed.
+
+The final merge plan remains one complete integration through #1616, followed
+by verification of the dependent PR/issue closures and cleanup. #1534 is also
+resolved by the already tested prompt pin metadata implementation (#1574/#1575):
+the repository/blob audit route is explicit, and unavailable Git evidence is
+reported. The separate design records #1504 and #1537 and pre-existing judge
+rendering depth #1469 retain their documented dispositions.

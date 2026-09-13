@@ -44,7 +44,7 @@
     "api"
   ],
   "installed_validator_dependency_commit": "1f05d8c63a3ae2d4a7bceb90112aff09435d5de6",
-  "integration_dependency_commit": "9f522f49dcad47e49a6c4694f0e71095ed20dbe6",
+  "integration_dependency_commit": "9bb8bc8cc80f616beb34d91c7147a909e311d187",
   "issues": [
     1556,
     1612,
@@ -62,7 +62,7 @@
   "preserved_condition": "notes/reference_rescore_2026-09-12_cborg_runtime",
   "previous_boundary": {
     "path": "notes/manifest_corpus_root_boundary_2026-09-13.json",
-    "sha256": "468a5bf9f82af43dd09165ffc5851e82222f9d01ed0b803bf41091d6157c211c"
+    "sha256": "7fcf09905834f510e5581e94a766a6e2df31c8a391b811a63adf89650636bcd8"
   },
   "records_generated": [],
   "records_rescored": [],
