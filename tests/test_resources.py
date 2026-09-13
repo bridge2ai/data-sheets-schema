@@ -866,8 +866,12 @@ class TestCodexRoundFive(unittest.TestCase):
         """#1663"""
         import click.testing
         from data_sheets_schema.cli.bundle import bundle
-        repo = self._checkout(Path(self.tmp) / "wt"); os.chdir(repo / "src")
-        r = click.testing.CliRunner().invoke(bundle, ["chunk", "--project", "CHORUS", "--max-lines", "7"])
+        repo = self._checkout(Path(self.tmp) / "wt")
+        manifest = repo / "source_manifest.yaml"
+        manifest.write_text("projects:\n  SYNTHETIC:\n    sources: []\n")
+        os.chdir(repo / "src")
+        r = click.testing.CliRunner().invoke(bundle, ["chunk", "--manifest", str(manifest),
+            "--project", "SYNTHETIC", "--max-lines", "7"])
         self.assertNotEqual(r.exit_code, 0); self.assertIn("repository root", r.output)
 
     def test_agent_lookup_honours_an_authoritative_absence(self):
