@@ -37,7 +37,7 @@ poetry run linkml-validate \
 make validate-d4d FILE=path/to/file_d4d.yaml
 
 # Validate all files for a project
-make validate-d4d-project PROJECT=AI_READI GENERATOR=claudecode
+make validate-d4d-project PROJECT=<PROJECT> GENERATOR=claudecode   # a project the manifest declares
 
 # Validate all D4D files
 make validate-d4d-all

@@ -154,8 +154,10 @@ def load_form_failures(cache_dir: Path = JUDGEMENT_CACHE) -> list[FormFailure]:
             rubrics.add(entry.get("rubric", ""))
             models.add(entry.get("model", ""))
             schemas.add(entry.get("schema", ""))
-            if entry.get("specification"):
-                specifications.add(str(entry["specification"]))
+            # An entry with no attestation is its own population: a failure
+            # judged before the complete specification was recorded is not
+            # the same instrument as one judged under it (#1608).
+            specifications.add(str(entry.get("specification") or ""))
             out.append(FormFailure(
                 project=project, slot=entry["slot"], value=entry["value"],
                 reason=entry.get("reason", ""),
@@ -485,9 +487,14 @@ class FormSubtypeClassifier:
         if failure.schema and failure.schema != self.schema:
             raise ValueError(f"the failure was judged under schema {failure.schema[:12]}…, this classifier "
                              f"is keyed on {self.schema[:12]}…; they are different instruments (#1514)")
-        if failure.specification and self.specification and failure.specification != self.specification:
+        if failure.specification and failure.specification != self.specification:
+            # A failure that carries a complete-specification hash never
+            # takes a label cached under another one — or under none: a
+            # classifier with no attestation is not this instrument (#1562,
+            # #1608). A failure with no attestation is read like one with no
+            # schema: legacy, stamped rather than refused.
             raise ValueError(f"the failure was judged under specification {failure.specification[:12]}…, this "
-                             f"classifier is keyed on {self.specification[:12]}…; they are different instruments (#1562)")
+                             f"classifier is keyed on {self.specification[:12] or '(none)'}; they are different instruments (#1562, #1608)")
         reason_hash = hashlib.sha256(str(failure.reason).encode("utf-8")).hexdigest()
         key = failure.key + (":" + reason_hash if self.specification else "")
         if key in self._memo:

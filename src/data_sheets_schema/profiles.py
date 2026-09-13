@@ -116,10 +116,13 @@ ENV_VAR = "D4D_PROFILE"
 class Selection:
     """A profile and why it was selected — what a record states (#1443)."""
     profile: Profile
-    #: `environment`; `no manifest`; `manifest:<path>@<sha256[:12]>` or
-    #: `default manifest:<path>@<sha256[:12]>`, each with ` (undeclared)`
-    #: when the manifest has no `profile:` key; `<kind>:<path> (missing)`
-    #: when the path is not there. The path is repository-relative under
+    #: `environment`; `no manifest`; `stated by the caller`;
+    #: `manifest:<path>@<sha256[:12]>` or `default manifest:<path>@<sha256[:12]>`,
+    #: each with ` (undeclared)` when the manifest has no `profile:` key;
+    #: `<kind>:<path> (missing)` when the path is not there;
+    #: `rendered instruction`, with ` (this process would select <name>: <basis>)`
+    #: when the recorder's own selection differs, for the profile a launch
+    #: instruction carried (#1581). The path is repository-relative under
     #: the checkout (#1466, #1494).
     basis: str
 
@@ -144,11 +147,21 @@ def declared_profile(manifest: Path | str | None) -> str | None:
         return None
     from data_sheets_schema.schema_cache import load_yaml
     try:
-        data = load_yaml(p) or {}
+        data = load_yaml(p)
     except Exception as exc:                                   # noqa: BLE001 — yaml or OS; the file is named (#1586)
         raise ValueError(f"manifest {p} could not be read: {exc}") from None
-    value = data.get("profile") if isinstance(data, dict) else None
-    return str(value) if value else None
+    if data is None:
+        return None                                            # an empty document declares nothing
+    if not isinstance(data, dict):
+        # The registry refuses this file; the digest must not read it as
+        # an undeclared profile and switch instruments (#1610).
+        raise ValueError(f"manifest {p} is not a mapping")
+    value = data.get("profile")
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"manifest {p} declares profile {value!r}, which is not a profile name")
+    return value.strip()
 
 
 def default_manifest() -> Path | None:
