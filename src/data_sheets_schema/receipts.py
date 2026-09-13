@@ -1304,7 +1304,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     import hashlib
 
     from data_sheets_schema.chunking import chunk_texts as _texts
-    from data_sheets_schema.chunking import manifest_for, canonical_name
+    from data_sheets_schema.chunking import manifest_for, canonical_name, validate_manifest_mapping
 
     base = {"expected": expected, "non_checks": list(NON_CHECKS)}
     if not receipt.exists():
@@ -1371,6 +1371,10 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
                     disk_state = (f"the manifest on disk has {cand.get('chunk_count')} chunks, "
                                   f"not the {record_chunks['chunk_count']} the record cites")
                 else:
+                    # A claimed md5/count alone cannot establish coverage.
+                    # The selected mapping must enumerate the canonical chunks
+                    # of these exact bytes under its declared rule (#1472).
+                    validate_manifest_mapping(cand, disk_bytes, canonical_name(bundle))
                     on_disk = cand
             except (OSError, ValueError, yaml.YAMLError) as exc:
                 disk_state = f"the manifest on disk is unreadable ({exc})"
@@ -1380,9 +1384,8 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     # A refusal names what an operator would do; `disk_state` alone goes
     # into the persisted `bundle_basis` (#1187 round 5, SF1).
     disk_because = (disk_state + (f" — {disk_advice}" if disk_advice else "")) if disk_state else None
-    # `on_disk` already proves the manifest chunked the bytes on disk, so the
-    # bytes decide (round 4 review, SF2): a manifest whose own sha256 line
-    # disagrees with its md5 is not a third state.
+    # `on_disk` is a complete canonical mapping of these bytes, with both
+    # digests checked. Invalid disk mappings require recorded-rule recovery.
     manifest_is_the_records = on_disk is not None and (not recorded or bytes_on_disk_are_the_records)
     bundle_basis: dict[str, Any] = {"source": "bundle on disk", "path": str(bundle)}
     rule = (record_chunks or {}).get("rule") or (on_disk or {}).get("rule")

@@ -22,6 +22,7 @@ corpus. What changes is that nothing a general user runs is gated on it.
 from __future__ import annotations
 
 import hashlib
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -41,6 +42,12 @@ DOCUMENT_BUNDLE_SUFFIX = "_preprocessed.txt"
 
 #: "The caller did not choose": `select_manifest` then decides by rule.
 AUTO = object()
+
+
+def manifest_declared_unused(value: str | None) -> bool:
+    """Recognize the complete header sentinel, never words inside a path."""
+    value = re.sub(r"^\s*#?\s*Source manifest:\s*", "", value or "", flags=re.I)
+    return re.fullmatch(r"not used(?:\s*\([^\n]*\))?\s*", value.strip(), re.I) is not None
 
 
 def _concat_dir() -> Path:
