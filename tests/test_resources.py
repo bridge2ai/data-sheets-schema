@@ -426,3 +426,110 @@ class TestRoundThree(unittest.TestCase):
         (other / "pyproject.toml").write_text('[tool.poetry]\nname = "someone-elses"\n')
         self.assertFalse(_is_our_checkout(other))
         self.assertTrue(_is_our_checkout(ROOT))
+
+
+class TestClaudeRoundThree(unittest.TestCase):
+    """The Claude round-3 findings on #1455 (#1588–#1593)."""
+
+    def setUp(self):
+        self._cwd = os.getcwd()
+        self.tmp = tempfile.mkdtemp(prefix="d4d-resources-")
+        os.chdir(self.tmp)
+
+    def tearDown(self):
+        os.chdir(self._cwd)
+
+    def _stage_checkout(self, name: str, *, git: bool) -> Path:
+        """A second checkout of this project: our `pyproject.toml`, the source
+        layout, one playbook — and its own repository when `git`."""
+        import subprocess
+        repo = Path(self.tmp) / name
+        (repo / "src" / "data_sheets_schema").mkdir(parents=True)
+        (repo / ".claude" / "commands").mkdir(parents=True)
+        (repo / "pyproject.toml").write_text('[tool.poetry]\nname = "data-sheets-schema"\n', encoding="utf-8")
+        (repo / ".claude" / "commands" / "d4d-uniform-rules.md").write_text("# the worktree's rules\n", encoding="utf-8")
+        if git:
+            run = lambda *a: subprocess.run(["git", "-c", "user.email=t@example.org", "-c", "user.name=t", *a],
+                                            cwd=repo, check=True, capture_output=True)
+            run("init", "-q"); run("add", "."); run("commit", "-q", "-m", "x")
+        return repo
+
+    def test_a_second_checkout_as_the_working_directory_is_the_resource_root(self):
+        """#1588: code from one checkout, cwd another — the record names the
+        cwd's commit, keeps its files repository-relative, and the root guard
+        refuses a subdirectory of it."""
+        import hashlib
+        import subprocess
+        import click
+        from data_sheets_schema import provenance
+        from data_sheets_schema.cli._repo_utils import get_repo_root
+        from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+        from data_sheets_schema.resources import CHECKOUT_ROOT, cwd_checkout, repo_relative, resource_root
+        repo = self._stage_checkout("wt", git=True)
+        os.chdir(repo)
+        self.assertEqual(cwd_checkout(), repo.resolve())
+        self.assertEqual(resource_root(), (repo.resolve(), "checkout"))
+        self.assertEqual(get_repo_root(), repo.resolve())
+        facts = provenance.repo_facts()
+        head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repo, capture_output=True, text=True).stdout.strip()
+        self.assertEqual((facts["commit"], facts["dirty"], Path(facts["resource_root"])), (head, False, repo.resolve()))
+        self.assertNotEqual(facts["commit"],
+                            subprocess.run(["git", "rev-parse", "HEAD"], cwd=CHECKOUT_ROOT, capture_output=True, text=True).stdout.strip())
+        # The playbook is the cwd's, hashed as the cwd's bytes, recorded relative — the
+        # commit the record names reproduces the hash it records.
+        rel = ".claude/commands/d4d-uniform-rules.md"
+        self.assertEqual(repo_relative(rel, cwd=False), rel)
+        self.assertEqual(repo_relative(str(repo / rel), cwd=False), rel)
+        entry = next(e for e in provenance.playbook_facts()["files"] if e["path"].endswith("d4d-uniform-rules.md"))
+        self.assertEqual(entry["path"], rel)
+        self.assertEqual(entry["sha256"], hashlib.sha256(b"# the worktree's rules\n").hexdigest())
+        blob = subprocess.run(["git", "show", f"{facts['commit']}:{rel}"], cwd=repo, capture_output=True, text=True).stdout
+        self.assertEqual(hashlib.sha256(blob.encode()).hexdigest(), entry["sha256"])
+        _require_repo_root_cwd("t")                                   # the root of a second checkout
+        (repo / "sub").mkdir(); os.chdir(repo / "sub")
+        with self.assertRaises(click.ClickException):
+            _require_repo_root_cwd("t")                               # inside it (#672, generalised)
+
+    def test_a_checkout_git_cannot_answer_for_records_unknown_not_clean(self):
+        """#1591"""
+        from data_sheets_schema import provenance
+        repo = self._stage_checkout("exported", git=False)
+        os.chdir(repo)
+        facts = provenance.repo_facts()
+        self.assertEqual((facts["commit"], facts["dirty"], facts["dirty_file_count"], facts["resource_kind"]),
+                         (None, None, None, "checkout"))
+        self.assertIn("unknown, not clean", facts["note"])
+
+    def test_a_validator_crash_on_the_record_is_a_finding_about_the_record(self):
+        """#1589: a YAML the loader rejects names the file in the traceback —
+        the validator ran, on that record; a crash that never opened it did not."""
+        from data_sheets_schema.api_runner import FULL_SCHEMA_PATH, _validator_did_not_run, _validator_lines
+        bad = Path(self.tmp) / "bad.yaml"
+        bad.write_text("id: x\ntitle: [unclosed\n", encoding="utf-8")
+        parser = ("Traceback (most recent call last):\n  File \"x.py\", line 1, in <module>\n"
+                  "yaml.parser.ParserError: while parsing a flow sequence\n"
+                  f"  in \"{bad}\", line 2, column 8\nexpected ',' or ']', but got '<stream end>'\n")
+        self.assertFalse(_validator_did_not_run(parser, bad))
+        self.assertTrue(_validator_did_not_run(parser))                # no record named: as before
+        self.assertTrue(_validator_did_not_run("Traceback (most recent call last):\nModuleNotFoundError: No module named 'linkml'\n", bad))
+        self.assertTrue(_validator_did_not_run(f"Traceback (most recent call last):\nFileNotFoundError: [Errno 2] No such file or directory: '{bad}'\n", bad))
+        os.chdir(ROOT)
+        findings, failure = _validator_lines(bad, FULL_SCHEMA_PATH, "Dataset")
+        self.assertIsNone(failure, failure)
+        self.assertTrue(findings and any("ParserError" in l or "while parsing" in l for l in findings), findings)
+
+    def test_rocrate_normalize_and_map_keep_their_help(self):
+        """#1590"""
+        from click.testing import CliRunner
+        from data_sheets_schema.cli.rocrate import rocrate
+        for name, text in (("normalize", "Normalize upstream RO-Crate packages"), ("map", "Map a crate to D4D")):
+            r = CliRunner().invoke(rocrate, [name, "--help"])
+            self.assertEqual(r.exit_code, 0, r.output)
+            self.assertIn(text, r.output)
+
+    @unittest.skipUnless(__import__("shutil").which("poetry"), "poetry is not installed")
+    def test_the_lock_and_the_metadata_agree(self):
+        """#1593: no extra names a dependency the main table does not declare."""
+        import subprocess
+        r = subprocess.run(["poetry", "check", "--lock"], cwd=ROOT, capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)

@@ -77,6 +77,43 @@ def is_checkout() -> bool:
     return CHECKOUT_ROOT is not None
 
 
+def checkout_at(directory: str | Path) -> Path | None:
+    """The checkout of this project `directory` is in: itself when it is
+    one, else its nearest ancestor that is — a worktree or a second clone as
+    much as the checkout the code is imported from. None outside every
+    checkout."""
+    try:
+        p = Path(directory).resolve()
+    except OSError:
+        return None
+    for candidate in (p, *p.parents):
+        if _is_our_checkout(candidate):
+            return candidate
+    return None
+
+
+def cwd_checkout() -> Path | None:
+    """The working directory when it is the *root* of a checkout of this
+    project (#1588): its files are what `resource_path` reads first, so it —
+    not the checkout the code happens to be imported from — is where the
+    resources come from. A subdirectory of a checkout is not one (#672)."""
+    cwd = Path.cwd()
+    return cwd.resolve() if _is_our_checkout(cwd) else None
+
+
+def resource_root() -> tuple[Path, str]:
+    """Where this process's resources come from, decided once for git facts
+    and path identity alike (#1588): `(root, "checkout")` for the working
+    directory when it is a checkout of this project, else for the checkout
+    the package is imported from; `(root, "install")` for a wheel."""
+    here = cwd_checkout()
+    if here is not None:
+        return here, "checkout"
+    if CHECKOUT_ROOT is not None:
+        return CHECKOUT_ROOT, "checkout"
+    return INSTALL_ROOT, "install"
+
+
 def roots() -> list[Path]:
     """Where a repository-relative resource may live, in order."""
     out = []
@@ -177,19 +214,22 @@ def repo_relative(path: str | Path, *, cwd: bool = True) -> str:
     pin could match (#673).
     """
     p = Path(path)
+    here = cwd_checkout()
     if not p.is_absolute() and is_resource(p):
-        in_checkout = (CHECKOUT_ROOT is not None
-                       and Path.cwd().resolve() == CHECKOUT_ROOT.resolve())
-        # The shipped file's identity is its spelling; a staged tree's own
-        # file (it exists here, and here is not the checkout) is resolved —
-        # for the registry's key and the record alike (#1536, #1573).
-        if in_checkout or not p.exists():
+        # The shipped file's identity is its spelling — in any checkout of
+        # this project, a worktree or a second clone included (#1588); a
+        # staged tree's own file (it exists here, and here is no checkout)
+        # is resolved — for the registry's key and the record alike (#1536,
+        # #1573).
+        if here is not None or not p.exists():
             return p.as_posix()
     try:
         resolved = p.resolve()
     except OSError:
         return p.as_posix()
     anchors: list[tuple[Path, tuple[str, ...], bool]] = []
+    if here is not None:
+        anchors.append((here, (), False))
     if CHECKOUT_ROOT is not None:
         anchors.append((CHECKOUT_ROOT, (), False))
     anchors.append((PACKAGE_ROOT, _PACKAGE_PREFIX, False))

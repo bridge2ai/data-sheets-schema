@@ -1540,7 +1540,7 @@ package is imported from one (`pyproject.toml` two levels up); else the
 installed copy — the wheel places the condition prompts and their pin
 registry, the playbooks and agent definitions the record hashes, and the
 rubric sources at the same relative paths under the installation root, and
-the schema files as package data — so `src`, `data` and `.claude` are
+the schema files as package data — so `src`, `data`, `.claude` and `.github` are
 top-level entries of `site-packages` and `import src` resolves as a
 namespace package there, a stated cost of keeping one spelling in both
 places (#1504). Only `src/`, `.claude/`, `.github/`, `data/rubric/` and
@@ -1593,7 +1593,15 @@ a file it did not read, #1529; on an install the digest ledger under
 the record's `repo` block names `resource_root` and `resource_kind` —
 the checkout git runs at, or the install root and package version — so
 a record made from a user's own repository no longer attests that
-repository's commit beside the checkout's hashes, #1550; `agent_pin`
+repository's commit beside the checkout's hashes, #1550; that root is
+decided once (`resources.resource_root`): the working directory when it
+is a checkout of this project — a worktree or a second clone, whose files
+the readers take first — else the checkout the code is imported from, so
+a run from a worktree with the primary's code names the worktree's
+commit and keeps its files repository-relative, and the root guard
+refuses a subdirectory of any checkout, #1588; where git cannot answer
+there the commit and the dirty state are recorded unknown, not clean,
+#1591; `agent_pin`
 reads the shipped definitions, while `chunking.anchored`, the review
 pack's bundle path, `verifiable`'s record lookup and `git show` at the
 repository root still anchor on the checkout and are checkout-only until

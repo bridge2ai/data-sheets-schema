@@ -157,16 +157,18 @@ def _require_repo_root_cwd(command: str) -> None:
     # shell that wandered into a subdirectory of the checkout: that record
     # would land under <subdir>/data/ where no check reads it. Refuse
     # exactly that case.
-    from data_sheets_schema.resources import CHECKOUT_ROOT
+    # Any checkout of this project, not only the one the code is imported
+    # from (#1588): a worktree's subdirectory is as wrong a place as the
+    # primary's.
+    from data_sheets_schema.resources import checkout_at
     cwd = Path.cwd().resolve()
-    if CHECKOUT_ROOT is not None:
-        root = CHECKOUT_ROOT.resolve()
-        if cwd != root and root in cwd.parents:
-            raise click.ClickException(
-                f"{command} must run from the data-sheets-schema repository root, "
-                f"not a directory inside it: output paths resolve relative to the "
-                f"working directory, and a record written from {cwd} would land "
-                "where no check reads it. cd to the repo root and re-run.")
+    root = checkout_at(cwd)
+    if root is not None and cwd != root:
+        raise click.ClickException(
+            f"{command} must run from the data-sheets-schema repository root ({root}), "
+            f"not a directory inside it: output paths resolve relative to the "
+            f"working directory, and a record written from {cwd} would land "
+            "where no check reads it. cd to the repo root and re-run.")
 
 
 def _parse_phases(specs) -> list[dict]:

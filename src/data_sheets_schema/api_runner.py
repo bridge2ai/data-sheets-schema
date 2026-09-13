@@ -2602,16 +2602,31 @@ def validation_block(spec: RunSpec, problems: list[dict[str, str]],
     return block
 
 
-def _validator_did_not_run(text: str) -> bool:
+#: What a crash says when it never opened the data file (#1589).
+_NOT_OPENED = ("No such file or directory", "Permission denied", "Is a directory")
+
+
+def _validator_did_not_run(text: str, data_path: str | Path | None = None) -> bool:
     """A traceback, a missing module or a usage error is the validator failing
     to start, not a finding about the record (#1506); handed to a repair
     round as findings it would be repaired against. Decided on whole lines
     (#1525): a finding line — `[ERROR] …` — proves the validator ran, and a
     value inside a finding (`'does not exist.' is not of type 'object'`)
-    never counts as a marker."""
+    never counts as a marker.
+
+    A crash that names the data file — a YAML the loader rejects, a value a
+    plugin chokes on — is the validator failing *on the record* (#1589):
+    that is a finding about the record, and what a repair round is for. A
+    crash before the data file is opened, or one saying it could not be
+    opened, is the validator not running."""
     lines = [l.strip() for l in text.splitlines()]
     if any(l.startswith(("Traceback (most recent call last)", "ModuleNotFoundError:", "ImportError:"))
            for l in lines):
+        if data_path is not None and "Traceback" in text:
+            crash = text[text.index("Traceback"):]
+            names = {str(data_path), Path(data_path).name}
+            if any(n in crash for n in names) and not any(m in crash for m in _NOT_OPENED):
+                return False                 # it ran, and the record broke it
         return True                          # a crash, whatever it printed first (#1572)
     if any(l.startswith(("[ERROR]", "[WARN", "[WARNING]")) for l in lines):
         return False
@@ -2639,7 +2654,7 @@ def _validator_lines(path: Path, schema: str,
     if r.returncode == 0:
         return [], None
     text = r.stdout + r.stderr
-    if _validator_did_not_run(text):
+    if _validator_did_not_run(text, path):
         return None, f"linkml-validate did not run: {text.strip()[-300:]}"
     lines = [l for l in text.strip().splitlines()
              if l.strip()]

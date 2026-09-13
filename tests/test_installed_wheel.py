@@ -40,10 +40,10 @@ class TestTheInstalledWheel(unittest.TestCase):
         cls.venv = cls.tmp / "venv"
         subprocess.run([sys.executable, "-m", "venv", str(cls.venv)], check=True)
         cls.python = cls.venv / ("Scripts" if os.name == "nt" else "bin") / "python"
-        # pytest only so the offline fake client of the runner tests can be
-        # imported by the child; the wheel's own dependencies come from its
-        # metadata — which is what this canary checks.
-        r = subprocess.run([str(cls.python), "-m", "pip", "install", "--quiet", str(cls.wheel), "pytest"],
+        # The wheel alone: its dependencies come from its metadata — which is
+        # what this canary checks — and the offline fake client it imports
+        # from the runner tests needs nothing beyond them (#1592).
+        r = subprocess.run([str(cls.python), "-m", "pip", "install", "--quiet", str(cls.wheel)],
                            capture_output=True, text=True)
         if r.returncode != 0:
             # An opted-in canary fails on an install failure; it does not skip (#1489).
@@ -164,7 +164,7 @@ class TestTheInstalledWheel(unittest.TestCase):
             v = rec.get("validation") or {{}}
             assert v.get("passed") is True and not v.get("problems") and not v.get("failure"), v
             assert (rec.get("pair_consistency") or {{}}).get("ran") is True, rec.get("pair_consistency")
-            assert (rec.get("form") or {{}}).get("recorded_by") and (rec.get("grounding") or {{}}).get("checked") is True, (rec.get("form"), rec.get("grounding"))
+            assert (rec.get("form") or {{}}).get("checked") is True and (rec.get("grounding") or {{}}).get("checked") is True, (rec.get("form"), rec.get("grounding"))   # the runner computes them inline
             assert (rec.get("core_derivation") or {{}}).get("derived") is True, rec.get("core_derivation")
             notes = rec.get("notes") or []
             assert any("Model settings read from .github/workflows/d4d_assistant_deterministic.config" in n for n in notes), notes   # the shipped config was read (#1529)

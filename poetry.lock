@@ -8124,10 +8124,7 @@ markers = {dev = "python_version == \"3.9\""}
 docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (<7.2.5)", "sphinx (>=3.5)", "sphinx-lint"]
 testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-black (>=0.3.7) ; platform_python_implementation != \"PyPy\"", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-ignore-flaky", "pytest-mypy (>=0.9.1) ; platform_python_implementation != \"PyPy\"", "pytest-ruff"]
 
-[extras]
-docs = []
-
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9"
-content-hash = "c2750f5b33e3215a130e2a42a6dadf311e24b25a541c67d5641c2cd31a3148cc"
+content-hash = "5542e3128a4cb1707e59f3f6348ede37edd6a6a44f6f3504496772bfddc85e34"

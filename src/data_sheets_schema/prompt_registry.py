@@ -301,11 +301,11 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
     """
     if not reason or not reason.strip():
         raise ValueError("a pin needs a reason — see the docstring")
-    from data_sheets_schema.resources import CHECKOUT_ROOT, resource_path, roots
+    from data_sheets_schema.resources import cwd_checkout, resource_path, roots
     p = resource_path(path)
     target = resource_path(registry)
     shipped = {(root / REGISTRY).resolve() for root in roots()}
-    at_checkout_root = CHECKOUT_ROOT is not None and Path.cwd().resolve() == CHECKOUT_ROOT.resolve()
+    at_checkout_root = cwd_checkout() is not None                    # any checkout of this project (#1588)
     implicit = not Path(registry).is_absolute()
     if implicit and (target != Path(registry) or (target.resolve() in shipped and not at_checkout_root)):
         # Resolution fell through to the checkout's or the installed
