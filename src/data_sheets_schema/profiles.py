@@ -38,7 +38,7 @@ from typing import Any
 from data_sheets_schema.registry import DEFAULT_MANIFEST
 
 #: The pinned registry vocabularies the study's digest renders (#538).
-STUDY_VOCABULARY_PIN = Path(__file__).with_name("b2ai_registry_vocabularies.yaml")
+STUDY_VOCABULARY_PIN = Path("src/data_sheets_schema/b2ai_registry_vocabularies.yaml")   # a resource, resolved when read (#1680)
 
 #: The source checkout this module is imported from, or None for an install:
 #: `pyproject.toml` two levels up (`<root>/src/data_sheets_schema/profiles.py`).
@@ -77,13 +77,22 @@ class Profile:
 
     @property
     def pin_path(self) -> Path | None:
-        """Where this profile's vocabulary is read from *now*."""
+        """The vocabulary file this profile reads: the digest module's pin
+        when the profile tracks it, else its own — resolved through the
+        resource resolver when spelled relative, so it is the working
+        checkout's copy from a checkout and package data from an install,
+        never the importing code's (#1680)."""
         if self.vocabulary_pin is None:
             return None
         if self.tracks_digest_pin:
             from data_sheets_schema import schema_digest
-            return Path(schema_digest.VOCABULARY_PIN)
-        return self.vocabulary_pin
+            pin = Path(schema_digest.VOCABULARY_PIN)
+        else:
+            pin = Path(self.vocabulary_pin)
+        if pin.is_absolute():
+            return pin
+        from data_sheets_schema.resources import resource_path
+        return resource_path(pin)
 
     @property
     def has_vocabulary(self) -> bool:

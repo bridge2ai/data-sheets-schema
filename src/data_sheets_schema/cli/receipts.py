@@ -46,6 +46,8 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest):
     the run's procedure was to write one, which the provenance record says
     (`inputs.receipt_expected`).
     """
+    from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+    _require_repo_root_cwd("d4d receipts check")          # a corpus write lands under the cwd (#1685)
     from data_sheets_schema.cli.method import resolve_method
     if not project.strip() or "/" in project or "\\" in project or project in {".", ".."}:
         raise click.BadParameter("must be a nonempty dataset basename", param_hint="--project")

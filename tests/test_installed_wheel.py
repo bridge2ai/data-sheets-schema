@@ -189,6 +189,8 @@ class TestTheInstalledWheel(unittest.TestCase):
             assert v.get("passed") is True and not v.get("problems") and not v.get("failure"), v
             assert (rec.get("pair_consistency") or {{}}).get("ran") is True, rec.get("pair_consistency")
             assert (rec.get("form") or {{}}).get("checked") is True and (rec.get("grounding") or {{}}).get("checked") is True, (rec.get("form"), rec.get("grounding"))   # the runner computes them inline
+            repo = rec.get("repo") or {{}}
+            assert repo.get("resource_kind") == "install" and repo.get("dirty") is False and repo.get("package_version"), repo   # measured against the RECORD (#1683)
             assert (rec.get("core_derivation") or {{}}).get("derived") is True, rec.get("core_derivation")
             notes = rec.get("notes") or []
             assert any("Model settings read from .github/workflows/d4d_assistant_deterministic.config" in n for n in notes), notes   # the shipped config was read (#1529)
