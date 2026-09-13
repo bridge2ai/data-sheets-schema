@@ -190,3 +190,22 @@ shebang correction. All 101 corpus/selected-command/recording integration
 checks pass. All 60 historical renderer controls retain their hashes.
 The next independent review and exact-head CI remain merge gates.
 No production record, rating, source bundle or historical attribution changes.
+
+## Review round 9 — 2026-09-13
+
+#1689 binds provenance rechecks to the discovered record's corpus and requires
+the replacement hashes to equal the prior pins under every recorded algorithm.
+Unavailable prior pins hold the bulk update. Equivalent problem-path spellings
+are compared only after their artifact hashes reproduce. #1690 preserves any
+existing validation verdict during default runs validate, including a relocated
+record whose old absolute paths are unavailable; --recheck remains explicit.
+
+All six original regressions fail before the fixes. The expanded lane passes
+63 validation, guarded-recheck and preservation checks, including unavailable
+pins and equivalent relative/absolute problem paths. Older gate fixtures now
+compute actual artifact hashes instead of returning placeholder values. All
+223 broader corpus/run checks pass and all 60 renderer controls match. #1688
+keeps the implicit chunk-write guard fixture in its own synthetic manifest.
+The branch includes installed dependency a18659192 and packaging 2a840076a.
+No production artifact, score or historical attribution changes; the next
+independent review and exact-head CI remain required.

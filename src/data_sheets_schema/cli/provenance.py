@@ -738,11 +738,11 @@ def recheck_validation(method, label, project, every, execute):
                 continue
             considered.add(run.method)
             for proj in run.projects:
-                path = record_path_for(proj, run.method, run.label)
+                path = record_path_for(proj, run.method, run.label, run.path.parent.parent)
                 if not path.exists() or str(path) in seen:
                     continue
                 seen.add(str(path))
-                status = _recheck_one(run.method, run.label, proj, execute, gated=True)
+                status = _recheck_one(run.method, run.label, proj, execute, gated=True, record_path=path)
                 counts[status] = counts.get(status, 0) + 1
         if wanted is not None and not considered:
             raise click.ClickException(f"--method {method!r} matched no run directory")
@@ -776,31 +776,34 @@ def _schema_pin_moved(block: dict) -> bool:
     return any(pinned.get(k) and pinned[k] != v for k, v in live.items())
 
 
-def _problem_shape(block: dict) -> list:
+def _problem_shape(block: dict, artifact_aliases: dict | None = None) -> list:
     """What a validation problem names, message wording aside: its artifact,
     its class and the JSON-pointer paths in its message (#1190 review, M3)."""
     import re as _re
-    return sorted((str(p.get("artifact")), str(p.get("class")),
+    return sorted((str((artifact_aliases or {}).get(str(p.get("artifact")), p.get("artifact"))), str(p.get("class")),
                    tuple(sorted(set(_re.findall(r"\bin (/[^\s|]*)", str(p.get("error") or ""))))))
                   for p in (block.get("problems") or []))
 
 
-def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bool) -> str:
+def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bool,
+                 record_path: Path | None = None) -> str:
     """One record; returns what happened. Under `gated` the write needs the
     verdict and the artifacts unchanged and the field absent."""
     import yaml as _yaml
 
-    from data_sheets_schema.api_runner import RunSpec, validate_outputs, validation_block
+    from data_sheets_schema.api_runner import ValidationInputs, validate_outputs, validation_block
     from data_sheets_schema.provenance import record_path_for
-    path = record_path_for(project, method, label)
+    path = record_path if record_path is not None else record_path_for(project, method, label)
     if not path.exists():
         raise click.ClickException(f"no record at {path}")
-    from pathlib import Path as _P
     # The record lives under `{method}_core`; the artifacts under `{method}`
     # and `{method}_core`. A `_core` suffix names the record's directory,
     # not the method (#1032).
     base = method[:-5] if method.endswith("_core") else method
-    spec = RunSpec(project=project, arm="", method=base, bundle=_P(""), label=label)
+    corpus_dir = path.parent.parent.parent
+    spec = ValidationInputs(
+        full_path=corpus_dir / base / label / f"{project}_d4d.yaml",
+        core_path=path.parent / f"{project}_d4d_core.yaml")
     data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     prior = data.get("validation") or {}
     tag = f"{project} {method} {label}"
@@ -851,10 +854,25 @@ def _recheck_one(method: str, label: str, project: str, execute: bool, gated: bo
         # An artifact still on disk is verified against its own recorded
         # hash, as `provenance.verify_entry` does.
         from data_sheets_schema.provenance import verify_entry
-        drifted = [k for k, v in (prior.get("artifacts") or {}).items()
-                   if isinstance(v, dict) and verify_entry(v, record=path) is False]
-        moved = ("verdict" if not same_verdict else "artifacts" if drifted
-                 else "problems" if _problem_shape(prior) != _problem_shape(block) else None)
+        previous = prior.get("artifacts") or {}
+        replacement = block.get("artifacts") or {}
+        same_artifacts = (isinstance(previous, dict) and isinstance(replacement, dict)
+            and bool(previous) and previous.keys() == replacement.keys()
+            and all(isinstance(entry, dict) and isinstance(replacement[name], dict)
+                    and verify_entry(entry, record=path) is True
+                    and all(replacement[name].get(algorithm) == digest
+                            for algorithm, digest in entry.items()
+                            if algorithm in ("sha256", "md5") and digest)
+                    for name, entry in previous.items()))
+        # Equivalent recorded path spellings may become absolute when a
+        # recheck runs from a nested directory. Compare problem locations by
+        # their artifact only after its recorded hashes have reproduced.
+        aliases = ({str(entry.get("path")): replacement[name].get("path")
+                    for name, entry in previous.items()
+                    if entry.get("path") and replacement[name].get("path")}
+                   if same_artifacts else {})
+        moved = ("verdict" if not same_verdict else "artifacts" if not same_artifacts
+                 else "problems" if _problem_shape(prior, aliases) != _problem_shape(block) else None)
         if moved:
             click.echo(f"   held: the {moved} would move; rerun by label to write it deliberately")
             return "held"
