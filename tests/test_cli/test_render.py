@@ -29,12 +29,11 @@ class TestRenderCLI(unittest.TestCase):
         self.runner = CliRunner()
 
         # The render CLI validates before writing, and validate_d4d_yaml unwraps
-        # the DatasetCollection format — it extracts `resources` and validates
-        # each as a `Dataset`. So `id` belongs on the resource, not at the top
-        # level; without it the fixture fails validation instead of exercising
-        # the output-path and CSS behaviour these tests are about.
+        # the DatasetCollection class envelope and validates the whole
+        # collection. Both the collection and each resource carry identities.
         sample_data = {
             "DatasetCollection": {
+                "id": "https://example.org/datasets/collection",
                 "resources": [
                     {
                         "id": "https://example.org/datasets/sample",
@@ -43,9 +42,7 @@ class TestRenderCLI(unittest.TestCase):
                         "description": "A compact test datasheet."
                     }
                 ]
-            },
-            "license": "CC-BY-4.0",
-            "version": "1.0"
+            }
         }
         self.input_file.write_text(yaml.safe_dump(sample_data), encoding="utf-8")
         self.linkml_output_file = self.test_path / "rendered" / "sample_linkml.html"

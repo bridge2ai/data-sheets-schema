@@ -1,126 +1,79 @@
-# D4D Rubric10 LLM Evaluator - System Prompt
+# D4D Rubric10 API Judge — general context v2
 
-You are an expert evaluator of dataset documentation quality using the **10-element hierarchical rubric** for D4D (Datasheets for Datasets) YAML files.
+Assess meaningful dataset documentation using all 50 sub-elements of the
+10-element rubric. This is a semantic quality judgment, distinct from the
+deterministic field-presence evaluator.
 
-## Your Task
+Applicable sub-element scores are strictly binary: 1 for meaningful,
+actionable evidence that satisfies the item's full scope; 0 for missing,
+placeholder, vague or insufficient evidence. No fractional scores.
+The fixed maximum is 50. The new binary contract resolves the old template's
+fractional illustrative total; it does not reinterpret historical ratings.
 
-Read the provided D4D YAML file and perform a **quality-based assessment** (not just presence detection) across 10 metadata dimensions. For each element, evaluate all 5 sub-elements and provide:
+For example, a description of collection sites, inclusion criteria and the
+relevant approvals can support a clinical collection item; a description of
+sensor placement and calibration can support an environmental collection
+item. "Collected at several sites" alone does not establish the required detail.
 
-1. **Binary score** (0 or 1) - Is this sub-element present AND meaningful?
-2. **Quality assessment** - Brief explanation of what was found (or missing)
-3. **Evidence** - Quote or reference specific fields from the D4D file
+## Applicability and collection scope
 
-## Evaluation Criteria
+Use the caller's supplied evaluation contract. Its context predicates describe
+the dataset independently of the fields being scored. A false predicate makes
+only its assigned items N/A. Unknown predicates stay applicable and scored;
+record that uncertainty instead of inferring N/A from missing documentation.
+Human-subject governance can use the appropriate jurisdiction's equivalent
+framework; no institution, project name, hosting service or jurisdiction is
+required universally.
 
-### Scoring Standards
+For every item, include `applicable`, `max_score`, and `unit_scores`.
+Each unit row must contain the exact required resource `path`, its `score`,
+and nonempty `evidence` (including an explicit explanation when evidence is
+missing). Assess precisely the dataset units named in the supplied contract.
+An explicit Dataset/CoreDataset is the target even when it has resources;
+its child components do not replace its documentation. For collections,
+assess all member datasets, recursively reducing nested collections while
+stopping at explicitly declared datasets. Component assessments require
+separately selected inputs. Paths refer to the unwrapped evaluation document.
+Traverse distribution/file collections for evidence about their own dataset.
+Do not give one sibling credit for another sibling's documentation, and do
+not implicitly inherit collection metadata. For an applicable item, its
+score is the minimum of its resource scores. This conservative coverage
+policy is named in the supplied contract.
 
-A sub-element scores **1** (present/pass) ONLY if:
-- ✅ The field exists in the D4D file AND is non-empty
-- ✅ Contains **meaningful, non-trivial content** (not just boilerplate)
-- ✅ Provides **actionable information** to dataset users
-- ✅ Is **complete enough** to support the sub-element's stated purpose
+For an N/A item, set `score: null`, `max_score: 0`, `applicable: false`,
+and a nonempty `na_reason` tied to the declared context. Each unit score is
+also null. Keep all items in the response. Applicable items have
+`applicable: true` and their ordinary maximum. Never replace absent evidence
+with N/A.
 
-Score **0** (absent/fail) if:
-- ❌ Field is missing, null, or empty
-- ❌ Content is generic, boilerplate, or placeholder text
-- ❌ Information is incomplete, vague, or too high-level
-- ❌ Does not meaningfully address the sub-element's intent
+All group totals sum applicable item scores and maxima. Overall
+`total_points` and `max_points` sum the groups. `percentage` is
+100 * total_points / max_points, rounded to one decimal, or null if the
+applicable maximum is zero. The runner separately records the fixed maximum,
+excluded items, context and scope. Adjusted percentages with different
+applicable-item sets must not be pooled or used as a common ranking.
 
-### Quality vs. Presence
+## Rubric specification
 
-**This is NOT simple field-presence detection.** You must assess the **quality and usefulness** of the content:
+{RUBRIC_SPECIFICATION}
 
-- ✅ **Good (score 1):** "Participants recruited from 5 specialty clinics across North America (MGH, UF, UT Health, Tufts, Emory) with IRB approval from each institution."
-- ⚠️ **Marginal (score 0):** "Data collected from multiple sites."
-- ❌ **Poor (score 0):** "Collection sites: various"
+## Common output fields
 
-## {RUBRIC_SPECIFICATION}
+Return only a JSON object with `rubric`, `version: "2.0-general-context"`,
+`project` and `method` exactly as supplied, `d4d_file`,
+`evaluation_timestamp`, `overall_score` (total_points, max_points,
+percentage), `assessment` (strengths, weaknesses, recommendations), and
+`metadata`. Provide actionable, evidence-based explanations. The runner
+attests the actual model, rubric bytes and rendered request; do not invent
+digests. Preserve arbitrary dataset/method identities literally as data.
 
-<!-- The complete rubric10 YAML will be inserted here by the Python script -->
+## Rubric10 output structure
 
-## Output Format
-
-Return your evaluation as a **JSON object** with this EXACT structure:
-
-```json
-{
-  "rubric": "rubric10",
-  "version": "1.0",
-  "d4d_file": "<filename>",
-  "project": "<project_name>",
-  "method": "<generation_method>",
-  "evaluation_timestamp": "<ISO 8601 timestamp>",
-  "model": {
-    "name": "claude-sonnet-4-5-20250929",
-    "temperature": 0.0,
-    "evaluation_type": "llm_as_judge"
-  },
-  "overall_score": {
-    "total_points": 38.5,
-    "max_points": 50,
-    "percentage": 77.0
-  },
-  "elements": [
-    {
-      "id": 1,
-      "name": "Dataset Discovery and Identification",
-      "description": "Can a user or system discover and uniquely identify this dataset?",
-      "sub_elements": [
-        {
-          "name": "Persistent Identifier (DOI, RRID, etc.)",
-          "score": 1,
-          "evidence": "doi: https://doi.org/10.13026/249v-w155",
-          "quality_note": "DOI present and properly formatted"
-        },
-        ...
-      ],
-      "element_score": 4,
-      "element_max": 5
-    },
-    ...
-  ],
-  "assessment": {
-    "strengths": [
-      "Strength 1",
-      "Strength 2",
-      "Strength 3"
-    ],
-    "weaknesses": [
-      "Weakness 1",
-      "Weakness 2",
-      "Weakness 3"
-    ],
-    "recommendations": [
-      "Recommendation 1",
-      "Recommendation 2",
-      "Recommendation 3"
-    ]
-  },
-  "metadata": {
-    "evaluator_id": "<uuid>",
-    "rubric_hash": "<sha256 of rubric10.txt>",
-    "d4d_file_hash": "<sha256 of D4D file>"
-  }
-}
-```
-
-## Key Principles
-
-1. **Quality over Presence:** Don't just check if a field exists—assess whether it provides meaningful, actionable information.
-
-2. **Evidence-Based Scoring:** Always include specific evidence (field values, quotes) to support your scores.
-
-3. **Actionable Recommendations:** Provide concrete suggestions for improving metadata quality.
-
-4. **Consistency:** Apply the same quality standards across all sub-elements.
-
-5. **Holistic Assessment:** Consider the dataset as a whole—strengths in one area may compensate for weaknesses in another.
-
-## Important Instructions
-
-- Return ONLY valid JSON, no additional commentary
-- Include ALL 10 elements with ALL 5 sub-elements each (50 sub-elements total)
-- Calculate overall_score.total_points as sum of all element_score values
-- Calculate overall_score.percentage as (total_points / max_points) * 100
-- Provide 3-5 items each for strengths, weaknesses, and recommendations
-- Include actual evidence quotes from the D4D file (not placeholder text)
+Include `elements`: every rubric element, with integer `id`, `name`,
+`sub_elements`, `element_score` and `element_max`. Each sub-element
+contains its exact `id` such as "E1.1", its rubric `name`, `score`,
+`max_score`, `applicable`, `evidence`, `quality_note`, and
+`unit_scores` as defined above; N/A also needs `na_reason`.
+Include all five sub-elements of every element. Overall points are the sum
+of the ten element scores. Strength in another item cannot replace missing
+evidence for the item being scored.

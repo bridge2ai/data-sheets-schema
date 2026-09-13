@@ -222,8 +222,12 @@ class TestTheContractAsksForTheScoringRules(unittest.TestCase):
                              ("d4d-rubric20-semantic", "rubric20")):
             with self.subTest(agent=name):
                 text = (ROOT / ".claude" / "agents" / f"{name}.md").read_text()
-                self.assertIn(f'"rubric_hash": "<sha256 of data/rubric/'
-                              f'{rubric}.txt>"', text)
+                # Version 2 examples carry a real source-text digest. Keep
+                # the named source path beside the example so a caller knows
+                # which bytes to hash, and verify that the example is current.
+                digest = hashlib.sha256((ROOT / "data" / "rubric" / f"{rubric}.txt").read_bytes()).hexdigest()
+                self.assertIn(f'"rubric_sha256": "{digest}"', text)
+                self.assertIn(f"data/rubric/{rubric}.txt", text)
 
 
 @pytest.mark.corpus   # walks the committed corpus; the main-branch lane (#1203)

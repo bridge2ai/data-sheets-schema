@@ -33,6 +33,10 @@ from typing import Dict, List, Any, Literal, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime
 import anthropic
+from data_sheets_schema.evaluation_context import (
+    context_digest, identity, load_context, normalize_context, unwrap_document,
+)
+from data_sheets_schema.judge_contract import evaluation_contract, validate_result, VERSION
 
 
 #: Where a result's identity is carried, so no exporter has to parse it out of
@@ -68,22 +72,17 @@ class LLMEvaluationConfig:
     rubric_dir: Path = Path("data/rubric")
     prompts_dir: Path = Path("src/download/prompts")
     schema_path: Path = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
+    error_dir: Path = Path("data/evaluation_llm/errors")
+    attempts_dir: Optional[Path] = None
 
 
 class D4DLLMEvaluator:
     """LLM-as-judge evaluator for D4D files using Claude Sonnet 4.5"""
 
-    def __init__(self, config: Optional[LLMEvaluationConfig] = None):
+    def __init__(self, config: Optional[LLMEvaluationConfig] = None, *, context=None, client=None):
         self.config = config or LLMEvaluationConfig()
-
-        # Initialize Anthropic client
-        try:
-            self.client = anthropic.Anthropic()  # Uses ANTHROPIC_API_KEY env var
-        except Exception as e:
-            raise RuntimeError(
-                "Failed to initialize Anthropic client. "
-                "Please set ANTHROPIC_API_KEY environment variable."
-            ) from e
+        self.context = normalize_context(context)
+        self._rubric_bytes = {}
 
         # Load rubrics
         self.rubric10 = self._load_rubric("rubric10.txt")
@@ -92,6 +91,8 @@ class D4DLLMEvaluator:
         # Load prompts
         self.rubric10_system_prompt = self._load_prompt("rubric10_system_prompt.md")
         self.rubric20_system_prompt = self._load_prompt("rubric20_system_prompt.md")
+        # Validate inputs and load local assets before constructing a provider.
+        self.client = client if client is not None else anthropic.Anthropic()
 
     def _load_rubric(self, filename: str) -> Dict[str, Any]:
         """Load and parse rubric YAML"""
@@ -99,8 +100,9 @@ class D4DLLMEvaluator:
         if not path.exists():
             raise FileNotFoundError(f"Rubric file not found: {path}")
 
-        with open(path) as f:
-            return yaml.safe_load(f)
+        raw = path.read_bytes()
+        self._rubric_bytes[filename] = raw
+        return yaml.safe_load(raw)
 
     def _load_prompt(self, filename: str) -> str:
         """Load prompt template"""
@@ -117,7 +119,7 @@ class D4DLLMEvaluator:
         with open(file_path, 'rb') as f:
             for chunk in iter(lambda: f.read(4096), b""):
                 sha256.update(chunk)
-        return f"sha256:{sha256.hexdigest()[:16]}..."  # Truncated for readability
+        return sha256.hexdigest()
 
     def _build_system_prompt(self, rubric_name: Literal["rubric10", "rubric20"]) -> str:
         """Construct system prompt with rubric specification"""
@@ -135,13 +137,19 @@ class D4DLLMEvaluator:
 
         return prompt
 
-    def _build_user_prompt(self, d4d_content: str, project: str, method: str, d4d_filename: str) -> str:
+    def _build_user_prompt(self, d4d_content: str, project: str, method: str, d4d_filename: str,
+                           *, contract: dict) -> str:
         """Construct user prompt with D4D file to evaluate"""
         return f"""Evaluate this D4D datasheet for quality and completeness.
 
 **Project:** {project}
 **Generation Method:** {method}
 **Filename:** {d4d_filename}
+
+**Declared applicability and required evaluation scope:**
+```json
+{json.dumps(contract, ensure_ascii=False, sort_keys=True)}
+```
 
 **D4D YAML Content:**
 ```yaml
@@ -162,22 +170,24 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
 
         Args:
             d4d_path: Path to D4D YAML file
-            project: Project name (AI_READI, CHORUS, CM4AI, VOICE)
-            method: Generation method (curated, gpt5, claudecode, etc.)
+            project: Nonempty dataset or project identity supplied by the caller
+            method: Nonempty generation-method identity supplied by the caller
             rubric: Which rubric to use ("rubric10", "rubric20", or "both")
 
         Returns:
             Dictionary with evaluation results for requested rubric(s)
         """
-        # Load D4D file
+        identity(project, "project")
+        identity(method, "method")
+        if rubric not in {"rubric10", "rubric20", "both"}:
+            raise ValueError("unknown rubric")
+        # Capture the exact input once; both judges receive these same bytes.
         if not d4d_path.exists():
             raise FileNotFoundError(f"D4D file not found: {d4d_path}")
 
-        with open(d4d_path) as f:
-            d4d_content = f.read()
-
-        # Calculate file hash
-        d4d_file_hash = self._calculate_file_hash(d4d_path)
+        raw = d4d_path.read_bytes()
+        d4d_content = raw.decode("utf-8-sig")
+        d4d_file_hash = hashlib.sha256(raw).hexdigest()
 
         results = {}
 
@@ -217,9 +227,16 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
         d4d_file_hash: str
     ) -> Dict[str, Any]:
         """Evaluate with a specific rubric using Claude API"""
-        # Build prompts
+        identity(project, "project")
+        identity(method, "method")
+        specification = self.rubric10 if rubric_name == "rubric10" else self.rubric20
+        contract = evaluation_contract(
+            rubric_name, specification, self.context,
+            unwrap_document(yaml.safe_load(d4d_content)))
+        # Build and attest the actual strings sent to the provider.
         system_prompt = self._build_system_prompt(rubric_name)
-        user_prompt = self._build_user_prompt(d4d_content, project, method, d4d_filename)
+        user_prompt = self._build_user_prompt(
+            d4d_content, project, method, d4d_filename, contract=contract)
 
         # Call Claude API
         try:
@@ -233,17 +250,26 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
         except Exception as e:
             raise RuntimeError(f"Claude API call failed: {e}") from e
 
-        # Parse response
+        raw_response = "\n".join(block.text for block in response.content if hasattr(block, "text"))
+        # Validate the accepted score under this instrument's own contract.
         try:
-            evaluation = self._parse_llm_response(response.content[0].text)
+            if getattr(response, "stop_reason", "end_turn") not in {"end_turn", "stop_sequence"}:
+                raise ValueError("provider did not finish the evaluation")
+            evaluation = self._parse_llm_response(raw_response)
+            validate_result(evaluation, rubric_name, project, method, contract)
         except Exception as e:
-            # Save failed response for debugging
-            error_file = Path(f"evaluation_error_{rubric_name}_{project}_{method}.txt")
-            with open(error_file, 'w') as f:
-                f.write(f"Error: {e}\n\n")
-                f.write(f"Response:\n{response.content[0].text}")
+            # Identity is data, never a path component. Preserve every attempt.
+            self.config.error_dir.mkdir(parents=True, exist_ok=True)
+            error_file = self.config.error_dir / f"{rubric_name}_{uuid.uuid4().hex}.json"
+            with error_file.open("x", encoding="utf-8") as f:
+                json.dump({"error": str(e), "response": raw_response,
+                           "project": project, "method": method,
+                           "input_sha256": d4d_file_hash,
+                           "instrument_sha256": hashlib.sha256(system_prompt.encode()).hexdigest(),
+                           "request_user_prompt_sha256": hashlib.sha256(user_prompt.encode()).hexdigest()},
+                          f, indent=2)
             raise RuntimeError(
-                f"Failed to parse LLM response. Response saved to {error_file}"
+                f"Failed to accept LLM response. Response saved to {error_file}"
             ) from e
 
         # Preserve judge annotations, but attest the actual request ourselves.
@@ -254,14 +280,28 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
             metadata["evaluator_reported_instrument_sha256"] = metadata["instrument_sha256"]
         metadata.update({
             "evaluator_id": metadata.get("evaluator_id") or str(uuid.uuid4()),
-            "rubric_hash": self._calculate_file_hash(
-                self.config.rubric_dir / f"{rubric_name}.txt"),
+            "rubric_hash": hashlib.sha256(self._rubric_bytes[f"{rubric_name}.txt"]).hexdigest(),
             "d4d_file_hash": d4d_file_hash,
             "instrument_kind": "api_system_prompt",
             "instrument_sha256": hashlib.sha256(system_prompt.encode("utf-8")).hexdigest(),
             "request_user_prompt_sha256": hashlib.sha256(user_prompt.encode("utf-8")).hexdigest(),
+            "context_sha256": context_digest(self.context),
+            "instrument_version": VERSION,
+            "model": self.config.model,
+            "temperature": self.config.temperature,
         })
         evaluation["metadata"] = metadata
+        evaluation["model"] = {"name": self.config.model, "temperature": self.config.temperature,
+                               "evaluation_type": "llm_as_judge"}
+        evaluation["d4d_file"] = d4d_filename
+        if getattr(response, "model", None):
+            metadata["response_model"] = response.model
+        if self.config.attempts_dir is not None:
+            # Retain each accepted rating before a later rubric can fail.
+            self.config.attempts_dir.mkdir(parents=True, exist_ok=True)
+            attempt = self.config.attempts_dir / f"{rubric_name}_{uuid.uuid4().hex}.json"
+            with attempt.open("x", encoding="utf-8") as stream:
+                json.dump({"evaluation": evaluation, "raw_response": raw_response}, stream, indent=2)
 
         return evaluation
 
@@ -298,6 +338,8 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
             row = {
                 "project": project,
                 "method": method,
+                "label": (project_results.get(IDENTITY) or {}).get("label"),
+                "file_path": (project_results.get(IDENTITY) or {}).get("file_path"),
             }
 
             # Add rubric10 scores
@@ -314,13 +356,27 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
                 row["rubric20_max"] = r20["overall_score"]["max_points"]
                 row["rubric20_percentage"] = r20["overall_score"]["percentage"]
 
+            for rubric in ("rubric10", "rubric20"):
+                if rubric not in project_results:
+                    continue
+                result = project_results[rubric]
+                score = result["overall_score"]
+                metadata = result.get("metadata") or {}
+                for name in ("fixed_max_points", "fixed_percentage"):
+                    row[f"{rubric}_{name}"] = score.get(name)
+                row[f"{rubric}_excluded_items"] = json.dumps(score.get("excluded_items", []))
+                for name in ("instrument_sha256", "context_sha256", "d4d_file_hash"):
+                    row[f"{rubric}_{name}"] = metadata.get(name)
+                row[f"{rubric}_scope"] = json.dumps(result.get("evaluation_scope"), sort_keys=True)
+
             rows.append(row)
 
         # Write CSV
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, 'w', newline='') as f:
             if rows:
-                writer = csv.DictWriter(f, fieldnames=rows[0].keys())
+                fields = list(dict.fromkeys(key for row in rows for key in row))
+                writer = csv.DictWriter(f, fieldnames=fields)
                 writer.writeheader()
                 writer.writerows(rows)
 
@@ -336,20 +392,24 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
         with open(output_path, 'w') as f:
             f.write(f"# D4D {rubric_name.upper()} LLM Evaluation Report\n\n")
             f.write(f"**Generated:** {datetime.now().isoformat()}\n\n")
-            f.write(f"**Model:** claude-sonnet-4-5-20250929 (temperature=0.0)\n\n")
+            f.write(f"**Model:** {self.config.model} (temperature={self.config.temperature})\n\n")
+            f.write("Fixed and applicability-adjusted scores have different denominators. "
+                    "Compare only matching instruments, contexts and excluded-item sets.\n\n")
             f.write("---\n\n")
 
             # Summary table
             f.write("## Summary\n\n")
-            f.write("| Project | Method | Total | Max | Percentage |\n")
-            f.write("|---------|--------|-------|-----|------------|\n")
+            f.write("| Project | Method | Run | Input | Total | Max | Percentage |\n")
+            f.write("|---------|--------|-----|-------|-------|-----|------------|\n")
 
             for project_method, project_results in results.items():
                 if rubric_name in project_results:
                     project, method = identity_of(project_method,
                                                   project_results)
                     r = project_results[rubric_name]["overall_score"]
-                    f.write(f"| {project} | {method} | {r['total_points']} | {r['max_points']} | {r['percentage']:.1f}% |\n")
+                    percentage = "N/A" if r["percentage"] is None else f"{r['percentage']:.1f}%"
+                    run = project_results.get(IDENTITY) or {}
+                    f.write(f"| {project} | {method} | {run.get('label') or '—'} | {run.get('file_path') or project_results[rubric_name].get('d4d_file', 'unrecorded')} | {r['total_points']} | {r['max_points']} | {percentage} |\n")
 
             f.write("\n---\n\n")
 
@@ -367,7 +427,12 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
 
                 # Overall score
                 score = result["overall_score"]
-                f.write(f"**Overall Score:** {score['total_points']}/{score['max_points']} ({score['percentage']:.1f}%)\n\n")
+                percentage = "N/A" if score["percentage"] is None else f"{score['percentage']:.1f}%"
+                f.write(f"**Overall Score:** {score['total_points']}/{score['max_points']} ({percentage})\n\n")
+                f.write(f"**Fixed maximum:** {score.get('fixed_max_points', 'unrecorded')}; "
+                        f"**excluded items:** {', '.join(score.get('excluded_items', [])) or 'none'}\n\n")
+                f.write(f"**Instrument:** {result.get('metadata', {}).get('instrument_sha256', 'unrecorded')}\n\n")
+                f.write(f"**Context:** {result.get('metadata', {}).get('context_sha256', 'unrecorded')}\n\n")
 
                 # Strengths
                 if "assessment" in result and "strengths" in result["assessment"]:
@@ -401,7 +466,7 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Evaluate D4D YAML files using LLM-as-judge (Claude Sonnet 4.5)"
+        description="Evaluate declared D4D records using the direct API judge"
     )
 
     # Input options
@@ -412,7 +477,6 @@ def main():
     # Evaluation options
     parser.add_argument(
         "--project",
-        choices=["AI_READI", "CHORUS", "CM4AI", "VOICE"],
         help="Project name (required if --file is used)"
     )
     parser.add_argument(
@@ -434,38 +498,54 @@ def main():
         help="Output directory (default: data/evaluation_llm)"
     )
 
+    parser.add_argument("--context", type=Path, help="YAML/JSON applicability declarations")
+    parser.add_argument("--base-dir", type=Path, default=Path("data/d4d_concatenated"),
+                        help="Root containing method and optional run-label directories")
     args = parser.parse_args()
 
     # Validate arguments
     if args.file and (not args.project or not args.method):
         parser.error("--file requires --project and --method")
 
-    # Initialize evaluator
-    print("🚀 Initializing D4D LLM Evaluator...")
-    evaluator = D4DLLMEvaluator()
-
     # Collect files to evaluate
     if args.file:
-        files_to_evaluate = [(args.file, args.project, args.method)]
+        identity(args.project, "project")
+        identity(args.method, "method")
+        files_to_evaluate = [(args.file, args.project, args.method, None)]
     else:
-        # Find all D4D files
         files_to_evaluate = []
-        base_dir = Path("data/d4d_concatenated")
-
-        for method_dir in ["curated", "gpt5", "claudecode", "claudecode_agent", "claudecode_assistant"]:
-            method_path = base_dir / method_dir
-            if not method_path.exists():
+        method_paths = sorted(path for path in args.base_dir.iterdir() if path.is_dir()) if args.base_dir.is_dir() else []
+        for method_path in method_paths:
+            if args.method and method_path.name != args.method:
                 continue
-
-            for d4d_file in method_path.glob("*_d4d.yaml"):
-                project = d4d_file.stem.replace("_d4d", "")
-                files_to_evaluate.append((d4d_file, project, method_dir))
+            for d4d_file in sorted(method_path.rglob("*.yaml")):
+                relative = d4d_file.relative_to(method_path)
+                if len(relative.parts) > 2:
+                    continue
+                suffix = next((s for s in ("_d4d_core.yaml", "_d4d.yaml", "_curated.yaml")
+                               if d4d_file.name.endswith(s)), None)
+                if suffix is None:
+                    continue
+                project = d4d_file.name[:-len(suffix)]
+                if args.project and project != args.project:
+                    continue
+                files_to_evaluate.append((d4d_file, project, method_path.name,
+                                          relative.parts[0] if len(relative.parts) == 2 else None))
+    if not files_to_evaluate:
+        parser.error("no D4D records matched the selected inputs")
+    context = load_context(args.context)
+    output_dir = args.output_dir / (
+        datetime.now().strftime("%Y-%m-%d_%H%M%S") + "_api-judge-v2_" + uuid.uuid4().hex)
+    # Every invocation has its own directory; preserve all earlier evaluations.
+    evaluator = D4DLLMEvaluator(LLMEvaluationConfig(error_dir=output_dir / "errors",
+                                                  attempts_dir=output_dir / "attempts"), context=context)
 
     print(f"📊 Found {len(files_to_evaluate)} D4D files to evaluate\n")
 
     # Evaluate files
     all_results = {}
-    for d4d_file, project, method in files_to_evaluate:
+    failures = 0
+    for d4d_file, project, method, label in files_to_evaluate:
         print(f"\n{'='*60}")
         print(f"Evaluating: {project} - {method}")
         print(f"File: {d4d_file}")
@@ -477,19 +557,22 @@ def main():
             # them later by splitting the key on its first underscore reported
             # AI_READI as project "AI" and VOICE_PEDIATRIC as "VOICE" — merging
             # two datasets the manifest declares distinct (#622).
-            results[IDENTITY] = {"project": project, "method": method}
-            all_results[f"{project}_{method}"] = results
+            results[IDENTITY] = {"project": project, "method": method, "label": label,
+                                "file_path": str(d4d_file)}
+            all_results[json.dumps([project, method, label, str(d4d_file)])] = results
+            evaluator.export_to_json(all_results, output_dir / "scores.json")
 
             # Print summary
             if "rubric10" in results:
                 r10 = results["rubric10"]["overall_score"]
-                print(f"✅ Rubric10: {r10['total_points']}/{r10['max_points']} ({r10['percentage']:.1f}%)")
+                print(f"✅ Rubric10: {r10['total_points']}/{r10['max_points']}")
 
             if "rubric20" in results:
                 r20 = results["rubric20"]["overall_score"]
-                print(f"✅ Rubric20: {r20['total_points']}/{r20['max_points']} ({r20['percentage']:.1f}%)")
+                print(f"✅ Rubric20: {r20['total_points']}/{r20['max_points']}")
 
         except Exception as e:
+            failures += 1
             print(f"❌ Evaluation failed: {e}")
             import traceback
             traceback.print_exc()
@@ -501,29 +584,31 @@ def main():
         print('='*60)
 
         # Export CSV
-        csv_path = args.output_dir / "scores.csv"
+        csv_path = output_dir / "scores.csv"
         evaluator.export_to_csv(all_results, csv_path)
         print(f"✅ CSV exported to: {csv_path}")
 
         # Export JSON
-        json_path = args.output_dir / "scores.json"
+        json_path = output_dir / "scores.json"
         evaluator.export_to_json(all_results, json_path)
         print(f"✅ JSON exported to: {json_path}")
 
         # Export Markdown reports
         if args.rubric in ["rubric10", "both"]:
-            md_path = args.output_dir / "rubric10" / "summary_report.md"
+            md_path = output_dir / "rubric10" / "summary_report.md"
             evaluator.export_to_markdown(all_results, md_path, "rubric10")
             print(f"✅ Rubric10 report exported to: {md_path}")
 
         if args.rubric in ["rubric20", "both"]:
-            md_path = args.output_dir / "rubric20" / "summary_report.md"
+            md_path = output_dir / "rubric20" / "summary_report.md"
             evaluator.export_to_markdown(all_results, md_path, "rubric20")
             print(f"✅ Rubric20 report exported to: {md_path}")
 
-        print(f"\n✨ Evaluation complete! Results saved to {args.output_dir}")
+        print(f"\n✨ Evaluation complete! Results saved to {output_dir}")
     else:
         print("\n⚠️  No results to export")
+    if failures:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

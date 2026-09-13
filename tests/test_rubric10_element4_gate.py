@@ -164,14 +164,20 @@ class TestTheSoftwareSubElementIsStatedOnce(unittest.TestCase):
                 return line
         self.fail(f"no conditions-table row for {condition!r}")
 
-    def test_the_table_scopes_the_software_condition_to_sub_element_three(self):
-        """The blocker in the Codex review of PR #1078: the table gated
-        sub-elements 3 and 4 together while the prose released 4."""
-        row = self._row("Software tools produced as dataset output")
+    def test_preprocessing_has_its_own_gate_independent_of_released_software(self):
+        """#1414: processing documentation applies without a software output."""
+        row = self._row("Data processing")
         gates = row.rsplit("|", 2)[1]
         self.assertIn("sub-element 3", gates)
         self.assertNotIn("3–4", gates)
         self.assertNotIn("3-4", gates)
+        self.assertNotIn("Software tools produced as dataset output", self.text)
+        element = self.text.split("### Element 8:", 1)[1].split("### Element 9:", 1)[0]
+        processing = re.split(r"^3\. \*\*", element, flags=re.M)[1]
+        processing = re.split(r"^4\. \*\*", processing, flags=re.M)[0]
+        self.assertIn("data_processing predicate", processing)
+        self.assertNotIn("only score if `external_resources`", processing)
+        self.assertIn("sub-element 4", self._row("Processing software"))
 
     def test_nothing_in_the_block_re_imposes_the_repository_gate(self):
         """The unchanged local `Applies to` restored the very gate the
@@ -222,7 +228,8 @@ class TestTheSoftwareSubElementIsStatedOnce(unittest.TestCase):
         documents no tooling by that very silence."""
         self.assertIn("is **not** gated on whether a repository is pointed at",
                       self.block_flat)
-        self.assertIn("governs sub-element 3 only", self.block_flat)
+        self.assertIn("processing_software predicate", self.block_flat)
+        self.assertIn("Missing scoring fields never establish false", self.block_flat)
 
 
 if __name__ == "__main__":

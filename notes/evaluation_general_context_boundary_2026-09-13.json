@@ -1,0 +1,72 @@
+{
+  "date": "2026-09-13",
+  "status": "implementation_boundary_no_new_measurements",
+  "generation_dependency": "PR #1367",
+  "issues": [
+    1300,
+    627,
+    159,
+    1414
+  ],
+  "generation_arms": [
+    "api",
+    "agentic"
+  ],
+  "evaluation_styles": [
+    "rubric10_presence",
+    "rubric20_presence",
+    "rubric10_api_quality",
+    "rubric20_api_quality",
+    "rubric10_agent_quality",
+    "rubric20_agent_quality",
+    "rubric10_agent_semantic",
+    "rubric20_agent_semantic",
+    "schema_and_provenance",
+    "grounding_receipts_and_report",
+    "source_and_record_semantic_review",
+    "human_adjudication_and_repeats"
+  ],
+  "records_rescored": [],
+  "records_generated": [],
+  "runtime_quoted_definition_sha256": null,
+  "files": {
+    ".claude/agents/d4d-rubric10.md": "c7cb23b3693ce9813534214a1da4611dac2f87cb51392204bd826ea26e1562e5",
+    ".claude/agents/d4d-rubric20.md": "6b7aeff1d7c2dc827710162129991d5466e63eb12df218ef47347b228ec87b50",
+    ".claude/agents/d4d-rubric10-semantic.md": "d78cb66cd01f4114cc2f2d3b8bf6af486682573b6529617f9a024de554239c8f",
+    ".claude/agents/d4d-rubric20-semantic.md": "484c28271b42037b9e18030768a3d0213e49c4f2d7ca3513c5196cb493f278f9",
+    "data/rubric/rubric10.txt": "9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97",
+    "data/rubric/rubric20.txt": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
+    "src/download/prompts/rubric10_system_prompt.md": "187b693af395355d5e912e5310eee2da590a51f84e771ca6d3b611572b9e49a7",
+    "src/download/prompts/rubric20_system_prompt.md": "0ef76922733671b100f2454793adc8718e5aefcf0d62508780f3f82d795410c3",
+    "src/download/prompts/rubric10_semantic_schema.json": "607d44412fad475e90dc27e56614f767d4d72677c3141a5d12b7571aa3af886f",
+    "src/download/prompts/rubric20_semantic_schema.json": "0c79f51048dd080155ed6b0bd8b3ba92509869c89c526ab98fdca8a6c2ad9988",
+    "src/data_sheets_schema/schema/D4D_Evaluation_Summary.yaml": "2cc165cd388d53918d8cc6f5c4bbf2bdd347194e3c6f7b914cfb1695165da765",
+    "src/data_sheets_schema/evaluation_context.py": "e27856877cac196034cad20ca5429906afb6d85fce28d5eaf10b24ab14d0878e",
+    "src/data_sheets_schema/judge_contract.py": "40c424dd282c864fa3add1f036d00e7dfcfb5f988ed3d8588ee034301cbf24db",
+    "src/data_sheets_schema/semantic_scope.py": "d3677eab91bd61072fb259cf43ee9cb6732a4b9626f9c7747b443ea6a08aeb55",
+    "src/data_sheets_schema/semantic_comparison.py": "c2522d718477fdc4ff296213e5983f3b549d689189e120fc85f1f868a36e060d",
+    "src/evaluation/evaluate_d4d.py": "55dd7a94b3f58b465a6b6df70241434927935bc4363c50a9f2f7b80bf2acbc0c",
+    "src/evaluation/evaluate_d4d_llm.py": "88e6e309c4924e72eb8e29bd8225a2ab19fd955ce163d0bcc7acda90ab7e84d1",
+    "src/data_sheets_schema/cli/evaluate.py": "9b6c72d1a158b9428a4988fd2833d00b188215f297d63c0edbb93b5e4db278a5",
+    "scripts/validate_evaluation_schema.py": "7b53cb67349452b7fed71b935bfbcb320e1a09169c855acb6e28a4b6f6684fc6",
+    "scripts/reference_rescore.py": "13478d53f74c5f4873c899abbc1fd2dc20e18eb29d1e3bf47a4af7c28d242223",
+    "src/data_sheets_schema/agent_pin.py": "35d60bcc835ba0d77e3c3c531fe225b8825ff77f038a7cc499cfbcaa535ba962"
+  },
+  "presence_instrument": {
+    "kind": "deterministic_presence",
+    "version": "2.0",
+    "sha256": "a5a333f015ce13873baa6c04386bd17a9f2d12c9135dffc542954f06865f6bc6",
+    "inputs": {
+      "rubric10": "9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97",
+      "rubric20": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
+      "runner": "55dd7a94b3f58b465a6b6df70241434927935bc4363c50a9f2f7b80bf2acbc0c",
+      "context_policy": "e27856877cac196034cad20ca5429906afb6d85fce28d5eaf10b24ab14d0878e"
+    }
+  },
+  "api_system_prompt_sha256": {
+    "rubric10": "84f3b88838b777ef0b85358c9100ce905e8697c85f140b475b30f013f0363c98",
+    "rubric20": "6744fe03c12f76787accf63e5d9cb094123e5aed8fd9d9b99da703252b92aaa6"
+  },
+  "preserved_condition": "notes/reference_rescore_2026-09-12_cborg_runtime",
+  "preservation_sha256": "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f"
+}

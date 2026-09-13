@@ -192,8 +192,9 @@ class TestD4DEvaluation(unittest.TestCase):
 
         data = evaluator._load_d4d_yaml(self.d4d_file_collection)
         self.assertIsNotNone(data)
-        self.assertEqual(data['title'], 'Test Dataset Collection')
-        self.assertEqual(data['description'], 'A test dataset in collection format')
+        self.assertEqual(len(data['resources']), 1)
+        self.assertEqual(data['resources'][0]['title'], 'Test Dataset Collection')
+        self.assertEqual(data['resources'][0]['description'], 'A test dataset in collection format')
 
     def test_extract_field_value_simple(self):
         """Test extracting simple field value."""
