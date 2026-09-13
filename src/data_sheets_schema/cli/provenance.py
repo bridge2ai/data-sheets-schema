@@ -1505,6 +1505,8 @@ def backfill(verified, dry_run):
     their runtime identities, accounting, prompt/phase evidence or receipt
     expectations (#1456). Use the targeted annotation and recovery commands
     to enrich an existing record under their individual evidence checks.
+    Missing records with API recovery journals or an active API writer are
+    deferred: reconstructing them would discard observed generation evidence.
 
     Refuses to run from anywhere but the repository root. For a missing
     record, fields that cannot honestly be recovered are listed under
@@ -1515,7 +1517,12 @@ def backfill(verified, dry_run):
     from data_sheets_schema.provenance import build_record, record_path_for
     from data_sheets_schema.runs import discover
 
-    written = proposed = kept = 0
+    from contextlib import nullcontext
+    from data_sheets_schema.usage_ledger import (
+        UsageLedgerError, exclusive_outputs, recovery_files,
+    )
+
+    written = proposed = kept = deferred = 0
     for run in discover():
         if run.is_core or run.deterministic:
             continue
@@ -1525,33 +1532,50 @@ def backfill(verified, dry_run):
                 click.echo(f"  kept existing {target}")
                 kept += 1
                 continue
-            rec = build_record(project, run.method, run.label,
-                               mode="reconstructed", input_verified=run.label in verified)
-            n_unrec = len(rec.data.get("unrecoverable") or [])
-            if dry_run:
-                click.echo(f"  would write {target}  ({n_unrec} unrecoverable)")
-                proposed += 1
-            else:
-                # Publish a complete record only if the destination is still
-                # absent. A run can finish while reconstruction is in progress.
-                import os
-                import tempfile
-                target.parent.mkdir(parents=True, exist_ok=True)
-                with tempfile.TemporaryDirectory(prefix=".backfill-", dir=target.parent) as temporary:
-                    staged = Path(temporary) / target.name
-                    rec.write(staged)
-                    try:
-                        os.link(staged, target)
-                    except FileExistsError:
+            try:
+                # Share the API writer's provenance lock through publication.
+                # A dry run only reads; it never creates a lock or directory.
+                with nullcontext() if dry_run else exclusive_outputs((target,)):
+                    if target.exists():
                         click.echo(f"  kept existing {target}")
                         kept += 1
                         continue
-                from data_sheets_schema.schema_cache import forget
-                forget(target)
-                click.echo(f"  ✓ {target}  ({n_unrec} unrecoverable)")
-                written += 1
+                    pending = recovery_files(target.parent, project)
+                    if pending:
+                        click.echo(f"  deferred {target}: API recovery evidence exists "
+                                   f"({', '.join(path.name for path in pending)})")
+                        deferred += 1
+                        continue
+                    rec = build_record(project, run.method, run.label,
+                                       mode="reconstructed", input_verified=run.label in verified)
+                    n_unrec = len(rec.data.get("unrecoverable") or [])
+                    if dry_run:
+                        click.echo(f"  would write {target}  ({n_unrec} unrecoverable)")
+                        proposed += 1
+                    else:
+                        # Also preserve a non-cooperating writer's complete record.
+                        import os
+                        import tempfile
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        with tempfile.TemporaryDirectory(prefix=".backfill-", dir=target.parent) as temporary:
+                            staged = Path(temporary) / target.name
+                            rec.write(staged)
+                            try:
+                                os.link(staged, target)
+                            except FileExistsError:
+                                click.echo(f"  kept existing {target}")
+                                kept += 1
+                                continue
+                        from data_sheets_schema.schema_cache import forget
+                        forget(target)
+                        click.echo(f"  ✓ {target}  ({n_unrec} unrecoverable)")
+                        written += 1
+            except UsageLedgerError as exc:
+                click.echo(f"  deferred {target}: {exc}")
+                deferred += 1
     click.echo(f"\n{'would write' if dry_run else 'wrote'} "
-               f"{proposed if dry_run else written} record(s); kept {kept} existing record(s)")
+               f"{proposed if dry_run else written} record(s); kept {kept} existing record(s); "
+               f"deferred {deferred} API generation(s)")
 
 
 @provenance.command('reasoning')
