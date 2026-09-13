@@ -365,7 +365,13 @@ def _run_result(cmd: list[str], *, strip: bool = True, cwd: Path | None = None) 
         # status into None (a dirty tree recorded as clean) nor collapse
         # into U+FFFD (two files recorded as one); and no newline
         # translation, so a `\r` in a name is kept.
-        r = subprocess.run(cmd, capture_output=True, timeout=15, cwd=str(cwd) if cwd else None)
+        env = None
+        if cmd and cmd[0] == "git":
+            # `GIT_DIR`/`GIT_WORK_TREE` would make git answer for another
+            # repository while `--show-toplevel` echoes the cwd (#1684).
+            env = {k: v for k, v in os.environ.items()
+                   if k not in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR")}
+        r = subprocess.run(cmd, capture_output=True, timeout=15, cwd=str(cwd) if cwd else None, env=env)
     except Exception:
         return False, ""
     text = r.stdout.decode("utf-8", errors="backslashreplace")
@@ -667,9 +673,23 @@ def _installed_files_changed() -> tuple[list[str], bool, list[str]]:
         return [], False, []
     changed: list[str] = []
     unmeasured: list[str] = []
+    ledger_appended = False
     seen = 0
     for entry in entries:
         name = str(entry)
+        if name.endswith("data_sheets_schema/schema/digest_inventory.yaml"):
+            # The digest ledger is package data a run appends to by design
+            # (#1537): a difference there is the ledger growing, reported
+            # under its own key, not an edited shipped file (#1683).
+            try:
+                data = entry.locate().read_bytes()
+            except OSError:
+                changed.append(name); continue
+            h = getattr(entry, "hash", None)
+            if h is not None and getattr(h, "value", None):
+                digest = hashlib.new(getattr(h, "mode", "sha256"), data).digest()
+                ledger_appended = base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii") != h.value
+            continue
         bookkeeping = (name.endswith(".pth") or "__pycache__" in name
                        or any(name.endswith(b) for b in _INSTALL_BOOKKEEPING))
         h = getattr(entry, "hash", None)
@@ -694,6 +714,7 @@ def _installed_files_changed() -> tuple[list[str], bool, list[str]]:
             continue
         if base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii") != h.value:
             changed.append(name)
+    _installed_files_changed.ledger_appended = ledger_appended
     return sorted(changed), seen > 0 and not unmeasured, sorted(unmeasured)
 
 
@@ -719,7 +740,9 @@ def repo_facts() -> dict[str, Any]:
         except PackageNotFoundError:
             pkg = None
         changed, measured, unmeasured = _installed_files_changed()
+        ledger_appended = getattr(_installed_files_changed, "ledger_appended", False)
         return {"commit": None, "commit_short": None, "branch": None,
+                **({"ledger_appended": True} if ledger_appended else {}),
                 "dirty": (bool(changed) if measured else None),
                 "dirty_file_count": (len(changed) if measured else None),
                 "dirty_paths": changed[:DIRTY_PATHS_MAX],

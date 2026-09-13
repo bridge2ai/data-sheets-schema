@@ -1462,6 +1462,8 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
     block naming every candidate and the criterion, so the choice is auditable
     and reversible.
     """
+    from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+    _require_repo_root_cwd("d4d runs select")          # a corpus write lands under the cwd (#1685)
     if review_margin is not None:
         raise click.ClickException(
             "--review-margin is retired: review metrics are reported only "

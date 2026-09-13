@@ -11,6 +11,15 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _prompts_copy(tmp) -> Path:
+    """A copy of the prompts directory outside the checkout: a test that
+    aliases it can never write the developer's real registry (#1686)."""
+    import shutil
+    dest = Path(tempfile.mkdtemp(prefix="d4d-prompts-copy-")) / "prompts"   # outside `tmp`: the alias leaves the tree
+    shutil.copytree(ROOT / "src/download/prompts", dest)
+    return dest
+
+
 class TestResourcesFromElsewhere(unittest.TestCase):
     def setUp(self):
         self._cwd = os.getcwd()
@@ -408,7 +417,7 @@ class TestRoundThree(unittest.TestCase):
         """#1576"""
         from data_sheets_schema import prompt_registry as pr
         (Path(self.tmp) / "src/download").mkdir(parents=True)
-        os.symlink(ROOT / "src/download/prompts", Path(self.tmp) / "src/download/prompts")
+        os.symlink(_prompts_copy(self.tmp), Path(self.tmp) / "src/download/prompts")   # a copy, never the real directory (#1686)
         with self.assertRaises(ValueError) as caught:
             pr.pin("src/download/prompts/d4d_generic_arm_prompt_v9.md", "must not write through the alias")
         self.assertIn("not in the working tree", str(caught.exception))
@@ -613,13 +622,13 @@ class TestCodexRoundFour(unittest.TestCase):
         from data_sheets_schema import resources
         from data_sheets_schema.cli.provenance import _require_repo_root_cwd
         repo = self._second_checkout(); (repo / "sub").mkdir()
-        real = Path.read_text
+        real = Path.read_bytes
         def unreadable(path, *a, **kw):
             if Path(path).resolve() == (repo / "pyproject.toml").resolve():
                 raise PermissionError(13, "Permission denied", str(path))
             return real(path, *a, **kw)
         os.chdir(repo / "sub")
-        with mock.patch.object(Path, "read_text", unreadable):
+        with mock.patch.object(Path, "read_bytes", unreadable):
             with self.assertRaises(resources.ResourceRootError):
                 resources.checkout_at(Path.cwd())
             with self.assertRaises(click.ClickException):
@@ -671,7 +680,7 @@ class TestCodexRoundFour(unittest.TestCase):
         from data_sheets_schema.resources import CHECKOUT_ROOT
         repo = self._second_checkout()
         (repo / "src/download").mkdir(parents=True)
-        os.symlink(CHECKOUT_ROOT / "src/download/prompts", repo / "src/download/prompts")
+        os.symlink(_prompts_copy(self.tmp), repo / "src/download/prompts")   # a copy, never the real directory (#1686)
         os.chdir(repo)
         with self.assertRaises(ValueError) as caught:
             pr.pin(".claude/commands/d4d-uniform-rules.md", "must not write the other checkout's registry")
@@ -1009,3 +1018,114 @@ class TestCodexRoundFive(unittest.TestCase):
         self.assertEqual(good.returncode, 0, good.stdout + good.stderr)
         bad = validate(dict(report, records_unchecked="not an integer", unchecked=42))
         self.assertNotEqual(bad.returncode, 0)
+
+
+class TestClaudeRoundFive(unittest.TestCase):
+    """The Claude round-5 findings on #1455 (#1680–#1687)."""
+
+    def setUp(self):
+        self._cwd = os.getcwd()
+        self.tmp = tempfile.mkdtemp(prefix="d4d-resources-")
+        os.chdir(self.tmp)
+
+    def tearDown(self):
+        os.chdir(self._cwd)
+
+    def _checkout(self, at: Path, marker: bytes = b'[tool.poetry]\nname = "data-sheets-schema"\n') -> Path:
+        (at / "src" / "data_sheets_schema").mkdir(parents=True)
+        (at / "pyproject.toml").write_bytes(marker)
+        return at
+
+    def test_the_vocabulary_pin_is_the_working_checkouts(self):
+        """#1680"""
+        from data_sheets_schema import schema_digest
+        from data_sheets_schema.profiles import BRIDGE2AI, vocabulary_bytes
+        repo = self._checkout(Path(self.tmp) / "wt")
+        own = b"vocabularies:\n  B2AI_TOPIC:\n    '1': Only here\n"
+        (repo / "src" / "data_sheets_schema" / "b2ai_registry_vocabularies.yaml").write_bytes(own)
+        os.chdir(repo)
+        self.assertEqual(BRIDGE2AI.pin_path.resolve(), (repo / schema_digest.VOCABULARY_PIN).resolve())
+        self.assertEqual(vocabulary_bytes(BRIDGE2AI), own)
+        os.chdir(ROOT)
+        self.assertEqual(BRIDGE2AI.pin_path.resolve(), (ROOT / schema_digest.VOCABULARY_PIN).resolve())
+
+    def test_an_unreadable_marker_above_a_non_checkout_decides_nothing(self):
+        """#1681"""
+        from data_sheets_schema import resources
+        proj = Path(self.tmp) / "proj"; (proj / "sub").mkdir(parents=True)
+        (proj / "pyproject.toml").write_text('name = "someone-elses"\n', encoding="utf-8")
+        real = Path.read_bytes
+        def unreadable(path, *a, **kw):
+            if Path(path).resolve() == (proj / "pyproject.toml").resolve():
+                raise PermissionError(13, "Permission denied", str(path))
+            return real(path, *a, **kw)
+        os.chdir(proj / "sub")
+        with mock.patch.object(Path, "read_bytes", unreadable):
+            self.assertIsNone(resources.checkout_at(Path.cwd()))
+            self.assertEqual(resources.resource_path("src/download/prompts/d4d_generic_arm_prompt_v9.md"),
+                             ROOT / "src/download/prompts/d4d_generic_arm_prompt_v9.md")
+
+    def test_a_non_utf8_marker_is_read_not_crashed_on(self):
+        """#1682"""
+        from data_sheets_schema.resources import _is_our_checkout
+        ours = self._checkout(Path(self.tmp) / "ours", b'name = "data-sheets-schema"\nauthor = "J\xf6rg"\n')
+        theirs = self._checkout(Path(self.tmp) / "theirs", b'name = "someone-elses"\nauthor = "J\xf6rg"\n')
+        self.assertTrue(_is_our_checkout(ours)); self.assertFalse(_is_our_checkout(theirs))
+
+    def test_a_ledger_append_is_not_an_edited_shipped_file(self):
+        """#1683"""
+        import base64, hashlib
+        from types import SimpleNamespace
+        from data_sheets_schema import provenance
+        good = Path(self.tmp) / "good.py"; good.write_text("good", encoding="utf-8")
+        ledger = Path(self.tmp) / "digest_inventory.yaml"; ledger.write_text("grown\n", encoding="utf-8")
+        class Entry:
+            def __init__(self, name, path, of):
+                self.name, self.path = name, path
+                self.hash = SimpleNamespace(mode="sha256", value=base64.urlsafe_b64encode(hashlib.sha256(of).digest()).rstrip(b"=").decode())
+            def __str__(self): return self.name
+            def locate(self): return self.path
+        entries = [Entry("good.py", good, b"good"), Entry("data_sheets_schema/schema/digest_inventory.yaml", ledger, b"shipped\n")]
+        with mock.patch("importlib.metadata.files", return_value=entries):
+            self.assertEqual(provenance._installed_files_changed(), ([], True, []))
+            self.assertTrue(provenance._installed_files_changed.ledger_appended)
+        with mock.patch("data_sheets_schema.resources.resource_root", return_value=(Path(self.tmp), "install")), \
+                mock.patch("importlib.metadata.files", return_value=entries):
+            facts = provenance.repo_facts()
+        self.assertEqual((facts["dirty"], facts.get("ledger_appended")), (False, True))
+
+    def test_git_is_asked_without_a_borrowed_git_dir(self):
+        """#1684"""
+        import subprocess
+        from data_sheets_schema import provenance
+        export = self._checkout(Path(self.tmp) / "export"); os.chdir(export)
+        with mock.patch.dict(os.environ, {"GIT_DIR": str(ROOT / ".git")}):
+            facts = provenance.repo_facts()
+        self.assertEqual((facts["commit"], facts["dirty"]), (None, None))
+        seen = {}
+        real = provenance.subprocess.run
+        def spy(cmd, **kw):
+            seen["env"] = kw.get("env"); return real(cmd, **kw)
+        with mock.patch.dict(os.environ, {"GIT_DIR": "/nowhere"}), mock.patch.object(provenance.subprocess, "run", spy):
+            provenance._run_result(["git", "rev-parse", "HEAD"], cwd=ROOT)
+        self.assertNotIn("GIT_DIR", seen["env"])
+
+    def test_the_other_corpus_writers_refuse_a_subdirectory(self):
+        """#1685"""
+        import click.testing
+        from data_sheets_schema.cli.receipts import receipts
+        from data_sheets_schema.cli.review import review
+        from data_sheets_schema.cli.runs import runs
+        os.chdir(ROOT / "tests")
+        for group, args in ((receipts, ["check", "--label", "x", "--project", "CHORUS"]),
+                            (review, ["pack", "--label", "x", "--project", "CHORUS"]),
+                            (runs, ["select", "--project", "CHORUS", "--config", "x"])):
+            r = click.testing.CliRunner().invoke(group, args)
+            self.assertNotEqual(r.exit_code, 0)
+            self.assertIn("repository root", r.output, args[0])
+
+    def test_the_docs_say_one_thing_about_the_corpus_anchor(self):
+        """#1687"""
+        text = (ROOT / "CLAUDE.md").read_text(encoding="utf-8")
+        self.assertNotIn("`chunking.anchored`, the review\npack's bundle path", text)
+        self.assertIn("`chunking.anchored` follows the resource\nroot", text)

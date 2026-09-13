@@ -1623,10 +1623,10 @@ clean, #1621/#1635; an install compares its files with the wheel's
 RECORD, #1641; where git cannot answer
 there the commit and the dirty state are recorded unknown, not clean,
 #1591; `agent_pin`
-reads the shipped definitions, while `chunking.anchored`, the review
-pack's bundle path, `verifiable`'s record lookup and `git show` at the
-repository root still anchor on the checkout and are checkout-only until
-the corpus root follows the manifest, #1523/#1553),
+reads the shipped definitions and `chunking.anchored` follows the resource
+root (#1640), while `verifiable`'s record lookup and the `git show` bundle-bytes
+lookup still anchor on the code checkout and are checkout-only until the
+corpus root follows the manifest, #1523/#1553),
 by the publish workflow before `poetry build`, not a pull-request test; it
 fails, never skips, when the wheel does not install.
 
