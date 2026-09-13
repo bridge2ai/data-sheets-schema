@@ -160,9 +160,12 @@ def _require_repo_root_cwd(command: str) -> None:
     # Any checkout of this project, not only the one the code is imported
     # from (#1588): a worktree's subdirectory is as wrong a place as the
     # primary's.
-    from data_sheets_schema.resources import checkout_at
+    from data_sheets_schema.resources import ResourceRootError, checkout_at
     cwd = Path.cwd().resolve()
-    root = checkout_at(cwd)
+    try:
+        root = checkout_at(cwd)
+    except ResourceRootError as exc:
+        raise click.ClickException(f"{command}: {exc}; a record cannot say whose resources it hashed (#1619)")
     if root is not None and cwd != root:
         raise click.ClickException(
             f"{command} must run from the data-sheets-schema repository root ({root}), "

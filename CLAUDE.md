@@ -1608,7 +1608,16 @@ is a checkout of this project — a worktree or a second clone, whose files
 the readers take first — else the checkout the code is imported from, so
 a run from a worktree with the primary's code names the worktree's
 commit and keeps its files repository-relative, and the root guard
-refuses a subdirectory of any checkout, #1588; where git cannot answer
+refuses a subdirectory of any checkout, #1588; that checkout is
+authoritative for its absences too — a playbook or prompt it lacks is
+`exists: false`, never another checkout's — a file under another
+checkout keeps its absolute identity, an unreadable `pyproject.toml` is
+refused rather than read as no checkout, and the corpus (`chunking.anchored`,
+the default manifest, the healthsheet's Source line) anchors on the same
+root, #1617/#1618/#1619/#1640; git must answer for that root itself, not
+an enclosing repository, and a failed status query is unknown, not
+clean, #1621/#1635; an install compares its files with the wheel's
+RECORD, #1641; where git cannot answer
 there the commit and the dirty state are recorded unknown, not clean,
 #1591; `agent_pin`
 reads the shipped definitions, while `chunking.anchored`, the review

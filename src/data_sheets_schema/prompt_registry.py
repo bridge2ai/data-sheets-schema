@@ -301,18 +301,25 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
     """
     if not reason or not reason.strip():
         raise ValueError("a pin needs a reason — see the docstring")
-    from data_sheets_schema.resources import cwd_checkout, resource_path, roots
+    from data_sheets_schema.resources import resource_path
     p = resource_path(path)
     target = resource_path(registry)
-    shipped = {(root / REGISTRY).resolve() for root in roots()}
-    at_checkout_root = cwd_checkout() is not None                    # any checkout of this project (#1588)
     implicit = not Path(registry).is_absolute()
-    if implicit and (target != Path(registry) or (target.resolve() in shipped and not at_checkout_root)):
+
+    def _in_working_tree(t: Path) -> bool:
+        # The file physically under the working directory — through no
+        # symlink, in a file or a directory (#1576, #1622).
+        try:
+            return t.resolve().is_relative_to(Path.cwd().resolve())
+        except (OSError, ValueError):
+            return False
+    if implicit and (target != Path(registry) or not _in_working_tree(target)):
         # Resolution fell through to the checkout's or the installed
-        # registry — or a staged alias resolves to it (#1576): a shared
-        # canonical declaration is never an implicit write target from a
-        # directory that has none (#1484). An explicit absolute path is
-        # the escape hatch.
+        # registry — or an alias in this tree resolves into another one
+        # (#1576, #1622): a shared canonical declaration is never an
+        # implicit write target from a directory that does not physically
+        # hold it (#1484), whether or not this directory is itself a
+        # checkout. An explicit absolute path is the escape hatch.
         raise ValueError(
             f"the registry {registry} is not in the working tree ({target.resolve()} would be written); "
             "run from the checkout root or name the registry explicitly")

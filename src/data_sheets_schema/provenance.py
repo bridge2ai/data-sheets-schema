@@ -355,7 +355,9 @@ def prompt_facts(prompt_paths: list[Path] | None,
     return facts
 
 
-def _run(cmd: list[str], *, strip: bool = True, cwd: Path | None = None) -> str | None:
+def _run_result(cmd: list[str], *, strip: bool = True, cwd: Path | None = None) -> tuple[bool, str]:
+    """`(ok, output)`: `ok` only when the command ran and exited 0, so an
+    empty successful output and a failure are told apart (#1621)."""
     try:
         # Bytes, decoded with a reversible escape (#1045): a path git prints
         # verbatim under -z that is not UTF-8 must neither turn the whole
@@ -363,11 +365,17 @@ def _run(cmd: list[str], *, strip: bool = True, cwd: Path | None = None) -> str 
         # into U+FFFD (two files recorded as one); and no newline
         # translation, so a `\r` in a name is kept.
         r = subprocess.run(cmd, capture_output=True, timeout=15, cwd=str(cwd) if cwd else None)
-        text = r.stdout.decode("utf-8", errors="backslashreplace")
-        out = text.strip() if strip else text
-        return out or None
     except Exception:
-        return None
+        return False, ""
+    text = r.stdout.decode("utf-8", errors="backslashreplace")
+    return r.returncode == 0, (text.strip() if strip else text)
+
+
+def _run(cmd: list[str], *, strip: bool = True, cwd: Path | None = None) -> str | None:
+    """The output of a command that exited 0, else None — never the output
+    of one that failed (#1621)."""
+    ok, out = _run_result(cmd, strip=strip, cwd=cwd)
+    return out or None if ok else None
 
 
 _EFFORT_LADDER = ("minimal", "low", "medium", "high")
@@ -635,6 +643,38 @@ def software_facts() -> dict[str, Any]:
 DIRTY_PATHS_MAX = 50
 
 
+def _installed_files_changed() -> tuple[list[str], bool]:
+    """`(paths, measured)`: the installed files whose bytes no longer match
+    the wheel's RECORD — an edited shipped file, a rewritten digest ledger
+    (#1537) — or that are gone; `measured` False when the RECORD cannot be
+    read (#1641). The record's hashes are `<algorithm>=<urlsafe base64,
+    unpadded>`."""
+    import base64
+    from importlib.metadata import PackageNotFoundError, files
+    try:
+        entries = files("data-sheets-schema")
+    except PackageNotFoundError:
+        return [], False
+    if not entries:
+        return [], False
+    changed: list[str] = []
+    seen = 0
+    for entry in entries:
+        h = getattr(entry, "hash", None)
+        if h is None or not getattr(h, "value", None):
+            continue
+        seen += 1
+        try:
+            algo = getattr(h, "mode", "sha256")
+            digest = hashlib.new(algo, entry.locate().read_bytes()).digest()
+        except (OSError, ValueError):
+            changed.append(str(entry))
+            continue
+        if base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii") != h.value:
+            changed.append(str(entry))
+    return sorted(changed), seen > 0
+
+
 def repo_facts() -> dict[str, Any]:
     """The repository the *resources* came from (#1550, #1588): the working
     directory when it is a checkout of this project — a worktree or a
@@ -656,18 +696,44 @@ def repo_facts() -> dict[str, Any]:
             pkg = version("data-sheets-schema")
         except PackageNotFoundError:
             pkg = None
-        return {"commit": None, "commit_short": None, "branch": None, "dirty": False,
-                "dirty_file_count": 0, "dirty_paths": [],
+        changed, measured = _installed_files_changed()
+        return {"commit": None, "commit_short": None, "branch": None,
+                "dirty": (bool(changed) if measured else None),
+                "dirty_file_count": (len(changed) if measured else None),
+                "dirty_paths": changed[:DIRTY_PATHS_MAX],
+                **({"dirty_paths_truncated": len(changed) - DIRTY_PATHS_MAX} if len(changed) > DIRTY_PATHS_MAX else {}),
                 "resource_root": str(at), "resource_kind": "install", "package_version": pkg,
-                "note": "no checkout: the resources are the installed package's, so there is no commit to name"}
+                "note": ("no checkout: the resources are the installed package's, so there is no commit to name; "
+                         + ("the installed files were compared with the wheel's RECORD hashes (#1641)" if measured
+                            else "the wheel's RECORD could not be read, so whether the installed files changed is unknown, not clean (#1641)"))}
     commit = _run(["git", "rev-parse", "HEAD"], cwd=at)
-    if commit is None:
+    top = _run(["git", "rev-parse", "--show-toplevel"], cwd=at)
+    try:
+        same_tree = top is not None and Path(top).resolve() == Path(at).resolve()
+    except OSError:
+        same_tree = False
+    if commit is None or not same_tree:
+        # No repository there, or git answering for an *enclosing* one — an
+        # export placed inside another project's repository would otherwise
+        # be attested with that project's commit and called dirty because
+        # of itself (#1635): unknown, not clean (#1591).
+        why = (f"git answers for {top}, not the resource root" if commit is not None and top is not None
+               else "no repository there, or no git")
         return {"commit": None, "commit_short": None, "branch": None, "dirty": None,
                 "dirty_file_count": None, "dirty_paths": [],
                 "resource_root": str(at), "resource_kind": "checkout",
-                "note": f"git could not answer at {at} (no repository there, or no git): "
+                "note": f"git could not answer for {at} ({why}): "
                         "the commit and the dirty state are unknown, not clean"}
-    dirty = _run(["git", "status", "--porcelain", "-z"], strip=False, cwd=at)
+    ok, dirty = _run_result(["git", "status", "--porcelain", "-z"], strip=False, cwd=at)
+    if not ok:
+        # The commit is known, the tree's state is not: unknown, not clean (#1621).
+        return {
+            "commit": commit,
+            "commit_short": _run(["git", "rev-parse", "--short", "HEAD"], cwd=at),
+            "branch": _run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=at),
+            "resource_root": str(at), "resource_kind": "checkout",
+            "dirty": None, "dirty_file_count": None, "dirty_paths": [],
+            "note": f"git status failed at {at}: the dirty state is unknown, not clean"}
     # NUL-separated, unstripped (#1039): `_run`'s strip took the leading
     # status space off the first line and `aurelian` was recorded as
     # `urelian`; a path with a space survives -z where a line split does

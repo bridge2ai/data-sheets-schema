@@ -722,6 +722,12 @@ def trap_inventory(root: Path | None = None,
                if "ATTIC" not in p.parts)
     traps: dict[tuple[str, str, str | None], dict[str, Any]] = {}
     scanned = with_errors = 0
+    # A finding that is not a `[ERROR]` line — a YAML the loader rejects,
+    # named in a traceback — is kept with its record, not dropped (#1623).
+    unparsed: list[dict[str, Any]] = []
+    # A record the validator could not run on is neither scanned nor clean:
+    # it is listed, so the report says what it could not check (#1642).
+    unchecked: list[dict[str, Any]] = []
     for f in files:
         core = f.name.endswith("_d4d_core.yaml")
         project = f.name.replace("_d4d_core.yaml", "").replace(
@@ -731,10 +737,16 @@ def trap_inventory(root: Path | None = None,
             f, CORE_SCHEMA_PATH if core else FULL_SCHEMA_PATH,
             "CoreDataset" if core else "Dataset")
         if failure is not None:
+            unchecked.append({"record": str(f), "project": project, "method": method,
+                              "failure": failure[:300]})
             continue
         scanned += 1
         if lines:
             with_errors += 1
+        other = [line for line in lines if not parse_validator_line(line)]
+        if other and not any(parse_validator_line(line) for line in lines):
+            unparsed.append({"record": str(f), "project": project, "method": method,
+                             "lines": [line[:200] for line in other[-4:]]})
         for line in lines:
             parsed = parse_validator_line(line)
             if not parsed:
@@ -773,6 +785,10 @@ def trap_inventory(root: Path | None = None,
             "excluding ATTIC and quarantined .failed-* files. Valid records "
             "contribute zero rows."),
         "records_scanned": scanned,
+        "records_with_unparsed_findings": len(unparsed),
+        "unparsed_findings": unparsed,
+        "records_unchecked": len(unchecked),
+        "unchecked": unchecked,
         "records_with_errors": with_errors,
         "traps": rows,
     }

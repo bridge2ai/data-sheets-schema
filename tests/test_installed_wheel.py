@@ -65,6 +65,23 @@ class TestTheInstalledWheel(unittest.TestCase):
         return subprocess.run([str(self.python), "-c", textwrap.dedent(code)], cwd=self.work,
                               capture_output=True, text=True, env=e)
 
+    def test_the_metadata_declares_the_runners_sdk_and_ships_only_the_rubrics(self):
+        """#1636: `anthropic` and `httpx` are requirements of the wheel, at the
+        locked SDK; #1637: the rubric directory ships the rubrics alone."""
+        import zipfile
+        r = self._run("""
+            from importlib.metadata import requires, version
+            reqs = requires("data-sheets-schema")
+            assert any(x.startswith("anthropic") for x in reqs), reqs
+            assert any(x.startswith("httpx") for x in reqs), reqs
+            assert version("anthropic") == "0.72.0", version("anthropic")
+            print("ok")
+        """)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        names = zipfile.ZipFile(self.wheel).namelist()
+        rubric = sorted(n for n in names if n.startswith("data/rubric/"))
+        self.assertEqual(rubric, ["data/rubric/rubric10.txt", "data/rubric/rubric20.txt"], rubric)
+
     def test_the_metadata_requires_linkml_unconditionally(self):
         """#1476: `linkml` was in the `docs` extra as well as the main table, and
         poetry emitted it extra-only."""

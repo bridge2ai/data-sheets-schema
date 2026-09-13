@@ -190,21 +190,37 @@ def manifest_path(project: str, chunks_dir: Path | None = None) -> Path:
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
+def corpus_root() -> Path | None:
+    """The checkout the corpus is anchored on: the resource root when it is
+    a checkout — the working directory's when it is one, else the code's
+    (#1640, #1588) — and None from an install, where the corpus is the
+    caller's own tree."""
+    from data_sheets_schema.resources import resource_root
+    root, kind = resource_root()
+    return root if kind == "checkout" else None
+
+
 def anchored(d: Path) -> Path:
     """A repository-owned relative directory as a path that is correct from
     any working directory: as written from the repository root — so the
     paths a record carries stay relative and portable (`inputs.chunks.path`
     is `data/preprocessed/chunks/…` on every record) — and anchored to the
-    checkout from anywhere else (#1367 round 2, #1388)."""
+    checkout from anywhere else (#1367 round 2, #1388). The checkout is
+    the one the resources come from, so a run from a worktree reads the
+    worktree's manifest *and* the worktree's bundles (#1640); from an
+    install the path stays the caller's (#1523)."""
     d = Path(d)
     if d.is_absolute():
         return d
+    root = corpus_root()
+    if root is None:
+        return d
     try:
-        if Path.cwd().resolve() == REPO_ROOT:
+        if Path.cwd().resolve() == root.resolve():
             return d
     except OSError:
         pass
-    return REPO_ROOT / d
+    return root / d
 
 
 def _study_dir() -> Path:
