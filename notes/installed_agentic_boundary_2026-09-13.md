@@ -175,3 +175,29 @@ resolved by the already tested prompt pin metadata implementation (#1574/#1575):
 the repository/blob audit route is explicit, and unavailable Git evidence is
 reported. The separate design records #1504 and #1537 and pre-existing judge
 rendering depth #1469 retain their documented dispositions.
+
+## Final CI corrections and review round 9 — 2026-09-13
+
+Round 8 approved the implementation and its ancestry. Its full CI run passed
+4,683 tests and exposed seven failures: six stale fixtures and one shared-corpus
+mutation race. The corrections for #1755–#1757 are included from corpus commit
+a60b4b9b0. Recorder fixtures accept the explicit corpus argument; structural
+validation fixtures use synthetic artifacts independently of generation
+profiles; historical replay fixtures use their actual renderer version.
+Bundle-audit mutation cases operate on temporary copies, with a guard against
+even transient writes to the shared corpus.
+
+All 142 affected tests pass in parallel on the corpus branch, with one existing
+skip. All 29 affected integration checks pass here, with the same skip. The
+three old mutation bodies are rejected by the new guard before changing any
+tracked bundle. The final delta changes tests and boundary notes only: all 35
+implementation hashes are unchanged from approved round 8, so the prior wheel,
+60-renderer and measurement-preservation results still apply. No generation,
+evaluation or historical artifact change was introduced.
+
+#1301 is closed by this complete integration: the installed workflow and
+agentic follow-ups supply the evaluation and offline generation acceptance
+that the packaging component alone deferred. The exact final commit requires
+a new independent review and green full CI before merge. Preserve the complete
+commit history, verify all seven component PRs and linked issues close, then
+remove only their completed branches/worktrees.

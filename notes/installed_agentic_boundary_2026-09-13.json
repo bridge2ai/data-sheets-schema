@@ -44,8 +44,9 @@
     "api"
   ],
   "installed_validator_dependency_commit": "1f05d8c63a3ae2d4a7bceb90112aff09435d5de6",
-  "integration_dependency_commit": "9bb8bc8cc80f616beb34d91c7147a909e311d187",
+  "integration_dependency_commit": "a60b4b9b08d39c6b0d1bc8f6359424ca3921d5d2",
   "issues": [
+    1301,
     1556,
     1612,
     1633,
@@ -55,14 +56,17 @@
     1652,
     1688,
     1691,
-    1697
+    1697,
+    1755,
+    1756,
+    1757
   ],
   "minimum_agentic_python": "3.10",
   "preservation_sha256": "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f",
   "preserved_condition": "notes/reference_rescore_2026-09-12_cborg_runtime",
   "previous_boundary": {
     "path": "notes/manifest_corpus_root_boundary_2026-09-13.json",
-    "sha256": "7fcf09905834f510e5581e94a766a6e2df31c8a391b811a63adf89650636bcd8"
+    "sha256": "97c84255ea0f0d6f8930bc987d1ef5969a1d0b4788e1fbff185a2e1202028232"
   },
   "records_generated": [],
   "records_rescored": [],
