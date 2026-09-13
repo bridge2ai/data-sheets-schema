@@ -297,7 +297,10 @@ def check_manifest(manifest: Path = MANIFEST) -> list[dict]:
     A declaration that names a project or a source that does not exist is worse
     than none: it reads as a control and enforces nothing.
     """
+    from data_sheets_schema.registry import Registry
+
     data = load_manifest(manifest)
+    registry = Registry(path=Path(manifest), data=data)
     projects = data.get("projects") or {}
     problems: list[dict] = []
     for project, scope in (data.get("scope") or {}).items():
@@ -339,8 +342,7 @@ def check_manifest(manifest: Path = MANIFEST) -> list[dict]:
                 # A list of sources is a shape the scope block renders
                 # (#1177 review, SF1): each name is checked.
                 sources = list(src) if isinstance(src, (list, tuple)) else [src]
-                known = {e.get("id") for e in projects.get(project) or []
-                         if isinstance(e, dict)}
+                known = {e.get("id") for e in registry.sources(project)}
                 for one in sources:
                     if not _is_identifier(one):
                         problems.append({"project": project,
