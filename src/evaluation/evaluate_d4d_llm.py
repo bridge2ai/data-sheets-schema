@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Compatibility entry point; implementation is in data_sheets_schema.evaluation.evaluate_d4d_llm."""
 import sys
 from data_sheets_schema.evaluation.evaluate_d4d_llm import *  # noqa: F401,F403
