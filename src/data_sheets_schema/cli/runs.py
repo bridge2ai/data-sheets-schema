@@ -536,6 +536,7 @@ def check_cmd(method, label, project, strict):
     from data_sheets_schema.runs import _prov, header_disagreements, stale_output_sizes
     header_mismatches = []
     pack_pin_drift = []                                        # a record's review pins a pack no longer on disk (#1095)
+    profile_disagreements: list[str] = []
     for run in discover():
         if run.is_core or run.deterministic:
             continue
@@ -553,6 +554,12 @@ def check_cmd(method, label, project, strict):
             # a standard loader keeps only the last, so a record that
             # carries one is not the record its readers see.
             prov_data = _prov(run.method, run.label, proj) or {}
+            # A record whose profile and digest, or whose stored spec and
+            # schema, name different instruments is two records in one:
+            # the gate and the readers would disagree (#1581, #1678, #1699).
+            from data_sheets_schema.provenance import profile_problems
+            for problem in profile_problems(prov_data):
+                profile_disagreements.append(f"{run.label}/{proj}: {problem}")
             # The record's review block pins the pack by sha256; a pack rewritten
             # underneath it (a forced `d4d review pack`) leaves `review.adverse`
             # ranking canonicals on a review of a pack that no longer exists
@@ -1033,7 +1040,12 @@ def check_cmd(method, label, project, strict):
                    "the header from the record; a run resumed past its record write "
                    "keeps the header it had.")
 
-    if strict and (failed or bad_requests or never_pinned or condition_contradictions):
+    if profile_disagreements:
+        click.echo(f"\n❌ {len(profile_disagreements)} record(s) name two instruments (profile vs digest, or "
+                   "stored spec vs schema; #1699) — fatal under --strict:")
+        for line in profile_disagreements:
+            click.echo(f"   {line}")
+    if strict and (failed or bad_requests or never_pinned or condition_contradictions or profile_disagreements):
         raise SystemExit(1)
 
 
