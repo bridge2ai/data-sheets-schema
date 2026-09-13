@@ -261,3 +261,23 @@ one existing skip and one fixture failure; #1731 gives that fixture its own
 dataset, and its targeted check passes. All 60 historical renderer controls
 remain identical. The boundary now pins 17 source files. No production
 generation, scoring, downloads or historical artifact rewrites occur.
+
+## Review round 13 — 2026-09-13
+
+The round-12 review found two remaining CLI ownership gaps, filed as #1735
+and #1736. Live recording now selects the corpus before reading output
+headers, retains that owner while building the record, and fixes the write
+destination to that corpus. Paths inside records remain portable at their
+own root. Header-only backfill passes each discovered run's corpus to both
+the builder and its write target. Existing records and API recovery evidence
+retain their preservation rules. The positive-manifest guard now compares
+resolved identity and content rather than spelling (#1732).
+
+The new CLI regressions reproduced both findings before correction. The
+focused provenance checks pass across their initial run and corrected
+discovery fixtures. The expanded integration run passed 197 checks; its
+remaining portability regression and ten related checks pass after narrowing
+the fix to the write destination. Packaging commit 53359f583 and profile
+compatibility commit b1d04ab0 are integrated. All 60 historical renderer
+controls reproduce their hashes. No production records were generated or
+rescored. Independent round-13 review and exact-head CI follow.

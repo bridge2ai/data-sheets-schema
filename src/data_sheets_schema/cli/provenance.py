@@ -411,7 +411,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     # corpus. Resolve that namespace before reading any output header (#1735).
     selected_manifest = select_manifest(project, input_bundle, requested)
     for _ in range(2):
-        concat_dir = _corpus_path(_CD, selected_manifest).absolute()
+        concat_dir = _corpus_path(_CD, selected_manifest)
         full_out = concat_dir / base / label / f"{project}_d4d.yaml"
         h = parse_header(full_out) if full_out.exists() else {}
         header_bundle = h.get("Source bundle") or h.get("Source")
@@ -515,7 +515,9 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                 f"--phase-skipped {bad}: not phases this pipeline has. "
                 f"Known: {', '.join(sorted(known))}")
         rec.data["phases_skipped"] = list(phases_skipped)
-    out = rec.write(record_path_for(project, method, label, concat_dir=concat_dir))
+    # Freeze the write destination so record_path_for cannot rediscover an
+    # ambient owner; the record itself keeps portable paths at its own root.
+    out = rec.write(record_path_for(project, method, label, concat_dir=concat_dir.absolute()))
     click.echo(f"✓ {out}")
     _inline_checks(out)
 
