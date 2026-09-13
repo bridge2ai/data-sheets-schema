@@ -1412,7 +1412,7 @@ def _extend_one(proj: str, method: str, label: str, given: list, execute: bool, 
         click.echo("   (report only; --execute writes the extension)"); return
     _extend_run_observed(log, obs, recorded_by="d4d provenance extend-observed (#1010)",
                          instrument="the transcript's reasoning measure (#1000/#1011), recomputed by "
-                                    "scripts/agentic_observed.py from the transcripts named on the bytes the "
+                                    "data_sheets_schema/agentic_observed.py from the transcripts named on the bytes the "
                                     "record hashed, "
                                     + ("under the record's own run_observed_until cut"
                                        if until is not None else

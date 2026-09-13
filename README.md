@@ -88,8 +88,9 @@ The installed package supports explicit-file API generation, presence and API
 evaluation, semantic-output validation, and HTML rendering outside the checkout.
 Build with `poetry build` and install the resulting wheel into your environment.
 Use caller-owned input and output paths; the API workflow does not require the
-study's data tree. Repository maintenance and some agentic playbook helpers
-still require a checkout.
+study's data tree. Agentic execution requires Python 3.10 or newer and uses
+the installed interpreter, schemas, playbook and transcript observer.
+Repository-history maintenance commands still require a checkout.
 
 For example, from your own project directory:
 
@@ -116,6 +117,13 @@ from elsewhere. Relative paths declared inside the manifest resolve from
 `PROJECT`; a standalone manifest uses its own directory. Explicit `--out-dir`
 continues to resolve from the caller's working directory. Repository-history
 repair commands still require their original checkout.
+
+Agentic prompts rendered with `d4d api render-prompt --runtime "Codex CLI"`
+or `--runtime "Claude Code"` include commands for the current installation.
+`d4d agents playbook` prints the executable playbook, and the `agents preamble`
+and `agents check-echo` commands verify the selected definition using packaged
+preimages when Git history is unavailable. Preserve the emitted render spec
+and actual transcripts with the run.
 
 ### Command Groups
 

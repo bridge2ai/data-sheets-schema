@@ -1,0 +1,60 @@
+{
+  "agentic_renderer": 6,
+  "api_renderer": 5,
+  "date": "2026-09-13",
+  "files": {
+    ".claude/agents/_preimages.json": "47945829b182bb4af6ca1a6dceb80514b00f4e0075a8ae127b48601bbde744e7",
+    ".claude/agents/d4d-description-reviewer.md": "e516c3074e10fb7708180c0e39427aeebd4e783c5aad79292d80a7bed1d8fb3c",
+    ".claude/agents/d4d-mapper.md": "0f2c2cfe48c0779defcf3d1d5599a422286b643c3a04ef1c1c3f9441cfba776f",
+    ".claude/agents/d4d-provenance-guard.md": "2b8889f4f698847294eb1c017f4bf095da3f0d919dc5903b984270df8f1c8278",
+    ".claude/agents/d4d-review-record.md": "c7ada7285e435a14c88768668d5755d31e08499098b80f60d0ba4f97425a723d",
+    ".claude/agents/d4d-rocrate.md": "07e9178f495ed6d7fa3bda88bed838f565114ed9993b0c06e5a339dce264cd8b",
+    ".claude/agents/d4d-rubric10-semantic.md": "d78cb66cd01f4114cc2f2d3b8bf6af486682573b6529617f9a024de554239c8f",
+    ".claude/agents/d4d-rubric10.md": "c7cb23b3693ce9813534214a1da4611dac2f87cb51392204bd826ea26e1562e5",
+    ".claude/agents/d4d-rubric20-semantic.md": "484c28271b42037b9e18030768a3d0213e49c4f2d7ca3513c5196cb493f278f9",
+    ".claude/agents/d4d-rubric20.md": "6b7aeff1d7c2dc827710162129991d5466e63eb12df218ef47347b228ec87b50",
+    ".claude/agents/d4d-schema-expert.md": "ee29218dbfd1ec6b8644a8fc734efc3abf4d5e605af71ee18ca41372ba5f3960",
+    ".claude/agents/d4d-validator.md": "4447a3ec00cdcc40b7cebad49d361c605997a987919cd5aa8b2c7240997bd618",
+    ".claude/agents/schema-stats.md": "1667c26410baaba1e038e9183e76debd12bfe4b89aa61906adc99c5475b5380e",
+    ".claude/commands/README.md": "fc18706650406406f4322f1b1bcf9a192264cd99e41756edf8405e84c3349dd8",
+    ".claude/commands/d4d-add-mapping.md": "2c73d1e8aa2980caaf2c544c3254c408f498fb350b33e217e8bcba161e3ecbc1",
+    ".claude/commands/d4d-agent.md": "bc5e09a24b43fc46731d0326ceeb64352c20d263e6384294710f4de4f62ac3ca",
+    ".claude/commands/d4d-assistant.md": "cff15f9beb10c1b2f54319aafdd8dc3962ddbeeaede32c12462fdeb7bed52af0",
+    ".claude/commands/d4d-full-core.md": "65c5e8cd368b1214fe4f85c445c2418a53cf34357da15b727311049c8fe26e96",
+    ".claude/commands/d4d-input-deep-research.md": "1bcc0254a34d261bb3ab355b05d45330a9dd23c6512f02f444dc11fbc750141e",
+    ".claude/commands/d4d-uniform-rules.md": "5d418feabc5da80b7d2c3edfd1c0d5aaa2d711888d6ada56bdee92d4f01439e1",
+    ".claude/commands/d4d-webfetch.md": "783c1659c0d4ec4280c6d993e53cec7c0ecbc6a88b07318bbf2f84429bd2431b",
+    "poetry.lock": "f4a9bfdb7bd0c48eac92d644ed7d12deddc5fe4182d5b6c6acf05e6edf13eacf",
+    "pyproject.toml": "86df2da59eb22bca48e30189cc2427d32bd5d53c3132b403409a0fd052ab3483",
+    "scripts/agentic_observed.py": "dd6ca4294eef8afaa9248ea71d652541fe4a62064e998d6193ccc402c1751653",
+    "scripts/update_agent_preimages.py": "8e7825087e2edcfc7d53972a4e3f9f977cffe584c5050f8441092100b35d4066",
+    "src/data_sheets_schema/agent_pin.py": "3f1f6f841592102c72047062b8c083f5c89fb2e10e2c75dc049388856b6ec846",
+    "src/data_sheets_schema/agentic_observed.py": "1bdeb4fde0bc28a63d9615acba9e53f70db027668086be35ceae8d12c369c0a8",
+    "src/data_sheets_schema/agentic_runtime.py": "4e05048f075c154b57aa272663345fcd3c8f1c4ca8c803c4119c5a1d72d9c9b8",
+    "src/data_sheets_schema/api_runner.py": "434d377b07b20a279f33b99be5773d793da2aeef581cf0ced032f44731666017",
+    "src/data_sheets_schema/cli/__main__.py": "0848b1c32239a50b9efd3b432181704327b749c2e470a75865baa55ed997674e",
+    "src/data_sheets_schema/cli/agents.py": "3b9da62cbf939e9b7934cf101e1073f7e06735c6a155457a4859a0d323b231e7",
+    "src/data_sheets_schema/cli/provenance.py": "af3af92a8e121a21a51d879924ecc1275cf38878b3466d7656438e6fbbf9313f",
+    "src/data_sheets_schema/provenance.py": "98a084fce97cc6f324bfed383bffb6e4464ec45b71355b529c3e6c22edf2f0b8",
+    "src/data_sheets_schema/resources.py": "0438987d06609f6bc99680e4efa0423b52b80bde10f29ffa4a2f314d3897c073"
+  },
+  "generation_arms": [
+    "agentic",
+    "api"
+  ],
+  "issues": [
+    1556,
+    1612
+  ],
+  "minimum_agentic_python": "3.10",
+  "preservation_sha256": "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f",
+  "preserved_condition": "notes/reference_rescore_2026-09-12_cborg_runtime",
+  "previous_boundary": {
+    "path": "notes/manifest_corpus_root_boundary_2026-09-13.json",
+    "sha256": "756dcdab6778505bf666d36ab8e4935f70a618aa07ff3dd36cabf63021653fd9"
+  },
+  "records_generated": [],
+  "records_rescored": [],
+  "runtime_quoted_definition_sha256": null,
+  "status": "implementation_boundary_no_new_measurements"
+}
