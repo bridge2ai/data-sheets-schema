@@ -965,6 +965,15 @@ def artifact_root(record: Path) -> Path | None:
     return None if record.is_absolute() else Path.cwd()
 
 
+def resolve_record_input(path: Path, record: Path) -> Path | None:
+    """Resolve a recorded input without borrowing an unrelated caller base."""
+    path = Path(path)
+    if path.is_absolute():
+        return path
+    owner = artifact_root(record)
+    return owner / path if owner is not None else None
+
+
 def verify_entry(entry: dict[str, Any], *, record: Path | None = None) -> bool | None:
     """Does the file still hash to what the entry recorded? None if unknowable."""
     got = recorded_hash(entry)
@@ -1529,13 +1538,25 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     # were elsewhere or absent — the GitHub assistant's layout, and the same
     # class as the declared-bundle defect: a path assumed rather than derived
     # from the spec that already knew it (#604).
-    from data_sheets_schema.corpus import root, relative_to_root
-    namespace = manifest if selected_manifest is AUTO else selected_manifest
-    owner = root() if namespace is AUTO else root(namespace)
-    if concat_dir == CONCAT_DIR:
-        concat_dir = relative_to_root(concat_dir, owner)
+    from data_sheets_schema.corpus import root, relative_to_root, manifest_override, AUTO as CORPUS_AUTO
+    from data_sheets_schema.registry import select_manifest
     base = method[:-5] if method.endswith("_core") else method
     outputs = outputs or {}
+    namespace = manifest if selected_manifest is AUTO else selected_manifest
+    automatic_namespace = namespace is AUTO
+    explicit_namespace = manifest_override() is not CORPUS_AUTO if automatic_namespace else True
+    if automatic_namespace:
+        namespace = select_manifest(project, input_bundle) if input_bundle is not None or explicit_namespace else None
+    owner = root(namespace)
+    if automatic_namespace and input_bundle is None and not explicit_namespace:
+        # Header-only reconstruction needs the discovered artifact address;
+        # an ancestor's manifest cannot establish where this run wrote.
+        core_address = outputs.get("core") or (
+            concat_dir / f"{base}_core" / label / f"{project}_d4d_core.yaml")
+        owner = artifact_root(Path(core_address).absolute().with_name(
+            f"{project}_provenance.yaml")) or Path.cwd().resolve()
+    if concat_dir == CONCAT_DIR:
+        concat_dir = relative_to_root(concat_dir, owner)
     full = outputs.get("full") or concat_dir / base / label / f"{project}_d4d.yaml"
     core = outputs.get("core") or (
         concat_dir / f"{base}_core" / label / f"{project}_d4d_core.yaml")
@@ -1543,8 +1564,9 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         concat_dir / f"{base}_core" / label / f"{project}_reconciliation.md")
     # A flat record's absolute address does not encode its launch directory.
     # Capture input addresses now, while their caller base is still known.
-    freeze_inputs = (owner != Path.cwd().resolve() or artifact_root(
-        Path(core).absolute().with_name(f"{project}_provenance.yaml")) is None)
+    output_owner = artifact_root(Path(core).absolute().with_name(f"{project}_provenance.yaml"))
+    freeze_inputs = (owner != Path.cwd().resolve() or output_owner is None
+                     or output_owner.resolve() != Path.cwd().resolve())
 
     header = parse_header(full)
     unrecoverable: list[dict[str, str]] = []
@@ -1562,6 +1584,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         bundle = relative_to_root(Path(declared), owner) if declared else None
     if bundle is not None and freeze_inputs:
         bundle = Path(bundle).absolute()
+    if automatic_namespace and input_bundle is None:
+        namespace = select_manifest(project, bundle) if bundle is not None else None
 
     inputs: dict[str, Any] = {"bundle_path": str(bundle) if bundle else None,
                               "chunks": None,
@@ -1606,7 +1630,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
             manifest = None
             manifest_basis = manifest_basis or f"the output header declares the source manifest unused ({header_manifest})"
         elif header_manifest:
-            manifest = Path(header_manifest)
+            manifest = relative_to_root(Path(header_manifest), owner)
             manifest_basis = manifest_basis or "the output header declares this source manifest"
         else:
             manifest = select_manifest(project, bundle) if bundle is not None else None

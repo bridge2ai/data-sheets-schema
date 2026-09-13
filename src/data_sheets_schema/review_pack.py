@@ -106,11 +106,8 @@ def _anchored(rel: Path) -> Path:
 
 def _record_input(path: Path, provenance: Path) -> Path | None:
     """Recorded inputs retain their corpus owner, without ambient fallback."""
-    if path.is_absolute():
-        return path
-    from data_sheets_schema.provenance import artifact_root
-    owner = artifact_root(provenance)
-    return owner / path if owner is not None else None
+    from data_sheets_schema.provenance import resolve_record_input
+    return resolve_record_input(path, provenance)
 
 
 PAIR_SCHEMAS = ("src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
