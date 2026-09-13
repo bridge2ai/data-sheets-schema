@@ -142,6 +142,29 @@ def main():
             # separately registered repair. Do not erase the controller record.
             audit.setdefault("controller_runs_with_worker_failures", []).append(str(result_path.relative_to(ROOT)))
     preliminary = json.loads((ROOT / "notes/reference_rescore_2026-09-12_cborg/preliminary_audit.json").read_bytes())
+    archive_record_path = r.PLAN / "report_dispatch_preservation_1356.json"
+    archive_record = json.loads(archive_record_path.read_bytes())
+    if (archive_record["manifest_sha256"] != r.digest(r.PLAN / "manifest.json")
+            or archive_record["registered_path"] != batch.c.MEASURED_PATH
+            or archive_record["measured_code_archive"] != batch.c.MEASURED_ARCHIVE
+            or archive_record["measured_code_sha256"] != batch.c.MEASURED_SHA256
+            or archive_record["measured_scheduler_archive"] != batch.c.MEASURED_SCHEDULER_ARCHIVE
+            or archive_record["measured_scheduler_sha256"] != registration["scheduler_sha256"]):
+        raise ValueError("post-measurement code archive identifies different measured bytes")
+    for rel, sha in archive_record["preserved_before_repair"].items():
+        if r.digest(ROOT / rel) != sha:
+            raise ValueError(f"pre-repair evidence changed: {rel}")
+        preserved[rel] = sha
+    preserved[str(archive_record_path.relative_to(ROOT))] = r.digest(archive_record_path)
+    audit["measured_code_archive"] = {
+        "registered_path": batch.c.MEASURED_PATH, "path": batch.c.MEASURED_ARCHIVE,
+        "sha256": batch.c.MEASURED_SHA256,
+        "scheduler_path": batch.c.MEASURED_SCHEDULER_ARCHIVE,
+        "scheduler_sha256": registration["scheduler_sha256"],
+        "preservation_record": str(archive_record_path.relative_to(ROOT)),
+        "preservation_record_sha256": r.digest(archive_record_path),
+        "qualification": "The public report command was repaired after all measurements completed. Verification uses the exact archived adapter and scheduler bytes recorded by the unchanged manifest and registration, not the updated reporting commands.",
+    }
     audit["verified_local_prelaunch_failures"] = prelaunch
     audit["total_attempts_including_local_preflights"] = audit["actual_model_calls"] + len(prelaunch)
     audit["archived_scheduler_snapshots_verified"] = snapshots
@@ -158,7 +181,8 @@ def main():
         "verified_at": r.now(), "manifest_sha256": audit["manifest_sha256"], "accepted": len(written),
         "verification": "Every published rating and retained candidate matches the last successful original evaluator Write at its isolated output path.",
         "model_calls_during_verification": 0, "ratings": written})
-    immutable = {**manifest["pinned_files"], **manifest["prior_evaluations"], **preserved}
+    measured_pins = r.measured_pinned_files(manifest)
+    immutable = {**measured_pins, **manifest["prior_evaluations"], **preserved}
     for directory in (r.PLAN / "attempts", r.PLAN / "batch_runs"):
         for path in directory.rglob("*"):
             if path.is_file():
@@ -167,6 +191,18 @@ def main():
         immutable[job["output"]] = r.digest(ROOT / job["output"])
     r.write_json(r.PLAN / "measurement_file_hashes.json", {
         "verified_at": r.now(), "search_scope": "Filesystem walk includes ignored attempt and controller files.",
+        "measured_code_archives": {
+            "scripts/reference_rescore_cborg_batch.py": {
+                "path": batch.c.MEASURED_SCHEDULER_ARCHIVE,
+                "sha256": registration["scheduler_sha256"],
+                "basis": "Exact scheduler bytes used for the completed measurements, preserved before #1356.",
+            },
+            "scripts/reference_rescore_cborg.py": {
+                "path": batch.c.MEASURED_ARCHIVE,
+                "sha256": batch.c.MEASURED_SHA256,
+                "basis": "Exact adapter bytes used for the completed measurements; the public command was subsequently repaired under #1356. The original manifest and receipts are unchanged.",
+            }
+        },
         "files": immutable})
     print(json.dumps({k: v for k, v in audit.items() if k not in ("ratings", "original_calls")}, indent=2))
 

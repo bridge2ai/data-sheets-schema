@@ -1,5 +1,21 @@
 # CBORG reference rescore with execution metadata — 2026-09-12
 
+**Completed:** all 56 ratings and the separate v9 generation canary are retained.
+Use the [completion summary](completion_summary.md) for results and limitations.
+The launch instructions below document the completed experiment. After #1356,
+the public commands allow audit/report only; additional scoring requires a new
+registration. Rebuild the current qualified reports with:
+
+```bash
+python scripts/reference_rescore_cborg.py audit
+python scripts/reference_rescore_cborg.py report
+```
+
+These commands make no model calls. The [preservation record](report_dispatch_preservation_1356.json)
+binds the exact measured adapter and scheduler archives to their original
+manifest and registration hashes. The post-measurement reporting repair does
+not restamp the instrument, prompts, receipts or evaluations.
+
 This supersedes the preliminary CBORG condition before any cohort fill.
 That condition retains one accepted canary, three excluded attempts and
 $10.26736050 of CLI-reported usage across four sessions. No prior rating

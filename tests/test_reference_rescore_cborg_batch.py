@@ -157,7 +157,11 @@ def test_stop_during_launch_preparation_leaves_job_queued(tmp_path, monkeypatch,
                    for line in (tmp_path / "run/events.jsonl").read_text().splitlines())
 
 
-def test_worker_unblocks_inherited_launch_signals_before_preflight(monkeypatch):
+def test_worker_unblocks_inherited_launch_signals_before_preflight(tmp_path, monkeypatch):
+    # Exercise launch preflight in an unfinished condition. The real, completed
+    # condition now rejects new workers before reaching this historical path.
+    monkeypatch.setattr(batch, "ROOT", tmp_path)
+
     def inspect_mask():
         mask = signal.pthread_sigmask(signal.SIG_BLOCK, set())
         assert not {signal.SIGINT, signal.SIGTERM}.intersection(mask)

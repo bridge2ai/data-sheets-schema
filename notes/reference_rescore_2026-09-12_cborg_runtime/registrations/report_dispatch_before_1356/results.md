@@ -14,8 +14,6 @@
 
 **Evaluation timing:** Execution times and condition boundaries use launcher receipt started_at/completed_at, with original receipt hashes recorded in results.json. Model-written evaluation_timestamp values remain unchanged and are not independently verified, including values inside the recorded interval. Of 56 accepted ratings, 23 metadata timestamps lie outside their session intervals and 0 cannot be compared as timezone-aware timestamps. An interval mismatch alone does not establish fabrication; approximations and timezone errors can also cause it.
 
-**Measured code archive:** The public report command was repaired after all measurements completed. Verification uses the exact archived adapter and scheduler bytes recorded by the unchanged manifest and registration, not the updated reporting commands. See [the preservation record](report_dispatch_preservation_1356.json).
-
 Completed 56 of 56 planned evaluations.
 
 # Semantic comparison: both score bases

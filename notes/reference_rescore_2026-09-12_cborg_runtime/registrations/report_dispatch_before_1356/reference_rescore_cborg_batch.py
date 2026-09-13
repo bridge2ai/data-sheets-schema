@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Inspect the completed four-worker CBORG reference condition.
+"""Launch the registered CBORG ratings with a separately reviewed four-worker canary.
 
-The measured scheduler is archived under its registered hash. This command
-allows plan inspection and refuses new launches for the completed condition.
-Historical scheduling helpers remain available for offline verification.
+This scheduler does not alter the frozen evaluator, prompts or manifest. Its
+pilot is the registered primary canary. Each worker runs the original
+isolated evaluator and retains its original attempt evidence.
 """
 from __future__ import annotations
 
@@ -33,8 +33,7 @@ def load_registered():
     manifest = json.loads((PLAN / "manifest.json").read_bytes())
     registration = json.loads(REGISTRATION.read_bytes())
     if (registration["manifest_sha256"] != r.digest(PLAN / "manifest.json")
-            or registration["scheduler_sha256"] != r.digest(c.measured_code_path(
-                "scripts/reference_rescore_cborg_batch.py", registration["scheduler_sha256"], ROOT))
+            or registration["scheduler_sha256"] != r.digest(Path(__file__))
             or registration["workers"] != 4
             or manifest["transport"] != c.TRANSPORT):
         raise ValueError("batch registration does not match the frozen execution files")
@@ -176,7 +175,7 @@ def verify_prelaunch_failure(r, source, registration):
                 ("receipt.json", "stderr.txt", "transcript.jsonl", "prompt.txt")}
     if set(files) != required or files != entry.get("files"):
         raise ValueError("pre-launch failure evidence changed or is incomplete")
-    if r.digest(c.measured_code_path("scripts/reference_rescore_cborg.py", entry.get("adapter_sha256"), ROOT)) != entry.get("adapter_sha256"):
+    if r.digest(ROOT / "scripts/reference_rescore_cborg.py") != entry.get("adapter_sha256"):
         raise ValueError("pre-launch control-flow evidence changed")
     receipt = json.loads((source / "receipt.json").read_bytes())
     manifest = json.loads((PLAN / "manifest.json").read_bytes())
@@ -362,8 +361,6 @@ def main(argv=None):
     parser.add_argument("--job")
     parser.add_argument("--phase", choices=("pilot", "remaining"))
     args = parser.parse_args(argv)
-    if args.action != "plan" and (ROOT / c.MEASURED_SCHEDULER_ARCHIVE).is_file():
-        raise ValueError("This CBORG condition is complete; use reference_rescore_cborg.py audit/report or register a new condition.")
     if args.action == "worker":
         signal.pthread_sigmask(signal.SIG_UNBLOCK, {signal.SIGINT, signal.SIGTERM})
     r, manifest, registration = load_registered()

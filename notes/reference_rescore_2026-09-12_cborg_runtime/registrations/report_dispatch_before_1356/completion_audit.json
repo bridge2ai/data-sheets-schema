@@ -1,5 +1,5 @@
 {
-  "audited_at": "2026-09-13T01:14:53.536276+00:00",
+  "audited_at": "2026-09-13T00:53:15.977979+00:00",
   "status": "verified",
   "manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
   "unresolved_attempts": [],
@@ -1778,16 +1778,6 @@
     "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T21-21-44.065547+00-00_remaining/result.json",
     "notes/reference_rescore_2026-09-12_cborg_runtime/batch_runs/2026-09-12T22-36-59.308318+00-00_remaining/result.json"
   ],
-  "measured_code_archive": {
-    "registered_path": "scripts/reference_rescore_cborg.py",
-    "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/reference_rescore_cborg.py",
-    "sha256": "750b0e5d7ca9521d9d3e0432627b67d76a4ea2cb77c2eafc7a5e4442414456df",
-    "scheduler_path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/reference_rescore_cborg_batch.py",
-    "scheduler_sha256": "ef2e7f2c6ef17d8880a5e2884fb45ca8160a74d2f30825d030bad7ef32ab2d60",
-    "preservation_record": "notes/reference_rescore_2026-09-12_cborg_runtime/report_dispatch_preservation_1356.json",
-    "preservation_record_sha256": "a824291d620c928df9fb07f6062be440aedabe866638f0a5579863df60be0e13",
-    "qualification": "The public report command was repaired after all measurements completed. Verification uses the exact archived adapter and scheduler bytes recorded by the unchanged manifest and registration, not the updated reporting commands."
-  },
   "verified_local_prelaunch_failures": [
     {
       "source": "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/CHORUS_v7_rep1_r10_rating1/2026-09-12T20-03-10.039046+00-00",
@@ -1811,7 +1801,7 @@
   "transport_manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
   "batch_registration_sha256": "b0a02133382c51cd8ebaa480917bd1c8920f3c7cfece11deea0392c6d9f0cbad",
   "original_successful_write_bindings": 56,
-  "pre_batch_and_generation_preservation_hashes_verified": 450,
+  "pre_batch_and_generation_preservation_hashes_verified": 440,
   "v9_generated_records": 1,
   "v9_model_requests": 6,
   "v9_catalogue_price_estimate_usd": "3.30811950",

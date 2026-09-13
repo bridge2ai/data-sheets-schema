@@ -1,18 +1,6 @@
 {
-  "verified_at": "2026-09-13T01:15:00.917154+00:00",
+  "verified_at": "2026-09-13T00:53:23.729817+00:00",
   "search_scope": "Filesystem walk includes ignored attempt and controller files.",
-  "measured_code_archives": {
-    "scripts/reference_rescore_cborg_batch.py": {
-      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/reference_rescore_cborg_batch.py",
-      "sha256": "ef2e7f2c6ef17d8880a5e2884fb45ca8160a74d2f30825d030bad7ef32ab2d60",
-      "basis": "Exact scheduler bytes used for the completed measurements, preserved before #1356."
-    },
-    "scripts/reference_rescore_cborg.py": {
-      "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/reference_rescore_cborg.py",
-      "sha256": "750b0e5d7ca9521d9d3e0432627b67d76a4ea2cb77c2eafc7a5e4442414456df",
-      "basis": "Exact adapter bytes used for the completed measurements; the public command was subsequently repaired under #1356. The original manifest and receipts are unchanged."
-    }
-  },
   "files": {
     ".claude/agents/d4d-rubric10-semantic.md": "66ad623121272099bf94535ae5be2163a5f5005fe895d2bf2bf04c4f90e34864",
     ".claude/agents/d4d-rubric20-semantic.md": "9d08b5f3d7a3e9828a6c6cbd59a0eacf302979399067ff5aa70480d95a0e7dd3",
@@ -48,8 +36,8 @@
     "scripts/validate_evaluation_schema.py": "dc2e540c4800950eb866914c72894cda668b9a92d41c5f05aa045ff17483652c",
     "src/download/prompts/rubric10_semantic_schema.json": "5ac1989a60414d41f03383266535eee9963816d0d9b42bf5b90e1efe8d9d3dc2",
     "src/download/prompts/rubric20_semantic_schema.json": "5ccdbd229471748fa1dde8074d904c0334c983741dd90c7e56f95b45b012f32b",
+    "scripts/reference_rescore_cborg.py": "750b0e5d7ca9521d9d3e0432627b67d76a4ea2cb77c2eafc7a5e4442414456df",
     "src/data_sheets_schema/agent_pin.py": "35d60bcc835ba0d77e3c3c531fe225b8825ff77f038a7cc499cfbcaa535ba962",
-    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/reference_rescore_cborg.py": "750b0e5d7ca9521d9d3e0432627b67d76a4ea2cb77c2eafc7a5e4442414456df",
     "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg/CHORUS_v7_rep1_r10_rating1_evaluation.json": "8b08357453730a468b3f47f8c0c0315d1ef30fe69ed937a0c95cbf2f9f9d8178",
     "data/evaluation_llm/rubric10_semantic/label_aware/CM4AI_2026-08-28agentic_rep3_evaluation.json": "4ba339dbbbae8b772c69342d16fd4ad03677f91ed944971d93c76377ae16db60",
     "data/evaluation_llm/rubric10_semantic/label_aware/VOICE_2026-08-28agentic_rep1_evaluation.json": "4d0c2104cd11234106a43b0f1af675e19fd24b34878ed659dfc9661c5c12db30",
@@ -748,15 +736,6 @@
     "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/intermediate/CHORUS_coverage_receipt.yaml": "5619e50e6720194b1cd837efa38caaa60da8f72495ae460a8bcad6b0041b3950",
     "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/intermediate/CHORUS_core.yaml": "9482551ac2840131ec1bb0ba2f9654f518e18c338f43696f3af33e12b5b86a9a",
     "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/intermediate/CHORUS_full.yaml": "81dabcdda36c4fb38631c3fa1f300901b5efdb2d7007e9be105039c4d351cab6",
-    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/completion_audit.json": "660f4084c1ff308b3d373f24130d529cdd81271b1e927a06f6ac89f10752a01b",
-    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/measurement_file_hashes.json": "ca0d6359d8963d83c9c40354b1237110c6497101b7478746ed29a0810baeaa78",
-    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/final_written_output_audit.json": "d50145a74d167404c6ac07bcb23a397f90075b54261dc6d3f6224f77d61de99e",
-    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/results.json": "52fe41cc351db360e8da785a906ce7208f45c64199a0ff24fc9ae3b6ad36f2c5",
-    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/results.md": "6301b0aca08a004c51c0322de275425df177d7957dfae7afbaf44394b0c2fdbb",
-    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/completion_summary.md": "13cd302577e8d821a993ab9b073cfd37927570f2e4ace79842001eff304cf255",
-    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/semantic_review.md": "64777eb0a8b1131a8df993c68719f31054edb5b557bc621cd1feeed8046f7c32",
-    "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/reference_rescore_cborg_batch.py": "ef2e7f2c6ef17d8880a5e2884fb45ca8160a74d2f30825d030bad7ef32ab2d60",
-    "notes/reference_rescore_2026-09-12_cborg_runtime/report_dispatch_preservation_1356.json": "a824291d620c928df9fb07f6062be440aedabe866638f0a5579863df60be0e13",
     "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v7_rep1_r20_rating1/2026-09-12T23-53-44.887718+00-00/execution_deadline.json": "12e70d2cdbb617a0a6fcd80e42be8a8ddc975e181bf14e8c633a2a1e3ca5e9fc",
     "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v7_rep1_r20_rating1/2026-09-12T23-53-44.887718+00-00/transcript.jsonl": "895dbb242dc2f909cd001bbd0a43c2e0be13ddc7508df31a2a476020c3280ad8",
     "notes/reference_rescore_2026-09-12_cborg_runtime/attempts/VOICE_v7_rep1_r20_rating1/2026-09-12T23-53-44.887718+00-00/candidate.json": "db3a18828b9a1b6042585790d6917a35e4342569c313636cbf701460ab6446f9",

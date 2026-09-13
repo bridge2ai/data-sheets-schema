@@ -131,6 +131,16 @@ def main():
     for rel, sha in inventory.items():
         if r.digest(ROOT / rel) != sha:
             raise ValueError(f"measurement changed after audit: {rel}")
+    code_archive = audit["measured_code_archive"]
+    if (code_archive["registered_path"] != batch.c.MEASURED_PATH
+            or code_archive["path"] != batch.c.MEASURED_ARCHIVE
+            or code_archive["sha256"] != batch.c.MEASURED_SHA256
+            or inventory.get(code_archive["path"]) != code_archive["sha256"]
+            or code_archive["scheduler_path"] != batch.c.MEASURED_SCHEDULER_ARCHIVE
+            or code_archive["scheduler_sha256"] != batch.c.MEASURED_SCHEDULER_SHA256
+            or inventory.get(code_archive["scheduler_path"]) != code_archive["scheduler_sha256"]
+            or r.digest(ROOT / code_archive["preservation_record"]) != code_archive["preservation_record_sha256"]):
+        raise ValueError("report lacks the matching measured-code archive")
     timing = timestamp_qualification(r, manifest, writes, inventory)
     review = json.loads((plan / "semantic_review.json").read_bytes())
     if (review["manifest_sha256"] != audit["manifest_sha256"]
@@ -184,7 +194,9 @@ def main():
               + " See [the original statements and interpretation](canary_narrative_qualification.json).\n\n"
               + "**CM4AI pilot judgments:** " + cm4ai_narrative["qualification"]
               + " See [the original statements and input evidence](cm4ai_pilot_narrative_qualification_1355.json).\n\n"
-              + "**Evaluation timing:** " + timing["qualification"] + "\n\n")
+              + "**Evaluation timing:** " + timing["qualification"] + "\n\n"
+              + "**Measured code archive:** " + code_archive["qualification"]
+              + " See [the preservation record](report_dispatch_preservation_1356.json).\n\n")
     reports = [plan / name for name in ("results.json", "results.md", "completion_summary.md", "semantic_review.md")]
     before = {path: path.read_bytes() if path.exists() else None for path in reports}
     try:
@@ -199,6 +211,7 @@ def main():
         results["evaluation_narrative_qualification"] = narrative_qualification
         results["additional_evaluation_narrative_qualifications"] = [cm4ai_qualification]
         results["evaluation_timestamp_qualification"] = timing
+        results["measured_code_archive"] = code_archive
         results["cost_accounting"] = {key: audit[key] for key in (
             "cost_accounting_complete", "cli_reported_total_cost_usd", "known_terminal_cli_cost_usd",
             "unpriced_excluded_sessions", "cost_qualification")}

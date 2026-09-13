@@ -1,5 +1,5 @@
 {
-  "reported_at": "2026-09-13T01:15:22.367934+00:00",
+  "reported_at": "2026-09-13T00:53:35.304526+00:00",
   "completed": 56,
   "planned": 56,
   "percentage_basis": "computed_from_point_totals_and_denominators",
@@ -1221,16 +1221,6 @@
     "outside_receipt_interval": 23,
     "not_comparable": 0,
     "qualification": "Execution times and condition boundaries use launcher receipt started_at/completed_at, with original receipt hashes recorded in results.json. Model-written evaluation_timestamp values remain unchanged and are not independently verified, including values inside the recorded interval. Of 56 accepted ratings, 23 metadata timestamps lie outside their session intervals and 0 cannot be compared as timezone-aware timestamps. An interval mismatch alone does not establish fabrication; approximations and timezone errors can also cause it."
-  },
-  "measured_code_archive": {
-    "registered_path": "scripts/reference_rescore_cborg.py",
-    "path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/reference_rescore_cborg.py",
-    "sha256": "750b0e5d7ca9521d9d3e0432627b67d76a4ea2cb77c2eafc7a5e4442414456df",
-    "scheduler_path": "notes/reference_rescore_2026-09-12_cborg_runtime/registrations/report_dispatch_before_1356/reference_rescore_cborg_batch.py",
-    "scheduler_sha256": "ef2e7f2c6ef17d8880a5e2884fb45ca8160a74d2f30825d030bad7ef32ab2d60",
-    "preservation_record": "notes/reference_rescore_2026-09-12_cborg_runtime/report_dispatch_preservation_1356.json",
-    "preservation_record_sha256": "a824291d620c928df9fb07f6062be440aedabe866638f0a5579863df60be0e13",
-    "qualification": "The public report command was repaired after all measurements completed. Verification uses the exact archived adapter and scheduler bytes recorded by the unchanged manifest and registration, not the updated reporting commands."
   },
   "cost_accounting": {
     "cost_accounting_complete": false,

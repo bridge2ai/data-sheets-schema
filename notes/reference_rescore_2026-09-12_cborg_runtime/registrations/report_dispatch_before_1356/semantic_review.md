@@ -16,8 +16,6 @@ Inspect all 24 accepted rubric20 Q19 objects in this CBORG condition against the
 
 **Evaluation timing:** Execution times and condition boundaries use launcher receipt started_at/completed_at, with original receipt hashes recorded in results.json. Model-written evaluation_timestamp values remain unchanged and are not independently verified, including values inside the recorded interval. Of 56 accepted ratings, 23 metadata timestamps lie outside their session intervals and 0 cannot be compared as timezone-aware timestamps. An interval mismatch alone does not establish fabrication; approximations and timezone errors can also cause it.
 
-**Measured code archive:** The public report command was repaired after all measurements completed. Verification uses the exact archived adapter and scheduler bytes recorded by the unchanged manifest and registration, not the updated reporting commands. See [the preservation record](report_dispatch_preservation_1356.json).
-
 The frozen rule permits complete textual provenance as well as W3C PROV-O graphs. A representation-related objection is flagged for adjudication; this inspection does not assign replacement scores or certify other judgments or external source truth.
 
 ## AI_READI_v7_rep1_r20_rating1

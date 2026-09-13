@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-"""Audit and report the completed CBORG reference rescore.
+"""Run the separately registered CBORG reference rescore without replacing v7/v8 scores.
 
-The original adapter and scheduler are archived with their measured hashes.
-The public CLI now only verifies retained evidence and rebuilds qualified
-reports; additional ratings require a new registration. Historical transport
-helpers remain available for offline verification.
+The existing reference runner supplies the frozen prompts and acceptance gates.
+This adapter gives the new provider condition its own manifest and output paths,
+and acts as the evaluator executable so every session uses CBORG explicitly.
 """
 from __future__ import annotations
 
 import argparse
-import hashlib
 import importlib.util
 import json
 import os
@@ -19,12 +17,6 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 DATE = "2026-09-12_cborg_runtime"
-MEASURED_PATH = "scripts/reference_rescore_cborg.py"
-MEASURED_SHA256 = "750b0e5d7ca9521d9d3e0432627b67d76a4ea2cb77c2eafc7a5e4442414456df"
-MEASURED_MANIFEST_SHA256 = "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2"
-MEASURED_ARCHIVE = f"notes/reference_rescore_{DATE}/registrations/report_dispatch_before_1356/reference_rescore_cborg.py"
-MEASURED_SCHEDULER_SHA256 = "ef2e7f2c6ef17d8880a5e2884fb45ca8160a74d2f30825d030bad7ef32ab2d60"
-MEASURED_SCHEDULER_ARCHIVE = f"notes/reference_rescore_{DATE}/registrations/report_dispatch_before_1356/reference_rescore_cborg_batch.py"
 TRANSPORT = {
     "provider": "LBL CBORG",
     "base_url": "https://api.cborg.lbl.gov",
@@ -64,41 +56,6 @@ def cborg_environment(source: dict[str, str]) -> dict[str, str]:
     return env
 
 
-def measured_code_path(relative, expected_sha256, root=None):
-    """Resolve a historical code check explicitly; digest() still reads real bytes."""
-    root = ROOT if root is None else root
-    bindings = {
-        MEASURED_PATH: (MEASURED_ARCHIVE, MEASURED_SHA256),
-        "scripts/reference_rescore_cborg_batch.py": (MEASURED_SCHEDULER_ARCHIVE, MEASURED_SCHEDULER_SHA256),
-    }
-    binding = bindings.get(relative)
-    if binding is None or expected_sha256 != binding[1]:
-        return root / relative
-    path = root / binding[0]
-    if hashlib.sha256(path.read_bytes()).hexdigest() != expected_sha256:
-        raise ValueError("archived measured execution bytes changed")
-    return path
-
-
-def measured_pinned_files(manifest):
-    """Resolve this completed condition's adapter pin to its measured archive.
-
-    The manifest and receipts retain the original measurement contract. The
-    updated command is never represented as the bytes used during scoring.
-    """
-    pins = dict(manifest["pinned_files"])
-    if pins.get(MEASURED_PATH) != MEASURED_SHA256:
-        return pins
-    raw = (ROOT / f"notes/reference_rescore_{DATE}/manifest.json").read_bytes()
-    if (hashlib.sha256(raw).hexdigest() != MEASURED_MANIFEST_SHA256
-            or json.loads(raw) != manifest):
-        raise ValueError("archived code binding differs from the registered manifest")
-    measured_code_path(MEASURED_PATH, MEASURED_SHA256)
-    del pins[MEASURED_PATH]
-    pins[MEASURED_ARCHIVE] = MEASURED_SHA256
-    return pins
-
-
 def load_runner():
     sys.path[:0] = [str(ROOT / "src"), str(ROOT / "scripts")]
     spec = importlib.util.spec_from_file_location("cborg_reference_runner", ROOT / "scripts/reference_rescore.py")
@@ -109,10 +66,6 @@ def load_runner():
     runner.PLAN = ROOT / f"notes/reference_rescore_{DATE}"
     validate = runner.validate_candidate
     scoring_prompt = runner.job_prompt
-    verify = runner.verify_frozen
-
-    def verify_measured_bytes(manifest):
-        verify({**manifest, "pinned_files": measured_pinned_files(manifest)})
 
     def prompt_with_execution_metadata(manifest, job):
         identity = manifest["transport"]["runtime_model_identifier"]
@@ -136,8 +89,6 @@ def load_runner():
 
     runner.validate_candidate = validate_with_transport
     runner.job_prompt = prompt_with_execution_metadata
-    runner.verify_frozen = verify_measured_bytes
-    runner.measured_pinned_files = measured_pinned_files
     return runner
 
 
@@ -192,15 +143,44 @@ def route_evaluator(args: list[str]) -> None:
 
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
-    parser = argparse.ArgumentParser(description="Audit or rebuild qualified reports for the completed CBORG condition. Start a separate registration for new ratings.")
-    parser.add_argument("action", choices=("report", "audit"))
+    if args[:1] == ["--print"]:
+        route_evaluator(args)
+        return 1  # execve cannot return on success.
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("action", choices=("freeze", "canary", "accept-canary", "remaining", "report", "audit"))
     parsed = parser.parse_args(args)
-    name = "write_completion_summary.py" if parsed.action == "report" else "audit_completion.py"
-    path = ROOT / f"notes/reference_rescore_{DATE}/execution_tools" / name
-    spec = importlib.util.spec_from_file_location("cborg_qualified_" + parsed.action, path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    module.main()
+    runner = load_runner()
+    if parsed.action == "freeze":
+        manifest = freeze(runner)
+        print(f"Registered {len(manifest['jobs'])} CBORG ratings; no calls made.")
+        return 0
+    manifest = json.loads((runner.PLAN / "manifest.json").read_bytes())
+    if manifest.get("transport") != TRANSPORT:
+        raise ValueError("transport differs from the registered CBORG condition")
+    runner.verify_frozen(manifest)
+    if parsed.action == "report":
+        runner.report_results(manifest)
+        return 0
+    if parsed.action == "audit":
+        import audit_reference_rescore as audit
+        audit.r = runner
+        sys.argv = [sys.argv[0]]
+        return audit.main()
+    if parsed.action == "accept-canary":
+        review = runner.PLAN / "canary_review.md"
+        if not review.is_file() or not review.read_text().strip():
+            raise ValueError("write the inspected canary review before accepting it")
+        runner.accept_canary(manifest)
+        return 0
+    cborg_environment(dict(os.environ))  # Refuse missing credentials before creating an attempt.
+    jobs = manifest["jobs"][:1] if parsed.action == "canary" else manifest["jobs"]
+    for job in jobs:
+        if parsed.action == "remaining" and (ROOT / job["output"]).exists():
+            runner.require_canary(manifest, job)
+            runner.successful_receipt(manifest, job)
+            continue
+        if runner.run_job(manifest, job, str(Path(__file__).resolve()))["status"] != "passed":
+            return 1
     return 0
 
 

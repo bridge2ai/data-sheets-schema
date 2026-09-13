@@ -29,6 +29,13 @@ The user requested “rescore with CBORG API” and separately approved adding a
 
 ## Commands
 
+The generation and evaluation launches below are historical instructions for
+completed canaries. Additional model calls require a new registration. The
+current adapter permits only `audit` and `report`, both without model calls;
+run audit before report to rebuild the qualified manuscript tables. See the
+[completed condition](../reference_rescore_2026-09-12_cborg_runtime/completion_summary.md)
+and [post-measurement preservation record](../reference_rescore_2026-09-12_cborg_runtime/report_dispatch_preservation_1356.json).
+
 Run in the project Poetry environment, from the repository root. The CBORG key must be inherited as an environment variable, never written to a command, manifest or log.
 
 ```bash
