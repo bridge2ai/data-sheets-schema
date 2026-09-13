@@ -4,16 +4,16 @@
     "src/data_sheets_schema/api_runner.py": "eee3a6cfd7cc632508e6ab6cd4ac71cfb15caf16484d4255e6c252bb920839cf",
     "src/data_sheets_schema/backfill_checks.py": "e80e7ae38236d2bc83f4ab332b8ae0465aa5e3c050061be32899191180a7a101",
     "src/data_sheets_schema/chunking.py": "21ecc188bffe61efc38ce3fca84292dbbab08043973649364449263cdbe86e4a",
-    "src/data_sheets_schema/cli/api.py": "c9dedebba350edd0a9e5e7638b3e78f907854921fada4c855b389d6634e6d199",
-    "src/data_sheets_schema/cli/provenance.py": "0e49e780921bcac8355c974df55d65ee24f7dc4f15831a6d3b6882b0485a348d",
+    "src/data_sheets_schema/cli/api.py": "cd45007f463ecb2a553f7ec5084f2ca5348c1592af0f9eb38d17d5ad24ad6d9a",
+    "src/data_sheets_schema/cli/provenance.py": "739b486eb63fd510efc57e6c9816000df5a5a40229022ac39a98582428a35e9a",
     "src/data_sheets_schema/cli/receipts.py": "4134a1e383fd4fd4775de172824f1c142e3ed7ed1a9ecef2511887d572222d6f",
     "src/data_sheets_schema/cli/runs.py": "252451d708a46524703b6b645d153df86ee5a9da394712677ff0bdcba4a4de58",
     "src/data_sheets_schema/corpus.py": "056034a783b3e304252ab81a094f3d8e9d99eb3e2b7db00ec73c67b989491c95",
-    "src/data_sheets_schema/profiles.py": "89fbca990b0bbf44cff0b8a6d1e6089e8d0fa6ae07df70c384c1cfc58325d00b",
-    "src/data_sheets_schema/provenance.py": "57df904b0736e40574b767f27c3bb531c5f42f98682d66ee89f6f1f57bc401b1",
+    "src/data_sheets_schema/profiles.py": "55524c2ede59dbd320ef2646ae0aa4018076030944a9ced1b4f0dc7bc4d9faaf",
+    "src/data_sheets_schema/provenance.py": "df34f0c6dd64e264a57f442fcc05c3353f56dc0071ddde252903983eef846158",
     "src/data_sheets_schema/receipts.py": "033179c2e51f88d2e048281a08a7f0b8a738bf6d74385355cb094b320cac7f44",
     "src/data_sheets_schema/registry.py": "04868fd2cd791c41e47637f638dc338d3b777d928ae7c793a696676ccacafdb3",
-    "src/data_sheets_schema/resources.py": "9fe33bd7645de0b984fb2fbfbc99c37b8723bfb340af0be5bddd15c07d3f0cdb",
+    "src/data_sheets_schema/resources.py": "7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435",
     "src/data_sheets_schema/review_pack.py": "a8be3deeddf18ab3ab932e206f421c77380042acf79772aa8bdf029a3900cbec",
     "src/data_sheets_schema/runs.py": "b2c4a3a3266487faffac5ba4ff193595646913bc877b5e4d375c07b4bd89ad9c",
     "src/data_sheets_schema/verifiable.py": "e997cb63a9807d7a534b86b66547d2eda9e5cd29c562cebbb49497c959da1f18"
@@ -23,7 +23,7 @@
     "api"
   ],
   "historical_renderer_controls": 60,
-  "integration_dependency_commit": "1e50aa0e785a37ef98aeb05af66fcd4e06f8bb1b",
+  "integration_dependency_commit": "acd2997fb88a2f0992e3c0804c5cbfde0bf9c99d",
   "issues": [
     1523,
     1594,
@@ -56,7 +56,10 @@
     1724,
     1725,
     1726,
-    1731
+    1731,
+    1732,
+    1735,
+    1736
   ],
   "new_spec_chunk_check_uses_manifest": true,
   "preservation_sha256": "58ec7244e52e90c2b5fbc819af8ecf40903a30cf8d4248a958c4f9d1ef727f6f",
